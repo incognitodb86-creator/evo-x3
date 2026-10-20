@@ -1,0 +1,11 @@
+{
+ "phase": "P2",
+ "arm": "canary",
+ "vsa": true,
+ "tag": "p2_canary_vsa_416x736_29f_8st",
+ "secs": 25.1,
+ "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\p2_canary_00001_.mp4",
+ "file": "C:\\AI\\community\\p2\\p2_canary_vsa_416x736_29f_8st.mp4",
+ "prompt_id": "5584b72a-64ff-456f-b576-3567f6aba20d",
+ "finished": "2026-10-20 10:39 CT"
+}

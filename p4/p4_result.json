@@ -1,0 +1,30 @@
+{
+ "p4_A10_cont_noAB": {
+  "secs": 355.7,
+  "file": "C:\\AI\\community\\p4\\p4_A10_cont_noAB.mp4"
+ },
+ "p4_A10_cont_AB05": {
+  "secs": 205.4,
+  "file": "C:\\AI\\community\\p4\\p4_A10_cont_AB05.mp4"
+ },
+ "p4_B5_cont_noAB": {
+  "secs": 340.5,
+  "file": "C:\\AI\\community\\p4\\p4_B5_cont_noAB.mp4"
+ },
+ "p4_B5_cont_AB05": {
+  "secs": 290.6,
+  "file": "C:\\AI\\community\\p4\\p4_B5_cont_AB05.mp4"
+ },
+ "p4_C10_cut_part1": {
+  "secs": 150.3,
+  "file": "C:\\AI\\community\\p4\\p4_C10_cut_part1.mp4"
+ },
+ "p4_C10_cut_part2": {
+  "secs": 150.4,
+  "file": "C:\\AI\\community\\p4\\p4_C10_cut_part2.mp4"
+ },
+ "p4_C10_cut_joined": {
+  "file": "C:\\AI\\community\\p4\\p4_C10_cut_joined.mp4",
+  "exists": true
+ }
+}
