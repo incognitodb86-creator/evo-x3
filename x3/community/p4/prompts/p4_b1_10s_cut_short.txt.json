@@ -1,0 +1,13 @@
+{
+ "shot": {
+  "id": "p4_b1_10s_cut",
+  "image_note": "adult woman, dark hair slicked back, metallic geometric top, black photo studio, hard key light",
+  "beat": "She turns in a slow full circle under the key light, hands on her hips, looking back over her shoulder at the camera. She sits down on a black studio stool, crosses her legs, leans forward with her elbows on her knees and laughs softly. Use two [Shot N] segments with a hard cut to a closer angle halfway.",
+  "prev_beat": "She slowly lifts the metallic top off over her head, tosses it aside and turns her bare upper body toward the key light, holding eye contact. She steps closer to the camera, tilts her head back and runs both hands up through her slicked-back hair, then smiles."
+ },
+ "arm": "short",
+ "secs": 10,
+ "words": 95,
+ "model": "coding_sc117_strata",
+ "guide": "MiniMax-H3 VIDEO_PROMPT_WRITING_GUIDE_base_en.md"
+}

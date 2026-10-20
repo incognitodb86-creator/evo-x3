@@ -1,0 +1,190 @@
+{
+ "id": "e3f2b845-8f2c-4b5a-9caf-eac1029d3e7e",
+ "revision": 0,
+ "last_node_id": 143,
+ "last_link_id": 274,
+ "nodes": [
+  {
+   "id": 92,
+   "type": "SaveVideo",
+   "pos": [
+    -370,
+    4880
+   ],
+   "size": [
+    940,
+    126
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "video",
+     "type": "VIDEO",
+     "link": 194
+    }
+   ],
+   "outputs": [
+    {
+     "name": "video",
+     "type": "VIDEO",
+     "links": null
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.33.0"
+   },
+   "widgets_values": [
+    "community/app_h3_i2v",
+    "auto",
+    "auto",
+    "auto"
+   ],
+   "widgets_values_named": {
+    "filename_prefix": "community/app_h3_i2v",
+    "format": "auto",
+    "format.codec": "auto",
+    "codec": "auto"
+   }
+  },
+  {
+   "id": 105,
+   "type": "4c314f31-ecda-4b08-ae98-faaba1bf613f",
+   "pos": [
+    -900,
+    4880
+   ],
+   "size": [
+    480,
+    630
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "first_frame",
+     "shape": 7,
+     "type": "IMAGE",
+     "link": 262
+    },
+    {
+     "name": "last_frame",
+     "shape": 7,
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "width",
+     "type": "INT",
+     "widget": {
+      "name": "width"
+     },
+     "link": 271
+    },
+    {
+     "name": "height",
+     "type": "INT",
+     "widget": {
+      "name": "height"
+     },
+     "link": 272
+    },
+    {
+     "label": "duration",
+     "name": "value_1",
+     "type": "FLOAT",
+     "widget": {
+      "name": "value_1"
+     },
+     "link": null
+    },
+    {
+     "label": "audio_vae",
+     "name": "vae_name_1",
+     "type": "COMBO",
+     "widget": {
+      "name": "vae_name_1"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "VIDEO",
+     "type": "VIDEO",
+     "links": [
+      194
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.33.0",
+    "previewExposures": []
+   },
+   "widgets_values": [
+    "The woman from the start image, an adult with auburn hair, stands in the concrete courtyard among potted plants. She looks into the camera with a slow smile, unhooks her sheer black corset top and lets it fall, then runs both hands down over her bare breasts and hips while swaying gently. Static medium shot, soft daylight, shallow depth of field. Sound: quiet courtyard ambience, distant birds, her soft breath and a low laugh.",
+    1344,
+    768,
+    5,
+    51050001,
+    "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+    "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+    "minimax_h3_video_vae_int8_convrot.safetensors",
+    "minimax_h3_audio_vae_fp32.safetensors",
+    "comfy kitchen attention"
+   ],
+   "widgets_values_named": {
+    "prompt": "The woman from the start image, an adult with auburn hair, stands in the concrete courtyard among potted plants. She looks into the camera with a slow smile, unhooks her sheer black corset top and lets it fall, then runs both hands down over her bare breasts and hips while swaying gently. Static medium shot, soft daylight, shallow depth of field. Sound: quiet courtyard ambience, distant birds, her soft breath and a low laugh.",
+    "width": 1344,
+    "height": 768,
+    "value_1": 5,
+    "noise_seed": 51050001,
+    "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+    "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+    "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors",
+    "vae_name_1": "minimax_h3_audio_vae_fp32.safetensors",
+    "attention": "comfy kitchen attention"
+   }
+  },
+  {
+   "id": 136,
+   "type": "LoadImage",
+   "pos": [
+    -1230,
+    4880
+   ],
+   "size": [
+    290,
+    330
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      262,
+      270
+     ]
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": null
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "community/FD006_768x1344.png",
+    "image"
+   ],
+   "widgets_values_named": {

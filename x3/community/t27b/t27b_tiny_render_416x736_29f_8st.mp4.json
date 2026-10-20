@@ -1,0 +1,10 @@
+{
+ "phase": "27B test",
+ "prompt_by": "tmp_27b_timing",
+ "tag": "t27b_tiny_render_416x736_29f_8st",
+ "secs": 40.4,
+ "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\t27b_tiny_00001_.mp4",
+ "file": "C:\\AI\\community\\t27b\\t27b_tiny_render_416x736_29f_8st.mp4",
+ "prompt_id": "ff274739-ede5-472b-b0b8-ff9e5d0c8e1d",
+ "finished": "2026-10-20 10:44 CT"
+}

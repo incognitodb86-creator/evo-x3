@@ -1,0 +1,41 @@
+[
+ {
+  "id": "p5_S1_i2v_short",
+  "image": "FD006",
+  "image_note": "adult woman with auburn hair, sheer black corset top and dark trousers, standing in a concrete courtyard among potted plants, soft daylight",
+  "beat": "She looks into the camera with a slow smile, unhooks her sheer black corset top and lets it fall, then runs both hands down over her bare breasts and hips while swaying gently.",
+  "mode": "i2v",
+  "arm": "short",
+  "secs": 5,
+  "seed": 51070001,
+  "w": 576,
+  "h": 1024,
+  "steps": 8
+ },
+ {
+  "id": "p5_S2_i2v_short",
+  "image": "FD003",
+  "image_note": "adult woman, dark hair slicked back, metallic geometric top, black photo studio, hard key light",
+  "beat": "She slowly lifts the metallic top off over her head, tosses it aside and turns her bare upper body toward the key light, one hand sliding down her stomach while holding eye contact.",
+  "mode": "i2v",
+  "arm": "short",
+  "secs": 5,
+  "seed": 51070002,
+  "w": 576,
+  "h": 1024,
+  "steps": 8
+ },
+ {
+  "id": "p5_S3_i2v_short",
+  "image": "D15",
+  "image_note": "adult woman with long dark hair in a high bun, toned and tanned, black mesh triangle bikini, standing at a steel-and-glass balcony railing in a dark modern penthouse",
+  "beat": "She traces her fingers from her collarbone to the bikini top's center strap, unties it and lets it fall, then turns a quarter toward the light, slides both hands down to her hips and looks back over her shoulder.",
+  "mode": "i2v",
+  "arm": "short",
+  "secs": 5,
+  "seed": 51070003,
+  "w": 576,
+  "h": 1024,
+  "steps": 8
+ }
+]

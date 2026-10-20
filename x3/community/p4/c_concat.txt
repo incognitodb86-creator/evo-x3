@@ -1,0 +1,2 @@
+file 'C:\AI\community\p4\p4_C10_cut_part1.mp4'
+file 'C:\AI\community\p4\p4_C10_cut_part2.mp4'
