@@ -1,0 +1,18 @@
+{
+ "phase": "P4",
+ "w": 576,
+ "h": 1024,
+ "steps": 8,
+ "seed": 51060000,
+ "vsa": true,
+ "shift": "10/3",
+ "sampler": "euler/simple",
+ "antiburn": null,
+ "chunks": 1,
+ "tag": "p4_C10_cut_part2",
+ "secs": 150.4,
+ "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\p4_00006_.mp4",
+ "file": "C:\\AI\\community\\p4\\p4_C10_cut_part2.mp4",
+ "prompt_id": "f6d1217e-3d36-4ee2-8753-02a3c0650240",
+ "finished": "2026-10-20 11:16 CT"
+}

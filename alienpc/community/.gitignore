@@ -1,0 +1,19 @@
+# forgesafe 2026-10-20: git checkpoints for Forge/Ralph (local only, never pushed). Media, models, run outputs and logs stay out.
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.wav
+*.safetensors
+*.gguf
+runs/
+p4/*.mp4
+tmpx/
+__pycache__/
+*.pyc
+*.log
+logs/
+sessions/
+*.out
+*.err

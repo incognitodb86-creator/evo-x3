@@ -1,0 +1,209 @@
+{
+ "clip": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "type": "minimax",
+   "device": "default"
+  }
+ },
+ "vvae": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+  }
+ },
+ "avae": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+  }
+ },
+ "ksel": {
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "euler"
+  }
+ },
+ "noise": {
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 51050001
+  }
+ },
+ "m_unet": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "m_attn": {
+  "class_type": "ModelAttentionBackend",
+  "inputs": {
+   "model": [
+    "m_unet",
+    0
+   ],
+   "attention": "comfy kitchen attention"
+  }
+ },
+ "m_vsa": {
+  "class_type": "BlockSparseAttention",
+  "inputs": {
+   "model": [
+    "m_attn",
+    0
+   ],
+   "selection": "vsa",
+   "selection.keep_percent": 10,
+   "start_percent": 0.2,
+   "end_percent": 1.0,
+   "dense_blocks": "",
+   "min_tokens": 12288,
+   "extra_tokens": 256,
+   "sink_conditioning": "exact_kv_and_rows",
+   "verbose": false
+  }
+ },
+ "m_shift": {
+  "class_type": "MiniMaxH3SigmaShift",
+  "inputs": {
+   "model": [
+    "m_vsa",
+    0
+   ],
+   "shift_video": 10.0,
+   "shift_audio": 3.0
+  }
+ },
+ "img": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/FD006_768x1344.png"
+  }
+ },
+ "c0": {
+  "class_type": "MiniMaxH3ImageToVideo",
+  "inputs": {
+   "clip": [
+    "clip",
+    0
+   ],
+   "vae": [
+    "vvae",
+    0
+   ],
+   "prompt": "The woman from the start image, an adult with auburn hair, stands in the concrete courtyard among potted plants. She looks into the camera with a slow smile, unhooks her sheer black corset top and lets it fall, then runs both hands down over her bare breasts and hips while swaying gently. Static medium shot, soft daylight, shallow depth of field. Sound: quiet courtyard ambience, distant birds, her soft breath and a low laugh.",
+   "width": 768,
+   "height": 1344,
+   "length": 124,
+   "first_frame": [
+    "img",
+    0
+   ]
+  }
+ },
+ "s0_sched": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "model": [
+    "m_shift",
+    0
+   ],
+   "scheduler": "simple",
+   "steps": 10,
+   "denoise": 1.0
+  }
+ },
+ "s0_guide": {
+  "class_type": "BasicGuider",
+  "inputs": {
+   "model": [
+    "m_shift",
+    0
+   ],
+   "conditioning": [
+    "c0",
+    0
+   ]
+  }
+ },
+ "s0_samp": {
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "noise": [
+    "noise",
+    0
+   ],
+   "guider": [
+    "s0_guide",
+    0
+   ],
+   "sampler": [
+    "ksel",
+    0
+   ],
+   "sigmas": [
+    "s0_sched",
+    0
+   ],
+   "latent_image": [
+    "c0",
+    1
+   ]
+  }
+ },
+ "dec_v": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "s0_samp",
+    0
+   ],
+   "vae": [
+    "vvae",
+    0
+   ]
+  }
+ },
+ "dec_a": {
+  "class_type": "VAEDecodeAudio",
+  "inputs": {
+   "samples": [
+    "s0_samp",
+    0
+   ],
+   "vae": [
+    "avae",
+    0
+   ]
+  }
+ },
+ "mkvid": {
+  "class_type": "CreateVideo",
+  "inputs": {
+   "images": [
+    "dec_v",
+    0
+   ],
+   "audio": [
+    "dec_a",
+    0
+   ],
+   "fps": 24
+  }
+ },
+ "save": {
+  "class_type": "SaveVideo",
+  "inputs": {
+   "video": [
+    "mkvid",
+    0
+   ],
+   "filename_prefix": "community/p2_clip2_short",
+   "format": "auto",
+   "codec": "auto"
+  }
+ }
+}
