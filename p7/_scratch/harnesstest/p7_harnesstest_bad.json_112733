@@ -1,0 +1,20 @@
+[
+    {
+        "id":  "p7_harnesstest_bad_seg2",
+        "image":  "POOL",
+        "image_note":  "adult woman with long straight blonde hair worn loose past her shoulders, blue eyes, slim and toned with lightly tanned skin, wearing a wet, sheer champagne-beige scoop-neck bikini top and matching sheer low-rise bikini bottoms",
+        "beat":  "Cut to the dark living room: topless in her sheer beige bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass. Then, about five seconds in, cut within this clip ([Shot 2]) to a close-up of her face and shoulders as she smiles at the camera.",
+        "chunks":  [
+                       "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her."
+                   ],
+        "chunk_secs":  10,
+        "mode":  "r2v",
+        "arm":  "long_r2v",
+        "secs":  10,
+        "seed":  51080001,
+        "w":  768,
+        "h":  1344,
+        "steps":  30,
+        "antiburn":  0.7
+    }
+]

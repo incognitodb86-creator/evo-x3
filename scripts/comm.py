@@ -40,6 +40,7 @@ APPROVED = {  # ALI-80 approved adult stills only
  "FD006": r"C:\Users\derek\5slock\approved_characters\FLOW_DARKHAIR_2026-10-19\FD006.jpg",
  "FD003": r"C:\Users\derek\5slock\approved_characters\FLOW_DARKHAIR_2026-10-19\FD003.jpg",
  "D12": r"C:\Users\derek\5slock\approved_characters\D12\D12_Woman_posing_in_bikini.jpg",
+ "POOL": r"C:\Users\derek\5slock\approved_characters\POOL\COND_POOL_BIKINI_PORTRAIT.jpg",  # pool-20261021: Derek-approved (approved_characters\INDEX.csv id POOL); P7 fixed still from 2026-10-21
 }
 
 def stage(key, w, h):
