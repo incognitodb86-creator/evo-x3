@@ -1,0 +1,17 @@
+{
+    "started":  "2026-10-21T09:55:52",
+    "rc":  0,
+    "budget_cap_min":  360,
+    "budget_used_min":  146,
+    "log":  "C:\\AI\\community\\p7\\jobs\\p7_r2_probe_review.out",
+    "id":  "p7_r2_probe_review",
+    "ok":  true,
+    "kind":  "review",
+    "note":  "p6_review rc=0 (0 ok, 2 input error, 3 refused: GPU busy/lock/adults-only guard, 5 judge replies unusable)",
+    "outputs":  [
+                    "C:\\AI\\community\\p7\\reviews\\p7_r2_probe_review\\review.md",
+                    "C:\\AI\\community\\p7\\reviews\\p7_r2_probe_review\\review.json"
+                ],
+    "finished":  "2026-10-21T09:58:00",
+    "wall_min":  2.1
+}
