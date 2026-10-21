@@ -1,0 +1,65 @@
+# D8: the local LLM drafts every prompt from the official MiniMax H3 guide. No gate; Derek can edit the .txt before rendering.
+import json, os, sys, time
+sys.path.insert(0, r"C:\AI\community\scripts"); from comm import *
+GUIDES = os.path.join(W, "guides")
+BASE_GUIDE = open(os.path.join(GUIDES, "VIDEO_PROMPT_WRITING_GUIDE_base_en.md"), encoding="utf-8").read()
+REF_GUIDE = open(os.path.join(GUIDES, "VIDEO_PROMPT_WRITING_GUIDE_ref_en.md"), encoding="utf-8").read()
+RULES = ("Hard rules: every character is a fictional adult aged 21 or older and must be described as an adult woman / adult man; "
+         "never mention or imply anyone under 21, school, or youth. Present tense, literal, time-ordered. Do not invent new people unless the beat asks. "
+         "Output ONLY the final prompt text, no preamble, no markdown fences.")
+# D2 arms (Derrick 2026-10-20): short 60-120 words PER 5 s, long 150-250 words PER 5 s, REF2VA long 350-500 flat
+# (the 350-500 range is the official guide's generation-task length: guides/VIDEO_PROMPT_WRITING_GUIDE_ref_en.md:242).
+# The short arm is shared by i2v and r2v shots (the shot's "mode" picks the graph); only the length rule differs.
+def _limits(arm, secs):
+    if arm == "short": return int(60 * secs / 5), int(120 * secs / 5)
+    if arm == "long_i2v": return int(150 * secs / 5), int(250 * secs / 5)
+    if arm == "long_r2v": return 350, 500
+    if arm == "long_cont": return int(150 * secs / 5), int(250 * secs / 5)
+    raise ValueError(arm)
+def system_for(arm, secs):
+    lo, hi = _limits(arm, secs)
+    if arm == "long_r2v":
+        return (f"You write prompts for the MiniMax H3 reference-to-video (REF2VA) model, following this official guide exactly:\n\n{REF_GUIDE}\n\n"
+                f"Write the full-reference prompt for a {secs}-second clip whose <Subject 1> appearance comes from <Picture 1>. "
+                f"The picture already has the same aspect ratio as the output. Length: {lo}-{hi} words. {RULES}")
+    if arm == "long_cont":
+        return (f"You write prompts for the MiniMax H3 video model, following this official guide exactly:\n\n{BASE_GUIDE}\n\n"
+                f"This {secs}-second clip is a latent CONTINUATION of the previous clip (no picture is attached), so use the T2VA form: "
+                f"no instruction line, just the three core fields, and re-state the subject's identity, hair and outfit so they stay consistent. "
+                f"Length: {lo}-{hi} words. {RULES}")
+    if arm == "long_i2v":
+        return (f"You write prompts for the MiniMax H3 image-to-video (I2VA) model, following this official guide exactly:\n\n{BASE_GUIDE}\n\n"
+                f"Write the I2VA prompt for a {secs}-second clip whose first frame is <Picture 1>. Start with the exact I2VA instruction line, "
+                f"then the three core fields. Length: {lo}-{hi} words. {RULES}")
+    return (f"You write SHORT prompts for the MiniMax H3 video model. Distilled from the official guide: start from the image "
+            f"(identity, clothing, setting stay consistent), then action onset, continuous development, result; one camera line; one sound line; "
+            f"use [Shot N] markers only if the beat asks for a cut. Plain prose, no field labels. {secs}-second clip. Length: {lo}-{hi} words. {RULES}")
+def user_for(shot, arm):
+    s = f"Start image / reference: {shot['image_note']}\nBeat for this clip: {shot['beat']}"
+    if shot.get("prev_beat"): s += f"\nThis clip continues directly from the previous clip, which showed: {shot['prev_beat']}"
+    if arm == "long_r2v": s += "\nThe reference is a still of the subject only; compose the shot freely, keeping her identity, hair and outfit."
+    return s
+def write(shot, arm, secs, outdir, tries=3, logfile=None):
+    os.makedirs(outdir, exist_ok=True)
+    path = os.path.join(outdir, f"{shot['id']}_{arm}.txt")
+    if os.path.exists(path):  # Derek's edits win: never overwrite an existing prompt file
+        return open(path, encoding="utf-8").read().strip()
+    lo, hi = _limits(arm, secs); fb = ""
+    for t in range(tries):
+        t0 = time.time()
+        txt = llm(system_for(arm, secs), user_for(shot, arm) + fb, max_tokens=6000, temperature=0.6)
+        n = len(txt.split()); ok_len = lo * 0.85 <= n <= hi * 1.15; ok_guard = guard_ok(txt)
+        log(f"PROMPT {shot['id']} {arm} try{t} words={n} range={lo}-{hi} len_ok={ok_len} guard_ok={ok_guard} secs={time.time()-t0:.0f}", logfile)
+        if ok_len and ok_guard: break
+        fb = f"\n\nYour previous draft was {n} words; it must be {lo}-{hi} words." if not ok_len else "\n\nRewrite: describe everyone strictly as adults."
+    if not guard_ok(txt): raise RuntimeError(f"guard failed for {shot['id']} {arm}")
+    open(path, "w", encoding="utf-8").write(txt + "\n")
+    json.dump({"shot": shot, "arm": arm, "secs": secs, "words": len(txt.split()), "model": "coding_sc117_strata",
+               "guide": "MiniMax-H3 VIDEO_PROMPT_WRITING_GUIDE_" + ("ref" if arm == "long_r2v" else "base") + "_en.md"},
+              open(path + ".json", "w", encoding="utf-8"), indent=1)
+    return txt
+if __name__ == "__main__":
+    shots = json.load(open(sys.argv[1], encoding="utf-8")); outdir = sys.argv[2]; arms = sys.argv[3].split(",")
+    for sh in shots:
+        for a in arms: write(sh, a, sh.get("secs", 5), outdir, logfile=os.path.join(outdir, "prompts.log"))
+    print("PROMPTS_DONE")

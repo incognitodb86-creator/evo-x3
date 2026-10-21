@@ -1,12 +1,10 @@
 {
-  "request_id": "p7_r1_full_review",
-  "jobs": [
-    {
-      "kind": "review",
-      "id": "p7_r1_full_review",
-      "pairs": [
-        "p6_1min_cuts=p7_r1_c1_pmot_full"
-      ]
-    }
-  ]
+ "request_id": "p7_r3_probes",
+ "jobs": [
+  {
+   "kind": "render",
+   "id": "p7_r3_c3_sd1000",
+   "stitch": false
+  }
+ ]
 }
