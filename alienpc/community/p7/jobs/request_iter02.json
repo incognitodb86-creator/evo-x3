@@ -1,14 +1,10 @@
 {
-  "request_id": "p7_r1_probe_review",
-  "jobs": [
-    {
-      "kind": "review",
-      "id": "p7_r1_probe_review",
-      "pairs": [
-        "p6_1min_cuts:seg1=p7_r1_c1_pmot:seg1",
-        "p6_1min_cuts_ab05:seg1=p7_r1_c2_st12:seg1",
-        "p6_1min_community:seg1=p7_r1_c3_ab05:seg1"
-      ]
-    }
-  ]
+ "request_id": "p7_r2_full_review",
+ "jobs": [
+  {
+   "kind": "review",
+   "id": "p7_r2_full_review",
+   "pairs": ["p6_1min_community=p7_r2_c3_pmot_full_pool"]
+  }
+ ]
 }
