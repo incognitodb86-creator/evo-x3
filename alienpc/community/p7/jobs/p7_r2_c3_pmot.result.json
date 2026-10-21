@@ -1,0 +1,16 @@
+{
+    "started":  "2026-10-21T09:36:38",
+    "rc":  0,
+    "budget_cap_min":  360,
+    "budget_used_min":  143.9,
+    "log":  "C:\\AI\\community\\p7\\jobs\\p7_r2_c3_pmot.out",
+    "id":  "p7_r2_c3_pmot",
+    "ok":  true,
+    "kind":  "render",
+    "note":  "batch_queue rc=0 rendered=1/1 prompts_reused=0 stitch=False",
+    "outputs":  [
+                    "C:\\AI\\community\\runs\\p7_r2_c3_pmot\\results.json"
+                ],
+    "finished":  "2026-10-21T09:53:16",
+    "wall_min":  16.6
+}
