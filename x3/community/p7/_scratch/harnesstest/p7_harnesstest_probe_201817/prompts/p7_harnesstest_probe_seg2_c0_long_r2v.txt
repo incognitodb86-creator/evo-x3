@@ -1,0 +1,20 @@
+subject_definitions:
+<Subject 1> is the adult woman whose appearance comes from <Picture 1>, with long dark hair in a high bun, toned and tanned skin, and a black mesh triangle bikini.
+
+summary:
+[reference generation] The target video is a 10-second adult scene set in a dark modern penthouse. <Subject 1> appears as an adult woman in a black mesh triangle bikini, first at a steel-and-glass balcony railing, then after a cut walking barefoot through a dark living room toward a floor-to-ceiling window with city lights behind the glass. <Picture 1> supplies only her appearance, and the shot composition is freely composed around the requested beat.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - her adult identity, long dark hair in a high bun, toned and tanned skin, and black mesh triangle bikini are retained; only the setting changes from the balcony to the interior.
+
+detailed_description:
+The target video uses a realistic cinematic adult scene with low-key lighting, reflective surfaces, and a restrained nighttime color palette.
+[Shot 1] The scene opens in a dark modern penthouse. <Subject 1>, an adult woman with long dark hair in a high bun, toned and tanned skin, and a black mesh triangle bikini, stands at a steel-and-glass balcony railing. Her body is angled away from the camera, her palms rest on the metal rail, and the city lights glow behind the glass. The camera holds a medium-wide view from behind and slightly to the side, keeping her face partially visible in profile. Wind moves a few loose strands near her neck. Her shoulders rise and fall with calm breathing. The glass railing reflects the exterior lights in thin vertical streaks. At the edge of the balcony, a dark sliding door frame separates the terrace from the interior.
+[Shot 2] At 00:03.500, the shot cuts to the dark living room. <Subject 1> is now topless in her black bikini bottoms, barefoot, and standing just inside the threshold. The polished floor reflects the city lights as soft colored bands. The camera tracks from a low rear angle as she walks forward, her feet pressing silently against the glossy floor. Her high bun remains intact, and the black mesh triangle bikini is no longer present; only the black bottoms remain visible. She crosses the room with steady adult posture, arms relaxed at her sides. The floor-to-ceiling window dominates the far wall, and the exterior city lights create a deep blue and amber glow behind the glass. The camera moves slowly forward, maintaining a medium shot from behind, while the interior remains dark except for faint reflections on the floor and window frame.
+[Shot 3] At 00:08.000, the shot cuts to a close view from behind as <Subject 1> stops at the window. Her hands lift to the glass, fingertips touching the surface without pressing hard. The city lights blur softly through the pane. Her reflection appears faintly over the skyline, aligned with her adult silhouette. She stands still, head slightly lowered, then turns her face toward the glass as the exterior glow traces the line of her jaw. The shot holds for the final two seconds with no additional movement.
+
+overall_soundscape:
+Soft barefoot footsteps, faint fabric movement, and low distant city hum continue throughout the scene.
+
+non_diegetic_music:
+N/A
