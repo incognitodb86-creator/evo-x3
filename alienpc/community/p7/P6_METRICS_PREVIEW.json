@@ -1,0 +1,888 @@
+{
+ "rubric": "p7-rubric-v1 (2026-10-20)",
+ "when": "2026-10-20 19:55 CT",
+ "judge": null,
+ "model_used": false,
+ "calls": 0,
+ "asks": 0,
+ "judge_failures": 0,
+ "judge_secs": 0,
+ "weights": {
+  "abs": 0.4,
+  "pairwise": 0.4,
+  "objective": 0.2,
+  "flag_penalty": 0.75
+ },
+ "dims": {
+  "motion_quality": 0.15,
+  "temporal_consistency": 0.15,
+  "burn_exposure": 0.1,
+  "identity_consistency": 0.2,
+  "prompt_adherence": 0.1,
+  "artifacts": 0.2,
+  "pacing_cuts": 0.1
+ },
+ "title": "P6 objective-metrics preview (no model)",
+ "ranking": [
+  {
+   "name": "p6_1min_cuts",
+   "label": "V4",
+   "video": "C:\\AI\\community\\runs\\p6_1min_cuts\\p6_1min_cuts_stitched.mp4",
+   "kind": "full",
+   "metrics": {
+    "frames": 1444,
+    "fps": 24.0,
+    "duration": 60.157,
+    "cuts_detected": 15,
+    "cut_times": [
+     5.58,
+     10.17,
+     14.12,
+     20.08,
+     25.33,
+     31.29,
+     34.29,
+     40.12,
+     40.88,
+     45.88,
+     52.25,
+     52.71,
+     53.0,
+     53.29,
+     53.62
+    ],
+    "motion": 4.322,
+    "lum_flicker": 0.539,
+    "tex_flicker": 1.168,
+    "freeze_frac": 0.011,
+    "seam_ratio": 1.44,
+    "sat_mean": 0.4249,
+    "clip_frac": 0.0035,
+    "sharpness": 513.4,
+    "sat_drift_max": 0.0876,
+    "clip_late_max": 0.0068,
+    "sharp_drift_min": -0.4082,
+    "color_drift_max": 3.448,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 5.58,
+      "sat_drift": 0.00026527092903161353,
+      "clip_late": 2.9279651675485007e-05,
+      "sharp_drift": 0.20089351923586052,
+      "color_drift_ab": 0.7292228023344789
+     },
+     {
+      "t0": 5.58,
+      "t1": 10.17,
+      "sat_drift": -0.01720714646909982,
+      "clip_late": 0.0023699294532627865,
+      "sharp_drift": 0.40384438858202687,
+      "color_drift_ab": 1.9336785176897007
+     },
+     {
+      "t0": 10.17,
+      "t1": 14.12,
+      "sat_drift": 0.04228119904045835,
+      "clip_late": 0.0020231665196942974,
+      "sharp_drift": -0.08213922999873258,
+      "color_drift_ab": 2.0280975377319486
+     },
+     {
+      "t0": 14.12,
+      "t1": 20.04,
+      "sat_drift": 0.027018558180193164,
+      "clip_late": 0.006825603505291006,
+      "sharp_drift": -0.4081558689174313,
+      "color_drift_ab": 2.1920624996749023
+     },
+     {
+      "t0": 20.04,
+      "t1": 25.33,
+      "sat_drift": -0.05671013442595707,
+      "clip_late": 0.00031863150352733684,
+      "sharp_drift": 2.72947803031445,
+      "color_drift_ab": 1.493611448350088
+     },
+     {
+      "t0": 25.33,
+      "t1": 31.29,
+      "sat_drift": -0.049823336131533,
+      "clip_late": 0.0002493937389770723,
+      "sharp_drift": -0.20513159255371316,
+      "color_drift_ab": 3.4476137543888954
+     },
+     {
+      "t0": 34.29,
+      "t1": 40.08,
+      "sat_drift": -0.002783143545142197,
+      "clip_late": 0.0004202491181657848,
+      "sharp_drift": -0.16452310435382989,
+      "color_drift_ab": 0.3029732538484118
+     },
+     {
+      "t0": 40.88,
+      "t1": 45.88,
+      "sat_drift": 0.07991498996764479,
+      "clip_late": 0.006551752645502645,
+      "sharp_drift": 0.49119965034969915,
+      "color_drift_ab": 1.2231395478903573
+     },
+     {
+      "t0": 45.88,
+      "t1": 52.25,
+      "sat_drift": 0.08755678884269358,
+      "clip_late": 0.00028659611992945327,
+      "sharp_drift": -0.026514863054501348,
+      "color_drift_ab": 1.851557870993919
+     },
+     {
+      "t0": 53.62,
+      "t1": 60.13,
+      "sat_drift": 0.0040338903479144594,
+      "clip_late": 0.0011832423941798942,
+      "sharp_drift": 0.13129103500275074,
+      "color_drift_ab": 0.3477976386777728
+     }
+    ],
+    "objective_score": 8.63,
+    "objective_penalties": {
+     "lum_flicker": 0.17,
+     "tex_flicker": 0.08,
+     "burn_sat_drift": 0.3,
+     "burn_clip": 0.0,
+     "blur_drift": 0.77,
+     "color_drift": 0.05,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 8.63,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera. Then, about five seconds in, cut within this clip ([Shot 2]) to a close-up of her face and shoulders as she smiles at the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V4\\w01_sheet.jpg"
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V4\\w02_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 20.04,
+     "t1": 30.06,
+     "beat": "Cut to the dark living room: topless in her black bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass. Then, about five seconds in, cut within this clip ([Shot 2]) to a close-up of her face and shoulders as she smiles at the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V4\\w03_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 30.06,
+     "t1": 40.08,
+     "beat": "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V4\\w04_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 40.08,
+     "t1": 50.1,
+     "beat": "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor. Then, about five seconds in, cut within this clip ([Shot 2]) to a close-up of her face and shoulders as she smiles at the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V4\\w05_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 50.1,
+     "t1": 60.13,
+     "beat": "Now nude, she rolls onto her side facing the camera, props her head on one hand, laughs softly and blows the camera a kiss.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V4\\w06_sheet.jpg"
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V4\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\ref_D15.jpg",
+   "abs": null,
+   "pairwise": null,
+   "flags": [],
+   "dims": null,
+   "composite": 8.63,
+   "rank": 1
+  },
+  {
+   "name": "p6_1min_cuts_ab05",
+   "label": "V5",
+   "video": "C:\\AI\\community\\runs\\p6_1min_cuts_ab05\\p6_1min_cuts_ab05_stitched.mp4",
+   "kind": "full",
+   "metrics": {
+    "frames": 1444,
+    "fps": 24.0,
+    "duration": 60.157,
+    "cuts_detected": 14,
+    "cut_times": [
+     6.29,
+     10.17,
+     14.33,
+     20.08,
+     24.67,
+     31.42,
+     34.33,
+     40.12,
+     40.71,
+     41.04,
+     41.38,
+     45.33,
+     52.88,
+     54.5
+    ],
+    "motion": 5.135,
+    "lum_flicker": 0.536,
+    "tex_flicker": 1.236,
+    "freeze_frac": 0.004,
+    "seam_ratio": 0.75,
+    "sat_mean": 0.4515,
+    "clip_frac": 0.0012,
+    "sharpness": 337.8,
+    "sat_drift_max": 0.0974,
+    "clip_late_max": 0.0019,
+    "sharp_drift_min": -0.5137,
+    "color_drift_max": 4.854,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 6.29,
+      "sat_drift": -0.08871767927249086,
+      "clip_late": 0.000509810405643739,
+      "sharp_drift": -0.3015720098602016,
+      "color_drift_ab": 4.85421570650808
+     },
+     {
+      "t0": 6.29,
+      "t1": 10.17,
+      "sat_drift": 0.09738403131986861,
+      "clip_late": 2.985376249265138e-05,
+      "sharp_drift": 1.0780627660826174,
+      "color_drift_ab": 3.5442438100575164
+     },
+     {
+      "t0": 10.17,
+      "t1": 14.33,
+      "sat_drift": -0.03275030126166911,
+      "clip_late": 8.037551440329218e-05,
+      "sharp_drift": -0.3012102792838678,
+      "color_drift_ab": 3.895912598856015
+     },
+     {
+      "t0": 14.33,
+      "t1": 20.04,
+      "sat_drift": 0.08791207841449933,
+      "clip_late": 4.8225308641975306e-05,
+      "sharp_drift": 0.11290767176428296,
+      "color_drift_ab": 1.124570676731795
+     },
+     {
+      "t0": 20.04,
+      "t1": 24.67,
+      "sat_drift": -0.014278708822267894,
+      "clip_late": 0.0019381981187536746,
+      "sharp_drift": -0.5136599705250309,
+      "color_drift_ab": 1.3547296016721901
+     },
+     {
+      "t0": 24.67,
+      "t1": 31.42,
+      "sat_drift": -0.06087206366030473,
+      "clip_late": 0.0016176146384479719,
+      "sharp_drift": 0.572204693766458,
+      "color_drift_ab": 2.923577793799659
+     },
+     {
+      "t0": 34.33,
+      "t1": 40.08,
+      "sat_drift": -0.06694859116915675,
+      "clip_late": 0.00019806823192239858,
+      "sharp_drift": -0.4490625081039362,
+      "color_drift_ab": 3.4078575601419328
+     },
+     {
+      "t0": 41.38,
+      "t1": 45.33,
+      "sat_drift": -0.03759309328939031,
+      "clip_late": 3.215020576131687e-05,
+      "sharp_drift": 0.3416291364257833,
+      "color_drift_ab": 1.1812130041426236
+     },
+     {
+      "t0": 45.33,
+      "t1": 52.88,
+      "sat_drift": -0.025815465576798036,
+      "clip_late": 0.0014605379188712521,
+      "sharp_drift": 0.10445498242767348,
+      "color_drift_ab": 0.9341953934266961
+     },
+     {
+      "t0": 54.5,
+      "t1": 60.13,
+      "sat_drift": -0.05298367602424647,
+      "clip_late": 2.755731922398589e-05,
+      "sharp_drift": -0.303285315055733,
+      "color_drift_ab": 1.8970311958077426
+     }
+    ],
+    "objective_score": 7.88,
+    "objective_penalties": {
+     "lum_flicker": 0.17,
+     "tex_flicker": 0.37,
+     "burn_sat_drift": 0.38,
+     "burn_clip": 0.0,
+     "blur_drift": 1.0,
+     "color_drift": 0.21,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 7.88,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera. Then, about five seconds in, cut within this clip ([Shot 2]) to a close-up of her face and shoulders as she smiles at the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V5\\w01_sheet.jpg"
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V5\\w02_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 20.04,
+     "t1": 30.06,
+     "beat": "Cut to the dark living room: topless in her black bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass. Then, about five seconds in, cut within this clip ([Shot 2]) to a close-up of her face and shoulders as she smiles at the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V5\\w03_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 30.06,
+     "t1": 40.08,
+     "beat": "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V5\\w04_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 40.08,
+     "t1": 50.1,
+     "beat": "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor. Then, about five seconds in, cut within this clip ([Shot 2]) to a close-up of her face and shoulders as she smiles at the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V5\\w05_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 50.1,
+     "t1": 60.13,
+     "beat": "Now nude, she rolls onto her side facing the camera, props her head on one hand, laughs softly and blows the camera a kiss.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V5\\w06_sheet.jpg"
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V5\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\ref_D15.jpg",
+   "abs": null,
+   "pairwise": null,
+   "flags": [],
+   "dims": null,
+   "composite": 7.88,
+   "rank": 2
+  },
+  {
+   "name": "p6_1min_community",
+   "label": "V1",
+   "video": "C:\\AI\\community\\runs\\p6_1min_community\\p6_1min_community_stitched.mp4",
+   "kind": "full",
+   "metrics": {
+    "frames": 1444,
+    "fps": 24.0,
+    "duration": 60.157,
+    "cuts_detected": 4,
+    "cut_times": [
+     20.08,
+     23.17,
+     40.12,
+     43.17
+    ],
+    "motion": 4.051,
+    "lum_flicker": 0.459,
+    "tex_flicker": 1.199,
+    "freeze_frac": 0.01,
+    "seam_ratio": 2.29,
+    "sat_mean": 0.4227,
+    "clip_frac": 0.0036,
+    "sharpness": 388.3,
+    "sat_drift_max": 0.2258,
+    "clip_late_max": 0.016,
+    "sharp_drift_min": -0.4062,
+    "color_drift_max": 6.095,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 20.04,
+      "sat_drift": -0.2693491397648937,
+      "clip_late": 0.01600620958259847,
+      "sharp_drift": -0.08298778751187519,
+      "color_drift_ab": 6.095245572729171
+     },
+     {
+      "t0": 20.04,
+      "t1": 23.17,
+      "sat_drift": 0.06070167463586573,
+      "clip_late": 0.0025100124926513818,
+      "sharp_drift": -0.2860420962716028,
+      "color_drift_ab": 0.9104192500720418
+     },
+     {
+      "t0": 23.17,
+      "t1": 40.08,
+      "sat_drift": -0.28054423304249765,
+      "clip_late": 0.0030336015579071132,
+      "sharp_drift": 2.1949791010003183,
+      "color_drift_ab": 5.595156227593554
+     },
+     {
+      "t0": 40.08,
+      "t1": 43.17,
+      "sat_drift": -0.17122534292281932,
+      "clip_late": 0.0001699368018812463,
+      "sharp_drift": -0.40622027266475447,
+      "color_drift_ab": 3.6268350592372163
+     },
+     {
+      "t0": 43.17,
+      "t1": 60.13,
+      "sat_drift": 0.2257875658920394,
+      "clip_late": 0.0003731720311581422,
+      "sharp_drift": -0.26920480100400523,
+      "color_drift_ab": 3.1455513439582914
+     }
+    ],
+    "objective_score": 7.02,
+    "objective_penalties": {
+     "lum_flicker": 0.07,
+     "tex_flicker": 0.21,
+     "burn_sat_drift": 1.41,
+     "burn_clip": 0.18,
+     "blur_drift": 0.77,
+     "color_drift": 0.34,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 7.02,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V1\\w01_sheet.jpg"
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V1\\w02_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 20.04,
+     "t1": 30.06,
+     "beat": "Cut to the dark living room: topless in her black bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V1\\w03_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 30.06,
+     "t1": 40.08,
+     "beat": "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V1\\w04_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 40.08,
+     "t1": 50.1,
+     "beat": "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V1\\w05_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 50.1,
+     "t1": 60.13,
+     "beat": "Now nude, she rolls onto her side facing the camera, props her head on one hand, laughs softly and blows the camera a kiss.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V1\\w06_sheet.jpg"
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V1\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\ref_D15.jpg",
+   "abs": null,
+   "pairwise": null,
+   "flags": [],
+   "dims": null,
+   "composite": 7.02,
+   "rank": 3
+  },
+  {
+   "name": "p6_1min_ab05",
+   "label": "V3",
+   "video": "C:\\AI\\community\\runs\\p6_1min_ab05\\p6_1min_ab05_stitched.mp4",
+   "kind": "full",
+   "metrics": {
+    "frames": 1444,
+    "fps": 24.0,
+    "duration": 60.157,
+    "cuts_detected": 6,
+    "cut_times": [
+     20.08,
+     23.58,
+     28.12,
+     40.12,
+     44.08,
+     53.21
+    ],
+    "motion": 3.753,
+    "lum_flicker": 0.364,
+    "tex_flicker": 1.138,
+    "freeze_frac": 0.01,
+    "seam_ratio": 0.98,
+    "sat_mean": 0.4422,
+    "clip_frac": 0.0025,
+    "sharpness": 450.2,
+    "sat_drift_max": 0.2476,
+    "clip_late_max": 0.0139,
+    "sharp_drift_min": -0.4649,
+    "color_drift_max": 9.446,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 20.04,
+      "sat_drift": -0.2916305694315481,
+      "clip_late": 0.013876947383891829,
+      "sharp_drift": 0.5696602788323211,
+      "color_drift_ab": 1.7351095502661813
+     },
+     {
+      "t0": 20.04,
+      "t1": 23.58,
+      "sat_drift": -0.001692138592690351,
+      "clip_late": 0.0016304747207524983,
+      "sharp_drift": 0.019402509565586312,
+      "color_drift_ab": 0.25397923660504906
+     },
+     {
+      "t0": 23.58,
+      "t1": 28.12,
+      "sat_drift": 0.2476050859358545,
+      "clip_late": 0.004331092004703115,
+      "sharp_drift": 0.46692378457936723,
+      "color_drift_ab": 9.446319558763637
+     },
+     {
+      "t0": 28.12,
+      "t1": 40.08,
+      "sat_drift": -0.15307195572896382,
+      "clip_late": 0.0007287379972565158,
+      "sharp_drift": 1.4651212738364232,
+      "color_drift_ab": 4.095704792227455
+     },
+     {
+      "t0": 40.08,
+      "t1": 44.08,
+      "sat_drift": -0.006648908546552423,
+      "clip_late": 0.00016534391534391533,
+      "sharp_drift": -0.4649186227777654,
+      "color_drift_ab": 4.352960989706
+     },
+     {
+      "t0": 44.08,
+      "t1": 53.21,
+      "sat_drift": -0.08697442675289524,
+      "clip_late": 0.001268620874275636,
+      "sharp_drift": 0.1415321766874904,
+      "color_drift_ab": 1.3392023712435261
+     },
+     {
+      "t0": 53.21,
+      "t1": 60.13,
+      "sat_drift": 0.11714321713675968,
+      "clip_late": 0.002511849647266314,
+      "sharp_drift": -0.07164841394820665,
+      "color_drift_ab": 0.6920397534672101
+     }
+    ],
+    "objective_score": 6.67,
+    "objective_penalties": {
+     "lum_flicker": 0.0,
+     "tex_flicker": 0.0,
+     "burn_sat_drift": 1.58,
+     "burn_clip": 0.12,
+     "blur_drift": 0.91,
+     "color_drift": 0.72,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 6.67,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V3\\w01_sheet.jpg"
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V3\\w02_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 20.04,
+     "t1": 30.06,
+     "beat": "Cut to the dark living room: topless in her black bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V3\\w03_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 30.06,
+     "t1": 40.08,
+     "beat": "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V3\\w04_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 40.08,
+     "t1": 50.1,
+     "beat": "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V3\\w05_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 50.1,
+     "t1": 60.13,
+     "beat": "Now nude, she rolls onto her side facing the camera, props her head on one hand, laughs softly and blows the camera a kiss.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V3\\w06_sheet.jpg"
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V3\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\ref_D15.jpg",
+   "abs": null,
+   "pairwise": null,
+   "flags": [],
+   "dims": null,
+   "composite": 6.67,
+   "rank": 4
+  },
+  {
+   "name": "p6_1min_switchyard",
+   "label": "V2",
+   "video": "C:\\AI\\community\\runs\\p6_1min_switchyard\\p6_1min_switchyard_stitched.mp4",
+   "kind": "full",
+   "metrics": {
+    "frames": 1488,
+    "fps": 24.0,
+    "duration": 62.0,
+    "cuts_detected": 11,
+    "cut_times": [
+     5.42,
+     12.21,
+     23.83,
+     42.0,
+     46.58,
+     47.96,
+     53.25,
+     53.54,
+     53.88,
+     54.17,
+     58.46
+    ],
+    "motion": 5.63,
+    "lum_flicker": 0.887,
+    "tex_flicker": 1.255,
+    "freeze_frac": 0.022,
+    "seam_ratio": 5.07,
+    "sat_mean": 0.4295,
+    "clip_frac": 0.0148,
+    "sharpness": 665.1,
+    "sat_drift_max": 0.226,
+    "clip_late_max": 0.197,
+    "sharp_drift_min": -0.5545,
+    "color_drift_max": 7.217,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 5.17,
+      "sat_drift": 0.2259894349539835,
+      "clip_late": 0.0019307346781305115,
+      "sharp_drift": -0.5544655576286117,
+      "color_drift_ab": 7.217374533284843
+     },
+     {
+      "t0": 5.42,
+      "t1": 10.33,
+      "sat_drift": 0.03500929571330058,
+      "clip_late": 0.0035480048500881834,
+      "sharp_drift": -0.062402327434614935,
+      "color_drift_ab": 2.133507377756147
+     },
+     {
+      "t0": 12.21,
+      "t1": 15.5,
+      "sat_drift": 0.11743258707113768,
+      "clip_late": 0.1969751249265138,
+      "sharp_drift": -0.05864287649385158,
+      "color_drift_ab": 2.784253833381829
+     },
+     {
+      "t0": 15.5,
+      "t1": 20.67,
+      "sat_drift": 0.10125756193973445,
+      "clip_late": 0.0023854304453262785,
+      "sharp_drift": -0.2158365381001306,
+      "color_drift_ab": 1.2855202746270382
+     },
+     {
+      "t0": 20.67,
+      "t1": 23.83,
+      "sat_drift": -0.1666673928286586,
+      "clip_late": 0.010807062022339801,
+      "sharp_drift": 1.4427626167846972,
+      "color_drift_ab": 3.3201054415476916
+     },
+     {
+      "t0": 25.83,
+      "t1": 31.0,
+      "sat_drift": -0.007457313287849265,
+      "clip_late": 0.0018893986992945327,
+      "sharp_drift": 0.18448318712844225,
+      "color_drift_ab": 2.6532504798890204
+     },
+     {
+      "t0": 31.0,
+      "t1": 36.17,
+      "sat_drift": 0.18626395576366406,
+      "clip_late": 0.0008491098985890653,
+      "sharp_drift": -0.3997445166526299,
+      "color_drift_ab": 4.213295126238037
+     },
+     {
+      "t0": 36.17,
+      "t1": 41.33,
+      "sat_drift": -0.08974909000875286,
+      "clip_late": 0.0019048996913580247,
+      "sharp_drift": -0.0076744565229809325,
+      "color_drift_ab": 1.5594738249563072
+     },
+     {
+      "t0": 42.0,
+      "t1": 46.5,
+      "sat_drift": 0.05943654957170352,
+      "clip_late": 0.0016362158289241623,
+      "sharp_drift": -0.2978646158691064,
+      "color_drift_ab": 0.8475964988318168
+     },
+     {
+      "t0": 47.96,
+      "t1": 51.67,
+      "sat_drift": 0.08911137477832165,
+      "clip_late": 0.004668669165196942,
+      "sharp_drift": -0.0024897540616246605,
+      "color_drift_ab": 3.3408198495316483
+     },
+     {
+      "t0": 58.46,
+      "t1": 62.0,
+      "sat_drift": -0.003744245424945003,
+      "clip_late": 0.015124375367430923,
+      "sharp_drift": 0.10693641844565116,
+      "color_drift_ab": 1.1173224177113117
+     }
+    ],
+    "objective_score": 4.42,
+    "objective_penalties": {
+     "lum_flicker": 0.61,
+     "tex_flicker": 0.45,
+     "burn_sat_drift": 1.41,
+     "burn_clip": 1.5,
+     "blur_drift": 1.0,
+     "color_drift": 0.47,
+     "freeze": 0.0,
+     "seam_jump": 0.15
+    }
+   },
+   "objective": 4.42,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.33,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V2\\w01_sheet.jpg"
+    },
+    {
+     "seg": 2,
+     "t0": 10.33,
+     "t1": 20.67,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V2\\w02_sheet.jpg"
+    },
+    {
+     "seg": 3,
+     "t0": 20.67,
+     "t1": 31.0,
+     "beat": "Cut to the dark living room: topless in her black bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V2\\w03_sheet.jpg"
+    },
+    {
+     "seg": 4,
+     "t0": 31.0,
+     "t1": 41.33,
+     "beat": "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V2\\w04_sheet.jpg"
+    },
+    {
+     "seg": 5,
+     "t0": 41.33,
+     "t1": 51.67,
+     "beat": "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V2\\w05_sheet.jpg"
+    },
+    {
+     "seg": 6,
+     "t0": 51.67,
+     "t1": 62.0,
+     "beat": "Now nude, she rolls onto her side facing the camera, props her head on one hand, laughs softly and blows the camera a kiss.",
+     "sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V2\\w06_sheet.jpg"
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\V2\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\P6_METRICS_PREVIEW_work\\ref_D15.jpg",
+   "abs": null,
+   "pairwise": null,
+   "flags": [],
+   "dims": null,
+   "composite": 4.42,
+   "rank": 5
+  }
+ ],
+ "pairs": [],
+ "top3": [
+  "p6_1min_cuts",
+  "p6_1min_cuts_ab05",
+  "p6_1min_community"
+ ]
+}
