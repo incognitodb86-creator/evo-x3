@@ -1,0 +1,17 @@
+{
+    "started":  "2026-10-21T13:07:30",
+    "rc":  0,
+    "budget_cap_min":  360,
+    "budget_used_min":  214.7,
+    "log":  "C:\\AI\\community\\p7\\jobs\\p7_final_rank.out",
+    "id":  "p7_final_rank",
+    "ok":  true,
+    "kind":  "review",
+    "note":  "p6_review rc=0 (0 ok, 2 input error, 3 refused: GPU busy/lock/adults-only guard, 5 judge replies unusable)",
+    "outputs":  [
+                    "C:\\AI\\community\\p7\\reviews\\p7_final_rank\\review.md",
+                    "C:\\AI\\community\\p7\\reviews\\p7_final_rank\\review.json"
+                ],
+    "finished":  "2026-10-21T13:09:52",
+    "wall_min":  2.4
+}

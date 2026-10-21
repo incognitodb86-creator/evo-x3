@@ -1,10 +1,14 @@
 {
- "request_id": "p7_r2_c3_full",
+ "request_id": "p7_final_rank",
  "jobs": [
   {
-   "kind": "render",
-   "id": "p7_r2_c3_pmot_full",
-   "stitch": true
+   "kind": "review",
+   "id": "p7_final_rank",
+   "cands": [
+    "p6_1min_cuts",
+    "p6_1min_cuts_ab05",
+    "p6_1min_community"
+   ]
   }
  ]
 }
