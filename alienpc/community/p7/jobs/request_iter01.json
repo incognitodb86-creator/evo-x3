@@ -1,1 +1,34 @@
-{"request_id": "p7_r1", "jobs": [{"kind": "review", "id": "p7_r1_rank", "preset": "p6"}]}
+{
+ "request_id": "p7_r1_probes",
+ "jobs": [
+  {
+   "kind": "render",
+   "id": "p7_r1_c1_pmot",
+   "stitch": false
+  },
+  {
+   "kind": "render",
+   "id": "p7_r1_c2_st12",
+   "stitch": false,
+   "reuse_prompts": [
+    {
+     "src_run": "p6_1min_cuts_ab05",
+     "src_id": "p6_1min_cuts_ab05_seg1",
+     "dst_id": "p7_r1_c2_st12_seg1"
+    }
+   ]
+  },
+  {
+   "kind": "render",
+   "id": "p7_r1_c3_ab05",
+   "stitch": false,
+   "reuse_prompts": [
+    {
+     "src_run": "p6_1min_community",
+     "src_id": "p6_1min_seg1",
+     "dst_id": "p7_r1_c3_ab05_seg1"
+    }
+   ]
+  }
+ ]
+}
