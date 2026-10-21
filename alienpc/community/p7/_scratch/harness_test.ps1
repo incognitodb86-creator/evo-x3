@@ -33,21 +33,31 @@ Check 'bad id has no result' (-not (Test-Path "$Jobs\..\evil.result.json"))
 Check 'unknown kind refused' ((Res 'p7_ht_kind').note -match 'unknown kind')
 Check 'bad pair refused' ((Res 'p7_ht_rev').note -match 'refused')
 # 5 review ok path builds the right argv
-Req @{ request_id='x'; jobs=@(@{kind='review'; id='p7_ht_rank'; preset='p6'}, @{kind='review'; id='p7_ht_cmp'; pairs=@('p6_1min_ab05:seg2=p7_ht_probe:seg2')}) }; $script:calls=@(); RunJobs '04'
+Req @{ request_id='x'; jobs=@(@{kind='review'; id='p7_ht_rank'; preset='p6'}, @{kind='review'; id='p7_ht_cmp'; pairs=@('p6_1min_ab05:seg2=p7_ht_probe:seg2')}) }; $script:calls=@(); $rrSave = ${function:ReuseRanking}; ${function:ReuseRanking} = { $null }; RunJobs '04'; ${function:ReuseRanking} = $rrSave   # pool-20261021: hermetic - a live runs\P6_RANKING.json < 18 h old would otherwise be reused (no p6_review call)
 Check 'preset argv' ($script:calls[0][1] -match 'rank --preset p6 --judge qwen3vl_judge --out C:\\AI\\community\\runs\\P6_RANKING')
 Check 'compare argv' ($script:calls[1][1] -match 'compare --judge qwen3vl_judge --out .*p7_ht_cmp\\review --pair p6_1min_ab05:seg2=p7_ht_probe:seg2')
 Check 'review without json = ok false' (-not (Res 'p7_ht_cmp').ok)
 # 6 render: checkshots rejects a bad shot list, accepts a good one; prompt reuse copies parent prompts; budget refusal
 $id='p7_harnesstest_probe'; $sh="$C\shots\$id.json"
-$base = [IO.File]::ReadAllText("$C\shots\p6_1min_ab05.json") | ConvertFrom-Json; $seg = @($base)[1]; $seg.id = "${id}_seg2"; $seg.antiburn = 0.7
+# pool-20261021: the probe is built from the POOL template; reuse from the D15 parent is skipped, reuse from a POOL run works
+$base = [IO.File]::ReadAllText("$C\shots\pool_parents\p6_1min_cuts_ab05.json") | ConvertFrom-Json; $seg = @($base)[1]; $seg.id = "${id}_seg2"; $seg.antiburn = 0.7
 [IO.File]::WriteAllText($sh, (ConvertTo-Json @($seg) -Depth 5), $Enc)
-Req @{ request_id='x'; jobs=@(@{kind='render'; id=$id; stitch=$false; reuse_prompts=@(@{src_run='p6_1min_ab05'; src_id='p6_1min_ab05_seg2'; dst_id="${id}_seg2"})}) }; $script:calls=@(); RunJobs '05'
+Req @{ request_id='x'; jobs=@(@{kind='render'; id=$id; stitch=$false; reuse_prompts=@(@{src_run='p6_1min_cuts_ab05'; src_id='p6_1min_cuts_ab05_seg2'; dst_id="${id}_seg2"})}) }; $script:calls=@(); RunJobs '05'
 $r = Res $id
 Check 'render ran via ComfyUI venv batch_queue --no-upload --no-stitch' ($script:calls.Count -eq 1 -and $script:calls[0][0] -eq 'C:\fake\python.exe' -and $script:calls[0][1] -match 'batch_queue\.py .*p7_harnesstest_probe --no-upload --no-stitch')
 Check 'render timeout 40 min for 1 shot' ($script:calls[0][2] -eq 40)
-Check 'prompts reused (2 txt + 2 json)' ($r.note -match 'prompts_reused=4')
+Check 'pool: reuse from the D15 parent skipped (fresh prompts)' (($r.note -match 'prompts_reused=0') -and ($r.note -match 'reuse skipped .*p6_1min_cuts_ab05/p6_1min_cuts_ab05_seg2'))
 Check 'no results.json -> ok false' (-not $r.ok)
 $copied = @(Get-ChildItem "$C\runs\$id\prompts" -File | % Name) -join ','; "  copied: $copied"
+$ps='p7_harnesstest_poolsrc'; $pseg = $seg.PSObject.Copy(); $pseg.id = "${ps}_seg2"; [IO.File]::WriteAllText("$C\shots\$ps.json", (ConvertTo-Json @($pseg) -Depth 5), $Enc)
+New-Item -ItemType Directory -Force "$C\runs\$ps\prompts" | Out-Null; foreach($n in "${ps}_seg2_c0_long_r2v.txt","${ps}_seg2_c0_long_r2v.txt.json","${ps}_seg2_c1_long_cont.txt","${ps}_seg2_c1_long_cont.txt.json"){ [IO.File]::WriteAllText("$C\runs\$ps\prompts\$n", 'x', $Enc) }
+$id3='p7_harnesstest_poolreuse'; $s3 = $seg.PSObject.Copy(); $s3.id = "${id3}_seg2"; [IO.File]::WriteAllText("$C\shots\$id3.json", (ConvertTo-Json @($s3) -Depth 5), $Enc)
+Req @{ request_id='x'; jobs=@(@{kind='render'; id=$id3; stitch=$false; reuse_prompts=@(@{src_run=$ps; src_id="${ps}_seg2"; dst_id="${id3}_seg2"})}) }; RunJobs '05b'
+Check 'pool: prompts reused from a POOL run (2 txt + 2 json)' ((Res $id3).note -match 'prompts_reused=4' -and (Res $id3).note -notmatch 'reuse skipped')
+$id4='p7_harnesstest_d15'; $dd = [IO.File]::ReadAllText("$C\shots\p6_1min_cuts_ab05.json") | ConvertFrom-Json; $d15 = @($dd)[1]; $d15.id = "${id4}_seg2"
+[IO.File]::WriteAllText("$C\shots\$id4.json", (ConvertTo-Json @($d15) -Depth 5), $Enc); Req @{ request_id='x'; jobs=@(@{kind='render'; id=$id4}) }; $script:calls=@(); RunJobs '05c'
+Check 'pool: a D15 shot list is refused before any render' (((Res $id4).note -match 'checkshots BAD: .*must be POOL') -and $script:calls.Count -eq 0)
+Check 'pool: PoolRun true for the POOL template copy, false for the D15 parent' ((PoolRun $ps) -and -not (PoolRun 'p6_1min_cuts_ab05'))
 $bad = @($seg) | % { $x = $_.PSObject.Copy(); $x.steps = 30; $x }; $id2='p7_harnesstest_bad'; $bad[0].id = "${id2}_seg2"
 [IO.File]::WriteAllText("$C\shots\$id2.json", (ConvertTo-Json @($bad) -Depth 5), $Enc)
 Req @{ request_id='x'; jobs=@(@{kind='render'; id=$id2}) }; RunJobs '06'; Check 'checkshots rejects steps 30' ((Res $id2).note -match 'checkshots BAD: .*steps')
@@ -55,5 +65,5 @@ Req @{ request_id='x'; jobs=@(@{kind='render'; id=$id2}) }; RunJobs '06'; Check 
 Check 'budget refusal' ((Res 'p7_ht_budget').refused -eq 'budget')
 # cleanup: move (not delete) the test artefacts out of the live folders
 New-Item -ItemType Directory -Force C:\AI\community\p7\_scratch\harnesstest | Out-Null
-foreach($p in "$C\shots\$id.json","$C\shots\$id2.json","$C\runs\$id"){ if(Test-Path $p){ Move-Item $p ("C:\AI\community\p7\_scratch\harnesstest\" + (Split-Path $p -Leaf) + "_" + (Get-Date -f HHmmss)) } }
+foreach($p in "$C\shots\$id.json","$C\shots\$id2.json","$C\runs\$id","$C\shots\$ps.json","$C\runs\$ps","$C\shots\$id3.json","$C\runs\$id3","$C\shots\$id4.json","$C\runs\$id4"){ if(Test-Path $p){ Move-Item $p ("C:\AI\community\p7\_scratch\harnesstest\" + (Split-Path $p -Leaf) + "_" + (Get-Date -f HHmmss)) } }
 "RESULT pass=$pass fail=$fail tmp=$T"

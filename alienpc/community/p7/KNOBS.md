@@ -2,6 +2,11 @@
 Prepared 2026-10-20 evening for Derek. Research behind it: `C:\AI\community\research\video-review-optimize-2026-10-20.md`.
 All characters are fictional adults aged 21+ (canon: `C:\Users\derek\5slock\plans\canon\fiction-cond-lock.md`). Nothing involving minors, ever.
 
+**POOL switch 2026-10-21 (Derek: "ok continue p7 but i want it to use a blonde instead", picked "Use POOL"):** from task P7.2.3b on, every P7 render uses the approved still
+`POOL` (`C:\Users\derek\5slock\approved_characters\POOL\COND_POOL_BIKINI_PORTRAIT.jpg`, INDEX.csv id POOL), never D15. Beats, knobs, seeds
+and caps are unchanged - this is a settings test. Scores of D15 renders (all P6 parents and every P7 run before `p7_r2_c3_pmot_full_pool`)
+are NOT comparable with POOL scores; a POOL child judged against a D15 parent has the image change mixed into its verdict (leaderboard note).
+
 ## 1. How GPU work happens (the only way)
 You never render, never run `p6_review.py` / `batch_queue.py`, never call llama-swap or ComfyUI. The loop's LLM and ComfyUI share one
 exclusive llama-swap group: one model request from you while a render runs kills the render. Instead you write ONE file per iteration,
@@ -22,6 +27,10 @@ Render job (shots file MUST be `C:\AI\community\shots\<id>.json`; output folder 
   NOT ask the LLM for new wording - the knob is then the only change. Leave a segment out of `reuse_prompts` only when its beat text changed
   (knobs `cut_*`, `p_*`): batch_queue then writes fresh prompts for it with the LLM (between iterations, before ComfyUI wakes).
   Segment ids of the parents: `p6_1min_community` -> `p6_1min_seg1..3`; other P6 runs -> `<run>_seg1..3`; P7 runs -> `<run>_seg1..3`.
+- POOL rule (2026-10-21): `reuse_prompts` only works from a POOL run (`shots\<src_run>.json` has image POOL on every shot). All P6 parents and
+  every P7 run before `p7_r2_c3_pmot_full_pool` are D15 runs whose prompts describe the D15 subject: the harness skips those entries
+  ("reuse skipped" in the result note; not a failure) and batch_queue writes fresh POOL prompts (~5 min LLM per job). Leave
+  `reuse_prompts` out while the parent is a D15 run.
 Review jobs (all local: ffmpeg + CPU metrics + local VLM `qwen3vl_judge`):
 ```json
 {"kind": "review", "id": "p7_r1_rank", "preset": "p6"}                                       // -> runs\P6_RANKING.md/.json
@@ -32,10 +41,13 @@ Result file `p7\jobs\<id>.result.json`: `ok`, `rc`, `wall_min`, `budget_used_min
 (`budget` | `gpu-busy`). A malformed request gets `p7\jobs\request_iterNN.result.json` instead.
 
 ## 2. Shot rules (the harness runs `p6_review.py checkshots` and refuses anything else)
-Copy the parent's shot object(s) from its shots file (`shots\p6_1min_community.json`, `shots\p6_1min_ab05.json`, `shots\p6_1min_cuts.json`,
-`shots\p6_1min_cuts_ab05.json`, or the parent's `shots\p7_*.json`) and change ONLY the knob and the `id`.
-Allowed keys: id, image, image_note, beat, chunks, chunk_secs, mode, arm, secs, seed, w, h, steps, antiburn. Fixed: image D15 (same approved
-adult still as the parent), 768x1344, mode r2v, arm long_r2v, secs 10, chunk_secs 10, at most one chunk, no loras. 1-3 shots per file.
+Copy the parent's shot object(s) from its POOL template: `shots\pool_parents\p6_1min_cuts.json`, `shots\pool_parents\p6_1min_cuts_ab05.json`,
+`shots\pool_parents\p6_1min_community.json` (the P6 parents with image POOL, the POOL image_note and "black bikini bottoms" -> "sheer beige
+bikini bottoms"; never copy the D15 files `shots\p6_*.json`), or the parent's `shots\p7_*.json` when that run is on POOL (for a D15 P7 run
+from before 2026-10-21 use the POOL template of its P6 parent plus that run's knob). Change ONLY the knob and the `id`.
+Allowed keys: id, image, image_note, beat, chunks, chunk_secs, mode, arm, secs, seed, w, h, steps, antiburn. Fixed: image POOL (the approved adult still since 2026-10-21; D15 is refused)
+with image_note exactly "adult woman with long straight blonde hair worn loose past her shoulders, blue eyes, slim and toned with lightly tanned skin, wearing a wet, sheer champagne-beige scoop-neck bikini top and matching sheer low-rise bikini bottoms"
+(checkshots compares it byte for byte; beat/chunk text must not describe the D15 subject: dark hair, high bun, black bikini), 768x1344, mode r2v, arm long_r2v, secs 10, chunk_secs 10, at most one chunk, no loras. 1-3 shots per file.
 Ids: `<job id>_segN`, keeping the parent's segment number N (a probe of segment 2 is `<job id>_seg2`).
 
 ## 3. Knobs - ONE per probe, everything else identical to the parent

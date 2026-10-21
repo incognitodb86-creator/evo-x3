@@ -576,6 +576,12 @@ def write_report(path_prefix, title, ranked, pair_log, meta, extra=None):
 
 # ---------------------------------------------------------------- checkshots (harness pre-render validation of Forge's p7 shot lists)
 ALLOWED_KEYS = {"id", "image", "image_note", "beat", "chunks", "chunk_secs", "mode", "arm", "secs", "seed", "w", "h", "steps", "antiburn"}
+# pool-20261021 (Derek 2026-10-21 "ok continue p7 but i want it to use a blonde instead", picked "Use POOL"; backup p6_review.py.bak-20261021-pool): every P7 shot uses the approved
+# POOL still with exactly this subject text; D15 is refused. D15 scores from before the switch are not comparable with POOL scores.
+P7_IMAGE = "POOL"
+P7_IMAGE_NOTE = ("adult woman with long straight blonde hair worn loose past her shoulders, blue eyes, slim and toned with "
+                 "lightly tanned skin, wearing a wet, sheer champagne-beige scoop-neck bikini top and matching sheer low-rise bikini bottoms")
+D15_SUBJECT = re.compile(r"(?i)\b(high bun|dark[- ]haired|dark hair|black (mesh )?(triangle )?bikini)")
 def check_shots(path, job_id):
     bad = []
     if not re.fullmatch(r"p7_[a-z0-9_]{3,48}", job_id or ""): return [f"bad job id {job_id!r}"]
@@ -590,6 +596,8 @@ def check_shots(path, job_id):
         if extra: bad.append(f"{p}: keys not allowed {sorted(extra)} (no loras / new fields)")
         if not re.fullmatch(re.escape(job_id) + r"_seg[1-3]", str(s.get("id", ""))): bad.append(f"{p}: id must be {job_id}_seg1..3")
         if s.get("image") not in APPROVED: bad.append(f"{p}: image must be an approved still key {sorted(APPROVED)}")
+        elif s.get("image") != P7_IMAGE: bad.append(f"{p}: image must be {P7_IMAGE} (P7 fixed still since 2026-10-21, KNOBS.md section 2)")
+        if s.get("image_note") != P7_IMAGE_NOTE: bad.append(f"{p}: image_note must be exactly the POOL subject text (KNOBS.md section 2 / p6_review.P7_IMAGE_NOTE)")
         if (s.get("w"), s.get("h")) != (768, 1344): bad.append(f"{p}: w/h must be 768x1344 (finals size)")
         if not isinstance(s.get("steps"), int) or not 8 <= s["steps"] <= 12: bad.append(f"{p}: steps must be an int 8-12")
         if not isinstance(s.get("seed"), int) or not 0 < s["seed"] < 2 ** 31: bad.append(f"{p}: seed must be a positive int")
@@ -603,6 +611,8 @@ def check_shots(path, job_id):
         texts = [s.get("beat"), s.get("image_note")] + (ch if isinstance(ch, list) else [])
         if not all(isinstance(t, str) and 0 < len(t) <= 1500 for t in texts[:2]): bad.append(f"{p}: beat and image_note must be non-empty strings <= 1500 chars")
         if not all(guard_ok(t) for t in texts if isinstance(t, str)): bad.append(f"{p}: adults-only guard hit")
+        if any(isinstance(t, str) and D15_SUBJECT.search(t) for t in [s.get("beat")] + (ch if isinstance(ch, list) else [])):
+            bad.append(f"{p}: beat/chunk still describes the D15 subject (dark hair / high bun / black bikini); POOL is blonde in a sheer beige bikini")
     return bad
 
 

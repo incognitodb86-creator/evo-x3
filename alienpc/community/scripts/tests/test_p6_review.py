@@ -138,7 +138,7 @@ class Pure(unittest.TestCase):
     def test_checkshots(self):
         if not R.APPROVED: self.skipTest("comm.py not importable here")
         d = tempfile.mkdtemp(); jid = "p7_unittest_probe"
-        good = [{"id": jid + "_seg2", "image": "D15", "image_note": "adult woman, 30, dark hair", "beat": "She walks to the window.", "chunks": ["She smiles."],
+        good = [{"id": jid + "_seg2", "image": "POOL", "image_note": R.P7_IMAGE_NOTE, "beat": "She walks to the window.", "chunks": ["She smiles."],
                  "chunk_secs": 10, "mode": "r2v", "arm": "long_r2v", "secs": 10, "seed": 51080001, "w": 768, "h": 1344, "steps": 12, "antiburn": 0.5}]
         p = os.path.join(d, jid + ".json"); json.dump(good, open(p, "w"))
         bad = R.check_shots(p, jid); self.assertEqual(len(bad), 1); self.assertIn("shots file must be", bad[0])   # outside shots dir
@@ -148,6 +148,14 @@ class Pure(unittest.TestCase):
             worse = [dict(good[0], steps=30, loras=[["x", 1]], image="NEW", w=1024)]; json.dump(worse, open(p, "w"))
             msgs = " ".join(R.check_shots(p, jid))
             for frag in ("steps", "loras", "approved", "768x1344"): self.assertIn(frag, msgs)
+            # pool-20261021: P7 is fixed on POOL - D15, a D15 subject note or D15 subject words in the beat are refused
+            json.dump([dict(good[0], image="D15")], open(p, "w"))
+            self.assertTrue(any("must be POOL" in m for m in R.check_shots(p, jid)))
+            json.dump([dict(good[0], image_note="adult woman with long dark hair in a high bun")], open(p, "w"))
+            self.assertTrue(any("image_note must be exactly" in m for m in R.check_shots(p, jid)))
+            json.dump([dict(good[0], beat="Topless in her black bikini bottoms she walks to the window.")], open(p, "w"))
+            self.assertTrue(any("D15 subject" in m for m in R.check_shots(p, jid)))
+            json.dump(good, open(p, "w")); self.assertEqual(R.check_shots(p, jid), [])
             self.assertTrue(R.check_shots(p, "../evil"))
         finally: R.SHOTS = orig
 
