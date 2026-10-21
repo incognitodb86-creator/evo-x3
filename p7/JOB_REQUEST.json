@@ -1,0 +1,10 @@
+{
+ "request_id": "p7_r3_probes",
+ "jobs": [
+  {
+   "kind": "render",
+   "id": "p7_r3_c3_sd1000",
+   "stitch": false
+  }
+ ]
+}
