@@ -1,0 +1,10 @@
+{
+  "request_id": "p7_r1_c1_full",
+  "jobs": [
+    {
+      "kind": "render",
+      "id": "p7_r1_c1_pmot_full",
+      "stitch": true
+    }
+  ]
+}
