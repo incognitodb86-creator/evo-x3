@@ -181,7 +181,7 @@ def run(g, tag, meta, outdir, logfile=None, poll=5, timeout=7200):
             log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile); return None
     log(f"JOB timeout {tag}", logfile); return None
 
-def llm(system, user, max_tokens=3000, temperature=0.6, model="coding_sc117_strata"):
+def llm(system, user, max_tokens=3000, temperature=0.6, model="coding_swift15_iq3s_esp"):
     body = {"model": model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
             "max_tokens": max_tokens, "temperature": temperature}
     r = http(LS + "/v1/chat/completions", body, timeout=1200)

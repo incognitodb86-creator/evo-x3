@@ -54,7 +54,7 @@ def write(shot, arm, secs, outdir, tries=3, logfile=None):
         fb = f"\n\nYour previous draft was {n} words; it must be {lo}-{hi} words." if not ok_len else "\n\nRewrite: describe everyone strictly as adults."
     if not guard_ok(txt): raise RuntimeError(f"guard failed for {shot['id']} {arm}")
     open(path, "w", encoding="utf-8").write(txt + "\n")
-    json.dump({"shot": shot, "arm": arm, "secs": secs, "words": len(txt.split()), "model": "coding_sc117_strata",
+    json.dump({"shot": shot, "arm": arm, "secs": secs, "words": len(txt.split()), "model": "coding_swift15_iq3s_esp",
                "guide": "MiniMax-H3 VIDEO_PROMPT_WRITING_GUIDE_" + ("ref" if arm == "long_r2v" else "base") + "_en.md"},
               open(path + ".json", "w", encoding="utf-8"), indent=1)
     return txt
