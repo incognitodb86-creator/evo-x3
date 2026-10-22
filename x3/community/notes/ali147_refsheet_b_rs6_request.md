@@ -6,6 +6,35 @@ sbs_refsheet_refsheetb.mp4 and stills at frame 0 (opening, since chunk 1 changed
 Per PROMPT.md Forge may only REQUEST a job; `scripts\run_graph_job.py` is run by the harness after this
 iteration exits, so the render half is verified by the next iteration and the line stays `- [ ]`.
 
+## RE-REQUEST 2026-10-22 (iteration after the id-gate fix) - supersedes the section below
+The 18:46:35 CT refusal (`p7\jobs\request_iter02.json`, no result.json, no GPU spent) was a ralph.ps1 id gate, not the request
+(see `ali147_refsheet_b_rs6_refused.md`). Max Architect widened both gates ~18:52 CT (`ralph.ps1.bak-20261022-idregex` present), and the
+TASKS.md RS6 line says "re-request the same job id, it was never used". This iteration re-issued the identical one-job request after
+read-only checks; the render half stays with the next iteration, so RS6 stays `- [ ]`.
+
+- `C:\AI\community\p7\JOB_REQUEST.json` written again = `{"jobs": [{"id": "ali147_pool_refsheet_b_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}`
+  (119 B, byte-for-byte the form the spec gives); `python -m json.tool` prints exactly one job with only id / kind / frames / frames_tol / minutes.
+  The file was ABSENT before this write (`ls` = No such file), so nothing stale is being overwritten.
+- Id gate check `notes\ali147_refsheet_b_rs6_idcheck.py` (v2 - **parses the two `-notmatch` patterns out of the live ralph.ps1** instead of
+  hardcoding them, py_compile clean): reads `ralph.ps1:184` = `^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$` and
+  `ralph.ps1:265` = `^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$`; verdicts: ctrl True/True, refsheet True/True, **refsheet_b True/True**, dip
+  True/True, and the output ends `ARM ID ACCEPTED BY BOTH LIVE GATES, BUDGET GATE OPEN`.
+- Budget gate (`ralph.ps1:187-188`, file `ralph-community\logs\p7_budget.json` - NOT `C:\AI\community\logs`, which does not exist):
+  `used_min 259.3 < cap_min 390`, `jobs 21 < job_cap 27`, updated 18:22:13 = open, so the re-request cannot be refused as `refused: budget`.
+- Id freedom re-confirmed: `grep -n "refsheet_b|P7 job" logs\ralph.log` ends at the single 18:46:35 `refused: bad id` line - no start, no `ok=`,
+  no later refusal after the fix; `p7\jobs\` has no `ali147_pool_refsheet_b_s51080000.result.json/.out/.err.out`; the arm folder holds only
+  `request.api.json` (12,144 B) + `graph_diff.txt`. So the `*.failed-20261022` move rule does not apply, and `ralph.ps1:185` ("id already used")
+  and `:268` ("missing request.api.json") cannot fire.
+- Graph re-verified read-only with `notes\ali147_refsheet_b_rs6_precheck.py` = `ALL CHECKS PASS` (unchanged RS5 graph): 26 nodes;
+  `comm.guard_ok` passes on c0 (3,951 chars sha256 afa3cf3e9c12ffad...) and c1 (2,569 chars sha256 49c94ba7759859e2...); node set identical to
+  REFSHEET with only `c0` + `save` differing (24/26 byte-identical); c0 `MiniMaxH3ReferenceToVideo` ref_image_1 = start still, ref_image_2 = the
+  sheet, `ref_image_size max`, length 243, 768x1344; c1 byte-identical to RS3; both LoadImage strings resolve inside `ComfyUI\input`
+  (`img` = community/POOL_768x1344.png sha256 9cf9ff95..., `sheet` = community/RS016_portrait_1152x2016.png sha256 da0b6a0b... = RS1's);
+  seed 51080000, steps 10 both schedulers, euler/simple, shift 10/3, fps 24, win1 238/22 -> 481 frames; `save.filename_prefix` = the new id.
+- No render, no ffmpeg, no GPU / ComfyUI / llama-swap / Strata call by Forge. ralph.ps1 was NOT edited (Max's).
+
+The sections below are the 18:45 CT iteration (same request, refused by the old gate) - kept as the audit trail.
+
 ## What was written this iteration
 - `C:\AI\community\p7\JOB_REQUEST.json` = `{"jobs": [{"id": "ali147_pool_refsheet_b_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}`
   - `python -m json.tool` prints exactly one job with only id / kind / frames / frames_tol / minutes. Nothing else in the file.
