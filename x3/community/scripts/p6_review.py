@@ -388,6 +388,25 @@ class Judge:
         return None
 
 def T(text): return {"type": "text", "text": text}
+
+# judge-20261021 (backup p6_review.py.bak-20261021-judge): a pair whose two videos use DIFFERENT approved characters (e.g. a D15
+# parent vs a POOL child) used to be judged against video x's reference only, so the other video always "failed" identity.
+def pair_refs(ref_a, ref_b):
+    """-> (image-order text, [ref paths]) for a pairwise call. Same ref: one shared anchor. Two different refs: each video is
+    judged against its own. One missing (unknown key -> no ref, fail-closed elsewhere): no identity anchor at all."""
+    if ref_a and ref_a == ref_b:
+        return "Image 1 = reference still. Image 2 = video A frames. Image 3 = video B frames. ", [ref_a]
+    if ref_a and ref_b:
+        return ("Image 1 = reference still for video A. Image 2 = reference still for video B (the two videos use different approved "
+                "characters on purpose: judge each video's identity ONLY against its own reference, never against the other one). "
+                "Image 3 = video A frames. Image 4 = video B frames. "), [ref_a, ref_b]
+    return "Image 1 = video A frames. Image 2 = video B frames. ", []
+
+def judge_unusable(meta):
+    """True when a model review must not count as ok: no judge asks at all, every reply unusable, or > 25 % unusable."""
+    if not meta or not meta.get("model_used"): return False
+    asks, fails = meta.get("asks", 0), meta.get("judge_failures", 0)
+    return asks <= 0 or fails >= asks or fails > 0.25 * asks
 def I(path): return {"type": "image_url", "image_url": {"url": b64(path)}}
 
 
@@ -526,10 +545,10 @@ def review(cands, out_prefix, judge_model, use_model, lf, frames_per_window=6, g
             rx, ry = rows[x], rows[y]
             beats = " | ".join(f"{i + 1}) {w['beat']}" for i, w in enumerate(rx["windows"]))
             def ask(a, b):
+                order, refs = pair_refs(a["ref"], b["ref"])
                 parts = [T(f"Rubric {RUBRIC_VERSION}. PAIRWISE: two videos made from the same plan; decide which is better overall and per dimension. "
-                           f"Beats in order: {beats}\n" + ("Image 1 = reference still. Image 2 = video A frames. Image 3 = video B frames. " if rx["ref"] else
-                           "Image 1 = video A frames. Image 2 = video B frames. ") + f"Say tie only if truly equal. Reply JSON: {PAIR_SCHEMA_TEXT}")]
-                if rx["ref"]: parts.append(I(rx["ref"]))
+                           f"Beats in order: {beats}\n" + order + f"Say tie only if truly equal. Reply JSON: {PAIR_SCHEMA_TEXT}")]
+                parts += [I(p) for p in refs]
                 parts += [I(a["global_sheet"]), I(b["global_sheet"])]
                 return judge.ask(parts, norm_pair, max_tokens=600)
             first, second = ask(rx, ry), ask(ry, rx)
@@ -661,7 +680,7 @@ def main(argv=None):
         else:
             pairs = [p.split("=", 1) for p in a.pair]
             if not pairs or any(len(p) != 2 for p in pairs): print("need --pair PARENT=CHILD"); return 2
-            allr, alll, verdicts, meta = [], [], [], None
+            allr, alll, verdicts, meta, tot = [], [], [], None, {"calls": 0, "asks": 0, "judge_failures": 0, "judge_secs": 0.0}
             for i, (pa, ch) in enumerate(pairs, 1):
                 cands = [resolve(pa), resolve(ch)]
                 ranked, plog, meta = review(cands, f"{out}_pair{i}", a.judge, not a.no_model, lf, frames_per_window=a.frames)
@@ -671,9 +690,11 @@ def main(argv=None):
                                  "parent_composite": byn[pa]["composite"], "child_composite": byn[ch]["composite"],
                                  "child_weakest_segment": byn[ch].get("weakest_segment")})
                 allr += ranked; alll += plog
+                for k in tot: tot[k] += meta[k]
+            meta = dict(meta, **dict(tot, judge_secs=round(tot["judge_secs"], 1)))   # judge counts over ALL pairs, not just the last one
             write_report(out, a.title or "P7 comparison", rank_rows(allr), alll, meta, extra={"verdicts": verdicts})
         log(f"DONE -> {out}.md / .json", lf)
-        if meta and meta["model_used"] and meta["judge_failures"] > 0.25 * max(1, meta["asks"]):
+        if judge_unusable(meta):
             log(f"JUDGE FAILURE: {meta['judge_failures']}/{meta['asks']} replies unusable - ranking written but not trustworthy", lf); return 5
         return 0
     except PermissionError as e:
