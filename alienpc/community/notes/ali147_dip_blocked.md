@@ -62,3 +62,34 @@ Compile check after the patch: `python -m py_compile C:/AI/community/scripts/dip
 on changed files). Then re-request with `{"jobs": [{"id": "ali147_pool_dip_s51080000", "kind": "dip"}]}` and
 DIP_PROOF's gate (result.json ok=true) opens on the following iteration.
 
+---
+
+# ALI-147 DIP_PROOF, second attempt - the patch landed, the DIP run never happened (Forge Ralph, next iteration)
+
+State read this iteration (read-only; no ffmpeg, no GPU, no git by Forge):
+
+| Item | Finding |
+|---|---|
+| `C:\AI\community\scripts\dip_join.py` | **Patched as required** - mtime 2026-10-22 16:52:59; `build()` encode line now ends `"-frames:v", str(sum(fr)), "-c:a", "aac"` and the `-r 24` is gone (sum(fr)=1443 from the probe of each input, nothing hard-coded). `python -m py_compile C:/AI/community/scripts/dip_join.py` - clean. |
+| `C:\AI\community\p7\JOB_REQUEST.json` | **Absent** at the start of this iteration, i.e. DIP_REQ's request file was consumed. |
+| `p7\jobs\ali147_pool_dip_s51080000.result.json` | **Unchanged** - mtime 16:34:41, `ok=false rc=5 note="dip_join rc=5"`, started 16:34:24, wall_min 0.3. No newer attempt file, no redo (as expected: `kind=dip` has no harness redo path). |
+| `runs\ali147_pool_dip_s51080000\dip.log` | **Unchanged** - mtime 16:34:41, 10 lines, ends `2026-10-22 16:34:41 CT DIP end FAIL`; `segment frames [481, 481, 481]`; all three `ffmpeg_exit=0 ... frames=1444 audio=True dur=60.192`. |
+| `ffmpeg_cmd.txt` + the three mp4s | **Unchanged** - mtimes 16:34:35/16:34:40/16:34:41, and the commands still end `-c:v libx264 -crf 14 -pix_fmt yuv420p -r 24 -c:a aac` (the pre-patch form). So the files on disk are the OLD encodes, not the patched script's output. |
+| My own ffprobe `-select_streams v:0 -count_packets` | `base_reenc.mp4` -> `768,1344,24/1,1444`; `dipblack.mp4` -> `768,1344,24/1,1444`; `dipwhite.mp4` -> `768,1344,24/1,1444`. Check still fails (needs 1443). |
+
+Conclusion: DIP_PROOF cannot be written honestly. Its gate is `result.json ok=true`; the job that would produce it was **never run after the patch**. The request mechanism (write `p7\JOB_REQUEST.json`, harness runs it after the iteration) has no effect on this job - the file is gone, nothing was executed, and there is no dip redo. That is a harness/dispatch gap for `kind=dip`, not a DIP failure and not a quality question.
+
+Action taken by Forge this iteration: DIP_PROOF marked `[!]` + BLOCKED + `STOP_RALPH`, and the **identical** single dip job re-stated in `C:\AI\community\p7\JOB_REQUEST.json`:
+
+```json
+{"jobs": [{"id": "ali147_pool_dip_s51080000", "kind": "dip"}]}
+```
+
+(`python -m json.tool` prints exactly that id/kind, nothing else. No graph job, no render, no frame counts - a dip request carries only id + kind.)
+
+Action for Derrick (his call, both paths are open):
+- **A.** Run the dip job once with the patched script (the harness's `kind=dip` path, or `python -u C:\AI\community\scripts\dip_join.py C:\AI\community\runs\ali147_pool_dip_s51080000`). Expected with the patch: `dip.log` reads `frames=1443` per output and `DIP end ok`, result.json `ok=true`, and DIP_PROOF's gate opens on the next iteration. A 3x481-packet concat with no output-rate rescale is 60.125 s of video; audio ends ~41.7 ms after the last video frame, identical in all three outputs, so the by-eye comparison stays frame-aligned.
+- **B.** Accept 1443 +-1 as a mux artefact and relax the DIP check - then DIP_PROOF can be written against the existing outputs (I did not write it, because the task's check names 1443 and the gate says ok=true).
+
+If the re-stated request is consumed again with no run (same 16:34 mtimes next iteration), the dip path in `ralph.ps1` needs Derrick's eyes; Forge will not request a third time and will not run dip_join.py or ffmpeg itself.
+
