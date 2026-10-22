@@ -159,5 +159,21 @@ class Pure(unittest.TestCase):
             self.assertTrue(R.check_shots(p, "../evil"))
         finally: R.SHOTS = orig
 
+class JudgeFix(unittest.TestCase):
+    # judge-20261021: pairwise identity anchor per video; a review with 0 usable judge replies is not ok
+    def test_pair_refs(self):
+        txt, refs = R.pair_refs("ref_D15.jpg", "ref_D15.jpg"); self.assertEqual(refs, ["ref_D15.jpg"]); self.assertIn("Image 3 = video B", txt)
+        txt, refs = R.pair_refs("ref_D15.jpg", "ref_POOL.jpg"); self.assertEqual(refs, ["ref_D15.jpg", "ref_POOL.jpg"])
+        self.assertIn("own reference", txt); self.assertIn("Image 4 = video B", txt)
+        self.assertEqual(R.pair_refs("ref_POOL.jpg", "ref_D15.jpg")[1], ["ref_POOL.jpg", "ref_D15.jpg"])   # follows A/B order on swap
+        for a, b in (("ref_D15.jpg", None), (None, "ref_POOL.jpg"), (None, None)):
+            txt, refs = R.pair_refs(a, b); self.assertEqual(refs, []); self.assertTrue(txt.startswith("Image 1 = video A frames"))
+
+    def test_judge_unusable(self):
+        m = lambda asks, fails, used=True: {"model_used": used, "asks": asks, "judge_failures": fails}
+        self.assertFalse(R.judge_unusable(m(8, 0))); self.assertFalse(R.judge_unusable(m(8, 2)))
+        self.assertTrue(R.judge_unusable(m(8, 3))); self.assertTrue(R.judge_unusable(m(5, 5))); self.assertTrue(R.judge_unusable(m(0, 0)))
+        self.assertFalse(R.judge_unusable(m(0, 0, used=False))); self.assertFalse(R.judge_unusable(None))
+
 if __name__ == "__main__":
     unittest.main()
