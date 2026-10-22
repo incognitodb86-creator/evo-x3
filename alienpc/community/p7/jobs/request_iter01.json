@@ -1,10 +1,8 @@
 {
-  "request_id": "p7_r2_c3_full_pool",
   "jobs": [
     {
-      "kind": "render",
-      "id": "p7_r2_c3_pmot_full_pool",
-      "stitch": true
+      "id": "ali147_pool_dip_s51080000",
+      "kind": "dip"
     }
   ]
 }
