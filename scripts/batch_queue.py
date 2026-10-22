@@ -20,7 +20,8 @@ def graph_for(sh, prompts, prefix):
     ext = frames_for(sh.get("chunk_secs", 5)) - 5 if sh.get("chunks") else 119   # 17k extension frames
     ext = max(17, ext - ext % 17)
     return build(sh["mode"], prompts, img, w, h, first, sh.get("steps", 10), sh["seed"], prefix,
-                 ext_frames=ext, antiburn=sh.get("antiburn"), loras=tuple(tuple(x) for x in sh.get("loras", [])))
+                 ext_frames=ext, antiburn=sh.get("antiburn"), loras=tuple(tuple(x) for x in sh.get("loras", [])),
+                 attention=sh.get("attention", "comfy kitchen attention"))  # ALI-157
 def stitch(files, out):
     lst = out + ".txt"; open(lst, "w", encoding="utf-8").write("".join(f"file '{f}'\n" for f in files))
     r = subprocess.run([os.path.join(FFD, "ffmpeg.exe"), "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", out], capture_output=True, text=True)
@@ -46,7 +47,7 @@ def contact_sheet(files, out, notes_path, meta):
     return os.path.exists(out)
 def upload(path, run, LF):
     dest = f"gdrive:AlienPc/community/{run}"
-    r = subprocess.run([RCLONE, "copy", path, dest, "--retries", "1", "--low-level-retries", "1"], capture_output=True, text=True, timeout=900)
+    r = subprocess.run([RCLONE, "copy", path, dest, "--retries", "3", "--low-level-retries", "1"], capture_output=True, text=True, timeout=900)  # ALI-155: rclone default --retries 3
     ok = r.returncode == 0; log(f"RCLONE copy {os.path.basename(path)} -> {dest} rc={r.returncode} {'' if ok else r.stderr.strip()[-300:]}", LF)
     return ok
 if __name__ == "__main__":
@@ -57,10 +58,11 @@ if __name__ == "__main__":
     if "--dry-run" in flags:
         for sh in shots: json.dump(graph_for(sh, P[sh["id"]], f"community/{run_name}/{sh['id']}"), open(os.path.join(OUT, sh["id"] + ".dry.api.json"), "w"), indent=1)
         log("BATCH DRY-RUN DONE (prompts + graphs written, nothing rendered)", LF); sys.exit(0)
-    ensure_comfy(LF)                                                   # 2) unload LLM, wake ComfyUI
+    # 2) ALI-154: unload LLM + wake ComfyUI now runs before EACH job (inside the loop below)
     done = []
     for sh in shots:                                                   # 3) render one at a time
         meta = {k: v for k, v in sh.items() if k not in ("chunks",)}; meta.update(run=run_name, prompts=[os.path.join(PD, x) for x in os.listdir(PD) if x.startswith(sh["id"]) and x.endswith(".txt")])
+        ensure_comfy(LF)                                               # ALI-154: per-job unload
         r = run(graph_for(sh, P[sh["id"]], f"community/{run_name}/{sh['id']}"), sh["id"], meta, OUT, LF)
         if r: done.append(r)
     files = [d["file"] for d in done]
