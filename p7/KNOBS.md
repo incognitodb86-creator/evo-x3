@@ -1,3 +1,5 @@
+> SUPERSEDED 2026-10-22 (Max Architect): the judge-promote rule in section 4 no longer applies - the judge only sorts; Derrick picks KEEP. No vision judge on explicit output.
+
 # P7 playbook - review, keep top 3, optimise (harness-owned: Forge reads this, never edits it)
 Prepared 2026-10-20 evening for Derek. Research behind it: `C:\AI\community\research\video-review-optimize-2026-10-20.md`.
 All characters are fictional adults aged 21+ (canon: `C:\Users\derek\5slock\plans\canon\fiction-cond-lock.md`). Nothing involving minors, ever.
