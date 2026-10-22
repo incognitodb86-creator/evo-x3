@@ -61,7 +61,7 @@ def stage(key, w, h):
 def frames_for(sec):  # 17k+5 grid at 24 fps
     k = max(0, round((sec * 24 - 5) / 17)); return 17 * k + 5
 
-def _model_chain(g, loras=(), vsa=True, prefix="m"):
+def _model_chain(g, loras=(), vsa=True, prefix="m", attention="comfy kitchen attention"):
     if "unet" not in g:  # one shared loader (never load the UNET twice)
         g["unet"] = {"class_type": "UNETLoader", "inputs": {"unet_name": UNET, "weight_dtype": "default"}}
     src = ["unet", 0]
@@ -70,7 +70,7 @@ def _model_chain(g, loras=(), vsa=True, prefix="m"):
         g[f"{prefix}_lora{i}"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": src, "lora_name": name, "strength_model": float(s)}}
         src = [f"{prefix}_lora{i}", 0]
     if vsa:
-        g[f"{prefix}_attn"] = {"class_type": "ModelAttentionBackend", "inputs": {"model": src, "attention": "comfy kitchen attention"}}
+        g[f"{prefix}_attn"] = {"class_type": "ModelAttentionBackend", "inputs": {"model": src, "attention": attention}}  # ALI-157: A/B arm
         g[f"{prefix}_vsa"] = {"class_type": "BlockSparseAttention", "inputs": {"model": [f"{prefix}_attn", 0],
             "selection": "vsa", "selection.keep_percent": 10, "start_percent": 0.2, "end_percent": 1.0,
             "dense_blocks": "", "min_tokens": 12288, "extra_tokens": 256, "sink_conditioning": "exact_kv_and_rows", "verbose": False}}
@@ -109,15 +109,15 @@ def first_pass(g, mode, prompt, img, w, h, length, steps, model):
     return _sample(g, "s0", model, ["c0", 0], ["c0", 1], steps, ["noise", 0])
 
 def build(mode, prompts, img, w, h, first_len, steps, seed, prefix, ext_frames=119, overlap=22,
-          loras=(), vsa=True, antiburn=None):
+          loras=(), vsa=True, antiburn=None, attention="comfy kitchen attention"):
     """prompts[0] = first chunk; prompts[1:] = continuation chunks (latent-tail continuation, ttulttul nodes).
     antiburn: strength for Anti-Burn LoRA on chunk 2+ only (None = off)."""
     g = {}; _common(g)
     g["noise"] = {"class_type": "RandomNoise", "inputs": {"noise_seed": int(seed)}}
-    m0 = _model_chain(g, loras, vsa, "m")
+    m0 = _model_chain(g, loras, vsa, "m", attention)
     mc = m0
     if antiburn and len(prompts) > 1:
-        mc = _model_chain(g, tuple(loras) + ((ANTIBURN, antiburn),), vsa, "mab")
+        mc = _model_chain(g, tuple(loras) + ((ANTIBURN, antiburn),), vsa, "mab", attention)
     lat = first_pass(g, mode, prompts[0], img, w, h, first_len, steps, m0)
     for i, p in enumerate(prompts[1:], start=1):
         g[f"win{i}"] = {"class_type": "MiniMaxH3GuidedContinuationWindow", "inputs": {"previous_av_latent": lat,
@@ -142,7 +142,9 @@ def ensure_comfy(logfile=None):
     """GPU sharing: make sure no LLM is loaded, then wake ComfyUI through llama-swap."""
     r = running(); names = [x.get("model") for x in (r.get("running") or [])] if isinstance(r, dict) else []
     if any(n and n != "comfyui_auto" for n in names):
-        log(f"UNLOAD LLM(s) {names}", logfile); http(LS + "/unload", timeout=120)
+        log(f"UNLOAD LLM(s) {names}", logfile)
+        for n in names:  # ALI-154: documented POST /api/models/unload/:model_id (llama-swap README), not legacy GET /unload
+            if n and n != "comfyui_auto": http(LS + "/api/models/unload/" + n, timeout=120, method="POST")
     t0 = time.time()
     st = http(BASE + "/system_stats", timeout=300)
     log(f"COMFY ready v{st['system']['comfyui_version']} wait={time.time()-t0:.0f}s vram_free={st['devices'][0].get('vram_free',0)/2**30:.1f}GiB", logfile)
