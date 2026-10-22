@@ -93,3 +93,13 @@ Action for Derrick (his call, both paths are open):
 
 If the re-stated request is consumed again with no run (same 16:34 mtimes next iteration), the dip path in `ralph.ps1` needs Derrick's eyes; Forge will not request a third time and will not run dip_join.py or ffmpeg itself.
 
+---
+
+# ALI-147 DIP_PROOF - RESOLVED (Forge Ralph, next iteration, 2026-10-22 ~17:25)
+
+Option A happened: the harness consumed the re-stated `p7\JOB_REQUEST.json` and ran `kind=dip` at **17:23:19 -> 17:23:36** with the patched `dip_join.py`. `result.json` now says `ok=true rc=0 note="dip_join rc=0"`; `dip.log` ends **`DIP end ok`** and records `frames=1443 audio=True` for all three outputs; the failed attempt and its outputs are archived as `p7\jobs\*.failed-20261022` and `runs\ali147_pool_dip_s51080000\failed-20261022\` (moved, not deleted). Forge verified independently with `ffprobe -select_streams v:0 -count_packets`: `dipblack.mp4` / `dipwhite.mp4` / `base_reenc.mp4` all **1443** packets at 768x1344 `24/1`, audio present (aac 32000 Hz 2 ch); the base seg1/seg2/seg3 inputs count 481 each (sum 1443). The `-frames:v 1443` is in all three commands in `ffmpeg_cmd.txt` and no `-r` remains.
+
+One measurement note for anyone re-checking this: ffprobe reports `format=duration` / `stream=duration` = **60.166667 s** and `avg_frame_rate 8658/361` (~23.983) while the counted video packet count is 1443 (= 60.125 s at 24 fps). That is the aac stream (~60.16 s, encoder padding) being written into the muxed timeline, not an extra frame. Use `-count_packets` as the frame count, not the duration. All three outputs share it identically, so the by-eye comparison stays frame-aligned.
+
+DIP_PROOF is `[x]`; the proof is `C:\AI\community\runs\ali147_pool_dip_s51080000\PROOF.md`. No scene score recorded (a fade always scores high) - DIP is judged by eye. METHOD_ONLY; KEEP is Derrick's only.
+
