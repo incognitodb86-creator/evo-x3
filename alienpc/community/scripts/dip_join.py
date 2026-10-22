@@ -22,7 +22,7 @@ def main():
             fc.append(f"{v}{','.join(vf) or 'null'}[v{i}]"); fc.append(f"{a}{','.join(af) or 'anull'}[a{i}]"); parts.append(f"[v{i}][a{i}]")
         fc.append(f"{''.join(parts)}concat=n={len(fr)}:v=1:a=1[v][a]")
         cmd = ["ffmpeg", "-hide_banner", "-y"] + sum([["-i", s] for s in SEGS], []) + ["-filter_complex", ";".join(fc), "-map", "[v]", "-map", "[a]",
-               "-c:v", "libx264", "-crf", "14", "-pix_fmt", "yuv420p", "-r", str(fps), "-c:a", "aac", os.path.join(D, out)]
+               "-c:v", "libx264", "-crf", "14", "-pix_fmt", "yuv420p", "-frames:v", str(sum(fr)), "-c:a", "aac", os.path.join(D, out)]
         cmds.append(" ".join(f'"{c}"' if " " in c or ";" in c else c for c in cmd)); r = subprocess.run(cmd, capture_output=True, text=True)
         p = rg.probe(os.path.join(D, out)) if r.returncode == 0 else {}
         log(f"DIP {out} ffmpeg_exit={r.returncode} frames={p.get('frames')} audio={p.get('audio')} dur={p.get('duration')} bytes={p.get('bytes')}")
