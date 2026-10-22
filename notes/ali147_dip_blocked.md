@@ -31,3 +31,34 @@ is requested (a render/ffmpeg re-run is not mine to run, and a quality re-reques
 - The harness performed no redo for `kind=dip` (redos are the graph path: max 2, same seed then seed+1).
 
 Method only. KEEP is Derrick's. Nothing here judges the explicit content.
+
+---
+
+# ALI-147 DIP_FIX - BLOCKED for scope (next iteration, same loop)
+
+The next task line (DIP_FIX) is the fix for the above, but it is not writable by Forge: PROMPT.md's hard
+rules say "Never edit ... scripts", and its writable-files list (TASKS.md, p7\JOB_REQUEST.json,
+runs\ali147_pool_*\request.api.json, PROOF.md/fairness.txt, notes\*, one AGENTS.md learning line) excludes
+`C:\AI\community\scripts\*`. The task also says "git commit", which AGENTS.md assigns to the harness
+(Forge never runs git commit / checkout / reset). Marked `[!]` + BLOCKED + STOP_RALPH; no DIP re-requested
+by Forge (a `kind=dip` job gets no harness redo, so the re-run is a Derrick action).
+
+## The patch, for whoever owns scripts\ (verified read-only, not applied)
+In `dip_join.py` -> `build()`, the encode line is the only place the count is lost. Per the task (add
+`ffmpeg -frames:v <sum>`; https://ffmpeg.org/ffmpeg.html#Video-Options), the smallest change is one token
+pair on that existing line - `sum(fr)` is already computed on the line above from the probe of each input
+segment, so nothing is hard-coded:
+
+```
+"-c:v", "libx264", "-crf", "14", "-pix_fmt", "yuv420p", "-r", str(fps), "-frames:v", str(sum(fr)), "-c:a", "aac", os.path.join(D, out)]
+```
+
+Notes for the review: `-frames:v` stops the video stream at exactly 1443 packets, which is what the
+function's own gate measures (`p.get("frames") == sum(fr)`), so dip.log will read `DIP end ok`. Keep `-r 24`
+or drop it - with `-frames:v` the rate rescale no longer changes the packet count. The aac stream is
+untouched, so audio ends ~1/24 s (41.7 ms) after the last video frame in all three outputs; the three
+outputs stay frame-aligned with each other and with base_reenc, so the by-eye comparison is unaffected.
+Compile check after the patch: `python -m py_compile C:/AI/community/scripts/dip_join.py` (the harness runs it
+on changed files). Then re-request with `{"jobs": [{"id": "ali147_pool_dip_s51080000", "kind": "dip"}]}` and
+DIP_PROOF's gate (result.json ok=true) opens on the following iteration.
+
