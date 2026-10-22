@@ -1,10 +1,1 @@
-{
- "request_id": "p7_r3_probes",
- "jobs": [
-  {
-   "kind": "render",
-   "id": "p7_r3_c3_sd1000",
-   "stitch": false
-  }
- ]
-}
+{"jobs": [{"id": "ali147_pool_fix5_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}
