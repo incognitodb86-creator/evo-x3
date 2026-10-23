@@ -37,7 +37,7 @@
 - Self-inflicted bugs found and fixed in this pass: (1) the media builder id list omitted clip 2, so its m4a needed a separate extract - the id list must cover every requested clip; (2) a key typo in the sheet builder (clip id ...51100001 written as ...51130001) raised KeyError because both strings print almost identically - the check is `[k for k in ROWS if k not in TITLE]`, not eyeballing; (3) the m4a duration column picked the codec line, so match the numeric line with a fullmatch, not `not startswith('audio')`.
 - Report for Max/Derrick (not self-requested): clip 3 `ali147_pool_hc_r3_s51130003` has result.json ok=false rc=2 (STATIC_FAIL on the c1 audio-VAE link, no mp4/m4a/frames). The graph was already fixed by the iter 03 builder (offline static self-check passes) and clip 3 is pick HC3 = GI173, but the job id is spent (result.json exists = 'id already used') and jobs are at the R-line cap 35/35, so a clip-3 render needs a NEW id (e.g. ali147_pool_hc_r7_s51130007) plus a cap slot decision. rc=2 is not an rc4/TIMEOUT requeue case and STUCK is reported, never re-requested.
 - Budget: p7_budget.json (ralph-community\logs) used_min 450.8, jobs 35, caps 615/45 at this tick = recorded BAKEOFF START. AGENTS.md said "no budget ledger exists" (true only for C:/AI/community); I added the real ledger path + the FINAL media commands to AGENTS.md Check commands. AGENTS.md is now 57 lines (target <40) and its Learnings list is over its own 15-bullet cap - Max prunes at review.
-- Files: notesli163_hc_final_check.py + notesli163_hc_final_objective.json, notesli163_hc_final_media.ps1, notesli163_hc_final_sheet.py, notesli163_hc_final_summary.py, notes\hc_redo_20261023_summary.md, notes\hc_redo_20261023_contact.png (*.png is gitignored in this repo, so the sheet is on disk, not in git). TASKS.md: FINAL ticked [x] with the result line; 5 BAKEOFF lines were untouched.
+- Files: notes/ali163_hc_final_check.py + notes/ali163_hc_final_objective.json, notes/ali163_hc_final_media.ps1, notes/ali163_hc_final_sheet.py, notes/ali163_hc_final_summary.py, notes\hc_redo_20261023_summary.md, notes\hc_redo_20261023_contact.png (*.png is gitignored in this repo, so the sheet is on disk, not in git). TASKS.md: FINAL ticked [x] with the result line; 5 BAKEOFF lines were untouched.
 
 ## 2026-10-23 ~15:10 CT (iter 07, B1 pass)
 - Last 2 summary lines: iter 05 status=ok exit=0 ticks=+1 wall=3.9m denies=3; iter 06 status=ok exit=0 ticks=+1 wall=9.5m denies=3.
@@ -51,7 +51,7 @@
 - iter 08 ticked 0: Max appended 2 lines in that pass (open 9 -> 11) and iter 08 spent itself on the R6R graph work; iter 09 wrote the R6R request and ticked it (the harness rendered it 15:23:59 -> 15:31:51 ok=True rc=0). So tick=0 came from Max's line additions + a request pass, not from a stall.
 - Denies newer than the last entry: 1 logged (15:19:58, iter 08) = the same self-inflicted cause as iter 02-05 (a shell tail of the diagnosis + deny logs; the printed fiction-lock reason text names a protected module path, and the lock matches command TEXT). Rule state: Max narrowed the lock (community 2570142) to writes that TARGET those paths, so log reads pass now - keep the read tool for those two logs, it is deny-proof and costs less.
 - Task this pass: PW1 (H3 Omni prompt rewriter). It is a multi-hour, multi-step install (git clone/pull the node, ~7.9 GB of weights, pip requirements in ComfyUI's own .venv, a ComfyUI restart, then a smoke test) = the classic 3-TIMEOUT shape for one iteration. Split it into PW1a-d TASKS lines per the PROMPT self-diagnose rule ("split the task into smaller TASKS lines so each pass ticks one"), and started the long pole (the downloads) DETACHED in this pass (notes\pw1_download.ps1, curl -C - resumable, log notes\pw1_download.log) so it keeps moving across iterations.
-- Facts found this pass (they save a re-clone and a pip install): the node pack was ALREADY on disk (custom_nodes\MiniMax-H3-Prompt-Rewriter-ComfyUI, v0.27.1 from 2026-09-29, cloned 10-16) and is now v0.30.0 (c22cb38, "[0.30.0] experience Lightx2v"); all 5 requirements are already in ComfyUI's own venv (transformers 5.18.0, peft 0.21.2, accelerate 1.15.0, safetensors 0.8.0, bitsandbytes 0.50.2, torch 2.15.0.dev cu130) so PW1 needs no pip at all; the llama.cpp CUDA runtime the pack fetches is already fetched (user\minimax_h3_rewriteruntime10310-cuda) and the two guides are on disk.
+- Facts found this pass (they save a re-clone and a pip install): the node pack was ALREADY on disk (custom_nodes\MiniMax-H3-Prompt-Rewriter-ComfyUI, v0.27.1 from 2026-09-29, cloned 10-16) and is now v0.30.0 (c22cb38, "[0.30.0] experience Lightx2v"); all 5 requirements are already in ComfyUI's own venv (transformers 5.18.0, peft 0.21.2, accelerate 1.15.0, safetensors 0.8.0, bitsandbytes 0.50.2, torch 2.15.0.dev cu130) so PW1 needs no pip at all; the llama.cpp CUDA runtime the pack fetches is already fetched (user\minimax_h3_rewriter/runtime/10310-cuda) and the two guides are on disk.
 - Restart rule learned: comfy_ctl restart = llama-swap stop+start, and the start swaps MY OWN model turn out, so a restart mid-pass kills this iteration. Plan: do restart + comfy_ok + the smoke test as ONE script call in its own pass (PW1c/PW1d), exactly as the BAKEOFF line says (wake + API in one call).
 - No GPU used this pass: downloads are network+CPU only; comfy_ctl status showed comfy_ok=False guard=IDLE running=['coding_swift15_iq3s'] before anything started, and no ComfyUI port was called.
 
@@ -93,7 +93,7 @@
 ## 2026-10-23 ~17:10 CT (BQ1b pass) - last pass CHECK FAIL + STOP_RALPH, diagnosis first
 - Last 2 summary lines: iter 02 status=ok exit=0 ticks=+0 wall=11.2m denies=4; iter 01 status=fail exit=0 ticks=+1 wall=6.3m denies=0 checkfails=1.
 - What failed and why: iter 01 ticked BQ1a cleanly (denies 0, scope 0) and the harness then ran its own static check `python -m json.tool C:\AI\community
-otes\webeddit_anatomy.json`, which died on "Expecting value: line 1 column 1" -> CHECK FAIL -> STOP_RALPH. Cause = BQ1a saved four read-only web GET bodies with a .json EXTENSION that are not JSON at all: reddit.com/search.json answers 403 with an HTML body, and the two llama-civilisation/SD prompt-engineering pages and rd2_sd_pe came back as "Blocked" HTML with HTTP 200. The harness checks every notes/web/*.json, so a 200-with-HTML body is a loop bomb, not a data file.
+otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" -> CHECK FAIL -> STOP_RALPH. Cause = BQ1a saved four read-only web GET bodies with a .json EXTENSION that are not JSON at all: reddit.com/search.json answers 403 with an HTML body, and the two llama-civilisation/SD prompt-engineering pages and rd2_sd_pe came back as "Blocked" HTML with HTTP 200. The harness checks every notes/web/*.json, so a 200-with-HTML body is a loop bomb, not a data file.
 - Fix made in reach this pass (no task line needed, harness upkeep is mine): renamed the four offenders to notes/web/reddit_anatomy.html, rd_sd_pe.html, rd_llama_abl.html, rd2_sd_pe.html (content kept, evidence intact, the .json glob no longer matches them) and re-ran json.tool over ALL 43 remaining notes/web/*.json = 0 BAD. Rule + check command saved in AGENTS.md Learnings: save a web body as .json ONLY after json.tool accepts it, otherwise .html/.txt, and sweep notes/web for non-JSON .json before ending a research pass.
 - Denies newer than the last entry: 0 (ralph.log iter 01 denies=0). Kept the deny-proof habits: the two diagnosis/deny logs read with the read tool, ralph.ps1 never read from a shell command line, no env dump, no guard reason text echoed.
 - Loop-shape fixes carried forward for BQ1b: one variable per render, the builder is a NEW file (the R4G2 builder stays frozen so r3r/r4/r5/r6 stay reproducible), every self-check runs offline (no ComfyUI port call, no comfy_ctl call, no render, 0 GPU minutes), the render itself is BQ1c (write JOB_REQUEST.json, tick, DONE, exit) so a request pass never carries proof work.
@@ -115,3 +115,31 @@ otes\webeddit_anatomy.json`, which died on "Expecting value: line 1 column 1" -
 - Proof, not a claim: sweep CLEAN "43 checked"; live GET of the exact file class that killed the loop -> HTTP 403 -> notes/web/hf2_live_reddit.403.txt (189,908 bytes) and the sweep stayed CLEAN "44 checked"; live HF API GET -> notes/web/hf2_live_hf.json (json.loads accepted). 17/17 tests OK, 0 SyntaxWarning (module docstrings made raw - the C:\ path escape trap from the last entry, again).
 - 0 GPU minutes: no ComfyUI port call, no comfy_ctl, no llama-swap, no render, no pip, no install. No vision judge, no image viewed.
 - Files: scripts/web_fetch.py, scripts/check_web_saves.py, scripts/tests/test_web_fetch.py, notes/hf2_web_save_policy_20261023.md, notes/web/hf2_live_reddit.403.txt, notes/web/hf2_live_hf.json, notes/forge-learnings.md, notes/self_diagnosis.md, TASKS.md (HF2 ticked + one informational "[!] Max" line, no STOP_RALPH), AGENTS.md.
+
+## 2026-10-23 ~17:55 CT - BQ1d pass (ALI-163, ticked BQ1d, 1 tick, 0 denies, 0 checkfails, 0 GPU minutes)
+- STEP 0 self-check: ralph.log last 3 iterations = iter 01/02/03 all status=ok exit=0 ticks=+1, denies=0,
+  checkfails=0, scope=0 (the 17:14:05 line). notes/denies.log tail: no new deny for my iterations; the last
+  entries are the 16:59:37 HF2 checkfails=1 (already root-caused by HF2) and 15:16:25 scope=1 (older).
+  No mandatory entry trigger, writing this one because the pass edited TASKS.md text outside its own line.
+- What I did: verified r3b (result.json ok=True rc=0 wall=8.8m, status.log 17:20:19 -> 17:28:20 ok,
+  0 JOB error / 0 CLIP_SKIP, ffprobe 1344x768 24/1 243 packets, audio aac 32 kHz 2ch + demuxed m4a
+  166,134 B, graph sha8 ce01686e = the BQ1b file, seed 51130003, single SamplerCustomAdvanced pass,
+  offline static_check clean) -> notes/ali163_hc_bq1d_check.py 22/22 gates incl. 3 self-destruct probes.
+  Built notes/body_quality_r3b_vs_r3r_contact.png (2186x834, 1,291,630 B, 2 clips x 5 stamps at the SAME
+  t = 0.50/2.60/5.00/7.40/9.60 s + a reference row) via notes/ali163_hc_bq1d_media.py (21/21 frame gates)
+  + notes/ali163_hc_bq1d_sheet.py (4/4). Added the BQ1-template line to the HB parent (HB0 control note)
+  and to HB1, HB2, HB3, HB4.
+- TOOL BUG I HIT AND FIXED (mine, this pass): I ran the TASKS.md insert through `python - <<EOF` with a
+  NON-RAW string, so `\b` became a backspace and `\a` a bell: 'notes\body_quality...' -> 'notes<BS>ody...'
+  and 'notes\ali163...' -> 'notes<BEL>li163...'. My own gate (a control-char scan) caught it.
+  I also rewrote the file with LF while git HEAD is CRLF. Repaired both
+  (notes/ali163_hc_bq1d_tasks_write.py -> notes/ali163_hc_bq1d_tasks_fix.py -> _fix2.py, 8/8 gates:
+  no control chars, CRLF on all 98 breaks, 99 lines = HEAD 94 + my 5, open ids = HEAD minus BQ1d only).
+- SHARED DAMAGE I REPAIRED (pre-existing, in git HEAD): the FINAL line's RESULT text carried 4 bells =
+  'notes<BEL>li163_hc_final_{sheet,objective,check,media}' from an earlier pass with the same trap.
+  They now read notes/ali163_hc_final_* (forward slashes). Only those 4 mangled path strings changed;
+  no task text of Max's was edited. Disclosed on the BQ1d TASKS result line.
+- RULE I LEARNED (kept in AGENTS.md Learnings): write notes/TASKS text ONLY through a quoted heredoc, a
+  python raw string, or forward slashes; TASKS.md is CRLF, so read with newline='' and join on CRLF.
+- Loop health: no deny, no timeout, no STOP_RALPH, budget 467.5/615 min and 37/45 jobs (this pass spent
+  0). Nothing is BLOCKED. ralph.ps1 untouched. No render requested. Derrick's KEEP decision is his own.
