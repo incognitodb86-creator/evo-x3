@@ -1,4 +1,4 @@
-"""BQ1d TASKS.md VERIFIER - READ-ONLY, writes nothing (2026-10-23 ~18:20 CT).
+r"""BQ1d TASKS.md VERIFIER - READ-ONLY, writes nothing (2026-10-23 ~18:20 CT).
 
 Checks the live ralph-community\TASKS.md after the BQ1d tick, the 5 BQ1-template lines and the
 pre-existing control-char repair:
