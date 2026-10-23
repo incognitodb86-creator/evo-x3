@@ -15,9 +15,8 @@ PASS ralph.ps1 gate present: budget-min
 PASS ralph.ps1 gate present: budget-jobs
 PASS ralph.ps1 gate present: graph-missing-request
 PASS ralph.ps1 gate present: graph-mp4-exists
-PASS p7\jobs live files: ['ali147_pool_fix4_s51080000.result.json', 'ali147_pool_fix4_s51080000.out', 'ali147_pool_fix4_s51080000.err.out'] .failed-20261022 copies: []
-  live result.json ok=False rc=5 note=run_graph_job rc=5 (objective failure after 2 redos: STUCK, flagged for Derrick) started=2026-10-22T17:35:59 finished=2026-10-22T17:37:07
-FAIL harness gate 185: 'ali147_pool_fix4_s51080000.result.json' absent -> request accepted (if this FAILS the run will log 'refused: id already used', no GPU spent, no new result.json)
+PASS p7\jobs live files: [] .failed-20261022 copies: ['ali147_pool_fix4_s51080000.result.json', 'ali147_pool_fix4_s51080000.out', 'ali147_pool_fix4_s51080000.err.out']
+PASS harness gate 185: 'ali147_pool_fix4_s51080000.result.json' absent -> request accepted (if this FAILS the run will log 'refused: id already used', no GPU spent, no new result.json)
   -> PREDICTED: RunJobs logs "P7 job ali147_pool_fix4_s51080000 refused: id already used" (the :185 continue), writes NO result.json, spends NO GPU. Only the harness moving p7\jobs\<id>.result.json/.out/.err.out to *.failed-<date> frees the id (p7\jobs = protected-paths [p7-harness], Forge must not move them).
   p7_budget.json {'used_min': 276.3, 'jobs': 22, 'cap_min': 390, 'job_cap': 27, 'updated': '2026-10-22T19:11:34'}
 PASS budget gate: used_min 276.3 < cap_min 390
@@ -220,5 +219,4 @@ PASS clip_5 identical once validated/duration excluded, prompt sha256 8ed332629e
 PASS clip_6 only validated/duration differ from the .bak (got ['duration', 'validated'])
 PASS clip_6 identical once validated/duration excluded, prompt sha256 d7d29ad985a7a43232f65879ea2c1c75317b6b0c803d95ede9bd26a1e78bc0e3
 
-CHECK FAILS 1
- - harness gate 185: 'ali147_pool_fix4_s51080000.result.json' absent -> request accepted (if this FAILS the run will log 'refused: id already used', no GPU spent, no new result.json)
+ALL CHECKS PASS
