@@ -9,7 +9,13 @@ Per clip (nothing else changes):
       c0 ref_images.ref_image_1 = [img,0]  = the LEFT woman's crop  (<Picture 1> -> <Subject 1>)
          ref_images.ref_image_2 = [img2,0] = the RIGHT woman's crop (<Picture 2> -> <Subject 2>)
   solos (R7=HC4, R8=HC5): node "sheet" deleted, no img2; c0 ref_images.ref_image_1 = [img,0] = her face crop
-  c0 ref_image_size "match"; c1 = MiniMaxH3ImageToVideo with 0 reference images (all ref_* keys removed)
+  c0 ref_image_size "match"; c1 = MiniMaxH3ImageToVideo with 0 reference images (all ref_* keys removed) AND no
+      audio_vae: MiniMaxH3ImageToVideo has NO audio_vae input (comfy_extras/nodes_minimax_h3.py:116-135 = clip, vae,
+      prompt, width, height, length, first_frame?, last_frame?), so the link the base (ReferenceToVideo) carried made
+      run_graph_job.static_check fail = STATIC_FAIL ... c1.audio_vae: not an input of MiniMaxH3ImageToVideo, rc=2, the
+      whole r3 job died at 0.9 min (2026-10-23 14:15 CT). The audio path stays: avae -> c0.audio_vae and avae -> dec_a
+      (proof: runs/ali147_pool_hc_c2_s51100002, whose c1 = MiniMaxH3ImageToVideo with NO audio_vae, objective audio=true).
+      Check 11 now re-runs that static check offline against the on-disk schema, for every H3 node in the graph.
   c0 1344x768 length 124 + win1.extension_frames 119 = 243 f @ 24 fps; prompts hc_r<n>_c0/c1.txt (R4G2 wording)
   noise.noise_seed = the clip seed; save.filename_prefix = community/<id>/<id>
 
@@ -18,7 +24,7 @@ it); face boxes come from notes/ali163_hc_r4g2_facebox.py (CPU SCRFD-10G, notes/
 Sampling / geometry / audio path byte-identical to the base (beta6 int8, euler/simple/10, shift 10/3, vsa,
 single pass, 24 fps, audio VAE + decoder wired).
 
-Self-check: 10 numbered checks, PASS/FAIL lines, exit 1 on any FAIL.
+Self-check: 11 numbered checks, PASS/FAIL lines, exit 1 on any FAIL.
 Usage: python ali163_hc_r4g2_build.py [R6|R7|R8|R9]
 """
 import hashlib
@@ -37,6 +43,46 @@ RALPH = r"C:\Users\derek\5slock\ralph-community\ralph.ps1"
 BASE_ID = "ali147_pool_refsheet_b_s51080000"
 SRC = os.path.join(W, "runs", BASE_ID, "request.api.json")
 HC_DIR = os.path.join(COMFY, "input", "community", "hc")
+H3_SRC = os.path.join(COMFY, "comfy_extras", "nodes_minimax_h3.py")
+
+
+def h3_schema():
+    """{class: (required, optional)} read from the ON-DISK H3 node schema = the same names run_graph_job.static_check
+    reads from ComfyUI /object_info, so a graph that passes check 11 cannot die on STATIC_FAIL rc=2 (no network).
+    Only TOP-LEVEL io.X.Input(...) entries count (depth 0 in the inputs=[...] list), so the io.Autogrow template's
+    inner io.Image.Input("ref_image") does NOT become a required input of the node."""
+    txt = open(H3_SRC, encoding="utf-8").read()
+    out = {}
+    for m in re.finditer(r'node_id="(\w+)",', txt):
+        cls, start = m.group(1), m.end()
+        end = txt.find("outputs=[", start)
+        blk = txt[start:end if end > 0 else start + 4000]
+        req, opt = set(), set()
+        for im in re.finditer(r'io\.\w+\.Input\("(\w+)"', blk):
+            pre = blk[:im.start()]
+            depth = pre.count("(") - pre.count(")") + pre.count("[") - pre.count("]")
+            if depth != 1:
+                continue                      # 1 = a direct entry of inputs=[...]; 2+ = an Autogrow template input
+            args = _args(blk, im.end())
+            (opt if "optional=True" in args else req).add(im.group(1))
+        if req:
+            out[cls] = (req, opt)
+    return out
+
+
+def _args(txt, i):
+    """txt[i] is the '(' of an argument list; return the argument text (parens inside strings included)."""
+    depth, j = 0, i
+    while j < len(txt):
+        if txt[j] == "(":
+            depth += 1
+        elif txt[j] == ")":
+            depth -= 1
+            if depth == 0:
+                return txt[i + 1:j]
+        j += 1
+    return txt[i:]
+
 
 CLIPS = {
     "R6": dict(id="ali147_pool_hc_r3_s51130003", seed=51130003, women=2,
@@ -87,6 +133,21 @@ def sha(p):
     return hashlib.sha256(open(p, "rb").read()).hexdigest()
 
 
+def scan(g, sch):
+    """Offline clone of run_graph_job.static_check for the H3 classes it can see on disk: returns the bad-input lines."""
+    bad = []
+    for nid, n in sorted(g.items()):
+        ct = n["class_type"]
+        if ct not in sch:
+            continue
+        names = sch[ct][0] | sch[ct][1]
+        keys = {k.split(".")[0] for k in n["inputs"]}
+        bad += [f"{nid}.{k}: not an input of {ct}" for k in sorted(keys - names)]
+        bad += [f"{nid}: required input {r} missing" for r in sorted(sch[ct][0])
+                if r not in n["inputs"] and not any(a.startswith(r + ".") for a in n["inputs"])]
+    return bad
+
+
 def build(tag):
     c = CLIPS[tag]
     ID, SEED, WOMEN = c["id"], c["seed"], c["women"]
@@ -94,7 +155,7 @@ def build(tag):
     # per-node key diffs vs the RS6 base (the base c0 ref_image_2 slot pointed at "sheet"; it now points at
     # the img2 face crop (pair) or is deleted (solo), so ref_images.ref_image_2 is a changed key in both cases)
     expect = {"c0": ["height", "length", "prompt", "ref_image_size", "ref_images.ref_image_2", "width"],
-              "c1": ["height", "prompt", "ref_image_size", "ref_images.ref_image_1", "width"],
+              "c1": ["audio_vae", "height", "prompt", "ref_image_size", "ref_images.ref_image_1", "width"],
               "img": ["image"], "noise": ["noise_seed"], "save": ["filename_prefix"], "win1": ["extension_frames"],
               "sheet": ["image"]}
     if pair:
@@ -125,7 +186,7 @@ def build(tag):
     i1["width"], i1["height"] = 1344, 768
     i1["prompt"] = p1
     i1["length"] = ["win1", 1]
-    i1["audio_vae"] = ["avae", 0]
+    i1.pop("audio_vae", None)   # MiniMaxH3ImageToVideo has NO audio_vae input (static_check rc=2, see header)
     for k in list(i1):
         if k.startswith("ref_"):
             del i1[k]
@@ -286,6 +347,25 @@ def build(tag):
                     f"sha256={sha(p)[:12]}")
     ck(ok10, "10 every crop is logged by face_crop.py with ok=True, its --box, its source = the approved pick, "
              "out_px 512 and the byte count on disk: " + " | ".join(rows))
+    # ---- CHECK 11: static-input self-check (offline clone of run_graph_job.static_check for the H3 nodes) ----
+    sch = h3_schema()
+    n_h3 = len([n for n in new.values() if n["class_type"] in sch])
+    bad11 = scan(new, sch)
+    avae_users = sorted(k for k, v in new.items() if any(isinstance(x, list) and x == ["avae", 0] for x in v["inputs"].values()))
+    # the check must not be vacuous: it has to catch the exact defect that killed the r3 job at rc=2 (14:15 CT)
+    dead = json.loads(open(os.path.join(W, "runs", "ali147_pool_hc_r3_s51130003", "request.api.json"),
+                           encoding="utf-8").read())
+    bad_dead = scan(dead, sch)
+    ck(not bad11 and n_h3 >= 3 and "MiniMaxH3ImageToVideo" in sch
+       and "audio_vae" in sch["MiniMaxH3ReferenceToVideo"][1]
+       and "audio_vae" not in sch["MiniMaxH3ImageToVideo"][0] | sch["MiniMaxH3ImageToVideo"][1]
+       and "audio_vae" not in new["c1"]["inputs"] and avae_users == ["c0", "dec_a"]
+       and "c1.audio_vae: not an input of MiniMaxH3ImageToVideo" in bad_dead,
+       f"11 static-input self-check vs the on-disk schema {os.path.basename(H3_SRC)} (the class that killed r3 at rc=2): "
+       f"{n_h3} H3 nodes, every input name legal + all required inputs present {bad11 or 'OK'}; c1 carries no audio_vae; "
+       f"avae feeds exactly {avae_users} (c0 ref audio + dec_a), so the audio path survives as in the rendered c2 clip; "
+       f"the check is not vacuous - it reproduces the r3 defect {bad_dead}")
+
     print(f"{tag} graph bytes {len(data)} sha256 {hashlib.sha256(data).hexdigest()}")
     return data
 
@@ -297,4 +377,4 @@ print("=" * 110)
 if fails:
     print("CHECKS FAIL " + json.dumps(fails))
     sys.exit(1)
-print(f"ALL CHECKS PASS ({n_pass} PASS lines, 10 numbered checks per clip: {want})")
+print(f"ALL CHECKS PASS ({n_pass} PASS lines, 11 numbered checks per clip: {want})")
