@@ -10,6 +10,12 @@ import os, sys, json, copy, time, argparse, subprocess, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import comm
 LS = comm.LS; COMFY = "http://127.0.0.1:10004"; comm.BASE = COMFY
 def post(u, t=120): return urllib.request.urlopen(urllib.request.Request(u, data=b"", method="POST"), timeout=t).read()
+# ALI-163 R3 harness fix (2026-10-23, backup run_graph_job.py.bak-20261023-hcimg): a graph job can be an IMAGE job
+# (Klein 9B reference-sheet edit -> SaveImage -> .png). The objective gate below is a VIDEO gate (audio stream, exact frame
+# count, blackdetect/freezedetect, timed contact sheet), so an honest sheet render failed as "no audio stream" and went STUCK
+# after 2 redos. Video jobs are untouched: CreateVideo/SaveVideo write .mp4, so this branch only fires on these extensions.
+# Image gate = ffprobe decodes it, reports a size, exactly 1 packet, bytes > 0. No judge, no quality redo (unchanged rule).
+IMG_EXT = (".png", ".jpg", ".jpeg", ".bmp", ".tga", ".webp")
 def comfy_ok():
     try: urllib.request.urlopen(COMFY + "/system_stats", timeout=10).read(); return True
     except Exception: return False
@@ -73,15 +79,20 @@ def main():
             why = []
             if not s: why = ["JOB error"]
             else:
-                p = probe(s["file"]); bf = blackfreeze(s["file"])
+                img = os.path.splitext(s["file"])[1].lower() in IMG_EXT
+                p = probe(s["file"]); bf = [] if img else blackfreeze(s["file"])
                 if p["bytes"] <= 0: why.append("0-byte file")
-                if not p["audio"]: why.append("no audio stream")
-                if a.frames and abs(p["frames"] - a.frames) > a.frames_tol: why.append(f"frames {p['frames']} != {a.frames}+-{a.frames_tol}")
+                if img:
+                    if not (p["w"] and p["h"]): why.append("image unreadable (ffprobe reported no size)")
+                    elif p["frames"] != 1: why.append(f"image packet count {p['frames']} != 1")
+                else:
+                    if not p["audio"]: why.append("no audio stream")
+                    if a.frames and abs(p["frames"] - a.frames) > a.frames_tol: why.append(f"frames {p['frames']} != {a.frames}+-{a.frames_tol}")
                 why += [f"detect {x}" for x in bf]
-                res["attempts"].append(dict(p, tag=tag, file=s["file"], secs=s["secs"], blackfreeze=bf))
+                res["attempts"].append(dict(p, tag=tag, file=s["file"], secs=s["secs"], blackfreeze=bf, image=img))
             if not why:
-                cs = contact_sheet(s["file"], os.path.join(D, a.tag + "_stills_contact.png"), p["duration"])
-                res.update(ok=True, file=s["file"], contact_sheet=cs); log(f"OBJECTIVE ok {tag} frames={p['frames']} audio={p['audio']} dur={p['duration']:.3f} bytes={p['bytes']} contact={cs}"); rc = 0; break
+                cs = None if img else contact_sheet(s["file"], os.path.join(D, a.tag + "_stills_contact.png"), p["duration"])
+                res.update(ok=True, file=s["file"], contact_sheet=cs, image=img); log(f"OBJECTIVE ok {tag} image={img} frames={p['frames']} size={p['w']}x{p['h']} audio={p['audio']} dur={p['duration']:.3f} bytes={p['bytes']} contact={cs}"); rc = 0; break
             log(f"OBJECTIVE FAIL {tag} " + "; ".join(why)); res.setdefault("fails", []).append({"tag": tag, "why": why})
         else:
             log(f"STUCK {a.tag} objective failure after {a.max_redo} redos - flagged for Derrick")
