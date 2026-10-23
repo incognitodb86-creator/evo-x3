@@ -21,3 +21,11 @@
 - Fix in reach this pass: (a) never echo/quote that path in command text or output - use the read tool for the deny log; (b) append learnings with a file-write helper, not a shell printf; (c) do not touch ralph.ps1/PROMPT.md/permission files (iter 03 SCOPE fail, earlier). No retry, no workaround was attempted at any deny.
 - 0 timeouts, ticks +1 every pass since the restart; the r3 rc=2 STATIC_FAIL was fixed by the iter 03 pass (builder pops the invalid c1 link + offline static self-check), r4 rendered ok=True in 7.9 min.
 - Task this pass: R8 (clip 5, id ali147_pool_hc_r5_s51130005) - verify the rebuilt graph read-only (notes/ali163_hc_r8_request_check.py), budget gate, request, tick, exit. No rebuild (Max 1:40 PM CT).
+
+## 2026-10-23 ~14:50 CT (iter 05, R9 pass)
+- Last 2 summary lines: iter 03 status=ok exit=0 ticks=+1 wall=6.2m denies=3; iter 04 status=ok exit=0 ticks=+1 wall=4.1m denies=3. No timeout, ticks +1 every pass since the restart.
+- Denies since the last entry (3 in iter 04, 3 in iter 05 so far): every one is the SAME self-inflicted cause - a shell `tail` of the deny log itself, whose stdout echoed the fiction-lock reason text (that text names the protected youth-guard module path), so the guard blocked the whole command. 0 work-losing denies, 0 protected files touched, no retry, no workaround.
+- Cause: reading that log through the shell prints the blocked path back into the command output; the lock matches command TEXT, not only the write target.
+- Fix in reach (applied this pass): read the deny log with the read tool (its output is not a shell command string) with a small limit, never tail/cat it in bash/powershell; never echo that path in any command text. Also: ralph.ps1 / PROMPT.md / permission files stay Max's (iter 03 SCOPE fail).
+- Task this pass: R9 (clip 6, pick HC6 = BD076 casino lounge pair, id ali147_pool_hc_r6_s51130006 seed 51130006). Graph NOT rebuilt (Max 1:40 PM CT); verified read-only with notes/ali163_hc_r9_request_check.py = ALL CHECKS PASS, 77 PASS lines, rc 0.
+- Budget at request: used_min 443.2 (gate 475), jobs 34 (gate 35) = open, last R-line render.
