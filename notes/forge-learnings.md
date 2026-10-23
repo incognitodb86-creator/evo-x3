@@ -81,3 +81,22 @@ R-line render request self-check (R6, 2026-10-23): verify the R4G2 graph as-is, 
 - 2026-10-23 HF2 (loop stopped 16:59:37 on a non-JSON notes/web/*.json): a web body's extension is a claim, prove it from the bytes - save with scripts/web_fetch.py (.json only if json.loads accepts, else .html/.txt, non-200 -> x.403.txt) and end every research pass with scripts/check_web_saves.py (rc 1 = offenders, --fix renames). 17 offline tests in scripts/tests/test_web_fetch.py, incl. the incident replay + a non-vacuity probe. notes/hf2_web_save_policy_20261023.md
 - WRITE-ENCODING TRAP (BQ1d 2026-10-23, mine, caught by my own control-char gate): TASKS.md/notes text must NEVER go through a NON-RAW python string that contains backslash paths: `\b` -> BACKSPACE (eats the 'b': 'notes\body' -> 'notes<BS>ody'), `\a` -> BELL (eats the 'a': 'notes\ali163' -> 'notes<BEL>li163'), plus the known `\n` / `\r`. git HEAD of ralph-community\TASKS.md carries 4 such bells in the FINAL line's RESULT text (an older pass). Safe forms: a quoted heredoc (cat >> f <<'EOF'), a python RAW string (r"..."), or forward slashes; verify with a scan `[(i+1,[ord(c) for c in l if 0<ord(c)<32]) for i,l in enumerate(text.split("\r\n")) ...]` (per line, else CRLF 13/10 = a FALSE fail). TASKS.md IS CRLF: read with io.open(newline="") and join on "\r\n", never write newline="\n" (an LF rewrite makes the harness diff touch every line; check `git diff --stat` stays small).
 - RENDERED-GRAPH REF READ (BQ1d): read ref slots with fullmatch r"ref_images\.ref_image_\d+" over every node whose class_type startswith "MiniMaxH3", and take the seed from inputs["noise_seed"] (RandomNoise has noise_seed, NOT seed - a `seed` scan returns [] = a FALSE fail). ffprobe -show_streams -of csv=p=0 prints codec_name BEFORE codec_type, so an audio stream line is 'aac,audio,32000,2': test ',audio' in line, never line.startswith("audio") (that bug made my first audio gate fail). Contact-sheet builders: paste stamps at fixed timestamps for BOTH clips from one shared TS list, label cells from the objective JSON (data, not memory), paint a red MISSING block + fail the gate when a stamp is absent, then self-check the PNG (exists, >150 KB, exact size, pasted count).
+
+- 2026-10-23 FINAL REOPENED (ALI-163 iter 05, CPU-only): the FINAL verify + contact sheet now carry BOTH clip-3
+  re-renders - ali147_pool_hc_r3r_s51130003 (face crops only) and ali147_pool_hc_r3b_s51130003 (BQ1c rewire = start
+  still on c0+c1 + the 2 face crops), same pick HC3 GI173, same seed 51130003, both ok rc=0 / 243 f. The sheet is 9
+  rows; the dead r3 id keeps its own NO RENDER row.
+- NEW OBJECTIVE ITEM (no vision judge): per clip the 5 sheet frames are counted, sha256'd, checked for duplicates and
+  measured with PIL ImageStat grayscale stdev. A black/flat frame sits near 0; every rendered clip measured
+  33.94-56.77 min stdev. The old clip-2 row is table-only (no sheet row by spec), so it reports 0 frames on purpose.
+- SHEET SELF-CHECK + self-destruct probe (ali163_hc_final_sheet.py): after saving, re-open the png and assert every
+  rendered row's 5 cells are non-flat (luma stdev > 5) and the NO-RENDER row shows the red panel (mean R > G+15).
+  Probe recipe: mv one notes/hc_final_frames/<id>_fN.png out, rebuild - the builder MUST exit rc=1 naming clip+cell
+  (verified: hid r6_f4 -> FAIL ali147_pool_hc_r6_s51130006 cell 4), restore -> rc=0 PASS 9 rows. A green sheet with no
+  probe proves nothing.
+- The FINAL summary md is a GENERATOR OUTPUT (notes/ali163_hc_final_summary.py). Max's 4:51 PM CT correction block now
+  lives as a hard-coded line at the top of the script, so it survives every re-run; any prose added by hand in the md
+  is eaten on the next run. Same rule for the objective json (ali163_hc_final_check.py) and the contact png
+  (ali163_hc_final_sheet.py + ali163_hc_final_media.ps1 for the frame/m4a extraction).
+- Budget read at the FINAL reopen tick: used_min 450.8 / jobs 35 (jobs = the R-line cap 35). After r3r (15:24-15:31,
+  416.3 s) + r3b (17:20-17:28, 481.9 s) inside the ALI-173 bakeoff allowance it is 467.5 / 37 (cap 615 / 45).
