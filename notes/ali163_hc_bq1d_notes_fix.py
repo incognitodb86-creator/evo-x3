@@ -1,4 +1,4 @@
-"""BQ1d notes/self_diagnosis.md repair (CPU only, idempotent, 2026-10-23 ~18:05 CT).
+r"""BQ1d notes/self_diagnosis.md repair (CPU only, idempotent, 2026-10-23 ~18:05 CT).
 
 The write-encoding trap damaged this file in EARLIER passes (my own append was clean):
 - line 40: 5 bells 'notes<BEL>li163_hc_final_*' (the \a escape ate the 'a' of ali163)
