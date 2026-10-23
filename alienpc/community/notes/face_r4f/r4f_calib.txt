@@ -1,0 +1,71 @@
+== sheets: faces found (SCRFD thr 0.4, 768x1344) ==
+  HC1 w1 faces=2 areas=[66002, 15700] intra_sheet_cos=[0.639]
+  HC1 w2 faces=4 areas=[86640, 50009, 14747, 8539] intra_sheet_cos=[0.693, 0.589, 0.007, 0.72, 0.106, 0.048]
+  HC2 w1 faces=4 areas=[50091, 21068, 13548, 9185] intra_sheet_cos=[0.401, 0.589, 0.164, 0.313, 0.207, 0.058]
+  HC2 w2 faces=6 areas=[72742, 8161, 6693, 5752, 5466, 5377] intra_sheet_cos=[0.37, 0.066, 0.062, 0.027, 0.017, 0.008, 0.018, 0.029, -0.049, 0.036, 0.04, 0.104, 0.212, 0.626, 0.312]
+  anchorL HC1_w1 vs HC1_w2 = 0.411
+  anchorL HC1_w1 vs HC2_w1 = 0.692
+  anchorL HC1_w1 vs HC2_w2 = 0.522
+  anchorL HC1_w2 vs HC2_w1 = 0.400
+  anchorL HC1_w2 vs HC2_w2 = 0.540
+  anchorL HC2_w1 vs HC2_w2 = 0.543
+
+== picks: faces + A/B controls ==
+  HC1 faces=2 areas=[26271, 20542]
+  HC1 w1 maxdim=175  A(sheetL)=0.377 A(sheetM)=0.431  B(other sheetL)=0.181
+  HC1 w2 maxdim=162  A(sheetL)=0.466 A(sheetM)=0.369  B(other sheetL)=0.009
+  HC2 faces=2 areas=[27289, 26976]
+  HC2 w1 maxdim=186  A(sheetL)=0.266 A(sheetM)=0.217  B(other sheetL)=0.113
+  HC2 w2 maxdim=203  A(sheetL)=0.242 A(sheetM)=0.240  B(other sheetL)=0.039
+
+== clips: one-to-one assignment, D (pick<->video) and E (video<->video) ==
+  r1_243f_sheeted f0    faces=2  w1 sheetL=0.269 pick=0.331 box=89x148  w2 sheetL=-0.023 pick=0.155 box=88x152
+  r1_243f_sheeted f40   faces=2  w1 sheetL=0.070 pick=0.049 box=101x184  w2 sheetL=0.246 pick=0.270 box=113x177
+  r1_243f_sheeted f80   faces=2  w1 sheetL=0.198 pick=0.210 box=100x192  w2 sheetL=0.046 pick=0.061 box=109x200
+  r1_243f_sheeted f120  faces=2  w1 sheetL=0.094 pick=0.216 box=95x182  w2 sheetL=0.083 pick=0.111 box=112x176
+  r1_243f_sheeted f160  faces=2  w1 sheetL=0.491 pick=0.372 box=114x176  w2 sheetL=0.292 pick=0.275 box=135x177
+  r1_243f_sheeted f200  faces=1  w2 sheetL=0.204 pick=0.164 box=195x180
+  r1_243f_sheeted f240  faces=1  w2 sheetL=0.196 pick=0.127 box=214x207
+  SUMMARY r1_243f_sheeted      w1  pairs=5 single=2 none=0  sheetL med=0.1975  pick med=0.2159  consec med=0.4041  first_last=0.2285  maxdim med=182.0
+  SUMMARY r1_243f_sheeted      w2  pairs=5 single=2 none=0  sheetL med=0.1958  pick med=0.1555  consec med=0.3997  first_last=0.0756  maxdim med=177.0
+  r2_243f_sheeted f0    faces=2  w1 sheetL=0.065 pick=0.177 box=84x158  w2 sheetL=0.324 pick=0.281 box=98x159
+  r2_243f_sheeted f40   faces=2  w1 sheetL=0.246 pick=0.447 box=147x253  w2 sheetL=0.072 pick=0.088 box=143x235
+  r2_243f_sheeted f80   faces=0
+  r2_243f_sheeted f120  faces=2  w1 sheetL=0.145 pick=0.272 box=105x153  w2 sheetL=0.221 pick=0.237 box=96x162
+  r2_243f_sheeted f160  faces=2  w1 sheetL=0.326 pick=0.223 box=111x163  w2 sheetL=0.236 pick=0.288 box=123x190
+  r2_243f_sheeted f200  faces=2  w1 sheetL=0.507 pick=0.199 box=162x198  w2 sheetL=0.370 pick=0.235 box=147x207
+  r2_243f_sheeted f240  faces=2  w1 sheetL=0.620 pick=0.261 box=175x211  w2 sheetL=0.191 pick=0.118 box=153x192
+  SUMMARY r2_243f_sheeted      w1  pairs=6 single=0 none=1  sheetL med=0.2863  pick med=0.242  consec med=0.4349  first_last=0.0938  maxdim med=180.5
+  SUMMARY r2_243f_sheeted      w2  pairs=6 single=0 none=1  sheetL med=0.2283  pick med=0.236  consec med=0.2752  first_last=0.2198  maxdim med=191.0
+  c1_481f_maskonly f0    faces=2  w1 sheetL=0.076 pick=0.184 box=111x184  w2 sheetL=0.205 pick=0.321 box=108x189
+  c1_481f_maskonly f80   faces=1  w2 sheetL=0.366 pick=0.373 box=181x183
+  c1_481f_maskonly f160  faces=2  w1 sheetL=0.120 pick=0.369 box=111x150  w2 sheetL=0.200 pick=0.212 box=172x141
+  c1_481f_maskonly f240  faces=2  w1 sheetL=0.002 pick=0.213 box=104x131  w2 sheetL=0.181 pick=0.156 box=172x127
+  c1_481f_maskonly f320  faces=2  w1 sheetL=0.091 pick=0.286 box=119x151  w2 sheetL=0.260 pick=0.223 box=191x166
+  c1_481f_maskonly f400  faces=2  w1 sheetL=0.100 pick=0.312 box=119x188  w2 sheetL=0.212 pick=0.179 box=199x133
+  c1_481f_maskonly f480  faces=2  w1 sheetL=0.109 pick=0.169 box=120x158  w2 sheetL=0.291 pick=0.284 box=175x193
+  SUMMARY c1_481f_maskonly     w1  pairs=6 single=1 none=0  sheetL med=0.0956  pick med=0.2495  consec med=0.5674  first_last=0.092  maxdim med=154.5
+  SUMMARY c1_481f_maskonly     w2  pairs=6 single=1 none=0  sheetL med=0.2118  pick med=0.2225  consec med=0.5028  first_last=0.2653  maxdim med=189.0
+  c2_481f_maskonly f0    faces=2  w1 sheetL=0.027 pick=0.169 box=97x187  w2 sheetL=0.135 pick=0.265 box=116x179
+  c2_481f_maskonly f80   faces=2  w1 sheetL=0.128 pick=0.341 box=102x125  w2 sheetL=0.116 pick=0.238 box=90x123
+  c2_481f_maskonly f160  faces=2  w1 sheetL=0.017 pick=0.095 box=109x144  w2 sheetL=0.264 pick=0.106 box=156x128
+  c2_481f_maskonly f240  faces=2  w1 sheetL=0.246 pick=0.347 box=139x150  w2 sheetL=-0.077 pick=0.032 box=117x146
+  c2_481f_maskonly f320  faces=1  w2 sheetL=0.172 pick=0.190 box=170x199
+  c2_481f_maskonly f400  faces=2  w1 sheetL=0.241 pick=0.249 box=120x147  w2 sheetL=0.221 pick=0.063 box=108x136
+  c2_481f_maskonly f480  faces=1  w2 sheetL=0.048 pick=0.153 box=98x99
+  SUMMARY c2_481f_maskonly     w1  pairs=5 single=2 none=0  sheetL med=0.1275  pick med=0.2492  consec med=0.1425  first_last=0.1565  maxdim med=147.0
+  SUMMARY c2_481f_maskonly     w2  pairs=5 single=2 none=0  sheetL med=0.1352  pick med=0.1526  consec med=0.0611  first_last=0.303  maxdim med=146.0
+  r1_old157f_nosheet f12   faces=2  w1 sheetL=0.100 pick=0.154 box=93x171  w2 sheetL=0.082 pick=0.214 box=96x172
+  r1_old157f_nosheet f121  faces=2  w1 sheetL=0.109 pick=0.214 box=103x202  w2 sheetL=0.101 pick=0.093 box=118x194
+  r1_old157f_nosheet f241  faces=2  w1 sheetL=0.092 pick=0.222 box=97x184  w2 sheetL=0.118 pick=0.118 box=115x180
+  r1_old157f_nosheet f361  faces=2  w1 sheetL=0.228 pick=0.280 box=121x203  w2 sheetL=0.156 pick=0.200 box=170x183
+  r1_old157f_nosheet f481  faces=1  w2 sheetL=0.076 pick=0.013 box=204x198
+  SUMMARY r1_old157f_nosheet   w1  pairs=4 single=1 none=0  sheetL med=0.1045  pick med=0.2177  consec med=0.5914  first_last=0.119  maxdim med=193.0
+  SUMMARY r1_old157f_nosheet   w2  pairs=4 single=1 none=0  sheetL med=0.1014  pick med=0.1178  consec med=0.4157  first_last=0.1897  maxdim med=183.0
+  r2_old157f_nosheet f12   faces=2  w1 sheetL=0.075 pick=0.235 box=110x218  w2 sheetL=0.184 pick=0.117 box=119x213
+  r2_old157f_nosheet f121  faces=2  w1 sheetL=0.068 pick=0.087 box=164x270  w2 sheetL=0.042 pick=0.068 box=137x273
+  r2_old157f_nosheet f241  faces=2  w1 sheetL=-0.055 pick=0.058 box=95x161  w2 sheetL=0.138 pick=0.068 box=103x152
+  r2_old157f_nosheet f361  faces=2  w1 sheetL=0.570 pick=0.215 box=168x187  w2 sheetL=0.243 pick=0.149 box=141x205
+  r2_old157f_nosheet f481  faces=2  w1 sheetL=0.599 pick=0.197 box=171x199  w2 sheetL=0.195 pick=0.144 box=144x219
+  SUMMARY r2_old157f_nosheet   w1  pairs=5 single=0 none=0  sheetL med=0.0749  pick med=0.1965  consec med=0.28  first_last=0.1937  maxdim med=199.0
+  SUMMARY r2_old157f_nosheet   w2  pairs=5 single=0 none=0  sheetL med=0.1838  pick med=0.1165  consec med=0.1196  first_last=0.0977  maxdim med=213.0
