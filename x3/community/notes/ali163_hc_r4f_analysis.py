@@ -113,10 +113,10 @@ W("4. **Face density per slot.** A pick slot holds exactly 2 faces (175x150 + 12
 W("5. **Anchors.** v1 names the woman by hair colour inside the same picture the video starts from "
   "(\"the adult woman with long blonde hair shown in <Picture 1>\"). v2 names her **sheet-first** "
   "(\"the adult woman shown in the multi-view reference sheet in <Picture 2>\") and demotes the start still to a "
-  "scene/wardrobe reference (\"<Picture 1> is the start still of ...\"). Neither shape uses the spatial anchors "
-  "(\"on the LEFT side of <Picture 1>\") that the R5 v1 builder template has for HC3-HC6 - grep count for "
-  "the R5 builder's v1 template for HC3-HC6 does (the word table below counts `LEFT`, `RIGHT`, "
-  "`left woman`, `right woman` in the 8 submitted prompt strings).")
+  "scene/wardrobe reference (\"<Picture 1> is the start still of ...\"). Neither shape uses a left/right spatial anchor: "
+  "`left woman` / `right woman` occur in 0 of the 8 submitted prompt strings and `RIGHT` in 0 of 8 (the 2 `LEFT` hits are "
+  "the lowercase word \"left\" in prose such as \"a soft key light from the left\"); the R5 v1 builder template for HC3-HC6 "
+  "does use \"the adult woman on the LEFT side of <Picture 1>\", which is why R6-R9 need the anchor restored.")
 W("6. **Face language.** No prompt in any of the four clips contains a face crop / close-up / bust / headshot / "
   "portrait / macro / shallow-depth instruction (see the word table below: 0 hits for `close-up`, `crop`, `bust`, "
   "`headshot`, `portrait`, `macro`, `shallow depth of field`, `bokeh`, `negative prompt`, `4K`, `ultra`, `hyper`). "
@@ -184,7 +184,7 @@ W("")
 W("### F. Five-line summary (plain language, exactly five lines)")
 W("")
 W("1. The redo let the reference sheets speak for identity: the second chunk of r1/r2 receives **only** the two 9:16 multi-view sheets, the approved start still is never a reference there, and those sheet faces measure cosine 0.22-0.47 from the real faces in the still, so the model faithfully renders the Klein sheet's generic face and the result drifts off the pick.")
-W("2. Pixel weight is why: with `ref_image_size=max` a 1152x2016 sheet is fed at full 2.32 Mpx, so the redo carries 5.70 Mpx of reference in chunk 1 and 4.64 Mpx in chunk 2 against a 1.03 Mpx frame, 4.5-5.5x the reference load of the approved 120 s clips, which use one 1.03 Mpx 16:9 start frame and nothing at all in the continuation.")
+W("2. Pixel weight is why: with `ref_image_size=max` a 1152x2016 sheet is fed at full 2.32 Mpx, so the redo carries 5.70 Mpx of reference in chunk 1 and 4.64 Mpx in chunk 2 against a 1.03 Mpx frame, 4.5-5.5x the reference load of the approved 481-frame clips, which use one 1.03 Mpx 16:9 start frame and nothing at all in the continuation.")
 W("3. The prompts never ask for a face: 0 of 8 prompt strings contain close-up / crop / bust / headshot / portrait / macro / shallow-depth / negative-prompt words, and the face boxes prove it - 90-190 px wide, 1.1-3.6% of the frame, sheet-fed clips no better than sheet-free ones, which is unresolvable at 1080p; only a 400-550 px face-crop reference plus explicit face language changes that, keeping the full-body 16:9 start frame.")
 W("4. The binding got weaker at the same time: v1 names each woman by hair colour inside the same picture the video starts from, v2 names her \"the woman shown in the multi-view reference sheet\" and demotes the start still to scenery, and no submitted prompt uses the left/right spatial anchor - so hair colour is the only thing separating the two identities, and the pair's sheets are 0.30-0.57 similar to each other, which invites a swap.")
 W("5. What to change for R6-R9 (R4G), no new renders and no new seeds in this pass: keep the 16:9 approved start frame as the ONLY reference and keep it present in **every** chunk including the continuation (c1/c2's chunk 2 has no reference at all, r1/r2's chunk 2 has only the two sheets), carry the extender README's `subject_definitions` wording on both chunks with \"<Subject 1> is the exact same woman shown in <Picture 1>\", say the picture is for her face and hair only, add one \"the camera frames her face in close-up\" beat per woman, keep `denoise 1.0 / shift 10 and 3 / euler / 10 steps`, and keep 1344x768 / 24 fps / 243 f (124 c0 + 119 extension) with audio.")
