@@ -1,1 +1,11 @@
-{"jobs": [{"id": "ali147_pool_hc_c1_s51100001", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}
+{
+ "jobs": [
+  {
+   "id": "ali147_pool_hc_sheet_s51120000",
+   "kind": "graph",
+   "frames": 0,
+   "frames_tol": 0,
+   "minutes": 180
+  }
+ ]
+}
