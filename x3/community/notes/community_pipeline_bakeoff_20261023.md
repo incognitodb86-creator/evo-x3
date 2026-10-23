@@ -96,3 +96,25 @@ Plan for B2: build from `examples/MiniMax_H3_Continuum_V39.json` + our `unet/cli
 check as FINAL + face similarity. Budget gate before requesting: read
 `C:\Users\derek\5slock\ralph-community\logs\p7_budget.json` (at B1: used_min 450.8, jobs 35, caps 615/45; the 120 min /
 10 jobs above 495/35 belong to this bakeoff).
+
+## PW1c REGISTER + RESTART - 2026-10-23 16:02-16:03 CT (iter 10, ~1.5 GPU min, no render)
+
+`comfy_ctl.py restart` (exact cmd, rc 0) -> `COMFY_OK 16:02:52` -> `status comfy_ok=True queue=(0,0)
+guard=(0,['IDLE']) running=['comfyui_auto']`. Live registration 6/6 in the same tool call as the
+restart, and the 0-GPU offline half 8/8. `MiniMaxH3PromptWriterOmni` is registered and its model list
+names the on-disk `Qwen2.5-Omni-7B GGUF Q4_K_M`; the adapter shows as
+`on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]`; the no-base sentinel is
+absent; 50 MiniMax* classes, 2605 total. No models.json edit (discovery + catalog resolve every file;
+the only addable entry is the 18.6 GB 27B pair, and this box has 45 GB free).
+
+The live check failed twice before it passed, and both causes are the trap for the next person:
+(1) llama-swap unloads ComfyUI the moment the next model turn starts, so a check in a later call hits
+a refused port - capture in the wake window, parse the saved file later; (2) ComfyUI 0.38's v2 `io`
+nodes expose a combo as `["COMBO", {"options": [...]}]`, so `/object_info` filtering must read
+`spec[1]["options"]`, while v1 nodes keep `spec[0]` - reading only `spec[0]` reports a registered
+node as an empty list. Raw `/object_info` (5.5 MB) is filtered in-process and never printed.
+
+Two resolver-driven moves, zero re-download: the Q8_0 adapter GGUF into a folder named after its repo
+id (`...-LoRA-Omni-GGUF`) for `paths.present_file`, and the lightx2v safetensors up out of
+`lightx2v-safetensors\` for `paths.adapter_is_complete`. Full note `notes/forge_pw1c_register.md`,
+GPU windows in `notes/bakeoff_gpu_ledger.md`, result `p7/jobs/ali173_pw1c.result.json`.
