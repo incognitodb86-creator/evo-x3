@@ -65,3 +65,20 @@ Derrick 3:44 PM CT, verbatim: "Ok do it also have forge research lora for our fi
 - **Approved:** if the 2906001 All-In-One Uncensored graph requires its own merged H3 checkpoint, Forge may download that one checkpoint, at the version the workflow page names. Before downloading, Forge checks free disk and logs the name, size, URL and path in `notes\installs_downloads.md`. HB2 then runs with that checkpoint instead of our int8 model. Everything else about the scene stays the same.
 - **Not approved:** any other new model or checkpoint still goes to `notes\guard_requests.md`.
 - **Research follow-ons (text only, no GPU):** queued after HB5 as RL1 (character LoRAs, ALI-181), RF1 (face consistency, ALI-182) and RA1 (audio, ALI-183; Derrick 3:45 PM CT "Also have forge research voices and stuff better audio").
+
+## Amendment 2026-10-23 4:05 PM CT: Forge downloads autonomously
+
+Derrick 4:05 PM CT, verbatim: "No.forhe can just download whatever lora wtf", "Forge should be able to do this automously", "What about all the other stuff".
+
+This supersedes every "needs Derrick card", "new checkpoint needs Derrick" and "write it to guard_requests" rule for downloads above. Forge now downloads and installs anything it needs (models, LoRAs, checkpoints, custom nodes, tools) on its own, with no card and no request.
+
+The only limits left:
+- no secrets;
+- comm.py and the youth guard stay untouched;
+- fictional adults only (fiction lock v2.3.0), so no real-person or celebrity LoRAs;
+- downloads are stored under C:\AI, and ComfyUI points at them through extra_model_paths.yaml or a link;
+- every action is logged (forge_actions.log, installs_downloads.md);
+- the GPU lock stays (no ComfyUI restart mid-render);
+- GPU work stays inside the 615/45 caps.
+
+Body quality (BQ1, ALI-184) now runs before every HB arm, and all HB arms use its improved template.
