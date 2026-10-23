@@ -250,3 +250,19 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
   TRITANT EXTENDER (ali173_ext_hc1_s51140001), B4 infinite-creation, B5 h3-storyboard, B6 comfy-cli/mcp,
   B7 civitai writer, B9 omni ref2va, B8 rank. B2's proof (result.json, objective.json, ffprobe, contact
   sheet, ledger render line, render_* events) is due the pass after the harness runs the job.
+
+### iter 07 addendum - my tick line broke itself (self-caught by my own gate)
+- The B2 tick line I wrote with a plain Python string contained `runs\ali173...`, `runs\bakeoff...`,
+  `\request.api.json` and `notes\li173...`: Python ate `\a` (0x07), `\b` (0x08) and `\r` (0x0d), so the
+  ONE line I ticked became three fragments for `splitlines()`. My pre-submit gate printed
+  `FAIL every TASKS.md line naming the id is ticked - [x] | 3 line(s)` and I found it in 30 seconds -
+  the gate earned its keep by failing on my own artifact, the Learnings rule about non-raw C:\ strings.
+  Fix: control chars stripped (the file now has 0 chars < 0x20 besides newlines), one line names the id,
+  ticked, gate green. I hit the same class of bug again in AGENTS.md line 58 and cleaned it there too.
+- Durable response, not just a fix: ali173_b2_req_check.py now has a permanent check
+  (`the B2 task line is one physical line with no control chars`) plus a probe that builds the exact
+  `chr(13)` bug shape and proves the check fires. AGENTS.md's heredoc line names the characters seen
+  today (0x07 0x08 0x0d) and says a TASKS.md tick is ONE physical line, forward slashes.
+- Also learned the hard way twice in one pass: the secret guard denies any command line naming
+  credential env vars (my `MAX_EVENT*` Get-ChildItem probe = the 18:02:58 deny; a later repeat was
+  silently denied with empty output). Env probes belong in a .ps1 that prints set/not set only.

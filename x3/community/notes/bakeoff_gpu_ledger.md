@@ -51,3 +51,10 @@ Staged request (written, not rendered):
 No render happened in this loop: the harness runs graph jobs only between iterations after a clean pass,
 and `STOP_RALPH` (Max 18:17 CT) wants a relaunch at `-GpuCapMin 700 -JobMax 55` first.
 `p7/jobs/ali173_cont_hc1_s51140001.result.json` does not exist as of 18:36 CT.
+| 7 | 18:5x CT | (cpu) | durable graph copy + restore: notes/ali173_b2_graph_ali173_cont_hc1_s51140001.json (runs/ is gitignored, C:/AI/community/.gitignore:10, and ralph.ps1 has no `git clean` = grep 0 hits), notes/ali173_b2_restore_graph.py OK byte-identical sha=1efecedd53549c5e, --selftest 4/4 probes fired (missing durable / missing live / edited live / clean) | graph sha 1efecedd53549c5e05887985f352a18d5897ca8587588af39b67052bfabd2088; git ca155bc | - | no render |
+
+## Ledger keys this task does not own
+- `wall_s` per render: the harness records the job wall time in p7/jobs/<id>.result.json; I do not time a render I do not run.
+- `first_frame_png`, `contact_sheet_sha256`, `seam_delta`, `face_similarity`, `retry`, `prompt_source`: created with the
+  result.json, objective.json and contact sheet, i.e. the pass after the harness runs the job.
+- `prompt_source` is already fixed in writing: notes/hc_c1_c0.txt, sha256 4d73c059385d88d7b3238503922e2d254fe78691b37e2d2ff669da059ca176a2, shacl128 4d73c059385d88d7, unchanged.
