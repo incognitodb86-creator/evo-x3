@@ -1,0 +1,69 @@
+== sheet anchors (SCRFD-10G thr 0.4 at 768x1344, ArcFace glintr100, mean of top 4 by area) ==
+  HC1 w1  img=1152x2016  faces=2 (area>=1500: 2)  areas=[66002, 15700]  det=[0.79, 0.84]
+  HC1 w2  img=1152x2016  faces=4 (area>=1500: 4)  areas=[86640, 50009, 14747, 8539]  det=[0.87, 0.87, 0.87, 0.8]
+  HC2 w1  img=1152x2016  faces=4 (area>=1500: 4)  areas=[50091, 21068, 13548, 9185]  det=[0.89, 0.77, 0.89, 0.84]
+  HC2 w2  img=1152x2016  faces=6 (area>=1500: 6)  areas=[72742, 8161, 6693, 5752, 5466, 5377]  det=[0.79, 0.9, 0.86, 0.79, 0.64, 0.79]
+  anchor cos HC1 w1 vs w2 = 0.502
+  anchor cos HC2 w1 vs w2 = 0.576
+
+== pick jpg faces vs sheet anchors (identity chain pick -> sheet) ==
+  HC1 img=1376x768 faces=2 areas=[26271, 20542]
+    face0 box=[309, 132, 484, 282] maxdim=175 area=26271 det=0.79  w1=0.431 w2=0.223  -> w1
+    face1 box=[742, 51, 868, 214] maxdim=162 area=20542 det=0.80  w1=0.037 w2=0.369  -> w2
+  HC2 img=1376x768 faces=2 areas=[27289, 26976]
+    face0 box=[658, 60, 792, 264] maxdim=203 area=27289 det=0.77  w1=0.053 w2=0.240  -> w2
+    face1 box=[392, 44, 578, 189] maxdim=186 area=26976 det=0.79  w1=0.217 w2=0.147  -> w1
+
+== per-clip frames (SCRFD thr 0.4 at 640x640) ==
+  r1_243f_sheeted f0    faces=2  w1 cos=0.268 other=0.204 area=13284 box=89x148  w2 cos=0.204 other=0.268 area=13284 box=89x148
+  r1_243f_sheeted f40   faces=2  w1 cos=0.074 other=0.076 area=18775 box=101x184  w2 cos=0.175 other=0.032 area=20078 box=113x177
+  r1_243f_sheeted f80   faces=2  w1 cos=0.232 other=0.087 area=19290 box=100x192  w2 cos=0.087 other=0.232 area=19290 box=100x192
+  r1_243f_sheeted f120  faces=2  w1 cos=0.133 other=0.046 area=17486 box=95x182  w2 cos=0.096 other=0.060 area=19881 box=112x176
+  r1_243f_sheeted f160  faces=2  w1 cos=0.556 other=0.324 area=20240 box=114x176  w2 cos=0.324 other=0.556 area=20240 box=114x176
+  r1_243f_sheeted f200  faces=1  w1 cos=-0.015 other=0.140 area=35199 box=195x180  w2 cos=0.140 other=-0.015 area=35199 box=195x180
+  r1_243f_sheeted f240  faces=1  w1 cos=0.007 other=0.167 area=44595 box=214x207  w2 cos=0.167 other=0.007 area=44595 box=214x207
+  r2_243f_sheeted f0    faces=2  w1 cos=0.138 other=0.280 area=15711 box=98x159  w2 cos=0.280 other=0.138 area=15711 box=98x159
+  r2_243f_sheeted f40   faces=2  w1 cos=0.332 other=0.256 area=37317 box=147x253  w2 cos=0.256 other=0.332 area=37317 box=147x253
+  r2_243f_sheeted f80   faces=0  
+  r2_243f_sheeted f120  faces=2  w1 cos=0.192 other=0.165 area=16207 box=105x153  w2 cos=0.286 other=0.182 area=15723 box=96x162
+  r2_243f_sheeted f160  faces=2  w1 cos=0.424 other=0.343 area=18126 box=111x163  w2 cos=0.343 other=0.424 area=18126 box=111x163
+  r2_243f_sheeted f200  faces=2  w1 cos=0.488 other=0.336 area=32132 box=162x198  w2 cos=0.393 other=0.309 area=30628 box=147x207
+  r2_243f_sheeted f240  faces=2  w1 cos=0.567 other=0.319 area=37116 box=175x211  w2 cos=0.319 other=0.567 area=37116 box=175x211
+  c1_481f_maskonly f0    faces=2  w1 cos=0.127 other=0.225 area=20562 box=108x189  w2 cos=0.225 other=0.127 area=20562 box=108x189
+  c1_481f_maskonly f80   faces=1  w1 cos=0.136 other=0.350 area=33340 box=181x183  w2 cos=0.350 other=0.136 area=33340 box=181x183
+  c1_481f_maskonly f160  faces=2  w1 cos=0.168 other=0.215 area=16699 box=111x150  w2 cos=0.215 other=0.168 area=16699 box=111x150
+  c1_481f_maskonly f240  faces=2  w1 cos=0.065 other=0.203 area=13803 box=104x131  w2 cos=0.203 other=0.065 area=13803 box=104x131
+  c1_481f_maskonly f320  faces=2  w1 cos=0.101 other=0.161 area=18081 box=119x151  w2 cos=0.171 other=0.021 area=31978 box=191x166
+  c1_481f_maskonly f400  faces=2  w1 cos=0.163 other=0.195 area=22472 box=119x188  w2 cos=0.195 other=0.163 area=22472 box=119x188
+  c1_481f_maskonly f480  faces=2  w1 cos=0.131 other=0.135 area=19079 box=120x158  w2 cos=0.292 other=0.065 area=33975 box=175x193
+  c2_481f_maskonly f0    faces=2  w1 cos=0.139 other=0.092 area=18254 box=97x187  w2 cos=0.203 other=0.041 area=20909 box=116x179
+  c2_481f_maskonly f80   faces=2  w1 cos=0.078 other=0.063 area=12878 box=102x125  w2 cos=0.173 other=0.030 area=11215 box=90x123
+  c2_481f_maskonly f160  faces=2  w1 cos=0.164 other=0.186 area=20075 box=156x128  w2 cos=0.186 other=0.164 area=20075 box=156x128
+  c2_481f_maskonly f240  faces=2  w1 cos=0.283 other=0.155 area=21088 box=139x150  w2 cos=0.155 other=0.283 area=21088 box=139x150
+  c2_481f_maskonly f320  faces=1  w1 cos=0.150 other=0.196 area=34095 box=170x199  w2 cos=0.196 other=0.150 area=34095 box=170x199
+  c2_481f_maskonly f400  faces=2  w1 cos=0.278 other=0.246 area=14742 box=108x136  w2 cos=0.246 other=0.278 area=14742 box=108x136
+  c2_481f_maskonly f480  faces=1  w1 cos=-0.104 other=0.089 area=9802 box=98x99  w2 cos=0.089 other=-0.104 area=9802 box=98x99
+  r1_old157f_nosheet f12   faces=2  w1 cos=0.136 other=0.088 area=15954 box=93x171  w2 cos=0.148 other=-0.033 area=16530 box=96x172
+  r1_old157f_nosheet f121  faces=2  w1 cos=0.163 other=0.091 area=20914 box=103x202  w2 cos=0.152 other=0.046 area=22913 box=118x194
+  r1_old157f_nosheet f241  faces=2  w1 cos=0.122 other=0.047 area=17890 box=97x184  w2 cos=0.115 other=0.056 area=20892 box=115x180
+  r1_old157f_nosheet f361  faces=2  w1 cos=0.272 other=0.160 area=24649 box=121x203  w2 cos=0.160 other=0.272 area=24649 box=121x203
+  r1_old157f_nosheet f481  faces=1  w1 cos=-0.004 other=0.009 area=40545 box=204x198  w2 cos=0.009 other=-0.004 area=40545 box=204x198
+  r2_old157f_nosheet f12   faces=2  w1 cos=0.269 other=0.273 area=25657 box=119x213  w2 cos=0.273 other=0.269 area=25657 box=119x213
+  r2_old157f_nosheet f121  faces=2  w1 cos=0.098 other=0.084 area=37690 box=137x273  w2 cos=0.084 other=0.098 area=37690 box=137x273
+  r2_old157f_nosheet f241  faces=2  w1 cos=0.180 other=0.155 area=15797 box=103x152  w2 cos=0.155 other=0.180 area=15797 box=103x152
+  r2_old157f_nosheet f361  faces=2  w1 cos=0.556 other=0.294 area=31514 box=168x187  w2 cos=0.294 other=0.556 area=31514 box=168x187
+  r2_old157f_nosheet f481  faces=2  w1 cos=0.535 other=0.287 area=34169 box=171x199  w2 cos=0.316 other=0.309 area=31628 box=144x219
+
+== summary ==
+  r1_243f_sheeted        w1  frames=7 face=7 cos_mean=0.1795 cos_min=-0.0147 cos_other=0.1492 swaps=3 consec=0.3852 first_last=0.0865 area_mean=24124 box=129x181 det=0.773
+  r1_243f_sheeted        w2  frames=7 face=7 cos_mean=0.1704 cos_min=0.0869 cos_other=0.163 swaps=3 consec=0.1973 first_last=0.0865 area_mean=24652 box=133x179 det=0.761
+  r2_243f_sheeted        w1  frames=7 face=6 cos_mean=0.3566 cos_min=0.1375 cos_other=0.2832 swaps=1 consec=0.4446 first_last=0.0861 area_mean=26101 box=133x189 det=0.77
+  r2_243f_sheeted        w2  frames=7 face=6 cos_mean=0.3129 cos_min=0.2564 cos_other=0.3253 swaps=3 consec=0.1893 first_last=0.0861 area_mean=25770 box=129x192 det=0.741
+  c1_481f_maskonly       w1  frames=7 face=7 cos_mean=0.1272 cos_min=0.0646 cos_other=0.2123 swaps=7 consec=0.4736 first_last=0.0256 area_mean=20576 box=123x164 det=0.816
+  c1_481f_maskonly       w2  frames=7 face=7 cos_mean=0.236 cos_min=0.1708 cos_other=0.1064 swaps=0 consec=0.2515 first_last=0.2653 area_mean=24689 box=141x171 det=0.788
+  c2_481f_maskonly       w1  frames=7 face=7 cos_mean=0.1411 cos_min=-0.104 cos_other=0.1467 swaps=3 consec=0.2665 first_last=0.2264 area_mean=18704 box=124x146 det=0.796
+  c2_481f_maskonly       w2  frames=7 face=7 cos_mean=0.1783 cos_min=0.0892 cos_other=0.1201 swaps=2 consec=0.2034 first_last=0.303 area_mean=18846 box=125x144 det=0.8
+  r1_old157f_nosheet     w1  frames=5 face=5 cos_mean=0.1379 cos_min=-0.0039 cos_other=0.0787 swaps=1 consec=0.3293 first_last=0.0136 area_mean=23990 box=123x191 det=0.734
+  r1_old157f_nosheet     w2  frames=5 face=5 cos_mean=0.1165 cos_min=0.0085 cos_other=0.0676 swaps=1 consec=0.253 first_last=0.1897 area_mean=25105 box=130x189 det=0.714
+  r2_old157f_nosheet     w1  frames=5 face=5 cos_mean=0.328 cos_min=0.0983 cos_other=0.2185 swaps=1 consec=0.3223 first_last=0.2352 area_mean=28965 box=139x204 det=0.754
+  r2_old157f_nosheet     w2  frames=5 face=5 cos_mean=0.2242 cos_min=0.0839 cos_other=0.2827 swaps=3 consec=0.1577 first_last=0.0977 area_mean=28457 box=134x208 det=0.74
