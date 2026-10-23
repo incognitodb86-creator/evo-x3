@@ -1,10 +1,1 @@
-{
-  "request_id": "p7_r1_c1_full",
-  "jobs": [
-    {
-      "kind": "render",
-      "id": "p7_r1_c1_pmot_full",
-      "stitch": true
-    }
-  ]
-}
+{"jobs": [{"id": "ali147_pool_fix4_s51080000", "kind": "graph", "frames": 1443, "frames_tol": 24, "minutes": 180}]}
