@@ -45,6 +45,11 @@ const cases = [
   ["powershell", "Stop-Process -Name foo -ErrorAction SilentlyContinue; Invoke-WebRequest https://example.com -OutFile C:\\AI\\community\\tmp\\x.html", "allow"],
   ["bash", "curl -s http://127.0.0.1:8080/upstream/x/v1/models", "allow"],
   ["edit", "C:/AI/community/scripts/face_crop.py", "allow"], ["edit", "C:/AI/community/scripts/comm.py", "deny"], ["bash", "echo x > C:/AI/community/scripts/comm.py", "deny"],
+  ["bash", "cd C:/AI/community && python - <<'EOF'\nline='DENIED by fiction-lock on comm.py'\nopen('notes/denies.log','a').write(line)\nEOF", "allow"],
+  ["bash", "tail -n 40 C:/AI/community/notes/self_diagnosis.md; echo ---; grep comm.py C:/AI/community/notes/denies.log > C:/AI/community/notes/x.txt", "allow"],
+  ["powershell", "Copy-Item C:/AI/community/notes/x.py C:/AI/community/scripts/comm.py", "deny"],
+  ["bash", "python -c \"open('C:/AI/community/scripts/comm.py','w').write('')\"", "deny"],
+  ["bash", "sed -i s/a/b/ C:/AI/community/scripts/tests/test_p6_review.py", "deny"],
   // R4G regression: the 12 commands/paths denied 1:17-1:38 PM CT must now pass
   ["bash", "wc -l C:/Users/derek/5slock/ralph-community/TASKS.md; awk 'NR>=1 && NR<=20 {print NR\": \"length($0)}' C:/Users/derek/5slock/ralph-community/TASKS.md", "allow"],
   ["bash", "python -c \"\nimport json\np=r'C:\\AI\\community\\runs\\ali147_pool_hc_c1_s51100001\\request.api.json'\ng=json.loads(open(p,encoding='utf-8').read())\nprint('nodes',len(g))\n\"", "allow"],
