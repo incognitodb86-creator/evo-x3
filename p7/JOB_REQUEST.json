@@ -1,0 +1,12 @@
+{
+ "jobs": [
+  {
+   "id": "ali173_cont_hc1_s51140001",
+   "kind": "graph",
+   "frames": 240,
+   "frames_tol": 33,
+   "minutes": 60,
+   "note": "ALI-173 B2 CONTINUUM SCENE: H3ContinuumSamplerV39 (ComfyUI-H3-Continuum 3.10.2) chunks the clip itself - 2 x 5.0 s = 240 f assembly target, 1024x576 16:9, euler/simple steps 10, shift 10/3, beta6 int8, seed 51140001, HC1 start still + 2 per-woman sheets as Continuum reference_image_1/2/3, one pass, no negative input in this node (no: prose line)."
+  }
+ ]
+}
