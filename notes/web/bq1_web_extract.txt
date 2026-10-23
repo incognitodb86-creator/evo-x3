@@ -1,0 +1,31 @@
+
+######## hf_Alissonerdx_H3-ComfyUI.md 6203 chars
+  * license_link: https://huggingface.co/Alissonerdx/Minimax-H3-ComfyUI/blob/main/LICENSES.md
+  * Experimental LoRAs for [MiniMax H3](https://huggingface.co/MiniMaxAI/MiniMax-H3), packaged for
+  * [`ref2va` weights](https://huggingface.co/Comfy-Org/MiniMax-H3/tree/main/diffusion_models).
+  * resolution, prompt and reference images.
+  * | [`minimax_h3_lms_v1.0_r64`](loras/minimax_h3_lms_v1.0_r64.safetensors) | Sharpness/detail enhancement using an aligned source-video guide | Fixed enhancement caption | [LMS / Sharpness guide](docs/lms.md) | [`minimax_h3_lms_workflow.json`](workflows/minimax_h3_lms_workflow.json) |
+  * | [`minimax_h3_vfx_edit_v1.0_r128_ffp`](loras/minimax_h3_vfx_edit_v1.0_r128_ffp.safetensors) | Higher-resolution VFX Edit version with experimental first-frame propagation | `vfx_edit:` | [VFX Edit and FFP guide](docs/vfx-edit.md) | [`minimax_h3_vfxedit_wokflow.json`](workflows/minimax_h3_vfxedit_wokflow.json) |
+  * | [`minimax_h3_head_swap_v1.0_r32`](loras/minimax_h3_head_swap_v1.0_r32.safetensors) | Experimental reference-image head replacement over an aligned source video | `head_swap:` | [Head Swap guide and prompt template](docs/head-swap.md) | [`minimax_h3_head_swap_workflow.json`](workflows/minimax_h3_head_swap_workflow.json) |
+  * | [`minimax_h3_character_swap_v1.1_ref2va_fro`](loras/minimax_h3_character_swap_v1.1_ref2va_fro.safetensors) **(recommended)** | Replace the main guide subject with the character in a reference image while following the guide performance; 80 MB SVD extraction | `body_swap:` | [Character Swap guide, prompt template and examples](docs/character-swap.md) | [Shot Planner](workflows/minimax_h3_characte
+  * | [`minimax_h3_character_swap_v1.0_ref2va_r64_gl`](loras/minimax_h3_character_swap_v1.0_ref2va_r64_gl.safetensors) | Previous Character Swap release (rank 64) | `body_swap:` | [Character Swap guide](docs/character-swap.md) | [Shot Planner](workflows/minimax_h3_character_swap_workflow_v1.0.json) / [native nodes](workflows/minimax_h3_character_swap_workflow_native_nodes_v1.0.json) |
+  * | [`minimax_h3_live_wallpaper_v1.0_ref2va_r32`](loras/minimax_h3_live_wallpaper_v1.0_ref2va_r32.safetensors) | Animate one to three reference images; often more faithful to facial features, but with less predictable camera behavior | `live_wallpaper:` | [Live Wallpaper guide](docs/live-wallpaper.md) | [`minimax_h3_live_wallpaper_workflow.json`](workflows/minimax_h3_live_wallpaper_workflow.json) |
+  * | [`minimax_h3_live_wallpaper_v1.0_ref2va_r64`](loras/minimax_h3_live_wallpaper_v1.0_ref2va_r64.safetensors) | Camera-aware continuation of R32 for prompt-directed camera behavior and temporal reference frames | `live_wallpaper:` | [Live Wallpaper guide](docs/live-wallpaper.md) | [`minimax_h3_live_wallpaper_workflow.json`](workflows/minimax_h3_live_wallpaper_workflow.json) |
+  * release of an experimental latent-upscaler checkpoint. It was trained for 2,000 steps with the same
+  * [LBH-123-AI/Minimax_h3_latent_Upscaler](https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler)
+  * [`minimax_h3_latent_upscaler_3d_fp16.safetensors`](https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler/blob/main/minimax_h3_latent_upscaler_3d_fp16.safetensors)
+  * `MiniMaxH3AddGuide` at `frame_idx = 0`. This is different from a native image/video reference:
+  * Base model credit to [MiniMaxAI](https://huggingface.co/MiniMaxAI/MiniMax-H3), ComfyUI-ready
+  * weights to [Comfy-Org](https://huggingface.co/Comfy-Org/MiniMax-H3), and guide-latent training
+
+######## hf_alibaba-pai_Acc-LoRAs.md 7291 chars
+  * license_link: https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE
+  * We apply Parallel Decoding Distillation (PDD) <sup>[1](#ref1)</sup> to [MiniMax-H3](https://huggingface.co/MiniMaxAI/MiniMax-H3), enabling efficient video generation in only a few inference steps.
+  * For more details, please refer to our [GitHub repo](https://github.com/aigc-apps/VideoX-Fun).
+  * | Name | Base Model | Hugging Face | Description |
+  * Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+  File "C:\Program Files\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f917' in position 128: character maps to <undefined>
