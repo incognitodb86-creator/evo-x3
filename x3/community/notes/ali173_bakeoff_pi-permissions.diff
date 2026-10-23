@@ -1,0 +1,15 @@
+--- a/pi-permissions.jsonc
++++ b/pi-permissions.jsonc
+@@ -279,7 +279,11 @@
+     "write:C:/AI/security/skillspector/REVIEW.md": "deny",
+     // readme (ALI-163, 2026-10-23 11:07 AM CT, Derrick "Yes do it"): custom_nodes README*.md are read-only for Forge (read/grep via special.external_directory below).
+     "edit:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*.md": "deny",
+-    "write:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*.md": "deny"
++    "write:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*.md": "deny",
++    // bakeoff (ALI-173, 2026-10-23 1:07 PM CT, Derrick "Yes, add 120 GPU min and 10 jobs for the bakeoff and let Forge restart and call ComfyUI itself"):
++    // the restart helper is Max's (it holds the render-running refusal), so it stays out of the scriptfix allow above.
++    "edit:C:/AI/community/scripts/comfy_ctl.py": "deny",
++    "write:C:/AI/community/scripts/comfy_ctl.py": "deny"
+   },
+ 
+   "mcp": {
