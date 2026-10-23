@@ -1,0 +1,1286 @@
+{
+ "port": "10004",
+ "checks": [
+  {
+   "name": "1 Omni node class registered",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "2 Omni node model list names the Qwen2.5-Omni-7B base",
+   "ok": true,
+   "note": "Qwen2.5-Omni-7B (official, bf16) · 22.4 GB download · ~9 GB ; Qwen2.5-Omni-7B GGUF Q4_K_M · 6.2 GB download · ~9 GB with t; Qwen2.5-Omni-7B GGUF Q8_0 · 9.7 GB download · ~13 GB - close"
+  },
+  {
+   "name": "2b the 7B base row is NOT marked 'wrong size for the adapter'",
+   "ok": true,
+   "note": "['on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the ']"
+  },
+  {
+   "name": "3 the Q8_0 Omni adapter GGUF is listed by the nodes",
+   "ok": true,
+   "note": "MiniMaxH3RewriterOptions.adapter = MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf · 0.34 GB download — half the size, same re"
+  },
+  {
+   "name": "4 no '(no Qwen2.5-Omni base found' sentinel",
+   "ok": true,
+   "note": "[]"
+  },
+  {
+   "name": "5 at least one 'on disk:' row in the pack's widgets",
+   "ok": true,
+   "note": "29 rows"
+  }
+ ],
+ "rows": [
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  },
+  {
+   "class": "MiniMaxH3MultiReferenceCaption",
+   "widget": "model",
+   "option": "Qwen2.5-Omni-7B · 5.8 GB download · ~8 GB — same modalities, better prose; step up when the 3B's captions are too plain"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptRewriter",
+   "widget": "model",
+   "option": "on disk: Hemmingway-1-Uncensored-Heretic.i1-IQ3_M.gguf [gguf, 11.7 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptRewriter",
+   "widget": "model",
+   "option": "on disk: Qwen3.5-4B-Q4_K_M.gguf [gguf, 2.6 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3PromptRewriter",
+   "widget": "model",
+   "option": "on disk: Qwen3.5-9B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf [gguf, 5.2 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3PromptWriterOmni",
+   "widget": "model",
+   "option": "Qwen2.5-Omni-7B (official, bf16) · 22.4 GB download · ~9 GB as nf4 / ~13 GB as int8 / ~24 GB as bf16"
+  },
+  {
+   "class": "MiniMaxH3PromptWriterOmni",
+   "widget": "model",
+   "option": "Qwen2.5-Omni-7B GGUF Q4_K_M · 6.2 GB download · ~9 GB with the adapter and a 12k context"
+  },
+  {
+   "class": "MiniMaxH3PromptWriterOmni",
+   "widget": "model",
+   "option": "Qwen2.5-Omni-7B GGUF Q8_0 · 9.7 GB download · ~13 GB - closer to the bf16 rewrite on a card that has room"
+  },
+  {
+   "class": "MiniMaxH3PromptWriterOmni",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3ReferenceCaption",
+   "widget": "model",
+   "option": "Qwen2.5-Omni-7B · 5.8 GB download · ~8 GB — same modalities, better prose; step up when the 3B's captions are too plain"
+  },
+  {
+   "class": "MiniMaxH3RewriterOptions",
+   "widget": "adapter",
+   "option": "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-F16.gguf · 0.65 GB download"
+  },
+  {
+   "class": "MiniMaxH3RewriterOptions",
+   "widget": "adapter",
+   "option": "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf · 0.34 GB download — half the size, same rewrite behaviour"
+  },
+  {
+   "class": "MiniMaxH3RewriterOptions",
+   "widget": "adapter",
+   "option": "on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_27b",
+   "option": "on disk: Hemmingway-1-Uncensored-Heretic.i1-IQ3_M.gguf [gguf, 11.7 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_27b",
+   "option": "on disk: Qwen3.5-4B-Q4_K_M.gguf [gguf, 2.6 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_27b",
+   "option": "on disk: Qwen3.5-9B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf [gguf, 5.2 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_omni",
+   "option": "Qwen2.5-Omni-7B (official, bf16) · 22.4 GB download · ~9 GB as nf4 / ~13 GB as int8 / ~24 GB as bf16"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_omni",
+   "option": "Qwen2.5-Omni-7B GGUF Q4_K_M · 6.2 GB download · ~9 GB with the adapter and a 12k context"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_omni",
+   "option": "Qwen2.5-Omni-7B GGUF Q8_0 · 9.7 GB download · ~13 GB - closer to the bf16 rewrite on a card that has room"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_omni",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "caption_model",
+   "option": "Qwen2.5-Omni-7B · 5.8 GB download · ~8 GB — same modalities, better prose; step up when the 3B's captions are too plain"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  }
+ ],
+ "nodes": [
+  {
+   "class": "ComfyCloudMiniMaxH3FirstLastFrameToVideoNode",
+   "widgets": [
+    "aspect_ratio",
+    "duration_seconds",
+    "first_frame",
+    "last_frame",
+    "prompt",
+    "resolution",
+    "seed"
+   ]
+  },
+  {
+   "class": "ComfyCloudMiniMaxH3ImageToVideoNode",
+   "widgets": [
+    "aspect_ratio",
+    "duration_seconds",
+    "first_frame",
+    "prompt",
+    "resolution",
+    "seed"
+   ]
+  },
+  {
+   "class": "ComfyCloudMiniMaxH3TextToVideoNode",
+   "widgets": [
+    "aspect_ratio",
+    "duration_seconds",
+    "prompt",
+    "resolution",
+    "seed"
+   ]
+  },
+  {
+   "class": "ComfyCloudMiniMaxMusic3TextToAudioNode",
+   "widgets": [
+    "audio_quality",
+    "lyrics",
+    "max_duration",
+    "prompt",
+    "seed"
+   ]
+  },
+  {
+   "class": "EmptyMiniMaxH3LatentAV",
+   "widgets": [
+    "height",
+    "length",
+    "width"
+   ]
+  },
+  {
+   "class": "EmptyMiniMaxMusic3LatentAudio",
+   "widgets": [
+    "batch_size",
+    "seconds"
+   ]
+  },
+  {
+   "class": "MiniMaxH3AddGuide",
+   "widgets": [
+    "audio",
+    "audio_vae",
+    "frame_idx",
+    "image",
+    "latent",
+    "positive",
+    "vae"
+   ]
+  },
+  {
+   "class": "MiniMaxH3AppendContinuation",
+   "widgets": [
+    "overlap_audio_tokens",
+    "overlap_video_tokens",
+    "previous_av_latent",
+    "sampled_window",
+    "transition_audio_tokens",
+    "transition_video_tokens"
+   ]
+  },
+  {
+   "class": "MiniMaxH3EffectEmbeddings",
+   "widgets": [
+    "bypass",
+    "effects",
+    "placement",
+    "prompt"
+   ]
+  },
+  {
+   "class": "MiniMaxH3Extender",
+   "widgets": [
+    "audio_context_length",
+    "audio_vae",
+    "clip",
+    "clips_json",
+    "context_length",
+    "continue_existing_video",
+    "denoise",
+    "fl2va_model",
+    "generation_mode",
+    "height",
+    "megapixels",
+    "model",
+    "motion_context",
+    "prompt_pack",
+    "ref_audio",
+    "ref_audio_1",
+    "ref_audio_2",
+    "ref_audio_3",
+    "ref_image_size",
+    "ref_pack",
+    "ref_video_1",
+    "ref_video_2",
+    "ref_video_3",
+    "ref_video_audio_1",
+    "ref_video_audio_2",
+    "ref_video_audio_3",
+    "ref_video_fps_1",
+    "ref_video_fps_2",
+    "ref_video_fps_3",
+    "refine_denoise",
+    "refine_enabled",
+    "refine_scale",
+    "refine_steps",
+    "refs_json",
+    "resolution_mode",
+    "run_mode",
+    "sampler_name",
+    "scheduler",
+    "sigmas",
+    "steps",
+    "vae",
+    "width"
+   ]
+  },
+  {
+   "class": "MiniMaxH3FunControlNetApply",
+   "widgets": [
+    "control_video",
+    "end_percent",
+    "mask",
+    "model",
+    "model_patch",
+    "source_video",
+    "start_percent",
+    "strength",
+    "vae"
+   ]
+  },
+  {
+   "class": "MiniMaxH3GuidePrompt",
+   "widgets": [
+    "aspect_ratio",
+    "auto_download",
+    "duration",
+    "format",
+    "prompt",
+    "reference_material",
+    "resolution",
+    "task"
+   ]
+  },
+  {
+   "class": "MiniMaxH3GuidedContinuationWindow",
+   "widgets": [
+    "extension_frames",
+    "overlap_frames",
+    "previous_av_latent"
+   ]
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widgets": [
+    "aspect_ratio",
+    "bypass",
+    "duration",
+    "greedy",
+    "keep_model_loaded",
+    "library_pick",
+    "model",
+    "options",
+    "prompt",
+    "reference_material",
+    "repeat_last",
+    "resolution",
+    "seed",
+    "system_prompt",
+    "task"
+   ]
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widgets": [
+    "aspect_ratio",
+    "bypass",
+    "duration",
+    "greedy",
+    "keep_model_loaded",
+    "library_pick",
+    "model",
+    "options",
+    "prompt",
+    "reference_assets",
+    "repeat_last",
+    "resolution",
+    "seed",
+    "system_prompt"
+   ]
+  },
+  {
+   "class": "MiniMaxH3ImageToVideo",
+   "widgets": [
+    "clip",
+    "first_frame",
+    "height",
+    "last_frame",
+    "length",
+    "prompt",
+    "vae",
+    "width"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LQPackageLoad",
+   "widgets": [
+    "chunk_mode",
+    "edit_json",
+    "index",
+    "index_mode",
+    "load_source",
+    "max_scene_seconds",
+    "min_scene_seconds",
+    "scene_threshold",
+    "selection_json"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LQPackageSave",
+   "widgets": [
+    "audio",
+    "filename_prefix",
+    "images",
+    "negative",
+    "note",
+    "positive",
+    "project",
+    "prompt",
+    "samples",
+    "seed"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LatentBlur",
+   "widgets": [
+    "radius",
+    "samples"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LatentContrast",
+   "widgets": [
+    "contrast",
+    "preserve_norm",
+    "samples"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LatentSharpen",
+   "widgets": [
+    "amount",
+    "radius",
+    "samples"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LatentTailGuide",
+   "widgets": [
+    "overlap_audio_tokens",
+    "overlap_video_tokens",
+    "positive",
+    "previous_av_latent",
+    "target_av_latent"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LatentUpscaleCombined",
+   "widgets": [
+    "audio_denoise",
+    "learned_model",
+    "learned_upscaler",
+    "match_stats",
+    "method",
+    "model",
+    "negative",
+    "noise",
+    "noise_resample",
+    "positive",
+    "samples",
+    "sigmas"
+   ]
+  },
+  {
+   "class": "MiniMaxH3LoraTriggers",
+   "widgets": [
+    "bypass",
+    "prompt",
+    "triggers"
+   ]
+  },
+  {
+   "class": "MiniMaxH3MotionContextDiskFinalDecode",
+   "widgets": [
+    "audio_bitrate",
+    "audio_vae",
+    "auto_save_project",
+    "autoplay",
+    "cache",
+    "codec",
+    "crf",
+    "filename_prefix",
+    "fps",
+    "output_directory",
+    "preset",
+    "save_individual_clips",
+    "vae"
+   ]
+  },
+  {
+   "class": "MiniMaxH3MotionContextDiskJoin",
+   "widgets": [
+    "fps",
+    "previous_cache",
+    "run_mode",
+    "samples",
+    "trim_frames",
+    "validated"
+   ]
+  },
+  {
+   "class": "MiniMaxH3MotionContextRAM",
+   "widgets": [
+    "audio_context_length",
+    "conditioning",
+    "context_latent",
+    "context_length",
+    "latent"
+   ]
+  },
+  {
+   "class": "MiniMaxH3MultiReferenceCaption",
+   "widgets": [
+    "audios",
+    "bypass",
+    "clip",
+    "context_size",
+    "enabled_mask",
+    "length",
+    "max_frames",
+    "model",
+    "options",
+    "pictures",
+    "previous",
+    "reference_instructions",
+    "repeat_last",
+    "seed",
+    "subjects",
+    "videos"
+   ]
+  },
+  {
+   "class": "MiniMaxH3Pass2StaggeredScheduler",
+   "widgets": [
+    "base_scheduler",
+    "denoise",
+    "model",
+    "reference_steps",
+    "rho",
+    "shape",
+    "steps"
+   ]
+  },
+  {
+   "class": "MiniMaxH3PromptCheck",
+   "widgets": [
+    "duration",
+    "options",
+    "prompt",
+    "references",
+    "task"
+   ]
+  },
+  {
+   "class": "MiniMaxH3PromptPackBridge",
+   "widgets": [
+    "prompt_1",
+    "prompt_10",
+    "prompt_100",
+    "prompt_101",
+    "prompt_102",
+    "prompt_103",
+    "prompt_104",
+    "prompt_105",
+    "prompt_106",
+    "prompt_107",
+    "prompt_108",
+    "prompt_109",
+    "prompt_11",
+    "prompt_110",
+    "prompt_111",
+    "prompt_112",
+    "prompt_113",
+    "prompt_114",
+    "prompt_115",
+    "prompt_116",
+    "prompt_117",
+    "prompt_118",
+    "prompt_119",
+    "prompt_12",
+    "prompt_120",
+    "prompt_121",
+    "prompt_122",
+    "prompt_123",
+    "prompt_124",
+    "prompt_125",
+    "prompt_126",
+    "prompt_127",
+    "prompt_128",
+    "prompt_13",
+    "prompt_14",
+    "prompt_15",
+    "prompt_16",
+    "prompt_17",
+    "prompt_18",
+    "prompt_19",
+    "prompt_2",
+    "prompt_20",
+    "prompt_21",
+    "prompt_22",
+    "prompt_23",
+    "prompt_24",
+    "prompt_25",
+    "prompt_26",
+    "prompt_27",
+    "prompt_28",
+    "prompt_29",
+    "prompt_3",
+    "prompt_30",
+    "prompt_31",
+    "prompt_32",
+    "prompt_33",
+    "prompt_34",
+    "prompt_35",
+    "prompt_36",
+    "prompt_37",
+    "prompt_38",
+    "prompt_39",
+    "prompt_4",
+    "prompt_40",
+    "prompt_41",
+    "prompt_42",
+    "prompt_43",
+    "prompt_44",
+    "prompt_45",
+    "prompt_46",
+    "prompt_47",
+    "prompt_48",
+    "prompt_49",
+    "prompt_5",
+    "prompt_50",
+    "prompt_51",
+    "prompt_52",
+    "prompt_53",
+    "prompt_54",
+    "prompt_55",
+    "prompt_56",
+    "prompt_57",
+    "prompt_58",
+    "prompt_59",
+    "prompt_6",
+    "prompt_60",
+    "prompt_61",
+    "prompt_62",
+    "prompt_63",
+    "prompt_64",
+    "prompt_65",
+    "prompt_66",
+    "prompt_67",
+    "prompt_68",
+    "prompt_69",
+    "prompt_7",
+    "prompt_70",
+    "prompt_71",
+    "prompt_72",
+    "prompt_73",
+    "prompt_74",
+    "prompt_75",
+    "prompt_76",
+    "prompt_77",
+    "prompt_78",
+    "prompt_79",
+    "prompt_8",
+    "prompt_80",
+    "prompt_81",
+    "prompt_82",
+    "prompt_83",
+    "prompt_84",
+    "prompt_85",
+    "prompt_86",
+    "prompt_87",
+    "prompt_88",
+    "prompt_89",
+    "prompt_9",
+    "prompt_90",
+    "prompt_91",
+    "prompt_92",
+    "prompt_93",
+    "prompt_94",
+    "prompt_95",
+    "prompt_96",
+    "prompt_97",
+    "prompt_98",
+    "prompt_99"
+   ]
+  },
+  {
+   "class": "MiniMaxH3PromptPresets",
+   "widgets": [
+    "preset"
+   ]
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widgets": [
+    "bypass",
+    "detail",
+    "greedy",
+    "keep_audio",
+    "keep_camera",
+    "keep_model_loaded",
+    "keep_style",
+    "language",
+    "model",
+    "options",
+    "prompt",
+    "seed",
+    "subjects",
+    "system_prompt"
+   ]
+  },
+  {
+   "class": "MiniMaxH3PromptRewriter",
+   "widgets": [
+    "aspect_ratio",
+    "bypass",
+    "duration",
+    "greedy",
+    "keep_model_loaded",
+    "library_pick",
+    "model",
+    "options",
+    "prompt",
+    "quantization",
+    "repeat_last",
+    "resolution",
+    "seed"
+   ]
+  },
+  {
+   "class": "MiniMaxH3PromptWriter8B",
+   "widgets": [
+    "aspect_ratio",
+    "bypass",
+    "duration",
+    "first_frame",
+    "greedy",
+    "keep_model_loaded",
+    "last_frame",
+    "library_pick",
+    "model",
+    "options",
+    "prompt",
+    "quantization",
+    "repeat_last",
+    "resolution",
+    "seed",
+    "task"
+   ]
+  },
+  {
+   "class": "MiniMaxH3PromptWriterOmni",
+   "widgets": [
+    "aspect_ratio",
+    "bypass",
+    "duration",
+    "greedy",
+    "keep_model_loaded",
+    "library_pick",
+    "max_frames",
+    "model",
+    "options",
+    "prompt",
+    "quantization",
+    "reference_layout",
+    "references",
+    "repeat_last",
+    "resolution",
+    "seed",
+    "task"
+   ]
+  },
+  {
+   "class": "MiniMaxH3ReducePrompt",
+   "widgets": [
+    "detail",
+    "format",
+    "keep_audio",
+    "keep_camera",
+    "keep_style",
+    "language",
+    "prompt",
+    "subjects",
+    "system_prompt"
+   ]
+  },
+  {
+   "class": "MiniMaxH3ReferenceAdapter",
+   "widgets": [
+    "bundle",
+    "items",
+    "split_batches"
+   ]
+  },
+  {
+   "class": "MiniMaxH3ReferenceCaption",
+   "widgets": [
+    "audio",
+    "bypass",
+    "clip",
+    "context_size",
+    "description",
+    "image",
+    "instruction",
+    "length",
+    "max_frames",
+    "model",
+    "options",
+    "previous",
+    "repeat_last",
+    "role",
+    "seed",
+    "video"
+   ]
+  },
+  {
+   "class": "MiniMaxH3ReferencePackBridge",
+   "widgets": [
+    "ref_1",
+    "ref_2",
+    "ref_3",
+    "ref_4",
+    "ref_5",
+    "ref_6",
+    "ref_7",
+    "ref_8",
+    "ref_9"
+   ]
+  },
+  {
+   "class": "MiniMaxH3ReferenceSlots",
+   "widgets": [
+    "references",
+    "soundtracks"
+   ]
+  },
+  {
+   "class": "MiniMaxH3ReferenceToVideo",
+   "widgets": [
+    "audio_vae",
+    "clip",
+    "height",
+    "length",
+    "prompt",
+    "ref_audios",
+    "ref_image_size",
+    "ref_images",
+    "ref_video_audios",
+    "ref_videos",
+    "vae",
+    "width"
+   ]
+  },
+  {
+   "class": "MiniMaxH3RewriterOptions",
+   "widgets": [
+    "adapter",
+    "attn_implementation",
+    "auto_download",
+    "device",
+    "downloader",
+    "fix_once",
+    "gguf_runtime",
+    "gpu_layers",
+    "llama_backend",
+    "max_new_tokens",
+    "merge_lora",
+    "n_ctx",
+    "prompt_file",
+    "repetition_penalty",
+    "self_check",
+    "temperature",
+    "top_k",
+    "top_p",
+    "trust_remote_code",
+    "use_lora"
+   ]
+  },
+  {
+   "class": "MiniMaxH3SigmaShift",
+   "widgets": [
+    "model",
+    "shift_audio",
+    "shift_video"
+   ]
+  },
+  {
+   "class": "MiniMaxH3TailFromLatent",
+   "widgets": [
+    "align_to_h3_grid",
+    "audio_vae",
+    "samples",
+    "tail_seconds",
+    "vae"
+   ]
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widgets": [
+    "aspect_ratio",
+    "bypass",
+    "duration",
+    "first_frame",
+    "frame_switches",
+    "greedy",
+    "keep_model_loaded",
+    "last_frame",
+    "library_pick",
+    "lora",
+    "model_27b",
+    "model_8b",
+    "model_omni",
+    "options",
+    "prompt",
+    "quantization_27b",
+    "quantization_8b",
+    "quantization_omni",
+    "reference_audio",
+    "reference_video",
+    "repeat_last",
+    "resolution",
+    "seed",
+    "task"
+   ]
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widgets": [
+    "aspect_ratio",
+    "bypass",
+    "caption_length",
+    "caption_model",
+    "clip",
+    "context_size",
+    "duration",
+    "greedy",
+    "keep_model_loaded",
+    "library_pick",
+    "max_frames",
+    "options",
+    "previous",
+    "prompt",
+    "reference_instructions",
+    "reference_layout",
+    "references",
+    "repeat_last",
+    "resolution",
+    "seed",
+    "system_prompt",
+    "task",
+    "writer_model"
+   ]
+  },
+  {
+   "class": "MiniMaxH3UpscaleCollect",
+   "widgets": [
+    "audio",
+    "crf",
+    "images",
+    "package_pipe"
+   ]
+  },
+  {
+   "class": "MiniMaxH3VAEDecodeFast",
+   "widgets": [
+    "output_device",
+    "samples",
+    "tile_overlap",
+    "tile_size",
+    "tiling",
+    "vae"
+   ]
+  },
+  {
+   "class": "MiniMaxMusic3TextEncode",
+   "widgets": [
+    "caption",
+    "cfg_scale",
+    "clip",
+    "lyrics",
+    "max_duration",
+    "seed",
+    "top_k"
+   ]
+  }
+ ],
+ "system_stats": {
+  "os": "win32",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "comfyui": "0.38.0",
+  "devices": [
+   "cuda:0 NVIDIA GeForce RTX 5070 Ti : cudaMallocAsync"
+  ]
+ },
+ "queue": {
+  "running": 0,
+  "pending": 0
+ },
+ "object_info_bytes": 5523929,
+ "node_classes": 2605,
+ "minimax_nodes": [
+  "ComfyCloudMiniMaxH3FirstLastFrameToVideoNode",
+  "ComfyCloudMiniMaxH3ImageToVideoNode",
+  "ComfyCloudMiniMaxH3TextToVideoNode",
+  "ComfyCloudMiniMaxMusic3TextToAudioNode",
+  "EmptyMiniMaxH3LatentAV",
+  "EmptyMiniMaxMusic3LatentAudio",
+  "MiniMaxH3AddGuide",
+  "MiniMaxH3AppendContinuation",
+  "MiniMaxH3EffectEmbeddings",
+  "MiniMaxH3Extender",
+  "MiniMaxH3FunControlNetApply",
+  "MiniMaxH3GuidePrompt",
+  "MiniMaxH3GuidedContinuationWindow",
+  "MiniMaxH3GuidedWriter",
+  "MiniMaxH3GuidedWriterRef",
+  "MiniMaxH3ImageToVideo",
+  "MiniMaxH3LQPackageLoad",
+  "MiniMaxH3LQPackageSave",
+  "MiniMaxH3LatentBlur",
+  "MiniMaxH3LatentContrast",
+  "MiniMaxH3LatentSharpen",
+  "MiniMaxH3LatentTailGuide",
+  "MiniMaxH3LatentUpscaleCombined",
+  "MiniMaxH3LoraTriggers",
+  "MiniMaxH3MotionContextDiskFinalDecode",
+  "MiniMaxH3MotionContextDiskJoin",
+  "MiniMaxH3MotionContextRAM",
+  "MiniMaxH3MultiReferenceCaption",
+  "MiniMaxH3Pass2StaggeredScheduler",
+  "MiniMaxH3PromptCheck",
+  "MiniMaxH3PromptPackBridge",
+  "MiniMaxH3PromptPresets",
+  "MiniMaxH3PromptReducer",
+  "MiniMaxH3PromptRewriter",
+  "MiniMaxH3PromptWriter8B",
+  "MiniMaxH3PromptWriterOmni",
+  "MiniMaxH3ReducePrompt",
+  "MiniMaxH3ReferenceAdapter",
+  "MiniMaxH3ReferenceCaption",
+  "MiniMaxH3ReferencePackBridge",
+  "MiniMaxH3ReferenceSlots",
+  "MiniMaxH3ReferenceToVideo",
+  "MiniMaxH3RewriterOptions",
+  "MiniMaxH3SigmaShift",
+  "MiniMaxH3TailFromLatent",
+  "MiniMaxH3UniversalRewriter",
+  "MiniMaxH3UniversalWriter",
+  "MiniMaxH3UpscaleCollect",
+  "MiniMaxH3VAEDecodeFast",
+  "MiniMaxMusic3TextEncode"
+ ],
+ "omni_model_row_count": 4,
+ "omni_model_rows": [
+  "Qwen2.5-Omni-7B (official, bf16) · 22.4 GB download · ~9 GB as nf4 / ~13 GB as int8 / ~24 GB as bf16",
+  "Qwen2.5-Omni-7B GGUF Q4_K_M · 6.2 GB download · ~9 GB with the adapter and a 12k context",
+  "Qwen2.5-Omni-7B GGUF Q8_0 · 9.7 GB download · ~13 GB - closer to the bf16 rewrite on a card that has room",
+  "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+ ],
+ "on_disk_rows": [
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriter",
+   "widget": "model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3GuidedWriterRef",
+   "widget": "model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptReducer",
+   "widget": "model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptRewriter",
+   "widget": "model",
+   "option": "on disk: Hemmingway-1-Uncensored-Heretic.i1-IQ3_M.gguf [gguf, 11.7 GB]"
+  },
+  {
+   "class": "MiniMaxH3PromptRewriter",
+   "widget": "model",
+   "option": "on disk: Qwen3.5-4B-Q4_K_M.gguf [gguf, 2.6 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3PromptRewriter",
+   "widget": "model",
+   "option": "on disk: Qwen3.5-9B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf [gguf, 5.2 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3PromptWriterOmni",
+   "widget": "model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3RewriterOptions",
+   "widget": "adapter",
+   "option": "on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_27b",
+   "option": "on disk: Hemmingway-1-Uncensored-Heretic.i1-IQ3_M.gguf [gguf, 11.7 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_27b",
+   "option": "on disk: Qwen3.5-4B-Q4_K_M.gguf [gguf, 2.6 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_27b",
+   "option": "on disk: Qwen3.5-9B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf [gguf, 5.2 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3UniversalRewriter",
+   "widget": "model_omni",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen2.5-Omni-7B-Q4_K_M.gguf [qwen2vl, 4.4 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [qwen2vl, 2.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: sulphur_dev-Q5_K_M.gguf [ltxv, 15.0 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen3-4B-Q4_K_M.gguf [qwen3, 2.3 GB]"
+  },
+  {
+   "class": "MiniMaxH3UniversalWriter",
+   "widget": "writer_model",
+   "option": "on disk: Qwen3-8B-Q8_0.gguf [qwen3, 8.1 GB]"
+  }
+ ],
+ "scanned_7b_rows_in_omni_list": [],
+ "pass": true
+}
