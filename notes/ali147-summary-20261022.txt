@@ -364,7 +364,7 @@ Existence checks for referenced evidence files
   C:\AI\community\runs\ali147_pool_fix4_s51080000\fairness.txt exists=True size=16349
   C:\AI\community\logs\p7_budget.json exists=False size=-
   C:\Users\derek\5slock\ralph-community\logs\p7_budget.json exists=True size=129
-  C:\AI\community\notes\ali147_summary.md exists=True size=26694
+  C:\AI\community\notes\ali147_summary.md exists=True size=29047
 
 ==============================================================================
 Identity / reference images (read-only, PIL + sha256)
