@@ -1,0 +1,309 @@
+[
+ {
+  "label": "CONTROL r3r (face crops only, start still NOT in the graph)",
+  "id": "ali147_pool_hc_r3r_s51130003",
+  "pick": "HC3 GI173",
+  "expected_frames": 243,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T15:23:59",
+  "finished": "2026-10-23T15:31:51",
+  "wall_min": 7.9,
+  "note": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 458.7,
+  "budget_cap_min": 615,
+  "job_start": [
+   "2026-10-23 15:24:54 CT JOB start ali147_pool_hc_r3r_s51130003 prompt_id=72c98f52-ed8c-4117-bc4c-dab4d0b35f49"
+  ],
+  "job_end": [
+   "2026-10-23 15:31:50 CT JOB end ali147_pool_hc_r3r_s51130003 ok secs=416.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 15:31:51 CT OBJECTIVE ok ali147_pool_hc_r3r_s51130003 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3760110 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 3760110,
+  "mp4_sha256": "642cdea337d13974addc5273b21c3a9f8e43fbb06c3d4d0decdc67a73278a482",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "mp4_streams": {
+   "rc": 0,
+   "lines": [
+    "h264,video",
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 165349,
+  "m4a_sha256": "4f8264942172d20a9c0f061d1c163c880e4942ce93754a4449f587d5d0f5c88e",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "graph_bytes": 14976,
+  "graph_sha256": "43f6e40ddf2336173ef0e25bf34c677e81de092e816007f2d78f46335a038711",
+  "seed": [
+   51130003
+  ],
+  "ref_slots": {
+   "c0": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "slots": [
+     {
+      "slot": "ref_images.ref_image_1",
+      "node": "img",
+      "image": "community/hc/HC3_w1_face.png"
+     },
+     {
+      "slot": "ref_images.ref_image_2",
+      "node": "img2",
+      "image": "community/hc/HC3_w2_face.png"
+     }
+    ],
+    "primary": null,
+    "ref_image_size": "match"
+   }
+  },
+  "loadimage": [
+   "community/hc/HC3_w1_face.png",
+   "community/hc/HC3_w2_face.png"
+  ],
+  "c_class": {
+   "c0": "MiniMaxH3ReferenceToVideo",
+   "c1": "MiniMaxH3ImageToVideo"
+  },
+  "wh": {
+   "c0": [
+    1344,
+    768
+   ],
+   "c1": [
+    1344,
+    768
+   ]
+  },
+  "c0_length": 124,
+  "ext_frames": [
+   119
+  ],
+  "sampler_custom_advanced": 2,
+  "sampler_name": [
+   "euler"
+  ],
+  "shift": {
+   "10.0": 3.0
+  },
+  "steps": [
+   10
+  ],
+  "soundscape": "overall_soundscape: Soft exterior room tone with distant surf, a light sea breeze and occasional far gull calls. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the stone as weight shifts, sharp inhales, heavy breathing, a",
+  "static_defects": [],
+  "node_count": 26,
+  "class_counts": {
+   "MiniMaxH3AppendContinuation": 1,
+   "VAELoader": 2,
+   "MiniMaxH3ReferenceToVideo": 1,
+   "MiniMaxH3ImageToVideo": 1,
+   "CLIPLoader": 1,
+   "VAEDecodeAudio": 1,
+   "VAEDecode": 1,
+   "LoadImage": 2,
+   "KSamplerSelect": 1,
+   "ModelAttentionBackend": 1,
+   "MiniMaxH3SigmaShift": 1,
+   "BlockSparseAttention": 1,
+   "CreateVideo": 1,
+   "RandomNoise": 1,
+   "BasicGuider": 2,
+   "SamplerCustomAdvanced": 2,
+   "BasicScheduler": 2,
+   "SaveVideo": 1,
+   "MiniMaxH3LatentTailGuide": 1,
+   "UNETLoader": 1,
+   "MiniMaxH3GuidedContinuationWindow": 1
+  }
+ },
+ {
+  "label": "BQ1b r3b (start still = Picture 1 body/scene, crops = face-only refs)",
+  "id": "ali147_pool_hc_r3b_s51130003",
+  "pick": "HC3 GI173",
+  "expected_frames": 243,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T17:19:31",
+  "finished": "2026-10-23T17:28:21",
+  "wall_min": 8.8,
+  "note": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 467.5,
+  "budget_cap_min": 615,
+  "job_start": [
+   "2026-10-23 17:20:19 CT JOB start ali147_pool_hc_r3b_s51130003 prompt_id=886bc3a9-caed-4f42-9efd-54be8a8b23ce"
+  ],
+  "job_end": [
+   "2026-10-23 17:28:20 CT JOB end ali147_pool_hc_r3b_s51130003 ok secs=481.9 file=C:\\AI\\community\\runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 17:28:21 CT OBJECTIVE ok ali147_pool_hc_r3b_s51130003 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3527348 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 3527348,
+  "mp4_sha256": "d125b8feb11e4aea368714c88cccd863cb40659a0117f7817d1ceb78a4f320f3",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "mp4_streams": {
+   "rc": 0,
+   "lines": [
+    "h264,video",
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 166134,
+  "m4a_sha256": "bceb4cd611f3276f2262d354aed8b8ac44936f957aa82df0fd80e7dcb7053885",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "graph_bytes": 18339,
+  "graph_sha256": "ce01686e03909d04be500bb8a186230011c71d12668d2a0fb4686f60809df9f7",
+  "seed": [
+   51130003
+  ],
+  "ref_slots": {
+   "c0": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "slots": [
+     {
+      "slot": "ref_images.ref_image_1",
+      "node": "img",
+      "image": "community/hc/HC3_lesbian_beach.jpg"
+     },
+     {
+      "slot": "ref_images.ref_image_2",
+      "node": "img2",
+      "image": "community/hc/HC3_w1_face.png"
+     },
+     {
+      "slot": "ref_images.ref_image_3",
+      "node": "img3",
+      "image": "community/hc/HC3_w2_face.png"
+     }
+    ],
+    "primary": null,
+    "ref_image_size": "match"
+   },
+   "c1": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "slots": [
+     {
+      "slot": "ref_images.ref_image_1",
+      "node": "img",
+      "image": "community/hc/HC3_lesbian_beach.jpg"
+     },
+     {
+      "slot": "ref_images.ref_image_2",
+      "node": "img2",
+      "image": "community/hc/HC3_w1_face.png"
+     },
+     {
+      "slot": "ref_images.ref_image_3",
+      "node": "img3",
+      "image": "community/hc/HC3_w2_face.png"
+     }
+    ],
+    "primary": null,
+    "ref_image_size": "match"
+   }
+  },
+  "loadimage": [
+   "community/hc/HC3_lesbian_beach.jpg",
+   "community/hc/HC3_w1_face.png",
+   "community/hc/HC3_w2_face.png"
+  ],
+  "c_class": {
+   "c0": "MiniMaxH3ReferenceToVideo",
+   "c1": "MiniMaxH3ReferenceToVideo"
+  },
+  "wh": {
+   "c0": [
+    1344,
+    768
+   ],
+   "c1": [
+    1344,
+    768
+   ]
+  },
+  "c0_length": 124,
+  "ext_frames": [
+   119
+  ],
+  "sampler_custom_advanced": 2,
+  "sampler_name": [
+   "euler"
+  ],
+  "shift": {
+   "10.0": 3.0
+  },
+  "steps": [
+   10
+  ],
+  "soundscape": "overall_soundscape: Soft exterior room tone with distant surf, a light sea breeze and occasional far gull calls. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the stone as weight shifts, sharp inhales, heavy breathing, a",
+  "static_defects": [],
+  "node_count": 27,
+  "class_counts": {
+   "MiniMaxH3AppendContinuation": 1,
+   "VAELoader": 2,
+   "MiniMaxH3ReferenceToVideo": 2,
+   "CLIPLoader": 1,
+   "VAEDecodeAudio": 1,
+   "VAEDecode": 1,
+   "LoadImage": 3,
+   "KSamplerSelect": 1,
+   "ModelAttentionBackend": 1,
+   "MiniMaxH3SigmaShift": 1,
+   "BlockSparseAttention": 1,
+   "CreateVideo": 1,
+   "RandomNoise": 1,
+   "BasicGuider": 2,
+   "SamplerCustomAdvanced": 2,
+   "BasicScheduler": 2,
+   "SaveVideo": 1,
+   "MiniMaxH3LatentTailGuide": 1,
+   "UNETLoader": 1,
+   "MiniMaxH3GuidedContinuationWindow": 1
+  }
+ }
+]
