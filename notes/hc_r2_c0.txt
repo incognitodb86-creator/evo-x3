@@ -1,0 +1,24 @@
+subject_definitions:
+<Subject 1> is the adult woman shown in the multi-view reference sheet in <Picture 2>, the blonde woman of the two-woman start still in <Picture 1>, a fictional adult aged 26, with long loose blonde hair, soft natural features, a slim natural figure with full natural breasts and gently rounded hips, and smooth lightly tanned skin with a natural matte texture.
+<Subject 2> is the adult woman shown in the multi-view reference sheet in <Picture 3>, the dark-haired woman of the two-woman start still in <Picture 1>, a fictional adult aged 25, with long dark hair, a soft feminine figure, natural waist, wide hips and full natural breasts, and warm smooth skin.
+<Picture 1> is the start still of <Subject 1> and <Subject 2> locked in a close passionate embrace.
+<Picture 2> is the multi-view reference sheet of <Subject 1> alone.
+<Picture 3> is the multi-view reference sheet of <Subject 2> alone.
+
+summary:
+[reference generation] The target video is the first 5 seconds of a 10-second single continuous shot of <Subject 1> and <Subject 2> in a warm bedroom at dusk. The shot uses <Picture 1> for the scene and <Picture 2> and <Picture 3> only as appearance guidance for the two women while freely composing the room, wardrobe and camera. The two women stand locked in an embrace, kiss with open mouths, and pull each other's clothing off, ending naked and falling back onto the bed. Explicit adult content, two consenting fictional adults. dynamic video, fluid natural motions.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - <Picture 2> keeps her identity, long blonde hair, slim natural figure, full natural breasts and lightly tanned skin; undressing and being touched are actions, not a change of identity.
+<Subject 2> (appears in [Shot 1]): fully_preserved - <Picture 3> keeps her identity, long dark hair, soft feminine figure, wide hips and warm skin; embracing and undressing are actions, not a change of identity.
+Their clothing from <Picture 1> is pulled off during the shot and lands on the bedroom rug, and both women are naked for the rest of the clip.
+
+detailed_description:
+The target video is a realistic, warmly lit bedroom scene, photorealistic skin and anatomy: natural matte skin with visible pores, fine vellus hair and only a soft natural sheen where it is damp, realistic natural body proportions, and dynamic video with fluid natural motions.
+[Shot 1] The shot opens on <Subject 1>, the blonde adult woman of <Picture 2>, and <Subject 2>, the dark-haired adult woman of <Picture 3>, standing locked chest to chest in a passionate embrace beside a rumpled bed in a bedroom lit by warm dusk light through a half-curtained window, a soft lamp glow filling the shadows. They wear the everyday clothing of <Picture 1>. The camera starts in a medium two-shot at chest height and drifts in slowly and steadily, low amplitude, no cuts. They kiss hard with open mouths, tongues moving, faces close, eyes half closed, hands roaming over each other's back and breasts through the fabric. <Subject 2> shrugs her own top off her shoulders and pulls the shirt of <Subject 1> up and over her head while <Subject 1> unfastens the front of <Subject 2>'s top. The garments slide off shoulders, breasts and hips with visible friction and drop to the rug. Both women end the shot naked: <Subject 1> with full natural bare breasts of soft realistic weight, smooth skin and round light-brown areolae with natural nipples; <Subject 2> with softer bare breasts, a natural waist and wide hips. Skin meets skin as they press together, hips shifting, knees parting, thighs brushing, one hand flat on the bed for balance. The camera keeps a stable focal plane on the two bodies with the window light raking across their skin and the room softly blurred behind them. The shot ends with the two naked women sinking down onto the edge of the bed, still kissing, foreheads touching, chests rising and falling, the discarded clothing on the rug.
+
+overall_soundscape:
+A quiet bedroom room tone with a low distant city hum and soft traffic outside the window, plus a faint bedside lamp buzz. Close, muffled intimate sound: wet kissing and tongue sounds, soft flesh thudding and skin of the bodies clapping together, fabric sliding off skin and landing softly on the rug, bedsprings creaking and bedding rustling as weight settles, deep breathing, and low moaning and gasping from both women, one low and one higher. No dialogue, no announcer, no counting, no crowd, no narration; the room stays otherwise silent.
+
+non_diegetic_music:
+N/A
