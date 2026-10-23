@@ -1,0 +1,101 @@
+PRE-PREQUEST READ-ONLY CHECK for ali147_pool_promptv2_seg3_s51080002
+arm graph C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/request.api.json bytes 12569 sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2
+
+== adults-only guard (the harness's own call: run_graph_job.py -> comm.guard_ok; a hit = exit 3 CLIP_SKIP)
+PASS guard_ok on c0.prompt (4358 chars, sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b)
+  note: contains the word 'pussy' x1 (adult anatomy; not a guard term)
+PASS guard_ok on c1.prompt (2903 chars, sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383)
+  note: contains the word 'pussy' x1 (adult anatomy; not a guard term)
+  note: contains the word 'nude' x1 (adult anatomy; not a guard term)
+PASS guard_ok on file v2_seg3_c0_r2v.txt
+PASS guard_ok on file v2_seg3_c1_t2va.txt
+prompt-bearing nodes: ["c0", "c1"]
+
+== job id gates parsed out of the LIVE ralph.ps1 (a hardcoded copy of a regex proves nothing)
+ralph.ps1 lines with -notmatch: 7, patterns found: 6
+  pattern \\__manager\\
+  pattern _work\\
+  pattern ^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$
+  pattern ^p[67]_[a-z0-9_]+$
+  pattern ^[a-z0-9_]+$
+  pattern ^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$
+PASS found the p7 id pattern(s) in ralph.ps1: 2
+PASS id ali147_pool_promptv2_seg3_s51080002 matches ^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$
+PASS id ali147_pool_promptv2_seg3_s51080002 matches ^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$
+
+== id-free gates (ralph.ps1: 'id already used' / 'outputs exist')
+PASS absent (id free): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.result.json
+PASS absent (id free): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.out
+PASS absent (id free): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.err.out
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/status.log
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/objective.json
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.mp4
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.api.json
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.mp4.json
+PASS absent (no prior render): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.result.json.failed-20261022
+arm dir contents (only request.api.json / graph_diff.txt / fairness.txt / PROOF.md may exist - Forge-writable):
+       10818  fairness.txt
+       13806  graph_diff.txt
+       12569  request.api.json
+PASS arm dir holds only Forge-writable names
+p7/JOB_REQUEST.json present now: False (a Request file is CONSUMED at exit -> p7/jobs/request_iter<NN>.json)
+
+== budget (live ralph-community/logs/p7_budget.json)
+p7_budget.json {"used_min": 342, "jobs": 24, "cap_min": 390, "job_cap": 27, "updated": "2026-10-22T22:36:32"}
+PASS used_min 342 < cap_min 390
+PASS jobs 24 < job_cap 27
+this job requests minutes=60 as a PRE-JOB gate only (ralph.ps1 clamps 30..180); the base run's own seg3 render time is read from its sidecar on the next lines.
+base seg3 sidecar keys ["antiburn", "arm", "beat", "chunk_secs", "comfy_output", "file", "finished", "h", "id", "image", "image_note", "mode", "prompt_id", "prompts", "run", "secs", "seed", "steps", "tag", "w"]
+  sidecar secs -> 816.0
+  sidecar seed -> 51080002
+  sidecar steps -> 10
+  sidecar w -> 768
+  sidecar h -> 1344
+  sidecar chunk_secs -> 10
+  sidecar antiburn -> null
+  sidecar mode -> "r2v"
+  sidecar image_note -> "adult woman with long straight blonde hair worn loose past her shoulders, blue eyes, slim and toned with lightly tanned skin, wearing a wet, sheer champagne-beige scoop-neck bikini top and matching s
+  sidecar comfy_output -> "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\p7_r2_c3_pmot_full_pool\\p7_r2_c3_pmot_full_pool_seg3_00001_.mp4"
+  sidecar file -> "C:\\AI\\community\\runs\\p7_r2_c3_pmot_full_pool\\p7_r2_c3_pmot_full_pool_seg3.mp4"
+  sidecar prompt_id -> "ca1c92dd-2371-4bf7-bf5f-ad224c5d4378"
+  sidecar run -> "p7_r2_c3_pmot_full_pool"
+  sidecar id -> "p7_r2_c3_pmot_full_pool_seg3"
+  sidecar tag -> "p7_r2_c3_pmot_full_pool_seg3"
+  sidecar arm -> "long_r2v"
+  sidecar beat -> "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor. Slow, smooth, continuous movement with nat
+  -> the base run's own seg3 render time is the control baseline for this arm (same graph, same seed).
+
+== class_type / input-key parity with the already-rendered base seg3 graph (no new node on this arm)
+PASS same 25 node keys as the base seg3 graph the harness already rendered
+PASS every class_type and input key set identical to the rendered source: []
+classes used: ["BasicGuider", "BasicScheduler", "BlockSparseAttention", "CLIPLoader", "CreateVideo", "KSamplerSelect", "LoadImage", "MiniMaxH3AppendContinuation", "MiniMaxH3GuidedContinuationWindow", "MiniMaxH3ImageToVideo", "MiniMaxH3LatentTailGuide", "MiniMaxH3ReferenceToVideo", "MiniMaxH3SigmaShift", "ModelAttentionBackend", "RandomNoise", "SamplerCustomAdvanced", "SaveVideo", "UNETLoader", "VAEDecode", "VAEDecodeAudio", "VAELoader"]
+(MiniMaxH3* built-ins are NOT in specs/extender_object_info.json - Extender nodes only - their proof of listability is class_type in ok-rendered graphs.)
+
+== LoadImage strings resolve inside ComfyUI\input
+PASS img image 'community/POOL_768x1344.png' resolves inside ComfyUI\input
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input\community\POOL_768x1344.png bytes 1354030 sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075
+  MEASURED sha256 <9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075> len 64
+  AGENTS.md POOL literal is 63 chars (9cf9ff95f2d6f2fb3882219a8d98995b673e78a8001d7a41af1755cc918d075) - comparing the 63-char prefix, never exact equality
+PASS POOL still hash is a full 64-char sha256 (PV2-0 lesson: assert len==64)
+  POOL hash values recorded in existing Forge notes/PROOF/fairness files: ["9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075"]
+PASS POOL still sha256 == the single value recorded across existing notes/PROOF/fairness files (data-to-data compare; the AGENTS.md literal is a 63-char truncation, so string equality against it is a FALSE fail)
+  (an absolute path outside input is invalid: nodes.py -> folder_paths.get_annotated_filepath requires is_within_directory)
+
+== settings held equal to the base seg3 graph
+PASS seed 51080002 in both (base seg3 seed)
+PASS c0.length 243 + win1.extension_frames 238 = 481
+PASS fps 24
+PASS VSA node identical
+PASS m_attn attention is 'comfy kitchen attention' (NOT 'vsa' - a hardcoded enum would be a FALSE fail)
+PASS filename_prefix routes output into community/ali147_pool_promptv2_seg3_s51080002
+PASS differing nodes exactly ['c0','c1','save'] (got ["c0", "c1", "save"])
+
+== sbs / fixed-frame stills (Max's, per the TASKS sbs rule)
+find runs -name 'sbs_*' = 2 file(s): ["C:/AI/community/runs\\ali147_pool_refsheet_b_s51080000\\sbs_refsheet_refsheetb.mp4", "C:/AI/community/runs\\ali147_pool_refsheet_s51080000\\sbs_fix1_refsheet.mp4"]
+expected at verify: sbs_base_seg3_promptv2.mp4 (base stitched 962-1442 | new 0-480) and full-res stills at
+new frames 200, 243, 300, 400, 480 = Max/harness files (run_graph_job.py has NO hstack path and its contact
+sheet samples only the +-1.5 s windows, so frames 200/300/400/480 are never covered by it).
+
+NOTE: the render itself (status.log JOB end ok, ffprobe 481/768x1344/24/audio, sha256, contact sheet, render secs)
+is verified in the NEXT iteration, per PROMPT.md: Forge may only REQUEST; the harness runs scripts/run_graph_job.py
+after this iteration exits. This line keeps '- [ ]'.
