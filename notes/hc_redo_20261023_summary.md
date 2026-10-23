@@ -1,5 +1,8 @@
 # ALI-163 hc redo - FINAL summary (2026-10-23, Forge)
 
+> **Correction 2026-10-23 (Max, 4:51 PM CT):** the 2:59 PM CT claim that the redos use the approved start still is wrong. r3r–r6 used face crops only; the start still was not in the graph (found 4:03 PM CT; fix in ALI-184 BQ1). The original lines below are kept.
+
+
 METHOD_ONLY. Review = contact sheet + objective checks only (ffprobe -count_packets, ffmpeg stream copy, sha256, status.log greps). NO vision judge was called on any output (superseded 2026-10-22). No quality redo was requested. **KEEP is Derrick's only.**
 
 Contact sheet: `C:/AI/community/notes/hc_redo_20261023_contact.png` (built by notes\ali163_hc_final_sheet.py from frames extracted by notes\ali163_hc_final_media.ps1 at t = 0.50 / 2.60 / 5.00 / 7.40 / 9.60 s; rows 0 and 1 use the SAME timestamps, so old clip 1 and new clip 1 line up frame-for-frame). Raw objective dump: notes\ali163_hc_final_objective.json (notes\ali163_hc_final_check.py).
@@ -106,7 +109,7 @@ Probe = `ffprobe -v error -select_streams v:0 -count_packets -show_entries strea
 - render secs: None (prompt_id None), finished None
 - result.json: ok=False rc=2 started 2026-10-23T14:14:42 finished 2026-10-23T14:15:36 wall_min=0.9 budget_used_min_at_finish=428.3 note="run_graph_job rc=2 (static check failed, see status.log)"
 - greps: 'JOB error' = 0, 'CLIP_SKIP' = 0 (both must be 0)
-- start still: HC3 GI173 (pair)
+- start still: HC3 GI173 (pair) [CORRECTION 2026-10-23 4:51 PM CT: the start still was NOT in this redo's graph; it loaded face crops only (found 4:03 PM CT; fix in ALI-184 BQ1)]
 - reference input(s) in graph: img = community/hc/HC3_w1_face.png, img2 = community/hc/HC3_w2_face.png (face crops, R4G2)
 - sound line: overall_soundscape: Soft exterior room tone with distant surf, a light sea breeze and occasional far gull calls. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the stone as weight shifts, sharp inhales, heavy breathing, a
 - graph canvas: width [1344, 1344], height [768, 768], extension_frames [119], seed [51130003]
@@ -123,7 +126,7 @@ Probe = `ffprobe -v error -select_streams v:0 -count_packets -show_entries strea
 - status.log: `2026-10-23 14:29:26 CT JOB end ali147_pool_hc_r4_s51130004 ok secs=416.2 file=C:\AI\community\runs\ali147_pool_hc_r4_s51130004\ali147_pool_hc_r4_s51130004.mp4`
 - status.log: `2026-10-23 14:29:26 CT OBJECTIVE ok ali147_pool_hc_r4_s51130004 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3712205 contact=C:\AI\community\runs\ali147_pool_hc_r4_s51130004\ali147_pool_hc_r4_s51130004_stills_contact.png`
 - greps: 'JOB error' = 0, 'CLIP_SKIP' = 0 (both must be 0)
-- start still: HC4 GI107 (solo)
+- start still: HC4 GI107 (solo) [CORRECTION 2026-10-23 4:51 PM CT: the start still was NOT in this redo's graph; it loaded face crops only (found 4:03 PM CT; fix in ALI-184 BQ1)]
 - reference input(s) in graph: img = community/hc/HC4_w1_face.png (face crop, R4G2)
 - sound line: overall_soundscape: A quiet interior room tone with a faint high-frequency window-air hiss. Rhythmic close sound: bare feet slapping and sliding on pale wood, cloth rustling as the sports top is pulled off and lands softly on the floor, palms sliding over wet skin, the barre creaking lightly under a hand, deep breathing and counted exhales, low moaning as her breathing quickens. One clear radio be
 - graph canvas: width [1344, 1344], height [768, 768], extension_frames [119], seed [51130004]
@@ -140,7 +143,7 @@ Probe = `ffprobe -v error -select_streams v:0 -count_packets -show_entries strea
 - status.log: `2026-10-23 14:41:14 CT JOB end ali147_pool_hc_r5_s51130005 ok secs=411.3 file=C:\AI\community\runs\ali147_pool_hc_r5_s51130005\ali147_pool_hc_r5_s51130005.mp4`
 - status.log: `2026-10-23 14:41:15 CT OBJECTIVE ok ali147_pool_hc_r5_s51130005 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=2543598 contact=C:\AI\community\runs\ali147_pool_hc_r5_s51130005\ali147_pool_hc_r5_s51130005_stills_contact.png`
 - greps: 'JOB error' = 0, 'CLIP_SKIP' = 0 (both must be 0)
-- start still: HC5 GI150 (solo)
+- start still: HC5 GI150 (solo) [CORRECTION 2026-10-23 4:51 PM CT: the start still was NOT in this redo's graph; it loaded face crops only (found 4:03 PM CT; fix in ALI-184 BQ1)]
 - reference input(s) in graph: img = community/hc/HC5_w1_face.png (face crop, R4G2)
 - sound line: overall_soundscape: Quiet interior room tone with a faint distant traffic hum through closed curtains. Close, wet sound: fingertips sliding on wet skin, soft skin-on-skin contact at the chest, the bedspread rustling and the mattress springs creaking as she lies back, sheet fabric gripping under a hand, a wet sliding sound at the point of contact, sharp inhales, heavy breathing, and a rising moan t
 - graph canvas: width [1344, 1344], height [768, 768], extension_frames [119], seed [51130005]
@@ -157,7 +160,7 @@ Probe = `ffprobe -v error -select_streams v:0 -count_packets -show_entries strea
 - status.log: `2026-10-23 14:52:53 CT JOB end ali147_pool_hc_r6_s51130006 ok secs=426.3 file=C:\AI\community\runs\ali147_pool_hc_r6_s51130006\ali147_pool_hc_r6_s51130006.mp4`
 - status.log: `2026-10-23 14:52:54 CT OBJECTIVE ok ali147_pool_hc_r6_s51130006 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3650591 contact=C:\AI\community\runs\ali147_pool_hc_r6_s51130006\ali147_pool_hc_r6_s51130006_stills_contact.png`
 - greps: 'JOB error' = 0, 'CLIP_SKIP' = 0 (both must be 0)
-- start still: HC6 BD076 (pair)
+- start still: HC6 BD076 (pair) [CORRECTION 2026-10-23 4:51 PM CT: the start still was NOT in this redo's graph; it loaded face crops only (found 4:03 PM CT; fix in ALI-184 BQ1)]
 - reference input(s) in graph: img = community/hc/HC6_w1_face.png, img2 = community/hc/HC6_w2_face.png (face crops, R4G2)
 - sound line: overall_soundscape: Late lounge room tone with distant slot chimes and muffled room murmur far away, ice ticking in a glass, low air-handling hum. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, vinyl squeaking as weight shifts, sharp inhales, 
 - graph canvas: width [1344, 1344], height [768, 768], extension_frames [119], seed [51130006]
