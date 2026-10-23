@@ -1,0 +1,605 @@
+[
+ {
+  "label": "clip1 OLD",
+  "id": "ali147_pool_hc_c1_s51100001",
+  "pick": "HC1 BD004",
+  "note": "old batch (481 f)",
+  "expected_frames": 481,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T09:33:40",
+  "finished": "2026-10-23T09:48:41",
+  "wall_min": 15,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 390.3,
+  "job_start": [
+   "2026-10-23 09:34:47 CT JOB start ali147_pool_hc_c1_s51100001 prompt_id=d48e6c13-7754-41c4-b032-c04d0eacd19d"
+  ],
+  "job_end": [
+   "2026-10-23 09:48:40 CT JOB end ali147_pool_hc_c1_s51100001 ok secs=832.5 file=C:\\AI\\community\\runs\\ali147_pool_hc_c1_s51100001\\ali147_pool_hc_c1_s51100001.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 09:48:40 CT OBJECTIVE ok ali147_pool_hc_c1_s51100001 frames=481 audio=True dur=20.042 bytes=5487624 contact=C:\\AI\\community\\runs\\ali147_pool_hc_c1_s51100001\\ali147_pool_hc_c1_s51100001_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 09:33:40 CT UNLOAD LLM coding_swift15_iq3s_esp",
+   "2026-10-23 09:34:47 CT JOB start ali147_pool_hc_c1_s51100001 prompt_id=d48e6c13-7754-41c4-b032-c04d0eacd19d",
+   "2026-10-23 09:48:40 CT JOB end ali147_pool_hc_c1_s51100001 ok secs=832.5 file=C:\\AI\\community\\runs\\ali147_pool_hc_c1_s51100001\\ali147_pool_hc_c1_s51100001.mp4",
+   "2026-10-23 09:48:40 CT OBJECTIVE ok ali147_pool_hc_c1_s51100001 frames=481 audio=True dur=20.042 bytes=5487624 contact=C:\\AI\\community\\runs\\ali147_pool_hc_c1_s51100001\\ali147_pool_hc_c1_s51100001_stills_contact.png",
+   "2026-10-23 09:48:41 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_c1_s51100001\\ali147_pool_hc_c1_s51100001.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 5487624,
+  "mp4_sha256": "4fafb9f7de06728f1c71615ffb036d75dccde446bd38c9dcb8cb506a6abc222c",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "481",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 832.5,
+  "finished_ct": "2026-10-23 09:48 CT",
+  "prompt_id": "d48e6c13-7754-41c4-b032-c04d0eacd19d",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_c1_s51100001\\ali147_pool_hc_c1_s51100001.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 326142,
+  "m4a_sha256": "acc67888bc8ebde30f9fc10d294def16aa94921c615160264461e70a4e7f7ce7",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "20.042000"
+   ],
+   "err": ""
+  },
+  "seed": [
+   51100001
+  ],
+  "refs": [
+   "community/hc/HC1_Two_women_in_studio_editorial.jpg"
+  ],
+  "soundscape": "overall_soundscape: Soft studio room tone with a low air-handling hum and a faint high-frequency studio-light buzz. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, sharp inhales, heavy breathing, and rising moans and gasps from both women, one ",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   238
+  ]
+ },
+ {
+  "label": "clip2 OLD",
+  "id": "ali147_pool_hc_c2_s51100002",
+  "pick": "HC2 BD007",
+  "note": "old batch (481 f)",
+  "expected_frames": 481,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T09:51:28",
+  "finished": "2026-10-23T10:06:07",
+  "wall_min": 14.6,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 404.9,
+  "job_start": [
+   "2026-10-23 09:51:59 CT JOB start ali147_pool_hc_c2_s51100002 prompt_id=8f8b405b-dec5-4bbc-ae3b-9833508b7804"
+  ],
+  "job_end": [
+   "2026-10-23 10:06:06 CT JOB end ali147_pool_hc_c2_s51100002 ok secs=847.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_c2_s51100002\\ali147_pool_hc_c2_s51100002.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 10:06:06 CT OBJECTIVE ok ali147_pool_hc_c2_s51100002 frames=481 audio=True dur=20.042 bytes=6509571 contact=C:\\AI\\community\\runs\\ali147_pool_hc_c2_s51100002\\ali147_pool_hc_c2_s51100002_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 09:51:28 CT UNLOAD LLM coding_swift15_iq3s_esp",
+   "2026-10-23 09:51:59 CT JOB start ali147_pool_hc_c2_s51100002 prompt_id=8f8b405b-dec5-4bbc-ae3b-9833508b7804",
+   "2026-10-23 10:06:06 CT JOB end ali147_pool_hc_c2_s51100002 ok secs=847.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_c2_s51100002\\ali147_pool_hc_c2_s51100002.mp4",
+   "2026-10-23 10:06:06 CT OBJECTIVE ok ali147_pool_hc_c2_s51100002 frames=481 audio=True dur=20.042 bytes=6509571 contact=C:\\AI\\community\\runs\\ali147_pool_hc_c2_s51100002\\ali147_pool_hc_c2_s51100002_stills_contact.png",
+   "2026-10-23 10:06:07 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_c2_s51100002\\ali147_pool_hc_c2_s51100002.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 6509571,
+  "mp4_sha256": "a9f68cc6881a7bc35c8d060fa096d797af077a36eea101d4942437c5f08dc234",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "481",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 847.3,
+  "finished_ct": "2026-10-23 10:06 CT",
+  "prompt_id": "8f8b405b-dec5-4bbc-ae3b-9833508b7804",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_c2_s51100002\\ali147_pool_hc_c2_s51100002.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 329467,
+  "m4a_sha256": "04c2c7a613c468b11028a4005cbf46e51e80263643556a3fbf148d583035bd76",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "20.042000"
+   ],
+   "err": ""
+  },
+  "seed": [
+   51100002
+  ],
+  "refs": [
+   "community/hc/HC2_Two_women_in_passionate_embrace.jpg"
+  ],
+  "soundscape": "overall_soundscape: A quiet bedroom room tone with a low distant city hum and soft traffic outside the window, plus a faint bedside lamp buzz. Close muffled intimate sound: wet kissing and tongue sounds, fabric sliding off skin and landing softly on the rug, bedsprings creaking and bedding rustling under shifting weight, skin sliding on skin, soft flesh thudding and skin of the bodies clapping tog",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   238
+  ]
+ },
+ {
+  "label": "clip1 NEW",
+  "id": "ali147_pool_hc_r1_s51130001",
+  "pick": "HC1 BD004",
+  "note": "R4",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T11:46:15",
+  "finished": "2026-10-23T11:55:41",
+  "wall_min": 9.4,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 417.9,
+  "job_start": [
+   "2026-10-23 11:46:53 CT JOB start ali147_pool_hc_r1_s51130001 prompt_id=3d2bf21f-d176-4e10-a9c7-fb807389404a"
+  ],
+  "job_end": [
+   "2026-10-23 11:55:40 CT JOB end ali147_pool_hc_r1_s51130001 ok secs=526.7 file=C:\\AI\\community\\runs\\ali147_pool_hc_r1_s51130001\\ali147_pool_hc_r1_s51130001.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 11:55:40 CT OBJECTIVE ok ali147_pool_hc_r1_s51130001 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=2774534 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r1_s51130001\\ali147_pool_hc_r1_s51130001_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 11:46:15 CT UNLOAD LLM coding_swift15_iq3s_esp",
+   "2026-10-23 11:46:53 CT JOB start ali147_pool_hc_r1_s51130001 prompt_id=3d2bf21f-d176-4e10-a9c7-fb807389404a",
+   "2026-10-23 11:55:40 CT JOB end ali147_pool_hc_r1_s51130001 ok secs=526.7 file=C:\\AI\\community\\runs\\ali147_pool_hc_r1_s51130001\\ali147_pool_hc_r1_s51130001.mp4",
+   "2026-10-23 11:55:40 CT OBJECTIVE ok ali147_pool_hc_r1_s51130001 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=2774534 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r1_s51130001\\ali147_pool_hc_r1_s51130001_stills_contact.png",
+   "2026-10-23 11:55:40 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r1_s51130001\\ali147_pool_hc_r1_s51130001.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 2774534,
+  "mp4_sha256": "b5f78becd371b800dd7e44051365f682df5ad0254266a6f635cb3ce726d9f9e8",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 526.7,
+  "finished_ct": "2026-10-23 11:55 CT",
+  "prompt_id": "3d2bf21f-d176-4e10-a9c7-fb807389404a",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r1_s51130001\\ali147_pool_hc_r1_s51130001.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 164299,
+  "m4a_sha256": "7b89d5a0a32940cca2ed1c8e5a08ca42f1f26905e3e266b4dad93d2a0dc6f1fd",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "seed": [
+   51130001
+  ],
+  "refs": [
+   "community/hc/HC1_Two_women_in_studio_editorial.jpg",
+   "community/hc/HC1_w1_blonde_00001_.png",
+   "community/hc/HC1_w2_darkhair_00001_.png"
+  ],
+  "soundscape": "overall_soundscape: Soft studio room tone with a low air-handling hum and a faint high-frequency studio-light buzz. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the floor as weight shifts, sharp inhales, heavy breathing",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ },
+ {
+  "label": "clip2 NEW",
+  "id": "ali147_pool_hc_r2_s51130002",
+  "pick": "HC2 BD007",
+  "note": "R5",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T11:59:43",
+  "finished": "2026-10-23T12:09:16",
+  "wall_min": 9.5,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 427.4,
+  "job_start": [
+   "2026-10-23 12:00:13 CT JOB start ali147_pool_hc_r2_s51130002 prompt_id=8f6267ef-36e8-4cc1-b095-60bfcb7bfba0"
+  ],
+  "job_end": [
+   "2026-10-23 12:09:15 CT JOB end ali147_pool_hc_r2_s51130002 ok secs=541.7 file=C:\\AI\\community\\runs\\ali147_pool_hc_r2_s51130002\\ali147_pool_hc_r2_s51130002.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 12:09:15 CT OBJECTIVE ok ali147_pool_hc_r2_s51130002 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3831791 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r2_s51130002\\ali147_pool_hc_r2_s51130002_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 11:59:44 CT UNLOAD LLM coding_swift15_iq3s_esp",
+   "2026-10-23 12:00:13 CT JOB start ali147_pool_hc_r2_s51130002 prompt_id=8f6267ef-36e8-4cc1-b095-60bfcb7bfba0",
+   "2026-10-23 12:09:15 CT JOB end ali147_pool_hc_r2_s51130002 ok secs=541.7 file=C:\\AI\\community\\runs\\ali147_pool_hc_r2_s51130002\\ali147_pool_hc_r2_s51130002.mp4",
+   "2026-10-23 12:09:15 CT OBJECTIVE ok ali147_pool_hc_r2_s51130002 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3831791 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r2_s51130002\\ali147_pool_hc_r2_s51130002_stills_contact.png",
+   "2026-10-23 12:09:16 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r2_s51130002\\ali147_pool_hc_r2_s51130002.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 3831791,
+  "mp4_sha256": "55cef572bab00c30c3ba5ec453a540384e7d63ef57d51cd5e6db9a5f09e70f53",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 541.7,
+  "finished_ct": "2026-10-23 12:09 CT",
+  "prompt_id": "8f6267ef-36e8-4cc1-b095-60bfcb7bfba0",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r2_s51130002\\ali147_pool_hc_r2_s51130002.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 166973,
+  "m4a_sha256": "2a52eaa076213904a257113cd80649640058040935e7d0f933d8d2064a1d27f3",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "seed": [
+   51130002
+  ],
+  "refs": [
+   "community/hc/HC2_Two_women_in_passionate_embrace.jpg",
+   "community/hc/HC2_w1_blonde_00001_.png",
+   "community/hc/HC2_w2_darkhair_00001_.png"
+  ],
+  "soundscape": "overall_soundscape: Soft bedroom room tone with a low distant city hum, soft traffic outside the window and a faint bedside lamp buzz. Intimate close sound: skin sliding on skin, repeated soft wet sliding sounds at the point of contact, soft flesh thudding and skin of the bodies clapping together as hips grind and rise into contact, a slick wet skin squeak on the mattress as weight shifts, bedspri",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ },
+ {
+  "label": "clip3",
+  "id": "ali147_pool_hc_r3_s51130003",
+  "pick": "HC3 GI173",
+  "note": "R6",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": false,
+  "rc": 2,
+  "started": "2026-10-23T14:14:42",
+  "finished": "2026-10-23T14:15:36",
+  "wall_min": 0.9,
+  "note_rc": "run_graph_job rc=2 (static check failed, see status.log)",
+  "budget_used_min": 428.3,
+  "job_start": [],
+  "job_end": [],
+  "objective_line": [],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 14:14:42 CT UNLOAD LLM coding_swift15_iq3s",
+   "2026-10-23 14:15:36 CT STATIC_FAIL ali147_pool_hc_r3_s51130003 c1.audio_vae: not an input of MiniMaxH3ImageToVideo"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r3_s51130003\\ali147_pool_hc_r3_s51130003.mp4",
+  "mp4_exists": false,
+  "seed": [
+   51130003
+  ],
+  "refs": [
+   "community/hc/HC3_w1_face.png",
+   "community/hc/HC3_w2_face.png"
+  ],
+  "soundscape": "overall_soundscape: Soft exterior room tone with distant surf, a light sea breeze and occasional far gull calls. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the stone as weight shifts, sharp inhales, heavy breathing, a",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ },
+ {
+  "label": "clip4",
+  "id": "ali147_pool_hc_r4_s51130004",
+  "pick": "HC4 GI107",
+  "note": "R7",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T14:22:01",
+  "finished": "2026-10-23T14:29:26",
+  "wall_min": 7.4,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 435.7,
+  "job_start": [
+   "2026-10-23 14:22:29 CT JOB start ali147_pool_hc_r4_s51130004 prompt_id=19d0276b-c9d1-4028-96a8-8f5b82eaa0a1"
+  ],
+  "job_end": [
+   "2026-10-23 14:29:26 CT JOB end ali147_pool_hc_r4_s51130004 ok secs=416.2 file=C:\\AI\\community\\runs\\ali147_pool_hc_r4_s51130004\\ali147_pool_hc_r4_s51130004.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 14:29:26 CT OBJECTIVE ok ali147_pool_hc_r4_s51130004 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3712205 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r4_s51130004\\ali147_pool_hc_r4_s51130004_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 14:22:01 CT UNLOAD LLM coding_swift15_iq3s",
+   "2026-10-23 14:22:29 CT JOB start ali147_pool_hc_r4_s51130004 prompt_id=19d0276b-c9d1-4028-96a8-8f5b82eaa0a1",
+   "2026-10-23 14:29:26 CT JOB end ali147_pool_hc_r4_s51130004 ok secs=416.2 file=C:\\AI\\community\\runs\\ali147_pool_hc_r4_s51130004\\ali147_pool_hc_r4_s51130004.mp4",
+   "2026-10-23 14:29:26 CT OBJECTIVE ok ali147_pool_hc_r4_s51130004 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3712205 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r4_s51130004\\ali147_pool_hc_r4_s51130004_stills_contact.png",
+   "2026-10-23 14:29:26 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r4_s51130004\\ali147_pool_hc_r4_s51130004.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 3712205,
+  "mp4_sha256": "c031b097817e0ca0473eb33205da5be8177b12de2a734124867c9460fb363332",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 416.2,
+  "finished_ct": "2026-10-23 14:29 CT",
+  "prompt_id": "19d0276b-c9d1-4028-96a8-8f5b82eaa0a1",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r4_s51130004\\ali147_pool_hc_r4_s51130004.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 165323,
+  "m4a_sha256": "7e9dba1e35b974486513ce9e757faa25eefdcd5969067e858e5eea818566ecff",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "seed": [
+   51130004
+  ],
+  "refs": [
+   "community/hc/HC4_w1_face.png"
+  ],
+  "soundscape": "overall_soundscape: A quiet interior room tone with a faint high-frequency window-air hiss. Rhythmic close sound: bare feet slapping and sliding on pale wood, cloth rustling as the sports top is pulled off and lands softly on the floor, palms sliding over wet skin, the barre creaking lightly under a hand, deep breathing and counted exhales, low moaning as her breathing quickens. One clear radio be",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ },
+ {
+  "label": "clip5",
+  "id": "ali147_pool_hc_r5_s51130005",
+  "pick": "HC5 GI150",
+  "note": "R8",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T14:33:45",
+  "finished": "2026-10-23T14:41:15",
+  "wall_min": 7.5,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 443.2,
+  "job_start": [
+   "2026-10-23 14:34:23 CT JOB start ali147_pool_hc_r5_s51130005 prompt_id=4342a681-e226-4d9d-9703-c70edb823d43"
+  ],
+  "job_end": [
+   "2026-10-23 14:41:14 CT JOB end ali147_pool_hc_r5_s51130005 ok secs=411.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 14:41:15 CT OBJECTIVE ok ali147_pool_hc_r5_s51130005 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=2543598 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 14:33:45 CT UNLOAD LLM coding_swift15_iq3s",
+   "2026-10-23 14:34:23 CT JOB start ali147_pool_hc_r5_s51130005 prompt_id=4342a681-e226-4d9d-9703-c70edb823d43",
+   "2026-10-23 14:41:14 CT JOB end ali147_pool_hc_r5_s51130005 ok secs=411.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005.mp4",
+   "2026-10-23 14:41:15 CT OBJECTIVE ok ali147_pool_hc_r5_s51130005 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=2543598 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005_stills_contact.png",
+   "2026-10-23 14:41:15 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 2543598,
+  "mp4_sha256": "87b8dd7f54f1702dacbb86a4f0c2560a030ec614ff1dc7065e3699da7ef5b625",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 411.3,
+  "finished_ct": "2026-10-23 14:41 CT",
+  "prompt_id": "4342a681-e226-4d9d-9703-c70edb823d43",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 165906,
+  "m4a_sha256": "222ba75e27106fc3cf81ce3af0c591426158e0cb51f3109e061ff2f94f1635bd",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "seed": [
+   51130005
+  ],
+  "refs": [
+   "community/hc/HC5_w1_face.png"
+  ],
+  "soundscape": "overall_soundscape: Quiet interior room tone with a faint distant traffic hum through closed curtains. Close, wet sound: fingertips sliding on wet skin, soft skin-on-skin contact at the chest, the bedspread rustling and the mattress springs creaking as she lies back, sheet fabric gripping under a hand, a wet sliding sound at the point of contact, sharp inhales, heavy breathing, and a rising moan t",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ },
+ {
+  "label": "clip6",
+  "id": "ali147_pool_hc_r6_s51130006",
+  "pick": "HC6 BD076",
+  "note": "R9",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T14:45:19",
+  "finished": "2026-10-23T14:52:54",
+  "wall_min": 7.6,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 450.8,
+  "job_start": [
+   "2026-10-23 14:45:47 CT JOB start ali147_pool_hc_r6_s51130006 prompt_id=9c9d0cb9-c26c-429d-917f-c206ac8df841"
+  ],
+  "job_end": [
+   "2026-10-23 14:52:53 CT JOB end ali147_pool_hc_r6_s51130006 ok secs=426.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_r6_s51130006\\ali147_pool_hc_r6_s51130006.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 14:52:54 CT OBJECTIVE ok ali147_pool_hc_r6_s51130006 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3650591 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r6_s51130006\\ali147_pool_hc_r6_s51130006_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 14:45:19 CT UNLOAD LLM coding_swift15_iq3s",
+   "2026-10-23 14:45:47 CT JOB start ali147_pool_hc_r6_s51130006 prompt_id=9c9d0cb9-c26c-429d-917f-c206ac8df841",
+   "2026-10-23 14:52:53 CT JOB end ali147_pool_hc_r6_s51130006 ok secs=426.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_r6_s51130006\\ali147_pool_hc_r6_s51130006.mp4",
+   "2026-10-23 14:52:54 CT OBJECTIVE ok ali147_pool_hc_r6_s51130006 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3650591 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r6_s51130006\\ali147_pool_hc_r6_s51130006_stills_contact.png",
+   "2026-10-23 14:52:54 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r6_s51130006\\ali147_pool_hc_r6_s51130006.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 3650591,
+  "mp4_sha256": "9f17cddfa1e72c70736d9ecc0c013648d189cb169eeb2c4c86524f34d938d911",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 426.3,
+  "finished_ct": "2026-10-23 14:52 CT",
+  "prompt_id": "9c9d0cb9-c26c-429d-917f-c206ac8df841",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r6_s51130006\\ali147_pool_hc_r6_s51130006.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 164660,
+  "m4a_sha256": "e468c9ee6023f8790e42129d466129028f7c0a972f9183fe4a58f0afa14bc002",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "seed": [
+   51130006
+  ],
+  "refs": [
+   "community/hc/HC6_w1_face.png",
+   "community/hc/HC6_w2_face.png"
+  ],
+  "soundscape": "overall_soundscape: Late lounge room tone with distant slot chimes and muffled room murmur far away, ice ticking in a glass, low air-handling hum. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, vinyl squeaking as weight shifts, sharp inhales, ",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ }
+]
