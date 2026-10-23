@@ -1,0 +1,574 @@
+// Run: node --test tests/pi/headless-guard.test.mjs   (Node >= 22.18 strips TypeScript types natively)
+import assert from "node:assert/strict";
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { test } from "node:test";
+
+// Redirect the spill directory before the extension computes it.
+const sandbox = mkdtempSync(join(tmpdir(), "pi-guard-test-"));
+process.env.TEMP = sandbox;
+process.env.TMP = sandbox;
+process.env.TMPDIR = sandbox;
+
+const ext = await import("../../.pi/extensions/headless-guard-and-truncate.ts");
+
+const blocked = (cmd, id) => {
+	const v = ext.checkCommand(cmd);
+	assert.ok(v, `expected block: ${cmd}`);
+	if (id) assert.equal(v.id, id, cmd);
+};
+const allowed = (cmd) => assert.equal(ext.checkCommand(cmd), null, `expected allow: ${cmd}`);
+
+test("denylist: destructive deletes", () => {
+	blocked("rm -rf build", "recursive-rm");
+	blocked("rm -fr /tmp/x", "recursive-rm");
+	blocked("rm -r dir", "recursive-rm");
+	blocked("rm --recursive dir", "recursive-rm");
+	blocked("cd x && rm -Rf y", "recursive-rm");
+	blocked("del /s /q C:\\temp\\*", "del-recursive");
+	blocked("DEL /F /S foo", "del-recursive");
+	blocked("rd /s /q out", "del-recursive");
+	blocked("Remove-Item -Recurse -Force .\\out", "remove-item-recurse");
+	blocked("Remove-Item .\\out -r", "remove-item-recurse");
+	blocked("ri out -Recurse", "remove-item-recurse");
+	allowed("rm file.txt");
+	allowed("rm -f file.txt");
+	allowed("docker run --rm -it image");
+	allowed("echo form -r x");
+	allowed("Remove-Item .\\one.txt -Force");
+});
+
+test("denylist: git push, format, disk tools", () => {
+	blocked("git push", "git-push");
+	blocked("git push origin main --force", "git-push");
+	blocked("git -C C:/AI/director push", "git-push");
+	blocked("git --no-pager push", "git-push");
+	blocked("echo ok; git push", "git-push");
+	allowed("git status");
+	allowed("git commit -m 'fix push handling'");
+	allowed("git log --grep=push");
+	blocked("format C:", "disk-format");
+	blocked("cmd /c format d: /q", "disk-format");
+	blocked("Format-Volume -DriveLetter D", "disk-format");
+	blocked("diskpart", "disk-format");
+	allowed("git log --format=%H");
+	allowed("Get-ChildItem | Format-Table Name");
+	allowed("python -c \"print('{:s}'.format('x'))\"");
+});
+
+test("denylist: raw /object_info vs /object_info/<NodeClass>", () => {
+	blocked("curl http://127.0.0.1:8188/object_info", "raw-object-info");
+	blocked("python -c \"import urllib.request as u;print(u.urlopen('http://127.0.0.1:8189/object_info').read())\"", "raw-object-info");
+	blocked("Invoke-RestMethod http://127.0.0.1:8188/object_info?x=1", "raw-object-info");
+	blocked("wget http://localhost:8188/object_info/", "raw-object-info");
+	// forgesafe 2026-10-20: single-node form is still fine for the object_info rule; on a local GPU port the gpu-endpoints rule now blocks it.
+	allowed("curl http://example.test/object_info/KSampler");
+	allowed("python -c \"u.urlopen(f'http://example.test/object_info/{n}')\"");
+	blocked("curl http://127.0.0.1:8188/object_info/KSampler", "gpu-endpoints");
+	blocked("python -c \"u.urlopen(f'http://127.0.0.1:8188/object_info/{n}')\"", "gpu-endpoints");
+	allowed("python scripts/comfy_inspect.py KSampler --port 8189");
+	allowed("grep -n object_info tools/comfy_probe.py");
+	allowed("cat C:/AI/director/object_info.json");
+});
+
+test("denylist: gpu-endpoints (llama-swap / ComfyUI / Strata ports, /upstream/, load/unload)", () => {
+	blocked("curl http://127.0.0.1:8080/v1/models", "gpu-endpoints");
+	blocked("curl -s 127.0.0.1:10002/queue", "gpu-endpoints");
+	blocked("Invoke-RestMethod http://localhost:8080/upstream/comfyui_auto/queue", "gpu-endpoints");
+	blocked("Invoke-WebRequest -UseBasicParsing http://127.0.0.1:10001/health", "gpu-endpoints");
+	blocked("python -c \"import urllib.request as u; u.urlopen('http://127.0.0.1:8080/unload')\"", "gpu-endpoints");
+	blocked("python -c \"import requests; requests.post('http://localhost:8188/prompt', json={})\"", "gpu-endpoints");
+	blocked("node -e \"fetch('http://localhost:8189/prompt')\"", "gpu-endpoints");
+	blocked("wget -qO- http://[::1]:8080/running", "gpu-endpoints");
+	blocked("curl http://alienpc:8080/unload", "gpu-endpoints");
+	blocked("curl http://127.0.0.1:9999/upstream/x", "gpu-endpoints");
+	blocked("echo test | grep comfyui_longvideo", "gpu-endpoints");
+	allowed("echo llama-swap listens on port 8080");
+	allowed("grep -n BASE C:/AI/community/scripts/comm.py");
+	allowed("cat C:/AI/director/config/load_order.md");
+	allowed("ls src/loaders/load.ts");
+	allowed("curl http://127.0.0.1:18080/x");
+	allowed("python scripts/comfy_inspect.py KSampler --port 8189");
+});
+
+test("denylist: gpu-endpoints (running render scripts, not compiling them)", () => {
+	blocked("python -u C:\\AI\\community\\scripts\\p6.py", "gpu-endpoints");
+	blocked("python C:/AI/community/scripts/p4.py", "gpu-endpoints");
+	blocked("\"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\.venv\\Scripts\\python.exe\" -u C:\\AI\\community\\scripts\\batch_queue.py x.json run1", "gpu-endpoints");
+	blocked("& $py -u C:\\AI\\community\\scripts\\sy_1min.py", "gpu-endpoints");
+	blocked("py -3 scripts/p3_appmode.py", "gpu-endpoints");
+	blocked("python3.12 scripts/p5_check.py", "gpu-endpoints");
+	blocked("Start-Process python -ArgumentList 'C:\\AI\\community\\scripts\\p6.py'", "gpu-endpoints");
+	blocked("powershell -NoProfile -File C:\\AI\\community\\scripts\\p6_variants.ps1", "gpu-endpoints");
+	blocked("& C:\\Users\\derek\\5slock\\ralph-community\\chain.ps1", "gpu-endpoints");
+	allowed("python -m py_compile C:\\AI\\community\\scripts\\p6.py");
+	allowed("python -m py_compile C:/AI/community/scripts/batch_queue.py");
+	allowed("python -m json.tool C:\\AI\\community\\shots\\p6_pairs.json");
+	allowed("cat C:/AI/community/scripts/p6.py");
+	allowed("grep -n step C:/AI/community/scripts/p6.py");
+	allowed("python C:/AI/community/scripts/settings_fix_check.py");
+	allowed("Get-Content C:\\AI\\community\\scripts\\p6_variants.ps1");
+	assert.equal(ext.evaluateToolCall("powershell", { command: "Invoke-WebRequest http://127.0.0.1:10002/queue" })?.id, "gpu-endpoints");
+	assert.equal(ext.evaluateToolCall("bash", { command: "python -u C:/AI/community/scripts/p6.py" })?.id, "gpu-endpoints");
+	assert.equal(ext.evaluateToolCall("powershell", { command: "python -m py_compile C:/AI/community/scripts/p6.py" }), null);
+});
+
+test("denylist: gpu-imports (python import of render/review modules) - p7lock", () => {
+	blocked("python -c \"import batch_queue; batch_queue.main()\"", "gpu-imports");
+	blocked("python -c \"import sys; sys.path.insert(0, r'C:\\AI\\community\\scripts'); import p6_review as r; r.main()\"", "gpu-imports");
+	blocked("python -c \"from comm import stage\"", "gpu-imports");
+	blocked("python -c \"import os, json, prompt_writer\"", "gpu-imports");
+	blocked("python -c \"from scripts import sy_1min\"", "gpu-imports");
+	blocked("python -c \"import scripts.p6 as p\"", "gpu-imports");
+	blocked("& $py -c \"import p4\"", "gpu-imports");
+	blocked("py -3 -c \"__import__('batch_queue')\"", "gpu-imports");
+	blocked("python -c \"import importlib; importlib.import_module('p6_review')\"", "gpu-imports");
+	blocked("python -c \"import runpy; runpy.run_path('C:/AI/community/scripts/batch_queue.py')\"", "gpu-imports");
+	blocked("python -m p6_review rank --preset p6", "gpu-imports");
+	blocked("python -m scripts.batch_queue x.json run1", "gpu-imports");
+	blocked("C:\\Python312\\python.exe -c \"import comm\"", "gpu-imports");
+	blocked("\"import batch_queue\" | python -", "gpu-imports");
+	blocked("echo from comm import x | py -3 -", "gpu-imports");
+	blocked("python - <<EOF\nimport p6_review\nEOF", "gpu-imports");
+	assert.equal(ext.evaluateToolCall("powershell", { command: "python -c \"import batch_queue\"" })?.id, "gpu-imports");
+	allowed("python -m pytest C:/AI/community/scripts/tests/test_p6_review.py -q");
+	allowed("python -m py_compile C:/AI/community/scripts/comm.py");
+	allowed("python -m json.tool C:/AI/community/p7/JOB_REQUEST.json");
+	allowed("python -c \"import json; print(json.load(open('C:/AI/community/runs/P6_RANKING.json'))['top3'])\"");
+	allowed("python -c \"import common, os\"");
+	allowed("rg -n \"import comm\" C:/AI/community/scripts");
+	allowed("Select-String -Path C:\\AI\\community\\scripts\\p6.py -Pattern 'from comm import'");
+	allowed("git commit -m \"U3: import comm docs\"");
+});
+
+test("denylist: .env* edits only", () => {
+	blocked("echo SECRET=1 > .env", "env-file-edit");
+	blocked("echo X>>.env.local", "env-file-edit");
+	blocked("echo x | tee -a D:/proj/.env", "env-file-edit");
+	blocked("sed -i 's/a/b/' .env.production", "env-file-edit");
+	blocked("Set-Content -Path .env -Value x", "env-file-edit");
+	blocked("Add-Content .\\.env 'A=1'", "env-file-edit");
+	blocked("cp .env.example .env", "env-file-edit");
+	blocked("mv .env .env.bak", "env-file-edit");
+	blocked("rm .env", "env-file-edit");
+	allowed("cat .env.example");
+	allowed("ls .env/Scripts");
+	allowed("echo hello > environment.txt");
+	allowed("python -m venv .venv && .venv/Scripts/activate");
+});
+
+test("write/edit: .env* paths and raw object_info in code", () => {
+	assert.equal(ext.evaluateToolCall("write", { path: "D:/proj/.env", content: "A=1" })?.id, "env-file-edit");
+	assert.equal(ext.evaluateToolCall("edit", { path: ".env.local", edits: [{ oldText: "a", newText: "b" }] })?.id, "env-file-edit");
+	assert.equal(ext.evaluateToolCall("write", { path: "src/x.py", content: "get('/object_info')" })?.id, "raw-object-info");
+	assert.equal(ext.evaluateToolCall("edit", { path: "src/x.py", edits: [{ oldText: "a", newText: "u + '/object_info'" }] })?.id, "raw-object-info");
+	assert.equal(ext.evaluateToolCall("write", { path: "src/x.py", content: "get('/object_info/KSampler')" }), null);
+	assert.equal(ext.evaluateToolCall("write", { path: "notes.md", content: "never GET /object_info" }), null);
+	assert.equal(ext.evaluateToolCall("write", { path: "scripts/comfy_inspect.py", content: "get('/object_info')" }), null);
+	assert.equal(ext.evaluateToolCall("edit", { path: "src/x.py", edits: [{ oldText: "/object_info", newText: "ok" }] }), null);
+	assert.equal(ext.evaluateToolCall("write", { path: "src/env_utils.py", content: "x=1" }), null);
+	assert.equal(ext.evaluateToolCall("read", { path: ".env" }), null);
+});
+
+test("block reason is a plain-text message for the model", () => {
+	const v = ext.evaluateToolCall("bash", { command: "git push" });
+	const msg = ext.blockMessage(v);
+	assert.match(msg, /^Blocked by headless guard \[git-push\]/);
+	assert.match(msg, /Do not retry the same command/);
+});
+
+test("truncation: under the limits nothing changes", () => {
+	assert.equal(ext.exceedsLimits("a\nb\nc"), false);
+	assert.equal(ext.exceedsLimits("x".repeat(32 * 1024)), false);
+	assert.equal(ext.exceedsLimits("l\n".repeat(1000)), false);
+});
+
+test("truncation: over 1000 lines / over 32 KB", () => {
+	assert.equal(ext.exceedsLimits("l\n".repeat(1001)), true);
+	assert.equal(ext.exceedsLimits("x".repeat(32 * 1024 + 1)), true);
+});
+
+test("truncation: shape is first 40 + last 40 + path, and stays small", () => {
+	const text = Array.from({ length: 5000 }, (_, i) => `line-${i + 1} ${"y".repeat(60)}`).join("\n");
+	const out = ext.formatTruncated(text, "C:\\tmp\\full.txt");
+	assert.ok(out.includes("C:\\tmp\\full.txt"));
+	assert.ok(out.includes("line-1 ") && out.includes("line-40 "));
+	assert.ok(!out.includes("line-41 ") && !out.includes("line-4960 "));
+	assert.ok(out.includes("line-4961 ") && out.includes("line-5000 "));
+	assert.ok(out.includes("4920 lines omitted"));
+	assert.ok(Buffer.byteLength(out) < 32 * 1024);
+});
+
+test("truncation: one gigantic line is clipped (no 32 KB escape hatch)", () => {
+	const text = `{"blob":"${"z".repeat(2_000_000)}"}`;
+	const out = ext.formatTruncated(text, "C:\\tmp\\full.txt");
+	assert.ok(Buffer.byteLength(out) < 4096);
+	assert.ok(out.includes("chars]"));
+});
+
+test("spill: full output is written to %TEMP%/pi-tool-outputs/<uuid>.txt", () => {
+	const text = "a".repeat(100_000);
+	const path = ext.spillFull(text);
+	assert.match(path, /pi-tool-outputs[\\/][0-9a-f-]{36}\.txt$/);
+	assert.ok(path.startsWith(sandbox));
+	assert.equal(readFileSync(path, "utf8"), text);
+});
+
+function fakePi() {
+	const handlers = {};
+	return {
+		handlers,
+		on(name, fn) {
+			(handlers[name] ??= []).push(fn);
+			return () => {};
+		},
+	};
+}
+
+test("handlers: tool_call blocks with a reason and passes allowed calls", async () => {
+	const pi = fakePi();
+	ext.default(pi);
+	const ctx = { hasUI: true };
+	const deny = await pi.handlers.tool_call[0]({ toolName: "bash", input: { command: "rm -rf /" } }, ctx);
+	assert.equal(deny.block, true);
+	assert.match(deny.reason, /recursive-rm/);
+	const ok = await pi.handlers.tool_call[0]({ toolName: "bash", input: { command: "git status" } }, ctx);
+	assert.equal(ok, undefined);
+});
+
+test("handlers: tool_result truncates, keeps images, spills file", async () => {
+	const pi = fakePi();
+	ext.default(pi);
+	const big = Array.from({ length: 3000 }, (_, i) => `row ${i}`).join("\n");
+	const image = { type: "image", data: "AAAA", mimeType: "image/png" };
+	const res = await pi.handlers.tool_result[0]({ toolName: "bash", input: {}, content: [{ type: "text", text: big }, image] }, {});
+	assert.ok(res.content[0].text.includes("TOOL OUTPUT TRUNCATED"));
+	assert.deepEqual(res.content[1], image);
+	const path = /Full output saved to: (.+)/.exec(res.content[0].text)[1].trim();
+	assert.ok(existsSync(path));
+	assert.equal(readFileSync(path, "utf8"), big);
+	assert.equal(await pi.handlers.tool_result[0]({ toolName: "bash", input: {}, content: [{ type: "text", text: "small" }] }, {}), undefined);
+});
+
+test("handlers: re-reading a spill file does not create another spill", async () => {
+	const pi = fakePi();
+	ext.default(pi);
+	const spilled = ext.spillFull("q\n".repeat(5000));
+	const res = await pi.handlers.tool_result[0]({ toolName: "read", input: { path: spilled }, content: [{ type: "text", text: "q\n".repeat(5000) }] }, {});
+	assert.ok(res.content[0].text.includes(spilled));
+});
+
+test("handlers: headless run enables non-persistent auto-approve and env defaults; UI run does not", async () => {
+	const calls = [];
+	let yolo = false;
+	globalThis.__piPermissionSystem = {
+		getYoloMode: () => yolo,
+		setYoloMode: (enabled, options) => {
+			yolo = enabled;
+			calls.push({ enabled, options });
+			return { yoloMode: enabled };
+		},
+	};
+	delete process.env.GIT_TERMINAL_PROMPT;
+	const pi = fakePi();
+	ext.default(pi);
+	await pi.handlers.session_start[0]({}, { hasUI: true });
+	assert.equal(calls.length, 0);
+	assert.equal(process.env.GIT_TERMINAL_PROMPT, undefined);
+	await pi.handlers.session_start[0]({}, { hasUI: false });
+	assert.equal(calls.length, 1);
+	assert.equal(calls[0].enabled, true);
+	assert.equal(calls[0].options.persist, false);
+	assert.equal(process.env.GIT_TERMINAL_PROMPT, "0");
+	await pi.handlers.tool_call[0]({ toolName: "read", input: {} }, { hasUI: false });
+	assert.equal(calls.length, 1, "already on: no second call");
+	delete globalThis.__piPermissionSystem;
+});
+
+test("handlers: PI_HEADLESS_GUARD_AUTO_APPROVE=0 opts out", async () => {
+	let called = false;
+	globalThis.__piPermissionSystem = { getYoloMode: () => false, setYoloMode: () => ((called = true), { yoloMode: true }) };
+	process.env.PI_HEADLESS_GUARD_AUTO_APPROVE = "0";
+	const pi = fakePi();
+	ext.default(pi);
+	await pi.handlers.session_start[0]({}, { hasUI: false });
+	assert.equal(called, false);
+	delete process.env.PI_HEADLESS_GUARD_AUTO_APPROVE;
+	delete globalThis.__piPermissionSystem;
+});
+
+// ---------------------------------------------------------------------------------------------------------------
+// ALI-160 K4 (2026-10-23): headless command allowlist (headless-guard-allowlist.json)
+// ---------------------------------------------------------------------------------------------------------------
+const pp = await import("../../.pi/extensions/protected-paths.ts");
+const H = { headless: true, cwd: "C:\\Users\\derek\\5slock" };
+const ps = (cmd) => ext.evaluateToolCall("powershell", { command: cmd }, H);
+const sh = (cmd) => ext.evaluateToolCall("bash", { command: cmd }, H);
+
+// community 2026-10-23 (Derrick 11:49 AM CT "Yes, switch Forge to the community permissions (1, 2, 4, 5)"):
+// mode "denylist" replaces the per-command allowlist; hazards + argument rules for git/curl/copy-item/ffmpeg/certutil/find/powershell.
+test("community: the JSON loads in denylist mode with the web domains", () => {
+	const al = ext.loadAllowlist();
+	assert.deepEqual(al.tools, ["bash", "powershell"]);
+	assert.equal(al.mode, "denylist");
+	for (const d of ["github.com", "huggingface.co", "docs.comfy.org", "civitai.com", "reddit.com"]) assert.ok(al.web.domains.includes(d), d);
+	assert.ok(al.git.denySubcommands.includes("push") && al.git.denySubcommands.includes("reset"));
+});
+
+test("community commands: ordinary commands are allowed (allowed case)", () => {
+	assert.equal(ps("Get-ChildItem C:\\AI\\community\\notes | Select-Object -First 3"), null);
+	assert.equal(ps("Move-Item C:\\AI\\community\\notes\\a.txt C:\\AI\\community\\notes\\old\\a.txt"), null);
+	assert.equal(ps("Remove-Item C:\\AI\\community\\notes\\scratch.txt"), null);
+	assert.equal(ps("python C:\\AI\\community\\notes\\check.py; node -e 1"), null);
+	assert.equal(sh("node -e 1 && ls C:/AI/ComfyUI/custom_nodes | head -5"), null);
+	assert.equal(sh("python - <<'PY'\nimport json\nprint(json.dumps({'a': 1}))\nPY"), null);
+	assert.equal(sh("certutil.exe -hashfile \"C:\\AI\\community\\runs\\a.mp4\" SHA256"), null);
+	assert.equal(ps("& 'C:\\ffmpeg\\bin\\ffprobe.exe' -v error -show_streams x.mp4"), null);
+});
+
+test("community commands: hazards are blocked (blocked case)", () => {
+	assert.equal(ps("Remove-Item -Recurse -Force C:\\AI\\community\\x")?.id, "remove-item-recurse");
+	assert.equal(sh("rm -rf C:/AI/community/x")?.id, "recursive-rm");
+	assert.equal(ps("iex 'Get-Date'")?.id, "hazard-command");
+	assert.equal(ps("Invoke-Expression (Get-Content a.ps1 -Raw)")?.id, "hazard-command");
+	assert.equal(ps("Get-Date; Start-Process notepad")?.id, "hazard-command");
+	assert.equal(ps("Stop-Process -Name node")?.id, "hazard-command");
+	assert.equal(sh("bash -c 'git reset --hard'")?.id, "git-reset");
+	assert.equal(sh("cmd /c dir")?.id, "hazard-command");
+	assert.equal(ps("powershell -EncodedCommand ZQBjAGgAbwA=")?.id, "encoded-command");
+	assert.equal(ps("& $py -c 'print(1)'")?.id, "call-variable");
+	assert.equal(ps("[System.Diagnostics.Process]::Start('cmd')")?.id, "dotnet-exec");
+	assert.equal(ps("Get-Content D:\\Apps\\finance-app\\.env.local")?.id, "finance-paths");
+	assert.equal(ps("Get-ChildItem C:\\Apps\\x")?.id, "finance-paths");
+	assert.equal(sh("curl -s http://127.0.0.1:3100/api")?.id, "finance-paths");
+	assert.equal(ps("python -m pip install requests")?.id, "package-install");
+	assert.equal(sh("npm install left-pad")?.id, "package-install");
+	assert.equal(ps("Set-Content C:\\Users\\derek\\5slock\\approved_characters\\POOL\\x.txt x")?.id, "approved-write");
+	assert.equal(ps("Rename-Item C:\\Users\\derek\\5slock\\approved_characters\\POOL\\a.jpg b.jpg")?.id, "approved-write");
+	assert.equal(ps("python -u C:\\AI\\community\\scripts\\p6.py")?.id, "gpu-endpoints");
+	assert.equal(ps("python -c \"import batch_queue\"")?.id, "gpu-imports");
+	assert.equal(sh("curl -s http://127.0.0.1:8080/upstream/coding_swift15_iq3s/v1/models")?.id, "gpu-endpoints");
+	assert.equal(sh("powershell -NoProfile -Command \"Remove-Item -Recurse C:/AI/x\"")?.id, "remove-item-recurse");
+});
+
+test("community web: curl GET to the docs domains (allowed) vs POST / upload / other domains (blocked)", () => {
+	// allowed
+	assert.equal(ps("curl.exe -sL https://github.com/Comfy-Org/ComfyUI/blob/master/README.md"), null);
+	assert.equal(sh("curl -sSL --max-time 30 https://huggingface.co/api/models?search=wan2.2"), null);
+	assert.equal(sh("curl -s https://raw.githubusercontent.com/kijai/ComfyUI-WanVideoWrapper/main/readme.md"), null);
+	assert.equal(sh("curl -sI https://docs.comfy.org/tutorials/video/wan/wan2_2"), null);
+	assert.equal(sh("curl -s https://www.reddit.com/r/comfyui/top.json?t=week"), null);
+	assert.equal(sh("curl -sL -o C:/AI/community/notes/web/civitai.html https://civitai.com/articles/1"), null);
+	// blocked
+	assert.equal(sh("curl -s -X POST https://github.com/x")?.id, "curl-method");
+	assert.equal(sh("curl -s -d a=1 https://github.com/x")?.id, "curl-arg");
+	assert.equal(sh("curl -s --data-binary @C:/AI/community/notes/progress.md https://github.com/x")?.id, "curl-arg");
+	assert.equal(sh("curl -F f=@x.png https://huggingface.co/x")?.id, "curl-arg");
+	assert.equal(sh("curl -T x.png https://huggingface.co/x")?.id, "curl-arg");
+	assert.equal(sh("curl -H 'Authorization: Bearer x' https://huggingface.co/x")?.id, "curl-arg");
+	assert.equal(sh("curl -s https://example.com/")?.id, "curl-domain");
+	assert.equal(sh("curl -s https://github.com.evil.io/")?.id, "curl-domain");
+	assert.equal(sh("curl -s https://user@github.com/")?.id, "curl-url");
+	assert.equal(sh("curl -s file:///C:/Users/derek/.pi/agent/auth.json")?.id, "curl-url");
+	assert.equal(sh("curl -sL -o C:/Users/derek/x.ps1 https://github.com/x")?.id, "curl-arg");
+	assert.equal(ps("curl https://github.com/x")?.id, "hazard-command", "bare curl in PowerShell 5 is Invoke-WebRequest");
+	assert.equal(ps("Invoke-WebRequest https://github.com -Method Post")?.id, "hazard-command");
+	assert.equal(sh("wget https://github.com/x")?.id, "hazard-command");
+	assert.equal(sh("certutil -urlcache -f http://x y")?.id, "certutil");
+});
+
+test("community git: commit with a real message (allowed) vs push / reset / weak commit (blocked)", () => {
+	// allowed
+	assert.equal(ps("git -C C:/AI/community status; git -C C:/AI/community log -3 --oneline"), null);
+	assert.equal(ps("git -C C:/AI/community add scripts/p6_graph.py; git -C C:/AI/community commit -m \"R3: fix p6 sheet path after tests pass\""), null);
+	assert.equal(sh("git add scripts/tests/test_p6.py && git commit -m 'R3: add p6 path test (pytest green)'"), null);
+	// blocked
+	assert.equal(sh("git push")?.id, "git-push");
+	assert.equal(ps("git -C C:/AI/community push origin main")?.id, "git-push");
+	assert.equal(ps("git -C C:/AI/community reset --hard")?.id, "git-reset");
+	assert.equal(ps("git reset HEAD~1")?.id, "git-reset");
+	assert.equal(ps("git -C C:/AI/community checkout -- scripts/p6.py")?.id, "git-subcommand");
+	assert.equal(ps("git clean -fdx")?.id, "git-subcommand");
+	assert.equal(ps("git commit -m x")?.id, "git-commit");
+	assert.equal(ps("git commit -m wip")?.id, "git-commit");
+	assert.equal(ps("git commit")?.id, "git-commit");
+	assert.equal(ps("git commit --amend -m \"R3: fix p6 sheet path again\"")?.id, "git-commit");
+	assert.equal(ps("git commit --no-verify -m \"R3: fix p6 sheet path again\"")?.id, "git-commit");
+});
+
+test("community .env: .env* edits blocked; reading other files and editing non-env files allowed", () => {
+	assert.equal(ps("Set-Content C:\\AI\\community\\notes\\progress2.md 'x'"), null);
+	assert.equal(ps("Add-Content C:\\AI\\community\\.env 'X=1'")?.id, "env-file-edit");
+	assert.equal(sh("echo X=1 >> C:/AI/director/.env.local")?.id, "env-file-edit");
+	assert.ok(["env-file-edit", "secret-path"].includes(ext.evaluateToolCall("edit", { path: "C:\\AI\\community\\.env", edits: [] }, H)?.id), "edit of .env is blocked");
+	assert.equal(ext.evaluateToolCall("write", { path: "C:\\AI\\community\\notes\\a.md", content: "x" }, H), null);
+});
+
+test("community scope: loop repo commits, secrets and finance (Forge) vs Household's C:/Apps session (unchanged allowlist)", () => {
+	assert.equal(ps("git -C C:/Users/derek/5slock/ralph-community commit -m \"R3: tick the sheet task now\"")?.id, "git-loop-repo");
+	assert.equal(ps("git -C C:\\Users\\derek\\5slock\\ralph-community add TASKS.md")?.id, "git-loop-repo");
+	assert.equal(ps("git add C:/AI/community/.env")?.id, "env-file-edit");
+	assert.equal(ext.evaluateToolCall("read", { path: "C:\\AI\\community\\.env" }, H)?.id, "secret-path");
+	assert.equal(ext.evaluateToolCall("read", { path: "C:/Users/derek/.pi/agent/auth.json" }, H)?.id, "secret-path");
+	assert.equal(ext.evaluateToolCall("read", { path: "D:/Apps/finance-app/src/a.ts" }, H)?.id, "finance-paths");
+	assert.equal(ext.evaluateToolCall("read", { path: "C:/AI/ComfyUI/custom_nodes/x/nodes.py" }, H), null);
+	assert.equal(ext.evaluateToolCall("read", { path: "C:/AI/director/config/llama-swap.yaml" }, H), null, "reads widen");
+	assert.equal(ext.evaluateToolCall("edit", { path: "C:/AI/director/config/llama-swap.yaml", edits: [] }, H)?.id, "forge-write-scope", "writes do not");
+	assert.equal(ext.evaluateToolCall("write", { path: "C:/AI/strata-0.2.2/x.json", content: "x" }, H)?.id, "forge-write-scope");
+	assert.equal(ext.evaluateToolCall("write", { path: "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/x/nodes.py", content: "x" }, H)?.id, "forge-write-scope");
+	assert.equal(ext.evaluateToolCall("write", { path: "C:/AI/community/notes/x.md", content: "x" }, H), null);
+	assert.equal(ext.evaluateToolCall("read", { path: "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/x/nodes.py" }, H), null);
+	const HH = { headless: true, cwd: "C:\\Apps\\finance-app-rebuild" };
+	assert.equal(ext.evaluateToolCall("powershell", { command: "Get-ChildItem C:\\Apps\\finance-app-rebuild\\src" }, HH), null, "Household session is not finance-blocked");
+	assert.equal(ext.evaluateToolCall("powershell", { command: "Start-Process notepad" }, HH)?.id, "not-allowlisted", "Household session keeps the K4 allowlist");
+	assert.equal(ext.evaluateToolCall("read", { path: "C:/Apps/finance-app-rebuild/src/a.ts" }, HH), null);
+});
+
+test("trial 12:14 PM CT: infinite-creation + Continuum installs/clones (allowed) vs other installs (blocked)", () => {
+	const ic = "C:\\AI\\community\\tools\\infinite-creation";
+	const cn = "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\custom_nodes";
+	assert.equal(ps(`git clone https://github.com/SwotAtmk/infinite-creation ${ic}`), null);
+	assert.equal(ps(`git clone --depth 1 https://github.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum ${cn}\\ComfyUI-H3-Continuum`), null);
+	assert.equal(ps(`Set-Location ${ic}; pnpm install`), null);
+	assert.equal(ps(`pnpm -C ${ic} install`), null);
+	assert.equal(ps(`pnpm -C ${ic} run install:skills`), null);
+	assert.equal(ps("npm install -g pnpm@9"), null);
+	assert.equal(ps(`& 'C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\python_embeded\\python.exe' -m pip install -r ${cn}\\ComfyUI-H3-Continuum\\requirements.txt`), null);
+	assert.equal(ps("pnpm install")?.id, "package-install", "pnpm only inside the infinite-creation folder");
+	assert.equal(ps(`Set-Location C:\\AI\\community; pnpm install`)?.id, "package-install");
+	assert.equal(ps("python -m pip install torch")?.id, "package-install");
+	assert.equal(ps("npm install -g left-pad")?.id, "package-install");
+	assert.equal(ps("pnpm -C C:\\AI\\community install")?.id, "package-install");
+	assert.equal(ps("npm -g install left-pad")?.id, "package-install");
+	assert.equal(ps("winget install OpenJS.NodeJS")?.id, "package-install");
+	assert.equal(ps(`git clone https://example.com/x.git ${ic}`)?.id, "git-clone");
+	assert.equal(ps("git clone https://github.com/SwotAtmk/infinite-creation C:\\Temp\\ic")?.id, "git-clone");
+	assert.equal(ps("git clone https://github.com/SwotAtmk/infinite-creation")?.id, "git-clone");
+	assert.equal(ps("git -C C:/AI/community remote add evil https://example.com/x")?.id, "git-remote");
+});
+
+test("community: protected-paths still blocks the loop harness (ralph.ps1)", () => {
+	const ralph = "C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1";
+	assert.equal(ps(`Set-Content -Path ${ralph} -Value x`), null);
+	assert.ok(pp.evaluate("powershell", { command: `Set-Content -Path ${ralph} -Value x` }, H.cwd), "protected-paths blocks the ralph.ps1 shell write");
+	assert.ok(pp.evaluate("edit", { path: ralph, edits: [] }, H.cwd), "protected-paths blocks the ralph.ps1 edit");
+	assert.ok(pp.evaluate("write", { path: ralph, content: "x" }, H.cwd), "protected-paths blocks the ralph.ps1 write");
+});
+
+test("community handlers: headless tool_call enforces hazards; UI runs are unchanged", async () => {
+	const pi = fakePi();
+	ext.default(pi);
+	const headless = { hasUI: false, cwd: "C:\\Users\\derek\\5slock" };
+	const deny = await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Start-Process notepad" } }, headless);
+	assert.equal(deny.block, true);
+	assert.match(deny.reason, /\[hazard-command\]/);
+	assert.equal(await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Move-Item C:\\AI\\community\\notes\\a.txt C:\\AI\\community\\notes\\b.txt" } }, headless), undefined);
+	assert.equal(await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Start-Process notepad" } }, { hasUI: true }), undefined);
+});
+
+// ALI-163 (2026-10-23): Copy-Item scoped to approved still -> hc input folder; ffmpeg/ffprobe local files only
+test("ALI-163 copywide: Copy-Item images ComfyUI/output (or approved) -> ComfyUI/input, wildcards ok", () => {
+	const src = "C:\\Users\\derek\\5slock\\approved_characters\\GROK_IMAGINE_2026-10-19\\GI046.jpg";
+	const out = "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output";
+	const inp = "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\input";
+	const hc = `${inp}\\community\\hc`;
+	// allowed
+	assert.equal(ps(`Copy-Item -LiteralPath '${src}' -Destination '${hc}\\HC1_GI046.jpg'`), null);
+	assert.equal(ps(`Copy-Item '${src}' '${hc}'`), null);
+	assert.equal(ps(`Copy-Item -Path '${out}\\community\\ali147\\sheet_00001_.png' -Destination '${hc}\\sheet.png'`), null);
+	assert.equal(ps(`Copy-Item '${out}\\community\\*\\*.png' '${inp}\\community\\sheets'`), null);
+	assert.equal(ps(`Copy-Item -Force -Path '${out}\\x_*.webp' -Destination '${inp}\\x.webp'`), null);
+	assert.equal(ps(`Copy-Item -Recurse -Path '${out}\\a\\*.jpeg' -Destination '${inp}'`), null);
+	assert.equal(ps(`Copy-Item 'C:\\Users\\derek\\5slock\\approved_characters\\POOL\\*.jpg' '${hc}'`), null);
+	assert.equal(ps(`Copy-Item -LiteralPath '${src}' -Destination '${hc}\\..\\POOL_768x1344.png'`), null, "still inside ComfyUI/input");
+	// blocked
+	assert.equal(ps(`Copy-Item -LiteralPath '${src}' -Destination 'C:\\AI\\community\\notes\\x.jpg'`)?.id, "copy-item");
+	assert.equal(ps(`Copy-Item -Path '${out}\\a.png' -Destination '${out}\\b.png'`)?.id, "copy-item", "dest must be under ComfyUI/input");
+	assert.equal(ps(`Copy-Item -Path '${out}\\a.png' -Destination '${inp}\\..\\models\\a.png'`)?.id, "copy-item");
+	assert.equal(ps(`Copy-Item -Force -Path '${out}\\a.png' -Destination 'C:\\Users\\derek\\5slock\\approved_characters\\POOL\\a.png'`)?.id, "copy-item", "never overwrite approved_characters");
+	assert.equal(ps(`Copy-Item -LiteralPath 'C:\\AI\\community\\runs\\a.mp4' -Destination '${hc}\\a.mp4'`)?.id, "copy-item");
+	assert.equal(ps(`Copy-Item -Path '${out}\\a\\*' -Destination '${inp}'`)?.id, "copy-item", "image files only");
+	assert.equal(ps(`Copy-Item -Path '${out}\\a.mp4' -Destination '${inp}\\a.mp4'`)?.id, "copy-item");
+	assert.equal(ps(`Copy-Item -Path '${out}\\$x.png' -Destination '${inp}'`)?.id, "copy-item");
+	assert.equal(ps(`Copy-Item -Exclude x -Path '${out}\\a.png' -Destination '${inp}'`)?.id, "copy-item");
+	assert.equal(ps(`Move-Item '${src}' '${hc}'`)?.id, "approved-write", "nothing is moved out of approved_characters");
+	assert.equal(sh(`cp '${src}' '${hc}'`), null, "bash cp is unchanged by this patch (pi-permissions still denies absolute targets)");
+});
+test("ALI-163 hc: ffmpeg/ffprobe local files only", () => {
+	const ff = "& 'C:\\ff\\bin\\ffmpeg.exe'";
+	assert.equal(ps(`${ff} -hide_banner -i C:\\AI\\community\\runs\\a\\a.mp4 -vn -c:a copy C:\\AI\\community\\runs\\a\\a.m4a`), null);
+	assert.equal(ps(`${ff} -i a.mp4 -i a.m4a -map 0:v -map 1:a -c copy b.mp4`), null);
+	assert.equal(ps(`${ff} -ss 2 -i a.mp4 -frames:v 1 -vf scale=256:-2,drawtext=text=x:fontcolor=white s.png`), null);
+	assert.equal(ps(`${ff} -i https://example.com/x.mp4 out.mp4`)?.id, "ffmpeg-arg");
+	assert.equal(ps(`${ff} -i a.mp4 -f mpegts udp://10.0.0.5:1234`)?.id, "ffmpeg-arg");
+	assert.equal(ps(`${ff} -i a.mp4 -f mp4 pipe:1`)?.id, "ffmpeg-arg");
+	assert.equal(ps(`${ff} -y -i a.mp4 b.mp4`)?.id, "ffmpeg-arg");
+	assert.equal(ps(`${ff} -listen 1 -i a.mp4 b.mp4`)?.id, "ffmpeg-arg");
+	assert.equal(ps("& 'C:\\ffmpeg\\bin\\ffprobe.exe' -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 x.mp4"), null);
+	assert.equal(ps("& 'C:\\ffmpeg\\bin\\ffprobe.exe' http://example.com/x.mp4")?.id, "ffmpeg-arg");
+	assert.equal(sh("ffmpeg -i a.mp4 b.mp4"), null, "denylist mode: bash ffmpeg runs, with the same local-file rules");
+	assert.equal(sh("ffmpeg -i https://example.com/x.mp4 b.mp4")?.id, "ffmpeg-arg");
+});
+
+// bakeoff 2026-10-23 (ALI-173, Derrick 1:07 PM CT "Yes, add 120 GPU min and 10 jobs for the bakeoff and let Forge restart and call ComfyUI itself")
+test("bakeoff ComfyUI API: read + queue on :8188/:8189/:10004 (allowed) vs interrupt/free/other GPU ports (blocked)", () => {
+	// allowed
+	assert.equal(ps("curl.exe -s http://127.0.0.1:10004/queue"), null);
+	assert.equal(ps("curl.exe -s http://127.0.0.1:8188/system_stats; curl.exe -s http://127.0.0.1:8189/history"), null);
+	assert.equal(ps("curl.exe -s -X POST -H \"Content-Type: application/json\" --data-binary \"@C:\\AI\\community\\notes\\bake\\b4.json\" http://127.0.0.1:10004/prompt"), null);
+	assert.equal(ps("python -c \"import urllib.request as u; print(u.urlopen('http://127.0.0.1:10004/history').read()[:200])\""), null);
+	assert.equal(ps("curl.exe -s \"http://127.0.0.1:10004/view?filename=a.png&type=output\" -o C:\\AI\\community\\notes\\bake\\a.png"), null);
+	// blocked
+	assert.equal(ps("curl.exe -s -X POST http://127.0.0.1:10004/interrupt")?.id, "gpu-endpoints");
+	assert.equal(ps("curl.exe -s -X POST http://127.0.0.1:10004/free")?.id, "gpu-endpoints");
+	assert.equal(ps("curl.exe -s http://127.0.0.1:10002/v1/models")?.id, "gpu-endpoints", "Strata's own port stays blocked");
+	assert.equal(ps("curl.exe -s -X POST -d x https://github.com/x")?.id, "curl-method");
+	assert.equal(ext.checkCommand("curl -s http://127.0.0.1:10004/prompt")?.id, "gpu-endpoints", "non-Forge sessions unchanged");
+});
+
+test("bakeoff llama-swap: /v1 + /comfyui/ wake (allowed) vs /upstream, /unload, /api, /running (blocked)", () => {
+	assert.equal(ps("curl.exe -s -X POST -H \"Content-Type: application/json\" -d \"@C:\\AI\\community\\notes\\bake\\chat.json\" http://127.0.0.1:8080/v1/chat/completions"), null);
+	assert.equal(ps("curl.exe -s http://127.0.0.1:8080/v1/models"), null);
+	assert.equal(ps("curl.exe -s http://127.0.0.1:8080/comfyui/"), null);
+	assert.equal(ps("curl.exe -s http://127.0.0.1:8080/upstream/coding_swift15_iq3s/v1/models")?.id, "gpu-endpoints");
+	assert.equal(ps("curl.exe -s -X POST http://127.0.0.1:8080/api/models/unload/comfyui_auto")?.id, "gpu-endpoints");
+	assert.equal(ps("curl.exe -s http://127.0.0.1:8080/unload")?.id, "gpu-endpoints");
+	assert.equal(ps("curl.exe -s http://127.0.0.1:8080/running")?.id, "gpu-endpoints");
+	assert.equal(ps("curl.exe -s -X POST -H \"Authorization: Bearer x\" http://127.0.0.1:8080/v1/chat/completions")?.id, "curl-arg");
+});
+
+test("bakeoff restart: comfy_ctl.py restart while idle (allowed) vs during a running render (blocked); raw kills stay blocked", () => {
+	const prev = process.env.PI_GUARD_RENDER_RUNNING;
+	try {
+		process.env.PI_GUARD_RENDER_RUNNING = "0";
+		assert.equal(ps("python C:\\AI\\community\\scripts\\comfy_ctl.py restart"), null);
+		assert.equal(ps("& C:\\AI\\director\\.venv\\Scripts\\python.exe C:/AI/community/scripts/comfy_ctl.py stop"), null);
+		assert.equal(ps("python C:\\AI\\community\\scripts\\comfy_ctl.py status"), null);
+		process.env.PI_GUARD_RENDER_RUNNING = "1";
+		assert.equal(ps("python C:\\AI\\community\\scripts\\comfy_ctl.py restart")?.id, "comfy-restart-busy");
+		assert.equal(ps("python C:\\AI\\community\\scripts\\comfy_ctl.py stop")?.id, "comfy-restart-busy");
+		assert.equal(ps("python C:\\AI\\community\\scripts\\comfy_ctl.py status"), null, "status is always allowed");
+		assert.equal(ps("Stop-Process -Name python")?.id, "hazard-command");
+		assert.equal(ps("taskkill /F /IM python.exe")?.id, "hazard-command");
+	} finally {
+		if (prev === undefined) delete process.env.PI_GUARD_RENDER_RUNNING; else process.env.PI_GUARD_RENDER_RUNNING = prev;
+	}
+});
+
+test("readfix: python -c multi-line / ';' and 2>/dev/null are Forge-only and shape-checked", () => {
+	const nf = (cmd) => ext.evaluateToolCall("bash", { command: cmd }, { headless: true, cwd: "C:\\Apps\\finance-app-rebuild" });
+	assert.equal(sh("python -c \"import json\np=r'C:/AI/community/runs/x/request.api.json'\nprint(len(json.load(open(p))))\""), null);
+	assert.equal(sh("python -c \"import os; print(os.listdir('C:/Users/derek'))\""), null);
+	assert.equal(sh("python -c 'import sys; print(sys.version)' 2>/dev/null"), null);
+	assert.equal(sh("find C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI -maxdepth 3 -iname \"*h3*\" 2>/dev/null"), null);
+	assert.equal(sh("python -c \"print(1)\"; git status")?.id, "python-c-shape");
+	assert.equal(sh("python -c \"print(1)\"\nnpm publish")?.id, "python-c-shape");
+	assert.ok(sh("python -c \"print(1)\" > C:/AI/director/x.txt"));
+	assert.equal(sh("python -c \"print($(whoami))\"")?.id, "python-c-shape");
+	assert.equal(sh("python -c print(1)")?.id, "python-c-shape");
+	assert.equal(sh("find . -name x; cat y 2>/dev/null")?.id, "python-c-shape");
+	assert.equal(sh("python -c \"print(1)\"\ngit push origin main")?.id, "git-push");
+	assert.equal(nf("python -c \"import os; print(1)\"")?.id, "forge-only-relax");
+	assert.equal(nf("find . -name x 2>/dev/null")?.id, "forge-only-relax");
+});

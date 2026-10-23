@@ -1,0 +1,108 @@
+// Run: node --test tests/pi/protected-paths.test.mjs   (Node >= 22.18 strips TypeScript types natively). Pure checks; no model, no GPU.
+import assert from "node:assert/strict";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { test } from "node:test";
+
+const sandbox = mkdtempSync(join(tmpdir(), "pi-pp-test-"));
+process.env.TEMP = sandbox;
+process.env.TMP = sandbox;
+process.env.USERPROFILE = "C:\\Users\\derek";
+
+const ext = await import("../../.pi/extensions/protected-paths.ts");
+const CWD = "C:\\Users\\derek\\5slock";
+const W = (path) => ext.evaluate("write", { path, content: "x" }, CWD);
+const E = (path) => ext.evaluate("edit", { path, edits: [{ oldText: "a", newText: "b" }] }, CWD);
+const S = (command, tool = "bash") => ext.evaluate(tool, { command }, CWD);
+
+test("write/edit: protected targets are blocked", () => {
+	assert.equal(W("C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\user\\default\\workflows\\Community_H3_I2V_beta6.app.json")?.id, "comfyui-user");
+	assert.equal(E("C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/user/default/comfy.settings.json")?.id, "comfyui-user");
+	assert.equal(W("C:/AI/comfy-longvideo/ComfyUI/blueprints/x.app.json")?.id, "comfyui-live-workflow");
+	assert.equal(E("C:\\AI\\director\\config\\llama-swap.yaml")?.id, "llama-swap-config");
+	assert.equal(E("C:\\AI\\strata-0.2.1.1\\strata-iq3_s.json")?.id, "strata-config");
+	assert.equal(W("~/.pi/agent/settings.json")?.id, "pi-agent-config");
+	assert.equal(E("C:\\Users\\derek\\.pi\\agent\\pi-permissions.jsonc")?.id, "pi-agent-config");
+	assert.equal(E("ralph-community\\ralph.ps1")?.id, "loop-harness");
+	assert.equal(E("C:/Users/derek/5slock/ralph-community/chain.ps1")?.id, "loop-harness");
+	assert.equal(W("ralph-community/PROMPT.md")?.id, "loop-harness");
+	assert.equal(W("C:\\Apps\\finance-app\\server.ts")?.id, "apps");
+	assert.equal(W("/c/Apps/finance-app/x.ts")?.id, "apps");
+	assert.equal(E("C:/AI/director/.pi/extensions/headless-guard-and-truncate.ts")?.id, "guard-extensions");
+	assert.equal(W("..\\HardcoreNSFW-TestRuntime\\ComfyUI\\user\\x.json")?.id, "comfyui-user");
+});
+
+test("write/edit: normal work files pass", () => {
+	assert.equal(W("C:\\AI\\community\\scripts\\settings_fix_check.py"), null); // p7lock: comm.py is now protected (see below)
+	assert.equal(E("C:/AI/community/notes/c5.md"), null);
+	assert.equal(E("C:\\Users\\derek\\5slock\\ralph-community\\TASKS.md"), null);
+	assert.equal(W("C:\\AI\\community\\p3\\Community_H3.app.json"), null);
+	assert.equal(E("C:\\AI\\director\\config\\llama-swap.yaml.5slock-STAGED"), null);
+	assert.equal(E("C:\\AI\\strata-0.2.1.1\\docs\\notes\\x.json"), null);
+	assert.equal(W("C:\\Users\\derek\\5slock\\other\\PROMPT.md"), null);
+	assert.equal(ext.evaluate("read", { path: "C:\\AI\\director\\config\\llama-swap.yaml" }, CWD), null);
+});
+
+test("shell: writes into protected paths are blocked (bash + powershell)", () => {
+	assert.equal(S("cp x.json C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/user/default/workflows/a.json")?.id, "comfyui-user");
+	assert.equal(S("echo x >> C:/AI/director/config/llama-swap.yaml")?.id, "llama-swap-config");
+	assert.equal(S("sed -i 's/a/b/' /c/AI/strata-0.2.1.1/strata-iq3_s.json")?.id, "strata-config");
+	assert.equal(S("Set-Content -Path C:\\Users\\derek\\.pi\\agent\\settings.json -Value '{}'", "powershell")?.id, "pi-agent-config");
+	assert.equal(S("Copy-Item a.ps1 'C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1' -Force", "powershell")?.id, "loop-harness");
+	assert.equal(S("[IO.File]::WriteAllText(\"C:\\Apps\\finance-app\\a.txt\", 'x')", "powershell")?.id, "apps");
+	assert.equal(S("python -c \"open('C:/AI/strata/strata.json','w').write('x')\"")?.id, "strata-config");
+	assert.equal(S("git checkout -- C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/user/default/workflows/x.json")?.id, "comfyui-user");
+	assert.equal(S("Remove-Item ~/.pi/agent/models.json", "powershell")?.id, "pi-agent-config");
+});
+
+test("shell: reads of protected paths and writes elsewhere pass", () => {
+	assert.equal(S("cat C:/AI/director/config/llama-swap.yaml"), null);
+	assert.equal(S("Get-Content C:\\AI\\strata-0.2.1.1\\strata-iq3_s.json -Raw 2>$null", "powershell"), null);
+	assert.equal(S("grep -n coding ~/.pi/agent/settings.json"), null);
+	assert.equal(S("Select-String -Path C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1 -Pattern Max | Out-Null", "powershell"), null);
+	assert.equal(S("python -m py_compile C:/AI/community/scripts/comm.py"), null);
+	assert.equal(S("cp C:/AI/community/scripts/a.py C:/AI/community/scripts/a.py.bak"), null);
+	assert.equal(S("echo done > C:/AI/community/notes/x.md"), null);
+	assert.equal(S("git status --porcelain"), null);
+});
+
+test("p7lock: GPU pipeline and P7 harness files are blocked (write/edit + shell)", () => {
+	for (const f of ["batch_queue.py", "comm.py", "prompt_writer.py", "p6_review.py", "p6.py", "p3_appmode.py", "p5_check.py", "sy_1min.py", "mk_p6_variants.py", "p6_variants.ps1"])
+		assert.equal(W(`C:\\AI\\community\\scripts\\${f}`)?.id, "gpu-pipeline", f);
+	assert.equal(E("C:/AI/director/scripts/gpu_guard.ps1")?.id, "gpu-pipeline");
+	assert.equal(E("C:/AI/director/scripts/gpu_lock.ps1")?.id, "gpu-pipeline");
+	assert.equal(W("C:/AI/director/scripts/overnight_chain.ps1")?.id, "gpu-pipeline");
+	assert.equal(E("C:/AI/community/p7/KNOBS.md")?.id, "p7-harness");
+	assert.equal(W("C:/AI/community/p7/jobs/p7_r1_rank.result.json")?.id, "p7-harness");
+	assert.equal(W("C:/AI/community/p7/reviews/p7_r1_probe_review/review.json")?.id, "p7-harness");
+	assert.equal(W("C:/AI/community/runs/P6_RANKING.json")?.id, "p7-harness");
+	assert.equal(W("C:/Users/derek/5slock/ralph-community/logs/p7_budget.json")?.id, "p7-harness");
+	assert.equal(S("Set-Content C:\\AI\\community\\scripts\\batch_queue.py 'x'", "powershell")?.id, "gpu-pipeline");
+	assert.equal(S("python -c \"open('C:/AI/community/scripts/comm.py','w').write('')\"")?.id, "gpu-pipeline");
+	assert.equal(S("Copy-Item x.json C:/AI/community/p7/jobs/p7_r1_rank.result.json", "powershell")?.id, "p7-harness");
+	assert.equal(S("[IO.File]::WriteAllText('C:\\AI\\director\\scripts\\gpu_guard.ps1', 'x')", "powershell")?.id, "gpu-pipeline");
+});
+
+test("p7lock: what Forge writes for P7 still passes", () => {
+	assert.equal(W("C:/AI/community/shots/p7_r1_c1_ab07.json"), null);
+	assert.equal(W("C:/AI/community/p7/JOB_REQUEST.json"), null);
+	assert.equal(W("C:/AI/community/p7/notes/r1.md"), null);
+	assert.equal(W("C:/AI/community/runs/P7_LEADERBOARD.md"), null);
+	assert.equal(W("C:/AI/community/runs/P7_SUMMARY.md"), null);
+	assert.equal(W("C:/AI/community/scripts/tests/test_x.py"), null);
+	assert.equal(S("python -m py_compile C:/AI/community/scripts/comm.py"), null);
+	assert.equal(S("Get-Content C:\\AI\\community\\p7\\jobs\\p7_r1_rank.result.json -Raw", "powershell"), null);
+	assert.equal(S("Set-Content -Path C:\\AI\\community\\p7\\JOB_REQUEST.json -Value '{}'", "powershell"), null);
+	assert.equal(W("C:/Apps/finance-app-rebuild/src/x.ts"), null);
+});
+
+test("handler blocks with a readable reason", async () => {
+	const handlers = {};
+	ext.default({ on: (n, fn) => ((handlers[n] ??= []).push(fn), () => {}) });
+	const ctx = { hasUI: false, cwd: CWD };
+	const r = await handlers.tool_call[0]({ toolName: "write", input: { path: "C:\\AI\\director\\config\\llama-swap.yaml", content: "" } }, ctx);
+	assert.equal(r.block, true);
+	assert.match(r.reason, /^Blocked by protected-paths \[llama-swap-config\]/);
+	assert.equal(await handlers.tool_call[0]({ toolName: "write", input: { path: "C:\\AI\\community\\x.md", content: "" } }, ctx), undefined);
+});

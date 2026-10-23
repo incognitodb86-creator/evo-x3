@@ -1,0 +1,114 @@
+﻿diff --git "a/C:\\AI\\community\\notes\\ralph.ps1.bak-20261023-forgeopen" "b/C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1"
+index 8a7dae5..12d12fe 100644
+--- "a/C:\\AI\\community\\notes\\ralph.ps1.bak-20261023-forgeopen"
++++ "b/C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1"
+@@ -40,6 +40,11 @@
+ #  - a JOB_REQUEST left by a timed-out/failed pass is kept (RunJobs, all normal guards) when its ids are in TASKS.md and the pass ticked/REQUESTED a line.
+ # bakeoff 2026-10-23 (ALI-173, Derrick 2026-10-23 1:07 PM CT "Yes, add 120 GPU min and 10 jobs for the bakeoff and let Forge restart and call ComfyUI itself"; backup C:\AI\community\notes\ralph.ps1.bak-20261023-bakeoff):
+ #  - default caps 495 -> 615 GPU min, 35 -> 45 jobs (+120 min / +10 jobs for the bakeoff B1-B8; R6-R9 stay inside 495/35 per TASKS.md).
++# forgeopen 2026-10-23 (ALI-163; Derrick 1:53 PM CT "Really anything secrets cause it's gotta do the finance stuff", 1:52 PM CT "Even looser only restricted secrets and finances. Other than that it just needs to keep a log", 1:48 PM CT "No setup forge correctly"; backup C:\AI\community\notes\ralph.ps1.bak-20261023-forgeopen):
++#  - Forge passes use their own pi policy (PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR = C:\Users\derek\.pi\forge-policy): default allow, deny secrets only. Other agents keep ~/.pi/agent/pi-permissions.jsonc.
++#  - after every pass: every tool call -> C:\AI\community\notes\forge_actions.log; every tool-result deny + the summary line -> notes\denies.log (Huntley "loop back is everything").
++#  - scope check logs and never stops: new files in ralph-community are moved to _removed + logged; tracked changes (Forge or Max) are logged; only the fiction-lock / GPU-lock / budget files are restored (logged, loop continues). py_compile runs on scripts\ only; pytest backpressure stays. Summary gets GUARD_REQUEST when notes\guard_requests.md changed.
++#  - readfix 2026-10-23: deny counter = tool-result denies only; scripts\face_crop.py (R4G2 crops) is harness-owned ($Prot).
+ #  - graph/dip + generic job ids may be ali173_<arm>_s<seed>; scripts\comfy_ctl.py (Forge's ComfyUI restart helper) is harness-owned ($Prot).
+ param([int]$Max=10,[int]$TimeoutMin=20,[int]$GuardWaitMin=180,[int]$GuardPollSec=120,[int]$GpuCapMin=615,[int]$JobMax=45,[int]$UtilMax=30)
+ $R='C:\Users\derek\5slock'; $K='C:\Users\derek\5slock\ralph-community'; $L="$K\logs"; $C='C:\AI\community'
+@@ -110,9 +115,8 @@ $P7="$C\p7"; $Req="$P7\JOB_REQUEST.json"; $Jobs="$P7\jobs"; $Revs="$P7\reviews";
+ $DPy='C:\AI\director\.venv\Scripts\python.exe'; $GJ="$C\scripts\run_graph_job.py"; $DJ="$C\scripts\dip_join.py"   # ali160
+ $CPy='C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe'; $Rev="$C\scripts\p6_review.py"; $BQ="$C\scripts\batch_queue.py"
+ # harness-owned files the model must not change (restored from a per-iteration snapshot + STOP_RALPH); plus every *.json/*.md in p7\jobs and p7\reviews
+-$Prot=@("$C\scripts\tests\test_p6_review.py","$C\scripts\comm.py","$C\scripts\comfy_ctl.py",   # narrow 2026-10-22: harness scripts editable by Forge except comm.py (youth guard) and the test
+-        "$P7\KNOBS.md",$Guard,'C:\AI\director\scripts\gpu_lock.ps1',"$C\runs\P6_RANKING.md","$C\runs\P6_RANKING.json",$Budget,
+-        "$C\shots\pool_parents\p6_1min_cuts.json","$C\shots\pool_parents\p6_1min_cuts_ab05.json","$C\shots\pool_parents\p6_1min_community.json")
++$Prot=@("$C\scripts\tests\test_p6_review.py","$C\scripts\comm.py","$C\scripts\comfy_ctl.py",   # forgeopen: face_crop.py is Forge-owned; restore list = fiction lock + GPU lock + budget/job records only
++        $Guard,'C:\AI\director\scripts\gpu_lock.ps1',$Budget)   # (was also KNOBS.md, P6_RANKING.*, p6_1min_cuts*.json - now Forge-owned)
+ $Enc = New-Object Text.UTF8Encoding $false; $script:JobStop = $false
+ New-Item -ItemType Directory -Force $Jobs, $Revs | Out-Null
+ function WriteJson($path, $obj){ [IO.File]::WriteAllText($path, ($obj | ConvertTo-Json -Depth 6), $Enc) }
+@@ -305,7 +309,37 @@ function ReqTicked {
+ }
+ $py = (Get-Command python -ErrorAction SilentlyContinue).Source; if(-not $py){ $py = 'C:\Program Files\Python312\python.exe' }
+ $cli="$env:APPDATA\npm\node_modules\@earendil-works\pi-coding-agent\dist\bundle\cli.js"
++$env:PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR = 'C:\Users\derek\.pi\forge-policy'   # forgeopen: Forge-only pi policy (inherited by the pi process below)
++$ActLog = "$C\notes\forge_actions.log"; $DenyLogF = "$C\notes\denies.log"; $GReq = "$C\notes\guard_requests.md"
+ $a="`"$cli`" --print --provider llama-swap --model coding_swift15_iq3s --exclude-tools codemode,tool_search --no-mcp --session-dir `"$Sess`" `"@$K\PROMPT.md`" `"Follow PROMPT.md exactly.`""
++function PassLog($path, $n){
++  # forgeopen: one line per tool call -> forge_actions.log; tool-result denies -> denies.log. Returns the deny count (tool results only).
++  $calls = @{}; $act = @(); $den = @(); $k = 0
++  foreach($line in [IO.File]::ReadLines($path)){
++    if($line -notmatch '"toolCall"|"toolResult"'){ continue }
++    try { $e = $line | ConvertFrom-Json } catch { continue }
++    $m = $e.message; if(-not $m){ continue }
++    if($m.role -eq 'assistant'){ foreach($c in @($m.content)){ if($c.type -eq 'toolCall'){ $calls["$($c.id)"] = $c } }; continue }
++    if($m.role -ne 'toolResult'){ continue }
++    $ts = "$($e.timestamp)"; try { $ts = ([datetimeoffset]::Parse($ts)).ToLocalTime().ToString('yyyy-MM-ddTHH:mm:ss') } catch {}
++    $txt = (@($m.content) | ForEach-Object { "$($_.text)" }) -join ' '
++    $c = $calls["$($m.toolCallId)"]; $a = if($c){ $c.arguments } else { $null }
++    $what = if($a -and $a.command){ "$($a.command)" } elseif($a -and $a.path){ "$($a.path)" } elseif($a){ ($a | ConvertTo-Json -Compress -Depth 3) } else { '' }
++    $what = $what -replace "`r",'' -replace "`n",'\n'; if($what.Length -gt 400){ $what = $what.Substring(0,400) + '...' }
++    $hits = [regex]::Matches($txt, 'is not permitted to run|requires approval|Blocked by (headless guard|protected-paths)').Count
++    if($hits){
++      $k += $hits
++      $rule = if($txt -match "\(matched '([^']*)'\)"){ "pi bash '$($Matches[1])'" } elseif($txt -match 'Blocked by headless guard \[([^\]]+)\]'){ "headless-guard $($Matches[1])" } elseif($txt -match 'outside working directory'){ 'pi external_directory' } elseif($txt -match 'protected-paths'){ 'protected-paths' } elseif($txt -match 'requires approval'){ 'pi ask' } else { 'pi deny' }
++      $reason = ($txt -replace '\s+',' '); if($reason.Length -gt 300){ $reason = $reason.Substring(0,300) + '...' }
++      $den += "$ts iter $n DENY tool=$($m.toolName) rule=$rule | $what | $reason"
++      $res = "DENIED ($rule)"
++    } elseif($m.isError){ $res = 'error: ' + (($txt -replace '\s+',' ') -replace '^(.{0,160}).*$','$1') } else { $res = 'ok' }
++    $act += "$ts iter $n $($m.toolName) | $what | $res"
++  }
++  if($act.Count){ Add-Content -LiteralPath $ActLog -Value $act -Encoding UTF8 }
++  if($den.Count){ Add-Content -LiteralPath $DenyLogF -Value $den -Encoding UTF8 }
++  return $k
++}
+ $why='max-iterations'; $i=0; $cut=0; $np=0; $prevEnd=''; $bad=0
+ while($i -lt $Max){
+   if(Test-Path "$K\STOP_RALPH"){$why='STOP_RALPH';break}; if((Open) -eq 0){$why='COMPLETE';break}
+@@ -327,21 +361,25 @@ while($i -lt $Max){
+   $chg = @(Changed $C | ForEach-Object { [pscustomobject]@{ Code=$_.Code; Path=$_.Path; Full=(Join-Path $C $_.Path) } }) + @(Changed $K | ForEach-Object { [pscustomobject]@{ Code=$_.Code; Path=$_.Path; Full=(Join-Path $K $_.Path); InK=$true } })
+   foreach($ch in $chg){
+     if(-not (Test-Path -LiteralPath $ch.Full -PathType Leaf)){ continue }
+-    if($ch.Full -match '\.py$'){ $o = @(& $py -m py_compile $ch.Full 2>&1 | ForEach-Object { "$_".Trim() } | Where-Object { $_ }); if($LASTEXITCODE -ne 0){ $fails += "py_compile $($ch.Full): $(($o | Select-Object -Last 2) -join ' / ')" } }
++    if($ch.Full -match '\.py$' -and $ch.Full -like "$C\scripts\*"){   # forgeopen: py_compile on scripts\ only
++      $o = @(& $py -m py_compile $ch.Full 2>&1 | ForEach-Object { "$_".Trim() } | Where-Object { $_ }); if($LASTEXITCODE -ne 0){ $fails += "py_compile $($ch.Full): $(($o | Select-Object -Last 2) -join ' / ')" } }
+     elseif($ch.Full -match '\.json$'){ $o = @(& $py -m json.tool $ch.Full 2>&1 | ForEach-Object { "$_".Trim() } | Where-Object { $_ }); if($LASTEXITCODE -ne 0){ $fails += "json.tool $($ch.Full): $($o | Select-Object -Last 1)" } }
+   }
+   # ali160 A8 backpressure (ghuntley.com/ralph): the community tests must pass before a task counts
+   $pt = @(& $DPy -m pytest -q "$C\scripts\tests" 2>&1 | ForEach-Object { "$_" }); $ptFail = ($LASTEXITCODE -ne 0)
+   if($ptFail){ $fails += "pytest: $(($pt | Select-Object -Last 2) -join ' / ')" }
+   # --- scope check: ralph-community may change TASKS.md, STOP_RALPH, notes\* only; C:\AI\community is the work dir
+-  $viol += @(KScope $chg $n)
+-  foreach($ch in @($chg | Where-Object { -not $_.InK -and ($_.Path -match '(?i)comfyui[\\/]user[\\/]') })){ $null = G -C $C checkout '--' $ch.Path; $viol += "ComfyUI\user path restored: $($ch.Full)" }
+-  $wfAfter = WfHashes
+-  foreach($f in $wfBefore.Keys){
+-    if($wfAfter[$f] -ne $wfBefore[$f]){ $src = Join-Path $snapDir $f.Substring($WF.Length).TrimStart('\'); Copy-Item -LiteralPath $src -Destination $f -Force; $viol += "live ComfyUI file changed/deleted, restored from $src : $f" }
++  $chgAll = @($chg | ForEach-Object { "$($_.Code) $($_.Full)" }); if($chgAll.Count){ Add-Content -LiteralPath $ActLog -Value ("$(Get-Date -f s) iter $n HARNESS changed files (allowed, logged): " + ($chgAll -join ' | ')) -Encoding UTF8 }   # forgeopen: scope check logs, never stops
++  foreach($ch in @($chg | Where-Object { $_.InK -and $_.Code -eq '??' })){
++    $rel = $ch.Path -replace '/','\'; if($rel -eq 'TASKS.md' -or $rel -eq 'STOP_RALPH' -or $rel -like 'notes\*' -or -not (Test-Path -LiteralPath $ch.Full)){ continue }
++    $rd = "$K\_removed"; New-Item -ItemType Directory -Force $rd | Out-Null; $dst = Join-Path $rd ((Split-Path $rel -Leaf) + "-$(Get-Date -f 'yyyyMMdd-HHmmss')")
++    Move-Item -LiteralPath $ch.Full -Destination $dst -Force; Add-Content -LiteralPath $ActLog -Value "$(Get-Date -f s) iter $n HARNESS new file in ralph-community moved aside (not a stop): $($ch.Full) -> $dst" -Encoding UTF8
+   }
+-  foreach($f in $wfAfter.Keys){ if(-not $wfBefore.ContainsKey($f)){ $viol += "new file under ComfyUI\user (left in place, review it): $f" } }
+-  $viol += @(ProtCheck $protBefore)
++  $wfAfter = WfHashes   # forgeopen: ComfyUI\user + harness-owned files are logged, not restored
++  $wfCh = @(foreach($f in $wfAfter.Keys){ if($wfAfter[$f] -ne $wfBefore[$f]){ $f } }) + @(foreach($f in $wfBefore.Keys){ if(-not $wfAfter.ContainsKey($f)){ "deleted $f" } })
++  $prRes = @(ProtCheck $protBefore)   # fiction lock / GPU lock / budget + job records: restored and logged, the loop continues
++  if($wfCh.Count){ Add-Content -LiteralPath $ActLog -Value ("$(Get-Date -f s) iter $n HARNESS ComfyUI\user changes (allowed, logged): " + ($wfCh -join ' | ')) -Encoding UTF8 }
++  foreach($v in $prRes){ Log "iter $n RESTORED (continuing): $v"; Add-Content -LiteralPath $ActLog -Value "$(Get-Date -f s) iter $n HARNESS RESTORED (continuing): $v" -Encoding UTF8 }
+   if((FHash $Agents) -ne $preAgents){ Log "iter $n note: 5slock\AGENTS.md was updated by the model (allowed: command notes)" }
+   foreach($f in $fails){ Log "iter $n CHECK FAIL: $f" }; foreach($v in $viol){ Log "iter $n SCOPE: $v" }
+   $status = if($fails.Count -or $viol.Count -or $timedOut -or ($code -ne 0)){ 'fail' } else { 'ok' }
+@@ -349,9 +387,11 @@ while($i -lt $Max){
+   if($ptFail){ $null = G -C $C revert --no-edit HEAD; Log "iter ${n}: FAIL pytest backpressure - reverted this iteration's C:\AI\community commit (git rc $script:GitRc)" }
+   # --- one-line summary
+   $den = 0; $sf = Get-ChildItem -LiteralPath $Sess -Recurse -File -Filter *.jsonl -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+-  if($sf){ $den = @(Select-String -LiteralPath $sf.FullName -Pattern 'is not permitted to run|requires approval|Blocked by (headless guard|protected-paths)' -AllMatches | ForEach-Object { $_.Matches.Count } | Measure-Object -Sum).Sum; if(-not $den){ $den = 0 } }
++  if($sf){ try { $den = [int](PassLog $sf.FullName $n) } catch { $den = 0; Add-Content -LiteralPath $ActLog -Value "$(Get-Date -f s) iter $n PassLog error: $_" -Encoding UTF8 } }   # forgeopen: actions + denies logs; count = tool-result denies only
+   $ex = if($timedOut){ 'TIMEOUT' } elseif($code -eq 1){ '1(CUTOFF)' } else { "$code" }
+-  Log ("iter $n summary: status=$status exit=$ex ticks=+{0} wall={1:N1}m denies={2} checkfails={3} scope={4} open={5}" -f ((Ticks) - $preTicks), ((Get-Date)-$t0).TotalMinutes, $den, $fails.Count, $viol.Count, (Open))
++  $sumLine = ("iter $n summary: status=$status exit=$ex ticks=+{0} wall={1:N1}m denies={2} checkfails={3} scope={4} open={5}" -f ((Ticks) - $preTicks), ((Get-Date)-$t0).TotalMinutes, $den, $fails.Count, $viol.Count, (Open))
++  if((Test-Path -LiteralPath $GReq) -and ((Get-Item -LiteralPath $GReq).LastWriteTime -ge $t0)){ $sumLine += ' GUARD_REQUEST' }
++  Log $sumLine; Add-Content -LiteralPath $DenyLogF -Value "$(Get-Date -f s) $sumLine" -Encoding UTF8
+   # --- stop rules (existing STOP_RALPH / COMPLETE logic kept)
+   if($viol.Count){ Stop-Ralph "iter ${n}: scope check failed - $($viol -join ' | ')"; $why='scope'; break }
+   if($fails.Count){ Stop-Ralph "iter ${n}: harness check failed - $($fails -join ' | ')"; $why='check-failed'; break }
