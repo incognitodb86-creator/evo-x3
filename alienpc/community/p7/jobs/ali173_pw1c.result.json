@@ -1,0 +1,59 @@
+{
+ "id": "ali173_pw1c",
+ "task": "ALI-173 PW1c REGISTER + RESTART",
+ "ok": true,
+ "pass": true,
+ "ts": "2026-10-23 16:03 CT",
+ "comfy_ok": true,
+ "comfy_ok_line": "2026-10-23 16:02:57 CT status: comfy_ok=True queue=(0, 0) guard=(0, ['IDLE']) running=['comfyui_auto']",
+ "restart": {
+  "exact_command": "python C:\\AI\\community\\scripts\\comfy_ctl.py restart",
+  "ok": true,
+  "rc": 0,
+  "log": [
+   "2026-10-23 16:02:26 CT stop: ComfyUI not loaded",
+   "2026-10-23 16:02:28 CT start: GET /comfyui/ (llama-swap wake; swaps the LLM out)",
+   "2026-10-23 16:02:52 CT COMFY_OK http://127.0.0.1:10004 running=['comfyui_auto']"
+  ]
+ },
+ "live_checks": {
+  "script": "notes/ali173_pw1c_live_check.py",
+  "passed": 6,
+  "total": 6,
+  "rc": 0,
+  "dump": "notes/pw1c_live_objective.json",
+  "omni_node_registered": true,
+  "omni_model_rows": [
+   "Qwen2.5-Omni-7B (official, bf16) - 22.4 GB download - ~9 GB as nf4 / ~13 GB as int8 / ~24 GB as bf16",
+   "Qwen2.5-Omni-7B GGUF Q4_K_M - 6.2 GB download - ~9 GB with the adapter and a 12k context",
+   "Qwen2.5-Omni-7B GGUF Q8_0 - 9.7 GB download - ~13 GB",
+   "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+  ],
+  "adapter_rows": [
+   "MiniMaxH3RewriterOptions.adapter = MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf - 0.34 GB download",
+   "MiniMaxH3RewriterOptions.adapter = on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]"
+  ],
+  "on_disk_rows_total": 29,
+  "sentinel_seen": false,
+  "comfyui_version": "0.38.0",
+  "minimax_nodes_registered": 50
+ },
+ "offline_checks": {
+  "script": "notes/ali173_pw1c_offline.py",
+  "passed": 8,
+  "total": 8,
+  "rc": 0,
+  "dump": "notes/pw1c_objective.json",
+  "note": "runs the pack's own discovery/catalog/paths code offline (folder_paths stubbed, no ComfyUI, no port)"
+ },
+ "models_json_edit": false,
+ "models_json_edit_reason": "no entry needed: discovery.scan_captioner_gguf(qwen2vl) finds the 7B pair, catalog.models_omni() 'Qwen2.5-Omni-7B GGUF Q4_K_M' resolves through paths.present_pair, and the Q8_0 adapter resolves through paths.present_file + the adapter scan. The 18.6 GB entry (Qwen3.6-27B + H3 LoRA) was NOT added: adding it would invite a 18.6 GB download on this 45 GB-free card.",
+ "file_layout_fixes": [
+  "models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf - moved the adapter GGUF into a folder named after its repo id, which is what paths.present_file() looks for (repo last segment). Before: unresolved.",
+  "models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni/{adapter_config.json,adapter_model.safetensors,...} - moved the lightx2v safetensors one level UP out of the lightx2v-safetensors\\ subfolder, which is what paths.present_folder(complete=adapter_is_complete) checks. Before: the transformers route saw nothing."
+ ],
+ "gpu_minutes_this_pass": 1.5,
+ "gpu_note": "three llama-swap ComfyUI windows (15:57:35-15:58:04, 15:59:25-15:59:54, 16:02:28-16:02:57), all status/registration only, queue stayed (0,0), no workflow queued, no DiT loaded. The task text said 0 GPU min; the restart it requires is itself a GPU action, so the minutes are logged in notes/bakeoff_gpu_ledger.md.",
+ "smoke_test": "not run - PW1d owns the smoke test",
+ "blocked": null
+}
