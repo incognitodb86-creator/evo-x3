@@ -1,0 +1,19 @@
+{
+    "started":  "2026-10-23T14:33:45",
+    "rc":  0,
+    "budget_cap_min":  615,
+    "budget_used_min":  443.2,
+    "log":  "C:\\AI\\community\\p7\\jobs\\ali147_pool_hc_r5_s51130005.out",
+    "id":  "ali147_pool_hc_r5_s51130005",
+    "ok":  true,
+    "kind":  "graph",
+    "note":  "run_graph_job rc=0 (ok)",
+    "outputs":  [
+                    "C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\status.log",
+                    "C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\objective.json",
+                    "C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005.mp4",
+                    "C:\\AI\\community\\runs\\ali147_pool_hc_r5_s51130005\\ali147_pool_hc_r5_s51130005_stills_contact.png"
+                ],
+    "finished":  "2026-10-23T14:41:15",
+    "wall_min":  7.5
+}
