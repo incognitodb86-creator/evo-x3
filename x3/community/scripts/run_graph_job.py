@@ -15,7 +15,7 @@ def post(u, t=120): return urllib.request.urlopen(urllib.request.Request(u, data
 # count, blackdetect/freezedetect, timed contact sheet), so an honest sheet render failed as "no audio stream" and went STUCK
 # after 2 redos. Video jobs are untouched: CreateVideo/SaveVideo write .mp4, so this branch only fires on these extensions.
 # Image gate = ffprobe decodes it, reports a size, exactly 1 packet, bytes > 0. No judge, no quality redo (unchanged rule).
-IMG_EXT = (".png", ".jpg", ".jpeg", ".bmp", ".tga", ".webp")
+IMG_EXT = (".png",)  # Max review 2026-10-23: .png image jobs only (the sheet path); other image types stay on the video gate
 def comfy_ok():
     try: urllib.request.urlopen(COMFY + "/system_stats", timeout=10).read(); return True
     except Exception: return False
@@ -79,7 +79,7 @@ def main():
             why = []
             if not s: why = ["JOB error"]
             else:
-                img = os.path.splitext(s["file"])[1].lower() in IMG_EXT
+                img = a.frames == 0 and os.path.splitext(s["file"])[1].lower() in IMG_EXT  # image gate only for frames-0 requests
                 p = probe(s["file"]); bf = [] if img else blackfreeze(s["file"])
                 if p["bytes"] <= 0: why.append("0-byte file")
                 if img:
