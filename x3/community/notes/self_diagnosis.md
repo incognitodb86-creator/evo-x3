@@ -13,3 +13,11 @@
 - Learned fix: reddit.com/.json and old.reddit.com/.json return a "Blocked" HTML page from this box (rd_sd_pe.json / rd2_sd_pe.json = HTML), so r/ evidence is unreachable; cite HF API + raw model cards + GitHub raw READMEs instead (recorded in AGENTS.md Learnings).
 - Harness note: AGENTS.md "## Learnings" is at 17 bullets (cap says 15); PROMPT.md forces the self-diagnosis line and I added two R4H lines, so Max prunes at review - did not delete anyone else's command notes.
 - 0 denies this pass (no guard hits; all GETs were plain curl.exe -sL --max-time 30 ... -o notes\web\<file>).
+
+## 2026-10-23 ~14:35 CT (R8 pass, iter 04)
+- Last 2 summary lines: iter 02 status=ok ticks=+1 wall=4.0m denies=3; iter 03 status=ok ticks=+1 wall=6.2m denies=3.
+- Denies since the last entry (3 in iter 02, 1 in iter 03): the append/print TEXT named the protected youth-guard module path inside the command string, so the whole shell command was blocked (fiction-lock matches command text, not only the target). Iter 03's deny was a tail of the deny log itself, because the reason text echoed in stdout names that path.
+- Cause: un-narrowed rule; Max narrowed it at 2:26 PM CT (community commit 2570142) to writes that TARGET those paths, and pruned AGENTS.md Learnings 18->14.
+- Fix in reach this pass: (a) never echo/quote that path in command text or output - use the read tool for the deny log; (b) append learnings with a file-write helper, not a shell printf; (c) do not touch ralph.ps1/PROMPT.md/permission files (iter 03 SCOPE fail, earlier). No retry, no workaround was attempted at any deny.
+- 0 timeouts, ticks +1 every pass since the restart; the r3 rc=2 STATIC_FAIL was fixed by the iter 03 pass (builder pops the invalid c1 link + offline static self-check), r4 rendered ok=True in 7.9 min.
+- Task this pass: R8 (clip 5, id ali147_pool_hc_r5_s51130005) - verify the rebuilt graph read-only (notes/ali163_hc_r8_request_check.py), budget gate, request, tick, exit. No rebuild (Max 1:40 PM CT).
