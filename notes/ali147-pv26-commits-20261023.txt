@@ -1,0 +1,24 @@
+ALI-147 PV2-6 commits probe - 2026-10-23 01:09:54  READ-ONLY
+
+== ComfyUI core (comfy_extras/nodes_sparse_attention.py = BlockSparseAttention)
+   dir C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI exists=True
+   git rev-parse HEAD -> rc=0 6b747c0428c343e1417219641db93a4fb7cb69ae 
+   git rev-parse --short HEAD -> rc=0 6b747c04 
+   git status --porcelain -> rc=0 ?? COMFY_LEASE_TR.md | ?? ComfyUI_Pipeline_Manager_GUI.ps1 | ?? GrokLevel_Sampler_Settings_Comparison.md | ?? IMAGE_REVIEW_REPORT.md | ?? LAUNCH_VISIBLE_FOR_DADDY.bat | ?? Launch_Pipeline_Manager.bat | ?? MODELS_NOW_AVAILABLE.txt | ?? QUICK_500_FIX_DCC_YANDY.md | ?? RESUME_HERE.txt | ?? REVIEW_REPORT.md | ?? Review-Images.py | ?? TESTING_REPORT.md | ?? Test-CommunityWorkflows.ps1 | ?? Test_Sydney_ 
+   git log -1 --format=%H %ad %s --date=iso -> rc=0 6b747c0428c343e1417219641db93a4fb7cb69ae 2026-09-29 14:46:44 -0400 ComfyUI v0.38.0 
+
+== ComfyUI_MiniMax_H3_Extender (MiniMaxH3* built-ins)
+   dir C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/ComfyUI_MiniMax_H3_Extender exists=True
+   git rev-parse HEAD -> rc=0 0861230cc38cbfbdb8d7b97dd9473f536a253c0b 
+   git rev-parse --short HEAD -> rc=0 0861230 
+   git status --porcelain -> rc=0 ?? __pycache__/ | ?? cache/ 
+   git log -1 --format=%H %ad %s --date=iso -> rc=0 0861230cc38cbfbdb8d7b97dd9473f536a253c0b 2026-10-20 13:47:42 +0200 Bump version from 3.0.12 to 3.0.13 
+
+== the VSA node file (ComfyUI core, not the Extender)
+   C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/comfy_extras/nodes_sparse_attention.py exists=True size=23450
+   sha256 de202f2b5eb753a5748e1c6452cdc10cdf28834ffd8f8bb6acfaf6f643de9692
+   last-modified mtime 2026-10-01T16:29:53.252653
+   nodes_sparse_attention.py:353| class BlockSparseAttention(io.ComfyNode):
+   nodes_sparse_attention.py:433| class BlockSparseAttentionExtension(ComfyExtension):
+
+   last commit touching nodes_sparse_attention.py -> rc=0 6b747c0428c343e1417219641db93a4fb7cb69ae 
