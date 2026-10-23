@@ -1,0 +1,24 @@
+subject_definitions:
+<Subject 1> is the adult woman shown in the multi-view reference sheet in <Picture 2>, the blonde woman of the two-woman start still in <Picture 1>, a fictional adult aged 25, with long loose blonde hair, soft natural features, a slim natural figure with full natural breasts and gently rounded hips, and smooth lightly tanned skin with a natural matte texture.
+<Subject 2> is the adult woman shown in the multi-view reference sheet in <Picture 3>, the dark-haired woman of the two-woman start still in <Picture 1>, a fictional adult aged 24, with long dark hair, a soft feminine figure, natural waist, wide hips and full natural breasts, and warm smooth skin.
+<Picture 1> is the start still of <Subject 1> and <Subject 2> seated close together in a warm photo studio.
+<Picture 2> is the multi-view reference sheet of <Subject 1> alone.
+<Picture 3> is the multi-view reference sheet of <Subject 2> alone.
+
+summary:
+[reference generation] The target video is the first 5 seconds of a 10-second single continuous shot of <Subject 1> and <Subject 2> in a warm photo studio. The shot uses <Picture 1> for the scene and <Picture 2> and <Picture 3> only as appearance guidance for the two women while freely composing the environment, wardrobe and camera. The two women lean in, kiss with open mouths, and pull each other's studio clothing off, ending topless and close. Explicit adult content, two consenting fictional adults. dynamic video, fluid natural motions.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - <Picture 2> keeps her identity, long blonde hair, slim natural figure, full natural breasts and lightly tanned skin; undressing and being touched are actions, not a change of identity.
+<Subject 2> (appears in [Shot 1]): fully_preserved - <Picture 3> keeps her identity, long dark hair, soft feminine figure, wide hips and warm skin; kneeling and touching are actions, not a change of identity.
+Their studio clothing from <Picture 1> is removed during the shot and lies in a heap on the dark studio floor for the rest of the clip.
+
+detailed_description:
+The target video is a realistic, warmly lit studio scene, photorealistic skin and anatomy: natural matte skin with visible pores, fine vellus hair and only a soft natural sheen, realistic natural body proportions, and dynamic video with fluid natural motions.
+[Shot 1] The shot opens on <Subject 1>, the blonde adult woman of <Picture 2>, and <Subject 2>, the dark-haired adult woman of <Picture 3>, seated close together on a dark studio floor in front of a warm beige seamless backdrop lit by a soft key light from the left. They wear the studio outfits of <Picture 1>. The camera starts in a medium two-shot and moves in slowly and steadily, low amplitude, no cuts. They lean in and kiss with open mouths, tongues touching, faces close, eyes half closed. <Subject 1>'s hands pull the shirt of <Subject 2> up and over her head while <Subject 2> unfastens the front of <Subject 1>'s top. The garments slide off shoulders and arms with visible friction and drop to the floor. Both women end the shot topless: <Subject 1> with full natural breasts of soft realistic weight, smooth skin and round light-brown areolae with natural nipples; <Subject 2> with softer, darker-skinned breasts that sway as she moves. Their faces stay close, foreheads touching, breathing heavy, chests rising and falling. Body contact is continuous and weighted: hips shifting, knees parting, thighs brushing, one hand flat on the floor for balance. The camera keeps a stable focal plane on the two bodies with the backdrop softly blurred. The shot ends with the two women still kissing, naked from the waist up, the discarded clothing in a heap beside them.
+
+overall_soundscape:
+A quiet studio room tone with a low, soft air-handling hum. Close, muffled intimate sound: wet kissing and tongue sounds, soft flesh thudding and skin of the bodies clapping together, fabric sliding off skin and landing softly on the floor, deep breathing, and low moaning and gasping from both women, one low and one higher. No dialogue, no announcer, no counting, no crowd, no narration; the room stays otherwise silent.
+
+non_diegetic_music:
+N/A
