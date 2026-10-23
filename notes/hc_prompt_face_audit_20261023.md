@@ -925,3 +925,30 @@ One builder fix in this pass: check 6 counted `KSamplerAdvanced` nodes, which th
 3. The pick is declared to be for the face and the hair only, the picture is named the only visual reference, and no garment word sits inside any binding line (garment words stay in the action prose, where the R4F count showed they were the only garment mentions).
 4. One "the camera frames her face in close-up" beat per woman sits in c0 beat 1 and in c1; sampling is untouched (denoise 1.0, cfg 1, euler/simple, 10 steps, shift 10/3, vsa, beta6 int8, single pass, 243 f = 124 + 119, 24 fps, audio wired).
 5. The builder self-check is **9/9 PASS on all four clips** (112 PASS lines, rc 0); prompt files hc_r3_c0/_c1, hc_r4_c0/_c1, hc_r5_c0/_c1, hc_r6_c0/_c1 all pass `guard_ok`; R4G requested **no render** - `p7\JOB_REQUEST.json` is not written, the ids are free, and R6-R9 request them one at a time under the 475-min / 35-job gate.
+
+
+## 8b. R4G2 (2026-10-23, the crop path) - what changed in this audit
+
+Face crops (scripts\face_crop.py, --size 512, boxes from CPU SCRFD-10G notes\ali163_hc_r4g2_facebox.py, verified by notes\ali163_hc_r4g2_verify.py with SCRFD-10G + ArcFace glintr100, table notes\face_r4g2\r4g2_table.txt):
+
+| crop | source pick | face box | px | faces in crop | face % of crop | cos(crop, source face) |
+|---|---|---|---|---|---|---|
+| HC3_w1_face.png | GI173.jpg | 382,0,171,240 | 512x512 | 1 | 15.0 % | 0.992 |
+| HC3_w2_face.png | GI173.jpg | 799,228,222,204 | 512x512 | 1 | 16.5 % | 0.922 |
+| HC4_w1_face.png | GI107.jpg | 830,56,107,143 | 512x512 | 1 | 15.6 % | 0.960 |
+| HC5_w1_face.png | GI150.jpg | 307,154,163,212 | 512x512 | 1 | 15.7 % | 0.958 |
+| HC6_w1_face.png | BD076.jpg | 471,33,209,157 | 512x512 | 1 | 16.3 % | 0.905 |
+| HC6_w2_face.png | BD076.jpg | 783,68,133,190 | 512x512 | 1 | 15.0 % | 0.910 |
+
+Pair separation: cos(HC3_w1, HC3_w2) = 0.272 and cos(HC6_w1, HC6_w2) = 0.098 - the two crops of a pair are provably different women, so a swapped reference slot in R6/R9 cannot pass silently.
+
+The reference-pixel problem in section 8 is solved by geometry: a 512x512 crop is 0.26 Mpx against a 1344x768 = 1.03 Mpx canvas, so `ref_image_size` "match" (the node default, now set on c0) never resamples the reference and the face enters the VAE at crop resolution. Reference area share = 0.26/(1.03+0.26) = 20 % for one crop, 0.52/1.55 = 34 % for a pair (the RS6 sheet was 2.32 Mpx = 69 %).
+
+Wording shipped in the four c0 prompts and the two pair c1 prompts (F1-F5 kept: definition-line count == women, <Subject N> count == women, no garment word inside a binding line, the calm-camera close-up beat, face-and-hair-only reference framing):
+1. "The photograph in <Picture 1> shows ... her face is small in the frame" is GONE - untrue of a crop. Replaced by "<Picture 1> is a tight close-up crop of the face and hair of one adult woman, cut from the approved photograph in which she is fully clothed, and the face fills the picture": the fully-clothed provenance R4G asked for survives, reworded so it no longer claims a wide frame.
+2. pairs: <Picture 1> -> <Subject 1>, <Picture 2> -> <Subject 2>; the graph wires ref_image_1 -> img (the left-hand woman's crop) and ref_image_2 -> img2 (the right-hand woman's crop); summary + retention lines bind both faces and hair and exclude environment, wardrobe, bodies and camera.
+3. the dead "<subject 1/2> is the woman on the left/right of the input photo" fragments (never registered, and after R4G2 also unbacked) are gone from all four c0 files.
+4. pair c1 files: "the woman who was on the left/right of that photograph" -> "the woman on the left/right in the opening five seconds of this clip" - c0 no longer describes a photograph layout, and c1 conditions on the clip's own first five seconds.
+
+Graphs (notes\ali163_hc_r4g2_build.py, ALL CHECKS PASS, 116 PASS lines = 10 numbered checks x 4 clips, base runs\ali147_pool_refsheet_b_s51080000, one LoadImage per woman, no Klein sheet node): R6 ali147_pool_hc_r3_s51130003 15,020 B sha 15839d966d18; R7 ali147_pool_hc_r4_s51130004 13,544 B sha 28c9f4da246a; R8 ali147_pool_hc_r5_s51130005 13,569 B sha 7436c17ba1b9; R9 ali147_pool_hc_r6_s51130006 15,655 B sha 661b3af6fbe3. c0 1344x768 length 124 + win1.extension_frames 119 = 243 f @ 24 fps, c1 MiniMaxH3ImageToVideo with 0 reference images, sampling and audio byte-identical to the base. R4G2 requested no render: p7\JOB_REQUEST.json not written, all four ids free.
+
