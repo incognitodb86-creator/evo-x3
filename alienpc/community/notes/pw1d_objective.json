@@ -1,0 +1,200 @@
+{
+ "rep": {
+  "mode": "run",
+  "port": "10004",
+  "still": "community/hc/HC3_lesbian_beach.jpg",
+  "t_start": "2026-10-23 16:17:23",
+  "t_start_ct": "2026-10-23 16:17:23",
+  "omni_widgets": [
+   "model",
+   "quantization",
+   "resolution",
+   "task"
+  ],
+  "omni_model_rows": [
+   "Qwen2.5-Omni-7B (official, bf16) \u00b7 22.4 GB download \u00b7 ~9 GB as nf4 / ~13 GB as int8 / ~24 GB as bf16",
+   "Qwen2.5-Omni-7B GGUF Q4_K_M \u00b7 6.2 GB download \u00b7 ~9 GB with the adapter and a 12k context",
+   "Qwen2.5-Omni-7B GGUF Q8_0 \u00b7 9.7 GB download \u00b7 ~13 GB - closer to the bf16 rewrite on a card that has room",
+   "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+  ],
+  "adapter_rows": [
+   "lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-F16.gguf \u00b7 3.48 GB download",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-Q8_0.gguf \u00b7 1.85 GB download \u2014 half the size, same rewrite behaviour",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-8B-F16.gguf \u00b7 1.3 GB download",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-8B-Q8_0.gguf \u00b7 0.69 GB download \u2014 half the size, same rewrite behaviour",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-F16.gguf \u00b7 0.65 GB download",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf \u00b7 0.34 GB download \u2014 half the size, same rewrite behaviour",
+   "on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]"
+  ],
+  "model": "Qwen2.5-Omni-7B GGUF Q4_K_M \u00b7 6.2 GB download \u00b7 ~9 GB with the adapter and a 12k context",
+  "model_row": "catalog row (resolves to the on-disk pair, proof notes/pw1c_objective.json)",
+  "adapter": "on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]",
+  "adapter_row": "on-disk scan row",
+  "prompt_id": "d0606964-415f-4bbc-ba0f-d68e286bb023",
+  "queue_end": "(0, 0)",
+  "t_end": "2026-10-23 16:17:28",
+  "gpu_min": 0.1,
+  "preview_nodes": {},
+  "writer_outputs_raw": {},
+  "status": {
+   "status_str": "error",
+   "completed": false,
+   "messages": [
+    [
+     "execution_start",
+     {
+      "prompt_id": "d0606964-415f-4bbc-ba0f-d68e286bb023",
+      "timestamp": 1792790243784
+     }
+    ],
+    [
+     "execution_cached",
+     {
+      "nodes": [],
+      "prompt_id": "d0606964-415f-4bbc-ba0f-d68e286bb023",
+      "timestamp": 1792790243869
+     }
+    ],
+    [
+     "execution_error",
+     {
+      "prompt_id": "d0606964-415f-4bbc-ba0f-d68e286bb023",
+      "node_id": "13",
+      "node_type": "MiniMaxH3PromptWriterOmni",
+      "executed": [
+       "12",
+       "11"
+      ],
+      "exception_message": "MiniMaxH3PromptWriterOmni.execute() got an unexpected keyword argument 'ref_0'\n",
+      "exception_type": "TypeError",
+      "traceback": [
+       "  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 547, in execute\n    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+       "  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 352, in get_output_data\n    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+       "  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 326, in _async_map_node_over_list\n    await process_inputs(input_dict, i)\n",
+       "  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 314, in process_inputs\n    result = f(**inputs)\n             ^^^^^^^^^^^\n",
+       "  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\comfy_api\\internal\\__init__.py\", line 149, in wrapped_func\n    return method(locked_class, **inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+       "  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\comfy_api\\latest\\_io.py\", line 2053, in EXECUTE_NORMALIZED\n    to_return = cls.execute(*args, **kwargs)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"
+      ],
+      "current_inputs": {
+       "options": [
+        "{'max_new_tokens': 2048, 'temperature': 0.7, 'top_p': 0.8, 'top_k': 20, 'repetition_penalty': 1.05, 'attn_implementation': 'sdpa', 'adapter': 'on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]', 'use_lora': True, 'merge_lora': 'auto', 'auto_download': False, 'downloader': 'built-in', 'gpu_layers': -1, 'n_ctx': 8192, 'gguf_runtime': 'auto', 'llama_backend': 'auto', 'device': 'auto', 'trust_remote_code': False, 'prompt_file': 'global', 'self_check': 'warnings and notes', 'fix_once': False}"
+       ],
+       "task": [
+        "REF2AV"
+       ],
+       "resolution": [
+        "16:9"
+       ],
+       "duration": [
+        10.0
+       ],
+       "prompt": [
+        "Use <Picture 1> for the beach scene and for the two adult women in it. The clip opens on them close and unhurried in the shallow surf at golden hour, the camera low and near, handheld with a slow drift in; warm rim light, wet skin, spray backlit. Adult fictional scene, two women, no one else in frame, the sound is the surf and their breathing."
+       ],
+       "model": [
+        "Qwen2.5-Omni-7B GGUF Q4_K_M \u00b7 6.2 GB download \u00b7 ~9 GB with the adapter and a 12k context"
+       ],
+       "quantization": [
+        "nf4"
+       ],
+       "greedy": [
+        true
+       ],
+       "seed": [
+        42
+       ],
+       "keep_model_loaded": [
+        false
+       ],
+       "reference_layout": [
+        "{}"
+       ],
+       "ref_0": [
+        "tensor([[[[0.9098, 0.9529, 0.9647],\n          [0.9059, 0.9490, 0.9608],\n          [0.9059, 0.9490, 0.9608],\n          ...,\n          [0.5255, 0.5059, 0.3569],\n          [0.5216, 0.5020, 0.3529],\n          [0.5216, 0.5020, 0.3529]],\n\n         [[0.9020, 0.9451, 0.9569],\n          [0.9059, 0.9490, 0.9608],\n          [0.9059, 0.9490, 0.9608],\n          ...,\n          [0.5137, 0.4941, 0.3451],\n          [0.5098, 0.4902, 0.3412],\n          [0.5098, 0.4902, 0.3412]],\n\n         [[0.9020, 0.9451, 0.9569],\n          [0.9059, 0.9490, 0.9608],\n          [0.9098, 0.9529, 0.9647],\n          ...,\n          [0.5020, 0.4863, 0.3255],\n          [0.4980, 0.4824, 0.3216],\n          [0.4941, 0.4784, 0.3176]],\n\n         ...,\n\n         [[0.5804, 0.5647, 0.5647],\n          [0.5804, 0.5647, 0.5647],\n          [0.5765, 0.5608, 0.5608],\n          ...,\n          [0.4314, 0.2902, 0.2431],\n          [0.4314, 0.2863, 0.2510],\n          [0.4314, 0.2863, 0.2510]],\n\n         [[0.5725, 0.5569, 0.5569],\n          [0.5725, 0.5569, 0.5569],\n          [0.5686, 0.5529, 0.5529],\n          ...,\n          [0.4353, 0.2941, 0.2471],\n          [0.4353, 0.2941, 0.2471],\n          [0.4314, 0.2902, 0.2431]],\n\n         [[0.5686, 0.5529, 0.5529],\n          [0.5686, 0.5529, 0.5529],\n          [0.5647, 0.5490, 0.5490],\n          ...,\n          [0.4392, 0.2980, 0.2510],\n          [0.4392, 0.2980, 0.2510],\n          [0.4353, 0.2941, 0.2471]]]])"
+       ]
+      },
+      "current_outputs": [
+       "904",
+       "12",
+       "11",
+       "901",
+       "903",
+       "902",
+       "13",
+       "906",
+       "907",
+       "900",
+       "905"
+      ],
+      "timestamp": 1792790243977
+     }
+    ]
+   ]
+  },
+  "fields_found": {
+   "subject_definitions": false,
+   "summary": false,
+   "retention_analysis": false,
+   "detailed_description": false,
+   "overall_soundscape": false,
+   "non_diegetic_music": false
+  },
+  "n_fields": 0,
+  "prompt_len": 0,
+  "grid_243": false,
+  "media_files": [],
+  "checks": [
+   {
+    "name": "1 subject_definitions",
+    "ok": false
+   },
+   {
+    "name": "2 summary",
+    "ok": false
+   },
+   {
+    "name": "3 retention_analysis",
+    "ok": false
+   },
+   {
+    "name": "4 detailed_description",
+    "ok": false
+   },
+   {
+    "name": "5 overall_soundscape",
+    "ok": false
+   },
+   {
+    "name": "6 non_diegetic_music",
+    "ok": false
+   },
+   {
+    "name": "7 rewritten_prompt >= 600 chars",
+    "ok": false
+   },
+   {
+    "name": "8 the 10.0 s answer quotes the 243-frame grid",
+    "ok": false
+   },
+   {
+    "name": "9 no media file written under ComfyUI/output/community",
+    "ok": true
+   },
+   {
+    "name": "10 writer status completed without error",
+    "ok": false
+   }
+  ]
+ },
+ "outputs": {
+  "rewritten_prompt": "",
+  "integrated_multimodal_description": "",
+  "subject_definitions": "",
+  "summary": "",
+  "retention_analysis": "",
+  "detailed_description": "",
+  "overall_soundscape": "",
+  "non_diegetic_music": ""
+ }
+}

@@ -18,3 +18,6 @@ Readings that frame the card, taken this pass: at 15:58:04 the ComfyUI device li
 ComfyUI was up and `['coding_swift15_iq3s']` when it slept. Between the windows ComfyUI is
 unloaded by llama-swap, so a check written as "wake, then ask" in a LATER call hits a refused
 port - every live row above was captured in the same tool call that opened the window.
+| 2026-10-23 16:17:23 -> 2026-10-23 16:17:28 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.1 | PW1d smoke rewrite REF2AV 16:9 10.0 s, seed 42, 7B Q4_K_M + Q8_0 Omni adapter | (0, 0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_objective.json` |
+| 2026-10-23 16:15:35 -> 16:16:02 | ComfyUI wake (llama-swap GET /comfyui/) | 0.5 | comfy_ok, live /object_info/<class> of the writer + options nodes (the first read was wrapped by class key -> 0 rows) | (0, 0) | `notes/pw1d_objective.json` |
+| 2026-10-23 16:16:57 -> 16:17:24 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.6 | PW1d smoke rewrite REF2AV 16:9 10.0 s seed 42, 7B Q4_K_M + on-disk Q8_0 Omni adapter, auto_download False - **failed in 0.19 s**: execute() got an unexpected keyword argument 'ref_0' (autogrow references must be a LIST of links) | (1,0) -> (0,0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_graph.json`, ComfyUI console `user/comfyui_10004.log` |

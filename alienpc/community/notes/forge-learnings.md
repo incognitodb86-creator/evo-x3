@@ -56,3 +56,7 @@ R-line render request self-check (R6, 2026-10-23): verify the R4G2 graph as-is, 
 ## ALI-173 B1 pass 2026-10-23 ~15:15 CT (AGENTS.md Learnings pruned to 15 bullets, verbatim here)
 - Redo clips R4-R9: builders notes/ali163_hc_r5_build.py (sheet refs) then ali163_hc_r4g2_build.py (face-crop refs); 243 f = c0 124 + win1 119; R6-R9 request checker notes/ali163_hc_r6_request_check.py.
 - Request checks notes/ali163_hc_r8 (solo) + ali163_hc_r9 (pair): diff vs the sibling graph = per-clip keys only (5 solo; 6 pair + c1.audio_vae); sheet scan = LoadImage paths
+
+## 2026-10-23 iter 02 (PW1d) - two verbatim operational facts
+- COMFY_AUTOGROW_V3 in an API graph = a LIST of links ("references": [["11",0]]); a dict {"ref_0": [...]} is expanded by ComfyUI into a ref_0 kwarg and the node dies "execute() got an unexpected keyword argument 'ref_0'". /prompt returns 200 for both, so only the console log (ComfyUI/user/comfyui_10004.log) tells the truth - a failed job's /history dies with the process when llama-swap unloads ComfyUI between model turns.
+- GET /object_info/<Class> wraps the node under its class key: unwrap info[cls] before reading input.required[x][1]["options"], else every row list comes back empty.
