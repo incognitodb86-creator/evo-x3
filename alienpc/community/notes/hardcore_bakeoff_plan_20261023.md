@@ -34,7 +34,7 @@ The fixed scene for every arm:
 
 **Workflow JSONs and custom nodes**
 - The 2967166 and 2906001 workflow JSONs, plus any custom nodes they need, go into `custom_nodes`.
-- If a workflow needs a new **checkpoint** (for example 2906001's merged H3 model), Forge runs that arm with our 10Eros int8 model instead. It writes the checkpoint name, size and URL to `notes\guard_requests.md`, and Max asks Derrick.
+- If a workflow needs a new **checkpoint** (for example 2906001's merged H3 model), Forge runs that arm with our 10Eros int8 model instead. It writes the checkpoint name, size and URL to `notes\guard_requests.md`, and Max asks Derrick. [VOID 2026-10-23: superseded by Derrick 4:05 PM CT "Forge should be able to do this automously"; Forge downloads on its own, see the 4:05 amendment below]
 
 **The 27B Heretic GGUF + mmproj** (largest quant that fits)
 - Pick the quant from the HF page. While Forge's own model is loaded on llama-swap, check `nvidia-smi` free VRAM and choose the quant whose weights + mmproj + ~1.5 GB of context fit in that free space. On a 4090 (24 GB) next to the resident coder this is likely an IQ3/Q3 quant.
@@ -63,7 +63,7 @@ The fixed scene for every arm:
 Derrick 3:44 PM CT, verbatim: "Ok do it also have forge research lora for our fictional characters and do research on how to get better face consistency ect". His "Ok do it" answered Max's note that HB2 may need its own merged model.
 
 - **Approved:** if the 2906001 All-In-One Uncensored graph requires its own merged H3 checkpoint, Forge may download that one checkpoint, at the version the workflow page names. Before downloading, Forge checks free disk and logs the name, size, URL and path in `notes\installs_downloads.md`. HB2 then runs with that checkpoint instead of our int8 model. Everything else about the scene stays the same.
-- **Not approved:** any other new model or checkpoint still goes to `notes\guard_requests.md`.
+- **Not approved:** any other new model or checkpoint still goes to `notes\guard_requests.md`. [VOID 2026-10-23: superseded by Derrick 4:05 PM CT "Forge should be able to do this automously"; Forge downloads on its own, see the 4:05 amendment below]
 - **Research follow-ons (text only, no GPU):** queued after HB5 as RL1 (character LoRAs, ALI-181), RF1 (face consistency, ALI-182) and RA1 (audio, ALI-183; Derrick 3:45 PM CT "Also have forge research voices and stuff better audio").
 
 ## Amendment 2026-10-23 4:05 PM CT: Forge downloads autonomously
