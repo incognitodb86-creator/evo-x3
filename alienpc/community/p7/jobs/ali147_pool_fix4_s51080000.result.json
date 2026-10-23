@@ -1,0 +1,19 @@
+{
+    "started":  "2026-10-22T20:08:29",
+    "rc":  0,
+    "budget_cap_min":  390,
+    "budget_used_min":  327.1,
+    "log":  "C:\\AI\\community\\p7\\jobs\\ali147_pool_fix4_s51080000.out",
+    "id":  "ali147_pool_fix4_s51080000",
+    "ok":  true,
+    "kind":  "graph",
+    "note":  "run_graph_job rc=0 (ok)",
+    "outputs":  [
+                    "C:\\AI\\community\\runs\\ali147_pool_fix4_s51080000\\status.log",
+                    "C:\\AI\\community\\runs\\ali147_pool_fix4_s51080000\\objective.json",
+                    "C:\\AI\\community\\runs\\ali147_pool_fix4_s51080000\\ali147_pool_fix4_s51080000.mp4",
+                    "C:\\AI\\community\\runs\\ali147_pool_fix4_s51080000\\ali147_pool_fix4_s51080000_stills_contact.png"
+                ],
+    "finished":  "2026-10-22T20:59:15",
+    "wall_min":  50.8
+}
