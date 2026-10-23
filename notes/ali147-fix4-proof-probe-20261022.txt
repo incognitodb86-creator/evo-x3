@@ -1,0 +1,426 @@
+=== seg1  nodes=25 bytes=10885 sha256=c3dedab341f2b108ee31dd1aadd51a00b9a74008ca8511b604d3962d20d125d3
+  node app1 MiniMaxH3AppendContinuation
+    input overlap_audio_tokens = ['win1', 3]
+    input overlap_video_tokens = ['win1', 2]
+    input previous_av_latent = ['s0_samp', 0]
+    input sampled_window = ['s1_samp', 0]
+    input transition_audio_tokens = ['win1', 5]
+    input transition_video_tokens = ['win1', 4]
+  node avae VAELoader
+    input vae_name = 'minimax_h3_audio_vae_fp32.safetensors'
+  node c0 MiniMaxH3ReferenceToVideo
+    input audio_vae = ['avae', 0]
+    input clip = ['clip', 0]
+    input height = 1344
+    input length = 243
+    input prompt len=3295 sha256=7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+    input ref_image_size = 'match'
+    input ref_images.ref_image_1 = ['img', 0]
+    input vae = ['vvae', 0]
+    input width = 768
+  node c1 MiniMaxH3ImageToVideo
+    input clip = ['clip', 0]
+    input height = 1344
+    input length = ['win1', 1]
+    input prompt len=2303 sha256=6686d7057ead8ac945bff9263858afee0d3881b119502d7d13ab63f69d86f013
+    input vae = ['vvae', 0]
+    input width = 768
+  node clip CLIPLoader
+    input clip_name = 'qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors'
+    input device = 'default'
+    input type = 'minimax'
+  node dec_a VAEDecodeAudio
+    input samples = ['app1', 0]
+    input vae = ['avae', 0]
+  node dec_v VAEDecode
+    input samples = ['app1', 0]
+    input vae = ['vvae', 0]
+  node img LoadImage
+    input image = 'community/POOL_768x1344.png'
+  node ksel KSamplerSelect
+    input sampler_name = 'euler'
+  node m_attn ModelAttentionBackend
+    input attention = 'comfy kitchen attention'
+    input model = ['unet', 0]
+  node m_shift MiniMaxH3SigmaShift
+    input model = ['m_vsa', 0]
+    input shift_audio = 3.0
+    input shift_video = 10.0
+  node m_vsa BlockSparseAttention
+    input dense_blocks = ''
+    input end_percent = 1.0
+    input extra_tokens = 256
+    input min_tokens = 12288
+    input model = ['m_attn', 0]
+    input selection = 'vsa'
+    input selection.keep_percent = 10
+    input sink_conditioning = 'exact_kv_and_rows'
+    input start_percent = 0.2
+    input verbose = False
+  node mkvid CreateVideo
+    input audio = ['dec_a', 0]
+    input fps = 24
+    input images = ['dec_v', 0]
+  node noise RandomNoise
+    input noise_seed = 51080000
+  node s0_guide BasicGuider
+    input conditioning = ['c0', 0]
+    input model = ['m_shift', 0]
+  node s0_samp SamplerCustomAdvanced
+    input guider = ['s0_guide', 0]
+    input latent_image = ['c0', 1]
+    input noise = ['noise', 0]
+    input sampler = ['ksel', 0]
+    input sigmas = ['s0_sched', 0]
+  node s0_sched BasicScheduler
+    input denoise = 1.0
+    input model = ['m_shift', 0]
+    input scheduler = 'simple'
+    input steps = 10
+  node s1_guide BasicGuider
+    input conditioning = ['tail1', 0]
+    input model = ['m_shift', 0]
+  node s1_samp SamplerCustomAdvanced
+    input guider = ['s1_guide', 0]
+    input latent_image = ['win1', 0]
+    input noise = ['noise', 0]
+    input sampler = ['ksel', 0]
+    input sigmas = ['s1_sched', 0]
+  node s1_sched BasicScheduler
+    input denoise = 1.0
+    input model = ['m_shift', 0]
+    input scheduler = 'simple'
+    input steps = 10
+  node save SaveVideo
+    input codec = 'auto'
+    input filename_prefix = 'community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg1'
+    input format = 'auto'
+    input video = ['mkvid', 0]
+  node tail1 MiniMaxH3LatentTailGuide
+    input overlap_audio_tokens = ['win1', 3]
+    input overlap_video_tokens = ['win1', 2]
+    input positive = ['c1', 0]
+    input previous_av_latent = ['s0_samp', 0]
+    input target_av_latent = ['win1', 0]
+  node unet UNETLoader
+    input unet_name = '10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors'
+    input weight_dtype = 'default'
+  node vvae VAELoader
+    input vae_name = 'minimax_h3_video_vae_int8_convrot.safetensors'
+  node win1 MiniMaxH3GuidedContinuationWindow
+    input extension_frames = 238
+    input overlap_frames = 22
+    input previous_av_latent = ['s0_samp', 0]
+=== seg2  nodes=25 bytes=11098 sha256=b21c1b953a08747e465f39accfdc344d4dd352712de6851edf40b45cc753494f
+  node app1 MiniMaxH3AppendContinuation
+    input overlap_audio_tokens = ['win1', 3]
+    input overlap_video_tokens = ['win1', 2]
+    input previous_av_latent = ['s0_samp', 0]
+    input sampled_window = ['s1_samp', 0]
+    input transition_audio_tokens = ['win1', 5]
+    input transition_video_tokens = ['win1', 4]
+  node avae VAELoader
+    input vae_name = 'minimax_h3_audio_vae_fp32.safetensors'
+  node c0 MiniMaxH3ReferenceToVideo
+    input audio_vae = ['avae', 0]
+    input clip = ['clip', 0]
+    input height = 1344
+    input length = 243
+    input prompt len=3545 sha256=1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815
+    input ref_image_size = 'match'
+    input ref_images.ref_image_1 = ['img', 0]
+    input vae = ['vvae', 0]
+    input width = 768
+  node c1 MiniMaxH3ImageToVideo
+    input clip = ['clip', 0]
+    input height = 1344
+    input length = ['win1', 1]
+    input prompt len=2266 sha256=d7a4b4d4b49c663dab032a68e12afa7856a69c991d6138b17d6d83558c5794ef
+    input vae = ['vvae', 0]
+    input width = 768
+  node clip CLIPLoader
+    input clip_name = 'qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors'
+    input device = 'default'
+    input type = 'minimax'
+  node dec_a VAEDecodeAudio
+    input samples = ['app1', 0]
+    input vae = ['avae', 0]
+  node dec_v VAEDecode
+    input samples = ['app1', 0]
+    input vae = ['vvae', 0]
+  node img LoadImage
+    input image = 'community/POOL_768x1344.png'
+  node ksel KSamplerSelect
+    input sampler_name = 'euler'
+  node m_attn ModelAttentionBackend
+    input attention = 'comfy kitchen attention'
+    input model = ['unet', 0]
+  node m_shift MiniMaxH3SigmaShift
+    input model = ['m_vsa', 0]
+    input shift_audio = 3.0
+    input shift_video = 10.0
+  node m_vsa BlockSparseAttention
+    input dense_blocks = ''
+    input end_percent = 1.0
+    input extra_tokens = 256
+    input min_tokens = 12288
+    input model = ['m_attn', 0]
+    input selection = 'vsa'
+    input selection.keep_percent = 10
+    input sink_conditioning = 'exact_kv_and_rows'
+    input start_percent = 0.2
+    input verbose = False
+  node mkvid CreateVideo
+    input audio = ['dec_a', 0]
+    input fps = 24
+    input images = ['dec_v', 0]
+  node noise RandomNoise
+    input noise_seed = 51080001
+  node s0_guide BasicGuider
+    input conditioning = ['c0', 0]
+    input model = ['m_shift', 0]
+  node s0_samp SamplerCustomAdvanced
+    input guider = ['s0_guide', 0]
+    input latent_image = ['c0', 1]
+    input noise = ['noise', 0]
+    input sampler = ['ksel', 0]
+    input sigmas = ['s0_sched', 0]
+  node s0_sched BasicScheduler
+    input denoise = 1.0
+    input model = ['m_shift', 0]
+    input scheduler = 'simple'
+    input steps = 10
+  node s1_guide BasicGuider
+    input conditioning = ['tail1', 0]
+    input model = ['m_shift', 0]
+  node s1_samp SamplerCustomAdvanced
+    input guider = ['s1_guide', 0]
+    input latent_image = ['win1', 0]
+    input noise = ['noise', 0]
+    input sampler = ['ksel', 0]
+    input sigmas = ['s1_sched', 0]
+  node s1_sched BasicScheduler
+    input denoise = 1.0
+    input model = ['m_shift', 0]
+    input scheduler = 'simple'
+    input steps = 10
+  node save SaveVideo
+    input codec = 'auto'
+    input filename_prefix = 'community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg2'
+    input format = 'auto'
+    input video = ['mkvid', 0]
+  node tail1 MiniMaxH3LatentTailGuide
+    input overlap_audio_tokens = ['win1', 3]
+    input overlap_video_tokens = ['win1', 2]
+    input positive = ['c1', 0]
+    input previous_av_latent = ['s0_samp', 0]
+    input target_av_latent = ['win1', 0]
+  node unet UNETLoader
+    input unet_name = '10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors'
+    input weight_dtype = 'default'
+  node vvae VAELoader
+    input vae_name = 'minimax_h3_video_vae_int8_convrot.safetensors'
+  node win1 MiniMaxH3GuidedContinuationWindow
+    input extension_frames = 238
+    input overlap_frames = 22
+    input previous_av_latent = ['s0_samp', 0]
+=== seg3  nodes=25 bytes=10910 sha256=c5b6726c1d5870f597ba51fcf65499d489be9a1755ebf1905ab8fac5960e8fec
+  node app1 MiniMaxH3AppendContinuation
+    input overlap_audio_tokens = ['win1', 3]
+    input overlap_video_tokens = ['win1', 2]
+    input previous_av_latent = ['s0_samp', 0]
+    input sampled_window = ['s1_samp', 0]
+    input transition_audio_tokens = ['win1', 5]
+    input transition_video_tokens = ['win1', 4]
+  node avae VAELoader
+    input vae_name = 'minimax_h3_audio_vae_fp32.safetensors'
+  node c0 MiniMaxH3ReferenceToVideo
+    input audio_vae = ['avae', 0]
+    input clip = ['clip', 0]
+    input height = 1344
+    input length = 243
+    input prompt len=3354 sha256=8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+    input ref_image_size = 'match'
+    input ref_images.ref_image_1 = ['img', 0]
+    input vae = ['vvae', 0]
+    input width = 768
+  node c1 MiniMaxH3ImageToVideo
+    input clip = ['clip', 0]
+    input height = 1344
+    input length = ['win1', 1]
+    input prompt len=2269 sha256=dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89
+    input vae = ['vvae', 0]
+    input width = 768
+  node clip CLIPLoader
+    input clip_name = 'qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors'
+    input device = 'default'
+    input type = 'minimax'
+  node dec_a VAEDecodeAudio
+    input samples = ['app1', 0]
+    input vae = ['avae', 0]
+  node dec_v VAEDecode
+    input samples = ['app1', 0]
+    input vae = ['vvae', 0]
+  node img LoadImage
+    input image = 'community/POOL_768x1344.png'
+  node ksel KSamplerSelect
+    input sampler_name = 'euler'
+  node m_attn ModelAttentionBackend
+    input attention = 'comfy kitchen attention'
+    input model = ['unet', 0]
+  node m_shift MiniMaxH3SigmaShift
+    input model = ['m_vsa', 0]
+    input shift_audio = 3.0
+    input shift_video = 10.0
+  node m_vsa BlockSparseAttention
+    input dense_blocks = ''
+    input end_percent = 1.0
+    input extra_tokens = 256
+    input min_tokens = 12288
+    input model = ['m_attn', 0]
+    input selection = 'vsa'
+    input selection.keep_percent = 10
+    input sink_conditioning = 'exact_kv_and_rows'
+    input start_percent = 0.2
+    input verbose = False
+  node mkvid CreateVideo
+    input audio = ['dec_a', 0]
+    input fps = 24
+    input images = ['dec_v', 0]
+  node noise RandomNoise
+    input noise_seed = 51080002
+  node s0_guide BasicGuider
+    input conditioning = ['c0', 0]
+    input model = ['m_shift', 0]
+  node s0_samp SamplerCustomAdvanced
+    input guider = ['s0_guide', 0]
+    input latent_image = ['c0', 1]
+    input noise = ['noise', 0]
+    input sampler = ['ksel', 0]
+    input sigmas = ['s0_sched', 0]
+  node s0_sched BasicScheduler
+    input denoise = 1.0
+    input model = ['m_shift', 0]
+    input scheduler = 'simple'
+    input steps = 10
+  node s1_guide BasicGuider
+    input conditioning = ['tail1', 0]
+    input model = ['m_shift', 0]
+  node s1_samp SamplerCustomAdvanced
+    input guider = ['s1_guide', 0]
+    input latent_image = ['win1', 0]
+    input noise = ['noise', 0]
+    input sampler = ['ksel', 0]
+    input sigmas = ['s1_sched', 0]
+  node s1_sched BasicScheduler
+    input denoise = 1.0
+    input model = ['m_shift', 0]
+    input scheduler = 'simple'
+    input steps = 10
+  node save SaveVideo
+    input codec = 'auto'
+    input filename_prefix = 'community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3'
+    input format = 'auto'
+    input video = ['mkvid', 0]
+  node tail1 MiniMaxH3LatentTailGuide
+    input overlap_audio_tokens = ['win1', 3]
+    input overlap_video_tokens = ['win1', 2]
+    input positive = ['c1', 0]
+    input previous_av_latent = ['s0_samp', 0]
+    input target_av_latent = ['win1', 0]
+  node unet UNETLoader
+    input unet_name = '10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors'
+    input weight_dtype = 'default'
+  node vvae VAELoader
+    input vae_name = 'minimax_h3_video_vae_int8_convrot.safetensors'
+  node win1 MiniMaxH3GuidedContinuationWindow
+    input extension_frames = 238
+    input overlap_frames = 22
+    input previous_av_latent = ['s0_samp', 0]
+=== FIX4 graph nodes=13
+  node avae VAELoader
+    input vae_name = 'minimax_h3_audio_vae_fp32.safetensors'
+  node clip CLIPLoader
+    input clip_name = 'qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors'
+    input device = 'default'
+    input type = 'minimax'
+  node dec MiniMaxH3MotionContextDiskFinalDecode
+    input audio_bitrate = '192k'
+    input audio_vae = ['avae', 0]
+    input auto_save_project = False
+    input autoplay = False
+    input cache = ['ext', 0]
+    input codec = 'H.264'
+    input crf = 17
+    input filename_prefix = 'ali147_pool_fix4_s51080000_decode'
+    input fps = 24.0
+    input output_directory = ''
+    input preset = 'fast'
+    input save_individual_clips = False
+    input vae = ['vvae', 0]
+  node ext MiniMaxH3Extender
+    input audio_context_length = 0
+    input audio_vae = ['avae', 0]
+    input clip = ['clip', 0]
+    input clips_json str_len=20094 sha256=2d545bf79b9806439d8d81d283806b839dd83932a5fd6fe45b6a71b0936d4ef0
+    input context_length = '22'
+    input denoise = 1.0
+    input generation_mode = 'ref2va'
+    input height = 1344
+    input megapixels = 0.4
+    input model = ['m_shift', 0]
+    input motion_context = True
+    input prompt_pack = ['ppack', 0]
+    input ref_image_size = 'match'
+    input ref_pack = ['rpack', 0]
+    input refine_denoise = 0.3
+    input refine_enabled = False
+    input refine_scale = 1.5
+    input refine_steps = 4
+    input refs_json = '{"version":2,"refs":[null,null,null,null,null,null,null,null,null]}'
+    input resolution_mode = 'manual'
+    input run_mode = 'full_batch'
+    input sampler_name = 'euler'
+    input scheduler = 'simple'
+    input steps = 10
+    input vae = ['vvae', 0]
+    input width = 768
+  node img LoadImage
+    input image = 'community/POOL_768x1344.png'
+  node m_attn ModelAttentionBackend
+    input attention = 'comfy kitchen attention'
+    input model = ['unet', 0]
+  node m_shift MiniMaxH3SigmaShift
+    input model = ['m_vsa', 0]
+    input shift_audio = 3.0
+    input shift_video = 10.0
+  node m_vsa BlockSparseAttention
+    input dense_blocks = ''
+    input end_percent = 1.0
+    input extra_tokens = 256
+    input min_tokens = 12288
+    input model = ['m_attn', 0]
+    input selection = 'vsa'
+    input selection.keep_percent = 10
+    input sink_conditioning = 'exact_kv_and_rows'
+    input start_percent = 0.2
+    input verbose = False
+  node ppack MiniMaxH3PromptPackBridge
+    input prompt_1 str_len=3295 sha256=7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+    input prompt_2 str_len=2569 sha256=49c94ba7759859e26af01dff17230b80a834fa4b1ff57bcaac332cf40c655045
+    input prompt_3 str_len=3545 sha256=1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815
+    input prompt_4 str_len=2602 sha256=dcf5579f6cd2a04bce2d78da4aa19b35c89129b2feb07e50d202c713e1e08a11
+    input prompt_5 str_len=3354 sha256=8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+    input prompt_6 str_len=2579 sha256=d7d29ad985a7a43232f65879ea2c1c75317b6b0c803d95ede9bd26a1e78bc0e3
+  node rpack MiniMaxH3ReferencePackBridge
+    input ref_1 = ['img', 0]
+  node save SaveVideo
+    input codec = 'auto'
+    input filename_prefix = 'community/ali147_pool_fix4_s51080000/ali147_pool_fix4_s51080000'
+    input format = 'auto'
+    input video = ['dec', 0]
+  node unet UNETLoader
+    input unet_name = '10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors'
+    input weight_dtype = 'default'
+  node vvae VAELoader
+    input vae_name = 'minimax_h3_video_vae_int8_convrot.safetensors'
