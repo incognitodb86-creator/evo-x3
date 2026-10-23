@@ -143,3 +143,10 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
   python raw string, or forward slashes; TASKS.md is CRLF, so read with newline='' and join on CRLF.
 - Loop health: no deny, no timeout, no STOP_RALPH, budget 467.5/615 min and 37/45 jobs (this pass spent
   0). Nothing is BLOCKED. ralph.ps1 untouched. No render requested. Derrick's KEEP decision is his own.
+- Repair in this same file, disclosed (the notes_fix run): 3 more pre-existing escape-damage forms were
+  eaten letters, not just control chars, so '/' alone left a half-repair - line 40 'notes<BEL>li163_hc_final_*'
+  -> notes/ali163_hc_final_*, line 55 'minimax_h3_rewriteruntime<BS>10310-cuda' -> .../runtime/10310-cuda,
+  line 96 'notes\web<BEL>eddit_anatomy.json' (HF2's own HF2 line) -> notes/web/reddit_anatomy.json.
+  Gate 7/7 ALL CHECKS PASS (notes/ali163_hc_bq1d_notes_fix.py) + a CRLF-aware scan
+  (notes/ali163_hc_bq1d_ctrlscan.py) = 0 defects in 38 files (notes/*.md + TASKS.md + PROMPT.md + AGENTS.md).
+  No line of prose was reworded: only control chars became '/' and the 3 eaten letters were restored.
