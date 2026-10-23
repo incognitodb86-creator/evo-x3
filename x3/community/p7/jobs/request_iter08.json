@@ -1,14 +1,11 @@
 {
- "request_id": "p7_r2_probe_review",
- "jobs": [
-  {
-   "kind": "review",
-   "id": "p7_r2_probe_review",
-   "pairs": [
-    "p6_1min_cuts:seg1=p7_r2_c1_sd1000:seg1",
-    "p6_1min_cuts_ab05:seg1=p7_r2_c2_ab03:seg1",
-    "p6_1min_community:seg1=p7_r2_c3_pmot:seg1"
-   ]
-  }
- ]
+  "jobs": [
+    {
+      "id": "ali147_pool_hc_r3r_s51130003",
+      "kind": "graph",
+      "frames": 243,
+      "frames_tol": 0,
+      "minutes": 60
+    }
+  ]
 }
