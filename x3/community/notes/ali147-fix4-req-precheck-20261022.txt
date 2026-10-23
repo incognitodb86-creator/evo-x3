@@ -1,0 +1,224 @@
+JOB_REQUEST.json bytes 116 sha256 18c015eaa0d42c9a3bc44438175fc03cd83f976bd5d13ae02b524210b0987ed8
+PASS top level keys == ['jobs'] got ['jobs']
+PASS exactly one job, got 1
+PASS job keys exactly id/kind/frames/frames_tol/minutes, got ['frames', 'frames_tol', 'id', 'kind', 'minutes']
+PASS job[id] == 'ali147_pool_fix4_s51080000' (got 'ali147_pool_fix4_s51080000')
+PASS job[kind] == 'graph' (got 'graph')
+PASS job[frames] == 1443 (got 1443)
+PASS job[frames_tol] == 24 (got 24)
+PASS job[minutes] == 180 (got 180)
+PASS found 2 live id gates in ralph.ps1 (line 184 + the graph/dip gate), got 2: ['^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+)$', '^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+$']
+PASS id ali147_pool_fix4_s51080000 matches live pattern ^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$
+PASS id ali147_pool_fix4_s51080000 matches live pattern ^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$
+PASS ralph.ps1 gate present: id-already-used
+PASS ralph.ps1 gate present: budget-min
+PASS ralph.ps1 gate present: budget-jobs
+PASS ralph.ps1 gate present: graph-missing-request
+PASS ralph.ps1 gate present: graph-mp4-exists
+PASS p7\jobs live files: ['ali147_pool_fix4_s51080000.result.json', 'ali147_pool_fix4_s51080000.out', 'ali147_pool_fix4_s51080000.err.out'] .failed-20261022 copies: []
+  live result.json ok=False rc=5 note=run_graph_job rc=5 (objective failure after 2 redos: STUCK, flagged for Derrick) started=2026-10-22T17:35:59 finished=2026-10-22T17:37:07
+FAIL harness gate 185: 'ali147_pool_fix4_s51080000.result.json' absent -> request accepted (if this FAILS the run will log 'refused: id already used', no GPU spent, no new result.json)
+  -> PREDICTED: RunJobs logs "P7 job ali147_pool_fix4_s51080000 refused: id already used" (the :185 continue), writes NO result.json, spends NO GPU. Only the harness moving p7\jobs\<id>.result.json/.out/.err.out to *.failed-<date> frees the id (p7\jobs = protected-paths [p7-harness], Forge must not move them).
+  p7_budget.json {'used_min': 276.3, 'jobs': 22, 'cap_min': 390, 'job_cap': 27, 'updated': '2026-10-22T19:11:34'}
+PASS budget gate: used_min 276.3 < cap_min 390
+PASS job gate: jobs 22 < job_cap 27
+  NOTE the 180 min request would take used_min to 456.3 (cap 390): the gate is checked BEFORE the job only
+PASS run folder request.api.json present (gate 268)
+PASS gate 269: ali147_pool_fix4_s51080000.mp4 absent in run root (arm not rendered)
+PASS run root clean of prior-output status.log (moved to failed-20261022)
+PASS run root clean of prior-output objective.json (moved to failed-20261022)
+PASS run root clean of prior-output ali147_pool_fix4_s51080000.api.json (moved to failed-20261022)
+PASS run root clean of prior-output ali147_pool_fix4_s51080000_stills_contact.png (moved to failed-20261022)
+PASS old outputs preserved in failed-20261022\status.log
+PASS graph_diff.txt present
+PASS .bak-20261022-fix4graph present
+graph nodes 13 sha256 7530cf228c73bae7631b3a97b1c8770e56797318d1782925907b4738956dbf57 bytes 41921
+PASS node avae class VAELoader in specs\extender_object_info.json
+PASS node clip class CLIPLoader in specs\extender_object_info.json
+PASS node dec class MiniMaxH3MotionContextDiskFinalDecode in specs\extender_object_info.json
+PASS node ext class MiniMaxH3Extender in specs\extender_object_info.json
+PASS node img class LoadImage in specs\extender_object_info.json
+PASS node m_attn class ModelAttentionBackend in specs\extender_object_info.json
+PASS node m_shift class MiniMaxH3SigmaShift in specs\extender_object_info.json
+PASS node m_vsa class BlockSparseAttention in specs\extender_object_info.json
+PASS node ppack class MiniMaxH3PromptPackBridge in specs\extender_object_info.json
+PASS node rpack class MiniMaxH3ReferencePackBridge in specs\extender_object_info.json
+PASS node save class SaveVideo in specs\extender_object_info.json
+PASS node unet class UNETLoader in specs\extender_object_info.json
+PASS node vvae class VAELoader in specs\extender_object_info.json
+PASS node avae input 'vae_name' exists in object_info (dynamic-combo sub-inputs included)
+PASS node clip input 'clip_name' exists in object_info (dynamic-combo sub-inputs included)
+PASS node clip input 'device' exists in object_info (dynamic-combo sub-inputs included)
+PASS node clip input 'type' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'audio_bitrate' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'audio_vae' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'auto_save_project' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'autoplay' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'cache' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'codec' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'crf' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'filename_prefix' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'fps' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'output_directory' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'preset' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'save_individual_clips' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec input 'vae' exists in object_info (dynamic-combo sub-inputs included)
+PASS node dec link cache -> existing node ext
+PASS node dec link vae -> existing node vvae
+PASS node dec link audio_vae -> existing node avae
+PASS node ext input 'audio_context_length' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'audio_vae' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'clip' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'clips_json' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'context_length' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'denoise' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'generation_mode' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'height' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'megapixels' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'model' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'motion_context' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'prompt_pack' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'ref_image_size' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'ref_pack' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'refine_denoise' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'refine_enabled' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'refine_scale' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'refine_steps' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'refs_json' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'resolution_mode' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'run_mode' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'sampler_name' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'scheduler' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'steps' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'vae' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext input 'width' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ext link model -> existing node m_shift
+PASS node ext link clip -> existing node clip
+PASS node ext link vae -> existing node vvae
+PASS node ext link audio_vae -> existing node avae
+PASS node ext link prompt_pack -> existing node ppack
+PASS node ext link ref_pack -> existing node rpack
+PASS node img input 'image' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_attn input 'attention' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_attn input 'model' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_attn link model -> existing node unet
+PASS node m_shift input 'model' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_shift input 'shift_audio' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_shift input 'shift_video' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_shift link model -> existing node m_vsa
+PASS node m_vsa input 'dense_blocks' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'end_percent' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'extra_tokens' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'min_tokens' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'model' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'selection' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'selection.keep_percent' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'sink_conditioning' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'start_percent' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa input 'verbose' exists in object_info (dynamic-combo sub-inputs included)
+PASS node m_vsa link model -> existing node m_attn
+PASS node ppack input 'prompt_1' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ppack input 'prompt_2' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ppack input 'prompt_3' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ppack input 'prompt_4' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ppack input 'prompt_5' exists in object_info (dynamic-combo sub-inputs included)
+PASS node ppack input 'prompt_6' exists in object_info (dynamic-combo sub-inputs included)
+PASS node rpack input 'ref_1' exists in object_info (dynamic-combo sub-inputs included)
+PASS node rpack link ref_1 -> existing node img
+PASS node save input 'codec' exists in object_info (dynamic-combo sub-inputs included)
+PASS node save input 'filename_prefix' exists in object_info (dynamic-combo sub-inputs included)
+PASS node save input 'format' exists in object_info (dynamic-combo sub-inputs included)
+PASS node save input 'video' exists in object_info (dynamic-combo sub-inputs included)
+PASS node save link video -> existing node dec
+PASS node unet input 'unet_name' exists in object_info (dynamic-combo sub-inputs included)
+PASS node unet input 'weight_dtype' exists in object_info (dynamic-combo sub-inputs included)
+PASS node vvae input 'vae_name' exists in object_info (dynamic-combo sub-inputs included)
+PASS exactly one MiniMaxH3Extender
+PASS extender run_mode == 'full_batch' (got 'full_batch')
+PASS extender generation_mode == 'ref2va' (got 'ref2va')
+PASS extender motion_context == True (got True)
+PASS extender refine_enabled == False (got False)
+PASS extender resolution_mode == 'manual' (got 'manual')
+PASS extender width == 768 (got 768)
+PASS extender height == 1344 (got 1344)
+PASS extender steps == 10 (got 10)
+PASS extender sampler_name == 'euler' (got 'euler')
+PASS extender scheduler == 'simple' (got 'simple')
+PASS extender denoise == 1.0 (got 1.0)
+PASS extender context_length == '22' (got '22')
+  clips_json top-level keys ['clips', 'version']
+  clips_json project-level validated=None seed=None seed_mode=None
+  clip_1 keys ['color_adjustment', 'duration', 'first_frame', 'first_source', 'guides', 'id', 'last_frame', 'local_refs', 'loras', 'name', 'prompt', 'seed', 'seed_mode', 'validated']
+PASS 6 clips, got 6
+PASS clip_1 validated false
+PASS clip_1 duration 10.125 -> 243 frames (expected 243)
+PASS clip_1 243 frames on the 5+17k grid
+PASS clip_1 seed 51080000 / seed_mode fixed (got 51080000 'fixed')
+PASS clip_1 prompt is a non-empty string (3295 chars) sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+PASS clip_2 validated false
+PASS clip_2 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_2 260 frames on the 5+17k grid
+PASS clip_2 seed 51080000 / seed_mode fixed (got 51080000 'fixed')
+PASS clip_2 prompt is a non-empty string (2569 chars) sha256 49c94ba7759859e26af01dff17230b80a834fa4b1ff57bcaac332cf40c655045
+PASS clip_3 validated false
+PASS clip_3 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_3 260 frames on the 5+17k grid
+PASS clip_3 seed 51080000 / seed_mode fixed (got 51080000 'fixed')
+PASS clip_3 prompt is a non-empty string (3545 chars) sha256 1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815
+PASS clip_4 validated false
+PASS clip_4 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_4 260 frames on the 5+17k grid
+PASS clip_4 seed 51080000 / seed_mode fixed (got 51080000 'fixed')
+PASS clip_4 prompt is a non-empty string (2602 chars) sha256 dcf5579f6cd2a04bce2d78da4aa19b35c89129b2feb07e50d202c713e1e08a11
+PASS clip_5 validated false
+PASS clip_5 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_5 260 frames on the 5+17k grid
+PASS clip_5 seed 51080000 / seed_mode fixed (got 51080000 'fixed')
+PASS clip_5 prompt is a non-empty string (3354 chars) sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+PASS clip_6 validated false
+PASS clip_6 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_6 260 frames on the 5+17k grid
+PASS clip_6 seed 51080000 / seed_mode fixed (got 51080000 'fixed')
+PASS clip_6 prompt is a non-empty string (2579 chars) sha256 d7d29ad985a7a43232f65879ea2c1c75317b6b0c803d95ede9bd26a1e78bc0e3
+  raw frames 1543, kept after 5 seams x22 = 1433 frames = 59.708 s
+PASS kept 1433 within tol 24 of 1443
+PASS extender has no prompt_1 input (prompts live on the PromptPackBridge) (got None)
+PASS extender has no prompt_2 input (prompts live on the PromptPackBridge) (got None)
+PASS extender has no prompt_3 input (prompts live on the PromptPackBridge) (got None)
+PASS extender has no prompt_4 input (prompts live on the PromptPackBridge) (got None)
+PASS extender has no prompt_5 input (prompts live on the PromptPackBridge) (got None)
+PASS extender has no prompt_6 input (prompts live on the PromptPackBridge) (got None)
+PASS ppack prompt_1 is a non-empty string (3295 chars) sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+PASS ppack prompt_2 is a non-empty string (2569 chars) sha256 49c94ba7759859e26af01dff17230b80a834fa4b1ff57bcaac332cf40c655045
+PASS ppack prompt_3 is a non-empty string (3545 chars) sha256 1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815
+PASS ppack prompt_4 is a non-empty string (2602 chars) sha256 dcf5579f6cd2a04bce2d78da4aa19b35c89129b2feb07e50d202c713e1e08a11
+PASS ppack prompt_5 is a non-empty string (3354 chars) sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+PASS ppack prompt_6 is a non-empty string (2579 chars) sha256 d7d29ad985a7a43232f65879ea2c1c75317b6b0c803d95ede9bd26a1e78bc0e3
+PASS exactly one SaveVideo
+PASS SaveVideo filename_prefix 'community/ali147_pool_fix4_s51080000/ali147_pool_fix4_s51080000'
+PASS SaveVideo fed by MiniMaxH3MotionContextDiskFinalDecode
+  node img LoadImage 'community/POOL_768x1344.png'
+PASS node img LoadImage 'community/POOL_768x1344.png' resolves inside ComfyUI\input
+    sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075 size 1354030
+  base arm dir C:/Users/derek/5slock/2026-10-22-run-a exists=False
+  -> Fairness (l) node-by-node vs the base graph is NOT computable here (no 2026-10-22-run-a on disk, same state as spec item 8 and the FIX4_GRAPH notes); the only diff in graph_diff.txt is the .bak -> new clips_json pair
+PASS graph_diff.txt = exactly 1 removed + 1 added line (the validated/duration clip list), got -1 +1
+PASS the only removal carries escaped validated:true x6 (6) and the only addition escaped validated:false x6 (6)
+PASS node id set unchanged (13 ids)
+PASS vs the .bak the changed node set is exactly ['ext'] (got ['ext']); 12/13 nodes byte-identical
+PASS the only changed ext input key is clips_json
+PASS clip_1 only validated/duration differ from the .bak (got ['validated'])
+PASS clip_1 identical once validated/duration excluded, prompt sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+PASS clip_2 only validated/duration differ from the .bak (got ['duration', 'validated'])
+PASS clip_2 identical once validated/duration excluded, prompt sha256 49c94ba7759859e26af01dff17230b80a834fa4b1ff57bcaac332cf40c655045
+PASS clip_3 only validated/duration differ from the .bak (got ['duration', 'validated'])
+PASS clip_3 identical once validated/duration excluded, prompt sha256 1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815
+PASS clip_4 only validated/duration differ from the .bak (got ['duration', 'validated'])
+PASS clip_4 identical once validated/duration excluded, prompt sha256 dcf5579f6cd2a04bce2d78da4aa19b35c89129b2feb07e50d202c713e1e08a11
+PASS clip_5 only validated/duration differ from the .bak (got ['duration', 'validated'])
+PASS clip_5 identical once validated/duration excluded, prompt sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+PASS clip_6 only validated/duration differ from the .bak (got ['duration', 'validated'])
+PASS clip_6 identical once validated/duration excluded, prompt sha256 d7d29ad985a7a43232f65879ea2c1c75317b6b0c803d95ede9bd26a1e78bc0e3
+
+CHECK FAILS 1
+ - harness gate 185: 'ali147_pool_fix4_s51080000.result.json' absent -> request accepted (if this FAILS the run will log 'refused: id already used', no GPU spent, no new result.json)
