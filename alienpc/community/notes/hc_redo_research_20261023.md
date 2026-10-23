@@ -451,3 +451,88 @@ No face metric for the rendered mp4 was measured in this pass, and none is claim
 - No GPU, no runner, no judge, no image/video opened, no request written, no graph touched, no downloads.
 
 METHOD_ONLY. No quality verdict, no A/B winner. **KEEP is Derrick's only.**
+
+## Sheets (R3V verify, 2026-10-23 ~11:35 CT, read-only, no GPU, no vision judge, no image opened)
+
+Job record (`p7\jobs\ali147_pool_hc_sheet_s51120000.result.json`, `runs\ali147_pool_hc_sheet_s51120000\status.log` + `objective.json`):
+`2026-10-23 11:24:40 CT JOB start ... prompt_id=a5614396-7f59-49c4-97b4-9eadfbe020cc` /
+`11:27:26 CT JOB end ali147_pool_hc_sheet_s51120000 ok secs=166.2` /
+`11:27:26 CT OBJECTIVE ok ... image=True frames=1 size=1152x2016 audio=False dur=0.000 bytes=2756008 contact=None` /
+`11:27:27 CT UNLOAD comfyui_auto`. `ok=true rc=0 wall_min=3.6`, `blackfreeze=[]`, one attempt, no redo.
+Provenance: my `request.api.json` 28,547 B sha256 `47fa7713cc8ddc7f57cb2d8ed36127b9c7f6b82506d1e2912936f1a276c276ae` vs the
+rendered `ali147_pool_hc_sheet_s51120000.api.json` 28,545 B sha256 `05f3c1ce39641df2ddad89bc02afc6da599539dad9fa307d952edf3cdc272e02` =
+116/116 node keys, **0 node-body diffs** (`json.dumps(node, sort_keys=True)` per node); the 2-byte delta is my trailing newline
+(req crlf 1415 + final LF, api crlf 1414, no final LF) - the graph that rendered is mine.
+The harness copied ONE tile to `runs\<id>\<id>.png` (sha256 `06127d1f970c...` = `HC5_00001_.png`, the last chain to finish);
+`<id>.png.json` names `comfy_output = ...\output\community\hc_sheets\HC5_00001_.png`. All 10 sheets exist (10 SaveImage prefixes,
+one png each), so the single-file harness gate is a sampling limit, not a loss.
+
+All 10 = **1152x2016 RGB PNG** (the RS016 sheet shape, PIL `.size`/`.mode`/`.format`), sha256 = `certutil`-equivalent hashlib, in
+`C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\output\community\hc_sheets\`:
+
+| sheet png | size | bytes | sha256 | LoadImage string for R4-R9 |
+|---|---|---|---|---|
+| HC1_w1_blonde_00001_.png | 1152x2016 | 2,464,826 | `022cd65e0c3360ba44fba19067ccf11521e3f48450bad481bea7146a4f775c76` | `community/hc_sheets/HC1_w1_blonde_00001_.png [output]` |
+| HC1_w2_darkhair_00001_.png | 1152x2016 | 2,759,840 | `8336fa03aab3de285711605e485f338fd6f2373e7a38397193ea378da3eeca6d` | `community/hc_sheets/HC1_w2_darkhair_00001_.png [output]` |
+| HC2_w1_blonde_00001_.png | 1152x2016 | 2,657,620 | `0daac8df30bb67ab55ad5d85167f6984932e8228ec2f57120b01d6945dac452b` | `community/hc_sheets/HC2_w1_blonde_00001_.png [output]` |
+| HC2_w2_darkhair_00001_.png | 1152x2016 | 2,692,366 | `3c9701692eb0ecac6e344b7b575c66a2e8e9711ac1a3b6a433743fe7cf154170` | `community/hc_sheets/HC2_w2_darkhair_00001_.png [output]` |
+| HC3_w1_left_00001_.png | 1152x2016 | 2,407,134 | `92e67db3a2e4431f0307a52d7d4ae02465f43745ec9ff53e33221dec80fd0394` | `community/hc_sheets/HC3_w1_left_00001_.png [output]` |
+| HC3_w2_right_00001_.png | 1152x2016 | 2,787,085 | `fbaf562317d009edc3e3c7839d148a54d70be7fe223758cb6c61a3ae53f357de` | `community/hc_sheets/HC3_w2_right_00001_.png [output]` |
+| HC4_00001_.png | 1152x2016 | 2,810,404 | `ee2459d1f0215f6938afeae5c432240f15404594fc42a63fe28b3420a74bdc9a` | `community/hc_sheets/HC4_00001_.png [output]` |
+| HC5_00001_.png | 1152x2016 | 2,756,008 | `06127d1f970c183b82bd96d48a4dafe1d6f501b17d0b705359c978691a9dc7b6` | `community/hc_sheets/HC5_00001_.png [output]` |
+| HC6_w1_blonde_00001_.png | 1152x2016 | 2,916,630 | `abd37c7953c63ca8a034dea51b5a5455a3f7363f05ff30389ca3660d31ebffdd` | `community/hc_sheets/HC6_w1_blonde_00001_.png [output]` |
+| HC6_w2_darkhair_00001_.png | 1152x2016 | 2,455,247 | `d6ed95d56a11fd7ff91475d0cd809ee56ddf2d2dc223c19bc1eb618c8aef25bf` | `community/hc_sheets/HC6_w2_darkhair_00001_.png [output]` |
+
+### Sheet placement is NOT needed: a LoadImage string exists for every sheet at its saved location
+
+The R3 note assumed a sheet must be copied into `ComfyUI\input` (the RS5 precedent). It does not. Source, read out of this box:
+
+- `ComfyUI\folder_paths.py:257-270 annotated_filepath(name)`: a name ending in the 8-char output tag sets
+  `base_dir = get_output_directory()` and strips `name[:-9]`; the 7-char input tag strips `name[:-8]`, the 6-char temp tag
+  `name[:-7]` - every strip is **one char longer than the tag**, so the tag must be preceded by a space (that space is the
+  9th char). Probed with the real function: `"abc.png[output]" -> ('abc.pn', <output>)` (truncated, `isfile=False`),
+  `"abc.png [output]" -> ('abc.png', <output>)`.
+- `folder_paths.py:343-357 get_annotated_filepath` joins that `base_dir` and hard-requires
+  `is_within_directory` (`:326-340`, realpath + commonpath) - so an absolute path under `ComfyUI\output` passed as the string
+  raises `ValueError: Invalid file path` (measured), and a plain `community/hc_sheets/<png>` resolves into `input\...` and
+  does not exist (measured, `isfile=False`).
+- `ComfyUI\nodes.py:1763-1764 LoadImage.load_image` -> `folder_paths.get_annotated_filepath(image)` (the runtime load),
+  `:1807-1813 IS_CHANGED` (same call, sha256 of the file), `:1815-1820 VALIDATE_INPUTS` ->
+  `folder_paths.exists_annotated_filepath` (`folder_paths.py:360-370`), which uses the **same** `annotated_filepath` tag logic.
+  So the tagged string passes ComfyUI's own per-node input validation, not just the load step.
+- Live test with the box's own functions imported read-only (`sys.path.insert` + `set_output_directory` / `set_input_directory`
+  / `set_temp_directory` exactly as `main.py:162/:175/:510`): **10/10 sheets resolve, `isfile=True`** for the
+  `"<relpath> [output]"` form; the known-good pick string `community/hc/HC1_Two_women_in_studio_editorial.jpg` resolves to
+  `input\community\hc\...` `isfile=True` (the no-tag input form still works, unchanged).
+- UI listability is a non-issue for a headless render: `nodes.py:1748-1753 INPUT_TYPES` lists only the top-level files of the
+  input dir, yet subfolder strings have always been accepted verbatim through the API (this batch's own graphs use
+  `community/hc/HC*_*.jpg`, and the RS6 arm used `community/POOL_768x1344.png`).
+
+So **R4-R9 use `LoadImage = "community/hc_sheets/<sheet>_00001_.png [output]"`** (one space before the tag), and the 6 placed
+picks stay `community/hc/HC<n>_<name>.jpg`. No copy into `ComfyUI\input`, no guard question, no Max action.
+
+- Persistence requirement (the only real cost): `ComfyUI\output\community\hc_sheets\*.png` must stay on disk until R9 renders.
+  Nothing in the harness deletes output; a re-run of the sheet job writes `_00002_.png` (never overwrites `_00001_.png`), so the
+  names and sha256 above stay valid. If Max ever archives/cleans `ComfyUI\output`, R4-R9 die with `Invalid image file` -
+  the fallback is a copy into `input\community\hc\` (Max-only: the guard's Copy-Item takes sources under `approved_characters` only).
+- Map for R4-R9 (ordinals, from `notes\hc_sheets_map_20261023.md`): pair clips HC1/HC2/HC3/HC6 bind
+  `<Picture 1>` = the placed pair pick, `<Picture 2>` = the `*_w1_*` sheet, `<Picture 3>` = the `*_w2_*` sheet
+  (`<Subject 1>` = sheet 2's woman, `<Subject 2>` = sheet 3's woman); solo clips HC4/HC5 bind `<Picture 1>` = pick,
+  `<Picture 2>` = its solo sheet. Seeds 51120001-51120008 + the two untouched solo seeds 51100004/51100005.
+- Isolation caveat (unchanged, R3 note): no vision judge is allowed, so whether Klein dropped the second woman in each pair
+  sheet is **Derrick's eye on the png only**. This pass proves size / sha / count / resolvability and that the 2 solo chains'
+  text+seed+prefix are unchanged (`notes\ali163_hc_r3b_build.py` asserts it); it does not prove face fidelity of a sheet.
+- Budget at verify time (`ralph-community\logs\p7_budget.json`, `updated 2026-10-23T11:27:27`):
+  `used_min 408.5 / cap_min 495`, `jobs 29 / job_cap 35` = 86.5 min and **6 job slots** - Max raised `-JobMax` from 32 to 35,
+  so R4-R9 fit in slots 30-35. R4 gate: 408.5 < 475, 29 < 35.
+- R4-R9 ids `ali147_pool_hc_r<n>_s5113000<n>` all match **both** live ralph.ps1 `-notmatch` gates
+  (`^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$` and `^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$`).
+- Probes (read-only, all CPU): `notes\ali163_hc_r3v_verify.py` -> `RESULT: ALL CHECKS PASS` (job record, 10 pngs, 1152x2016 RGB,
+  sha256 x64 hex, 0 node-body diffs, source-line dumps, candidate strings, placed-pick list, live id gates, budget);
+  `notes\ali163_hc_r3v_paths2.py` -> the 10/10 `[output]` resolution + the tag off-by-one + the `ValueError` on an absolute
+  output path; `notes\ali163_hc_r3v_src.py` / `notes\ali163_hc_r3v_paths.py` -> file/function locations
+  (`LoadImage` is `ComfyUI\nodes.py:1746`, **not** `comfy_extras\nodes.py`, which does not exist on this build).
+- Denied and not retried: `bash` with `;` (one probe), `grep` on `scripts\comm.py` (protected-paths [gpu-pipeline]) - the
+  placement question was answered from ComfyUI source instead, which is the stronger evidence.
+
+METHOD_ONLY. No quality verdict, no A/B winner, no vision judge. **KEEP is Derrick's only.**
