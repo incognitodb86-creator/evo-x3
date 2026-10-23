@@ -701,4 +701,227 @@ R4F (research + measurement, this pass) is complete: the ranked fix list is `C:\
 
 Statements required by the task: c1, c2, r1, r2 prompt texts are listed verbatim and completely (section A + the `<details>` blocks); the line-by-line comparison is section B; the reference images as placed (pixel sizes, aspect, sha256, per-face box sizes) are in the tables of sections C and D; face box size per woman per clip is measured in D. **No new renders were submitted in this pass** (no `p7\JOB_REQUEST.json` was written, no GPU touched), **no new seeds** (only the seeds of the four already-submitted clips are named), **no vision judge**, **no download, no install** (R4F runs used `C:\AI\qa_gate_venv` only, per its ALLOWLIST).
 
+## R4G (2026-10-23, Forge): the old r1/r2 prompt text and reference slots vs the CITED wording, line by line
 
+Written by `C:\AI\community\notes\ali163_hc_r4g_build.py` (the builder) and `C:\AI\community\notes\ali163_hc_r4g_audit.py` (this section). Task line R4G = graph builder + prompt text work: **no GPU, no render, no JOB_REQUEST.json, no download, no new node, no vision judge, no new seeds**.
+
+### R4G.0 Inputs (read this pass)
+
+| file | bytes | sha256(12) |
+|---|---|---|
+| runs\ali147_pool_hc_r1_s51130001\request.api.json (r1) | 13805 | 2c8eeb6d2d0b |
+| runs\ali147_pool_hc_r2_s51130002\request.api.json (r2) | 14507 | 5719961fa101 |
+| runs\ali147_pool_hc_r3_s51130003\request.api.json (R6) | 14720 | ed52ea0b0e0f |
+| runs\ali147_pool_hc_r4_s51130004\request.api.json (R7) | 13585 | b17333d681f6 |
+| runs\ali147_pool_hc_r5_s51130005\request.api.json (R8) | 13600 | a47142b394b9 |
+| runs\ali147_pool_hc_r6_s51130006\request.api.json (R9) | 15371 | e20106ff422f |
+| notes\hc_r3_c0.txt (R6 c0) | 5043 | fd4815380ed9 |
+| notes\hc_r3_c1.txt (R6 c1) | 4323 | 95a4fb18c924 |
+| notes\hc_r4_c0.txt (R7 c0) | 4371 | a9c8a808383e |
+| notes\hc_r4_c1.txt (R7 c1) | 3856 | 26ae52224813 |
+| notes\hc_r5_c0.txt (R8 c0) | 4449 | 2f5788568b3f |
+| notes\hc_r5_c1.txt (R8 c1) | 3803 | fb212b9e80a1 |
+| notes\hc_r6_c0.txt (R9 c0) | 5306 | bbdbbb96925f |
+| notes\hc_r6_c1.txt (R9 c1) | 4705 | 0133ac0f226f |
+| notes\web\ext_readme.md | 21826 | 2acf218bdced |
+| notes\web\longvid_readme.md | 40528 | a6b23f0d1676 |
+| notes\web\hf_eros_d63.html | 294656 | 860f49e97969 |
+
+### R4G.1 The cited community wording, quoted VERBATIM from the saved copies (file + line numbers)
+
+`notes\web\ext_readme.md` = https://raw.githubusercontent.com/tritant/ComfyUI_MiniMax_H3_Extender/main/README.md (the node installed on this box, `ComfyUI\custom_nodes\ComfyUI_MiniMax_H3_Extender`), lines 379-392:
+
+> When using image references, it is strongly recommended to place a `subject_definitions` block at the **beginning of every clip prompt**.
+>
+> This helps MiniMax H3 keep the same subjects, identities, clothing, visual roles and even the environment associated with a reference image from one clip to the next.
+>
+> ### Example
+>
+> > **subject_definitions:**  
+> > `<Picture 1>` is the reference image defining the exact visual appearance, identity, face, hairstyle, body proportions, clothing, accessories, and overall look of `<Subject 1>`, as well as the established environment and visual context of the scene.  
+> > `<Picture 2>` is the reference image defining the exact visual appearance, identity, face, hairstyle, body proportions, clothing, accessories, and overall look of `<Subject 2>`.  
+> > `<Subject 1>` is the exact same woman shown in `<Picture 1>`.  
+> > `<Subject 2>` is her friend, the exact same woman shown in `<Picture 2>`.  
+> > `<Subject 3>` is the same street environment and scene context established in `<Picture 1>`.
+>
+> Place this `subject_definitions` block at the **very beginning of every clip prompt**.
+>
+
+`notes\web\longvid_readme.md` = https://raw.githubusercontent.com/Smite79/MiniMax-H3-LongVideos/main/README.md:
+
+- L174-179 (F4 - once a garment is off the shot says the picture is for that person's face and hair only, and the prompt names the garment no more than the beat does):
+> - A reference picture shows its person in the clothes they had on, and H3 copies what it
+>   sees, print and all, back onto them. So the picture goes in cropped to their face and
+>   hair (see Reference pictures), and once a garment is off the shot also says the picture
+>   is for their face and hair only. `info` shows *naked:* for each undressed person.
+> - The prompt names the garment no more than the beat does, since every mention is one
+>   more pull toward drawing it.
+- L349-350 (F5 - a beat that sets the camera framing (close-up, the camera frames her face) holds only its own people):
+>   between frame only the beat's people as above. A beat that sets the camera's framing
+>   (*close-up*, *the camera frames her face*) always holds only its own people.
+- L436-437 (F7 - a person's own picture is left out of shots that start on a frame they are already in):
+> Once a person is held, their own picture (written right after their name, as in
+> `Mara <Picture 1>`) is left out of shots that start on a frame they are already in. A
+- L458-461 (F4/F8 - a person's picture goes in cropped to their face and hair, so clothes come only from the words (the 400-550 px crop is NOT approved for this batch, so R4G uses the full pick at `match` instead)):
+> A person's picture always goes in cropped to their face and hair (found with DWPose), so
+> their clothes come only from the words: the clothes in the picture never end up on top of
+> the ones the scene describes. `info` marks it *face and hair* under *pictures:*, and says
+> when no face could be found and the whole picture went in.
+- L621-621 (F6 - denoise is fixed at 1.0: partial denoise desyncs the joint audio/video schedule):
+> - Denoise is fixed at 1.0: partial denoise desyncs the joint audio/video schedule.
+
+The 10Eros-Max card wording (https://huggingface.co/TenStrip/10Eros-Max/discussions/63, saved as `notes\web\hf_eros_d63.html`, quoted in `notes\hc_face_research_20261023.md` item 5): `<Subject 1>` (appears in [Shot 1]): **fully_preserved - her face, hair, clothes, bone structure are exactly as in `<picture 1>`**.
+
+Node code read locally (no download): `ComfyUI\custom_nodes\ComfyUI_MiniMax_H3_Extender\extender.py:110-116, 2267-2310` - `ref_image_size` `match` caps every reference to the canvas pixels, `max` only downscales a side over 2048, so the 1152x2016 Klein sheets entered the VAE at full 2.32 Mpx against a 1.032 Mpx canvas (R4F section C).
+
+### R4G.2 Reference slots AS WIRED in the graph - old r1/r2 (submitted) vs new R6-R9 (this pass)
+
+| clip | chunk | class | ref_image_size | ref slots -> LoadImage node -> file | file WxH | file Mpx | effective Mpx into the VAE |
+|---|---|---|---|---|---|---|---|
+| r1 | c0 | MiniMaxH3ReferenceToVideo | max | ref_images.ref_image_1 -> img (LoadImage) -> `community/hc/HC1_Two_women_in_studio_editorial.jpg` | 1376x768 | 1.057 | 1.057 |
+| r1 | c0 | MiniMaxH3ReferenceToVideo | max | ref_images.ref_image_2 -> sheet (LoadImage) -> `community/hc/HC1_w1_blonde_00001_.png` | 1152x2016 | 2.322 | 2.322 |
+| r1 | c1 | MiniMaxH3ReferenceToVideo | max | ref_images.ref_image_1 -> sheet (LoadImage) -> `community/hc/HC1_w1_blonde_00001_.png` | 1152x2016 | 2.322 | 2.322 |
+| r2 | c0 | MiniMaxH3ReferenceToVideo | max | ref_images.ref_image_1 -> img (LoadImage) -> `community/hc/HC2_Two_women_in_passionate_embrace.jpg` | 1376x768 | 1.057 | 1.057 |
+| r2 | c0 | MiniMaxH3ReferenceToVideo | max | ref_images.ref_image_2 -> sheet (LoadImage) -> `community/hc/HC2_w1_blonde_00001_.png` | 1152x2016 | 2.322 | 2.322 |
+| r2 | c1 | MiniMaxH3ReferenceToVideo | max | ref_images.ref_image_1 -> sheet (LoadImage) -> `community/hc/HC2_w1_blonde_00001_.png` | 1152x2016 | 2.322 | 2.322 |
+| R6 | c0 | MiniMaxH3ReferenceToVideo | match | ref_images.ref_image_1 -> img (LoadImage) -> `community/hc/HC3_lesbian_beach.jpg` | 1792x1008 | 1.806 | 1.032 |
+| R6 | c1 | MiniMaxH3ImageToVideo | (no ref_image_size key) | (0 reference images) | - | - | - |
+| R6 | graph | - | - | **LoadImage nodes = 1 ['img']; c0 refs = 1 (the approved pick), c1 refs = 0** | - | - | - |
+| R7 | c0 | MiniMaxH3ReferenceToVideo | match | ref_images.ref_image_1 -> img (LoadImage) -> `community/hc/HC4_strip_tease_aerobics.jpg` | 1792x1008 | 1.806 | 1.032 |
+| R7 | c1 | MiniMaxH3ImageToVideo | (no ref_image_size key) | (0 reference images) | - | - | - |
+| R7 | graph | - | - | **LoadImage nodes = 1 ['img']; c0 refs = 1 (the approved pick), c1 refs = 0** | - | - | - |
+| R8 | c0 | MiniMaxH3ReferenceToVideo | match | ref_images.ref_image_1 -> img (LoadImage) -> `community/hc/HC5_spicy_solo.jpg` | 1792x1008 | 1.806 | 1.032 |
+| R8 | c1 | MiniMaxH3ImageToVideo | (no ref_image_size key) | (0 reference images) | - | - | - |
+| R8 | graph | - | - | **LoadImage nodes = 1 ['img']; c0 refs = 1 (the approved pick), c1 refs = 0** | - | - | - |
+| R9 | c0 | MiniMaxH3ReferenceToVideo | match | ref_images.ref_image_1 -> img (LoadImage) -> `community/hc/HC6_women_casino_lounge.jpg` | 1376x768 | 1.057 | 1.032 |
+| R9 | c1 | MiniMaxH3ImageToVideo | (no ref_image_size key) | (0 reference images) | - | - | - |
+| R9 | graph | - | - | **LoadImage nodes = 1 ['img']; c0 refs = 1 (the approved pick), c1 refs = 0** | - | - | - |
+
+The Klein sheet nodes (`sheet`, `sheet2`) are deleted from the new graphs: no sheet is referenced by any clip in this batch, and the prompt text carries no `<Picture 2>`-or-higher slot (counted in .3/.4).
+
+### R4G.3 Line by line: the OLD r1/r2 `subject_definitions` text vs the NEW R4G text (verbatim, with the F-rule per line)
+
+Pair clips compare pair-to-pair: r1 (HC1, pair) -> R6 (HC3, pair); r2 (HC2, pair) -> R9 (HC6, pair). The solo clips R7 (HC4) and R8 (HC5) have no submitted solo baseline; their new text is listed in .4.
+
+#### r1.c0 (submitted, sheeted) vs R6.c0 (new, pick-only) - 6 lines
+
+| # | F-rule for this line | OLD (verbatim) | old flags | NEW (verbatim) | new flags |
+|---|---|---|---|---|---|
+| 1 | F3: block header at the very beginning of every clip prompt (README L379, L392) | subject_definitions: | - | subject_definitions: | - |
+| 2 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Subject 1> is the adult woman shown in the multi-view reference sheet in <Picture 2>, the blonde woman of the two-woman start still in <Picture 1>, a fictional adult aged 25, with long loose blonde hair, soft natural features, a slim natural figure with full natural breasts and gently rounded hips, and smooth lightly tanned skin with a natural matte texture. | sheet-ref(Picture2+), subject-line | <Picture 1> is the reference image defining the exact visual appearance, identity, face, hairstyle, body proportions, and overall look of <Subject 1> and of <Subject 2>. The photograph in <Picture 1> shows two adult women close together, and it is the only visual reference for either woman in this clip. The woman on the left of <Picture 1> is fully clothed, her face is small in the frame, and this picture is the only visual reference for her in this clip; the same is true of the woman on the right of <Picture 1>. <Picture 1> is used for the faces and the hair of the two women only: the environment, the wardrobe and the camera of this video are new and are not taken from <Picture 1>. | garment-word, face/identity-words, verbatim-def-head |
+| 3 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Subject 2> is the adult woman shown in the multi-view reference sheet in <Picture 3>, the dark-haired woman of the two-woman start still in <Picture 1>, a fictional adult aged 24, with long dark hair, a soft feminine figure, natural waist, wide hips and full natural breasts, and warm smooth skin. | sheet-ref(Picture2+), subject-line | <Subject 1> is the exact same woman shown in <Picture 1>, the woman on the left of the photograph, a fictional adult aged 21, preserving her face, hairstyle, and body proportions with complete fidelity, with a slim natural figure, a natural waist, gently rounded hips and full natural breasts. | face/identity-words, binding-phrase, subject-line |
+| 4 | prose line, no identity rule attached | <Picture 1> is the start still of <Subject 1> and <Subject 2> seated close together in a warm photo studio. | - | <Subject 2> is the exact same woman shown in <Picture 1>, the woman on the right of the photograph, a fictional adult aged 23, preserving her face, hairstyle, and body proportions with complete fidelity, with a soft feminine figure, wide hips and full natural breasts. | face/identity-words, binding-phrase, subject-line |
+| 5 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Picture 2> is the multi-view reference sheet of <Subject 1> alone. | sheet-ref(Picture2+) | (dropped) | - |
+| 6 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Picture 3> is the multi-view reference sheet of <Subject 2> alone. | sheet-ref(Picture2+) | (dropped) | - |
+
+#### r1.c1 (submitted, sheeted) vs R6.c1 (new, pick-only) - 5 lines
+
+| # | F-rule for this line | OLD (verbatim) | old flags | NEW (verbatim) | new flags |
+|---|---|---|---|---|---|
+| 1 | F3: block header at the very beginning of every clip prompt (README L379, L392) | subject_definitions: | - | subject_definitions: | - |
+| 2 | F3: subject line rebuilt on the card wording (face, hairstyle, body proportions) with the binding phrase | <Subject 1> is the adult woman from the multi-view reference sheet in <Picture 1>, the blonde woman established in the first 5 seconds of this clip: long loose blonde hair, soft natural features, slim natural figure, full natural bare breasts with round light-brown areolae and natural nipples, and lightly tanned skin with a natural matte texture. | subject-line | This continuation chunk carries no reference pictures at all: the identity of both women is carried by these words and by the first 5 seconds of this clip. | face/identity-words |
+| 3 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Subject 2> is the adult woman from the multi-view reference sheet in <Picture 2>, the dark-haired woman established in the first 5 seconds of this clip: long dark hair, soft feminine figure, natural waist, wide hips, bare breasts, and warm smooth skin. | sheet-ref(Picture2+), subject-line | <Subject 1> is the exact same woman shown in <Picture 1> of the first 5 seconds of this clip, preserving her face, hairstyle, and body proportions with complete fidelity: the woman who was on the left of that photograph, a fictional adult aged 21, with a slim natural figure, a natural waist, gently rounded hips and full natural bare breasts with round light-brown areolae and natural nipples. | face/identity-words, binding-phrase, subject-line |
+| 4 | prose line, no identity rule attached | (no such line) | - | <Subject 2> is the exact same woman shown in <Picture 1> of the first 5 seconds of this clip, preserving her face, hairstyle, and body proportions with complete fidelity: the woman who was on the right of that photograph, a fictional adult aged 23, with a soft feminine figure, wide hips and full natural bare breasts. | face/identity-words, binding-phrase, subject-line |
+| 5 | prose line, no identity rule attached | (no such line) | - | Their faces, hairstyles and body proportions in this continuation are the faces, hairstyles and body proportions of the first 5 seconds, unchanged; undressing and being touched are actions, not a change of identity. | garment-word, face/identity-words |
+
+Per-clip identity facts for r1 -> R6: pick refs in c0 old 2 -> new 1; refs in c1 old 1 -> new 0; `<Picture 2+>` occurrences old 12 -> new 0; binding phrase old 0 -> new 4; "in close-up" beats old 0 -> new 4 (women 2, one per woman in c0 beat 1 and in c1).
+
+#### r2.c0 (submitted, sheeted) vs R9.c0 (new, pick-only) - 6 lines
+
+| # | F-rule for this line | OLD (verbatim) | old flags | NEW (verbatim) | new flags |
+|---|---|---|---|---|---|
+| 1 | F3: block header at the very beginning of every clip prompt (README L379, L392) | subject_definitions: | - | subject_definitions: | - |
+| 2 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Subject 1> is the adult woman shown in the multi-view reference sheet in <Picture 2>, the blonde woman of the two-woman start still in <Picture 1>, a fictional adult aged 26, with long loose blonde hair, soft natural features, a slim natural figure with full natural breasts and gently rounded hips, and smooth lightly tanned skin with a natural matte texture. | sheet-ref(Picture2+), subject-line | <Picture 1> is the reference image defining the exact visual appearance, identity, face, hairstyle, body proportions, and overall look of <Subject 1> and of <Subject 2>. The photograph in <Picture 1> shows two adult women embracing close together, and it is the only visual reference for either woman in this clip. The woman on the left of <Picture 1> is fully clothed, her face is small in the frame, and this picture is the only visual reference for her in this clip; the same is true of the woman on the right of <Picture 1>. <Picture 1> is used for the faces and the hair of the two women only: the environment, the wardrobe and the camera of this video are new and are not taken from <Picture 1>. | garment-word, face/identity-words, verbatim-def-head |
+| 3 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Subject 2> is the adult woman shown in the multi-view reference sheet in <Picture 3>, the dark-haired woman of the two-woman start still in <Picture 1>, a fictional adult aged 25, with long dark hair, a soft feminine figure, natural waist, wide hips and full natural breasts, and warm smooth skin. | sheet-ref(Picture2+), subject-line | <Subject 1> is the exact same woman shown in <Picture 1>, the woman on the left of the photograph, a fictional adult aged 21, preserving her face, hairstyle, and body proportions with complete fidelity, with a slim natural figure, a natural waist, gently rounded hips and full natural breasts. | face/identity-words, binding-phrase, subject-line |
+| 4 | prose line, no identity rule attached | <Picture 1> is the start still of <Subject 1> and <Subject 2> locked in a close passionate embrace. | - | <Subject 2> is the exact same woman shown in <Picture 1>, the woman on the right of the photograph, a fictional adult aged 25, preserving her face, hairstyle, and body proportions with complete fidelity, with a soft feminine figure, wide hips and full natural breasts. | face/identity-words, binding-phrase, subject-line |
+| 5 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Picture 2> is the multi-view reference sheet of <Subject 1> alone. | sheet-ref(Picture2+) | (dropped) | - |
+| 6 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Picture 3> is the multi-view reference sheet of <Subject 2> alone. | sheet-ref(Picture2+) | (dropped) | - |
+
+#### r2.c1 (submitted, sheeted) vs R9.c1 (new, pick-only) - 5 lines
+
+| # | F-rule for this line | OLD (verbatim) | old flags | NEW (verbatim) | new flags |
+|---|---|---|---|---|---|
+| 1 | F3: block header at the very beginning of every clip prompt (README L379, L392) | subject_definitions: | - | subject_definitions: | - |
+| 2 | F3: subject line rebuilt on the card wording (face, hairstyle, body proportions) with the binding phrase | <Subject 1> is the adult woman from the multi-view reference sheet in <Picture 1>, the blonde woman established in the first 5 seconds of this clip: long loose blonde hair, soft natural features, slim natural figure, full natural bare breasts with round light-brown areolae and natural nipples, and lightly tanned skin with a natural matte texture. | subject-line | This continuation chunk carries no reference pictures at all: the identity of both women is carried by these words and by the first 5 seconds of this clip. | face/identity-words |
+| 3 | F1+F2: this <Picture N> is a Klein multi-view sheet (2-6 faces, pick-vs-own-sheet cosine 0.22-0.47, two unrelated sheets 0.69) - the slot and the line are GONE in the new prompt | <Subject 2> is the adult woman from the multi-view reference sheet in <Picture 2>, the dark-haired woman established in the first 5 seconds of this clip: long dark hair, soft feminine figure, natural waist, wide hips, bare breasts, and warm smooth skin. | sheet-ref(Picture2+), subject-line | <Subject 1> is the exact same woman shown in <Picture 1> of the first 5 seconds of this clip, preserving her face, hairstyle, and body proportions with complete fidelity: the woman who was on the left of that photograph, a fictional adult aged 21, with a slim natural figure, a natural waist, gently rounded hips and full natural bare breasts with round light-brown areolae and natural nipples. | face/identity-words, binding-phrase, subject-line |
+| 4 | prose line, no identity rule attached | (no such line) | - | <Subject 2> is the exact same woman shown in <Picture 1> of the first 5 seconds of this clip, preserving her face, hairstyle, and body proportions with complete fidelity: the woman who was on the right of that photograph, a fictional adult aged 25, with a soft feminine figure, wide hips and full natural bare breasts. | face/identity-words, binding-phrase, subject-line |
+| 5 | prose line, no identity rule attached | (no such line) | - | Their faces, hairstyles and body proportions in this continuation are the faces, hairstyles and body proportions of the first 5 seconds, unchanged; undressing and being touched are actions, not a change of identity. Both dark evening dresses from the first 5 seconds lie in a heap on the red vinyl booth seat and stay there; both women stay dressed from the waist down. | garment-word, face/identity-words |
+
+Per-clip identity facts for r2 -> R9: pick refs in c0 old 2 -> new 1; refs in c1 old 1 -> new 0; `<Picture 2+>` occurrences old 12 -> new 0; binding phrase old 0 -> new 4; "in close-up" beats old 0 -> new 4 (women 2, one per woman in c0 beat 1 and in c1).
+
+### R4G.4 The new prompt files (R6-R9) - guard_ok, v2 blocks, close-up beats, slots used
+
+| file | chars | guard_ok | subject_definitions: | overall_soundscape: | non_diegetic_music: | retention_analysis: (c0) / integrated_multimodal_description: (c1) | "in close-up" | <Picture 1> | <Picture 2+> | binding-phrase lines |
+|---|---|---|---|---|---|---|---|---|---|---|
+| notes\hc_r3_c0.txt (R6 c0) | 5042 | **True** | True | True | True | True | 2 | 12 | 0 | 2 |
+| notes\hc_r3_c1.txt (R6 c1) | 4322 | **True** | True | True | True | True | 2 | 2 | 0 | 2 |
+| notes\hc_r4_c0.txt (R7 c0) | 4370 | **True** | True | True | True | True | 1 | 9 | 0 | 1 |
+| notes\hc_r4_c1.txt (R7 c1) | 3855 | **True** | True | True | True | True | 1 | 1 | 0 | 1 |
+| notes\hc_r5_c0.txt (R8 c0) | 4448 | **True** | True | True | True | True | 1 | 9 | 0 | 1 |
+| notes\hc_r5_c1.txt (R8 c1) | 3802 | **True** | True | True | True | True | 1 | 1 | 0 | 1 |
+| notes\hc_r6_c0.txt (R9 c0) | 5305 | **True** | True | True | True | True | 2 | 12 | 0 | 2 |
+| notes\hc_r6_c1.txt (R9 c1) | 4704 | **True** | True | True | True | True | 2 | 2 | 0 | 2 |
+
+`guard_ok` is `C:\AI\community\scripts\comm.py::guard_ok` (the youth guard the runner applies), run here on all 8 files: all True; no youth-coded word (minor/teen/school/young/underage) appears in any of them; every character is a named fictional adult aged 21+ (content lock v2.3.0).
+
+### R4G.5 Builder self-check - 9 numbered checks per clip, captured from a real run of the builder
+
+`python C:\AI\community\notes\ali163_hc_r4g_build.py` -> rc 0; R6 9/9 checks; R7 9/9 checks; R8 9/9 checks; R9 9/9 checks (the raw run prints 112 PASS/FAIL lines because check 1 prints one line per allowed node)
+
+- **R6** / ali147_pool_hc_r3_s51130003 / seed 51130003: checks 1, 2, 3, 4, 5, 6, 7, 8, 9 -> **9/9 PASS**; 14720 sha256 ed52ea0b0e0fcd642491ad56219846b572f973c08b9a645ae07b3856342bc8fb
+  - PASS 1 graph diff vs ali147_pool_refsheet_b_s51080000: nodes +[] -['sheet'], count 25, changed nodes ['c0', 'c1', 'img', 'noise', 'save', 'sheet', 'win1'], per-node keys as expected
+  - PASS 2 frames = c0 124 + win1.extension_frames 119 = 243 (the R1 count 243), 24 fps, 10.125 s
+  - PASS 3 geometry 1344x768 (16:9) in c0 and c1
+  - PASS 4 c0 refs ['ref_images.ref_image_1'] (the pick only, node img), c1 refs [] (class MiniMaxH3ImageToVideo, 0 refs), no sheet node, pick community/hc/HC3_lesbian_beach.jpg resolves in ComfyUI\input and is byte-identical to approved GI173.jpg: True
+  - PASS 5 c0 ref_image_size = match (node default, ref downscaled to the 1344x768 canvas px); c1 has no ref_image_size (0 refs)
+  - PASS 6 sampling fixed as base (denoise 1.0 in the base sched/samplers, euler/simple/10 steps, shift 10/3, vsa, beta6 int8), single pass (2 SamplerCustomAdvanced, no RIFE/refine/upscale), audio VAE + audio decoder wired, 1344x768
+  - PASS 7 prompts byte-exact in the graph, v2 blocks present (c0 subject_definitions/summary/retention_analysis/detailed_description, c1 subject_definitions/integrated_multimodal_description + first 5 seconds), overall_soundscape: + non_diegetic_music: in both, guard_ok, no youth-coded words (c0 5042 chars, c1 4322 chars)
+  - PASS 8 extender/model-card wording in BOTH chunks: verbatim <Picture 1> definition in c0, binding phrase '<Subject 1> is the exact same woman shown in <Picture 1>' in c0 and c1, c1 declares 0 reference pictures, picture = face and hair only + fully clothed/small-face/only-reference sentence in c0, close-up face beats 2/2 (women 2), subjects c0 2 c1 2 = 2 women, no <Picture 2+>, no garment word inside any binding line
+  - PASS 9 id charset + live ralph.ps1 id gates ['^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+|ali173_[a-z0-9]+(_[a-z0-9]+)?_s\\d+)$', '^(ali147_pool|ali173)_[a-z0-9]+(_[a-z0-9]+)?_s\\d+$'], id free (no result.json/objective.json/output folder), no JOB_REQUEST.json queued (R4G = no render)
+
+- **R7** / ali147_pool_hc_r4_s51130004 / seed 51130004: checks 1, 2, 3, 4, 5, 6, 7, 8, 9 -> **9/9 PASS**; 13585 sha256 b17333d681f6ed6e23c174942508d4f57c396376c67c618eb86b90c63c51de27
+  - PASS 1 graph diff vs ali147_pool_refsheet_b_s51080000: nodes +[] -['sheet'], count 25, changed nodes ['c0', 'c1', 'img', 'noise', 'save', 'sheet', 'win1'], per-node keys as expected
+  - PASS 2 frames = c0 124 + win1.extension_frames 119 = 243 (the R1 count 243), 24 fps, 10.125 s
+  - PASS 3 geometry 1344x768 (16:9) in c0 and c1
+  - PASS 4 c0 refs ['ref_images.ref_image_1'] (the pick only, node img), c1 refs [] (class MiniMaxH3ImageToVideo, 0 refs), no sheet node, pick community/hc/HC4_strip_tease_aerobics.jpg resolves in ComfyUI\input and is byte-identical to approved GI107.jpg: True
+  - PASS 5 c0 ref_image_size = match (node default, ref downscaled to the 1344x768 canvas px); c1 has no ref_image_size (0 refs)
+  - PASS 6 sampling fixed as base (denoise 1.0 in the base sched/samplers, euler/simple/10 steps, shift 10/3, vsa, beta6 int8), single pass (2 SamplerCustomAdvanced, no RIFE/refine/upscale), audio VAE + audio decoder wired, 1344x768
+  - PASS 7 prompts byte-exact in the graph, v2 blocks present (c0 subject_definitions/summary/retention_analysis/detailed_description, c1 subject_definitions/integrated_multimodal_description + first 5 seconds), overall_soundscape: + non_diegetic_music: in both, guard_ok, no youth-coded words (c0 4370 chars, c1 3855 chars)
+  - PASS 8 extender/model-card wording in BOTH chunks: verbatim <Picture 1> definition in c0, binding phrase '<Subject 1> is the exact same woman shown in <Picture 1>' in c0 and c1, c1 declares 0 reference pictures, picture = face and hair only + fully clothed/small-face/only-reference sentence in c0, close-up face beats 1/1 (women 1), subjects c0 1 c1 1 = 1 women, no <Picture 2+>, no garment word inside any binding line
+  - PASS 9 id charset + live ralph.ps1 id gates ['^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+|ali173_[a-z0-9]+(_[a-z0-9]+)?_s\\d+)$', '^(ali147_pool|ali173)_[a-z0-9]+(_[a-z0-9]+)?_s\\d+$'], id free (no result.json/objective.json/output folder), no JOB_REQUEST.json queued (R4G = no render)
+
+- **R8** / ali147_pool_hc_r5_s51130005 / seed 51130005: checks 1, 2, 3, 4, 5, 6, 7, 8, 9 -> **9/9 PASS**; 13600 sha256 a47142b394b92b3b9589692c66f0b162f70df9be4974d8dca1ec35f42a68bfc5
+  - PASS 1 graph diff vs ali147_pool_refsheet_b_s51080000: nodes +[] -['sheet'], count 25, changed nodes ['c0', 'c1', 'img', 'noise', 'save', 'sheet', 'win1'], per-node keys as expected
+  - PASS 2 frames = c0 124 + win1.extension_frames 119 = 243 (the R1 count 243), 24 fps, 10.125 s
+  - PASS 3 geometry 1344x768 (16:9) in c0 and c1
+  - PASS 4 c0 refs ['ref_images.ref_image_1'] (the pick only, node img), c1 refs [] (class MiniMaxH3ImageToVideo, 0 refs), no sheet node, pick community/hc/HC5_spicy_solo.jpg resolves in ComfyUI\input and is byte-identical to approved GI150.jpg: True
+  - PASS 5 c0 ref_image_size = match (node default, ref downscaled to the 1344x768 canvas px); c1 has no ref_image_size (0 refs)
+  - PASS 6 sampling fixed as base (denoise 1.0 in the base sched/samplers, euler/simple/10 steps, shift 10/3, vsa, beta6 int8), single pass (2 SamplerCustomAdvanced, no RIFE/refine/upscale), audio VAE + audio decoder wired, 1344x768
+  - PASS 7 prompts byte-exact in the graph, v2 blocks present (c0 subject_definitions/summary/retention_analysis/detailed_description, c1 subject_definitions/integrated_multimodal_description + first 5 seconds), overall_soundscape: + non_diegetic_music: in both, guard_ok, no youth-coded words (c0 4448 chars, c1 3802 chars)
+  - PASS 8 extender/model-card wording in BOTH chunks: verbatim <Picture 1> definition in c0, binding phrase '<Subject 1> is the exact same woman shown in <Picture 1>' in c0 and c1, c1 declares 0 reference pictures, picture = face and hair only + fully clothed/small-face/only-reference sentence in c0, close-up face beats 1/1 (women 1), subjects c0 1 c1 1 = 1 women, no <Picture 2+>, no garment word inside any binding line
+  - PASS 9 id charset + live ralph.ps1 id gates ['^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+|ali173_[a-z0-9]+(_[a-z0-9]+)?_s\\d+)$', '^(ali147_pool|ali173)_[a-z0-9]+(_[a-z0-9]+)?_s\\d+$'], id free (no result.json/objective.json/output folder), no JOB_REQUEST.json queued (R4G = no render)
+
+- **R9** / ali147_pool_hc_r6_s51130006 / seed 51130006: checks 1, 2, 3, 4, 5, 6, 7, 8, 9 -> **9/9 PASS**; 15371 sha256 e20106ff422f9150598dbf22548b356b8dbd35bafa1cb007159f9cbc44519aff
+  - PASS 1 graph diff vs ali147_pool_refsheet_b_s51080000: nodes +[] -['sheet'], count 25, changed nodes ['c0', 'c1', 'img', 'noise', 'save', 'sheet', 'win1'], per-node keys as expected
+  - PASS 2 frames = c0 124 + win1.extension_frames 119 = 243 (the R1 count 243), 24 fps, 10.125 s
+  - PASS 3 geometry 1344x768 (16:9) in c0 and c1
+  - PASS 4 c0 refs ['ref_images.ref_image_1'] (the pick only, node img), c1 refs [] (class MiniMaxH3ImageToVideo, 0 refs), no sheet node, pick community/hc/HC6_women_casino_lounge.jpg resolves in ComfyUI\input and is byte-identical to approved BD076.jpg: True
+  - PASS 5 c0 ref_image_size = match (node default, ref downscaled to the 1344x768 canvas px); c1 has no ref_image_size (0 refs)
+  - PASS 6 sampling fixed as base (denoise 1.0 in the base sched/samplers, euler/simple/10 steps, shift 10/3, vsa, beta6 int8), single pass (2 SamplerCustomAdvanced, no RIFE/refine/upscale), audio VAE + audio decoder wired, 1344x768
+  - PASS 7 prompts byte-exact in the graph, v2 blocks present (c0 subject_definitions/summary/retention_analysis/detailed_description, c1 subject_definitions/integrated_multimodal_description + first 5 seconds), overall_soundscape: + non_diegetic_music: in both, guard_ok, no youth-coded words (c0 5305 chars, c1 4704 chars)
+  - PASS 8 extender/model-card wording in BOTH chunks: verbatim <Picture 1> definition in c0, binding phrase '<Subject 1> is the exact same woman shown in <Picture 1>' in c0 and c1, c1 declares 0 reference pictures, picture = face and hair only + fully clothed/small-face/only-reference sentence in c0, close-up face beats 2/2 (women 2), subjects c0 2 c1 2 = 2 women, no <Picture 2+>, no garment word inside any binding line
+  - PASS 9 id charset + live ralph.ps1 id gates ['^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+|ali173_[a-z0-9]+(_[a-z0-9]+)?_s\\d+)$', '^(ali147_pool|ali173)_[a-z0-9]+(_[a-z0-9]+)?_s\\d+$'], id free (no result.json/objective.json/output folder), no JOB_REQUEST.json queued (R4G = no render)
+
+`ALL CHECKS PASS (112 PASS lines, 9 numbered checks per clip: ['R6', 'R7', 'R8', 'R9'])`
+
+The 9 checks are: 1 graph diff vs the RS6 base is only the intended nodes/keys (sheet deleted; c0/c1/img/noise/save/win1 keys as listed; every other node byte-identical); 2 frames 124 + 119 = 243 at 24 fps = 10.125 s (the R1 frame count); 3 1344x768 in both chunks; 4 exactly 1 LoadImage (the approved pick, byte-identical to the approved file, resolves in ComfyUI\input) on c0 and 0 reference images on c1 (c1 = MiniMaxH3ImageToVideo), no sheet node; 5 `ref_image_size = match` on c0 and no ref key at all on c1; 6 sampling byte-identical to the base (denoise 1.0 on both schedulers, euler/simple/10 steps, shift 10/3, vsa, beta6 int8, single pass, audio VAE + audio decoder wired); 7 prompts byte-exact in the graph + v2 blocks + guard_ok; 8 the R4G identity wording (verbatim `<Picture 1>` definition, binding phrase in BOTH chunks, c1 declares 0 reference pictures, picture = face and hair only, fully-clothed/small-face sentence, one close-up beat per woman, no `<Picture 2+>`, no garment word inside any binding line); 9 id charset + the live ralph.ps1 id gates + id free + no JOB_REQUEST.json queued.
+
+One builder fix in this pass: check 6 counted `KSamplerAdvanced` nodes, which this graph does not use (it uses 2 `SamplerCustomAdvanced` + `KSamplerSelect`), so check 6 reported FAIL on a correct graph. It now counts the real node class; no graph byte changed by that fix.
+
+### R4G.6 Five-line plain summary
+
+1. The Klein multi-view sheets are gone from both chunks of R6-R9: each new graph has exactly **1 LoadImage** (the approved pick) on c0 with `ref_image_size = match` (1.032 Mpx into the VAE, the canvas size) and **0 reference images** on c1.
+2. Both chunks now open with `subject_definitions:` in the extender README's verbatim wording - the `<Picture 1>` definition line naming identity, face, hairstyle and body proportions, and `<Subject 1> is the exact same woman shown in <Picture 1>` (pairs: both subjects bind to the one pair pick); c1 says the continuation carries no reference pictures at all.
+3. The pick is declared to be for the face and the hair only, the picture is named the only visual reference, and no garment word sits inside any binding line (garment words stay in the action prose, where the R4F count showed they were the only garment mentions).
+4. One "the camera frames her face in close-up" beat per woman sits in c0 beat 1 and in c1; sampling is untouched (denoise 1.0, cfg 1, euler/simple, 10 steps, shift 10/3, vsa, beta6 int8, single pass, 243 f = 124 + 119, 24 fps, audio wired).
+5. The builder self-check is **9/9 PASS on all four clips** (112 PASS lines, rc 0); prompt files hc_r3_c0/_c1, hc_r4_c0/_c1, hc_r5_c0/_c1, hc_r6_c0/_c1 all pass `guard_ok`; R4G requested **no render** - `p7\JOB_REQUEST.json` is not written, the ids are free, and R6-R9 request them one at a time under the 475-min / 35-job gate.

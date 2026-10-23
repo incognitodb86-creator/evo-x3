@@ -184,9 +184,10 @@ def build(tag):
                      for n in set(base) - set(EXPECT_KEYS) - {"sheet", "c1"})
              and not any("RIFE" in v["class_type"] or "Refine" in v["class_type"] or "Upscale" in v["class_type"] for v in new.values())
              and new["dec_a"]["inputs"]["vae"] == ["avae", 0] and new["mkvid"]["inputs"]["audio"] == ["dec_a", 0]
-             and len([v for v in new.values() if v["class_type"] == "KSamplerAdvanced"]) == 2)
+             and len([v for v in new.values() if v["class_type"] == "SamplerCustomAdvanced"]) == 2
+             and not any(v["class_type"] == "KSamplerAdvanced" for v in new.values()))
     ck(fixed, "6 sampling fixed as base (denoise 1.0 in the base sched/samplers, euler/simple/10 steps, shift 10/3, vsa, beta6 int8), "
-             "single pass (2 samplers, no RIFE/refine/upscale), audio VAE + audio decoder wired, 1344x768")
+             "single pass (2 SamplerCustomAdvanced, no RIFE/refine/upscale), audio VAE + audio decoder wired, 1344x768")
 
     # ---- CHECK 7: prompt text carried byte-exact + v2 blocks + guard ----
     ok7 = True
