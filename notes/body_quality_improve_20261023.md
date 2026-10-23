@@ -82,3 +82,29 @@ check 12 the prompt diff; check 13 a **self-destruct probe** that restores the r
 side-by-side is a clean A/B), then END the iteration. BQ1d reviews the 243-frame render against
 `runs/ali147_pool_hc_r3r_s51130003` with objective checks only (ffprobe frames/res/fps/audio, seam diff, hashes,
 labelled contact sheet) - no vision judge, KEEP is Derrick's.
+
+## BQ1d (2026-10-23 ~17:55 CT) the rewire VERIFIED in the rendered graph + the side-by-side
+- The rendered r3b graph (p7/jobs/ali147_pool_hc_r3b_s51130003.submitted_graph.json, sha8 ce01686e =
+  notes/ali163_hc_bq1b_request.api.json byte-for-byte) carries on c0 AND c1, class MiniMaxH3ReferenceToVideo,
+  ref_image_size match: ref_image_1 = community/hc/HC3_lesbian_beach.jpg (the approved start still =
+  <Picture 1> body/scene) + ref_image_2 = community/hc/HC3_w1_face.png + ref_image_3 = community/hc/HC3_w2_face.png
+  (face-only). The r3r control carries ONLY the 2 face crops (LoadImage list = the 2 crops, 2 ref slots on c0):
+  the body defect, proved, not asserted.
+- Objective verify (notes/ali163_hc_bq1d_check.py, 22/22 gates + 3 self-destruct probes): both clips
+  ok=True rc=0, 1 JOB start + 1 JOB end ok, 0 JOB error / 0 CLIP_SKIP, 1344x768, 24/1 fps, 243 packets
+  = 10.125 s, audio aac 32 kHz 2ch in the mp4 AND in the demuxed m4a (165,349 B / 166,134 B), seed 51130003
+  both, 124 + 119 f, euler, 10 steps, shift 10.0 / 3.0, 2 SamplerCustomAdvanced = one sampling pass,
+  overall_soundscape: line present, offline static_check clean. Fairness: seed, scene, frames, resolution,
+  steps, sampler, shift all fixed; the single variable = the ref wiring.
+- Side-by-side = notes/body_quality_r3b_vs_r3r_contact.png (2186x834, 1,291,630 B): row A = r3r control,
+  row B = r3b rewired, 5 stamps each at the SAME t = 0.50 / 2.60 / 5.00 / 7.40 / 9.60 s, label cells carry
+  id / seed / start still / refs / ok / rc / WxH / fps / packets / audio / m4a / wall / sha8 read from
+  notes/ali163_hc_bq1d_objective.json; a reference row shows the approved start still + the 2 face crops.
+  Frame gates 21/21: every frame 1344x768 and non-black (mean 117.8-138.0), the same t across the two clips
+  always differs (two distinct renders), f0 vs f4 differs inside each clip (motion). Sheet gates 4/4, and a
+  missing stamp paints a red MISSING block and fails the builder, so the sheet cannot hide a gap.
+- BQ1 TEMPLATE for the bakeoff arms: HB1, HB2, HB3, HB4 now each carry a TASKS.md line saying they use the
+  improved template (start still = ref_image_1 on c0 AND c1 + face crops face-only, builder
+  notes/ali163_hc_bq1_build.py, prompts notes/hc_r3b_c0.txt + notes/hc_r3b_c1.txt); the HB parent line carries
+  the HB0-control note (HB0 = r3r = the before-shot, no new job).
+- No vision judge: no image was opened, shown, described or scored by a model. KEEP is Derrick's only.
