@@ -1,0 +1,1 @@
+- 2026-10-23 R4H: no binaries/weights installed (research only). ~20 read-only web GETs saved as text under C:\AI\community\notes\web (HF /api/models searches, /api/models/<id>?blobs=true metadata, .../raw/main/README.md model cards, one GitHub raw README 198 KB) - sizes listed in notes\small_prompt_llm_research_20261023.md "## Method". Total ~0.5 MB, no disk impact.
