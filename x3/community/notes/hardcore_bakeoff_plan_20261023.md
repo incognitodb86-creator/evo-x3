@@ -57,3 +57,11 @@ The fixed scene for every arm:
 ## Output
 
 `C:\AI\community\notes\hardcore_bakeoff_20261023.md` has one table: arm, ran yes/no/[!], prompt used, wall time, GPU min, retries, face cosine per woman, objective checks, and install notes (sizes, paths). Next to it goes a side-by-side contact sheet `notes\hardcore_bakeoff_20261023_contact.png`. B8 RANK includes the HB arms. Max copies the clips to the box for Derrick.
+
+## Amendment 2026-10-23 3:44 PM CT: HB2 merged model approved
+
+Derrick 3:44 PM CT, verbatim: "Ok do it also have forge research lora for our fictional characters and do research on how to get better face consistency ect". His "Ok do it" answered Max's note that HB2 may need its own merged model.
+
+- **Approved:** if the 2906001 All-In-One Uncensored graph requires its own merged H3 checkpoint, Forge may download that one checkpoint, at the version the workflow page names. Before downloading, Forge checks free disk and logs the name, size, URL and path in `notes\installs_downloads.md`. HB2 then runs with that checkpoint instead of our int8 model. Everything else about the scene stays the same.
+- **Not approved:** any other new model or checkpoint still goes to `notes\guard_requests.md`.
+- **Research follow-ons (text only, no GPU):** queued after HB5 as RL1 (character LoRAs, ALI-181), RF1 (face consistency, ALI-182) and RA1 (audio, ALI-183; Derrick 3:45 PM CT "Also have forge research voices and stuff better audio").
