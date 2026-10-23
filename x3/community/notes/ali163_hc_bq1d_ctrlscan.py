@@ -1,4 +1,4 @@
-"""BQ1d: scan ralph-community\TASKS.md line by line, CRLF-AWARE (2026-10-23 ~18:10 CT).
+r"""BQ1d: scan ralph-community\TASKS.md line by line, CRLF-AWARE (2026-10-23 ~18:10 CT).
 
 Lesson being fixed: my first gate scanned `text.split("\n")` and tested every char with
 0 < ord < 32, so the trailing CR of every CRLF line looked like a control char = a FALSE fail.
