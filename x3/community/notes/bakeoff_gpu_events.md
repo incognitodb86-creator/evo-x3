@@ -26,6 +26,11 @@ simply that **it had never been written** - B1 produced the schema doc and valid
 A2's precondition ("events exist under runs/") was unmet. Keep the durable schema, ledger, findings and
 validators in `notes/` (tracked), and re-emit `render_*` events when the harness runs jobs.
 
-Current lines: 2 (the B2 `request_staged` + `precheck_pass` pair written 2026-10-23 18:36 CT, loop07,
-`job_id ali173_cont_hc1_s51140001`, sha256 of `runs/ali173_cont_hc1_s51140001/request.api.json`). A
-`render_*` pair is due when the harness runs the job - the loop never renders.
+Current lines: 4 (loop07, `job_id ali173_cont_hc1_s51140001`, `sha256` = the sha of
+`runs/ali173_cont_hc1_s51140001/request.api.json` = `1efecedd53549c5e05887985f352a18d5897ca8587588af39b67052bfabd2088`):
+`request_staged` + `precheck_pass` (18:30:25) and the `gpu_window_open` / `gpu_window_close` pair for the
+18:12:36-18:13:00 CT read-only schema window (comfy_ok=True, queue (0,0), gpu_guard IDLE rc 0).
+Validate with `python C:/AI/community/notes/ali173_b2_events_check.py` (it re-hashes the graph file named by
+each line and refuses a sha that is not that file; `--selftest` = 12 probes: 65-hex, 63-hex, UPPERCASE, iter=loop1,
+job_id=loop01, dashed job_id, unknown event, 5-key, 7-key, a sha from a different graph, missing file). A
+`render_start`/`render_pass` (or `render_fail`) pair is due when the harness runs the job - the loop never renders.
