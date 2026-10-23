@@ -59,6 +59,51 @@
    ],
    "err": ""
   },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_c1_s51100001_f0.png",
+    "sha256": "b7a46c1361b11f109492f437cfc71562944b6bf59803a13bec0f254ef5989c33",
+    "size": 639546,
+    "luma_mean": 117.15,
+    "luma_std": 61.37
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_c1_s51100001_f1.png",
+    "sha256": "18fd952f7cf5f8e61fe6992c31f7efd7fb51099651c2dc0416b9373f197fe708",
+    "size": 609198,
+    "luma_mean": 113.51,
+    "luma_std": 55.48
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_c1_s51100001_f2.png",
+    "sha256": "052585bb46ea498700cdfb446f7f6c191e4848b69426df32aa5dff701edf51ae",
+    "size": 757080,
+    "luma_mean": 106.51,
+    "luma_std": 58.64
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_c1_s51100001_f3.png",
+    "sha256": "57196683eaf8ce7a5ad493a90e615ab87e9118e2c8aedeff021ec89f2c7bc08d",
+    "size": 776895,
+    "luma_mean": 105.15,
+    "luma_std": 59.09
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_c1_s51100001_f4.png",
+    "sha256": "e8c13c30f422af037eecbe4ee2ee3e0a85c401f454efd64e003f7467a114d19f",
+    "size": 783493,
+    "luma_mean": 105.36,
+    "luma_std": 58.22
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 55.48,
   "seed": [
    51100001
   ],
@@ -138,6 +183,10 @@
    ],
    "err": ""
   },
+  "frames": [],
+  "frames_count": 0,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": null,
   "seed": [
    51100002
   ],
@@ -217,6 +266,51 @@
    ],
    "err": ""
   },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r1_s51130001_f0.png",
+    "sha256": "4b5052a771272413dc149da2b52650a440a83ed11123b4a86ee12dc77514d9d9",
+    "size": 695284,
+    "luma_mean": 101.58,
+    "luma_std": 63.62
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r1_s51130001_f1.png",
+    "sha256": "15c62ea7253fefd7edbfabd0f89c87ba9441255c393a9f7a40375496cbfdb046",
+    "size": 753103,
+    "luma_mean": 107.79,
+    "luma_std": 58.82
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r1_s51130001_f2.png",
+    "sha256": "3429df4a31fe2b8c32928e59e00d408e283763202d24ce4b0c990f877c1d4831",
+    "size": 775674,
+    "luma_mean": 105.64,
+    "luma_std": 57.1
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r1_s51130001_f3.png",
+    "sha256": "9792d771b181d936a562b48960a1ec88195bb2daca1a1fc0df20660d5ecc5b45",
+    "size": 818190,
+    "luma_mean": 103.19,
+    "luma_std": 61.75
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r1_s51130001_f4.png",
+    "sha256": "159d7c5846441ff3f5c6593e414b9794f359ee2ab8a3f9a5e7500765d71f7a00",
+    "size": 874806,
+    "luma_mean": 96.19,
+    "luma_std": 56.77
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 56.77,
   "seed": [
    51130001
   ],
@@ -298,6 +392,51 @@
    ],
    "err": ""
   },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r2_s51130002_f0.png",
+    "sha256": "612bde1c4d5ec4401876cd79f189049716b64657d4a02e31fe0bed2591bea26f",
+    "size": 838546,
+    "luma_mean": 76.64,
+    "luma_std": 59.04
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r2_s51130002_f1.png",
+    "sha256": "b4fc9a93999e8e67c940e9e92ca0f234d5b5c0400c075f3c844c3a1d66ad019d",
+    "size": 812687,
+    "luma_mean": 83.22,
+    "luma_std": 54.81
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r2_s51130002_f2.png",
+    "sha256": "9401ff1c21652d379228dd510fac33abc319a6ccb00cea430f7bb6a6a3a21038",
+    "size": 823529,
+    "luma_mean": 73.87,
+    "luma_std": 45.58
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r2_s51130002_f3.png",
+    "sha256": "afbb1bf793f62048e2d1cb14c0e6f5894715fe64bac0102b7c3d1cd694aa9aa7",
+    "size": 981112,
+    "luma_mean": 84.3,
+    "luma_std": 48.69
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r2_s51130002_f4.png",
+    "sha256": "cdb7483c85be58f75f97e1426d03cdad53fc4088e8f1078b6457057e2ce4aa82",
+    "size": 947563,
+    "luma_mean": 83.09,
+    "luma_std": 48.87
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 45.58,
   "seed": [
    51130002
   ],
@@ -323,7 +462,7 @@
   "label": "clip3",
   "id": "ali147_pool_hc_r3_s51130003",
   "pick": "HC3 GI173",
-  "note": "R6",
+  "note": "R6 (rc=2 static fail, no render)",
   "expected_frames": 243,
   "result_exists": true,
   "ok": false,
@@ -348,6 +487,257 @@
    51130003
   ],
   "refs": [
+   "community/hc/HC3_w1_face.png",
+   "community/hc/HC3_w2_face.png"
+  ],
+  "soundscape": "overall_soundscape: Soft exterior room tone with distant surf, a light sea breeze and occasional far gull calls. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the stone as weight shifts, sharp inhales, heavy breathing, a",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ },
+ {
+  "label": "clip3 R6R",
+  "id": "ali147_pool_hc_r3r_s51130003",
+  "pick": "HC3 GI173",
+  "note": "R6R re-render, face crops only",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T15:23:59",
+  "finished": "2026-10-23T15:31:51",
+  "wall_min": 7.9,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 458.7,
+  "job_start": [
+   "2026-10-23 15:24:54 CT JOB start ali147_pool_hc_r3r_s51130003 prompt_id=72c98f52-ed8c-4117-bc4c-dab4d0b35f49"
+  ],
+  "job_end": [
+   "2026-10-23 15:31:50 CT JOB end ali147_pool_hc_r3r_s51130003 ok secs=416.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 15:31:51 CT OBJECTIVE ok ali147_pool_hc_r3r_s51130003 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3760110 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 15:23:59 CT UNLOAD LLM coding_swift15_iq3s",
+   "2026-10-23 15:24:54 CT JOB start ali147_pool_hc_r3r_s51130003 prompt_id=72c98f52-ed8c-4117-bc4c-dab4d0b35f49",
+   "2026-10-23 15:31:50 CT JOB end ali147_pool_hc_r3r_s51130003 ok secs=416.3 file=C:\\AI\\community\\runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003.mp4",
+   "2026-10-23 15:31:51 CT OBJECTIVE ok ali147_pool_hc_r3r_s51130003 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3760110 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003_stills_contact.png",
+   "2026-10-23 15:31:51 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 3760110,
+  "mp4_sha256": "642cdea337d13974addc5273b21c3a9f8e43fbb06c3d4d0decdc67a73278a482",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 416.3,
+  "finished_ct": "2026-10-23 15:31 CT",
+  "prompt_id": "72c98f52-ed8c-4117-bc4c-dab4d0b35f49",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r3r_s51130003\\ali147_pool_hc_r3r_s51130003.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 165349,
+  "m4a_sha256": "4f8264942172d20a9c0f061d1c163c880e4942ce93754a4449f587d5d0f5c88e",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3r_s51130003_f0.png",
+    "sha256": "fccc513081b07c085afdd7eec328d822a598e9d140bc139cb319730ea144f070",
+    "size": 491581,
+    "luma_mean": 117.76,
+    "luma_std": 45.92
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3r_s51130003_f1.png",
+    "sha256": "537422e848561d9e294ae31d07ca21c18904f3b4274354652126fc99fed64d3b",
+    "size": 765838,
+    "luma_mean": 129.94,
+    "luma_std": 53.01
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3r_s51130003_f2.png",
+    "sha256": "8f6fbb130b2634c0e0b48fcf414a9fb545fe26bc9e4d488e6400f73dd7a713ee",
+    "size": 782789,
+    "luma_mean": 126.02,
+    "luma_std": 46.34
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3r_s51130003_f3.png",
+    "sha256": "040f0ecc8ef4dd01f21ae84146b4fd8e6b5f0d13e66a51afec5b5660e68b5a9a",
+    "size": 829900,
+    "luma_mean": 129.84,
+    "luma_std": 50.79
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3r_s51130003_f4.png",
+    "sha256": "5dc99e5c3ea304461353c51e32ed6de56b917715410ffcfb6ef3898776b7e11b",
+    "size": 801108,
+    "luma_mean": 137.74,
+    "luma_std": 62.25
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 45.92,
+  "seed": [
+   51130003
+  ],
+  "refs": [
+   "community/hc/HC3_w1_face.png",
+   "community/hc/HC3_w2_face.png"
+  ],
+  "soundscape": "overall_soundscape: Soft exterior room tone with distant surf, a light sea breeze and occasional far gull calls. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the stone as weight shifts, sharp inhales, heavy breathing, a",
+  "width": [
+   1344,
+   1344
+  ],
+  "height": [
+   768,
+   768
+  ],
+  "ext_frames": [
+   119
+  ]
+ },
+ {
+  "label": "clip3 BQ1c",
+  "id": "ali147_pool_hc_r3b_s51130003",
+  "pick": "HC3 GI173",
+  "note": "BQ1c rewire, start still + face crops",
+  "expected_frames": 243,
+  "result_exists": true,
+  "ok": true,
+  "rc": 0,
+  "started": "2026-10-23T17:19:31",
+  "finished": "2026-10-23T17:28:21",
+  "wall_min": 8.8,
+  "note_rc": "run_graph_job rc=0 (ok)",
+  "budget_used_min": 467.5,
+  "job_start": [
+   "2026-10-23 17:20:19 CT JOB start ali147_pool_hc_r3b_s51130003 prompt_id=886bc3a9-caed-4f42-9efd-54be8a8b23ce"
+  ],
+  "job_end": [
+   "2026-10-23 17:28:20 CT JOB end ali147_pool_hc_r3b_s51130003 ok secs=481.9 file=C:\\AI\\community\\runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003.mp4"
+  ],
+  "objective_line": [
+   "2026-10-23 17:28:21 CT OBJECTIVE ok ali147_pool_hc_r3b_s51130003 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3527348 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003_stills_contact.png"
+  ],
+  "job_error_grep": 0,
+  "clip_skip_grep": 0,
+  "status_tail": [
+   "2026-10-23 17:19:32 CT UNLOAD LLM coding_swift15_iq3s",
+   "2026-10-23 17:20:19 CT JOB start ali147_pool_hc_r3b_s51130003 prompt_id=886bc3a9-caed-4f42-9efd-54be8a8b23ce",
+   "2026-10-23 17:28:20 CT JOB end ali147_pool_hc_r3b_s51130003 ok secs=481.9 file=C:\\AI\\community\\runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003.mp4",
+   "2026-10-23 17:28:21 CT OBJECTIVE ok ali147_pool_hc_r3b_s51130003 image=False frames=243 size=1344x768 audio=True dur=10.125 bytes=3527348 contact=C:\\AI\\community\\runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003_stills_contact.png",
+   "2026-10-23 17:28:21 CT UNLOAD comfyui_auto (POST /api/models/unload)"
+  ],
+  "mp4": "C:/AI/community/runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003.mp4",
+  "mp4_exists": true,
+  "mp4_bytes": 3527348,
+  "mp4_sha256": "d125b8feb11e4aea368714c88cccd863cb40659a0117f7817d1ceb78a4f320f3",
+  "video": {
+   "rc": 0,
+   "w": "1344",
+   "h": "768",
+   "fps": "24/1",
+   "packets": "243",
+   "err": ""
+  },
+  "audio_stream": "aac,32000,2",
+  "render_secs": 481.9,
+  "finished_ct": "2026-10-23 17:28 CT",
+  "prompt_id": "886bc3a9-caed-4f42-9efd-54be8a8b23ce",
+  "m4a": "C:/AI/community/runs\\ali147_pool_hc_r3b_s51130003\\ali147_pool_hc_r3b_s51130003.m4a",
+  "m4a_exists": true,
+  "m4a_bytes": 166134,
+  "m4a_sha256": "bceb4cd611f3276f2262d354aed8b8ac44936f957aa82df0fd80e7dcb7053885",
+  "m4a_probe": {
+   "rc": 0,
+   "lines": [
+    "aac,audio,32000,2",
+    "10.125000"
+   ],
+   "err": ""
+  },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3b_s51130003_f0.png",
+    "sha256": "846038272872aa840dae7c43488506ad44ee9ad72d47f62d9f5bb8fffb1a01a6",
+    "size": 606329,
+    "luma_mean": 135.92,
+    "luma_std": 56.31
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3b_s51130003_f1.png",
+    "sha256": "2c31e64795b312aa0af46b14083869864a5b0e309283202e7ecd27d07eed4d04",
+    "size": 749930,
+    "luma_mean": 131.12,
+    "luma_std": 58.29
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3b_s51130003_f2.png",
+    "sha256": "bd70ffb55eafa7f9b05e727d6da7814e853ae585fe4c2d406b65bcb47e8f2146",
+    "size": 830567,
+    "luma_mean": 120.6,
+    "luma_std": 47.22
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3b_s51130003_f3.png",
+    "sha256": "a121b9be54642c9af6214175a1fd0c11f9cc24ddb76dc76fb3cd8d1a31c5846d",
+    "size": 781714,
+    "luma_mean": 121.62,
+    "luma_std": 54.26
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r3b_s51130003_f4.png",
+    "sha256": "64c12b130cde71acfa36af845cd94377bb542c5cce43cd73c21ebc11c9017a5a",
+    "size": 741160,
+    "luma_mean": 138.03,
+    "luma_std": 64.47
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 47.22,
+  "seed": [
+   51130003
+  ],
+  "refs": [
+   "community/hc/HC3_lesbian_beach.jpg",
    "community/hc/HC3_w1_face.png",
    "community/hc/HC3_w2_face.png"
   ],
@@ -424,6 +814,51 @@
    ],
    "err": ""
   },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r4_s51130004_f0.png",
+    "sha256": "d2d1c19afaeab1837de759138656cd0c96df69d922df3cc14061949473ca990a",
+    "size": 607931,
+    "luma_mean": 106.57,
+    "luma_std": 59.23
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r4_s51130004_f1.png",
+    "sha256": "30247c3d47e057e6b466e4f53ae12fa219492c6e21cfb89d4c324395c16689a8",
+    "size": 686316,
+    "luma_mean": 137.71,
+    "luma_std": 49.73
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r4_s51130004_f2.png",
+    "sha256": "023f0a50b455e5ae6cb08cc23f25326f797f78807de78198bb5b077c0834e63d",
+    "size": 755094,
+    "luma_mean": 135.62,
+    "luma_std": 49.97
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r4_s51130004_f3.png",
+    "sha256": "c4866d82d116f3c96fe65249e3294093a2894023d8339ed626c91ff87f35d93d",
+    "size": 805081,
+    "luma_mean": 113.6,
+    "luma_std": 62.26
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r4_s51130004_f4.png",
+    "sha256": "4eee6f967dff4b1956ab303dccae258d01ecc53381412939b72fbf13ba1fd932",
+    "size": 855794,
+    "luma_mean": 129.56,
+    "luma_std": 53.09
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 49.73,
   "seed": [
    51130004
   ],
@@ -503,6 +938,51 @@
    ],
    "err": ""
   },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r5_s51130005_f0.png",
+    "sha256": "107c6ff65e4bf71574aafac8c45887675ce5cbaed181710240ff3c7b6677b7aa",
+    "size": 467169,
+    "luma_mean": 60.86,
+    "luma_std": 33.94
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r5_s51130005_f1.png",
+    "sha256": "f5dc9755a3108562cb6bff4fbb43dd7222b766dc3404e498a9c7b53eb2d5db4f",
+    "size": 681840,
+    "luma_mean": 70.34,
+    "luma_std": 52.11
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r5_s51130005_f2.png",
+    "sha256": "23dd1d67cf222dd36a2391deaa90ccf14b5462d669f1b4065cc454d48cdd7002",
+    "size": 815536,
+    "luma_mean": 72.48,
+    "luma_std": 47.33
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r5_s51130005_f3.png",
+    "sha256": "7882b7a84b6328f23636e12994f747b053b788499a05f9f0ecaad9ebeff5020d",
+    "size": 760102,
+    "luma_mean": 87.6,
+    "luma_std": 47.49
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r5_s51130005_f4.png",
+    "sha256": "803d4595f2029001b5d5530965a45a3a8aae9fa861414660e6f1ce3a40285e39",
+    "size": 750015,
+    "luma_mean": 92.15,
+    "luma_std": 52.48
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 33.94,
   "seed": [
    51130005
   ],
@@ -582,6 +1062,51 @@
    ],
    "err": ""
   },
+  "frames": [
+   {
+    "i": 0,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r6_s51130006_f0.png",
+    "sha256": "b197dbf6a67eb4a621015d1e2666ef7a52fb326e09ee43e787298e540df46986",
+    "size": 806311,
+    "luma_mean": 91.02,
+    "luma_std": 63.12
+   },
+   {
+    "i": 1,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r6_s51130006_f1.png",
+    "sha256": "ac6aea83ed9606be0796efbe0886fa524b5ffce5d3b88dfc8dc712964d225b5c",
+    "size": 844436,
+    "luma_mean": 57.53,
+    "luma_std": 60.79
+   },
+   {
+    "i": 2,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r6_s51130006_f2.png",
+    "sha256": "f9a0da3d56e84d80e9afd55331acc68e029a23b47ca6f0e443eefaf9839d3dc0",
+    "size": 834757,
+    "luma_mean": 54.52,
+    "luma_std": 56.97
+   },
+   {
+    "i": 3,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r6_s51130006_f3.png",
+    "sha256": "d956044bb2c477a2701c737d97d0af1d1c2b1fc7334ac89a1fc3d4509d810e65",
+    "size": 848151,
+    "luma_mean": 76.15,
+    "luma_std": 56.13
+   },
+   {
+    "i": 4,
+    "path": "C:/AI/community/notes/hc_final_frames\\ali147_pool_hc_r6_s51130006_f4.png",
+    "sha256": "1b7ca29556a4181cdc1cd6d2a2f034a67a966363804424d5be4ceda60c285bcf",
+    "size": 844772,
+    "luma_mean": 78.88,
+    "luma_std": 59.13
+   }
+  ],
+  "frames_count": 5,
+  "frames_sha_unique": true,
+  "frames_min_luma_std": 56.13,
   "seed": [
    51130006
   ],
