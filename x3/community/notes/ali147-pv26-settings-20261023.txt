@@ -1,0 +1,571 @@
+ALI-147 PV2-6 settings table - 2026-10-23 01:09:05  READ-ONLY (graph fields, no GPU)
+prompt fields are shown as length + sha256 only (the prompt text itself is in the graph and in specs\prompt_v2\*)
+
+== CTRL (driver-rendered seg1)
+   graph C:/AI/community/runs\ali147_pool_ctrl_s51080000\submitted_graph.pretty.json  10886 B  sha256 698854152284100e60b6ac87a795a7f083160a9556acb3fb868793b7f4373bb6  nodes=25
+  [c0] MiniMaxH3ReferenceToVideo
+      audio_vae              ["avae", 0]
+      clip                   ["clip", 0]
+      height                 1344
+      length                 243
+      prompt                 TEXT 3295 chars sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+      ref_image_size         "match"
+      ref_images.ref_image_1 ["img", 0]
+      vae                    ["vvae", 0]
+      width                  768
+  [c1] MiniMaxH3ImageToVideo
+      clip                   ["clip", 0]
+      height                 1344
+      length                 ["win1", 1]
+      prompt                 TEXT 2303 chars sha256 6686d7057ead8ac945bff9263858afee0d3881b119502d7d13ab63f69d86f013
+      vae                    ["vvae", 0]
+      width                  768
+  [img] LoadImage
+      image                  "community/POOL_768x1344.png"
+  [app1] MiniMaxH3AppendContinuation
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      previous_av_latent     ["s0_samp", 0]
+      sampled_window         ["s1_samp", 0]
+      transition_audio_tokens ["win1", 5]
+      transition_video_tokens ["win1", 4]
+  [avae] VAELoader
+      vae_name               "minimax_h3_audio_vae_fp32.safetensors"
+  [clip] CLIPLoader
+      clip_name              "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+      device                 "default"
+      type                   "minimax"
+  [ksel] KSamplerSelect
+      sampler_name           "euler"
+  [save] SaveVideo
+      codec                  "auto"
+      filename_prefix        "community/ali147_pool_ctrl_s51080000/ali147_pool_ctrl_s51080000"
+      format                 "auto"
+      video                  ["mkvid", 0]
+  [unet] UNETLoader
+      unet_name              "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors"
+      weight_dtype           "default"
+  [vvae] VAELoader
+      vae_name               "minimax_h3_video_vae_int8_convrot.safetensors"
+  [win1] MiniMaxH3GuidedContinuationWindow
+      extension_frames       238
+      overlap_frames         22
+      previous_av_latent     ["s0_samp", 0]
+  [dec_a] VAEDecodeAudio
+      samples                ["app1", 0]
+      vae                    ["avae", 0]
+  [dec_v] VAEDecode
+      samples                ["app1", 0]
+      vae                    ["vvae", 0]
+  [m_vsa] BlockSparseAttention
+      dense_blocks           ""
+      end_percent            1.0
+      extra_tokens           256
+      min_tokens             12288
+      model                  ["m_attn", 0]
+      selection              "vsa"
+      selection.keep_percent 10
+      sink_conditioning      "exact_kv_and_rows"
+      start_percent          0.2
+      verbose                false
+  [mkvid] CreateVideo
+      audio                  ["dec_a", 0]
+      fps                    24
+      images                 ["dec_v", 0]
+  [noise] RandomNoise
+      noise_seed             51080000
+  [tail1] MiniMaxH3LatentTailGuide
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      positive               ["c1", 0]
+      previous_av_latent     ["s0_samp", 0]
+      target_av_latent       ["win1", 0]
+  [m_attn] ModelAttentionBackend
+      attention              "comfy kitchen attention"
+      model                  ["unet", 0]
+  [m_shift] MiniMaxH3SigmaShift
+      model                  ["m_vsa", 0]
+      shift_audio            3.0
+      shift_video            10.0
+  [s0_samp] SamplerCustomAdvanced
+      guider                 ["s0_guide", 0]
+      latent_image           ["c0", 1]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s0_sched", 0]
+  [s1_samp] SamplerCustomAdvanced
+      guider                 ["s1_guide", 0]
+      latent_image           ["win1", 0]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s1_sched", 0]
+  [s0_guide] BasicGuider
+      conditioning           ["c0", 0]
+      model                  ["m_shift", 0]
+  [s0_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+  [s1_guide] BasicGuider
+      conditioning           ["tail1", 0]
+      model                  ["m_shift", 0]
+  [s1_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+   absent known setting-node ids: ['m_cache', 'sampler', 'vae', 'vae_d', 'lora_1', 'lora_2', 'lora_3', 'lora_4', 'lora_5', 'bridge', 'v2_a0', 'v2_a1', 'ext']
+
+== PV2-1 arm
+   graph C:/AI/community/runs\ali147_pool_promptv2_s51080000\request.api.json  12480 B  sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5  nodes=25
+  [c0] MiniMaxH3ReferenceToVideo
+      audio_vae              ["avae", 0]
+      clip                   ["clip", 0]
+      height                 1344
+      length                 243
+      prompt                 TEXT 4411 chars sha256 889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6
+      ref_image_size         "match"
+      ref_images.ref_image_1 ["img", 0]
+      vae                    ["vvae", 0]
+      width                  768
+  [c1] MiniMaxH3ImageToVideo
+      clip                   ["clip", 0]
+      height                 1344
+      length                 ["win1", 1]
+      prompt                 TEXT 2769 chars sha256 655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b
+      vae                    ["vvae", 0]
+      width                  768
+  [img] LoadImage
+      image                  "community/POOL_768x1344.png"
+  [app1] MiniMaxH3AppendContinuation
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      previous_av_latent     ["s0_samp", 0]
+      sampled_window         ["s1_samp", 0]
+      transition_audio_tokens ["win1", 5]
+      transition_video_tokens ["win1", 4]
+  [avae] VAELoader
+      vae_name               "minimax_h3_audio_vae_fp32.safetensors"
+  [clip] CLIPLoader
+      clip_name              "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+      device                 "default"
+      type                   "minimax"
+  [ksel] KSamplerSelect
+      sampler_name           "euler"
+  [save] SaveVideo
+      codec                  "auto"
+      filename_prefix        "community/ali147_pool_promptv2_s51080000/ali147_pool_promptv2_s51080000"
+      format                 "auto"
+      video                  ["mkvid", 0]
+  [unet] UNETLoader
+      unet_name              "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors"
+      weight_dtype           "default"
+  [vvae] VAELoader
+      vae_name               "minimax_h3_video_vae_int8_convrot.safetensors"
+  [win1] MiniMaxH3GuidedContinuationWindow
+      extension_frames       238
+      overlap_frames         22
+      previous_av_latent     ["s0_samp", 0]
+  [dec_a] VAEDecodeAudio
+      samples                ["app1", 0]
+      vae                    ["avae", 0]
+  [dec_v] VAEDecode
+      samples                ["app1", 0]
+      vae                    ["vvae", 0]
+  [m_vsa] BlockSparseAttention
+      dense_blocks           ""
+      end_percent            1.0
+      extra_tokens           256
+      min_tokens             12288
+      model                  ["m_attn", 0]
+      selection              "vsa"
+      selection.keep_percent 10
+      sink_conditioning      "exact_kv_and_rows"
+      start_percent          0.2
+      verbose                false
+  [mkvid] CreateVideo
+      audio                  ["dec_a", 0]
+      fps                    24
+      images                 ["dec_v", 0]
+  [noise] RandomNoise
+      noise_seed             51080000
+  [tail1] MiniMaxH3LatentTailGuide
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      positive               ["c1", 0]
+      previous_av_latent     ["s0_samp", 0]
+      target_av_latent       ["win1", 0]
+  [m_attn] ModelAttentionBackend
+      attention              "comfy kitchen attention"
+      model                  ["unet", 0]
+  [m_shift] MiniMaxH3SigmaShift
+      model                  ["m_vsa", 0]
+      shift_audio            3.0
+      shift_video            10.0
+  [s0_samp] SamplerCustomAdvanced
+      guider                 ["s0_guide", 0]
+      latent_image           ["c0", 1]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s0_sched", 0]
+  [s1_samp] SamplerCustomAdvanced
+      guider                 ["s1_guide", 0]
+      latent_image           ["win1", 0]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s1_sched", 0]
+  [s0_guide] BasicGuider
+      conditioning           ["c0", 0]
+      model                  ["m_shift", 0]
+  [s0_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+  [s1_guide] BasicGuider
+      conditioning           ["tail1", 0]
+      model                  ["m_shift", 0]
+  [s1_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+   absent known setting-node ids: ['m_cache', 'sampler', 'vae', 'vae_d', 'lora_1', 'lora_2', 'lora_3', 'lora_4', 'lora_5', 'bridge', 'v2_a0', 'v2_a1', 'ext']
+
+== BASE seg3 (the PV2-2 control)
+   graph C:/AI/community/runs\p7_r2_c3_pmot_full_pool\p7_r2_c3_pmot_full_pool_seg3.api.json  10910 B  sha256 c5b6726c1d5870f597ba51fcf65499d489be9a1755ebf1905ab8fac5960e8fec  nodes=25
+  [c0] MiniMaxH3ReferenceToVideo
+      audio_vae              ["avae", 0]
+      clip                   ["clip", 0]
+      height                 1344
+      length                 243
+      prompt                 TEXT 3354 chars sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+      ref_image_size         "match"
+      ref_images.ref_image_1 ["img", 0]
+      vae                    ["vvae", 0]
+      width                  768
+  [c1] MiniMaxH3ImageToVideo
+      clip                   ["clip", 0]
+      height                 1344
+      length                 ["win1", 1]
+      prompt                 TEXT 2269 chars sha256 dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89
+      vae                    ["vvae", 0]
+      width                  768
+  [img] LoadImage
+      image                  "community/POOL_768x1344.png"
+  [app1] MiniMaxH3AppendContinuation
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      previous_av_latent     ["s0_samp", 0]
+      sampled_window         ["s1_samp", 0]
+      transition_audio_tokens ["win1", 5]
+      transition_video_tokens ["win1", 4]
+  [avae] VAELoader
+      vae_name               "minimax_h3_audio_vae_fp32.safetensors"
+  [clip] CLIPLoader
+      clip_name              "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+      device                 "default"
+      type                   "minimax"
+  [ksel] KSamplerSelect
+      sampler_name           "euler"
+  [save] SaveVideo
+      codec                  "auto"
+      filename_prefix        "community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3"
+      format                 "auto"
+      video                  ["mkvid", 0]
+  [unet] UNETLoader
+      unet_name              "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors"
+      weight_dtype           "default"
+  [vvae] VAELoader
+      vae_name               "minimax_h3_video_vae_int8_convrot.safetensors"
+  [win1] MiniMaxH3GuidedContinuationWindow
+      extension_frames       238
+      overlap_frames         22
+      previous_av_latent     ["s0_samp", 0]
+  [dec_a] VAEDecodeAudio
+      samples                ["app1", 0]
+      vae                    ["avae", 0]
+  [dec_v] VAEDecode
+      samples                ["app1", 0]
+      vae                    ["vvae", 0]
+  [m_vsa] BlockSparseAttention
+      dense_blocks           ""
+      end_percent            1.0
+      extra_tokens           256
+      min_tokens             12288
+      model                  ["m_attn", 0]
+      selection              "vsa"
+      selection.keep_percent 10
+      sink_conditioning      "exact_kv_and_rows"
+      start_percent          0.2
+      verbose                false
+  [mkvid] CreateVideo
+      audio                  ["dec_a", 0]
+      fps                    24
+      images                 ["dec_v", 0]
+  [noise] RandomNoise
+      noise_seed             51080002
+  [tail1] MiniMaxH3LatentTailGuide
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      positive               ["c1", 0]
+      previous_av_latent     ["s0_samp", 0]
+      target_av_latent       ["win1", 0]
+  [m_attn] ModelAttentionBackend
+      attention              "comfy kitchen attention"
+      model                  ["unet", 0]
+  [m_shift] MiniMaxH3SigmaShift
+      model                  ["m_vsa", 0]
+      shift_audio            3.0
+      shift_video            10.0
+  [s0_samp] SamplerCustomAdvanced
+      guider                 ["s0_guide", 0]
+      latent_image           ["c0", 1]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s0_sched", 0]
+  [s1_samp] SamplerCustomAdvanced
+      guider                 ["s1_guide", 0]
+      latent_image           ["win1", 0]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s1_sched", 0]
+  [s0_guide] BasicGuider
+      conditioning           ["c0", 0]
+      model                  ["m_shift", 0]
+  [s0_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+  [s1_guide] BasicGuider
+      conditioning           ["tail1", 0]
+      model                  ["m_shift", 0]
+  [s1_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+   absent known setting-node ids: ['m_cache', 'sampler', 'vae', 'vae_d', 'lora_1', 'lora_2', 'lora_3', 'lora_4', 'lora_5', 'bridge', 'v2_a0', 'v2_a1', 'ext']
+
+== PV2-2 arm
+   graph C:/AI/community/runs\ali147_pool_promptv2_seg3_s51080002\request.api.json  12569 B  sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2  nodes=25
+  [c0] MiniMaxH3ReferenceToVideo
+      audio_vae              ["avae", 0]
+      clip                   ["clip", 0]
+      height                 1344
+      length                 243
+      prompt                 TEXT 4358 chars sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b
+      ref_image_size         "match"
+      ref_images.ref_image_1 ["img", 0]
+      vae                    ["vvae", 0]
+      width                  768
+  [c1] MiniMaxH3ImageToVideo
+      clip                   ["clip", 0]
+      height                 1344
+      length                 ["win1", 1]
+      prompt                 TEXT 2903 chars sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383
+      vae                    ["vvae", 0]
+      width                  768
+  [img] LoadImage
+      image                  "community/POOL_768x1344.png"
+  [app1] MiniMaxH3AppendContinuation
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      previous_av_latent     ["s0_samp", 0]
+      sampled_window         ["s1_samp", 0]
+      transition_audio_tokens ["win1", 5]
+      transition_video_tokens ["win1", 4]
+  [avae] VAELoader
+      vae_name               "minimax_h3_audio_vae_fp32.safetensors"
+  [clip] CLIPLoader
+      clip_name              "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+      device                 "default"
+      type                   "minimax"
+  [ksel] KSamplerSelect
+      sampler_name           "euler"
+  [save] SaveVideo
+      codec                  "auto"
+      filename_prefix        "community/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002"
+      format                 "auto"
+      video                  ["mkvid", 0]
+  [unet] UNETLoader
+      unet_name              "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors"
+      weight_dtype           "default"
+  [vvae] VAELoader
+      vae_name               "minimax_h3_video_vae_int8_convrot.safetensors"
+  [win1] MiniMaxH3GuidedContinuationWindow
+      extension_frames       238
+      overlap_frames         22
+      previous_av_latent     ["s0_samp", 0]
+  [dec_a] VAEDecodeAudio
+      samples                ["app1", 0]
+      vae                    ["avae", 0]
+  [dec_v] VAEDecode
+      samples                ["app1", 0]
+      vae                    ["vvae", 0]
+  [m_vsa] BlockSparseAttention
+      dense_blocks           ""
+      end_percent            1.0
+      extra_tokens           256
+      min_tokens             12288
+      model                  ["m_attn", 0]
+      selection              "vsa"
+      selection.keep_percent 10
+      sink_conditioning      "exact_kv_and_rows"
+      start_percent          0.2
+      verbose                false
+  [mkvid] CreateVideo
+      audio                  ["dec_a", 0]
+      fps                    24
+      images                 ["dec_v", 0]
+  [noise] RandomNoise
+      noise_seed             51080002
+  [tail1] MiniMaxH3LatentTailGuide
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      positive               ["c1", 0]
+      previous_av_latent     ["s0_samp", 0]
+      target_av_latent       ["win1", 0]
+  [m_attn] ModelAttentionBackend
+      attention              "comfy kitchen attention"
+      model                  ["unet", 0]
+  [m_shift] MiniMaxH3SigmaShift
+      model                  ["m_vsa", 0]
+      shift_audio            3.0
+      shift_video            10.0
+  [s0_samp] SamplerCustomAdvanced
+      guider                 ["s0_guide", 0]
+      latent_image           ["c0", 1]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s0_sched", 0]
+  [s1_samp] SamplerCustomAdvanced
+      guider                 ["s1_guide", 0]
+      latent_image           ["win1", 0]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s1_sched", 0]
+  [s0_guide] BasicGuider
+      conditioning           ["c0", 0]
+      model                  ["m_shift", 0]
+  [s0_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+  [s1_guide] BasicGuider
+      conditioning           ["tail1", 0]
+      model                  ["m_shift", 0]
+  [s1_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+   absent known setting-node ids: ['m_cache', 'sampler', 'vae', 'vae_d', 'lora_1', 'lora_2', 'lora_3', 'lora_4', 'lora_5', 'bridge', 'v2_a0', 'v2_a1', 'ext']
+
+== PV2-3 arm (dense)
+   graph C:/AI/community/runs\ali147_pool_dense_s51080000\request.api.json  10517 B  sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39  nodes=24
+  [c0] MiniMaxH3ReferenceToVideo
+      audio_vae              ["avae", 0]
+      clip                   ["clip", 0]
+      height                 1344
+      length                 243
+      prompt                 TEXT 3295 chars sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+      ref_image_size         "match"
+      ref_images.ref_image_1 ["img", 0]
+      vae                    ["vvae", 0]
+      width                  768
+  [c1] MiniMaxH3ImageToVideo
+      clip                   ["clip", 0]
+      height                 1344
+      length                 ["win1", 1]
+      prompt                 TEXT 2303 chars sha256 6686d7057ead8ac945bff9263858afee0d3881b119502d7d13ab63f69d86f013
+      vae                    ["vvae", 0]
+      width                  768
+  [img] LoadImage
+      image                  "community/POOL_768x1344.png"
+  [app1] MiniMaxH3AppendContinuation
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      previous_av_latent     ["s0_samp", 0]
+      sampled_window         ["s1_samp", 0]
+      transition_audio_tokens ["win1", 5]
+      transition_video_tokens ["win1", 4]
+  [avae] VAELoader
+      vae_name               "minimax_h3_audio_vae_fp32.safetensors"
+  [clip] CLIPLoader
+      clip_name              "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+      device                 "default"
+      type                   "minimax"
+  [ksel] KSamplerSelect
+      sampler_name           "euler"
+  [save] SaveVideo
+      codec                  "auto"
+      filename_prefix        "community/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000"
+      format                 "auto"
+      video                  ["mkvid", 0]
+  [unet] UNETLoader
+      unet_name              "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors"
+      weight_dtype           "default"
+  [vvae] VAELoader
+      vae_name               "minimax_h3_video_vae_int8_convrot.safetensors"
+  [win1] MiniMaxH3GuidedContinuationWindow
+      extension_frames       238
+      overlap_frames         22
+      previous_av_latent     ["s0_samp", 0]
+  [dec_a] VAEDecodeAudio
+      samples                ["app1", 0]
+      vae                    ["avae", 0]
+  [dec_v] VAEDecode
+      samples                ["app1", 0]
+      vae                    ["vvae", 0]
+  [mkvid] CreateVideo
+      audio                  ["dec_a", 0]
+      fps                    24
+      images                 ["dec_v", 0]
+  [noise] RandomNoise
+      noise_seed             51080000
+  [tail1] MiniMaxH3LatentTailGuide
+      overlap_audio_tokens   ["win1", 3]
+      overlap_video_tokens   ["win1", 2]
+      positive               ["c1", 0]
+      previous_av_latent     ["s0_samp", 0]
+      target_av_latent       ["win1", 0]
+  [m_attn] ModelAttentionBackend
+      attention              "comfy kitchen attention"
+      model                  ["unet", 0]
+  [m_shift] MiniMaxH3SigmaShift
+      model                  ["m_attn", 0]
+      shift_audio            3.0
+      shift_video            10.0
+  [s0_samp] SamplerCustomAdvanced
+      guider                 ["s0_guide", 0]
+      latent_image           ["c0", 1]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s0_sched", 0]
+  [s1_samp] SamplerCustomAdvanced
+      guider                 ["s1_guide", 0]
+      latent_image           ["win1", 0]
+      noise                  ["noise", 0]
+      sampler                ["ksel", 0]
+      sigmas                 ["s1_sched", 0]
+  [s0_guide] BasicGuider
+      conditioning           ["c0", 0]
+      model                  ["m_shift", 0]
+  [s0_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+  [s1_guide] BasicGuider
+      conditioning           ["tail1", 0]
+      model                  ["m_shift", 0]
+  [s1_sched] BasicScheduler
+      denoise                1.0
+      model                  ["m_shift", 0]
+      scheduler              "simple"
+      steps                  10
+   absent known setting-node ids: ['m_vsa', 'm_cache', 'sampler', 'vae', 'vae_d', 'lora_1', 'lora_2', 'lora_3', 'lora_4', 'lora_5', 'bridge', 'v2_a0', 'v2_a1', 'ext']

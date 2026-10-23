@@ -1,0 +1,16 @@
+ALI-147 PV2-6 file inventory - 2026-10-23 01:19:09 (read-only; this file lists the report + probe files this iteration wrote)
+     20924  1cf0d64b88022829  C:/AI/community/notes\ali147_pv26_report_probe.py
+      5492  e11cdfef411aa693  C:/AI/community/notes\ali147_pv26_card_probe.py
+      2702  7b4802067fbca639  C:/AI/community/notes\ali147_pv26_settings.py
+      2614  f958f11991e3ccdb  C:/AI/community/notes\ali147_pv26_commits.py
+       268  345927c115834711  C:/AI/community/notes\ali147_pv26_linerepr.py
+      2002  62b8695209a3c700  C:/AI/community/notes\ali147_pv26_inventory2.py
+     27141  f1ec15349e20ad24  C:/AI/community/notes\ali147-pv26-report-probe-20261023.txt
+      4363  c84e871baa47f77d  C:/AI/community/notes\ali147-pv26-card-probe-20261023.txt
+     23939  271ec7252e9e4e9f  C:/AI/community/notes\ali147-pv26-settings-20261023.txt
+      1958  c816b46194cf7204  C:/AI/community/notes\ali147-pv26-commits-20261023.txt
+     21741  fdb497063e1c0b6d  C:/AI/community/notes\ali147-report-pv2-20261023.md
+     24151  509acacc55ca10c9  C:/AI/community/notes\ali147_REPORT_pv2.md
+     21741  fdb497063e1c0b6d  C:/AI/community/runs/ali147_pool_promptv2_s51080000/REPORT_pv2.md  (report copy outside notes\, from the earlier PV2-6 line text; kept, no deletes)
+TOTAL 13 files 159036 bytes
+AGENTS.md Learnings bullet lines = 16 (cap 15)
