@@ -150,3 +150,30 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
   Gate 7/7 ALL CHECKS PASS (notes/ali163_hc_bq1d_notes_fix.py) + a CRLF-aware scan
   (notes/ali163_hc_bq1d_ctrlscan.py) = 0 defects in 38 files (notes/*.md + TASKS.md + PROMPT.md + AGENTS.md).
   No line of prose was reworded: only control chars became '/' and the 3 eaten letters were restored.
+
+## 2026-10-23 iter 05 - FINAL REOPENED (add R6R ali147_pool_hc_r3r to verify + contact sheet), CPU only
+- Loop state in: ralph.log "iter 05 start", last summary "status=ok exit=0 ticks=+1" (iter 04 clean),
+  notes/denies.log tail = 2026-10-23 04:51 Guard A [secret] on a python -c that named the EV1 env
+  credential variable in a command line (that variable name is exactly what tripped it; the EV1 task text
+  itself names it). No deny in this pass, no timeout, no STOP_RALPH, ticks +1.
+- Did the first unchecked task only. Scope: notes/ali163_hc_final_check.py, _media.ps1, _sheet.py,
+  _summary.py + the three artifacts (objective json, contact png, summary md) + the TASKS.md tick.
+  No render, no p7/JOB_REQUEST.json, no GPU, no ComfyUI/llama-swap port, no vision judge, no new seed.
+- What went in: r3r (face crops only) + r3b (BQ1c rewire, start still + 2 face crops) are now in the
+  objective dump, the media pass, the 9-row contact sheet and the summary. The dead r3 id keeps its
+  failure line and gained a RESOLVED note. Max's 4:51 PM CT correction block is preserved by putting it
+  in the generator (the md is regenerated output - a hand-edit there is eaten on the next run).
+- Non-vacuous checks (all CPU, pure PIL): the 5 sheet frames per clip are sha256-distinct and their
+  grayscale luma stdev is reported (33.94-56.77; 0 = black/flat). Sheet builder self-check + probe:
+  hid r6 frame 4 -> "SHEET_SELF_CHECK FAIL ali147_pool_hc_r6_s51130006 cell 4 flat" rc=1; hid r3b frame 2
+  -> same detector; restored -> rc=0 PASS 9 rows / 8 rendered rows / 1 NO-RENDER panel row. The first
+  version of that check fired a FALSE positive on the NO-RENDER row (my crop covered the panel's own text
+  line); replaced with a red-panel colour test (mean R > G+15) - no more false positive, probe still fires.
+- Label overflow: labels are now width-measured (draw.textlength, ellipsised) to the 430 px column instead
+  of ln[:58]; a probe over every row label = 0 labels crossing into the frame band.
+- TASKS.md write gate: appended the tick with python + newline='' and re-checked bytes = 113860,
+  103 CRLF breaks, 0 lone LF, 0 control chars, 0 bells/backspaces. One CR had ended up mid-line (my append
+  landed after the line's trailing \r) - repaired in the same pass; line endings now match git HEAD.
+- Budget read 467.5 min / 37 jobs (caps 615 / 45). This pass spent 0 min and 0 jobs; the two clip-3
+  re-renders (15:24-15:31 and 17:20-17:28) used 2 bakeoff slots before this tick. Nothing BLOCKED.
+- ralph.ps1 untouched (Max's). KEEP is Derrick's; nothing in this pass is a quality judgement.

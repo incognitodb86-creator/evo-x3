@@ -13,6 +13,8 @@ import os
 import re
 import subprocess
 
+from PIL import Image, ImageStat
+
 FFPROBE = (
     "C:/Users/derek/AppData/Local/Microsoft/Winget/Packages/"
     "Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.0.1-full_build/bin/ffprobe.exe"
@@ -27,11 +29,15 @@ CLIPS = [
     ("clip2 OLD", "ali147_pool_hc_c2_s51100002", "HC2 BD007", 481, "old batch (481 f)"),
     ("clip1 NEW", "ali147_pool_hc_r1_s51130001", "HC1 BD004", 243, "R4"),
     ("clip2 NEW", "ali147_pool_hc_r2_s51130002", "HC2 BD007", 243, "R5"),
-    ("clip3", "ali147_pool_hc_r3_s51130003", "HC3 GI173", 243, "R6"),
+    ("clip3", "ali147_pool_hc_r3_s51130003", "HC3 GI173", 243, "R6 (rc=2 static fail, no render)"),
+    ("clip3 R6R", "ali147_pool_hc_r3r_s51130003", "HC3 GI173", 243, "R6R re-render, face crops only"),
+    ("clip3 BQ1c", "ali147_pool_hc_r3b_s51130003", "HC3 GI173", 243, "BQ1c rewire, start still + face crops"),
     ("clip4", "ali147_pool_hc_r4_s51130004", "HC4 GI107", 243, "R7"),
     ("clip5", "ali147_pool_hc_r5_s51130005", "HC5 GI150", 243, "R8"),
     ("clip6", "ali147_pool_hc_r6_s51130006", "HC6 BD076", 243, "R9"),
 ]
+# contact-sheet frames (extracted by notes/ali163_hc_final_media.ps1) - objective non-black check
+FRAMES = "C:/AI/community/notes/hc_final_frames"
 
 
 def sh(*args):
@@ -144,6 +150,22 @@ for label, cid, pick, exp_frames, note in CLIPS:
             row["m4a_bytes"] = os.path.getsize(m4a)
             row["m4a_sha256"] = sha256(m4a)
             row["m4a_probe"] = probe_audio(m4a)
+        # frames: count + objective luma stats (a black/duplicate frame is a real failure mode;
+        # this is a pure-PIL number, NOT a vision judge)
+        fr = []
+        for i in range(5):
+            fp = os.path.join(FRAMES, f"{cid}_f{i}.png")
+            if not os.path.exists(fp):
+                continue
+            g = Image.open(fp).convert("L")
+            st = ImageStat.Stat(g)
+            fr.append({"i": i, "path": fp, "sha256": sha256(fp),
+                       "size": os.path.getsize(fp),
+                       "luma_mean": round(st.mean[0], 2), "luma_std": round(st.stddev[0], 2)})
+        row["frames"] = fr
+        row["frames_count"] = len(fr)
+        row["frames_sha_unique"] = len({f["sha256"] for f in fr}) == len(fr)
+        row["frames_min_luma_std"] = min([f["luma_std"] for f in fr], default=None)
     # graph: seed, refs, sound line, frames
     gp = os.path.join(d, "request.api.json")
     if os.path.exists(gp):
@@ -180,4 +202,6 @@ print()
 for r in rows:
     print(r["id"], "JOBERROR=", r.get("job_error_grep"), "CLIPSKIP=", r.get("clip_skip_grep"),
           "m4a_probe=", r.get("m4a_probe", {}).get("lines"),
+          "frames=", r.get("frames_count"), "sha_uniq=", r.get("frames_sha_unique"),
+          "min_luma_std=", r.get("frames_min_luma_std"),
           "soundscape=", (r.get("soundscape") or "")[:80])

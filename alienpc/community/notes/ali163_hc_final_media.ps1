@@ -6,7 +6,7 @@ $Runs  = 'C:\AI\community\runs'
 $Frams = 'C:\AI\community\notes\hc_final_frames'
 New-Item -ItemType Directory -Force -Path $Frams | Out-Null
 
-$ids = @('ali147_pool_hc_c1_s51100001','ali147_pool_hc_r1_s51130001','ali147_pool_hc_r2_s51130002','ali147_pool_hc_r4_s51130004','ali147_pool_hc_r5_s51130005','ali147_pool_hc_r6_s51130006')
+$ids = @('ali147_pool_hc_c1_s51100001','ali147_pool_hc_r1_s51130001','ali147_pool_hc_r2_s51130002','ali147_pool_hc_r3r_s51130003','ali147_pool_hc_r3b_s51130003','ali147_pool_hc_r4_s51130004','ali147_pool_hc_r5_s51130005','ali147_pool_hc_r6_s51130006')
 foreach ($id in $ids) {
   $mp4 = Join-Path $Runs "$id\$id.mp4"
   if (-not (Test-Path -LiteralPath $mp4)) { Write-Output "MISSING $mp4"; continue }
