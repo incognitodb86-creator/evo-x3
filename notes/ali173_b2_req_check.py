@@ -87,6 +87,17 @@ mine = [l for l in tk.splitlines() if ID in l]
 ck(len(mine) >= 1 and all("- [x]" in l for l in mine), f"every TASKS.md line naming the id is ticked - [x]",
    f"{len(mine)} line(s)")
 ck(not any("BLOCKED" in l.upper() for l in mine), "no B2 line carries a BLOCKED note", " | ".join(l.strip()[:60] for l in mine))
+# Control chars in a task line are a real fault, not cosmetics: a non-raw Python string with a C:\ path
+# turns "\ali173" into \a (0x07), "\bakeoff" into \b (0x08) and "\request" into \r (0x0d), which SPLITS
+# the line for splitlines()/the harness's line regexes - my first B2 tick did exactly that and the tick
+# check below saw three fragments, one unticked. A ticked line must be ONE line with no control chars.
+cctrl = [c for c in (mine[0] if mine else "") if ord(c) < 32 or ord(c) == 127]
+ck(not cctrl, "the B2 task line is one physical line with no control chars (a \\a \\b \\r from a C:\\ path "
+             "splits it and breaks ReqTicked)",
+   f"{len(cctrl)} control char(s)" + (f" {[hex(ord(c)) for c in sorted(set(cctrl))]}" if cctrl else ""))
+_v = "- [x] B2 CONTINUUM C:" + chr(13) + "ali173_cont_hc1_s51140001"      # the exact bug shape
+print(f"PROBE {'FIRED ' if any(ord(c) < 32 for c in _v) else 'SILENT'} a \\r from a C:\\ path in a task line "
+      f"is caught by this check ({'rejected' if any(ord(c) < 32 for c in _v) else 'ACCEPTED - VACOUS'})")
 
 for f in (GRAPHF, STAGED):
     r = subprocess.run([sys.executable, "-m", "json.tool", f], capture_output=True, text=True)

@@ -96,9 +96,17 @@ design and recorded here, not fixed by a kludge.
   `GpuCapMin[^=]*=` search runs past the line into prose and captured 375 on the first run; the tick
   check is per-line, and both are probed.
 
-## 7. Render state
+## 7. Render state and graph durability
 
 The job is **requested, not rendered**: `C:/AI/community/p7/JOB_REQUEST.json` staged at ~18:35 CT
 (`kind=graph`, `frames 240`, `frames_tol 33`, `minutes 60`), `p7/jobs/ali173_cont_hc1_s51140001.result.json`
 does not exist. Proof (objective.json, ffprobe, labelled contact sheet) and the ledger's render line are
 due next pass. No vision judgement is made here - KEEP is Derrick's.
+
+Durability: `C:/AI/community/runs/` is gitignored, so the graph the job reads is not in any commit, and
+`ralph.ps1` has no `git clean` (grep = 0 hits) - it survives iterations but nothing restores it. The
+durable copy is **`notes/ali173_b2_graph_ali173_cont_hc1_s51140001.json`** (committed, sha256
+`1efecedd53549c5e05887985f352a18d5897ca8587588af39b67052bfabd2088`, the value written to
+`runs/bakeoff_gpu_events.jsonl`), and `python C:/AI/community/notes/ali173_b2_restore_graph.py` re-copies
+it into `runs/<id>/request.api.json` (it refuses, rc 2, if the live file differs semantically, so it can
+never overwrite a graph a running job is reading; `--selftest` = 4/4 probes fired).
