@@ -1,0 +1,78 @@
+[civitai model 2866184] MiniMax H3 Reverse Prompt & Expansion Workflow (NSFW) | type Workflows | nsfw False | tags nsfw, tool, minimax h3
+
+---- block ----
+
+🚀 Workflow Features & Setup Guide Place the official H3_NSFW_Physics_Engine.txt file into the directory path \ComfyUI\models\LLM\prompts , and select H3_NSFW_Physics_Engine.txt in the system_prompt field of the prompt expansion model node.
+
+ > ⚠️ Important Notice : This workflow incorporates an acceleration LoRA and Kijai's SageAttention node. Please ensure you download the required LoRA and custom node before running.
+
+ 🌟 Key Features MiniMax H3 Prompt Synthesizer : Built-in prompt engineering node supporting multi-dimensional parameter assembly (Shot Type, Perspective, Lens Optics, Camera Movement) with bilingual presets. Includes an integrated side-by-side web workspace (with right-edge hover focus) and safe image drag-and-drop functionality.
+
+ 
+
+ Gemma 4 12B IT QAT Integration : Integrates Gemma 4's thinking mode for deeper reasoning, high-precision prompt interrogation, detailed captioning, and complex tag conversion. 
+
+ 
+
+ 📦 Required Custom Nodes Installation Open your terminal, navigate to your ComfyUI custom_nodes directory, and run the following commands: 
+
+ 
+
+ 
+
+ cd ComfyUI/custom_nodes
+
+# 1. MiniMax H3 Prompt Synthesizer Node
+git clone https://github.com/mizukir0418-gif/ComfyUI-MiniMax-H3-Prompt_Synthesizer.git
+
+# 2. LLM Text Processor Node (Required for Gemma 4)
+git clone https://github.com/KingManiya/ComfyUI-LLM-text-processor.git
+ 🧠 LLM Model Setup Model Download : Download gemma-4-12b-it-uncensored-GGUF or the recommended variant from SC117/gemma-4-12B-it-heretic-QAT-GGUF · Hugging Face . 
+
+ 
+
+ Storage Path : Place the .gguf file inside: 
+
+ 
+
+ 
+
+ ComfyUI/models/LLM/
+ 
+ ⚠️ Critical Fix: Updating llama.cpp Backend (Gemma 4 Compatibility) Because Gemma 4 utilizes a new architecture, the older default backend built into the LLM node will throw an error (e.g., unknown projector type or inference failed) on its first run. Follow these steps to update it: 
+
+ 
+
+ Download the Latest Backend : Go to llama.cpp GitHub Releases and download the release zip matching your GPU/CUDA environment (e.g., Windows x64 CUDA 13 or CUDA 12). 
+
+ 
+
+ Locate Target Directory : Navigate to the following folder inside your ComfyUI installation: 
+
+ 
+
+ 
+
+ ComfyUI/custom_nodes/ComfyUI-LLM-text-processor/vendor/llama.cpp/b8840/win-x64-cuda13/
+ 
+ Replace Files : Extract the downloaded zip file and copy-paste all extracted files directly into the win-x64-cuda13 folder, overwriting the existing ones. 
+
+ 
+
+ Restart : Restart ComfyUI to apply the updates. 
+
+ 
+
+ DISCLAIMER & TERMS OF USE
+
+ This workflow is provided strictly for educational, technical research, and sex education/learning reference purposes only. By accessing, downloading, or utilizing this MiniMax H3 workflow, you agree to the following terms:
+
+ * Educational & Research Scope: This workflow is designed solely to demonstrate pipeline architectures, model integration, and technical workflows for academic, research, and adult educational reference. It must not be used for commercial monetization, public broadcasting, or illicit activities.
+
+ * Strict Age Restriction: This material contains parameters associated with adult/NSFW content. You must be at least 18 years of age (or the legal age of majority in your jurisdiction) to view, download, or execute this workflow.
+
+ * User Accountability & Policy Compliance: You assume full responsibility for all prompt inputs, generated outputs, and downstream applications. You are required to comply with all applicable local laws, host platform rules, and the Terms of Service (ToS) governing the underlying MiniMax models and API endpoints.
+
+ * No Liability ("AS IS"): This workflow is provided on an "AS IS" basis, without warranties of any kind, express or implied. The author(s) assume no liability for account suspensions, API rate limits/blocks, system instability, or legal consequences arising from its use.
+
+ * Zero Tolerance for Misuse: The author(s) explicitly prohibit, and do not condone, the creation or distribution of non-consensual content, deepfakes, illegal material, or any form of harmful media.

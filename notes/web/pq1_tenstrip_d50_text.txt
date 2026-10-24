@@ -1,0 +1,21 @@
+This model is great! I mainly generate anime theme and I loved the test4 version but it has some frame skipping issues so I decided to try out beta5, test4 was perfect for me otherwise.
+I'm confused because both FL2VA and Ref2VA format seem to give similar results, that the video has very good motion and great audio, but it would shift the color to green or blue. Same LLM-optimized prompt worked fine in test4. The prompt is approx. 300 English words for a 15 second video.
+Also I'm not sure if we should use the FL2VA node or the Ref2VA node in ComfyUI, like should we use Ref2VA prompting in FL2VA node?
+
+ See translation ChiNoel Sep 15 • edited Sep 15 <div
+
+---- block ----
+
+ok I did some controlled testing and imo maybe the TURBO version is being weird. The non-turbo beta5 + separate lightning lora performs better than turbo version at same generation settings, at least that's what I noticed after generating 3 videos each.
+
+ Still would love to know how the model is intended to be prompted. I was using FL2VA prompting format and node for the tests.
+
+ See translation TenStrip Owner Sep 17 <div
+
+---- block ----
+
+I would use ref prompting for everything actually. One of the benefits of hybrid is you can ref prompt for T2V or I2V. descriptions especially. Even for T2V you can establish " is ...." before the main prompt. Just use those subject tags, drop the references, and drop the overall_description and retention clauses for T2V. 
+
+ See translation ❤️ 3 3 + Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <path fill-rule="evenodd" clip-rule="evenodd" d="M6 22.5h20a2 2 0 0 0 2

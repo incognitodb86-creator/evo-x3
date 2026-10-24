@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<meta content='width=device-width, initial-scale=1.0' name='viewport'>
+<meta content='light dark' name='color-scheme'>
+<link href='../../../main.css' rel='stylesheet'>
+<script defer src='../../../main.js'></script>
+<link href='../../../icon.png' rel='icon' type='image/png'>
+<link href='../../../icon.svg' rel='icon' type='image/svg+xml'>
+<title>siti - FFmpeg 8.0.3 / Filters / Video</title>
+</head>
+<body>
+<header>
+<div class='sidebar-toggle'>
+<input id='sidebar-toggle-check' type='checkbox'>
+<label for='sidebar-toggle-check'>Sidebar</label>
+</div>
+<div class='title'>FFmpeg 8.0.3</div>
+<div class='links'>
+<a href='../../../version-matrix.html'>Version Matrix</a>
+<a href='https://github.com/ayosec/ffmpeg-filters-docs'>Source</a>
+</div>
+</header>
+<nav>
+<div class='current-version'>
+<div class='version-label'>8.0.3</div>
+<details open>
+<summary>Filters</summary>
+<details>
+<summary>Audio</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305560'>...</label>
+<a href='../Audio/aap.html' title='Apply Affine Projection algorithm to the first audio stream using the second audio stream.'>aap</a>
+<a href='../Audio/acompressor.html' title='A compressor is mainly used to reduce the dynamic range of a signal.'>acompressor</a>
+<a href='../Audio/acontrast.html' title='Simple audio dynamic range compression/expansion filter.'>acontrast</a>
+<a href='../Audio/acopy.html' title='Copy the input audio source unchanged to the output.'>acopy</a>
+<a href='../Audio/acrossfade.html' title='Apply cross fade from one input audio stream to another input audio stream.'>acrossfade</a>
+<a href='../Audio/acrossover.html' title='Split audio stream into several bands.'>acrossover</a>
+<a href='../Audio/acrusher.html' title='Reduce audio bit resolution.'>acrusher</a>
+<a href='../Audio/acue.html' title='Delay audio filtering until a given wallclock timestamp.'>acue</a>
+<a href='../Audio/adeclick.html' title='Remove impulsive noise from input audio.'>adeclick</a>
+<a href='../Audio/adeclip.html' title='Remove clipped samples from input audio.'>adeclip</a>
+<a href='../Audio/adecorrelate.html' title='Apply decorrelation to input audio stream.'>adecorrelate</a>
+<a href='../Audio/adelay.html' title='Delay one or more audio channels.'>adelay</a>
+<a href='../Audio/adenorm.html' title='Remedy denormals in audio by adding extremely low-level noise.'>adenorm</a>
+<a href='../Audio/aderivative.html' title='Compute derivative/integral of audio stream.'>aderivative</a>
+<a href='../Audio/aintegral.html' title='Compute derivative/integral of audio stream.'>aintegral</a>
+<a href='../Audio/adrc.html' title='Apply spectral dynamic range controller filter to input audio stream.'>adrc</a>
+<a href='../Audio/adynamicequalizer.html' title='Apply dynamic equalization to input audio stream.'>adynamicequalizer</a>
+<a href='../Audio/adynamicsmooth.html' title='Apply dynamic smoothing to input audio stream.'>adynamicsmooth</a>
+<a href='../Audio/aecho.html' title='Apply echoing to the input audio.'>aecho</a>
+<a href='../Audio/aemphasis.html' title='Audio emphasis filter creates or restores material directly taken from LPs or emphased CDs with different filter curves.'>aemphasis</a>
+<a href='../Audio/aeval.html' title='Modify an audio signal according to the specified expressions.'>aeval</a>
+<a href='../Audio/aexciter.html' title='An exciter is used to produce high sound that is not present in the original signal.'>aexciter</a>
+<a href='../Audio/afade.html' title='Apply fade-in/out effect to input audio.'>afade</a>
+<a href='../Audio/afftdn.html' title='Denoise audio samples with FFT.'>afftdn</a>
+<a href='../Audio/afftfilt.html' title='Apply arbitrary expressions to samples in frequency domain.'>afftfilt</a>
+<a href='../Audio/afir.html' title='Apply an arbitrary Finite Impulse Response filter.'>afir</a>
+<a href='../Audio/aformat.html' title='Set output format constraints for the input audio.'>aformat</a>
+<a href='../Audio/afreqshift.html' title='Apply frequency shift to input audio samples.'>afreqshift</a>
+<a href='../Audio/afwtdn.html' title='Reduce broadband noise from input samples using Wavelets.'>afwtdn</a>
+<a href='../Audio/agate.html' title='A gate is mainly used to reduce lower parts of a signal.'>agate</a>
+<a href='../Audio/aiir.html' title='Apply an arbitrary Infinite Impulse Response filter.'>aiir</a>
+<a href='../Audio/alimiter.html' title='The limiter prevents an input signal from rising over a desired threshold.'>alimiter</a>
+<a href='../Audio/allpass.html' title='Apply a two-pole all-pass filter with central frequency (in Hz) frequency, and filter-width width.'>allpass</a>
+<a href='../Audio/aloop.html' title='Loop audio samples.'>aloop</a>
+<a href='../Audio/amerge.html' title='Merge two or more audio streams into a single multi-channel stream.'>amerge</a>
+<a href='../Audio/amix.html' title='Mixes multiple audio inputs into a single output.'>amix</a>
+<a href='../Audio/amultiply.html' title='Multiply first audio stream with second audio stream and store result in output audio stream.'>amultiply</a>
+<a href='../Audio/anequalizer.html' title='High-order parametric multiband equalizer for each channel.'>anequalizer</a>
+<a href='../Audio/anlmdn.html' title='Reduce broadband noise in audio samples using Non-Local Means algorithm.'>anlmdn</a>
+<a href='../Audio/anlmf.html' title='Apply Normalized Least-Mean-(Squares|Fourth) algorithm to the first audio stream using the second audio stream.'>anlmf</a>
+<a href='../Audio/anlms.html' title='Apply Normalized Least-Mean-(Squares|Fourth) algorithm to the first audio stream using the second audio stream.'>anlms</a>
+<a href='../Audio/anull.html' title='Pass the audio source unchanged to the output.'>anull</a>
+<a href='../Audio/apad.html' title='Pad the end of an audio stream with silence.'>apad</a>
+<a href='../Audio/aphaser.html' title='Add a phasing effect to the input audio.'>aphaser</a>
+<a href='../Audio/aphaseshift.html' title='Apply phase shift to input audio samples.'>aphaseshift</a>
+<a href='../Audio/apsnr.html' title='Measure Audio Peak Signal-to-Noise Ratio.'>apsnr</a>
+<a href='../Audio/apsyclip.html' title='Apply Psychoacoustic clipper to input audio stream.'>apsyclip</a>
+<a href='../Audio/apulsator.html' title='Audio pulsator is something between an autopanner and a tremolo.'>apulsator</a>
+<a href='../Audio/aresample.html' title='Resample the input audio to the specified parameters, using the libswresample library.'>aresample</a>
+<a href='../Audio/areverse.html' title='Reverse an audio clip.'>areverse</a>
+<a href='../Audio/arls.html' title='Apply Recursive Least Squares algorithm to the first audio stream using the second audio stream.'>arls</a>
+<a href='../Audio/arnndn.html' title='Reduce noise from speech using Recurrent Neural Networks.'>arnndn</a>
+<a href='../Audio/asdr.html' title='Measure Audio Signal-to-Distortion Ratio.'>asdr</a>
+<a href='../Audio/asetnsamples.html' title='Set the number of samples per each output audio frame.'>asetnsamples</a>
+<a href='../Audio/asetrate.html' title='Set the sample rate without altering the PCM data.'>asetrate</a>
+<a href='../Audio/ashowinfo.html' title='Show a line containing various information for each input audio frame.'>ashowinfo</a>
+<a href='../Audio/asisdr.html' title='Measure Audio Scaled-Invariant Signal-to-Distortion Ratio.'>asisdr</a>
+<a href='../Audio/asoftclip.html' title='Apply audio soft clipping.'>asoftclip</a>
+<a href='../Audio/aspectralstats.html' title='Display frequency domain statistical information about the audio channels.'>aspectralstats</a>
+<a href='../Audio/asr.html' title='Automatic Speech Recognition .'>asr</a>
+<a href='../Audio/astats.html' title='Display time domain statistical information about the audio channels.'>astats</a>
+<a href='../Audio/asubboost.html' title='Boost subwoofer frequencies.'>asubboost</a>
+<a href='../Audio/asubcut.html' title='Cut subwoofer frequencies.'>asubcut</a>
+<a href='../Audio/asupercut.html' title='Cut super frequencies.'>asupercut</a>
+<a href='../Audio/asuperpass.html' title='Apply high order Butterworth band-pass filter.'>asuperpass</a>
+<a href='../Audio/asuperstop.html' title='Apply high order Butterworth band-stop filter.'>asuperstop</a>
+<a href='../Audio/atempo.html' title='Adjust audio tempo.'>atempo</a>
+<a href='../Audio/atilt.html' title='Apply spectral tilt filter to audio stream.'>atilt</a>
+<a href='../Audio/atrim.html' title='Trim the input so that the output contains one continuous subpart of the input.'>atrim</a>
+<a href='../Audio/axcorrelate.html' title='Calculate normalized windowed cross-correlation between two input audio streams.'>axcorrelate</a>
+<a href='../Audio/bandpass.html' title='Apply a two-pole Butterworth band-pass filter with central frequency frequency, and (3dB-point) band-width width.'>bandpass</a>
+<a href='../Audio/bandreject.html' title='Apply a two-pole Butterworth band-reject filter with central frequency frequency, and (3dB-point) band-width width.'>bandreject</a>
+<a href='../Audio/bass.html' title='Boost or cut the bass (lower) frequencies of the audio using a two-pole shelving filter with a response similar to that of a standard hi-fi’s tone-controls.'>bass</a>
+<a href='../Audio/lowshelf.html' title='Boost or cut the bass (lower) frequencies of the audio using a two-pole shelving filter with a response similar to that of a standard hi-fi’s tone-controls.'>lowshelf</a>
+<a href='../Audio/biquad.html' title='Apply a biquad IIR filter with the given coefficients.'>biquad</a>
+<a href='../Audio/bs2b.html' title='Bauer stereo to binaural transformation, which improves headphone listening of stereo audio records.'>bs2b</a>
+<a href='../Audio/channelmap.html' title='Remap input channels to new locations.'>channelmap</a>
+<a href='../Audio/channelsplit.html' title='Split each channel from an input audio stream into a separate output stream.'>channelsplit</a>
+<a href='../Audio/chorus.html' title='Add a chorus effect to the audio.'>chorus</a>
+<a href='../Audio/compand.html' title='Compress or expand the audio’s dynamic range.'>compand</a>
+<a href='../Audio/compensationdelay.html' title='Compensation Delay Line is a metric based delay to compensate differing positions of microphones or speakers.'>compensationdelay</a>
+<a href='../Audio/crossfeed.html' title='Apply headphone crossfeed filter.'>crossfeed</a>
+<a href='../Audio/crystalizer.html' title='Simple algorithm for audio noise sharpening.'>crystalizer</a>
+<a href='../Audio/dcshift.html' title='Apply a DC shift to the audio.'>dcshift</a>
+<a href='../Audio/deesser.html' title='Apply de-essing to the audio samples.'>deesser</a>
+<a href='../Audio/dialoguenhance.html' title='Enhance dialogue in stereo audio.'>dialoguenhance</a>
+<a href='../Audio/drmeter.html' title='Measure audio dynamic range.'>drmeter</a>
+<a href='../Audio/dynaudnorm.html' title='Dynamic Audio Normalizer.'>dynaudnorm</a>
+<a href='../Audio/earwax.html' title='Make audio easier to listen to on headphones.'>earwax</a>
+<a href='../Audio/equalizer.html' title='Apply a two-pole peaking equalisation (EQ) filter.'>equalizer</a>
+<a href='../Audio/extrastereo.html' title='Linearly increases the difference between left and right channels which adds some sort of &quot;live&quot; effect to playback.'>extrastereo</a>
+<a href='../Audio/firequalizer.html' title='Apply FIR Equalization using arbitrary frequency response.'>firequalizer</a>
+<a href='../Audio/flanger.html' title='Apply a flanging effect to the audio.'>flanger</a>
+<a href='../Audio/haas.html' title='Apply Haas effect to audio.'>haas</a>
+<a href='../Audio/hdcd.html' title='Decodes High Definition Compatible Digital (HDCD) data.'>hdcd</a>
+<a href='../Audio/headphone.html' title='Apply head-related transfer functions (HRTFs) to create virtual loudspeakers around the user for binaural listening via headphones.'>headphone</a>
+<a href='../Audio/highpass.html' title='Apply a high-pass filter with 3dB point frequency.'>highpass</a>
+<a href='../Audio/join.html' title='Join multiple input streams into one multi-channel stream.'>join</a>
+<a href='../Audio/ladspa.html' title='Load a LADSPA (Linux Audio Developer’s Simple Plugin API) plugin.'>ladspa</a>
+<a href='../Audio/loudnorm.html' title='EBU R128 loudness normalization.'>loudnorm</a>
+<a href='../Audio/lowpass.html' title='Apply a low-pass filter with 3dB point frequency.'>lowpass</a>
+<a href='../Audio/lv2.html' title='Load a LV2 (LADSPA Version 2) plugin.'>lv2</a>
+<a href='../Audio/mcompand.html' title='Multiband Compress or expand the audio’s dynamic range.'>mcompand</a>
+<a href='../Audio/pan.html' title='Mix channels with specific gain levels.'>pan</a>
+<a href='../Audio/replaygain.html' title='ReplayGain scanner filter.'>replaygain</a>
+<a href='../Audio/resample.html' title='Convert the audio sample format, sample rate and channel layout.'>resample</a>
+<a href='../Audio/rubberband.html' title='Apply time-stretching and pitch-shifting with librubberband.'>rubberband</a>
+<a href='../Audio/sidechaincompress.html' title='This filter acts like normal compressor but has the ability to compress detected signal using second input signal.'>sidechaincompress</a>
+<a href='../Audio/sidechaingate.html' title='A sidechain gate acts like a normal (wideband) gate but has the ability to filter the detected signal before sending it to the gain reduction stage.'>sidechaingate</a>
+<a href='../Audio/silencedetect.html' title='Detect silence in an audio stream.'>silencedetect</a>
+<a href='../Audio/silenceremove.html' title='Remove silence from the beginning, middle or end of the audio.'>silenceremove</a>
+<a href='../Audio/sofalizer.html' title='SOFAlizer uses head-related transfer functions (HRTFs) to create virtual loudspeakers around the user for binaural listening via headphones (audio formats up to 9 channels supported).'>sofalizer</a>
+<a href='../Audio/speechnorm.html' title='Speech Normalizer.'>speechnorm</a>
+<a href='../Audio/stereotools.html' title='This filter has some handy utilities to manage stereo signals, for converting M/S stereo recordings to L/R signal while having control over the parameters or spreading the stereo image of master track.'>stereotools</a>
+<a href='../Audio/stereowiden.html' title='This filter enhance the stereo effect by suppressing signal common to both channels and by delaying the signal of left into right and vice versa, thereby widening the stereo effect.'>stereowiden</a>
+<a href='../Audio/superequalizer.html' title='Apply 18 band equalizer.'>superequalizer</a>
+<a href='../Audio/surround.html' title='Apply audio surround upmix filter.'>surround</a>
+<a href='../Audio/tiltshelf.html' title='Boost or cut the lower frequencies and cut or boost higher frequencies of the audio using a two-pole shelving filter with a response similar to that of a standard hi-fi’s tone-controls.'>tiltshelf</a>
+<a href='../Audio/treble.html' title='Boost or cut treble (upper) frequencies of the audio using a two-pole shelving filter with a response similar to that of a standard hi-fi’s tone-controls.'>treble</a>
+<a href='../Audio/highshelf.html' title='Boost or cut treble (upper) frequencies of the audio using a two-pole shelving filter with a response similar to that of a standard hi-fi’s tone-controls.'>highshelf</a>
+<a href='../Audio/tremolo.html' title='Sinusoidal amplitude modulation.'>tremolo</a>
+<a href='../Audio/vibrato.html' title='Sinusoidal phase modulation.'>vibrato</a>
+<a href='../Audio/virtualbass.html' title='Apply audio Virtual Bass filter.'>virtualbass</a>
+<a href='../Audio/volume.html' title='Adjust the input audio volume.'>volume</a>
+<a href='../Audio/volumedetect.html' title='Detect the volume of the input video.'>volumedetect</a>
+<a href='../Audio/whisper.html' title='It runs automatic speech recognition using the OpenAI’s Whisper model.'>whisper</a>
+<label class='show-all-label' for='showall305560'>Show All</label>
+<input class='show-all' id='showall305560' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>Bitstream</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305580'>...</label>
+<a href='../Bitstream/aac_adtstoasc.html' title='Convert MPEG-2/4 AAC ADTS to an MPEG-4 Audio Specific Configuration bitstream.'>aac_adtstoasc</a>
+<a href='../Bitstream/av1_metadata.html' title='Modify metadata embedded in an AV1 stream.'>av1_metadata</a>
+<a href='../Bitstream/chomp.html' title='Remove zero padding at the end of a packet.'>chomp</a>
+<a href='../Bitstream/dca_core.html' title='Extract the core from a DCA/DTS stream, dropping extensions such as DTS-HD.'>dca_core</a>
+<a href='../Bitstream/dovi_rpu.html' title='Manipulate Dolby Vision metadata in a HEVC/AV1 bitstream, optionally enabling metadata compression.'>dovi_rpu</a>
+<a href='../Bitstream/dump_extra.html' title='Add extradata to the beginning of the filtered packets except when said packets already exactly begin with the extradata that is intended to be added.'>dump_extra</a>
+<a href='../Bitstream/dv_error_marker.html' title='Blocks in DV which are marked as damaged are replaced by blocks of the specified color.'>dv_error_marker</a>
+<a href='../Bitstream/eac3_core.html' title='Extract the core from a E-AC-3 stream, dropping extra channels.'>eac3_core</a>
+<a href='../Bitstream/eia608_to_smpte436m.html' title='Convert from a EIA_608 stream to a SMPTE_436M_ANC data stream, wrapping the closed captions in CTA-708 CDP VANC packets.'>eia608_to_smpte436m</a>
+<a href='../Bitstream/extract_extradata.html' title='Extract the in-band extradata.'>extract_extradata</a>
+<a href='../Bitstream/filter_units.html' title='Remove units with types in or not in a given set from the stream.'>filter_units</a>
+<a href='../Bitstream/hapqa_extract.html' title='Extract Rgb or Alpha part of an HAPQA file, without recompression, in order to create an HAPQ or an HAPAlphaOnly file.'>hapqa_extract</a>
+<a href='../Bitstream/h264_metadata.html' title='Modify metadata embedded in an H.264 stream.'>h264_metadata</a>
+<a href='../Bitstream/h264_mp4toannexb.html' title='Convert an H.264 bitstream from length prefixed mode to start code prefixed mode (as defined in the Annex B of the ITU-T H.264 specification).'>h264_mp4toannexb</a>
+<a href='../Bitstream/h264_redundant_pps.html' title='This applies a specific fixup to some Blu-ray BDMV H264 streams which contain redundant PPSs.'>h264_redundant_pps</a>
+<a href='../Bitstream/hevc_metadata.html' title='Modify metadata embedded in an HEVC stream.'>hevc_metadata</a>
+<a href='../Bitstream/hevc_mp4toannexb.html' title='Convert an HEVC/H.265 bitstream from length prefixed mode to start code prefixed mode (as defined in the Annex B of the ITU-T H.265 specification).'>hevc_mp4toannexb</a>
+<a href='../Bitstream/imxdump.html' title='Modifies the bitstream to fit in MOV and to be usable by the Final Cut Pro decoder.'>imxdump</a>
+<a href='../Bitstream/mjpeg2jpeg.html' title='Convert MJPEG/AVI1 packets to full JPEG/JFIF packets.'>mjpeg2jpeg</a>
+<a href='../Bitstream/mjpegadump.html' title='Add an MJPEG A header to the bitstream, to enable decoding by Quicktime.'>mjpegadump</a>
+<a href='../Bitstream/mov2textsub.html' title='Extract a representable text file from MOV subtitles, stripping the metadata header from each subtitle packet.'>mov2textsub</a>
+<a href='../Bitstream/mpeg2_metadata.html' title='Modify metadata embedded in an MPEG-2 stream.'>mpeg2_metadata</a>
+<a href='../Bitstream/mpeg4_unpack_bframes.html' title='Unpack DivX-style packed B-frames.'>mpeg4_unpack_bframes</a>
+<a href='../Bitstream/noise.html' title='Damages the contents of packets or simply drops them without damaging the container.'>noise</a>
+<a href='../Bitstream/null.html' title='This bitstream filter passes the packets through unchanged.'>null</a>
+<a href='../Bitstream/pcm_rechunk.html' title='Repacketize PCM audio to a fixed number of samples per packet or a fixed packet rate per second.'>pcm_rechunk</a>
+<a href='../Bitstream/pgs_frame_merge.html' title='Merge a sequence of PGS Subtitle segments ending with an &quot;end of display set&quot; segment into a single packet.'>pgs_frame_merge</a>
+<a href='../Bitstream/prores_metadata.html' title='Modify color property metadata embedded in prores stream.'>prores_metadata</a>
+<a href='../Bitstream/remove_extra.html' title='Remove extradata from packets.'>remove_extra</a>
+<a href='../Bitstream/setts.html' title='Set PTS and DTS in packets.'>setts</a>
+<a href='../Bitstream/showinfo.html' title='Log basic packet information.'>showinfo</a>
+<a href='../Bitstream/smpte436m_to_eia608.html' title='Convert from a SMPTE_436M_ANC data stream to a EIA_608 stream, extracting the closed captions from CTA-708 CDP VANC packets, and ignoring all other data.'>smpte436m_to_eia608</a>
+<a href='../Bitstream/text2movsub.html' title='Convert text subtitles to MOV subtitles (as used by the mov_text codec) with metadata headers.'>text2movsub</a>
+<a href='../Bitstream/trace_headers.html' title='Log trace output containing all syntax elements in the coded stream headers (everything above the level of individual coded blocks).'>trace_headers</a>
+<a href='../Bitstream/truehd_core.html' title='Extract the core from a TrueHD stream, dropping ATMOS data.'>truehd_core</a>
+<a href='../Bitstream/vp9_metadata.html' title='Modify metadata embedded in a VP9 stream.'>vp9_metadata</a>
+<a href='../Bitstream/vp9_superframe.html' title='Merge VP9 invisible (alt-ref) frames back into VP9 superframes.'>vp9_superframe</a>
+<a href='../Bitstream/vp9_superframe_split.html' title='Split VP9 superframes into single frames.'>vp9_superframe_split</a>
+<a href='../Bitstream/vp9_raw_reorder.html' title='Given a VP9 stream with correct timestamps but possibly out of order, insert additional show-existing-frame packets to correct the ordering.'>vp9_raw_reorder</a>
+<label class='show-all-label' for='showall305580'>Show All</label>
+<input class='show-all' id='showall305580' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>CUDA NPP Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305600'>...</label>
+<a href='../CUDA-NPP-Video/scale_npp.html' title='Use the NVIDIA Performance Primitives (libnpp) to perform scaling and/or pixel format conversion on CUDA video frames.'>scale_npp</a>
+<a href='../CUDA-NPP-Video/scale2ref_npp.html' title='Use the NVIDIA Performance Primitives (libnpp) to scale (resize) the input video, based on a reference video.'>scale2ref_npp</a>
+<a href='../CUDA-NPP-Video/sharpen_npp.html' title='Use the NVIDIA Performance Primitives (libnpp) to perform image sharpening with border control.'>sharpen_npp</a>
+<a href='../CUDA-NPP-Video/transpose_npp.html' title='Transpose rows with columns in the input video and optionally flip it.'>transpose_npp</a>
+<label class='show-all-label' for='showall305600'>Show All</label>
+<input class='show-all' id='showall305600' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>CUDA Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305620'>...</label>
+<a href='../CUDA-Video/bilateral_cuda.html' title='CUDA accelerated bilateral filter, an edge preserving filter.'>bilateral_cuda</a>
+<a href='../CUDA-Video/bwdif_cuda.html' title='Deinterlace the input video using the bwdif algorithm, but implemented in CUDA so that it can work as part of a GPU accelerated pipeline with nvdec and/or nvenc.'>bwdif_cuda</a>
+<a href='../CUDA-Video/chromakey_cuda.html' title='CUDA accelerated YUV colorspace color/chroma keying.'>chromakey_cuda</a>
+<a href='../CUDA-Video/colorspace_cuda.html' title='CUDA accelerated implementation of the colorspace filter.'>colorspace_cuda</a>
+<a href='../CUDA-Video/overlay_cuda.html' title='Overlay one video on top of another.'>overlay_cuda</a>
+<a href='../CUDA-Video/pad_cuda.html' title='Add paddings to an input video stream using CUDA.'>pad_cuda</a>
+<a href='../CUDA-Video/scale_cuda.html' title='Scale (resize) and convert (pixel format) the input video, using accelerated CUDA kernels.'>scale_cuda</a>
+<a href='../CUDA-Video/thumbnail_cuda.html' title='Select the most representative frame in a given sequence of consecutive frames using CUDA.'>thumbnail_cuda</a>
+<a href='../CUDA-Video/yadif_cuda.html' title='Deinterlace the input video using the yadif algorithm, but implemented in CUDA so that it can work as part of a GPU accelerated pipeline with nvdec and/or nvenc.'>yadif_cuda</a>
+<label class='show-all-label' for='showall305620'>Show All</label>
+<input class='show-all' id='showall305620' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>OpenCL Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305640'>...</label>
+<a href='../OpenCL-Video/avgblur_opencl.html' title='Apply average blur filter.'>avgblur_opencl</a>
+<a href='../OpenCL-Video/boxblur_opencl.html' title='Apply a boxblur algorithm to the input video.'>boxblur_opencl</a>
+<a href='../OpenCL-Video/colorkey_opencl.html' title='RGB colorspace color keying.'>colorkey_opencl</a>
+<a href='../OpenCL-Video/convolution_opencl.html' title='Apply convolution of 3x3, 5x5, 7x7 matrix.'>convolution_opencl</a>
+<a href='../OpenCL-Video/erosion_opencl.html' title='Apply erosion effect to the video.'>erosion_opencl</a>
+<a href='../OpenCL-Video/deshake_opencl.html' title='Feature-point based video stabilization filter.'>deshake_opencl</a>
+<a href='../OpenCL-Video/dilation_opencl.html' title='Apply dilation effect to the video.'>dilation_opencl</a>
+<a href='../OpenCL-Video/nlmeans_opencl.html' title='Non-local Means denoise filter through OpenCL, this filter accepts same options as nlmeans.'>nlmeans_opencl</a>
+<a href='../OpenCL-Video/overlay_opencl.html' title='Overlay one video on top of another.'>overlay_opencl</a>
+<a href='../OpenCL-Video/pad_opencl.html' title='Add paddings to the input image, and place the original input at the provided x, y coordinates.'>pad_opencl</a>
+<a href='../OpenCL-Video/prewitt_opencl.html' title='Apply the Prewitt operator to input video stream.'>prewitt_opencl</a>
+<a href='../OpenCL-Video/program_opencl.html' title='Filter video using an OpenCL program.'>program_opencl</a>
+<a href='../OpenCL-Video/remap_opencl.html' title='Remap pixels using 2nd: Xmap and 3rd: Ymap input video stream.'>remap_opencl</a>
+<a href='../OpenCL-Video/roberts_opencl.html' title='Apply the Roberts cross operator to input video stream.'>roberts_opencl</a>
+<a href='../OpenCL-Video/sobel_opencl.html' title='Apply the Sobel operator to input video stream.'>sobel_opencl</a>
+<a href='../OpenCL-Video/tonemap_opencl.html' title='Perform HDR(PQ/HLG) to SDR conversion with tone-mapping.'>tonemap_opencl</a>
+<a href='../OpenCL-Video/unsharp_opencl.html' title='Sharpen or blur the input video.'>unsharp_opencl</a>
+<a href='../OpenCL-Video/xfade_opencl.html' title='Cross fade two videos with custom transition effect by using OpenCL.'>xfade_opencl</a>
+<label class='show-all-label' for='showall305640'>Show All</label>
+<input class='show-all' id='showall305640' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>QSV Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305660'>...</label>
+<a href='../QSV-Video/hstack_qsv.html' title='Stack input videos horizontally.'>hstack_qsv</a>
+<a href='../QSV-Video/vstack_qsv.html' title='Stack input videos vertically.'>vstack_qsv</a>
+<a href='../QSV-Video/xstack_qsv.html' title='Stack video inputs into custom layout.'>xstack_qsv</a>
+<label class='show-all-label' for='showall305660'>Show All</label>
+<input class='show-all' id='showall305660' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>VAAPI Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305680'>...</label>
+<a href='../VAAPI-Video/overlay_vaapi.html' title='Overlay one video on the top of another.'>overlay_vaapi</a>
+<a href='../VAAPI-Video/tonemap_vaapi.html' title='Perform HDR-to-SDR or HDR-to-HDR tone-mapping.'>tonemap_vaapi</a>
+<a href='../VAAPI-Video/hstack_vaapi.html' title='Stack input videos horizontally.'>hstack_vaapi</a>
+<a href='../VAAPI-Video/vstack_vaapi.html' title='Stack input videos vertically.'>vstack_vaapi</a>
+<a href='../VAAPI-Video/xstack_vaapi.html' title='Stack video inputs into custom layout.'>xstack_vaapi</a>
+<a href='../VAAPI-Video/pad_vaapi.html' title='Add paddings to the input image, and place the original input at the provided x, y coordinates.'>pad_vaapi</a>
+<a href='../VAAPI-Video/drawbox_vaapi.html' title='Draw a colored box on the input image.'>drawbox_vaapi</a>
+<label class='show-all-label' for='showall305680'>Show All</label>
+<input class='show-all' id='showall305680' type='checkbox'>
+</div>
+</details>
+<details open>
+<summary>Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305700'>...</label>
+<a class='collapse' href='addroi.html' title='Mark a region of interest in a video frame.'>addroi</a>
+<a class='collapse' href='alphaextract.html' title='Extract the alpha component from the input as a grayscale video.'>alphaextract</a>
+<a class='collapse' href='alphamerge.html' title='Add or replace the alpha component of the primary input with the grayscale value of a second input.'>alphamerge</a>
+<a class='collapse' href='amplify.html' title='Amplify differences between current pixel and pixels of adjacent frames in same pixel location.'>amplify</a>
+<a class='collapse' href='ass.html' title='Same as the subtitles filter, except that it doesn’t require libavcodec and libavformat to work.'>ass</a>
+<a class='collapse' href='atadenoise.html' title='Apply an Adaptive Temporal Averaging Denoiser to the video input.'>atadenoise</a>
+<a class='collapse' href='avgblur.html' title='Apply average blur filter.'>avgblur</a>
+<a class='collapse' href='backgroundkey.html' title='Turns a static background into transparency.'>backgroundkey</a>
+<a class='collapse' href='bbox.html' title='Compute the bounding box for the non-black pixels in the input frame luma plane.'>bbox</a>
+<a class='collapse' href='bilateral.html' title='Apply bilateral filter, spatial smoothing while preserving edges.'>bilateral</a>
+<a class='collapse' href='bitplanenoise.html' title='Show and measure bit plane noise.'>bitplanenoise</a>
+<a class='collapse' href='blackdetect.html' title='Detect video intervals that are (almost) completely black.'>blackdetect</a>
+<a class='collapse' href='blackdetect_vulkan.html' title='Detect video intervals that are (almost) completely black.'>blackdetect_vulkan</a>
+<a class='collapse' href='blackframe.html' title='Detect frames that are (almost) completely black.'>blackframe</a>
+<a class='collapse' href='blend.html' title='Blend two video frames into each other.'>blend</a>
+<a class='collapse' href='blockdetect.html' title='Determines blockiness of frames without altering the input frames.'>blockdetect</a>
+<a class='collapse' href='blurdetect.html' title='Determines blurriness of frames without altering the input frames.'>blurdetect</a>
+<a class='collapse' href='bm3d.html' title='Denoise frames using Block-Matching 3D algorithm.'>bm3d</a>
+<a class='collapse' href='boxblur.html' title='Apply a boxblur algorithm to the input video.'>boxblur</a>
+<a class='collapse' href='bwdif.html' title='Deinterlace the input video (&quot;bwdif&quot; stands for &quot;Bob Weaver Deinterlacing Filter&quot;).'>bwdif</a>
+<a class='collapse' href='ccrepack.html' title='Repack CEA-708 closed captioning side data .'>ccrepack</a>
+<a class='collapse' href='cas.html' title='Apply Contrast Adaptive Sharpen filter to video stream.'>cas</a>
+<a class='collapse' href='chromahold.html' title='Remove all color information for all colors except for certain one.'>chromahold</a>
+<a class='collapse' href='chromakey.html' title='YUV colorspace color/chroma keying.'>chromakey</a>
+<a class='collapse' href='chromanr.html' title='Reduce chrominance noise.'>chromanr</a>
+<a class='collapse' href='chromashift.html' title='Shift chroma pixels horizontally and/or vertically.'>chromashift</a>
+<a class='collapse' href='ciescope.html' title='Display CIE color diagram with pixels overlaid onto it.'>ciescope</a>
+<a class='collapse' href='codecview.html' title='Visualize information exported by some codecs.'>codecview</a>
+<a class='collapse' href='colorbalance.html' title='Modify intensity of primary colors (red, green and blue) of input frames.'>colorbalance</a>
+<a class='collapse' href='colorcontrast.html' title='Adjust color contrast between RGB components.'>colorcontrast</a>
+<a class='collapse' href='colorcorrect.html' title='Adjust color white balance selectively for blacks and whites.'>colorcorrect</a>
+<a class='collapse' href='colorchannelmixer.html' title='Adjust video input frames by re-mixing color channels.'>colorchannelmixer</a>
+<a class='collapse' href='colordetect.html' title='Analyze the video frames to determine the effective value range and alpha mode.'>colordetect</a>
+<a class='collapse' href='colorize.html' title='Overlay a solid color on the video stream.'>colorize</a>
+<a class='collapse' href='colorkey.html' title='RGB colorspace color keying.'>colorkey</a>
+<a class='collapse' href='colorhold.html' title='Remove all color information for all RGB colors except for certain one.'>colorhold</a>
+<a class='collapse' href='colorlevels.html' title='Adjust video input frames using levels.'>colorlevels</a>
+<a class='collapse' href='colormap.html' title='Apply custom color maps to video stream.'>colormap</a>
+<a class='collapse' href='colormatrix.html' title='Convert color matrix.'>colormatrix</a>
+<a class='collapse' href='colorspace.html' title='Convert colorspace, transfer characteristics or color primaries.'>colorspace</a>
+<a class='collapse' href='colortemperature.html' title='Adjust color temperature in video to simulate variations in ambient color temperature.'>colortemperature</a>
+<a class='collapse' href='convolution.html' title='Apply convolution of 3x3, 5x5, 7x7 or horizontal/vertical up to 49 elements.'>convolution</a>
+<a class='collapse' href='convolve.html' title='Apply 2D convolution of video stream in frequency domain using second stream as impulse.'>convolve</a>
+<a class='collapse' href='copy.html' title='Copy the input video source unchanged to the output.'>copy</a>
+<a class='collapse' href='coreimage.html' title='Video filtering on GPU using Apple’s CoreImage API on OSX.'>coreimage</a>
+<a class='collapse' href='corr.html' title='Obtain the correlation between two input videos.'>corr</a>
+<a class='collapse' href='cover_rect.html' title='Cover a rectangular object .'>cover_rect</a>
+<a class='collapse' href='crop.html' title='Crop the input video to given dimensions.'>crop</a>
+<a class='collapse' href='cropdetect.html' title='Auto-detect the crop size.'>cropdetect</a>
+<a class='collapse' href='cue.html' title='Delay video filtering until a given wallclock timestamp.'>cue</a>
+<a class='collapse' href='curves.html' title='Apply color adjustments using curves.'>curves</a>
+<a class='collapse' href='datascope.html' title='Video data analysis filter.'>datascope</a>
+<a class='collapse' href='dblur.html' title='Apply Directional blur filter.'>dblur</a>
+<a class='collapse' href='dctdnoiz.html' title='Denoise frames using 2D DCT (frequency domain filtering).'>dctdnoiz</a>
+<a class='collapse' href='deband.html' title='Remove banding artifacts from input video.'>deband</a>
+<a class='collapse' href='deblock.html' title='Remove blocking artifacts from input video.'>deblock</a>
+<a class='collapse' href='decimate.html' title='Drop duplicated frames at regular intervals.'>decimate</a>
+<a class='collapse' href='deconvolve.html' title='Apply 2D deconvolution of video stream in frequency domain using second stream as impulse.'>deconvolve</a>
+<a class='collapse' href='dedot.html' title='Reduce cross-luminance (dot-crawl) and cross-color (rainbows) from video.'>dedot</a>
+<a class='collapse' href='deflate.html' title='Apply deflate effect to the video.'>deflate</a>
+<a class='collapse' href='deflicker.html' title='Remove temporal frame luminance variations.'>deflicker</a>
+<a class='collapse' href='dejudder.html' title='Remove judder produced by partially interlaced telecined content.'>dejudder</a>
+<a class='collapse' href='delogo.html' title='Suppress a TV station logo by a simple interpolation of the surrounding pixels.'>delogo</a>
+<a class='collapse' href='derain.html' title='Remove the rain in the input image/video by applying the derain methods based on convolutional neural networks.'>derain</a>
+<a class='collapse' href='deshake.html' title='Attempt to fix small changes in horizontal and/or vertical shift.'>deshake</a>
+<a class='collapse' href='despill.html' title='Remove unwanted contamination of foreground colors, caused by reflected color of greenscreen or bluescreen.'>despill</a>
+<a class='collapse' href='detelecine.html' title='Apply an exact inverse of the telecine operation.'>detelecine</a>
+<a class='collapse' href='dilation.html' title='Apply dilation effect to the video.'>dilation</a>
+<a class='collapse' href='displace.html' title='Displace pixels as indicated by second and third input stream.'>displace</a>
+<a class='collapse' href='dnn_classify.html' title='Do classification with deep neural networks based on bounding boxes.'>dnn_classify</a>
+<a class='collapse' href='dnn_detect.html' title='Do object detection with deep neural networks.'>dnn_detect</a>
+<a class='collapse' href='dnn_processing.html' title='Do image processing with deep neural networks.'>dnn_processing</a>
+<a class='collapse' href='drawbox.html' title='Draw a colored box on the input image.'>drawbox</a>
+<a class='collapse' href='drawgraph.html' title='Draw a graph using input video metadata.'>drawgraph</a>
+<a class='collapse' href='drawgrid.html' title='Draw a grid on the input image.'>drawgrid</a>
+<a class='collapse' href='drawtext.html' title='Draw a text string or text from a specified file on top of a video, using the libfreetype library.'>drawtext</a>
+<a class='collapse' href='edgedetect.html' title='Detect and draw edges.'>edgedetect</a>
+<a class='collapse' href='elbg.html' title='Apply a posterize effect using the ELBG (Enhanced LBG) algorithm.'>elbg</a>
+<a class='collapse' href='entropy.html' title='Measure graylevel entropy in histogram of color channels of video frames.'>entropy</a>
+<a class='collapse' href='epx.html' title='Apply the EPX magnification filter which is designed for pixel art.'>epx</a>
+<a class='collapse' href='eq.html' title='Set brightness, contrast, saturation and approximate gamma adjustment.'>eq</a>
+<a class='collapse' href='erosion.html' title='Apply erosion effect to the video.'>erosion</a>
+<a class='collapse' href='estdif.html' title='Deinterlace the input video (&quot;estdif&quot; stands for &quot;Edge Slope Tracing Deinterlacing Filter&quot;).'>estdif</a>
+<a class='collapse' href='exposure.html' title='Adjust exposure of the video stream.'>exposure</a>
+<a class='collapse' href='extractplanes.html' title='Extract color channel components from input video stream into separate grayscale video streams.'>extractplanes</a>
+<a class='collapse' href='fade.html' title='Apply a fade-in/out effect to the input video.'>fade</a>
+<a class='collapse' href='feedback.html' title='Apply feedback video filter.'>feedback</a>
+<a class='collapse' href='fftdnoiz.html' title='Denoise frames using 3D FFT (frequency domain filtering).'>fftdnoiz</a>
+<a class='collapse' href='fftfilt.html' title='Apply arbitrary expressions to samples in frequency domain .'>fftfilt</a>
+<a class='collapse' href='field.html' title='Extract a single field from an interlaced image using stride arithmetic to avoid wasting CPU time.'>field</a>
+<a class='collapse' href='fieldhint.html' title='Create new frames by copying the top and bottom fields from surrounding frames supplied as numbers by the hint file.'>fieldhint</a>
+<a class='collapse' href='fieldmatch.html' title='Field matching filter for inverse telecine.'>fieldmatch</a>
+<a class='collapse' href='fieldorder.html' title='Transform the field order of the input video.'>fieldorder</a>
+<a class='collapse' href='fillborders.html' title='Fill borders of the input video, without changing video stream dimensions.'>fillborders</a>
+<a class='collapse' href='find_rect.html' title='Find a rectangular object in the input video.'>find_rect</a>
+<a class='collapse' href='floodfill.html' title='Flood area with values of same pixel components with another values.'>floodfill</a>
+<a class='collapse' href='format.html' title='Convert the input video to one of the specified pixel formats.'>format</a>
+<a class='collapse' href='fps.html' title='Convert the video to specified constant frame rate by duplicating or dropping frames as necessary.'>fps</a>
+<a class='collapse' href='framepack.html' title='Pack two different video streams into a stereoscopic video, setting proper metadata on supported codecs.'>framepack</a>
+<a class='collapse' href='framerate.html' title='Change the frame rate by interpolating new video output frames from the source frames.'>framerate</a>
+<a class='collapse' href='framestep.html' title='Select one frame every N-th frame.'>framestep</a>
+<a class='collapse' href='freezedetect.html' title='Detect frozen video.'>freezedetect</a>
+<a class='collapse' href='freezeframes.html' title='Freeze video frames.'>freezeframes</a>
+<a class='collapse' href='frei0r.html' title='Apply a frei0r effect to the input video.'>frei0r</a>
+<a class='collapse' href='fspp.html' title='Apply fast and simple postprocessing.'>fspp</a>
+<a class='collapse' href='fsync.html' title='Synchronize video frames with an external mapping from a file.'>fsync</a>
+<a class='collapse' href='gblur.html' title='Apply Gaussian blur filter.'>gblur</a>
+<a class='collapse' href='geq.html' title='Apply generic equation to each pixel.'>geq</a>
+<a class='collapse' href='gradfun.html' title='Fix the banding artifacts that are sometimes introduced into nearly flat regions by truncation to 8-bit color depth.'>gradfun</a>
+<a class='collapse' href='graphmonitor.html' title='Show various filtergraph stats.'>graphmonitor</a>
+<a class='collapse' href='grayworld.html' title='A color constancy filter that applies color correction based on the grayworld assumption .'>grayworld</a>
+<a class='collapse' href='greyedge.html' title='A color constancy variation filter which estimates scene illumination via grey edge algorithm and corrects the scene colors accordingly.'>greyedge</a>
+<a class='collapse' href='guided.html' title='Apply guided filter for edge-preserving smoothing, dehazing and so on.'>guided</a>
+<a class='collapse' href='haldclut.html' title='Apply a Hald CLUT to a video stream.'>haldclut</a>
+<a class='collapse' href='hflip.html' title='Flip the input video horizontally.'>hflip</a>
+<a class='collapse' href='histeq.html' title='This filter applies a global color histogram equalization on a per-frame basis.'>histeq</a>
+<a class='collapse' href='histogram.html' title='Compute and draw a color distribution histogram for the input video.'>histogram</a>
+<a class='collapse' href='hqdn3d.html' title='This is a high precision/quality 3d denoise filter.'>hqdn3d</a>
+<a class='collapse' href='hwdownload.html' title='Download hardware frames to system memory.'>hwdownload</a>
+<a class='collapse' href='hwmap.html' title='Map hardware frames to system memory or to another device.'>hwmap</a>
+<a class='collapse' href='hwupload.html' title='Upload system memory frames to hardware surfaces.'>hwupload</a>
+<a class='collapse' href='hwupload_cuda.html' title='Upload system memory frames to a CUDA device.'>hwupload_cuda</a>
+<a class='collapse' href='hqx.html' title='Apply a high-quality magnification filter designed for pixel art.'>hqx</a>
+<a class='collapse' href='hstack.html' title='Stack input videos horizontally.'>hstack</a>
+<a class='collapse' href='hsvhold.html' title='Turns a certain HSV range into gray values.'>hsvhold</a>
+<a class='collapse' href='hsvkey.html' title='Turns a certain HSV range into transparency.'>hsvkey</a>
+<a class='collapse' href='hue.html' title='Modify the hue and/or the saturation of the input.'>hue</a>
+<a class='collapse' href='huesaturation.html' title='Apply hue-saturation-intensity adjustments to input video stream.'>huesaturation</a>
+<a class='collapse' href='hysteresis.html' title='Grow first stream into second stream by connecting components.'>hysteresis</a>
+<a class='collapse' href='iccdetect.html' title='Detect the colorspace from an embedded ICC profile (if present), and update the frame’s tags accordingly.'>iccdetect</a>
+<a class='collapse' href='iccgen.html' title='Generate ICC profiles and attach them to frames.'>iccgen</a>
+<a class='collapse' href='identity.html' title='Obtain the identity score between two input videos.'>identity</a>
+<a class='collapse' href='idet.html' title='Detect video interlacing type.'>idet</a>
+<a class='collapse' href='il.html' title='Deinterleave or interleave fields.'>il</a>
+<a class='collapse' href='inflate.html' title='Apply inflate effect to the video.'>inflate</a>
+<a class='collapse' href='interlace.html' title='Simple interlacing filter from progressive contents.'>interlace</a>
+<a class='collapse' href='interlace_vulkan.html' title='Simple interlacing filter from progressive contents.'>interlace_vulkan</a>
+<a class='collapse' href='kerndeint.html' title='Deinterlace input video by applying Donald Graft’s adaptive kernel deinterling.'>kerndeint</a>
+<a class='collapse' href='kirsch.html' title='Apply kirsch operator to input video stream.'>kirsch</a>
+<a class='collapse' href='lagfun.html' title='Slowly update darker pixels.'>lagfun</a>
+<a class='collapse' href='lenscorrection.html' title='Correct radial lens distortion .'>lenscorrection</a>
+<a class='collapse' href='lensfun.html' title='Apply lens correction via the lensfun library.'>lensfun</a>
+<a class='collapse' href='lcevc.html' title='Low Complexity Enhancement Video Codec filter based on liblcevc_dec.'>lcevc</a>
+<a class='collapse' href='libplacebo.html' title='Flexible GPU-accelerated processing filter based on libplacebo.'>libplacebo</a>
+<a class='collapse' href='libvmaf.html' title='Calculate the VMAF (Video Multi-Method Assessment Fusion) score for a reference/distorted pair of input videos.'>libvmaf</a>
+<a class='collapse' href='libvmaf_cuda.html' title='This is the CUDA variant of the libvmaf filter.'>libvmaf_cuda</a>
+<a class='collapse' href='limitdiff.html' title='Apply limited difference filter using second and optionally third video stream.'>limitdiff</a>
+<a class='collapse' href='limiter.html' title='Limits the pixel components values to the specified range [min, max].'>limiter</a>
+<a class='collapse' href='loop.html' title='Loop video frames.'>loop</a>
+<a class='collapse' href='lut1d.html' title='Apply a 1D LUT to an input video.'>lut1d</a>
+<a class='collapse' href='lut3d.html' title='Apply a 3D LUT to an input video.'>lut3d</a>
+<a class='collapse' href='lumakey.html' title='Turn certain luma values into transparency.'>lumakey</a>
+<a class='collapse' href='lut.html' title='Compute a look-up table for binding each pixel component input value to an output value, and apply it to the input video.'>lut</a>
+<a class='collapse' href='lutrgb.html' title='Compute a look-up table for binding each pixel component input value to an output value, and apply it to the input video.'>lutrgb</a>
+<a class='collapse' href='lutyuv.html' title='Compute a look-up table for binding each pixel component input value to an output value, and apply it to the input video.'>lutyuv</a>
+<a class='collapse' href='lut2.html' title='The lut2 filter takes two input streams and outputs one
+            stream.'>lut2</a>
+<a class='collapse' href='tlut2.html' title='The tlut2 (time lut2) filter takes two consecutive frames
+            from one single stream.'>tlut2</a>
+<a class='collapse' href='maskedclamp.html' title='Clamp the first input stream with the second input and third input stream.'>maskedclamp</a>
+<a class='collapse' href='maskedmax.html' title='Merge the second and third input stream into output stream using absolute differences between second input stream and first input stream and absolute difference between third input stream and first input stream.'>maskedmax</a>
+<a class='collapse' href='maskedmerge.html' title='Merge the first input stream with the second input stream using per pixel weights in the third input stream.'>maskedmerge</a>
+<a class='collapse' href='maskedmin.html' title='Merge the second and third input stream into output stream using absolute differences between second input stream and first input stream and absolute difference between third input stream and first input stream.'>maskedmin</a>
+<a class='collapse' href='maskedthreshold.html' title='Pick pixels comparing absolute difference of two video streams with fixed threshold.'>maskedthreshold</a>
+<a class='collapse' href='maskfun.html' title='Create mask from input video.'>maskfun</a>
+<a class='collapse' href='mcdeint.html' title='Apply motion-compensation deinterlacing.'>mcdeint</a>
+<a class='collapse' href='median.html' title='Pick median pixel from certain rectangle defined by radius.'>median</a>
+<a class='collapse' href='mergeplanes.html' title='Merge color channel components from several video streams.'>mergeplanes</a>
+<a class='collapse' href='mestimate.html' title='Estimate and export motion vectors using block matching algorithms.'>mestimate</a>
+<a class='collapse' href='midequalizer.html' title='Apply Midway Image Equalization effect using two video streams.'>midequalizer</a>
+<a class='collapse' href='minterpolate.html' title='Convert the video to specified frame rate using motion interpolation.'>minterpolate</a>
+<a class='collapse' href='mix.html' title='Mix several video input streams into one video stream.'>mix</a>
+<a class='collapse' href='monochrome.html' title='Convert video to gray using custom color filter.'>monochrome</a>
+<a class='collapse' href='morpho.html' title='This filter allows to apply main morphological grayscale transforms, erode and dilate with arbitrary structures set in second input stream.'>morpho</a>
+<a class='collapse' href='mpdecimate.html' title='Drop frames that do not differ greatly from the previous frame in order to reduce frame rate.'>mpdecimate</a>
+<a class='collapse' href='msad.html' title='Obtain the MSAD (Mean Sum of Absolute Differences) between two input videos.'>msad</a>
+<a class='collapse' href='multiply.html' title='Multiply first video stream pixels values with second video stream pixels values.'>multiply</a>
+<a class='collapse' href='negate.html' title='Negate (invert) the input video.'>negate</a>
+<a class='collapse' href='nlmeans.html' title='Denoise frames using Non-Local Means algorithm.'>nlmeans</a>
+<a class='collapse' href='nnedi.html' title='Deinterlace video using neural network edge directed interpolation.'>nnedi</a>
+<a class='collapse' href='noformat.html' title='Force libavfilter not to use any of the specified pixel formats for the input to the next filter.'>noformat</a>
+<a class='collapse' href='noise.html' title='Add noise on video input frame.'>noise</a>
+<a class='collapse' href='normalize.html' title='Normalize RGB video (aka histogram stretching, contrast stretching).'>normalize</a>
+<a class='collapse' href='null.html' title='Pass the video source unchanged to the output.'>null</a>
+<a class='collapse' href='ocr.html' title='Optical Character Recognition .'>ocr</a>
+<a class='collapse' href='ocv.html' title='Apply a video transform using libopencv.'>ocv</a>
+<a class='collapse' href='oscilloscope.html' title='2D Video Oscilloscope.'>oscilloscope</a>
+<a class='collapse' href='overlay.html' title='Overlay one video on top of another.'>overlay</a>
+<a class='collapse' href='owdenoise.html' title='Apply Overcomplete Wavelet denoiser.'>owdenoise</a>
+<a class='collapse' href='pad.html' title='Add paddings to the input image, and place the original input at the provided x, y coordinates.'>pad</a>
+<a class='collapse' href='palettegen.html' title='Generate one palette for a whole video stream.'>palettegen</a>
+<a class='collapse' href='paletteuse.html' title='Use a palette to downsample an input video stream.'>paletteuse</a>
+<a class='collapse' href='perspective.html' title='Correct perspective of video not recorded perpendicular to the screen.'>perspective</a>
+<a class='collapse' href='phase.html' title='Delay interlaced video by one field time so that the field order changes.'>phase</a>
+<a class='collapse' href='photosensitivity.html' title='Reduce various flashes in video, so to help users with epilepsy.'>photosensitivity</a>
+<a class='collapse' href='pixdesctest.html' title='Pixel format descriptor test filter, mainly useful for internal testing.'>pixdesctest</a>
+<a class='collapse' href='pixelize.html' title='Apply pixelization to video stream.'>pixelize</a>
+<a class='collapse' href='pixscope.html' title='Display sample values of color channels.'>pixscope</a>
+<a class='collapse' href='pp7.html' title='Apply Postprocessing filter 7.'>pp7</a>
+<a class='collapse' href='premultiply.html' title='Apply alpha premultiply effect to input video stream using first plane of second stream as alpha.'>premultiply</a>
+<a class='collapse' href='prewitt.html' title='Apply prewitt operator to input video stream.'>prewitt</a>
+<a class='collapse' href='pseudocolor.html' title='Alter frame colors in video with pseudocolors.'>pseudocolor</a>
+<a class='collapse' href='psnr.html' title='Obtain the average, maximum and minimum PSNR (Peak Signal to Noise Ratio) between two input videos.'>psnr</a>
+<a class='collapse' href='pullup.html' title='Pulldown reversal (inverse telecine) filter, capable of handling mixed hard-telecine, 24000/1001 fps progressive, and 30000/1001 fps progressive content.'>pullup</a>
+<a class='collapse' href='qp.html' title='Change video quantization parameters (QP).'>qp</a>
+<a class='collapse' href='qrencode.html' title='Generate a QR code using the libqrencode library (see https://fukuchi.org/works/qrencode/), and overlay it on top of the current frame.'>qrencode</a>
+<a class='collapse' href='quirc.html' title='Identify and decode a QR code using the libquirc library (see https://github.com/dlbeer/quirc/), and print the identified QR codes positions and payload as metadata.'>quirc</a>
+<a class='collapse' href='random.html' title='Flush video frames from internal cache of frames into a random order.'>random</a>
+<a class='collapse' href='readeia608.html' title='Read closed captioning (EIA-608) information from the top lines of a video frame.'>readeia608</a>
+<a class='collapse' href='readvitc.html' title='Read vertical interval timecode (VITC) information from the top lines of a video frame.'>readvitc</a>
+<a class='collapse' href='remap.html' title='Remap pixels using 2nd: Xmap and 3rd: Ymap input video stream.'>remap</a>
+<a class='collapse' href='removegrain.html' title='The removegrain filter is a spatial denoiser for progressive video.'>removegrain</a>
+<a class='collapse' href='removelogo.html' title='Suppress a TV station logo, using an image file to determine which pixels comprise the logo.'>removelogo</a>
+<a class='collapse' href='repeatfields.html' title='This filter uses the repeat_field flag from the Video ES headers and hard repeats fields based on its value.'>repeatfields</a>
+<a class='collapse' href='reverse.html' title='Reverse a video clip.'>reverse</a>
+<a class='collapse' href='rgbashift.html' title='Shift R/G/B/A pixels horizontally and/or vertically.'>rgbashift</a>
+<a class='collapse' href='roberts.html' title='Apply roberts cross operator to input video stream.'>roberts</a>
+<a class='collapse' href='rotate.html' title='Rotate video by an arbitrary angle expressed in radians.'>rotate</a>
+<a class='collapse' href='sab.html' title='Apply Shape Adaptive Blur.'>sab</a>
+<a class='collapse' href='scale.html' title='Scale (resize) the input video, using the libswscale library.'>scale</a>
+<a class='collapse' href='scharr.html' title='Apply scharr operator to input video stream.'>scharr</a>
+<a class='collapse' href='scroll.html' title='Scroll input video horizontally and/or vertically by constant speed.'>scroll</a>
+<a class='collapse' href='scdet.html' title='Detect video scene change.'>scdet</a>
+<a class='collapse' href='selectivecolor.html' title='Adjust cyan, magenta, yellow and black (CMYK) to certain ranges of colors (such as &quot;reds&quot;, &quot;yellows&quot;, &quot;greens&quot;, &quot;cyans&quot;, ...).'>selectivecolor</a>
+<a class='collapse' href='separatefields.html' title='The separatefields takes a frame-based video input and splits each frame into its components fields, producing a new half height clip with twice the frame rate and twice the frame count.'>separatefields</a>
+<a class='collapse' href='setdar.html' title='The setdar filter sets the Display Aspect Ratio for the filter
+            output video.'>setdar</a>
+<a class='collapse' href='setsar.html' title='The setsar filter sets the Sample (aka Pixel) Aspect Ratio for
+            the filter output video.'>setsar</a>
+<a class='collapse' href='setfield.html' title='Force field for the output video frame.'>setfield</a>
+<a class='collapse' href='setparams.html' title='Force frame parameter for the output video frame.'>setparams</a>
+<a class='collapse' href='shear.html' title='Apply shear transform to input video.'>shear</a>
+<a href='showinfo.html' title='Show a line containing various information for each input video frame.'>showinfo</a>
+<a href='showpalette.html' title='Displays the 256 colors palette of each frame.'>showpalette</a>
+<a href='shuffleframes.html' title='Reorder and/or duplicate and/or drop video frames.'>shuffleframes</a>
+<a href='shufflepixels.html' title='Reorder pixels in video frames.'>shufflepixels</a>
+<a href='shuffleplanes.html' title='Reorder and/or duplicate video planes.'>shuffleplanes</a>
+<a href='signalstats.html' title='Evaluate various visual metrics that assist in determining issues associated with the digitization of analog video media.'>signalstats</a>
+<a href='signature.html' title='Calculates the MPEG-7 Video Signature.'>signature</a>
+<b>siti</b>
+<a href='smartblur.html' title='Blur the input video without impacting the outlines.'>smartblur</a>
+<a href='sobel.html' title='Apply sobel operator to input video stream.'>sobel</a>
+<a href='spp.html' title='Apply a simple postprocessing filter that compresses and decompresses the image at several (or - in the case of quality level 6 - all) shifts and average the results.'>spp</a>
+<a href='sr.html' title='Scale the input by applying one of the super-resolution methods based on convolutional neural networks.'>sr</a>
+<a href='sr_amf.html' title='Upscale (size increasing) for the input video using AMD Advanced Media Framework library for hardware acceleration.'>sr_amf</a>
+<a href='ssim.html' title='Obtain the SSIM (Structural SImilarity Metric) between two input videos.'>ssim</a>
+<a href='stereo3d.html' title='Convert between different stereoscopic image formats.'>stereo3d</a>
+<a class='collapse' href='streamselect.html' title='The streamselect and astreamselect filter supports the following
+               commands:
+               
+            .'>streamselect</a>
+<a class='collapse' href='astreamselect.html' title='The streamselect and astreamselect filter supports the following
+               commands:
+               
+            .'>astreamselect</a>
+<a class='collapse' href='subtitles.html' title='Draw subtitles on top of input video using the libass library.'>subtitles</a>
+<a class='collapse' href='super2xsai.html' title='Scale the input by 2x and smooth using the Super2xSaI (Scale and Interpolate) pixel art scaling algorithm.'>super2xsai</a>
+<a class='collapse' href='swaprect.html' title='Swap two rectangular objects in video.'>swaprect</a>
+<a class='collapse' href='swapuv.html' title='Swap U &amp; V plane.'>swapuv</a>
+<a class='collapse' href='tblend.html' title='Blend successive video frames.'>tblend</a>
+<a class='collapse' href='telecine.html' title='Apply telecine process to the video.'>telecine</a>
+<a class='collapse' href='thistogram.html' title='Compute and draw a color distribution histogram for the input video across time.'>thistogram</a>
+<a class='collapse' href='threshold.html' title='Apply threshold effect to video stream.'>threshold</a>
+<a class='collapse' href='thumbnail.html' title='Select the most representative frame in a given sequence of consecutive frames.'>thumbnail</a>
+<a class='collapse' href='tile.html' title='Tile several successive frames together.'>tile</a>
+<a class='collapse' href='tiltandshift.html' title='Apply tilt-and-shift effect.'>tiltandshift</a>
+<a class='collapse' href='tinterlace.html' title='Perform various types of temporal field interlacing.'>tinterlace</a>
+<a class='collapse' href='tmedian.html' title='Pick median pixels from several successive input video frames.'>tmedian</a>
+<a class='collapse' href='tmidequalizer.html' title='Apply Temporal Midway Video Equalization effect.'>tmidequalizer</a>
+<a class='collapse' href='tmix.html' title='Mix successive video frames.'>tmix</a>
+<a class='collapse' href='tonemap.html' title='Tone map colors from different dynamic ranges.'>tonemap</a>
+<a class='collapse' href='tpad.html' title='Temporarily pad video frames.'>tpad</a>
+<a class='collapse' href='transpose.html' title='Transpose rows with columns in the input video and optionally flip it.'>transpose</a>
+<a class='collapse' href='trim.html' title='Trim the input so that the output contains one continuous subpart of the input.'>trim</a>
+<a class='collapse' href='unpremultiply.html' title='Apply alpha unpremultiply effect to input video stream using first plane of second stream as alpha.'>unpremultiply</a>
+<a class='collapse' href='unsharp.html' title='Sharpen or blur the input video.'>unsharp</a>
+<a class='collapse' href='untile.html' title='Decompose a video made of tiled images into the individual images.'>untile</a>
+<a class='collapse' href='uspp.html' title='Apply ultra slow/simple postprocessing filter that compresses and decompresses the image at several (or - in the case of quality level 8 - all) shifts and average the results.'>uspp</a>
+<a class='collapse' href='v360.html' title='Convert 360 videos between various formats.'>v360</a>
+<a class='collapse' href='vaguedenoiser.html' title='Apply a wavelet based denoiser.'>vaguedenoiser</a>
+<a class='collapse' href='varblur.html' title='Apply variable blur filter by using 2nd video stream to set blur radius.'>varblur</a>
+<a class='collapse' href='vectorscope.html' title='Display 2 color component values in the two dimensional graph (which is called a vectorscope).'>vectorscope</a>
+<a class='collapse' href='vidstabdetect.html' title='Analyze video stabilization/deshaking.'>vidstabdetect</a>
+<a class='collapse' href='vidstabtransform.html' title='Video stabilization/deshaking: pass 2 of 2, see vidstabdetect for pass 1.'>vidstabtransform</a>
+<a class='collapse' href='vflip.html' title='Flip the input video vertically.'>vflip</a>
+<a class='collapse' href='vfrdet.html' title='Detect variable frame rate video.'>vfrdet</a>
+<a class='collapse' href='vibrance.html' title='Boost or alter saturation.'>vibrance</a>
+<a class='collapse' href='vif.html' title='Obtain the average VIF (Visual Information Fidelity) between two input videos.'>vif</a>
+<a class='collapse' href='vignette.html' title='Make or reverse a natural vignetting effect.'>vignette</a>
+<a class='collapse' href='vmafmotion.html' title='Obtain the average VMAF motion score of a video.'>vmafmotion</a>
+<a class='collapse' href='vpp_amf.html' title='Scale (resize) and convert colorspace, transfer characteristics or color primaries for the input video, using AMD Advanced Media Framework library for hardware acceleration.'>vpp_amf</a>
+<a class='collapse' href='vstack.html' title='Stack input videos vertically.'>vstack</a>
+<a class='collapse' href='w3fdif.html' title='Deinterlace the input video (&quot;w3fdif&quot; stands for &quot;Weston 3 Field Deinterlacing Filter&quot;).'>w3fdif</a>
+<a class='collapse' href='waveform.html' title='Video waveform monitor.'>waveform</a>
+<a class='collapse' href='weave.html' title='The weave takes a field-based video input and join
+            each two sequential fields into single frame, producing a new double
+            height clip with half the frame rate and half the frame count.'>weave</a>
+<a class='collapse' href='doubleweave.html' title='The doubleweave works same as weave but without
+            halving frame rate and frame count.'>doubleweave</a>
+<a class='collapse' href='xbr.html' title='Apply the xBR high-quality magnification filter which is designed for pixel art.'>xbr</a>
+<a class='collapse' href='xcorrelate.html' title='Apply normalized cross-correlation between first and second input video stream.'>xcorrelate</a>
+<a class='collapse' href='xfade.html' title='Apply cross fade from one input video stream to another input video stream.'>xfade</a>
+<a class='collapse' href='xmedian.html' title='Pick median pixels from several input videos.'>xmedian</a>
+<a class='collapse' href='xpsnr.html' title='Obtain the average (across all input frames) and minimum (across all color plane averages) eXtended Perceptually weighted peak Signal-to-Noise Ratio (XPSNR) between two input videos.'>xpsnr</a>
+<a class='collapse' href='xstack.html' title='Stack video inputs into custom layout.'>xstack</a>
+<a class='collapse' href='yadif.html' title='Deinterlace the input video (&quot;yadif&quot; means &quot;yet another deinterlacing filter&quot;).'>yadif</a>
+<a class='collapse' href='yaepblur.html' title='Apply blur filter while preserving edges (&quot;yaepblur&quot; means &quot;yet another edge preserving blur filter&quot;).'>yaepblur</a>
+<a class='collapse' href='zoompan.html' title='Apply Zoom &amp; Pan effect.'>zoompan</a>
+<a class='collapse' href='zscale.html' title='Scale (resize) the input video, using the z.lib library: https://github.com/sekrit-twc/zimg.'>zscale</a>
+<label class='show-all-label' for='showall305700'>Show All</label>
+<input class='show-all' id='showall305700' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>VideoToolbox Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305720'>...</label>
+<a href='../VideoToolbox-Video/scale_vt.html' title='Scale and convert the color parameters using VTPixelTransferSession.'>scale_vt</a>
+<a href='../VideoToolbox-Video/transpose_vt.html' title='Transpose rows with columns in the input video and optionally flip it.'>transpose_vt</a>
+<label class='show-all-label' for='showall305720'>Show All</label>
+<input class='show-all' id='showall305720' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>Vulkan Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305740'>...</label>
+<a href='../Vulkan-Video/avgblur_vulkan.html' title='Apply an average blur filter, implemented on the GPU using Vulkan.'>avgblur_vulkan</a>
+<a href='../Vulkan-Video/blend_vulkan.html' title='Blend two Vulkan frames into each other.'>blend_vulkan</a>
+<a href='../Vulkan-Video/bwdif_vulkan.html' title='Deinterlacer using bwdif, the &quot;Bob Weaver Deinterlacing Filter&quot; algorithm, implemented on the GPU using Vulkan.'>bwdif_vulkan</a>
+<a href='../Vulkan-Video/chromaber_vulkan.html' title='Apply an effect that emulates chromatic aberration.'>chromaber_vulkan</a>
+<a href='../Vulkan-Video/color_vulkan.html' title='Video source that creates a Vulkan frame of a solid color.'>color_vulkan</a>
+<a href='../Vulkan-Video/vflip_vulkan.html' title='Flips an image vertically.'>vflip_vulkan</a>
+<a href='../Vulkan-Video/hflip_vulkan.html' title='Flips an image horizontally.'>hflip_vulkan</a>
+<a href='../Vulkan-Video/flip_vulkan.html' title='Flips an image along both the vertical and horizontal axis.'>flip_vulkan</a>
+<a href='../Vulkan-Video/gblur_vulkan.html' title='Apply Gaussian blur filter on Vulkan frames.'>gblur_vulkan</a>
+<a href='../Vulkan-Video/nlmeans_vulkan.html' title='Denoise frames using Non-Local Means algorithm, implemented on the GPU using Vulkan.'>nlmeans_vulkan</a>
+<a href='../Vulkan-Video/overlay_vulkan.html' title='Overlay one video on top of another.'>overlay_vulkan</a>
+<a href='../Vulkan-Video/transpose_vulkan.html' title='Transpose rows with columns in the input video and optionally flip it.'>transpose_vulkan</a>
+<label class='show-all-label' for='showall305740'>Show All</label>
+<input class='show-all' id='showall305740' type='checkbox'>
+</div>
+</details>
+</details>
+<details>
+<summary>Sinks</summary>
+<details>
+<summary>Audio</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305760'>...</label>
+<a href='../../Sinks/Audio/abuffersink.html' title='Buffer audio frames, and make them available to the end of filter chain.'>abuffersink</a>
+<a href='../../Sinks/Audio/anullsink.html' title='Null audio sink; do absolutely nothing with the input audio.'>anullsink</a>
+<label class='show-all-label' for='showall305760'>Show All</label>
+<input class='show-all' id='showall305760' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305780'>...</label>
+<a href='../../Sinks/Video/buffersink.html' title='Buffer video frames, and make them available to the end of the filter graph.'>buffersink</a>
+<a href='../../Sinks/Video/nullsink.html' title='Null video sink: do absolutely nothing with the input video.'>nullsink</a>
+<label class='show-all-label' for='showall305780'>Show All</label>
+<input class='show-all' id='showall305780' type='checkbox'>
+</div>
+</details>
+</details>
+<details>
+<summary>Sources</summary>
+<details>
+<summary>Audio</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305800'>...</label>
+<a href='../../Sources/Audio/abuffer.html' title='Buffer audio frames, and make them available to the filter chain.'>abuffer</a>
+<a href='../../Sources/Audio/aevalsrc.html' title='Generate an audio signal specified by an expression.'>aevalsrc</a>
+<a href='../../Sources/Audio/afdelaysrc.html' title='Generate a fractional delay FIR coefficients.'>afdelaysrc</a>
+<a href='../../Sources/Audio/afireqsrc.html' title='Generate a FIR equalizer coefficients.'>afireqsrc</a>
+<a href='../../Sources/Audio/afirsrc.html' title='Generate a FIR coefficients using frequency sampling method.'>afirsrc</a>
+<a href='../../Sources/Audio/anullsrc.html' title='The null audio source, return unprocessed audio frames.'>anullsrc</a>
+<a href='../../Sources/Audio/flite.html' title='Synthesize a voice utterance using the libflite library.'>flite</a>
+<a href='../../Sources/Audio/anoisesrc.html' title='Generate a noise audio signal.'>anoisesrc</a>
+<a href='../../Sources/Audio/hilbert.html' title='Generate odd-tap Hilbert transform FIR coefficients.'>hilbert</a>
+<a href='../../Sources/Audio/sinc.html' title='Generate a sinc kaiser-windowed low-pass, high-pass, band-pass, or band-reject FIR coefficients.'>sinc</a>
+<a href='../../Sources/Audio/sine.html' title='Generate an audio signal made of a sine wave with amplitude 1/8.'>sine</a>
+<label class='show-all-label' for='showall305800'>Show All</label>
+<input class='show-all' id='showall305800' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>Multimedia</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305820'>...</label>
+<a href='../Multimedia/a3dscope.html' title='Convert input audio to 3d scope video output.'>a3dscope</a>
+<a href='../Multimedia/abitscope.html' title='Convert input audio to a video output, displaying the audio bit scope.'>abitscope</a>
+<a href='../Multimedia/adrawgraph.html' title='Draw a graph using input audio metadata.'>adrawgraph</a>
+<a href='../Multimedia/agraphmonitor.html' title='See graphmonitor.'>agraphmonitor</a>
+<a href='../Multimedia/ahistogram.html' title='Convert input audio to a video output, displaying the volume histogram.'>ahistogram</a>
+<a href='../Multimedia/aphasemeter.html' title='Measures phase of input audio, which is exported as metadata lavfi.aphasemeter.phase, representing mean phase of current audio frame.'>aphasemeter</a>
+<a href='../Multimedia/avectorscope.html' title='Convert input audio to a video output, representing the audio vector scope.'>avectorscope</a>
+<a href='../Multimedia/bench.html' title='Benchmark part of a filtergraph.'>bench</a>
+<a href='../Multimedia/abench.html' title='Benchmark part of a filtergraph.'>abench</a>
+<a href='../Multimedia/concat.html' title='Concatenate audio and video streams, joining them together one after the other.'>concat</a>
+<a href='../Multimedia/ebur128.html' title='EBU R128 scanner filter.'>ebur128</a>
+<a href='../Multimedia/interleave.html' title='interleave works with video inputs, ainterleave with audio.'>interleave</a>
+<a href='../Multimedia/ainterleave.html' title='interleave works with video inputs, ainterleave with audio.'>ainterleave</a>
+<a href='../Multimedia/latency.html' title='Measure filtering latency.'>latency</a>
+<a href='../Multimedia/alatency.html' title='Measure filtering latency.'>alatency</a>
+<a href='../Multimedia/metadata.html' title='Manipulate frame metadata.'>metadata</a>
+<a href='../Multimedia/ametadata.html' title='Manipulate frame metadata.'>ametadata</a>
+<a href='../Multimedia/perms.html' title='Set read/write permissions for the output frames.'>perms</a>
+<a href='../Multimedia/aperms.html' title='Set read/write permissions for the output frames.'>aperms</a>
+<a href='../Multimedia/realtime.html' title='Slow down filtering to match real time approximately.'>realtime</a>
+<a href='../Multimedia/arealtime.html' title='Slow down filtering to match real time approximately.'>arealtime</a>
+<a href='../Multimedia/segment.html' title='segment works on video frames, asegment on audio samples.'>segment</a>
+<a href='../Multimedia/asegment.html' title='segment works on video frames, asegment on audio samples.'>asegment</a>
+<a href='../Multimedia/select.html' title='Select frames to pass in output.'>select</a>
+<a href='../Multimedia/aselect.html' title='Select frames to pass in output.'>aselect</a>
+<a href='../Multimedia/sendcmd.html' title='sendcmd must be inserted between two video filters,
+            asendcmd must be inserted between two audio filters, but apart
+            from that they act the same way.'>sendcmd</a>
+<a href='../Multimedia/asendcmd.html' title='sendcmd must be inserted between two video filters,
+            asendcmd must be inserted between two audio filters, but apart
+            from that they act the same way.'>asendcmd</a>
+<a href='../Multimedia/setpts.html' title='setpts works on video frames, asetpts on audio frames.'>setpts</a>
+<a href='../Multimedia/asetpts.html' title='setpts works on video frames, asetpts on audio frames.'>asetpts</a>
+<a href='../Multimedia/setrange.html' title='Force color range for the output video frame.'>setrange</a>
+<a href='../Multimedia/settb.html' title='Set the timebase to use for the output frames timestamps.'>settb</a>
+<a href='../Multimedia/asettb.html' title='Set the timebase to use for the output frames timestamps.'>asettb</a>
+<a href='../Multimedia/showcqt.html' title='Convert input audio to a video output representing frequency spectrum logarithmically using Brown-Puckette constant Q transform algorithm with direct frequency domain coefficient calculation (but the transform itself is not really constant Q, instead the Q factor is actually variable/clamped), with musical tone scale, from E0 to D#10.'>showcqt</a>
+<a href='../Multimedia/showcwt.html' title='Convert input audio to video output representing frequency spectrum using Continuous Wavelet Transform and Morlet wavelet.'>showcwt</a>
+<a href='../Multimedia/showfreqs.html' title='Convert input audio to video output representing the audio power spectrum.'>showfreqs</a>
+<a href='../Multimedia/showspatial.html' title='Convert stereo input audio to a video output, representing the spatial relationship between two channels.'>showspatial</a>
+<a href='../Multimedia/showspectrum.html' title='Convert input audio to a video output, representing the audio frequency spectrum.'>showspectrum</a>
+<a href='../Multimedia/showspectrumpic.html' title='Convert input audio to a single video frame, representing the audio frequency spectrum.'>showspectrumpic</a>
+<a href='../Multimedia/showvolume.html' title='Convert input audio volume to a video output.'>showvolume</a>
+<a href='../Multimedia/showwaves.html' title='Convert input audio to a video output, representing the samples waves.'>showwaves</a>
+<a href='../Multimedia/showwavespic.html' title='Convert input audio to a single video frame, representing the samples waves.'>showwavespic</a>
+<a href='../Multimedia/sidedata.html' title='Delete frame side data, or select frames based on it.'>sidedata</a>
+<a href='../Multimedia/asidedata.html' title='Delete frame side data, or select frames based on it.'>asidedata</a>
+<a href='../Multimedia/spectrumsynth.html' title='Synthesize audio from 2 input video spectrums, first input stream represents magnitude across time and second represents phase across time.'>spectrumsynth</a>
+<a href='../Multimedia/split.html' title='asplit works with audio input, split with video.'>split</a>
+<a href='../Multimedia/asplit.html' title='asplit works with audio input, split with video.'>asplit</a>
+<a href='../Multimedia/zmq.html' title='zmq and azmq work as a pass-through filters.'>zmq</a>
+<a href='../Multimedia/azmq.html' title='zmq and azmq work as a pass-through filters.'>azmq</a>
+<a href='../../Sources/Multimedia/amovie.html' title='This is the same as movie source, except it selects an audio stream by default.'>amovie</a>
+<a href='../../Sources/Multimedia/avsynctest.html' title='Generate an Audio/Video Sync Test.'>avsynctest</a>
+<a href='../../Sources/Multimedia/movie.html' title='Read audio and/or video stream(s) from a movie container.'>movie</a>
+<label class='show-all-label' for='showall305820'>Show All</label>
+<input class='show-all' id='showall305820' type='checkbox'>
+</div>
+</details>
+<details>
+<summary>Video</summary>
+<div class='items'>
+<label class='show-all-label' for='showall305840'>...</label>
+<a href='../../Sources/Video/buffer.html' title='Buffer video frames, and make them available to the filter chain.'>buffer</a>
+<a href='../../Sources/Video/cellauto.html' title='Create a pattern generated by an elementary cellular automaton.'>cellauto</a>
+<a href='../../Sources/Video/coreimagesrc.html' title='Video source generated on GPU using Apple’s CoreImage API on OSX.'>coreimagesrc</a>
+<a href='../../Sources/Video/ddagrab.html' title='Captures the Windows Desktop via Desktop Duplication API.'>ddagrab</a>
+<a href='../../Sources/Video/gradients.html' title='Generate several gradients.'>gradients</a>
+<a href='../../Sources/Video/mandelbrot.html' title='Generate a Mandelbrot set fractal, and progressively zoom towards the point specified with start_x and start_y.'>mandelbrot</a>
+<a href='../../Sources/Video/mptestsrc.html' title='Generate various test patterns, as generated by the MPlayer test filter.'>mptestsrc</a>
+<a href='../../Sources/Video/frei0r_src.html' title='Provide a frei0r source.'>frei0r_src</a>
+<a href='../../Sources/Video/life.html' title='Generate a life pattern.'>life</a>
+<a href='../../Sources/Video/perlin.html' title='Generate Perlin noise.'>perlin</a>
+<a href='../../Sources/Video/qrencodesrc.html' title='Generate a QR code using the libqrencode library (see https://fukuchi.org/works/qrencode/).'>qrencodesrc</a>
+<a href='../../Sources/Video/allrgb.html' title='The allrgb source returns frames of size 4096x4096 of all rgb colors.'>allrgb</a>
+<a href='../../Sources/Video/allyuv.html' title='The allyuv source returns frames of size 4096x4096 of all yuv colors.'>allyuv</a>
+<a href='../../Sources/Video/color.html' title='The color source provides an uniformly colored input.'>color</a>
+<a href='../../Sources/Video/colorchart.html' title='The colorchart source provides a colors checker chart.'>colorchart</a>
+<a href='../../Sources/Video/colorspectrum.html' title='The colorspectrum source provides a color spectrum input.'>colorspectrum</a>
+<a href='../../Sources/Video/haldclutsrc.html' title='The haldclutsrc source provides an identity Hald CLUT.'>haldclutsrc</a>
+<a href='../../Sources/Video/nullsrc.html' title='The nullsrc source returns unprocessed video frames.'>nullsrc</a>
+<a href='../../Sources/Video/pal75bars.html' title='The pal75bars source generates a color bars pattern, based on
+            EBU PAL recommendations with 75% color levels.'>pal75bars</a>
+<a href='../../Sources/Video/pal100bars.html' title='The pal100bars source generates a color bars pattern, based on
+            EBU PAL recommendations with 100% color levels.'>pal100bars</a>
+<a href='../../Sources/Video/rgbtestsrc.html' title='The rgbtestsrc source generates an RGB test pattern useful for
+            detecting RGB vs BGR issues.'>rgbtestsrc</a>
+<a href='../../Sources/Video/smptebars.html' title='The smptebars source generates a color bars pattern, based on
+            the SMPTE Engineering Guideline EG 1-1990.'>smptebars</a>
+<a href='../../Sources/Video/smptehdbars.html' title='The smptehdbars source generates a color bars pattern, based on
+            the SMPTE RP 219-2002.'>smptehdbars</a>
+<a href='../../Sources/Video/testsrc.html' title='The testsrc source generates a test video pattern, showing a
+            color pattern, a scrolling gradient and a timestamp.'>testsrc</a>
+<a href='../../Sources/Video/testsrc2.html' title='The testsrc2 source is similar to testsrc, but supports more
+            pixel formats instead of just rgb24.'>testsrc2</a>
+<a href='../../Sources/Video/yuvtestsrc.html' title='The yuvtestsrc source generates an YUV test pattern.'>yuvtestsrc</a>
+<a href='../../Sources/Video/openclsrc.html' title='Generate video using an OpenCL program.'>openclsrc</a>
+<a href='../../Sources/Video/sierpinski.html' title='Generate a Sierpinski carpet/triangle fractal, and randomly pan around.'>sierpinski</a>
+<a href='../../Sources/Video/zoneplate.html' title='Generate a zoneplate test video pattern.'>zoneplate</a>
+<label class='show-all-label' for='showall305840'>Show All</label>
+<input class='show-all' id='showall305840' type='checkbox'>
+</div>
+</details>
+</details>
+</div>
+<details class='other-versions'>
+<summary id='other-versions-header'>Other Vers.</summary>
+<a class='version' href='../../../9.0/Filters/Video/siti.html'>9.0.1</a>
+<a class='version' href='../../../8.1/Filters/Video/siti.html'>8.1.2</a>
+<a class='version' href='../../../7.1/Filters/Video/siti.html'>7.1.5</a>
+<a class='version' href='../../../7.0/Filters/Video/siti.html'>7.0.3</a>
+<a class='version' href='../../../6.1/Filters/Video/siti.html'>6.1.6</a>
+<a class='version' href='../../../6.0/Filters/Video/siti.html'>6.0.1</a>
+<a class='version' href='../../../5.1/Filters/Video/siti.html'>5.1.10</a>
+<a class='version' href='../../../5.0'>5.0.3</a>
+<a class='version' href='../../../4.4'>4.4.8</a>
+<a class='version' href='../../../4.3'>4.3.9</a>
+<a class='version' href='../../../4.2'>4.2.11</a>
+<a class='version' href='../../../4.1'>4.1.11</a>
+<a class='version' href='../../../4.0'>4.0.6</a>
+<a class='version' href='../../../3.4'>3.4.14</a>
+<a class='version' href='../../../3.3'>3.3.9</a>
+<a class='version' href='../../../3.2'>3.2.19</a>
+<a class='version' href='../../../3.1'>3.1.11</a>
+<a class='version' href='../../../3.0'>3.0.12</a>
+<a class='version' href='../../../2.8'>2.8.22</a>
+<a class='version' href='../../../2.7'>2.7.7</a>
+<a class='version' href='../../../2.6'>2.6.9</a>
+<a class='version' href='../../../2.5'>2.5.11</a>
+<a class='version' href='../../../2.4'>2.4.14</a>
+<a class='version' href='../../../2.3'>2.3.6</a>
+<a class='version' href='../../../2.2'>2.2.16</a>
+<a class='version' href='../../../2.1'>2.1.8</a>
+<a class='version' href='../../../2.0'>2.0.7</a>
+<a class='version' href='../../../1.2'>1.2.12</a>
+<a class='version' href='../../../1.1'>1.1.16</a>
+<a class='version' href='../../../1.0'>1.0.10</a>
+<a class='version' href='../../../0.11'>0.11.5</a>
+<a class='version' href='../../../0.10'>0.10.16</a>
+<a class='version' href='../../../0.9'>0.9.4</a>
+<a class='version' href='../../../0.8'>0.8.15</a>
+<a class='version' href='../../../0.7'>0.7.17</a>
+<a class='version' href='../../../0.6'>0.6.7</a>
+<a class='version' href='../../../0.5'>0.5.15</a>
+</details>
+</nav>
+<main class='item'>
+<div class='header'>
+<div class='breadcrumbs'>
+<a href='../..'>8.0.3</a>
+<span class='separator'> ❭ </span>
+<a href='..'>Filters</a>
+<span class='separator'> ❭ </span>
+<a href='.'>Video</a>
+<span class='separator'> ❭ </span>
+<b>siti</b>
+</div>
+<div class='since-version'>
+<span title='Estimation based on the documentation.'>Since<sup>*</sup></span>
+5.1
+</div>
+</div>
+<section data-title="siti"><a class="direct-link" name="siti" href="#siti">#</a><p>Calculate Spatial Information (SI) and Temporal Information (TI) scores for a video,
+            as defined in ITU-T Rec. P.910 (11/21): Subjective video quality assessment methods
+            for multimedia applications. Available PDF at <a target="_blank" href="https://www.itu.int/rec/T-REC-P.910-202111-S/en">https://www.itu.int/rec/T-REC-P.910-202111-S/en</a>.
+            Note that this is a legacy implementation that corresponds to a superseded recommendation.
+            Refer to ITU-T Rec. P.910 (07/22) for the latest version: <a target="_blank" href="https://www.itu.int/rec/T-REC-P.910-202207-I/en">https://www.itu.int/rec/T-REC-P.910-202207-I/en</a></p>
+         <p>It accepts the following option:
+            
+         </p>
+         <dl class="option">
+            <dt><span class="option">print_summary</span></dt>
+            <dd>
+               <p>If set to 1, Summary statistics will be printed to the console. Default 0.
+                  
+               </p>
+            </dd>
+         </dl>
+         <section class="examples"><a class="direct-link" name="Examples" href="#Examples">#</a><h2>Examples</h2>
+            <ul>
+               <li>
+                  <p>To calculate SI/TI metrics and print summary:
+                     
+                  </p><pre class="example" data-source="ffmpeg -i input.mp4 -vf siti=print_summary=1 -f null -"><span style="color: #953800">ffmpeg</span><span style="color: #24292f;background-color: #f6f8fa"> </span><span style="color: #116329">-i</span><span style="color: #24292f;background-color: #f6f8fa"> </span>input.mp4<span style="color: #24292f;background-color: #f6f8fa"> </span><span style="color: #116329">-vf</span><span style="color: #24292f;background-color: #f6f8fa"> </span><span style="color: #8250df">siti</span><span style="color: #0550ae">=</span><span style="color: #116329">print_summary</span><span style="color: #0550ae">=</span>1<span style="color: #24292f;background-color: #f6f8fa"> </span><span style="color: #116329">-f</span><span style="color: #24292f;background-color: #f6f8fa"> </span>null<span style="color: #24292f;background-color: #f6f8fa"> </span>-</pre></li>
+            </ul>
+         </section>
+      </section>
+
+</main>
+</body>
+</html>

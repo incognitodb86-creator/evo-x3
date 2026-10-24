@@ -1,0 +1,46 @@
+[source file pq1_tenstrip_d68.html - HTML from TenStrip/10Eros-Max discussion]
+
+=====
+
+Hello there,
+
+ First of all beta 6 is awesome, clearly so much better animation than previous versions and I thank so much Tenstrip for his hard work.
+
+ But I'm facing a very annoying problem for continuing anything created with it.
+I followed the recommended settings 10/3, everything recommended inside the given 2-pass workflow, but when I try to continue, the continuing video looks either low fps (if I did a 1st pass for the first video created) or it does a literal image and audio cut if I continue from a 2-pass video + the same low fps of course. First video looks perfect but this drop in fps is extremely annoying, besides low fps the second video looks good even though there's a slight color shift I can fix with editing software, but low fps is barely fixable unless I would render second video at a higher fps but might end up in a awkward result. It was not doing that with previous models, second video was always looking good and running visually at same fps. Of course it's not a problem in the video combine, I've checked everything even used an exact same continuation from a clip created in beta 5 and another one in beta 6 to compare.
+
+ Note I tried using both the continuation presented in the beta 6 workflow and the one using the node h3-motion-context and both deliver same low fps looking second video.
+
+ I hope someone can help me fix this.
+
+ Thanks in advance for your help.
+
+ See translation LokkenJP 6 days ago • edited 6 days ago <div
+
+=====
+
+Hey. 
+
+ Assuming you’re talking about my workflow (it’s not something “official” by TenStrip), the continuation feature always requires AND produces 24fps video. 
+
+ I’ve found some instances in which beta6 generates videos that “seems” to be lower fps, but almost always that can be counteracted either with a better seed, with a appropriate prompt adjustment, disabling a conflicting Lora, or playing with the sampler/scheduler settings. VSA sparse attn node can also have something to do with that. 
+
+ First I would do is rewording your prompt, and adding something in the line of “dynamic video, fluid natural motions” with different seeds. If that doesn’t work, maybe changing the scheduler settings to res_multistep or even lcm or euler. Finally, bypassing the sparse attention node can be used too for troubleshooting but I don’t think that’s the cause. 
+
+ Besides the guiding and conditioning, nothing is done differently for a continuation video than for a straight single normal one. So if the first part looks good and the second one have that slow mo feeling, it’s something particular to that second prompt or scene 
+
+ See translation 👍 1 1 + CattyCaat 6 days ago • edited 6 days ago <div
+
+=====
+
+There's something causing a motion frame rate drop randomly. I can only assume it's the fasth3 turbo used but I'm gonna remove that and the anime motion loras and use the new FastH3 Omni one when it comes out, that will probably fix that. I saved multiple instances where it happens to see.
+
+ See translation ❤️ 3 3 + CattyCaat 5 days ago <div
+
+=====
+
+How are you continuing the video? 
+
+ See translation Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <path fill-rule="evenodd" clip-rule="evenodd" d="M6 22.5h20a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2
