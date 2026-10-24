@@ -279,3 +279,8 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
 - 13 s at 24 fps = 312 frames (RZ2's target); 481 f = 20.04 s = the "20 seconds" shape Derrick rejected at 6:12 PM CT; 10 s = 240 f is NOT on the grid.
 - Continuum arm: canvas multiple of 32 (1024x576, not 832x468), target_frames = chunks * chunk_seconds * fps, sampler has no negative/CFG key (no: lines in sequence_prompt), frame_rate is the duration lever.
 - Source: C:/AI/community/notes/hc_lessons_20261023.md + notes/bakeoff_gpu_findings.md; skills C:/AI/community/skills/h3-hc-render/SKILL.md.
+
+### MEM1 tail (same pass, 19:15 CT): the skill-format validator caught me, then I caught it
+- First run of the validator: 3/3 skills flagged 'no when-to-use' - true, the tasks say 'when to use, steps', so I added an explicit 'When to use this skill' section to each. 3/3 now pass name/description/when-to-use/steps/Sources, 0 control chars, 0 CRLF, names unique and equal to the directory names.
+- The validator's own bug: my anchor guesses for the section headings failed twice (I pasted an anchor from the wrong file), which is how the insert for forge-self-diagnose nearly got lost. Rule kept: read the file's exact heading before editing it - grep '^## ' first, then edit.
+- Self-check that the skills carry no protected-path text: 0 hits for the canon path / its filename in all 3 SKILL.md (the fiction lock matches command text, and a skill body is text the model pastes into commands).
