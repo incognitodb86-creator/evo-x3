@@ -1,0 +1,386 @@
+{
+ "app1": {
+  "class_type": "MiniMaxH3AppendContinuation",
+  "inputs": {
+   "overlap_audio_tokens": [
+    "win1",
+    3
+   ],
+   "overlap_video_tokens": [
+    "win1",
+    2
+   ],
+   "previous_av_latent": [
+    "s0_samp",
+    0
+   ],
+   "sampled_window": [
+    "s1_samp",
+    0
+   ],
+   "transition_audio_tokens": [
+    "win1",
+    5
+   ],
+   "transition_video_tokens": [
+    "win1",
+    4
+   ]
+  }
+ },
+ "avae": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+  }
+ },
+ "c0": {
+  "class_type": "MiniMaxH3ReferenceToVideo",
+  "inputs": {
+   "audio_vae": [
+    "avae",
+    0
+   ],
+   "clip": [
+    "clip",
+    0
+   ],
+   "height": 768,
+   "length": 124,
+   "prompt": "subject_definitions:\n<Picture 1> is the approved full-body start photograph of the two adult women on a sunlit seaside terrace, and it is the reference image that defines the bodies, skin, figures, height, build, skin tone, faces, hair, wardrobe, terrace, lighting and camera context of this video for both <Subject 1> and <Subject 2>. <Picture 2> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 1>, cropped tight to her face and hair. <Picture 3> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 2>, cropped tight to her face and hair. <Picture 1> shows the whole of each woman's body in that terrace setting, and <Picture 2> and <Picture 3> are tight close-up crops of one woman's face and hair each, cut from <Picture 1>, and the face fills each of those crops. Every woman in this video has the face and hair of her own crop and the body, skin and figure seen in <Picture 1>: nothing about their bodies is invented and no body is left to chance. The light holiday clothing worn in <Picture 1> is the wardrobe this shot opens in, and this shot removes it; taking clothing off is an action in the story, not a change of body, skin, figure or identity.\n<Subject 1> is the exact same woman shown in <Picture 2>, the woman on the left of <Picture 1>, a fictional adult aged 21, preserving her face, hairstyle, body, skin and figure with complete fidelity, a tall slim natural adult frame with a defined waist, gently rounded hips, firm shapely thighs and full natural breasts with soft real weight and natural lower fullness.\n<Subject 2> is the exact same woman shown in <Picture 3>, the woman on the right of <Picture 1>, a fictional adult aged 23, preserving her face, hairstyle, body, skin and figure with complete fidelity, a soft full feminine adult frame with a wide hip spread, thick thighs, a rounded seat and fuller breasts that hang softly with their weight.\n\nsummary:\n[reference generation] The target video is the first 5 seconds of a 10-second single continuous shot of <Subject 1> and <Subject 2>, two fictional adult women, on a sunlit terrace above a calm sea at golden hour. The shot uses <Picture 1> for the bodies, skin, figures, wardrobe, terrace and light and <Picture 2> and <Picture 3> for the face and hair of <Subject 1> and <Subject 2>, and composes the camera from that same photograph. Their adult bodies stay weighty, solid and anatomically correct, with matte textured skin, as the two women lean in, kiss with open mouths, and take off each other's holiday clothing, ending topless and close. Explicit adult content, two consenting fictional adults aged 21 and 23. dynamic video, fluid natural motions.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - <Picture 2> keeps her face and hairstyle and <Picture 1> keeps her body, skin, figure and height; undressing and being touched are actions, not a change of identity.\n<Subject 2> (appears in [Shot 1]): fully_preserved - <Picture 3> keeps her face and hairstyle and <Picture 1> keeps her body, skin, figure and height; kneeling and touching are actions, not a change of identity.\nThe light holiday clothing both women wear at the start of this shot is the clothing of <Picture 1>; it is removed during the shot and lies on the terrace tiles for the rest of the clip, so the bodies that become bare are the same bodies the photograph shows.\n\ndetailed_description:\nThe target video is a realistic, warmly lit seaside terrace scene, photorealistic skin and anatomy: natural matte skin with visible pores, fine vellus hair and only a soft natural sheen where sweat gathers, never a waxy, plastic or airbrushed surface, real adult body mass with visible collarbones and knee, calf and ankle joint definition, and dynamic video with fluid natural motions.\n[Shot 1] The shot opens on <Subject 1> and <Subject 2> seated close together on a warm stone terrace above a calm sea, a low cream wall behind them, the sea and a golden sky in the background, soft warm key light from the left, exactly the terrace, light and standing of the two women in <Picture 1>. In the first two seconds the camera frames the face of <Subject 1> in close-up, filling the right of the frame with her face and hair, her eyes half closed and her breathing slow, and the camera frames the face of <Subject 2> in close-up in the same two seconds, her face at the left of the frame, her gaze dropping and her mouth parting. The camera then pulls back, steadily and slowly, low amplitude, no cuts, into a medium two-shot of the two women, and their bodies read as real adult bodies with weight: <Subject 1> slim with a pinched waist over rounded hips, <Subject 2> softer with a broad hip spread and heavy thighs, both with breasts that move and settle with their own weight. They lean in and kiss with open mouths, tongues touching, faces close, eyes half closed. <Subject 1>'s hands take the strap of the sundress of <Subject 2> down over her shoulders while <Subject 2> unfastens the front of the linen shirt of <Subject 1>. The garments slide off shoulders and arms with visible friction and drop onto the terrace tiles. Both women end the shot topless: <Subject 1> with full natural breasts of soft realistic weight, smooth textured skin and round light-brown areolae with natural nipples; <Subject 2> with softer, fuller breasts that sway as she moves and settle low against her chest wall. Their faces stay close, foreheads touching, breathing heavy, chests rising and falling. Body contact is continuous and weighted: hips shifting, knees parting, thighs brushing, one hand flat on the stone for balance, fingers gripping with five separate fingers, elbows and knees hinging naturally, bodies pressing without merging. The camera keeps a stable focal plane on the two bodies with the sea softly blurred. The shot ends with the two women still kissing, naked from the waist up, the discarded clothing in a heap beside them.\n\noverall_soundscape:\nA quiet exterior room tone: soft distant surf, a light sea breeze, occasional gull calls far away. Close, muffled intimate sound: wet kissing and tongue sounds, soft flesh thudding and skin of the bodies clapping together, fabric sliding off skin and landing softly on stone tiles, deep breathing, and low moaning and gasping from both women, one low and one higher. No dialogue, no announcer, no counting, no crowd, no narration; nothing in the background talking.\n\nnon_diegetic_music:\nN/A",
+   "ref_image_size": "match",
+   "ref_images.ref_image_1": [
+    "img",
+    0
+   ],
+   "ref_images.ref_image_2": [
+    "img2",
+    0
+   ],
+   "vae": [
+    "vvae",
+    0
+   ],
+   "width": 1344,
+   "ref_images.ref_image_3": [
+    "img3",
+    0
+   ]
+  }
+ },
+ "c1": {
+  "class_type": "MiniMaxH3ReferenceToVideo",
+  "inputs": {
+   "audio_vae": [
+    "avae",
+    0
+   ],
+   "clip": [
+    "clip",
+    0
+   ],
+   "height": 768,
+   "length": [
+    "win1",
+    1
+   ],
+   "prompt": "subject_definitions:\nThis continuation chunk carries the same three reference pictures as the first 5 seconds of this clip. <Picture 1> is the approved full-body start photograph of the two adult women on a sunlit seaside terrace, and it is the reference image that defines the bodies, skin, figures, height, build, skin tone, faces, hair, wardrobe, terrace, lighting and camera context of this video for both women. <Picture 2> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 1>, and <Picture 3> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 2>. Both crops were cut from <Picture 1> and the face fills each of those crops, so each woman's face and hair come from her own crop while her body, skin and figure come from <Picture 1> and from the body the viewer already saw in the first 5 seconds of this clip, and no body is invented in this continuation. The light holiday clothing of <Picture 1> came off during the first 5 seconds and lies on the terrace tiles, so these women are bare from the waist up here, and being naked and being touched are actions in the story, not changes of body, skin, figure or identity.\n<Subject 1> is the exact same woman shown in <Picture 2> of the reference pictures and in the first 5 seconds of this clip, preserving her face, hairstyle, body, skin and figure with complete fidelity: the woman on the left in the opening five seconds of this clip, a fictional adult aged 21, tall and slim with a defined natural waist, gently rounded hips, firm shapely thighs and full natural bare breasts with round light-brown areolae and natural nipples.\n<Subject 2> is the exact same woman shown in <Picture 3> of the reference pictures and in the first 5 seconds of this clip, preserving her face, hairstyle, body, skin and figure with complete fidelity: the woman on the right in the opening five seconds of this clip, a fictional adult aged 23, soft and full with a wide hip spread, thick thighs, a rounded seat and fuller natural bare breasts that hang softly with their weight.\nTheir faces, hairstyles, bodies, skin and figures in this continuation are the faces, hairstyles, bodies, skin and figures of the first 5 seconds of this clip, unchanged.\n\nintegrated_multimodal_description:\n[Shot 1] Live-action, cinematic, a medium two-shot continues from the previous seaside moment as one unbroken take on the same warm stone terrace above the calm sea, with the same golden sky and the same soft warm key light from the left, the same terrace and standing as in <Picture 1>. Photorealistic skin and anatomy: natural matte skin with visible pores, fine vellus hair and only a soft natural sheen of sweat on the inner thighs, the collarbones and between the bodies, never a waxy, plastic or airbrushed surface, real adult body mass with shoulder definition and knee, calf and ankle joint definition, and dynamic video, fluid natural motions. The same two fictional adult women established in the first 5 seconds are kept exactly, <Subject 1> and <Subject 2> with the same faces, the same hair and the same bodies as in the first 5 seconds: <Subject 1> tall and slim with a defined waist and gently rounded hips, <Subject 2> soft and full with a wide hip spread and heavy thighs. Both are topless, their light holiday clothing in a heap on the tiles beside them, their breasts moving and settling with their own weight. Early in the shot the camera frames the face of <Subject 1> in close-up, her jaw and throat wet with a fine sheen, her eyes half closed, her mouth open on a slow breath; a moment later the camera frames the face of <Subject 2> in close-up, her brows lifted, her lips parted, a strand of hair stuck to her wet cheek. Then the camera drifts down and lower, slowly, small amplitude, no cuts. <Subject 1> leans back against the low terrace wall on both palms, elbows bending naturally, head tipped back, and slowly spreads her thighs, her stomach muscles showing as she moves. <Subject 2> moves onto her knees between those thighs, leans forward, and presses her mouth and tongue against the bare, wet vulva of <Subject 1>, her thumbs spreading the outer lips apart while her tongue works in slow, continuous strokes. <Subject 1>'s hips rise in small weighted thrusts toward the contact, her stomach tensing, her fingers pressing into the warm stone with five separate fingers, her thighs trembling and her toes curling. Wet gloss shows at the point of contact, and thin strands of hair stick to her inner thigh. The camera keeps a stable focal plane on the two bodies with the sea softly blurred, drifting slightly lower to keep the contact in frame without cutting, slow speed, no cuts, the two bodies pressing and sliding without merging. <Subject 1>'s hands leave the wall, grip the shoulders of <Subject 2>, and press her closer; her chest heaves and her mouth opens in a long moan. Both women keep their eyes open at times and glance toward the camera, expressions dazed and pleased. The clip ends with <Subject 2> still between the thighs of <Subject 1>, head down, and the hips of <Subject 1> lifting into the contact.\n\noverall_soundscape:\nSoft exterior room tone with distant surf, a light sea breeze and occasional far gull calls. Intimate close sound: repeated soft wet sliding sounds and tongue sounds, soft flesh thudding and skin of the bodies clapping together as hips rise into contact, slick wet noises at the point of contact, a soft skin squeak on the stone as weight shifts, sharp inhales, heavy breathing, and rising moans and gasps from both women, one low and one higher. No dialogue, no counting, no announcer, no crowd noise, nothing in the background talking.\n\nnon_diegetic_music:\nA very low sustained synth pad at a slow tempo with a soft sub-bass pulse, sparse and quiet, staying under the body sounds and fading slightly at the end.",
+   "ref_image_size": "match",
+   "ref_images.ref_image_1": [
+    "img",
+    0
+   ],
+   "vae": [
+    "vvae",
+    0
+   ],
+   "width": 1344,
+   "ref_images.ref_image_2": [
+    "img2",
+    0
+   ],
+   "ref_images.ref_image_3": [
+    "img3",
+    0
+   ]
+  }
+ },
+ "clip": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "device": "default",
+   "type": "minimax"
+  }
+ },
+ "dec_a": {
+  "class_type": "VAEDecodeAudio",
+  "inputs": {
+   "samples": [
+    "app1",
+    0
+   ],
+   "vae": [
+    "avae",
+    0
+   ]
+  }
+ },
+ "dec_v": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "app1",
+    0
+   ],
+   "vae": [
+    "vvae",
+    0
+   ]
+  }
+ },
+ "img": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/hc/HC3_lesbian_beach.jpg"
+  }
+ },
+ "ksel": {
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "euler"
+  }
+ },
+ "m_attn": {
+  "class_type": "ModelAttentionBackend",
+  "inputs": {
+   "attention": "comfy kitchen attention",
+   "model": [
+    "unet",
+    0
+   ]
+  }
+ },
+ "m_shift": {
+  "class_type": "MiniMaxH3SigmaShift",
+  "inputs": {
+   "model": [
+    "m_vsa",
+    0
+   ],
+   "shift_audio": 3.0,
+   "shift_video": 10.0
+  }
+ },
+ "m_vsa": {
+  "class_type": "BlockSparseAttention",
+  "inputs": {
+   "dense_blocks": "",
+   "end_percent": 1.0,
+   "extra_tokens": 256,
+   "min_tokens": 12288,
+   "model": [
+    "m_attn",
+    0
+   ],
+   "selection": "vsa",
+   "selection.keep_percent": 10,
+   "sink_conditioning": "exact_kv_and_rows",
+   "start_percent": 0.2,
+   "verbose": false
+  }
+ },
+ "mkvid": {
+  "class_type": "CreateVideo",
+  "inputs": {
+   "audio": [
+    "dec_a",
+    0
+   ],
+   "fps": 24,
+   "images": [
+    "dec_v",
+    0
+   ]
+  }
+ },
+ "noise": {
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 51130003
+  }
+ },
+ "s0_guide": {
+  "class_type": "BasicGuider",
+  "inputs": {
+   "conditioning": [
+    "c0",
+    0
+   ],
+   "model": [
+    "m_shift",
+    0
+   ]
+  }
+ },
+ "s0_samp": {
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "guider": [
+    "s0_guide",
+    0
+   ],
+   "latent_image": [
+    "c0",
+    1
+   ],
+   "noise": [
+    "noise",
+    0
+   ],
+   "sampler": [
+    "ksel",
+    0
+   ],
+   "sigmas": [
+    "s0_sched",
+    0
+   ]
+  }
+ },
+ "s0_sched": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "denoise": 1.0,
+   "model": [
+    "m_shift",
+    0
+   ],
+   "scheduler": "simple",
+   "steps": 10
+  }
+ },
+ "s1_guide": {
+  "class_type": "BasicGuider",
+  "inputs": {
+   "conditioning": [
+    "tail1",
+    0
+   ],
+   "model": [
+    "m_shift",
+    0
+   ]
+  }
+ },
+ "s1_samp": {
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "guider": [
+    "s1_guide",
+    0
+   ],
+   "latent_image": [
+    "win1",
+    0
+   ],
+   "noise": [
+    "noise",
+    0
+   ],
+   "sampler": [
+    "ksel",
+    0
+   ],
+   "sigmas": [
+    "s1_sched",
+    0
+   ]
+  }
+ },
+ "s1_sched": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "denoise": 1.0,
+   "model": [
+    "m_shift",
+    0
+   ],
+   "scheduler": "simple",
+   "steps": 10
+  }
+ },
+ "save": {
+  "class_type": "SaveVideo",
+  "inputs": {
+   "codec": "auto",
+   "filename_prefix": "community/ali147_pool_hc_r3b_s51130003/ali147_pool_hc_r3b_s51130003",
+   "format": "auto",
+   "video": [
+    "mkvid",
+    0
+   ]
+  }
+ },
+ "tail1": {
+  "class_type": "MiniMaxH3LatentTailGuide",
+  "inputs": {
+   "overlap_audio_tokens": [
+    "win1",
+    3
+   ],
+   "overlap_video_tokens": [
+    "win1",
+    2
+   ],
+   "positive": [
+    "c1",
+    0
+   ],
+   "previous_av_latent": [
+    "s0_samp",
+    0
+   ],
+   "target_av_latent": [
+    "win1",
+    0
+   ]
+  }
+ },
+ "unet": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "vvae": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+  }
+ },
+ "win1": {
+  "class_type": "MiniMaxH3GuidedContinuationWindow",
+  "inputs": {
+   "extension_frames": 119,
+   "overlap_frames": 22,
+   "previous_av_latent": [
+    "s0_samp",
+    0
+   ]
+  }
+ },
+ "img2": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/hc/HC3_w1_face.png"
+  }
+ },
+ "img3": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/hc/HC3_w2_face.png"
+  }
+ }
+}

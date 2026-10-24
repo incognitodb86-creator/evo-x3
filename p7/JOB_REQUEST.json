@@ -1,0 +1,12 @@
+{
+    "jobs": [
+        {
+            "id": "ali147_pool_hc_r3i_s51130003",
+            "kind": "graph",
+            "frames": 243,
+            "frames_tol": 33,
+            "minutes": 60,
+            "note": "ALI-163 2.1b ONE VARIABLE = THE PROMPT: byte-clone of the rendered r3b/BQ1c graph (seed 51130003, 3 ref slots on c0 and c1, 1344x768, 243 f, euler, steps 10, shift 10/3) with only c0/c1 prompt and filename_prefix changed; prompts are the official Ref2VA six-section rewrite in notes/im1_prompts.md (350-500 word main field, At MM:SS.mmm beats, canon camera wording, <Video 1> continuation). comm.guard_ok passed over every string input; offline static check clean. graph sha256 6b5749443c99f4b4ed853ecadf6fcad9d187bb73da599ffd797cc6ed74db5563"
+        }
+    ]
+}
