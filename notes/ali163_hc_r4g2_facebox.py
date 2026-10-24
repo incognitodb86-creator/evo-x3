@@ -24,6 +24,16 @@ PICKS = [
     ("HC4", "GROK_IMAGINE_2026-10-19b/GI107.jpg", 1),
     ("HC5", "GROK_IMAGINE_2026-10-19b/GI150.jpg", 1),
     ("HC6", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD076.jpg", 2),
+    # HC15 (fix_plan 0.1, Max 2:20 PM CT Oct 24): the 6 approved 16:9 stills not used as a
+    # LoadImage reference before this item, sorted by relative path, first 6 of 21 candidates.
+    # Expected face counts: FLOW_BLONDE_DARK_PAIRS folders are blonde+dark pairs (CHARACTER.md);
+    # GROK_IMAGINE counts are unknown, so faces_found is the measurement, not an assumption.
+    ("HC15A", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg", 2),
+    ("HC15B", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD006.jpg", 2),
+    ("HC15C", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD013.jpg", 2),
+    ("HC15D", "GROK_IMAGINE_2026-10-19/GI046.jpg", 1),
+    ("HC15E", "GROK_IMAGINE_2026-10-19/GI063.jpg", 1),
+    ("HC15F", "GROK_IMAGINE_2026-10-19/GI072.jpg", 1),
 ]
 
 

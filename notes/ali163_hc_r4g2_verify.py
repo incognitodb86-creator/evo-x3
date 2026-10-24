@@ -33,6 +33,9 @@ CROPS = [
     ("HC5_w1", "HC5_w1_face.png", "GROK_IMAGINE_2026-10-19b/GI150.jpg", [307, 154, 163, 212], "HC5"),
     ("HC6_w1", "HC6_w1_face.png", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD076.jpg", [471, 33, 209, 157], "HC6"),
     ("HC6_w2", "HC6_w2_face.png", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD076.jpg", [783, 68, 133, 190], "HC6"),
+    # HC15 clip 1 (fix_plan 0.1, Max 2:20 PM CT Oct 24): both women of the approved BD002 pair still
+    ("HC15A_w1", "BD002_w1_face.png", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg", [252, 93, 214, 105], "HC15A"),
+    ("HC15A_w2", "BD002_w2_face.png", "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg", [738, 44, 129, 175], "HC15A"),
 ]
 
 det, rec = Scrfd(thr=0.5), ArcFace()
