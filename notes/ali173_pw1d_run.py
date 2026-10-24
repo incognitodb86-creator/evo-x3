@@ -127,8 +127,7 @@ def build_graph(model, adapter, ref_form):
     # API graph gives it a LIST of links. The dict form {"ref_0": [...]} is flattened by ComfyUI into
     # a ref_0 kwarg and the node dies: TypeError: ...got an unexpected keyword argument 'ref_0'
     # (proof notes/pw1_smoke_omni_hc3.md, ComfyUI console log user/comfyui_10004.log 16:17:23.974).
-    refs = ({"references": [["11", 0]]} if ref_form == "list"
-            else {"references": {"ref_0": ["11", 0]}})
+    refs = {"ref_0": ["11", 0]}
     g = {
         "11": {"class_type": "LoadImage", "_meta": {"title": "HC3 start still"},
                "inputs": {"image": STILL}},
@@ -366,7 +365,7 @@ def main():
         say("FAIL: the node does not list the on-disk pair -> [!] and STOP_RALPH")
         sys.exit(6)
 
-    graph = build_graph(model, adapter, "list")
+    graph = build_graph(model, adapter, "dict")
     json.dump(graph, open(OUT_GRAPH, "w", encoding="utf-8"), indent=1, ensure_ascii=True)
     say("graph -> %s (%d nodes, no media node)" % (OUT_GRAPH, len(graph)))
 
