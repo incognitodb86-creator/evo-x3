@@ -1,0 +1,16 @@
+{
+    "started": "2026-10-24T12:18:50",
+    "rc": 0,
+    "id": "ali147_pool_hc_r3i_s51130003",
+    "ok": true,
+    "kind": "graph",
+    "note": "run_graph_job rc=0 (ok)",
+    "outputs": [
+        "C:\\AI\\community\\runs\\ali147_pool_hc_r3i_s51130003\\status.log",
+        "C:\\AI\\community\\runs\\ali147_pool_hc_r3i_s51130003\\objective.json",
+        "C:\\AI\\community\\runs\\ali147_pool_hc_r3i_s51130003\\ali147_pool_hc_r3i_s51130003.mp4",
+        "C:\\AI\\community\\runs\\ali147_pool_hc_r3i_s51130003\\ali147_pool_hc_r3i_s51130003_stills_contact.png"
+    ],
+    "finished": "2026-10-24T12:26:58",
+    "wall_min": 8.1
+}
