@@ -1,0 +1,100 @@
+I've been having some issues with Beta 6. Beta 5 works significantly better for me, especially when it comes to prompt following and motion accuracy. Beta 6 looks slightly more realistic, but it struggles to follow my prompts properly.
+Since many people are saying that Beta 6 is a big improvement over Beta 5, I'm wondering if the problem might be my ComfyUI workflow or settings.
+I'd really like to try different workflows and see if I can get better results.
+[I am using I2V and not T2V]
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Could someone share a working Beta 6 ComfyUI workflow (.json)? 
+ 
+ 
+ See translation 👍 5 5 + <path d="M10.5 6.36328C10.4998 6.61534 10.3117 6.82821 10.0615 6.85938C9.32558 6.95111 8.62935 7.2287 8.0459 7.66406C7.67946 7.9406
+
+---- block ----
+
+might be your prompting, i am using ref2v prompt template for every single one of my videos, and it works just well, i am using the Pixxorama workflow, with the recomended settings video shift 10 audio 3 
+
+ See translation LokkenJP 12 days ago • edited 12 days ago <div
+
+---- block ----
+
+I have a 2 stage beta 6 workflow with latent upscaling on my repository that works pretty nice. 
+
+ Straight 8-10 steps single pass workflows are still preferred, but a two staged one is usually faster, and allows for quick previews.
+
+ https://huggingface.co/LokkenJP/TenEros_Max_optimized_learned if you want to take a look, in the SampleWorkFlowTwoPassOptimized subfolder
+
+ See translation 👍 5 5 + firsak 11 days ago <div
+
+---- block ----
+
+staying on beta5.
+for me beta6 has terrible adherence to the provided image references.
+
+ See translation 👍 3 3 + dartagnan69 11 days ago <div
+
+---- block ----
+
+staying on beta5.
+for me beta6 has terrible adherence to the provided image references.
+
+ 
+ Same here. I've done several ref2video tests, and while beta6 seems to have better image quality, movements using character sheet references feel stiff. I think beta5 is much better in that regard.
+
+ See translation TenStrip Owner 10 days ago <div
+
+---- block ----
+
+Most should be taking my word and the comments more seriously and looking at their sampling, workflow and prompt. You have an issue there and I'm gonna start pushing back on model blamers. "Adherence", which is extremely broad by the way, can be a sampling shift cause or undersampling. b6 runs with 10/3 shift, 10 video shift while the normal model and b5 run 12. That's not suggested, it's required. It is literally built with full reference timestep and even has viggle in it. I've done video replacement, continuation, audio, music video lipsync, mixed multiple video references together, i2v done with reference node, 8 image reference composed outputs all perfectly fine and way beyond what 5 could do which is more or less just fl2va level.
+
+ See translation ❤️ 2 2 + ivansa123 9 days ago <div
+
+---- block ----
+
+I also noticed that the new model handles ITV much worse—it really distorts people's appearances and the environment, and produces a sort of "soapy" image—but the physics look a lot better.
+
+ See translation BalorDMN 9 days ago <div
+
+---- block ----
+
+i dont know if i am a dumbass or something, but if you would follow what TenStrip said, you wouldnt had these issues, Beta 6 is miles above b5, it handles refferences really well, I2v really well heck i got great generation from text to image as well. Yall either use incorect prompts, or your everyday downloaded workflow with 17 speed ups. Set your shift to 10/3 use onlysparse attn, just give a idea to a llm, Use the REF2V prompt guide minimax published, and you wont have issues,
+
+ Visual quality is much better in 6 Audio is miles better in 6 movement is much better in 6
+
+ See translation ivansa123 9 days ago <div
+
+---- block ----
+
+Could you share your workflow?
+
+ See translation LokkenJP 9 days ago • edited 9 days ago <div
+
+---- block ----
+
+Could you share your workflow?
+
+ 
+ Not sure which one BalorDMN is using, but you might want to take a look at the sample one I posted for my Beta6 quants on my repo (link just a few messages above this one). With proper prompting it does i2v perfectly fine. Small identity/context drift on long videos is inevitable in i2v as that's a H3 base issue. That exactly is the reason why proper ref2av mode or the now common refmods exist. Anyway, a properly set up workflow shouldn't be worse for i2v in Eros Beta6 than it was on beta5 or base Fast H3 in this regard.
+
+ Look at this post for some guidelines from TenStrip for proper i2v anchoring:
+ https://huggingface.co/TenStrip/10Eros-Max/discussions/63#6acd1e8d38e2e5318c1efa43 
+
+ See translation ❤️ 1 1 + Vinyl86 1 day ago <div
+
+---- block ----
+
+What workflow should be used for this model? I haven’t found one that works with VSAgates. 10Eros_Max_FastH3_VSAgates_UNSTABLE_beta6-int8_HQ
+
+ See translation LokkenJP 1 day ago <div
+
+---- block ----
+
+My workflow should work too with the gated beta6. have in mind that it is marked UNSTABLE for a reason. Some scenarios don't work as expected, context is easily lost on long videos, reference doesn't work as good as it should, etc...
+
+ See translation Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <svg class="mr-1.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="currentColor" focusable="false" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid
