@@ -9,6 +9,12 @@
  "comm": "C:\\AI\\community\\scripts\\comm.py",
  "dupe_resolution": [
   {
+   "dropped": "ali147_pool_hc_r3b_s51130003",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali147_pool_hc_r3i_s51130003",
+   "seed": 51130003
+  },
+  {
    "dropped": "ali147_pool_hc_r3r_s51130003",
    "reason": "superseded by a newer render of the same seed",
    "retained": "ali147_pool_hc_r3b_s51130003",
@@ -17,8 +23,12 @@
  ],
  "excluded": [
   {
+   "id": "ali147_pool_hc_r3b_s51130003",
+   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3i_s51130003)"
+  },
+  {
    "id": "ali147_pool_hc_r3r_s51130003",
-   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3b_s51130003)"
+   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3i_s51130003)"
   },
   {
    "id": "ali173_cont_hc1_s51140001",
@@ -95,20 +105,20 @@
   "ach": 2,
   "acodec": "aac",
   "asr": 32000,
-  "bytes": 16639506,
+  "bytes": 16361582,
   "fmt_dur": 53.282063,
   "fps": "24/1",
   "h": 768,
-  "mtime": 1792858419,
+  "mtime": 1792862896,
   "path": "C:/AI/community/review/hc169/review_cut.mp4",
-  "sha256": "b415835649f2319cbe2c33b43323d7f55a7b52d248d5ed330f89f139389d3f20",
+  "sha256": "127fc668b7411fa8d7196b53fab4950b95bab7ce91562cddb928004516589798",
   "vcodec": "h264",
   "vdur": 53.25,
   "vpackets": 1278,
   "w": 1344
  },
- "problems": 0,
- "rc": 0,
+ "problems": 2,
+ "rc": 1,
  "scene": [
   {
    "ach": 2,
@@ -195,7 +205,7 @@
     "GROK_IMAGINE_2026-10-19b/GI173.jpg"
    ],
    "asr": 32000,
-   "bytes": 3527348,
+   "bytes": 3250307,
    "crops": [
     "community/hc/HC3_w1_face.png",
     "community/hc/HC3_w2_face.png"
@@ -204,7 +214,7 @@
    "fps": "24/1",
    "gate_refusals": [],
    "gate_strings": 2,
-   "graph": "C:/AI/community/runs/ali147_pool_hc_r3b_s51130003/ali147_pool_hc_r3b_s51130003.api.json",
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3i_s51130003/ali147_pool_hc_r3i_s51130003.api.json",
    "graph_canvas": [
     1344,
     null
@@ -212,12 +222,12 @@
    "graph_frames": 124,
    "graph_src": "p7/graphs",
    "h": 768,
-   "id": "ali147_pool_hc_r3b_s51130003",
-   "mtime": 1792794496,
-   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali147_pool_hc_r3b_s51130003/ali147_pool_hc_r3b_s51130003_00001_.mp4",
+   "id": "ali147_pool_hc_r3i_s51130003",
+   "mtime": 1792862813,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali147_pool_hc_r3i_s51130003/ali147_pool_hc_r3i_s51130003_00001_.mp4",
    "ref_violations": [],
    "seed": 51130003,
-   "sha256": "d125b8feb11e4aea368714c88cccd863cb40659a0117f7817d1ceb78a4f320f3",
+   "sha256": "47ca711455fd04de4d68d7ad1c07d7e827efcd88cb5f62b759d44de8dad9fc91",
    "stills": [
     {
      "approved": "GROK_IMAGINE_2026-10-19b/GI173.jpg",
@@ -277,13 +287,13 @@
   "ach": null,
   "acodec": null,
   "asr": null,
-  "bytes": 621783,
+  "bytes": 614506,
   "fmt_dur": 0.0,
   "fps": "25/1",
   "h": 512,
-  "mtime": 1792858420,
+  "mtime": 1792862896,
   "path": "C:/AI/community/review/hc169/contact_sheet.png",
-  "sha256": "700672c5809ed0808c42025584bf845053ce2ae4c567807ea39a5c98907cf8db",
+  "sha256": "b097f729962fcad76ec6d17522c410649e7375c4e3b6f5ad8350b76843817396",
   "vcodec": "png",
   "vdur": 0.0,
   "vpackets": 1,
