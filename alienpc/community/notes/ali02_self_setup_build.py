@@ -15,13 +15,17 @@ and the body it cites is the body that fetch saved. Things the builder enforces:
   2. every cited web/ body appears in a manifest (URL + body pair, no folklore);
   3. verdict in the 4-value vocabulary;
   4. claim text carries no saved-body path and the action is a real decision;
-  5. blocked entries name a stamp file that exists (401/403/404 = unverifiable, never a fact).
---selftest seeds one fault per detector; all five MUST fire (a check that cannot fail is
-worthless - forge rule).
+  5. blocked entries name a stamp file that exists (401/403/404 = unverifiable, never a fact);
+  6. no row module shadows a module-level name (AST) - 0.2 shipped `BLOCKED = [...]` twice in
+     a.py and b.py, so the first list was discarded and 20 blocked rows never reached the
+     deliverable while --check stayed green; text grepping cannot see this, the AST can.
+--selftest seeds one fault per detector; all eight MUST fire, and SHADOW must stay silent on
+the live row modules (a check that cannot fail is worthless - forge rule).
 Run: C:/AI/director/.venv/Scripts/python.exe C:/AI/community/notes/ali02_self_setup_build.py [--selftest|--check]
 """
 from __future__ import annotations
 
+import ast
 import json
 import os
 import re
@@ -38,7 +42,9 @@ import ali02_self_setup_rows_c as C  # noqa: E402
 
 OUT = os.path.join(HERE, "self_setup_20261023.md")
 MANIFESTS = ("ali02_sources.json", "ali02_sources_04y.json", "ali02_sources_04z.json",
-             "ali02_sources_04x.json", "ali02_sources_04w.json")
+             "ali02_sources_04x.json", "ali02_sources_04w.json", "ali02_sources_05a.json")
+ROW_MODULES = ("ali02_self_setup_rows_a.py", "ali02_self_setup_rows_b.py",
+               "ali02_self_setup_rows_c.py")
 VERDICTS = {"verified", "stale", "wrong"}
 STAMP = re.compile(r"\.(?:401|403|404)(?:-\d+)?\.txt$")
 COMFY = r"C:/Users/derek/HardcoreNSFW-TestRuntime"
@@ -223,6 +229,28 @@ def check_blocked(blocked, man, problems):
     return blocked
 
 
+def check_shadow(modules, problems):
+    """AST detector for the defect 0.2 shipped: a module-level name assigned TWICE, so the
+    first ROWS/BLOCKED list is discarded and rows silently leave the deliverable while
+    --check stays green. Text grepping the file cannot see this; the AST can."""
+    for path in modules:
+        name = os.path.basename(path)
+        with open(path, encoding="utf-8") as f:
+            tree = ast.parse(f.read(), name)
+        top = {}
+        for node in tree.body:
+            for t in getattr(node, "targets", []):
+                if isinstance(t, ast.Name):
+                    top.setdefault(t.id, []).append(node.lineno)
+        for ident, lines in sorted(top.items()):
+            if len(lines) > 1:
+                problems.append(
+                    "SHADOW %s: %s is assigned twice at module level (lines %s) - the first "
+                    "assignment is discarded, so rows/block entries vanish from the deliverable "
+                    "and --check cannot see it; merge them into one list" % (name, ident, lines))
+    return problems
+
+
 def selftest(rows, man) -> int:
     seed = [
         ("seed: dead body", "web/00zz_never_saved_body.json", "verified", "seeded citation to a body that does not exist"),
@@ -238,15 +266,34 @@ def selftest(rows, man) -> int:
     seed_blocked = [("seed: blocked entry whose URL did not write the stamp",
                      "https://api.github.com/repos/someone/else", "web/04x_tenstrip_repo.401-2.txt")]
     check_blocked(seed_blocked, man, problems)
-    kinds = ("CITED", "URL", "VERDICT", "LABEL", "CLAIM", "STAMP", "BLOCKED")
+    # SHADOW seed: the exact planted defect (ROWS assigned twice), kept in a string so the
+    # builder's own source stays clean and the detector is the only thing that can see it.
+    seed_shadow = 'ROWS = ["planted first list"]\nROWS = ["planted second list"]\n'
+    seed_path = os.path.join(HERE, "_ali02_shadow_seed_a.py")
+    with open(seed_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(seed_shadow)
+    try:
+        shadow = check_shadow([seed_path], [])
+    finally:
+        os.remove(seed_path)
+    problems.extend(shadow)
+    kinds = ("CITED", "URL", "VERDICT", "LABEL", "CLAIM", "STAMP", "BLOCKED", "SHADOW")
     fired = [k for k in kinds if any(p.startswith(k) for p in problems)]
-    print("SELFTEST: 7 seeded faults, detectors fired %d/7: %s" % (len(fired), fired))
+    silent = [k for k in kinds if k not in fired]
+    print("SELFTEST: %d seeded faults, detectors fired %d/%d: %s" % (len(kinds), len(fired), len(kinds), fired))
     for p in problems:
         print("   seed ->", p[:120])
-    if len(fired) < 7:
-        print("SELFTEST FAILED: the builder check is dead weight")
+    real_shadow = check_shadow([os.path.join(HERE, m) for m in ROW_MODULES], [])
+    print("REAL ROW MODULES: SHADOW fires %d time(s): %s"
+          % (len(real_shadow), [p.split(" ")[1] + ":" + p.split(": ")[1][:40] for p in real_shadow] or "silent"))
+    if len(fired) < len(kinds):
+        print("SELFTEST FAILED: the builder check is dead weight, silent detectors: %s" % silent)
         return 1
-    print("SELFTEST PASS: CITED / URL / VERDICT / LABEL / CLAIM / STAMP / BLOCKED all fire")
+    if real_shadow:
+        print("SELFTEST FAILED: a live row module shadows a name; no row is checked on it")
+        return 1
+    print("SELFTEST PASS: CITED / URL / VERDICT / LABEL / CLAIM / STAMP / BLOCKED / SHADOW all "
+          "fire on the seeds and SHADOW is silent on the live row modules")
     return 0
 
 
@@ -268,6 +315,7 @@ def main() -> int:
     problems = []
     check(rows, man, problems)
     check_blocked(blocked, man, problems)
+    check_shadow([os.path.join(HERE, m) for m in ROW_MODULES], problems)
     if problems:
         print("PROBLEMS (%d):" % len(problems))
         for p in problems:
