@@ -1,0 +1,90 @@
+[
+ {
+  "name": "04y_reg_continuum",
+  "url": "https://api.comfy.org/nodes/comfyui-minimax-h3-continuation"
+ },
+ {
+  "name": "04y_reg_extender",
+  "url": "https://api.comfy.org/nodes/comfyui-minimax-h3-video-lab-extender"
+ },
+ {
+  "name": "04y_reg_infinite",
+  "url": "https://api.comfy.org/nodes/comfyui-infinite-creation"
+ },
+ {
+  "name": "04y_reg_latentup",
+  "url": "https://api.comfy.org/nodes/minimax_h3_latent_upscaler"
+ },
+ {
+  "name": "04y_reg_facecons",
+  "url": "https://api.comfy.org/nodes/comfyui-faceconsistency"
+ },
+ {
+  "name": "04y_repo_comfyui",
+  "url": "https://api.github.com/repos/Comfy-Org/ComfyUI"
+ },
+ {
+  "name": "04y_repo_kijai",
+  "url": "https://api.github.com/repos/kijai/ComfyUI-KJNodes"
+ },
+ {
+  "name": "04y_repo_fizgig",
+  "url": "https://api.github.com/repos/Fizgig/ComfyUI_LayerDiffuse"
+ },
+ {
+  "name": "04y_repo_pytorch",
+  "url": "https://api.github.com/repos/pytorch/pytorch"
+ },
+ {
+  "name": "04y_rel_comfyui",
+  "url": "https://api.github.com/repos/Comfy-Org/ComfyUI/releases/latest"
+ },
+ {
+  "name": "04y_rel_llamaswap",
+  "url": "https://api.github.com/repos/GOAT1000/llama-swap/releases/latest"
+ },
+ {
+  "name": "04y_rel_loopat",
+  "url": "https://api.github.com/repos/shanemcc/loopat/releases/latest"
+ },
+ {
+  "name": "04y_rel_pimono",
+  "url": "https://api.github.com/repos/opencl/pimono/releases/latest"
+ },
+ {
+  "name": "04y_comfy_versions",
+  "url": "https://api.comfy.org/versions"
+ },
+ {
+  "name": "04y_pypi_torch",
+  "url": "https://pypi.org/pypi/torch/json"
+ },
+ {
+  "name": "04y_pypi_pipx",
+  "url": "https://pypi.org/pypi/pipx/json"
+ },
+ {
+  "name": "04y_ms_h3",
+  "url": "https://www.modelscope.cn/api/v1/models/Comfy-Org/MiniMax-H3"
+ },
+ {
+  "name": "04y_civ_2860061",
+  "url": "https://civitai.com/api/v1/models/2860061"
+ },
+ {
+  "name": "04y_civ_3153751",
+  "url": "https://civitai.com/api/v1/models/3153751"
+ },
+ {
+  "name": "04y_hf_comfyorg_h3",
+  "url": "https://huggingface.co/api/models/Comfy-Org/MiniMax-H3"
+ },
+ {
+  "name": "04y_arxiv_2607_22010",
+  "url": "https://arxiv.org/abs/2607.22010"
+ },
+ {
+  "name": "04y_gh_mps_utils",
+  "url": "https://api.github.com/repos/Ludifred/ComfyUI-MPS-Utils"
+ }
+]
