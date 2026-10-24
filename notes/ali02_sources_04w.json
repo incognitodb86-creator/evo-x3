@@ -1,0 +1,30 @@
+[
+  {
+    "name": "04w_cont_hardening.py",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/hardening.py"
+  },
+  {
+    "name": "04w_cont_resolution.py",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/resolution.py"
+  },
+  {
+    "name": "04w_cont_readme.md",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/README.md"
+  },
+  {
+    "name": "04w_cont_changelog.md",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/CHANGELOG.md"
+  },
+  {
+    "name": "04w_cont_commits.json",
+    "url": "https://api.github.com/repos/ukr8b3g-cmyk/ComfyUI-H3-Continuum/commits?per_page=1"
+  },
+  {
+    "name": "04w_extender_readme.md",
+    "url": "https://raw.githubusercontent.com/Barapeh/ComfyUI_MiniMax_H3_Extender/master/README.md"
+  },
+  {
+    "name": "04w_flyonly_api.json",
+    "url": "https://huggingface.co/api/models/flyonlylow/Qwen2.5-Omni-7B-DPO-AIO-Merge-PSYCHE-Reasoning-B64-Q8_0-GGUF"
+  }
+]
