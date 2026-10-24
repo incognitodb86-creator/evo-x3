@@ -1,0 +1,716 @@
+<!DOCTYPE html><html lang="en" data-theme-storage-key="pi:theme"><head><title>Extensions · Documentation · Pi</title><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><script>(() => {
+  const root = document.documentElement;
+  const storageKey = "pi:theme";
+  const colorSchemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const storedMode = localStorage.getItem(storageKey);
+  const mode = storedMode === "light" || storedMode === "dark" ? storedMode : "system";
+  const theme = mode === "system" ? (colorSchemeMediaQuery.matches ? "dark" : "light") : mode;
+
+  root.dataset.theme = theme;
+  root.dataset.themeMode = mode;
+  root.style.colorScheme = theme;
+})();</script><script>if ("noModule" in document.createElement("script")) document.documentElement.dataset.mermaidLoading = "";</script><link rel="preload" href="/fonts/PlantinNowVariable-Upright.woff2" as="font" type="font/woff2" crossorigin="anonymous"/><link rel="preload" href="/fonts/PlantinNowVariable-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous"/><link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/><link rel="stylesheet" type="text/css" href="/style.css?v=ce56f151-ae5c-4099-952b-3a34fea01d2c"/><link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg?v=ce56f151-ae5c-4099-952b-3a34fea01d2c"/><link rel="alternate" type="application/rss+xml" title="Pi Changelog" href="/changelog.xml"/><meta name="description" content="A terminal-based coding agent"/><meta property="og:title" content="Pi Coding Agent"/><meta property="og:type" content="website"/><meta property="og:description" content="A terminal-based coding agent"/><meta property="og:url" content="https://pi.dev"/><meta property="og:image" content="https://pi.dev/social.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="There are many agent harnesses, but this one is yours."/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:image" content="https://pi.dev/social.png"/><meta name="twitter:image:alt" content="There are many agent harnesses, but this one is yours."/><meta property="twitter:domain" content="pi.dev"/><meta property="twitter:url" content="https://pi.dev"/><meta name="twitter:title" content="Pi Coding Agent"/><meta name="twitter:description" content="A terminal-based coding agent"/><script>window.__sa=window.__sa||function(){(__sa._=__sa._||[]).push(arguments)}</script><script src="/assets/pi-dev.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c"></script><noscript><style>
+            [data-theme-toggle] {
+              display: none;
+            }
+            @media (max-width: 1023px) {
+              #stickyNav #sticky-nav-inner-js,
+              #stickyNav .nav-sheet-backdrop,
+              #stickyNav .nav-sheet {
+                display: none;
+              }
+              #stickyNav .sticky-nav-noscript-shell {
+                display: flex;
+              }
+            }
+          </style></noscript><script src="/assets/sa.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c" data-auto="false"></script><script src="/assets/logo-context-menu.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c" defer=""></script><script src="/assets/nav-sheet.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c" defer=""></script><script src="/assets/theme-toggle.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c" defer=""></script><script type="module">import("/assets/markdown-mermaid.mjs?v=ce56f151-ae5c-4099-952b-3a34fea01d2c").catch((error) => { document.documentElement.removeAttribute("data-mermaid-loading"); throw error; });</script></head><body><div class="site-header"><aside class="site-announcement" aria-label="Announcement"><p>People of Pi: We&#39;ve shipped <a href="https://earendil.com/posts/pi-1-0/">Pi 1.0</a> with <a href="https://earendil.com/posts/pi-durable/">Pi Durable</a>. Go make them yours.</p></aside><nav class="sticky-nav" id="stickyNav" data-nav-root="true" data-nav-open="false"><div class="sticky-nav-inner" id="sticky-nav-inner-js"><a href="/" class="sticky-nav-logo" aria-label="Pi home" data-logo-context-trigger="true"><svg class="pi-logo-mark" viewBox="0 0 800 800" aria-hidden="true" focusable="false"><path fill="#F09082" d="M165.29 165.29H517.36V400H400V282.65H165.29Z"></path><path fill="#4D9ABF" d="M165.29 282.65H282.65V400H400V517.36H282.65V634.72H165.29Z"></path><path fill="#F1BE58" d="M517.36 400H634.72V634.72H517.36Z"></path></svg></a><div class="logo-context-menu" data-logo-context-menu="true" hidden=""><button type="button" class="logo-context-menu-item" data-logo-context-copy-svg="true">Copy SVG</button><a class="logo-context-menu-item" href="/logo-auto.svg" download="pi-logo.svg" data-logo-context-download="true">Download SVG</a><a class="logo-context-menu-item" href="/press-kit">Press Kit</a></div><div class="sticky-nav-page-links" aria-label="Primary navigation"><a href="/docs/latest" class="sticky-nav-page-link is-active" aria-current="page">Documentation</a><a href="/changelog" class="sticky-nav-page-link">Changelog</a><a href="/models" class="sticky-nav-page-link">Models</a><a href="/packages" class="sticky-nav-page-link">Packages</a><a href="https://radius.earendil.com/" target="_blank" rel="noopener" class="sticky-nav-page-link">Radius</a></div><a href="https://earendil.com" class="sticky-nav-earendil" title="Earendil Inc. website" aria-label="Earendil Inc. website" target="_blank" rel="noopener"><svg class="sticky-nav-earendil-emblem" viewBox="121.24 22.62 81.65 149.38" aria-hidden="true" focusable="false"><path fill="currentColor" d="M202.89 123.89c.4 29.74-40.27 26.97-40.8 48.11h-.05c-.52-21.14-41.19-18.38-40.8-48.11 27.99 0 40.09-46.29 40.82-101.27.74 54.98 12.83 101.27 40.82 101.27h0Z"></path></svg></a><button type="button" class="sticky-nav-toggle burger-trigger" aria-controls="navSheet" aria-label="Open menu" aria-expanded="false" data-open="false" data-nav-toggle="true"><span class="bt-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="bt-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="bt-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></span></button></div><noscript><div class="sticky-nav-noscript-shell"><a href="/" class="sticky-nav-logo sticky-nav-noscript-logo" aria-label="Pi home"><svg class="pi-logo-mark" viewBox="0 0 800 800" aria-hidden="true" focusable="false"><path fill="#F09082" d="M165.29 165.29H517.36V400H400V282.65H165.29Z"></path><path fill="#4D9ABF" d="M165.29 282.65H282.65V400H400V517.36H282.65V634.72H165.29Z"></path><path fill="#F1BE58" d="M517.36 400H634.72V634.72H517.36Z"></path></svg></a><details class="sticky-nav-noscript"><summary class="sticky-nav-noscript-summary"><span class="visually-hidden">Menu</span><span class="sticky-nav-noscript-trigger burger-trigger" aria-hidden="true"><span class="bt-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="bt-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="bt-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></span></span></summary><div class="sticky-nav-noscript-panel"><div class="nav-sheet-inner"><div class="nav-sheet-links"><a href="/docs/latest" class="nav-sheet-link is-active" aria-current="page"><span>Documentation</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="/changelog" class="nav-sheet-link"><span>Changelog</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="/models" class="nav-sheet-link"><span>Models</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="/packages" class="nav-sheet-link"><span>Packages</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="https://radius.earendil.com/" target="_blank" rel="noopener" class="nav-sheet-link"><span>Radius</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a></div><div class="nav-sheet-separator" aria-hidden="true"></div><div class="nav-sheet-meta"><div class="nav-sheet-socials"><a href="https://github.com/earendil-works/pi/tree/main/packages/coding-agent" class="nav-sheet-social" aria-label="GitHub"><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg></span><span>GitHub</span></a><a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent" class="nav-sheet-social" aria-label="npm"><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M0 0v24h24v-24h-24zm19.2 19.2h-2.4v-9.6h-4.8v9.6h-7.2v-14.4h14.4v14.4z"></path></svg></span><span>npm</span></a><a href="https://discord.com/invite/3cU7Bz4UPx" class="nav-sheet-social" aria-label="Discord"><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"></path></svg></span><span>Discord</span></a><a href="https://x.com/pidotdev" class="nav-sheet-social" aria-label="X"><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"></path></svg></span><span>X</span></a></div><div class="nav-sheet-separator" aria-hidden="true"></div><div class="nav-sheet-footer"><a href="https://earendil.com" class="nav-sheet-footer-link" title="Earendil Inc. website" aria-label="Earendil Inc. website" target="_blank" rel="noopener"><span class="nav-sheet-footer-mark" aria-hidden="true"><svg class="nav-sheet-earendil-emblem" viewBox="121.24 22.62 81.65 149.38" aria-hidden="true" focusable="false"><path fill="currentColor" d="M202.89 123.89c.4 29.74-40.27 26.97-40.8 48.11h-.05c-.52-21.14-41.19-18.38-40.8-48.11 27.99 0 40.09-46.29 40.82-101.27.74 54.98 12.83 101.27 40.82 101.27h0Z"></path></svg></span><span class="nav-sheet-footer-copy sticky-nav-page-link">Earendil Inc.</span></a></div></div></div></div></details></div></noscript><div class="nav-sheet-backdrop" data-nav-backdrop="true" aria-hidden="true"></div><aside class="nav-sheet" id="navSheet" data-nav-sheet="true" data-open="false" aria-hidden="true" aria-label="Navigation menu" inert=""><div class="nav-sheet-inner"><div class="nav-sheet-links"><a href="/docs/latest" class="nav-sheet-link is-active" aria-current="page" data-nav-sheet-close=""><span>Documentation</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="/changelog" class="nav-sheet-link" data-nav-sheet-close=""><span>Changelog</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="/models" class="nav-sheet-link" data-nav-sheet-close=""><span>Models</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="/packages" class="nav-sheet-link" data-nav-sheet-close=""><span>Packages</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a><a href="https://radius.earendil.com/" target="_blank" rel="noopener" class="nav-sheet-link" data-nav-sheet-close=""><span>Radius</span><span class="nav-sheet-arrow" aria-hidden="true">→</span></a></div><div class="nav-sheet-separator" aria-hidden="true"></div><div class="nav-sheet-meta"><div class="nav-sheet-socials"><a href="https://github.com/earendil-works/pi/tree/main/packages/coding-agent" class="nav-sheet-social" aria-label="GitHub" data-nav-sheet-close=""><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg></span><span>GitHub</span></a><a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent" class="nav-sheet-social" aria-label="npm" data-nav-sheet-close=""><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M0 0v24h24v-24h-24zm19.2 19.2h-2.4v-9.6h-4.8v9.6h-7.2v-14.4h14.4v14.4z"></path></svg></span><span>npm</span></a><a href="https://discord.com/invite/3cU7Bz4UPx" class="nav-sheet-social" aria-label="Discord" data-nav-sheet-close=""><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"></path></svg></span><span>Discord</span></a><a href="https://x.com/pidotdev" class="nav-sheet-social" aria-label="X" data-nav-sheet-close=""><span class="nav-sheet-social-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"></path></svg></span><span>X</span></a></div><div class="nav-sheet-separator" aria-hidden="true"></div><div class="nav-sheet-footer"><a href="https://earendil.com" class="nav-sheet-footer-link" title="Earendil Inc. website" aria-label="Earendil Inc. website" target="_blank" rel="noopener" data-nav-sheet-close=""><span class="nav-sheet-footer-mark" aria-hidden="true"><svg class="nav-sheet-earendil-emblem" viewBox="121.24 22.62 81.65 149.38" aria-hidden="true" focusable="false"><path fill="currentColor" d="M202.89 123.89c.4 29.74-40.27 26.97-40.8 48.11h-.05c-.52-21.14-41.19-18.38-40.8-48.11 27.99 0 40.09-46.29 40.82-101.27.74 54.98 12.83 101.27 40.82 101.27h0Z"></path></svg></span><span class="nav-sheet-footer-copy sticky-nav-page-link">Earendil Inc.</span></a></div></div></div></aside></nav></div><div class="site-tilt-layer"><main class="content-shell docs-page"><section class="docs-layout"><div class="docs-mobile-tools"><details class="surface-panel docs-mobile-disclosure docs-mobile-navigation"><summary>Navigation</summary><div class="docs-mobile-disclosure-body docs-mobile-navigation-body"><div class="docs-mobile-nav-section"><p class="docs-mobile-nav-heading">On this page</p><nav class="docs-toc-links" aria-label="On this page"><a class="docs-toc-link docs-toc-link-depth-2" href="#create-and-load-an-extension">Create and load an extension</a><a class="docs-toc-link docs-toc-link-depth-2" href="#add-it-to-pi">Add it to Pi</a><a class="docs-toc-link docs-toc-link-depth-2" href="#understand-the-runtime-lifecycle">Understand the runtime lifecycle</a><a class="docs-toc-link docs-toc-link-depth-3" href="#choose-an-event-by-intent">Choose an event by intent</a><a class="docs-toc-link docs-toc-link-depth-2" href="#choose-an-integration-point">Choose an integration point</a><a class="docs-toc-link docs-toc-link-depth-2" href="#follow-the-extension-contracts">Follow the extension contracts</a><a class="docs-toc-link docs-toc-link-depth-3" href="#events-and-concurrency">Events and concurrency</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tools">Tools</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tool-exposure">Tool exposure</a><a class="docs-toc-link docs-toc-link-depth-3" href="#activate-tools-dynamically">Activate tools dynamically</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tool-rendering">Tool rendering</a><a class="docs-toc-link docs-toc-link-depth-3" href="#mcp-servers">MCP servers</a><a class="docs-toc-link docs-toc-link-depth-3" href="#context-and-session-changes">Context and session changes</a><a class="docs-toc-link docs-toc-link-depth-3" href="#state">State</a><a class="docs-toc-link docs-toc-link-depth-3" href="#ui-and-modes">UI and modes</a><a class="docs-toc-link docs-toc-link-depth-3" href="#errors-and-cleanup">Errors and cleanup</a><a class="docs-toc-link docs-toc-link-depth-2" href="#examples-and-reference">Examples and reference</a></nav></div><details class="docs-mobile-docs-disclosure"><summary>Documentation</summary><div class="docs-mobile-docs-disclosure-body"><nav class="docs-nav-groups" aria-label="Documentation navigation"><section class="docs-nav-group"><h2>Get Started</h2><div class="docs-nav-links"><a class="docs-nav-link" href="/docs/latest">Overview</a><a class="docs-nav-link" href="/docs/latest/quickstart">Quickstart</a><a class="docs-nav-link" href="/docs/latest/how-pi-works">How Pi Works</a></div></section><section class="docs-nav-group"><h2>Guides</h2><div class="docs-nav-links"><h3 class="docs-nav-section-title">Run Pi</h3><a class="docs-nav-link" href="/docs/latest/usage">Use Pi in the Terminal</a><a class="docs-nav-link" href="/docs/latest/models">Choose a Model</a><a class="docs-nav-link" href="/docs/latest/sessions">Manage Sessions and Context</a><a class="docs-nav-link" href="/docs/latest/security">Run Pi Safely</a><a class="docs-nav-link" href="/docs/latest/containerization">Isolate Pi</a><a class="docs-nav-link" href="/docs/latest/llama-cpp">Run Local Models</a><a class="docs-nav-link" href="/docs/latest/nvidia-rtx-llama-cpp">Run Local Models on NVIDIA RTX</a><a class="docs-nav-link" href="/docs/latest/terminal-setup">Configure Your Terminal</a><a class="docs-nav-link" href="/docs/latest/shell-aliases">Configure Shell Commands</a><a class="docs-nav-link" href="/docs/latest/tmux">Run Pi in tmux</a><a class="docs-nav-link" href="/docs/latest/windows">Run Pi on Windows</a><a class="docs-nav-link" href="/docs/latest/termux">Run Pi on Android</a><h3 class="docs-nav-section-title">Customize Pi</h3><a class="docs-nav-link" href="/docs/latest/configuration">Configure Pi</a><a class="docs-nav-link" href="/docs/latest/prompt-templates">Create Prompt Templates</a><a class="docs-nav-link" href="/docs/latest/skills">Add Skills</a><a class="docs-nav-link" href="/docs/latest/themes">Create Themes</a><a class="docs-nav-link" href="/docs/latest/packages">Use Pi Packages</a><a class="docs-nav-link" href="/docs/latest/mcp">Connect MCP Servers</a><h3 class="docs-nav-section-title">Build on Pi</h3><a class="docs-nav-link is-active" href="/docs/latest/extensions">Build Extensions</a><a class="docs-nav-link" href="/docs/latest/custom-provider">Add Custom Providers</a><a class="docs-nav-link" href="/docs/latest/virtual-models">Route with Virtual Models</a><a class="docs-nav-link" href="/docs/latest/tui">Build Terminal UI Components</a><a class="docs-nav-link" href="/docs/latest/cli-integration">Integrate with the CLI</a><a class="docs-nav-link" href="/docs/latest/sdk">Use the SDK</a></div></section><section class="docs-nav-group"><h2>Reference</h2><div class="docs-nav-links"><a class="docs-nav-link" href="/docs/latest/cli">CLI</a><a class="docs-nav-link" href="/docs/latest/codemode">Codemode</a><a class="docs-nav-link" href="/docs/latest/slash-commands">Slash Commands</a><a class="docs-nav-link" href="/docs/latest/settings">Settings</a><a class="docs-nav-link" href="/docs/latest/models-configuration">Models Configuration</a><a class="docs-nav-link" href="/docs/latest/environment-variables">Environment Variables</a><a class="docs-nav-link" href="/docs/latest/keybindings">Keybindings</a><a class="docs-nav-link" href="/docs/latest/providers">Providers</a><a class="docs-nav-link" href="/docs/latest/session-format">Session File Format</a><a class="docs-nav-link" href="/docs/latest/compaction">Compaction and Branch Summaries</a><a class="docs-nav-link" href="/docs/latest/json">JSON Event Stream</a><a class="docs-nav-link" href="/docs/latest/rpc">RPC Protocol</a><a class="docs-nav-link" href="/docs/latest/rpc-commands">RPC Commands</a><a class="docs-nav-link" href="/docs/latest/rpc-extension-ui">RPC Extension UI</a><a class="docs-nav-link" href="/docs/latest/message-types">Message Types</a></div></section><div class="docs-nav-utility"><a class="docs-nav-link" href="/changelog">Changelog</a></div></nav></div></details></div></details></div><section class="docs-search" aria-label="Search documentation" data-docs-search="true" data-docs-search-index-url="/docs/latest/search-index.json" data-docs-search-minisearch-src="/assets/vendor/minisearch.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c" data-state="idle"><form class="docs-search-form" action="/docs/latest" role="search" data-docs-search-form="true"><label class="visually-hidden" for="docs-search-input-latest">Search documentation</label><div class="docs-search-field"><span class="docs-search-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="24" viewBox="0 0 24 24" width="24" aria-hidden="true"><path d="M22 22h-2v-2h2v2Zm-2-2h-2v-2h2v2Zm-6-2H6v-2h8v2Zm4 0h-2v-2h2v2ZM6 16H4v-2h2v2Zm10 0h-2v-2h2v2ZM4 14H2V6h2v8Zm14 0h-2V6h2v8ZM6 6H4V4h2v2Zm10 0h-2V4h2v2Zm-2-2H6V2h8v2Z"></path></svg></span><input id="docs-search-input-latest" class="text-control docs-search-input" type="search" name="q" placeholder="Search documentation…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="docs-search-results-latest" data-docs-search-input="true"/><kbd class="docs-search-shortcut" aria-hidden="true" data-docs-search-shortcut="true">⌘ K</kbd><button class="docs-search-clear" type="button" aria-label="Clear search" data-docs-search-clear="true" hidden=""><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="24" viewBox="0 0 24 24" width="24" aria-hidden="true"><path d="M5 5h2v2H5zm2 2h2v2H7zm2 2h2v2H9zm2 2h2v2h-2zm2-2h2v2h-2zm2-2h2v2h-2zm2-2h2v2h-2zM9 13h2v2H9zm-2 2h2v2H7zm-2 2h2v2H5zm8-4h2v2h-2zm2 2h2v2h-2zm2 2h2v2h-2z"></path></svg></button></div></form><div class="docs-search-panel" data-docs-search-panel="true" hidden=""><p id="docs-search-message-latest" class="docs-search-message" data-docs-search-message="true" aria-live="polite"></p><div id="docs-search-results-latest" class="docs-search-results" data-docs-search-results="true"></div></div><template data-docs-search-result-template="true"><li class="docs-search-result" hidden=""><a class="docs-search-result-link" href="#"><span class="docs-search-result-meta"></span><strong class="docs-search-result-title"></strong><span class="docs-search-result-excerpt"></span></a></li></template></section><aside class="docs-nav-rail"><section class="surface-panel content-card docs-side-card docs-nav-card"><header class="content-card-header"><h2 class="content-card-title"><span class="docs-brand-mark"><span>Documentation</span></span></h2></header><div class="content-card-body"><nav class="docs-nav-groups" aria-label="Documentation navigation"><section class="docs-nav-group"><h2>Get Started</h2><div class="docs-nav-links"><a class="docs-nav-link" href="/docs/latest">Overview</a><a class="docs-nav-link" href="/docs/latest/quickstart">Quickstart</a><a class="docs-nav-link" href="/docs/latest/how-pi-works">How Pi Works</a></div></section><section class="docs-nav-group"><h2>Guides</h2><div class="docs-nav-links"><h3 class="docs-nav-section-title">Run Pi</h3><a class="docs-nav-link" href="/docs/latest/usage">Use Pi in the Terminal</a><a class="docs-nav-link" href="/docs/latest/models">Choose a Model</a><a class="docs-nav-link" href="/docs/latest/sessions">Manage Sessions and Context</a><a class="docs-nav-link" href="/docs/latest/security">Run Pi Safely</a><a class="docs-nav-link" href="/docs/latest/containerization">Isolate Pi</a><a class="docs-nav-link" href="/docs/latest/llama-cpp">Run Local Models</a><a class="docs-nav-link" href="/docs/latest/nvidia-rtx-llama-cpp">Run Local Models on NVIDIA RTX</a><a class="docs-nav-link" href="/docs/latest/terminal-setup">Configure Your Terminal</a><a class="docs-nav-link" href="/docs/latest/shell-aliases">Configure Shell Commands</a><a class="docs-nav-link" href="/docs/latest/tmux">Run Pi in tmux</a><a class="docs-nav-link" href="/docs/latest/windows">Run Pi on Windows</a><a class="docs-nav-link" href="/docs/latest/termux">Run Pi on Android</a><h3 class="docs-nav-section-title">Customize Pi</h3><a class="docs-nav-link" href="/docs/latest/configuration">Configure Pi</a><a class="docs-nav-link" href="/docs/latest/prompt-templates">Create Prompt Templates</a><a class="docs-nav-link" href="/docs/latest/skills">Add Skills</a><a class="docs-nav-link" href="/docs/latest/themes">Create Themes</a><a class="docs-nav-link" href="/docs/latest/packages">Use Pi Packages</a><a class="docs-nav-link" href="/docs/latest/mcp">Connect MCP Servers</a><h3 class="docs-nav-section-title">Build on Pi</h3><a class="docs-nav-link is-active" href="/docs/latest/extensions">Build Extensions</a><a class="docs-nav-link" href="/docs/latest/custom-provider">Add Custom Providers</a><a class="docs-nav-link" href="/docs/latest/virtual-models">Route with Virtual Models</a><a class="docs-nav-link" href="/docs/latest/tui">Build Terminal UI Components</a><a class="docs-nav-link" href="/docs/latest/cli-integration">Integrate with the CLI</a><a class="docs-nav-link" href="/docs/latest/sdk">Use the SDK</a></div></section><section class="docs-nav-group"><h2>Reference</h2><div class="docs-nav-links"><a class="docs-nav-link" href="/docs/latest/cli">CLI</a><a class="docs-nav-link" href="/docs/latest/codemode">Codemode</a><a class="docs-nav-link" href="/docs/latest/slash-commands">Slash Commands</a><a class="docs-nav-link" href="/docs/latest/settings">Settings</a><a class="docs-nav-link" href="/docs/latest/models-configuration">Models Configuration</a><a class="docs-nav-link" href="/docs/latest/environment-variables">Environment Variables</a><a class="docs-nav-link" href="/docs/latest/keybindings">Keybindings</a><a class="docs-nav-link" href="/docs/latest/providers">Providers</a><a class="docs-nav-link" href="/docs/latest/session-format">Session File Format</a><a class="docs-nav-link" href="/docs/latest/compaction">Compaction and Branch Summaries</a><a class="docs-nav-link" href="/docs/latest/json">JSON Event Stream</a><a class="docs-nav-link" href="/docs/latest/rpc">RPC Protocol</a><a class="docs-nav-link" href="/docs/latest/rpc-commands">RPC Commands</a><a class="docs-nav-link" href="/docs/latest/rpc-extension-ui">RPC Extension UI</a><a class="docs-nav-link" href="/docs/latest/message-types">Message Types</a></div></section><div class="docs-nav-utility"><a class="docs-nav-link" href="/changelog">Changelog</a></div></nav></div></section></aside><aside class="docs-toc-rail"><section class="surface-panel content-card docs-side-card docs-toc-card"><header class="content-card-header"><h2 class="content-card-title">On this page</h2></header><div class="content-card-body"><nav class="docs-toc-links" aria-label="On this page"><a class="docs-toc-link docs-toc-link-depth-2" href="#create-and-load-an-extension">Create and load an extension</a><a class="docs-toc-link docs-toc-link-depth-2" href="#add-it-to-pi">Add it to Pi</a><a class="docs-toc-link docs-toc-link-depth-2" href="#understand-the-runtime-lifecycle">Understand the runtime lifecycle</a><a class="docs-toc-link docs-toc-link-depth-3" href="#choose-an-event-by-intent">Choose an event by intent</a><a class="docs-toc-link docs-toc-link-depth-2" href="#choose-an-integration-point">Choose an integration point</a><a class="docs-toc-link docs-toc-link-depth-2" href="#follow-the-extension-contracts">Follow the extension contracts</a><a class="docs-toc-link docs-toc-link-depth-3" href="#events-and-concurrency">Events and concurrency</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tools">Tools</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tool-exposure">Tool exposure</a><a class="docs-toc-link docs-toc-link-depth-3" href="#activate-tools-dynamically">Activate tools dynamically</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tool-rendering">Tool rendering</a><a class="docs-toc-link docs-toc-link-depth-3" href="#mcp-servers">MCP servers</a><a class="docs-toc-link docs-toc-link-depth-3" href="#context-and-session-changes">Context and session changes</a><a class="docs-toc-link docs-toc-link-depth-3" href="#state">State</a><a class="docs-toc-link docs-toc-link-depth-3" href="#ui-and-modes">UI and modes</a><a class="docs-toc-link docs-toc-link-depth-3" href="#errors-and-cleanup">Errors and cleanup</a><a class="docs-toc-link docs-toc-link-depth-2" href="#examples-and-reference">Examples and reference</a></nav></div></section></aside><div class="docs-main-column"><div class="docs-toc-inline"><details class="surface-panel docs-toc-summary"><summary>On this page</summary><div class="docs-toc-summary-body"><nav class="docs-toc-links" aria-label="On this page"><a class="docs-toc-link docs-toc-link-depth-2" href="#create-and-load-an-extension">Create and load an extension</a><a class="docs-toc-link docs-toc-link-depth-2" href="#add-it-to-pi">Add it to Pi</a><a class="docs-toc-link docs-toc-link-depth-2" href="#understand-the-runtime-lifecycle">Understand the runtime lifecycle</a><a class="docs-toc-link docs-toc-link-depth-3" href="#choose-an-event-by-intent">Choose an event by intent</a><a class="docs-toc-link docs-toc-link-depth-2" href="#choose-an-integration-point">Choose an integration point</a><a class="docs-toc-link docs-toc-link-depth-2" href="#follow-the-extension-contracts">Follow the extension contracts</a><a class="docs-toc-link docs-toc-link-depth-3" href="#events-and-concurrency">Events and concurrency</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tools">Tools</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tool-exposure">Tool exposure</a><a class="docs-toc-link docs-toc-link-depth-3" href="#activate-tools-dynamically">Activate tools dynamically</a><a class="docs-toc-link docs-toc-link-depth-3" href="#tool-rendering">Tool rendering</a><a class="docs-toc-link docs-toc-link-depth-3" href="#mcp-servers">MCP servers</a><a class="docs-toc-link docs-toc-link-depth-3" href="#context-and-session-changes">Context and session changes</a><a class="docs-toc-link docs-toc-link-depth-3" href="#state">State</a><a class="docs-toc-link docs-toc-link-depth-3" href="#ui-and-modes">UI and modes</a><a class="docs-toc-link docs-toc-link-depth-3" href="#errors-and-cleanup">Errors and cleanup</a><a class="docs-toc-link docs-toc-link-depth-2" href="#examples-and-reference">Examples and reference</a></nav></div></details></div><section class="surface-panel content-card docs-article-card"><div class="content-card-body"><header class="docs-article-header"><div class="docs-article-title-row"><h1 class="docs-page-title">Extensions</h1><div class="docs-article-meta"><span class="docs-article-version">Latest</span><span class="docs-article-meta-separator" aria-hidden="true">·</span><a class="docs-article-action" href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md" aria-label="View source on GitHub"><span class="docs-article-action-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg></span></a><span class="docs-article-meta-separator" aria-hidden="true">·</span><a class="docs-article-action" href="https://github.com/earendil-works/pi/edit/main/packages/coding-agent/docs/extensions.md" aria-label="Edit this page on GitHub"><span class="docs-article-action-icon docs-article-action-icon-edit"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M11 1h2v1h1v1h1v3h-1v1h-1v1h-1v1h-1v1h-1v1H9v1H8v1H7v1H6v1H1v-5h1V9h1V8h1V7h1V6h1V5h1V4h1V3h1V2h2zm1 2h-1v1h-1v1H9v1H8v1H7v1H6v1H5v1H4v1H3v2h2v-1h1v-1h1v-1h1V9h1V8h1V7h1V6h1V5h1V4h-1z"></path></svg></span></a></div></div></header><div class="rich-text docs-prose"><p>Extensions are TypeScript modules that add executable behavior to Pi. Use one when a workflow needs tools, commands, event handlers, model providers, session state, or terminal UI rather than instructions alone.</p>
+<p>An extension runs inside the Pi process with the same operating-system permissions. It can inspect prompts, tool calls, files, credentials, and session history, so load extensions only from sources you trust.</p>
+<p>Typical extensions add an agent tool, protect paths, confirm dangerous commands, react to session events, modify context, expose a command, or display persistent status.</p>
+<p><a id="quick-start"></a>
+<a id="writing-an-extension"></a>
+<a id="create-an-extension"></a></p>
+<div class="markdown-heading depth-2">
+        <h2 id="create-and-load-an-extension" tabindex="-1">
+          Create and load an extension
+        </h2>
+        <a href="#create-and-load-an-extension" class="heading-anchor" aria-label="Permalink: Create and load an extension" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#create-and-load-an-extension">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>An extension exports a default factory that receives <code>ExtensionAPI</code>. The factory registers capabilities for the current extension runtime.</p>
+<p>Create <code>~/.pi/agent/extensions/hello.ts</code>:</p>
+<div class="markdown-code-block">
+      <button type="button" class="markdown-code-copy" data-copy data-copy-from="#markdown-code-76-1" data-copy-preserve data-copy-label="Copy code" data-copy-flash-aria-label="Copied" aria-label="Copy code">
+        <span class="markdown-code-copy-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="24" viewBox="0 0 24 24" width="24" aria-hidden="true"><path d="M6 8h2v12H6zM2 4h2v12H2zm18 4h2v8h-2zM8 6h12v2H8zM4 2h12v2H4zm14 14h2v2h-2zm-2 2h2v2h-2zm-8 2h8v2H8zm6-6h6v2h-6z"></path><path d="M14 14h2v6h-2zm2-10h2v2h-2zM4 16h2v2H4z"></path></svg></span>
+        <span class="markdown-code-check-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+      </button>
+      <pre class="shiki shiki-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e" tabindex="0"><code id="markdown-code-76-1"><span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">import</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> type</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> { ExtensionAPI } </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">from</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> "@earendil-works/pi-coding-agent"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">export</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> default</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> function</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">pi</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0"> ExtensionAPI</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  pi.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">registerCommand</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"hello"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">    description: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"Show a greeting"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">    handler</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">: </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">async</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">name</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, </span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=></span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">      ctx.ui.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">notify</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">`Hello, ${</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">name</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> ||</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> "world"}!`</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"info"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  });</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+    </div><p>Start Pi and run <code>/hello</code>. During development, load a file directly:</p>
+<div class="markdown-code-block">
+      <button type="button" class="markdown-code-copy" data-copy data-copy-from="#markdown-code-76-2" data-copy-preserve data-copy-label="Copy code" data-copy-flash-aria-label="Copied" aria-label="Copy code">
+        <span class="markdown-code-copy-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="24" viewBox="0 0 24 24" width="24" aria-hidden="true"><path d="M6 8h2v12H6zM2 4h2v12H2zm18 4h2v8h-2zM8 6h12v2H8zM4 2h12v2H4zm14 14h2v2h-2zm-2 2h2v2h-2zm-8 2h8v2H8zm6-6h6v2h-6z"></path><path d="M14 14h2v6h-2zm2-10h2v2h-2zM4 16h2v2H4z"></path></svg></span>
+        <span class="markdown-code-check-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+      </button>
+      <pre class="shiki shiki-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e" tabindex="0"><code id="markdown-code-76-2"><span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">pi</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> --extension</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> ./hello.ts</span></span></code></pre>
+    </div><p>Pi uses <code>jiti</code>, so local TypeScript extensions do not need a separate compilation step. Use <a href="/docs/latest/packages">Pi packages</a> for distributed extensions and dependencies.</p>
+<p><a id="extension-locations"></a>
+<a id="available-imports"></a>
+<a id="choose-where-it-loads"></a></p>
+<div class="markdown-heading depth-2">
+        <h2 id="add-it-to-pi" tabindex="-1">
+          Add it to Pi
+        </h2>
+        <a href="#add-it-to-pi" class="heading-anchor" aria-label="Permalink: Add it to Pi" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#add-it-to-pi">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>Place the extension in your user or project extensions directory. Pi loads direct TypeScript or JavaScript files and subdirectories containing an <code>index.ts</code> or <code>index.js</code> entry point.</p>
+<p>Use a single file for a small extension and a directory for a multi-file implementation. Put npm dependencies in a nearby <code>package.json</code>. See <a href="/docs/latest/configuration">Configuration</a> for conventional locations and <a href="/docs/latest/settings#resources">Settings</a> for additional paths.</p>
+<p>Reload replaces the extension runtime, so code after <code>await ctx.reload()</code> must not reuse state from the old runtime. Only personal and explicit command-line extensions can participate in the <code>project_trust</code> event that runs before project extensions load.</p>
+<p><a id="understand-the-lifecycle"></a></p>
+<div class="markdown-heading depth-2">
+        <h2 id="understand-the-runtime-lifecycle" tabindex="-1">
+          Understand the runtime lifecycle
+        </h2>
+        <a href="#understand-the-runtime-lifecycle" class="heading-anchor" aria-label="Permalink: Understand the runtime lifecycle" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#understand-the-runtime-lifecycle">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>The factory can be synchronous or asynchronous. Pi waits for an asynchronous factory before startup continues, allowing it to fetch configuration or register providers needed during startup.</p>
+<p>Do not start processes, sockets, watchers, or timers in the factory because some invocations load extensions without starting a session.
+Start long-lived resources from <code>session_start</code> or from the command or tool that needs them.
+Close session-scoped resources from an idempotent <code>session_shutdown</code> handler.</p>
+<p>A normal prompt starts a run. The run repeats turns, then checks whether more work starts another low-level agent run:</p>
+<pre class="markdown-mermaid-source" data-mermaid-source data-mermaid-description="markdown-mermaid-description-76-1">flowchart TD
+    Input[&quot;input&quot;] --&gt; Before[&quot;before_agent_start&quot;]
+    Before --&gt; AgentStart[&quot;agent_start&quot;]
+    AgentStart --&gt; Turns[[&quot;turns&quot;]]
+    Turns --&gt; AgentEnd[&quot;agent_end&quot;]
+    AgentEnd --&gt; MoreRuns{&quot;More work?&quot;}
+    MoreRuns --&gt;|yes| AgentStart
+    MoreRuns --&gt;|no| BeforeSettle[&quot;agent_before_settle&quot;]
+    BeforeSettle --&gt; Continue{&quot;Continuation requested?&quot;}
+    Continue --&gt;|yes| AgentStart
+    Continue --&gt;|no| Settled[&quot;agent_settled&quot;]</pre>
+        <span id="markdown-mermaid-description-76-1" class="visually-hidden" hidden>Mermaid diagram source:
+flowchart TD
+    Input[&quot;input&quot;] --&gt; Before[&quot;before_agent_start&quot;]
+    Before --&gt; AgentStart[&quot;agent_start&quot;]
+    AgentStart --&gt; Turns[[&quot;turns&quot;]]
+    Turns --&gt; AgentEnd[&quot;agent_end&quot;]
+    AgentEnd --&gt; MoreRuns{&quot;More work?&quot;}
+    MoreRuns --&gt;|yes| AgentStart
+    MoreRuns --&gt;|no| BeforeSettle[&quot;agent_before_settle&quot;]
+    BeforeSettle --&gt; Continue{&quot;Continuation requested?&quot;}
+    Continue --&gt;|yes| AgentStart
+    Continue --&gt;|no| Settled[&quot;agent_settled&quot;]</span><p>More work means a retry, recovery, compaction retry, or queued work.</p>
+<p>Each turn sends one model request and executes the tool calls in the assistant response:</p>
+<pre class="markdown-mermaid-source" data-mermaid-source data-mermaid-description="markdown-mermaid-description-76-2">flowchart TD
+    TurnStart[&quot;turn_start&quot;] --&gt; Request[[&quot;model request&quot;]]
+    Request --&gt; ToolDecision{&quot;Tool calls?&quot;}
+    ToolDecision --&gt;|yes| Tools[[&quot;tool execution&quot;]]
+    Tools --&gt; TurnEnd[&quot;turn_end&quot;]
+    ToolDecision --&gt;|no| TurnEnd
+    TurnEnd --&gt; MoreTurns{&quot;Another turn?&quot;}
+    MoreTurns --&gt;|yes| TurnStart
+    MoreTurns --&gt;|no| AgentEnd([&quot;agent_end&quot;])</pre>
+        <span id="markdown-mermaid-description-76-2" class="visually-hidden" hidden>Mermaid diagram source:
+flowchart TD
+    TurnStart[&quot;turn_start&quot;] --&gt; Request[[&quot;model request&quot;]]
+    Request --&gt; ToolDecision{&quot;Tool calls?&quot;}
+    ToolDecision --&gt;|yes| Tools[[&quot;tool execution&quot;]]
+    Tools --&gt; TurnEnd[&quot;turn_end&quot;]
+    ToolDecision --&gt;|no| TurnEnd
+    TurnEnd --&gt; MoreTurns{&quot;Another turn?&quot;}
+    MoreTurns --&gt;|yes| TurnStart
+    MoreTurns --&gt;|no| AgentEnd([&quot;agent_end&quot;])</span><p>The model request runs these hooks in order:</p>
+<ol>
+<li><code>context</code></li>
+<li><code>context_with_system</code></li>
+<li><code>before_provider_headers</code></li>
+<li><code>before_provider_request</code></li>
+<li><code>after_provider_response</code></li>
+<li><code>provider_stream_event</code> and assistant message events</li>
+</ol>
+<p>Tool execution runs these hooks in order for each tool call:</p>
+<ol>
+<li><code>tool_execution_start</code></li>
+<li><code>tool_call</code></li>
+<li><code>tool_execution_update</code> while the tool executes</li>
+<li><code>tool_result</code></li>
+<li><code>tool_execution_end</code></li>
+</ol>
+<p>The lifecycle involves these event groups:</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Events</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Input preparation</td>
+<td><code>input</code>, <code>before_agent_start</code></td>
+</tr>
+<tr>
+<td>Agent run</td>
+<td><code>agent_start</code>, <code>agent_end</code></td>
+</tr>
+<tr>
+<td>Model turn</td>
+<td><code>turn_start</code>, <code>context</code>, <code>context_with_system</code>, <code>turn_end</code></td>
+</tr>
+<tr>
+<td>Provider call</td>
+<td><code>before_provider_headers</code>, <code>before_provider_request</code>, <code>after_provider_response</code>, <code>provider_stream_event</code></td>
+</tr>
+<tr>
+<td>Message lifecycle</td>
+<td><code>message_start</code>, <code>message_update</code>, <code>message_end</code></td>
+</tr>
+<tr>
+<td>Tool execution</td>
+<td><code>tool_execution_start</code>, <code>tool_call</code>, <code>tool_execution_update</code>, <code>tool_result</code>, <code>tool_execution_end</code></td>
+</tr>
+<tr>
+<td>Settlement</td>
+<td><code>agent_before_settle</code>, <code>agent_settled</code></td>
+</tr>
+</tbody></table>
+<p>Pi counts as busy while a run starts, including the compaction check and <code>before_agent_start</code>, so messages sent meanwhile go into the starting run. Message lifecycle events also cover user and tool-result messages; the model request list places only the assistant stream where it occurs in each turn.</p>
+<p>Tool hooks run for each tool call, and one assistant response can start another turn by returning tool calls. Provider hooks run only when that transport exposes the corresponding stage. See the exported declarations in <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/src/core/extensions/types.ts"><code>extensions/types.ts</code></a> for exact event payloads and result types.</p>
+<p>Session startup and replacement follow a separate lifecycle:</p>
+<pre class="markdown-mermaid-source" data-mermaid-source data-mermaid-description="markdown-mermaid-description-76-3">flowchart TD
+    Startup[&quot;Process startup&quot;] --&gt; Trust[&quot;project_trust when needed&quot;]
+    Trust --&gt; SessionStart[&quot;session_start&quot;]
+    Switch[&quot;/new or /resume&quot;] --&gt; BeforeSwitch[&quot;session_before_switch&quot;]
+    Fork[&quot;/fork or /clone&quot;] --&gt; BeforeFork[&quot;session_before_fork&quot;]
+    BeforeSwitch --&gt; Shutdown[&quot;session_shutdown&quot;]
+    BeforeFork --&gt; Shutdown
+    Reload[&quot;reload&quot;] --&gt; Shutdown
+    Shutdown --&gt; Replacing{&quot;Replacing the runtime?&quot;}
+    Replacing --&gt;|yes| Replacement[&quot;load replacement extension runtime&quot;]
+    Replacement --&gt; SessionStart
+    Replacing --&gt;|no| Stop[&quot;process exits&quot;]
+    SessionStart --&gt; Discover[&quot;resources_discover&quot;]</pre>
+        <span id="markdown-mermaid-description-76-3" class="visually-hidden" hidden>Mermaid diagram source:
+flowchart TD
+    Startup[&quot;Process startup&quot;] --&gt; Trust[&quot;project_trust when needed&quot;]
+    Trust --&gt; SessionStart[&quot;session_start&quot;]
+    Switch[&quot;/new or /resume&quot;] --&gt; BeforeSwitch[&quot;session_before_switch&quot;]
+    Fork[&quot;/fork or /clone&quot;] --&gt; BeforeFork[&quot;session_before_fork&quot;]
+    BeforeSwitch --&gt; Shutdown[&quot;session_shutdown&quot;]
+    BeforeFork --&gt; Shutdown
+    Reload[&quot;reload&quot;] --&gt; Shutdown
+    Shutdown --&gt; Replacing{&quot;Replacing the runtime?&quot;}
+    Replacing --&gt;|yes| Replacement[&quot;load replacement extension runtime&quot;]
+    Replacement --&gt; SessionStart
+    Replacing --&gt;|no| Stop[&quot;process exits&quot;]
+    SessionStart --&gt; Discover[&quot;resources_discover&quot;]</span><p><code>project_trust</code> runs before trusted project resources load and can run again when session replacement enters a new working directory. Retries, recovery, compaction, and queued messages can start another agent run after <code>agent_end</code>, so <code>agent_end</code> is not a final-idle signal. Reload and session replacement invalidate the old runtime. Code after <code>await ctx.reload()</code> still belongs to the old runtime and must not reuse its session-bound state.</p>
+<div class="markdown-heading depth-3">
+        <h3 id="choose-an-event-by-intent" tabindex="-1">
+          Choose an event by intent
+        </h3>
+        <a href="#choose-an-event-by-intent" class="heading-anchor" aria-label="Permalink: Choose an event by intent" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#choose-an-event-by-intent">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Inspect, transform, or consume raw user input</td>
+<td><code>input</code></td>
+</tr>
+<tr>
+<td>Change prompt sections, active tools, or add context before a run</td>
+<td><code>before_agent_start</code></td>
+</tr>
+<tr>
+<td>Observe one low-level agent run</td>
+<td><code>agent_start</code>, <code>agent_end</code></td>
+</tr>
+<tr>
+<td>Act after one model response and its tool calls</td>
+<td><code>turn_end</code></td>
+</tr>
+<tr>
+<td>Filter conversation messages for one provider request</td>
+<td><code>context</code></td>
+</tr>
+<tr>
+<td>Transform the complete transcript, including system messages</td>
+<td><code>context_with_system</code></td>
+</tr>
+<tr>
+<td>Change request headers or the serialized provider payload</td>
+<td><code>before_provider_headers</code>, <code>before_provider_request</code></td>
+</tr>
+<tr>
+<td>Observe provider response metadata or parsed stream events</td>
+<td><code>after_provider_response</code>, <code>provider_stream_event</code></td>
+</tr>
+<tr>
+<td>Authorize or modify a tool call</td>
+<td><code>tool_call</code></td>
+</tr>
+<tr>
+<td>Redact, annotate, or replace a tool result</td>
+<td><code>tool_result</code></td>
+</tr>
+<tr>
+<td>Append final entries or request one last continuation</td>
+<td><code>agent_before_settle</code></td>
+</tr>
+<tr>
+<td>Run notification work after automatic processing has stopped</td>
+<td><code>agent_settled</code></td>
+</tr>
+<tr>
+<td>Initialize or release session-scoped resources</td>
+<td><code>session_start</code>, <code>session_shutdown</code></td>
+</tr>
+</tbody></table>
+<p><a id="agent_start--agent_end--agent_before_settle--agent_settled"></a></p>
+<p>Use <code>agent_before_settle</code> when an extension must append entries or request one final continuation. Use <code>agent_settled</code> for notification-only work that should run after Pi has no automatic continuation remaining.</p>
+<p><a id="extensionapi-methods"></a></p>
+<div class="markdown-heading depth-2">
+        <h2 id="choose-an-integration-point" tabindex="-1">
+          Choose an integration point
+        </h2>
+        <a href="#choose-an-integration-point" class="heading-anchor" aria-label="Permalink: Choose an integration point" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#choose-an-integration-point">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Main API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Observe or modify lifecycle behavior</td>
+<td><code>pi.on()</code></td>
+</tr>
+<tr>
+<td>Add a model-callable operation</td>
+<td><code>pi.registerTool()</code></td>
+</tr>
+<tr>
+<td>Add a <code>/</code> command</td>
+<td><code>pi.registerCommand()</code></td>
+</tr>
+<tr>
+<td>Add a shortcut or CLI flag</td>
+<td><code>pi.registerShortcut()</code> or <code>pi.registerFlag()</code></td>
+</tr>
+<tr>
+<td>Send user or custom messages</td>
+<td><code>pi.sendUserMessage()</code> or <code>pi.sendMessage()</code></td>
+</tr>
+<tr>
+<td>Persist non-context session data</td>
+<td><code>pi.appendEntry()</code></td>
+</tr>
+<tr>
+<td>Change active tools, model, or thinking level</td>
+<td>Session control methods on <code>pi</code></td>
+</tr>
+<tr>
+<td>Add a model provider</td>
+<td><code>pi.registerProvider()</code></td>
+</tr>
+<tr>
+<td>Add an MCP server</td>
+<td><code>pi.registerMcpServer()</code></td>
+</tr>
+<tr>
+<td>Route each request to a model</td>
+<td><a href="/docs/latest/virtual-models"><code>pi.registerVirtualModel()</code></a></td>
+</tr>
+<tr>
+<td>Add terminal rendering</td>
+<td>Renderer registration and <code>ctx.ui</code></td>
+</tr>
+<tr>
+<td>Communicate with another extension</td>
+<td><code>pi.events</code></td>
+</tr>
+</tbody></table>
+<p>Use the exported declarations in <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/src/core/extensions/types.ts"><code>extensions/types.ts</code></a> for exact event, context, tool, and result types.</p>
+<div class="markdown-heading depth-2">
+        <h2 id="follow-the-extension-contracts" tabindex="-1">
+          Follow the extension contracts
+        </h2>
+        <a href="#follow-the-extension-contracts" class="heading-anchor" aria-label="Permalink: Follow the extension contracts" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#follow-the-extension-contracts">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p><a id="events"></a>
+<a id="work-with-events"></a></p>
+<div class="markdown-heading depth-3">
+        <h3 id="events-and-concurrency" tabindex="-1">
+          Events and concurrency
+        </h3>
+        <a href="#events-and-concurrency" class="heading-anchor" aria-label="Permalink: Events and concurrency" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#events-and-concurrency">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>Handlers run in extension load and registration order. <code>pi.on()</code> returns a function that unsubscribes that registration; changes do not affect a dispatch already in progress.
+Some events notify; others transform data, replace results, or cancel an operation.
+Use each event’s declared result type rather than assuming every return value has an effect.</p>
+<p>Events cover resource discovery, sessions, agent and message lifecycle, providers, tools, and raw input.</p>
+<div class="markdown-heading depth-4">
+        <h4 id="understand-handler-composition" tabindex="-1">
+          Understand handler composition
+        </h4>
+        <a href="#understand-handler-composition" class="heading-anchor" aria-label="Permalink: Understand handler composition" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#understand-handler-composition">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Notification</td>
+<td>Return values are ignored. Use the event for observation only.</td>
+</tr>
+<tr>
+<td>In-place mutation</td>
+<td>Later handlers see changes to values such as <code>before_provider_headers.headers</code>, <code>before_agent_start.systemPromptOptions</code>, and <code>tool_call.input</code>.</td>
+</tr>
+<tr>
+<td>Chained transformation</td>
+<td>Later handlers receive the value returned by earlier <code>input</code>, <code>context</code>, <code>context_with_system</code>, <code>message_end</code>, <code>tool_result</code>, and <code>before_provider_request</code> handlers.</td>
+</tr>
+<tr>
+<td>Gate</td>
+<td>A handled input, blocked tool call, cancelled session operation, or handled <code>user_bash</code> command stops that operation&#39;s normal fallback path.</td>
+</tr>
+<tr>
+<td>Actionable boundary</td>
+<td>Each <code>turn_end</code> or <code>agent_before_settle</code> handler sees the entries and continuation decision proposed so far.</td>
+</tr>
+<tr>
+<td>Last override</td>
+<td>The last <code>cache_warming_decision</code> handler that returns an action wins.</td>
+</tr>
+</tbody></table>
+<p>Notification handlers should not perform slow work on a streaming event. Transform handlers should preserve fields they do not intentionally own, and gate handlers should fail closed when their safety decision cannot be made.</p>
+<p><code>before_agent_start</code> exposes both the current prompt and its structured <code>systemPromptOptions</code>. <code>event.messageType</code> says what started the run: <code>&quot;user&quot;</code> for a prompt or <code>pi.sendUserMessage()</code>, with <code>prompt</code> and <code>images</code>; <code>&quot;custom&quot;</code> for <code>pi.sendMessage(..., { triggerTurn: true })</code>, with the starting <code>message</code> and no <code>prompt</code>. A returned <code>message</code> is added to either kind of run; check <code>messageType</code> to skip runs started by custom messages. Prefer changing prompt sections, selected tools, or guidelines so Pi can append a transcript delta. Returning <code>systemPrompt</code>, or setting <code>forceSystemPrompt</code>, replaces the whole prompt for that run while the transcript continues recording the structured sections. Providers receive the forced text as their leading system prompt.</p>
+<p><code>message_end</code> can replace a finalized message while preserving its role. <code>tool_call</code> can mutate input or block execution. <code>tool_result</code> handlers compose, with each handler seeing prior changes.</p>
+<p><a id="provider_stream_event"></a></p>
+<p><code>provider_stream_event</code> fires for each parsed provider stream event before Pi normalizes it. The event identifies the provider, API, and model; <code>event.data</code> is the earliest structured value available to Pi, not necessarily the original HTTP bytes or SSE frame. Treat it as read-only because mutation can affect normalization. The event is notification-only and is not persisted.</p>
+<p>Handlers are awaited in stream order, so slow handlers delay stream consumption. Handler errors are reported without changing the provider response. See <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/debug-provider.ts"><code>debug-provider.ts</code></a> for an opt-in viewer that groups raw events by assistant message.</p>
+<p><a id="context_with_system"></a></p>
+<p><code>context</code> transforms conversation messages without prompt and tool system messages; Pi restores that state afterward. Use <code>context_with_system</code> only when a request-local transformation must own the complete transcript, and keep a system message at index zero.</p>
+<p><code>turn_end</code> and <code>agent_before_settle</code> are actionable boundaries. Their handlers can chain proposed <code>custom</code>, <code>custom_message</code>, <code>context_edit</code>, or <code>compaction</code> entries and return <code>continue: true</code> for one next model request. Guard continuation conditions because an unconditional continuation can loop. Use the exported event declarations for the complete validation and ordering contract.</p>
+<p><a id="cache_warming_decision"></a></p>
+<p><code>cache_warming_decision</code> can override an idle prompt-cache refresh with <code>{ action: &quot;warm&quot; }</code> or <code>{ action: &quot;stop&quot; }</code>. The last handler that returns an action wins.</p>
+<p>Tool calls from one assistant message can run in parallel.
+Do not assume a sibling call or result exists when another tool event runs.
+Use <code>ctx.signal</code> for nested work owned by an active turn; commands and idle session events often have no operation signal.</p>
+<p>A <code>user_bash</code> handler that returns <code>undefined</code> passes the command to the next handler and then to local execution if no handler handles it. Returning <code>operations</code> or <code>result</code> stops propagation. A handler failure blocks the command rather than falling through to local execution.</p>
+<p><a id="custom-tools"></a>
+<a id="register-tools"></a></p>
+<div class="markdown-heading depth-3">
+        <h3 id="tools" tabindex="-1">
+          Tools
+        </h3>
+        <a href="#tools" class="heading-anchor" aria-label="Permalink: Tools" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#tools">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>A custom tool defines a name, model-facing description, TypeBox parameter schema, and <code>execute()</code> function.
+Its result requires model-facing <code>content</code> and a <code>details</code> field for rendering or state reconstruction.
+Use <code>details: undefined</code> when there are no structured details. If the tool makes nested model calls, include their <code>usage</code> in the result so session totals remain accurate.</p>
+<p>Throw from <code>execute()</code> to produce a failed tool result.
+Returning an object does not mark it as an error.
+Return <code>terminate: true</code> only when the agent should skip its automatic follow-up after every completed tool in that batch agrees to terminate.</p>
+<p>Use sequential execution when tools share mutable in-memory state.
+File-mutating tools should wrap the complete read-modify-write operation with <code>withFileMutationQueue()</code>.
+Truncate large model-facing results and tell the model where to read the complete output.</p>
+<p>Declare <code>outputSchema</code> and return a matching <code>structuredContent</code> when the result is data. The model still receives <code>content</code>; programmatic callers such as codemode scripts receive <code>structuredContent</code> instead of the text. Tools without <code>outputSchema</code> are passed to scripts as their text content. To report a failure that still carries data, return the result with <code>isError: true</code> instead of throwing: the model sees an error, and scripts still receive <code>structuredContent</code>.</p>
+<p>A tool can run other tools with <code>ctx.executeTool(name, args, { signal, onUpdate })</code>. Nested calls go through argument validation and the <code>tool_call</code> and <code>tool_result</code> handlers like model-issued calls, and emit <code>tool_execution_start</code>, <code>tool_execution_update</code>, and <code>tool_execution_end</code>; all of these events carry <code>parentToolCallId</code>, and their <code>toolCallId</code> is assigned by pi as <code>&lt;parent id&gt;/&lt;n&gt;</code>. These ids do not appear as tool calls or tool results in the transcript. Nested calls do not add transcript entries: their results only reach the calling tool, which reports them itself, for example through <code>onUpdate</code> and <code>details</code>. The session keeps a bounded record of them (name, arguments, status, duration, error; never results) as <code>nestedCalls</code> on the calling tool&#39;s result message. It is used for compaction file lists and shown in HTML exports. Arguments over 8 KiB per call or 32 KiB per tool result are omitted, at most 256 calls are kept, and <code>complete: false</code> marks a record that lost anything. The <code>usage</code> of nested results, at every depth, is added to the calling tool&#39;s result <code>usage</code>, so a tool reports only its own usage, not that of the tools it called. <code>ctx.tools</code> lists the tools <code>ctx.executeTool()</code> can call. <code>tool_result</code> handlers that redact <code>content</code> should also replace <code>structuredContent</code>; replacing only <code>content</code> drops it.</p>
+<p>See <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/hello.ts"><code>hello.ts</code></a>, <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/todo.ts"><code>todo.ts</code></a>, <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/dynamic-tools.ts"><code>dynamic-tools.ts</code></a>, and <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/truncated-tool.ts"><code>truncated-tool.ts</code></a>.</p>
+<div class="markdown-heading depth-3">
+        <h3 id="tool-exposure" tabindex="-1">
+          Tool exposure
+        </h3>
+        <a href="#tool-exposure" class="heading-anchor" aria-label="Permalink: Tool exposure" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#tool-exposure">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p><code>exposure</code> controls how the model reaches a tool. &quot;Callable&quot; means callable from other tools through <code>ctx.executeTool()</code> (<code>ctx.tools</code>), as the <code>codemode</code> tool&#39;s scripts do:</p>
+<ul>
+<li><code>direct</code> (default): declared to the model while active, and callable while active.</li>
+<li><code>model-only</code>: declared to the model while active, never callable. Use it for tools that orchestrate other tools or ask the user.</li>
+<li><code>codemode</code>: callable whenever registered, and listed by the <code>codemode</code> tool. Not declared to the model unless activated explicitly.</li>
+<li><code>deferred</code>: like <code>codemode</code>, but codemode tools do not list it; <code>tool_search</code> can find and activate it.</li>
+<li><code>hidden</code>: registered but unreachable. Re-register a tool with <code>exposure: &quot;hidden&quot;</code> to withdraw it, since tools cannot be unregistered.</li>
+</ul>
+<p><code>namespace: { name, aliases, description, instructions }</code> groups related tools, as MCP servers do. Codemode tools list a namespace under one heading with its <code>description</code>. <code>instructions</code> holds longer usage guidance; it is not listed, and codemode scripts read it with <code>describeNamespace(name)</code>. <code>aliases</code> are other names scripts may look the namespace up by, for example the server name <code>docs</code> for <code>mcp__docs</code>; a name and the same name as a script identifier (<code>my-docs</code>, <code>my_docs</code>) match alike.</p>
+<p>Registering a <code>direct</code> or <code>model-only</code> tool activates it; the other exposures are not activated on registration. The active set (<code>pi.getActiveTools()</code>, <code>pi.setActiveTools()</code>) is the set of tools declared to the model. <code>pi.getAllTools()</code> reports each tool&#39;s <code>exposure</code>, <code>namespace</code>, <code>annotations</code>, and <code>reachesTools</code>.</p>
+<p><code>annotations</code> are hints about what a tool does, with the meaning of MCP tool annotations: <code>readOnlyHint</code>, <code>destructiveHint</code>, <code>idempotentHint</code>, and <code>openWorldHint</code>. MCP tools carry the hints their server declares. Missing hints take the MCP defaults: a tool is not read-only, and may be destructive and reach an open world. The hints are not verified, but a permission extension can use them to decide which calls to confirm. This confirms the calls Codex asks approval for:</p>
+<div class="markdown-code-block">
+      <button type="button" class="markdown-code-copy" data-copy data-copy-from="#markdown-code-76-3" data-copy-preserve data-copy-label="Copy code" data-copy-flash-aria-label="Copied" aria-label="Copy code">
+        <span class="markdown-code-copy-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="24" viewBox="0 0 24 24" width="24" aria-hidden="true"><path d="M6 8h2v12H6zM2 4h2v12H2zm18 4h2v8h-2zM8 6h12v2H8zM4 2h12v2H4zm14 14h2v2h-2zm-2 2h2v2h-2zm-8 2h8v2H8zm6-6h6v2h-6z"></path><path d="M14 14h2v6h-2zm2-10h2v2h-2zM4 16h2v2H4z"></path></svg></span>
+        <span class="markdown-code-check-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+      </button>
+      <pre class="shiki shiki-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e" tabindex="0"><code id="markdown-code-76-3"><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">pi.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">on</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"tool_call"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">async</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">event</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, </span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=></span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">  const</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> hints</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> =</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pi.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">getAllTools</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">().</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">find</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">((</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">tool</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=></span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> tool.name </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">===</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> event.toolName)?.annotations;</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">  const</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> needsApproval</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> =</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">    hints?.destructiveHint </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">===</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> ||</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">    (</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">!</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">hints?.readOnlyHint </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">&#x26;&#x26;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> ((hints?.destructiveHint </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">??</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">||</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (hints?.openWorldHint </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">??</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">)));</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">  if</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (needsApproval </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">&#x26;&#x26;</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> !</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">await</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> ctx.ui.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">confirm</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"Allow tool call?"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, event.toolName))) {</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">    return</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> { block: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, reason: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">`${</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">event</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">toolName</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">} was not approved`</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> };</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">});</span></span></code></pre>
+    </div><p>A tool that orchestrates other tools can adjust what the model sees while it is active with <code>prepareLoadout(loadout)</code>. It runs whenever the active tools change and receives the declared tools, the callable tools, and every registered tool with its exposure, namespace, and prompt guidelines. It returns replacement <code>descriptions</code> for declared tools (including its own) and <code>hiddenDeclarations</code>: active tools whose declarations requests leave out while they stay active and callable. The default system prompt leaves hidden tools out of its tool list and rules, and names no tool in the skills hint when the file reader is hidden, so the orchestrating tool should present their guidelines itself. <code>codemode</code> uses only this hook, <code>exposure</code>, <code>reachesTools</code>, and <code>ctx.executeTool()</code>, so another tool can implement the same behavior under a different name.</p>
+<p>A tool that reaches other tools declares which ones a call may reach with <code>reachesTools(input)</code>: <code>&quot;all&quot;</code>, or the words of the input that may name them, where a word refers to every tool or namespace whose name it contains. <code>codemode</code> returns <code>&quot;all&quot;</code> for scripts that search or list tools and the words of the script otherwise; <code>tool_search</code> always returns <code>&quot;all&quot;</code>. Extensions that register tools late use it from their <code>tool_call</code> handler to finish registering the tools a call needs before it runs, as the MCP extension does for servers that are still connecting. The MCP extension also activates <code>codemode</code> or <code>tool_search</code> for MCP tools only when the tool of that name declares <code>reachesTools</code>.</p>
+<div class="markdown-heading depth-3">
+        <h3 id="activate-tools-dynamically" tabindex="-1">
+          Activate tools dynamically
+        </h3>
+        <a href="#activate-tools-dynamically" class="heading-anchor" aria-label="Permalink: Activate tools dynamically" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#activate-tools-dynamically">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>Register every tool first, keep optional tools inactive, and use <code>pi.setActiveTools()</code> from a loader tool to select the desired active tools. Names must already be registered; unknown names are ignored.</p>
+<p>Pi records the initial prompt and tool set in the transcript&#39;s first system message, then appends tool and prompt changes before the next model request. Providers that cannot represent the transition receive a complete transcript checkpoint, which can invalidate the cached prefix.</p>
+<div class="markdown-heading depth-3">
+        <h3 id="tool-rendering" tabindex="-1">
+          Tool rendering
+        </h3>
+        <a href="#tool-rendering" class="heading-anchor" aria-label="Permalink: Tool rendering" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#tool-rendering">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>A tool&#39;s <code>renderCall</code> and <code>renderResult</code> draw its calls in the interactive transcript and in HTML exports. <code>pi.registerToolRenderer((toolName, next) =&gt; renderers)</code> chooses renderers for calls to any tool, including tools that are not registered yet, such as MCP tools in a resumed session before their server connected. <code>next()</code> returns what the remaining resolvers (in extension load order), then the registered tool, would use, so <code>next() ?? mine</code> only fills in.</p>
+<div class="markdown-heading depth-3">
+        <h3 id="mcp-servers" tabindex="-1">
+          MCP servers
+        </h3>
+        <a href="#mcp-servers" class="heading-anchor" aria-label="Permalink: MCP servers" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#mcp-servers">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p><code>pi.registerMcpServer(name, config)</code> adds an MCP server for the current session. <code>config</code> has the shape of an <code>mcpServers</code> entry in <a href="/docs/latest/mcp"><code>mcp.json</code></a>: <code>command</code>, <code>args</code>, <code>env</code>, and <code>cwd</code> for stdio servers, <code>url</code>, <code>headers</code>, and <code>oauth</code> for HTTP servers, plus <code>exposure</code>, <code>toolExposure</code>, <code>description</code>, <code>enabled</code>, and <code>timeout</code>.</p>
+<div class="markdown-code-block">
+      <button type="button" class="markdown-code-copy" data-copy data-copy-from="#markdown-code-76-4" data-copy-preserve data-copy-label="Copy code" data-copy-flash-aria-label="Copied" aria-label="Copy code">
+        <span class="markdown-code-copy-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="24" viewBox="0 0 24 24" width="24" aria-hidden="true"><path d="M6 8h2v12H6zM2 4h2v12H2zm18 4h2v8h-2zM8 6h12v2H8zM4 2h12v2H4zm14 14h2v2h-2zm-2 2h2v2h-2zm-8 2h8v2H8zm6-6h6v2h-6z"></path><path d="M14 14h2v6h-2zm2-10h2v2h-2zM4 16h2v2H4z"></path></svg></span>
+        <span class="markdown-code-check-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+      </button>
+      <pre class="shiki shiki-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e" tabindex="0"><code id="markdown-code-76-4"><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">pi.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">registerMcpServer</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"jira"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, { url: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"https://mcp.example.com/jira"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, exposure: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"codemode"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> });</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">pi.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">unregisterMcpServer</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"jira"</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+    </div><p>Servers registered while the extension loads connect when the session starts, together with the <code>mcp.json</code> servers; servers registered later connect right away, and <code>pi.unregisterMcpServer()</code> closes the connection and makes the server&#39;s tools unreachable. Registrations are not saved: register again on every load, for example based on the extension&#39;s own settings. A server in <code>mcp.json</code> with the same name takes precedence, and <code>/mcp</code> shows the override. Registering the same name again replaces the extension&#39;s earlier registration; names registered by another extension, invalid names, and invalid configs throw.</p>
+<p>The built-in MCP support connects registered servers. When nothing does, because another extension replaced it (see <a href="/docs/latest/mcp#replace-the-built-in-mcp-support">MCP</a>), each registration is reported as an extension error. Other MCP extensions can connect registered servers too: read them with <code>pi.getMcpServers()</code> on <code>session_start</code> and handle the <code>mcp_servers_change</code> event for later changes.</p>
+<p><a id="extensioncontext"></a>
+<a id="extensioncommandcontext"></a>
+<a id="use-extension-context"></a></p>
+<div class="markdown-heading depth-3">
+        <h3 id="context-and-session-changes" tabindex="-1">
+          Context and session changes
+        </h3>
+        <a href="#context-and-session-changes" class="heading-anchor" aria-label="Permalink: Context and session changes" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#context-and-session-changes">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p><code>ExtensionContext</code> provides the working directory, mode, UI, session manager, model runtime, abort signal, context usage, and controls for compaction and shutdown.
+Use <code>ctx.modelRegistry.streamSimple()</code> for provider-neutral nested model calls.</p>
+<p>Command handlers receive <code>ExtensionCommandContext</code>, which adds operations for waiting until idle, reloading, tree navigation, and session replacement.
+These operations are command-only because calling them from lifecycle handlers can deadlock the runtime.</p>
+<p>Session replacement invalidates the old context. Capture only plain data before switching, then use the fresh context supplied to <code>withSession</code> for session-bound work.</p>
+<p><a id="state-management"></a>
+<a id="persist-state"></a></p>
+<div class="markdown-heading depth-3">
+        <h3 id="state" tabindex="-1">
+          State
+        </h3>
+        <a href="#state" class="heading-anchor" aria-label="Permalink: State" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#state">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>Choose storage based on how state participates in the conversation:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Storage</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tool state that follows the active branch</td>
+<td>Tool-result <code>details</code></td>
+</tr>
+<tr>
+<td>Durable data excluded from model context</td>
+<td><code>pi.appendEntry()</code></td>
+</tr>
+<tr>
+<td>Custom content stored and sent to the model</td>
+<td><code>pi.sendMessage()</code></td>
+</tr>
+<tr>
+<td>Data outside one session</td>
+<td>External storage</td>
+</tr>
+</tbody></table>
+<p>Reconstruct branch-sensitive state from <code>ctx.sessionManager.getBranch()</code> during <code>session_start</code>.
+Do not rebuild it from every file entry because abandoned branches represent alternative histories.
+Register an entry or message renderer when custom stored content should appear in the transcript.</p>
+<p><a id="custom-ui"></a>
+<a id="mode-behavior"></a>
+<a id="interact-with-the-user"></a>
+<a id="account-for-each-mode"></a></p>
+<div class="markdown-heading depth-3">
+        <h3 id="ui-and-modes" tabindex="-1">
+          UI and modes
+        </h3>
+        <a href="#ui-and-modes" class="heading-anchor" aria-label="Permalink: UI and modes" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#ui-and-modes">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p><code>ctx.ui</code> provides dialogs, notifications, status text, widgets, titles, editor access, and custom components.
+Use <code>ctx.ui.custom()</code> only when the interaction needs its own rendering and input.
+See <a href="/docs/latest/tui">Terminal UI</a> for component, focus, overlay, theme, and performance guidance.</p>
+<p>Extensions load in interactive, RPC, JSON, and print modes.
+Interactive mode provides the complete terminal UI.
+RPC can forward supported dialogs and notifications through the <a href="/docs/latest/rpc-extension-ui">RPC Extension UI protocol</a>, but not custom terminal components; JSON and print modes have no UI.
+Guard terminal-only behavior with <code>ctx.mode === &quot;tui&quot;</code> and use <code>ctx.hasUI</code> for interactions supported by interactive and RPC clients.</p>
+<p>Keep tool and event behavior independent from rendering so non-interactive modes remain functional.</p>
+<p><a id="error-handling"></a>
+<a id="handle-errors-and-shutdown"></a></p>
+<div class="markdown-heading depth-3">
+        <h3 id="errors-and-cleanup" tabindex="-1">
+          Errors and cleanup
+        </h3>
+        <a href="#errors-and-cleanup" class="heading-anchor" aria-label="Permalink: Errors and cleanup" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#errors-and-cleanup">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>Pi reports handler errors and continues where possible. A <code>tool_call</code> handler failure blocks the tool as a fail-safe; a tool execution failure becomes an error result for the model.</p>
+<p>Release resources in <code>session_shutdown</code> even when normal operation attempted cleanup.
+Keep cleanup idempotent because cancellation, reload, session replacement, and process exit can converge on the same path.
+Use <code>ctx.shutdown()</code> to request an orderly process shutdown.</p>
+<p><a id="examples-reference"></a>
+<a id="use-examples-as-the-implementation-reference"></a></p>
+<div class="markdown-heading depth-2">
+        <h2 id="examples-and-reference" tabindex="-1">
+          Examples and reference
+        </h2>
+        <a href="#examples-and-reference" class="heading-anchor" aria-label="Permalink: Examples and reference" data-copy data-copy-text="https://pi.dev/docs/latest/extensions#examples-and-reference">
+          <span class="anchor-link"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M9.30558 10.206C9.57224 10.4726 9.59447 10.8912 9.37225 11.1831L9.30558 11.2594L6.84751 13.7175C5.58692 14.9781 3.54311 14.9781 2.28252 13.7175C1.0654 12.5004 1.02344 10.5531 2.15661 9.28564L2.28252 9.15251L4.74059 6.69443C5.0315 6.40353 5.50315 6.40353 5.79405 6.69443C6.06071 6.9611 6.08294 7.37963 5.86072 7.67161L5.79405 7.74789L3.33598 10.206C2.6572 10.8847 2.6572 11.9853 3.33598 12.664C3.98082 13.3089 5.00628 13.3411 5.68918 12.7608L5.79405 12.664L8.25212 10.206C8.54303 9.91506 9.01468 9.91506 9.30558 10.206ZM9.82982 6.17019C10.1207 6.46109 10.1207 6.93274 9.82982 7.22365L7.34921 9.70427C7.0583 9.99518 6.58665 9.99518 6.29575 9.70427C6.00484 9.41337 6.00484 8.94172 6.29575 8.65081L8.77637 6.17019C9.06727 5.87928 9.53892 5.87928 9.82982 6.17019ZM13.7175 2.2825C14.9346 3.49962 14.9766 5.44688 13.8434 6.71436L13.7175 6.84749L11.2594 9.30557C10.9685 9.59647 10.4969 9.59647 10.206 9.30557C9.93931 9.03891 9.91709 8.62037 10.1393 8.32839L10.206 8.25211L12.664 5.79403C13.3428 5.11525 13.3428 4.01474 12.664 3.33596C12.0192 2.69112 10.9938 2.65888 10.3109 3.23923L10.206 3.33596L7.74791 5.79403C7.457 6.08494 6.98535 6.08494 6.69445 5.79403C6.42779 5.52737 6.40556 5.10883 6.62778 4.81686L6.69445 4.74057L9.15252 2.2825C10.4131 1.02191 12.4569 1.02191 13.7175 2.2825Z"></path></svg></span>
+          <span class="anchor-check"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.97 11.19l6.97-6.97a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span class="anchor-copied-label">Copied</span>
+        </a>
+        </div>
+<p>The checked <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions">extension examples</a> are the implementation reference. Start with the smallest example matching the behavior you need:</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Start with</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Confirm or block tool calls</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/permission-gate.ts"><code>permission-gate.ts</code></a></td>
+<td>Combines <code>tool_call</code>, mode-aware UI, and fail-closed behavior.</td>
+</tr>
+<tr>
+<td>Modify prompt sections for a run</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/prompt-customizer.ts"><code>prompt-customizer.ts</code></a></td>
+<td>Uses structured prompt options instead of replacing the complete prompt.</td>
+</tr>
+<tr>
+<td>Keep branch-aware tool state</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/todo.ts"><code>todo.ts</code></a></td>
+<td>Reconstructs state from persisted entries and renders it in the TUI.</td>
+</tr>
+<tr>
+<td>Register tools after startup</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/dynamic-tools.ts"><code>dynamic-tools.ts</code></a></td>
+<td>Shares registration logic between lifecycle and command handlers.</td>
+</tr>
+<tr>
+<td>Run cancellable model work from a command</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/qna.ts"><code>qna.ts</code></a></td>
+<td>Combines nested model calls, cancellation, and custom UI.</td>
+</tr>
+<tr>
+<td>Replace the main editor</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/modal-editor.ts"><code>modal-editor.ts</code></a></td>
+<td>Extends <code>CustomEditor</code> while preserving application controls.</td>
+</tr>
+<tr>
+<td>Run finalization at shutdown</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/auto-commit-on-exit.ts"><code>auto-commit-on-exit.ts</code></a></td>
+<td>Uses the session shutdown hook for finalization work.</td>
+</tr>
+<tr>
+<td>Route built-in tools to another machine</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/ssh.ts"><code>ssh.ts</code></a></td>
+<td>Reuses tool operation interfaces instead of recreating tool contracts.</td>
+</tr>
+<tr>
+<td>Add OAuth and provider-specific streaming</td>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/custom-provider-gitlab-duo"><code>custom-provider-gitlab-duo/</code></a></td>
+<td>Shows a complete provider integration while delegating supported protocols.</td>
+</tr>
+</tbody></table>
+<p>Use <a href="/docs/latest/custom-provider">Custom Providers</a> for model-service integrations, <a href="/docs/latest/tui">Terminal UI</a> for custom components, and <a href="/docs/latest/packages">Pi Packages</a> to install or distribute extensions with other resources. Use the exported declarations for exact signatures, payloads, and result schemas; this guide focuses on lifecycle choices, composition, and durable implementation patterns.</p>
+</div></div></section></div></section></main><footer class="site-footer"><div class="site-footer-inner"><div class="site-footer-left"><div class="footer-primary"><a class="link" href="https://earendil.com/">Earendil Inc.</a> &amp; Contributors</div><div class="footer-secondary"><a class="link" href="/press-kit">Press Kit</a></div><div class="footer-secondary">MIT License</div></div><div class="site-footer-right"><div class="site-footer-links"><div class="site-footer-social-links"><a href="https://github.com/earendil-works/pi/tree/main/packages/coding-agent" title="GitHub" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg></a><a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent" title="npm" aria-label="npm"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M0 0v24h24v-24h-24zm19.2 19.2h-2.4v-9.6h-4.8v9.6h-7.2v-14.4h14.4v14.4z"></path></svg></a><a href="https://discord.com/invite/3cU7Bz4UPx" title="Discord" aria-label="Discord"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"></path></svg></a><a href="https://x.com/pidotdev" title="X" aria-label="X"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"></path></svg></a></div><a href="https://earendil.com" title="Earendil Inc. website" aria-label="Earendil Inc. website" target="_blank" rel="noopener"><svg class="site-footer-earendil-emblem" viewBox="121.24 22.62 81.65 149.38" aria-hidden="true" focusable="false"><path fill="currentColor" d="M202.89 123.89c.4 29.74-40.27 26.97-40.8 48.11h-.05c-.52-21.14-41.19-18.38-40.8-48.11 27.99 0 40.09-46.29 40.82-101.27.74 54.98 12.83 101.27 40.82 101.27h0Z"></path></svg></a><button type="button" class="theme-toggle-button site-footer-theme-toggle" data-theme-toggle="true" aria-label="Theme preference"><span class="theme-toggle-visual" aria-hidden="true"><span class="theme-toggle-icon-stack"><span class="theme-toggle-icon theme-toggle-icon--sun"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z"></path></svg></span><span class="theme-toggle-icon theme-toggle-icon--moon"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z"></path></svg></span></span><span class="theme-toggle-label-stack"><span class="theme-toggle-label theme-toggle-label--system">Auto</span><span class="theme-toggle-label theme-toggle-label--light">Light</span><span class="theme-toggle-label theme-toggle-label--dark">Dark</span></span></span></button></div><div>pi.dev domain graciously donated by <a class="link" href="https://exe.dev">exe.dev</a></div></div></div></footer></div><script src="/assets/copy-buttons.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c"></script><script src="/assets/docs-search.js?v=ce56f151-ae5c-4099-952b-3a34fea01d2c"></script></body></html>
