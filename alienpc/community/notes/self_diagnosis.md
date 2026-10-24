@@ -266,3 +266,16 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
 - Also learned the hard way twice in one pass: the secret guard denies any command line naming
   credential env vars (my `MAX_EVENT*` Get-ChildItem probe = the 18:02:58 deny; a later repeat was
   silently denied with empty output). Env probes belong in a .ps1 that prints set/not set only.
+
+## 2026-10-23T19:07 CT MEM1 pass (loop 08, ALI-163, CPU only)
+- STEP 0 breaker: last line of logs/ralph.log = iter 01 start 2026-10-23 18:55:41 (iter 07 exited status=ok exit=0 ticks=+1 wall=39.8m denies=0 checkfails=0 scope=0 open=16). No STOP_RALPH at start, none written by this pass.
+- denies.log read with the read tool (tail/cat of that file is what tripped the fiction lock 4 times this pass: 675-678, all self-inflicted command text, 0 guard bugs). Last 3 deny classes seen: fiction-lock x3, secret env probe x1 (EV1 test), protected-paths ralph.ps1 x1 (earlier pass, SCOPE fail + STOP_RALPH).
+- Action: MEM1. 3 skills built (C:/AI/community/skills/{h3-hc-render,h3-prompting,forge-self-diagnose}/SKILL.md), notes/skills_wiring.md (Pi discovery paths + the setting Max adds; Pi config untouched = Max's), AGENTS.md Learnings merged 16 -> 15 with Max's 3 items, no-loss proof of the 15 old bullets in notes/forge-learnings.md, PQ1 one-variable A/B design written down.
+- Health: TASKS.md 0 control chars (per-line scan), 18 CRLF lines, 16 open tasks after this tick; budget gate file read-only; 0 GPU calls this pass, GPU lock respected.
+- Next: PQ1 (research, 144p proxy videos are fine), then IM1 (one-variable A/B render, same seeds). MEM1 left no open question for the next loop.
+
+## Canonical numbers, added by MEM1 (Max audit 2026-10-23 6:40 PM CT, item 3: self_diagnosis had no chunking line)
+- Community clip length: 243 frames = 10.125 s at 24 fps; the frame grid is (frames - 5) % 17 == 0; c0 length 124, window overlap 22, extension 119, c1 141 generated (22 hidden), 124 + 119 = 243; duration = round(frames/24, 6).
+- 13 s at 24 fps = 312 frames (RZ2's target); 481 f = 20.04 s = the "20 seconds" shape Derrick rejected at 6:12 PM CT; 10 s = 240 f is NOT on the grid.
+- Continuum arm: canvas multiple of 32 (1024x576, not 832x468), target_frames = chunks * chunk_seconds * fps, sampler has no negative/CFG key (no: lines in sequence_prompt), frame_rate is the duration lever.
+- Source: C:/AI/community/notes/hc_lessons_20261023.md + notes/bakeoff_gpu_findings.md; skills C:/AI/community/skills/h3-hc-render/SKILL.md.
