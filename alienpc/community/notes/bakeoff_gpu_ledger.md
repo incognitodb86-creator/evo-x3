@@ -58,3 +58,6 @@ and `STOP_RALPH` (Max 18:17 CT) wants a relaunch at `-GpuCapMin 700 -JobMax 55` 
 - `first_frame_png`, `contact_sheet_sha256`, `seam_delta`, `face_similarity`, `retry`, `prompt_source`: created with the
   result.json, objective.json and contact sheet, i.e. the pass after the harness runs the job.
 - `prompt_source` is already fixed in writing: notes/hc_c1_c0.txt, sha256 4d73c059385d88d7b3238503922e2d254fe78691b37e2d2ff669da059ca176a2, shacl128 4d73c059385d88d7, unchanged.
+| 2026-10-24 12:33:00 -> 2026-10-24 12:33:06 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.1 | PW1d smoke rewrite REF2AV 16:9 10.0 s, seed 42, 7B Q4_K_M + Q8_0 Omni adapter | (0, 0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_objective.json` |
+| 2026-10-24 12:36:05 -> 2026-10-24 12:36:11 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.1 | PW1d smoke rewrite REF2AV 16:9 10.0 s, seed 42, 7B Q4_K_M + Q8_0 Omni adapter | (0, 0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_objective.json` |
+| 2026-10-24 12:36:40 -> 2026-10-24 12:37:01 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.3 | PW1d smoke rewrite REF2AV 16:9 10.0 s, seed 42, 7B Q4_K_M + Q8_0 Omni adapter | (0, 0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_objective.json` |
