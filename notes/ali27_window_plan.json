@@ -1,0 +1,1175 @@
+{
+ "note": "for a GPU render window only; this builder never queues, never calls ComfyUI/llama-swap, and never writes C:/AI/community/p7/JOB_REQUEST.json",
+ "scene_clips": [
+  "agy_baseline13_s51240001",
+  "ali147_pool_hc_c1_s51100001",
+  "ali147_pool_hc_c2_s51100002",
+  "ali147_pool_hc_r3b_s51130003"
+ ],
+ "window_jobs": [
+  {
+   "canvas": [
+    384,
+    672
+   ],
+   "frames": 39,
+   "graph": "C:/AI/community/runs/ali147_canary/ali147_canary.api.json",
+   "id": "ali147_canary",
+   "mp4": true,
+   "reason": "NOT_16x9 384x672",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_ctrl_s51080000/ali147_pool_ctrl_s51080000.api.json",
+   "id": "ali147_pool_ctrl_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000.api.json",
+   "id": "ali147_pool_dense_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_fix1_s51080000/ali147_pool_fix1_s51080000.api.json",
+   "id": "ali147_pool_fix1_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_fix4_s51080000/ali147_pool_fix4_s51080000.api.json",
+   "id": "ali147_pool_fix4_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": null
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_fix4_s51080000/failed-20261022/ali147_pool_fix4_s51080000.api.json",
+   "id": "ali147_pool_fix4_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": null
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_fix4_s51080000/failed-20261022/ali147_pool_fix4_s51080000_redo1.api.json",
+   "id": "ali147_pool_fix4_s51080000_redo1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": null
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_fix4_s51080000/failed-20261022/ali147_pool_fix4_s51080000_redo2.api.json",
+   "id": "ali147_pool_fix4_s51080000_redo2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": null
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_fix5_s51080000/ali147_pool_fix5_s51080000.api.json",
+   "id": "ali147_pool_fix5_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r1_s51130001/ali147_pool_hc_r1_s51130001.api.json",
+   "id": "ali147_pool_hc_r1_s51130001",
+   "mp4": true,
+   "reason": "unapproved full-frame reference: community/hc/HC1_w1_blonde_00001_.png,community/hc/HC1_w2_darkhair_00001_.png",
+   "seed": 51130001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r2_s51130002/ali147_pool_hc_r2_s51130002.api.json",
+   "id": "ali147_pool_hc_r2_s51130002",
+   "mp4": true,
+   "reason": "unapproved full-frame reference: community/hc/HC2_w1_blonde_00001_.png,community/hc/HC2_w2_darkhair_00001_.png",
+   "seed": 51130002
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali147_pool_hc_r3b_s51130003.baseline.api.json",
+   "id": "ali147_pool_hc_r3b_s51130003.baseline",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali147_pool_hc_r3i_s51130003.api.json",
+   "id": "ali147_pool_hc_r3i_s51130003",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3r_s51130003/ali147_pool_hc_r3r_s51130003.api.json",
+   "id": "ali147_pool_hc_r3r_s51130003",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3b_s51130003)",
+   "seed": 51130003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r4_s51130004/ali147_pool_hc_r4_s51130004.api.json",
+   "id": "ali147_pool_hc_r4_s51130004",
+   "mp4": true,
+   "reason": "no approved start still in the graph (LoadImage slots: community/hc/HC4_w1_face.png)",
+   "seed": 51130004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r5_s51130005/ali147_pool_hc_r5_s51130005.api.json",
+   "id": "ali147_pool_hc_r5_s51130005",
+   "mp4": true,
+   "reason": "no approved start still in the graph (LoadImage slots: community/hc/HC5_w1_face.png)",
+   "seed": 51130005
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r6_s51130006/ali147_pool_hc_r6_s51130006.api.json",
+   "id": "ali147_pool_hc_r6_s51130006",
+   "mp4": true,
+   "reason": "no approved start still in the graph (LoadImage slots: community/hc/HC6_w1_face.png,community/hc/HC6_w2_face.png)",
+   "seed": 51130006
+  },
+  {
+   "canvas": [
+    1152,
+    2016
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_sheet_s51120000/ali147_pool_hc_sheet_s51120000.api.json",
+   "id": "ali147_pool_hc_sheet_s51120000",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51120001
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_promptv2_s51080000/ali147_pool_promptv2_s51080000.api.json",
+   "id": "ali147_pool_promptv2_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.api.json",
+   "id": "ali147_pool_promptv2_seg3_s51080002",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_refsheet_b_s51080000/ali147_pool_refsheet_b_s51080000.api.json",
+   "id": "ali147_pool_refsheet_b_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_refsheet_s51080000/ali147_pool_refsheet_s51080000.api.json",
+   "id": "ali147_pool_refsheet_s51080000",
+   "mp4": true,
+   "reason": "NOT_16x9 768x1344",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    1024,
+    576
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali173_cont_hc1_s51140001/ali173_cont_hc1_s51140001.api.json",
+   "id": "ali173_cont_hc1_s51140001",
+   "mp4": true,
+   "reason": "NOT_16x9 1024x576",
+   "seed": null
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_ab05/p6_1min_ab05_seg1.api.json",
+   "id": "p6_1min_ab05_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_ab05/p6_1min_ab05_seg2.api.json",
+   "id": "p6_1min_ab05_seg2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_ab05/p6_1min_ab05_seg3.api.json",
+   "id": "p6_1min_ab05_seg3",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_cuts_ab05/p6_1min_cuts_ab05_seg1.api.json",
+   "id": "p6_1min_cuts_ab05_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_cuts_ab05/p6_1min_cuts_ab05_seg2.api.json",
+   "id": "p6_1min_cuts_ab05_seg2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_cuts_ab05/p6_1min_cuts_ab05_seg3.api.json",
+   "id": "p6_1min_cuts_ab05_seg3",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_cuts/p6_1min_cuts_seg1.api.json",
+   "id": "p6_1min_cuts_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_cuts/p6_1min_cuts_seg2.api.json",
+   "id": "p6_1min_cuts_seg2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_cuts/p6_1min_cuts_seg3.api.json",
+   "id": "p6_1min_cuts_seg3",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_community/p6_1min_seg1.api.json",
+   "id": "p6_1min_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_community/p6_1min_seg2.api.json",
+   "id": "p6_1min_seg2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p6_1min_community/p6_1min_seg3.api.json",
+   "id": "p6_1min_seg3",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S1_i2v_long_i2v.api.json",
+   "id": "p6_S1_i2v_long_i2v",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S1_i2v_short.api.json",
+   "id": "p6_S1_i2v_short",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S1_r2v_long_r2v.api.json",
+   "id": "p6_S1_r2v_long_r2v",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S1_r2v_short.api.json",
+   "id": "p6_S1_r2v_short",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S2_i2v_long_i2v.api.json",
+   "id": "p6_S2_i2v_long_i2v",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S2_i2v_short.api.json",
+   "id": "p6_S2_i2v_short",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S2_r2v_long_r2v.api.json",
+   "id": "p6_S2_r2v_long_r2v",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S2_r2v_short.api.json",
+   "id": "p6_S2_r2v_short",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S3_i2v_long_i2v.api.json",
+   "id": "p6_S3_i2v_long_i2v",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070003
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S3_i2v_short.api.json",
+   "id": "p6_S3_i2v_short",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070003
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S3_r2v_long_r2v.api.json",
+   "id": "p6_S3_r2v_long_r2v",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070003
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_pairs/p6_S3_r2v_short.api.json",
+   "id": "p6_S3_r2v_short",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51070003
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r1_c1_pmot_full/p7_r1_c1_pmot_full_seg1.api.json",
+   "id": "p7_r1_c1_pmot_full_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r1_c1_pmot_full/p7_r1_c1_pmot_full_seg2.api.json",
+   "id": "p7_r1_c1_pmot_full_seg2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r1_c1_pmot_full/p7_r1_c1_pmot_full_seg3.api.json",
+   "id": "p7_r1_c1_pmot_full_seg3",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r1_c1_pmot/p7_r1_c1_pmot_seg1.api.json",
+   "id": "p7_r1_c1_pmot_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r1_c2_st12/p7_r1_c2_st12_seg1.api.json",
+   "id": "p7_r1_c2_st12_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r1_c3_ab05/p7_r1_c3_ab05_seg1.api.json",
+   "id": "p7_r1_c3_ab05_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c1_sd1000/p7_r2_c1_sd1000_seg1.api.json",
+   "id": "p7_r2_c1_sd1000_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51081000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c2_ab03/p7_r2_c2_ab03_seg1.api.json",
+   "id": "p7_r2_c2_ab03_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg1.api.json",
+   "id": "p7_r2_c3_pmot_full_pool_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg2.api.json",
+   "id": "p7_r2_c3_pmot_full_pool_seg2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3.api.json",
+   "id": "p7_r2_c3_pmot_full_pool_seg3",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c3_pmot_full/p7_r2_c3_pmot_full_seg1.api.json",
+   "id": "p7_r2_c3_pmot_full_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c3_pmot_full/p7_r2_c3_pmot_full_seg2.api.json",
+   "id": "p7_r2_c3_pmot_full_seg2",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r2_c3_pmot/p7_r2_c3_pmot_seg1.api.json",
+   "id": "p7_r2_c3_pmot_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/p7_r3_c3_sd1000/p7_r3_c3_sd1000_seg1.api.json",
+   "id": "p7_r3_c3_sd1000_seg1",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51081000
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 39,
+   "graph": "C:/AI/community/runs/agy_baseline13_s51240001/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51240001
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_dense_s51080000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_fix1_s51080000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_fix4_s51080000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": null
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_fix5_s51080000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_c1_s51100001/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51100001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_c2_s51100002/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51100002
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r1_s51130001/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r2_s51130002/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130002
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3_s51130003/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3b_s51130003/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3i_s51130003/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3r_s51130003/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r4_s51130004/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r5_s51130005/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130005
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r6_s51130006/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51130006
+  },
+  {
+   "canvas": [
+    1152,
+    2016
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_sheet_s51100000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51100001
+  },
+  {
+   "canvas": [
+    1152,
+    2016
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_sheet_s51120000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51120001
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_promptv2_s51080000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080002
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_refsheet_b_s51080000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    768,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali147_pool_refsheet_s51080000/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51080000
+  },
+  {
+   "canvas": [
+    1024,
+    576
+   ],
+   "frames": null,
+   "graph": "C:/AI/community/runs/ali173_cont_hc1_s51140001/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": null
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c00.api.json",
+   "id": "sy_c00",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090000
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c01.api.json",
+   "id": "sy_c01",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090001
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c02.api.json",
+   "id": "sy_c02",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090002
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c03.api.json",
+   "id": "sy_c03",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090003
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c04.api.json",
+   "id": "sy_c04",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090004
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c05.api.json",
+   "id": "sy_c05",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090005
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c06.api.json",
+   "id": "sy_c06",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090006
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c07.api.json",
+   "id": "sy_c07",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090007
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c08.api.json",
+   "id": "sy_c08",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090008
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c09.api.json",
+   "id": "sy_c09",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090009
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c10.api.json",
+   "id": "sy_c10",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090010
+  },
+  {
+   "canvas": [
+    768,
+    1344
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/p6_1min_switchyard/sy_c11.api.json",
+   "id": "sy_c11",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51090011
+  }
+ ]
+}
