@@ -52,6 +52,7 @@ CITE_BODY = "notes/web/07ff_trac_concat.html"
 CUT = "review_cut.mp4"
 SHEET = "contact_sheet.png"
 TABLE = "review_table.md"
+CONCAT = "concat_list.txt"      # the concat demuxer list, kept so the cut is re-buildable by hand
 THUMB_W, THUMB_H = 448, 256
 CANVAS = (1344, 768)          # 16:9, both a multiple of 32 (AGENTS.md: 468 % 32 = 20 is unreachable)
 FPS = "24/1"
@@ -528,6 +529,15 @@ def check(m=None):
     # 12 CLOBBER: the builder's write surface must never include the 2.1b request artifact
     if REQUEST in list(m.get("writes", [])) + [str(x) for x in m.get("writes", [])]:
         P.append("CLOBBER builder write surface includes %s (owner = fix_plan 2.1b)" % REQUEST)
+    # 14 LITTER: the standing folder is Derrick's surface, so only the artifacts may live in it.
+    # The selftest writes probe files, and a per-pass gate that litters the human folder is a defect (found
+    # 2026-10-24: two probe files survived a gate run), so this class is probed, not promised.
+    allow = {CUT, SHEET, TABLE, CONCAT, "thumbs"}
+    litter = sorted(x.name for x in REVIEW.iterdir() if x.name not in allow)
+    if litter:
+        P.append("LITTER %s in %s (only the cut, sheet, table, concat list and thumbs belong here)" % (
+            ",".join(litter), REVIEW.as_posix()))
+
     # 13 ORDER: order is a function of (seed, id) only, never of scan order. A rotation of the
     # disk rows, re-sorted by the documented key, must land back on the manifest order.
     perm = live["scene"][1:] + live["scene"][:1]
@@ -614,6 +624,9 @@ def seeds(m):
     d = copy.deepcopy(m)
     d["out"]["mtime"] = 0
     out.append(("STALE_CUT", d, "STALE"))
+    (REVIEW / "ali27_litter_probe.txt").write_text("selftest litter" + chr(10), encoding="utf-8",
+                                                   newline="" + chr(10))
+    out.append(("LITTER", copy.deepcopy(m), "LITTER"))
     d = copy.deepcopy(m)
     d["writes"] = list(d["writes"]) + [REQUEST]
     out.append(("CLOBBER_REQUEST", d, "CLOBBER"))
@@ -628,18 +641,24 @@ def seeds(m):
 def selftest():
     m = json.loads(MAN.read_text(encoding="utf-8"))
     fired, silent = [], []
+    nseed = len(seeds(m))          # count FIRST: seeds() writes two probe files into the review folder
     for name, mut, token in seeds(m):
         P = check(mut)
+        if name == "LITTER":
+            (REVIEW / "ali27_litter_probe.txt").unlink(missing_ok=True)
         if any(p.startswith(token) for p in P):
             fired.append(name)
         else:
             silent.append((name, P[:2]))
+    # the probe files seeds() writes are selftest litter: the review folder is the human surface, so
+    # nothing but the three artifacts + thumbs may live there. Counted before, removed before the real-tree
+    # check, so the real-tree verdict measures the folder this run leaves behind (LITTER caught 2 files
+    # that a gate run left there on 2026-10-24).
+    for f in REVIEW.glob("ali27_*probe*"):
+        f.unlink()
     real = check(m)
-    for f in (REVIEW / "ali27_keepword_probe.md", REVIEW / "ali27_ref_probe.api.json"):
-        if f.is_file():
-            f.unlink()
     print("SELFTEST_CLEAN seeds=%d fired=%d silent=%d real_tree_problems=%d" % (
-        len(seeds(m)), len(fired), len(silent), len(real)))
+        nseed, len(fired), len(silent), len(real)))
     for n, P in silent:
         print("SILENT %s -> %r" % (n, P))
     for p in real:
