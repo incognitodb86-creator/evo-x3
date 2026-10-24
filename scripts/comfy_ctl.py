@@ -9,7 +9,7 @@ ComfyUI (comfyui_auto) is a llama-swap member in the exclusive "main" group with
 Exit: 0 ok (prints COMFY_OK on start/restart), 3 refused (render running), 4 ComfyUI down after start/restart, 2 usage.
 Never /upstream. This file is harness-owned (Max): Forge must not edit it."""
 import json, subprocess, sys, time, urllib.request
-LS = "http://127.0.0.1:8080"; COMFY = "http://127.0.0.1:10004"
+LS = "http://127.0.0.1:8080"; COMFY = LS + "/comfyui"
 GUARD = r"C:\AI\director\scripts\gpu_guard.ps1"; LOG = r"C:\AI\community\notes\comfy_ctl.log"
 def log(m):
     line = time.strftime("%Y-%m-%d %H:%M:%S CT ") + m
