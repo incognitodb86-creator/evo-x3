@@ -7,6 +7,12 @@ description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta6 int
 
 Work the loop in this order. One job per pass. Never mix a request pass with a proof pass.
 
+## 0. When to use this skill
+
+- A render-request task in this batch: writing an arm graph, re-requesting a dead clip, choosing length/canvas, counting jobs, spending GPU minutes.
+- Verifying a rendered clip (frame count, fps, audio, seams, hashes) or deciding whether a pass may submit at all.
+- Any MiniMaxH3 / Continuum 3.10.2 job: the numbers below are the ones that already burned real jobs.
+
 ## 1. Read the state before anything
 
 - `tail -n 15 C:/Users/derek/5slock/ralph-community/logs/ralph.log` (TIMEOUT / same-FAIL breaker: PROMPT.md STEP 0).

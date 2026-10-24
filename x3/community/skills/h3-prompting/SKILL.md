@@ -11,6 +11,12 @@ prompt/graph variables stay separable. Fiction lock: every character is a fictio
 module named in AGENTS.md "## Scope" is never edited (the lock matches the TEXT of a command too, so never put that
 path in a command string).
 
+## 0. When to use this skill
+
+- Writing or reviewing any clip prompt: `notes/hc_*.txt`, `specs/prompt_v2/*`, `notes/im1_prompts.md`, a Continuum `sequence_prompt`, or the `overall_soundscape:` line of any chunk.
+- PQ1 (prompt research) and IM1 (the one-variable A/B re-render) - the plan and the open list are in section 7.
+- After a clip is judged weak: section 6 is the vocabulary that fixed identity drift and under-skin detail.
+
 ## 1. Section skeleton (keep the section names and the line counts stable)
 
 Worked example: `specs/prompt_v2/v2_seg1_c0_r2v.txt`, rendered baselines `notes/hc_r3b_c0.txt` (22 lines) and
