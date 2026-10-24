@@ -328,3 +328,36 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
   minutes) - needs the GPU and an approved still, so it is a submittable `p7/JOB_REQUEST.json`, not a
   render run inside this pass.
 2026-10-24 04:42 (item 1.4): the loop has been reporting clean passes it cannot prove, so this pass made the claim measurable instead of asserting it. Measured from disk: iterations 1-4 are all not-clean (no per-pass test record; iter 2 no tick; iter 4 self-echoed the completion token at logs/iter-20261024-04.log:670 then hit FALSE_COMPLETE at 50.2 min), and the strict clean streak is 0, so 1.4 stays unticked. New instruments: notes/ali11_pass_receipt.py (27-case selftest) and notes/ali11_run_checks.py (12 checks, 11-case selftest, first manifest notes/pass_checks/20261024-05.json all rc 0). Two self-inflicted bugs caught by probes on the way: three check markers written from memory failed 3/12 rows on a clean tree (now pinned in MARKER_SAMPLES with counter-samples), and editing AGENTS.md from a non-raw Python string ate the backslashes in C:\AI paths (restored from git, re-applied raw). ralph.ps1 token rule tightened to tok_all=1 + tok_solo=1 with a distinct TOKEN_ECHO log line; chain.ps1 open=0 matching kept (DONE.txt keys additive).
+
+## 2026-10-25 pass - 0.1 HC15 clip 2 staged (one clip, one variable, nothing queued)
+
+- `logs/ralph.log` tail: 26 index lines, last = `DONE: open=17 iter=26 claim=True commits=2 stuck=0`, and the
+  `FALSE_COMPLETE` rule did not fire with 17 open items - so this build's exit keys do not gate on open items
+  the way the 0.5 note in AGENTS.md describes; the commit-per-iteration key did (commits=2).
+- `iter-2026-10-25-26.log` (182 lines): the previous pass (0.1 clip-1 record) ended with `<promise>COMPLETE`
+  after 48 tool calls, 16m55s. No `STOP_RALPH`, no check failures, no denies in that pass.
+- `notes/denies.log` tail (read with the read tool, never a shell tail - the fiction lock matches command text):
+  newest entry 2026-10-23, nothing new; this pass produced 0 denies.
+- **Max wrote over my plan record between passes.** `git log -- fix_plan.md` = `f0d721a`, `a62b8ef`, `94f6b1a`
+  (Max, 2:18-2:25 PM CT) land on top of my `a5ad2bd`, and my later fix_plan commits (`38414e4` 2.1b,
+  `765e393` 2.1c, `9451817`/`672e197` 0.1) are absent from `git log`: the 0.1 line I read at the start of this
+  pass (1,900+ chars of ticks) is 303 chars now. Diagnosis: the plan file has two writers (Max edits the item
+  text, Ralph appends ticks), and Max's edit was authored from a snapshot taken before my commits. Mitigation
+  applied: keep ticks short, and put the full record in files with one owner (`notes/progress.md`,
+  `C:/AI/community/notes/hc15_20261024.md`); the 2.1b/2.1c evidence is intact in C:/AI/community
+  (`38414e4`, `9451817`, `765e393`), so nothing is lost, only the plan-line echo.
+- **L8 bit me again:** the `progress/` folder I read mid-pass (a 39-line 2026-10-25 file) is gone at build time -
+  it is untracked scratch, and `git ls-files progress` = 0. The tracked durable log is `notes/progress.md`;
+  this entry and the last two go there.
+- **My own two defects, both caught by checks before staging.**
+  1. A ~10 KB bash heredoc used to append the clip-2 prompts was silently truncated by the tool mid-write
+     (file grew 18,910 -> 27,038 B and ended inside a sentence). Caught by a size + block-marker census,
+     repaired by truncating to the known-good 18,910 B and appending a `write`-tool fragment. Rule: long prose
+     goes in through the `write` tool, then python appends it; the shell heredoc is for short text.
+  2. First `p7/JOB_REQUEST.json` draft added `graph` and `out` path keys. The key-set comparison against the
+     harness model request `p7/jobs/request_iter07.json` (and `git show 3f9ede8:p7/JOB_REQUEST.json`) rejected
+     it: the contract is exactly `frames, frames_tol, id, kind, minutes, note`, and the runner derives the
+     paths from the id. Fixed before staging.
+- GPU: nothing queued, no llama-swap/ComfyUI/Strata call, no render script. The gates run here were
+  `comm.guard_ok` (3/3 prose strings), the offline schema `scan` (5 H3 classes, clean), `LoadImage` file
+  existence, id-free-of-output, and `pytest scripts/tests/test_p6_review.py` = 21 passed.
