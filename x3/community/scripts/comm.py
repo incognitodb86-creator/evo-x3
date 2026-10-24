@@ -105,7 +105,7 @@ def first_pass(g, mode, prompt, img, w, h, length, steps, model):
             "width": w, "height": h, "length": length, "first_frame": ["img", 0]}}
     else:
         g["c0"] = {"class_type": "MiniMaxH3ReferenceToVideo", "inputs": {"clip": ["clip", 0], "vae": ["vvae", 0], "audio_vae": ["avae", 0],
-            "prompt": prompt, "width": w, "height": h, "length": length, "ref_image_size": "match", "ref_images.ref_image_1": ["img", 0]}}
+            "prompt": prompt, "width": w, "height": h, "length": length, "ref_image_size": "max", "ref_images.ref_image_1": ["img", 0]}}
     return _sample(g, "s0", model, ["c0", 0], ["c0", 1], steps, ["noise", 0])
 
 def build(mode, prompts, img, w, h, first_len, steps, seed, prefix, ext_frames=119, overlap=22,
