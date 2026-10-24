@@ -302,3 +302,97 @@ The room tone of <Video 1> with the window wash steady underneath. Wet finger so
 
 non_diegetic_music:
 The guitar figure resolves into a slower two-chord loop, brushed snare dropping out, tempo around 68 bpm, dynamics peaking across the two climaxes and fading to a soft sustain as the pair fold together.
+## Clip 4 = ali163_hc15_gi046_s51150004 (15.083 s, 362 f, 1344x768, 24 fps, seed 51150004)
+
+Same guide as clips 1-3. Measured grounding (`notes/ali163_hc_r4g2_facebox.py`, row `HC15D`, re-run 2026-10-24 box
+clock): `C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI046.jpg` = 1792x1008, ratio 1.7778,
+**exactly 1 face**: box 341,330,201,201 (2.24% of frame, h/w 1.00 = frontal, SCRFD score 0.872, hair luma 98.9 = dark
+brown). `CHARACTER.md` (Derrick-approved 2026-10-19 11:01 AM CT, verbatim "also add 100 images fromt he grok imagine
+download folders anyone"): fictional adults, batch selected by extension/sha256/phash/pixels only, and R3 forbids
+opening any Grok Imagine prompt sidecar - `GI046.jpg` has no sidecar beside it (`ls GI046*` = 1 file).
+Identity gate (`notes/ali163_hc_r4g2_verify.py` row `HC15D_w1`, run 2026-10-24 box clock):
+`GI046_w1_face.png` **PASSES** at ArcFace cos **0.945** with the face at **21.6%** of the crop (gate: square 400-550 px,
+>= 1 face, face >= 12% of crop, cos >= 0.45). This is the strongest crop in HC15 and the first with no caveat:
+clips 1-3 each lost a crop to a tilted source box (h/w 0.49-0.68 -> cos 0.058-0.503) and BD013's accepted crop sat at
+the weakest margin in the set (0.49). So clip 4 ships the same **2-slot** shape (`ref_image_1` = `GI046.jpg`,
+`ref_image_2` = `GI046_w1_face.png`) with **both** slots verified references of the same woman, and no unverified face
+riding on the start still alone. Pair distinctness does not apply: one face, one subject.
+Choreography is a fourth shape, and it is dictated by the measurement: 1 face = 1 person in the frame, so this clip is
+**solo** - clips 1-3 are pair scenes. That also drops the identity problem the pair clips carry (the second woman has
+no verified reference at all). Room, light, colour and wardrobe stay delegated to `<Picture 1>`, and the choreography
+uses the standing height and the floor of `<Picture 1>` only, because no vision model reads this material (hard line)
+and HC15 invents no setting.
+
+### id=ali163_hc15_gi046_s51150004 chunk=c0 seed=51150004
+
+subject_definitions:
+<Subject 1> is the woman in the 16:9 start photograph in <Picture 1>, the only person in that photograph, a fictional adult aged 27: slim and toned, flat stomach, long legs with visible calf and knee definition, light tan skin with visible pores and fine vellus hair, dark brown shoulder-length hair, natural unreconstructed breasts with dark areolae, and the wardrobe she wears in <Picture 1>. Her face, hair, body, skin and figure all come from <Picture 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.
+<Picture 1> is the approved 16:9 start photograph of <Subject 1> standing alone, her face in the upper left of centre of frame. It is the first frame of this video and it defines her body, skin, figure, face, hair, wardrobe, the room, the floor, the wall, the light, the colour cast and the camera position.
+<Picture 2> is the face crop of <Subject 1>, the same woman, forehead, hair, jaw and shoulders filling the square. It is an identity reference only.
+
+summary:
+[reference generation] The target video is the first 5.17 seconds of a single continuous 16:9 shot of <Subject 1>, a fictional adult woman alone in the room of <Picture 1>, who takes off the clothes she is wearing in the opening photograph and stands naked in its light, one hand on her own breast. The shot uses <Picture 1> as the first frame and the scene, and <Picture 2> as her face and hair.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - the single woman of <Picture 1> and <Picture 2>, keeping her face, hair, slim toned figure, skin tone, height, build and the wardrobe of <Picture 1>.
+<Picture 1> ([Shot 1] first frame): fully_preserved - the room, the floor, the wall, the light direction, the colour cast, her standing start position, the 16:9 framing and the camera height.
+
+detailed_description:
+Live-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the woman.
+[Shot 1] A single continuous 16:9 medium shot that keeps the framing, the room, the floor, the wall, the light and the colour of <Picture 1> exactly, with <Picture 1> as the first frame. <Subject 1> stands where she stands in the opening photograph, at the same distance from the lens and the same height, weight on her back foot, one shoulder angled into the light of <Picture 1>, and she is the only person in frame. Photorealistic skin and anatomy: natural matte skin with visible pores and fine vellus hair, real adult body mass with joint definition, five separate fingers on each hand, natural adult proportions, a soft sheen of sweat only where her palms press her own skin. The camera starts as a Static Shot on her, then a Push In with small amplitude at slow speed closes the lens distance by a hand's width across the segment. At 00:00.000, the frame is the opening photograph: <Subject 1> standing, chin lifted, mouth closed, hands loose at her sides, the light of <Picture 1> lying across her collarbones. At 00:01.400, both her hands go to the hem of the top she wears in <Picture 1> and lift it in one continuous motion: the hem rises over her ribs and her bare breasts, the fabric takes her head and her arms and leaves frame, and she shakes her dark hair back with both wrists, her nipples tightening in the cooler air of the room. At 00:03.000, her thumbs hook the waistband of the lower garment she wears in <Picture 1> and draw it down over her hips, her thighs and her feet, the fabric pooling on the floor of <Picture 1> and sliding out of frame, so that she stands naked in the light of the opening photograph: her slim toned stomach, her hips, her long legs and her breasts are exactly the body of the woman in <Picture 1>, with a neat dark triangle of pubic hair above her vulva. At 00:04.400, her right palm slides flat down from her sternum across one breast and her thumb rolls the dark nipple, her head tips back, her jaw parts and her breath lengthens, while her left hand hangs loose at her side with open fingers. The shot ends with <Subject 1> standing naked in the framing of <Picture 1>, chin up, one hand closed on her own breast, her eyes finding the lens, the wall and light of the opening photograph steady behind her.
+
+overall_soundscape:
+The room tone of the space in <Picture 1>, a soft ventilation hum and a faint outside wash through a window. Fabric friction as a knit top stretches over breasts and head, the slap of fabric pooling on the floor, a waistband snapping free of hips. Her own quickened breathing, a long open-mouthed exhale as her hand closes on her breast, a low soft moan with her head tipped back.
+
+non_diegetic_music:
+A low muted guitar figure over a slow finger-snare loop, low volume, tempo around 68 bpm, dynamics rising gently as her hand closes on her breast and settling at the end of the segment.
+
+### id=ali163_hc15_gi046_s51150004 chunk=c1 seed=51150004
+
+subject_definitions:
+<Subject 1> is the woman of the start photograph in <Picture 1>, a fictional adult aged 27: slim and toned, flat stomach, long legs, light tan skin with visible pores, dark brown shoulder-length hair, naked and standing in the room of <Picture 1> as she became in <Video 1>. Her face, hair, body, skin and figure all come from <Picture 1> and from the body the viewer saw in <Video 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.
+<Picture 1> is the approved 16:9 start photograph of <Subject 1> in the room of <Picture 1>; it defines her body, skin, figure, face, hair, the room, the floor, the wall, the light, the colour cast and the camera context.
+<Picture 2> is the face crop of <Subject 1>, an identity reference for her face and hair.
+
+summary:
+[video continuation + reference generation] This segment continues the same single continuous shot from <Video 1>: over the next 4.96 seconds <Subject 1>, naked and standing alone, sits down on the floor of the room, opens her legs and slides two fingers of one hand into herself while her other hand works her breast. The same room, floor, light, colour, lens and camera height carry from <Video 1>.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - her face, hair, slim toned figure, skin tone (carried from <Picture 1> and <Video 1>) and the naked, standing-then-seated state her body reached in <Video 1>.
+<Video 1> (the first 5.17 seconds of this clip): fully_preserved - the room, the floor, the wall, the light direction, the colour cast, the framing, the camera height and her discarded clothing on the floor outside frame.
+<Picture 1> (scene anchor): partially_preserved - the room, floor, wall, light and colour carry; the woman is now naked and seated where she was standing and dressed in the photograph.
+
+detailed_description:
+Live-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the woman's body and face.
+[Shot 1] One continuous take that carries the lens position, room, floor, wall, light and colour of <Video 1> forward, the camera resuming as an Arc Shot with small amplitude at slow speed, curving a quarter of the way around her so the window light travels from the left of frame toward the camera, then settling into a Push In with small amplitude at slow speed. <Subject 1> is naked, standing where the first segment left her, her discarded clothing in a heap on the floor outside frame, her skin glossy where her own palm has rubbed. At 00:05.200, she lowers herself down onto the floor of <Picture 1>, sitting back on her palms, one knee lifting and falling open, then the other, so that she is seated with her legs wide and her vulva in the window light, her dark triangle damp. At 00:06.800, her right hand goes between her thighs: two fingers part her outer lips and press along her inner lips, her index finger circles her swollen clitoris once, and a wet sound opens with the contact; her other two fingers curl against her thigh and her breath catches. At 00:08.400, her left hand cups her own breast, thumb and forefinger rolling the dark nipple and pinching it lightly, and her two working fingers slide inside herself in one long stroke, knuckle grazing, her palm flat against her clitoris on the way out; her stomach flattens, her heel drags the floor of <Picture 1>, her head falls back against the wall. At 00:09.900, she picks up a steady rhythm, fingers in and out, thumb circling her clitoris, her breast squeezing and releasing in the same beat, her mouth open on a rising moan, her dark hair falling forward over one cheek, the wet shine of her own fingers catching the window light at the meeting point of her hand and her body. Her skin detail stays crisp and natural at the close distance, her anatomy natural and adult throughout: labia, clitoris, pubic hair, stomach and thighs rendered as the body of the woman in <Picture 1>. The shot ends with her seated, legs open, two fingers buried inside herself, chin lifted, eyes half closed, the room of <Video 1> steady behind her.
+
+overall_soundscape:
+The same room tone as <Video 1>, the window wash a little louder with the camera closer. Fabric of her own clothing rustling as she sits, a heel dragging on the floor, wet finger sounds at her vulva, a palm sliding on her own breast, a sharp intake of breath. Her breathing turning into rising open-mouthed moans, short gasps on each stroke, a low broken cry at the end of the segment.
+
+non_diegetic_music:
+The muted guitar figure continues, a brushed snare entering, tempo around 68 bpm, dynamics swelling with her rhythm and easing at the end of the segment.
+
+### id=ali163_hc15_gi046_s51150004 chunk=c2 seed=51150004
+
+subject_definitions:
+<Subject 1> is the woman of the start photograph in <Picture 1>, a fictional adult aged 27: slim and toned, light tan skin with visible pores, dark brown shoulder-length hair, naked, seated on the floor of the room with her legs open and her own fingers inside herself as she was at the end of <Video 1>. Her face, hair, body, skin and figure all come from <Picture 1> and from <Video 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.
+<Picture 1> is the approved 16:9 start photograph of <Subject 1> in the room of <Picture 1>; it defines her face, body, skin, the room, the floor, the wall, the light, the colour cast and the camera context.
+<Picture 2> is the face crop of <Subject 1>, an identity reference for her face and hair.
+
+summary:
+[keyframe completion + video continuation] This segment carries the same single continuous take for the final 4.96 seconds: <Subject 1>, seated and naked on the floor of the room of <Picture 1>, brings herself to a climax with her own fingers, rides it out in pulses, and settles back into the framing and light of the opening photograph. The room, floor, light, colour, lens and camera height carry from <Video 1>.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - her face, hair, slim toned figure, skin tone, and her seated, naked, self-touching position at the end of <Video 1>.
+<Video 1> (the first 10.13 seconds of this clip): fully_preserved - the room, the floor, the wall, the light, the colour cast, the framing, the camera height, her discarded clothing on the floor outside frame and the wetness already on her fingers and vulva.
+<Picture 1> (scene anchor): partially_preserved - the room, floor, wall, light and colour carry; the woman is naked and seated on the floor in front of the wall.
+
+detailed_description:
+Live-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the woman's face and the contact of her own hand.
+[Shot 1] One continuous take resuming the exact framing and lens height of <Video 1>, the camera a Push In with small amplitude at slow speed for the first two beats, then a Pedestal Down with small amplitude at slow speed as her torso bows, and a Pull Out with small amplitude at slow speed for the last beat so she settles back into the medium framing of the opening photograph. <Subject 1> sits on the floor of <Picture 1> exactly where the first ten seconds left her, legs open, her right hand working between her thighs, her left hand on her own breast, her chest already glossy with sweat. At 00:10.200, her two fingers move faster inside herself, her thumb pressing small circles on her clitoris, her breast squeezing with each stroke, her stomach tightening under the skin, her toes curling on the floor. At 00:11.600, she comes: her hips stutter in four short pulses against her own hand, her thighs clamp, her abdomen cramps, her back bows off the wall, her head tips back and her mouth opens on a rising cry that breaks into a whispered word, her fingers working through it, her breast shivering with each pulse, areola taut, wetness shining between her fingers and her vulva. At 00:13.000, the pulses roll through her in waves, her thighs trembling, her chest heaving, her fingers slowing to open palm strokes over her own clitoris and inner thigh, her eyes sliding shut, a long shaking exhale leaving her. At 00:14.300, she folds forward over her bent knees, her right hand withdrawing and her palm pressing flat on her own stomach, her left arm locked around her shins, her bare breast flattening against her thigh, her dark hair curtaining her face, her whole body twitching in the last aftershocks. The final frame is <Subject 1> seated on the floor of <Picture 1> in the same 16:9 medium framing as the opening photograph, the same room, wall and light, naked, slick, hair across her face, chest rising and falling, the wall steady behind her.
+
+overall_soundscape:
+The room tone of <Video 1> with the window wash steady underneath. Wet finger sounds quickening at her vulva, a palm slapping softly against her own thigh, the floor shifting under her, fabric of her discarded clothes under her weight, her own hand sliding on her stomach. Her cry rising and breaking, a whispered phrase, long shaking exhales, sobbing moans easing into ragged breathing and one small laugh at the end.
+
+non_diegetic_music:
+The guitar figure resolves into a slower two-chord loop, brushed snare dropping out, tempo around 68 bpm, dynamics peaking across the climax and fading to a soft sustain as she folds forward.
