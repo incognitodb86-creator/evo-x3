@@ -1,0 +1,14 @@
+[
+  {
+    "name": "05a_impact_readme_master.txt",
+    "url": "https://raw.githubusercontent.com/ltdrdata/ComfyUI-Impact-Pack/master/README.md"
+  },
+  {
+    "name": "05a_gh_search_facerefine.json",
+    "url": "https://api.github.com/search/repositories?q=FaceRefine%20in:name"
+  },
+  {
+    "name": "05a_gh_repo_h3_facerefine.json",
+    "url": "https://api.github.com/repos/Carasibana/ComfyUI-H3-FaceRefine"
+  }
+]
