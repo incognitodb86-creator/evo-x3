@@ -62,10 +62,15 @@ def blackfreeze(f):
     e = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", f, "-vf", "blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2", "-an", "-f", "null", "-"], capture_output=True, text=True).stderr
     return [l.split("] ", 1)[-1] for l in e.splitlines() if "black_start" in l or "freeze_start" in l][:6]
 def contact_sheet(f, out, dur):
-    """stills every 0.5 s in +-1.5 s windows around 0:10/0:20/0:30/0:40/0:50 (inside the clip); no judging."""
-    ts = sorted({round(m + d * 0.5, 2) for m in (10, 20, 30, 40, 50) for d in range(-3, 4) if 0 <= m + d * 0.5 <= dur - 0.05})
+    """stills every second across the clip per Derrick brief; no judging."""
+    if dur <= 25:
+        ts = [float(s) for s in range(int(dur) + 1) if s <= dur - 0.05]
+        cols = 4
+    else:
+        ts = sorted({round(m + d * 0.5, 2) for m in (10, 20, 30, 40, 50) for d in range(-3, 4) if 0 <= m + d * 0.5 <= dur - 0.05})
+        cols = 7
     if not ts: return None
-    sel = "+".join(f"between(t\\,{t - 0.02:.2f}\\,{t + 0.02:.2f})" for t in ts); cols = 7; rows = (len(ts) + cols - 1) // cols
+    sel = "+".join(f"between(t\\,{t - 0.02:.2f}\\,{t + 0.02:.2f})" for t in ts); rows = (len(ts) + cols - 1) // cols
     vf = f"select='{sel}',scale=256:-2,drawtext=text='%{{pts\\:hms}}':x=6:y=6:fontsize=18:fontcolor=white:box=1:boxcolor=black@0.6,tile={cols}x{rows}:padding=4"
     r = subprocess.run(["ffmpeg", "-hide_banner", "-y", "-i", f, "-vf", vf, "-vsync", "vfr", "-frames:v", "1", out], capture_output=True, text=True)
     return out if r.returncode == 0 and os.path.exists(out) else None
