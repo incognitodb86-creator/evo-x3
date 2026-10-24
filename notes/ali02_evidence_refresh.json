@@ -1,0 +1,98 @@
+[
+  {
+    "name": "03y_mc_readme.txt",
+    "bytes": 3698,
+    "sha256_16": "ba3be667bf67bba7",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max/raw/main/README.md"
+  },
+  {
+    "name": "03y_graft_md.txt",
+    "bytes": 24858,
+    "sha256_16": "d575ba61388eb8dd",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max/raw/main/h3_graft_methodology.md"
+  },
+  {
+    "name": "03y_mc_discussions.404.txt",
+    "bytes": 52376,
+    "sha256_16": "610a0040c0dfa6cd",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max/api/discussions?reviewed=false&sort=newest"
+  },
+  {
+    "name": "03y_lightx2v_readme.401.txt",
+    "bytes": 29,
+    "sha256_16": "45b71fe98efe5f53",
+    "url": "https://huggingface.co/lightx2v/MiniMax-H3-33B-Turbo-Single-Step/raw/main/README.md"
+  },
+  {
+    "name": "03y_pack_readme.401.txt",
+    "bytes": 29,
+    "sha256_16": "45b71fe98efe5f53",
+    "url": "https://huggingface.co/pytraveler/MiniMax-H3-Prompt-Rewriter-ComfyUI/raw/main/README.md"
+  },
+  {
+    "name": "03y_fal_realism_card.txt",
+    "bytes": 5866,
+    "sha256_16": "be4c7cc4d9cc77df",
+    "url": "https://huggingface.co/fal/MiniMax-H3-Realism-People-LoRA/raw/main/README.md"
+  },
+  {
+    "name": "03y_minimax_base_api.404.txt",
+    "bytes": 52364,
+    "sha256_16": "6d0b02e95dd1d827",
+    "url": "https://huggingface.co/MiniMaxAI/MiniMax-H3/api/main"
+  },
+  {
+    "name": "03y_comfy_json_handler.404.txt",
+    "bytes": 14,
+    "sha256_16": "d5558cd419c8d46b",
+    "url": "https://raw.githubusercontent.com/Comfy-Org/ComfyUI/main/tools/comfy_json_handler.py"
+  },
+  {
+    "name": "03y_issue15529.html",
+    "bytes": 289440,
+    "sha256_16": "93f8d9c7b1cb5875",
+    "url": "https://github.com/Comfy-Org/ComfyUI/issues/15529"
+  },
+  {
+    "name": "03y_continuation_readme.404.txt",
+    "bytes": 14,
+    "sha256_16": "d5558cd419c8d46b",
+    "url": "https://raw.githubusercontent.com/SeanMesh/ComfyUI-MiniMax-H3-Continuation/main/README.md"
+  },
+  {
+    "name": "03y_civ_continuum.json",
+    "bytes": 62558,
+    "sha256_16": "76c8993eb229c486",
+    "url": "https://civitai.com/api/v1/models/2860061"
+  },
+  {
+    "name": "03y_civ_2906001.json",
+    "bytes": 11872,
+    "sha256_16": "c3ef7119396a684d",
+    "url": "https://civitai.com/api/v1/models/2906001"
+  },
+  {
+    "name": "03y_civ_multishot.json",
+    "bytes": 519296,
+    "sha256_16": "6ae2bbbaa543f471",
+    "url": "https://civitai.com/api/v1/models/2833322"
+  },
+  {
+    "name": "03y_civ_llmvision.json",
+    "bytes": 10035,
+    "sha256_16": "f81e716581e55417",
+    "url": "https://civitai.com/api/v1/models/2967166"
+  },
+  {
+    "name": "03y_civ_antiburn.404.txt",
+    "bytes": 36,
+    "sha256_16": "a3d20463869a7a84",
+    "url": "https://civitai.com/api/v1/models/1635185"
+  },
+  {
+    "name": "03y_civ_face.404.txt",
+    "bytes": 36,
+    "sha256_16": "7872ef65c39fa693",
+    "url": "https://civitai.com/api/v1/models/2905999"
+  }
+]
