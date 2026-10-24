@@ -363,6 +363,8 @@ def make_ctx(write=False):
                                   "official Ref2VA six-section rewrite in notes/im1_prompts.md (350-500 word main "
                                   "field, At MM:SS.mmm beats, canon camera wording, <Video 1> continuation). "
                                   "comm.guard_ok passed over every string input; offline static check clean. "
+                                  "The prompt set is the negation-free v2 of notes/im1_prompts.md "
+                                  "(fix_plan 3.1, gate notes/ali31_prompt_set_check.py). "
                                   "graph sha256 " + hashlib.sha256(data).hexdigest())}]}
         req_bytes = (json.dumps(req, indent=4) + "\n").encode("utf-8")
         open(REQ, "wb").write(req_bytes)
@@ -430,15 +432,41 @@ def run(g, ctx):
     return probs
 
 
+def restage_guard(req=REQ, nid=NEW_ID, jobs_dir=os.path.join(C, "p7", "jobs"), runs_dir=os.path.join(C, "runs")):
+    """--restage replaces an ALREADY STAGED, UNRENDERED request, and nothing else.
+    Preconditions, each a hard refusal: the request exists, this id has no result.json and no rendered mp4,
+    and the request on disk carries exactly this id. Returns the sha256 of the bytes being replaced.
+    Paths are parameters so notes/ali31_prompt_set_check.py can seed all three refusals in a temp tree."""
+    if not os.path.exists(req):
+        raise SystemExit(f"REFUSE --restage needs an existing staged request at {req}")
+    for p in (os.path.join(jobs_dir, nid + ".result.json"), os.path.join(runs_dir, nid, nid + ".mp4")):
+        if os.path.exists(p):
+            raise SystemExit(f"REFUSE --restage: {nid} is already rendered/finished at {p}")
+    prev = open(req, "rb").read()
+    ids = [j.get("id") for j in json.loads(prev.decode("utf-8")).get("jobs", [])]
+    if ids != [nid]:
+        raise SystemExit(f"REFUSE --restage: the request on disk carries {ids}, not {[nid]}")
+    os.remove(req)
+    return hashlib.sha256(prev).hexdigest()
+
+
 def main():
     mode = (sys.argv[1] if len(sys.argv) > 1 else "--check").lower()
     if mode == "--selftest":
         return selftest()
-    if mode == "--build":
-        if os.path.exists(REQ):
-            raise SystemExit(f"REFUSE {REQ} already exists; a request is only submittable while it is absent")
+    if mode in ("--build", "--restage"):
+        prev_sha = None
+        if mode == "--build":
+            if os.path.exists(REQ):
+                raise SystemExit(f"REFUSE {REQ} already exists; a request is only submittable while it is absent")
+        else:
+            prev_sha = restage_guard()
         ctx = make_ctx(write=True)
         man = build_manifest(ctx["g"], ctx)
+        if prev_sha:
+            man["restage_of_request_sha"] = prev_sha
+            man["restage_reason"] = ("the 3.1 prompt audit rewrote the prompt text, so the staged request of 2.1b "
+                                     "carried a graph sha that no longer matches the words it quotes")
         open(MAN, "w", encoding="utf-8").write(json.dumps(man, indent=2, sort_keys=True) + "\n")
         ctx["manifest"] = man
         ctx["req_bytes"] = open(REQ, "rb").read()
@@ -446,7 +474,10 @@ def main():
         ctx = make_ctx(write=False)
     probs = run(ctx["g"], ctx)
     m = ctx["manifest"]
-    if mode == "--build":
+    if mode in ("--build", "--restage"):
+        if m.get("restage_of_request_sha"):
+            print(f"restaged request {REQ}: replaced bytes sha {m['restage_of_request_sha'][:16]} "
+                  f"({m['restage_reason']})")
         print(f"wrote {GOUT} {m['graph_bytes']} B sha {m['graph_sha'][:16]}")
         print(f"wrote {ROUT}")
         print(f"wrote {REQ} jobs={m['request']['jobs']} id={m['request']['id']} frames={m['request']['frames']}")
@@ -557,6 +588,52 @@ def selftest():
         open(seed_keeper, "wb").write(b"x")
         c["keeper"] = seed_keeper
     case("BASE", base_drift)
+
+    # --restage (the 3.1 prompt rewrite refreshed a staged, unrendered request) is graded in a temp tree, so no
+    # real request, result or run dir is touched by these four cases.
+    def restage_cases():
+        import tempfile
+        t = tempfile.mkdtemp(prefix="im1b_restage_")
+        req, jobs, runs = os.path.join(t, "JOB_REQUEST.json"), os.path.join(t, "jobs"), os.path.join(t, "runs")
+        os.makedirs(jobs)
+        os.makedirs(runs)
+        mine = json.dumps({"jobs": [{"id": NEW_ID}]}).encode("utf-8")
+
+        def guarded(expect_refusal):
+            def run_case(setup, tag):
+                setup()
+                try:
+                    restage_guard(req=req, nid=NEW_ID, jobs_dir=jobs, runs_dir=runs)
+                    fired_ok = not expect_refusal
+                    detail = ["guard passed, bytes consumed"] if not expect_refusal else ["guard PASSED, must refuse"]
+                except SystemExit as e:
+                    fired_ok = expect_refusal and str(e).startswith("REFUSE")
+                    detail = [str(e)]
+                seeds.append((tag, fired_ok, detail, [] if fired_ok else detail))
+            return run_case
+        gc = guarded(True)
+
+        def absent():
+            for p in (req, os.path.join(jobs, NEW_ID + ".result.json")):
+                if os.path.exists(p):
+                    os.remove(p)
+        gc(absent, "RESTAGE_ABSENT")
+
+        def rendered():
+            open(req, "wb").write(mine)
+            open(os.path.join(jobs, NEW_ID + ".result.json"), "w").write("{}")
+        gc(rendered, "RESTAGE_RENDERED")
+
+        def foreign():
+            os.remove(os.path.join(jobs, NEW_ID + ".result.json"))
+            open(req, "wb").write(json.dumps({"jobs": [{"id": BASE_ID}]}).encode("utf-8"))
+        gc(foreign, "RESTAGE_FOREIGN")
+
+        def ours():
+            open(req, "wb").write(mine)
+        guarded(False)(ours, "RESTAGE_OWN_ID_PASSES")      # counter-sample: the guard must let its own id through
+
+    restage_cases()
 
     fired = [t for t, hit, p, x in seeds if hit]
     leaky = [(t, p) for t, hit, p, x in seeds if not hit]
