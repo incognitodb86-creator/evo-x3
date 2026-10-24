@@ -4,11 +4,21 @@ Called by ralph.ps1 job kind "graph"; Forge never runs it itself. Usage:
 Input: <arm_dir>\request.api.json. Uses comm.run (status.log JOB start/end lines) unchanged.
 Redo rule (Derrick / max-DECISIONS 2026-10-22 3:46 PM CT): only OBJECTIVE failures redo, max 2 (redo 1 same seed, redo 2 seed+1):
 JOB error (incl. node_errors at submit), ffprobe frame count / missing audio / 0-byte, black or frozen frames. No judge here.
-ComfyUI: woken via llama-swap's documented /comfyui/ route, then addressed on its own port; never /upstream. Unloaded after via
+ComfyUI: every call goes through llama-swap's documented /comfyui/ passthrough (docs/kb/guides/
+upstreams/comfyui.md, wired to the reserved comfyui_auto); no port is hard-coded because
+llama-swap assigns it (--port ${PORT}); never /upstream. Unloaded after via
 POST /api/models/unload/comfyui_auto. Exit: 0 ok, 2 static check, 3 adults-only guard, 4 ComfyUI down, 5 objective fail after redos."""
 import os, sys, json, copy, time, argparse, subprocess, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import comm
-LS = comm.LS; COMFY = "http://127.0.0.1:10004"; comm.BASE = COMFY
+LS = comm.LS
+# CA2 0.2 community USAGE audit (2026-11-03): llama-swap docs/kb/guides/upstreams/comfyui.md makes
+# the client base its dedicated /comfyui/ passthrough, and the port is llama-swap-assigned: the live
+# C:/AI/director/config/llama-swap.yaml has startPort 10001, every cmd uses --port ${PORT}, and the
+# literal 10004 appears 0 times in it. The old COMFY = "http://127.0.0.1:10004" was a DERIVED port
+# (7-member alphabetical order), and this box's own gpu_guard.ps1:12-13 resolves ComfyUI's port from
+# the main.py command line with a 10002/10003 fallback - so the port is not a constant to bake in.
+# Address the documented route; llama-swap proxies it to comfyui_auto and blocks on readiness.
+COMFY = LS + "/comfyui"; comm.BASE = COMFY
 def post(u, t=120): return urllib.request.urlopen(urllib.request.Request(u, data=b"", method="POST"), timeout=t).read()
 # ALI-163 R3 harness fix (2026-10-23, backup run_graph_job.py.bak-20261023-hcimg): a graph job can be an IMAGE job
 # (Klein 9B reference-sheet edit -> SaveImage -> .png). The objective gate below is a VIDEO gate (audio stream, exact frame
@@ -24,9 +34,12 @@ def wake(log):
     for n in names:
         if n and n != "comfyui_auto": log(f"UNLOAD LLM {n}"); post(f"{LS}/api/models/unload/{n}")
     if not comfy_ok():
-        try: urllib.request.urlopen(LS + "/comfyui/", timeout=900).read()
-        except Exception as e: log(f"COMFY wake note {str(e)[:160]}")
-    for _ in range(60):
+        # docs/comfyui.md: GET to the exact route root is IN the fixed ignore set and "returns 404
+        # while the model is not loaded", so it cannot wake anything; a non-ignored path "starts it
+        # as usual" and llama-swap blocks up to healthCheckTimeout (1200 in the live config). So the
+        # root GET is gone and the poll below runs on a starting path (/system_stats) for 240 x 5 s.
+        log("wake: GET /comfyui/ is ignored by llama-swap (docs/comfyui.md); polling /comfyui/system_stats")
+    for _ in range(240):
         if comfy_ok(): return True
         time.sleep(5)
     return False

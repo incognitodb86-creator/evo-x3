@@ -4,7 +4,7 @@
   "agy_baseline13_s51240001",
   "ali147_pool_hc_c1_s51100001",
   "ali147_pool_hc_c2_s51100002",
-  "ali147_pool_hc_r3b_s51130003"
+  "ali147_pool_hc_r3i_s51130003"
  ],
  "window_jobs": [
   {
@@ -145,10 +145,10 @@
     null
    ],
    "frames": 124,
-   "graph": "C:/AI/community/p7/graphs/ali147_pool_hc_r3b_s51130003.baseline.api.json",
-   "id": "ali147_pool_hc_r3b_s51130003.baseline",
-   "mp4": false,
-   "reason": "mp4 absent - render it in a GPU window",
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3b_s51130003/ali147_pool_hc_r3b_s51130003.api.json",
+   "id": "ali147_pool_hc_r3b_s51130003",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3i_s51130003)",
    "seed": 51130003
   },
   {
@@ -157,8 +157,8 @@
     null
    ],
    "frames": 124,
-   "graph": "C:/AI/community/p7/graphs/ali147_pool_hc_r3i_s51130003.api.json",
-   "id": "ali147_pool_hc_r3i_s51130003",
+   "graph": "C:/AI/community/p7/graphs/ali147_pool_hc_r3b_s51130003.baseline.api.json",
+   "id": "ali147_pool_hc_r3b_s51130003.baseline",
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
    "seed": 51130003
@@ -172,7 +172,7 @@
    "graph": "C:/AI/community/runs/ali147_pool_hc_r3r_s51130003/ali147_pool_hc_r3r_s51130003.api.json",
    "id": "ali147_pool_hc_r3r_s51130003",
    "mp4": true,
-   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3b_s51130003)",
+   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3i_s51130003)",
    "seed": 51130003
   },
   {
@@ -270,6 +270,66 @@
    "mp4": true,
    "reason": "NOT_16x9 768x1344",
    "seed": 51080000
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd002_s51150001.api.json",
+   "id": "ali163_hc15_bd002_s51150001",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd006_s51150002.api.json",
+   "id": "ali163_hc15_bd006_s51150002",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150002
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd013_s51150003.api.json",
+   "id": "ali163_hc15_bd013_s51150003",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi046_s51150004.api.json",
+   "id": "ali163_hc15_gi046_s51150004",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi063_s51150005.api.json",
+   "id": "ali163_hc15_gi063_s51150005",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150005
   },
   {
    "canvas": [
@@ -1017,6 +1077,18 @@
   },
   {
    "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150005/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150005
+  },
+  {
+   "canvas": [
     1024,
     576
    ],
@@ -1026,6 +1098,54 @@
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
    "seed": null
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_bd002_s51150001/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_bd006_s51150002/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150002
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_bd013_s51150003/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_gi046_s51150004/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150004
   },
   {
    "canvas": [
