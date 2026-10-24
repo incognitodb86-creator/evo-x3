@@ -10,6 +10,12 @@ guitar". PROMPT.md makes this a per-iteration duty. ralph.ps1, PROMPT.md, TASKS 
 permission file stay Max's: editing them = SCOPE fail + STOP_RALPH. If you need one, write `[!] Max: <ask>` in notes
 and a line in `notes/guard_requests.md`, print `GUARD_REQUEST`, and carry on with the rest.
 
+## 0. When to use this skill
+
+- The first tool calls of EVERY iteration (ralph.log, the deny log, your own notes) before touching any file.
+- After a CHECK FAIL, SCOPE fail, TIMEOUT, ticks=+0, a split TASKS.md line, a new deny, or a check that went green suspiciously fast.
+- Before saying DONE: section 5 is the evidence bar.
+
 ## 1. Every pass, in order
 
 1. `tail -n 15 C:/Users/derek/5slock/ralph-community/logs/ralph.log` - STEP 0 breaker: 3 TIMEOUTs in a row, or the
