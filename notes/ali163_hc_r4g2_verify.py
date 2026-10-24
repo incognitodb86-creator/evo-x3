@@ -46,6 +46,11 @@ CROPS = [
     ("HC15D_w1", "GI046_w1_face.png", "GROK_IMAGINE_2026-10-19/GI046.jpg", [341, 330, 201, 201], "HC15D"),
     # HC15 clip 5 (fix_plan 0.1, HC15 pass 6): the solo woman of the approved GI063 start still (1 face, HC15E, box h/w 1.22 frontal)
     ("HC15E_w1", "GI063_w1_face.png", "GROK_IMAGINE_2026-10-19/GI063.jpg", [209, 233, 166, 202], "HC15E"),
+    # HC15 clip 6 (fix_plan 0.1, HC15 pass 7): the two women of the approved GI072 start still.
+    # SCRFD finds 2 faces in GI072 (row HC15F of notes/ali163_hc_r4g2_facebox.py), not the 1 expected
+    # there, so this is a pair scene: w1 = left face box 909,345,89,130 (h/w 1.46), w2 = right 1139,39,89,119.
+    ("HC15F_w1", "GI072_w1_face.png", "GROK_IMAGINE_2026-10-19/GI072.jpg", [909, 345, 89, 130], "HC15F"),
+    ("HC15F_w2", "GI072_w2_face.png", "GROK_IMAGINE_2026-10-19/GI072.jpg", [1139, 39, 89, 119], "HC15F"),
 ]
 
 det, rec = Scrfd(thr=0.5), ArcFace()
