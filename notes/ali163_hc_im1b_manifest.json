@@ -69,8 +69,8 @@
     "prose_strings": 2
   },
   "gpu_contact": "none: no socket, no queue, no GPU command in this builder (NO_GPU check)",
-  "graph_bytes": 19372,
-  "graph_sha": "6b5749443c99f4b4ed853ecadf6fcad9d187bb73da599ffd797cc6ed74db5563",
+  "graph_bytes": 19441,
+  "graph_sha": "670e5c904d2a78c2a16f1b519c02046a014e6b5d9cb89998de53d0f75db6659a",
   "idfree": {
     "comfy_out": false,
     "p7_result": false,
@@ -133,7 +133,7 @@
         "Push In"
       ],
       "main_field": "integrated_multimodal_description",
-      "main_words": 454,
+      "main_words": 459,
       "picture1_first_frame": true,
       "sections": [
         "subject_definitions",
@@ -145,18 +145,20 @@
       ],
       "speed": true,
       "video1": true,
-      "words": 1133
+      "words": 1145
     }
   },
   "request": {
-    "bytes": 772,
+    "bytes": 889,
     "frames": 243,
     "frames_tol": 33,
     "id": "ali147_pool_hc_r3i_s51130003",
     "jobs": 1,
     "minutes": 60,
-    "sha16": "5a3fe22a5d56bc68"
+    "sha16": "61565fcabe6e4346"
   },
+  "restage_of_request_sha": "5a3fe22a5d56bc686bdf83b5974b036d7c89fed4682d075743f3ff076a5d4ce0",
+  "restage_reason": "the 3.1 prompt audit rewrote the prompt text, so the staged request of 2.1b carried a graph sha that no longer matches the words it quotes",
   "sampler": "euler",
   "seed": 51130003,
   "shift": [
