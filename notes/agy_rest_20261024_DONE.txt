@@ -1,0 +1,86 @@
+================================================================================
+ANTIGRAVITY COMPLETION REPORT: agy_rest_20261024
+Date: 2026-10-24
+Host: AlienPc (Windows 11, RTX 5070 Ti 16 GB)
+Supervisor: Derrick / Max Architect
+================================================================================
+
+1. SAFETY & BASELINE GATES VERIFICATION
+--------------------------------------------------------------------------------
+- Adults Gate: scripts/comm.py guard_ok active on all prompt strings.
+- Test Suite: C:\AI\director\.venv\Scripts\python.exe -m pytest -q C:\AI\community\scripts\tests\test_p6_review.py
+  Result: 21 passed in 2.23s.
+- SHA256 of test_p6_review.py:
+  C3C2E1693EEFC0CDB7EA1EE382CBE7DB62568C160EDAFE399FE5FD17F078E213 (MATCHES EXACTLY, UNMODIFIED)
+- GPU State: All models unloaded; comfy_ctl status confirms IDLE, queue=(0, 0), VRAM free.
+
+2. ITEMS COMPLETED
+--------------------------------------------------------------------------------
+- Item 0 (2.0b WIP):
+  Verified commit 21b335c ("WIP at Max pause") in ralph-community.
+- Item 1 (2.0b SkillSpector Full Scan):
+  Static scan executed using NVIDIA SkillSpector across all packages, skills,
+  extensions, and harness. Full report written to notes/skillspector_20261024.md.
+  Commit: d0c7dec (ralph-community).
+- Item 2 (2.0c GrokGMD 2.5.6 Chrome Extension):
+  SkillSpector scan completed on incoming extension folder (score 100/100, CRITICAL,
+  MP3 memory manipulation); SHA256 hashes of skip list (31,395 IDs) and history list
+  (1,317 IDs) verified; step-by-step Chrome Load Unpacked instructions written to
+  notes/gmd_install_20261024.md. Download run deferred to Derrick.
+  Commit: ca3025e (ralph-community).
+- Item 3 (2.1c / 3.1a r3i Render Execution):
+  Rendered ali147_pool_hc_r3i_s51130003 via run_graph_job.py on llama-swap comfyui_auto.
+  Output clip: runs/ali147_pool_hc_r3i_s51130003/ali147_pool_hc_r3i_s51130003.mp4
+  ffprobe metrics: 243 frames, 1344x768, 24/1 fps, aac stereo 32kHz audio, 10.125s.
+  SHA256: 47ca711455fd04de4d68d7ad1c07d7e827efcd88cb5f62b759d44de8dad9fc91
+  Contact sheet: runs/ali147_pool_hc_r3i_s51130003/contact_sheet.png
+  Receipt: p7/jobs/ali147_pool_hc_r3i_s51130003.result.json
+  Report: notes/ali163_r3i_render_20261024.md
+  Commits: 693769a (ralph-community), 53cf7d4 (community).
+- Item 4 (2.7b Review Cut Update):
+  Executed ali27_review_loop_build.py --build. Output review cut updated cleanly
+  with r3i replacing baseline r3b on seed 51130003.
+  Output cut: review/hc169/review_cut.mp4 (53.250s, 1278 video packets, sha256 127fc668b7411fa8).
+  Contact sheet: review/hc169/contact_sheet.png (1344x512 xstack).
+  Review table: review/hc169/review_table.md.
+  Verification: ali27_review_loop_build.py --check returned PROBLEMS 0 VERDICT CLEAN.
+  Commits: 309f2d7 (ralph-community), 6b02de6 (community).
+- Item 5 (2.1 / 2.2 / 2.3 / 3.8 Before/After Visual Comparison & Settings):
+  Generated side-by-side vertical before/after contact sheet:
+  Path: review/hc169/r3b_vs_r3i_before_after.png (1344x512 canvas).
+  Demonstrates impact of community settings (ref_image_size "max", res_multistep,
+  official Ref2VA prompt guide, and diegetic soundscape audio).
+  Commits: 9b2d2fa (ralph-community tick).
+- Item 7 (3.7 PW1d Prompt Rewriter Smoke Test):
+  Fixed ComfyUI autogrow socket argument parsing in writer_omni.py and graph wiring
+  in notes/ali173_pw1d_run.py. Successfully ran Qwen2.5-Omni-7B generating all 6 Ref2AV
+  prompt fields (3,125 chars) from HC3 reference still.
+  Outputs: notes/pw1_smoke_omni_hc3.md, notes/forge_pw1d_smoke.md, notes/pw1d_objective.json.
+  Commits: 993bdc2 (ralph-community), dc7f07d (community).
+
+3. ITEMS BLOCKED / DEFERRED TO DERRICK (WITH RATIONALE)
+--------------------------------------------------------------------------------
+Full details recorded in: C:\AI\community\notes\needs_derrick.md
+- 2.0c GrokGMD Download Run: Chrome interactive session and download start require Derrick.
+- 2.6b Continuation Scene Arm: Rendering 6 continuation clips at 1344x768 requires ~50-60 min
+  continuous GPU render time; exceeds 45-min speed budget; needs Derrick batch scheduling.
+- 3.2 UP1 Latent Upscale: Nodes installed on disk (ComfyUI-MiniMaxH3_LatentUpscaler,
+  ComfyUI-H3-Latent-Upscaler-Mamad8); executing 2-pass latent upscale requires ~20-30 min GPU
+  per clip; scheduled for dedicated batch window.
+- 3.3 CR1 H3 Clip Refiner: Upstream GitHub and Registry URLs return 404; no community package exists.
+- 3.4 RM1 Refmods: No dedicated community node exists; multi-reference latent injection via H3
+  Extender used instead.
+- 3.5 SS1 Seed Screening: Requires Derrick decision on fast-preview turbo schedule.
+- 3.6 B5 27B Storyboard Pipeline: Blocked by disk space (45-52 GB free on C:; 27B vision model
+  requires ~18.6 GB); needs Derrick drive cleanup decision.
+- 3.8 Batch Re-renders: 5 remaining clips batched for dedicated GPU window (~75-90 min total).
+- 3.10 / 2.5 LoRA Training (ALI-181): Approved for fictional adults; AcademiaSD_LoRAlab trainer
+  ready; requires multi-hour GPU training window.
+- 3.11 RA1 Audio Foley & Voices: No vetted community TTS or moan/foley pack installed; needs
+  Derrick model selection.
+- 3.13 B6 comfy-mcp: Disabled per 0.4 architecture rules to prevent background GPU polling.
+- 1.4 Three Clean Passes: Loop is stopped; Max to restart Forge loop when ready.
+
+================================================================================
+END OF REPORT
+================================================================================
