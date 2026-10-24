@@ -1,0 +1,253 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/9ZDskmO6hHz8zRBLgx4SZXuUmFI</id>
+  <title>arXiv Query: search_query=&amp;id_list=2311.17982,2406.15252,2504.14716,2503.09949,2503.05977,2602.06013&amp;start=0&amp;max_results=20</title>
+  <updated>2026-10-24T01:58:48Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=20&amp;id_list=2311.17982,2406.15252,2504.14716,2503.09949,2503.05977,2602.06013" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>20</opensearch:itemsPerPage>
+  <opensearch:totalResults>6</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2406.15252v3</id>
+    <title>VideoScore: Building Automatic Metrics to Simulate Fine-grained Human Feedback for Video Generation</title>
+    <updated>2024-10-14T04:08:53Z</updated>
+    <link href="https://arxiv.org/abs/2406.15252v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2406.15252v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The recent years have witnessed great advances in video generation. However, the development of automatic video metrics is lagging significantly behind. None of the existing metric is able to provide reliable scores over generated videos. The main barrier is the lack of large-scale human-annotated dataset. In this paper, we release VideoFeedback, the first large-scale dataset containing human-provided multi-aspect score over 37.6K synthesized videos from 11 existing video generative models. We train VideoScore (initialized from Mantis) based on VideoFeedback to enable automatic video quality assessment. Experiments show that the Spearman correlation between VideoScore and humans can reach 77.1 on VideoFeedback-test, beating the prior best metrics by about 50 points. Further result on other held-out EvalCrafter, GenAI-Bench, and VBench show that VideoScore has consistently much higher correlation with human judges than other metrics. Due to these results, we believe VideoScore can serve as a great proxy for human raters to (1) rate different video models to track progress (2) simulate fine-grained human feedback in Reinforcement Learning with Human Feedback (RLHF) to improve current video generation models.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-06-21T15:43:46Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xuan He</name>
+    </author>
+    <author>
+      <name>Dongfu Jiang</name>
+    </author>
+    <author>
+      <name>Ge Zhang</name>
+    </author>
+    <author>
+      <name>Max Ku</name>
+    </author>
+    <author>
+      <name>Achint Soni</name>
+    </author>
+    <author>
+      <name>Sherman Siu</name>
+    </author>
+    <author>
+      <name>Haonan Chen</name>
+    </author>
+    <author>
+      <name>Abhranil Chandra</name>
+    </author>
+    <author>
+      <name>Ziyan Jiang</name>
+    </author>
+    <author>
+      <name>Aaran Arulraj</name>
+    </author>
+    <author>
+      <name>Kai Wang</name>
+    </author>
+    <author>
+      <name>Quy Duc Do</name>
+    </author>
+    <author>
+      <name>Yuansheng Ni</name>
+    </author>
+    <author>
+      <name>Bohan Lyu</name>
+    </author>
+    <author>
+      <name>Yaswanth Narsupalli</name>
+    </author>
+    <author>
+      <name>Rongqi Fan</name>
+    </author>
+    <author>
+      <name>Zhiheng Lyu</name>
+    </author>
+    <author>
+      <name>Yuchen Lin</name>
+    </author>
+    <author>
+      <name>Wenhu Chen</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2504.14716v2</id>
+    <title>Pairwise or Pointwise? Evaluating Feedback Protocols for Bias in LLM-Based Evaluation</title>
+    <updated>2025-08-21T15:48:03Z</updated>
+    <link href="https://arxiv.org/abs/2504.14716v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2504.14716v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Large Language Models (LLMs) are widely used as proxies for human labelers in both training (Reinforcement Learning from AI Feedback) and large-scale response evaluation (LLM-as-a-judge). Alignment and evaluation are critical components in the development of reliable LLMs, and the choice of feedback protocol plays a central role in both but remains understudied. In this work, we show that the choice of feedback protocol for evaluation (absolute scores versus relative preferences) can significantly affect evaluation reliability and induce systematic biases. In the context of LLM-as-a-judge evaluation, we show that pairwise protocols are more vulnerable to distracted evaluation. Generator models can exploit spurious attributes (or distractor features) favored by the LLM judge, resulting in inflated scores for lower-quality outputs. We find that absolute scoring is more robust to such manipulation, producing judgments that better reflect response quality and are less influenced by distractor features. Our results demonstrate that generator models can flip preferences by embedding distractor features, skewing LLM-as-a-judge comparisons and leading to inaccurate conclusions about model quality in benchmark evaluations. Pairwise preferences flip in about 35% of the cases, compared to only 9% for absolute scores. We offer recommendations for choosing feedback protocols based on dataset characteristics and evaluation objectives.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-04-20T19:05:59Z</published>
+    <arxiv:comment>Published at COLM 2025</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Tuhina Tripathi</name>
+    </author>
+    <author>
+      <name>Manya Wadhwa</name>
+    </author>
+    <author>
+      <name>Greg Durrett</name>
+    </author>
+    <author>
+      <name>Scott Niekum</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2503.09949v4</id>
+    <title>UVE: Are MLLMs Unified Evaluators for AI-Generated Videos?</title>
+    <updated>2026-01-17T07:29:31Z</updated>
+    <link href="https://arxiv.org/abs/2503.09949v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2503.09949v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>With the rapid growth of video generative models (VGMs), it is essential to develop reliable and comprehensive automatic metrics for AI-generated videos (AIGVs). Existing methods either use off-the-shelf models optimized for other tasks or rely on human assessment data to train specialized evaluators. These approaches are constrained to specific evaluation aspects and are difficult to scale with the increasing demands for finer-grained and more comprehensive evaluations. To address this issue, this work investigates the feasibility of using multimodal large language models (MLLMs) as a unified evaluator for AIGVs, leveraging their strong visual perception and language understanding capabilities. To evaluate the performance of automatic metrics in unified AIGV evaluation, we introduce a benchmark called UVE-Bench. UVE-Bench collects videos generated by state-of-the-art VGMs and provides pairwise human preference annotations across 15 evaluation aspects. Using UVE-Bench, we extensively evaluate 18 MLLMs. Our empirical results suggest that while advanced MLLMs (e.g., Qwen2VL-72B and InternVL2.5-78B) still lag behind human evaluators, they demonstrate promising ability in unified AIGV evaluation, significantly surpassing existing specialized evaluation methods. Additionally, we conduct an in-depth analysis of key design choices that impact the performance of MLLM-driven evaluators, offering valuable insights for future research on AIGV evaluation.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-03-13T01:52:27Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yuanxin Liu</name>
+    </author>
+    <author>
+      <name>Rui Zhu</name>
+    </author>
+    <author>
+      <name>Shuhuai Ren</name>
+    </author>
+    <author>
+      <name>Jiacong Wang</name>
+    </author>
+    <author>
+      <name>Haoyuan Guo</name>
+    </author>
+    <author>
+      <name>Xu Sun</name>
+    </author>
+    <author>
+      <name>Lu Jiang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2503.05977v1</id>
+    <title>Is Your Video Language Model a Reliable Judge?</title>
+    <updated>2025-03-07T23:17:59Z</updated>
+    <link href="https://arxiv.org/abs/2503.05977v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2503.05977v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>As video language models (VLMs) gain more applications in various scenarios, the need for robust and scalable evaluation of their performance becomes increasingly critical. The traditional human expert-based evaluation of VLMs has limitations in consistency and scalability, which sparked interest in automatic methods such as employing VLMs to evaluate VLMs. However, the reliability of VLMs as judges remains underexplored. Existing methods often rely on a single VLM as the evaluator. However, this approach can be unreliable or biased because such a model may lack the ability to fully understand the content and may have inherent biases, ultimately compromising evaluation reliability. A remedy is to apply the principle of collective thoughts, aggregating evaluations from multiple VLMs to enhance reliability. This study investigates the efficacy of such approaches, particularly when the pool of judges includes both reliable and unreliable models. Our findings reveal that incorporating collective judgments from such a mixed pool does not necessarily improve the accuracy of the final evaluation. The inclusion of less reliable judges can introduce noise, undermining the overall reliability of the outcomes. To explore the factors that impact evaluation reliability, we fine-tune an underperforming VLM judge, Video-LLaVA, and observe that improved understanding ability alone is insufficient to make VLM judges more reliable. These findings stress the limitations of collective thought approaches and highlight the need for more advanced methods that can account for the reliability of individual models. Our study promotes the development of more reliable evaluation methods for VLMs</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-03-07T23:17:59Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ming Liu</name>
+    </author>
+    <author>
+      <name>Wensheng Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2311.17982v1</id>
+    <title>VBench: Comprehensive Benchmark Suite for Video Generative Models</title>
+    <updated>2023-11-29T18:39:01Z</updated>
+    <link href="https://arxiv.org/abs/2311.17982v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2311.17982v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Video generation has witnessed significant advancements, yet evaluating these models remains a challenge. A comprehensive evaluation benchmark for video generation is indispensable for two reasons: 1) Existing metrics do not fully align with human perceptions; 2) An ideal evaluation system should provide insights to inform future developments of video generation. To this end, we present VBench, a comprehensive benchmark suite that dissects "video generation quality" into specific, hierarchical, and disentangled dimensions, each with tailored prompts and evaluation methods. VBench has three appealing properties: 1) Comprehensive Dimensions: VBench comprises 16 dimensions in video generation (e.g., subject identity inconsistency, motion smoothness, temporal flickering, and spatial relationship, etc). The evaluation metrics with fine-grained levels reveal individual models' strengths and weaknesses. 2) Human Alignment: We also provide a dataset of human preference annotations to validate our benchmarks' alignment with human perception, for each evaluation dimension respectively. 3) Valuable Insights: We look into current models' ability across various evaluation dimensions, and various content types. We also investigate the gaps between video and image generation models. We will open-source VBench, including all prompts, evaluation methods, generated videos, and human preference annotations, and also include more video generation models in VBench to drive forward the field of video generation.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-11-29T18:39:01Z</published>
+    <arxiv:comment>Equal contributions from first four authors. Project page: https://vchitect.github.io/VBench-project/ Code: https://github.com/Vchitect/VBench</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ziqi Huang</name>
+    </author>
+    <author>
+      <name>Yinan He</name>
+    </author>
+    <author>
+      <name>Jiashuo Yu</name>
+    </author>
+    <author>
+      <name>Fan Zhang</name>
+    </author>
+    <author>
+      <name>Chenyang Si</name>
+    </author>
+    <author>
+      <name>Yuming Jiang</name>
+    </author>
+    <author>
+      <name>Yuanhan Zhang</name>
+    </author>
+    <author>
+      <name>Tianxing Wu</name>
+    </author>
+    <author>
+      <name>Qingyang Jin</name>
+    </author>
+    <author>
+      <name>Nattapol Chanpaisit</name>
+    </author>
+    <author>
+      <name>Yaohui Wang</name>
+    </author>
+    <author>
+      <name>Xinyuan Chen</name>
+    </author>
+    <author>
+      <name>Limin Wang</name>
+    </author>
+    <author>
+      <name>Dahua Lin</name>
+    </author>
+    <author>
+      <name>Yu Qiao</name>
+    </author>
+    <author>
+      <name>Ziwei Liu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2602.06013v1</id>
+    <title>GenArena: How Can We Achieve Human-Aligned Evaluation for Visual Generation Tasks?</title>
+    <updated>2026-02-05T18:52:48Z</updated>
+    <link href="https://arxiv.org/abs/2602.06013v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2602.06013v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The rapid advancement of visual generation models has outpaced traditional evaluation approaches, necessitating the adoption of Vision-Language Models as surrogate judges. In this work, we systematically investigate the reliability of the prevailing absolute pointwise scoring standard, across a wide spectrum of visual generation tasks. Our analysis reveals that this paradigm is limited due to stochastic inconsistency and poor alignment with human perception. To resolve these limitations, we introduce GenArena, a unified evaluation framework that leverages a pairwise comparison paradigm to ensure stable and human-aligned evaluation. Crucially, our experiments uncover a transformative finding that simply adopting this pairwise protocol enables off-the-shelf open-source models to outperform top-tier proprietary models. Notably, our method boosts evaluation accuracy by over 20% and achieves a Spearman correlation of 0.86 with the authoritative LMArena leaderboard, drastically surpassing the 0.36 correlation of pointwise methods. Based on GenArena, we benchmark state-of-the-art visual generation models across diverse tasks, providing the community with a rigorous and automated evaluation standard for visual generation.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-02-05T18:52:48Z</published>
+    <arxiv:comment>Project Page: https://genarena.github.io/, Code: https://github.com/ruihanglix/genarena</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ruihang Li</name>
+    </author>
+    <author>
+      <name>Leigang Qu</name>
+    </author>
+    <author>
+      <name>Jingxu Zhang</name>
+    </author>
+    <author>
+      <name>Dongnan Gui</name>
+    </author>
+    <author>
+      <name>Mengde Xu</name>
+    </author>
+    <author>
+      <name>Xiaosong Zhang</name>
+    </author>
+    <author>
+      <name>Han Hu</name>
+    </author>
+    <author>
+      <name>Wenjie Wang</name>
+    </author>
+    <author>
+      <name>Jiaqi Wang</name>
+    </author>
+  </entry>
+</feed>
