@@ -5,8 +5,8 @@
 - base: `Qwen2.5-Omni-7B GGUF Q4_K_M · 6.2 GB download · ~9 GB with the adapter and a 12k context`
 - adapter: `on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]`
 - options: max_new_tokens 2048, temperature 0.7, top_p 0.8, top_k 20, repetition_penalty 1.05, n_ctx 8192, gpu_layers -1, auto_download **False** (a smoke test must fail, not fetch)
-- prompt_id `d0606964-415f-4bbc-ba0f-d68e286bb023` | port 10004 | mode run
-- window: 2026-10-23 16:17:23 -> 2026-10-23 16:17:28 CT = 0.1 min GPU
+- prompt_id `8581a1ee-351e-4da5-8361-202a75ce6df1` | port 10004 | mode run
+- window: 2026-10-24 12:36:40 -> 2026-10-24 12:37:01 CT = 0.3 min GPU
 - text output only: no sampler, no DiT, no SaveVideo, no vision judge, no media file (check 9)
 
 ## The short prompt that went in
@@ -18,34 +18,62 @@ Use <Picture 1> for the beach scene and for the two adult women in it. The clip 
 ## rewritten_prompt (the six fields the node produced)
 
 ```
+subject_definitions:
+<Subject 1> is the woman on the left in <Picture 1>, featuring long blonde hair, a red and black plaid bikini top, and black bikini bottoms with a red floral pattern.
+<Subject 2> is the woman on the right in <Picture 1>, featuring long blonde hair, a pink bikini top with black trim, and black bikini bottoms with a pink geometric pattern.
+<Subject 3> is the beach scene in <Picture 1>, featuring a sandy beach, shallow surf, and a distant coastal landscape under warm golden hour lighting.
 
+summary:
+[reference generation] The target video features <Subject 1> and <Subject 2> sitting close together on the sand of <Subject 3>. The camera slowly drifts in on them as they relax in the shallow surf at golden hour, with warm rim light highlighting their wet skin and the spray backlit by the sun.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the red and black plaid bikini top and black bikini bottoms with a red floral pattern.
+<Subject 2> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the pink bikini top with black trim and black bikini bottoms with a pink geometric pattern.
+<Subject 3> (appears in [Shot 1]): fully_preserved - the target video takes place on the same sandy beach with shallow surf and a distant coastal landscape under warm golden hour lighting.
+
+detailed_description:
+The target video is in a realistic, cinematic style with warm golden hour lighting and a shallow depth of field.
+
+[Shot 1] The shot opens on a low-angle, handheld camera positioned near the sand of <Subject 3>, a serene beach scene featuring a sandy beach, shallow surf, and a distant coastal landscape. In the center of the frame, <Subject 1> and <Subject 2> sit close together on the wet sand. <Subject 1>, on the left, wears a red and black plaid bikini top and black bikini bottoms with a red floral pattern. <Subject 2>, on the right, wears a pink bikini top with black trim and black bikini bottoms with a pink geometric pattern. The camera slowly drifts in on them, maintaining a low and intimate viewpoint. The warm golden hour light casts a soft rim light on their wet skin, highlighting the glistening texture of their hair and bodies. The shallow surf washes gently around their legs, with small sprays of water backlit by the sun. The women relax in the shallow water, their bodies leaning slightly toward one another in a quiet, unhurried moment. <Subject 1> rests her arm on the sand, while <Subject 2> leans forward, her gaze directed downward. The camera continues its slow, steady push-in, enhancing the intimate atmosphere. The audible soundscape consists entirely of the rhythmic, soothing sound of the surf washing over the sand and the soft, natural breathing of the two women, creating a peaceful and relaxing environment.
+
+overall_soundscape:
+The soundscape features the continuous, soothing sound of shallow surf washing over the sand, accompanied by the soft, natural breathing of the two women.
+
+non_diegetic_music:
+N/A
 ```
 
 ## Fields split out
 
 ### subject_definitions
 
-(label not found)
+<Subject 1> is the woman on the left in <Picture 1>, featuring long blonde hair, a red and black plaid bikini top, and black bikini bottoms with a red floral pattern.
+<Subject 2> is the woman on the right in <Picture 1>, featuring long blonde hair, a pink bikini top with black trim, and black bikini bottoms with a pink geometric pattern.
+<Subject 3> is the beach scene in <Picture 1>, featuring a sandy beach, shallow surf, and a distant coastal landscape under warm golden hour lighting.
 
 ### summary
 
-(label not found)
+[reference generation] The target video features <Subject 1> and <Subject 2> sitting close together on the sand of <Subject 3>. The camera slowly drifts in on them as they relax in the shallow surf at golden hour, with warm rim light highlighting their wet skin and the spray backlit by the sun.
 
 ### retention_analysis
 
-(label not found)
+<Subject 1> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the red and black plaid bikini top and black bikini bottoms with a red floral pattern.
+<Subject 2> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the pink bikini top with black trim and black bikini bottoms with a pink geometric pattern.
+<Subject 3> (appears in [Shot 1]): fully_preserved - the target video takes place on the same sandy beach with shallow surf and a distant coastal landscape under warm golden hour lighting.
 
 ### detailed_description
 
-(label not found)
+The target video is in a realistic, cinematic style with warm golden hour lighting and a shallow depth of field.
+
+[Shot 1] The shot opens on a low-angle, handheld camera positioned near the sand of <Subject 3>, a serene beach scene featuring a sandy beach, shallow surf, and a distant coastal landscape. In the center of the frame, <Subject 1> and <Subject 2> sit close together on the wet sand. <Subject 1>, on the left, wears a red and black plaid bikini top and black bikini bottoms with a red floral pattern. <Subject 2>, on the right, wears a pink bikini top with black trim and black bikini bottoms with a pink geometric pattern. The camera slowly drifts in on them, maintaining a low and intimate viewpoint. The warm golden hour light casts a soft rim light on their wet skin, highlighting the glistening texture of their hair and bodies. The shallow surf washes gently around their legs, with small sprays of water backlit by the sun. The women relax in the shallow water, their bodies leaning slightly toward one another in a quiet, unhurried moment. <Subject 1> rests her arm on the sand, while <Subject 2> leans forward, her gaze directed downward. The camera continues its slow, steady push-in, enhancing the intimate atmosphere. The audible soundscape consists entirely of the rhythmic, soothing sound of the surf washing over the sand and the soft, natural breathing of the two women, creating a peaceful and relaxing environment.
 
 ### overall_soundscape
 
-(label not found)
+The soundscape features the continuous, soothing sound of shallow surf washing over the sand, accompanied by the soft, natural breathing of the two women.
 
 ### non_diegetic_music
 
-(label not found)
+N/A
 
 ## integrated_multimodal_description
 
@@ -55,51 +83,35 @@ Use <Picture 1> for the beach scene and for the two adult women in it. The clip 
 
 ## Objective checks
 
-- FAIL 1 subject_definitions
-- FAIL 2 summary
-- FAIL 3 retention_analysis
-- FAIL 4 detailed_description
-- FAIL 5 overall_soundscape
-- FAIL 6 non_diegetic_music
-- FAIL 7 rewritten_prompt >= 600 chars
+- PASS 1 subject_definitions
+- PASS 2 summary
+- PASS 3 retention_analysis
+- PASS 4 detailed_description
+- PASS 5 overall_soundscape
+- PASS 6 non_diegetic_music
+- PASS 7 rewritten_prompt >= 600 chars
 - FAIL 8 the 10.0 s answer quotes the 243-frame grid
 - PASS 9 no media file written under ComfyUI/output/community
-- FAIL 10 writer status completed without error
+- PASS 10 writer status completed without error
 
-0/6 checks passed. Media files in the window: none
+6/6 checks passed. Media files in the window: none
 
-## What this pass proved (iter 02, 16:15-16:26 CT) - the smoke test ran, the answer did not come back
-
-The job was built, accepted by `/prompt` (HTTP 200, prompt_id d0606964-415f-4bbc-ba0f-d68e286bb023) and executed in 0.19 s.
-It failed inside the node:
+## ComfyUI console (the durable copy of a failure reason)
 
 ```
-[16:17:23.974] !!! Exception during processing !!! MiniMaxH3PromptWriterOmni.execute() got an unexpected keyword argument 'ref_0'
+stamp [2026-10-24 12:36:0
+[2026-10-24 12:36:06.533] !!! Exception during processing !!! Ref2AV describes how a target video reuses reference assets, so it needs at least one. Connect a picture, a clip or a sound -- or pick T2AV, which is the task written from text alone.
+[2026-10-24 12:36:06.535] Traceback (most recent call last):
+  File "C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\execution.py", line 547, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\execution.py", line 352, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\execution.py", line 326, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+  File "C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\execution.py", line 314, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+  File "C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\comfy_api\internal\__init__.py", line 149, in wrapped_fu
 ```
-
-Cause (root, not guesswork): the Omni node declares `references` as one plain `execute()` parameter
-(`writer_omni.py:918-930`), and its v3 declaration is `IO.Autogrow(io_type="COMFY_AUTOGROW_V3",
-prefix="ref_", min 0, max 12)`. ComfyUI expands a **dict** value for that input into per-slot kwargs, so
-`"references": {"ref_0": ["11", 0]}` reaches `execute()` as `ref_0=...` and dies. In an API graph the value
-has to be a **list of links**: `"references": [["11", 0]]`, which ComfyUI resolves to `[IMAGE]` and passes as
-the `references` parameter the node actually reads (`_refs(references)` iterates it).
-
-Fixed in `notes/ali173_pw1d_run.py` (`build_graph(..., ref_form="list")`, the dict form kept as the fallback
-for a 400 that mentions references). The graph has 11 nodes: LoadImage, the options node, the writer, 8
-PreviewAny text nodes - nothing that can write media, and check 9 (no mp4/webm/png/wav under
-ComfyUI/output/community in the window) passed with 0 files.
-
-Live rows resolved from the running server this pass (the objective of the previous task, now used for real):
-- `MiniMaxH3PromptWriterOmni.model` = `Qwen2.5-Omni-7B GGUF Q4_K_M . 6.2 GB download . ~9 GB with the adapter and a 12k context` (the catalog row resolves to the on-disk base+mmproj pair - proof `notes/pw1c_objective.json`)
-- `MiniMaxH3RewriterOptions.adapter` = `on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]`
-- `auto_download=False` was set on purpose: a smoke test must fail loudly, never fetch 6.2 GB.
-
-GPU used by this pass: 1.1 min (two wakes 0.5 + 0.6, job 0.19 s), logged in `notes/bakeoff_gpu_ledger.md`;
-bakeoff total 2.6 min of the 120 min / 10 job extra. The line stays open as `[!]`.
-
-Next pass (one command, self-contained, gpu_guard IDLE is checked inside, no media node):
-```
-python C:/AI/community/notes/ali173_pw1d_run.py run     # wake + submit + poll + write the six fields
-python C:/AI/community/notes/ali173_pw1d_run.py fetch   # if the answer is not back inside the budget
-```
-Then copy `notes/pw1_smoke_omni_hc3.md` into `notes/forge_pw1d_smoke.md` if the checks pass and tick the line.
