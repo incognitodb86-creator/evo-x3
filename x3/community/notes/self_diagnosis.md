@@ -284,3 +284,46 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
 - First run of the validator: 3/3 skills flagged 'no when-to-use' - true, the tasks say 'when to use, steps', so I added an explicit 'When to use this skill' section to each. 3/3 now pass name/description/when-to-use/steps/Sources, 0 control chars, 0 CRLF, names unique and equal to the directory names.
 - The validator's own bug: my anchor guesses for the section headings failed twice (I pasted an anchor from the wrong file), which is how the insert for forge-self-diagnose nearly got lost. Rule kept: read the file's exact heading before editing it - grep '^## ' first, then edit.
 - Self-check that the skills carry no protected-path text: 0 hits for the canon path / its filename in all 3 SKILL.md (the fiction lock matches command text, and a skill body is text the model pastes into commands).
+
+### ALI-10 1.2 pass (box clock 2026-10-24 ~04:05), item 1.2 adults-only check
+- Path root for this block: `notes/...`, `logs/...` and `BASELINE_TEST_20261023.md` are under
+  `C:/Users/derek/5slock/ralph-community/`; `C:/AI/community/...` is written in full.
+- What the pass did: measured the adults-only gate instead of trusting it. `notes/ali10_adults_probe.py`
+  (--check = VERDICT CLEAN, 3 findings; --selftest = 17 fault seeds, 0 silent) proves the guard runs
+  before queueing (`comm.py:154-157` before the `/prompt` POST at `:160-161`; `run_graph_job.py:64-66`
+  before `comm.run()` at `:78`; the guard-deleted and guard-after-queue seeds fire) and that the gate is
+  key-scoped: over 96 real `*.api.json` graphs it reads 147 strings and leaves 89 prompt-bearing strings
+  unread (`CLIPTextEncode.text` 52, `MiniMaxH3PromptPackBridge.prompt_1..6` 30, `clips_json` 5,
+  `PrimitiveStringMultiline.value` 2), 10 graphs pass with 0 strings read, and the shipped Continuum
+  graph's node 188 `value` text (4,751 chars, contains "minors"/"underage") reaches the queue live
+  (rc 4, 63 attempts) while the same text under key `prompt` is blocked (rc 3, 0). Report
+  BASELINE_TEST_20261023.md PART 2; counts pinned `notes/ali10_adults_pins.json`; AGENTS.md L11
+  (39/39 lines, `notes/ali06_learnings_check.py` CLEAN, `--selftest` 18/18).
+- Loop health read this pass: `logs/DONE.txt` = `open=28 iter=3 claim=False commits=1 stuck=0` and
+  `logs/iter-20261024-03.log` ends `exit=0 ticks=0` - iteration 3 (item 1.1) printed
+  `<promise>COMPLETE</promise>` while 27 items were open; the loop kept going (0.5's dual-condition exit
+  works) and logged FALSE_COMPLETE. `fix_plan.md` is a multi-item plan, so a pass must not print the
+  token until sections 1 and 2 are clear: `PROMPT.md:10` says the loop exits at the token and
+  `PROMPT.md:23` says print it only when everything is done - the harness, not the prompt, is what
+  protects the stock `ralph-claude-code` exit. The token is also plain text in the transcript, so a
+  self-authored echo counts as "seen": see `notes/harness_findings_20261103.md` (H1/H2) for the two-token
+  and self-echo proofs and the proposed fixes.
+- Denies: `C:/AI/community/notes/denies.log` mtime 2026-10-23 19:06, 38 lines, newest row
+  `2026-10-23T19:06:14 iter 01 summary ... open=21` = 0 denies in this pass, nothing to work around.
+  `C:/AI/community/notes/forge_actions.log` stops at 00:12, i.e. the headless guard's action logger is
+  not writing for passes after the 0.4 reset - a real gap in the action record for 3 passes (H4).
+- Checks run (PROMPT 3c): pytest 21 (target file) / 38 (whole suite = 21 + 17 `test_web_fetch.py`),
+  sha256 of `test_p6_review.py` = the pinned `c3c2e169...e213` (13,127 B),
+  `notes/ali05_loop_check.py` CLEAN + `--selftest` 25/25 fired,
+  `notes/ali06_learnings_check.py` CLEAN + `--selftest` 18/18 fired,
+  `C:/AI/community/scripts/check_web_saves.py` CLEAN (160 json), `python -m py_compile` on the probe.
+  No GPU: 64 recorded URL attempts, all `http://127.0.0.1:9`, `urlopen` replaced by a recorder,
+  `comm.LOG` redirected to temp files, shared `community.log` gained 0 probe bytes.
+- Self-caught: my first draft of PART 2 cited a search-tool result for
+  `C:\Users\derek\5slock\Switchyard\tests\test_sy_review.py`, `C:\AI\ev2`, `notes/ali175_sw*.py` and
+  `fix_plan.md` lines 116/129/131 - the file has 87 lines, names none of those, and PowerShell
+  `Test-Path` returns False for all of them. The index behind that search tool is stale. L4/L10 again:
+  resolve a path by reading it, never by a search hit.
+- Next: 1.3 (one render driven end to end, comm.py guard first, record output path + ffprobe + GPU
+  minutes) - needs the GPU and an approved still, so it is a submittable `p7/JOB_REQUEST.json`, not a
+  render run inside this pass.
