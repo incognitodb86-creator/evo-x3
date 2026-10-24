@@ -1,0 +1,226 @@
+[
+  {
+    "name": ".claude-plugin",
+    "path": ".claude-plugin",
+    "sha": "6d6180a7cfc85d07dd9d60ef6882b26af832749b",
+    "size": 0,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/.claude-plugin?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/tree/main/.claude-plugin",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/trees/6d6180a7cfc85d07dd9d60ef6882b26af832749b",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/.claude-plugin?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/trees/6d6180a7cfc85d07dd9d60ef6882b26af832749b",
+      "html": "https://github.com/snarktank/ralph/tree/main/.claude-plugin"
+    }
+  },
+  {
+    "name": ".github",
+    "path": ".github",
+    "sha": "6c139cde19ba4e486b1f58fabf8443abc2e6504d",
+    "size": 0,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/.github?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/tree/main/.github",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/trees/6c139cde19ba4e486b1f58fabf8443abc2e6504d",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/.github?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/trees/6c139cde19ba4e486b1f58fabf8443abc2e6504d",
+      "html": "https://github.com/snarktank/ralph/tree/main/.github"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "f583b7e5257f3dcd0483109ec8bbe2c25e1a088b",
+    "size": 165,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/.gitignore?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/.gitignore",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/f583b7e5257f3dcd0483109ec8bbe2c25e1a088b",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/.gitignore?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/f583b7e5257f3dcd0483109ec8bbe2c25e1a088b",
+      "html": "https://github.com/snarktank/ralph/blob/main/.gitignore"
+    }
+  },
+  {
+    "name": "AGENTS.md",
+    "path": "AGENTS.md",
+    "sha": "9da9ecd1ac283f25c7cc730144f327cff7351692",
+    "size": 1409,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/AGENTS.md?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/AGENTS.md",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/9da9ecd1ac283f25c7cc730144f327cff7351692",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/AGENTS.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/AGENTS.md?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/9da9ecd1ac283f25c7cc730144f327cff7351692",
+      "html": "https://github.com/snarktank/ralph/blob/main/AGENTS.md"
+    }
+  },
+  {
+    "name": "CLAUDE.md",
+    "path": "CLAUDE.md",
+    "sha": "f95bb927e1aad384e410f7ddafb5bcd448ee3d6b",
+    "size": 4069,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/CLAUDE.md?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/CLAUDE.md",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/f95bb927e1aad384e410f7ddafb5bcd448ee3d6b",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/CLAUDE.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/CLAUDE.md?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/f95bb927e1aad384e410f7ddafb5bcd448ee3d6b",
+      "html": "https://github.com/snarktank/ralph/blob/main/CLAUDE.md"
+    }
+  },
+  {
+    "name": "LICENSE",
+    "path": "LICENSE",
+    "sha": "effa47fff218a20e451ed251abb6b28109c99d69",
+    "size": 1066,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/LICENSE?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/LICENSE",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/effa47fff218a20e451ed251abb6b28109c99d69",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/LICENSE",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/LICENSE?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/effa47fff218a20e451ed251abb6b28109c99d69",
+      "html": "https://github.com/snarktank/ralph/blob/main/LICENSE"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "d79d8b62e25624d0c67387515ed6881bfde56b7a",
+    "size": 7377,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/README.md?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/README.md",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/d79d8b62e25624d0c67387515ed6881bfde56b7a",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/README.md?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/d79d8b62e25624d0c67387515ed6881bfde56b7a",
+      "html": "https://github.com/snarktank/ralph/blob/main/README.md"
+    }
+  },
+  {
+    "name": "flowchart",
+    "path": "flowchart",
+    "sha": "3bc0132f0373f751b30fb6ca51a13b576bde9259",
+    "size": 0,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/flowchart?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/tree/main/flowchart",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/trees/3bc0132f0373f751b30fb6ca51a13b576bde9259",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/flowchart?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/trees/3bc0132f0373f751b30fb6ca51a13b576bde9259",
+      "html": "https://github.com/snarktank/ralph/tree/main/flowchart"
+    }
+  },
+  {
+    "name": "prd.json.example",
+    "path": "prd.json.example",
+    "sha": "fbc4066817a66e806078d3e468dcb8648123ba84",
+    "size": 2138,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/prd.json.example?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/prd.json.example",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/fbc4066817a66e806078d3e468dcb8648123ba84",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/prd.json.example",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/prd.json.example?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/fbc4066817a66e806078d3e468dcb8648123ba84",
+      "html": "https://github.com/snarktank/ralph/blob/main/prd.json.example"
+    }
+  },
+  {
+    "name": "prompt.md",
+    "path": "prompt.md",
+    "sha": "cdebe901dd7ed16ce6f6800ed67a1f72eff9e00c",
+    "size": 4199,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/prompt.md?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/prompt.md",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/cdebe901dd7ed16ce6f6800ed67a1f72eff9e00c",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/prompt.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/prompt.md?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/cdebe901dd7ed16ce6f6800ed67a1f72eff9e00c",
+      "html": "https://github.com/snarktank/ralph/blob/main/prompt.md"
+    }
+  },
+  {
+    "name": "ralph-flowchart.png",
+    "path": "ralph-flowchart.png",
+    "sha": "b74b0af9f88dbf5ec4227e6eaf3f9da1b3c92981",
+    "size": 4704146,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/ralph-flowchart.png?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/ralph-flowchart.png",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/b74b0af9f88dbf5ec4227e6eaf3f9da1b3c92981",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/ralph-flowchart.png",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/ralph-flowchart.png?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/b74b0af9f88dbf5ec4227e6eaf3f9da1b3c92981",
+      "html": "https://github.com/snarktank/ralph/blob/main/ralph-flowchart.png"
+    }
+  },
+  {
+    "name": "ralph.sh",
+    "path": "ralph.sh",
+    "sha": "baff052ac36f0138507056abc197c2e4b0b4a289",
+    "size": 3524,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/ralph.sh?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/ralph.sh",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/baff052ac36f0138507056abc197c2e4b0b4a289",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/ralph.sh",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/ralph.sh?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/baff052ac36f0138507056abc197c2e4b0b4a289",
+      "html": "https://github.com/snarktank/ralph/blob/main/ralph.sh"
+    }
+  },
+  {
+    "name": "ralph.webp",
+    "path": "ralph.webp",
+    "sha": "124eb2d08f2e120c0e71b4de38dcea35f77f7303",
+    "size": 275808,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/ralph.webp?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/blob/main/ralph.webp",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/blobs/124eb2d08f2e120c0e71b4de38dcea35f77f7303",
+    "download_url": "https://raw.githubusercontent.com/snarktank/ralph/main/ralph.webp",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/ralph.webp?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/blobs/124eb2d08f2e120c0e71b4de38dcea35f77f7303",
+      "html": "https://github.com/snarktank/ralph/blob/main/ralph.webp"
+    }
+  },
+  {
+    "name": "skills",
+    "path": "skills",
+    "sha": "a59a150de02238581fbef43017c3dd30a5a39081",
+    "size": 0,
+    "url": "https://api.github.com/repos/snarktank/ralph/contents/skills?ref=main",
+    "html_url": "https://github.com/snarktank/ralph/tree/main/skills",
+    "git_url": "https://api.github.com/repos/snarktank/ralph/git/trees/a59a150de02238581fbef43017c3dd30a5a39081",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/snarktank/ralph/contents/skills?ref=main",
+      "git": "https://api.github.com/repos/snarktank/ralph/git/trees/a59a150de02238581fbef43017c3dd30a5a39081",
+      "html": "https://github.com/snarktank/ralph/tree/main/skills"
+    }
+  }
+]
