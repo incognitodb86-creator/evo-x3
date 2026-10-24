@@ -1,0 +1,333 @@
+The beta 5 completely ignores my prompts. For example: My prompt is a nsfw scene in a room and the model generates a video with dressed people on a beach. Beta 3 and 4 worked as they should work. Some of you guys have the same experience? 
+
+ See translation g2t2 Sep 9 • edited Sep 9 <div
+
+---- block ----
+
+I have zero problems with Beta5. Aside from small audio, video issues its almost perfect prompt adherence. 
+
+ Could be LoRA conflict, sage attention version, workflow complexity ? Are you following the official prompt rules?
+
+ https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/docs/VIDEO_PROMPT_WRITING_GUIDE_base_en.md 
+ https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/docs/VIDEO_PROMPT_WRITING_GUIDE_ref_en.md 
+
+ See translation stphnvdb Sep 9 <div
+
+---- block ----
+
+I'm using the build in H3 prompt enhancer in WanGP. It always worked with H3 and also with 10Eros beta 3 and 4. And now with beta 5 I'm getting nonsense as result. I have no clue what could be the reason.
+
+ See translation g2t2 Sep 9 <div
+
+---- block ----
+
+ahh.. I don't use WanGP. sorry.. no idea about how to trouble shoot that workflow.
+
+ I'm using comfyui... from personal exp with beta5 (again comfyui) I was able to prompt ref2va workflows for tj and beta5 just understood it. I didn't even need to provide the actual tj reference image for posing.
+
+ See translation EllipsesMark Sep 9 <div
+
+---- block ----
+
+ahh.. I don't use WanGP. sorry.. no idea about how to trouble shoot that workflow.
+
+ I'm using comfyui... from personal exp with beta5 (again comfyui) I was able to prompt ref2va workflows for tj and beta5 just understood it. I didn't even need to provide the actual tj reference image for posing.
+
+ 
+ How are yall's vajayjay's lookin after it's blocked from view and then back again? 
+
+ See translation EllipsesMark Sep 10 <div
+
+---- block ----
+
+The beta 5 completely ignores my prompts. For example: My prompt is a nsfw scene in a room and the model generates a video with dressed people on a beach. Beta 3 and 4 worked as they should work. Some of you guys have the same experience?
+
+ 
+ I found your problem... 
+
+ Your prompt! I just did a test with a basic prompt and yup... had some massive pull into nsfw. but if you start with an image you MUST use ref2va prompting. 
+
+ See translation TenStrip Owner Sep 13 <div
+
+---- block ----
+
+Yeah any time I see "ignores prompt" that translates to, "prompt written so poorly it can't be tokenized." Needs a full rewrite if you ever have that outcome and approach differently.
+
+ See translation stphnvdb Sep 13 • edited Sep 13 <div
+
+---- block ----
+
+I know how to write H3 prompts, and there wasn't any issue with beta3 and 4. Also the original fl2va model gives me the result I want. But beta5 gives me a video that isn't even close to my prompt. It's like I write "a man sitting in a chair" and I get "people walking on a beach". Maybe it's the loras you used for beta5, I don't know. I use WanGP, I don't have Comfy installed atm.
+
+ See translation EllipsesMark Sep 13 <div
+
+---- block ----
+
+I know how to write H3 prompts, and there wasn't any issue with beta3 and 4. Also the original fl2va model gives me the result I want. But beta5 gives me a video that isn't even close to my prompt. It's like I write "a man sitting in a chair" and I get "people walking on a beach". Maybe it's the loras you used for beta5, I don't know. I use WanGP, I don't have Comfy installed atm.
+
+ 
+ Sooo... you're using the ref2va prompting structure or fl2va? You said fl2va gave you what you wanted. Makes me think that you're using fl2va prompt structure. Try ref2va. 
+
+ See translation g2t2 Sep 13 • edited Sep 13 <div
+
+---- block ----
+
+I know how to write H3 prompts, and there wasn't any issue with beta3 and 4. Also the original fl2va model gives me the result I want. But beta5 gives me a video that isn't even close to my prompt. It's like I write "a man sitting in a chair" and I get "people walking on a beach". Maybe it's the loras you used for beta5, I don't know. I use WanGP, I don't have Comfy installed atm.
+
+ 
+ Maybe post the prompt here so we can help see where it's going wrong. when I'm testing LoRA or Checkpoints I try to narrow the prompt down to basic stuff, like a character standing there saying "hello". It's the easiest and fastest way to pinpoint where the issues are coming from.
+
+ Did u try a generation with 0 LoRA and just the beta 5 Turbo checkpoint?
+
+ See translation EllipsesMark Sep 13 <div
+
+---- block ----
+
+I know how to write H3 prompts, and there wasn't any issue with beta3 and 4. Also the original fl2va model gives me the result I want. But beta5 gives me a video that isn't even close to my prompt. It's like I write "a man sitting in a chair" and I get "people walking on a beach". Maybe it's the loras you used for beta5, I don't know. I use WanGP, I don't have Comfy installed atm.
+
+ 
+ Maybe post the prompt here so we can help see where it's going wrong. when I'm testing LoRA or Checkpoints I try to narrow the prompt down to basic stuff, like a character standing there saying "hello". It's the easiest and fastest way to pinpoint where the issues are coming from.
+
+ Did u try a generation with 0 LoRA and just the beta 5 Turbo checkpoint?
+
+ 
+ Im like 99 percent positive its their prompt. They said they didnt have an issue with fl2va. Which makes me think they're using fl2va prompt. 
+
+ See translation stphnvdb Sep 14 • edited Sep 14 <div
+
+---- block ----
+
+I'll give you an example. This was my prompt:
+
+ integrated_multimodal_description: [Shot 1] EXTREME CLOSE-UP from directly behind a naked young woman as she walks briskly down a wet city street at dawn. Rain falls steadily, soaking her skin and hair. Her back muscles ripple with each step. The camera tracks her movement smoothly, maintaining the tight framing. She passes under a flickering streetlamp. The wet pavement reflects the dim gray sky. Her bare feet slap against the cold ground. The sound of rain is constant and muffled by the urban soundscape.
+overall_soundscape: Steady rainfall pattering against pavement and skin. Distant traffic hum. Occasional car door slams and tire screech. Her footsteps are audible beneath the rain — barefoot on wet asphalt. No dialogue. The audio is slightly muffled as if recorded from a distance or through an umbrella.
+non_diegetic_music: N/A
+
+ I also tried it with an ref2va prompt. I got the same result. I'm only using the chekpoint without any loras. One question remains: Why did beta3 and 4 work without issues? Also the default H3 model or any other finetune I' ve tested followed my prompt.
+
+ 
+
+ See translation EllipsesMark Sep 15 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="
+
+---- block ----
+
+I said you need to use ref2va prompting. Twice! And you still tried fl2va? I dont know man. Im getting to a point where it doesnt really matter what I say, if you arent willing to take the advice then i dont know what else to do. I'll try one more time. You said you also tried ref2va prompt, i would have expected that be the one you shared. But lets take a look SHAAALLLL WEEEE?? You're missing 3 sections to total a 6 section prompt. 
+
+ Retention can be used for a made up reference like... she is nude... with her brown hair and goldilocks snuzzle lard moccasins. 
+
+ The summary plays a deep role into the model. The more i read it... the more im realizing that you more than likely... without a shadow of doubt didnt try this in ref2va format. Or else your integral multimodal description would say detailed description: the target video is..... 
+
+ 3 and 4 worked for you because it wasnt as heavy into the ref2va training. 5 is heavy on ref2va based off the hybrid models. Probably b20.... maybe? I dont know. Tenstrip is super technical and waved his hands around a bit make a couple claps and sprinkled some sizzle on it.... or maybe because the merges he used for beta5 were heavier on ref2va trainings. Im going to come back.... and im going to post a video clip in the correct format. Stand by......
+
+ See translation EllipsesMark Sep 15 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="
+
+---- block ----
+
+Well.... You certainly can't make horror without other lora's that's for sure.... lmfao!!! here's the prompt brochacho. no lora's used. no reference images, just 8 steps at 0.8 resolution using res_multistep/simple to try and match your setup. If and only if after this.... you still don't want to read the H3 docs on prompting... then there isn't anyone in the world that can help you.
+
+ subject_definitions: is a nude woman as she walks on a wet city street with some nasty ass fuckin feet cuz she for the streets
+
+ retention_analysis: (appears in [Shot 1]) with her mangy lookin self
+
+ summary: A video of a woman walking down a wet city street while rainin in the middle of the night with a street light flickering as she walks by the street lamp, a black shadow passes in front of the camera she looks back and runs
+
+ detailed_description: The target video is a dark cinematic, live - action dollied shot of 15 seconds that frames a closeup on 's back, she is walking down a wet city street in the middle of the night while it's drizzling rain, she is walking in a with rapid limping steps with a hurried and worried demeanor. She has a sinister feeling.
+
+ [Shot 1] close up on 's upper back is walking away from the camera, she is limping while walking at a rapid pace with a limp on wet asphalt creating bare wet footstep slapping as she walks on wet asphalt. shot widens slightly and shows the woman completely nude with cuts, bruises and markings across her back as the camera follows her in a steady stabilized dolly. The street light is flickering as it she is walking by. a black shadowy figure passes in front of the screen startling her as a dark eerie feeling is felt, she turns quickly with an extremely frightened expression as she is panting then starts running away from the camera then the camera stays static as the woman runs away. As the woman is running, a semi tractor trailer comes out of nowhere from the left side of frame driving across the screen, the woman is struck deadly with the front of the tractor trailer. 
+
+ At 00:12.000, as soon as the truck makes contact with the woman the screen goes to black and a distorted music box can be heard playing. Scene must go black and distorted music box playing eerily by 00:13.000
+
+ overall_soundscape: drizzling rain pattering on asphalt underneath her wet slapping foot steps against the asphalt.
+
+ non_diegetic_music: suspenseful, thriller music, distorted music box. 
+
+ See translation <path d="M10.5 6.36328C10.4998 6.61534 10.3117 6.82821 10.0615 6.85938C9.32558 6.95111 8.62935 7.2287 8.0459 7.66406C7.67946 7.9406 7.38831 8.2959 7.19336 8.69824C6.99846 9.10055 6.90558 9.54059 6.9209 9.98242C6.92561 10.118 6.87449 10.2501 6.78027 10.3477C6.68608 10.445 6.55635 10.5 6.4209 10.5H5.5791C5.30296 10.5 5.0791 10.2761 5.0791 10C5.0791 8.87021 4.58249 8.14202 3.96387 7.66699L3.73926 7.50977C3.20273 7.16204 2.5865 6.93857 1.93945 6.85938C1.6888 6.82871 1.5002 6.61576 1.5 6.36328V5.63672C1.5002 5.38466 1.68831 5.17179 1.93848 5.14062C2.67435 5.0489 3.36971 4.77026 3.95312 4.33496C4.31963 4.05841 4.61166 3.70415 4.80664 3.30176C5.00154 2.89945 5.09442 2.45941 5.0791 2.01758C5.07439 1.88204 5.12551 1.74989 5.21973 1.65234C5.31392 1.55502 5.44365 1.5 5.5791 1.5H6.4209C6.69704 1.5 6.9209 1.72386 6.9209 2C6.9209 3.13215 7.41961 3.86098 8.04004 4.33594L8.29688
+
+---- block ----
+
+by the way.... the truck was supposed to hit her, but because x didn't happen neither did y and because y didn't happen it left z out in the open. 
+
+ See translation inykokso Sep 15 • edited Sep 15 <div
+
+---- block ----
+
+can comfirm bad prompt following/understanding , i used standart ref2va prompt and wf with ref pic 1 (girl) and pic 2 (girl) only (sfw) , no problem with characters , but the rest...instead of curtains in cariage gave me fishing nets all inside carriage,instead of canvas tents gave my also tents made od fishing nets , cariage from outside made of fishing nets (instead of ornate state cariage) , this was not random gave me this result 3x ,then i changed to oficial int 8 convrot fl2va model (also with ref prompt+ref wf) no problem , no fishing nets multiple run - of course i try to investigate with ai , respond was -there was multiple canvas/curtain/guard armor - wich model could understand as chainmail so to model mightt be confused....ok , it make sense but there was no such problem with standart int8
+just for info - i am using comfy ui - same prompt both of them fl2a int8 , original vs 10eros beta5 ,0.6mp,8step,
+
+ 
+
+ 
+
+ See translation EllipsesMark Sep 15 <ci
+
+---- block ----
+
+can comfirm bad prompt following/understanding , i used standart ref2va prompt and wf with ref pic 1 (girl) and pic 2 (girl) only (sfw) , no problem with characters , but the rest...instead of curtains in cariage gave me fishing nets all inside carriage,instead of canvas tents gave my also tents made od fishing nets , cariage from outside made of fishing nets (instead of ornate state cariage) , this was not random gave me this result 3x ,then i changed to oficial int 8 convrot fl2va model (also with ref prompt+ref wf) no problem , no fishing nets multiple run - of course i try to investigate with ai , respond was -there was multiple canvas/curtain/guard armor - wich model could understand as chainmail so to model mightt be confused....ok , it make sense but there was no such problem with standart int8
+
+ 
+ What was your prompt? it's probably how you described the curtains. 
+
+ See translation stphnvdb Sep 15 <div
+
+---- block ----
+
+@ EllipsesMark :
+Now I used exactly your prompt (using the 10Eros_Max_h3_TURBO-hybrid_beta5_int8.safetensors with 6 steps). Look what I got!?!?!
+
+ Maybe WanGP just can't handle beta5 for some reason. I don't have ComfyUI installed.
+
+ Anyway, thanks for helping! Much appreciated.
+
+ I keep using the official H3 checkpoint with the Mystic XXX lora. It gives me exactly what I want.
+
+ 
+
+ See translation EllipsesMark Sep 15 <div
+
+---- block ----
+
+@ EllipsesMark :
+Now I used exactly your prompt (using the 10Eros_Max_h3_TURBO-hybrid_beta5_int8.safetensors with 6 steps). Look what I got!?!?!
+
+ Maybe WanGP just can't handle beta5 for some reason. I don't have ComfyUI installed.
+
+ Anyway, thanks for helping! Much appreciated.
+
+ I keep using the official H3 checkpoint with the Mystic XXX lora. It gives me exactly what I want.
+
+ 
+
+ 
+ DAMN! I must have missed the part where you said you were using WANGP bro. That's completely on me. But all in all, i'm glad you found a way to get the videos needed. 
+
+ See translation stphnvdb Sep 15 <div
+
+---- block ----
+
+Just for interest: What's the difference when using beta5 in WanGP? It always worked for me with any finetune. I also tested Singularity today without any issues.
+
+ Here's the proof that I really used your prompt:
+ 
+
+ See translation ❤️ 1 1 + EllipsesMark Sep 15 <div
+
+---- block ----
+
+That's so weird. I wonder what wangp has, i've never used it. 
+
+ See translation stphnvdb Sep 16 • edited Sep 16 <div
+
+---- block ----
+
+That's so weird. I wonder what wangp has, i've never used it.
+
+ 
+ What WanGP has? Almost everything you can imagine. Many many models, prompt enhancers, sliding windows for long video gens and more. You really should try it.
+
+ AND BINGO!! I finally cracked beta5! 😃 The key to success really is the correct prompting. I wrote a new very detailled prompt. I really did describe every little detail very precisely (much more so than I usually do). Then I used the H3 prompt enhancer to write me a ref2va prompt. I got exactly the video I wanted. Beta5 really is pretty picky in prompting.
+
+ See translation ❤️ 1 1 + EllipsesMark Sep 17 <div
+
+---- block ----
+
+@ stphnvdb that's awesome man.... I wonder... would loras help improve the prompting aspect? Turbo or non turbo? Hmm... 
+
+ See translation TenStrip Owner Sep 17 <div
+
+---- block ----
+
+That's so weird. I wonder what wangp has, i've never used it.
+
+ 
+ What WanGP has? Almost everything you can imagine. Many many models, prompt enhancers, sliding windows for long video gens and more. You really should try it.
+
+ AND BINGO!! I finally cracked beta5! 😃 The key to success really is the correct prompting. I wrote a new very detailled prompt. I really did describe every little detail very precisely (much more so than I usually do). Then I used the H3 prompt enhancer to write me a ref2va prompt. I got exactly the video I wanted. Beta5 really is pretty picky in prompting.
+
+ 
+ This is just how minimax h3 is especially at low steps. I'm pretty sure a lot of closed source models like grok or seeddance contain prompt enhancer layers that sit after the input prompt and direct the model to actual results. Even with pre-enhanced prompts on minimax it still needs additional detail. When you fully describe every motion and action in the right way, it does work, but only when intensely directed. If something isn't prompted the model isn't going to fill in or make it's own decisions to increase quality, it'll gladly output two people just staring at each other and not moving at all. If anything when they model does input on it's own outside of the prompt its usually is some kind of misunderstood or bad token relation that makes weird stuff. LoraDaddy has an H3 director that does a lot of that and enhances fully but I'm still trying to get the best way to prompt it. When Sulphur releases it's going to change it's behavior a lot and go into version 1.0. 
+
+ See translation stphnvdb Sep 17 <div
+
+---- block ----
+
+I'm sorry, but I need to correct myself again. Now I know why beta5 didn't work until now. It wasn't my prompt, I just used the wrong preset/"workflow"/profile in WanGP. I have to use 10Eros beta5 as a 33B Ref2VA model. Everything else doesn't work. Now it even works with every prompt I write. Weird.
+
+ See translation ❤️ 1 1 + inykokso Sep 17 <div
+
+---- block ----
+
+can comfirm bad prompt following/understanding , i used standart ref2va prompt and wf with ref pic 1 (girl) and pic 2 (girl) only (sfw) , no problem with characters , but the rest...instead of curtains in cariage gave me fishing nets all inside carriage,instead of canvas tents gave my also tents made od fishing nets , cariage from outside made of fishing nets (instead of ornate state cariage) , this was not random gave me this result 3x ,then i changed to oficial int 8 convrot fl2va model (also with ref prompt+ref wf) no problem , no fishing nets multiple run - of course i try to investigate with ai , respond was -there was multiple canvas/curtain/guard armor - wich model could understand as chainmail so to model mightt be confused....ok , it make sense but there was no such problem with standart int8
+
+ 
+ What was your prompt? it's probably how you described the curtains.
+
+ 
+ 1-subject_definitions
+Subject 1 is Elara, the young woman in Picture 1, a princess being carried by carriage after an arduous mountain climb.
+Subject 2 is Mina, the woman in Picture 2, her attendant seated opposite her inside the same moving carriage interior at dusk.
+
+ summary
+[reference generation] The target video presents an intimate dialogue between Subject 1 and Subject 2 within a gently rocking carriage cabin lit by lantern light against deepening twilight outside; Subject 2 (S1) persuades Subject 1 to accept a proper bath in the copper tub before nightfall, while Subject 1 (S2), shy about being seen undressed behind canvas walls, objects until Subject 2 promises posted guards at her tent entrance.
+
+ retention_analysis
+Subject 1 (appears in [Shot 1], [Shot 2]) fully_preserved - her appearance and costume from Picture 1 are retained; she is seated inside the carriage facing Subject 2.
+Subject 2 (appears in [Shot 1], [Shot 2]) fully_preserved - her appearance from Picture 2 is retained; she leans toward Subject 1, speaking persuasively and then reassuringly.
+
+ detailed_description
+The target video is rendered in a high-end PixarDisney 3D animation style with expressive close-up facial animation, clean stylized textures, and cinematic lighting. The palette blends warm amber lantern glow inside the carriage against cool blue-grey twilight filtering through small window panes outside; fine dust motes drift lazily in slanted light shafts as the vehicle rocks gently over uneven ground beneath them.
+
+ [Shot 1] A medium two-shot from within the cramped carriage interior frames both subjects seated on opposite benches, facing each other across a narrow wooden table that holds a single brass lantern throwing soft warm pools of light onto their faces and hands while the rest of the cabin stays in dim shadow; outside, faint cool dusk light seeps through the small panes at frame edges. Subject 2 (S1) leans forward slightly with an earnest, measured expression and speaks to her companion d[English] After all that mountain dust and sweat, you need a proper bath before nightfall — warm water will wash away hours of trail.d Her fingers trace small reassuring circles on the table edge as she talks. Beside her across the space, Subject 1's face softens at first but gradually tightens into bashful worry; her gaze drifts to the thin curtain covering the carriage window and back again, lips parting in hesitation before she responds d[English] But someone might see me... undressed behind canvas walls with nothing between usd A faint pink flush creeps across her cheeks as her fingers twist nervously at the hem of her sleeve.
+
+ [Shot 2] At 0008.500, a close-up on Subject 1's face fills most of frame; cool twilight filters in through the small carriage window at right while warm lantern glow illuminates left side of face in soft Rembrandt lighting, emphasizing her glistening eyes and slight anxiety as she bites lower lip before looking up. The shot then cuts to a reverse medium close-up showing Subject 2 who has straightened slightly but keeps one hand extended in an open-palmed gesture toward the viewer-side edge of frame, smiling warmly with absolute confidence d[English] I'll post two guards at your door — polished steel and visors closed. No eyes will stray where they shouldn't.d Her steady gaze meets Subject 1's; visible relief drops from the younger woman's shoulders as a small grateful smile breaks through her shyness, fingers unclenching slowly from her sleeve hem while both sway gently with another lurch of carriage on rough terrain and lantern light steadies back to its calm glow across their faces.
+
+ overall_soundscape
+The steady wooden creak of carriage wheels rolling over a packed dirt path continues throughout; occasional soft groan of leather harness straps and faint metallic clink from brass fittings sway in rhythm with vehicle motion, muffled canvas fluttering against exterior wind is audible intermittently through cabin walls, alongside the very distant low crackle approaching just below threshold as campfire sounds begin to hint at arrival — all these physical layer elements remain consistent beneath dialogue without masking it.
+
+ non_diegetic_music NA
+
+ 2-continuation_from_previous_clip: |
+Continue the existing scene from the previous generated H3 clip with no cut, reset, or re-establishment. The incoming protected H3 audiovisual latent prefix is authoritative for current pose, motion, camera trajectory, facial state, lighting, environment, object state, voice, ambience, and timing. Connected reference images are optional; use them only to preserve stable subject identity and appearance beneath that incoming state.
+
+ subject_definitions:
+ is Elara, the young woman in , a princess being carried by carriage.
+ is Mina, the woman in , her attendant.
+ are the two guards in polished steel armor standing at attention flanking the entrance to 's state tent.
+
+ summary: |
+[reference generation] The target video transitions from the mountain climb to dusk at the foothill camp. The first 3 seconds offer a brief high‑angle wide establishing shot, then the camera descends to normal eye‑level coverage. The ornate black carriage halts among tents; attendants carry a copper tub toward Elara's tent; two armored guards stand at its entrance. Elara is seen from outside through the carriage window, her internal thoughts revealing her unease about the public bath.
+
+ retention_analysis:
+ (appears in [Shot 1], [Shot 2]): fully_preserved - her appearance and costume from are retained; her position at the window seen from outside, and her internal voiceovers are new.
+ (appears in [Shot 1], [Shot 2]): fully_preserved - her appearance from is retained; she moves among the retinue.
+ (appears in [Shot 1]): fully_preserved - two guards stand at the tent entrance throughout.
+
+ detailed_description: |
+The target video is rendered in a high-end Pixar/Disney 3D animation style with expressive close-up facial animation, clean stylized textures, and cinematic lighting. The palette shifts to deep dusk tones — warm orange firelight against cool blue-grey twilight sky.
+
+ [Shot 1] A wide establishing shot from a slight high angle, looking down over the camp at dusk. The ornate black carriage with gold detailing sits halted in a tight circle of pitched canvas tents in a foothill camp below the mountain; flickering orange glow from multiple campfires breaks up the encroaching dark, casting long dancing shadows across the ground. Attendants in muted linens carry a large copper tub through the rows of tents toward 's state tent. Flanking its entrance, two guards in polished steel armor stand rigidly at attention, their
+
+---- block ----
+
+I'm sorry, but I need to correct myself again. Now I know why beta5 didn't work until now. It wasn't my prompt, I just used the wrong preset/"workflow"/profile in WanGP. I have to use 10Eros beta5 as a 33B Ref2VA model. Everything else doesn't work. Now it even works with every prompt I write. Weird.
+
+ 
+ Yo! I'm super glad to hear that! That's super awesome. I would like to commend you on your ability to come back and let everyone know. 
+
+ See translation AlexiFalcone 17 days ago <div
+
+---- block ----
+
+I never managed to get this model working in WANGP with any of the presets. I don't understand what the issue is—it works for some people but not others.
+
+ See translation EllipsesMark 17 days ago <div
+
+---- block ----
+
+I never managed to get this model working in WANGP with any of the presets. I don't understand what the issue is—it works for some people but not others.
+
+ 
+ As someone mentioned. Not sure if its the same thing but they had to use 33b model? Not sure. Ive never used wangp. 
+
+ See translation Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <svg class="mr-1.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="currentColor" focusable="f

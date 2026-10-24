@@ -1,0 +1,55 @@
+I have seen this described, relaying here, I do not have h3 access myself.. 
+
+ https://github.com/gas/comfyui-minimax-h3-negpip (has a needed update from the forked project)
+
+ Just place this downstream of the CLIP/MODEL lines, as late as it can go. Adjust the prompt so any existing () is \ escaped so it becomes (S1). as example.
+
+ Then add at end of prompt after everything for example these two lines as they are:
+(speech, talking, spoken words, dialogue, narration, voice over, says, blathering, babbling, mumbling, saying, speaks, narrative, explains, narrator, voiceover, narration, off-screen voice, announcer:-1@a-)
+
+ (breathing, moaning, sighing, humming:1@a-)
+
+ 
+ This removes the talking and replaces it with those neutral "vocalizations". You can still prompt people to talk with the normal prompt format even with this. Adjust as needed of course.
+
+ Also node settings:
+value strength 1
+apply pos weight: true
+start - 0
+end - 999
+block stride - 1
+protect_text_rows: true
+measure_attention_mass: true (doesnt matter just for printout). 
+
+ Not sure if this can somehow be leveraged to train a lora itself that bakes this in to a degree but honestly this is good enough from what I have seen.
+
+ Ideally IMO this package would be adjusted so it is not reliant on () so normal prompts can be used without escaping ().
+
+ See translation 👍 4 4 + DaviKar 27 days ago <div
+
+---- block ----
+
+Good to see someone took it over. The original repo seems to have been abandoned by it's maintainer.
+
+ See translation pochenghorng 22 days ago <div
+
+---- block ----
+
+I found if reference audio is supplied this method wound fail. Or is ther other ways around?
+
+ See translation snake8888 22 days ago <div
+
+---- block ----
+
+I found if reference audio is supplied this method wound fail. Or is ther other ways around?
+
+ 
+ method was with ref audio, but keep ref audio under 90 frames (if from a video, so like 3-4 seconds or something tops). 
+
+ Also try running non-turbo, then using his shinanigans turbo seperately as lora, try 0.4 str, I find 0.5-0.6+ is where maybe increase babble chance. Also try to describe background sound more (in standard soundscape), background air conditioner or something I think helps.
+
+ I think above method is a last final refinement step if everything else feels nearly perfect after doing above.
+
+ See translation Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <button class="rounded-full border border-gray-100 pl-2 py-1 pr-2.5 flex i

@@ -1,0 +1,82 @@
+[civitai model 2967166] Minimax H3 LLM Vision and Reasoning. NSFW/SFW (REF2VA) | type Workflows | nsfw False | tags llm, vision, minimax h3, tool
+
+---- block ----
+
+This is Minimax H3 workflow, that has LLM agent to write a prompt for you. It automatically takes context from your reference images (vision), refines your request and formats it for Minimax H3, which makes prompting much easier.
+
+ Main features: 
+- User experience-oriented design
+- LLM-based prompting (using Ollama). Write a simple prompt and let LLM do the tedious work for you
+- Vision capabilities. LLM can see your references and reason through their contents, no need to describe your references by hand
+- Upscale and interpolate
+
+ - NSFW support. LLM understands NSFW concepts and can prompt almost anything
+
+ Other features: 
+- Advanced reference resolution control. Choose size of reference images/videos more precisely to balance between quality and generation speed
+- Trim reference Audio/Video inside workflow
+- LoRa support
+- Mid-generation video viewer. Skip failed generations before they are completed
+
+Video example with Loona in office contains very short and generalized prompt to show the power of LLM vision (imbedded workflow uses SFW system prompt)
+
+ Model Preview Override tiny_vae model (taeh3_madebyollin.safetensors)
+Download it here and put into models/vae_approx folder:
+ https://github.com/madebyollin/taehv/blob/62f7591f59dfbb4c3c02b7a621d180a9eeaba26c/safetensors/taeh3.safetensors 
+
+ You should be able to run this workflow with any LLM that can analyze images and runs with Ollama, but I can't guarantee that smaller ones will be able to follow instructions well enough. If you already have LLM running with Ollama, then skip to 7-th clause of LLM setup below, and adjust options according to your model specs. 
+
+ LLM setup (Ollama, Qwen3.8-27B Heretic GGUF): 
+
+1. Create directory for models (for example Qwen3.8-27B-Heretic-RVN)
+
+2. Download LLM with vision inside your directory
+Go to this link and search for quants, that fit your setup (push button below, to show all files)
+RVN-Q[YOUR_QUANT]_K_M-multilingual-vision.gguf
+ https://huggingface.co/0bserverx/Qwen3.8-27B-Heretic-Abliterated-Uncensored-GGUF/tree/main 
+
+If you have 32Gb VRAM, you can use this Q5: RVN-Q5_K_M-multilingual-vision.gguf
+If you have less, then consider overhead of a few Gb (don't pick those which barely fit on your VRAM). 
+
+LLM context will require additional VRAM (higher->more memory for thinking)
+
+ At 32768 context, the buffer takes roughly 2 to 3 GB of VRAM.
+
+ At 65536 context, it takes 4 to 6 GB .
+
+ At 131072 (128k) context, it takes 8 to 12 GB .
+
+ Workflow's default is 49152. 
+You can read more about overhead on the main page of this repository.
+
+3. Download vision adapter from the same repo (same file for all setups) inside your directory
+ mmproj-Qwen3.8-27B-Q8_0.gguf 
+
+4. Install Ollama
+ https://ollama.com/download/windows 
+
+ 
+5. Create a new file Modelfile (no extension) inside your model directory with two files, open it with your text editor and write:
+
+ FROM ./RVN-Q[YOUR_QUANT]_K_M-multilingual-vision.gguf 
+
+ ADAPTER ./mmproj-Qwen3.8-27B-Q8_0.gguf 
+
+Replace [YOUR_QUANT] to quant of model that you downloaded and make sure that filenames are exactly the same.
+
+6. Add LLM to Ollama.
+Click on the address bar at the top of the Windows File Explorer window.
+
+ Delete whatever text is there, type cmd, and press Enter. 
+
+Type command (you can change "Qwen3.8-27B-Heretic-RVN" to other name, this name we will choose from a node):
+ ollama create Qwen3.8-27B-Heretic-RVN -f Modelfile 
+
+and then press enter. Wait for completion.
+
+7. Make sure your ollama is opened and active (icon should appear in system tray)
+ 
+Open workflow and go into this subgraph 
+
+Select your newly created model at the right node (if it's not there then try restart comfyui) 
+You can change context value at the left depending on your VRAM
