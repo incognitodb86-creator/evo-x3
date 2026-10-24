@@ -361,3 +361,26 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
 - GPU: nothing queued, no llama-swap/ComfyUI/Strata call, no render script. The gates run here were
   `comm.guard_ok` (3/3 prose strings), the offline schema `scan` (5 H3 classes, clean), `LoadImage` file
   existence, id-free-of-output, and `pytest scripts/tests/test_p6_review.py` = 21 passed.
+
+
+## 2026-10-25 [0.1 HC15 pass 3] - clip 3 staged (BD013), nothing queued
+
+- Loop state read this pass: `logs/ralph.log` index lines end at the 2026-10-23 iter-01 summary; `notes/denies.log`
+  tail shows the same three summary lines, 0 new denies, so no new guard friction. Harness day 2026-10-25, box clock
+  2026-10-24 14:2x-14:5x CT.
+- Reused the pass-2 lesson about shell heredocs: the first `JOB_REQUEST.json` build ran through a bash heredoc and
+  was truncated mid-note (the python SyntaxError proved it, nothing was written). The note went to a temp file via
+  the `write` tool and a 20-line python built the request from it, with the key-set assertion against
+  `p7/jobs/request_iter07.json` kept. Same rule now twice confirmed: long prose never goes through a shell heredoc.
+- Caught my own invented hash: the request note quoted a full sha256 for `BD013.jpg` that I had typed by extending a
+  16-char measured prefix (48 characters of it were fiction). The staging step computes the sha from the bytes, prints
+  it, replaces the typed string, and asserts the computed sha is present in the request it writes, so the true value
+  `fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce` is what landed and a typed hash cannot survive
+  the write path. (AGENTS.md L4: never write a value you did not measure.)
+- Caught my own over-claim in the doc: I wrote that BD013_w1 was "the first pair-pick w1 crop to clear the gate";
+  re-reading `notes/face_r4g2/r4g2_table.txt` shows HC3_w1 (0.992) and HC6_w1 (0.905) cleared it long before, so
+  the claim is now "the weakest accepted crop in the set", which the table supports.
+- Gate decision surfaced, not buried: BD013_w1 passes at cos 0.49 with no margin, and wiring it in as `ref_image_3`
+  would be a second variable, so the graph keeps the 2-slot shape and the choice is written to `notes/needs_derrick.md`.
+- GPU: none. No llama-swap, ComfyUI, Strata, render script, queue, or port call. Gates run: `comm.guard_ok` 3/3,
+  offline schema `scan` 0 defects, LoadImage existence, id-free, `test_p6_review.py` 21 passed.
