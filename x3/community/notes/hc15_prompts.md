@@ -110,3 +110,98 @@ The room tone of <Video 1> with the window wash steady underneath. Wet tongue an
 
 non_diegetic_music:
 The electric piano figure resolves into a slower two-chord loop, brushed snare dropping out, tempo around 70 bpm, dynamics peaking at the climax and fading to a soft sustain as the two women come together.
+
+---
+
+## Clip 2 = ali163_hc15_bd006_s51150002 (15.083 s, 362 f, 1344x768, 24 fps, seed 51150002)
+
+Same guide as clip 1. Measured grounding (`notes/ali163_hc_r4g2_facebox.py`, row `HC15B`, run 2026-10-25):
+`C:/Users/derek/5slock/approved_characters/FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD006.jpg` = 1376x768,
+ratio 1.7922, exactly 2 faces left-to-right: box 215,146,156,91 (1.35% of frame, h/w 0.58 = tilted,
+hair luma 245.5 = blonde) and box 537,90,109,141 (1.46% of frame, h/w 1.29 = frontal, hair luma 186.2 =
+dark brown). `CHARACTER.md` (Derrick-approved 2026-10-19 12:30 PM CT): fictional adults, insightface
+age >= 18 screening, blonde + dark-haired pair. Identity gate (`notes/ali163_hc_r4g2_verify.py`, run
+2026-10-25): `BD006_w2_face.png` PASSES (cos 0.888, 15.3% of crop); `BD006_w1_face.png` **FAILS**
+(cos 0.058) for the same reason as BD002_w1 - the blonde's box is wider than tall, a tilted/profile
+detection - so that crop is EXCLUDED and the graph carries 2 slots: `ref_image_1` = `BD006.jpg`,
+`ref_image_2` = `BD006_w2_face.png`; `<Subject 1>` (the blonde) rides on `<Picture 1>` alone.
+Pair distinctness: cos(HC15B_w1 vs HC15B_w2) = 0.216, i.e. the two crops are different people.
+Roles are reversed from clip 1 on purpose: here the dark-haired woman kneels, so the woman who carries a
+verified face crop is the active subject. Room, light, colour, wardrobe stay delegated to `<Picture 1>`.
+
+### id=ali163_hc15_bd006_s51150002 chunk=c0 seed=51150002
+
+subject_definitions:
+<Subject 1> is the blonde woman on the left of the two-woman start photograph in <Picture 1>, a fictional adult aged 23: tall and athletic, broad shoulders, a flat stomach, firm long legs with visible knee and calf definition, fair skin with visible pores and fine vellus hair, long straight blonde hair, and the wardrobe she wears in <Picture 1>. Her face, hair, body, skin and figure all come from <Picture 1>.
+<Subject 2> is the adult woman whose face and hair are in the face crop in <Picture 2>, the dark-haired woman right of centre in the two-woman start photograph in <Picture 1>, a fictional adult aged 25: compact and soft, narrow waist, wide hips, full breasts, a round seat, olive skin with visible pores, long wavy dark brown hair, and the wardrobe she wears in <Picture 1>. Her face and hair come from <Picture 2>; her body, skin and figure come from <Picture 1>.
+<Picture 1> is the approved 16:9 start photograph of <Subject 1> and <Subject 2> standing side by side, the blonde woman at the left third of frame and the dark-haired woman right of centre, both faces in the upper half of frame. It is the first frame of this video and it defines their bodies, skin, figures, faces, hair, wardrobe, the room, the furnishings, the wall, the light, the colour cast and the camera position.
+
+summary:
+[reference generation] The target video is the first 5.17 seconds of a single continuous 16:9 shot of <Subject 1> and <Subject 2>, two fictional adult women dressed as in <Picture 1>, who kiss, pull each other's tops up and off, and stand bare-chested in the light of the opening photograph. The shot uses <Picture 1> as the first frame and the scene, and <Picture 2> as the face and hair of <Subject 2>.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - the blonde woman of <Picture 1>, keeping her face, hair, athletic figure, skin tone, height, build and the wardrobe of <Picture 1>.
+<Subject 2> (appears in [Shot 1]): fully_preserved - the dark-haired woman of <Picture 2> and <Picture 1>, keeping her face, hair, soft figure, skin tone, height, build and the wardrobe of <Picture 1>.
+<Picture 1> ([Shot 1] first frame): fully_preserved - the room, the wall, the light direction, the colour cast, the standing start position of the pair, the 16:9 framing and the camera height.
+
+detailed_description:
+Live-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the two women.
+[Shot 1] A single continuous 16:9 medium two-shot that keeps the framing, the room, the wall, the light and the colour of <Picture 1> exactly, with <Picture 1> as the first frame. <Subject 1> stands at the left third of frame and <Subject 2> stands right of centre, both in the wardrobe of <Picture 1>, at the same distance from the lens and the same height as the opening photograph, weight on their back feet, hips angled toward each other. Photorealistic skin and anatomy: natural matte skin with visible pores and fine vellus hair, real adult body mass with joint definition, five separate fingers on each hand, natural adult proportions, a soft sheen of sweat only where skin presses skin. The camera starts as a Static Shot on the pair, then a Push In with small amplitude at slow speed closes the lens distance by a hand's width across the segment. At 00:00.000, the frame is the opening photograph: the two women facing each other, chins lifted, mouths closed, hands loose at their sides, the light of <Picture 1> lying across their collarbones. At 00:01.200, <Subject 2> rises onto her front feet and presses her mouth to <Subject 1>'s mouth; her hands slide up the blonde's ribcage and her fingers open into the blonde hair at the nape, and <Subject 1>'s palms settle on the dark-haired woman's waist, thumbs pressing into the soft flesh above her hips; both mouths open into the kiss and their breathing quickens visibly. At 00:02.800, <Subject 1>'s hands hook the hem of <Subject 2>'s top and draw it up in one continuous pull, fabric stretching over her ribs and breasts and sliding off her shoulders, while <Subject 2> pulls the blonde's top up over her chest and head in the same motion; both garments leave frame and their bare chests come into the light: <Subject 1> taut and flat-chested with small pale areolae and the long line of her abdomen, <Subject 2> soft and full, heavy breasts swinging once with her weight and settling, darker areolae, skin catching the key light along the underside of her breasts. At 00:04.200, the women settle chest to chest, <Subject 1>'s forearms around the dark-haired woman's back, <Subject 2>'s hands cupping the blonde's breasts, thumbs rubbing, the kiss continuing, hair falling forward over their jaws, mouths parting for one visible breath and closing again. The shot ends with <Subject 1> and <Subject 2> still kissing, bare-chested, hips forward, <Subject 2>'s thigh between the blonde's legs, both chests rising fast.
+
+overall_soundscape:
+The room tone of the space in <Picture 1>, a soft ventilation hum and a faint outside wash through an open window. Fabric friction as two tops stretch and slide off shoulders, a light knock of a heel on the floor, a palm sliding on a ribcage. Quickened breathing from both women, small open-mouthed sighs at the mouth of the kiss, a low humming moan pressed against the other's mouth.
+
+non_diegetic_music:
+A low muted guitar figure over a slow finger-snare loop, low volume, tempo around 68 bpm, dynamics rising gently with the kiss and settling at the end of the segment.
+
+### id=ali163_hc15_bd006_s51150002 chunk=c1 seed=51150002
+
+subject_definitions:
+<Subject 1> is the blonde woman of the start photograph in <Picture 1>, a fictional adult aged 23: tall and athletic, flat stomach, firm long legs, fair skin with visible pores, long straight blonde hair, bare-chested as she became in <Video 1>. Her face, hair, body, skin and figure all come from <Picture 1> and from the body the viewer saw in <Video 1>.
+<Subject 2> is the adult woman whose face and hair are in the face crop in <Picture 2>, the dark-haired woman of the start photograph in <Picture 1>, a fictional adult aged 25: compact and soft, narrow waist, wide hips, full heavy breasts, round seat, olive skin with visible pores, long wavy dark brown hair, bare-chested as she became in <Video 1>. Her face and hair come from <Picture 2>; her body, skin and figure come from <Picture 1> and from the body the viewer saw in <Video 1>.
+<Picture 1> is the approved 16:9 start photograph of the two adult women in the room of <Picture 1>; it defines their bodies, skin, figures, faces, hair, the room, the wall, the light, the colour cast and the camera context for both women.
+
+summary:
+[video continuation + reference generation] This segment continues the same single continuous shot from <Video 1>: over the next 4.96 seconds <Subject 1> and <Subject 2>, both bare-chested from the first segment, work each other's lower garment down and off, and <Subject 2> sinks down onto her knees in front of the standing blonde. The same room, light, colour, lens and camera height carry from <Video 1>.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - her face, hair, athletic figure, skin tone (carried from <Picture 1> and <Video 1>) and the bare-chested state her body reached in <Video 1>.
+<Subject 2> (appears in [Shot 1]): fully_preserved - her face, hair, soft figure, skin tone and the bare-chested state her body reached in <Video 1>.
+<Video 1> (the first 5.17 seconds of this clip): fully_preserved - the room, the wall, the light direction, the colour cast, the framing, the camera height, and the fact that both women's tops lie discarded outside frame.
+<Picture 1> (scene anchor): partially_preserved - the room, wall, light and colour carry; the two women are now bare-chested where they were dressed in the photograph.
+
+detailed_description:
+Live-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the two women.
+[Shot 1] One continuous take that carries the lens position, room, wall, light and colour of <Video 1> forward, the camera resuming as an Arc Shot with small amplitude at slow speed, curving a quarter of the way around the pair so the window light travels from the left of frame toward the camera, then settling into a Push In with small amplitude at slow speed. Both women stand in the positions where the first segment left them, bare-chested, their discarded tops on the floor outside frame, skin glossy where their chests pressed. At 00:05.200, <Subject 2> breaks the kiss for one long breath and drops her mouth to the front of the blonde's collarbone; her hands go to the waistband of <Subject 1>'s lower garment and she works the fabric down over the blonde's hips and thighs with both palms, the garment pooling at her ankles. At 00:06.800, <Subject 1> pulls the dark-haired woman's lower garment down in the same way, stepping on the fabric as it falls, and for the first time both women stand naked in the light of <Picture 1>: <Subject 1> tall, legs long, hips narrow, a neat pale triangle of pubic hair, small pale areolae, abdominal muscles visible as she shifts her weight; <Subject 2> compact, hips wide, thick thighs, a dark triangle of pubic hair, heavy breasts that swing and settle with her weight, a round seat that catches the light. At 00:08.400, <Subject 2> steps back a half pace, looks at the blonde's whole body with her mouth open, breathing hard, then slides down onto her knees on the floor in front of her, one hand on the blonde's thigh for balance, the other at her own breast, thumbs rubbing her own areola as she settles. At 00:09.900, <Subject 1>'s hands come down into the dark hair at <Subject 2>'s temples and grip, her thighs parting, and <Subject 2> presses her face against the blonde's inner thighs, her tongue visible as it licks a long stroke upward through the wet pale folds; the blonde's head tips back, her jaw opening, her fingers tightening in the dark hair. The camera is steady, focus held on the contact point, the window light grazing both bodies, skin detail crisp and natural at the close distance, and the shot ends on <Subject 2> kneeling between the standing blonde's thighs with her fingers on the blonde's knees and the blonde's hips forward.
+
+overall_soundscape:
+The same room tone as <Video 1>, the window wash a little louder with the camera closer. Fabric pooling on the floor, a knee settling on the floorboards, palms sliding on wet skin, hair being gripped. Breathing that turns into a rising open-mouthed moan from <Subject 1>, short sharp breaths from <Subject 2>, the wet sound of a tongue working.
+
+non_diegetic_music:
+The muted guitar figure continues, a brushed snare entering, tempo around 68 bpm, dynamics swelling slightly as the kneeling position settles and easing back at the end of the segment.
+
+### id=ali163_hc15_bd006_s51150002 chunk=c2 seed=51150002
+
+subject_definitions:
+<Subject 1> is the blonde woman of the start photograph in <Picture 1>, a fictional adult aged 23: tall and athletic, fair skin with visible pores, long straight blonde hair, naked, standing as she was at the end of <Video 1>. Her face, hair, body, skin and figure all come from <Picture 1> and from <Video 1>.
+<Subject 2> is the adult woman whose face and hair are in the face crop in <Picture 2>, the dark-haired woman of the start photograph in <Picture 1>, a fictional adult aged 25: compact and soft, wide hips, thick thighs, full heavy breasts, olive skin with visible pores, long wavy dark brown hair, naked, kneeling as she was at the end of <Video 1>. Her face and hair come from <Picture 2>; her body, skin and figure come from <Picture 1> and from <Video 1>.
+<Picture 1> is the approved 16:9 start photograph of the two adult women in the room of <Picture 1>; it defines their faces, bodies, skin, the room, the wall, the light, the colour cast and the camera context.
+
+summary:
+[video continuation + reference generation] This segment continues the same single continuous take from <Video 1> for the final 4.96 seconds: <Subject 2> goes down on the standing <Subject 1>, the blonde comes with her hand in the dark hair, and the pair rise together to kiss chest to chest in the framing of the opening photograph. The room, light, colour, lens and camera height carry from <Video 1>.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - her face, hair, athletic figure, skin tone and her standing position at the end of <Video 1>.
+<Subject 2> (appears in [Shot 1]): fully_preserved - her face, hair, soft figure, skin tone and her kneeling position at the end of <Video 1>.
+<Video 1> (the first 10.13 seconds of this clip): fully_preserved - the room, the wall, the light, the colour cast, the framing, the camera height, the discarded clothing on the floor outside frame, and the wetness already on <Subject 1>.
+<Picture 1> (scene anchor): partially_preserved - the room, wall, light and colour carry; both women are naked and the pair are now on the floor in front of the wall.
+
+detailed_description:
+Live-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the contact of the two women.
+[Shot 1] One continuous take resuming the exact framing and lens height of <Video 1>, the camera a Push In with small amplitude at slow speed for the first three beats, then a Pedestal Up with small amplitude at slow speed as <Subject 2> is kissed upward, and a Pull Out with small amplitude at slow speed for the last beat so the two women settle back into the medium framing of the opening photograph. At 00:10.200, <Subject 2> takes the blonde onto her tongue, flat and broad, two long licks upward through the swollen wet pale folds, her fingers pressing the labia apart and her nose grazing the fair skin; <Subject 1>'s hips snap forward onto her face and her thighs clamp around the dark-haired woman's shoulders, toes curling on the floor. At 00:11.600, <Subject 2> works her tongue in fast short circles on the swollen nub, one thumb rubbing slow circles beside it, and she takes two fingers deep inside, knuckle grazing, a wet sound opening with it; <Subject 1>'s back bows, her hand tight in the dark hair steering, her mouth open, jaw shaking, a long rising moan breaking into words she swallows. At 00:13.000, <Subject 1>'s thighs tremble and press the dark head hard against her, her hips stutter in three short pulses, her abdominal muscles cramping, her small breasts shivering, the areolae taut, and she comes with her eyes shut, head thrown back, fingers twisting in the dark hair; the dark-haired woman's chin and cheek are wet and gleaming in the window light. At 00:14.300, <Subject 2> rises up off her knees and <Subject 1> pulls her in by the hair so their chests meet, skin sliding on skin; <Subject 2> lifts her wet fingers to the blonde's breast and draws them down the taut cleavage, leaving a shining streak, and they kiss hard, tongues meeting, both breathing through their open mouths. The final frame is the two women chest to chest in the same 16:9 medium framing and the same light as <Picture 1>, <Subject 1>'s arm locked around the dark-haired woman's waist, <Subject 2>'s hand on the back of her neck, both naked, both slick, the wall steady behind them.
+
+overall_soundscape:
+The room tone of <Video 1> with the window wash steady underneath. Wet tongue and finger sounds, a knee creaking on the floorboards, palms sliding on taut skin, hair being gripped. <Subject 1> moaning loudly and rising into a broken cry, then short gasps against the dark-haired woman's mouth; <Subject 2> humming against skin, both women breathing hard in the last second.
+
+non_diegetic_music:
+The guitar figure resolves into a slower two-chord loop, brushed snare dropping out, tempo around 68 bpm, dynamics peaking at the climax and fading to a soft sustain as the two women come together.
