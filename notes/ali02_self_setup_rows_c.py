@@ -50,25 +50,28 @@ ROWS = [
      "Only the r3b run dir survives; re-run the A/B with a committed timing script before the number is quoted again, and mark it as our own measurement, not community advice."),
 ]
 
+# BLOCKED: sources this audit could not verify. ONE list only - see
+# notes/ali07_blocked_reconcile_20261026.txt for what was dropped and why.
 BLOCKED = [
-    ("the ModelAttentionBackend schema on 0.38.0 (which keys the attention node exposes)",
-     "https://raw.githubusercontent.com/Comfy-Org/ComfyUI/main/CHANGELOG.json", "web/04x_comfy_changelog.404.txt"),
-    ("ComfyUI GitHub discussions 8568 / 12471 / 24165 about H3 quality",
-     "https://github.com/Comfy-Org/ComfyUI/discussions/8568", "web/02x_comfyui_disc8568.401.txt"),
-    ("ComfyUI issues 17706 / 18071 / 24551 (the extra upstream bug reports)",
-     "https://api.github.com/repos/Comfy-Org/ComfyUI/issues/17706", "web/02x_comfyui_issue17706.404.txt"),
-    ("the MiniMax H3 model repo page discussion 28 HTML view",
-     "https://huggingface.co/MiniMaxAI/MiniMax-H3/discussions/28", "web/02v_minimax_disc28_page.401.txt"),
-    ("prompt-relabeller model card page (the lightx2v PE card as a web page)",
-     "https://huggingface.co/ByteDance-Seed/prompt-relabeller-9B", "web/04z_pe_api.json"),
-    ("the Continuum continuation README as fetched from its repo root",
-     "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/README.md", "web/03y_continuation_readme.404.txt"),
+    ('the ModelAttentionBackend schema on 0.38.0 (which keys the attention node exposes)',
+     'https://raw.githubusercontent.com/Comfy-Org/ComfyUI/main/CHANGELOG.json',
+     'web/04x_comfy_changelog.404.txt',
+     'refused'),
+    ('ComfyUI issues 17706 / 18071 / 24551 (the extra upstream bug reports)',
+     'https://api.github.com/repos/Comfy-Org/ComfyUI/issues/17706',
+     'web/02x_comfyui_issue17706.404.txt',
+     'refused'),
+    ('the MiniMax H3 model repo page discussion 28 HTML view',
+     'https://huggingface.co/MiniMax/H3-1031-AIO-3dp7/discussions/28',
+     'web/02v_minimax_disc28_page.401.txt',
+     'refused'),
+    ('prompt-relabeller model card page (the lightx2v PE card as a web page)',
+     'https://huggingface.co/api/models/lightx2v/MiniMax-H3-Prompt-Relabeler-LoRA',
+     'web/04z_pe_api.json',
+     'no-answer'),
 ]
 
 SELF_MEASURED = [
     "the 106-class HF-Face pack support result and 0/5 model support come from Forge's own probe scripts, not from the HF space (API 401)",
 ]
 
-# No extra blocked entries: rows_b carries the shared BLOCKED list (401/403/404 stamps, each
-# checked against the manifest URL that wrote it).
-BLOCKED = []
