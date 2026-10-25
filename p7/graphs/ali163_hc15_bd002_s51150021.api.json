@@ -1,0 +1,405 @@
+{
+  "app1": {
+    "class_type": "MiniMaxH3AppendContinuation",
+    "inputs": {
+      "overlap_audio_tokens": [
+        "win1",
+        3
+      ],
+      "overlap_video_tokens": [
+        "win1",
+        2
+      ],
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ],
+      "sampled_window": [
+        "s1_samp",
+        0
+      ],
+      "transition_audio_tokens": [
+        "win1",
+        5
+      ],
+      "transition_video_tokens": [
+        "win1",
+        4
+      ]
+    }
+  },
+  "avae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "c0": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 768,
+      "length": 243,
+      "prompt": "subject_definitions:\n<Subject 1> is the platinum-blonde woman on the left of the two-woman start photograph in <Picture 1>, a fictional adult aged 22: slim and toned, natural shoulder definition, a defined waist, gently rounded hips, long legs with visible knee and calf definition, light skin with visible pores and fine vellus hair, long loose platinum-blonde hair, and the wardrobe she wears in <Picture 1>. Her face, hair, body, skin and figure all come from <Picture 1>.\n<Subject 2> is the adult woman whose face and hair are in the face crop in <Picture 2>, the dark-haired woman right of centre in the two-woman start photograph in <Picture 1>, a fictional adult aged 24: soft and full, a wide hip spread, thick thighs, a rounded seat, a full bust, warm skin with visible pores, long dark brown hair, and the wardrobe she wears in <Picture 1>. Her face and hair come from <Picture 2>; her body, skin and figure come from <Picture 1>.\n<Picture 1> is the approved 16:9 start photograph of <Subject 1> and <Subject 2> close together, the blonde woman at the left third of frame and the dark-haired woman right of centre, both faces in the upper half of frame. It is the first frame of this video and it defines their bodies, skin, figures, faces, hair, wardrobe, the room, the furnishings, the light, the colour cast and the camera position.\n\nsummary:\n[reference generation] The target video is the first 5.17 seconds of a single continuous 16:9 shot of <Subject 1> and <Subject 2>, two fictional adult women dressed as in <Picture 1>, who turn to each other, kiss, and draw each other's tops up and off their shoulders, ending the segment bare-chested and chest to chest. The shot uses <Picture 1> as the first frame and the scene, and <Picture 2> as the face and hair of <Subject 2>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - the blonde woman of <Picture 1>, keeping her face, hair, slim figure, skin tone, height, build and the wardrobe of <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - the dark-haired woman of <Picture 2> and <Picture 1>, keeping her face, hair, full figure, skin tone, height, build and the wardrobe of <Picture 1>.\n<Picture 1> ([Shot 1] first frame): fully_preserved - the room, furnishings, wall, light direction, colour cast, the standing start position of the pair, the 16:9 framing and the camera height.\n\ndetailed_description:\nLive-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the two women.\n[Shot 1] A single continuous 16:9 medium two-shot that keeps the framing, the room, the light and the colour of <Picture 1> exactly, with <Picture 1> as the first frame. <Subject 1> stands at the left third of frame and <Subject 2> stands right of centre, both in the wardrobe of <Picture 1>, in the same positions, at the same distance from the lens and at the same height as the opening photograph, weight settled on their back feet, hips angled toward each other. Photorealistic skin and anatomy: natural matte skin with visible pores and fine vellus hair, real adult body mass with joint definition, five separate fingers on each hand, natural adult proportions, a soft sheen of sweat only where skin presses skin. The camera starts as a Static Shot on the pair, then a Push In with small amplitude at slow speed closes the lens distance by a hand's width across the segment. At 00:00.000, the frame is the opening photograph: the two women facing each other, eyes lowered, mouths closed, hands loose at their sides, the light of <Picture 1> lying across their collarbones. At 00:01.300, <Subject 1> lifts her chin and closes the last centimetres between their mouths; her left hand rises to cup the side of <Subject 2>'s neck and her fingers spread into the dark hair at her temple, and <Subject 2>'s right palm slides onto the blonde's ribcage; both mouths open into the kiss and their breaths quicken visibly. At 00:02.900, <Subject 2>'s free hand hooks the hem of <Subject 1>'s top and draws it up over her ribs and chest in one continuous pull, the fabric stretching and sliding off her shoulders, while <Subject 1>'s hands lift the dark-haired woman's top off her shoulders in the same motion; both garments travel up and out of frame and their bare chests come into the light: <Subject 1> slim and lightly shaped with small light-brown areolae, <Subject 2> fuller and heavier, breasts hanging softly with their weight and darker areolae, skin catching the key light along the collarbones. At 00:04.300, the women settle chest to chest, <Subject 1>'s palms flat at her sides, <Subject 2>'s forearm across the blonde's waist, shoulders and chests in continuous contact, the kiss continuing, hair falling forward over their jaws, mouths parting for one visible breath and closing again. The shot ends with <Subject 1> and <Subject 2> still kissing, bare-chested, foreheads touching, <Subject 2>'s hand resting on the blonde's ribs, both chests rising fast.\n\noverall_soundscape:\nThe room tone of the space in <Picture 1>, a soft ventilation hum and a faint outside wash through an open window. Fabric friction as the two tops stretch and slide off shoulders, a light knock of a palm against a wall, heel shifts on the floor. Quickened nasal breathing from both women, small open-mouthed sighs at the mouth of the kiss, a low humming moan pressed against the other's mouth.\n\nnon_diegetic_music:\nA single muted electric piano figure in a slow three-beat loop with soft brush cymbals, low volume, tempo around 70 bpm, dynamics rising gently with the kiss and settling at the end of the segment.\n\n---",
+      "ref_image_size": "match",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "img2",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 1344
+    }
+  },
+  "c1": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 768,
+      "length": [
+        "win1",
+        1
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is the platinum-blonde woman of the start photograph in <Picture 1>, a fictional adult aged 22: slim and toned, defined waist, gently rounded hips, light skin with visible pores and fine vellus hair, long loose platinum-blonde hair, bare-chested as she became in <Video 1>. Her face, hair, body, skin and figure all come from <Picture 1> and from the body the viewer saw in <Video 1>.\n<Subject 2> is the adult woman whose face and hair are in the face crop in <Picture 2>, the dark-haired woman of the start photograph in <Picture 1>, a fictional adult aged 24: soft and full, wide hip spread, thick thighs, rounded seat, full bust, warm skin with visible pores, long dark brown hair, bare-chested as she became in <Video 1>. Her face and hair come from <Picture 2>; her body, skin and figure come from <Picture 1> and from the body the viewer saw in <Video 1>.\n<Picture 1> is the approved 16:9 start photograph of the two adult women in the room of <Picture 1>; it is the reference that defines their bodies, skin, figures, faces, hair, the room, the furnishings, the light, the colour cast and the camera context for both women.\n\nsummary:\n[video continuation + reference generation] This segment continues the same single continuous shot from <Video 1>: over the next 4.96 seconds <Subject 1> and <Subject 2>, both bare-chested from the first segment, work each other's lower garment down and off, part, and look at each other's naked bodies, ending with <Subject 2> stepping back onto the bed and <Subject 1> kneeling between her thighs. The same room, light, colour, lens and camera height carry from <Video 1>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - her face, hair, slim figure, skin tone (all carried from <Picture 1> and <Video 1>) and the state her body reached in <Video 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - her face, hair, full figure, skin tone and the state her body reached in <Video 1>.\n<Video 1> (the first 5.17 seconds of this clip): fully_preserved - the room, the light direction, the colour cast, the framing, the camera height, and the fact that both women's tops lie discarded outside frame.\n<Picture 1> (scene anchor): partially_preserved - the room, furnishings, wall, light and colour carry; the two women are now bare-chested where they were dressed in the photograph.\n\ndetailed_description:\nLive-action, cinematic realism, warm natural light, muted realistic palette, shallow depth of field held on the two women.\n[Shot 1] One continuous take that carries the lens position, room, light and colour of <Video 1> forward, the camera resuming as an Arc Shot with small amplitude at slow speed, curving a quarter of the way around the pair so the window light moves from the left of frame toward the camera, then settling into a Push In with small amplitude at slow speed. Both women stand in the positions where the first segment left them, bare-chested, their discarded tops on the floor outside frame, skin glossy where their chests pressed. At 00:05.200, <Subject 1> breaks the kiss for one long breath, drops her forehead to <Subject 2>'s shoulder, and her hands go to the waistband of <Subject 2>'s lower garment; she works the fabric down over the dark-haired woman's hips with both palms, and the garment slides down her thighs and off her shoes. At 00:06.900, <Subject 2> pulls the blonde's lower garment down in the same way, stepping out of it, and for the first time both women stand naked in the light of <Picture 1>: <Subject 1> slim, hips narrow, a neat triangle of pale pubic hair, small pale areolae, her breasts light and shaped as she moves; <Subject 2> full, wide hips, thick thighs, a dark triangle of pubic hair, heavy breasts that swing and settle with her weight, a round seat that catches the light. At 00:08.500, <Subject 2> turns and steps back onto the low bed behind her, sitting on the edge, elbows behind her, chest arched forward, thighs parting as she settles, and she looks down at <Subject 1> with her mouth open and breathing hard; <Subject 1> steps in toward her and lowers herself onto her knees between the dark-haired woman's thighs, one hand on each knee, thumbs pressing into the soft inner thigh flesh. At 00:09.900, <Subject 1> lifts her face toward <Subject 2>'s stomach, blonde hair falling forward against the darker skin of her inner thighs, her hands sliding up under the wet folds at the apex of <Subject 2>'s thighs, fingers spreading the labia apart; <Subject 2>'s hand comes down into the blonde's hair and grips it, her hips lifting an inch off the mattress, her mouth open on a soundless syllable. The camera is steady, focus held on the contact point, the window light grazing both bodies, skin detail crisp and natural at the close distance, and the shot ends on <Subject 1> kneeling between <Subject 2>'s thighs with her fingers on the wet, swollen folds and <Subject 2>'s hand tight in her hair.\n\noverall_soundscape:\nThe same room tone as <Video 1>, the window wash a little louder with the camera closer. Fabric pooling on the floor, a dull thud of a body settling on a mattress, a bed frame creaking once, palms sliding on wet skin. Breathing that turns into a rising open-mouthed moan from <Subject 2>, short sharp breaths from <Subject 1>, the wet sound of fingers working.\n\nnon_diegetic_music:\nThe muted electric piano figure continues, a brushed snare entering, tempo around 70 bpm, dynamics swelling slightly as the kneeling position settles and easing back at the end of the segment.\n\n---",
+      "ref_image_size": "match",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "img2",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 1344
+    }
+  },
+  "clip": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "dec_a": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "app1",
+        0
+      ],
+      "vae": [
+        "avae",
+        0
+      ]
+    }
+  },
+  "dec_v": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "app1",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "img": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/BD002.jpg"
+    }
+  },
+  "img2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/BD002_w2_face.png"
+    }
+  },
+  "ksel": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "m_attn": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "pytorch attention",
+      "model": [
+        "unet",
+        0
+      ]
+    }
+  },
+  "m_shift": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "m_vsa",
+        0
+      ],
+      "shift_audio": 3.0,
+      "shift_video": 10.0
+    }
+  },
+  "m_vsa": {
+    "class_type": "BlockSparseAttention",
+    "inputs": {
+      "dense_blocks": "",
+      "end_percent": 1.0,
+      "extra_tokens": 256,
+      "min_tokens": 12288,
+      "model": [
+        "m_attn",
+        0
+      ],
+      "selection": "vsa",
+      "selection.keep_percent": 10,
+      "sink_conditioning": "exact_kv_and_rows",
+      "start_percent": 0.2,
+      "verbose": false
+    }
+  },
+  "mkvid": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "dec_a",
+        0
+      ],
+      "fps": 24,
+      "images": [
+        "dec_v",
+        0
+      ]
+    }
+  },
+  "noise": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 51150001
+    }
+  },
+  "s0_guide": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "g0",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s0_samp": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s0_guide",
+        0
+      ],
+      "latent_image": [
+        "c0",
+        1
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s0_sched",
+        0
+      ]
+    }
+  },
+  "s0_sched": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 12
+    }
+  },
+  "s1_guide": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "tail1",
+        0
+      ],
+      "model": [
+        "lora_antiburn",
+        0
+      ]
+    }
+  },
+  "s1_samp": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s1_guide",
+        0
+      ],
+      "latent_image": [
+        "win1",
+        0
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s1_sched",
+        0
+      ]
+    }
+  },
+  "s1_sched": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "lora_antiburn",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 12
+    }
+  },
+  "save": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "community/ali163_hc15_bd002_s51150021/ali163_hc15_bd002_s51150021",
+      "format": "auto",
+      "video": [
+        "mkvid",
+        0
+      ]
+    }
+  },
+  "tail1": {
+    "class_type": "MiniMaxH3LatentTailGuide",
+    "inputs": {
+      "overlap_audio_tokens": [
+        "win1",
+        3
+      ],
+      "overlap_video_tokens": [
+        "win1",
+        2
+      ],
+      "positive": [
+        "c1",
+        0
+      ],
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ],
+      "target_av_latent": [
+        "win1",
+        0
+      ]
+    }
+  },
+  "unet": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "vvae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+    }
+  },
+  "win1": {
+    "class_type": "MiniMaxH3GuidedContinuationWindow",
+    "inputs": {
+      "extension_frames": 119,
+      "overlap_frames": 22,
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ]
+    }
+  },
+  "g0": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "c0",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "latent": [
+        "c0",
+        1
+      ],
+      "image": [
+        "img",
+        0
+      ],
+      "frame_idx": 0
+    }
+  },
+  "lora_antiburn": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "m_shift",
+        0
+      ],
+      "lora_name": "h3_antiburn_universal_v1.safetensors",
+      "strength_model": 0.5
+    }
+  }
+}

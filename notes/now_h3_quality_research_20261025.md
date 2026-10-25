@@ -127,3 +127,106 @@ failure state (2 x strict tool allowlist asks for `web_search`/`fetch_content`/`
 that this session does not register, 1 x 1,800,000 ms timeout). Their research bodies survive on disk
 (`sessions/subagent-artifacts/216bc02a-*.md`, `ff8df43f-*.md`) and their quotes were re-verified against the saved
 bodies before use in §1. The shipped artifact stayed with the parent.
+
+## 7. NOW-P1 shipped (the builder pass, 2026-10-25) - what is on disk, and the three deltas from §3/§4
+
+Artifact (written by `notes/hc15_anchor_fix_build.py --now-build`, no new scripts, per §4):
+
+- `C:/AI/community/p7/graphs/ali163_hc15_bd002_s51150021.api.json` - 28 nodes (27 + `lora_antiburn`), 18,489 B,
+  sha256 `c42a36e9abfc056e8951aac0bc336da6292bc07af1260f741e13b739afa5829e`, indent=2 + CRLF + no trailing newline
+  (the byte format of the base, measured by check 12). Base = the RENDERED clip-11
+  `ali163_hc15_bd002_s51150011.api.json`, 18,235 B, sha256
+  `8a57ebbf456b6f9d74ad1ca2424076041e8ad0c524d15f7f8a7c9a126a57e769`, 27 nodes, rendered in 571.7 s wall.
+- `C:/AI/community/runs/ali163_hc15_bd002_s51150021/request.api.json` - byte-identical to the graph (measured).
+- `C:/AI/community/p7/JOB_REQUEST.json` - re-armed: top level `id` / `api` / `run_dir` / `frames` 362 / `minutes` 20
+  and `jobs[]` = one row with exactly the 6 keys `id, kind, frames, frames_tol, minutes, note`, all naming the new id.
+- Builder modes added to the existing file: `--now-build`, `--now-check` (13 named detectors), `--now-selftest`
+  (37 seeded faults), `--now-sheet` (labelled frame-0 before/after sheet, ffmpeg + PIL, no vision judge).
+
+Measured switch values on the new graph, each read against the box's own `/object_info` dump
+(`notes/ali173_b2_object_info_full.json`), the only source the schema gate uses:
+
+| node | clip-11 | new | live schema |
+| --- | --- | --- | --- |
+| `s0_sched.steps` / `s1_sched.steps` | 8 | 12 | INT; published band 8-12 for this file (`notes/web/hc15_tenstrip_readme.txt:16` "It's a slow 8-12 step reference model in that configuration") |
+| `c0.ref_image_size` / `c1.ref_image_size` | `max` | `match` | options `['match','max']`, default `match` |
+| `m_attn.attention` | `comfy kitchen attention` | `pytorch attention` | options `['pytorch attention','comfy kitchen attention']`, default `pytorch attention` |
+| `lora_antiburn` | absent | `LoraLoaderModelOnly` (`model` <- `m_shift`, `lora_name` = `h3_antiburn_universal_v1.safetensors`, `strength_model` 0.5) feeding `s1_guide` + `s1_sched` | required keys exactly `['model','lora_name','strength_model']`; the file is in the live `lora_name` list and installed on disk |
+
+Prompts are byte-identical to clip-11 (`c0.prompt` sha256 `ed90eb1c0bbc6137080e632f`, `c1.prompt`
+`389a3402017dcdf3ebe11857`) and `noise_seed` stays 51150001, so the render A/B against clip-11 moves the four
+switches and nothing else.
+
+§4's allowed-diff set is 8 paths; the shipped gate is 9. The three deltas, each decided by published wording:
+
+1. **`save.filename_prefix` joined the allowed set.** §4 lists only the four switch paths + the new node + its 2
+   edges. `filename_prefix` IS the output folder (`community/<id>/<id>`), so an unchanged prefix would write the new
+   clip into `community/ali163_hc15_bd002_s51150011/`, the folder of the RENDERED before clip, and the id-free gate
+   (`p7/jobs/<id>.result.json` + `ComfyUI/output/community/<id>/*`) could never be satisfied. It is a naming path, not
+   a sampling path, and detector 5 names it in the allowed set. Seed N24 (prefix back to the rendered clip-11 folder)
+   fires detectors 5 and 11.
+2. **`LoraLoaderModelOnly`, not `LoraLoader`.** The LoRA's own README is the published wiring -
+   `notes/web/02v_antiburn_readme.txt:29` "Load it with `LoraLoaderModelOnly` on the model that makes your
+   **continuation clips**: 2, 3, 4 and so on.", `:30` "**Don't use it on clip 1.** A first clip has nothing to burn
+   from.", `:31` "**Start at 0.5.**", `:83` "LoRA: merged with `LoraLoaderModelOnly` before the turbo."; and
+   `notes/web/02v_docs_h3.txt:157` names only "`strength_model` ~0.5". `LoraLoaderModelOnly` requires exactly
+   `['model','lora_name','strength_model']` (measured), so it exposes only the published knob. `LoraLoader` also
+   requires `clip` + `strength_clip`, and **no published source gives a `strength_clip` value for this LoRA** - taking
+   one would be our own setting (the item says "no settings of your own") and would move the CLIP/conditioning path as
+   a fifth variable. Seed N13 (`class_type` = `LoraLoader`) fires 4 and 6.
+3. **`topk` stays unwritable, confirming §3 item 5.** `BlockSparseAttention` in this build exposes
+   `['dense_blocks','end_percent','extra_tokens','min_tokens','model','selection','selection.keep_percent',
+   'sink_conditioning','start_percent','verbose']` - no `topk` (measured from the dump; AGENTS.md records that ComfyUI
+   0.19.2 dropped `sparse_blocks`/`sparse_size`/`max_dims` from `ModelAttentionBackend`, whose live keys are now only
+   `['attention','model']`). §1 row 5's beta6 fast path is therefore only half-writable here: the antiburn LoRA goes
+   in, the `topk` value cannot be set at all. Seeds N15 (`topk` on `m_vsa`) and N25 (`min_tokens` moved) fire 5 and 6.
+
+Attention switch grounding, the two published lines that decide it: `notes/web/02v_docs_h3.txt:80`
+"**Comfy Kitchen attention cannot run `int8_convrot` checkpoints**; use a `bf16` build with that backend." and
+`:201` "Templates use **`int8_convrot`** checkpoints. **Comfy Kitchen does not support them**
+([issue #15529](https://github.com/Comfy-Org/ComfyUI/issues/15529)). Use default attention, or switch `UNETLoader` to
+**`pruned_bf16`** then change backend." Our unet is `10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors` (measured off the
+clip-11 graph), so `pytorch attention` = the docs' first-listed remedy. Steps grounding: `:176` "Speech and timbre need
+**12+** steps; at **8** steps audio is often the weak link." and `:182` "Splitting the schedule across two samplers
+drops multistep history: the second sampler's first step is first-order again. Keep one sampler run, or give the second
+enough steps to warm up." ref-size grounding: `notes/web/02v_docs_h3_native.txt:218` "**`ref_image_size`**: Default
+**`match`** (fit to canvas). **`max`** keeps 2048px short edge and is much slower; it does not upscale small files";
+our refs are a 1376x768 start frame and a 512x512 face crop (`c0.ref_images.ref_image_1` -> `img` =
+`ComfyUI/input/community/hc/BD002.jpg` measured 1376x768, `ref_image_2` -> `img2` = `community/hc/BD002_w2_face.png`
+measured 512x512; there is no `ref_image_3` in this graph), both under the 2048px short edge, so `max` buys no extra
+identity detail from these files ("it does not upscale small files") while spending reference tokens that "ride through
+every sampling step".
+
+Self-check receipts (this pass, run from `C:/AI/community`):
+
+- `python notes/hc15_anchor_fix_build.py --now-check` = `CHECKS real ALL 13 PASS`.
+- `python notes/hc15_anchor_fix_build.py --now-selftest` = `NOW-SELFTEST seeds=37 fired=37 silent=0
+  real_problems=0` + `NOW-SELFTEST-CLEAN`. Per-detector coverage (number of seeds that fire each detector) =
+  1:4 2:4 3:3 4:9 5:22 6:5 7:4 8:6 9:1 10:6 11:6 12:1 13:1 - every detector fires on at least one seed, so none is
+  decoration (L10). Seeds include §4's list verbatim: steps back to 8 (N1), `max` back (N4), `comfy kitchen
+  attention` back (N7), LoRA node dropped (N9), a `topk` key added (N15), one prompt char changed (N18), the graph id
+  renumbered (N24); plus non-published option strings (N6 `largest`, N8 `sla attention`), strength 1.0 (N10), the LoRA
+  on the clip-1 path against README:30 (N11), a real-but-different installed LoRA (N12), the `LoraLoader` class (N13),
+  LoRA feeding only the sampler (N14), a dropped required input (N16), an unknown class (N17), the full clip-11 clone
+  as the before artifact (N36), a minor-token prompt so the fiction gate must deny (N37), `cfg` injected (N33 -
+  AGENTS.md: this graph has no cfg key at all), handoff drift (N26-N31), ledger over budget (N29), byte drift (N32),
+  a stale frame-0 sheet (N35), and anchor/canvas/shift/window geometry (N20-N23).
+- `python -m pytest -q C:/AI/community/scripts/tests/test_p6_review.py` = `21 passed in 3.06s`.
+- `python C:/AI/community/notes/ali02_citation_check.py` = `checked 87 citations + 7 bans, 0 problems`; auto-cite
+  scan 120 tokens over 6 docs, 0 problems; 3 blocked (401/404) this pass, used as blocked rows only.
+- `python C:/AI/community/scripts/check_web_saves.py` = `CLEAN: C:/AI/community/notes/web - every *.json parses
+  (json.tool-safe), 171 checked`.
+- Ledger re-read this pass (not reused from §4): `used_min` 472.9 / `cap_min` 615, `jobs` 38 / `job_cap` 45 = 142.1
+  min and 7 jobs free. This job books 20 min from the measured 571.7 s wall of clip-11 x 12/8 steps = ~858 s plus the
+  `pytorch attention` per-step cost, so the projection is 492.9 min / 39 jobs.
+- **Coupling disclosed (measured, not assumed):** `p7/JOB_REQUEST.json` carries one armed job, so re-arming it for
+  51150021 turns the FIRST item's own arm detectors red. With the committed (HEAD) request file the FIRST item is
+  `CHECKS ... ALL 13 PASS`; with the re-armed file it fails exactly detectors 9 (ARM) and 10 (AUDIT-named note). The
+  FIRST item's builder was not edited; its receipt was written while it was armed, and any later re-arm (the
+  51150012-16 rows do the same) reproduces this. `--now-check` 11 has the same property in reverse for a later pass
+  that re-arms the channel.
+- No render in this pass: `--now-sheet` prints `SHEET_BLOCKED no render yet: ... runs\ali163_hc15_bd002_s51150021\
+  ali163_hc15_bd002_s51150021.mp4 (a Ralph pass never queues)`; the mp4 is absent,
+  `p7/jobs/ali163_hc15_bd002_s51150021.result.json` is absent, and there is no `ComfyUI/output/community/ali163_hc15_bd002_s51150021`.
+  §5's command stays the render handoff, and `--now-sheet` writes the labelled before/after frame-0 sheet (51150011
+  before, 51150021 after) for Derrick. KEEP is Derrick's alone; no vision judge on explicit output.
