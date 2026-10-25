@@ -18,3 +18,9 @@ sessions/
 *.out
 *.err
 tools/
+# 0.8 2026-10-25: the index recorded this unzipped tree as a gitlink with no .gitmodules and the inner
+# repo has no remote, so no clone can restore it and every write inside it is a permanent " M" row. The
+# tracked incoming/gmd-dl-ext-2.5.6.zip IS this tree (measured: 230 files byte-identical), so the unpacked
+# copy Chrome loads is a work copy, not a durable artifact. Its 2026-10-24 code changes are recorded in
+# notes/gmd_ext_20261024/ (diff + status + new test + per-file tree manifest) and re-checked by notes/ali08_git_clean_check.py.
+incoming/gmd-dl-ext-2.5.6/

@@ -1,0 +1,392 @@
+diff --git a/content.js b/content.js
+index 07b3d29..605c0af 100644
+--- a/content.js
++++ b/content.js
+@@ -470,9 +470,57 @@ async function getPromptCache() {
+ 
+ async function clearPromptCache() {
+     promptCache = null;
++    promptConvDone = null;
++    await chrome.storage.local.remove(PROMPT_CONV_DONE_KEY);
+     return chrome.storage.local.remove(PROMPT_CACHE_KEY);
+ }
+ 
++// 2026-10-24 patch: conversations whose /responses were already fetched
++// successfully (prompts for every asset they carry are in grok_prompt_cache).
++// The next run skips them, so an interrupted prompt walk resumes instead of
++// restarting from zero. { v:1, c: { [conversationId]: fetchedAtMs } }.
++const PROMPT_CONV_DONE_KEY = 'grok_prompt_conv_done';
++let promptConvDone = null;
++async function ensurePromptConvDone() {
++    if (promptConvDone) return promptConvDone;
++    try {
++        const raw = (await chrome.storage.local.get(PROMPT_CONV_DONE_KEY))[PROMPT_CONV_DONE_KEY];
++        promptConvDone = (raw && raw.v === 1 && raw.c && typeof raw.c === 'object') ? raw : { v: 1, c: {} };
++    } catch (e) {
++        promptConvDone = { v: 1, c: {} };
++    }
++    return promptConvDone;
++}
++async function flushPromptConvDone() {
++    if (!promptConvDone) return;
++    try {
++        const stored = (await chrome.storage.local.get(PROMPT_CONV_DONE_KEY))[PROMPT_CONV_DONE_KEY];
++        // Merge IN PLACE: recoverConversationPrompts holds a reference to
++        // promptConvDone and keeps marking conversations on it — replacing the
++        // object here silently dropped every mark after the first flush.
++        if (stored && stored.v === 1 && stored.c) {
++            for (const [cid, t] of Object.entries(stored.c)) {
++                if (!(cid in promptConvDone.c)) promptConvDone.c[cid] = t;
++            }
++        }
++        await chrome.storage.local.set({ [PROMPT_CONV_DONE_KEY]: promptConvDone });
++    } catch (error) {
++        console.warn('[PromptConvDone] flush failed (non-fatal):', error);
++    }
++}
++
++// 2026-10-24 patch: live generate progress, surfaced by getStatus
++// (top-level generateProgress, and displayStats.generateProgress /
++// displayStats.promptsProgress) so a long walk is visible without the popup.
++let generateProgress = null; // { phase, current, total, text, updatedAt }
++function setGenerateProgress(phase, current, total) {
++    generateProgress = {
++        phase, current, total,
++        text: total != null ? `${phase} ${current}/${total}` : `${phase} ${current}`,
++        updatedAt: Date.now()
++    };
++}
++
+ // 取得 Grok Tag 列表 = collection/list ∪ folder/list
+ async function fetchTagList() {
+     // Grok's tag migration is incomplete in BOTH directions (issue #13):
+@@ -1092,7 +1140,15 @@ async function recoverConversationPrompts(items, options, label) {
+         }
+     };
+ 
+-    const cids = needing.map(it => it.sourceConversationId || it.currentConversationId).filter(Boolean);
++    const allCids = needing.map(it => it.sourceConversationId || it.currentConversationId).filter(Boolean);
++    // Skip conversations a previous (possibly interrupted) run already fetched:
++    // everything they could yield is already in the cache.
++    const convDone = cache ? await ensurePromptConvDone() : null;
++    const cids = convDone ? allCids.filter(cid => !convDone.c[cid]) : allCids;
++    const skippedDoneConvs = new Set(allCids.filter(cid => convDone && convDone.c[cid])).size;
++    if (skippedDoneConvs > 0) {
++        await SystemLogger.info('Prompt recovery', `${prefix}skipping ${skippedDoneConvs} conversation(s) already fetched by an earlier run`);
++    }
+     if (cids.length === 0) {
+         // Everything was served from the cache, or the remainder is
+         // unrecoverable (e.g. Jan-2026 migration orphans without a conversation).
+@@ -1109,11 +1165,32 @@ async function recoverConversationPrompts(items, options, label) {
+     }
+ 
+     // --- 2. fetch only the conversations still missing ----------------------
++    // Incremental persistence: every ~50 conversations or ~30s the cache and
++    // the done-conversation set are flushed, so a dead tab / cancel / reload
++    // loses at most one interval of work.
++    const persister = GrokAssets.createIncrementalPersister({
++        flushEvery: 50,
++        flushIntervalMs: 30000,
++        flush: async () => {
++            if (cache) await cache.flush();
++            await flushPromptConvDone();
++        }
++    });
+     let result;
+     try {
+         result = await GrokAssets.fetchConversationAssetMetadata(fetch, cids, {
+             signalAborted: () => downloadAbortRequested,
++            maxRetries: 5,
++            retryBaseMs: 2000,
++            retryMaxMs: 30000,
++            maxConsecutiveErrors: 10,
++            onConversation: async (cid, convEntries) => {
++                if (cache) convEntries.forEach((entry, id) => cache.put(id, { p: entry.prompt, s: entry.sourceAssetId }));
++                if (convDone) convDone.c[cid] = Date.now();
++                await persister.tick();
++            },
+             onProgress: (current, total) => {
++                setGenerateProgress('prompts', current, total);
+                 chrome.runtime.sendMessage({
+                     action: 'generateListProgress',
+                     phase: 'prompts',
+@@ -1124,6 +1201,7 @@ async function recoverConversationPrompts(items, options, label) {
+         });
+     } catch (error) {
+         // fetchConversationAssetMetadata is designed to never throw — defensive only.
++        await persister.finish();
+         console.warn('  ⚠️ 提示詞復原失敗:', error.message);
+         await SystemLogger.warn('Prompt recovery', `${prefix}failed: ${error.message}`);
+         return { ...empty, filled: cacheHits, skipped: needingInitial.length - cacheHits, cacheHits };
+@@ -1154,8 +1232,10 @@ async function recoverConversationPrompts(items, options, label) {
+     // --- 4. remember the WHOLE fetched conversations, flush once ------------
+     if (cache && result.byAssetId && typeof result.byAssetId.forEach === 'function') {
+         result.byAssetId.forEach((entry, id) => cache.put(id, { p: entry.prompt, s: entry.sourceAssetId }));
+-        await cache.flush();
+     }
++    // Final flush on finish AND on cancel/stopped-early (cache + done set).
++    if (cache) await cache.flush();
++    await flushPromptConvDone();
+ 
+     await logSummary(result.conversationsFetched, result.conversationsRequested, cacheHits + applied.filled, result.errors,
+         (result.stoppedEarly ? ' (stopped early: consecutive failures)' : '') + (result.aborted ? ' (aborted)' : ''));
+@@ -1954,6 +2034,7 @@ async function generateMediaListFromTag(options) {
+             resolveImpl: (id, hd) => GrokAssets.resolveVideoQuality(fetch, id, hd),
+             mapImpl: GrokUtils.mapWithConcurrency,
+             onProgress: (current, total) => {
++                setGenerateProgress('resolving', current, total);
+                 chrome.runtime.sendMessage({
+                     action: 'generateListProgress',
+                     phase: 'resolving',
+@@ -2097,11 +2178,15 @@ async function generateMediaListFromAllMedia(options) {
+             fromDate,
+             toDate,
+             onProgress: (p) => {
++                setGenerateProgress('scan', p.assetCount, null);
+                 chrome.runtime.sendMessage({
+                     action: 'generateListProgress',
+                     count: p.assetCount
+                 }).catch(() => {}); // popup may be closed
+             },
++            // 2026-10-24: the by-id re-read of a resumed scan (~500 batches)
++            // used to report nothing, so getStatus looked frozen at "scan N".
++            onByIdProgress: (p) => setGenerateProgress('reread', p.count, p.total),
+             signalAborted: () => downloadAbortRequested
+         });
+     } catch (error) {
+@@ -2157,6 +2242,7 @@ async function generateMediaListFromAllMedia(options) {
+             conversationIds: cids,
+             signalAborted: () => downloadAbortRequested,
+             onProgress: (cur, total) => {
++                setGenerateProgress('titles', cur, total);
+                 chrome.runtime.sendMessage({
+                     action: 'generateListProgress',
+                     phase: 'titles',
+@@ -2235,6 +2321,7 @@ async function generateMediaListFromAllMedia(options) {
+             resolveImpl: (id, hd) => GrokAssets.resolveVideoQuality(fetch, id, hd),
+             mapImpl: GrokUtils.mapWithConcurrency,
+             onProgress: (current, total) => {
++                setGenerateProgress('resolving', current, total);
+                 chrome.runtime.sendMessage({
+                     action: 'generateListProgress',
+                     phase: 'resolving',
+@@ -4628,6 +4715,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                 return;
+             }
+             generateInProgress = true;
++            setGenerateProgress('starting', 0, null);
+             // A previous Cancel (of a generate, or of a download that has since
+             // finished) must not abort this fresh run. Never touch the flag
+             // while a download is actually running — that would un-cancel it.
+@@ -4641,7 +4729,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                 const result = await generateMediaList(request.options);
+                 const hdPriority = request.options?.hdPriority !== false;
+ 
+-                if (result) {
++                // 2026-10-24 patch: a Cancel during ANY generate phase (scan,
++                // titles, prompts, resolving) used to fall through and report
++                // success:true, partial:false — a watcher would then start a
++                // download from a truncated list. Report it as cancelled.
++                const cancelled = !!(downloadAbortRequested && !downloadInProgress) || !!(result && result.aborted);
++                if (result && cancelled) {
++                    await chrome.storage.local.set({
++                        generateResult: {
++                            success: false,
++                            status: 'cancelled',
++                            cancelled: true,
++                            partial: true,
++                            error: 'cancelled',
++                            imageCount: result.images.length,
++                            videoCount: result.videos.length,
++                            scanError: result.scanError || null,
++                            timestamp: Date.now()
++                        }
++                    });
++                } else if (result) {
+                     const videoCount = hdPriority
+                         ? result.videos.length
+                         : result.videos.reduce((acc, v) => acc + ((v.hd1080Url || v.hdUrl) ? 2 : 1), 0);
+@@ -4677,6 +4784,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                 });
+             } finally {
+                 generateInProgress = false;
++                if (generateProgress) generateProgress = { ...generateProgress, done: true, updatedAt: Date.now() };
+             }
+             return; // 已經 sendResponse 過了，直接返回
+         } else if (request.action === 'startDownload') {
+@@ -4772,11 +4880,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                 hasVideos: (state.videos?.length || 0) > 0,
+             } : null;
+ 
++            const promptsProgress = generateProgress && generateProgress.phase === 'prompts'
++                ? `prompts ${generateProgress.current}/${generateProgress.total}` : null;
++            if (displayStats) {
++                displayStats.generateProgress = generateProgress;
++                displayStats.promptsProgress = promptsProgress;
++            }
+             sendResponse({
+                 state: lightState,
+                 displayStats,
+                 historyCount: history.length,
+-                downloadProgress: downloadInProgress ? downloadCurrentProgress : null
++                downloadProgress: downloadInProgress ? downloadCurrentProgress : null,
++                generateInProgress,
++                generateProgress,
++                promptsProgress
+             });
+         } else if (request.action === 'importSkipIds') {
+             sendResponse(await importSkipIds(request.ids, { replace: request.replace === true }));
+diff --git a/src/grok-assets.js b/src/grok-assets.js
+index cfc1883..4e4ff0f 100644
+--- a/src/grok-assets.js
++++ b/src/grok-assets.js
+@@ -433,7 +433,7 @@ async function scanAllWithCheckpoint(fetchImpl = fetch, { store = null, scope =
+     const needRows = plan.assetIds.filter((id) => !have.has(id));
+     const getByIds = getByIdsImpl || getAssetsByIds;
+     const rows = needRows.length
+-        ? await safe(() => getByIds(fetchImpl, needRows, { signalAborted: listOpts.signalAborted, sleepImpl: listOpts.sleepImpl }), { assets: [], errors: 1, missingIds: needRows })
++        ? await safe(() => getByIds(fetchImpl, needRows, { signalAborted: listOpts.signalAborted, sleepImpl: listOpts.sleepImpl, onProgress: listOpts.onByIdProgress || null }), { assets: [], errors: 1, missingIds: needRows })
+         : { assets: [], errors: 0, missingIds: [] };
+ 
+     const byId = new Map();
+@@ -745,7 +745,14 @@ async function fetchConversationAssetMetadata(fetchImpl = fetch, conversationIds
+     maxConversations = Infinity,
+     maxRetries = 2,
+     maxConsecutiveErrors = 5,
+-    randomImpl = null
++    randomImpl = null,
++    // 2026-10-24 patch: onConversation(cid, Map<assetId, entry>) after each
++    // SUCCESSFUL conversation, so the caller can persist incrementally;
++    // retryBaseMs/retryMaxMs tune the 429/5xx backoff (Retry-After honored).
++    onConversation = null,
++    retryBaseMs = 500,
++    retryMaxMs = 4000,
++    retryAfterCapMs = 60000
+ } = {}) {
+     const sleep = sleepImpl || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+     const rand = randomImpl || Math.random;
+@@ -764,11 +771,13 @@ async function fetchConversationAssetMetadata(fetchImpl = fetch, conversationIds
+     const fetchOne = async (url) => {
+         let retryCount = 0;
+         while (true) {
++            let retryAfterMs = null;
+             try {
+                 const res = await fetchImpl(url);
+                 if (!res.ok) {
+                     const retryable = res.status === 429 || res.status >= 500;
+-                    if (!retryable || retryCount >= maxRetries) return { ok: false };
++                    if (!retryable || retryCount >= maxRetries) return { ok: false, status: res.status };
++                    retryAfterMs = parseRetryAfterMs(res.headers && typeof res.headers.get === 'function' ? res.headers.get('Retry-After') : null);
+                 } else {
+                     return { ok: true, data: await res.json() };
+                 }
+@@ -776,8 +785,10 @@ async function fetchConversationAssetMetadata(fetchImpl = fetch, conversationIds
+                 if (retryCount >= maxRetries) return { ok: false };
+             }
+             if (signalAborted && signalAborted()) { aborted = true; return { ok: false }; }
+-            const base = Math.min(500 * Math.pow(2, retryCount), 4000);
+-            await sleep(Math.round(rand() * base));
++            const base = Math.min(retryBaseMs * Math.pow(2, retryCount), retryMaxMs);
++            let waitMs = Math.round(base / 2 + rand() * base / 2);
++            if (retryAfterMs != null) waitMs = Math.max(waitMs, Math.min(retryAfterMs, retryAfterCapMs));
++            await sleep(waitMs);
+             retryCount++;
+         }
+     };
+@@ -804,6 +815,7 @@ async function fetchConversationAssetMetadata(fetchImpl = fetch, conversationIds
+         consecutiveErrors = 0;
+         const data = outcome.data;
+         const responses = (data && Array.isArray(data.responses)) ? data.responses : [];
++        const convEntries = new Map();
+         for (const response of responses) {
+             const rows = (response && Array.isArray(response.fileAttachmentAssetMetadata)) ? response.fileAttachmentAssetMetadata : [];
+             for (const row of rows) {
+@@ -827,9 +839,13 @@ async function fetchConversationAssetMetadata(fetchImpl = fetch, conversationIds
+                     entry.mediaGenInput = entry.mediaGenInput || prev.mediaGenInput;
+                 }
+                 byAssetId.set(row.assetId, entry);
++                convEntries.set(row.assetId, entry);
+             }
+         }
+ 
++        if (onConversation) {
++            try { await onConversation(cid, convEntries); } catch (e) { /* persistence must never break the walk */ }
++        }
+         if (onProgress) onProgress(i + 1, unique.length);
+     }
+ 
+@@ -1008,7 +1024,19 @@ async function getAssetsByIds(fetchImpl = fetch, assetIds, {
+             + chunk.map((id) => 'assetIds=' + encodeURIComponent(id)).join('&')
+             + '&workspaceKind=WORKSPACE_KIND_IMAGINE_ALL';
+         try {
+-            const res = await fetchImpl(url);
++            // 2026-10-24 patch: retry 429/5xx with backoff (honoring Retry-After)
++            // instead of dropping the batch — on a 31k-id resume ~55% of batches
++            // came back 429 and were silently lost, making every resume partial.
++            let res = null;
++            for (let attempt = 0; ; attempt++) {
++                res = await fetchImpl(url);
++                const retryable = !res.ok && (res.status === 429 || res.status >= 500);
++                if (!retryable || attempt >= 5 || (signalAborted && signalAborted())) break;
++                const ra = parseRetryAfterMs(res.headers && typeof res.headers.get === 'function' ? res.headers.get('Retry-After') : null);
++                const waitMs = Math.max(Math.min(2000 * Math.pow(2, attempt), 30000), ra != null ? Math.min(ra, 60000) : 0);
++                throttleMs = Math.min(Math.round(throttleMs * 1.5), 2500);
++                await sleep(waitMs);
++            }
+             if (!res.ok) { errors++; continue; }
+             const data = await res.json();
+             for (const raw of (data && data.assets) || []) {
+@@ -1334,7 +1362,32 @@ async function listTagAssetIdsUnion(fetchImpl = fetch, { collectionId = null, fo
+     };
+ }
+ 
+-const GrokAssets = { ASSET_PAGE_THROTTLE_MS, ASSET_PAGE_RETRY_BACKOFF_MS, parseRetryAfterMs, mergeAssetListsById, mergePartialWithStored, buildScanCheckpoint, planScanResume, scanAllWithCheckpoint, listGeneratedAssets, listAllGeneratedAssets, resolveVideoQuality, fetchConversationTitles, fetchConversationAssetMetadata, extractAssetPrompt, extractSourceAssetId, mapRawAsset, listCollections, listCollectionAssetIds, getAssetsByIds, listLegacyFolders, listLegacyFolderPostIds, listTagsUnion, resolveTagSources, listTagAssetIdsUnion };
++/**
++ * 2026-10-24 patch: throttled persistence for long walks (prompt recovery).
++ * tick() after each unit of work flushes when `flushEvery` units have
++ * accumulated OR `flushIntervalMs` has elapsed since the last flush;
++ * finish() always flushes whatever is pending. flush errors are swallowed.
++ */
++function createIncrementalPersister({ flush, flushEvery = 50, flushIntervalMs = 30000, now = () => Date.now() } = {}) {
++    let pending = 0;
++    let last = now();
++    let flushes = 0;
++    const doFlush = async () => {
++        pending = 0; last = now(); flushes++;
++        try { await flush(); } catch (e) { /* non-fatal */ }
++    };
++    return {
++        tick: async () => {
++            pending++;
++            if (pending >= flushEvery || now() - last >= flushIntervalMs) await doFlush();
++        },
++        finish: async () => { if (pending > 0) await doFlush(); },
++        get flushes() { return flushes; },
++        get pending() { return pending; }
++    };
++}
++
++const GrokAssets = { createIncrementalPersister, ASSET_PAGE_THROTTLE_MS, ASSET_PAGE_RETRY_BACKOFF_MS, parseRetryAfterMs, mergeAssetListsById, mergePartialWithStored, buildScanCheckpoint, planScanResume, scanAllWithCheckpoint, listGeneratedAssets, listAllGeneratedAssets, resolveVideoQuality, fetchConversationTitles, fetchConversationAssetMetadata, extractAssetPrompt, extractSourceAssetId, mapRawAsset, listCollections, listCollectionAssetIds, getAssetsByIds, listLegacyFolders, listLegacyFolderPostIds, listTagsUnion, resolveTagSources, listTagAssetIdsUnion };
+ 
+ if (typeof module !== 'undefined' && module.exports) module.exports = GrokAssets;
+ if (typeof window !== 'undefined') window.GrokAssets = GrokAssets;
+diff --git a/src/utils.js b/src/utils.js
+index 23cd7e1..ab64e2f 100644
+--- a/src/utils.js
++++ b/src/utils.js
+@@ -1428,8 +1428,10 @@
+ 
+     /** Prompt-cache schema version. Bump = drop the old store wholesale. */
+     const PROMPT_CACHE_SCHEMA_VERSION = 1;
+-    const PROMPT_CACHE_MAX_ENTRIES = 20000;
+-    const PROMPT_CACHE_PRUNE_TO = 16000; // hysteresis: avoids evicting on every flush at steady state
++    // 2026-10-24: raised from 20000/16000 — a 31.6k-asset library was evicting
++    // entries it had just fetched, which defeats the incremental resume.
++    const PROMPT_CACHE_MAX_ENTRIES = 80000;
++    const PROMPT_CACHE_PRUNE_TO = 70000; // hysteresis: avoids evicting on every flush at steady state
+ 
+     /** @returns {?{p:string, s:?string, t:number}} normalised record, or null when degenerate */
+     function normalizePromptCacheRecord(rec) {
+diff --git a/test/run-all.sh b/test/run-all.sh
+old mode 100755
+new mode 100644
