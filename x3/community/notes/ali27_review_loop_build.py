@@ -18,6 +18,13 @@ What is new vs 2.6 (notes/ali126_scene_cut_build.py, six hardcoded paths):
   * the adults gate (scripts/comm.py guard_ok) over EVERY prompt-bearing string of each clip's
     graph, not only key `prompt` (the L11 key-scope gap); a graph that refuses excludes its clip;
   * a deterministic per-seed selection rule, recorded (no silent drop);
+  * the adults gate over EVERY prompt-bearing string, and the receipt's own verdict: the manifest's problems/rc
+    are re-measured by the CLAIMS detector, and --build takes the verdict AFTER every artifact is on disk, with the
+    findings named in the receipt. Measured 2026-10-25 (fix_plan 1.4): the shipped order called check(m) BEFORE it
+    wrote the table, so the receipt shipped problems=11 TABLE findings measured against the PREVIOUS build's table
+    and stayed red for five passes while --check on the same folder read 0 - the per-pass review_folder_flags row
+    reads the receipt, so every pass logged TEST_FAIL off a number that measured the builder's own write order.
+    A verdict taken from a write order is not a measurement (L10).
   * a standing review folder + a per-pass gate (--check / --selftest).
 
 Community method: the FFmpeg project's own concat page
@@ -364,15 +371,26 @@ def build():
     m["sum_vpackets"] = sum(r["vpackets"] for r in s)
     m["sum_vdur"] = round(sum(r["vdur"] for r in s), 3)
     m["table"] = str(REVIEW / TABLE)
-    # the durable receipt carries its own verdict, so a per-pass flag row can read it without running me
-    m["problems"] = len(check(m))
-    m["rc"] = 0 if m["problems"] == 0 else 1
+    # Write every artifact FIRST (manifest with problems/rc = "PENDING", which claims nothing), then take the
+    # verdict with the same check() that --check runs - on the disk state - and only then write it into the
+    # receipt, naming every finding. See the header: the shipped order measured before the table existed.
+    m["findings"] = []
+    m["problems"] = "PENDING"
+    m["rc"] = "PENDING"
     MAN.write_text(json.dumps(m, indent=1, sort_keys=True), encoding="utf-8", newline="\n")
     (REVIEW / TABLE).write_text(render_table(m), encoding="utf-8", newline="\n")
+    P = check()
+    m["findings"] = P
+    m["problems"] = len(P)
+    m["rc"] = 0 if not P else 1
+    MAN.write_text(json.dumps(m, indent=1, sort_keys=True), encoding="utf-8", newline="\n")
     print("BUILT mode=%s clips=%d cut=%s f=%d dur=%.3f %dx%d bytes=%d sheet=%dx%d" % (
         mode, len(s), m["out"]["path"], m["out"]["vpackets"], m["out"]["vdur"], m["out"]["w"],
         m["out"]["h"], m["out"]["bytes"], m["sheet"]["w"], m["sheet"]["h"]))
-    return 0
+    for p in P:
+        print("PROBLEM " + p)
+    print("VERDICT problems=%d %s manifest=%s" % (len(P), "CLEAN" if not P else "RED", MAN.as_posix()))
+    return 0 if not P else 1
 
 def window_plan():
     """The GPU window's queue: every graph on disk whose clip is not in the review scene, with reason.
@@ -520,8 +538,9 @@ def check(m=None):
                 P.append("TABLE clip %s not named in the table" % r["id"])
         if txt != render_table(m):
             P.append("TABLE table bytes != render_table(manifest) (stale doc)")
-    # 11 KEEPWORD: no verdict words in the durable text
-    blob = (json.dumps({k: v for k, v in m.items() if k not in ("scene", "excluded")}) +
+    # 11 KEEPWORD: no verdict words in the durable text. `findings` is detector OUTPUT, not prose about a clip, and
+    # the KEEPWORD finding's own sentence contains "verdict", so a self-reference would be permanent red (L10).
+    blob = (json.dumps({k: v for k, v in m.items() if k not in ("scene", "excluded", "findings")}) +
             (tab.read_text(encoding="utf-8") if tab.is_file() else "")).lower()
     hits = sorted({w for w in KEEPWORDS if re.search(r"\b%s\b" % w, blob)})
     if hits:
@@ -546,6 +565,17 @@ def check(m=None):
         P.append("ORDER scene order is not reproducible from a re-ordered input list")
     if [r["id"] for r in live["scene"]] != ids:
         P.append("ORDER manifest order %r != disk order %r" % (ids, [r["id"] for r in live["scene"]]))
+    # 15 CLAIMS: the receipt's verdict must equal THIS measurement. base = the findings before the self-claim check,
+    # so the detector is idempotent. A "PENDING" claim makes no claim (--build's intermediate write).
+    def _claim(v):
+        return v if isinstance(v, int) and not isinstance(v, bool) else None
+    base = list(P)
+    want_rc = 0 if not base else 1
+    if _claim(m.get("problems")) is not None and _claim(m.get("problems")) != len(base):
+        P.append("CLAIMS the manifest says problems=%s and this measurement makes %d: %r" % (
+            m.get("problems"), len(base), base[:2]))
+    if _claim(m.get("rc")) is not None and _claim(m.get("rc")) != want_rc:
+        P.append("CLAIMS the manifest says rc=%s and this measurement makes rc=%d" % (m.get("rc"), want_rc))
     return P
 
 def render_check(m):
@@ -636,6 +666,18 @@ def seeds(m):
     d = copy.deepcopy(m)
     d["scene"] = d["scene"][:1]
     out.append(("TABLE_ROWS", d, "TABLE"))
+    # CLAIMS: the receipt's own verdict, in both directions. The first seed IS the shipped 2026-10-25 fault: a clean
+    # folder whose receipt claims problems=11 (the builder measured before writing its own table). The second is a
+    # green claim on a red artifact - the class L10 names.
+    d = copy.deepcopy(m)
+    d["problems"] = 11
+    d["rc"] = 1
+    out.append(("CLAIMS_INFLATED", d, "CLAIMS"))
+    d = copy.deepcopy(m)
+    d["out"]["mtime"] = 0            # a real fault: STALE fires, so a 0/0 claim on it is a false green
+    d["problems"] = 0
+    d["rc"] = 0
+    out.append(("CLAIMS_GREEN_ON_RED", d, "CLAIMS"))
     return out
 
 def selftest():

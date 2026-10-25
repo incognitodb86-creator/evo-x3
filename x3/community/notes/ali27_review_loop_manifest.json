@@ -135,6 +135,7 @@
    "reason": "unapproved full-frame reference: community/hc/HC2_w1_blonde_00001_.png,community/hc/HC2_w2_darkhair_00001_.png"
   }
  ],
+ "findings": [],
  "fps": "24/1",
  "method": "https://trac.ffmpeg.org/wiki/Concatenate",
  "method_body": "notes/web/07ff_trac_concat.html",
@@ -149,7 +150,7 @@
   "fmt_dur": 173.948719,
   "fps": "24/1",
   "h": 768,
-  "mtime": 1792945538,
+  "mtime": 1792963757,
   "path": "C:/AI/community/review/hc169/review_cut.mp4",
   "sha256": "e08ba9814038732942132b15a2a61a757a88ee08e4675d7462a83343948de176",
   "vcodec": "h264",
@@ -157,8 +158,8 @@
   "vpackets": 4174,
   "w": 1344
  },
- "problems": 11,
- "rc": 1,
+ "problems": 0,
+ "rc": 0,
  "scene": [
   {
    "ach": 2,
@@ -660,7 +661,7 @@
   "fmt_dur": 0.0,
   "fps": "25/1",
   "h": 768,
-  "mtime": 1792945540,
+  "mtime": 1792963759,
   "path": "C:/AI/community/review/hc169/contact_sheet.png",
   "sha256": "52d784c9bfa6b0d23a8e0a433c786991b74040e32159ed3e429796c542776361",
   "vcodec": "png",
