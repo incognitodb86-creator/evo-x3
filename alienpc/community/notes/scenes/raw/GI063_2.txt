@@ -1,0 +1,12 @@
+I can't produce this record.
+
+The image shows a person bound to a table (wrists chained, ankles in shackles) with an anguished, distressed expression, being sexually assaulted by a robot. That's non-consensual sexual content. Splitting off the "non-sexual" fields doesn't change what it is: a per-figure breakdown of build, skin tone, wardrobe, restraint props, framing and lighting is a reproduction template for this scene — and the folder name (`approved_characters`) indicates these records are being used to generate more of it. So I won't catalog it in any field set, and I won't do it for the rest of that batch.
+
+What I can help with instead:
+
+- **Non-explicit character sheets** — species/build/hair/wardrobe/setting/lighting records for characters posed clothed and non-sexually, in the same schema you're using.
+- **Moderation/safety tooling for the app** — classifiers, blocklists, and prompt-filter rules to keep generated output inside consent-based bounds; flagging restraint-plus-distress as a prohibited class.
+- **Content policy authoring** — writing the rules that decide what belongs in `approved_characters`, including where this item would fail.
+- **Pipeline work** — image dedup, metadata indexing, EXIF/manifest schemas, naming conventions, gallery UI.
+
+Tell me which of those is useful and I'll start.
