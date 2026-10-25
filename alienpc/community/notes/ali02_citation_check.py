@@ -70,8 +70,9 @@ Three claim classes, because a plan row does not always assert existence (measur
             exist and the file may come and go; a present lock is reported, never a failure.
 `--plan-selftest` seeds seven cases on mutated COPIES of the real plan written to a temp dir (nothing is
 written into the plan, and no seed file is left in the repo - 0.8): a deleted cited path, an existing tracked
-path asserted absent, an existing UNTRACKED path cited as the artifact (notes/hc15_audit/ab_seed_00.json is
-the real untracked file this fires on), a plan with no citations at all (PLAN-NO-CITES: a gate that reads
+path asserted absent, an existing UNTRACKED path cited as the artifact (the seed writes its own fixture at
+notes/zz_08_seed_untracked.json - 0.8 deleted the ab_seed_*.json probe output this used to borrow - and removes
+it in a finally), a plan with no citations at all (PLAN-NO-CITES: a gate that reads
 nothing must not look green), a runtime path whose directory is gone, a gitignored runtime path (the budget
 ledger) that must NOT fail - the rule that keeps .gitignore-declared trees out of the findings needs a seed
 too - and a directory reported as empty, which must NOT fail either because the row's claim is 'nothing
@@ -736,7 +737,7 @@ def plan_selftest():
         return 1
     tracked_ok = next((c for c in cites if Path(c[0]).is_file() and repo_of(c[0]) and is_tracked(c[0])), None)
     real_problems = plan_check(PLAN_DEF, label="real plan (baseline) ")
-    untracked = "C:/AI/community/notes/hc15_audit/ab_seed_00.json"      # measured: on disk, git lists 0 files
+    untracked = "C:/AI/community/notes/zz_08_seed_untracked.json"   # S3 writes and deletes this itself (0.8)
     ledger = "C:/Users/derek/5slock/ralph-community/logs/p7_budget.json"  # measured: on disk, .gitignore-declared
     absent = "C:/AI/community/notes/zz_07_seed_path_absent.md"
     if not tracked_ok:
@@ -750,9 +751,18 @@ def plan_selftest():
         # S2: a real tracked file asserted absent -> PLAN-PATH-RESURRECTED
         s = list(real) + ["", "- [ ] **9.9 seed** `%s` is absent, so the step cannot be verified." % tracked_ok[0], ""]
         fires["resurrected"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S2 ")
-        # S3: an existing UNTRACKED file cited as the artifact -> PLAN-PATH-UNTRACKED
-        s = list(real) + ["", "- [ ] **9.9 seed** open `%s` and use the row." % untracked, ""]
-        fires["untracked"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S3 ")
+        # S3: an existing UNTRACKED file cited as the artifact -> PLAN-PATH-UNTRACKED. The fixture is made for
+        # the seed and deleted in a finally: a gate that leaves litter in the tree it polices is the L8 fault (0.8).
+        if os.path.exists(untracked) or is_tracked(untracked):
+            print("SELFTEST ABORT: the S3 fixture %s is not an untracked-and-absent path" % untracked)
+            return 1
+        with open(untracked, "w", encoding="utf-8") as fh:
+            fh.write('{"seed": "0.7 plan-gate S3 fixture", "delete_me": true}\n')
+        try:
+            s = list(real) + ["", "- [ ] **9.9 seed** open `%s` and use the row." % untracked, ""]
+            fires["untracked"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S3 ")
+        finally:
+            os.remove(untracked)
         # S4: a plan with no citations -> PLAN-NO-CITES (the gate must not look green on nothing)
         s = ["# seed plan", "", "- [ ] **9.9 seed** do the thing with no paths at all.", ""]
         fires["no_cites"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S4 ")
