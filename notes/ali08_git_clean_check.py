@@ -72,9 +72,8 @@ ZIP = {"path": "incoming/gmd-dl-ext-2.5.6.zip", "bytes": 21935298,
        "sha256": "cf15deb6d0bbba02f9964942e812beb0ea7272c0278d13ac118a2d2d7fcf9b20",
        "blob": "c4c0ef01928aae34f5cc1831dc7ce8f2136d5dec",
        "inner_head": "eaa2b819f189021bc224afd7b7e11c7e8d2ccd52", "tree_files": 229,
-       "note": "fix_plan 2.0c recorded sha256 25404a6160429ba0927b66f4fe950ba021160e70ded4e532017ff86e58412f37 "
-               "for this path; the bytes git carries (and this gate re-measures) are cf15deb6... - 2.0c's sha is "
-               "stale, the plan row now carries the measured one"}
+       "note": "fix_plan.md:133 (item 2.0c) records this path as `zip sha256 cf15deb6...9b20` - it MATCHES the "
+               "bytes on disk, re-measured here, so the plan row is accurate and the zip is the durable identity"}
 BAK = {"src": "briefs/agy_monitor.md.pre-20261025.bak", "dst": "notes/briefs-snapshots-2026-10-25/agy_monitor_pre-MONITOR.md",
        "bytes": 1808, "sha256": "f3c6cb60e3d3ee47ccc5a0d195415337d91ae849fc45900baa8e8212023ce329"}
 # tracked by this item: bytes + sha256 at recording time. "grow" = a live log another task appends to (floor only).
@@ -106,7 +105,8 @@ FILES = {
                                    "why": "path + bytes + sha256 of all 229 files of the installed extension (the 0.3 MANIFEST shape)"},
 }
 DISPOSITIONS = [
-    (ZIP["path"], "keep-tracked", "already tracked at 21,935,298 B; 0.8 records the measured sha256 and corrects 2.0c's stale sha"),
+    (ZIP["path"], "keep-tracked", "already tracked at 21,935,298 B; 0.8 re-measures the sha256 and confirms "
+                                  "fix_plan 2.0c's recorded `cf15deb6...9b20` against the bytes on disk"),
     ("incoming/gmd-dl-ext-2.5.6", "untrack+ignore", "gitlink with no .gitmodules, inner repo has no remote, so no clone restores it; "
                                                      "the zip == this tree byte-for-byte (check 8), so the tree is a work copy"),
     (BAK["src"], "move", "AGENTS.md bars .bak in a git repo, and here git history is NOT the backup: the bytes move to "
@@ -379,6 +379,12 @@ def selftest():
 
     def seed(name, got):
         (fired if got else silent).append(name + (" " + json.dumps(got, ensure_ascii=False)[:160] if got else ""))
+
+    def seed_neg(name, got):
+        # negative control: the detector MUST stay silent here, so silence is the seed firing and any
+        # finding is the fault. Counted in the same list so a pass cannot hide a detector that always fires.
+        seed(name + " [negative control]",
+             ["stays silent on the real artifact, as required"] if not got else ["UNEXPECTED: " + x for x in got])
     # 1 CLEAN: a stray untracked file in the repo is exactly the row 0.8 cleans
     stray = os.path.join(W, "notes", "zz_08_gate_seed_untracked.txt")
     try:
@@ -420,10 +426,9 @@ def selftest():
     seed("2d UNTRACK reason line gone", untrack_check("incoming/gmd-dl-ext-2.5.6", "x",
                                                       [l for l in gi if "zip IS this tree" not in l], False))
     # the negative control: the real rule + reason must read CLEAN, so the detector is not just always-firing
-    seed("2d UNTRACK rule+reason reads clean", ["unexpected finding: " + x for x in
-                                                untrack_check("incoming/gmd-dl-ext-2.5.6",
-                                                             "1:.gitignore:24:gmd-dl-ext-2.5.6/\tC:/AI/community/incoming/gmd-dl-ext-2.5.6/content.js",
-                                                             gi, False)])
+    seed_neg("2d UNTRACK rule+reason", untrack_check("incoming/gmd-dl-ext-2.5.6",
+                                                     "1:.gitignore:24:gmd-dl-ext-2.5.6/\tC:/AI/community/incoming/gmd-dl-ext-2.5.6/content.js",
+                                                     gi, False))
     # 4 NO-WRITE: the OLD wiring restored in a source clone
     src = open(BUILDER, encoding="utf-8").read()
     old = src.replace('open(os.path.join(tmp, "ab_seed_%02d.json" % i), "w", encoding="utf-8")',
@@ -453,7 +458,7 @@ def selftest():
             shutil.rmtree(os.path.dirname(art["ex"]) + "_2", ignore_errors=True)
     except Exception as e:
         silent.append("HEAVY seed pass crashed: %r" % (e,))
-    need = 17
+    need = 21  # measured 2026-10-25: 20 fault seeds + 1 negative control; a seed that stops firing fails the gate
     print("\nseeds fired=%d silent=%d (need >=%d silent=0; real-tree problems=%d)" % (len(fired), len(silent), need, len(real)))
     for s in silent:
         print("SILENT_SEED " + s)
@@ -533,7 +538,7 @@ def write_note(path=NOTE):
           "`python C:/AI/community/notes/ali08_git_clean_check.py` -> all 7 checks pass (the 11 claims above), and "
           "`git status --porcelain` is 0 rows in `C:/AI/community` and `ralph-community` (`C:/AI/director`'s count "
           "is printed as out-of-scope context); "
-          "`--selftest` fires 17 seeds (a stray file moves the row count 0 -> 1, a dropped disposition row, an "
+          "`--selftest` fires 21 seeds = 20 faults + 1 negative control (a stray file moves the row count 0 -> 1, a dropped disposition row, an "
           "unknown class, a stale sha, a size drift, a grow-floor regression, litter restored, a `.bak` that came "
           "back, a missing move target, an ignore rule with no exact pattern / no reason line / a re-tracked "
           "gitlink, the OLD `AUD`-writing `ab_selftest` restored in a clone, a no-temp-dir builder, a stale zip "
