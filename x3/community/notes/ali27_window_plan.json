@@ -4,7 +4,14 @@
   "agy_baseline13_s51240001",
   "ali147_pool_hc_c1_s51100001",
   "ali147_pool_hc_c2_s51100002",
-  "ali147_pool_hc_r3i_s51130003"
+  "ali147_pool_hc_r3i_s51130003",
+  "ali163_hc15_bd002_s51150021",
+  "ali163_hc15_bd006_s51150002",
+  "ali163_hc15_bd013_s51150003",
+  "ali163_hc15_gi046_s51150014",
+  "ali163_hc15_gi046_s51150031",
+  "ali163_hc15_gi063_s51150015",
+  "ali163_hc15_gi072_s51150006"
  ],
  "window_jobs": [
   {
@@ -277,10 +284,10 @@
     null
    ],
    "frames": 124,
-   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd002_s51150001.api.json",
+   "graph": "C:/AI/community/runs/ali163_hc15_bd002_s51150001/ali163_hc15_bd002_s51150001.api.json",
    "id": "ali163_hc15_bd002_s51150001",
-   "mp4": false,
-   "reason": "mp4 absent - render it in a GPU window",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)",
    "seed": 51150001
   },
   {
@@ -289,8 +296,56 @@
     null
    ],
    "frames": 124,
-   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd006_s51150002.api.json",
-   "id": "ali163_hc15_bd006_s51150002",
+   "graph": "C:/AI/community/runs/hc15_bd002_s51150001/ali163_hc15_bd002_s51150001.api.json",
+   "id": "ali163_hc15_bd002_s51150001",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd002_s51150001.api.json",
+   "id": "ali163_hc15_bd002_s51150001",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd002_s51150011/ali163_hc15_bd002_s51150011.api.json",
+   "id": "ali163_hc15_bd002_s51150011",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd002_s51150011.api.json",
+   "id": "ali163_hc15_bd002_s51150011",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd006_s51150012.api.json",
+   "id": "ali163_hc15_bd006_s51150012",
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
    "seed": 51150002
@@ -300,9 +355,9 @@
     1344,
     null
    ],
-   "frames": 124,
-   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd013_s51150003.api.json",
-   "id": "ali163_hc15_bd013_s51150003",
+   "frames": 243,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd013_s51150013.api.json",
+   "id": "ali163_hc15_bd013_s51150013",
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
    "seed": 51150003
@@ -313,11 +368,71 @@
     null
    ],
    "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150004/ali163_hc15_gi046_s51150004.api.json",
+   "id": "ali163_hc15_gi046_s51150004",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150004 (retained ali163_hc15_gi046_s51150014)",
+   "seed": 51150004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_gi046_s51150004/ali163_hc15_gi046_s51150004.api.json",
+   "id": "ali163_hc15_gi046_s51150004",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150004 (retained ali163_hc15_gi046_s51150014)",
+   "seed": 51150004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
    "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi046_s51150004.api.json",
    "id": "ali163_hc15_gi046_s51150004",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150004 (retained ali163_hc15_gi046_s51150014)",
+   "seed": 51150004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi046_s51150032.api.json",
+   "id": "ali163_hc15_gi046_s51150032",
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
-   "seed": 51150004
+   "seed": 51150032
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150005/ali163_hc15_gi063_s51150005.api.json",
+   "id": "ali163_hc15_gi063_s51150005",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150005 (retained ali163_hc15_gi063_s51150015)",
+   "seed": 51150005
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_gi063_s51150005/ali163_hc15_gi063_s51150005.api.json",
+   "id": "ali163_hc15_gi063_s51150005",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150005 (retained ali163_hc15_gi063_s51150015)",
+   "seed": 51150005
   },
   {
    "canvas": [
@@ -327,9 +442,45 @@
    "frames": 124,
    "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi063_s51150005.api.json",
    "id": "ali163_hc15_gi063_s51150005",
+   "mp4": true,
+   "reason": "DUPE_SEED seed 51150005 (retained ali163_hc15_gi063_s51150015)",
+   "seed": 51150005
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi063_s51150031.api.json",
+   "id": "ali163_hc15_gi063_s51150031",
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
-   "seed": 51150005
+   "seed": 51150031
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi063_s51150032.api.json",
+   "id": "ali163_hc15_gi063_s51150032",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150032
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi072_s51150016.api.json",
+   "id": "ali163_hc15_gi072_s51150016",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150006
   },
   {
    "canvas": [
@@ -1081,11 +1232,203 @@
     null
    ],
    "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd002_s51150001/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd002_s51150011/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd002_s51150021/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150001
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd006_s51150002/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150002
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd006_s51150012/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150002
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd013_s51150003/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd013_s51150013/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150003
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150004/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150014/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150031/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150031
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150032/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150032
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
    "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150005/request.api.json",
    "id": "request",
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
    "seed": 51150005
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150015/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150005
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150031/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150031
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150032/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150032
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi072_s51150006/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150006
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 243,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi072_s51150016/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150006
   },
   {
    "canvas": [
@@ -1146,6 +1489,30 @@
    "mp4": false,
    "reason": "mp4 absent - render it in a GPU window",
    "seed": 51150004
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_gi063_s51150005/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150005
+  },
+  {
+   "canvas": [
+    1344,
+    null
+   ],
+   "frames": 124,
+   "graph": "C:/AI/community/runs/hc15_gi072_s51150006/request.api.json",
+   "id": "request",
+   "mp4": false,
+   "reason": "mp4 absent - render it in a GPU window",
+   "seed": 51150006
   },
   {
    "canvas": [

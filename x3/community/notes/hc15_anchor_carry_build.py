@@ -123,20 +123,133 @@ for _tk, _tv in TOP.items():
     for _t, _id in (("A", _tv["take_a"]), ("B", _tv["take_b"])):
         TOP_BY_ID[_id] = dict(still=_tk, src=_tv["src"], take=_t, take_a=_tv["take_a"], take_b=_tv["take_b"],
                               species=_tv["species"], body=_tv["body"], seed=int(_id.split("_s")[-1]))
-# The arm is the two FREE ids in Max's row-18 order (GI046 first). GI046 take A is spent (see
-# TOP_RENDERS), so the GI046 slot in the queue is take B; GI063 take A is free.
+# TOP_ORDER is Max's row-18 order over the named stills (GI046 first). It is NOT the arm: the arm is
+# top_arm_ids(), TOP_ORDER with every spent take (a video in the ComfyUI output dir) removed. Since TOP-SCENE
+# step 4 both GI046 takes are spent, so the arm carries one job: GI063 take A, and its render is Derrick's
+# row-21 call.
 TOP_ORDER = [TOP["GI046"]["take_b"], TOP["GI063"]["take_a"]]
 # A TOP id is spent the moment the ComfyUI output dir carries a video. The row below is the declared
 # statement about WHICH prose that render ran; file/bytes/sha256/stamp are measured off disk by
 # top_render_receipt(), so a receipt cannot be softer than the file (L10). KEEP stays Derrick's.
 TOP_RENDERS = {TOP["GI046"]["take_a"]: {
-    "prose": "the shipped pre-card-fidelity prose: the record was rewritten by TOP-SCENE on 2026-10-27 "
-             "and this mp4 predates the rewrite, so it is NOT a render of the current prose record",
+    "prose": "the shipped pre-card-fidelity prose: the record was rewritten by TOP-SCENE on 2026-10-25 "
+             "06:35:37 CT (measured mtime of " + os.path.basename(TOP_MD) + ") and this mp4 predates the "
+             "rewrite, so it is NOT a render of the current prose record",
     "select": "the selection is Derrick's alone; no vision judge, no score, no choice by the forge",
     "shape": "1344x768 24/1 362 f measured by ffprobe -select_streams v:0",
-    "queue": "p7/jobs/<id>.result.json is absent and runs/<id>/status.log ends in poll-warn timeouts "
+    "queue": "p7/jobs/<id>.result.json is absent, runs/<id>/ has no mp4 (the clip was collected from the "
+             "ComfyUI output dir), objective.json is attempts=[] and status.log ends in poll-warn timeouts "
              "04:15-04:23 CT: the id is spent by file evidence, not by a queue receipt",
-    "record": "notes/needs_derrick.md row 25"}}
+    "evidence": {"status_tokens": ("poll warn", "timed out"), "result_json": False, "runs_mp4": False},
+    "record": "notes/needs_derrick.md row 21c"},
+    # TOP-SCENE step 4 (2026-10-25): take B of GI046 rendered clean in one gated window. This row is the render
+    # receipt: the id is SPENT, so it is never a queue entry again (ck_top_arm) and the manifest must carry the
+    # measured mp4 (ck_idfree, ck_top_manifest). Its prose marker is the current record's own basename, which is
+    # what prose_render_count() measures.
+    TOP["GI046"]["take_b"]: {
+        "prose": f"{os.path.basename(TOP_MD)}: the card-faithful prose record this item builds, rendered clean in "
+                 "the 2026-10-25 07:20:24-07:31:28 CT gated window, measured off runs/<id>/status.log and "
+                 "objective.json; ffprobe on the mp4: 362 packets of 362, 1344x768, 24/1, h264 + aac",
+        "select": "the selection is Derrick's alone; no vision judge, no score, no choice by the forge",
+        "shape": "1344x768 24/1 362 f aac 15.083333 s 9395988 B measured by ffprobe off the mp4 on disk",
+        "queue": "measured off runs/<id>/: status.log carries the idle gate rc=0 IDLE, the render lock ACQUIRED "
+                 "rc=0 pid 1348, 'JOB end ... ok secs=661.8', 'OBJECTIVE ok ... frames=362 size=1344x768 "
+                 "audio=True', the lock RELEASED rc=0 pid 1348; objective.json parses ok=true with 362 f "
+                 "1344x768 24/1 aac 15.083333 s blackfreeze=[] outcome=ok collected_from_disk=false (nothing "
+                 "collected = nothing re-rendered); the mp4 sits in runs/<id>/ AND the ComfyUI output dir. "
+                 "p7/jobs/<id>.result.json is ABSENT: a p7/jobs receipt is not durable across a pass boundary "
+                 "(L8: an untracked file dies at the boundary), so the durable proof of a render is this manifest "
+                 "receipt + the runs/<id>/ logs, never the queue receipt. render_evidence_fires checks this row "
+                 "against those files, so the receipt cannot be softer than the disk",
+        "evidence": {"status_tokens": ("gpu" + "_guard rc=0 IDLE", "gpu" + "_lock acquire rc=0 ACQUIRED pid",
+                                       "JOB end", "ok secs=661.8", "OBJECTIVE ok", "frames=362", "size=1344x768",
+                                       "audio=True", "gpu" + "_lock release rc=0 RELEASED pid 1348"),
+                     "objective": {"ok": True, "frames": 362, "w": 1344, "h": 768, "fps": "24/1", "audio": True,
+                                   "duration": 15.083333, "secs": 661.8, "blackfreeze": [], "outcome": "ok",
+                                   "collected_from_disk": False},
+                     "result_json": False, "runs_mp4": True},
+        "record": "notes/needs_derrick.md row 26",
+        "derrick": {"quote": "the orc.scene is horrible you can already see the fick out but he stops pulls down "
+                             "his pants and then has a small human dick instead of a green orc dick?",
+                    "where": "Derrick 2026-10-25 7:49 AM CT, fix_plan.md MAX line 7",
+                    "verdict": "NOT kept: the species anatomy reads human (a small human dick, not a green orc "
+                               "dick); the card shows the torso, arms, hands and legs with no groin, so those "
+                               "anatomy words are card-silent and need Derrick's ruling "
+                               "(notes/needs_derrick.md row 28) before any re-render"}}}
+
+
+def render_evidence_fires(nid, ev):
+    """A declared render row is only as good as the files it cites (L10): re-measure each claim in `ev` off
+    runs/<id>/ and p7/jobs. A row that cites a receipt the sweep already ate, or a status line the render never
+    wrote, is a FAIL: the manifest must carry the durable proof, not a queue receipt that dies at the boundary."""
+    out = []
+    log = os.path.join(RUNS, nid, "status.log")
+    obj = os.path.join(RUNS, nid, "objective.json")
+    for tok in ev.get("status_tokens", ()):
+        if not os.path.isfile(log) or tok not in open(log, encoding="utf-8", errors="replace").read():
+            out.append(f"TOP-RENDER {nid} cites status.log token {tok!r} and runs/{nid}/status.log does not "
+                       "carry it on disk")
+    if "objective" in ev:
+        want, got = ev["objective"], {}
+        if os.path.isfile(obj):
+            try:
+                j = json.load(open(obj, encoding="utf-8"))
+                att = (j.get("attempts") or [{}])[-1]
+                got = {k: (j.get(k) if k == "ok" else att.get(k)) for k in want}
+            except Exception:
+                got = {}
+        bad = {k: (want[k], got.get(k, "<absent>")) for k in want if got.get(k, "<absent>") != want[k]}
+        if bad:
+            out.append(f"TOP-RENDER {nid} claims objective.json fields and runs/{nid}/objective.json measures "
+                       "(want, got) " + "; ".join(f"{k}={v[0]!r}/{v[1]!r}" for k, v in sorted(bad.items())) +
+                       ": a receipt row quotes the file, not a memory of the run")
+    if "result_json" in ev and os.path.isfile(os.path.join(JOBS, nid + ".result.json")) is not ev["result_json"]:
+        out.append(f"TOP-RENDER {nid} claims p7/jobs receipt present={ev['result_json']!r} and disk measures "
+                   f"present={os.path.isfile(os.path.join(JOBS, nid + '.result.json'))!r} (a queue receipt is "
+                   "not durable across a pass boundary; the manifest must cite files that are)")
+    if "runs_mp4" in ev and os.path.isfile(os.path.join(RUNS, nid, nid + ".mp4")) is not ev["runs_mp4"]:
+        out.append(f"TOP-RENDER {nid} claims runs/{nid}/{nid}.mp4 present={ev['runs_mp4']!r} and disk measures "
+                   f"present={os.path.isfile(os.path.join(RUNS, nid, nid + '.mp4'))!r}")
+    return out
+
+
+def prose_render_count(still):
+    """Measured: the takes of this still whose TOP_RENDERS prose marker IS the current prose record's basename.
+    A spent take's note has to quote this list and its count, so a note cannot claim '0 renders' the day the
+    record itself gets rendered (the fault step 4 exposes)."""
+    return [nid for nid, r in TOP_RENDERS.items()
+            if str(r.get("prose", "")).split(":")[0] == os.path.basename(TOP_MD) and nid in TOP[still].values()]
+
+
+def top_arm_ids():
+    """The arm is the FREE take of each named still, in Max's row-18 order. A take with a video in the ComfyUI
+    output dir is spent: a render receipt is a paid clip, not a queue entry (ck_top_arm, L19). And a still Max put
+    ON HOLD (fix_plan MAX block) is never armed, free or not: p7/JOB_REQUEST.json is a submittable handoff."""
+    return [nid for nid in TOP_ORDER
+            if not top_render_receipt(nid) and TOP_STILL_OF.get(nid) not in TOP_ONHOLD]
+
+
+def arm_block_reason(nid):
+    """Why this id may not be in the request file, measured: a paid clip, or a still under a hold."""
+    rec = top_render_receipt(nid)
+    if rec:
+        return (f"{nid} is SPENT (video {rec['bytes']} B sha {rec['sha256'][:16]} written {rec['written']}) - a "
+                "render receipt is not a queue entry")
+    st = TOP_STILL_OF.get(nid)
+    if st in TOP_ONHOLD:
+        return f"{nid} belongs to {st}, which is ON HOLD: {TOP_ONHOLD[st]}"
+    return f"{nid} is armed for no measured reason"
+
+
+# Max's MAX block (fix_plan.md line 6, 2026-10-25): GI063 is on hold until Derrick rules on needs_derrick.md
+# row 21, and "Do not render GI063 s51150031/s51150032 before his answer." An armed request is submittable, so
+# the hold is enforced at the arm, not left to the window's reading of the note.
+TOP_ONHOLD = {"GI063": "Max's MAX block, fix_plan.md line 6: 'Do not render GI063 s51150031/s51150032 before his "
+                       "answer' (Forge's own caption of the start still reads it as non-consensual) + "
+                       "notes/needs_derrick.md row 21"}
+TOP_STILL_OF = {nid: _st for _st, _tk in TOP.items() for nid in _tk.values()}
+
+
 # Max's naming, split per still so each manifest quotes the sentence that names its own figure (verbatim,
 # fix_plan.md line 2 / hc15_figures_20261025.md §1)
 TOP_STILL_ROW = {"GI046": "GI046 is the orc (large green-skinned muscular orc, behind a blonde woman on a rug in a "
@@ -874,18 +987,32 @@ def ck_top_arm(g, ctx):
     in the order Max's unblock row gave (GI046 then GI063). The other take stays staged and unarmed -
     disclosed, not hidden - and the ledger has to absorb what is armed (5:52-5:53 PM CT rule: the plan's
     queue math must not overdraw the standing cap). A spent id (a video already in the ComfyUI output dir)
-    is never armed: the render row is a receipt, not a queue entry."""
+    is never armed: the render row is a receipt, not a queue entry. When nothing is armable (both named stills
+    paid, or the free takes belong to a held still) the honest handoff is NO request file at all."""
     t = ctx["top"]
     if not t:
         return []
     req, led = ctx["req"], ctx["ledger"]
     out = []
-    if not req:
+    if not req and top_arm_ids():
         return ["TOP-ARM p7/JOB_REQUEST.json unreadable: TOP is not handed off"]
+    if not req:
+        return []
     ids = [j.get("id") for j in req.get("jobs", [])]
-    if ids != TOP_ORDER:
-        out.append(f"TOP-ARM jobs[] {ids} != the free take of each named still {TOP_ORDER} (Max's order: "
-                   "GI046 first, GI063 second; the other take is staged, not armed)")
+    expect = top_arm_ids()
+    if not expect:
+        # Nothing is armable (every take spent, or the free ones sit on a held still). Then the request file must
+        # NOT exist: PROMPT.md makes a request submittable, so an arm file here is an order to queue a paid clip
+        # or a clip under a hold. The work is a ruling, not a queue.
+        if req:
+            out.append("TOP-ARM p7/JOB_REQUEST.json exists while NOTHING is armable, so it is a submittable "
+                       "order to queue " + "; ".join(arm_block_reason(str(j.get("id"))) for j in req.get("jobs", []))
+                       + " - unarm it (top_arm() removes the file); the remaining work is Derrick's ruling")
+        return out
+    if ids != expect:
+        out.append(f"TOP-ARM jobs[] {ids} != the free take of each named still {expect} (Max's order: "
+                   "GI046 first, GI063 second; a take with a video in the output dir is spent and is never a "
+                   "queue entry; the other take is staged, not armed)")
     for j in req.get("jobs", []):
         if set(j) != {"id", "kind", "frames", "frames_tol", "minutes", "note"}:
             out.append(f"TOP-ARM {j.get('id')} job row keys {sorted(j)} != id,kind,frames,frames_tol,minutes,note")
@@ -918,9 +1045,10 @@ def ck_top_arm(g, ctx):
         out.append(f"TOP-ARM arming {armed} min over ledger {led['used_min']}/{led['cap_min']} min")
     if led["jobs"] + len(req.get("jobs", [])) > led["job_cap"]:
         out.append(f"TOP-ARM arming {len(req.get('jobs', []))} jobs over ledger {led['jobs']}/{led['job_cap']}")
-    if req.get("id") != TOP_ORDER[0] or req.get("api") != gpath(TOP_ORDER[0]).replace("\\", "/"):
-        out.append(f"TOP-ARM top level id/api {req.get('id')}/{req.get('api')} != {TOP_ORDER[0]}")
-    for nid in [x for x in TOP_TAKES if x not in TOP_ORDER]:
+    if req.get("id") != expect[0] or req.get("api") != gpath(expect[0]).replace("\\", "/"):
+        out.append(f"TOP-ARM top level id/api {req.get('id')}/{req.get('api')} != {expect[0]} (the first free "
+                   "take in Max's order)")
+    for nid in [x for x in TOP_TAKES if x not in expect]:
         if nid in ids:
             out.append(f"TOP-ARM the staged take {nid} is armed; its minutes are not in the disclosed "
                        f"queue math (the armed set is {TOP_ORDER})")
@@ -1052,19 +1180,29 @@ def ck_top_manifest(g, ctx):
     led = ctx["ledger"]
     note = str(m.get("note", ""))
     mps = m.get("prompts", {})
+    rec_now = top_render_receipt(ctx["id"])
+    res_now = os.path.isfile(os.path.join(JOBS, ctx["id"] + ".result.json"))
+    # a spent take's queue-receipt line is MEASURED: the clean render has a result.json, so a note that hardcodes
+    # "0 result.json" there is a false statement about disk. The free takes keep the 0 claim.
+    res_claim = "result.json present" if (rec_now and res_now) else "0 result.json"
     need = [str(len(g)), str(os.path.getsize(gp)), sha(gp), str(len(diff_paths(src, g))),
             str(mps.get("c0", {}).get("words")), str(mps.get("c0", {}).get("beats")),
             str(mps.get("c1", {}).get("words")), str(mps.get("c1", {}).get("beats")),
             str(m.get("gate_ok_all_prose")), "comm.guard_ok", "test_p6_review.py", "21 passed",
-            "no GPU call in this pass", "0 result.json", f"minutes={TOP_EST_MIN}", t["species"][0],
+            "no GPU call in this pass", res_claim, f"minutes={TOP_EST_MIN}", t["species"][0],
             "frame_idx 0", "243", "119", "1344x768", "audio", os.path.basename(TOP_MD),
             os.path.basename(TOP_GUIDE), os.path.basename(TOP_NAMING), os.path.basename(TOP_FIGURES),
             str(led.get("updated", ""))] 
     miss = [c for c in need if c not in note]
     if miss:
         out.append(f"TOP-MANIFEST note missing {miss}")
-    if not 1100 <= len(note) <= 2200:
-        out.append(f"TOP-MANIFEST note {len(note)} chars, 1100-2200 required (600-1100 for a graph)")
+    if not 1100 <= len(note) <= 2800:
+        # bound measured 2026-10-25: 1927 chars on a free take, 2373 on a spent take that predates the prose
+        # record, 2743 on the take that IS the record's render AND carries Derrick's judgment on it. The bound
+        # exists to stop a note sprawling, not to hide a receipt: a rendered + judged row has to carry the mp4
+        # bytes/sha/stamp, the prose it rendered, the render count of the current record, the queue-receipt truth
+        # and the human's own words.
+        out.append(f"TOP-MANIFEST note {len(note)} chars, 1100-2800 required (600-1100 for a graph)")
     hits = [w for w in BANNED_IN_MANIFEST if w in note.lower()]
     if hits:
         out.append(f"TOP-MANIFEST note carries a judgement token {hits}")
@@ -1107,15 +1245,43 @@ def ck_top_manifest(g, ctx):
                        "Derrick's alone (a forge render row never keeps, scores, or chooses)")
         if arm_armed(m):
             out.append("TOP-MANIFEST arms %s and it is spent - the request must carry a free id" % ctx["id"])
+        if res_claim == "result.json present" and res_claim not in note_of(m):
+            out.append("TOP-MANIFEST note of a spent take with a queue receipt must state 'result.json present' "
+                       "(the render's own p7/jobs receipt); the note must not claim 0 result.json on a clip that "
+                       "has one")
         if str(rec["bytes"]) not in note_of(m):
             out.append("TOP-MANIFEST note does not quote the spent render (mp4 bytes) the manifest carries")
         pn = TOP_RENDERS.get(ctx["id"], {}).get("prose", "")
         if pn and pn.split(":")[0] not in note_of(m):
             out.append("TOP-MANIFEST note of a spent take must say which prose the render ran (the "
                        "before/after rule: a reader must not take the mp4 for the current record)")
-        if "0 renders" not in note_of(m):
-            out.append("TOP-MANIFEST note of a spent take must state that the current prose record has 0 "
-                       "renders of this still, and which take carries it")
+        car = prose_render_count(t["still"])
+        want = f"this prose record has {len(car)} render"
+        if want not in note_of(m):
+            out.append(f"TOP-MANIFEST note of a spent take must state the MEASURED render count of the current "
+                       f"prose record for {t['still']} ({len(car)}: {', '.join(car) or 'none'}); a note that "
+                       "claims a count the receipts on disk do not carry reads the paid clip for someone else's "
+                       "experiment")
+        for cid in car:
+            if cid not in note_of(m):
+                out.append(f"TOP-MANIFEST note of a spent take must name the take that carries the current prose "
+                           f"record of {t['still']}: {cid}")
+        if ctx["id"] in car and "this take is the render of that record" not in note_of(m):
+            out.append("TOP-MANIFEST note of the take that IS the current record's render must say so (a reader "
+                       "must be able to find the paid clip of this prose, not only the ones that predate it)")
+        if ctx["id"] not in car and "this take is not a render of that record" not in note_of(m):
+            out.append("TOP-MANIFEST note of a spent take that predates the current prose record must say it is "
+                       "NOT a render of that record (the before/after rule)")
+        ev = TOP_RENDERS.get(ctx["id"], {}).get("evidence")
+        if ev:
+            out.extend(render_evidence_fires(ctx["id"], ev))
+        dj = TOP_RENDERS.get(ctx["id"], {}).get("derrick")
+        if dj:
+            miss = [c for c in ("Derrick judged", dj["verdict"], dj["quote"][:40]) if c not in note_of(m)]
+            if miss:
+                out.append("TOP-MANIFEST note of a take Derrick has judged must carry his verdict and the start of "
+                           "his words; missing " + repr(miss) + " (the manifest is the record; a judged clip "
+                           "cannot be written up as a good one)")
     elif os.path.isfile(mp4) or os.path.isfile(res) or os.path.isdir(out_dir):
         out.append(f"TOP-MANIFEST claims an unrendered id, and it is spent (mp4 {os.path.isfile(mp4)}, "
                    f"result {os.path.isfile(res)}, output dir {os.path.isdir(out_dir)})")
@@ -1126,7 +1292,7 @@ def ck_top_manifest(g, ctx):
     if arm.get("armed") != (ctx["id"] in armed_ids) or arm.get("request") != "p7/JOB_REQUEST.json":
         out.append(f"TOP-MANIFEST arm status {arm.get('armed')} != armed {ctx['id'] in armed_ids} in "
                    "p7/JOB_REQUEST.json")
-    if arm.get("armed") and arm.get("jobs") != TOP_ORDER:
+    if arm.get("armed") and arm.get("jobs") != top_arm_ids():
         out.append(f"TOP-MANIFEST arm jobs {arm.get('jobs')} != {TOP_ORDER}")
     if not arm.get("armed"):
         nm = arm.get("naming") or {}
@@ -1376,7 +1542,9 @@ def arm_armed(m):
 
 def top_note(nid, g, m, f):
     """the manifest note: the graph-receipt rule is 600-1100 chars; the TOP row needs naming + guide + defect +
-    counts + gate + id-free + minutes + arm, so it is bounded on both sides (1100-2200, ck_top_manifest)."""
+    counts + gate + id-free + minutes + arm, and a RENDERED take also carries the render receipt off disk, the
+    render count of the current prose, and Derrick's measured judgment on that clip, so the TOP note bound is
+    1100-2800, measured off the three shapes of row (ck_top_manifest)."""
     t = TOP_BY_ID[nid]
     st, win, sp = f["st"], f["win"], f["sp"]
     cm = m["card"]
@@ -1386,34 +1554,39 @@ def top_note(nid, g, m, f):
                                                         encoding="utf-8")).get("jobs", [])
                                          if os.path.isfile(os.path.join(W, "p7", "JOB_REQUEST.json")) else [])]
     rec = top_render_receipt(nid)
+    car = prose_render_count(t["still"])
+    res = "result.json present (the queue receipt of this render)" if os.path.isfile(os.path.join(JOBS, nid + ".result.json")) \
+        else "absent, 0 result.json"
+    dj = TOP_RENDERS.get(nid, {}).get("derrick")
     idf = ("id-free: no mp4, 0 result.json, no ComfyUI output dir, no GPU call in this pass."
            if not rec else
-           "id SPENT: %s %d B sha256 %s written %s, off the shipped pre-card-fidelity prose; 0 result.json, "
-           "no GPU call in this pass; this prose record has 0 renders of this still, so the free take "
-           "carries it."
-           % (os.path.basename(rec["file"]), rec["bytes"], rec["sha256"][:16], rec["written"]))
+           "id SPENT: %s %d B sha %s written %s off the prose row %s; result.json %s; no GPU call in this pass; "
+           "this prose record has %d render of %s (%s); this take is %s of that record.%s"
+           % (os.path.basename(rec["file"]), rec["bytes"], rec["sha256"][:16], rec["written"],
+              TOP_RENDERS[nid]["prose"], res, len(car), t["still"], ", ".join(car) or "none",
+              "the render" if nid in car else "not a render",
+              (f" Derrick judged this clip \"{dj['quote'][:40]}...\" - {dj['verdict']}") if dj else ""))
     return (
         "TOP %s take %s (fix_plan TOP, Derrick 2026-10-24 8:39 PM CT: 'the two videos the orc and the robot "
-        "fucking video ... Like hardcore sex'), figure named by %s, %s: %s. "
-        "Seed %d = the id number; take %s (%s) = the seed alone. Graph %d nodes %d B sha256 %s, %d changed "
-        "paths vs the carried source %s only: MiniMaxH3AddGuide frame_idx 0 on the c0 edge, "
-        "res_multistep/simple/8, 243 + a 119-frame window = %d f at 24 fps %.6f s, 1344x768, audio "
-        "intact, 2 SamplerCustomAdvanced, 0 cfg keys, ref slots + LoadImage untouched. Prose from "
-        "%s byte-for-byte: c0 detailed_description %d words / %d beats "
-        "%.3f-%.3fs, c1 integrated_multimodal_description %d words / %d beats %.3f-%.3fs, %d prohibition/negation "
-        "tokens, ages %s fictional, species words %s present in %d/%d chunks, default-figure clauses "
-        "%d (defect %s rows 2-3). "
-        "Structure = %s + TenStrip card. "
-        "Gate: comm.guard_ok %s on %d "
-        "prompt-bearing strings, tests/test_p6_review.py 21 passed. %s minutes=%d (clip 1-6 measured "
-        "24.0 min/job +25%% contingency). Receipts: --top-check / --top-selftest. Arm: %s (free take of each "
-        "still, Max's row-18 order, the other staged; ledger %s/%s min, %s/%s jobs, stamp %s). "
-        "card %s is the start-image card, card gate %s: %d figures, %d/%d card quotes verbatim, %d card words in "
-        "%d/%d chunks, %d gate hits, read by %s off the start still (ck_top_card, ck_top_facts). "
+        "fucking video ... Like hardcore sex'), figure named by %s, %s: %s. "        "Seed %d = the id number; the takes of a still differ by the seed alone. Graph %d nodes %d B sha256 %s, "
+        "%d changed paths vs source %s only: "
+        "MiniMaxH3AddGuide frame_idx 0 on the c0 edge, "
+        "res_multistep/simple/8, 243 + 119-frame window = %d f, 24 fps %.6f s, 1344x768, audio "
+        "intact, 2 SamplerCustomAdvanced, 0 cfg keys, ref slots + LoadImage as carried. Prose from "
+        "%s byte-for-byte: c0 detailed_description %dw / %d beats "
+        "%.3f-%.3fs, c1 integrated_multimodal_description %dw / %d beats %.3f-%.3fs, %d negation "
+        "tokens, ages %s fictional, species words %s in %d/%d chunks, default-figure clauses "
+        "%d (defect %s r2-3). "
+        "Structure %s + TenStrip card. "
+        "Gate: comm.guard_ok %s on %d prose strings, tests/test_p6_review.py 21 passed. %s minutes=%d (clip 1-6 "
+        "measured 24.0 min/job +25%% contingency); receipts --top-check/--top-selftest. Arm: %s (free take of "
+        "each still, Max's row-18 order, rest staged; ledger %s/%s min %s/%s jobs stamp %s). "
+        "card %s start-image card, card gate %s: %d figures, %d/%d card quotes verbatim, %d card words "
+        "%d/%d chunks, %d gate hits, read by %s off the start still (ck_top_card/ck_top_facts). "
         "The selection is Derrick's alone; no vision judge on explicit output."
     ) % (t["still"], t["take"], TOP_NAMING_WHERE, TOP_NAMING_ANSWERS, TOP_STILL_ROW[t["still"]],
-         m["seed"], "B" if t["take"] == "A" else "A",
-         t["take_b"] if t["take"] == "A" else t["take_a"], len(g), os.path.getsize(gp), sha(gp), len(f["diff"]),
+         m["seed"],
+         len(g), os.path.getsize(gp), sha(gp), len(f["diff"]),
          t["src"], FRAMES, FRAMES / g["mkvid"]["inputs"]["fps"],
          os.path.basename(TOP_MD), st["c0"]["words"], st["c0"]["beats"], win["c0"][0], win["c0"][1],
          st["c1"]["words"], st["c1"]["beats"], win["c1"][0], win["c1"][1],
@@ -1436,8 +1609,9 @@ def top_job_note(nid):
     f = top_facts(nid, g)
     st, win, sp = f["st"], f["win"], f["sp"]
     led = json.load(open(LEDGER, encoding="utf-8"))
-    order = TOP_ORDER.index(nid) + 1 if nid in TOP_ORDER else t["take"]
-    first = os.path.basename(TOP_ORDER[0]).split("_")[-2].upper()
+    arm = top_arm_ids()
+    order = arm.index(nid) + 1 if nid in arm else t["take"]
+    first = os.path.basename(arm[0]).split("_")[-2].upper() if arm else "none"
     return (
         "TOP %s take %s: the 15 s %s clip (fix_plan TOP; figure named by %s, %s - Max's verbatim sentence is in the "
         "manifest note and %s §1; prose contract + measured pixel rows in %s). Shape = the fixed clip-1 graph carried "
@@ -1451,7 +1625,7 @@ def top_job_note(nid):
         "id-free: no runs/%s/%s.mp4, 0 result.json, no output/%s. minutes=%d (clip 1-6 measured 24.0 min/job +25%% "
         "contingency); ledger at build %s. Receipt: notes/hc15_anchor_carry_build.py --top-check / --top-selftest. "
         "Render = a GPU window, never a Ralph pass: --frames %d, one job at a time, GPU idle first, route unloaded on "
-        "an empty queue (Max 2026-10-24 9:47 PM CT), order %s of 2, %s first; exact command: %s row 21. Unarm: "
+        "an empty queue (Max 2026-10-24 9:47 PM CT), order %s of %d, %s first; exact command: %s row 21. Unarm: "
         "notes/hc15_anchor_fix_build.py --now-build. Selection is Derrick's alone, no vision judge on explicit output."
     ) % (t["still"], t["take"], "orc" if t["still"] == "GI046" else "robot", TOP_NAMING_WHERE, TOP_NAMING_ANSWERS,
          os.path.basename(TOP_FIGURES), TOP_FIGURES, t["src"],
@@ -1463,28 +1637,34 @@ def top_job_note(nid):
          nid, nid, nid, TOP_EST_MIN,
          "used %s/%s min, %s/%s jobs, stamp %s" % (led["used_min"], led["cap_min"], led["jobs"], led["job_cap"],
                                                    led["updated"]),
-         FRAMES, order, first, TOP_NAMING)
+         FRAMES, order, len(arm), first, TOP_NAMING)
 
 
 def top_request_note():
     led = json.load(open(LEDGER, encoding="utf-8"))
+    arm = top_arm_ids()
+    spent = [x for x in TOP_TAKES if top_render_receipt(x)]
     return (
         "TOP (fix_plan TOP): the two named HC15 stills rendered with card-faithful prose on the fixed clip-1 "
         "shape, GI046 (the orc) then GI063 (the robot) in Max's 2026-10-24 9:30 PM CT order "
-        "(notes/needs_derrick.md row 18). Each job is its own 6-key row, frames 362 (15.083333 s), 30 min each, "
-        "ledger %s/%s min and %s/%s jobs before the render. The armed ids are the FREE take of each still: "
-        "ali163_hc15_gi046_s51150031 is spent (its mp4 is in the ComfyUI output dir, rendered 2026-10-25 04:04 "
-        "off the pre-card-fidelity prose, receipt in its manifest and notes/needs_derrick.md row 25), so the "
-        "GI046 slot is take B. The other take of each still is staged (graph, run-dir request, manifest) and "
-        "unarmed: arming 4 jobs = 120 min over the standing cap. This arm displaces the single-job "
-        "NOW-P1 arm of ali163_hc15_bd002_s51150021; restore it with python "
+        "(notes/needs_derrick.md row 18). %d job armed, frames 362 (15.083333 s), 30 min, ledger %s/%s min and "
+        "%s/%s jobs before the render. The armed ids are the FREE take of each named still: a take with a video "
+        "in the ComfyUI output dir is SPENT, and a render receipt is a paid clip, never a queue entry, so the "
+        "spent set is %s. GI046 is closed on the record: take A spent 2026-10-25 04:04 off the pre-card-fidelity "
+        "prose (row 21c), take B rendered clean 2026-10-25 07:20:24-07:31:28 CT off THIS prose record (362 f, "
+        "1344x768, 24/1, aac, objective.json ok=true, blackfreeze=[], 661.8 s, row 26), so the orc half of the ask is "
+        "on disk and is Derrick's to keep. GI063 take A is the only free take of a named still; queuing it is "
+        "Derrick's call, because the GI063 card records restraint and distress and the card-faithful prose "
+        "states no consent state at all (notes/needs_derrick.md row 21). The other take of each still is staged "
+        "(graph, run-dir request, manifest) and unarmed: arming 4 jobs = 120 min over the standing cap. This arm "
+        "displaces the single-job NOW-P1 arm of ali163_hc15_bd002_s51150021; restore it with python "
         "C:/AI/community/notes/hc15_anchor_fix_build.py --now-build (NOW-P1's own --now-check stays green only on "
         "its own single-job request, so its arm is re-issued, not edited). No GPU call, no queue "
         "in a Ralph pass: this file writes graph, run-dir request, manifest and the request file only. "
         "Receipts: notes/hc15_anchor_carry_build.py --top-check / --top-selftest, comm.guard_ok, "
         "scripts/tests/test_p6_review.py 21 passed. The selection is Derrick's alone; no vision judge on explicit "
         "output."
-    ) % (led["used_min"], led["cap_min"], led["jobs"], led["job_cap"])
+    ) % (len(arm), led["used_min"], led["cap_min"], led["jobs"], led["job_cap"], ", ".join(spent) or "none")
 
 
 def measure_top(nid):
@@ -1532,14 +1712,18 @@ def measure_top(nid):
         "rendered": (dict(TOP_RENDERS[nid], **top_render_receipt(nid)) if nid in TOP_RENDERS
                      and top_render_receipt(nid) else None),
         "budget_at_build": json.load(open(LEDGER, encoding="utf-8")), "est_min": TOP_EST_MIN,
-        "arm": {"armed": nid in armed_ids, "request": "p7/JOB_REQUEST.json", "jobs": TOP_ORDER,
+        "arm": {"armed": nid in armed_ids, "request": "p7/JOB_REQUEST.json", "jobs": top_arm_ids(),
                 "naming": {"file": TOP_NAMING.replace("\\", "/"), "row": 18, "who": "Max 2026-10-24 9:30 PM CT",
                            "still": t["still"], "text": TOP_STILL_ROW[t["still"]],
                            "order": "render GI046 and GI063 first, GI046 first of the two"},
                 "staged_unarmed": [x for x in TOP_TAKES if x not in armed_ids],
                 "displaced": NOW_P1, "restore": TOP_RESTORE,
-                "queue_math": "2 jobs x 30 min = 60 min on top of the ledger; 4 jobs x 30 min = 120 min would "
-                              "overdraw the standing cap 615 min, so take B is staged (notes/needs_derrick.md row 18)"},
+                "queue_math": "%d job x %d min = %d min on top of the ledger; arming all 4 takes = 120 min would "
+                              "overdraw the standing cap 615 min, and a take with a render receipt on disk is spent "
+                              "and is never a queue entry, so the staged set is %s (notes/needs_derrick.md rows "
+                              "18, 21, 26)"
+                              % (len(top_arm_ids()), TOP_EST_MIN, len(top_arm_ids()) * TOP_EST_MIN,
+                                 ", ".join(x for x in TOP_TAKES if x not in top_arm_ids()) or "empty")},
         "citations": list(TOP_CITATIONS),
         "notes": "staged in a Ralph pass: graph, run-dir request copy, manifest, and (take A only) the request "
                  "file. No render, no queue, no GPU, no vision judge, no " + "llama" + "-swap call.",
@@ -1583,11 +1767,29 @@ def top_build(nid):
 
 
 def top_arm():
+    arm = top_arm_ids()
+    rq = os.path.join(W, "p7", "JOB_REQUEST.json")
+    if not arm:
+        # The designed nothing-to-arm state: GI046 is paid for (TOP_RENDERS row 26) and GI063 is ON HOLD (MAX
+        # line 6 / row 21). A request file is submittable, so the honest handoff is no file at all.
+        removed = "" if not os.path.isfile(rq) else (os.remove(rq), " removed the stale request file")[1]
+        print("ARM NOTHING: no take of a named still is both free and unheld - " +
+              "; ".join(arm_block_reason(nid) for nid in TOP_ORDER) + "." + removed +
+              " p7/JOB_REQUEST.json is not written: a request is submittable, and the remaining work is a ruling "
+              "(needs_derrick.md rows 21, 26, 28), not a queue.")
+        for nid in TOP_TAKES:      # arm status is a fact about the request file, so re-derive the manifests
+            m = measure_top(nid)
+            if os.path.isfile(man_path(nid)):
+                old = json.load(open(man_path(nid), encoding="utf-8"))
+                m["checks"], m["check_failures"] = old.get("checks"), old.get("check_failures")
+                m["checks_all_clean"] = old.get("checks_all_clean")
+                json.dump(m, open(man_path(nid), "w", encoding="utf-8"), indent=1)
+        return 0
     jobs = [{"id": nid, "kind": "graph", "frames": FRAMES, "frames_tol": 33, "minutes": TOP_EST_MIN,
-             "note": top_job_note(nid)} for nid in TOP_ORDER]
-    req = {"jobs": jobs, "id": TOP_ORDER[0],
-           "run_dir": os.path.join(RUNS, TOP_ORDER[0]).replace("\\", "/"),
-           "api": gpath(TOP_ORDER[0]).replace("\\", "/"), "frames": FRAMES, "frames_tol": 33,
+             "note": top_job_note(nid)} for nid in arm]
+    req = {"jobs": jobs, "id": arm[0],
+           "run_dir": os.path.join(RUNS, arm[0]).replace("\\", "/"),
+           "api": gpath(arm[0]).replace("\\", "/"), "frames": FRAMES, "frames_tol": 33,
            "minutes": sum(j["minutes"] for j in jobs), "note": top_request_note()}
     open(os.path.join(W, "p7", "JOB_REQUEST.json"), "w", encoding="utf-8").write(
         json.dumps(req, indent=2, ensure_ascii=False))
@@ -1937,9 +2139,10 @@ def top_selftest():
     def man_spent(k, P):
         open(P["mp4"], "wb").write(b"mp4-not")
 
-    # seeded on a FREE take: a spent take carries a receipt, so its id-free claim is not the property under test
-    onfile("id already spent (an mp4 exists on disk)", B46, "ck_idfree", man_spent, files=("mp4",))
-    onfile("manifest claims an unrendered id and it is spent", B46, "ck_top_manifest", man_spent, files=("mp4",))
+    # seeded on a FREE take: a spent take carries a receipt, so its id-free claim is not the property under test.
+    # Take B of GI046 is spent since TOP-SCENE step 4, so the free GI063 take B carries this seed.
+    onfile("id already spent (an mp4 exists on disk)", B63, "ck_idfree", man_spent, files=("mp4",))
+    onfile("manifest claims an unrendered id and it is spent", B63, "ck_top_manifest", man_spent, files=("mp4",))
 
     def man_naming(k, P):
         m = json.load(open(P["man"], encoding="utf-8"))
@@ -1960,44 +2163,30 @@ def top_selftest():
     onfile("manifest quotes a ledger snapshot that is not the one on disk", A46, "ck_top_manifest", man_ledger,
            files=("man",))
 
-    def req_all4(k, P):
-        req = json.load(open(P["req"], encoding="utf-8"))
-        req["jobs"] += [{"id": TOP["GI046"]["take_a"], "kind": "graph", "frames": FRAMES, "frames_tol": 33,
-                        "minutes": TOP_EST_MIN, "note": top_job_note(TOP["GI046"]["take_a"])},
-                       {"id": B63, "kind": "graph", "frames": FRAMES, "frames_tol": 33, "minutes": TOP_EST_MIN,
-                        "note": top_job_note(B63)}]
-        req["minutes"] = sum(j["minutes"] for j in req["jobs"])
-        open(P["req"], "w", encoding="utf-8").write(json.dumps(req, indent=2, ensure_ascii=False))
+    # The arm is empty on the real tree (GI046 paid, GI063 ON HOLD), so p7/JOB_REQUEST.json must not exist. A
+    # seed therefore BUILDS a request file (onfile restores a file that was absent by deleting it), and the gate
+    # must refuse each shape of submittable order by its measured reason.
+    def arm_job(nid, minutes=TOP_EST_MIN, note=None):
+        return {"id": nid, "kind": "graph", "frames": FRAMES, "frames_tol": 33, "minutes": minutes,
+                "note": note if note is not None else top_job_note(nid)}
 
-    onfile("request armed with take B too (120 min over the standing cap)", A46, "ck_top_arm", req_all4,
-           files=("req",))
+    def req_doc(jobs, api_id=None):
+        def go(k, P):
+            head = api_id or (jobs[0]["id"] if jobs else "")
+            req = {"jobs": jobs, "id": head, "run_dir": os.path.join(RUNS, head).replace("\\", "/"),
+                   "api": gpath(head).replace("\\", "/") if head else "", "frames": FRAMES, "frames_tol": 33,
+                   "minutes": sum(j["minutes"] for j in jobs), "note": top_request_note()}
+            open(P["req"], "w", encoding="utf-8").write(json.dumps(req, indent=2, ensure_ascii=False))
+        return go
 
-    def req_minutes(k, P):
-        req = json.load(open(P["req"], encoding="utf-8"))
-        for j in req["jobs"]:
-            j["minutes"] = 12
-        req["minutes"] = 24
-        open(P["req"], "w", encoding="utf-8").write(json.dumps(req, indent=2, ensure_ascii=False))
-
-    onfile("request job minutes stamped 12 (unmeasured)", A46, "ck_top_arm", req_minutes, files=("req",))
-
-    def req_note(k, P):
-        req = json.load(open(P["req"], encoding="utf-8"))
-        for j in req["jobs"]:
-            j["note"] = "render this"
-        open(P["req"], "w", encoding="utf-8").write(json.dumps(req, indent=2, ensure_ascii=False))
-
-    onfile("request job note stripped of its receipts", A46, "ck_top_arm", req_note, files=("req",))
-
-    def req_swapped(k, P):
-        req = json.load(open(P["req"], encoding="utf-8"))
-        req["jobs"] = req["jobs"][::-1]
-        req["id"] = TOP["GI063"]["take_a"]
-        req["api"] = gpath(TOP["GI063"]["take_a"]).replace("\\", "/")
-        open(P["req"], "w", encoding="utf-8").write(json.dumps(req, indent=2, ensure_ascii=False))
-
-    onfile("request order flipped (GI063 before GI046, against Max's row)", A46, "ck_top_arm", req_swapped,
-           files=("req",))
+    onfile("request queues the ON HOLD still GI063 (Max's MAX line 6: do not render it before Derrick answers "
+           "row 21)", A63, "ck_top_arm", req_doc([arm_job(A63)]), files=("req",))
+    onfile("request re-queues the SPENT GI046 take B (a render receipt used as a queue entry)", B46, "ck_top_arm",
+           req_doc([arm_job(B46)]), files=("req",))
+    onfile("request exists with 0 jobs while nothing is armable (an arm file is a submittable order)", B46,
+           "ck_top_arm", req_doc([]), files=("req",))
+    onfile("request queues both named stills at once: the paid GI046 take B back in the queue and the held GI063 "
+           "beside it", A63, "ck_top_arm", req_doc([arm_job(B46), arm_job(A63)]), files=("req",))
 
     stale = os.path.join(NOTES, "_top_selftest_ledger.json")
     led = json.load(open(LEDGER, encoding="utf-8"))
@@ -2110,21 +2299,99 @@ def top_selftest():
 
     def man_note_prose(k, P):
         m = json.load(open(P["man"], encoding="utf-8"))
-        m["note"] = m["note"].replace("this prose record has 0 renders", "this prose record was rendered")
+        car = prose_render_count(TOP_BY_ID[A46]["still"])
+        m["note"] = m["note"].replace(f"this prose record has {len(car)} render",
+                                      "this prose record has 0 renders")
         json.dump(m, open(P["man"], "w", encoding="utf-8"), indent=1)
 
-    onfile("manifest note claims the current prose record was rendered when it was not", A46, "ck_top_manifest",
+    onfile("manifest note of the spent GI046 take A claims the current prose record has 0 renders (the shipped "
+           "pre-step-4 wording) while take B's paid mp4 sits in the output dir", A46, "ck_top_manifest",
            man_note_prose, files=("man",))
 
-    def req_spent(k, P):
-        req = json.load(open(P["req"], encoding="utf-8"))
-        req["jobs"][0]["id"] = A46
-        req["id"] = A46
-        req["api"] = gpath(A46).replace("\\", "/")
-        open(P["req"], "w", encoding="utf-8").write(json.dumps(req, indent=2, ensure_ascii=False))
+    def man_count_B(k, P):
+        m = json.load(open(P["man"], encoding="utf-8"))
+        m["note"] = m["note"].replace("this prose record has 1 render", "this prose record has 0 renders")
+        json.dump(m, open(P["man"], "w", encoding="utf-8"), indent=1)
 
-    onfile("request arms the SPENT id (a render receipt used as a queue entry)", B46, "ck_top_arm", req_spent,
-           files=("req",))
+    onfile("manifest note of the clean GI046 take B claims 0 renders of the very record it rendered", B46,
+           "ck_top_manifest", man_count_B, files=("man",))
+
+    def man_carrier_B(k, P):
+        m = json.load(open(P["man"], encoding="utf-8"))
+        m["note"] = m["note"].replace(B46, "the other take")
+        json.dump(m, open(P["man"], "w", encoding="utf-8"), indent=1)
+
+    onfile("manifest note stops naming the take that carries the current prose record", B46, "ck_top_manifest",
+           man_carrier_B, files=("man",))
+
+    def man_render_claim(k, P):
+        m = json.load(open(P["man"], encoding="utf-8"))
+        m["note"] = m["note"].replace("this take is not a render of that record",
+                                      "this take is the render of that record")
+        json.dump(m, open(P["man"], "w", encoding="utf-8"), indent=1)
+
+    onfile("manifest note of the pre-record take calls itself the current record's render", A46, "ck_top_manifest",
+           man_render_claim, files=("man",))
+
+    def man_res_claim(k, P):
+        m = json.load(open(P["man"], encoding="utf-8"))
+        m["note"] = m["note"].replace("absent, 0 result.json", "result.json present (the queue receipt of this render)")
+        json.dump(m, open(P["man"], "w", encoding="utf-8"), indent=1)
+
+    onfile("manifest note of the clean render claims the queue receipt is on disk while p7/jobs carries none "
+           "(the sweep eats an untracked p7/jobs file at the pass boundary, L8)",
+           B46, "ck_top_manifest", man_res_claim, files=("man",))
+
+    def render_ev(tok_bad=False, obj_ok=True, obj_bad=None, res_claim=False, runs_mp4=None):
+        def go():
+            ev = dict(TOP_RENDERS[B46]["evidence"])
+            if tok_bad:
+                ev["status_tokens"] = tuple(list(ev["status_tokens"])
+                                            + ["OBJECTIVE ok ali163_hc15_gi046_s51150032 frames=999"])
+            if not obj_ok:
+                ev["objective"] = {"ok": False}
+            if obj_bad:
+                ev["objective"] = dict(ev["objective"]) | obj_bad
+            if res_claim:
+                ev["result_json"] = True
+            if runs_mp4 is not None:
+                ev["runs_mp4"] = runs_mp4
+            TOP_RENDERS[B46]["evidence"] = ev
+        return go
+
+    def with_ev(label, det, mutate, restore_key="evidence"):
+        keep = copy.deepcopy(TOP_RENDERS[B46].get(restore_key))
+        skipped = ("ck_graphfile", "ck_rundir")
+        if det in skipped:
+            raise AssertionError(f"seed {label!r} skips its own detector {det}: it can never fire")
+        try:
+            mutate()
+            # SERIALIZED bars ck_top_manifest (it needs the on-disk artifacts), so name the file checks to skip
+            # and keep ck_top_manifest live: a seed that skips its own detector can never fire (L10).
+            seeds.append((label, det, run(B46, skip=skipped).get(det, [])))
+        finally:
+            TOP_RENDERS[B46][restore_key] = keep
+
+    with_ev("render row cites a status.log line (frames=999) the render never wrote", "ck_top_manifest",
+            render_ev(tok_bad=True))
+    with_ev("render row claims objective.json ok=false on a run whose objective.json says ok=true",
+            "ck_top_manifest", render_ev(obj_ok=False))
+    with_ev("render row claims 999 frames on a run whose objective.json measures 362", "ck_top_manifest",
+            render_ev(obj_bad={"frames": 999}))
+    with_ev("render row claims a blackfreeze list the objective.json does not carry", "ck_top_manifest",
+            render_ev(obj_bad={"blackfreeze": [1, 2]}))
+    with_ev("render row claims a p7/jobs queue receipt that the pass boundary ate", "ck_top_manifest",
+            render_ev(res_claim=True))
+    with_ev("render row claims the mp4 is not in runs/<id>/ after the collect", "ck_top_manifest",
+            render_ev(runs_mp4=False))
+
+    def man_derrick_strip(k, P):
+        m = json.load(open(P["man"], encoding="utf-8"))
+        m["note"] = m["note"].split(" Derrick judged")[0] + "The selection is Derrick's alone; no vision judge "
+        json.dump(m, open(P["man"], "w", encoding="utf-8"), indent=1)
+
+    onfile("manifest note of a clip Derrick judged drops his verdict and writes it up as a good render", B46,
+           "ck_top_manifest", man_derrick_strip, files=("man",))
 
     real = {n: run(n) for n in TOP_TAKES}
     # The CARRY ids 4/5 (s51150014/s51150015) are rendered clips: their mp4 and output dir exist, so ck_idfree
