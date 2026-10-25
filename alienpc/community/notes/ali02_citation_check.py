@@ -45,10 +45,44 @@ Two measured facts AUD1 added to this gate, because they are properties of the b
    (02v_docs_h3.txt) - the NUL-compact read in read_body() is the measured workaround, and the card
    file has 0 NUL bytes, so it needs none. Never cite a line number read through a decode that the
    file does not support.
+3. The plan is CRLF, and its rows are single PHYSICAL lines, so the gate splits on \n only: a row's line
+   number is the gate's address. Measured in fix_plan.md 2026-10-27: 251 CR (all at line ends) plus 12
+   control bytes inside the text (8x0x07, 2x0x08, 2x0x09) - a non-raw Python string wrote `C:` + backslash
+   paths and
+   ate the escapes (the AGENTS.md notes/ticks rule, now proven in the plan itself). A splitlines() there
+   invents rows, and reading a path through a decoder that eats escapes is how a citation stops matching the
+   file it names.
+
+PLAN mode (0.7, 2026-10-27) - the same class of fault one level up: a PLAN row that cites an artifact.
+`--plan` reads ralph-community/fix_plan.md, takes the rows that belong to an OPEN item (`- [ ]` / `- [~]`,
+excluding `## Optional`), extracts every forward-slash and backslash `C:` path citation, and checks it
+that prompted it: three rows of the TOP-SCENE item point at `notes/hc15_20261024_stills.md`, and no such file
+has ever been committed; the register the builder really writes is the generated block in
+`notes/hc15_20261024.md` (six clips) plus the per-id manifests `notes/hc15_anchor_carry_<id>.json`. A path
+that is not there costs the next agent its whole verification step, exactly like a dead web/ token.
+Three claim classes, because a plan row does not always assert existence (measured on the real plan):
+  POSITIVE  the row treats the file as the artifact to read/verify -> MUST exist, and inside a repo this
+            agent owns (C:/AI/community, C:/AI/director, ralph-community) MUST be git-tracked (L8, L20:
+            untracked files die at the pass boundary, so a tracked citation is the only durable one).
+  ABSENT    the row states the file is gone / has 0 rows / is not on disk -> MUST stay absent; if it shows
+            up the row is stale and the gate fires PLAN-PATH-RESURRECTED (the BANNED-list rule).
+  RUNTIME   the row describes a file a running script creates (the gpu-render lock) -> its directory must
+            exist and the file may come and go; a present lock is reported, never a failure.
+`--plan-selftest` seeds seven cases on mutated COPIES of the real plan written to a temp dir (nothing is
+written into the plan, and no seed file is left in the repo - 0.8): a deleted cited path, an existing tracked
+path asserted absent, an existing UNTRACKED path cited as the artifact (notes/hc15_audit/ab_seed_00.json is
+the real untracked file this fires on), a plan with no citations at all (PLAN-NO-CITES: a gate that reads
+nothing must not look green), a runtime path whose directory is gone, a gitignored runtime path (the budget
+ledger) that must NOT fail - the rule that keeps .gitignore-declared trees out of the findings needs a seed
+too - and a directory reported as empty, which must NOT fail either because the row's claim is 'nothing
+there'. Exit 0 = all seven behave and the real plan is clean.
 """
 from __future__ import annotations
+import os
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 WEB = Path(__file__).resolve().parent / "web"
@@ -433,7 +467,336 @@ def scan_docs(doc_paths=SCAN_DOCS, extra_tokens=()) -> int:
     return len(bad)
 
 
+# ---------------------------------------------------------------- PLAN mode (0.7) --
+PLAN_DEF = Path(r"C:/Users/derek/5slock/ralph-community/fix_plan.md")
+# repos this agent owns (AGENTS.md: these are the git repos); a cited path inside one must be tracked.
+REPOS = ("C:/AI/community", "C:/AI/director", "C:/Users/derek/5slock/ralph-community")
+PATH_FWD = re.compile(r"C:/[A-Za-z0-9_./\-]+[A-Za-z0-9_./\-]*")
+PATH_BS = re.compile(r"C:\\+[A-Za-z0-9_./\-][A-Za-z0-9_.\\/\-]*")   # "/" in the class: mixed-separator paths are real
+TASK_MARK = re.compile(r"^\s*(?:[-*]|\d+\.)\s*\[([ x~])\]")
+HEAD_MARK = re.compile(r"^#{1,4} ")
+# a row that says the file is gone / empty / never committed is an ABSENT claim, not a promise.
+NEG_RES = [r"\bdoes not exist\b", r"\bno such file\b", r"\b0 files\b", r"\b0 hits\b", r"\b0 rows\b",
+           r"\bnever committed\b", r"\bnot on disk\b", r"\bnot tracked\b", r"\buntracked\b", r"\bis absent\b",
+           r"\bare absent\b", r"\babsent\b", r"\bno mp4\b", r"\bno register\b", r"\bis gone\b", r"\bis deleted\b",
+           r"\breleased\b", r"\bno such\b", r"\bnot there\b", r"\bmissing\b", r"\bno file\b"]
+# a row that describes a file a running script creates: the file may legitimately not be there between runs.
+RUN_RES = [r"\block file\b", r"\btaken by\b", r"\b-acquire\b", r"\bat render time\b", r"\bduring a render\b",
+           r"\bwhile a render runs\b", r"\bgate file\b", r"\blive gate\b", r"\bruntime\b"]
+
+
+def plan_lines(plan_path):
+    """The plan as physical lines (split on \n, trailing \r dropped) - see docstring fact 3."""
+    return Path(plan_path).read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n").split("\n")
+
+
+def _scrub(s):
+    """Printable excerpt: control characters (the eaten-escape bytes) become visible markers."""
+    return "".join(ch if ord(ch) >= 32 else "<%02X>" % ord(ch) for ch in s)
+
+
+def plan_open_rows(lines):
+    """[(lineno, text)] for every line owned by an OPEN item: the `- [ ]`/`- [~]` line and its continuation
+    lines, up to the next task marker (its open/closed state wins) or any heading (ends the item). Rows under
+    a `## Optional` heading are exempt (the loop's own exit rule never reads them)."""
+    out, owner, opt = [], None, False
+    for i, ln in enumerate(lines):
+        if HEAD_MARK.match(ln):
+            opt = ln.lstrip("#").strip().lower().startswith("optional")
+            owner = None
+            continue
+        m = TASK_MARK.match(ln)
+        if m:
+            owner = m.group(1) in " ~"
+        if owner and not opt:
+            out.append((i + 1, ln))
+    return out
+
+
+def _clean_tok(tok):
+    """Normalize one cited path: backslashes to slashes, drop a `:12` line anchor and trailing prose
+    punctuation and any trailing slash, drop the bare drive root (a drive root is not an artifact)."""
+    t = tok.replace("\\\\", "/").replace("\\", "/")
+    t = re.sub(r":\d+(-\d+)?$", "", t)
+    t = t.rstrip(".,;:()")
+    while t.endswith("**"):
+        t = t[:-2].rstrip(".,;:()")
+    t = t.rstrip("/")
+    if re.fullmatch(r"[A-Za-z]:", t):
+        return None
+    return t
+
+
+def sentence_spans(line):
+    """[(start, end)] spans covering the line: one span per SENTENCE. A sentence ends at `.`, `;` or `:`
+    followed by whitespace, or at a list/heading marker. A span longer than 400 chars is cut at the nearest
+    `) ``, ``, `` `, ``, `, ` or `) ` so a claim window stays local. This exists because the plan's rows are
+    single physical lines that mix claims: row Q3 states a real ledger, then says a different file is absent 50
+    characters later, and a character window (160 chars, then 60 - both measured) calls the ledger an absence
+    claim. A claim is a sentence, so the window is the sentence that carries the mention."""
+    n = len(line)
+    starts = [0] + [m.end() for m in re.finditer(r"(?<=[.;:])\s+", line)]
+    starts += [m.end() for m in re.finditer(r"^\s*(?:[-*]|\d+\.)\s+", line, re.M)]
+    starts = sorted(set(s for s in starts if 0 <= s <= n))
+    spans = list(zip(starts, starts[1:] + [n]))
+    out = []
+    for s, e in spans:
+        if e - s > 400:
+            cut = max(line[s:e].rfind(c, 0, 400) for c in (") `", "`, ", ", ", ") "))
+            e = s + cut if cut > 80 else e
+        out.append((s, e))
+    return out
+
+
+def claim_window(line, spans, pos):
+    """The claim text for a mention at `pos`: from the sentence's start (or 60 chars before the mention, if
+    that is later) to the sentence's end, never more than 60 chars past the mention. The cap past the mention
+    is measured: row Q3's ledger mention sits 15 chars before its sentence ends, and a belt that reached the
+    sentence boundary + 60 chars read the NEXT sentence's "is absent" and called the ledger an absence claim.
+    Consequence, and the point of the gate: a citation's claim must be IN THE SAME SENTENCE as the citation."""
+    lo = max(0, pos - 60)
+    for s, e in spans:
+        if s <= pos < e:
+            return line[min(lo, s):e].lower()
+    return line[lo:pos + 60].lower()
+
+
+COUNT_NEG = re.compile(r"^(?:0|zero|no)\s+(?:rows|files|hits|matches|entries)\b")
+SCOPE = re.compile(r"^\W{0,6}\b(?:in|under|for|over|from|against|matching|matches)\b")
+
+
+def neg_claim(line, win, mpos):
+    """True when the sentence around a path mention claims that path is GONE. Two measured false-absence
+    classes are excluded, both read off real rows of this plan: a SCOPED search result - "has 0 hits in
+    <path>" (row 2.4) and "0 files matching <id>" (row Q2) report what a SEARCH returned, not the cited file;
+    and a count sitting before the mention with a scope word between them ("grep -l X in that repo = 0 rows.
+    <path>") is about the pattern. A bare claim ("0 files.", "no such file on disk", "is absent", "does not
+    exist") is the absence this gate exists to keep honest."""
+    for r in NEG_RES:
+        for m in re.finditer(r, win):
+            if not COUNT_NEG.match(m.group(0)):
+                return True
+            if m.end() <= mpos:
+                if not SCOPE.search(win[m.end():mpos]):
+                    return True
+            elif not SCOPE.search(win[m.end():]):
+                return True
+    return False
+
+
+def plan_cites(lines):
+    """[(path, lineno, cls, excerpt)] for every path cited by an OPEN row. cls = POSITIVE / ABSENT / RUNTIME,
+    read from the sentence that carries that mention (see sentence_spans()): a row of this plan is one physical
+    line that can name a real artifact, a denied file and a runtime lock in the same breath, so a per-line
+    classifier mis-classes everything on it (measured on the real plan: 20 problems, 17 of them invented by the
+    coarse rule). No claim marker in the sentence = POSITIVE: the row treats the path as an artifact to read."""
+    out = []
+    for n, ln in plan_open_rows(lines):
+        spans = sentence_spans(ln)
+        hits = [(m.start(), m.end(), _clean_tok(m.group(0))) for m in PATH_FWD.finditer(ln)]
+        hits += [(m.start(), m.end(), _clean_tok(m.group(0))) for m in PATH_BS.finditer(ln)]
+        seen = {}
+        for s, e, t in hits:
+            if not t:
+                continue
+            win = claim_window(ln, spans, s)
+            cls = "POSITIVE"
+            if any(re.search(r, win) for r in RUN_RES):
+                cls = "RUNTIME"
+            elif neg_claim(ln, win, s):
+                cls = "ABSENT"
+            if repo_of(t) and os.path.normpath(t).lower() == os.path.normpath(repo_of(t)).lower():
+                cls = "POSITIVE"      # a repo root is an existence claim, never an absence claim
+            seen.setdefault(t, cls)
+        for t, cls in sorted(seen.items()):
+            out.append((t, n, cls, _scrub(ln.strip())[:110]))
+    return out
+
+
+def repo_of(path):
+    p = str(path).replace("\\", "/").lower()
+    for r in REPOS:
+        if p == r.lower() or p.startswith(r.lower() + "/"):
+            return r
+    return None
+
+
+def is_tracked(path):
+    """True when git lists the path (file or directory prefix) in the repo that owns it. Outside an owned
+    repo there is no tracking rule (ComfyUI's install, C:/AI/locks, the 5slock tree), so True = 'no rule'."""
+    r = repo_of(path)
+    if not r:
+        return True
+    rel = os.path.relpath(str(path), r).replace(os.sep, "/")
+    try:
+        out = subprocess.run(["git", "-C", r, "ls-files", "--", rel], capture_output=True, text=True,
+                             timeout=60)
+    except Exception as e:
+        print("PLAN-PATH-GITERROR %s: %s" % (path, e))
+        return False
+    return bool(out.stdout.strip())
+
+
+def ignore_rule(path):
+    """`git check-ignore -v` for a path in an owned repo: 'file:line:pattern <TAB> path' when the repo declares
+    the path ignored, else ''. A gitignored runtime tree (logs/, runs/, .venv/, incoming/, p7/jobs/) is absent
+    from git BY DESIGN (L1: .gitignore ignores logs/ at any depth), so a citation of one is reported, never a
+    failure - the L8 class is a file a pass NEEDS durable and is not tracked, which is what PLAN-PATH-UNTRACKED
+    means."""
+    r = repo_of(path)
+    if not r:
+        return ""
+    rel = os.path.relpath(str(path), r).replace(os.sep, "/")
+    try:
+        out = subprocess.run(["git", "-C", r, "check-ignore", "-v", "--", rel], capture_output=True,
+                             text=True, timeout=60)
+    except Exception:
+        return ""
+    return out.stdout.strip().split("\t")[0] if out.returncode == 0 else ""
+
+
+def plan_check(plan_path=PLAN_DEF, label=""):
+    """The gate: every path cited by an OPEN plan row exists (and, in an owned repo, is tracked); every
+    ABSENT-claim path stays absent; every RUNTIME path's directory exists. Probe-only: reads, prints, writes
+    nothing. Returns the number of problems."""
+    plan_path = Path(plan_path)
+    if not plan_path.is_file():
+        print("PLAN-NO-PLAN %s is not on disk" % plan_path)
+        return 1
+    lines = plan_lines(plan_path)
+    cites = plan_cites(lines)
+    if not cites:
+        print("PLAN-NO-CITES %s: 0 paths cited by open rows - the gate read nothing, so it proves nothing"
+              % plan_path)
+        return 1
+    bad = []
+    for path, n, cls, excerpt in cites:
+        p = Path(path)
+        ex = p.exists()
+        if cls == "ABSENT":
+            if ex and p.is_dir():
+                print("plan-absent-dir   L%-3d %s is a directory the row points at while naming a file that is "
+                      "not there - the absence claim is about the file, not this directory" % (n, path))
+            elif ex and p.is_dir() and not os.listdir(p):
+                print("plan-empty-ok   L%-3d %s is an empty tree, which is what the row states" % (n, path))
+            elif ex:
+                print("PLAN-PATH-RESURRECTED L%-3d %s exists on disk (%d B) while the row says it is gone"
+                      % (n, path, p.stat().st_size))
+                bad.append((n, path, "resurrected"))
+            else:
+                print("plan-absent-ok  L%-3d %s is absent as the row states" % (n, path))
+        elif cls == "RUNTIME":
+            d = p if p.is_dir() else p.parent
+            if not d.is_dir():
+                print("PLAN-PATH-MISSING L%-3d %s: a runtime path whose directory %s does not exist"
+                      % (n, path, d))
+                bad.append((n, path, "runtime-dir"))
+            else:
+                print("plan-runtime-ok   L%-3d %s (dir %s exists; %s on disk now)" % (n, path, d,
+                                                                                      "file present" if ex else "file absent"))
+        else:
+            if not ex:
+                print("PLAN-PATH-MISSING L%-3d %s cited as the artifact by an OPEN row and not on disk"
+                      % (n, path))
+                bad.append((n, path, "missing"))
+                continue
+            if not is_tracked(p):
+                ign = ignore_rule(p)
+                if ign:
+                    print("plan-gitignored L%-3d %s is not tracked and the repo declares it ignored (%s) - a "
+                          "runtime path, never a durable citation" % (n, path, ign))
+                    continue
+                print("PLAN-PATH-UNTRACKED L%-3d %s exists (%d B) but git lists no file under it in %s"
+                      % (n, path, p.stat().st_size if p.is_file() else 0, repo_of(p)))
+                bad.append((n, path, "untracked"))
+                continue
+            print("plan-ok         L%-3d %s exists and is tracked" % (n, path))
+    n_open = len(plan_open_rows(lines))
+    print("\n%splan path gate: %d open-row lines, %d path citations, %d problems (%d POSITIVE / %d ABSENT / "
+          "%d RUNTIME)" % (label, n_open, len(cites), len(bad),
+                           sum(1 for c in cites if c[2] == "POSITIVE"),
+                           sum(1 for c in cites if c[2] == "ABSENT"),
+                           sum(1 for c in cites if c[2] == "RUNTIME")))
+    return len(bad)
+
+
+def _plan_seed(tmp, text):
+    p = Path(tmp) / "seed_plan.md"
+    p.write_text(text, encoding="utf-8")
+    return p
+
+
+def plan_selftest():
+    """Every detector of the plan gate MUST fire on a seeded copy of the real plan (written to a temp dir,
+    so the seed never enters the repo), and the real plan must be clean. Returns 0 when that holds."""
+    real = plan_lines(PLAN_DEF)
+    cites = plan_cites(real)
+    if not cites:
+        print("SELFTEST ABORT: the real plan yields 0 citations, so no seed can be chosen")
+        return 1
+    tracked_ok = next((c for c in cites if Path(c[0]).is_file() and repo_of(c[0]) and is_tracked(c[0])), None)
+    real_problems = plan_check(PLAN_DEF, label="real plan (baseline) ")
+    untracked = "C:/AI/community/notes/hc15_audit/ab_seed_00.json"      # measured: on disk, git lists 0 files
+    ledger = "C:/Users/derek/5slock/ralph-community/logs/p7_budget.json"  # measured: on disk, .gitignore-declared
+    absent = "C:/AI/community/notes/zz_07_seed_path_absent.md"
+    if not tracked_ok:
+        print("SELFTEST ABORT: no tracked cited path in the real plan to seed against")
+        return 1
+    fires = {}
+    with tempfile.TemporaryDirectory() as tmp:
+        # S1: a cited artifact is deleted (the 0.7 fault) -> PLAN-PATH-MISSING
+        s = list(real) + ["", "- [ ] **9.9 seed** read the register at `%s` and report it." % absent, ""]
+        fires["missing"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S1 ")
+        # S2: a real tracked file asserted absent -> PLAN-PATH-RESURRECTED
+        s = list(real) + ["", "- [ ] **9.9 seed** `%s` is absent, so the step cannot be verified." % tracked_ok[0], ""]
+        fires["resurrected"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S2 ")
+        # S3: an existing UNTRACKED file cited as the artifact -> PLAN-PATH-UNTRACKED
+        s = list(real) + ["", "- [ ] **9.9 seed** open `%s` and use the row." % untracked, ""]
+        fires["untracked"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S3 ")
+        # S4: a plan with no citations -> PLAN-NO-CITES (the gate must not look green on nothing)
+        s = ["# seed plan", "", "- [ ] **9.9 seed** do the thing with no paths at all.", ""]
+        fires["no_cites"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S4 ")
+        # S5: a RUNTIME row whose directory is gone -> PLAN-PATH-MISSING(runtime-dir)
+        s = list(real) + ["", "- [ ] **9.9 seed** the lock file lives at `%s/gpu-render.lock`." % (str(Path(tmp)).replace("\\", "/") + "/no_such_dir"), ""]
+        fires["runtime_dir"] = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S5 ")
+        # S7: an EMPTY tree reported as empty (the .codex/skills case: 0 files) must NOT fail - the row's claim
+        # is "nothing there", so an empty directory satisfies it. Measured: the strict rule failed real rows.
+        empty = os.path.join(tmp, "empty_tree")
+        os.makedirs(empty, exist_ok=True)
+        s = list(real) + ["", "- [ ] **9.9 seed** `%s` is an empty tree: 0 files, so nothing is installed." % empty, ""]
+        s7 = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S7 ")
+        empty_ok = (s7 - real_problems == 0)
+        print("seed S7 (empty tree reported as empty): +%d problems, expected +0: %s"
+              % (s7 - real_problems, "ok" if empty_ok else "FIRES - the gate is too strict"))
+        # S6: a gitignored runtime path (the budget ledger) must NOT fail: the gate reports it, and the
+        #     untracked detector must not fire there - the selftest needs a seed that proves the rule is real.
+        s = list(real) + ["", "- [ ] **9.9 seed** read the live ledger at `%s` before any request." % ledger, ""]
+        ign_fires = plan_check(_plan_seed(tmp, "\n".join(s)), label="seed S6 ")
+        print("seed S6 (gitignored ledger cited as an artifact): %d problems, expected 0" % ign_fires)
+    need = {"missing": 1, "resurrected": 1, "untracked": 1, "no_cites": 1, "runtime_dir": 1}
+    bad = {k: v for k, v in fires.items() if v < need[k]}
+    # S6 is measured as a DELTA over the real plan: appending a gitignored citation must add no problem.
+    if ign_fires - real_problems != 0:
+        bad["gitignore_rule"] = ign_fires - real_problems
+    if not empty_ok:
+        bad["empty_tree_rule"] = 1
+    print("\nplan selftest: seeds fired %s, required %s" % (fires, need))
+    if bad:
+        print("SELFTEST FAILED: seeds did not fire: " + ", ".join(sorted(bad)))
+        return 1
+    if real_problems:
+        print("SELFTEST: seeds all fire, but the REAL plan carries %d problem(s) - fix the plan" % real_problems)
+        return 1
+    print("plan selftest ok: PLAN-PATH-MISSING, PLAN-PATH-UNTRACKED, PLAN-PATH-RESURRECTED, "
+          "PLAN-NO-CITES and the runtime-dir seed all fire; 0 on the real plan")
+    return 0
+
+
 def main() -> int:
+    if "--plan-selftest" in sys.argv:
+        return plan_selftest()
+    if "--plan" in sys.argv:
+        return 1 if plan_check(PLAN_DEF) else 0
     if "--selftest" in sys.argv:
         n = run(SELFTEST_CITES, SELFTEST_BANS, label="selftest (must fail 3): ")
         s = scan_docs(doc_paths=[SEED_DOC], extra_tokens=[SEED_TOKEN])
@@ -447,8 +810,11 @@ def main() -> int:
         return 0
     for lab, what, why, stamp in BLOCKED:
         print("BLOCKED  %-24s %s | %s | body: %s" % (lab, what, why, stamp))
-    n = run(CITES, BANNED) + scan_global(GLOBAL_ABSENT) + scan_docs()
+    plan_problems = plan_check(PLAN_DEF)
+    n = run(CITES, BANNED) + scan_global(GLOBAL_ABSENT) + scan_docs() + plan_problems
     print("unverifiable (blocked) this pass: %d" % len(BLOCKED))
+    print("plan path gate (fix_plan.md): %d problem(s) - seeded selftest: python %s --plan-selftest"
+          % (plan_problems, sys.argv[0]))
     return 1 if n else 0
 
 
