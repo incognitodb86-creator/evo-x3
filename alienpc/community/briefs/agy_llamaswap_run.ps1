@@ -1,0 +1,2 @@
+Set-Location C:\Users\derek\5slock\ralph-community
+& 'C:\Users\derek\AppData\Local\agy\bin\agy.exe' -p "Read and carry out the brief at C:\AI\community\briefs\agy_llamaswap_setup_20261024.md exactly. Work until every step is done." --model gemini-3.8-flash-high --dangerously-skip-permissions --add-dir C:\AI --add-dir C:\Users\derek\5slock\ralph-community --add-dir D:\grok_downloads --print-timeout 0 --log-file C:\AI\community\briefs\agy_llamaswap_setup_20261024.log *> C:\AI\community\briefs\agy_llamaswap_setup_20261024.out.txt
