@@ -1,0 +1,325 @@
+{
+ "id": "ali163_hc15_gi063_s51150031",
+ "kind": "graph",
+ "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi063_s51150031.api.json",
+ "still": "GI063",
+ "take": "A",
+ "take_a": "ali163_hc15_gi063_s51150031",
+ "take_b": "ali163_hc15_gi063_s51150032",
+ "source_clip": "ali163_hc15_gi063_s51150015",
+ "source_graph_sha256": "e28d56f43ab92ce436ff31f82a113397e70f08db2c07320d1ce09e56ae21e35d",
+ "prompt_record": "C:/AI/community\\notes\\hc15_top_prompts_20261025.md",
+ "prompt_record_sha256": "fc8929517b04185cb14762e9b660666927990c0ce89f8f04fc1692120e127d2f",
+ "seed": 51150031,
+ "seed_rule": "the take seed is the id number (take A 51150031, take B 51150032); the two takes of one still differ by the seed alone (fix_plan TOP: 'render 2-3 takes per still'). The CARRY seed rule (seed carried from the source clip) belongs to the IM1 settings before/after and does not apply to a new prompt",
+ "shape": {
+  "guide_frame_idx": 0,
+  "passes": 2,
+  "c0_length": 243,
+  "extension_frames": 119,
+  "overlap_frames": 22,
+  "frames_total": 362,
+  "fps": 24,
+  "canvas": [
+   1344,
+   768
+  ],
+  "sampler": "res_multistep",
+  "steps": 8,
+  "scheduler": "simple",
+  "cfg_keys": 0
+ },
+ "windows": {
+  "c0": [
+   0.0,
+   10.125
+  ],
+  "c1": [
+   10.125,
+   15.083333
+  ]
+ },
+ "prompts": {
+  "c0": {
+   "words": 1207,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ]
+  },
+  "c1": {
+   "words": 1113,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "integrated_multimodal_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ]
+  }
+ },
+ "prompts_full": {
+  "c0": {
+   "words": 1207,
+   "main_words": 496,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ],
+   "neg": 0,
+   "ages": [
+    26,
+    30
+   ],
+   "camera_moves": [
+    "Push In",
+    "Static Shot"
+   ],
+   "amplitude": true,
+   "speed": true,
+   "video1": false,
+   "picture1_first_frame": true
+  },
+  "c1": {
+   "words": 1113,
+   "main_words": 450,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "integrated_multimodal_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ],
+   "neg": 0,
+   "ages": [
+    26,
+    30
+   ],
+   "camera_moves": [
+    "Arc Shot",
+    "Push In"
+   ],
+   "amplitude": true,
+   "speed": true,
+   "video1": true,
+   "picture1_first_frame": true
+  }
+ },
+ "species": {
+  "tokens": [
+   "robot",
+   "machine"
+  ],
+  "hits": {
+   "c0": 2,
+   "c1": 2
+  }
+ },
+ "default_figure_clauses": {
+  "c0": 0,
+  "c1": 0
+ },
+ "card": {
+  "facts": "C:/AI/community/notes/scenes/GI063.facts.json",
+  "facts_sha256": "063bd2397d0ad65d98ca97c81c63f39c002baa5da80d55a6c14db22b7c6026ee",
+  "card": "C:/AI/community/notes/scenes/GI063.md",
+  "card_sha256": "defe45f530d07e95983251e6a85c8e4852986883c65b61abdb0423c337c70a47",
+  "card_still_sha256": "e8fdb85a6f2a2cce",
+  "model": "coding_swift15_iq3s",
+  "status": "REFUSAL_TRUNCATED",
+  "scope_ok": true,
+  "figures": 2,
+  "evidence_rows": 22,
+  "evidence_verbatim": 22,
+  "per_chunk_tokens": 12,
+  "tokens_per_chunk": {
+   "c0": 12,
+   "c1": 12
+  },
+  "banned_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "head_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "solo_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "gate_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "fires": {
+   "c0": [],
+   "c1": []
+  },
+  "flags": {
+   "c0": {
+    "subjects": 2,
+    "card_figures": 2,
+    "missing_tokens": [],
+    "solo_hits": [],
+    "banned_hits": {},
+    "head_hits": {},
+    "beat0_pose": {
+     "1": [],
+     "2": []
+    },
+    "beat0_ban": {
+     "1": [],
+     "2": []
+    },
+    "room_missing": [],
+    "room_hits": [],
+    "age_no_marker": [],
+    "age_missing": [],
+    "consent_hits": [],
+    "consent_missing": []
+   },
+   "c1": {
+    "subjects": 2,
+    "card_figures": 2,
+    "missing_tokens": [],
+    "solo_hits": [],
+    "banned_hits": {},
+    "head_hits": {},
+    "beat0_pose": {
+     "1": [],
+     "2": []
+    },
+    "beat0_ban": {
+     "1": [],
+     "2": []
+    },
+    "room_missing": [],
+    "room_hits": [],
+    "age_no_marker": [],
+    "age_missing": [],
+    "consent_hits": [],
+    "consent_missing": []
+   }
+  }
+ },
+ "slots": {
+  "ref_images.ref_image_1": [
+   "img",
+   0
+  ],
+  "ref_images.ref_image_2": [
+   "img2",
+   0
+  ]
+ },
+ "images": {
+  "img": "community/hc/GI063.jpg",
+  "img2": "community/hc/GI063_w1_face.png"
+ },
+ "diff_paths": [
+  "[inputs].filename_prefix|save|",
+  "[inputs].noise_seed|noise|",
+  "[inputs].prompt|c0|",
+  "[inputs].prompt|c1|"
+ ],
+ "prose_strings": 2,
+ "gate_ok_all_prose": true,
+ "gate": "comm.guard_ok allow on every prompt-bearing string; scripts/tests/test_p6_review.py 21 passed (run 2026-10-25)",
+ "static_scan_defects": 0,
+ "graph_sha256": "37999bc09b775680d9e5912f286181620427324ebf99f1570f292dbc2f940aed",
+ "graph_bytes": 20817,
+ "run_dir_request_sha256": "37999bc09b775680d9e5912f286181620427324ebf99f1570f292dbc2f940aed",
+ "rendered": null,
+ "budget_at_build": {
+  "used_min": 472.9,
+  "jobs": 38,
+  "cap_min": 615,
+  "job_cap": 45,
+  "updated": "2026-10-23T18:53:47"
+ },
+ "est_min": 30,
+ "arm": {
+  "armed": false,
+  "request": "p7/JOB_REQUEST.json",
+  "jobs": [],
+  "naming": {
+   "file": "C:/AI/community/notes/needs_derrick.md",
+   "row": 18,
+   "who": "Max 2026-10-24 9:30 PM CT",
+   "still": "GI063",
+   "text": "GI063 is the robot (black and silver metallic humanoid robot, behind a blonde woman on a dark couch with a TV behind them)",
+   "order": "render GI046 and GI063 first, GI046 first of the two"
+  },
+  "staged_unarmed": [
+   "ali163_hc15_gi046_s51150031",
+   "ali163_hc15_gi046_s51150032",
+   "ali163_hc15_gi063_s51150031",
+   "ali163_hc15_gi063_s51150032"
+  ],
+  "displaced": "ali163_hc15_bd002_s51150021",
+  "restore": "python C:/AI/community/notes/hc15_anchor_fix_build.py --now-build",
+  "queue_math": "0 job x 30 min = 0 min on top of the ledger; arming all 4 takes = 120 min would overdraw the standing cap 615 min, and a take with a render receipt on disk is spent and is never a queue entry, so the staged set is ali163_hc15_gi046_s51150031, ali163_hc15_gi046_s51150032, ali163_hc15_gi063_s51150031, ali163_hc15_gi063_s51150032 (notes/needs_derrick.md rows 18, 21, 26)"
+ },
+ "citations": [
+  "C:/AI/community\\notes\\hc15_top_prompts_20261025.md",
+  "C:/AI/community\\notes\\prompt_guide_20261024.md",
+  "C:/AI/community\\notes\\hc15_figures_20261025.md",
+  "C:/AI/community\\notes\\needs_derrick.md",
+  "C:/AI/community\\notes\\web\\hc15_tenstrip_readme.txt",
+  "C:/Users/derek/5slock/approved_characters/ORC_POOL_EDGE/CHARACTER.md",
+  "C:/Users/derek/5slock/ralph-community/fix_plan.md",
+  "C:\\AI\\community\\notes\\hc15_anchor_carry_build.py",
+  "C:/AI/community\\notes\\hc15_anchor_fix_build.py",
+  "C:/AI/community\\scripts\\tests\\test_p6_review.py"
+ ],
+ "notes": "staged in a Ralph pass: graph, run-dir request copy, manifest, and (take A only) the request file. No render, no queue, no GPU, no vision judge, no llama-swap call.",
+ "note": "TOP GI063 take A (fix_plan TOP, Derrick 2026-10-24 8:39 PM CT: 'the two videos the orc and the robot fucking video ... Like hardcore sex'), figure named by Max 2026-10-24 9:30 PM CT, verbatim in fix_plan.md line 2 and notes/hc15_figures_20261025.md \u00a71, answers needs_derrick.md row 18: GI063 is the robot (black and silver metallic humanoid robot, behind a blonde woman on a dark couch with a TV behind them). Seed 51150031 = the id number; the takes of a still differ by the seed alone. Graph 27 nodes 20817 B sha256 37999bc09b775680d9e5912f286181620427324ebf99f1570f292dbc2f940aed, 4 changed paths vs source ali163_hc15_gi063_s51150015 only: MiniMaxH3AddGuide frame_idx 0 on the c0 edge, res_multistep/simple/8, 243 + 119-frame window = 362 f, 24 fps 15.083333 s, 1344x768, audio intact, 2 SamplerCustomAdvanced, 0 cfg keys, ref slots + LoadImage as carried. Prose from hc15_top_prompts_20261025.md byte-for-byte: c0 detailed_description 1207w / 5 beats 0.000-10.125s, c1 integrated_multimodal_description 1113w / 5 beats 10.125-15.083s, 0 negation tokens, ages [26, 30] fictional, species words robot/machine in 2/2 chunks, default-figure clauses 0 (defect hc15_figures_20261025.md r2-3). Structure prompt_guide_20261024.md + TenStrip card. Gate: comm.guard_ok True on 2 prose strings, tests/test_p6_review.py 21 passed. id-free: no mp4, 0 result.json, no ComfyUI output dir, no GPU call in this pass. minutes=30 (clip 1-6 measured 24.0 min/job +25% contingency); receipts --top-check/--top-selftest. Arm: staged (free take of each still, Max's row-18 order, rest staged; ledger 472.9/615 min 38/45 jobs stamp 2026-10-23T18:53:47). card e8fdb85a6f2a2cce start-image card, card gate REFUSAL_TRUNCATED: 2 figures, 22/22 card quotes verbatim, 12 card words 2/2 chunks, 0 gate hits, read by coding_swift15_iq3s off the start still (ck_top_card/ck_top_facts). The selection is Derrick's alone; no vision judge on explicit output.",
+ "checks": {
+  "ck_control": 0,
+  "ck_diff": 0,
+  "ck_top_diff": 0,
+  "ck_guide": 0,
+  "ck_shape": 0,
+  "ck_prose": 0,
+  "ck_top_species": 0,
+  "ck_top_age": 0,
+  "ck_top_words": 0,
+  "ck_top_beats": 0,
+  "ck_top_neg": 0,
+  "ck_top_sync": 0,
+  "ck_top_seed": 0,
+  "ck_gate": 0,
+  "ck_slots": 0,
+  "ck_inputs": 0,
+  "ck_idfree": 0,
+  "ck_schema": 0,
+  "ck_prefix": 0,
+  "ck_seed": 0,
+  "ck_rundir": 0,
+  "ck_graphfile": 0,
+  "ck_manifest": 0,
+  "ck_top_manifest": 0,
+  "ck_top_arm": 0,
+  "ck_top_card": 0,
+  "ck_top_facts": 0,
+  "ck_top_md": 0,
+  "ck_nogpu": 0
+ },
+ "check_failures": {},
+ "checks_all_clean": true
+}
