@@ -38,6 +38,14 @@ THE THREE SWITCHES (each one is a published community value, not an invention of
     Source: the continuation pack README's published example: "The example first generates a 243-frame clip"
     then "overlap_frames = 22, extension_frames = 119, window_length = 141" (same saved file).
 
+NOW-P1 (added 2026-10-25, the NOW item's builder pass - fix_plan NOW-P1, spec
+notes/now_h3_quality_research_20261025.md §3/§4): the SAME file, a SECOND artifact. --now-build writes
+`p7/graphs/ali163_hc15_bd002_s51150021.api.json` = the RENDERED clip-11 bytes + exactly the four published
+switches (steps 8 -> 12; ref_image_size max -> match; attention comfy kitchen attention -> pytorch attention; a new
+`LoraLoaderModelOnly` antiburn node on the CONTINUATION model path only), prompts byte-identical, seed unchanged,
+with its own 13 detectors (--now-check) and its own seeded-fault probe (--now-selftest). The clip-1 -> clip-11
+path above is untouched, so the shipped FIRST-item receipt stays reproducible.
+
 UNCHANGED ON PURPOSE: every prompt string (the subject-label rewrite is the NEXT fix_plan item, Derrick 5:48 PM
 CT), reference slots and ref_image_size, seed 51150001, canvas 1344x768 (the node's published default width/height),
 shift video 10.0 / audio 3.0 (node defaults), VSA attention settings, fps 24, the audio VAE + VAEDecodeAudio path.
@@ -51,6 +59,7 @@ RUN
   python C:/AI/community/notes/hc15_anchor_fix_build.py --check
   python C:/AI/community/notes/hc15_anchor_fix_build.py --selftest
   python C:/AI/community/notes/hc15_anchor_fix_build.py --sheet     # after the render, no GPU
+  python C:/AI/community/notes/hc15_anchor_fix_build.py --now-build|--now-check|--now-selftest  # NOW-P1
 """
 import glob
 import hashlib
@@ -105,6 +114,11 @@ def ck(cond, msg):
 
 def sha(p):
     return hashlib.sha256(open(p, "rb").read()).hexdigest()
+
+
+def sha_s(s):
+    """sha256 of a STRING (the byte identity of a prompt), not of a path."""
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
 
 def jload(p):
@@ -669,6 +683,498 @@ def sheet():
     return 0
 
 
+# ===================================================================== NOW-P1 (4 published switches, clip-11 clone)
+# The four switches, each with the published wording that is ON DISK (this is the gate's citation set):
+#  steps 8 -> 12      notes/web/02v_docs_h3.txt:176 "Speech and timbre need **12+** steps; at **8** steps audio is
+#                     often the weak link." and :182 "Splitting the schedule across two samplers drops multistep
+#                     history: the second sampler's first step is first-order again. Keep one sampler run, or give
+#                     the second enough steps to warm up." + notes/web/hc15_tenstrip_readme.txt "It's a slow 8-12
+#                     step reference model in that configuration" (the band for THIS checkpoint).
+#  ref_image_size     the box's own /object_info: MiniMaxH3ReferenceToVideo.ref_image_size options ['match','max'],
+#                     default 'match', tooltip "'max' uses the reference pipeline's 2048px short edge ... can be
+#                     much slower; it does not upscale small files". Measured refs: 1376x768 start frame
+#                     (community/hc/BD002.jpg) + 512x512 face crop (community/hc/BD002_w2_face.png), both under the
+#                     2048px short edge, so 'max' buys no detail these files do not contain.
+#  attention          notes/web/02v_docs_h3.txt: Comfy Kitchen attention is int8_convrot-incompatible; the live
+#                     schema default is 'pytorch attention'; our unet is
+#                     10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors (measured off the clip-11 graph).
+#  antiburn LoRA      notes/web/02v_antiburn_readme.txt:29 "Load it with `LoraLoaderModelOnly` on the model that
+#                     makes your **continuation clips**: 2, 3, 4 and so on.", :30 "Don't use it on clip 1.",
+#                     :31 "Start at 0.5." + notes/web/02v_docs_h3.txt:157 "... on clips after the first at
+#                     `strength_model` \~0.5". The card names `LoraLoaderModelOnly`, NOT `LoraLoader` (the §3/§4
+#                     shorthand), and names only strength_model - `LoraLoader` would force a `strength_clip` value
+#                     that no source publishes and would move the CLIP/conditioning path too = our own setting.
+NOW_ID = "ali163_hc15_bd002_s51150021"
+NOW_BASE_G = NEW_G                                   # clip-11 = the RENDERED before clip (frame-0 SSIM 0.915)
+NOW_G = os.path.join(W, "p7", "graphs", NOW_ID + ".api.json")
+OBJ_INFO = os.path.join(W, "notes", "ali173_b2_object_info_full.json")  # the box's own /object_info dump
+LORA_FILE = "h3_antiburn_universal_v1.safetensors"
+LORA_STRENGTH = 0.5
+STEPS_PUB = 12
+STEPS_BAND = (8, 12)                                  # TenStrip's published band for this checkpoint
+ATTN_PUB = "pytorch attention"
+REFSIZE_PUB = "match"
+NOW_MINUTES = 20                                      # clip-11 rendered in 571.7 s wall; 12/8 steps = 1.5x the
+                                                      # sampling passes (857 s = 14.3 min) + CK->pytorch attention
+                                                      # costs per-step time; 20 min is the disclosed estimate
+NOW_CITATIONS = {
+    "steps": "https://docs.comfy.org/tutorials/video/minimax/minimax-h3.md (notes/web/02v_docs_h3.txt:176,182) + "
+             "https://huggingface.co/TenStrip/10Eros-Max/raw/main/README.md",
+    "refsize": "https://docs.comfy.org/tutorials/video/minimax/minimax-h3-native.md (notes/web/"
+               "02v_docs_h3_native.txt) + the live /object_info default 'match' (notes/ali173_b2_object_info_full.json)",
+    "attention": "https://docs.comfy.org/tutorials/video/minimax/minimax-h3.md (int8_convrot) + "
+                 "https://github.com/Comfy-Org/ComfyUI/issues/15529 + the live schema default",
+    "lora": "https://huggingface.co/Imagineer13/H3-Anti-Burn-LoRA (notes/web/02v_antiburn_readme.txt:29-31) + "
+            "https://docs.comfy.org/tutorials/video/minimax/minimax-h3.md:157",
+}
+
+_OBJ = None
+
+
+def obj():
+    global _OBJ
+    if _OBJ is None:
+        _OBJ = jload(OBJ_INFO)
+    return _OBJ
+
+
+def obj_inputs(cls):
+    ins = (obj().get(cls) or {}).get("input", {})
+    return set(ins.get("required") or {}), set(ins.get("optional") or {})
+
+
+def obj_field(cls, key):
+    """(type, published_options, meta) of one input of one class, read from the box's own /object_info dump."""
+    ins = (obj().get(cls) or {}).get("input", {})
+    for sec in ("required", "optional"):
+        v = (ins.get(sec) or {}).get(key)
+        if not v:
+            continue
+        if isinstance(v[0], list):
+            return v[0], v[0], (v[1] if len(v) > 1 and isinstance(v[1], dict) else {})
+        meta = v[1] if len(v) > 1 and isinstance(v[1], dict) else {}
+        return v[0], meta.get("options"), meta
+    return None, None, {}
+
+
+def obj_schema_all():
+    out = {}
+    for cls in obj():
+        req, opt = obj_inputs(cls)
+        if req or opt:
+            out[cls] = (req, opt)
+    return out
+
+
+def obj_scan(g):
+    """Schema gate the item asks for: every class_type and every input key must exist in the live /object_info."""
+    sch = obj_schema_all()
+    bad = []
+    for nid, n in sorted(g.items()):
+        ct = n["class_type"]
+        if ct not in sch:
+            bad.append("%s: class %s is not in the box's /object_info" % (nid, ct))
+            continue
+        names = sch[ct][0] | sch[ct][1]
+        keys = {k.split(".")[0] for k in n["inputs"]}
+        bad += ["%s.%s: not an input of %s" % (nid, k, ct) for k in sorted(keys - names)]
+        bad += ["%s: required input %s missing" % (nid, r) for r in sorted(sch[ct][0])
+                if r not in n["inputs"] and not any(a.startswith(r + ".") for a in n["inputs"])]
+    return bad
+
+
+def transform_now(base):
+    """The four published switches, applied to the rendered clip-11 graph. Nothing else moves."""
+    g = json.loads(json.dumps(base))
+    for k in ("s0_sched", "s1_sched"):
+        g[k]["inputs"]["steps"] = STEPS_PUB
+    for k in ("c0", "c1"):
+        g[k]["inputs"]["ref_image_size"] = REFSIZE_PUB
+    g["m_attn"]["inputs"]["attention"] = ATTN_PUB
+    g["lora_antiburn"] = {"class_type": "LoraLoaderModelOnly",
+                          "inputs": {"model": ["m_shift", 0], "lora_name": LORA_FILE,
+                                     "strength_model": LORA_STRENGTH}}
+    for k in ("s1_guide", "s1_sched"):
+        g[k]["inputs"]["model"] = ["lora_antiburn", 0]
+    g["save"]["inputs"]["filename_prefix"] = "community/%s/%s" % (NOW_ID, NOW_ID)
+    return g
+
+
+# §4's allowed set + save.filename_prefix: the prefix IS the output folder, so an unchanged prefix would write the
+# new clip into the folder of the RENDERED clip-11. It is a naming path, not a sampling path, and the gate names it.
+NOW_ALLOWED = {("[inputs].steps", "s0_sched", ""), ("[inputs].steps", "s1_sched", ""),
+               ("[inputs].ref_image_size", "c0", ""), ("[inputs].ref_image_size", "c1", ""),
+               ("[inputs].attention", "m_attn", ""),
+               ("NODE+", "lora_antiburn", ""),
+               ("[inputs].model", "s1_guide", ""), ("[inputs].model", "s1_sched", ""),
+               ("[inputs].filename_prefix", "save", "")}
+
+
+def now_note(gnew):
+    b = open(NOW_G, "rb").read()
+    d = len(diff_paths(jload(NOW_BASE_G), gnew))
+    return ("HC15 NOW-P1 re-render of clip 1 (fix_plan NOW-P1, out of notes/now_h3_quality_research_20261025.md "
+            "§3/§4): the RENDERED clip-11 graph (ali163_hc15_bd002_s51150011, frame-0 SSIM 0.915) plus EXACTLY the "
+            "four published switches, same start still %s, same seed %d, same 1344x768 24 fps 362 f = 15.0833 s "
+            "with audio, prompts BYTE-IDENTICAL, %d changed paths and nothing else. (1) s0_sched/s1_sched steps 8 "
+            "-> 12: docs.comfy.org minimax-h3.md 'Speech and timbre need 12+ steps; at 8 steps audio is often the "
+            "weak link' and 'Splitting the schedule across two samplers drops multistep history ... give the second "
+            "enough steps to warm up' + TenStrip 10Eros-Max README 'a slow 8-12 step reference model in that "
+            "configuration'. (2) c0/c1 ref_image_size max -> match = the /object_info default; 'max' keeps a 2048px "
+            "short edge, is several times slower and does not upscale small files - the measured refs are a 1376x768 "
+            "start frame (community/hc/BD002.jpg) and a 512x512 face crop (community/hc/BD002_w2_face.png), both under "
+            "that 2048px short edge. "
+            "(3) m_attn.attention 'comfy kitchen attention' -> 'pytorch attention' = the schema default; the docs "
+            "publish that Comfy Kitchen attention cannot run int8_convrot checkpoints and this unet is "
+            "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors. (4) new node lora_antiburn = LoraLoaderModelOnly "
+            "(lora_name %s, strength_model %s) between m_shift and s1_guide/s1_sched ONLY, per the LoRA README "
+            "'Load it with LoraLoaderModelOnly on the model that makes your continuation clips' / 'Don't use it on "
+            "clip 1' / 'Start at 0.5'. Builder receipts: notes/hc15_anchor_fix_build.py --now-check (13 detectors) "
+            "and --now-selftest (seeded faults). Graph %d nodes, %d B, sha256 %s, 0 cfg keys, schema gate against "
+            "the box's own /object_info dump (notes/ali173_b2_object_info_full.json) 0 defects, comm.guard_ok allow "
+            "on every prompt-bearing string, scripts/tests/test_p6_review.py 21 passed. id-free: no runs/%s/%s.mp4, "
+            "no p7/jobs/%s.result.json, no ComfyUI output/%s. Render (GPU window, never a Ralph pass): "
+            "C:/AI/director/.venv/Scripts/python.exe C:/AI/community/scripts/run_graph_job.py "
+            "C:/AI/community/runs/%s %s --frames 362 after gpu_guard.ps1 prints IDLE, one job, then "
+            "python C:/AI/community/notes/hc15_anchor_fix_build.py --now-sheet and the labelled before/after "
+            "frame-0 sheet (51150011 before, 51150021 after) goes to Derrick. Unload comfyui_auto afterwards. "
+            "minutes=%d (measured: clip-11 wall 571.7 s; 12/8 steps = 1.5x the sampling passes = ~858 s, plus the "
+            "pytorch-attention per-step cost). KEEP is Derrick's alone; no vision judge on explicit output."
+            ) % (CLIPS_START, SEED, d, LORA_FILE, LORA_STRENGTH, len(gnew), len(b), sha(NOW_G),
+                 NOW_ID, NOW_ID, NOW_ID, NOW_ID, NOW_ID, NOW_ID, NOW_MINUTES)
+
+
+def now_arm(gnew):
+    run = os.path.join(W, "runs", NOW_ID)
+    os.makedirs(run, exist_ok=True)
+    open(os.path.join(run, "request.api.json"), "wb").write(open(NOW_G, "rb").read())
+    req = {"jobs": [{"id": NOW_ID, "kind": "graph", "frames": FRAMES, "frames_tol": 33,
+                     "minutes": NOW_MINUTES, "note": now_note(gnew)}],
+           "id": NOW_ID, "run_dir": run.replace("\\", "/"),
+           "api": NOW_G.replace("\\", "/"), "frames": FRAMES, "frames_tol": 33,
+           "minutes": NOW_MINUTES, "note": now_note(gnew)}
+    open(os.path.join(W, "p7", "JOB_REQUEST.json"), "w", encoding="utf-8").write(
+        json.dumps(req, indent=2, ensure_ascii=False))
+    return req
+
+
+def now_ctx():
+    mp4 = os.path.join(W, "runs", NOW_ID, NOW_ID + ".mp4")
+    rendered = os.path.isfile(mp4)
+    oj = os.path.join(W, "runs", NOW_ID, "objective.json")
+    return dict(req=jload(os.path.join(W, "p7", "JOB_REQUEST.json")),
+                ledger=jload(LEDGER),
+                new_graph_bytes=open(NOW_G, "rb").read(),
+                base_graph_bytes=open(NOW_BASE_G, "rb").read(),
+                run_api_bytes=(open(os.path.join(W, "runs", NOW_ID, "request.api.json"), "rb").read()
+                               if os.path.isfile(os.path.join(W, "runs", NOW_ID, "request.api.json")) else b""),
+                sheet_path=os.path.join(W, "runs", NOW_ID, NOW_ID + "_frame0_sheet.png"),
+                rendered=rendered,
+                obj=(jload(oj) if rendered and os.path.isfile(oj) else None),
+                probe=(probe(mp4) if rendered else None))
+
+
+def now_check(gbase, gnew, label="real", ctx=None):
+    """13 named detectors over the NOW-P1 artifact (clip-11 + the 4 published switches). Every one is provably
+    reachable: --now-selftest seeds the OLD value into a clone and requires the detector to fire there, 0 here."""
+    ctx = ctx or now_ctx()
+    fails.clear()
+    led, req = ctx["ledger"], ctx["req"]
+    # 1 STEPS: the published 12, inside the checkpoint's published 8-12 band, schedule/denoise unchanged
+    st = {k: n["inputs"]["steps"] for k, n in gnew.items() if k.endswith("_sched")}
+    lo, hi = STEPS_BAND
+    ck(st and set(st.values()) == {STEPS_PUB} and lo <= STEPS_PUB <= hi
+       and st != {k: gbase[k]["inputs"]["steps"] for k in st}
+       and all(n["inputs"]["scheduler"] == "simple" for k, n in gnew.items() if k.endswith("_sched"))
+       and all(n["inputs"]["denoise"] == 1.0 for k, n in gnew.items() if k.endswith("_sched"))
+       and gnew["ksel"]["inputs"]["sampler_name"] == "res_multistep",
+       "1 STEPS steps %d on every scheduler (clip-11 ran 8; published 12+ for audio, 8-12 band for this file), "
+       "simple/denoise 1.0/res_multistep kept" % STEPS_PUB)
+    # 2 REFSIZE: the /object_info default, and the value is one the published node offers
+    _t, opts, meta = obj_field("MiniMaxH3ReferenceToVideo", "ref_image_size")
+    vals = [gnew[k]["inputs"]["ref_image_size"] for k in ("c0", "c1")]
+    ck(vals == [REFSIZE_PUB, REFSIZE_PUB] and meta.get("default") == REFSIZE_PUB
+       and REFSIZE_PUB in (opts or []) and vals != [gbase["c0"]["inputs"]["ref_image_size"],
+                                                    gbase["c1"]["inputs"]["ref_image_size"]],
+       "2 REFSIZE c0/c1 ref_image_size %s = the /object_info default (options %s); clip-11 ran '%s'"
+       % (REFSIZE_PUB, opts, gbase["c0"]["inputs"]["ref_image_size"]))
+    # 3 ATTENTION: the schema default, valid for an int8 checkpoint (published incompatibility)
+    _t, aopts, ameta = obj_field("ModelAttentionBackend", "attention")
+    unet = gnew["unet"]["inputs"]["unet_name"]
+    ck(gnew["m_attn"]["inputs"]["attention"] == ATTN_PUB and ameta.get("default") == ATTN_PUB
+       and ATTN_PUB in (aopts or []) and "int8" in unet
+       and gbase["m_attn"]["inputs"]["attention"] != ATTN_PUB,
+       "3 ATTENTION m_attn.attention %s = the schema default (options %s); this unet is %s, and the docs publish "
+       "that comfy kitchen attention cannot run int8_convrot checkpoints" % (ATTN_PUB, aopts, unet))
+    # 4 LORA: the card's published wiring (node class, file, strength, continuation-only placement)
+    lora = [k for k, n in gnew.items() if n["class_type"] in ("LoraLoaderModelOnly", "LoraLoader")]
+    ln, lopts = (lora[0], obj_field("LoraLoaderModelOnly", "lora_name")[1]) if len(lora) == 1 else (None, None)
+    lin = gnew.get(ln, {}).get("inputs", {}) if ln else {}
+    ck(len(lora) == 1 and gnew[lora[0]]["class_type"] == "LoraLoaderModelOnly"
+       and lin.get("lora_name") == LORA_FILE and LORA_FILE in (lopts or [])
+       and lin.get("strength_model") == LORA_STRENGTH
+       and lin.get("model") == ["m_shift", 0]
+       and gnew["s1_guide"]["inputs"]["model"] == gnew["s1_sched"]["inputs"]["model"] == [ln, 0]
+       and gnew["s0_guide"]["inputs"]["model"] == gnew["s0_sched"]["inputs"]["model"] == ["m_shift", 0]
+       and os.path.isfile(os.path.join(COMFY, "models", "loras", LORA_FILE)),
+       "4 LORA one %s (%s, strength_model %s) fed by m_shift, feeding s1_guide AND s1_sched only, s0 still on "
+       "m_shift ('Don't use it on clip 1'), file installed + in the live lora_name list"
+       % ("LoraLoaderModelOnly", LORA_FILE, LORA_STRENGTH))
+    # 5 SCOPE: exactly the switched paths, nothing else
+    d = diff_paths(gbase, gnew)
+    ck(d == NOW_ALLOWED, "5 SCOPE diff vs the rendered clip-11 == the %d allowed paths and nothing else "
+       "(extra=%s missing=%s)" % (len(NOW_ALLOWED), sorted(d - NOW_ALLOWED)[:4], sorted(NOW_ALLOWED - d)[:4]))
+    # 6 SCHEMA against the box's own /object_info: every class + every input key + every switched value published
+    bad = obj_scan(gnew)
+    ck(not bad,
+       "6 SCHEMA every class_type and every input key of all %d nodes exists in notes/ali173_b2_object_info_full.json"
+       % len(gnew) + (" defects=%s" % bad[:3] if bad else ""))
+    # 7 PROMPTS byte-identical, seed unchanged (the A/B stays one-variable)
+    pp = [(sha_s(gbase[n]["inputs"]["prompt"]), sha_s(gnew[n]["inputs"]["prompt"])) for n in ("c0", "c1")]
+    ck(all(a == b for a, b in pp) and gnew["noise"]["inputs"]["noise_seed"] == SEED == 51150001
+       and gnew["noise"]["inputs"]["noise_seed"] == gbase["noise"]["inputs"]["noise_seed"],
+       "7 PROMPTS c0/c1 prompt sha256 %s == clip-11 byte-for-byte, seed %d unchanged"
+       % ([a[:16] for a, _ in pp], SEED))
+    # 8 UNCHANGED: the FIRST-item anchor and the clip shape, plus shift/VSA/fps/audio
+    def gv(g, node, key):
+        return g.get(node, {}).get("inputs", {}).get(key, "\0")
+    pairs = [("g0", "frame_idx"), ("g0", "image"), ("g0", "vae"), ("g0", "latent"), ("g0", "positive"),
+             ("s0_guide", "conditioning"), ("c0", "length"), ("win1", "overlap_frames"),
+             ("win1", "extension_frames"), ("c0", "width"), ("c0", "height"), ("c0", "ref_images.ref_image_1"),
+             ("c0", "ref_images.ref_image_2"), ("m_shift", "shift_video"), ("m_shift", "shift_audio"),
+             ("m_vsa", "selection"), ("m_vsa", "selection.keep_percent"), ("m_vsa", "min_tokens"),
+             ("m_vsa", "extra_tokens"), ("m_vsa", "start_percent"), ("m_vsa", "end_percent"),
+             ("mkvid", "fps"), ("dec_a", "vae"), ("c0", "audio_vae"), ("img", "image"), ("img2", "image"),
+             ("unet", "unet_name"), ("clip", "clip_name"), ("ksel", "sampler_name")]
+    drift = [(n, k) for n, k in pairs if gv(gnew, n, k) != gv(gbase, n, k)]
+    ck(not drift and gv(gnew, "g0", "frame_idx") == 0 and gv(gnew, "c0", "length") == 243
+       and (gv(gnew, "c0", "width"), gv(gnew, "c0", "height")) == (1344, 768)
+       and (gv(gnew, "m_shift", "shift_video"), gv(gnew, "m_shift", "shift_audio")) == (10.0, 3.0)
+       and gv(gnew, "mkvid", "fps") == 24 and gv(gnew, "win1", "overlap_frames") == 22
+       and gv(gnew, "win1", "extension_frames") == 119,
+       "8 UNCHANGED anchor g0 frame_idx 0 on the c0 edge, 243 + 22/119 window = 362 f, canvas 1344x768, shift "
+       "10/3, VSA block, fps 24, audio path, unet/clip files, ref slots (drift=%s)" % drift)
+    # 9 GATE: the fiction gate over EVERY prose string
+    prose = [(k, v) for k, n in gnew.items() for v in n["inputs"].values() if isinstance(v, str) and len(v) > 120]
+    allowed = [(k, v) for k, v in prose if guard_ok(v)]
+    ck(len(prose) == 2 and len(allowed) == 2,
+       "9 GATE comm.guard_ok allows %d/%d prompt-bearing strings (c0.prompt/c1.prompt)" % (len(allowed), len(prose)))
+    # 10 INTEGRITY
+    dangling = [f"{k}.{key}" for k, n in gnew.items() for key, v in n["inputs"].items()
+                if isinstance(v, list) and len(v) == 2 and isinstance(v[0], str) and v[0] not in gnew]
+    reach, stack = set(), ["save"]
+    while stack:
+        k = stack.pop()
+        if k in reach or k not in gnew:
+            continue
+        reach.add(k)
+        stack += [v[0] for v in gnew[k]["inputs"].values()
+                  if isinstance(v, list) and len(v) == 2 and isinstance(v[0], str)]
+    imgs = [n["inputs"]["image"] for n in gnew.values() if n["class_type"] == "LoadImage"]
+    ck(not dangling and reach == set(gnew) and len(gnew) == len(gbase) + 1
+       and all(os.path.isfile(os.path.join(COMFY, "input", i.replace("/", os.sep))) for i in imgs)
+       and not any("cfg" in k.lower() for k in json.dumps(gnew).split('"'))
+       and gnew["c0"]["inputs"]["width"] % 32 == 0 and gnew["c0"]["inputs"]["height"] % 32 == 0
+       and gnew["save"]["inputs"]["filename_prefix"] == "community/%s/%s" % (NOW_ID, NOW_ID),
+       "10 INTEGRITY 0 dangling, all %d nodes (base + 1 LoRA) feed save, LoadImage files exist, 0 cfg keys, "
+       "canvas on the 32 grid, filename_prefix names the NEW id" % len(gnew))
+    # 11 ARM, two states: ARMED (before the render) / RENDERED-WITH-PROOF (after the GPU window)
+    rid_free = not (ctx["rendered"]
+                    or os.path.isfile(os.path.join(W, "p7", "jobs", NOW_ID + ".result.json"))
+                    or glob.glob(os.path.join(COMFY, "output", "community", NOW_ID, "*")))
+    byte_ok = ctx["run_api_bytes"] == open(NOW_G, "rb").read()
+    id_ok = (req["id"] == NOW_ID and [j["id"] for j in req["jobs"]] == [NOW_ID]
+             and req["frames"] == FRAMES and req["minutes"] == NOW_MINUTES
+             and all(j["minutes"] == NOW_MINUTES for j in req["jobs"])
+             and set(req["jobs"][0]) == {"id", "kind", "frames", "frames_tol", "minutes", "note"}
+             and req["api"].replace("\\", "/") == NOW_G.replace("\\", "/")
+             and req["run_dir"].replace("\\", "/") == os.path.join(W, "runs", NOW_ID).replace("\\", "/")
+             and all(c in req["note"] for c in [LORA_FILE, NOW_ID])
+             and not any(w in req["note"].lower() for w in ("best", "winner", "ranking", "picks")))
+    if ctx["rendered"]:
+        obj_, pr = ctx["obj"], ctx["probe"]
+        a = (obj_ or {}).get("attempts", [{}])[0]
+        proof = (obj_ and obj_.get("ok") is True and a.get("tag") == NOW_ID and a.get("frames") == FRAMES
+                 and a.get("audio") is True and a.get("fps") == "24/1" and (a.get("w"), a.get("h")) == CANVAS
+                 and not a.get("blackfreeze") and pr and pr["frames"] == FRAMES and pr["audio"]
+                 and pr["fps"] == "24/1" and (pr["w"], pr["h"]) == CANVAS)
+        ck(id_ok and byte_ok and proof and led["used_min"] < led["cap_min"] and led["jobs"] + 1 <= led["job_cap"],
+           "11 ARM-RENDERED graph == run-dir request bytes, JOB_REQUEST names the new id in the top level AND "
+           "jobs[] (6 keys), render proof agrees (%s), ledger %s < %s min, %s + 1 <= %s jobs"
+           % (json.dumps(pr), led["used_min"], led["cap_min"], led["jobs"], led["job_cap"]))
+    else:
+        ck(id_ok and byte_ok and rid_free and led["used_min"] + NOW_MINUTES <= led["cap_min"]
+           and led["jobs"] + 1 <= led["job_cap"],
+           "11 ARM graph == run-dir request bytes, JOB_REQUEST names the new id in the top level AND jobs[] "
+           "(6 keys), id free of mp4/result/output, ledger %s + %d <= %s min and %s + 1 <= %s jobs (stamp %s)"
+           % (led["used_min"], NOW_MINUTES, led["cap_min"], led["jobs"], led["job_cap"], led.get("updated")))
+    # 12 BYTE FORMAT: the base file reproduces, and the new graph is written the same way
+    ind = dumps_like(ctx["base_graph_bytes"], gbase)
+    ck(ind is not None and ctx["new_graph_bytes"] == json.dumps(gnew, indent=ind, ensure_ascii=False)
+       .replace("\n", "\r\n").encode("utf-8") and not ctx["new_graph_bytes"].endswith(b"\n"),
+       "12 BYTEFORMAT the rendered clip-11 reproduces at indent=%s CRLF no trailing newline, and the new graph "
+       "is written the same way" % ind)
+    # 13 STALE SHEET: no before/after sheet predates the graph (the sheet is written only after a render)
+    sheet = ctx["sheet_path"]
+    ck(not os.path.isfile(sheet) or os.path.getmtime(sheet) > os.path.getmtime(NOW_G),
+       "13 STALE-SHEET no frame-0 sheet for the new id predates the graph")
+    print("CHECKS %s FAIL %s" % (label, json.dumps(fails)) if fails else
+          "CHECKS %s ALL %d PASS" % (label, 13))
+    return list(fails)
+
+
+def now_selftest(gbase):
+    """Seed the OLD value of each switch, the missing LoRA, a non-schema key, a prompt drift and a renumbered id
+    into clones of the real artifact; every detector must fire on its own seed and 0 on the real artifact."""
+    real = json.loads(open(NOW_G, encoding="utf-8").read())
+    base_ctx = now_ctx()
+    stale = os.path.join(AUD, "now_seed_stale_sheet.png")
+    os.makedirs(AUD, exist_ok=True)
+    open(stale, "wb").write(b"png-not")
+    os.utime(stale, (0, 0))
+
+    def rewire_base(g):
+        g.pop("lora_antiburn", None)
+        for k in ("s1_guide", "s1_sched"):
+            g[k]["inputs"]["model"] = ["m_shift", 0]
+        g["save"]["inputs"]["filename_prefix"] = "community/%s/%s" % (NEW_ID, NEW_ID)
+        for k in ("s0_sched", "s1_sched"):
+            g[k]["inputs"]["steps"] = 8
+        for k in ("c0", "c1"):
+            g[k]["inputs"]["ref_image_size"] = "max"
+        g["m_attn"]["inputs"]["attention"] = "comfy kitchen attention"
+        return g
+
+    SEEDS = [
+        ("N1 steps-back-to-8 (the clip-11 value)",
+         lambda g, c: [g[k]["inputs"].__setitem__("steps", 8) for k in ("s0_sched", "s1_sched")]),
+        ("N2 steps-20 (outside this checkpoint's published 8-12 band)",
+         lambda g, c: [g[k]["inputs"].__setitem__("steps", 20) for k in ("s0_sched", "s1_sched")]),
+        ("N3 scheduler-karras", lambda g, c: g["s0_sched"]["inputs"].__setitem__("scheduler", "karras")),
+        ("N4 ref_image_size-back-to-max (the clip-11 value)",
+         lambda g, c: [g[k]["inputs"].__setitem__("ref_image_size", "max") for k in ("c0", "c1")]),
+        ("N5 ref_image_size-only-on-c0 (half a switch)",
+         lambda g, c: g["c1"]["inputs"].__setitem__("ref_image_size", "max")),
+        ("N6 ref_image_size-value-not-offered-by-the-node",
+         lambda g, c: [g[k]["inputs"].__setitem__("ref_image_size", "largest") for k in ("c0", "c1")]),
+        ("N7 attention-back-to-comfy-kitchen (the clip-11 value)",
+         lambda g, c: g["m_attn"]["inputs"].__setitem__("attention", "comfy kitchen attention")),
+        ("N8 attention-value-not-offered-by-the-node",
+         lambda g, c: g["m_attn"]["inputs"].__setitem__("attention", "sla attention")),
+        ("N9 lora-dropped (clip-11 wiring, the s1 chain straight off m_shift)",
+         lambda g, c: (g.pop("lora_antiburn"), [g[k]["inputs"].__setitem__("model", ["m_shift", 0])
+                                               for k in ("s1_guide", "s1_sched")])),
+        ("N10 lora-strength-1.0 (the card says start at 0.5)",
+         lambda g, c: g["lora_antiburn"]["inputs"].__setitem__("strength_model", 1.0)),
+        ("N11 lora-on-the-first-clip-path-too ('Don't use it on clip 1')",
+         lambda g, c: [g[k]["inputs"].__setitem__("model", ["lora_antiburn", 0])
+                       for k in ("s0_guide", "s0_sched")]),
+        ("N12 lora-file-not-the-published-one (a real installed lora, not the antiburn file)",
+         lambda g, c: g["lora_antiburn"]["inputs"].__setitem__("lora_name", "PenisV2_minimax-h3_epoch60.safetensors")),
+        ("N13 lora-class-LoraLoader (needs an unpublished strength_clip)",
+         lambda g, c: g["lora_antiburn"].__setitem__("class_type", "LoraLoader")),
+        ("N14 lora-feeds-only-the-sampler (the guider stays on the un-LoRA'd model)",
+         lambda g, c: g["s1_guide"]["inputs"].__setitem__("model", ["m_shift", 0])),
+        ("N15 topk-key-added-to-m_vsa (not a published key of this build)",
+         lambda g, c: g["m_vsa"]["inputs"].__setitem__("topk", 0.15)),
+        ("N16 required-input-dropped (LoraLoaderModelOnly.strength_model)",
+         lambda g, c: g["lora_antiburn"]["inputs"].pop("strength_model")),
+        ("N17 class-not-in-the-object_info-dump",
+         lambda g, c: g["lora_antiburn"].__setitem__("class_type", "LoraLoaderModelOnlyV2")),
+        ("N18 prompt-char-drift (the rewrite belongs to the naming item)",
+         lambda g, c: g["c0"]["inputs"].__setitem__("prompt", g["c0"]["inputs"]["prompt"] + "x")),
+        ("N19 seed-changed (breaks the before/after A/B)",
+         lambda g, c: g["noise"]["inputs"].__setitem__("noise_seed", 51150999)),
+        ("N20 anchor-dropped (the shipped HC15 wiring: s0_guide fed by c0)",
+         lambda g, c: (g.pop("g0"), g["s0_guide"]["inputs"].__setitem__("conditioning", ["c0", 0]))),
+        ("N21 canvas-moved", lambda g, c: g["c0"]["inputs"].__setitem__("width", 1376)),
+        ("N22 shift-moved", lambda g, c: g["m_shift"]["inputs"].__setitem__("shift_video", 12.0)),
+        ("N23 window-overlap-23 (breaks the 17k+5 grid)",
+         lambda g, c: g["win1"]["inputs"].__setitem__("overlap_frames", 23)),
+        ("N24 id-renumbered (prefix back to the rendered clip-11 folder)",
+         lambda g, c: g["save"]["inputs"].__setitem__(
+             "filename_prefix", "community/%s/%s" % (NEW_ID, NEW_ID))),
+        ("N25 unallowed-key-moves (m_vsa.min_tokens off the published default)",
+         lambda g, c: g["m_vsa"]["inputs"].__setitem__("min_tokens", 4096)),
+        ("N26 handoff-jobs-names-the-RENDERED-clip",
+         lambda g, c: c["req"].__setitem__("jobs", [{"id": NEW_ID, "kind": "graph", "frames": FRAMES,
+                                                    "frames_tol": 33, "minutes": NOW_MINUTES, "note": "x"}])),
+        ("N27 handoff-jobs-keyset-drift (a 7th key sneaks in)",
+         lambda g, c: c["req"]["jobs"][0].__setitem__("graph", NOW_G.replace("\\", "/"))),
+        ("N28 handoff-top-level-id-is-the-old-clip",
+         lambda g, c: c["req"].__setitem__("id", NEW_ID)),
+        ("N29 ledger-would-blow-the-budget",
+         lambda g, c: c["ledger"].__setitem__("used_min", c["ledger"]["cap_min"] - 1)),
+        ("N30 handoff-minutes-90 (blows the job cap accounting)",
+         lambda g, c: (c["req"].__setitem__("minutes", 90),
+                       c["req"]["jobs"][0].__setitem__("minutes", 90))),
+        ("N31 run-dir-request-bytes-drift-from-the-graph",
+         lambda g, c: c.__setitem__("run_api_bytes", b"{drifted}")),
+        ("N32 graph-file-bytes-drift-from-the-graph-object",
+         lambda g, c: g["c1"]["inputs"].__setitem__("prompt", g["c1"]["inputs"]["prompt"] + " "), True),
+        ("N33 cfg-key-injected (AGENTS.md: this graph has no cfg key at all)",
+         lambda g, c: g["s1_sched"]["inputs"].__setitem__("cfg", 1.0)),
+        ("N34 LoadImage-file-not-in-ComfyUI-input", lambda g, c: g["img2"]["inputs"].__setitem__("image", "nope/x.png")),
+        ("N35 frame-0-sheet-older-than-the-graph", lambda g, c: c.__setitem__("sheet_path", stale)),
+        ("N37 prompt-passes-a-minor-token (the fiction gate must deny it)",
+         lambda g, c: g["c0"]["inputs"].__setitem__(
+             "prompt", g["c0"]["inputs"]["prompt"] + " The scene cuts to a teenage girl in a classroom.")),
+        ("N36 full-clip-11-clone (every switch reverted = the before artifact)",
+         lambda g, c: rewire_base(g)),
+    ]
+    fired, silent = [], []
+    for seed in SEEDS:
+        name, gfn = seed[0], seed[1]
+        keep_bytes = len(seed) > 2
+        g = copy.deepcopy(real)
+        c = copy.deepcopy(base_ctx)
+        gfn(g, c)
+        if not keep_bytes:
+            c["new_graph_bytes"] = json.dumps(g, indent=2, ensure_ascii=False).replace("\n", "\r\n").encode("utf-8")
+        f = now_check(json.loads(json.dumps(gbase)), g, label="seed:" + name, ctx=c)
+        (fired if f else silent).append(name)
+    real_fails = now_check(gbase, real, label="real", ctx=base_ctx)
+    print("NOW-SELFTEST seeds=%d fired=%d silent=%d real_problems=%d"
+          % (len(SEEDS), len(fired), len(silent), len(real_fails)))
+    if silent:
+        print("SILENT_SEEDS " + json.dumps(silent))
+    print("NOW-SELFTEST-CLEAN" if not silent and not real_fails else "NOW-SELFTEST-DIRTY")
+    return 0 if (not silent and not real_fails) else 1
+
+
+def now_sheet():
+    """Labelled frame-0 before/after sheet: 51150011 (before) vs 51150021 (after). ffmpeg + PIL, no vision judge."""
+    mp4 = os.path.join(W, "runs", NOW_ID, NOW_ID + ".mp4")
+    if not os.path.isfile(mp4):
+        print("SHEET_BLOCKED no render yet: " + mp4 + " (a Ralph pass never queues)")
+        return 1
+    from PIL import Image, ImageDraw
+    g = json.load(open(NOW_G, encoding="utf-8"))
+    w, h = g["c0"]["inputs"]["width"], g["c0"]["inputs"]["height"]
+    still = os.path.join(COMFY, "input", g["img"]["inputs"]["image"].replace("/", os.sep))
+    os.makedirs(AUD, exist_ok=True)
+    tiles = []
+    start = fit(still, w, h, os.path.join(AUD, "now_sheet_start.png"), "cover")
+    for label, src in (("start still " + g["img"]["inputs"]["image"], start),
+                       ("BEFORE 51150011 frame 0 (steps 8, ref max, comfy kitchen attention, no LoRA)",
+                        extract(os.path.join(W, "runs", NEW_ID, NEW_ID + ".mp4"), 0,
+                                os.path.join(AUD, "now_sheet_before.png"))),
+                       ("AFTER 51150021 frame 0 (steps 12, ref match, pytorch attention, antiburn 0.5 on clip 2)",
+                        extract(mp4, 0, os.path.join(AUD, "now_sheet_after.png")))):
+        s, p = ssim_psnr(src, start)
+        tiles.append((label + "  SSIM %.3f PSNR %.2f" % (s, p), src))
+    W2, H2 = w, h + 34
+    canvas = Image.new("RGB", (W2 * 3, H2), "white")
+    for i, (lab, p) in enumerate(tiles):
+        canvas.paste(Image.open(p).convert("RGB").resize((w, h)), (i * W2, 34))
+        ImageDraw.Draw(canvas).text((i * W2 + 6, 8), lab, fill="black")
+    out = os.path.join(W, "runs", NOW_ID, NOW_ID + "_frame0_sheet.png")
+    canvas.save(out)
+    print("SHEET " + out + " " + "x".join(str(t) for t in canvas.size))
+    print("KEEP is Derrick's alone; this sheet carries no verdict.")
+    return 0
+
+
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "--check"
     load_clips()
@@ -694,7 +1200,28 @@ def main():
         return selftest(gbase)
     if mode == "--sheet":
         return sheet()
-    print("usage: --metrics | --build | --check | --selftest | --sheet")
+    g11 = jload(NOW_BASE_G)
+    if mode == "--now-build":
+        ind = dumps_like(open(NOW_BASE_G, "rb").read(), g11)
+        if ind is None:
+            print("BUILD_BLOCKED clip-11 byte format (indent) not reproducible")
+            return 1
+        gnew = transform_now(g11)
+        data = write_graph(NOW_G, gnew, ind)
+        req = now_arm(gnew)
+        print("BUILT %s nodes=%d bytes=%d sha256=%s" % (NOW_G, len(gnew), len(data), sha(NOW_G)))
+        print("ARMED %s + %s id=%s frames=%d minutes=%d"
+              % (os.path.join(W, "runs", NOW_ID, "request.api.json"),
+                 os.path.join(W, "p7", "JOB_REQUEST.json"), req["id"], req["frames"], req["minutes"]))
+        return 0
+    if mode == "--now-check":
+        return 1 if now_check(g11, jload(NOW_G)) else 0
+    if mode == "--now-selftest":
+        return now_selftest(g11)
+    if mode == "--now-sheet":
+        return now_sheet()
+    print("usage: --metrics | --build | --check | --selftest | --sheet | "
+          "--now-build | --now-check | --now-selftest | --now-sheet")
     return 2
 
 
