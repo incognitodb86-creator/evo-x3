@@ -1,0 +1,87 @@
+{
+  "raw": {
+    "BD002.txt": {
+      "bytes": 2704,
+      "mtime": "2026-10-25T04:35:48",
+      "sha256": "348b35a9df3ed32e372bd38eb0d44ba2e7f7d1db66129bf3634807f52abbe536"
+    },
+    "BD006.txt": {
+      "bytes": 2740,
+      "mtime": "2026-10-25T04:36:05",
+      "sha256": "9ecf270d1044d8516faa10b2073a3862ff970d4b102cd9f8078a4018388e29d9"
+    },
+    "BD013.txt": {
+      "bytes": 2066,
+      "mtime": "2026-10-25T04:36:19",
+      "sha256": "5122a69dc3654cd8cd3c225acde3d625d024ac8d76cd5982a7cf3762c8918006"
+    },
+    "GI046.txt": {
+      "bytes": 1407,
+      "mtime": "2026-10-25T04:34:46",
+      "sha256": "8bc946031f0ab543765eb88a0848fd652405ebd29f3b8dcf373c7a181b39115d"
+    },
+    "GI046_2.txt": {
+      "bytes": 1226,
+      "mtime": "2026-10-25T04:37:52",
+      "sha256": "b711da16d2acd6ce75ba32f489c0c4d8b573009cf31d94bb46034ad0b7b84a98"
+    },
+    "GI063.txt": {
+      "bytes": 885,
+      "mtime": "2026-10-25T04:36:31",
+      "sha256": "f113852d84427b9a77111d1a0fa43eb2c74c5a6aac942a7bf1c4038754e04a77"
+    },
+    "GI063_2.txt": {
+      "bytes": 1337,
+      "mtime": "2026-10-25T04:38:06",
+      "sha256": "5db4267b7e01a7eb7c1205a6c298099c904d83e0e958b6af5f69679d27a11e22"
+    },
+    "GI072.txt": {
+      "bytes": 914,
+      "mtime": "2026-10-25T04:36:41",
+      "sha256": "9b8baf45d6cf557cea8c4164e9471c79b6547aa0974700c72e057686e0ea6072"
+    },
+    "GI072_2.txt": {
+      "bytes": 1337,
+      "mtime": "2026-10-25T04:38:18",
+      "sha256": "3ba2fc85ce71e20d8c9dd0b69fbd677429aaa813e4e5421684e51296591c3736"
+    }
+  },
+  "stills": {
+    "BD002": {
+      "bytes": 584054,
+      "mtime": "2026-10-17T22:10:46",
+      "sha256": "8209bfb95593553c0d430da1659dd3435603adf99b84fec31692d030855b7cb6",
+      "source_path": "C:/Users/derek/5slock/approved_characters/FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg"
+    },
+    "BD006": {
+      "bytes": 689369,
+      "mtime": "2026-10-17T22:10:47",
+      "sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4",
+      "source_path": "C:/Users/derek/5slock/approved_characters/FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD006.jpg"
+    },
+    "BD013": {
+      "bytes": 604111,
+      "mtime": "2026-10-17T22:10:46",
+      "sha256": "fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce",
+      "source_path": "C:/Users/derek/5slock/approved_characters/FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD013.jpg"
+    },
+    "GI046": {
+      "bytes": 567489,
+      "mtime": "2026-10-17T22:08:42",
+      "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+      "source_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI046.jpg"
+    },
+    "GI063": {
+      "bytes": 531083,
+      "mtime": "2026-10-17T22:08:36",
+      "sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+      "source_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI063.jpg"
+    },
+    "GI072": {
+      "bytes": 519486,
+      "mtime": "2026-10-19T10:59:19",
+      "sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588",
+      "source_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI072.jpg"
+    }
+  }
+}

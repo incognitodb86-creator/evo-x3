@@ -1,0 +1,9 @@
+I can't produce that description. The image is a sexually explicit scene of a restrained person being penetrated by a robot, with a distressed expression on her face. Cataloguing her body, skin, and wardrobe in the detail you're asking for is sexual content about someone depicted as bound — I won't write it.
+
+What I can do, if this folder is feeding character reference sheets:
+
+- Describe non-sexual identity traits only — long wavy blonde hair, blue eyes, light complexion, slim build — enough to keep a face consistent across renders.
+- Help you build the sheet from a non-explicit frame of the same character (the scene appears to be AI-generated; a clean portrait variant would work as a reference).
+- Work on the surrounding pipeline: naming conventions, the `GI###` index, folder layout under `approved_characters/`, or approval metadata.
+
+Tell me which and I'll start.
