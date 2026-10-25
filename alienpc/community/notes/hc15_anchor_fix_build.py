@@ -76,6 +76,7 @@ OLD_ID = "ali163_hc15_bd002_s51150001"
 NEW_ID = "ali163_hc15_bd002_s51150011"
 SEED = 51150001
 FRAMES = 362
+CANVAS = (1344, 768)   # the clip's canvas, read off clip 1's graph (c0.width/height); the render proof must agree
 BASE_G = os.path.join(W, "p7", "graphs", OLD_ID + ".api.json")
 NEW_G = os.path.join(W, "p7", "graphs", NEW_ID + ".api.json")
 LEDGER = r"C:\Users\derek\5slock\ralph-community\logs\p7_budget.json"
@@ -134,6 +135,12 @@ def probe(mp4):
     d = json.loads(out.stdout)
     v = [s for s in d["streams"] if s.get("codec_type") == "video"][0]
     a = [s for s in d["streams"] if s.get("codec_type") == "audio"]
+    if not a:
+        # -select_streams v:0 (needed for an honest nb_read_packets on the video) hides every other stream, so
+        # the audio presence is read from an unfiltered pass. AGENTS.md: "v:0 is required" - for the CSV fields.
+        a2 = subprocess.run([FFPROBE, "-v", "error", "-show_streams", "-of", "json", mp4],
+                            capture_output=True, text=True)
+        a = [s for s in json.loads(a2.stdout).get("streams", []) if s.get("codec_type") == "audio"]
     return dict(frames=int(v["nb_read_packets"]), w=int(v["width"]), h=int(v["height"]),
                 fps=v["r_frame_rate"], dur=float(v["duration"]), audio=bool(a))
 
@@ -366,12 +373,18 @@ def ctx_default():
     reachable (L10: a green check that cannot fail is worthless)."""
     am = os.path.join(W, "notes", "hc15_start_fidelity_audit.md")
     mj = os.path.join(AUD, "metrics.json")
+    mp4 = os.path.join(W, "runs", NEW_ID, NEW_ID + ".mp4")
+    rendered = os.path.isfile(mp4)
     return dict(req=jload(os.path.join(W, "p7", "JOB_REQUEST.json")),
                 ledger=jload(LEDGER),
                 audit_txt=open(am, encoding="utf-8").read() if os.path.isfile(am) else "",
                 metrics_rows=jload(mj)["rows"] if os.path.isfile(mj) else [],
                 new_graph_bytes=open(NEW_G, "rb").read(),
-                sheet_path=os.path.join(W, "runs", NEW_ID, NEW_ID + "_frame0_sheet.png"))
+                sheet_path=os.path.join(W, "runs", NEW_ID, NEW_ID + "_frame0_sheet.png"),
+                rendered=rendered,
+                obj=(jload(os.path.join(W, "runs", NEW_ID, "objective.json")) if rendered
+                     and os.path.isfile(os.path.join(W, "runs", NEW_ID, "objective.json")) else None),
+                probe=(probe(mp4) if rendered else None))
 
 
 def do_check(gbase, gnew, label="real", ctx=None):
@@ -456,21 +469,38 @@ def do_check(gbase, gnew, label="real", ctx=None):
        and gnew["c0"]["inputs"]["width"] % 32 == 0 and gnew["c0"]["inputs"]["height"] % 32 == 0,
        "8 INTEGRITY 0 dangling links, every node feeds save, LoadImage files exist in ComfyUI/input, 0 cfg keys, "
        "canvas on the 32 grid")
-    # 9 ARM + budget
+    # 9 ARM, two valid states: ARMED (before the render) or RENDERED-WITH-PROOF (after it).
+    # The pre-render state asserts the id is free; after a GPU window renders, the same detector asserts the
+    # render's own proof, so the receipt does not go red the moment the item is delivered.
     req = ctx["req"]
     led = ctx["ledger"]
-    rid_free = not (os.path.isfile(os.path.join(W, "runs", NEW_ID, NEW_ID + ".mp4"))
+    rid_free = not (ctx["rendered"]
                     or os.path.isfile(os.path.join(W, "p7", "jobs", NEW_ID + ".result.json"))
                     or glob.glob(os.path.join(COMFY, "output", "community", NEW_ID, "*")))
     byte_ok = os.path.isfile(os.path.join(W, "runs", NEW_ID, "request.api.json")) and \
         open(os.path.join(W, "runs", NEW_ID, "request.api.json"), "rb").read() == open(NEW_G, "rb").read()
-    ck(req["id"] == NEW_ID and [j["id"] for j in req["jobs"]] == [NEW_ID] and req["frames"] == FRAMES
-       and byte_ok and rid_free and req["api"].replace("\\", "/") == NEW_G.replace("\\", "/")
-       and req["run_dir"].replace("\\", "/") == os.path.join(W, "runs", NEW_ID).replace("\\", "/")
-       and led["used_min"] + MINUTES <= led["cap_min"] and led["jobs"] + 1 <= led["job_cap"],
-       "9 ARM graph == run-dir request byte-identical, JOB_REQUEST top level AND jobs[] = the new id, id free of "
-       "mp4/result/output, ledger %s + %d <= %s min and %s + 1 <= %s jobs"
-       % (led["used_min"], MINUTES, led["cap_min"], led["jobs"], led["job_cap"]))
+    id_ok = (req["id"] == NEW_ID and [j["id"] for j in req["jobs"]] == [NEW_ID] and req["frames"] == FRAMES
+             and req["api"].replace("\\", "/") == NEW_G.replace("\\", "/")
+             and req["run_dir"].replace("\\", "/") == os.path.join(W, "runs", NEW_ID).replace("\\", "/"))
+    if ctx["rendered"]:
+        obj, pr = ctx["obj"], ctx["probe"]
+        a = (obj or {}).get("attempts", [{}])[0]
+        proof = (obj and obj.get("ok") is True and a.get("tag") == NEW_ID and a.get("frames") == FRAMES
+                 and a.get("audio") is True and a.get("fps") == "24/1"
+                 and (a.get("w"), a.get("h")) == CANVAS and not a.get("blackfreeze")
+                 and pr and pr["frames"] == FRAMES and pr["audio"] and pr["fps"] == "24/1"
+                 and (pr["w"], pr["h"]) == CANVAS)
+        ck(id_ok and byte_ok and proof and led["used_min"] < led["cap_min"] and led["jobs"] + 1 <= led["job_cap"],
+           "9 ARM-RENDERED graph == run-dir request byte-identical, JOB_REQUEST top level AND jobs[] = the id, "
+           "render proof agrees (objective.json ok + ffprobe %s = 1344x768 24/1 %d f audio, 0 blackfreeze), "
+           "ledger %s < %s min and %s + 1 <= %s jobs"
+           % (json.dumps(pr), FRAMES, led["used_min"], led["cap_min"], led["jobs"], led["job_cap"]))
+    else:
+        ck(id_ok and byte_ok and rid_free
+           and led["used_min"] + MINUTES <= led["cap_min"] and led["jobs"] + 1 <= led["job_cap"],
+           "9 ARM graph == run-dir request byte-identical, JOB_REQUEST top level AND jobs[] = the new id, id free of "
+           "mp4/result/output, ledger %s + %d <= %s min and %s + 1 <= %s jobs"
+           % (led["used_min"], MINUTES, led["cap_min"], led["jobs"], led["job_cap"]))
     # 10 AUDIT CITED
     txt = ctx["audit_txt"]
     urls = set(re.findall(r"https?://[^\s)>\]]+", txt))
@@ -480,13 +510,24 @@ def do_check(gbase, gnew, label="real", ctx=None):
        and "hc15_start_fidelity_audit.md" in note,
        "10 AUDIT notes/hc15_start_fidelity_audit.md exists with %d URLs and every switched setting cites one, "
        "and the handoff note names it" % len(urls))
-    # 11 METRICS ON DISK
-    rows = ctx["metrics_rows"]
-    f0 = {r["id"]: r["frames_measured"]["0"]["ssim_cover"] for r in rows}
-    ck(len(rows) == 6 and all(v is not None and v < 0.5 for v in f0.values())
-       and max(f0.values()) < min([r["frames_measured"][str(r["frames"] - 1)]["ssim_cover"] for r in rows]) + 0.35,
-       "11 METRICS 6 clip rows on disk, every frame-0 SSIM < 0.5 (the defect the item reports) "
-       f"= {sorted(round(v, 3) for v in f0.values())}")
+    # 11 METRICS ON DISK: the before/after claim, measured. The six BEFORE rows must still show the reported
+    # defect (frame 0 far from the start still) and the AFTER row must show the anchor took (frame 0 lands on
+    # the still, and the start still's own faces are in frame 0 at or above the published identity gate).
+    rows = {r["id"]: r for r in ctx["metrics_rows"]}
+    before = {rid: rows[rid]["frames_measured"]["0"]["ssim_cover"] for rid in rows if rid != NEW_ID}
+    aft = rows.get(NEW_ID, {}).get("frames_measured", {}).get("0", {})
+    acos = [c for c in (aft.get("best_cos") or []) if c is not None]
+    ck(len(rows) == 7 and len(before) == 6
+       and all(v is not None and v < 0.5 for v in before.values())
+       and aft.get("ssim_cover") is not None and aft["ssim_cover"] >= 0.70
+       and aft.get("psnr_cover") is not None and aft["psnr_cover"] >= 20.0
+       and len(acos) >= 2 and min(acos) >= GATE_FLOOR
+       and aft["ssim_cover"] > max(before.values()),
+       "11 METRICS 6 BEFORE rows show the defect (frame-0 SSIM %s, all < 0.5) and the AFTER row frame 0 = "
+       "SSIM %s PSNR %s with the start-still faces at cos %s (gate %s) > the best BEFORE frame 0 %s"
+       % (sorted(round(v, 3) for v in before.values()), round(aft.get("ssim_cover") or -1, 4),
+          round(aft.get("psnr_cover") or -1, 2), sorted(round(c, 3) for c in acos), GATE_FLOOR,
+          round(max(before.values()) if before else -1, 4)))
     # 12 BYTE FORMAT
     base_bytes = open(BASE_G, "rb").read()
     ind = dumps_like(base_bytes, gbase)
@@ -554,6 +595,9 @@ def selftest(gbase):
          lambda g, c: c["req"].__setitem__("run_dir", os.path.join(W, "runs", OLD_ID).replace("\\", "/"))),
         ("F3 ledger-would-blow-the-budget", lambda g, c: c["ledger"].__setitem__("used_min", c["ledger"]["cap_min"])),
         ("F4 handoff-frames-363 (not the clip shape)", lambda g, c: c["req"].__setitem__("frames", 363)),
+        ("F5 rendered-clip-objective-says-243-frames", lambda g, c: c["obj"]["attempts"][0].__setitem__("frames", 243)),
+        ("F6 ffprobe-frames-disagree-with-the-objective", lambda g, c: c["probe"].__setitem__("frames", 243)),
+        ("F7 render-marked-not-ok", lambda g, c: c["obj"].__setitem__("ok", False)),
         ("G1 audit-file-missing", lambda g, c: c.__setitem__("audit_txt", "")),
         ("G2 audit-quotes-no-settings-URL", lambda g, c: c.__setitem__("audit_txt", c["audit_txt"][:200])),
         ("G3 handoff-note-drops-the-sampler-citation",
@@ -561,6 +605,14 @@ def selftest(gbase):
         ("H1 metrics-rows-missing", lambda g, c: c.__setitem__("metrics_rows", [])),
         ("H2 metrics-says-a-clip-already-starts-close",
          lambda g, c: c["metrics_rows"][0]["frames_measured"]["0"].__setitem__("ssim_cover", 0.9)),
+        ("H3 after-row-missing (only the six BEFORE clips measured)",
+         lambda g, c: c.__setitem__("metrics_rows", [r for r in c["metrics_rows"] if r["id"] != NEW_ID])),
+        ("H4 after-anchor-did-not-take (frame 0 SSIM 0.35, PSNR 6.8)",
+         lambda g, c: [r["frames_measured"]["0"].update(ssim_cover=0.35, psnr_cover=6.8)
+                       for r in c["metrics_rows"] if r["id"] == NEW_ID]),
+        ("H5 after-frame-0-faces-are-not-the-start-still-faces (cos 0.31)",
+         lambda g, c: [r["frames_measured"]["0"].__setitem__("best_cos", [0.31, 0.2])
+                       for r in c["metrics_rows"] if r["id"] == NEW_ID]),
         ("I1 graph-file-bytes-drift-from-the-graph-object", lambda g, c: g["c1"]["inputs"].__setitem__("prompt", g["c1"]["inputs"]["prompt"] + " "), True),
         ("J1 frame-0-sheet-older-than-the-graph", lambda g, c: c.__setitem__("sheet_path", stale)),
     ]

@@ -6,7 +6,7 @@ something is wrong", Derrick 2026-10-24 5:49 PM CT). Audited: the six rendered H
 Builder / receipts: `C:/AI/community/notes/hc15_anchor_fix_build.py` (`--metrics --build --check --selftest --sheet`),
 `C:/AI/community/notes/hc15_audit_timing.py`. No GPU was touched by this audit.
 
-## Verdict (three findings, in order of size)
+## Verdict (three findings, in order of size, plus the measured fix)
 
 1. **Nothing pins frame 0.** All six graphs generate with `MiniMaxH3ReferenceToVideo` in all three segments and
    never use a keyframe. `grep` over the six graphs: `first_frame` 0 hits, `last_frame` 0 hits,
@@ -38,6 +38,10 @@ Builder / receipts: `C:/AI/community/notes/hc15_anchor_fix_build.py` (`--metrics
    `notes/web/hc15_tenstrip_readme.txt`, verified sha256 `ba3be667…` against
    `notes/web/agy51_tenstrip_readme.md`). Every extra generated window is also a fresh chance to drift, so the
    3-pass shape multiplies finding 1.
+4. **Delivered, measured, seed-locked (2026-10-24 19:54 CT).** The three switches above, rendered on clip 1 with
+   the same seed 51150001, move frame 0 from SSIM 0.3476 / PSNR 6.74 to **0.9154 / 29.58** and put both
+   start-still faces **0.875 / 0.748** (over the 0.45 gate) where they were 0.217 / 0.328. Finding 1 was the
+   cause. Full evidence, including the 3-tile frame-0 sheet: "Frame-0 before/after" below.
 
 ## Frame 0 vs the start still (measured, `notes/hc15_audit/metrics.json`)
 
@@ -54,8 +58,14 @@ each start-still face against every face detected in the frame, best per source 
 | gi046 | 51150004 | community/hc/GI046.jpg | 0.2928 | 11.63 | 0.2932 | 1 | 0.257 | 0.3164 | 0.3009 |
 | gi063 | 51150005 | community/hc/GI063.jpg | 0.3108 | 11.29 | 0.3166 | **0** | none detected | 0.3043 | 0.2850 |
 | gi072 | 51150006 | community/hc/GI072.jpg | 0.2315 | 8.51 | 0.2292 | 1 | 0.314 / 0.025 | 0.2495 | 0.2474 |
+| **bd002 + anchor** | 51150001 | community/hc/BD002.jpg | **0.9154** | **29.58** | 0.7720 | 2 | **0.875 / 0.748** | 0.5644 | 0.3862 |
 
-Frame 0 is not the closest frame for bd002 (f181 0.3646 > f0), bd006 (f181 0.2440 > f0), bd013 (f181 0.3675,
+The last row is the re-render of the same clip, same seed, with the switch set (`ali163_hc15_bd002_s51150011`):
+frame 0 goes from SSIM 0.3476 / PSNR 6.74 to **0.9154 / 29.58**, and the two start-still faces go from
+0.217 / 0.328 (both under the 0.45 identity gate) to **0.875 / 0.748** (both over it). Frame 0 is now the
+closest frame of the clip, which is what an anchor is supposed to do.
+
+Frame 0 was not the closest frame for bd002 (f181 0.3646 > f0), bd006 (f181 0.2440 > f0), bd013 (f181 0.3675,
 f361 0.3653 > f0) and gi072 (f361 0.2474 > f0). Reproduce:
 `"C:/Program Files/Python312/python.exe" C:/AI/community/notes/hc15_anchor_fix_build.py --metrics`.
 
@@ -98,6 +108,11 @@ Per clip, from `runs/hc15_*/objective.json` + `*.mp4.json` (`notes/hc15_audit/ti
 | gi046 | 362 | 777.1 | 17:40 |
 | gi063 | 362 | 787.5 | 17:54 |
 | gi072 | 362 | 802.5 | 18:08 |
+| bd002 + anchor (2 passes, 8 steps) | 362 | **571.7** | 19:54 |
+
+The 2-pass / 8-step shape measured **571.7 s**, i.e. 181-231 s (24-29 %) faster than the six shipped clips, in
+line with the ~250 s the 3-pass shape costs above the published 2-pass example. Same canvas, same 362 f, same
+audio path, so the saving is the pass count and the 10→8 steps.
 
 Durable ComfyUI-side lines: `[2026-10-24 17:54:11.206] Prompt executed in 00:13:02` and
 `[2026-10-24 18:08:12.679] Prompt executed in 00:13:21` in
@@ -159,18 +174,42 @@ unchanged:
   passes instead of 3.
 
 Receipts: `--check` = 13 named detectors (ANCHOR, SAMPLER, GEOMETRY, UNCHANGED, SCOPE, SCHEMA, GATE, INTEGRITY,
-ARM, AUDIT-CITED, METRICS, BYTEFORMAT, STALE-SHEET) and `--selftest` = 32 seeded faults, each of which must
-fire a named detector and 0 on the real artifact. The handoff for the render itself is
+ARM, AUDIT-CITED, METRICS, BYTEFORMAT, STALE-SHEET) and `--selftest` = 38 seeded faults, each of which must
+fire a named detector and 0 on the real artifact. Measured 2026-10-24 20:20 CT:
+`CHECKS real ALL 13 PASS` / `SELFTEST seeds=38 fired=38 silent=0 real_problems=0`.
+ARM and METRICS have two states on purpose: before the render they assert the arm is submittable and the
+defect is measured; after it they assert the render's own proof (`objective.json ok` + `ffprobe` agreement on
+362 f / 1344x768 / 24 fps / audio, 0 blackfreeze) and the measured frame-0 improvement. A receipt that went
+red the moment the item was delivered would be worthless.
+The handoff for the render itself is
 `C:/AI/community/p7/JOB_REQUEST.json` (id `ali163_hc15_bd002_s51150011`, frames 362, 15 min; ledger
 `C:/Users/derek/5slock/ralph-community/logs/p7_budget.json` = 472.9/615 min, 38/45 jobs, so the clip fits).
 
-## Frame-0 before/after (the render the item asks for)
+## Frame-0 before/after (the render the item asks for) — delivered
 
-Not run: a Ralph pass never queues (`PROMPT.md`, `AGENTS.md`: the GPU is off-limits in-loop; llama-swap
-unload kills this agent). `notes/hc15_anchor_fix_build.py --sheet` builds the labelled 3-tile frame-0 sheet
-(start still / BEFORE clip-1 frame 0 / AFTER frame 0, each with SSIM+PSNR vs the start still) with ffmpeg+PIL
-only, refuses to run until `runs/ali163_hc15_bd002_s51150011/ali163_hc15_bd002_s51150011.mp4` exists, and
-prints that KEEP is Derrick's alone.
+The Ralph pass built the arm and stopped; a GPU window rendered it (a Ralph pass never queues:
+`PROMPT.md`, `AGENTS.md`). Evidence on disk:
+
+- clip: `C:/AI/community/runs/ali163_hc15_bd002_s51150011/ali163_hc15_bd002_s51150011.mp4` — 362 f,
+  1344x768, 24/1, duration 15.083333, 6,145,778 B, audio stream = `aac`, `objective.json ok=true`,
+  `blackfreeze=[]`, wall 571.7 s, finished 19:54:29 CT, sha256
+  `31fdc8fcfb1e6594c68d28607a0c49216e1610b9cb7fd3766aa4b7d5476a17b2`.
+- arm bytes: `runs/ali163_hc15_bd002_s51150011/request.api.json` is byte-identical to
+  `p7/graphs/ali163_hc15_bd002_s51150011.api.json` (18,235 B, sha256
+  `8a57ebbf456b6f9d74ad1ca2424076041e8ad0c524d15f7f8a7c9a126a57e769`), so what rendered is what the builder
+  wrote.
+- frame-0 sheet: `runs/ali163_hc15_bd002_s51150011/ali163_hc15_bd002_s51150011_frame0_sheet.png`
+  (2,484,529 B, sha256 `71625c337c64b64b1dbffd1a7bb731d99fe891bff67a452bb6d2bfa0eac0b98e`) — three labelled tiles: start still, BEFORE (clip 1 frame 0, euler/10, 124 f ×3, no anchor)
+  SSIM 0.3476 / PSNR 6.74, AFTER (frame 0 of this clip, `AddGuide frame_idx 0`, res_multistep/8, 243+119 f)
+  SSIM 0.9154 / PSNR 29.58. Built by `notes/hc15_anchor_fix_build.py --sheet`, ffmpeg + PIL only: no vision
+  judge, and KEEP is Derrick's alone. Per-second contact sheet from the render tool:
+  `runs/ali163_hc15_bd002_s51150011/ali163_hc15_bd002_s51150011_stills_contact.png`. The sheet and the mp4 live
+  in `runs/`, which `.gitignore` ignores, so the durable record is these hashes + `notes/hc15_audit/metrics.json`.
+- seed 51150001 unchanged, so the pair is a seed-locked A/B on exactly the three switches.
+
+Not stamped: the GPU window did not add this clip to the ledger (`logs/p7_budget.json` still 472.9/615 min,
+38/45 jobs, `updated 2026-10-23T18:53:47`), and there is no `p7/jobs/ali163_hc15_bd002_s51150011.result.json`.
+Reported in `notes/needs_derrick.md`, not fixed: the ledger is the loop's budget gate.
 
 ## Limits of this audit (read before acting on the numbers)
 
@@ -179,8 +218,11 @@ numbers as a relative signal across the six clips and across frames of one clip,
 "similarity to the picture". ArcFace cosine on a 10-step 15 s generation is an identity signal, not a
 photometric one. No human or vision-model judge looked at a frame; there is no vision judge in this loop
 (`AGENTS.md` hard line). The published res_multistep/6-8 setting is the card author's go-to for the distilled
-model, not a ComfyUI mandate; the anchor mechanism is documented behaviour, and its exact latent-space effect
-at frame 0 has not been measured on this box — that is exactly what the re-render measures. `last_frame`
+model, not a ComfyUI mandate. The anchor mechanism's latent-space effect at frame 0 is now measured on this
+box, on one clip, seed-locked: SSIM 0.3476 → 0.9154, both start-still faces 0.217/0.328 → 0.875/0.748. That is
+n=1: it says the switch set closes the start gap on bd002, not that it fixes the framing of the pair clips, and
+the anchor also changes framing (the 3:2 still is stretched to the 16:9 canvas at 0.772 SSIM stretch, so
+`first_frame`-style stretch, not `last_frame` center-crop, is what the graph lands). `last_frame`
 center-crops, `first_frame` stretches
 (<https://docs.comfy.org/tutorials/video/minimax/minimax-h3-native.md>), so a 3:2 still on a 16:9 canvas
 changes framing under the anchor; frame 0 will land close to the still, and framing for the pair clips is the
