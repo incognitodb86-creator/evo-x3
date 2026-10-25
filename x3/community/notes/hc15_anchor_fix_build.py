@@ -68,8 +68,10 @@ import copy
 import datetime
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 
 sys.path.insert(0, r"C:\AI\community\scripts")
 from comm import guard_ok  # noqa: E402  (the fiction gate; the only gate allowed to touch a graph)
@@ -1704,12 +1706,16 @@ def ab_check(ctx=None, label="real"):
 def ab_selftest():
     """Seed each fault into an in-memory clone of the measured artifacts (ids, a graph, a metric, a cosine, a
     meta tile, the doc text, the source slice, the tracked set); every detector must fire on its own seed and the
-    real tree must stay clean. No GPU, no queue, nothing written outside notes/hc15_audit ab_seed_* files."""
+    real tree must stay clean. No GPU, no queue, and NOTHING lands in the repo: 0.8 measured 20 ab_seed_*.json
+    seed files left in notes/hc15_audit - the metrics + contact-sheet surface Derrick reads - so every seed file
+    now goes into a temp dir that is removed before this returns.
+    """
     real = ab_ctx()
     if ab_check(real, label="real"):
         print("AB_SELFTEST the real tree is not clean - fix that first")
         return 1
     fired, silent, real_problem = [], [], False
+    tmp = tempfile.mkdtemp(prefix="hc15_ab_selftest_")   # 0.8: probe output never enters the tree
     txt0 = real["doc_text"]
     base_json = json.loads(json.dumps(real["jdoc"]))
 
@@ -1748,7 +1754,7 @@ def ab_selftest():
         ("9 sheet: a label set that names only one id", 9,
          lambda c: c["meta"].__setitem__("labels", [l.replace(NOW_ID, "clip") for l in c["meta"]["labels"]])),
         ("9 sheet: a label band with no printed text", 9,
-         lambda c: c.__setitem__("sheet_path", os.path.join(AUD, "ab_seed_blank_sheet.png"))),
+         lambda c: c.__setitem__("sheet_path", os.path.join(tmp, "ab_seed_blank_sheet.png"))),
         ("10 receipt: the doc claims the stalled render reported ok=True", 10,
          lambda c: c.__setitem__("doc_text", txt0.replace("ok=None, attempts=0", "ok=True, attempts=1 ok=True")
                                  .replace("NOT re-rendered", "re-rendered"))),
@@ -1770,17 +1776,19 @@ def ab_selftest():
         ("15 durable: the meta sha no longer equals the sheet bytes", 15,
          lambda c: c["meta"].__setitem__("sha", "0" * 64)),
     ]
-    os.makedirs(AUD, exist_ok=True)
     from PIL import Image
     Image.new("RGB", (AB_TILE[0] * AB_TILE[3], AB_TILE[4] + (AB_TILE[1] + AB_TILE[2]) * 3), "white").save(
-        os.path.join(AUD, "ab_seed_blank_sheet.png"))
-    for i, (name, want, mut) in enumerate(SEEDS):
-        c = clone()
-        mut(c)
-        open(os.path.join(AUD, "ab_seed_%02d.json" % i), "w", encoding="utf-8").write(
-            json.dumps({"seed": name, "target": want, "ids": c["ids"]}, ensure_ascii=False))
-        got = ab_check(c, label="seed:" + name)
-        (fired if any(f.startswith(str(want) + " ") for f in got) else silent).append(name)
+        os.path.join(tmp, "ab_seed_blank_sheet.png"))
+    try:
+        for i, (name, want, mut) in enumerate(SEEDS):
+            c = clone()
+            mut(c)
+            open(os.path.join(tmp, "ab_seed_%02d.json" % i), "w", encoding="utf-8").write(
+                json.dumps({"seed": name, "target": want, "ids": c["ids"]}, ensure_ascii=False))
+            got = ab_check(c, label="seed:" + name)
+            (fired if any(f.startswith(str(want) + " ") for f in got) else silent).append(name)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
     for f in ab_check(real, label="real-after-seeds"):
         real_problem = True
         print("REAL_PROBLEM " + f)
