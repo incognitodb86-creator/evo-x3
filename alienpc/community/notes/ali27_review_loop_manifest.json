@@ -19,6 +19,30 @@
    "reason": "superseded by a newer render of the same seed",
    "retained": "ali147_pool_hc_r3b_s51130003",
    "seed": 51130003
+  },
+  {
+   "dropped": "ali163_hc15_bd002_s51150001",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_bd002_s51150011",
+   "seed": 51150001
+  },
+  {
+   "dropped": "ali163_hc15_bd002_s51150011",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_bd002_s51150021",
+   "seed": 51150001
+  },
+  {
+   "dropped": "ali163_hc15_gi046_s51150004",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_gi046_s51150014",
+   "seed": 51150004
+  },
+  {
+   "dropped": "ali163_hc15_gi063_s51150005",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_gi063_s51150015",
+   "seed": 51150005
   }
  ],
  "excluded": [
@@ -29,6 +53,22 @@
   {
    "id": "ali147_pool_hc_r3r_s51130003",
    "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3i_s51130003)"
+  },
+  {
+   "id": "ali163_hc15_bd002_s51150001",
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)"
+  },
+  {
+   "id": "ali163_hc15_bd002_s51150011",
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)"
+  },
+  {
+   "id": "ali163_hc15_gi046_s51150004",
+   "reason": "DUPE_SEED seed 51150004 (retained ali163_hc15_gi046_s51150014)"
+  },
+  {
+   "id": "ali163_hc15_gi063_s51150005",
+   "reason": "DUPE_SEED seed 51150005 (retained ali163_hc15_gi063_s51150015)"
   },
   {
    "id": "ali173_cont_hc1_s51140001",
@@ -105,19 +145,19 @@
   "ach": 2,
   "acodec": "aac",
   "asr": 32000,
-  "bytes": 16361582,
-  "fmt_dur": 53.282063,
+  "bytes": 67174859,
+  "fmt_dur": 173.948719,
   "fps": "24/1",
   "h": 768,
-  "mtime": 1792862896,
+  "mtime": 1792945538,
   "path": "C:/AI/community/review/hc169/review_cut.mp4",
-  "sha256": "127fc668b7411fa8d7196b53fab4950b95bab7ce91562cddb928004516589798",
+  "sha256": "e08ba9814038732942132b15a2a61a757a88ee08e4675d7462a83343948de176",
   "vcodec": "h264",
-  "vdur": 53.25,
-  "vpackets": 1278,
+  "vdur": 173.917,
+  "vpackets": 4174,
   "w": 1344
  },
- "problems": 2,
+ "problems": 11,
  "rc": 1,
  "scene": [
   {
@@ -244,6 +284,335 @@
    "ach": 2,
    "acodec": "aac",
    "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 6297740,
+   "crops": [
+    "community/hc/BD002_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd002_s51150021/ali163_hc15_bd002_s51150021.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_bd002_s51150021",
+   "mtime": 1792897870,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_bd002_s51150021/ali163_hc15_bd002_s51150021_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150001,
+   "sha256": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg",
+     "input": "community/hc/BD002.jpg",
+     "sha256": "8209bfb95593553c0d430da1659dd3435603adf99b84fec31692d030855b7cb6"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD006.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 5428691,
+   "crops": [
+    "community/hc/BD006_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 3,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd006_s51150002/ali163_hc15_bd006_s51150002.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 124,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_bd006_s51150002",
+   "mtime": 1792879986,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_bd006_s51150002/ali163_hc15_bd006_s51150002_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150002,
+   "sha256": "1d6d4757e91d555fa69a94ac7f824d7526064a31376198854d86f0708d24aab2",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD006.jpg",
+     "input": "community/hc/BD006.jpg",
+     "sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD013.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 6377641,
+   "crops": [
+    "community/hc/BD013_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 3,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd013_s51150003/ali163_hc15_bd013_s51150003.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 124,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_bd013_s51150003",
+   "mtime": 1792880803,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_bd013_s51150003/ali163_hc15_bd013_s51150003_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150003,
+   "sha256": "510143ecd6fdd5c516f85f194ba986bdee5755226f0870c4b5b0616079044d1e",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD013.jpg",
+     "input": "community/hc/BD013.jpg",
+     "sha256": "fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI046.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 4896690,
+   "crops": [
+    "community/hc/GI046_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150014/ali163_hc15_gi046_s51150014.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi046_s51150014",
+   "mtime": 1792900924,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi046_s51150014/ali163_hc15_gi046_s51150014_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150004,
+   "sha256": "ac6a89aaf66e8e730f22853c2a6958dcda2dd07f57ebfefbe1df0d6ce9c4753d",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI046.jpg",
+     "input": "community/hc/GI046.jpg",
+     "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI063.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 4757839,
+   "crops": [
+    "community/hc/GI063_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150015/ali163_hc15_gi063_s51150015.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi063_s51150015",
+   "mtime": 1792901551,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi063_s51150015/ali163_hc15_gi063_s51150015_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150005,
+   "sha256": "6151ef8bcdeb1e025a3cdea8416135f3fd23fea17bbc46f88c615b240eb6caa5",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI063.jpg",
+     "input": "community/hc/GI063.jpg",
+     "sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI072.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 5858419,
+   "crops": [
+    "community/hc/GI072_w1_face.png",
+    "community/hc/GI072_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 3,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi072_s51150006/ali163_hc15_gi072_s51150006.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 124,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi072_s51150006",
+   "mtime": 1792883292,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi072_s51150006/ali163_hc15_gi072_s51150006_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150006,
+   "sha256": "8c3b24320a29ed2133fe9989c37d52d196ac3622490a17184bc97d7897e8823b",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI072.jpg",
+     "input": "community/hc/GI072.jpg",
+     "sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI046.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 8087674,
+   "crops": [
+    "community/hc/GI046_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150031/ali163_hc15_gi046_s51150031.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi046_s51150031",
+   "mtime": 1792919092,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi046_s51150031/ali163_hc15_gi046_s51150031_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150031,
+   "sha256": "ade76d01fabd94e5d60f40f4be0cf3b5c9d1488bf274b54afa46861b51e9e7e4",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI046.jpg",
+     "input": "community/hc/GI046.jpg",
+     "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI046.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 9395988,
+   "crops": [
+    "community/hc/GI046_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150032/ali163_hc15_gi046_s51150032.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi046_s51150032",
+   "mtime": 1792931467,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi046_s51150032/ali163_hc15_gi046_s51150032_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150032,
+   "sha256": "6cf9a239bb2d6b83f48261ab65c852472e3923943b3c914732a6be27baa22ba2",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI046.jpg",
+     "input": "community/hc/GI046.jpg",
+     "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
     "GROK_IMAGINE_2026-10-19b/GI173.jpg"
    ],
    "asr": 32000,
@@ -287,25 +656,25 @@
   "ach": null,
   "acodec": null,
   "asr": null,
-  "bytes": 614506,
+  "bytes": 1988324,
   "fmt_dur": 0.0,
   "fps": "25/1",
-  "h": 512,
-  "mtime": 1792862896,
+  "h": 768,
+  "mtime": 1792945540,
   "path": "C:/AI/community/review/hc169/contact_sheet.png",
-  "sha256": "b097f729962fcad76ec6d17522c410649e7375c4e3b6f5ad8350b76843817396",
+  "sha256": "52d784c9bfa6b0d23a8e0a433c786991b74040e32159ed3e429796c542776361",
   "vcodec": "png",
   "vdur": 0.0,
   "vpackets": 1,
-  "w": 1344
+  "w": 1792
  },
  "sheet_extent": [
-  1344,
-  512
+  1792,
+  768
  ],
- "sheet_note": "xstack inputs=4 layout=0_0|448_0|896_0|0_256",
- "sum_vdur": 53.251,
- "sum_vpackets": 1278,
+ "sheet_note": "xstack inputs=12 layout=0_0|448_0|896_0|1344_0|0_256|448_256|896_256|1344_256|0_512|448_512|896_512|1344_512",
+ "sum_vdur": 173.915,
+ "sum_vpackets": 4174,
  "table": "C:\\AI\\community\\review\\hc169\\review_table.md",
  "writes": [
   "C:\\AI\\community\\review\\hc169\\review_cut.mp4",
