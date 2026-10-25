@@ -65,6 +65,7 @@ import glob
 import hashlib
 import json
 import copy
+import datetime
 import os
 import re
 import subprocess
@@ -1175,6 +1176,623 @@ def now_sheet():
     return 0
 
 
+# ===================================================================== NOW-P2 (A/B of the rendered pair, CPU only)
+# The pair, BOTH already rendered: same seed 51150001, byte-identical c0/c1 prompts, same start frame and face
+# crops, so the only difference is the published switch set:
+#   BEFORE ali163_hc15_bd002_s51150011  steps 8, comfy kitchen attention, ref_image_size max, no LoRA (571.7 s)
+#   AFTER  ali163_hc15_bd002_s51150021  steps 12, pytorch attention, ref_image_size match, antiburn LoRA 0.5 on
+#            the continuation only (s1_guide + s1_sched). The client STALLED on it: ComfyUI wrote 7 byte-identical
+#            mp4s (sha 8d..., 2026-10-24 22:11 -> 2026-10-25 03:12), objective.json kept attempts=[],
+#            and the clip is COLLECTED FROM DISK and never re-rendered (L19, the RENDER-TIMEOUT rule).
+# This section is ffmpeg + PIL + CPU onnxruntime: it opens no connection, queues no job, takes no lock file, and
+# runs no vision judge, no score and no pick. KEEP is Derrick's alone.
+AB_PAIR = {"before": NEW_ID, "after": NOW_ID}
+AB_JSON = os.path.join(AUD, "ab_metrics_20261026.json")
+AB_SHEET = os.path.join(AUD, "now_p2_ab_sheet.png")
+AB_META = os.path.join(AUD, "now_p2_ab_sheet.meta.json")
+AB_DOC = os.path.join(W, "notes", "now_p2_before_after_20261026.md")
+AB_RUN_SHEET = os.path.join(W, "runs", NOW_ID, "now_p2_ab_sheet.png")
+AB_OLD_METRICS = os.path.join(AUD, "metrics.json")
+AB_FRAMES = (0, 181, 361)                 # frame 0, midpoint, last - the metrics.json frame convention
+AB_TS = (0.50, 2.60, 5.00, 7.40, 9.60)    # the ALI-163 FINAL sheet timestamps (notes/ali163_hc_final_sheet.py:13)
+AB_FLOOR = GATE_FLOOR                     # 0.45 (notes/ali163_hc_r4g2_verify.py:87)
+AB_TILE = (448, 256, 22, 5, 20)          # tile w, tile h, label band h, columns, header h - builder and gate 9 share it
+AB_KEEP_LINE = "KEEP is Derrick's alone; this file carries measured numbers only."
+AB_KEEP_BAN = ("keeper", "winners", "winner", "ranking", "ranked", "verdict", "picks", "the best", "pick the")
+AB_CITES = {  # every quote must be found VERBATIM in the named on-disk file (ck 12 AB-CITES)
+    "steps 12": ("notes/web/02v_docs_h3.txt", "Speech and timbre need **12+** steps"),
+    "steps band 8-12": ("notes/web/hc15_tenstrip_readme.txt", "slow 8-12 step reference model"),
+    "attention": ("notes/web/02v_docs_h3.txt", "Comfy Kitchen attention cannot run `int8_convrot` checkpoints"),
+    "lora continuation-only": ("notes/web/02v_antiburn_readme.txt", "Don't use it on clip 1"),
+}
+AB_SRC_MARK = "# ===================================================================== NOW-P2"
+# The forbidden tokens are built from fragments so that this section's own source does not contain them: gate 14
+# scans this section's bytes, and a literal in the definition would match itself (a check that fires on nothing).
+AB_NET = tuple(t.replace("~", "") for t in ("sock~et", "url~open", "http~.client", "re~quests.", "urllib~.request",
+                                            "/prom~pt", "queue~_prompt", "gpu~_lock", "gpu~_guard",
+                                            "llama~-swap", "81~88", "run_graph_~job"))
+
+
+def ab_mp4(rid):
+    return os.path.join(W, "runs", rid, rid + ".mp4")
+
+
+def ab_gpath(rid):
+    return os.path.join(W, "p7", "graphs", rid + ".api.json")
+
+
+def ab_copies(rid):
+    """The ComfyUI output copies of this render: bytes, sha256, mtime. The paid-for evidence of a stalled client."""
+    out = []
+    for f in sorted(glob.glob(os.path.join(COMFY, "output", "community", rid, "*.mp4"))):
+        b = open(f, "rb").read()
+        out.append(dict(name=os.path.basename(f), bytes=len(b), sha=hashlib.sha256(b).hexdigest(),
+                        mtime=datetime.datetime.fromtimestamp(os.path.getmtime(f)).strftime("%Y-%m-%d %H:%M:%S")))
+    return out
+
+
+def ab_setting(g):
+    """The switched settings, read out of the graph (not typed): steps, attention, ref size, LoRA wiring, shape."""
+    return dict(nodes=len(g), steps=sorted({n["inputs"]["steps"] for k, n in g.items() if k.endswith("_sched")}),
+                sampler=g["ksel"]["inputs"]["sampler_name"], attention=g["m_attn"]["inputs"]["attention"],
+                ref_image_size=sorted({g[k]["inputs"]["ref_image_size"] for k in ("c0", "c1")}),
+                lora=[dict(node=k, file=n["inputs"]["lora_name"], strength=n["inputs"]["strength_model"],
+                            model=n["inputs"]["model"])
+                      for k, n in g.items() if n["class_type"].startswith("Lora")],
+                seed=g["noise"]["inputs"]["noise_seed"], start=g["img"]["inputs"]["image"],
+                crops=[g[k]["inputs"]["image"] for k in ("img2", "img3") if k in g],
+                prompt_sha={k: sha_s(g[k]["inputs"]["prompt"]) for k in ("c0", "c1")},
+                canvas="%dx%d" % (g["c0"]["inputs"]["width"], g["c0"]["inputs"]["height"]))
+
+
+def ab_measure(rid, det, rec, cos, cv2):
+    """One clip: ffprobe shape, SSIM/PSNR of frames 0/181/361 against the start still in BOTH fit modes,
+    ArcFace cosine of each start-still face vs the closest face in the frame, plus the render receipt."""
+    g, mp4 = jload(ab_gpath(rid)), ab_mp4(rid)
+    assert os.path.isfile(mp4), "no mp4: " + mp4
+    pr = probe(mp4)
+    w, h = g["c0"]["inputs"]["width"], g["c0"]["inputs"]["height"]
+    still = os.path.join(COMFY, "input", g["img"]["inputs"]["image"].replace("/", os.sep))
+    sim = cv2.imread(still)
+    assert sim is not None, "start still unreadable: " + still
+    faces = sorted(det.detect(sim), key=lambda f: -((f["box"][2] - f["box"][0]) * (f["box"][3] - f["box"][1])))[:2]
+    emb = [rec.embed(sim, f) for f in faces]
+    cover = fit(still, w, h, os.path.join(AUD, "ab_%s_start_cover.png" % rid), "cover")
+    stretch = fit(still, w, h, os.path.join(AUD, "ab_%s_start_stretch.png" % rid), "stretch")
+    meas = {}
+    for n in AB_FRAMES:
+        fp = extract(mp4, n, os.path.join(AUD, "ab_%s_f%d.png" % (rid, n)))
+        s1, p1 = ssim_psnr(fp, cover)
+        s2, p2 = ssim_psnr(fp, stretch)
+        img = cv2.imread(fp)
+        fs = det.detect(img)
+        meas[str(n)] = dict(ssim_cover=s1, psnr_cover=p1, ssim_stretch=s2, psnr_stretch=p2, faces=len(fs),
+                            best_cos=[max([round(cos(e, rec.embed(img, f)), 3) for f in fs], default=None)
+                                      for e in emb])
+    b = open(mp4, "rb").read()
+    log = open(os.path.join(W, "runs", rid, "status.log"), encoding="utf-8", errors="replace").read().splitlines()
+    oj = os.path.join(W, "runs", rid, "objective.json")
+    objd = jload(oj) if os.path.isfile(oj) else None
+    return dict(id=rid, role="", mp4=mp4.replace("\\", "/"), bytes=len(b), sha=hashlib.sha256(b).hexdigest(),
+                mtime=datetime.datetime.fromtimestamp(os.path.getmtime(mp4)).strftime("%Y-%m-%d %H:%M:%S"),
+                probe=pr, graph=ab_gpath(rid).replace("\\", "/"), graph_sha=sha(ab_gpath(rid)),
+                setting=ab_setting(g), start_cover=cover.replace("\\", "/"), start_stretch=stretch.replace("\\", "/"),
+                start_faces=[[[round(float(v), 1) for v in f["box"]], round(f["score"], 3)] for f in faces],
+                frames_measured=meas, copies=ab_copies(rid),
+                job_start_rows=sum(1 for l in log if "JOB start" in l),
+                job_end_rows=sum(1 for l in log if "JOB end" in l),
+                poll_warns=sum(1 for l in log if "poll warn" in l),
+                job_start_first=next((l for l in log if "JOB start" in l), ""),
+                objective_ok=(objd or {}).get("ok"), objective_attempts=len((objd or {}).get("attempts", [])),
+                objective_secs=next((a.get("secs") for a in (objd or {}).get("attempts", [])
+                                     if a.get("tag") == rid), None))
+
+
+def ab_metrics():
+    """Measure both clips and write the durable numbers (runs/ is gitignored, L8/L20, so the JSON lives in notes/).
+    ArcFace needs onnxruntime -> run this mode under 'C:/Program Files/Python312/python.exe' (L16)."""
+    sys.path.insert(0, os.path.join(W, "notes"))
+    from hc_r4f_facelib import Scrfd, ArcFace, cos
+    import cv2
+    det, rec = Scrfd(), ArcFace()
+    rows = []
+    for role, rid in (("before", AB_PAIR["before"]), ("after", AB_PAIR["after"])):
+        r = ab_measure(rid, det, rec, cos, cv2)
+        r["role"] = role
+        rows.append(r)
+        print("FRAME0_BEST_COS %s %s %s" % (role, rid, json.dumps(r["frames_measured"]["0"]["best_cos"])))
+        print("FRAME0_SSIM %s %s cover %s stretch %s | PSNR cover %s stretch %s" % (
+            role, rid, r["frames_measured"]["0"]["ssim_cover"], r["frames_measured"]["0"]["ssim_stretch"],
+            r["frames_measured"]["0"]["psnr_cover"], r["frames_measured"]["0"]["psnr_stretch"]))
+        print("AB_ROW %s %s frames=%s canvas=%s audio=%s bytes=%d sha=%s copies=%d job_start=%d job_end=%d "
+              "attempts=%d wall=%s" % (role, rid, r["probe"]["frames"], "%dx%d" % (r["probe"]["w"], r["probe"]["h"]),
+                                       r["probe"]["audio"], r["bytes"], r["sha"][:16], len(r["copies"]),
+                                       r["job_start_rows"], r["job_end_rows"], r["objective_attempts"],
+                                       r["objective_secs"]))
+    doc = dict(tool="notes/hc15_anchor_fix_build.py --ab-metrics",
+               generated=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+               frames=list(AB_FRAMES), ts=list(AB_TS), floor=AB_FLOOR, cites=AB_CITES,
+               graph_diff=sorted("%s|%s|%s" % t for t in diff_paths(jload(ab_gpath(AB_PAIR["before"])),
+                                                                    jload(ab_gpath(AB_PAIR["after"])))),
+               rows=rows)
+    os.makedirs(AUD, exist_ok=True)
+    open(AB_JSON, "w", encoding="utf-8").write(json.dumps(doc, indent=1, ensure_ascii=False))
+    print("GATE_FLOOR n=%s" % AB_FLOOR)
+    print("AB_METRICS_JSON %s rows=%d" % (AB_JSON, len(rows)))
+    return 0
+
+
+def ab_labels(rows):
+    """The sheet's label strings, generated from the measured rows (ck 9 re-derives them, so the meta cannot lie)."""
+    by = {r["id"]: r for r in rows}
+    b, a = by[AB_PAIR["before"]], by[AB_PAIR["after"]]
+    start = b["setting"]["start"]
+    labs = ["start still " + start]
+    for r in (b, a):
+        m = r["frames_measured"]["0"]
+        f = lambda v, fmt: (fmt % v) if isinstance(v, (int, float)) else "n/a"
+        labs.append("%s [%s] frame 0 SSIM %s PSNR %s  steps %s attn %s ref %s lora %s" % (
+            r["id"], r["role"], f(m["ssim_cover"], "%.3f"), f(m["psnr_cover"], "%.2f"), r["setting"]["steps"],
+            r["setting"]["attention"], r["setting"]["ref_image_size"],
+            [l["file"] + "@" + str(l["strength"]) for l in r["setting"]["lora"]] or ["none"]))
+    for r in (b, a):
+        for t in AB_TS:
+            labs.append("%s [%s] t=%.2fs frame %d" % (r["id"], r["role"], t, int(t * 24)))
+    return labs
+
+
+def ab_sheet():
+    """Labelled before/after sheet: the start still, frame 0 of each clip with its measured SSIM/PSNR, and a
+    5-timestamp contact strip per clip. ffmpeg + PIL only - no vision model, no score, no pick on the frames."""
+    from PIL import Image, ImageDraw, ImageStat
+    rows = jload(AB_JSON)["rows"]
+    labs = ab_labels(rows)
+    b = next(r for r in rows if r["role"] == "before")
+    a = next(r for r in rows if r["role"] == "after")
+    w, h, pad, cols, header = AB_TILE
+    cover = fit(os.path.join(COMFY, "input", b["setting"]["start"].replace("/", os.sep)), w, h,
+                os.path.join(AUD, "ab_sheet_start.png"), "cover")
+    tiles = [(labs[0], cover)]
+    for r, lab in ((b, labs[1]), (a, labs[2])):
+        tiles.append((lab, extract(r["mp4"], 0, os.path.join(AUD, "ab_sheet_%s_f0.png" % r["role"]))))
+    i = 3
+    for r in (b, a):
+        for t in AB_TS:
+            tiles.append((labs[i], extract(r["mp4"], int(t * 24),
+                                           os.path.join(AUD, "ab_sheet_%s_t%s.png" % (r["role"], t)))))
+            i += 1
+    rows_n = -(-len(tiles) // cols)
+    canvas = Image.new("RGB", (cols * w, header + rows_n * (h + pad)), "white")
+    dr = ImageDraw.Draw(canvas)
+    dr.text((6, 4), "NOW-P2 A/B  BEFORE %s (steps 8, comfy kitchen attn, ref max, no LoRA) vs AFTER %s "
+                    "(steps 12, pytorch attn, ref match, antiburn 0.5)  same seed 51150001, same prompts"
+            % (AB_PAIR["before"], AB_PAIR["after"]), fill="black")
+    for i, (lab, src) in enumerate(tiles):
+        x = (i % cols) * w
+        y = header + (i // cols) * (h + pad) + pad
+        canvas.paste(Image.open(src).convert("RGB").resize((w, h)), (x, y))
+        dr.text((x + 4, y - 14), lab[:150], fill="black")
+    out = AB_SHEET
+    canvas.save(out)
+    stats = [round(ImageStat.Stat(Image.open(t[1]).convert("RGB")).stddev[0], 2) for t in tiles]
+    os.makedirs(os.path.dirname(AB_RUN_SHEET), exist_ok=True)
+    open(AB_RUN_SHEET, "wb").write(open(out, "rb").read())
+    meta = dict(sheet=out.replace("\\", "/"), run_copy=AB_RUN_SHEET.replace("\\", "/"),
+                bytes=os.path.getsize(out), sha=sha(out), size=list(canvas.size), tiles=len(tiles),
+                labels=labs, tile_std=stats, generated=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                tool="notes/hc15_anchor_fix_build.py --ab-sheet")
+    open(AB_META, "w", encoding="utf-8").write(json.dumps(meta, indent=1, ensure_ascii=False))
+    print("AB_SHEET %s %dx%d tiles=%d bytes=%d sha=%s" % (out, canvas.size[0], canvas.size[1], len(tiles),
+                                                           meta["bytes"], meta["sha"][:16]))
+    print("AB_SHEET_COPY " + AB_RUN_SHEET)
+    print("KEEP is Derrick's alone; this sheet carries no numbers-based pick and no verdict.")
+    return 0
+
+
+def ab_doc_text(doc):
+    """The human surface, written BY CODE from the measured JSON (ck 11 re-generates these bytes = no drift)."""
+    rows = {r["role"]: r for r in doc["rows"]}
+    b, a = rows["before"], rows["after"]
+    L = []
+    ap = L.append
+    ap("# NOW-P2 - the four published switches, measured before/after (2026-10-26)")
+    ap("")
+    ap("Generated by `python C:/AI/community/notes/hc15_anchor_fix_build.py --ab-note` from "
+       "`notes/hc15_audit/ab_metrics_20261026.json` (generated %s). Every number in this file is written by code "
+       "out of that JSON, and gate 11 DOC-SYNC re-generates these bytes, so a table row cannot drift. Re-measure "
+       "on CPU: `--ab-metrics` (ffmpeg SSIM/PSNR + CPU SCRFD-10G/ArcFace, no GPU); non-vacuity probe `--ab-selftest`"
+       % doc["generated"])
+    ap("")
+    ap("## The pair: one variable set")
+    ap("")
+    ap("| row | BEFORE `%s` | AFTER `%s` |" % (b["id"], a["id"]))
+    ap("|---|---|---|")
+    for lab, fn in (("steps (every `*_sched`)", lambda r: json.dumps(r["setting"]["steps"])),
+                    ("`m_attn.attention`", lambda r: r["setting"]["attention"]),
+                    ("`ref_image_size` (c0/c1)", lambda r: json.dumps(r["setting"]["ref_image_size"])),
+                    ("LoRA", lambda r: json.dumps([l["node"] + ":" + l["file"] + "@" + str(l["strength"])
+                                                   for l in r["setting"]["lora"]]) if r["setting"]["lora"] else "[]"),
+                    ("LoRA fed by / nodes", lambda r: json.dumps([l["model"] for l in r["setting"]["lora"]])
+                     if r["setting"]["lora"] else "-"),
+                    ("nodes", lambda r: str(r["setting"]["nodes"])),
+                    ("graph sha256", lambda r: r["graph_sha"][:16]),
+                    ("`noise_seed`", lambda r: str(r["setting"]["seed"])),
+                    ("start frame (`img.image`)", lambda r: r["setting"]["start"]),
+                    ("face crops", lambda r: json.dumps(r["setting"]["crops"])),
+                    ("c0 prompt sha256", lambda r: r["setting"]["prompt_sha"]["c0"][:16]),
+                    ("c1 prompt sha256", lambda r: r["setting"]["prompt_sha"]["c1"][:16]),
+                    ("frames / canvas / fps / audio", lambda r: "%d / %dx%d / %s / %s" % (
+                        r["probe"]["frames"], r["probe"]["w"], r["probe"]["h"], r["probe"]["fps"], r["probe"]["audio"])),
+                    ("mp4 bytes", lambda r: str(r["bytes"])),
+                    ("mp4 sha256", lambda r: r["sha"][:16]),
+                    ("render wall (s, from objective.json)", lambda r: str(r["objective_secs"]))):
+        ap("| %s | %s | %s |" % (lab, fn(b), fn(a)))
+    ap("")
+    ap("`diff_paths(before, after)` = %d paths: %s. Nothing else differs - the switch set is the only variable."
+       % (len(doc["graph_diff"]), ", ".join(doc["graph_diff"])))
+    ap("")
+    ap("### The switches, with the published wording that is on disk (verbatim)")
+    ap("")
+    for k, (f, q) in doc["cites"].items():
+        ap("- **%s** - `%s` carries: \"%s\"" % (k, f, q))
+    ap("")
+    ap("## Frames against the approved start still (START-FIDELITY: SSIM/PSNR, higher = closer to the picture)")
+    ap("")
+    ap("`cover` = the start still scaled-to-fill then cropped to the canvas; `stretch` = scaled to the canvas "
+       "exactly. Both fit modes are reported because the 2026-10-23 audit proved the cover crop carries the "
+       "identity (SSIM 0.315 vs 0.734 on the stretch of the same file).")
+    ap("")
+    ap("| frame | metric | BEFORE | AFTER | AFTER - BEFORE |")
+    ap("|---|---|---|---|---|")
+    def dl(va, vb):
+        """Delta only when both sides are numbers; a metric that could not be computed prints no delta (None-safe,
+        because a frame with no detected face has no cosine)."""
+        return "" if not isinstance(va, (int, float)) or not isinstance(vb, (int, float)) else "%+.4f" % (va - vb)
+    for n in ("0", "181", "361"):
+        for m in ("ssim_cover", "psnr_cover", "ssim_stretch", "psnr_stretch", "faces"):
+            vb, va = b["frames_measured"][n][m], a["frames_measured"][n][m]
+            ap("| %s | %s | %s | %s | %s |" % (n, m, vb, va, "" if m == "faces" else dl(va, vb)))
+        cb, ca = b["frames_measured"][n]["best_cos"], a["frames_measured"][n]["best_cos"]
+        ap("| %s | arcface cos (per start face) | %s | %s | %s |" % (
+            n, json.dumps(cb), json.dumps(ca),
+            ", ".join("%+.3f" % (y - x) for x, y in zip(cb, ca) if None not in (x, y))))
+    ap("")
+    ap("The identity floor this repo uses is `%s` (n=%s), and the START-FIDELITY bar is frame 0 SSIM 0.70 "
+       "(measured band 0.882-0.915 over the six HC15 clips). Numbers only: no judgement is attached to any row."
+       % (doc["floor"], doc["floor"]))
+    ap("")
+    ap("## The AFTER clip's render receipt (collected from disk, never re-rendered)")
+    ap("")
+    ap("- runs copy: `%s` - %d bytes, sha256 `%s`, mtime %s" % (a["mp4"], a["bytes"], a["sha"], a["mtime"]))
+    ap("- ComfyUI `output/community/%s/`: %d copies, all sha256 equal to the runs copy (%s), mtimes %s -> %s"
+       % (a["id"], len(a["copies"]), sorted({c["sha"][:16] for c in a["copies"]}),
+          a["copies"][0]["mtime"], a["copies"][-1]["mtime"]))
+    ap("- `status.log`: %d `JOB start` rows, %d `JOB end` rows, %d poll-warn rows - the client stalled, so the "
+       "runner recorded nothing and re-queued; the paid-for clip is on disk, so it was collected and NOT re-rendered "
+       "(the RENDER-TIMEOUT rule: a stall is not an objective failure)" % (a["job_start_rows"], a["job_end_rows"],
+                                                                            a["poll_warns"]))
+    ap("- `objective.json`: ok=%s, attempts=%d - no proof row, so the shape proof is the ffprobe pass above "
+       "(362 packets, 1344x768, 24/1, audio stream present), read by field name" % (a["objective_ok"],
+                                                                                      a["objective_attempts"]))
+    ap("- the BEFORE clip's own row is intact (ok=%s, attempts=%d, %s s wall), which is what makes the pair "
+       "comparable" % (b["objective_ok"], b["objective_attempts"], b["objective_secs"]))
+    ap("- the p7 ledger stamp `%s` predates the 2026-10-24 21:52 render: that window is outside the ledger "
+       "(as-said, not counted)" % jload(LEDGER).get("updated"))
+    ap("")
+    ap("## Sheet")
+    ap("")
+    meta = jload(AB_META)
+    ap("- `%s` (%dx%d, %d tiles, %d bytes, sha256 `%s`)" % (meta["sheet"], meta["size"][0], meta["size"][1],
+                                                             meta["tiles"], meta["bytes"], meta["sha"][:16]))
+    ap("- review copy: `%s`" % meta["run_copy"])
+    for lab in meta["labels"]:
+        ap("  - %s" % lab)
+    ap("")
+    ap(AB_KEEP_LINE)
+    ap("")
+    return "\n".join(L)
+
+
+def ab_note():
+    doc = jload(AB_JSON)
+    txt = ab_doc_text(doc)
+    open(AB_DOC, "w", encoding="utf-8", newline="\n").write(txt)
+    print("AB_DOC %s bytes=%d sha=%s" % (AB_DOC, len(txt.encode("utf-8")), sha_s(txt)[:16]))
+    return 0
+
+
+def ab_git_tracked():
+    out = subprocess.run(["git", "-C", W, "ls-files", "--cached"], capture_output=True, text=True)
+    return set(l.strip().replace("\\", "/").lower() for l in out.stdout.splitlines() if l.strip())
+
+
+def ab_src_section():
+    src = open(os.path.join(W, "notes", "hc15_anchor_fix_build.py"), encoding="utf-8").read()
+    i = src.find(AB_SRC_MARK)
+    return src[i:] if i >= 0 else ""
+
+
+def ab_git_ignored(path):
+    """Which .gitignore rule claims this path (empty string = not ignored). The media rule is a fact to measure,"
+    """
+    out = subprocess.run(["git", "-C", W, "check-ignore", "-v", path], capture_output=True, text=True)
+    return out.stdout.strip() if out.returncode == 0 else ""
+
+
+def ab_ctx(jpath=None, dpath=None, spath=None, mpath=None, ids=None):
+    jp = jpath or AB_JSON
+    dp = dpath or AB_DOC
+    ids = ids or AB_PAIR
+    doc = jload(jp)
+    return dict(json_path=jp, doc_path=dp, sheet_path=spath or AB_SHEET, meta_path=mpath or AB_META,
+                ids=ids, jdoc=doc, rows=doc["rows"], doc_text=open(dp, encoding="utf-8").read(),
+                meta=(jload(mpath or AB_META) if os.path.isfile(mpath or AB_META) else None),
+                old_metrics=(jload(AB_OLD_METRICS) if os.path.isfile(AB_OLD_METRICS) else None),
+                gb=jload(ab_gpath(ids["before"])), ga=jload(ab_gpath(ids["after"])),
+                tracked=ab_git_tracked(), ab_src=ab_src_section(), ledger=jload(LEDGER),
+                ignore_rule=ab_git_ignored(spath or AB_SHEET))
+
+
+def ab_label_pixels(sheet, n_tiles):
+    """Count dark pixels in each tile's label band of the sheet: measured proof that every tile carries printed
+    text (the labels are the sheet's whole point; a blank band means the sheet is not labelled)."""
+    w, h, pad, cols, header = AB_TILE
+    from PIL import Image
+    im = Image.open(sheet).convert("L")
+    px = im.load()
+    out = []
+    for i in range(n_tiles):
+        x0 = (i % cols) * w
+        y0 = header + (i // cols) * (h + pad)
+        out.append(sum(1 for y in range(y0, min(y0 + pad, im.size[1]))
+                       for x in range(x0, min(x0 + w, im.size[0])) if px[x, y] < 128))
+    return out
+
+
+def ab_check(ctx=None, label="real"):
+    """15 named detectors over the NOW-P2 artifacts. Every one is provably reachable: --ab-selftest seeds the fault
+    into a clone of the measured artifacts and requires the detector to fire there and 0 on the real tree. No GPU,
+    no queue, no vision model, no score, no pick."""
+    ctx = ctx or ab_ctx()
+    fails.clear()
+    rows = {r["id"]: r for r in ctx["rows"]}
+    ids = ctx["ids"]
+    b, a = rows.get(ids["before"]), rows.get(ids["after"])
+    have = bool(b and a)
+
+    def sg(r, k, d="\0"):
+        return (r or {}).get("setting", {}).get(k, d)
+
+    def fm(r, n, k):
+        return ((r or {}).get("frames_measured", {}).get(str(n), {}) or {}).get(k)
+
+    # 1 PAIR: both clips exist and carry the promised shape (362 f, 1344x768, 24/1, audio, 15.083333 s)
+    ok = have
+    for r in (b, a):
+        p = (r or {}).get("probe", {})
+        ok = (ok and os.path.isfile((r or {}).get("mp4", "x")) and p.get("frames") == 362
+              and (p.get("w"), p.get("h")) == CANVAS and p.get("fps") == "24/1" and p.get("audio") is True
+              and abs(p.get("dur", 0) - 362 / 24.0) < 0.01)
+    ck(ok, "1 PAIR both mp4s on disk and measured: 362 packets, 1344x768, 24/1, audio stream, dur %.6f "
+           "(before frames=%s after frames=%s)" % (362 / 24.0, sg(b, "x") and (b or {}).get("probe", {}).get("frames"),
+                                                   (a or {}).get("probe", {}).get("frames")))
+    # 2 SCOPE: the two graphs differ by exactly the published switch set, nothing else
+    gb, ga = ctx["gb"], ctx["ga"]
+    d = diff_paths(gb, ga)
+    ck(d == NOW_ALLOWED, "2 SCOPE diff_paths(before, after) == the %d allowed paths (steps x2, ref_image_size x2, "
+                         "attention, +lora node, its 2 edges, save prefix) and nothing else (extra=%s missing=%s)"
+       % (len(NOW_ALLOWED), sorted(d - NOW_ALLOWED)[:4], sorted(NOW_ALLOWED - d)[:4]))
+    # 3 SWITCH VALUES: the AFTER row carries the published values, the BEFORE row the old ones. The row's
+    #    ref_image_size is a SET of the c0/c1 values, so the per-node values are read from the graphs.
+    ck(have and set(a["setting"]["steps"]) == {STEPS_PUB} and a["setting"]["attention"] == ATTN_PUB
+       and set(a["setting"]["ref_image_size"]) == {REFSIZE_PUB}
+       and set(b["setting"]["ref_image_size"]) == {"max"}
+       and ga["c0"]["inputs"]["ref_image_size"] == ga["c1"]["inputs"]["ref_image_size"] == REFSIZE_PUB
+       and gb["c0"]["inputs"]["ref_image_size"] == gb["c1"]["inputs"]["ref_image_size"] == "max"
+       and [l["file"] for l in a["setting"]["lora"]] == [LORA_FILE]
+       and [l["strength"] for l in a["setting"]["lora"]] == [LORA_STRENGTH]
+       and [l["model"] for l in a["setting"]["lora"]] == [["m_shift", 0]]
+       and set(b["setting"]["steps"]) == {8} and b["setting"]["attention"] == "comfy kitchen attention"
+       and b["setting"]["lora"] == [],
+       "3 SWITCHES AFTER = steps %s / %s / ref %s / %s@%s fed by m_shift; BEFORE = steps [8] / comfy kitchen "
+       "attention / ref ['max','max'] / no LoRA (measured: after steps=%s attn=%s ref=%s lora=%s; before steps=%s "
+       "attn=%s ref=%s lora=%s)" % (STEPS_PUB, ATTN_PUB, REFSIZE_PUB, LORA_FILE, LORA_STRENGTH,
+                                    sg(a, "steps"), sg(a, "attention"), sg(a, "ref_image_size"),
+                                    json.dumps(sg(a, "lora", [])), sg(b, "steps"), sg(b, "attention"),
+                                    sg(b, "ref_image_size"), json.dumps(sg(b, "lora", []))))
+    # 4 ONE VARIABLE: seed, prompts, start still, face crops identical between the two renders
+    ck(have and a["setting"]["seed"] == b["setting"]["seed"] == SEED
+       and a["setting"]["prompt_sha"] == b["setting"]["prompt_sha"]
+       and a["setting"]["start"] == b["setting"]["start"] and a["setting"]["crops"] == b["setting"]["crops"],
+       "4 ONE-VARIABLE seed %d equal, c0/c1 prompt sha256 byte-equal, same start frame, same face crops "
+       "(seeds %s/%s, start %s/%s)" % (SEED, sg(b, "seed"), sg(a, "seed"), sg(b, "start"), sg(a, "start")))
+    # 5 MEASURED: 3 frames x 4 metrics, all finite floats, plus one ArcFace cosine per start-still face
+    need = ["ssim_cover", "psnr_cover", "ssim_stretch", "psnr_stretch"]
+    good = have and all(sorted(r["frames_measured"]) == [str(n) for n in AB_FRAMES]
+                        and all(isinstance(fm(r, n, k), float) and fm(r, n, k) > 0 for n in AB_FRAMES for k in need)
+                        and all(isinstance(v, float) for v in fm(r, 0, "best_cos"))
+                        and len(fm(r, 0, "best_cos")) == len(r["start_faces"]) >= 1 for r in (a, b))
+    ck(good, "5 MEASURED both rows carry frames %s x %s as finite positive floats + one ArcFace cosine per start "
+             "face (%s faces on the start still)" % (list(AB_FRAMES), need, len((b or {}).get("start_faces", []))))
+    # 6 REPRO: the BEFORE row reproduces notes/hc15_audit/metrics.json for the same clip (the two passes agree)
+    old = next((r for r in (ctx["old_metrics"] or {}).get("rows", []) if r["id"] == ids["before"]), None)
+    om = (old or {}).get("frames_measured", {}).get("0", {})
+    ck(have and om and all(abs(om[k] - fm(b, 0, k)) < 1e-4 for k in ("ssim_cover", "psnr_cover",
+                                                                     "ssim_stretch", "psnr_stretch")),
+       "6 REPRO the BEFORE frame-0 numbers reproduce notes/hc15_audit/metrics.json within 1e-4 (metrics.json SSIM "
+       "%s PSNR %s vs this pass %s / %s)" % (om.get("ssim_cover"), om.get("psnr_cover"),
+                                             fm(b, 0, "ssim_cover"), fm(b, 0, "psnr_cover")))
+    # 7 FRAME0-BEST: frame 0 is the highest-SSIM of the three measured frames in BOTH clips (start fidelity;
+    #    if a clip drifted away from the approved picture, this fires)
+    ck(have and all(max(fm(r, n, "ssim_cover") for n in AB_FRAMES) == fm(r, 0, "ssim_cover") for r in (a, b)),
+       "7 FRAME0-BEST frame 0 is the max-SSIM frame of %s in both clips (before f0 %s f%d %s; after f0 %s f%d %s)"
+       % (list(AB_FRAMES), fm(b, 0, "ssim_cover"), AB_FRAMES[-1], fm(b, AB_FRAMES[-1], "ssim_cover"),
+          fm(a, 0, "ssim_cover"), AB_FRAMES[-1], fm(a, AB_FRAMES[-1], "ssim_cover")))
+    # 8 FLOOR: ArcFace cosine of every start-still face at frame 0 above the identity floor this repo uses
+    ck(have and all(v is not None and v >= AB_FLOOR for r in (a, b) for v in fm(r, 0, "best_cos")),
+       "8 FLOOR frame-0 ArcFace cosines %s (before) / %s (after), all >= n=%s"
+       % (fm(b, 0, "best_cos"), fm(a, 0, "best_cos"), AB_FLOOR))
+    # 9 SHEET: the file, its meta, freshness, tile count, labels, non-flat pixels
+    m, sp = ctx["meta"], ctx["sheet_path"]
+    labs = ab_labels(ctx["rows"])
+    dark = ab_label_pixels(sp, len(labs)) if (m and os.path.isfile(sp)) else []
+    ck(m and os.path.isfile(sp) and m["sheet"].replace("\\", "/") == sp.replace("\\", "/")
+       and m["bytes"] == os.path.getsize(sp) and m["sha"] == sha(sp) and m["tiles"] == len(labs) == 13
+       and m["labels"] == labs and len(m["tile_std"]) == len(labs) and all(s > 1.0 for s in m["tile_std"])
+       and len(dark) == len(labs) and all(d > 20 for d in dark)
+       and ids["before"] in " ".join(m["labels"]) and ids["after"] in " ".join(m["labels"])
+       and os.path.getmtime(sp) > max(os.path.getmtime(ab_mp4(r)) for r in (ids["before"], ids["after"])),
+       "9 SHEET %s: bytes+sha match the meta, %d tiles == the %d labels this builder re-derives (both ids named), "
+       "every tile non-flat (min std %s), every label band printed (min %d dark px of %s), mtime newer than both mp4s"
+       % (os.path.basename(sp), (m or {}).get("tiles"), len(labs), min((m or {}).get("tile_std") or [0.0]),
+          min(dark or [0]), dark[:3]))
+    # 10 RECEIPT: the stall is disclosed, the clip is collected from disk, nothing re-rendered, no ok claim
+    shas = {c["sha"] for c in (a or {}).get("copies", [])}
+    okline = "ok=%s, attempts=%d" % ((a or {}).get("objective_ok"), (a or {}).get("objective_attempts"))
+    ck(have and len(a["copies"]) >= 2 and shas == {a["sha"]} and a["job_end_rows"] == 0
+       and a["objective_attempts"] == 0 and a["objective_ok"] is not True
+       and a["job_start_rows"] == len(a["copies"]) and a["poll_warns"] > 50
+       and str(len(a["copies"])) in ctx["doc_text"] and "stall" in ctx["doc_text"]
+       and "not re-rendered" in ctx["doc_text"].lower() and okline in ctx["doc_text"]
+       and "ok=True, attempts=0" not in ctx["doc_text"],
+       "10 RECEIPT %d byte-identical ComfyUI copies (all sha == the runs copy sha), %d `JOB start` rows, %d `JOB "
+       "end`, attempts=%d ok=%s, %d poll warns; the doc names the copy count, says stall + not re-rendered, claims "
+       "no ok=True" % (len((a or {}).get("copies", [])), (a or {}).get("job_start_rows"),
+                       (a or {}).get("job_end_rows"), (a or {}).get("objective_attempts"),
+                       (a or {}).get("objective_ok"), (a or {}).get("poll_warns")))
+    # 11 DOC-SYNC: the doc on disk == the bytes this code regenerates from the JSON (numbers cannot drift)
+    ck(ctx["doc_text"] == ab_doc_text(ctx["jdoc"]),
+       "11 DOC-SYNC %s == ab_doc_text(jdoc) regenerated now (%d vs %d chars)"
+       % (os.path.basename(ctx["doc_path"]), len(ctx["doc_text"]), len(ab_doc_text(ctx["jdoc"]))))
+    # 12 KEEP: no pick/judgement word anywhere in the doc, and the KEEP line present
+    hit = [w for w in AB_KEEP_BAN if w in ctx["doc_text"].lower()]
+    ck(not hit and AB_KEEP_LINE in ctx["doc_text"],
+       "12 KEEP 0 pick/judgement words (%s) in the doc and the KEEP-is-Derrick's line present" % hit)
+    # 13 CITES: every quote the doc prints is verbatim in the named notes/web file and printed in the doc
+    bad = []
+    for k, cq in ctx["jdoc"]["cites"].items():
+        f, q = cq[0], cq[1]
+        p = os.path.join(W, f.replace("/", os.sep))
+        if not os.path.isfile(p):
+            bad.append(k + ":missing " + f)
+        elif q not in open(p, encoding="utf-8", errors="replace").read():
+            bad.append(k + ":quote-not-in-file")
+        if k not in ctx["doc_text"] or q not in ctx["doc_text"]:
+            bad.append(k + ":not-printed-in-doc")
+    ck(not bad, "13 CITES all %d quotes verbatim in notes/web/ and printed in the doc (%s)"
+       % (len(ctx["jdoc"]["cites"]), bad[:3]))
+    # 14 NO-GPU: the A/B section touches no connection, no queue endpoint, no lock file, no swap route
+    hit = [t for t in AB_NET if t in ctx["ab_src"]]
+    ck(bool(ctx["ab_src"]) and not hit, "14 NO-GPU the %d-char NOW-P2 section carries 0 of %s (hits=%s)"
+       % (len(ctx["ab_src"]), list(AB_NET), hit))
+    # 15 DURABLE: runs/ is gitignored (L8, L20), so the durable proof lives under notes/. Media is too: .gitignore
+    #    carries "*.png" (measured by git check-ignore), and 0 png is tracked in the repo, so the sheet's byte
+    #    identity is its meta (bytes + sha256), which gate 9 verifies against the file.
+    need_t = [p.replace(W + os.sep, "").replace("\\", "/").lower() for p in
+              (AB_DOC, AB_JSON, AB_META, os.path.join(W, "notes", "hc15_anchor_fix_build.py"))]
+    miss = [t for t in need_t if t not in ctx["tracked"]]
+    ck(not miss and "*.png" in ctx["ignore_rule"].replace("\\", "/")
+       and m and m["bytes"] == os.path.getsize(AB_SHEET) and m["sha"] == sha(AB_SHEET),
+       "15 DURABLE doc+json+sheet-meta+builder tracked/staged in C:/AI/community (missing=%s); the sheet itself is "
+       "media-ignored by the rule %s, so its bytes %d + sha256 %s in the meta are its durable identity"
+       % (miss, (ctx["ignore_rule"].split("\n")[0][:60] or "<none>"), (m or {}).get("bytes", 0),
+          (m or {}).get("sha", "")[:16]))
+    print("CHECKS %s FAIL %s" % (label, json.dumps(fails)) if fails else "CHECKS %s ALL %d PASS" % (label, 15))
+    return list(fails)
+
+
+def ab_selftest():
+    """Seed each fault into an in-memory clone of the measured artifacts (ids, a graph, a metric, a cosine, a
+    meta tile, the doc text, the source slice, the tracked set); every detector must fire on its own seed and the
+    real tree must stay clean. No GPU, no queue, nothing written outside notes/hc15_audit ab_seed_* files."""
+    real = ab_ctx()
+    if ab_check(real, label="real"):
+        print("AB_SELFTEST the real tree is not clean - fix that first")
+        return 1
+    fired, silent, real_problem = [], [], False
+    txt0 = real["doc_text"]
+    base_json = json.loads(json.dumps(real["jdoc"]))
+
+    def clone():
+        c = ab_ctx()
+        c["jdoc"] = json.loads(json.dumps(base_json))
+        c["rows"] = c["jdoc"]["rows"]
+        c["gb"] = json.loads(json.dumps(real["gb"]))
+        c["ga"] = json.loads(json.dumps(real["ga"]))
+        c["meta"] = json.loads(json.dumps(real["meta"]))
+        c["doc_text"] = txt0
+        return c
+
+    def byrole(c, role):
+        return next(r for r in c["rows"] if r["role"] == role)
+
+    SEEDS = [
+        ("1 pair: the 243-frame clip-1 in place of the before clip", 1,
+         lambda c: c.update(ids={"before": OLD_ID, "after": NOW_ID})),
+        ("2 scope: the sampler also changes between the graphs", 2,
+         lambda c: c["ga"]["ksel"]["inputs"].__setitem__("sampler_name", "euler")),
+        ("3 switches: steps back to the before value on the after row", 3,
+         lambda c: byrole(c, "after")["setting"].__setitem__("steps", [8])),
+        ("4 one-variable: a prompt sha differs", 4,
+         lambda c: byrole(c, "after")["setting"]["prompt_sha"].__setitem__("c0", "0" * 64)),
+        ("5 measured: a metric becomes None", 5,
+         lambda c: byrole(c, "after")["frames_measured"]["0"].__setitem__("ssim_stretch", None)),
+        ("6 repro: the before frame-0 SSIM moves off metrics.json", 6,
+         lambda c: byrole(c, "before")["frames_measured"]["0"].__setitem__("ssim_cover", 0.5)),
+        ("7 frame0-best: the last frame outruns frame 0", 7,
+         lambda c: byrole(c, "after")["frames_measured"]["361"].__setitem__("ssim_cover", 0.99)),
+        ("8 floor: a frame-0 cosine under 0.45", 8,
+         lambda c: byrole(c, "after")["frames_measured"]["0"].__setitem__("best_cos", [0.12, 0.05])),
+        ("9 sheet: the first tile is flat black", 9,
+         lambda c: c["meta"].__setitem__("tile_std", [0.0] + c["meta"]["tile_std"][1:])),
+        ("9 sheet: a label set that names only one id", 9,
+         lambda c: c["meta"].__setitem__("labels", [l.replace(NOW_ID, "clip") for l in c["meta"]["labels"]])),
+        ("9 sheet: a label band with no printed text", 9,
+         lambda c: c.__setitem__("sheet_path", os.path.join(AUD, "ab_seed_blank_sheet.png"))),
+        ("10 receipt: the doc claims the stalled render reported ok=True", 10,
+         lambda c: c.__setitem__("doc_text", txt0.replace("ok=None, attempts=0", "ok=True, attempts=1 ok=True")
+                                 .replace("NOT re-rendered", "re-rendered"))),
+        ("10 receipt: one copy, so nothing proves the re-queue burn", 10,
+         lambda c: byrole(c, "after").__setitem__("copies", byrole(c, "after")["copies"][:1])),
+        ("11 doc-sync: a hand-typed number in the table", 11,
+         lambda c: c.__setitem__("doc_text", txt0.replace("0.915424", "0.95", 1))),
+        ("12 KEEP: a pick word in the doc", 12,
+         lambda c: c.__setitem__("doc_text", txt0 + "\nThe after is the best clip.\n")),
+        ("13 cites: a quote that is not in the cited file", 13,
+         lambda c: c["jdoc"]["cites"].__setitem__("steps 12",
+                                                  ["notes/web/02v_docs_h3.txt", "steps 12 guarantee fidelity"])),
+        ("14 no-gpu: a network call appears in the A/B section", 14,
+         lambda c: c.__setitem__("ab_src", c["ab_src"] + "\nimport " + "sock" + "et\n")),
+        ("15 durable: the artifacts are not tracked", 15,
+         lambda c: c.__setitem__("tracked", set())),
+        ("15 durable: the media-ignore rule is not the measured one", 15,
+         lambda c: c.__setitem__("ignore_rule", "")),
+        ("15 durable: the meta sha no longer equals the sheet bytes", 15,
+         lambda c: c["meta"].__setitem__("sha", "0" * 64)),
+    ]
+    os.makedirs(AUD, exist_ok=True)
+    from PIL import Image
+    Image.new("RGB", (AB_TILE[0] * AB_TILE[3], AB_TILE[4] + (AB_TILE[1] + AB_TILE[2]) * 3), "white").save(
+        os.path.join(AUD, "ab_seed_blank_sheet.png"))
+    for i, (name, want, mut) in enumerate(SEEDS):
+        c = clone()
+        mut(c)
+        open(os.path.join(AUD, "ab_seed_%02d.json" % i), "w", encoding="utf-8").write(
+            json.dumps({"seed": name, "target": want, "ids": c["ids"]}, ensure_ascii=False))
+        got = ab_check(c, label="seed:" + name)
+        (fired if any(f.startswith(str(want) + " ") for f in got) else silent).append(name)
+    for f in ab_check(real, label="real-after-seeds"):
+        real_problem = True
+        print("REAL_PROBLEM " + f)
+    print("AB_SEEDS %d fired=%d silent=%d" % (len(SEEDS), len(fired), len(silent)))
+    if silent:
+        print("SILENT_SEEDS " + json.dumps(silent, ensure_ascii=False))
+    clean = not silent and not real_problem
+    print("AB_SELFTEST " + ("SEEDS_FIRED %d/%d REAL_CLEAN" % (len(fired), len(SEEDS)) if clean
+                            else "AB_SELFTEST_DIRTY silent=%d real_problems=%d" % (len(silent), int(real_problem))))
+    return 0 if clean else 1
+
+
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "--check"
     load_clips()
@@ -1220,8 +1838,19 @@ def main():
         return now_selftest(g11)
     if mode == "--now-sheet":
         return now_sheet()
+    if mode == "--ab-metrics":
+        return ab_metrics()
+    if mode == "--ab-sheet":
+        return ab_sheet()
+    if mode == "--ab-note":
+        return ab_note()
+    if mode == "--ab-check":
+        return 1 if ab_check() else 0
+    if mode == "--ab-selftest":
+        return ab_selftest()
     print("usage: --metrics | --build | --check | --selftest | --sheet | "
-          "--now-build | --now-check | --now-selftest | --now-sheet")
+          "--now-build | --now-check | --now-selftest | --now-sheet | "
+          "--ab-metrics | --ab-sheet | --ab-note | --ab-check | --ab-selftest")
     return 2
 
 

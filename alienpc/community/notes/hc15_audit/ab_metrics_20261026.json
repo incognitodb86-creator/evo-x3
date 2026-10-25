@@ -1,0 +1,318 @@
+{
+ "tool": "notes/hc15_anchor_fix_build.py --ab-metrics",
+ "generated": "2026-10-25 08:23:07",
+ "frames": [
+  0,
+  181,
+  361
+ ],
+ "ts": [
+  0.5,
+  2.6,
+  5.0,
+  7.4,
+  9.6
+ ],
+ "floor": 0.45,
+ "cites": {
+  "steps 12": [
+   "notes/web/02v_docs_h3.txt",
+   "Speech and timbre need **12+** steps"
+  ],
+  "steps band 8-12": [
+   "notes/web/hc15_tenstrip_readme.txt",
+   "slow 8-12 step reference model"
+  ],
+  "attention": [
+   "notes/web/02v_docs_h3.txt",
+   "Comfy Kitchen attention cannot run `int8_convrot` checkpoints"
+  ],
+  "lora continuation-only": [
+   "notes/web/02v_antiburn_readme.txt",
+   "Don't use it on clip 1"
+  ]
+ },
+ "graph_diff": [
+  "NODE+|lora_antiburn|",
+  "[inputs].attention|m_attn|",
+  "[inputs].filename_prefix|save|",
+  "[inputs].model|s1_guide|",
+  "[inputs].model|s1_sched|",
+  "[inputs].ref_image_size|c0|",
+  "[inputs].ref_image_size|c1|",
+  "[inputs].steps|s0_sched|",
+  "[inputs].steps|s1_sched|"
+ ],
+ "rows": [
+  {
+   "id": "ali163_hc15_bd002_s51150011",
+   "role": "before",
+   "mp4": "C:/AI/community/runs/ali163_hc15_bd002_s51150011/ali163_hc15_bd002_s51150011.mp4",
+   "bytes": 6145778,
+   "sha": "31fdc8fcfb1e6594c68d28607a0c49216e1610b9cb7fd3766aa4b7d5476a17b2",
+   "mtime": "2026-10-24 19:54:29",
+   "probe": {
+    "frames": 362,
+    "w": 1344,
+    "h": 768,
+    "fps": "24/1",
+    "dur": 15.083333,
+    "audio": true
+   },
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd002_s51150011.api.json",
+   "graph_sha": "8a57ebbf456b6f9d74ad1ca2424076041e8ad0c524d15f7f8a7c9a126a57e769",
+   "setting": {
+    "nodes": 27,
+    "steps": [
+     8
+    ],
+    "sampler": "res_multistep",
+    "attention": "comfy kitchen attention",
+    "ref_image_size": [
+     "max"
+    ],
+    "lora": [],
+    "seed": 51150001,
+    "start": "community/hc/BD002.jpg",
+    "crops": [
+     "community/hc/BD002_w2_face.png"
+    ],
+    "prompt_sha": {
+     "c0": "ed90eb1c0bbc6137080e632f78b96230067b60bbea7a080b00688747c73d63a1",
+     "c1": "389a3402017dcdf3ebe11857f6c39b74cbdb22967d2aeb68342b99a05c211b98"
+    },
+    "canvas": "1344x768"
+   },
+   "start_cover": "C:/AI/community/notes/hc15_audit/ab_ali163_hc15_bd002_s51150011_start_cover.png",
+   "start_stretch": "C:/AI/community/notes/hc15_audit/ab_ali163_hc15_bd002_s51150011_start_stretch.png",
+   "start_faces": [
+    [
+     [
+      738.2,
+      44.4,
+      867.0,
+      219.2
+     ],
+     0.897
+    ],
+    [
+     [
+      252.3,
+      92.5,
+      466.3,
+      197.4
+     ],
+     0.771
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.915424,
+     "psnr_cover": 29.580949,
+     "ssim_stretch": 0.771982,
+     "psnr_stretch": 20.271323,
+     "faces": 2,
+     "best_cos": [
+      0.875,
+      0.748
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.357721,
+     "psnr_cover": 6.7112,
+     "ssim_stretch": 0.358458,
+     "psnr_stretch": 6.631023,
+     "faces": 2,
+     "best_cos": [
+      0.247,
+      0.108
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.346141,
+     "psnr_cover": 6.39856,
+     "ssim_stretch": 0.349496,
+     "psnr_stretch": 6.327019,
+     "faces": 1,
+     "best_cos": [
+      0.066,
+      0.187
+     ]
+    }
+   },
+   "copies": [
+    {
+     "name": "ali163_hc15_bd002_s51150011_00001_.mp4",
+     "bytes": 6145778,
+     "sha": "31fdc8fcfb1e6594c68d28607a0c49216e1610b9cb7fd3766aa4b7d5476a17b2",
+     "mtime": "2026-10-24 19:54:25"
+    }
+   ],
+   "job_start_rows": 1,
+   "job_end_rows": 1,
+   "poll_warns": 0,
+   "job_start_first": "2026-10-24 19:44:57 CT JOB start ali163_hc15_bd002_s51150011 prompt_id=8bc034da-ab0e-4687-94ee-ff5bce9d9af0",
+   "objective_ok": true,
+   "objective_attempts": 1,
+   "objective_secs": 571.7
+  },
+  {
+   "id": "ali163_hc15_bd002_s51150021",
+   "role": "after",
+   "mp4": "C:/AI/community/runs/ali163_hc15_bd002_s51150021/ali163_hc15_bd002_s51150021.mp4",
+   "bytes": 6297740,
+   "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+   "mtime": "2026-10-25 03:12:34",
+   "probe": {
+    "frames": 362,
+    "w": 1344,
+    "h": 768,
+    "fps": "24/1",
+    "dur": 15.083333,
+    "audio": true
+   },
+   "graph": "C:/AI/community/p7/graphs/ali163_hc15_bd002_s51150021.api.json",
+   "graph_sha": "c42a36e9abfc056e8951aac0bc336da6292bc07af1260f741e13b739afa5829e",
+   "setting": {
+    "nodes": 28,
+    "steps": [
+     12
+    ],
+    "sampler": "res_multistep",
+    "attention": "pytorch attention",
+    "ref_image_size": [
+     "match"
+    ],
+    "lora": [
+     {
+      "node": "lora_antiburn",
+      "file": "h3_antiburn_universal_v1.safetensors",
+      "strength": 0.5,
+      "model": [
+       "m_shift",
+       0
+      ]
+     }
+    ],
+    "seed": 51150001,
+    "start": "community/hc/BD002.jpg",
+    "crops": [
+     "community/hc/BD002_w2_face.png"
+    ],
+    "prompt_sha": {
+     "c0": "ed90eb1c0bbc6137080e632f78b96230067b60bbea7a080b00688747c73d63a1",
+     "c1": "389a3402017dcdf3ebe11857f6c39b74cbdb22967d2aeb68342b99a05c211b98"
+    },
+    "canvas": "1344x768"
+   },
+   "start_cover": "C:/AI/community/notes/hc15_audit/ab_ali163_hc15_bd002_s51150021_start_cover.png",
+   "start_stretch": "C:/AI/community/notes/hc15_audit/ab_ali163_hc15_bd002_s51150021_start_stretch.png",
+   "start_faces": [
+    [
+     [
+      738.2,
+      44.4,
+      867.0,
+      219.2
+     ],
+     0.897
+    ],
+    [
+     [
+      252.3,
+      92.5,
+      466.3,
+      197.4
+     ],
+     0.771
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.916295,
+     "psnr_cover": 29.643646,
+     "ssim_stretch": 0.772154,
+     "psnr_stretch": 20.230988,
+     "faces": 2,
+     "best_cos": [
+      0.859,
+      0.793
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.374122,
+     "psnr_cover": 6.914151,
+     "ssim_stretch": 0.375027,
+     "psnr_stretch": 6.829111,
+     "faces": 2,
+     "best_cos": [
+      0.201,
+      0.103
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.312151,
+     "psnr_cover": 6.013004,
+     "ssim_stretch": 0.31491,
+     "psnr_stretch": 5.949173,
+     "faces": 1,
+     "best_cos": [
+      -0.029,
+      0.274
+     ]
+    }
+   },
+   "copies": [
+    {
+     "name": "ali163_hc15_bd002_s51150021_00001_.mp4",
+     "bytes": 6297740,
+     "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+     "mtime": "2026-10-24 22:11:10"
+    },
+    {
+     "name": "ali163_hc15_bd002_s51150021_00002_.mp4",
+     "bytes": 6297740,
+     "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+     "mtime": "2026-10-24 23:52:03"
+    },
+    {
+     "name": "ali163_hc15_bd002_s51150021_00003_.mp4",
+     "bytes": 6297740,
+     "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+     "mtime": "2026-10-25 00:33:25"
+    },
+    {
+     "name": "ali163_hc15_bd002_s51150021_00004_.mp4",
+     "bytes": 6297740,
+     "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+     "mtime": "2026-10-25 01:11:35"
+    },
+    {
+     "name": "ali163_hc15_bd002_s51150021_00005_.mp4",
+     "bytes": 6297740,
+     "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+     "mtime": "2026-10-25 01:51:14"
+    },
+    {
+     "name": "ali163_hc15_bd002_s51150021_00006_.mp4",
+     "bytes": 6297740,
+     "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+     "mtime": "2026-10-25 02:31:44"
+    },
+    {
+     "name": "ali163_hc15_bd002_s51150021_00007_.mp4",
+     "bytes": 6297740,
+     "sha": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+     "mtime": "2026-10-25 03:12:34"
+    }
+   ],
+   "job_start_rows": 7,
+   "job_end_rows": 0,
+   "poll_warns": 276,
+   "job_start_first": "2026-10-24 21:52:58 CT JOB start ali163_hc15_bd002_s51150021 prompt_id=89584e5c-2668-4115-939a-55b01b90d52a",
+   "objective_ok": null,
+   "objective_attempts": 0,
+   "objective_secs": null
+  }
+ ]
+}
