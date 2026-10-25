@@ -26,7 +26,9 @@ Checks (7 groups, 12 claims; each one is seeded in --selftest, and must be 0 on 
                2e REPO-ROWS the rows this pass creates in BOTH repos it writes in (its plan, the Q5 citation fix,
                           the gate manifest, the two probe artifacts the standing gates rewrite) are named by a
                           disposition, tracked, and no longer status rows - and any status row that NO disposition
-                          names is reported by path, so a clean count of 0 can never hide an undecided file.
+                          names is reported by path, so a clean count of 0 can never hide an undecided file. An
+                          artifact regenerated per pass (the manifest, whose name carries the day) is named by a
+                          pattern, and a pattern that matches no tracked file is itself the fault.
   3  ZIP       the tracked zip's bytes/sha match the record, and the index blob == the HEAD blob == the disk bytes.
   4  NO-WRITE  hc15_anchor_fix_build.py's ab_selftest() writes nothing under notes/ and opens a temp dir, and
                notes/hc15_audit carries 0 ab_seed_* files (the OLD wiring, restored in a clone, must fire).
@@ -41,6 +43,7 @@ No GPU, no queue, no network, no LLM, no score, no pick. Reads + a temp dir. Exi
 real tree is clean.
 """
 from __future__ import annotations
+import glob
 import hashlib
 import io
 import json
@@ -138,8 +141,10 @@ REPO_ROWS = (
      "this item's plan; 22 plans are already tracked in that folder, so the plan belongs in git"),
     (RG, "notes/plans/render-timeout.md", "commit",
      "the Q5 fix: its :37 cited C:/AI/community/notes/rt_window_probe.py, a path that does not resolve"),
-    (RG, "notes/pass_checks/20261025-08.json", "commit",
-     "this pass's gate manifest (29 rows, 27 green); 11 sibling manifests are tracked"),
+    (RG, "notes/pass_checks/*.json", "commit",
+     "the loop's gate manifest, one per pass: 12 are tracked, so commit the one your pass produced (this pass "
+     "wrote 20261025-08.json, 29 rows / 27 green). A pattern is used because the name carries the day; "
+     "an unmatched pattern is a fault, so the rule cannot rot into an empty promise"),
     (RG, "notes/ali09_probe_result_20261103.json", "commit",
      "rewritten by the standing secrets_matrix gate; the file is tracked, so the new bytes go in the same shape"),
     (RG, "notes/ali13_bash_result_20261103.json", "commit",
@@ -204,6 +209,11 @@ def repo_rows_check(rows=REPO_ROWS, disp=DISPOSITIONS, repos=CLEAN_REPOS):
             bad.append("2e REPO-ROWS %s: class %s is not one of %s" % (p, cls, "/".join(CLASSES)))
             continue
         abs_p = os.path.join(repo, p.replace("/", os.sep))
+        if "*" in p:
+            hits = glob.glob(os.path.join(repo, p.replace("/", os.sep)))
+            if not any(is_tracked(m) for m in hits):
+                bad.append("2e REPO-ROWS %s: the pattern names no tracked file in %s" % (p, repo))
+            continue
         if not is_tracked(abs_p):
             bad.append("2e REPO-ROWS %s: not in git ls-files" % p)
         if not os.path.isfile(abs_p):
@@ -215,7 +225,8 @@ def repo_rows_check(rows=REPO_ROWS, disp=DISPOSITIONS, repos=CLEAN_REPOS):
     for repo in repos:
         for p in row_paths(repo):
             named = (repo, p) in declared or any(
-                r == repo and p.startswith(q.rstrip("/") + "/") for r, q, _, _ in rows)
+                r == repo and (p.startswith(q[:-1]) if q.endswith("*") else p.startswith(q.rstrip("/") + "/"))
+                for r, q, _, _ in rows)
             if not named:
                 bad.append("2e REPO-ROWS %s: a git status row in %s that no disposition names" % (p, repo))
     return bad
@@ -507,6 +518,8 @@ def selftest():
          repo_rows_check([(RG, "notes/zz_08_not_in_index.txt", "commit", "seed: not in the index")]))
     seed("2e REPO-ROWS bad class",
          repo_rows_check([(RG, REPO_ROWS[0][1], "committed", "seed: class not in CLASSES")]))
+    seed("2e REPO-ROWS pattern matches nothing",
+         repo_rows_check([(RG, "notes/zz_08_no_such_*.json", "commit", "seed: an empty rule")]))
     seed("2e REPO-ROWS no reason",
          repo_rows_check([(RG, REPO_ROWS[0][1], "commit", "  ")]))
     # 4 NO-WRITE: the OLD wiring restored in a source clone
@@ -538,7 +551,7 @@ def selftest():
             shutil.rmtree(os.path.dirname(art["ex"]) + "_2", ignore_errors=True)
     except Exception as e:
         silent.append("HEAVY seed pass crashed: %r" % (e,))
-    need = 25  # measured 2026-10-25: 24 fault seeds + 1 negative control; a seed that stops firing fails the gate
+    need = 26  # measured 2026-10-25: 25 fault seeds + 1 negative control; a seed that stops firing fails the gate
     print("\nseeds fired=%d silent=%d (need >=%d silent=0; real-tree problems=%d)" % (len(fired), len(silent), need, len(real)))
     for s in silent:
         print("SILENT_SEED " + s)
@@ -627,9 +640,9 @@ def write_note(path=NOTE):
           "`python C:/AI/community/notes/ali08_git_clean_check.py` -> all 7 checks pass (the 12 claims above), and "
           "`git status --porcelain` is 0 rows in `C:/AI/community` and `ralph-community` (`C:/AI/director`'s count "
           "is printed as out-of-scope context); "
-          "`--selftest` fires 25 seeds = 24 faults + 1 negative control (a stray file moves the row count 0 -> 1, a dropped disposition row, an "
+          "`--selftest` fires 26 seeds = 25 faults + 1 negative control (a stray file moves the row count 0 -> 1, a dropped disposition row, an "
           "unknown class, an unnamed status row in either repo, a declared row that left the index, a declared row "
-          "with no reason, a stale sha, a size drift, a grow-floor regression, litter restored, a `.bak` that came "
+          "with no reason, an artifact pattern that names no tracked file, a stale sha, a size drift, a grow-floor regression, litter restored, a `.bak` that came "
           "back, a missing move target, an ignore rule with no exact pattern / no reason line / a re-tracked "
           "gitlink, the OLD `AUD`-writing `ab_selftest` restored in a clone, a no-temp-dir builder, a stale zip "
           "sha, a tampered tree file, a manifest row naming a missing file, a truncated patch, a status record "
