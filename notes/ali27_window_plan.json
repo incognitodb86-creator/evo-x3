@@ -10,6 +10,7 @@
   "ali163_hc15_bd013_s51150003",
   "ali163_hc15_gi046_s51150014",
   "ali163_hc15_gi046_s51150031",
+  "ali163_hc15_gi046_s51150032",
   "ali163_hc15_gi063_s51150015",
   "ali163_hc15_gi072_s51150006"
  ],
@@ -397,18 +398,6 @@
    "mp4": true,
    "reason": "DUPE_SEED seed 51150004 (retained ali163_hc15_gi046_s51150014)",
    "seed": 51150004
-  },
-  {
-   "canvas": [
-    1344,
-    null
-   ],
-   "frames": 243,
-   "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi046_s51150032.api.json",
-   "id": "ali163_hc15_gi046_s51150032",
-   "mp4": false,
-   "reason": "mp4 absent - render it in a GPU window",
-   "seed": 51150032
   },
   {
    "canvas": [
