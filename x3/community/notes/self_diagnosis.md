@@ -450,3 +450,42 @@ Reported, NOT fixed (not this agent's to touch): the gate ledger is not stamped 
 `ali163_hc15_bd002_s51150011` used 571.7 s = 9.53 min of GPU and `logs/p7_budget.json` still reads
 472.9/615 min, 38/45 jobs, `updated 2026-10-23T18:53:47`, and there is no `p7/jobs/*.result.json` for it
 (`needs_derrick.md` row 14 with the numbers, row 17 RESOLVED). Forge does not edit its own gate ledger.
+
+## 2026-10-25 04:30 CT - VIS pass (ralph-community, item VIS ticked)
+Read ralph.log: last lines are three "iter 1 of 10 start" (02:58, 03:38, 03:58) with no completion line for
+03:58, i.e. the loop was relaunched twice while a pass was mid-flight, and this pass is that one. denies.log
+last write 2026-10-23 19:06; 0 denies in this window, no checkfails.
+Loop health, measured this pass: `notes/ali05_loop_check.py` VERDICT CLEAN, python/powershell open counts agree
+(54 -> 53 after the tick); `notes/ali06_learnings_check.py` went FAIL(3) -> CLEAN (AGENTS.md L4 was 598 chars
+and cited two `notes/...` paths that only resolve under C:/AI/community - cut to 289 with full paths).
+Self-critique: Max's VIS text named one config key, and my first `models.json` edit added
+`inputLimits.images.resize: true` - invalid, `docs/models.md:83-102` types `resize` as an object. Caught by
+reading the doc after the edit, removed in the same pass, so the shipped diff is one key per file. Lesson:
+read the doc for a key BEFORE writing it, and diff the live file against the snapshot to prove the diff.
+Second self-critique: the plan's premise was incomplete (pi blocks images at TWO gates), so a pass that had
+followed the item text literally would have shipped a no-op change and called it vision. Reading the installed
+code path (`read` tool -> `convertToLlm` -> provider request) is what found gate 1.
+Not fixed, not mine: the gate ledger is still not stamped per rendered job (`logs/p7_budget.json`
+`updated 2026-10-23T18:53:47`), and three mid-flight loop relaunches mean more than one pass can hold the
+model slot - the slot is single, so overlapping passes queue on each other (that is the shape of Max's 240 s
+probe timeout).
+
+## 2026-10-26 ~13:20 CT (TOP-SCENE text pass, plan item TOP-SCENE, no render)
+`logs/ralph.log` this window: three runs on 2026-10-26 - 11:39:10 start, 11:59:34 and 11:59:35 stops; 12:37:48 start,
+12:56:27 stop; 13:06:31 start. `logs/DONE.txt` reads `open= 52 iter= 13 claim= true commits= 1 stuck= 0`: the 52 is
+the count of OPEN plan items (the loop stops after 3 commitless iterations, which is what the 11:59 pair is), not a
+FALSE_COMPLETE claim. No STOP_RALPH marker. `notes/denies.log` tail (13:11:36-13:11:43) is `cmd:file:secret` and
+`secret-path:file` rows from another pass reading a credential-shaped path; the fiction lock is the p*.py render-script
+rule (L5) and it is what fires on render scripts, and the lock matches COMMAND TEXT, so this pass hit one deny writing
+a note whose text quoted an env-file glob - the guard read my prose as a secret path. Per the rules I did not retry:
+the note text was reworded and the append went through the write/edit tools.
+This pass's own faults, measured and fixed in-pass: (1) the card gates written this pass FAILed 135 rows on the first
+`--top-check` because the shipped prose carried the drift the item names - the FAIL is the gate working; (2)
+`ck_top_md`'s drift branch had NEVER executed: it referenced `key` and `word_re`, names in no scope of this module, so
+a real byte-drift between a graph and the prose record raised NameError instead of reporting a finding (L10: a failure
+path that has never run is not a check); the new F-21C-MD-SYNC seed is what exposed it; (3) six older selftest seeds
+were SEED MISSED because their anchors were phrases of the pre-rewrite prose - a seed whose anchor is absent is a
+no-op, and seeds must be re-anchored whenever the artifact they probe changes; (4) the facts files were md5-based
+while the card stamps a sha256 row, so integrity now reads sha256. End state: 65/65 seeds fire, 38 tests pass,
+116 PASS lines on `--top-check`, four graphs clean. Not done: the render (this is a text pass), the GI063 consent
+question (needs_derrick row 21), and the tick - TOP-SCENE stays open for its render + lesson step.
