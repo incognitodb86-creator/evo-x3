@@ -489,3 +489,38 @@ no-op, and seeds must be re-anchored whenever the artifact they probe changes; (
 while the card stamps a sha256 row, so integrity now reads sha256. End state: 65/65 seeds fire, 38 tests pass,
 116 PASS lines on `--top-check`, four graphs clean. Not done: the render (this is a text pass), the GI063 consent
 question (needs_derrick row 21), and the tick - TOP-SCENE stays open for its render + lesson step.
+
+
+## 2026-10-25 07:24-08:11 CT - TOP-SCENE step 4: the render is registered, the GI063 hold is enforced at the arm
+
+Reads: `notes/denies.log` empty (0 bytes, no deny this pass), `notes/needs_derrick.md` rows 21/26/27, the fix_plan
+MAX rows 6-7 (GI063 barred before row 21 is answered; Derrick 7:49 AM: the orc clip is "horrible ... a small human
+dick instead of a green orc dick"), the render dir `runs/ali163_hc15_gi046_s51150032/` (mp4 9,395,988 B,
+objective.json ok=true blackfreeze=[], status.log 8 lines: guard IDLE, lock acquired pid 1348, prompt_id 811b2759,
+ok 661.8 s, OBJECTIVE frames=362, unload, release rc 0), `p7/jobs` (57 tracked files, 0 matching *gi046*, newest
+write 2026-10-24 12:27:18 CT), GPU gate read-only: `guard=(0, ['IDLE'])`, no queue, no render started.
+
+Faults found in my own earlier work this item, and fixed: (1) the render row I wrote cited a
+`p7/jobs/<id>.result.json` receipt; disk carries none, and an untracked `p7/jobs` file dies at the pass boundary
+(L8) - so the manifest now states the truth ("absent, 0 result.json") and `render_evidence_fires()` re-measures
+every field a render row claims (status.log tokens, objective.json ok/frames/w/h/fps/audio/duration/secs/
+blackfreeze/outcome/collected_from_disk, p7/jobs presence, runs mp4 presence): 6 new seeds, each firing only on
+the seeded row. (2) A mid-pass probe of the render window printed fields (result.json present, a gpu_lock.release
+file) that two later tools measured absent - a probe inside a pass is a claim, not evidence; the receipt is the
+bytes on disk. (3) The manifest bound 1100-2200 was set before any row carried a render receipt, so a judged and
+rendered row (2743 chars) could not fit: the bound is now 1100-2800, measured off the three shapes of row
+(1927 free, 2373 pre-record, 2743 rendered+judged), not loosened silently. (4) `ck_top_arm` refused an empty arm
+with rc 1 and left the old request file on disk - an arm file is submittable, so that state is an order to queue a
+paid clip and a clip under a hold; `--top-arm` now deletes it and the gate fails if it exists. (5) Two lesson
+citations in `self_setup.md` named `p7/JOB_REQUEST.json`, which I deleted: a learning must cite a path that
+resolves, so the wording now names the arm file under `p7` and `ali06_learnings_check.py` returns CLEAN.
+
+End state: `--top-check` 4 TOP graphs clean, `--top-selftest` 75 seeds all fired with the real artifacts clean,
+`--check` clean (clip 11 control sha pinned True), `test_p6_review.py` 21 passed, `check_web_saves.py` CLEAN
+(172 json), `rt_window_probe.py --check` 13/13, `ali06_learnings_check.py` RESULT CLEAN (AGENTS 39 lines, L20,
+30 write-ups). Commits: `C:/AI/community` 8b948d5, `C:/Users/derek/5slock/ralph-community` 3268867. TOP-SCENE is
+ticked with the GI063 deferral written into the tick line.
+
+Not done, and not mine to do: KEEP is Derrick's (he judged this clip, no keeper issued); the GI063 render is
+barred by the MAX row until needs_derrick row 21 is answered; the orc anatomy words are card-silent (the GI046
+card shows torso/arms/hands/legs, no groin) and sit in needs_derrick row 28 - Forge will not invent them.
