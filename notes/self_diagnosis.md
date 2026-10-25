@@ -408,3 +408,45 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
   hand-off file, not a queued job; and Max's 11:50 AM no-new-scripts line collides with a Derrick item that
   demands measurements - recorded as row 16 for Derrick/Max instead of quietly deleting the tools or quietly
   ignoring the line.
+
+## 2026-10-24 ~20:20 CT iter (FIRST item delivered) - loop health, CPU only
+
+Loop state read off disk: `logs/ralph.log` ends `2026-10-24T18:10:36 iter 1 of 10 start`,
+`2026-10-24T18:44:54 iter 1 of 10 start`, `2026-10-24T20:07:23 iter 1 of 10 start` - the 18:10 and 18:44 runs
+wrote **no summary line**, and `16:18:29 iter 4 of 10 start` has none either, so three passes died mid-flight
+today. The last good summaries read `open=16 commits=1 stuck=0` / `open=17 commits=3` / `open=18 commits=2`:
+open items went 16 -> 17 -> 18 (items were added faster than the loop ticked them) and this pass takes it back
+to 20 -> 19 by ticking the item it worked.
+`notes/denies.log` has **0 lines dated 2026-10-24**; the newest entry is 2026-10-23T18:02:58, a [secret] rule
+that fired on a shell probe of credential-shaped environment-variable names (the rule matches command TEXT, so
+the name alone is enough - AGENTS.md learnings line). Nothing was blocked in this pass, nothing was retried.
+
+Diagnosis of the dead passes, in reach and not: the six HC15 clips rendered 16:59 -> 18:08 CT and the anchor
+clip rendered 19:45 -> 19:54 CT (`runs/*/objective.json` secs 752.5-802.5 and 571.7). Every llama-swap render
+unloads the LLM that is running this agent, and pi's provider timeout is 1200 s, so a pass that is mid-request
+when a ~13-minute render starts loses its model and prints no summary. 18:10:36 (2 min after the gi072 finish,
+mid swap churn) and 18:44:54 are both in that window. **A Ralph pass cannot outlive a render it is waiting on**
+- that is a property of the GPU window design, so it is reported, not worked around.
+
+What this pass did about the risks that ARE in reach:
+1. Zero GPU surface touched: no llama-swap, no ComfyUI port, no queue, no render script, no ledger edit. The
+   render the item asked for was already run by a GPU window, so this pass only measured what was on disk.
+2. Committed the previous pass's receipts FIRST (`C:/AI/community` 1f0b442, `ralph-community` 4ab24e7): the
+   audit doc, builder, metrics, graph and arm were staged-but-untracked, and `runs/` is gitignored - an
+   untracked body dies at the iteration boundary (AGENTS.md L8). A dead pass loses unmeasured work.
+3. Made the item's gate survive delivery: detectors 9 (ARM) and 11 (METRICS) asserted the PRE-render state
+   ("id free of mp4/result/output", "6 rows, every frame-0 SSIM < 0.5"), so they went red the moment the clip
+   rendered. That is a worthless receipt: the next pass would have read a green item as broken and re-armed an
+   id that already has an mp4. Both detectors now assert two states (armed = arm submittable + defect
+   measured; rendered = `objective.json` ok + ffprobe agreement + the measured frame-0 gain) and six new seeds
+   (F5 objective-says-243-f, F6 ffprobe-disagreement, F7 ok=false, H3 after-row-missing, H4 anchor-did-not-take
+   0.35/6.8, H5 faces-at-cos-0.31) keep them provably reachable: 38 seeds, 38 fired, 0 silent, real clean.
+4. Fixed a real probe bug the new state exposed: `probe()` ran ffprobe with `-select_streams v:0`, which
+   restricts the stream list, so the `streams` array never contained the audio stream and the clip read
+   `audio:false` while `objective.json` said true. AGENTS.md's "v:0 is required" is about the CSV field list.
+   Audio now comes from an unfiltered second pass, and the one-line command note went into AGENTS.md.
+
+Reported, NOT fixed (not this agent's to touch): the gate ledger is not stamped per rendered job -
+`ali163_hc15_bd002_s51150011` used 571.7 s = 9.53 min of GPU and `logs/p7_budget.json` still reads
+472.9/615 min, 38/45 jobs, `updated 2026-10-23T18:53:47`, and there is no `p7/jobs/*.result.json` for it
+(`needs_derrick.md` row 14 with the numbers, row 17 RESOLVED). Forge does not edit its own gate ledger.
