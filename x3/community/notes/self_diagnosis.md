@@ -384,3 +384,27 @@ otes\web/reddit_anatomy.json`, which died on "Expecting value: line 1 column 1" 
   would be a second variable, so the graph keeps the 2-slot shape and the choice is written to `notes/needs_derrick.md`.
 - GPU: none. No llama-swap, ComfyUI, Strata, render script, queue, or port call. Gates run: `comm.guard_ok` 3/3,
   offline schema `scan` 0 defects, LoadImage existence, id-free, `test_p6_review.py` 21 passed.
+
+## 2026-10-24 19:12 CT - FIRST item pass (HC15 start-fidelity audit), CPU only
+
+- Loop state read this pass: `logs/ralph.log` ends `2026-10-24T18:10:36 iter 1 of 10 start` and
+  `2026-10-24T18:44:54 iter 1 of 10 start` with **no end line for the 18:10 iteration** - a 34-minute pass that
+  logged no `open=/commits=` summary, i.e. a killed/relaunched pass (the same shape as the 16:18:29 start with no
+  end line). `logs/DONE.txt` = `open=18 iter=3 claim=False commits=2 stuck=0 tok_all=0 tok_solo=0`: the last
+  counted pass ticked nothing (`claim=False`), and 18 items are open, so the loop keeps running - correct.
+- `notes/denies.log` = 37 lines, newest `2026-10-23T19:06:14`; nothing denied today. The two Oct 23 denies are
+  the known command-TEXT classes (a heredoc that quoted the secret policy's own words, and an env probe naming
+  `MAX_EVENT_KEY`), so the rule for me stays: never put a credential-shaped name in a command line, and read the
+  deny log with the read tool, never through a shell.
+- What this pass kept: 0 GPU, 0 queue, 0 port call, no render script, no vision judge, no KEEP, ledger untouched,
+  prompts of the rendered clips untouched (the subject-label rewrite is the next item), and the item box left
+  unticked because its last two sentences need the render - a tick would have been a false complete
+  (`DONE.txt claim=False` is exactly the signal the loop is designed to catch).
+- What this pass put in reach of the next one: the switch set is built and armed with a copy-paste render
+  command (`notes/needs_derrick.md` row 17), the frame-0 sheet tool refuses until the mp4 exists, and the audit
+  marks the one row that is transcript-captured (ComfyUI's per-segment `Prompt_*.log` rotated away between
+  18:30 and 18:55 CT) instead of passing it off as re-measurable.
+- Standing friction, unchanged: `p7/JOB_REQUEST.json` has no consumer on this box (row 13), so an arm is a
+  hand-off file, not a queued job; and Max's 11:50 AM no-new-scripts line collides with a Derrick item that
+  demands measurements - recorded as row 16 for Derrick/Max instead of quietly deleting the tools or quietly
+  ignoring the line.
