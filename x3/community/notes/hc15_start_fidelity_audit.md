@@ -177,3 +177,82 @@ All rows are bodies saved by earlier research passes; each was opened and hashed
 ## 8. Gate on this doc
 
 AUD1 is text-only, so the gate is a citation scan, not a loop/pytest run (those are unaffected by two notes files): every community cell in §5 resolves to a `path:line` in §3/§6 whose file exists (re-verified by `os.path.exists` + sha16 above), and every removed phrase in §2 is a whole-corpus NO HIT from the § Method scan. Re-run the Method scan after any edit to this doc: a phrase quoted in §3/§5 that the scan no longer finds is a regression.
+
+## CITATION AUDIT (AUD1, 2026-10-27) - what the start-image card on disk says, line by line
+Append-only, in the shape of the 1.4p3 addendum: measured text, no restated prose. This section exists because
+the card line map in the 2.1b table (rows citing card `:30`/`:40`/`:41`/`:46`/`:51`/`:56`) does **not** match
+the card file on disk. Both audits cited it.
+
+### The card on disk
+`notes/web/hc15_tenstrip_readme.txt`, 3,698 B, md5 `6471e229170acb361bc88b232eb9c6be`, **63 lines**
+(`io.open(...).splitlines()` and `raw.split(b"
+")` agree; 0 CR bytes, 0 NUL bytes - it is plain UTF-8, not the
+UTF-16 shape `notes/ali02_citation_check.py` documents for `02v_docs_h3.txt`). **Five** byte-identical copies
+measured 2026-10-27 (same size, same md5 prefix, same sha256 prefix `ba3be667bf67bba7`): `03y_mc_readme.txt`,
+`03y_mc_readme_main2.txt`, `hc15_tenstrip_readme.txt`, `agy51_tenstrip_readme.md`, `pq1_tenstrip_card.txt`.
+The 15,125 B card revision that `notes/ali02_citation_check.py`'s docstring records as GONE is not in
+`notes/web`. Section 1 above (stamped "verified 2026-10-29") is accurate for `:16` and the `:26`-`:39` sampler
+list; the 2.1b table is not, and the table below is the diff between them and the file.
+
+### True line map of the copy on disk (verbatim)
+- `:14` "Shifted base H3, a capable model that still has base model capability and functions. Betas are all
+  testing integrations and bases and are just samples ahead of inegrating sulphur h3 which will be the main data
+  backbone and v1.0." (the card's own typos, verbatim)
+- `:16` "beta_6 is a built mostly-reference hybrid with a custom turbo meant to mimic how Fastv2 looks and
+  sounds. **Samples on 10/3 shift**, fully dense or with Fastv2 VSA sparse node settings on multiple samplers
+  like er_sde, euler, LCM, res_multistep, all having some different behaviors with prompt. **It's a slow 8-12
+  step reference model in that configuration.** 4step turbo loras can be run on top of it to reduce that.
+  **SLA sparsity seems to destroy it, avoid using that on any workflows.** It's ideal configuration is with full
+  gates and Fastv2 turbo and VSA gates when they have a reference solution figured out. The attempt to do that is
+  the unstable version which has multiple issues but looks and sounds perfect at 8 steps."
+- `:22` "beta_5 is built with a different normalization technique. It's built off 7 different concept-grouped
+  grafts and consensus merges from over 20 loras, no direct lora merges. ... Other concept loras will also load
+  on top more readily, usually needing lower strength 0.2-0.6."
+- `:24` "Sampling and prompt are the key to quality and success. Non-turbo full step audio will always be better
+  than audio on turbo versions."
+- `:26` "Some working sampling setups:" · `:28` `<ul>` · `:29` "er_sde/beta 4 steps" · `:31` "er_sde/beta57
+  4-6 steps" · `:33` "res_multistep/simple 6-8 steps (my go-to for best motion quality)" · `:35` "LCM/simple
+  6-8 steps (best turbo audio)" · `:37` "LCM/beta 4-6 steps" · `:39` "Euler/simple 4-8 steps" · `:40` `</ul>`
+- `:47` "Int8 versions" · `:48` "https://huggingface.co/cicalooo/10Eros-Max-h3-int8-convrot" (the card's only
+  int8/convrot content is this link - it publishes no quantization recipe)
+- `:52` "beta_4 and beta_3 are corrupted test versions. beta_5 is the only true functional one so far."
+- `:53` "No cache or spectrum if doing reference, they cause accuracy loss."
+- `:54` "Hybrid model is built on the delta1024 h3 merge."
+- `:63` "The standard H3 community license applies. Because this release now carries transferred character from
+  LTX 2.3, Wan 2.2, and Krea 2, the community licenses for those source models apply as well..."
+
+### Where the 2.1b table is stale (measured, 2026-10-27)
+| Cited in this file | Real state of the copy on disk | Verdict |
+|---|---|---|
+| card `:16` (VSA vs SLA, 8-12 step) | `:16` carries it | resolves |
+| card `:33` res_multistep 6-8, `:35` LCM/simple, `:53` no cache/spectrum | same lines | resolve |
+| Section 1 quotes "Sampling and prompt are the key to quality..." at `:20` | `:20` is blank; the sentence is `:24` | off by four |
+| card `:40` "Euler/simple 4-8 steps" | the sentence is `:39`; `:40` is `</ul>` | off by one |
+| card `:30` "er_sde/beta (default)" | `:29` is "er_sde/beta 4 steps"; `(default)` = 0 hits | off by one + invented tag |
+| card `:31` "er_sde/beta57 (my personal go-to)" | `:31` is "er_sde/beta57 4-6 steps"; `my personal go-to` = 0 hits | line ok, wording invented |
+| card `:41` audio "12+ steps" | `:24` is "Non-turbo full step audio will always be better than audio on turbo versions."; `12+ steps` = 0 hits in the card | sentence refuted; `12+ steps` is the **docs** page's (`02v_docs_h3.txt:176` "Speech and timbre need **12+** steps") |
+| card `:51` "use a BF16 base, and quantize to int8 with a convrot" | 0 hits; the card's int8 content is the link at `:47-48` | refuted |
+| card `:46` "10Eros Max benchmark" and `:56` "Model Spec: 10Eros Max" | 0 hits for `10Eros Max` (the file spells `10Eros-Max-h3-int8-convrot`); `Model Spec` = 0 hits; `:56` is a blank line, the file's last line is `:63` (the license line) | refuted |
+| "10-12 steps" as the card's range | `10-12` = 0 hits; `:16` says **8-12** | refuted, range corrected |
+| "Sampling and prompt are the key to quality" quoted as the word-count rule | `:24` carries that sentence; the card has no word count (`word` = 0 hits, gate `mc-word-count-absent`) | resolves, and the rule is ours |
+| card text about "16:9 / 9:16 / square / Use 1 image / resolution rules" | 0 hits each | card-silent, unchanged (L18: not_resolvable) |
+| `notes/plans/aud1-citation-repair.md` (2026-10-27) quotes `:14` "...much smarter...", `:17` "Use 3 images of the character...", `:24` "...ModelSamplingModelPatch node, no CFG." | 0 hits in every one of the 1,146 saved bodies; the real `:14` is the "Shifted base H3" sentence above | invented - a "measured" plan file is not evidence (AGENTS.md L4) |
+
+### Sentences the card publishes that neither audit recorded
+`:22` (beta_5 grafts, and LoRA strength **0.2-0.6** on top of these models), `:29`/`:31` step counts
+(er_sde/beta 4, er_sde/beta57 4-6), `:35` "(best turbo audio)", `:37` "LCM/beta 4-6 steps", `:16` "looks and
+sounds perfect at 8 steps" (the unstable full-gates attempt), `:52` beta_3/beta_4 corrupted, `:54` the
+delta1024 base, `:63` the LTX 2.3 / Wan 2.2 / Krea 2 license terms. The last one bears on the hard line
+"community/published settings only": this model's card carries third-party license obligations.
+
+### Gate
+`notes/ali02_citation_check.py`: CITES (133 rows, 46 added by AUD1, all resolve) carries every sentence quoted
+above as it appears on disk; BANNED (40 rows, all hold) carries every refuted string, including nine new card
+rows
+(`card-no-ultra-mode`, `card-no-3-images`, `card-no-beta6-chain-line`, `card-no-12plus-steps`,
+`card-no-bf16-convrot-line`, `card-no-ersde-default-tag`, `card-no-personal-go-to`,
+`card-no-10eros-max-spaceform`, `card-no-model-spec`); `GLOBAL_ABSENT` (22 tokens) is the corpus-wide 0-hit
+list; `SCAN_DOCS` includes this file and `notes/cf1_setup_audit_20261024.md`, so a citation of a body that is
+not on disk is a named failure. `--selftest` seeds all six detectors and requires them to fire.
+Six CITES rows I wrote earlier today FAILED MISSING-TEXT for exactly this reason (they quoted the 15,125 B
+card); they are recorded as BANNED rows, not quietly dropped.
