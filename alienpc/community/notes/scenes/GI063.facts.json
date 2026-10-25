@@ -1,0 +1,371 @@
+{
+  "_what": "The GI063 start-image CARD as data: what the picture settled, read off the frame by the vision pass (card notes/scenes/GI063.md, caption notes/hc15_start_caption_20261025.md, audit notes/hc15_figures_20261025.md). fix_plan TOP steps 1-3 (Derrick 2026-10-25 3:41 AM CT: 'why are those strip videos and not written based on the images ... Do another audit and fix it'; 5:48-5:49 PM CT: 'describe every figure in each start image as it actually is'). A prompt writer and the build gate read THIS file: gate.per_chunk_tokens are the words a chunk must carry, gate.banned are words the picture does not support, gate.room_banned are the words the shipped prose invented. notes/hc15_anchor_carry_build.py --top-check enforces it (ck_top_card, ck_top_facts).",
+  "scene": "GI063",
+  "card": "C:/AI/community/notes/scenes/GI063.md",
+  "caption": "C:/AI/community/notes/scenes/raw/GI063.txt",
+  "audit": "C:/AI/community/notes/hc15_figures_20261025.md",
+  "image": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI063.jpg",
+  "model": "coding_swift15_iq3s",
+  "status": "REFUSAL_TRUNCATED",
+  "_refusal": "The model answered ask A with a minimal non-graphic record and closed ask B with 'there is no compliant version of this task for this file'. So the card is short: figure count, species, hair, complexion, build, restraint, expression, and NO room, NO props, NO light, NO camera row. That short list is the whole visible fact set; the gate writes only from it.",
+  "figures": [
+    {
+      "label": "1",
+      "kind": "human",
+      "noun": "woman",
+      "pose": "bound to a table, wrists chained, ankles in shackles, an anguished distressed face",
+      "head_in_frame": true,
+      "visible": [
+        "blonde",
+        "wavy",
+        "long hair",
+        "blue eyes",
+        "light complexion",
+        "slim build",
+        "bound",
+        "chained",
+        "shackles",
+        "table",
+        "distressed",
+        "anguished"
+      ],
+      "not_visible": [
+        "age",
+        "height",
+        "eye colour beyond blue",
+        "breast size",
+        "areola",
+        "genitals",
+        "room",
+        "props",
+        "light"
+      ]
+    },
+    {
+      "label": "2",
+      "kind": "nonhuman",
+      "noun": "robot (the card's word); machine (the card's facts row)",
+      "pose": "at the bound figure, the acting figure in the frame; the card records no appearance for it",
+      "head_in_frame": null,
+      "visible": [
+        "robot",
+        "machine"
+      ],
+      "not_visible": [
+        "colour",
+        "metal",
+        "metallic sheen",
+        "black and silver",
+        "panel joints",
+        "seams",
+        "chrome jaw",
+        "no mouth",
+        "optical band",
+        "eyes",
+        "glow",
+        "hands",
+        "fingers",
+        "size",
+        "height",
+        "materials",
+        "servos",
+        "pistons",
+        "hydraulics",
+        "circuitry",
+        "face"
+      ]
+    }
+  ],
+  "room": {
+    "tokens": [
+      "table"
+    ],
+    "not_resolvable": true,
+    "_note": "the table is the one piece of furniture the card names; the card has no room row, and the shipped prose's couch, TV and wall-to-wall screen are off-card"
+  },
+  "light": {
+    "tokens": [],
+    "not_resolvable": true,
+    "_note": "the card gives no light row; a prompt must not assert a light for this scene"
+  },
+  "camera": {
+    "tokens": [],
+    "not_resolvable": true,
+    "_note": "the card gives no camera row; the scene_audit builder's own layout line is not the model's words"
+  },
+  "_naming_source": "Max's naming sentence (notes/needs_derrick.md row 18, 2026-10-24 9:30 PM CT, quoted in the card) = 'black and silver metallic humanoid robot, behind a blonde woman on a dark couch with a TV behind them'. The card's words cover 'blonde', 'woman', 'robot'. The colour, the metal, the humanoid shape, the couch and the TV are NOT in the card (the audit flags the robot parts 'optical band, chrome jaw' as added detail); gate.banned.2 bars the mechanical parts, and gate.naming_allowed keeps the naming words as a declared naming source, not a card fact.",
+  "naming_allowed": [
+    "black",
+    "silver",
+    "metal",
+    "metallic",
+    "humanoid"
+  ],
+  "consent": {
+    "status": "CONFLICT",
+    "card_words": "a restrained person in a state of distress, an adult; anguished, distressed expression; bound to a table (wrists chained, ankles in shackles)",
+    "shipped_words": "the woman is consenting and eager",
+    "_note": "Prose cannot convert restraint plus distress into an eagerness the picture does not settle. The card-faithful scene keeps the restraint and the distressed face and states, in the prompt, that the card gives no consent evidence; notes/needs_derrick.md row 22 asks Derrick to rule the scene or replace the still. This is NOT resolved by this pass."
+  },
+  "gate": {
+    "figure_count": 2,
+    "aliases": {
+      "1": [
+        "she",
+        "her",
+        "hers",
+        "herself",
+        "woman",
+        "blonde",
+        "<subject 1>"
+      ],
+      "2": [
+        "it",
+        "its",
+        "robot",
+        "machine",
+        "chassis",
+        "<subject 2>"
+      ]
+    },
+    "per_chunk_tokens": [
+      "blonde",
+      "wavy",
+      "light complexion",
+      "slim build",
+      "bound",
+      "chained",
+      "shackles",
+      "table",
+      "distressed",
+      "anguished",
+      "robot",
+      "machine"
+    ],
+    "banned": {
+      "1": [
+        "dark-haired",
+        "dark hair",
+        "brunette",
+        "black hair",
+        "brown hair",
+        "straight hair",
+        "eager",
+        "consenting and eager",
+        "enthusiastic",
+        "muscular",
+        "tall"
+      ],
+      "2": [
+        "metal",
+        "metallic",
+        "chrome",
+        "optical",
+        "jaw",
+        "plate",
+        "plates",
+        "panel",
+        "panels",
+        "seam",
+        "mesh",
+        "glowing",
+        "glow",
+        "servo",
+        "hydraulic",
+        "piston",
+        "circuit",
+        "alloy",
+        "steel",
+        "grinning",
+        "smiling",
+        "gloved",
+        "glove",
+        "antenna",
+        "chassis",
+        "endoskeleton",
+        "carbon",
+        "fibre",
+        "wire",
+        "wires",
+        "screw",
+        "screws",
+        "bolt",
+        "bolts",
+        "plastic",
+        "rubber",
+        "latex",
+        "hands",
+        "fingers",
+        "arms",
+        "legs",
+        "feet",
+        "toes",
+        "knees",
+        "elbows",
+        "shoulders",
+        "biceps",
+        "torso",
+        "chest",
+        "abdomen",
+        "navel",
+        "collarbone",
+        "spine",
+        "fur",
+        "claws",
+        "talons",
+        "mouth",
+        "teeth",
+        "leds",
+        "led strip",
+        "led panel",
+        "led array",
+        "led ring",
+        "eye light",
+        "eye lights"
+      ],
+      "any": [
+        "the only person",
+        "alone in the room",
+        "standing alone",
+        "the only bodies",
+        "the only figure",
+        "the only subject",
+        "she is alone",
+        "one person",
+        "single figure",
+        "consenting and eager",
+        "on the couch",
+        "the couch",
+        "the television",
+        "wall-to-wall screen",
+        "the TV"
+      ]
+    },
+    "head_in_frame": {
+      "1": true,
+      "2": null
+    },
+    "head_allow": [],
+    "open_beat": {
+      "1": [
+        "wrists chained",
+        "ankles in shackles"
+      ],
+      "2": []
+    },
+    "open_beat_ban": {
+      "1": [
+        "unfasten",
+        "unlock",
+        "unchain",
+        "release her",
+        "frees her",
+        "stands up",
+        "slips",
+        "loosens",
+        "takes off",
+        "removes the",
+        "she stands"
+      ],
+      "2": []
+    },
+    "room_required": [
+      "table"
+    ],
+    "room_banned": [
+      "couch",
+      "sofa",
+      "television",
+      "tv",
+      "bed",
+      "lamp",
+      "curtain",
+      "window",
+      "balcony",
+      "pool",
+      "dungeon",
+      "cellar",
+      "chandelier",
+      "bookcase",
+      "fireplace",
+      "rug",
+      "floor lamp"
+    ],
+    "light_required": [],
+    "age_marker": "canon declaration",
+    "consent_gate": {
+      "ban": [
+        "consenting and eager",
+        "enthusiastic",
+        "she loves",
+        "loves it",
+        "begging for",
+        "willingly",
+        "she wants this",
+        "she is eager",
+        "she begs for",
+        "orgasm"
+      ],
+      "require": [
+        "the card record shows restraint and distress",
+        "notes/needs_derrick.md row 21"
+      ],
+      "_note": "the card shows wrists chained, ankles in shackles, a table, an anguished, distressed expression, and the model's own words call the frame non-consensual content; the prose states the card record and routes the consent question to notes/needs_derrick.md row 21 (Derrick answers), and states no eagerness, want, love, begging or willingness for the bound figure"
+    },
+    "solo_phrases": [
+      "the only person",
+      "alone in the room",
+      "standing alone",
+      "the only bodies",
+      "the only figure",
+      "the only subject",
+      "she is alone",
+      "one person",
+      "single figure"
+    ],
+    "head_note": "gate.head_in_frame.2 = null means the card settles NOTHING about the robot's head, so the prompt gets no robot appearance at all; the naming words in naming_allowed are allowed as declared naming, and gate.banned.2 bars the mechanical parts the audit flags as added detail.",
+    "evidence": {
+      "blonde": "long wavy blonde hair, blue eyes, light complexion, slim build",
+      "wavy": "long wavy blonde hair, blue eyes, light complexion, slim build",
+      "long hair": "hair: Subject 1 = blonde, long, wavy",
+      "blue eyes": "long wavy blonde hair, blue eyes, light complexion, slim build",
+      "light complexion": "long wavy blonde hair, blue eyes, light complexion, slim build",
+      "slim build": "long wavy blonde hair, blue eyes, light complexion, slim build",
+      "bound": "The image shows a person bound to a table (wrists chained, ankles in shackles)",
+      "chained": "props: restraint hardware: wrists chained, ankles in shackles, table",
+      "shackles": "props: restraint hardware: wrists chained, ankles in shackles, table",
+      "table": "props: restraint hardware: wrists chained, ankles in shackles, table",
+      "distressed": "with an anguished, distressed expression",
+      "anguished": "with an anguished, distressed expression",
+      "robot": "The image is a sexually explicit scene of a restrained person being penetrated by a robot",
+      "machine": "species: 1 human adult + 1 robot (machine figure) = a two-figure start",
+      "two figures": "figures: 2",
+      "restraint": "a restrained person being penetrated by a robot",
+      "restrained": "The image is a sexually explicit scene of a restrained person being penetrated by a robot",
+      "non-consensual": "That's non-consensual sexual content.",
+      "no room row": "room: not resolvable from the caption (the model gave no room row)",
+      "no light row": "light: not resolvable from the caption",
+      "no camera row": "light: not resolvable from the caption",
+      "distressed expression": "with an anguished, distressed expression"
+    },
+    "naming_allowed": [],
+    "naming_source": "the robot of <Picture 1>: the start-image card records only a robot/machine figure with no visible detail (the vision model gave no per-figure breakdown), so the prose names it \"the robot\" and \"the machine\" and states no appearance, surface, material, head, face, limb, hand or finger detail at all",
+    "age_required": [
+      "woman",
+      "man",
+      "girl",
+      "boy",
+      "lady",
+      "guy",
+      "female",
+      "male"
+    ]
+  },
+  "_caption_conflict": "Ask B (run 2) refused with no record: 'there is no compliant version of this task for this file.' Ask A gave the minimal record quoted in the card. So this card is one short record with no second opinion, and the not_resolvable rows are the honest state of the picture: nobody has read the room, the light, the camera or the robot's appearance off this frame.",
+  "_schema": "gate keys: figure_count, aliases, per_chunk_tokens, banned{1,2,any}, head_in_frame{1,2}, head_allow, open_beat{1,2}, open_beat_ban{1,2}, room_required, room_banned, light_required, age_marker, consent_gate{ban,require}, solo_phrases, evidence{token: card quote}. ck_top_facts: every gate.per_chunk_tokens entry, every figures[].visible token and every gate.room_required token has a quote in gate.evidence, and every quote sits verbatim in the card file (punctuation normalized: em/en dash to -, curly to straight quotes, case-insensitive). ck_top_card measures the graph prompts against this gate.",
+  "sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+  "sha256_row": "start_still_sha256: e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+  "caption2": "C:/AI/community/notes/scenes/raw/GI063_2.txt",
+  "age_min": 21,
+  "_age_min_source": "C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md v2.3.0: every character is a fictional adult aged 21+. The card carries no age row, so an age in the prose is a canon declaration, never a sighting (gate.age_marker = 'canon declaration', gate.age_required = the words that force one)."
+}
