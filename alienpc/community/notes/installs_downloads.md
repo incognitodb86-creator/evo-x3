@@ -46,3 +46,19 @@
 - models.json decision: the only entry worth adding is the 18.6 GB `Qwen3.6-27B + pytraveler/MiniMax-H3-Prompt-Rewriter-LoRA` pair; adding it invites an 18.6 GB download on a box with 45 GB free for a route PW1d does not use. The Omni GGUF route needs no new bytes.
 - Two layout fixes (moves, zero re-download, sizes unchanged): `models\LLM\MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF\MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf` (343,173,408 B) - the folder now carries the repo-id name `paths.present_file()` looks for, it resolved to "" before; and the lightx2v safetensors set (README.md, adapter_config.json, adapter_model.safetensors 1,291,899,160 B, requirements.txt, system_prompt.py) moved UP from `models\LLM\MiniMax-H3-Prompt-Rewriter-LoRA-Omni\lightx2v-safetensors\` into `models\LLM\MiniMax-H3-Prompt-Rewriter-LoRA-Omni\`, where `paths.adapter_is_complete()` is true (`present_folder(complete=adapter_is_complete)` resolved; before: nothing).
 - Full note: `notes/forge_pw1c_register.md`. Result: `p7/jobs/ali173_pw1c.result.json` ok=True with the comfy_ok line.
+
+## 2026-10-25 04:29 CT - VIS: pi config change (not an install, no bytes downloaded)
+- `C:/Users/derek/.pi/agent/settings.json`: `images.blockImages` `true` -> `false` (pi docs/settings.md:114, pi
+  default `false`; `dist/core/sdk.js` `convertToLlm` replaces every `image` block with the literal text
+  "Image reading is disabled." while it is true).
+- `C:/Users/derek/.pi/agent/models.json`: `providers.llama-swap.models[coding_swift15_iq3s].input`
+  `["text"]` -> `["text","image"]` (docs/models-configuration.md:38 default `["text"]`; the `openai-completions`
+  provider emits `image_url` parts only inside `model.input.includes("image")`). `_esp` and
+  `coding_sc117_strata` left `["text"]` on purpose = control rows.
+- Backups (the only copies; `C:/Users/derek/.pi` is not a git repo):
+  `C:/AI/community/notes/pi_config_snapshots/models-pre-VIS.json` (sha256 head 416bd0cecbd48d06, 2952 B) and
+  `settings-pre-VIS.json` (d21909015d2a9f52, 1206 B). Revert = copy them back over the two live files.
+- Not touched: `llama-swap.yaml`, `C:/AI/strata-0.2.2/strata-swift15-iq3s.json` (its `vision` section,
+  `gpu: false` CPU encoder, is the server side that was already there), secrets, ComfyUI config.
+- Proof + control: `C:/Users/derek/5slock/ralph-community/notes/vis/vis_proof_after.md` (9/9 with the gates
+  open, `VISION-FAILED` with `blockImages` restored).

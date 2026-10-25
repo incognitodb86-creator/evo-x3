@@ -1,0 +1,56 @@
+{
+  "packages": [
+    "npm:pi-permission-system@0.8.0",
+    "npm:pi-subagents",
+    "git:github.com/EveryInc/compound-engineering-plugin",
+    "npm:pi-mobile",
+    "..\\..\\..\\..\\AI\\security\\skillspector\\clone"
+  ],
+  "defaultProvider": "llama-swap",
+  "defaultThinkingLevel": "high",
+  "defaultTools": [
+    "read",
+    "edit",
+    "write",
+    "bash",
+    "grep",
+    "find",
+    "ls"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 16384,
+    "modelOverrides": {
+      "strata/qwen3.8-flash-next-iq3_xxs": {
+        "reserveTokens": 12288
+      },
+      "llama-swap/coding_sc117_strata": {
+        "reserveTokens": 24576,
+        "keepRecentTokens": 20000
+      },
+      "llama-swap/coding_swift15_iq3s_esp": {
+        "reserveTokens": 24576,
+        "keepRecentTokens": 20000
+      }
+    }
+  },
+  "httpIdleTimeoutMs": 1950000,
+  "retry": {
+    "enabled": true,
+    "maxRetries": 2,
+    "provider": {
+      "timeoutMs": 1200000,
+      "maxRetries": 0
+    }
+  },
+  "enableInstallTelemetry": false,
+  "enableAnalytics": false,
+  "extensions": [
+    "-builtin:llama.cpp"
+  ],
+  "images": {
+    "blockImages": true
+  },
+  "model": "coding_swift15_iq3s"
+}
