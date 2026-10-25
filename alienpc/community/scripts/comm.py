@@ -9,6 +9,17 @@ TE = "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
 VVAE = "minimax_h3_video_vae_int8_convrot.safetensors"
 AVAE = "minimax_h3_audio_vae_fp32.safetensors"
 ANTIBURN = "h3_antiburn_universal_v1.safetensors"
+# RENDER-TIMEOUT (2026-10-26): llama-swap queues a request behind a model start, and its own budget for that is
+# healthCheckTimeout (1200 in the live C:/AI/director/config/llama-swap.yaml:5); the published rule is "set client
+# timeouts high enough for the queue and load time" (docs/kb/guides/routing/capacity-and-queues.md, saved body
+# C:/AI/community/notes/web/rt_ls_capacity-and-queues.txt:16-20). Measured with the old 60 s / 30 s: the POST /prompt
+# died at 60 s while llama-swap was starting comfyui_auto (briefs/agy_monitor.log 2026-10-24 22:36, "TimeoutError:
+# timed out at comm.run BASE/prompt" for ali163_hc15_bd002_s51150021), and a 5 s /history poll is itself a comfyui
+# wake, so poller and LLM caller ping-pong the GPU (C:/AI/director/logs/comfy-graceful-stop.log = ~90 s cycles of
+# "stop after 0s" for a fresh PID across the night of 2026-10-24/25).
+SUBMIT_TIMEOUT = 1200   # = live healthCheckTimeout; the /prompt POST waits behind a comfyui_auto start
+POLL_TIMEOUT = 120      # one /history read; ComfyUI answers slowly while it renders
+POLL_SEC = 60           # every /comfyui request is a wake, so the cadence sits above the measured ~90 s start
 LOG = os.path.join(W, "community.log")
 
 def log(s, logfile=None):
@@ -138,6 +149,26 @@ def running():
     try: return http(LS + "/running", timeout=10)
     except Exception as e: return {"error": str(e)}
 
+def comfy_loaded():
+    """True only when llama-swap answers /running and comfyui_auto is in it. /running is the documented admin route
+    (README, saved C:/AI/community/notes/web/rt_llamaswap_readme.txt:57 "`/running` - list currently running models"),
+    so unlike a /comfyui/... path it never wakes a model. None = /running unreadable: never conclude, keep polling."""
+    r = running()
+    if not isinstance(r, dict) or "error" in r: return None
+    return any(x.get("model") == "comfyui_auto" for x in (r.get("running") or []))
+
+def outcome(out, kind, pid=None, note=""):
+    """RENDER-TIMEOUT: comm.run keeps its contract (side dict on success, None on failure) and records WHY it failed
+    in the caller's dict, so the runner can tell a node error (an objective failure, so the redo rule applies) from
+    a client stall: a stall means the render may already be running and paid for, and llama-swap's own doc says client
+    retries "create more queued work" (notes/web/rt_ls_capacity-and-queues.txt:16-20). Kinds: guard, node_error,
+    submit_stall, evicted, stalled. Returns None so every call site stays a one-line `return outcome(...)`."""
+    if isinstance(out, dict):
+        out["outcome"] = kind
+        if pid: out["prompt_id"] = pid
+        if note: out["note"] = note
+    return None
+
 def ensure_comfy(logfile=None):
     """GPU sharing: make sure no LLM is loaded, then wake ComfyUI through llama-swap."""
     r = running(); names = [x.get("model") for x in (r.get("running") or [])] if isinstance(r, dict) else []
@@ -149,8 +180,11 @@ def ensure_comfy(logfile=None):
     st = http(BASE + "/system_stats", timeout=300)
     log(f"COMFY ready v{st['system']['comfyui_version']} wait={time.time()-t0:.0f}s vram_free={st['devices'][0].get('vram_free',0)/2**30:.1f}GiB", logfile)
 
-def run(g, tag, meta, outdir, logfile=None, poll=5, timeout=7200):
+def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=None):
     os.makedirs(outdir, exist_ok=True)
+    # pre-check for the outcome record only; the block below is the gate that stops the queue, unchanged (RENDER-TIMEOUT)
+    if any(isinstance(n["inputs"].get("prompt"), str) and not guard_ok(n["inputs"]["prompt"]) for n in g.values()):
+        outcome(out, "guard", note="adults-only guard hit; the pinned gate below is what returns before the POST")
     for n in g.values():
         p = n["inputs"].get("prompt")
         if isinstance(p, str) and not guard_ok(p):
@@ -159,14 +193,29 @@ def run(g, tag, meta, outdir, logfile=None, poll=5, timeout=7200):
     t0 = time.time()
     try:
         res = http(BASE + "/prompt", {"prompt": g, "client_id": "community-ali52",
-                   "extra_data": {"extra_pnginfo": {"workflow": {"api_prompt": g, "community": meta}}}})
+                   "extra_data": {"extra_pnginfo": {"workflow": {"api_prompt": g, "community": meta}}}},
+                   timeout=SUBMIT_TIMEOUT)
     except urllib.error.HTTPError as e:
-        log(f"JOB error {tag} POST {e.code} {e.read()[:1500]!r}", logfile); return None
+        log(f"JOB error {tag} POST {e.code} {e.read()[:1500]!r}", logfile)
+        return outcome(out, "node_error", note="POST /prompt rejected: " + str(e.code))
+    except Exception as e:
+        # a client-side stall on the submit says nothing about the server: llama-swap queues /prompt behind a model
+        # start, so the job may be running. Never re-POST on this outcome - that is how one clip cost 7 full renders.
+        log(f"JOB submit-stall {tag} {str(e)[:160]} (submit timeout {SUBMIT_TIMEOUT}s; the job may be running server-side)", logfile)
+        return outcome(out, "submit_stall", note=str(e)[:160])
     pid = res.get("prompt_id"); log(f"JOB start {tag} prompt_id={pid}", logfile)
     while time.time() - t0 < timeout:
         time.sleep(poll)
-        try: h = http(f"{BASE}/history/{pid}", timeout=30)
-        except Exception as e: log(f"poll warn {tag} {e}", logfile); continue
+        try: h = http(f"{BASE}/history/{pid}", timeout=POLL_TIMEOUT)
+        except Exception as e:
+            log(f"poll warn {tag} {e}", logfile)
+            if comfy_loaded() is False:
+                # comfyui_auto is gone: the next wake is a FRESH process with an EMPTY history, so this prompt_id can
+                # never be answered. Measured 2026-10-25: ComfyUI stopped at 04:04:54, 2 s after the gi046_s51150031
+                # clip was written at 04:04:52, and this loop went on warning for 19 more minutes (status.log 04:23:29).
+                log(f"poll stop {tag} comfyui_auto is not running: prompt_id {pid} is in no live history", logfile)
+                return outcome(out, "evicted", pid, note="history lost with the comfyui_auto process")
+            continue
         if pid in h:
             st = h[pid].get("status", {}); outs = h[pid].get("outputs", {})
             files = [(f.get("subfolder"), f.get("filename")) for o in outs.values() for k in ("images", "gifs", "videos") for f in o.get(k, [])]
@@ -180,8 +229,10 @@ def run(g, tag, meta, outdir, logfile=None, poll=5, timeout=7200):
                 json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
                 log(f"JOB end {tag} ok secs={dt:.1f} file={dst}", logfile); return side
             msgs = [m for m in st.get("messages", []) if m[0] == "execution_error"]
-            log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile); return None
-    log(f"JOB timeout {tag}", logfile); return None
+            log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile)
+            return outcome(out, "node_error", pid, note=json.dumps(msgs)[:300])
+    log(f"JOB timeout {tag}", logfile)
+    return outcome(out, "stalled", pid, note=f"no history in {timeout}s; the render may have landed in ComfyUI output")
 
 def llm(system, user, max_tokens=3000, temperature=0.6, model="coding_swift15_iq3s_esp"):
     body = {"model": model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],

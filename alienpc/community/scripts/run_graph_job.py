@@ -4,11 +4,24 @@ Called by ralph.ps1 job kind "graph"; Forge never runs it itself. Usage:
 Input: <arm_dir>\request.api.json. Uses comm.run (status.log JOB start/end lines) unchanged.
 Redo rule (Derrick / max-DECISIONS 2026-10-22 3:46 PM CT): only OBJECTIVE failures redo, max 2 (redo 1 same seed, redo 2 seed+1):
 JOB error (incl. node_errors at submit), ffprobe frame count / missing audio / 0-byte, black or frozen frames. No judge here.
+RENDER-TIMEOUT (2026-10-26) - a client stall is NOT an objective failure, so it is never re-queued, and a render that
+landed on disk is collected instead of re-rendered. Measured cost of the old behaviour: 7 JOB starts for
+ali163_hc15_bd002_s51150021 (2026-10-24 21:52:58, 23:32:53, 2026-10-25 00:14:58, 00:53:12, 01:32:46, 02:13:22,
+02:54:11), 18.2-19.2 min each, 7 byte-identical mp4s in ComfyUI output (sha256 b8d0b7b8...), 0 "JOB end" lines in
+300 lines of its status.log = ~2.2 GPU-hours for one clip, and that is what llama-swap's own doc warns about:
+"Avoid using many simultaneous client retries as a capacity control: they create more queued work"
+(docs/kb/guides/routing/capacity-and-queues.md, saved notes/web/rt_ls_capacity-and-queues.txt:16-20).
+The exclusive GPU window is now the box's published mechanism: gpu_guard.ps1 must report IDLE (rc 0) before
+queueing, and C:/AI/director/scripts/gpu_lock.ps1 -Acquire/-Release holds C:/AI/locks/gpu-render.lock under this
+process's PID for the whole window (gpu_guard.ps1:6,126-128 counts a live PID as BUSY; the lock's own header said
+"NOT used by any render script yet"). The lock makes comfy_ctl.py stop/restart refuse and every gate say BUSY.
 ComfyUI: every call goes through llama-swap's documented /comfyui/ passthrough (docs/kb/guides/
 upstreams/comfyui.md, wired to the reserved comfyui_auto); no port is hard-coded because
 llama-swap assigns it (--port ${PORT}); never /upstream. Unloaded after via
-POST /api/models/unload/comfyui_auto. Exit: 0 ok, 2 static check, 3 adults-only guard, 4 ComfyUI down, 5 objective fail after redos."""
-import os, sys, json, copy, time, argparse, subprocess, urllib.request
+POST /api/models/unload/comfyui_auto. Exit: 0 ok, 2 static check, 3 adults-only guard, 4 ComfyUI down, 5 objective
+fail after redos, 6 client stall (prompt_id recorded, job NOT re-queued - collect it, do not re-render), 7 GPU busy
+(gate BUSY or the lock is held by a live PID)."""
+import os, sys, json, copy, time, argparse, subprocess, urllib.request, glob, shutil
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import comm
 LS = comm.LS
 # CA2 0.2 community USAGE audit (2026-11-03): llama-swap docs/kb/guides/upstreams/comfyui.md makes
@@ -19,7 +32,36 @@ LS = comm.LS
 # the main.py command line with a 10002/10003 fallback - so the port is not a constant to bake in.
 # Address the documented route; llama-swap proxies it to comfyui_auto and blocks on readiness.
 COMFY = LS + "/comfyui"; comm.BASE = COMFY
+GPU_LOCK_PS = r"C:\AI\director\scripts\gpu_lock.ps1"; GPU_GUARD_PS = r"C:\AI\director\scripts\gpu_guard.ps1"
 def post(u, t=120): return urllib.request.urlopen(urllib.request.Request(u, data=b"", method="POST"), timeout=t).read()
+# RENDER-TIMEOUT (2026-10-26): the box's published GPU-window mechanism (C:/AI/director/scripts/gpu_lock.ps1 +
+# gpu_guard.ps1). gpu_guard exits 0 = IDLE, 3 = BUSY, and honours a lock file whose first number is a live PID.
+def ps_run(file, *args):
+    try:
+        r = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", file, *args],
+                           capture_output=True, text=True, timeout=300)
+        return r.returncode, (r.stdout + r.stderr).strip().replace("\n", " | ")
+    except Exception as e:
+        return 9, f"{os.path.basename(file)} run error {str(e)[:120]}"
+def gpu_idle(log):
+    rc, out = ps_run(GPU_GUARD_PS); log(f"gpu_guard rc={rc} {out[:200]}"); return rc == 0
+def gpu_lock(log, note):
+    rc, out = ps_run(GPU_LOCK_PS, "-Acquire", "-Owner", str(os.getpid()), "-Note", note)
+    log(f"gpu_lock acquire rc={rc} {out[:140]}"); return rc == 0
+def gpu_unlock(log):
+    rc, out = ps_run(GPU_LOCK_PS, "-Release", "-Owner", str(os.getpid())); log(f"gpu_lock release rc={rc} {out[:140]}")
+def collect_from_disk(tag, since, log):
+    """A paid render must never be re-rendered. When comfyui_auto died, its history died with it, but the graph's own
+    SaveVideo wrote the clip where the graph's subfolder says: ComfyUI output/community/<tag>/. Measured 2026-10-25:
+    the gi046_s51150031 clip (8,087,674 B) sits there with mtime 04:04:52 while the run dir has no mp4 and
+    p7/jobs/...result.json was never written. Returns the newest media file written at/after `since`, else None."""
+    d = os.path.join(comm.C, "output", "community", tag)
+    try:
+        cands = [p for p in glob.glob(os.path.join(d, "*"))
+                 if p.lower().endswith((".mp4", ".png")) and os.path.getmtime(p) >= since - 5]
+    except OSError:
+        return None
+    return max(cands, key=os.path.getmtime) if cands else None
 # ALI-163 R3 harness fix (2026-10-23, backup run_graph_job.py.bak-20261023-hcimg): a graph job can be an IMAGE job
 # (Klein 9B reference-sheet edit -> SaveImage -> .png). The objective gate below is a VIDEO gate (audio stream, exact frame
 # count, blackdetect/freezedetect, timed contact sheet), so an honest sheet render failed as "no audio stream" and went STUCK
@@ -82,7 +124,9 @@ def main():
     for n in g0.values():
         p = n["inputs"].get("prompt")
         if isinstance(p, str) and not comm.guard_ok(p): log(f"CLIP_SKIP {a.tag} adults-only guard"); return 3
-    if not wake(log): log(f"COMFY_DOWN {a.tag}"); return 4
+    if not gpu_idle(log): log(f"GPU_BUSY {a.tag} gpu_guard is not IDLE - nothing queued"); return 7
+    if not gpu_lock(log, f"run_graph_job {a.tag}"): log(f"GPU_BUSY {a.tag} gpu-render.lock held by a live PID - nothing queued"); return 7
+    if not wake(log): log(f"COMFY_DOWN {a.tag}"); gpu_unlock(log); return 4
     bad = static_check(g0)
     if bad: log(f"STATIC_FAIL {a.tag} " + " | ".join(bad[:8])); return 2
     seeds = [k for k, n in g0.items() if n["class_type"] == "RandomNoise"]; res = {"tag": a.tag, "attempts": []}; rc = 5
@@ -93,9 +137,29 @@ def main():
                 for k in seeds: g[k]["inputs"]["noise_seed"] = int(g[k]["inputs"]["noise_seed"]) + 1
             if att: log(f"REDO {att}/{a.max_redo} {a.tag} (objective failure; {'seed+1' if att == 2 else 'same seed'})")
             if not comfy_ok() and not wake(log): log(f"COMFY_DOWN {tag}"); rc = 4; break
-            s = comm.run(g, tag, {"run": a.tag, "attempt": att, "label": "METHOD_ONLY", "plan": "ALI-147"}, D, logfile=SL, timeout=a.timeout)
+            out = {}
+            t_att = time.time()
+            s = comm.run(g, tag, {"run": a.tag, "attempt": att, "label": "METHOD_ONLY", "plan": "ALI-147"}, D, logfile=SL, timeout=a.timeout, out=out)
             why = []
-            if not s: why = ["JOB error"]
+            oc = out.get("outcome", "ok")
+            if not s and oc in ("stalled", "evicted", "submit_stall"):
+                src = collect_from_disk(tag, t_att, log)
+                if src:
+                    dst = os.path.join(D, tag + os.path.splitext(src)[1])
+                    shutil.copyfile(src, dst)
+                    s = {"file": dst, "secs": round(time.time() - t_att, 1), "collected_from_disk": True, "src": src}
+                    json.dump(dict(meta={"run": a.tag, "attempt": att}, tag=tag, file=dst, src=src, prompt_id=out.get("prompt_id"),
+                                   outcome=oc, collected_from_disk=True, finished=time.strftime("%Y-%m-%d %H:%M CT")),
+                              open(dst + ".json", "w", encoding="utf-8"), indent=1)
+                    log(f"COLLECTED {tag} {src} (outcome={oc} prompt_id={out.get('prompt_id','none')}: the render landed, the history did not survive)")
+            if not s:
+                if oc in ("stalled", "evicted", "submit_stall"):
+                    # RENDER-TIMEOUT: the client stopped seeing the job, which is not an objective failure, so the
+                    # published redo rule does not apply. Re-queueing is what burned 7 identical 18-19 min renders.
+                    res["stall"] = {"tag": tag, "outcome": oc, "prompt_id": out.get("prompt_id"), "note": out.get("note", ""),
+                                    "collect_path": os.path.join(comm.C, "output", "community", tag)}
+                    log(f"STALL {tag} outcome={oc} prompt_id={out.get('prompt_id','none')} - NOT re-queued; collect from {res['stall']['collect_path']} or re-check history"); rc = 6; break
+                why = ["JOB error"]
             else:
                 img = a.frames == 0 and os.path.splitext(s["file"])[1].lower() in IMG_EXT  # image gate only for frames-0 requests
                 p = probe(s["file"]); bf = [] if img else blackfreeze(s["file"])
@@ -107,7 +171,8 @@ def main():
                     if not p["audio"]: why.append("no audio stream")
                     if a.frames and abs(p["frames"] - a.frames) > a.frames_tol: why.append(f"frames {p['frames']} != {a.frames}+-{a.frames_tol}")
                 why += [f"detect {x}" for x in bf]
-                res["attempts"].append(dict(p, tag=tag, file=s["file"], secs=s["secs"], blackfreeze=bf, image=img))
+                res["attempts"].append(dict(p, tag=tag, file=s["file"], secs=s["secs"], blackfreeze=bf, image=img, outcome=oc,
+                                            collected_from_disk=bool(s.get("collected_from_disk"))))
             if not why:
                 cs = None if img else contact_sheet(s["file"], os.path.join(D, a.tag + "_stills_contact.png"), p["duration"])
                 res.update(ok=True, file=s["file"], contact_sheet=cs, image=img); log(f"OBJECTIVE ok {tag} image={img} frames={p['frames']} size={p['w']}x{p['h']} audio={p['audio']} dur={p['duration']:.3f} bytes={p['bytes']} contact={cs}"); rc = 0; break
@@ -117,6 +182,7 @@ def main():
     finally:
         try: post(f"{LS}/api/models/unload/comfyui_auto", 300); log("UNLOAD comfyui_auto (POST /api/models/unload)")
         except Exception as e: log(f"unload note {str(e)[:120]}")
+        gpu_unlock(log)   # RENDER-TIMEOUT: release C:/AI/locks/gpu-render.lock so the gate opens for the next job
         json.dump(res, open(os.path.join(D, "objective.json"), "w", encoding="utf-8"), indent=1)
     return rc
 if __name__ == "__main__": sys.exit(main())
