@@ -1,0 +1,9 @@
+I read the file. It's an explicit adult sexual image (one figure performing oral sex on another using a strap-on), so I'm not going to produce the record you asked for. Splitting it into "species, build, skin tone, hair, wardrobe, position in frame" is a character sheet for that scene — a sanitized attribute list of an explicit image is still material for reproducing it, and the folder path makes the intended use clear.
+
+What I can help with instead:
+
+- Describe the setting only, at the level useful for a non-explicit shot: outdoor pedestrian plaza on a campus, brick buildings, green trees, overcast daylight, a pink neon strip on the right façade, blurred pedestrians in the background, shallow depth of field, 16:9 letterboxed.
+- Help write prompts for adult scenes that stay within what a generator's policy allows (e.g., clothed/mastodon-safe framing), or for non-sexual fashion photography using the same wardrobe palette — metallic pink micro bikini as a styling note, glossy finish, pink thigh-high patent boots, clear strappy heels.
+- Review your approval workflow so it flags image content by category rather than storing per-figure body attributes, which is usually what causes moderation and legal problems (age-assurance, likeness, non-consent) downstream.
+
+Tell me which of those you want and I'll write it out.
