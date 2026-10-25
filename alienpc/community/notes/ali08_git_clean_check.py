@@ -11,7 +11,7 @@ while 6 are the briefs the fix_plan MAX block cites as evidence, and 1 is a gitl
 So this file carries the disposition of every row as DATA and verifies it against disk. `--note` writes
 notes/git_status_cleanup_20261025.md FROM that same data, so the note and the gate cannot drift.
 
-Checks (7 groups, 11 claims; each one is seeded in --selftest, and must be 0 on the real tree):
+Checks (7 groups, 12 claims; each one is seeded in --selftest, and must be 0 on the real tree):
   1  CLEAN     `git status --porcelain` is 0 rows in the two repos this item writes in (`C:/AI/community`,
                `ralph-community`); `C:/AI/director`'s count is measured and printed as out-of-scope context.
   2  LEDGER    the 28 rows measured at 15:0x CT are all dispositioned, and every disposition resolves:
@@ -23,6 +23,10 @@ Checks (7 groups, 11 claims; each one is seeded in --selftest, and must be 0 on 
                           sha256 (that file is in NO commit: briefs/agy_monitor.md entered git only at e791bb6, the
                           MONITOR commit, whose blob is a different 1,456 B - git history was not the backup here).
                2d UNTRACK the gitlink is out of the index and the tree is declared ignored by a rule carrying a reason.
+               2e REPO-ROWS the rows this pass creates in BOTH repos it writes in (its plan, the Q5 citation fix,
+                          the gate manifest, the two probe artifacts the standing gates rewrite) are named by a
+                          disposition, tracked, and no longer status rows - and any status row that NO disposition
+                          names is reported by path, so a clean count of 0 can never hide an undecided file.
   3  ZIP       the tracked zip's bytes/sha match the record, and the index blob == the HEAD blob == the disk bytes.
   4  NO-WRITE  hc15_anchor_fix_build.py's ab_selftest() writes nothing under notes/ and opens a temp dir, and
                notes/hc15_audit carries 0 ab_seed_* files (the OLD wiring, restored in a clone, must fire).
@@ -52,7 +56,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ali02_citation_check import ignore_rule, is_tracked   # one source of truth for tracking + ignore rules
 
 W = r"C:/AI/community"
-CLEAN_REPOS = (W, r"C:/Users/derek/5slock/ralph-community")   # the two repos 0.8 writes in
+RG = r"C:/Users/derek/5slock/ralph-community"
+CLEAN_REPOS = (W, RG)                             # the two repos 0.8 writes in
 INFO_REPOS = (r"C:/AI/director",)                            # measured, never a finding of this item
 SNAP = "notes/gmd_ext_20261024"
 BUILDER = os.path.join(W, "notes", "hc15_anchor_fix_build.py")
@@ -124,6 +129,25 @@ DISPOSITIONS = [
 ]
 CLASSES = ("commit", "drop", "move", "untrack+ignore", "keep-tracked")
 
+# Rows this pass CREATES in the loop's own repo. Same rule as the 28: named per file, never bulk-added, and
+# re-measured (tracked + not a status row). `ralph-community/.gitignore:25` = `notes/ali10_probe_result_*.json`
+# is that repo's own answer to probe litter (an ignore rule); this item's answer is stronger - a temp root that
+# writes nothing into a human surface - and the two are recorded side by side so the difference is a decision.
+REPO_ROWS = (
+    (RG, "notes/plans/0.8-git-status-cleanup.md", "commit",
+     "this item's plan; 22 plans are already tracked in that folder, so the plan belongs in git"),
+    (RG, "notes/plans/render-timeout.md", "commit",
+     "the Q5 fix: its :37 cited C:/AI/community/notes/rt_window_probe.py, a path that does not resolve"),
+    (RG, "notes/pass_checks/20261025-08.json", "commit",
+     "this pass's gate manifest (29 rows, 27 green); 11 sibling manifests are tracked"),
+    (RG, "notes/ali09_probe_result_20261103.json", "commit",
+     "rewritten by the standing secrets_matrix gate; the file is tracked, so the new bytes go in the same shape"),
+    (RG, "notes/ali13_bash_result_20261103.json", "commit",
+     "same, from the bash_secrets_matrix row of the same run"),
+    (RG, "fix_plan.md", "commit",
+     "0.8 ticked with receipts + Q5 (fixed) + Q6 (registered); the loop reads this file, so its rows are never bulk-added"),
+)
+
 
 def g(repo, args, binary=False):
     if binary:
@@ -154,6 +178,47 @@ def clean_check(repos=CLEAN_REPOS):
 
 def info_rows():
     return {r: len(status_rows(r)) for r in INFO_REPOS}
+
+
+def row_paths(repo):
+    """Path field of each `git status --porcelain` line (rename lines carry `old -> new`; the quoted form of
+    a path is stripped, same convention as ali02's status_rows)."""
+    out = []
+    for ln in status_rows(repo):
+        p = ln[3:] if len(ln) > 3 else ln
+        p = p.split(" -> ")[-1].strip().strip('"')
+        if p:
+            out.append(p)
+    return out
+
+
+def repo_rows_check(rows=REPO_ROWS, disp=DISPOSITIONS, repos=CLEAN_REPOS):
+    """2e: every row this pass CREATES, in both repos it writes in, is named by a disposition, tracked, and no
+    longer a status row; and any status row that NO disposition names is reported by path. The second half is
+    what makes check 1 non-vacuous: 0 rows can never be the result of ignoring a file."""
+    bad = []
+    declared = {(r, p) for r, p, _, _ in rows}
+    declared |= {(W, p) for p in rows_of(disp)}
+    for repo, p, cls, why in rows:
+        if cls not in CLASSES:
+            bad.append("2e REPO-ROWS %s: class %s is not one of %s" % (p, cls, "/".join(CLASSES)))
+            continue
+        abs_p = os.path.join(repo, p.replace("/", os.sep))
+        if not is_tracked(abs_p):
+            bad.append("2e REPO-ROWS %s: not in git ls-files" % p)
+        if not os.path.isfile(abs_p):
+            bad.append("2e REPO-ROWS %s: not on disk" % p)
+        if not str(why).strip():
+            bad.append("2e REPO-ROWS %s: no reason recorded" % p)
+        if p in row_paths(repo):
+            bad.append("2e REPO-ROWS %s: still a git status row, the disposition is not resolved" % p)
+    for repo in repos:
+        for p in row_paths(repo):
+            named = (repo, p) in declared or any(
+                r == repo and p.startswith(q.rstrip("/") + "/") for r, q, _, _ in rows)
+            if not named:
+                bad.append("2e REPO-ROWS %s: a git status row in %s that no disposition names" % (p, repo))
+    return bad
 
 
 def commit_ok(p, rec):
@@ -329,6 +394,7 @@ def clean_report():
 
 CK = [("1 CLEAN", lambda a: clean_report()),
       ("2 LEDGER", lambda a: dispositions()),
+      ("2e REPO-ROWS", lambda a: repo_rows_check()),
       ("3 ZIP", lambda a: zip_check()),
       ("4 NO-WRITE", lambda a: no_write_check())]
 HEAVY = [("5 TREE==ZIP", lambda a: tree_check(a["rows"], ex=a["ex"])),
@@ -429,6 +495,20 @@ def selftest():
     seed_neg("2d UNTRACK rule+reason", untrack_check("incoming/gmd-dl-ext-2.5.6",
                                                      "1:.gitignore:24:gmd-dl-ext-2.5.6/\tC:/AI/community/incoming/gmd-dl-ext-2.5.6/content.js",
                                                      gi, False))
+    # 2e REPO-ROWS: an unnamed row in a repo the gate watches; a declared row that left the index; a bad class
+    p_seed = "notes/zz_08_repo_seed.txt"
+    try:
+        open(os.path.join(RG, p_seed), "w", encoding="utf-8").write("0.8 2e seed - removed in a finally\n")
+        seed("2e REPO-ROWS unnamed status row", [x for x in repo_rows_check() if p_seed in x])
+    finally:
+        if os.path.exists(os.path.join(RG, p_seed)):
+            os.remove(os.path.join(RG, p_seed))
+    seed("2e REPO-ROWS declared row untracked",
+         repo_rows_check([(RG, "notes/zz_08_not_in_index.txt", "commit", "seed: not in the index")]))
+    seed("2e REPO-ROWS bad class",
+         repo_rows_check([(RG, REPO_ROWS[0][1], "committed", "seed: class not in CLASSES")]))
+    seed("2e REPO-ROWS no reason",
+         repo_rows_check([(RG, REPO_ROWS[0][1], "commit", "  ")]))
     # 4 NO-WRITE: the OLD wiring restored in a source clone
     src = open(BUILDER, encoding="utf-8").read()
     old = src.replace('open(os.path.join(tmp, "ab_seed_%02d.json" % i), "w", encoding="utf-8")',
@@ -458,7 +538,7 @@ def selftest():
             shutil.rmtree(os.path.dirname(art["ex"]) + "_2", ignore_errors=True)
     except Exception as e:
         silent.append("HEAVY seed pass crashed: %r" % (e,))
-    need = 21  # measured 2026-10-25: 20 fault seeds + 1 negative control; a seed that stops firing fails the gate
+    need = 25  # measured 2026-10-25: 24 fault seeds + 1 negative control; a seed that stops firing fails the gate
     print("\nseeds fired=%d silent=%d (need >=%d silent=0; real-tree problems=%d)" % (len(fired), len(silent), need, len(real)))
     for s in silent:
         print("SILENT_SEED " + s)
@@ -534,12 +614,22 @@ def write_note(path=NOTE):
           "relative citation is a choice of repo (L3's cwd-relative class, L4's cite-only-what-you-read). 0.8 "
           "corrects the one wrong-root string in `notes/plans/render-timeout.md:37` and writes its own commands "
           "with the absolute ralph-community root.",
+          "", "## The rows this pass creates in the loop's own repo",
+          "0.8 writes in two repos, so the same per-file rule runs on `ralph-community`: "
+          "**" + str(len(REPO_ROWS)) + "** rows, each named, each re-measured by check 2e (tracked + no longer a "
+          "status row). " + " ".join("`%s` = %s;" % (p, why) for _, p, _, why in REPO_ROWS) +
+          " The contrast worth recording: that repo's own answer to probe litter is an ignore rule - "
+          "`ralph-community/.gitignore:25` = `notes/ali10_probe_result_*.json` - so the adults probe's stamped "
+          "artifacts never show as rows. 0.8 chose a temp root for the `ab_seed_*` files instead of an ignore rule: "
+          "an ignored file still sits in the human-reviewed folder and still gets opened by a reader; a temp root "
+          "writes nothing there. Both answers are now stated where the next pass can find them.",
           "", "## Done-when, measured",
-          "`python C:/AI/community/notes/ali08_git_clean_check.py` -> all 7 checks pass (the 11 claims above), and "
+          "`python C:/AI/community/notes/ali08_git_clean_check.py` -> all 7 checks pass (the 12 claims above), and "
           "`git status --porcelain` is 0 rows in `C:/AI/community` and `ralph-community` (`C:/AI/director`'s count "
           "is printed as out-of-scope context); "
-          "`--selftest` fires 21 seeds = 20 faults + 1 negative control (a stray file moves the row count 0 -> 1, a dropped disposition row, an "
-          "unknown class, a stale sha, a size drift, a grow-floor regression, litter restored, a `.bak` that came "
+          "`--selftest` fires 25 seeds = 24 faults + 1 negative control (a stray file moves the row count 0 -> 1, a dropped disposition row, an "
+          "unknown class, an unnamed status row in either repo, a declared row that left the index, a declared row "
+          "with no reason, a stale sha, a size drift, a grow-floor regression, litter restored, a `.bak` that came "
           "back, a missing move target, an ignore rule with no exact pattern / no reason line / a re-tracked "
           "gitlink, the OLD `AUD`-writing `ab_selftest` restored in a clone, a no-temp-dir builder, a stale zip "
           "sha, a tampered tree file, a manifest row naming a missing file, a truncated patch, a status record "
