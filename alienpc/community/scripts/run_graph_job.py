@@ -122,8 +122,8 @@ def main():
     D = a.arm_dir; SL = os.path.join(D, "status.log"); log = lambda m: comm.log(m, SL)
     g0 = json.load(open(os.path.join(D, "request.api.json"), encoding="utf-8"))
     for n in g0.values():
-        p = n["inputs"].get("prompt")
-        if isinstance(p, str) and not comm.guard_ok(p): log(f"CLIP_SKIP {a.tag} adults-only guard"); return 3
+        for s in comm.prompt_strings(n.get("inputs", {})):
+            if not comm.guard_ok(s): log(f"CLIP_SKIP {a.tag} adults-only guard"); return 3
     # RENDER-TIMEOUT (2026-10-26): every OFFLINE check runs before the GPU window is taken. The window is held by
     # C:/AI/locks/gpu-render.lock, and gpu_guard.ps1:6,126-128 counts a live PID in that file as BUSY, so an early
     # return that skips -Release would leave the box saying BUSY forever and block every later render.
