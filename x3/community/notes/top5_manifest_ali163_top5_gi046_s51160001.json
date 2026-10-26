@@ -1,9 +1,42 @@
 {
+ "ab_diff_measured": null,
+ "ab_reference_graph": null,
  "ages": [
   27,
   34
  ],
+ "arm": "a",
  "as_of": "2026-10-25",
+ "attention": {
+  "attention": "comfy kitchen attention",
+  "published": {
+   "author_names_the_family": "notes/web/hc15_tenstrip_readme.txt:47-48: the int8 builds are the \"10Eros-Max-h3-int8-convrot\" repo, so a file named *_int8* from that line is the published int8_convrot family",
+   "bf16_branch_out_of_reach": "the live /object_info UNETLoader list (notes/ckattn_20261025_obj_UNETLoader.json) offers 3 unet files and the only H3 one is the int8 file; pruned_bf16 is 40 GB and bf16 66 GB (notes/web/02v_docs_h3.txt:76,79) on a 16 GB RTX 5070 Ti",
+   "ck_allows_the_other_families": "notes/web/02v_docs_h3.txt:77-79 lists \"Comfy Kitchen attention\" as the attention for the fp8_scaled / fp32 / bf16 rows, so the published bar is the int8 family only",
+   "ck_is_int8_kernels": "notes/web/01_h3_ckpt_versions.txt:214 \"ComfyUI-Kitchen (comfy-kernel int8 attention)\" and :216 \"int8_convrot ... needs the int8 convrot mm kernel\"",
+   "ck_no_int8": "notes/web/02v_docs_h3.txt:201 \"Templates use int8_convrot checkpoints. Comfy Kitchen does not support them (issue #15529). Use default attention, or switch UNETLoader to pruned_bf16 then change backend.\" the same rule at :80 (\"Comfy Kitchen attention cannot run int8_convrot checkpoints; use a bf16 build with that backend\"), and the int8_convrot 21 GB row at :75",
+   "schema_defaults": "live /object_info read on this box 2026-10-25 23:32 CT, ComfyUI system 0.38.0 (notes/ckattn_20261025_obj_ModelAttentionBackend.json): options [\"pytorch attention\", \"comfy kitchen attention\"], default \"pytorch attention\", tooltip \"Comfy Kitchen attention uses quantized INT8 attention\""
+  },
+  "quant_family": "int8",
+  "schema": {
+   "default": "pytorch attention",
+   "file": "C:/AI/community\\notes\\ckattn_20261025_obj_ModelAttentionBackend.json",
+   "options": [
+    "pytorch attention",
+    "comfy kitchen attention"
+   ]
+  },
+  "unet_bytes": 21709633539,
+  "unet_exists": true,
+  "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+  "unet_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/diffusion_models\\10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+  "vsa": {
+   "keep_percent": null,
+   "recorded_for": "the dense backend is the fallback the sparse node names (live ModelAttentionBackend description, 2026-10-25 23:32 CT)",
+   "selection": "vsa",
+   "start_percent": 0.2
+  }
+ },
  "beats_s": [
   0.0,
   1.4,
@@ -142,6 +175,18 @@
   {
    "detail": [],
    "name": "no_judge",
+   "ok": true
+  },
+  {
+   "detail": [
+    "ATTENTION-CK-INT8 comfy kitchen attention on 10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors (21709633539 B, family int8 = the published int8_convrot family the checkpoint's author names). notes/web/02v_docs_h3.txt:201 \"Templates use int8_convrot checkpoints. Comfy Kitchen does not support them (issue #15529). Use default attention, or switch UNETLoader to pruned_bf16 then change backend.\" the same rule at :80 (\"Comfy Kitchen attention cannot run int8_convrot checkpoints; use a bf16 build with that backend\"), and the int8_convrot 21 GB row at :75 | notes/web/01_h3_ckpt_versions.txt:214 \"ComfyUI-Kitchen (comfy-kernel int8 attention)\" and :216 \"int8_convrot ... needs the int8 convrot mm kernel\" | notes/web/hc15_tenstrip_readme.txt:47-48: the int8 builds are the \"10Eros-Max-h3-int8-convrot\" repo, so a file named *_int8* from that line is the published int8_convrot family | the published value for this family is pytorch attention (the schema default); the other published branch (bf16) is out of reach on this box. the live /object_info UNETLoader list (notes/ckattn_20261025_obj_UNETLoader.json) offers 3 unet files and the only H3 one is the int8 file; pruned_bf16 is 40 GB and bf16 66 GB (notes/web/02v_docs_h3.txt:76,79) on a 16 GB RTX 5070 Ti"
+   ],
+   "name": "attention",
+   "ok": false
+  },
+  {
+   "detail": [],
+   "name": "ab",
    "ok": true
   }
  ],
