@@ -128,13 +128,13 @@ def main():
     # RENDER-TIMEOUT (2026-10-26): every OFFLINE check runs before the GPU window is taken. The window is held by
     # C:/AI/locks/gpu-render.lock, and gpu_guard.ps1:6,126-128 counts a live PID in that file as BUSY, so an early
     # return that skips -Release would leave the box saying BUSY forever and block every later render.
-    bad = static_check(g0)
-    if bad: log(f"STATIC_FAIL {a.tag} " + " | ".join(bad[:8])); return 2
     seeds = [k for k, n in g0.items() if n["class_type"] == "RandomNoise"]; res = {"tag": a.tag, "attempts": []}; rc = 5
     if not gpu_idle(log): log(f"GPU_BUSY {a.tag} gpu_guard is not IDLE - nothing queued"); return 7
     if not gpu_lock(log, f"run_graph_job {a.tag}"): log(f"GPU_BUSY {a.tag} gpu-render.lock held by a live PID - nothing queued"); return 7
     if not wake(log): log(f"COMFY_DOWN {a.tag}"); gpu_unlock(log); return 4
     try:
+        bad = static_check(g0)
+        if bad: log(f"STATIC_FAIL {a.tag} " + " | ".join(bad[:8])); return 2
         for att in range(a.max_redo + 1):
             g = copy.deepcopy(g0); tag = a.tag if att == 0 else f"{a.tag}_redo{att}"
             if att == 2:
