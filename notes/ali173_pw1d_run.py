@@ -34,10 +34,13 @@ import urllib.error
 import urllib.request
 import uuid
 
+sys.path.insert(0, r"C:/AI/community/scripts")
+import comm
+
 sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
 NOTES = r"C:/AI/community/notes"
 PORT = os.environ.get("PW1D_PORT", "10004")
-BASE = "http://127.0.0.1:" + PORT
+BASE = os.environ.get("PW1D_BASE", comm.BASE)
 CTL = [sys.executable, r"C:/AI/community/scripts/comfy_ctl.py"]
 OUT_MD = os.path.join(NOTES, "pw1_smoke_omni_hc3.md")
 OUT_JSON = os.path.join(NOTES, "pw1d_objective.json")
@@ -369,6 +372,19 @@ def main():
     json.dump(graph, open(OUT_GRAPH, "w", encoding="utf-8"), indent=1, ensure_ascii=True)
     say("graph -> %s (%d nodes, no media node)" % (OUT_GRAPH, len(graph)))
 
+    # Adults-only guard check before /prompt queue (Step 0)
+    if not comm.guard_ok(SHORT_PROMPT):
+        say("ADULTS-ONLY guard failed on SHORT_PROMPT")
+        sys.exit(3)
+        return 3
+    for node_id, node_data in graph.items():
+        inputs = node_data.get("inputs", {})
+        for k, v in inputs.items():
+            if isinstance(v, str) and not comm.guard_ok(v):
+                say("ADULTS-ONLY guard failed on node %s key %s" % (node_id, k))
+                sys.exit(3)
+                return 3
+
     try:
         body = json.loads(post("/prompt", {"prompt": graph, "client_id": uuid.uuid4().hex}))
     except urllib.error.HTTPError as e:
@@ -379,6 +395,17 @@ def main():
             graph = build_graph(model, adapter, "dict")
             json.dump(graph, open(OUT_GRAPH, "w", encoding="utf-8"), indent=1, ensure_ascii=True)
             say("retrying with the dict form references={'ref_0': [...]}")
+            if not comm.guard_ok(SHORT_PROMPT):
+                say("ADULTS-ONLY guard failed on SHORT_PROMPT")
+                sys.exit(3)
+                return 3
+            for node_id, node_data in graph.items():
+                inputs = node_data.get("inputs", {})
+                for k, v in inputs.items():
+                    if isinstance(v, str) and not comm.guard_ok(v):
+                        say("ADULTS-ONLY guard failed on node %s key %s" % (node_id, k))
+                        sys.exit(3)
+                        return 3
             body = json.loads(post("/prompt", {"prompt": graph, "client_id": uuid.uuid4().hex}))
         else:
             sys.exit(7)
