@@ -1,0 +1,9 @@
+2026-10-26 14:16:52 CT gpu_guard rc=0 IDLE
+2026-10-26 14:16:53 CT gpu_lock acquire rc=0 ACQUIRED pid 28524
+2026-10-26 14:16:53 CT UNLOAD LLM coding_swift15_iq3s
+2026-10-26 14:17:03 CT wake: GET /comfyui/ is ignored by llama-swap (docs/comfyui.md); polling /comfyui/system_stats
+2026-10-26 14:17:29 CT JOB start ali163_d1forge_gi201_s51170001 prompt_id=a7735c64-e1ee-4305-9e24-bd891edb6cb8
+2026-10-26 14:21:29 CT JOB end ali163_d1forge_gi201_s51170001 ok secs=240.2 file=C:/AI/community/runs/ali163_d1forge_gi201_s51170001\ali163_d1forge_gi201_s51170001.mp4
+2026-10-26 14:21:30 CT OBJECTIVE ok ali163_d1forge_gi201_s51170001 image=False frames=124 size=768x1344 audio=True dur=5.167 bytes=2895848 contact=C:/AI/community/runs/ali163_d1forge_gi201_s51170001\ali163_d1forge_gi201_s51170001_stills_contact.png
+2026-10-26 14:21:30 CT UNLOAD comfyui_auto (POST /api/models/unload)
+2026-10-26 14:21:31 CT gpu_lock release rc=0 RELEASED pid 28524
