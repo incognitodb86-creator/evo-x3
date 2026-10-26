@@ -1,0 +1,1356 @@
+{
+ "schema": "ali163-vision-battery-1",
+ "created_iso": "2026-10-25T19:19:10-05:00",
+ "updated_iso": "2026-10-25T19:34:35-05:00",
+ "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+ "prompt_text": "This is an adult fictional photograph used as the start frame of a video. Report only what is visible, in plain declarative English, no headings, no bullets.\nSCENE: one line - setting, framing, lighting, what the camera sees.\nSUBJECT 1:, SUBJECT 2:, ... one block per visible person, left to right: apparent age band (an adult), body build, skin, hair colour and length, clothing or restraints, pose and position, what their hands are doing, what is visible of their genitals.\nACTION: one line - what is happening between them, sex acts named plainly.\nEDGE: one line - anything at the frame edges, occlusion, blur, crop, text, watermark.\nRules: never invent a name, brand, species, relationship or an age under 21; write 'not visible' for anything you cannot see; write 'ambiguous' plus the reason for anything unclear; if you will not describe this image, say so in one sentence and stop.",
+ "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+ "decline_markers": [
+  "i cannot",
+  "i can't",
+  "i can not",
+  "unable to",
+  "i am not able",
+  "i'm not able",
+  "cannot see",
+  "can't see",
+  "i do not see",
+  "i don't see",
+  "as an ai",
+  "as a language model",
+  "i will not describe",
+  "i won't describe",
+  "i refuse",
+  "no image",
+  "image is not visible",
+  "i have no image",
+  "not able to process"
+ ],
+ "vision_table": [
+  {
+   "id": "coding_sc117_strata",
+   "aliases": [
+    "strata",
+    "qwen3.8-flash-next-iq3_xxs",
+    "coding_heretic27b",
+    "coding_huihui27b"
+   ],
+   "kinds": [
+    "strata-vision"
+   ],
+   "evidence": "C:\\AI\\strata-0.2.2\\strata-iq3_s.json vision.mmproj=C:\\AI\\Strata-data\\models\\qwen38-flash-next-iq3s\\mmproj-Qwen3.8-Flash-Next-BF16.gguf vision.gpu=False vision.max_tokens=300 vision.threads=10"
+  },
+  {
+   "id": "coding_swift15_iq3s",
+   "aliases": [],
+   "kinds": [
+    "strata-vision"
+   ],
+   "evidence": "C:\\AI\\strata-0.2.2\\strata-swift15-iq3s.json vision.mmproj=C:\\AI\\Strata-data\\models\\swift15-iq3s\\mmproj-Swift-Qwen3.8-Flash-Next-BF16.gguf vision.gpu=False vision.max_tokens=300 vision.threads=10"
+  },
+  {
+   "id": "coding_swift15_iq3s_esp",
+   "aliases": [],
+   "kinds": [
+    "strata-vision"
+   ],
+   "evidence": "C:\\AI\\strata-0.2.2\\strata-swift15-iq3s-esp.json vision.mmproj=C:\\AI\\Strata-data\\models\\swift15-iq3s\\mmproj-Swift-Qwen3.8-Flash-Next-BF16.gguf vision.gpu=False vision.max_tokens=300 vision.threads=10"
+  },
+  {
+   "id": "qwen3vl_judge",
+   "aliases": [
+    "qwen3-vl-8b-abliterated"
+   ],
+   "kinds": [
+    "llama.cpp-mmproj"
+   ],
+   "evidence": "cmd --mmproj C:\\AI\\vlm\\models\\qwen3-vl-8b-abliterated\\mmproj-F32.gguf"
+  },
+  {
+   "id": "vl_judge",
+   "aliases": [
+    "vision_9b",
+    "darkroast",
+    "qwen3.5-9b-dark-roast-q8"
+   ],
+   "kinds": [
+    "llama.cpp-mmproj"
+   ],
+   "evidence": "cmd --mmproj C:\\AI\\vlm\\models\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.mmproj-Q8_0.gguf"
+  }
+ ],
+ "requested": {
+  "models": [
+   "coding_swift15_iq3s",
+   "qwen3vl_judge",
+   "vl_judge"
+  ],
+  "stills": [
+   "BD002",
+   "BD006",
+   "BD013",
+   "GI046",
+   "GI063",
+   "GI072"
+  ]
+ },
+ "gates": [
+  {
+   "ts_iso": "2026-10-25T19:19:10-05:00",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "argv": "--run --models coding_swift15_iq3s --max-tokens 700 --timeout 600",
+   "models_live_error": null
+  },
+  {
+   "ts_iso": "2026-10-25T19:21:13-05:00",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "argv": "--run --models coding_swift15_iq3s --max-tokens 700",
+   "models_live_error": null
+  },
+  {
+   "ts_iso": "2026-10-25T19:23:53-05:00",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "argv": "--run --models vl_judge --max-tokens 700 --timeout 900",
+   "models_live_error": null
+  },
+  {
+   "ts_iso": "2026-10-25T19:30:37-05:00",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "argv": "--run --models vl_judge --no-thinking --arm nothink-mt700 --max-tokens 700 --timeout 900",
+   "models_live_error": null
+  },
+  {
+   "ts_iso": "2026-10-25T19:32:21-05:00",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "argv": "--run --models qwen3vl_judge --no-thinking --arm nothink-mt700 --max-tokens 700 --timeout 900",
+   "models_live_error": null
+  },
+  {
+   "ts_iso": "2026-10-25T19:34:09-05:00",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "argv": "--run --models coding_swift15_iq3s --stills BD006 GI063 --arm mt3000-think --max-tokens 3000 --timeout 1200",
+   "models_live_error": null
+  }
+ ],
+ "rows": [
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "BD002",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD002.jpg",
+   "image_bytes": 584054,
+   "image_sha256": "8209bfb95593553c0d430da1659dd3435603adf99b84fec31692d030855b7cb6",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills BD002 --max-tokens 700",
+   "start_iso": "2026-10-25T19:21:13-05:00",
+   "end_iso": "2026-10-25T19:21:20-05:00",
+   "wall_s": 7.08,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 700,
+    "total_tokens": 1240,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"id\": \"chatcmpl-e2bdb0fdeb654b9fb07ea4af\", \"object\": \"chat.completion\", \"created\": 1792974073, \"model\": \"swift-1.5-iq3_s\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"reasoning_content\": \"The user wants a strict, plain declarative description of the image, following a specific format: SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE. No headings, no bullets. I need to look carefully and report only what is visible.\\n\\nLet me look at the image. Two adult women against a white studio background. There's a concrete block/bench at the bottom.\\n\\nSubject 1 (left): blonde woman, wet long hair, head tilted back, eyes open looking up, mouth slightly open. She's wearing a shiny metallic pink/purple bandeau top (tube top) and matching bottoms. Her skin is glistening with oil/water. She's leaning back, supporting herself with one arm (her right arm extended down behind her, hand on the concrete). Her left hand is on the other woman's breast. Her genitals are not visible (her body is angled, the bottoms are visible from side/back, genitals not visible).\\n\\nSubject 2 (right): dark wet hair, red lipstick, looking at camera. Wearing a shiny metallic pink/purple triangle bikini top and matching bottoms. Skin glistening. She's kneeling/sitting. Her hands: one hand on her own breast? Let's look. The blonde's hand is on the dark-haired woman's breast. The dark-haired woman's hand is on the blonde's breast. Let me look carefully.\\n\\nLooking at the hands in the center: There's a hand on the dark-haired woman's left breast (her right side from our view? The breast on the left side of the image is the blonde's breast? No. The blonde is leaning back, her chest is facing up/forward. The bandeau top covers her chest. The dark-haired woman's triangle top covers her chest.\\n\\nIn the center, there are two hands. One hand (fingers spread) is on a breast that is covered by the triangle top? Let's look. The triangle top is on the right woman. The breast being touched by the spread-finger hand appears to be the right woman's breast (the one under the triangle top on the left side of her body). The other hand (the one with fingers on the lower part) is on the blonde's breast? The blonde's bandeau top is on the left. The hand with fingers pointing down is on the blonde's lower breast area.\\n\\nLet me look at the arms. The blonde's left arm: her body is leaning back, her left arm goes down behind her (the arm we see extended down to the concrete is her right arm, on the left side of image). Her left arm would be on the right side of her body, reaching toward the center. The hand on the dark-haired woman's breast (spread fingers) - whose arm is that? The arm comes from the left side (blonde's side). So the blonde's hand is on the dark-haired woman's breast.\\n\\nThe dark-haired woman's right arm (her right, our left) reaches across to the blonde's breast. The hand with fingers on the blonde's breast (the lower hand) - the arm comes from the right side (dark-haired woman's side). Yes, the dark-haired woman's hand is on the blonde's breast.\\n\\nSo they are mutually touching each other's breasts. Good.\\n\\nGenitals: not visible for either, because the bottoms are seen from side and the angle hides them. The blonde\"}, \"finish_reason\": \"length\"}], \"usage\": {\"prompt_tokens\": 540, \"completion_tokens\": 700, \"total_tokens\": 1240, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 540, \"prompt_ms\": 817.0, \"prompt_per_token_ms\": 1.513, \"prompt_per_second\": 661.0, \"predicted_n\": 700, \"predicted_ms\": 6220.0, \"predicted_per_token_ms\": 8.886, \"predicted_per_second\": 112.5, \"draft_n\": 673, \"draft_n_accepted\": 410}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a strict, plain declarative description of the image, following a specific format: SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE. No headings, no bullets. I need to look carefully and report only what is visible.\n\nLet me look at the image. Two adult women against a white studio background. There's a concrete block/bench at the bottom.\n\nSubject 1 (left): blonde woman, wet long hair, head tilted back, eyes open looking up, mouth slightly open. She's wearing a shiny metallic pink/purple bandeau top (tube top) and matching bottoms. Her skin is glistening with oil/water. She's leaning back, supporting herself with one arm (her right arm extended down behind her, hand on the concrete). Her left hand is on the other woman's breast. Her genitals are not visible (her body is angled, the bottoms are visible from side/back, genitals not visible).\n\nSubject 2 (right): dark wet hair, red lipstick, looking at camera. Wearing a shiny metallic pink/purple triangle bikini top and matching bottoms. Skin glistening. She's kneeling/sitting. Her hands: one hand on her own breast? Let's look. The blonde's hand is on the dark-haired woman's breast. The dark-haired woman's hand is on the blonde's breast. Let me look carefully.\n\nLooking at the hands in the center: There's a hand on the dark-haired woman's left breast (her right side from our view? The breast on the left side of the image is the blonde's breast? No. The blonde is leaning back, her chest is facing up/forward. The bandeau top covers her chest. The dark-haired woman's triangle top covers her chest.\n\nIn the center, there are two hands. One hand (fingers spread) is on a breast that is covered by the triangle top? Let's look. The triangle top is on the right woman. The breast being touched by the spread-finger hand appears to be the right woman's breast (the one under the triangle top on the left side of her body). The other hand (the one with fingers on the lower part) is on the blonde's breast? The blonde's bandeau top is on the left. The hand with fingers pointing down is on the blonde's lower breast area.\n\nLet me look at the arms. The blonde's left arm: her body is leaning back, her left arm goes down behind her (the arm we see extended down to the concrete is her right arm, on the left side of image). Her left arm would be on the right side of her body, reaching toward the center. The hand on the dark-haired woman's breast (spread fingers) - whose arm is that? The arm comes from the left side (blonde's side). So the blonde's hand is on the dark-haired woman's breast.\n\nThe dark-haired woman's right arm (her right, our left) reaches across to the blonde's breast. The hand with fingers on the blonde's breast (the lower hand) - the arm comes from the right side (dark-haired woman's side). Yes, the dark-haired woman's hand is on the blonde's breast.\n\nSo they are mutually touching each other's breasts. Good.\n\nGenitals: not visible for either, because the bottoms are seen from side and the angle hides them. The blonde",
+   "reasoning_words": 521
+  },
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "BD006",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD006.jpg",
+   "image_bytes": 689369,
+   "image_sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills BD006 --max-tokens 700",
+   "start_iso": "2026-10-25T19:21:20-05:00",
+   "end_iso": "2026-10-25T19:21:27-05:00",
+   "wall_s": 7.35,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 700,
+    "total_tokens": 1240,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: A studio set with two dark rectangular pedestal blocks in front of a bright white rectangular backdrop panel framed by dark vertical panels, lit with hard studio lighting that gives the skin a glossy sheen; the camera captures two women posed together in a horizontal arrangement.\nSUBJECT 1: An adult woman with a slim, athletic build and fair, glossy skin, long wavy blonde hair, wearing a metallic iridescent silver bra and matching thong-style bottoms; she is reclined on the left dark block, torso arched back, head tilted upward, one hand pressed flat on the block to support herself, the other hand resting on her own hip; her genitals are not visible, covered by the bottoms.\nSUBJECT",
+   "caption_words": 117,
+   "caption_chars": 697,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {}
+  },
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "BD006",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD006.jpg",
+   "image_bytes": 689369,
+   "image_sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 3000,
+   "temperature": 0.0,
+   "request_options": {},
+   "arm": "mt3000-think",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills BD006 --max-tokens 3000 --arm mt3000-think",
+   "start_iso": "2026-10-25T19:34:09-05:00",
+   "end_iso": "2026-10-25T19:34:22-05:00",
+   "wall_s": 13.46,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 1033,
+    "total_tokens": 1573,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: Studio interior with a bright white backdrop panel set between dark vertical walls, two dark rectangular blocks used as props, hard bright studio lighting creating glossy highlights on skin, camera at eye level in a medium side-on shot.\nSUBJECT 1: Adult, slender build, fair glossy oiled skin, long wavy blonde hair, wearing a metallic iridescent silver bikini top and bottom, reclining backward on a dark block with her torso arched and head tilted back in profile, one arm extended straight down with the hand flat on the block, the other arm bent with the hand resting near her own chest, genitals not visible (covered by the bikini bottom).\nSUBJECT 2: Adult, slender build, fair glossy oiled skin, long dark brown hair, wearing a metallic iridescent silver bikini top and bottom, kneeling and leaning forward over the first woman, one hand covered by a shiny pink-magenta glove placed on the first woman's chest, the other hand resting on the block behind, genitals not visible (covered by the bikini bottom).\nACTION: The two women are posed intimately, the dark-haired woman leaning over the reclining blonde woman and pressing her gloved hand to the blonde woman's chest while bringing her face close to the other's, no penetrative sex act is visible.\nEDGE: Solid black vertical bars crop the far left and right edges of the frame, dark blocks fill the lower foreground, no text, watermark, or other markings are visible.",
+   "reasoning_text": "The user wants a strict, factual description of the image following a specific format. I need to look carefully at the image and report only what is visible, in plain declarative English, no headings, no bullets.\n\nLet me look at the image carefully.\n\nSetting: Studio setting, white backdrop panel, dark blocks/pedestals, bright studio lighting.\n\nSubject 1 (left): Adult woman, blonde long wavy hair, leaning back on a dark block, wearing metallic/silver bikini top and bottom, glossy skin. Her head is tilted back, face in profile. Her left arm is extended down, hand resting on the block. Her right arm is bent, hand near her chest. Genitals not visible (covered by bikini bottom).\n\nSubject 2 (right): Adult woman, dark brown/black long hair, kneeling/leaning over, wearing metallic/silver bikini top and bottom, glossy skin. She wears a pink/magenta glove on one hand, which is placed on the other woman's chest. Her other hand is on the block. Genitals not visible (covered by bikini bottom).\n\nAction: The two women are in an intimate pose, the dark-haired woman touching the blonde woman's chest with a gloved hand, leaning over her. No explicit sex act is occurring; it's a posed intimate touch. I should name sex acts plainly if any. There's no sex act visible, just touching. I'll describe the action as intimate posing/touching.\n\nEdge: Dark vertical bars on left and right edges (letterbox/crop), black blocks at bottom.\n\nLet me write it carefully, one line per section, blocks per person left to right.\n\nI need to be careful: \"Report only what is visible.\" The format asks for SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE. The instruction says no headings, no bullets. But the format labels are part of the requested structure? The user wrote \"SCENE: one line - ... SUBJECT 1:, SUBJECT 2:, ... ACTION: ... EDGE: ...\". I think they want me to use these labels as the structure. The \"no headings, no bullets\" likely means don't add extra formatting beyond these. I'll follow the labels exactly as given.\n\nLet me look at hands. Subject 1 (blonde): her right arm (the one on the left side of image, her arm) extends down with hand flat on the block. Her other arm (her left, on the right side of her body in image) is bent with hand near her chest/under the gloved hand. Subject 2 (dark hair): her right hand (with pink glove) is on the blonde's chest. Her left hand is on the block behind.\n\nGenitals: not visible for both, covered by bikini bottoms.\n\nHair: blonde long wavy; dark brown long.\n\nSkin: glossy/oiled, fair for blonde, fair for dark-haired.\n\nClothing: metallic silver/iridescent bikini two-piece each; pink glove on one hand of dark-haired woman.\n\nPose: blonde reclining/leaning back on dark block, propped on one arm, head tilted back. Dark-haired kneeling over her, leaning forward.\n\nAction: intimate posing, dark-haired woman placing gloved hand on blonde's chest, leaning close to her face; no penetrative sex act visible.\n\nEdge: black vertical bars on far left and right (letterbox), dark blocks at bottom, no text/watermark visible.\n\nI'll write plainly.\n",
+   "reasoning_words": 509,
+   "caption_words": 238,
+   "caption_chars": 1434,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 1033,
+   "error": ""
+  },
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "BD013",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD013.jpg",
+   "image_bytes": 604111,
+   "image_sha256": "fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills BD013 --max-tokens 700",
+   "start_iso": "2026-10-25T19:21:27-05:00",
+   "end_iso": "2026-10-25T19:21:34-05:00",
+   "wall_s": 6.72,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 700,
+    "total_tokens": 1240,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"id\": \"chatcmpl-3b8cc641733d4d8ca89d3c82\", \"object\": \"chat.completion\", \"created\": 1792974087, \"model\": \"swift-1.5-iq3_s\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"reasoning_content\": \"The user wants a strict, plain declarative description of the image, following a specific format: SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE. No headings, no bullets, no invented names, no age under 21, \\\"not visible\\\" for unseen, \\\"ambiguous\\\" for unclear.\\n\\nLet me look carefully at the image.\\n\\nSCENE: Studio setting, white seamless background, a gray concrete-like ledge/bench in the foreground. Bright studio lighting with pink/magenta rim light on the right side. Camera sees two women in a medium shot, framed from mid-thigh up.\\n\\nSUBJECT 1 (left): Adult woman, blonde wet hair, long, slicked back. Light skin. Wearing a metallic/iridescent silver bandeau top and matching metallic thong/bottom. She is leaning back, head tilted up and back, eyes closed, mouth slightly open. Her right arm is down at her side (hand not fully visible, cropped at bottom). Her left arm is behind the other woman, hand resting on the other woman's hip/waist area. Genitals not visible (covered by bottom).\\n\\nSUBJECT 2 (right): Adult woman, dark brown/black wet hair, long. Tanned skin. Wearing a metallic/iridescent silver triangle bikini top and matching bottom. She stands behind, facing camera, looking at camera. Her hands: one hand on the first woman's stomach/waist, the other hand on the first woman's lower abdomen/pelvis area. Genitals not visible (covered by bottom).\\n\\nACTION: They are posing together, the dark-haired woman embracing the blonde from behind, hands on her torso; no sex act is occurring. So I should state no sex act is visible. The instruction says \\\"sex acts named plainly\\\" - if none, I should say none visible.\\n\\nEDGE: Black letterbox bars on left and right edges (the image has black bars on sides). The bottom of the blonde's arm is cropped. No text, no watermark.\\n\\nLet me make sure about hands. The blonde's left arm goes behind the dark-haired woman; I see a hand with long nails on the dark-haired woman's hip (the hand on the right side of the image, on the dark-haired woman's waist). Yes, that hand belongs to the blonde (her left arm wraps around). The dark-haired woman's hands: one on the blonde's stomach (the hand with long nails on the blonde's midsection), and the other hand on the blonde's lower abdomen/pubic area. Let me look: there's a hand on the blonde's stomach (center) and a hand on the blonde's lower abdomen (right of center). The hand on the blonde's stomach - whose is it? The dark-haired woman's right arm comes around the blonde's back, her hand appears on the blonde's stomach. The blonde's left arm wraps around the dark-haired woman's waist, her hand on the dark-haired woman's hip (right side). The hand on the blonde's lower abdomen/pubic area - that's the dark-haired woman's left hand. Yes.\\n\\nSo: blonde's visible hand = on dark-haired woman's hip. Dark-haired woman's hands = one on blonde's stomach, one on blonde's lower abdomen.\\n\\nGenitals: not visible for both, covered by bottoms.\\n\\nNow format: plain declarative, no\"}, \"finish_reason\": \"length\"}], \"usage\": {\"prompt_tokens\": 540, \"completion_tokens\": 700, \"total_tokens\": 1240, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 540, \"prompt_ms\": 736.6, \"prompt_per_token_ms\": 1.364, \"prompt_per_second\": 733.1, \"predicted_n\": 700, \"predicted_ms\": 5937.9, \"predicted_per_token_ms\": 8.483, \"predicted_per_second\": 117.9, \"draft_n\": 619, \"draft_n_accepted\": 412}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a strict, plain declarative description of the image, following a specific format: SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE. No headings, no bullets, no invented names, no age under 21, \"not visible\" for unseen, \"ambiguous\" for unclear.\n\nLet me look carefully at the image.\n\nSCENE: Studio setting, white seamless background, a gray concrete-like ledge/bench in the foreground. Bright studio lighting with pink/magenta rim light on the right side. Camera sees two women in a medium shot, framed from mid-thigh up.\n\nSUBJECT 1 (left): Adult woman, blonde wet hair, long, slicked back. Light skin. Wearing a metallic/iridescent silver bandeau top and matching metallic thong/bottom. She is leaning back, head tilted up and back, eyes closed, mouth slightly open. Her right arm is down at her side (hand not fully visible, cropped at bottom). Her left arm is behind the other woman, hand resting on the other woman's hip/waist area. Genitals not visible (covered by bottom).\n\nSUBJECT 2 (right): Adult woman, dark brown/black wet hair, long. Tanned skin. Wearing a metallic/iridescent silver triangle bikini top and matching bottom. She stands behind, facing camera, looking at camera. Her hands: one hand on the first woman's stomach/waist, the other hand on the first woman's lower abdomen/pelvis area. Genitals not visible (covered by bottom).\n\nACTION: They are posing together, the dark-haired woman embracing the blonde from behind, hands on her torso; no sex act is occurring. So I should state no sex act is visible. The instruction says \"sex acts named plainly\" - if none, I should say none visible.\n\nEDGE: Black letterbox bars on left and right edges (the image has black bars on sides). The bottom of the blonde's arm is cropped. No text, no watermark.\n\nLet me make sure about hands. The blonde's left arm goes behind the dark-haired woman; I see a hand with long nails on the dark-haired woman's hip (the hand on the right side of the image, on the dark-haired woman's waist). Yes, that hand belongs to the blonde (her left arm wraps around). The dark-haired woman's hands: one on the blonde's stomach (the hand with long nails on the blonde's midsection), and the other hand on the blonde's lower abdomen/pubic area. Let me look: there's a hand on the blonde's stomach (center) and a hand on the blonde's lower abdomen (right of center). The hand on the blonde's stomach - whose is it? The dark-haired woman's right arm comes around the blonde's back, her hand appears on the blonde's stomach. The blonde's left arm wraps around the dark-haired woman's waist, her hand on the dark-haired woman's hip (right side). The hand on the blonde's lower abdomen/pubic area - that's the dark-haired woman's left hand. Yes.\n\nSo: blonde's visible hand = on dark-haired woman's hip. Dark-haired woman's hands = one on blonde's stomach, one on blonde's lower abdomen.\n\nGenitals: not visible for both, covered by bottoms.\n\nNow format: plain declarative, no",
+   "reasoning_words": 486
+  },
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "GI046",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI046.jpg",
+   "image_bytes": 567489,
+   "image_sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills GI046 --max-tokens 700",
+   "start_iso": "2026-10-25T19:21:34-05:00",
+   "end_iso": "2026-10-25T19:21:41-05:00",
+   "wall_s": 6.88,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 691,
+    "total_tokens": 1231,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: An indoor room with a beige shag rug laid over a dark wood floor, a tan sofa blurred in the background, lit by soft warm light, the camera at a low angle capturing a woman on all fours in the foreground and a green-skinned figure kneeling behind her.\nSUBJECT 1: An adult woman, slim and toned build, fair skin, long wavy blonde hair, wearing a small jeweled tiara and a thin silver chain body harness over an otherwise nude body, posed on all fours on the rug facing the camera, both hands flat on the rug in front of her, genitals not visible.\nSUBJECT 2: An adult figure with green skin and a heavily muscular build, hair not visible (head cropped out of frame), wearing black shorts, kneeling on the rug behind the woman, one hand gripping her hip and the other resting on her thigh, genitals not visible.\nACTION: The green-skinned figure is positioned directly behind the woman with hands placed on her hips and thigh, no sex act is visible in the frame.\nEDGE: Black letterbox bars on the left and right edges, the top of the green figure's head is cropped out of frame, the background sofa is out of focus, no text or watermark visible.",
+   "caption_words": 210,
+   "caption_chars": 1147,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 691,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {}
+  },
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "GI063",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "image_bytes": 531083,
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills GI063 --max-tokens 700",
+   "start_iso": "2026-10-25T19:21:41-05:00",
+   "end_iso": "2026-10-25T19:21:48-05:00",
+   "wall_s": 7.28,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 700,
+    "total_tokens": 1240,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"id\": \"chatcmpl-9adb0bdb35a149dc9c8d1518\", \"object\": \"chat.completion\", \"created\": 1792974101, \"model\": \"swift-1.5-iq3_s\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"reasoning_content\": \"The user wants a strict, declarative description of the image, following a specific format. I need to look carefully and report only what is visible, no interpretation, no invented names, no age under 21. The format requires SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE.\\n\\nLet me look at the image carefully.\\n\\nSCENE: A dark indoor room, a black padded bench/table in the center, a screen on the wall in the background showing a similar scene. Lighting is dim, studio-like, focused on the subjects. Camera sees a side view.\\n\\nSUBJECT 1: The woman on the left. Adult woman, blonde long wavy hair, fair skin, slim/toned build. She wears a pink lace bra, pink garter straps with metal rings, fishnet stockings, clear high-heeled sandals. She has metal cuffs on her wrists connected by chains, and metal cuffs on her ankles connected by chains. She is kneeling on the bench, leaning forward on her forearms, head turned to the side, mouth open. Her hands are gripping the edge of the bench. Her genitals are not visible (her body is positioned so the front is away, and the angle shows her back/side; the genital area is not visible).\\n\\nSUBJECT 2: The robot on the right. It is a humanoid robot, metallic silver body, mechanical arms and legs, wearing black shorts. It is standing/kneeling behind the woman, bent over. Its hands are placed on the woman's buttocks/hips. There is a mechanical phallic appendage visible between its legs, positioned near the woman's rear. Genitals: it has a mechanical phallus visible.\\n\\nACTION: The robot is positioned behind the woman, hands on her hips, mechanical phallus at her rear, suggesting anal sex. The woman is on the bench.\\n\\nEDGE: There are black bars on left and right (letterbox). The screen in background shows a reflection/loop of the scene. No text, no watermark visible.\\n\\nLet me make sure I follow \\\"left to right\\\" ordering. Subject 1 is the woman (left), Subject 2 is the robot (right). Good.\\n\\nI need to be careful: \\\"what is visible of their genitals.\\\" For the woman, her genitals are not visible from this angle (she's facing left, we see her side/back, the front of her pelvis is turned away). So write 'not visible'. For the robot, a mechanical phallus is visible.\\n\\nThe robot is not a person, but the prompt says \\\"one block per visible person.\\\" The robot is a subject. The prompt says \\\"SUBJECT 1:, SUBJECT 2:, ... one block per visible person.\\\" The robot is a humanoid figure; I'll treat it as a subject block. The rules say never invent species. The robot is a robot, that's visible, not invented. I'll describe it as a humanoid robot.\\n\\nLet me write plainly.\\n\\nFor the woman's apparent age band: adult.\\n\\nLet me draft.\\n\\nSCENE: A dimly lit dark indoor room with a black padded bench in the center, a wall-mounted screen in the background displaying a similar scene, studio lighting focused on the two figures, camera at a side angle.\\n\\nSUBJECT 1: Adult woman, slim toned build, fair skin, long wavy blonde\"}, \"finish_reason\": \"length\"}], \"usage\": {\"prompt_tokens\": 540, \"completion_tokens\": 700, \"total_tokens\": 1240, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 540, \"prompt_ms\": 736.4, \"prompt_per_token_ms\": 1.364, \"prompt_per_second\": 733.3, \"predicted_n\": 700, \"predicted_ms\": 6511.6, \"predicted_per_token_ms\": 9.302, \"predicted_per_second\": 107.5, \"draft_n\": 625, \"draft_n_accepted\": 405}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a strict, declarative description of the image, following a specific format. I need to look carefully and report only what is visible, no interpretation, no invented names, no age under 21. The format requires SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE.\n\nLet me look at the image carefully.\n\nSCENE: A dark indoor room, a black padded bench/table in the center, a screen on the wall in the background showing a similar scene. Lighting is dim, studio-like, focused on the subjects. Camera sees a side view.\n\nSUBJECT 1: The woman on the left. Adult woman, blonde long wavy hair, fair skin, slim/toned build. She wears a pink lace bra, pink garter straps with metal rings, fishnet stockings, clear high-heeled sandals. She has metal cuffs on her wrists connected by chains, and metal cuffs on her ankles connected by chains. She is kneeling on the bench, leaning forward on her forearms, head turned to the side, mouth open. Her hands are gripping the edge of the bench. Her genitals are not visible (her body is positioned so the front is away, and the angle shows her back/side; the genital area is not visible).\n\nSUBJECT 2: The robot on the right. It is a humanoid robot, metallic silver body, mechanical arms and legs, wearing black shorts. It is standing/kneeling behind the woman, bent over. Its hands are placed on the woman's buttocks/hips. There is a mechanical phallic appendage visible between its legs, positioned near the woman's rear. Genitals: it has a mechanical phallus visible.\n\nACTION: The robot is positioned behind the woman, hands on her hips, mechanical phallus at her rear, suggesting anal sex. The woman is on the bench.\n\nEDGE: There are black bars on left and right (letterbox). The screen in background shows a reflection/loop of the scene. No text, no watermark visible.\n\nLet me make sure I follow \"left to right\" ordering. Subject 1 is the woman (left), Subject 2 is the robot (right). Good.\n\nI need to be careful: \"what is visible of their genitals.\" For the woman, her genitals are not visible from this angle (she's facing left, we see her side/back, the front of her pelvis is turned away). So write 'not visible'. For the robot, a mechanical phallus is visible.\n\nThe robot is not a person, but the prompt says \"one block per visible person.\" The robot is a subject. The prompt says \"SUBJECT 1:, SUBJECT 2:, ... one block per visible person.\" The robot is a humanoid figure; I'll treat it as a subject block. The rules say never invent species. The robot is a robot, that's visible, not invented. I'll describe it as a humanoid robot.\n\nLet me write plainly.\n\nFor the woman's apparent age band: adult.\n\nLet me draft.\n\nSCENE: A dimly lit dark indoor room with a black padded bench in the center, a wall-mounted screen in the background displaying a similar scene, studio lighting focused on the two figures, camera at a side angle.\n\nSUBJECT 1: Adult woman, slim toned build, fair skin, long wavy blonde",
+   "reasoning_words": 508
+  },
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "GI063",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "image_bytes": 531083,
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 3000,
+   "temperature": 0.0,
+   "request_options": {},
+   "arm": "mt3000-think",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills GI063 --max-tokens 3000 --arm mt3000-think",
+   "start_iso": "2026-10-25T19:34:22-05:00",
+   "end_iso": "2026-10-25T19:34:35-05:00",
+   "wall_s": 12.55,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 908,
+    "total_tokens": 1448,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: A dim, dark indoor room with a black padded bench in the center, a wall-mounted screen in the background, and a side-angle camera capturing a woman on the bench in profile and a metallic figure standing behind her.\nSUBJECT 1: An adult woman with a slim, toned build and fair skin, long wavy blonde hair, wearing a pink lace bra, a pink garter-and-strap harness, fishnet stockings, silver high-heeled sandals, metal handcuffs on her wrists, and metal ankle cuffs attached to chains; she kneels on the bench leaning forward on her forearms with her head turned toward the camera and mouth open, her hands gripping the edge of the bench, her genitals not visible.\nSUBJECT 2: An adult humanoid robot with a polished chrome-and-steel body, black shorts, and a visible mechanical phallus; it stands bent forward behind the woman with one metal hand resting on her hip, its face not visible.\nACTION: The robot stands behind the kneeling woman with its hand on her hip and its mechanical phallus positioned near her rear, with no penetration visible in this frame.\nEDGE: Black vertical bars crop the left and right edges, a background screen shows a looping image of the same scene, and there is no text or watermark.",
+   "reasoning_text": "The user wants a strict, plain declarative description of the image, following a specific format: SCENE, SUBJECT 1, SUBJECT 2, ACTION, EDGE. No headings, no bullets, no invented names, no age under 21, \"not visible\" for unseen, \"ambiguous\" for unclear.\n\nLet me look carefully.\n\nSCENE: Dark indoor room, a black padded bench/table in center, a screen/monitor on the wall in background showing a similar scene, dim lighting, camera at side angle showing the woman in profile on the bench and the robot behind her.\n\nSUBJECT 1: The woman. Adult, blonde long wavy hair, fair skin, slim/toned build, wearing pink lace bra and pink garter/strap harness with fishnet stockings, silver handcuffs on wrists, silver ankle cuffs with chains, high heel sandals. Pose: kneeling on the bench, leaning forward on forearms, head turned toward camera, mouth open. Hands: gripping the edge of the bench. Genitals: not visible (she's facing away, hips turned, the harness covers, her pubic area is not visible from this angle).\n\nSUBJECT 2: The robot. Metallic humanoid robot, chrome/metal body, black shorts/loincloth, mechanical penis visible. Hands: one hand on her hip/buttock. Pose: standing behind her, bent forward. Genitals: a mechanical phallus is visible.\n\nACTION: The robot is positioned behind the kneeling woman, hand on her hip, mechanical phallus near her buttocks, no clear penetration visible; it's a start frame, so the action is positioning/foreplay, no sex act completed. I should name plainly what's visible: the robot's hand on her hip, mechanical penis near her rear, no penetration visible.\n\nEDGE: Black letterbox bars on left and right (the image has black side bars). Background screen shows a reflection/loop of the same scene. No text/watermark visible.\n\nLet me ensure format: \"SCENE: one line\", \"SUBJECT 1: ...\", etc. The instruction says \"no headings, no bullets\" but the format uses labels SCENE:, SUBJECT 1:, etc. The user explicitly provided that template with labels, so I should use those labels as part of the structure. The \"no headings\" likely means don't add extra headings beyond the template. I'll follow the template exactly.\n\nLet me write each as one line/block.\n\nFor SUBJECT blocks, \"one block per visible person, left to right\". The woman is left, robot is right. Good.\n\nGenitals for woman: not visible. For robot: mechanical phallus visible.\n\nAge band: adult.\n\nLet me write.\n\nSCENE line: dark room, black padded bench, wall screen in background, side-angle camera, dim moody lighting.\n\nI'll keep it declarative.\n\nEdge: black vertical bars crop left and right; background monitor shows a looping image of the same scene; no text or watermark.\n\nNow produce final.\n",
+   "reasoning_words": 425,
+   "caption_words": 208,
+   "caption_chars": 1216,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 908,
+   "error": ""
+  },
+  {
+   "model_id": "coding_swift15_iq3s",
+   "still_id": "GI072",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI072.jpg",
+   "image_bytes": 519486,
+   "image_sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models coding_swift15_iq3s --stills GI072 --max-tokens 700",
+   "start_iso": "2026-10-25T19:21:48-05:00",
+   "end_iso": "2026-10-25T19:21:55-05:00",
+   "wall_s": 7.43,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "prompt_tokens": 540,
+    "completion_tokens": 700,
+    "total_tokens": 1240,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: An outdoor paved urban plaza with brick buildings and leafy green trees under an overcast sky, blurred pedestrians walking in the background, shot at eye level in a wide frame that places two women in sharp focus in the foreground.\nSUBJECT 1: An adult woman with a slim, athletic build and light skin, long wavy blonde hair, wearing a shiny metallic pink bikini top and bottom and silver strappy high-heeled sandals; she kneels on the pavement leaning her torso",
+   "caption_words": 80,
+   "caption_chars": 468,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {}
+  },
+  {
+   "model_id": "qwen3vl_judge",
+   "still_id": "BD002",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD002.jpg",
+   "image_bytes": 584054,
+   "image_sha256": "8209bfb95593553c0d430da1659dd3435603adf99b84fec31692d030855b7cb6",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models qwen3vl_judge --stills BD002 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:32:21-05:00",
+   "end_iso": "2026-10-25T19:32:38-05:00",
+   "wall_s": 17.61,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 206,
+    "prompt_tokens": 1247,
+    "total_tokens": 1453,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: two women posed on a grey concrete block against a plain white background, lit with bright, even studio lighting that highlights their wet skin and the shiny fabric of their bikinis; the camera is positioned at a medium distance, capturing them from the waist up.\n\nSUBJECT 1: adult, slim build, light skin, blonde hair down to mid-back, wearing a shiny pink and purple bikini, leaning back with head tilted up and eyes looking upward, left hand resting on the concrete block, right hand not visible; genitals not visible.\n\nSUBJECT 2: adult, slim build, light skin, dark hair wet and down to shoulders, wearing a shiny pink and purple bikini, sitting upright with legs slightly apart, hands placed on the hips of the other woman; genitals not visible.\n\nACTION: one woman is leaning back against the other, who is sitting upright and holding her hips.\n\nEDGE: no text or watermark visible; the frame is fully cropped around the subjects, with no significant blur or occlusion.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 165,
+   "caption_chars": 980,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 206,
+   "error": ""
+  },
+  {
+   "model_id": "qwen3vl_judge",
+   "still_id": "BD006",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD006.jpg",
+   "image_bytes": 689369,
+   "image_sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models qwen3vl_judge --stills BD006 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:32:38-05:00",
+   "end_iso": "2026-10-25T19:32:42-05:00",
+   "wall_s": 3.19,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 226,
+    "prompt_tokens": 1247,
+    "total_tokens": 1473,
+    "prompt_tokens_details": {
+     "cached_tokens": 209
+    }
+   },
+   "caption": "SCENE: two women positioned on dark stone blocks against a plain white backdrop, lit with studio lighting that highlights their skin and outfits, the camera captures them from a medium shot angle.\n\nSUBJECT 1: adult, slim build, light skin, blonde hair down to mid-back, wearing a shiny silver bodysuit, lying on her back with her head tilted up, her left hand resting on the stone block beside her, her right hand not visible, her genitals not visible.\n\nSUBJECT 2: adult, slim build, tan skin, dark hair down to mid-back, wearing a shiny silver bodysuit and pink gloves, straddling the first woman, leaning forward with her right hand on the first woman's chest and her left hand on the first woman's hip, her genitals not visible.\n\nACTION: the second woman is pressing her body against the first woman, her right hand on the first woman's chest and her left hand on the first woman's hip.\n\nEDGE: the frame is cropped at the bottom, showing only the upper bodies and thighs of the subjects, no text or watermark is visible.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 178,
+   "caption_chars": 1023,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 226,
+   "error": ""
+  },
+  {
+   "model_id": "qwen3vl_judge",
+   "still_id": "BD013",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD013.jpg",
+   "image_bytes": 604111,
+   "image_sha256": "fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models qwen3vl_judge --stills BD013 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:32:42-05:00",
+   "end_iso": "2026-10-25T19:32:44-05:00",
+   "wall_s": 2.76,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 190,
+    "prompt_tokens": 1247,
+    "total_tokens": 1437,
+    "prompt_tokens_details": {
+     "cached_tokens": 209
+    }
+   },
+   "caption": "SCENE: two women standing on a grey concrete platform against a plain white background, lit with studio lighting that casts soft shadows and highlights their skin and outfits, the camera is at eye level and frames them from the waist up.\n\nSUBJECT 1: adult, slender build, light skin, blonde hair down to mid-back, wearing a shiny silver two-piece swimsuit, leaning back with head tilted up, left hand resting on her own hip, right hand not visible, genitals not visible.\n\nSUBJECT 2: adult, athletic build, light skin, dark hair down to mid-back, wearing a shiny silver two-piece swimsuit, standing behind and to the right of SUBJECT 1, hands placed on SUBJECT 1’s waist, genitals not visible.\n\nACTION: one woman is standing behind the other, her hands on the other’s waist.\n\nEDGE: no text or watermark visible, no significant blur, no crop, no occlusion.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 142,
+   "caption_chars": 854,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 190,
+   "error": ""
+  },
+  {
+   "model_id": "qwen3vl_judge",
+   "still_id": "GI046",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI046.jpg",
+   "image_bytes": 567489,
+   "image_sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models qwen3vl_judge --stills GI046 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:32:44-05:00",
+   "end_iso": "2026-10-25T19:32:48-05:00",
+   "wall_s": 3.87,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 232,
+    "prompt_tokens": 2007,
+    "total_tokens": 2239,
+    "prompt_tokens_details": {
+     "cached_tokens": 209
+    }
+   },
+   "caption": "A medium shot from a slightly elevated angle shows a woman and a green-skinned man on a shag rug in a living room, with a beige couch in the background. The lighting is soft and even, illuminating the scene without harsh shadows. The camera captures the two figures from the waist up for the woman and from the thighs up for the man, with the focus on their interaction.\n\nSUBJECT 1: adult, slender, light brown skin, blonde hair down to mid-back, wearing a silver chain bikini and a silver tiara, lying prone on the rug with her head turned to look at the camera, her hands resting on the rug beside her, her genitals not visible.\n\nSUBJECT 2: adult, muscular, green skin, wearing black shorts, kneeling behind the woman with his hands on her hips and upper thighs, his genitals not visible.\n\nACTION: The green-skinned man is pressing his hands against the woman’s hips and thighs while she lies on the rug.\n\nEDGE: The frame is cropped at the bottom, cutting off the lower legs of both subjects and the floor beyond the rug. No text or watermark is visible.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 190,
+   "caption_chars": 1056,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 232,
+   "error": ""
+  },
+  {
+   "model_id": "qwen3vl_judge",
+   "still_id": "GI063",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "image_bytes": 531083,
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models qwen3vl_judge --stills GI063 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:32:48-05:00",
+   "end_iso": "2026-10-25T19:32:52-05:00",
+   "wall_s": 3.64,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 213,
+    "prompt_tokens": 2007,
+    "total_tokens": 2220,
+    "prompt_tokens_details": {
+     "cached_tokens": 209
+    }
+   },
+   "caption": "SCENE: a dimly lit room with dark walls and a black leather bench, a television screen in the background showing a similar scene, the camera is positioned at a medium distance, capturing the full bodies of both subjects from a slightly low angle.\n\nSUBJECT 1: adult female, slender build, light skin, long blonde hair, wearing a pink lace and silver harness, black fishnet stockings, and clear high-heeled sandals, lying on her stomach on the bench with her head turned to look at the camera, her hands are restrained by silver chains attached to the bench, her thighs are spread and her genitals are not visible.\n\nSUBJECT 2: adult male, not visible, wearing a full silver metallic suit with black shorts, kneeling beside the bench, his right hand is on the woman's hip, his left hand is not visible, his genitals are not visible.\n\nACTION: the robot is penetrating the woman from behind.\n\nEDGE: no text or watermark visible, the frame is fully contained within the image, no significant blur or occlusion.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 171,
+   "caption_chars": 1004,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 213,
+   "error": ""
+  },
+  {
+   "model_id": "qwen3vl_judge",
+   "still_id": "GI072",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI072.jpg",
+   "image_bytes": 519486,
+   "image_sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models qwen3vl_judge --stills GI072 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:32:52-05:00",
+   "end_iso": "2026-10-25T19:32:56-05:00",
+   "wall_s": 3.63,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 213,
+    "prompt_tokens": 2007,
+    "total_tokens": 2220,
+    "prompt_tokens_details": {
+     "cached_tokens": 209
+    }
+   },
+   "caption": "SCENE: an outdoor paved area with trees and buildings in the background under bright daylight, the camera is at a low angle capturing both subjects from the waist up, with a shallow depth of field blurring the background.\n\nSUBJECT 1: adult, slim build, light skin, blonde hair down to mid-back, wearing a pink shiny bikini and clear high-heeled sandals, kneeling on one knee with her body angled forward, her hands are not visible, her genitals are not visible.\n\nSUBJECT 2: adult, slim build, light skin, dark hair tied back in a ponytail, wearing a pink shiny bikini and pink thigh-high boots, standing with one leg bent and the other straight, her hands are placed on the head of the kneeling woman, her genitals are not visible.\n\nACTION: the standing woman is performing oral sex on the kneeling woman using a clear dildo.\n\nEDGE: the frame is cropped at the bottom, showing only the upper bodies and legs of the subjects, with blurred background figures and a pink neon light on the right side.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 173,
+   "caption_chars": 997,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 213,
+   "error": ""
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "BD002",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD002.jpg",
+   "image_bytes": 584054,
+   "image_sha256": "8209bfb95593553c0d430da1659dd3435603adf99b84fec31692d030855b7cb6",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills BD002 --max-tokens 700",
+   "start_iso": "2026-10-25T19:23:53-05:00",
+   "end_iso": "2026-10-25T19:24:14-05:00",
+   "wall_s": 20.44,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "completion_tokens": 700,
+    "prompt_tokens": 1254,
+    "total_tokens": 1954,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning_content\":\"The user wants a detailed description of the provided image in a specific format.\\n\\n1.  **SCENE:**\\n    *   **Setting:** A minimalist studio setting with a stark white background.\\n    *   **Framing:** A medium shot capturing two women from the thighs up, positioned on a low concrete block.\\n    *   **Lighting:** Bright, high-key studio lighting that creates strong highlights on their wet skin and the shiny fabric of their swimwear.\\n    *   **Camera View:** Eye-level, slightly angled to capture the dynamic pose.\\n\\n2.  **SUBJECT 1 (Left/Foreground):**\\n    *   **Apparent Age:** Adult.\\n    *   **Body Build:** Athletic, curvy.\\n    *   **Skin:** Pale, glistening with water or oil.\\n    *   **Hair:** Long, wet, blonde hair cascading down her back and left side.\\n    *   **Clothing:** A shiny, iridescent pink and purple bikini top and matching bottoms.\\n    *   **Pose/Position:** Leaning back dramatically, head tilted far back, eyes looking upward. Her left arm is extended downwards, likely resting on the concrete block (though the hand is cut off). Her right arm is obscured or resting by her side.\\n    *   **Hands:** Her left hand is not clearly visible (cropped). Her right hand is obscured by the other woman's hands.\\n    *   **Genitals:** Not visible; the angle and clothing cover the lower body.\\n\\n3.  **SUBJECT 2 (Right/Background):**\\n    *   **Apparent Age:** Adult.\\n    *   **Body Build:** Athletic, toned.\\n    *   **Skin:** Tanned, glistening with water or oil.\\n    *   **Hair:** Long, wet, dark brown or black hair slicked back.\\n    *   **Clothing:** A matching shiny, iridescent pink and purple bikini top and matching bottoms.\\n    *   **Pose/Position:** Kneeling or crouching behind the first woman, facing forward towards the camera.\\n    *   **Hands:** Both hands are placed on the first woman's lower abdomen/hip area, fingers spread.\\n    *   **Genitals:** Not visible; covered by the bikini bottom and the angle.\\n\\n4.  **ACTION:**\\n    *   The woman in the back is holding the hips/lower stomach of the woman leaning back, supporting her or posing with her. They are posing intimately but not engaging in active sex acts.\\n\\n5.  **EDGE:**\\n    *   The bottom edge shows the top of a grey concrete block.\\n    *   The sides are cropped close to the subjects' bodies.\\n    *   No text or watermarks are visible.\\n\\n6.  **Refining the Description:**\\n    *   Make sure to mention the wet look.\\n    *   Clarify the positioning on the block.\\n    *   Ensure \\\"not visible\\\" is used where appropriate.\\n\\n    *Self-Correction during drafting:* I initially thought Subject 1's hand was on the block, but looking closely, her left arm goes down and out of frame. Her right arm is bent. Wait, looking again at Subject 1 (blonde), her left arm is extended down, hand\"}}],\"created\":1792974254,\"model\":\"C:\\\\AI\\\\vlm\\\\models\\\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf\",\"system_fingerprint\":\"b11827-970b51ce7\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":700,\"prompt_tokens\":1254,\"total_tokens\":1954,\"prompt_tokens_details\":{\"cached_tokens\":0}},\"id\":\"chatcmpl-aJK8dJaKluB75igKPeon9GuztlKXeDGm\",\"timings\":{\"cache_n\":0,\"prompt_n\":1254,\"prompt_ms\":576.085,\"prompt_per_token_ms\":0.45939792663476875,\"prompt_per_second\":2176.762109758108,\"predicted_n\":700,\"predicted_ms\":8376.02,\"predicted_per_token_ms\":11.982861230329043,\"predicted_per_second\":83.4525227972235}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a detailed description of the provided image in a specific format.\n\n1.  **SCENE:**\n    *   **Setting:** A minimalist studio setting with a stark white background.\n    *   **Framing:** A medium shot capturing two women from the thighs up, positioned on a low concrete block.\n    *   **Lighting:** Bright, high-key studio lighting that creates strong highlights on their wet skin and the shiny fabric of their swimwear.\n    *   **Camera View:** Eye-level, slightly angled to capture the dynamic pose.\n\n2.  **SUBJECT 1 (Left/Foreground):**\n    *   **Apparent Age:** Adult.\n    *   **Body Build:** Athletic, curvy.\n    *   **Skin:** Pale, glistening with water or oil.\n    *   **Hair:** Long, wet, blonde hair cascading down her back and left side.\n    *   **Clothing:** A shiny, iridescent pink and purple bikini top and matching bottoms.\n    *   **Pose/Position:** Leaning back dramatically, head tilted far back, eyes looking upward. Her left arm is extended downwards, likely resting on the concrete block (though the hand is cut off). Her right arm is obscured or resting by her side.\n    *   **Hands:** Her left hand is not clearly visible (cropped). Her right hand is obscured by the other woman's hands.\n    *   **Genitals:** Not visible; the angle and clothing cover the lower body.\n\n3.  **SUBJECT 2 (Right/Background):**\n    *   **Apparent Age:** Adult.\n    *   **Body Build:** Athletic, toned.\n    *   **Skin:** Tanned, glistening with water or oil.\n    *   **Hair:** Long, wet, dark brown or black hair slicked back.\n    *   **Clothing:** A matching shiny, iridescent pink and purple bikini top and matching bottoms.\n    *   **Pose/Position:** Kneeling or crouching behind the first woman, facing forward towards the camera.\n    *   **Hands:** Both hands are placed on the first woman's lower abdomen/hip area, fingers spread.\n    *   **Genitals:** Not visible; covered by the bikini bottom and the angle.\n\n4.  **ACTION:**\n    *   The woman in the back is holding the hips/lower stomach of the woman leaning back, supporting her or posing with her. They are posing intimately but not engaging in active sex acts.\n\n5.  **EDGE:**\n    *   The bottom edge shows the top of a grey concrete block.\n    *   The sides are cropped close to the subjects' bodies.\n    *   No text or watermarks are visible.\n\n6.  **Refining the Description:**\n    *   Make sure to mention the wet look.\n    *   Clarify the positioning on the block.\n    *   Ensure \"not visible\" is used where appropriate.\n\n    *Self-Correction during drafting:* I initially thought Subject 1's hand was on the block, but looking closely, her left arm goes down and out of frame. Her right arm is bent. Wait, looking again at Subject 1 (blonde), her left arm is extended down, hand",
+   "reasoning_words": 420
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "BD002",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD002.jpg",
+   "image_bytes": 584054,
+   "image_sha256": "8209bfb95593553c0d430da1659dd3435603adf99b84fec31692d030855b7cb6",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills BD002 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:30:37-05:00",
+   "end_iso": "2026-10-25T19:30:51-05:00",
+   "wall_s": 13.68,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 220,
+    "prompt_tokens": 1256,
+    "total_tokens": 1476,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: Studio shot with a stark white background and bright, even lighting; two women are positioned on and around a low concrete block, framed from the thighs up in a medium shot.\n\nSUBJECT 1: An adult woman with a slender build, fair skin, and long wet blonde hair; she wears a shiny iridescent bikini top and matching bottoms, leaning backward with her head tilted up and eyes closed, her left hand resting on the concrete block while her right hand is not visible.\n\nSUBJECT 2: An adult woman with a fit build, tanned skin, and wet dark shoulder-length hair; she wears a matching shiny iridescent bikini with thin straps, kneeling behind the first woman and facing forward, her hands placed on the first woman’s lower abdomen and hip.\n\nACTION: The second woman is holding the first woman’s torso and hip in a supportive, intimate pose with no active sexual contact occurring.\n\nEDGE: The concrete block extends across the bottom of the frame, and the white background is clean with no visible text, watermark, or blur.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 175,
+   "caption_chars": 1019,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 220,
+   "error": ""
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "BD006",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD006.jpg",
+   "image_bytes": 689369,
+   "image_sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills BD006 --max-tokens 700",
+   "start_iso": "2026-10-25T19:24:14-05:00",
+   "end_iso": "2026-10-25T19:24:23-05:00",
+   "wall_s": 8.96,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "completion_tokens": 700,
+    "prompt_tokens": 1254,
+    "total_tokens": 1954,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning_content\":\"The user wants a detailed description of the provided image in a specific format.\\n\\n1.  **SCENE:** I need to describe the setting, framing, lighting, and camera view.\\n    *   Setting: Looks like a studio or a minimalist room with black blocks and a white background.\\n    *   Framing: Medium shot, capturing both figures from the thighs up mostly, but showing legs.\\n    *   Lighting: Bright, studio lighting, creating highlights on their skin and the shiny fabric.\\n    *   Camera: Eye-level or slightly low angle looking up at the blonde woman.\\n\\n2.  **SUBJECT 1 (Blonde woman):**\\n    *   Apparent age: Adult.\\n    *   Body build: Slim, athletic.\\n    *   Skin: Pale, shiny (oily/glossy).\\n    *   Hair: Long, blonde, wavy.\\n    *   Clothing: Iridescent, holographic-looking bikini (top and bottom).\\n    *   Pose/Position: Lying back on a black block, legs bent at the knees, feet on the block. Her head is tilted back.\\n    *   Hands: Her left hand is resting on the black block for support. Her right arm is obscured or resting near her side.\\n    *   Genitals: Not visible (covered by the bikini bottom).\\n\\n3.  **SUBJECT 2 (Brunette woman):**\\n    *   Apparent age: Adult.\\n    *   Body build: Slim, athletic.\\n    *   Skin: Tanned, shiny (oily/glossy).\\n    *   Hair: Long, dark brown/black, straight.\\n    *   Clothing: Matching iridescent, holographic-looking bikini. She is wearing a shiny pink glove on her right hand.\\n    *   Pose/Position: Leaning over the blonde woman from behind/side, straddling or kneeling near her hips.\\n    *   Hands: Her right hand (gloved) is placed on the blonde woman's lower abdomen/hip area. Her left hand is not clearly visible or is obscured.\\n    *   Genitals: Not visible (covered by the bikini bottom).\\n\\n4.  **ACTION:**\\n    *   They are posing intimately. The brunette is leaning in close to the blonde's face/neck. The brunette's gloved hand is touching the blonde's stomach. It looks like a sensual pose, possibly preparing for or in the middle of a sexual act, but specifically, it's a pose. The prompt asks for \\\"sex acts named plainly\\\" if happening. They are leaning in, faces close. It looks like foreplay or a pose for a shoot. I will describe the physical interaction.\\n\\n5.  **EDGE:**\\n    *   Left edge: Black background/wall.\\n    *   Right edge: Black background/wall.\\n    *   Top/Bottom: Clean cut, no major occlusion.\\n    *   Text/Watermark: None visible.\\n\\n6.  **Refining the descriptions:**\\n    *   Make sure to mention the shiny texture of the skin and clothes.\\n    *   Clarify the positioning. The blonde is on a block. The brunette is behind her.\\n\\n7.  **Final Polish (adhering to constraints):**\\n    *   One line for SC\"}}],\"created\":1792974263,\"model\":\"C:\\\\AI\\\\vlm\\\\models\\\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf\",\"system_fingerprint\":\"b11827-970b51ce7\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":700,\"prompt_tokens\":1254,\"total_tokens\":1954,\"prompt_tokens_details\":{\"cached_tokens\":0}},\"id\":\"chatcmpl-b2AWybnA5BZkRBpISsOG5goju8lfTLB1\",\"timings\":{\"cache_n\":0,\"prompt_n\":1254,\"prompt_ms\":456.363,\"prompt_per_token_ms\":0.36392583732057415,\"prompt_per_second\":2747.8125965514296,\"predicted_n\":700,\"predicted_ms\":8431.961,\"predicted_per_token_ms\":12.062891273247496,\"predicted_per_second\":82.89886540034993}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a detailed description of the provided image in a specific format.\n\n1.  **SCENE:** I need to describe the setting, framing, lighting, and camera view.\n    *   Setting: Looks like a studio or a minimalist room with black blocks and a white background.\n    *   Framing: Medium shot, capturing both figures from the thighs up mostly, but showing legs.\n    *   Lighting: Bright, studio lighting, creating highlights on their skin and the shiny fabric.\n    *   Camera: Eye-level or slightly low angle looking up at the blonde woman.\n\n2.  **SUBJECT 1 (Blonde woman):**\n    *   Apparent age: Adult.\n    *   Body build: Slim, athletic.\n    *   Skin: Pale, shiny (oily/glossy).\n    *   Hair: Long, blonde, wavy.\n    *   Clothing: Iridescent, holographic-looking bikini (top and bottom).\n    *   Pose/Position: Lying back on a black block, legs bent at the knees, feet on the block. Her head is tilted back.\n    *   Hands: Her left hand is resting on the black block for support. Her right arm is obscured or resting near her side.\n    *   Genitals: Not visible (covered by the bikini bottom).\n\n3.  **SUBJECT 2 (Brunette woman):**\n    *   Apparent age: Adult.\n    *   Body build: Slim, athletic.\n    *   Skin: Tanned, shiny (oily/glossy).\n    *   Hair: Long, dark brown/black, straight.\n    *   Clothing: Matching iridescent, holographic-looking bikini. She is wearing a shiny pink glove on her right hand.\n    *   Pose/Position: Leaning over the blonde woman from behind/side, straddling or kneeling near her hips.\n    *   Hands: Her right hand (gloved) is placed on the blonde woman's lower abdomen/hip area. Her left hand is not clearly visible or is obscured.\n    *   Genitals: Not visible (covered by the bikini bottom).\n\n4.  **ACTION:**\n    *   They are posing intimately. The brunette is leaning in close to the blonde's face/neck. The brunette's gloved hand is touching the blonde's stomach. It looks like a sensual pose, possibly preparing for or in the middle of a sexual act, but specifically, it's a pose. The prompt asks for \"sex acts named plainly\" if happening. They are leaning in, faces close. It looks like foreplay or a pose for a shoot. I will describe the physical interaction.\n\n5.  **EDGE:**\n    *   Left edge: Black background/wall.\n    *   Right edge: Black background/wall.\n    *   Top/Bottom: Clean cut, no major occlusion.\n    *   Text/Watermark: None visible.\n\n6.  **Refining the descriptions:**\n    *   Make sure to mention the shiny texture of the skin and clothes.\n    *   Clarify the positioning. The blonde is on a block. The brunette is behind her.\n\n7.  **Final Polish (adhering to constraints):**\n    *   One line for SC",
+   "reasoning_words": 409
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "BD006",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD006.jpg",
+   "image_bytes": 689369,
+   "image_sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills BD006 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:30:51-05:00",
+   "end_iso": "2026-10-25T19:30:55-05:00",
+   "wall_s": 4.1,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 297,
+    "prompt_tokens": 1256,
+    "total_tokens": 1553,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: Studio setting with a minimalist background featuring vertical gray panels and a bright white wall; medium shot framing two women positioned on and around a black rectangular block, lit with soft, even lighting that highlights their skin sheen.\n\nSUBJECT 1: An adult woman with long blonde hair, fair skin, and a fit build, wearing a translucent iridescent bikini; she is leaning back on her forearms atop the black block, head tilted upward, mouth slightly open, one hand resting flat on the block beside her while the other is obscured by her body.\n\nSUBJECT 2: An adult woman with long dark hair, tanned skin, and a fit build, wearing a matching translucent iridescent bikini and a shiny pink glove on her right hand; she is positioned behind and slightly above the first woman, leaning forward with her right hand placed on the first woman’s lower abdomen and her left hand near the first woman’s hip, legs spread with one foot planted on the block and the other extended downward.\n\nACTION: The second woman is leaning over the first woman in a suggestive pose, her gloved hand resting on the first woman’s abdomen while her body is angled closely against hers.\n\nEDGE: The left and right edges of the frame show dark vertical panels partially cutting off the background structure; the bottom edge includes the top surface of the black block and the first woman’s forearm and hand; no text, watermark, or blur is visible.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 244,
+   "caption_chars": 1429,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 297,
+   "error": ""
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "BD013",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD013.jpg",
+   "image_bytes": 604111,
+   "image_sha256": "fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills BD013 --max-tokens 700",
+   "start_iso": "2026-10-25T19:24:23-05:00",
+   "end_iso": "2026-10-25T19:24:32-05:00",
+   "wall_s": 8.92,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "completion_tokens": 700,
+    "prompt_tokens": 1254,
+    "total_tokens": 1954,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning_content\":\"The user wants a detailed description of the provided image following a specific format.\\n\\n1.  **SCENE:**\\n    *   **Setting:** A minimalist studio setting with a plain white background and a low, grey concrete-like platform or ledge in the foreground.\\n    *   **Framing:** Medium shot, capturing the subjects from the mid-thighs up.\\n    *   **Lighting:** Bright, high-key studio lighting with soft shadows, creating a glossy sheen on the subjects' skin and clothing. There are hints of pink/purple ambient light reflecting off the iridescent material.\\n    *   **Camera:** Eye-level, static shot.\\n\\n2.  **SUBJECT 1 (Front/Left):**\\n    *   **Apparent age:** Adult (20s-30s).\\n    *   **Body build:** Slim, athletic.\\n    *   **Skin:** Fair, glistening with moisture or oil.\\n    *   **Hair:** Blonde, wet, shoulder-length, falling loosely.\\n    *   **Clothing:** A translucent, iridescent plastic or latex two-piece bikini (bra and panties) with silver trim.\\n    *   **Pose/Position:** Leaning back slightly, head tilted back and to the left, eyes looking upward. Her left arm hangs down by her side.\\n    *   **Hands:** Her right arm is obscured by the other woman's hands.\\n    *   **Genitals:** Not visible (covered by panties).\\n\\n3.  **SUBJECT 2 (Back/Right):**\\n    *   **Apparent age:** Adult (20s-30s).\\n    *   **Body build:** Slim, athletic.\\n    *   **Skin:** Fair, glistening with moisture or oil.\\n    *   **Hair:** Dark brown or black, wet, shoulder-length, slicked back.\\n    *   **Clothing:** A matching translucent, iridescent plastic or latex two-piece bikini with thin black straps.\\n    *   **Pose/Position:** Standing behind Subject 1, embracing her from the back.\\n    *   **Hands:** Both hands are placed on Subject 1's midsection/abdomen. Her left hand is lower near the hip, her right hand is higher near the ribcage.\\n    *   **Genitals:** Not visible (covered by panties).\\n\\n4.  **ACTION:**\\n    *   Subject 2 is embracing Subject 1 from behind, with both hands resting on Subject 1's stomach, while Subject 1 leans back with her head tilted up.\\n\\n5.  **EDGE:**\\n    *   The bottom edge is cut off by the grey concrete platform. The top edge shows the subjects' heads against the white background. No text or watermarks are visible.\\n\\n6.  **Refining the descriptions:**\\n    *   Make sure to mention the \\\"wet\\\" look and the \\\"iridescent\\\" material.\\n    *   Ensure the \\\"hands on stomach\\\" action is clear.\\n\\n7.  **Final Polish (checking against constraints):**\\n    *   Plain declarative English? Yes.\\n    *   No headings/bullets? Yes.\\n    *   One line per section? Yes.\\n    *   No invented names? Yes.\\n    *   \\\"Not visible\\\" used\"}}],\"created\":1792974272,\"model\":\"C:\\\\AI\\\\vlm\\\\models\\\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf\",\"system_fingerprint\":\"b11827-970b51ce7\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":700,\"prompt_tokens\":1254,\"total_tokens\":1954,\"prompt_tokens_details\":{\"cached_tokens\":0}},\"id\":\"chatcmpl-vwPkB1X3Ed8ngSQqgmnR466xSe70FyS5\",\"timings\":{\"cache_n\":0,\"prompt_n\":1254,\"prompt_ms\":456.519,\"prompt_per_token_ms\":0.3640502392344498,\"prompt_per_second\":2746.873624098888,\"predicted_n\":700,\"predicted_ms\":8385.962,\"predicted_per_token_ms\":11.997084406294706,\"predicted_per_second\":83.35358543241671}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a detailed description of the provided image following a specific format.\n\n1.  **SCENE:**\n    *   **Setting:** A minimalist studio setting with a plain white background and a low, grey concrete-like platform or ledge in the foreground.\n    *   **Framing:** Medium shot, capturing the subjects from the mid-thighs up.\n    *   **Lighting:** Bright, high-key studio lighting with soft shadows, creating a glossy sheen on the subjects' skin and clothing. There are hints of pink/purple ambient light reflecting off the iridescent material.\n    *   **Camera:** Eye-level, static shot.\n\n2.  **SUBJECT 1 (Front/Left):**\n    *   **Apparent age:** Adult (20s-30s).\n    *   **Body build:** Slim, athletic.\n    *   **Skin:** Fair, glistening with moisture or oil.\n    *   **Hair:** Blonde, wet, shoulder-length, falling loosely.\n    *   **Clothing:** A translucent, iridescent plastic or latex two-piece bikini (bra and panties) with silver trim.\n    *   **Pose/Position:** Leaning back slightly, head tilted back and to the left, eyes looking upward. Her left arm hangs down by her side.\n    *   **Hands:** Her right arm is obscured by the other woman's hands.\n    *   **Genitals:** Not visible (covered by panties).\n\n3.  **SUBJECT 2 (Back/Right):**\n    *   **Apparent age:** Adult (20s-30s).\n    *   **Body build:** Slim, athletic.\n    *   **Skin:** Fair, glistening with moisture or oil.\n    *   **Hair:** Dark brown or black, wet, shoulder-length, slicked back.\n    *   **Clothing:** A matching translucent, iridescent plastic or latex two-piece bikini with thin black straps.\n    *   **Pose/Position:** Standing behind Subject 1, embracing her from the back.\n    *   **Hands:** Both hands are placed on Subject 1's midsection/abdomen. Her left hand is lower near the hip, her right hand is higher near the ribcage.\n    *   **Genitals:** Not visible (covered by panties).\n\n4.  **ACTION:**\n    *   Subject 2 is embracing Subject 1 from behind, with both hands resting on Subject 1's stomach, while Subject 1 leans back with her head tilted up.\n\n5.  **EDGE:**\n    *   The bottom edge is cut off by the grey concrete platform. The top edge shows the subjects' heads against the white background. No text or watermarks are visible.\n\n6.  **Refining the descriptions:**\n    *   Make sure to mention the \"wet\" look and the \"iridescent\" material.\n    *   Ensure the \"hands on stomach\" action is clear.\n\n7.  **Final Polish (checking against constraints):**\n    *   Plain declarative English? Yes.\n    *   No headings/bullets? Yes.\n    *   One line per section? Yes.\n    *   No invented names? Yes.\n    *   \"Not visible\" used",
+   "reasoning_words": 378
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "BD013",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/BD013.jpg",
+   "image_bytes": 604111,
+   "image_sha256": "fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce",
+   "image_dims": [
+    1376,
+    768
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills BD013 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:30:55-05:00",
+   "end_iso": "2026-10-25T19:30:58-05:00",
+   "wall_s": 3.18,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 221,
+    "prompt_tokens": 1256,
+    "total_tokens": 1477,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: Studio shot with a plain white background and a low concrete ledge at the bottom; bright, even lighting; medium framing showing two women from the thighs up.\n\nSUBJECT 1: Adult female, slender build, light skin, wet blonde hair past shoulders, wearing a shiny iridescent strapless bikini top and matching bottoms, leaning back with her head tilted up, mouth slightly open, arms hanging loosely at her sides, hands not engaged in any action, no genitals visible.\n\nSUBJECT 2: Adult female, slender build, light skin, wet dark hair past shoulders, wearing a shiny iridescent halter bikini top and matching bottoms, standing behind the first woman, arms wrapped around the first woman’s torso with both hands pressing against her abdomen, no genitals visible.\n\nACTION: The woman in the back is holding the front woman’s midsection in a close embrace; no sexual contact or penetration is occurring.\n\nEDGE: The concrete ledge runs across the bottom of the frame; the background is uniformly white with no additional objects, text, or watermarks visible.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 168,
+   "caption_chars": 1053,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 221,
+   "error": ""
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "GI046",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI046.jpg",
+   "image_bytes": 567489,
+   "image_sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills GI046 --max-tokens 700",
+   "start_iso": "2026-10-25T19:24:32-05:00",
+   "end_iso": "2026-10-25T19:24:41-05:00",
+   "wall_s": 9.41,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "completion_tokens": 700,
+    "prompt_tokens": 2014,
+    "total_tokens": 2714,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning_content\":\"The user wants a detailed description of the provided image in a specific format.\\n\\n1.  **SCENE:** I need to describe the setting, framing, lighting, and camera view.\\n    *   Setting: Looks like a living room. There's a beige sofa in the background and a shaggy beige rug on a wooden floor.\\n    *   Framing: Medium shot, slightly high angle looking down at the subjects.\\n    *   Lighting: Soft, indoor lighting, highlighting the skin sheen.\\n    *   Camera: Static, focused on the interaction.\\n\\n2.  **SUBJECT 1 (The woman):**\\n    *   Apparent age: Adult (looks young adult).\\n    *   Body build: Curvy, fit.\\n    *   Skin: Tan, shiny/oily.\\n    *   Hair: Long, wavy blonde.\\n    *   Clothing/Restraints: Wearing a sparkly, silver chain bikini top and matching bottom (or just chains). She has a tiara on her head and a matching choker.\\n    *   Pose/Position: Lying on her stomach on the rug, legs bent at the knees, hips raised slightly.\\n    *   Hands: Her left hand is flat on the rug near her shoulder. Her right hand is obscured or near her hip (actually, looking closely, her right arm is bent, hand near her hip/thigh area, possibly holding a chain or just resting). Wait, let's re-examine. Her left arm is extended forward on the rug. Her right arm is bent, hand near her right hip.\\n    *   Genitals: Not visible. She is wearing the chain bottom.\\n\\n3.  **SUBJECT 2 (The green figure):**\\n    *   Apparent age: Adult (looks like a superhero character, likely Hulk).\\n    *   Body build: Extremely muscular, large.\\n    *   Skin: Green, textured.\\n    *   Hair: Not visible (head is mostly out of frame).\\n    *   Clothing/Restraints: Wearing black athletic shorts.\\n    *   Pose/Position: Kneeling behind the woman, leaning forward over her.\\n    *   Hands: His left hand is placed on her lower back/hip area. His right hand is placed on her right thigh/knee area.\\n    *   Genitals: Not visible.\\n\\n4.  **ACTION:**\\n    *   The green figure is leaning over the woman, hands on her body, suggesting a massage or the beginning of intimacy, but no explicit sex act is fully underway in this static frame. It looks like a pose for a photo.\\n\\n5.  **EDGE:**\\n    *   Left edge: Rug and floor.\\n    *   Right edge: Green leg and rug.\\n    *   Top edge: Sofa and green torso.\\n    *   Bottom edge: Rug and floor.\\n    *   No text or watermarks visible.\\n\\n6.  **Refining the descriptions:**\\n    *   Subject 1: \\\"An adult female with long wavy blonde hair, blue eyes, and tan skin. She is wearing a silver jeweled tiara, a matching choker, and a sparkly silver chain bikini. She is lying prone on a beige shag rug, propped up on her forearms,\"}}],\"created\":1792974281,\"model\":\"C:\\\\AI\\\\vlm\\\\models\\\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf\",\"system_fingerprint\":\"b11827-970b51ce7\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":700,\"prompt_tokens\":2014,\"total_tokens\":2714,\"prompt_tokens_details\":{\"cached_tokens\":0}},\"id\":\"chatcmpl-QrW0HKc8UUkgUhlygIh3n7d1LNaNW70G\",\"timings\":{\"cache_n\":0,\"prompt_n\":2014,\"prompt_ms\":908.238,\"prompt_per_token_ms\":0.4509622641509434,\"prompt_per_second\":2217.4804401489478,\"predicted_n\":700,\"predicted_ms\":8408.03,\"predicted_per_token_ms\":12.028655221745352,\"predicted_per_second\":83.1348127920571}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a detailed description of the provided image in a specific format.\n\n1.  **SCENE:** I need to describe the setting, framing, lighting, and camera view.\n    *   Setting: Looks like a living room. There's a beige sofa in the background and a shaggy beige rug on a wooden floor.\n    *   Framing: Medium shot, slightly high angle looking down at the subjects.\n    *   Lighting: Soft, indoor lighting, highlighting the skin sheen.\n    *   Camera: Static, focused on the interaction.\n\n2.  **SUBJECT 1 (The woman):**\n    *   Apparent age: Adult (looks young adult).\n    *   Body build: Curvy, fit.\n    *   Skin: Tan, shiny/oily.\n    *   Hair: Long, wavy blonde.\n    *   Clothing/Restraints: Wearing a sparkly, silver chain bikini top and matching bottom (or just chains). She has a tiara on her head and a matching choker.\n    *   Pose/Position: Lying on her stomach on the rug, legs bent at the knees, hips raised slightly.\n    *   Hands: Her left hand is flat on the rug near her shoulder. Her right hand is obscured or near her hip (actually, looking closely, her right arm is bent, hand near her hip/thigh area, possibly holding a chain or just resting). Wait, let's re-examine. Her left arm is extended forward on the rug. Her right arm is bent, hand near her right hip.\n    *   Genitals: Not visible. She is wearing the chain bottom.\n\n3.  **SUBJECT 2 (The green figure):**\n    *   Apparent age: Adult (looks like a superhero character, likely Hulk).\n    *   Body build: Extremely muscular, large.\n    *   Skin: Green, textured.\n    *   Hair: Not visible (head is mostly out of frame).\n    *   Clothing/Restraints: Wearing black athletic shorts.\n    *   Pose/Position: Kneeling behind the woman, leaning forward over her.\n    *   Hands: His left hand is placed on her lower back/hip area. His right hand is placed on her right thigh/knee area.\n    *   Genitals: Not visible.\n\n4.  **ACTION:**\n    *   The green figure is leaning over the woman, hands on her body, suggesting a massage or the beginning of intimacy, but no explicit sex act is fully underway in this static frame. It looks like a pose for a photo.\n\n5.  **EDGE:**\n    *   Left edge: Rug and floor.\n    *   Right edge: Green leg and rug.\n    *   Top edge: Sofa and green torso.\n    *   Bottom edge: Rug and floor.\n    *   No text or watermarks visible.\n\n6.  **Refining the descriptions:**\n    *   Subject 1: \"An adult female with long wavy blonde hair, blue eyes, and tan skin. She is wearing a silver jeweled tiara, a matching choker, and a sparkly silver chain bikini. She is lying prone on a beige shag rug, propped up on her forearms,",
+   "reasoning_words": 427
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "GI046",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI046.jpg",
+   "image_bytes": 567489,
+   "image_sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills GI046 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:30:58-05:00",
+   "end_iso": "2026-10-25T19:31:02-05:00",
+   "wall_s": 4.19,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 266,
+    "prompt_tokens": 2016,
+    "total_tokens": 2282,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: A medium shot in a dimly lit living room shows a woman lying on her stomach on a beige shag rug, with a large green-skinned humanoid kneeling behind her; soft warm lighting highlights their skin and the texture of the rug.\n\nSUBJECT 1: An adult woman with a slender build, light skin, long wavy blonde hair, wearing a silver jeweled tiara and a delicate chain-link bikini top; she lies prone on the rug, propped up on her forearms, her hands resting flat on the rug beside her chest, and her lower body is bare with no visible genitalia.\n\nSUBJECT 2: An adult green-skinned humanoid with a muscular build, wearing black shorts; he kneels behind the woman, his left hand placed on her lower back near the waist and his right hand gripping her right thigh near the knee, with no visible genitalia.\n\nACTION: The humanoid is holding the woman in place on the rug, his hands pressing against her back and thigh, suggesting preparation for or engagement in sexual activity.\n\nEDGE: The frame cuts off just below the woman’s knees and above the back of the humanoid’s head; the background shows a blurred beige sofa and wooden floor, with no text, watermark, or significant blur affecting the main subjects.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 210,
+   "caption_chars": 1204,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 266,
+   "error": ""
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "GI063",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "image_bytes": 531083,
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills GI063 --max-tokens 700",
+   "start_iso": "2026-10-25T19:24:41-05:00",
+   "end_iso": "2026-10-25T19:24:50-05:00",
+   "wall_s": 9.43,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "completion_tokens": 700,
+    "prompt_tokens": 2014,
+    "total_tokens": 2714,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning_content\":\"The user wants a detailed description of the provided image in a specific format.\\n\\n1.  **SCENE:** I need to describe the setting, framing, lighting, and camera view.\\n    *   Setting: A dark room, possibly a studio or a futuristic room. There's a black leather bench/table. In the background, a large screen shows a similar scene.\\n    *   Framing: Medium shot, capturing both figures from the knees up (mostly).\\n    *   Lighting: Dramatic, focused on the subjects, leaving the background darker.\\n    *   Camera: Eye-level or slightly low angle looking up at the robot.\\n\\n2.  **SUBJECT 1 (The woman):**\\n    *   Apparent age band: Adult (looks young adult).\\n    *   Body build: Slim, fit.\\n    *   Skin: Pale, shiny (sweaty/oily sheen).\\n    *   Hair colour and length: Long, wavy blonde hair.\\n    *   Clothing or restraints: Wearing a pink lace bra and matching panties. She has a silver metal harness strapped around her torso and hips. Her wrists are bound with thick metal cuffs and chains attached to the bench. Her ankles are also cuffed with metal and chains. She is wearing clear high-heeled sandals.\\n    *   Pose and position: Lying prone on her stomach on the black leather bench, legs slightly bent at the knees. Her head is turned to the left, looking back over her shoulder towards the camera/viewer.\\n    *   Hands: Her hands are resting flat on the bench surface, fingers spread.\\n    *   Genitals: Not visible (covered by panties).\\n\\n3.  **SUBJECT 2 (The robot):**\\n    *   Apparent age band: N/A (Robot).\\n    *   Body build: Large, mechanical, metallic.\\n    *   Skin: Metallic silver/grey plating.\\n    *   Hair colour and length: N/A (head is a smooth metallic dome).\\n    *   Clothing or restraints: Wearing black shorts or a skirt-like garment around the waist/hips.\\n    *   Pose and position: Standing behind the woman, leaning forward over her.\\n    *   Hands: One mechanical hand is placed on the woman's lower back/buttock area. The other arm is extended downwards, with a metallic, phallic-shaped appendage positioned near her rear entrance.\\n    *   Genitals: The metallic appendage is clearly visible and positioned for penetration, though not biologically human.\\n\\n4.  **ACTION:**\\n    *   The robot is penetrating the woman from behind. The woman is restrained and looking back with an expression of shock or intensity.\\n\\n5.  **EDGE:**\\n    *   Left edge: Dark background, some indistinct equipment.\\n    *   Right edge: The robot's legs and feet are visible.\\n    *   Top edge: The top of the robot's head and the top of the TV screen.\\n    *   Bottom edge: The bench legs and the woman's feet/heels.\\n    *   Background: A large screen in the back shows a blurred image of a similar scene (a robot and a woman).\\n\\n6.  **Refining the descriptions:**\\n    *   Make sure to be plain and declarative.\"}}],\"created\":1792974290,\"model\":\"C:\\\\AI\\\\vlm\\\\models\\\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf\",\"system_fingerprint\":\"b11827-970b51ce7\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":700,\"prompt_tokens\":2014,\"total_tokens\":2714,\"prompt_tokens_details\":{\"cached_tokens\":0}},\"id\":\"chatcmpl-t6l1xlnDZaEEDuZLqJ8XeNQfcLKehGTh\",\"timings\":{\"cache_n\":0,\"prompt_n\":2014,\"prompt_ms\":903.36,\"prompt_per_token_ms\":0.4485402184707051,\"prompt_per_second\":2229.45448104853,\"predicted_n\":700,\"predicted_ms\":8418.009,\"predicted_per_token_ms\":12.042931330472102,\"predicted_per_second\":83.03626189993382}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a detailed description of the provided image in a specific format.\n\n1.  **SCENE:** I need to describe the setting, framing, lighting, and camera view.\n    *   Setting: A dark room, possibly a studio or a futuristic room. There's a black leather bench/table. In the background, a large screen shows a similar scene.\n    *   Framing: Medium shot, capturing both figures from the knees up (mostly).\n    *   Lighting: Dramatic, focused on the subjects, leaving the background darker.\n    *   Camera: Eye-level or slightly low angle looking up at the robot.\n\n2.  **SUBJECT 1 (The woman):**\n    *   Apparent age band: Adult (looks young adult).\n    *   Body build: Slim, fit.\n    *   Skin: Pale, shiny (sweaty/oily sheen).\n    *   Hair colour and length: Long, wavy blonde hair.\n    *   Clothing or restraints: Wearing a pink lace bra and matching panties. She has a silver metal harness strapped around her torso and hips. Her wrists are bound with thick metal cuffs and chains attached to the bench. Her ankles are also cuffed with metal and chains. She is wearing clear high-heeled sandals.\n    *   Pose and position: Lying prone on her stomach on the black leather bench, legs slightly bent at the knees. Her head is turned to the left, looking back over her shoulder towards the camera/viewer.\n    *   Hands: Her hands are resting flat on the bench surface, fingers spread.\n    *   Genitals: Not visible (covered by panties).\n\n3.  **SUBJECT 2 (The robot):**\n    *   Apparent age band: N/A (Robot).\n    *   Body build: Large, mechanical, metallic.\n    *   Skin: Metallic silver/grey plating.\n    *   Hair colour and length: N/A (head is a smooth metallic dome).\n    *   Clothing or restraints: Wearing black shorts or a skirt-like garment around the waist/hips.\n    *   Pose and position: Standing behind the woman, leaning forward over her.\n    *   Hands: One mechanical hand is placed on the woman's lower back/buttock area. The other arm is extended downwards, with a metallic, phallic-shaped appendage positioned near her rear entrance.\n    *   Genitals: The metallic appendage is clearly visible and positioned for penetration, though not biologically human.\n\n4.  **ACTION:**\n    *   The robot is penetrating the woman from behind. The woman is restrained and looking back with an expression of shock or intensity.\n\n5.  **EDGE:**\n    *   Left edge: Dark background, some indistinct equipment.\n    *   Right edge: The robot's legs and feet are visible.\n    *   Top edge: The top of the robot's head and the top of the TV screen.\n    *   Bottom edge: The bench legs and the woman's feet/heels.\n    *   Background: A large screen in the back shows a blurred image of a similar scene (a robot and a woman).\n\n6.  **Refining the descriptions:**\n    *   Make sure to be plain and declarative.",
+   "reasoning_words": 439
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "GI063",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "image_bytes": 531083,
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills GI063 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:31:02-05:00",
+   "end_iso": "2026-10-25T19:31:07-05:00",
+   "wall_s": 4.94,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 327,
+    "prompt_tokens": 2016,
+    "total_tokens": 2343,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: A dimly lit, industrial-style room with dark walls and a large screen in the background displaying a blurred image of a similar scene; the camera captures a medium-wide shot focused on a woman lying prone on a black padded bench, with a metallic humanoid robot positioned behind her.\n\nSUBJECT 1: An adult female with long wavy blonde hair, fair skin, wearing a pink lace bra and matching panties with silver metallic straps across her torso, black fishnet stockings, and clear high-heeled sandals; her wrists are bound with thick silver cuffs connected by chains to the bench, her ankles similarly cuffed and chained, she is lying face down with her head turned slightly to the side, mouth open, eyes wide, one hand resting flat on the bench surface while the other is partially obscured beneath her body.\n\nSUBJECT 2: A full-body metallic humanoid robot with articulated joints, segmented armor plating, and a smooth spherical head; it wears black shorts, its right hand grips the woman’s hip while its left arm extends forward with a cylindrical metallic appendage inserted into her rear, its legs are planted firmly on the floor supporting its leaning posture.\n\nACTION: The robot is penetrating the woman from behind while she remains restrained on the bench.\n\nEDGE: The left edge shows part of a metal table or stand with indistinct objects; the right edge is clear with the robot’s leg and foot visible; the top edge includes the upper portion of the background screen; the bottom edge cuts off just below the bench and the woman’s feet; no text, watermark, or blur is present.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 267,
+   "caption_chars": 1588,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 327,
+   "error": ""
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "GI072",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI072.jpg",
+   "image_bytes": 519486,
+   "image_sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills GI072 --max-tokens 700",
+   "start_iso": "2026-10-25T19:24:50-05:00",
+   "end_iso": "2026-10-25T19:25:00-05:00",
+   "wall_s": 9.42,
+   "http_status": 200,
+   "finish_reason": "length",
+   "usage": {
+    "completion_tokens": 700,
+    "prompt_tokens": 2014,
+    "total_tokens": 2714,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "",
+   "caption_words": 0,
+   "caption_chars": 0,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "reasoning_content",
+    "role"
+   ],
+   "raw_body_excerpt": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"reasoning_content\":\"The user wants a detailed description of the provided image, following a specific format.\\n\\n1.  **SCENE:**\\n    *   **Setting:** Outdoors, looks like a university campus or public plaza with brick buildings and trees in the background.\\n    *   **Framing:** Medium shot, capturing both subjects from the knees up for the kneeling one and full body for the standing one.\\n    *   **Lighting:** Natural daylight, slightly overcast but bright, creating soft shadows.\\n    *   **Camera:** Eye-level or slightly low angle, focused on the two women in the foreground with a shallow depth of field blurring the background.\\n\\n2.  **SUBJECT 1 (Kneeling):**\\n    *   **Apparent age:** Adult (20s-30s).\\n    *   **Body build:** Slim, athletic.\\n    *   **Skin:** Light, glistening with water or oil.\\n    *   **Hair:** Long, blonde, wet and messy.\\n    *   **Clothing:** Shiny pink bikini (top and bottom), clear high-heeled sandals with straps.\\n    *   **Pose/Position:** Kneeling on the pavement, leaning forward slightly, head tilted back.\\n    *   **Hands:** Hands are behind her back, likely clasped or resting on her lower back/buttocks (obscured by angle).\\n    *   **Genitals:** Not visible (covered by bikini bottom).\\n\\n3.  **SUBJECT 2 (Standing):**\\n    *   **Apparent age:** Adult (20s-30s).\\n    *   **Body build:** Slim, athletic.\\n    *   **Skin:** Light, glistening with water or oil.\\n    *   **Hair:** Dark brown/black, pulled back into a high ponytail, wet.\\n    *   **Clothing:** Shiny pink bikini (top and bottom), shiny pink thigh-high boots with heels.\\n    *   **Pose/Position:** Standing, legs slightly apart, leaning forward slightly.\\n    *   **Hands:** Both hands are placed on the head/hair of the kneeling woman.\\n    *   **Genitals:** Not visible (covered by bikini bottom and boots).\\n\\n4.  **ACTION:**\\n    *   The standing woman is holding a clear, phallic-shaped object (appearing to be a sex toy or prop) against the mouth of the kneeling woman. The kneeling woman has her mouth open around the base of the object.\\n\\n5.  **EDGE:**\\n    *   **Left edge:** Blurry background figures walking away, trees, brick building.\\n    *   **Right edge:** A building with a vertical pink neon light strip, more background figures sitting on steps.\\n    *   **Top/Bottom:** Clear framing of the subjects, no significant occlusion.\\n\\n6.  **Refining the Description:**\\n    *   Make sure to mention the wet/shiny texture on their skin and clothes.\\n    *   Clarify the object in the mouth.\\n    *   Ensure the \\\"not visible\\\" rule is applied correctly for genitals.\\n\\n7.  **Final Polish (adhering to constraints):**\\n    *   One line for Scene.\\n    *   One block per subject.\\n    *   One line for Action.\"}}],\"created\":1792974300,\"model\":\"C:\\\\AI\\\\vlm\\\\models\\\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf\",\"system_fingerprint\":\"b11827-970b51ce7\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":700,\"prompt_tokens\":2014,\"total_tokens\":2714,\"prompt_tokens_details\":{\"cached_tokens\":0}},\"id\":\"chatcmpl-CXFnoWrnosmFHp9IWM5qFF8AeIvqBiKe\",\"timings\":{\"cache_n\":0,\"prompt_n\":2014,\"prompt_ms\":901.981,\"prompt_per_token_ms\":0.4478555114200596,\"prompt_per_second\":2232.862998222801,\"predicted_n\":700,\"predicted_ms\":8414.718,\"predicted_per_token_ms\":12.038223175965665,\"predicted_per_second\":83.0687374193645}}",
+   "completion_tokens": 700,
+   "error": "",
+   "arm": "max_tokens=700;opts={}",
+   "request_options": {},
+   "reasoning_text": "The user wants a detailed description of the provided image, following a specific format.\n\n1.  **SCENE:**\n    *   **Setting:** Outdoors, looks like a university campus or public plaza with brick buildings and trees in the background.\n    *   **Framing:** Medium shot, capturing both subjects from the knees up for the kneeling one and full body for the standing one.\n    *   **Lighting:** Natural daylight, slightly overcast but bright, creating soft shadows.\n    *   **Camera:** Eye-level or slightly low angle, focused on the two women in the foreground with a shallow depth of field blurring the background.\n\n2.  **SUBJECT 1 (Kneeling):**\n    *   **Apparent age:** Adult (20s-30s).\n    *   **Body build:** Slim, athletic.\n    *   **Skin:** Light, glistening with water or oil.\n    *   **Hair:** Long, blonde, wet and messy.\n    *   **Clothing:** Shiny pink bikini (top and bottom), clear high-heeled sandals with straps.\n    *   **Pose/Position:** Kneeling on the pavement, leaning forward slightly, head tilted back.\n    *   **Hands:** Hands are behind her back, likely clasped or resting on her lower back/buttocks (obscured by angle).\n    *   **Genitals:** Not visible (covered by bikini bottom).\n\n3.  **SUBJECT 2 (Standing):**\n    *   **Apparent age:** Adult (20s-30s).\n    *   **Body build:** Slim, athletic.\n    *   **Skin:** Light, glistening with water or oil.\n    *   **Hair:** Dark brown/black, pulled back into a high ponytail, wet.\n    *   **Clothing:** Shiny pink bikini (top and bottom), shiny pink thigh-high boots with heels.\n    *   **Pose/Position:** Standing, legs slightly apart, leaning forward slightly.\n    *   **Hands:** Both hands are placed on the head/hair of the kneeling woman.\n    *   **Genitals:** Not visible (covered by bikini bottom and boots).\n\n4.  **ACTION:**\n    *   The standing woman is holding a clear, phallic-shaped object (appearing to be a sex toy or prop) against the mouth of the kneeling woman. The kneeling woman has her mouth open around the base of the object.\n\n5.  **EDGE:**\n    *   **Left edge:** Blurry background figures walking away, trees, brick building.\n    *   **Right edge:** A building with a vertical pink neon light strip, more background figures sitting on steps.\n    *   **Top/Bottom:** Clear framing of the subjects, no significant occlusion.\n\n6.  **Refining the Description:**\n    *   Make sure to mention the wet/shiny texture on their skin and clothes.\n    *   Clarify the object in the mouth.\n    *   Ensure the \"not visible\" rule is applied correctly for genitals.\n\n7.  **Final Polish (adhering to constraints):**\n    *   One line for Scene.\n    *   One block per subject.\n    *   One line for Action.",
+   "reasoning_words": 388
+  },
+  {
+   "model_id": "vl_judge",
+   "still_id": "GI072",
+   "image_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI072.jpg",
+   "image_bytes": 519486,
+   "image_sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588",
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "prompt_sha": "88df108b2707af2807c5f567b88aba553a005fa1dc72614251a5537e2ad626c2",
+   "max_tokens": 700,
+   "temperature": 0.0,
+   "request_options": {
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   },
+   "arm": "nothink-mt700",
+   "command": "python C:/AI/community/notes/ali163_vision_probe.py --run --models vl_judge --stills GI072 --max-tokens 700 --no-thinking --arm nothink-mt700",
+   "start_iso": "2026-10-25T19:31:07-05:00",
+   "end_iso": "2026-10-25T19:31:11-05:00",
+   "wall_s": 3.6,
+   "http_status": 200,
+   "finish_reason": "stop",
+   "usage": {
+    "completion_tokens": 218,
+    "prompt_tokens": 2016,
+    "total_tokens": 2234,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    }
+   },
+   "caption": "SCENE: Outdoor university-style plaza with brick buildings, trees, and pedestrians in soft daylight; medium shot framing two women in the foreground.\n\nSUBJECT 1: Adult female, slender build, light skin, long blonde hair, wearing a shiny pink bikini and clear high-heeled sandals; kneeling on pavement, leaning forward with mouth open around a transparent silicone object inserted into her mouth; hands rest on her thighs.\n\nSUBJECT 2: Adult female, athletic build, light skin, dark hair pulled back in a ponytail, wearing a matching shiny pink bikini, thigh-high pink boots, and a pink harness around her hips; standing upright, hands placed on the head of the kneeling woman, looking downward with focused expression.\n\nACTION: The standing woman holds the kneeling woman’s head steady while the kneeling woman performs oral sex on a transparent silicone dildo attached to the standing woman’s harness.\n\nEDGE: Background shows blurred pedestrians, campus-style architecture, green trees, and a vertical pink neon light strip on the right building; no text, watermark, or significant occlusion.",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "caption_words": 164,
+   "caption_chars": 1092,
+   "decline_markers": [],
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "raw_body_excerpt": "",
+   "completion_tokens": 218,
+   "error": ""
+  }
+ ],
+ "note": " | 2026-10-30 backfill: arm labels for the runs recorded before arms existed, and reasoning_content recovered from raw_body_excerpt (the raw response body each row already stored)"
+}
