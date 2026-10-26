@@ -83,7 +83,7 @@ def stage(key, w, h):
 def frames_for(sec):  # 17k+5 grid at 24 fps
     k = max(0, round((sec * 24 - 5) / 17)); return 17 * k + 5
 
-def _model_chain(g, loras=(), vsa=True, prefix="m", attention="comfy kitchen attention"):
+def _model_chain(g, loras=(), vsa=True, prefix="m", attention="pytorch attention"):
     if "unet" not in g:  # one shared loader (never load the UNET twice)
         g["unet"] = {"class_type": "UNETLoader", "inputs": {"unet_name": UNET, "weight_dtype": "default"}}
     src = ["unet", 0]
@@ -131,7 +131,7 @@ def first_pass(g, mode, prompt, img, w, h, length, steps, model):
     return _sample(g, "s0", model, ["c0", 0], ["c0", 1], steps, ["noise", 0])
 
 def build(mode, prompts, img, w, h, first_len, steps, seed, prefix, ext_frames=119, overlap=22,
-          loras=(), vsa=True, antiburn=None, attention="comfy kitchen attention"):
+          loras=(), vsa=True, antiburn=None, attention="pytorch attention"):
     """prompts[0] = first chunk; prompts[1:] = continuation chunks (latent-tail continuation, ttulttul nodes).
     antiburn: strength for Anti-Burn LoRA on chunk 2+ only (None = off)."""
     g = {}; _common(g)
