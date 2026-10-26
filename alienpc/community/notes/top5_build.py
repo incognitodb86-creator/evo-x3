@@ -49,6 +49,10 @@ MODES
   --check            build in memory, run every check, write notes/top5_manifest_<id>.json, print VERDICT
   --selftest         mutate a copy per seed, require the NAMED check to fire, and require 0 findings on
                      the real artifact; prints SELFTEST OK / ABORT
+  --arm a|b          a = the paid graph ...s51160001 (comfy kitchen attention, E5); b = the CK-ATTN A/B
+                     graph ...s51160002 (pytorch attention). Same prompt, same seed, one key differs:
+                     m_attn.attention. Gate 19 `attention` is the published rule, 20 `ab` is the
+                     one-variable rule measured as an exact path diff (L16).
 No GPU, no queue, no network: the schema check is the offline clone of run_graph_job.static_check
 (ali163_hc_r4g2_build.h3_schema/scan, parsed from comfy_extras/nodes_minimax_h3.py)."""
 import sys, os, re, json, copy, hashlib, glob, argparse
@@ -65,6 +69,42 @@ GRAPHS = os.path.join(C, "p7", "graphs")
 RUNS = os.path.join(C, "runs")
 SRC = "ali163_hc15_gi046_s51150032"
 NEW = "ali163_top5_gi046_s51160001"
+# CK-ATTN (2026-10-25, MAX block pick 3 "Sort out the Comfy Kitchen attention conflict"): the same
+# builder renders arm b, an A/B that moves ONE key. Arm a is the paid graph and keeps its value; arm b
+# carries the value the published docs name for an int8/convrot checkpoint (the schema default).
+NEW2 = "ali163_top5_gi046_s51160002"
+CK = "comfy kitchen attention"
+PYTORCH = "pytorch attention"
+ARMS = {"a": {"id": NEW, "attention": CK, "item": "E5 EULER-5S"},
+        "b": {"id": NEW2, "attention": PYTORCH, "item": "CK-ATTN CK-ATTN-B"}}
+MODEL_DIR = "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/diffusion_models"
+# the live options/default for the attention node, read on THIS box this date by
+# notes/ali173_b2_objinfo.py --only ModelAttentionBackend --prefix ckattn_20261025_obj
+LIVE_ATTN_SCHEMA = os.path.join(C, "notes", "ckattn_20261025_obj_ModelAttentionBackend.json")
+# Every published line the attention gate is keyed on, with the saved body + line that carries it
+# (PROMPT.md 5, L4: a claim cites a source read on this box). Quoted in findings and in the manifest.
+PUB = {
+    "ck_no_int8": 'notes/web/02v_docs_h3.txt:201 "Templates use int8_convrot checkpoints. Comfy Kitchen '
+                  'does not support them (issue #15529). Use default attention, or switch UNETLoader to '
+                  'pruned_bf16 then change backend." the same rule at :80 ("Comfy Kitchen attention '
+                  'cannot run int8_convrot checkpoints; use a bf16 build with that backend"), and the '
+                  'int8_convrot 21 GB row at :75',
+    "ck_allows_the_other_families": 'notes/web/02v_docs_h3.txt:77-79 lists "Comfy Kitchen attention" as '
+                  'the attention for the fp8_scaled / fp32 / bf16 rows, so the published bar is the int8 '
+                  'family only',
+    "ck_is_int8_kernels": 'notes/web/01_h3_ckpt_versions.txt:214 "ComfyUI-Kitchen (comfy-kernel int8 '
+                  'attention)" and :216 "int8_convrot ... needs the int8 convrot mm kernel"',
+    "author_names_the_family": 'notes/web/hc15_tenstrip_readme.txt:47-48: the int8 builds are the '
+                  '"10Eros-Max-h3-int8-convrot" repo, so a file named *_int8* from that line is the '
+                  'published int8_convrot family',
+    "schema_defaults": 'live /object_info read on this box 2026-10-25 23:32 CT, ComfyUI system 0.38.0 '
+                  '(notes/ckattn_20261025_obj_ModelAttentionBackend.json): options ["pytorch attention", '
+                  '"comfy kitchen attention"], default "pytorch attention", tooltip "Comfy Kitchen '
+                  'attention uses quantized INT8 attention"',
+    "bf16_branch_out_of_reach": 'the live /object_info UNETLoader list (notes/ckattn_20261025_obj_'
+                  'UNETLoader.json) offers 3 unet files and the only H3 one is the int8 file; pruned_bf16 '
+                  'is 40 GB and bf16 66 GB (notes/web/02v_docs_h3.txt:76,79) on a 16 GB RTX 5070 Ti',
+}
 SCENE = "GI046"
 SEED = 51160001
 FRAMES = 124                       # 17k+5 grid, 5.167 s at 24 fps, inside the node's trained range
@@ -77,6 +117,12 @@ CONT_CLASSES = ("MiniMaxH3GuidedContinuationWindow", "MiniMaxH3AppendContinuatio
 ALLOWED_DIFF = {f"{n}.NODE" for n in DROP} | {
     "dec_v.samples", "dec_a.samples", "c0.length", "c0.prompt",
     "ksel.sampler_name", "noise.noise_seed", "save.filename_prefix"}
+# Arm b moves one key more, the attention value. The `ab` gate is that exact set MEASURED as a path
+# diff against the paid arm-a graph on disk, never prose (L16).
+ARM_B_DIFF = ALLOWED_DIFF | {"m_attn.attention"}
+# The arm-vs-arm diff, read off the two graphs: exactly the attention value and the arm's own output
+# prefix (the prefix must differ or the two clips overwrite each other in ComfyUI/output).
+ARMS_DIFF = {"m_attn.attention", "save.filename_prefix"}
 # the card row no wording can satisfy, with the reason (measured by card_unsat below)
 CARD_KNOWN = ("F-CARD-POSE2",)
 NEG_WORDS = HC.TOP_NEG_WORDS
@@ -86,15 +132,26 @@ WORD_BAND = (350, 500)
 SUMMARY_MAX = 200
 
 
-def doc_block():
-    """the one c0 block of the prompt doc: (id, seed, sections dict, whole body text)."""
+def doc_block(arm="a"):
+    """the c0 block whose header id is this arm's graph: (id, seed, sections, body text). The doc may
+    carry the two A/B blocks and nothing else; both carry byte-identical prose and the same seed, so the
+    A/B changes one key. A31.parse_blocks is the shipped IM1 parser (L15), so the section order this
+    item renders is the order that gate reads."""
     bs = A31.parse_blocks(open(DOC, encoding="utf-8").read())
-    if len(bs) != 1:
-        raise SystemExit(f"top5: {DOC} carries {len(bs)} prompt blocks, want exactly 1")
-    b = bs[0]
-    if b["chunk"] != "c0" or b["id"] != NEW or b["seed"] != SEED:
-        raise SystemExit(f"top5: block header id={b['id']} chunk={b['chunk']} seed={b['seed']}, "
-                         f"want id={NEW} chunk=c0 seed={SEED}")
+    ids = sorted(b["id"] for b in bs)
+    if not bs or set(ids) - {ARMS["a"]["id"], ARMS["b"]["id"]}:
+        raise SystemExit(f"top5: {DOC} carries blocks {ids}, want only the arm ids "
+                         f"{ARMS['a']['id']}/{ARMS['b']['id']}")
+    for b in bs:
+        if b["chunk"] != "c0" or int(b["seed"]) != SEED:
+            raise SystemExit(f"top5: block {b['id']} is chunk={b['chunk']} seed={b['seed']}, "
+                             f"want c0/{SEED}")
+    if len(bs) == 2 and bs[0]["text"] != bs[1]["text"]:
+        raise SystemExit("top5: the A/B blocks do not carry byte-identical prose, so the two clips would "
+                         "differ by more than the attention value")
+    b = next(b for b in bs if b["id"] == ARMS[arm]["id"])
+    if b is None:
+        raise SystemExit(f"top5: no prompt block for arm {arm} ({ARMS[arm]['id']}) in {DOC}")
     return b
 
 
@@ -102,10 +159,12 @@ def gload(nid):
     return json.load(open(os.path.join(GRAPHS, nid + ".api.json"), encoding="utf-8"))
 
 
-def build():
-    """the 5-second single-pass euler graph, derived from SRC by subtraction (pure: returns a dict)."""
+def build(arm="a"):
+    """the arm's 5-second single-pass euler graph, derived from SRC by subtraction (pure: returns a dict).
+    The only arm-dependent lines are the attention value and the output prefix (check `ab`)."""
+    aid = ARMS[arm]["id"]
     g = copy.deepcopy(gload(SRC))
-    b = doc_block()
+    b = doc_block(arm)
     for n in DROP:
         g.pop(n, None)
     g["dec_v"]["inputs"]["samples"] = ["s0_samp", 0]
@@ -117,8 +176,9 @@ def build():
     g["c0"]["inputs"]["length"] = FRAMES
     g["c0"]["inputs"]["prompt"] = b["text"]
     g["ksel"]["inputs"]["sampler_name"] = "euler"
+    g["m_attn"]["inputs"]["attention"] = ARMS[arm]["attention"]
     g["noise"]["inputs"]["noise_seed"] = SEED
-    g["save"]["inputs"]["filename_prefix"] = f"community/{NEW}/{NEW}"
+    g["save"]["inputs"]["filename_prefix"] = f"community/{aid}/{aid}"
     return g
 
 
@@ -168,9 +228,10 @@ def neg_count(text):
 # ---------------------------------------------------------------------------- checks: each returns [] when it passes
 def ck_derive(g, ctx):
     src = gload(SRC)
+    allowed = ARM_B_DIFF if ctx.get("arm") == "b" else ALLOWED_DIFF
     d = A31.diff_paths(src, g)
-    bad = [f"DERIVE {p} is outside the allowed change set" for p in d if p not in ALLOWED_DIFF]
-    bad += [f"DERIVE allowed change {p} did not happen" for p in sorted(ALLOWED_DIFF) if p not in d]
+    bad = [f"DERIVE {p} is outside the allowed change set" for p in d if p not in allowed]
+    bad += [f"DERIVE allowed change {p} did not happen" for p in sorted(allowed) if p not in d]
     if set(g) & set(SRC) and set(g) - set(src):
         bad.append(f"DERIVE added nodes {sorted(set(g) - set(src))}")
     if set(src) - set(g) != DROP:
@@ -237,6 +298,8 @@ def ck_untouched(g, ctx):
     for nid in ("m_shift", "m_attn", "m_vsa", "unet", "clip", "vvae", "avae", "g0", "mkvid", "ksel"):
         if nid == "ksel":
             continue
+        if nid == "m_attn" and ctx.get("arm") == "b":
+            continue        # the attention value IS the arm-b variable; gate 19 owns it, gate 20 bounds it
         if g[nid]["inputs"] != src[nid]["inputs"]:
             out.append(f"UNTOUCHED {nid} inputs changed")
     for nid in ("c0",):
@@ -309,9 +372,10 @@ def ck_job_static(g, ctx):
     out = []
     if n != FRAMES:
         out.append(f"JOBS-static graph total {n} != the --frames value {FRAMES}")
-    st, have, _ = paid_state(NEW)
+    aid = ARMS[ctx.get("arm", "a")]["id"]
+    st, have, _ = paid_state(aid)
     if st == "half-paid":
-        out.append(f"JOBS-static {NEW} is half-paid: {len(have)} of 3 evidence files exist: {have}")
+        out.append(f"JOBS-static {aid} is half-paid: {len(have)} of 3 evidence files exist: {have}")
     if os.path.exists(os.path.join(C, "p7", "JOB_REQUEST.json")):
         out.append("JOBS-static p7/JOB_REQUEST.json is already queued")
     return out
@@ -451,30 +515,132 @@ def ck_no_judge(g, ctx):
             if re.search(r"\b" + w + r"\b", json.dumps(ctx["manifest"], ensure_ascii=False), re.I)]
 
 
+# ------------------------------------------------- CK-ATTN (2026-10-25): gates 19-20, the attention pair
+INT8_NAME = re.compile(r"int8|convrot", re.I)
+
+
+def unet_family(name):
+    """the published quant family read off the file name. The docs name the builds by these tokens
+    (pruned_int8_convrot / fp8_scaled / fp32 / bf16, notes/web/02v_docs_h3.txt:75-79), and the
+    checkpoint's own author labels the int8 line "10Eros-Max-h3-int8-convrot" (:47-48 of the saved
+    TenStrip README). Only the int8 family is what the published rule bars Comfy Kitchen from."""
+    n = name.lower()
+    if INT8_NAME.search(n):
+        return "int8"
+    for fam in ("fp8", "fp32", "bf16"):
+        if fam in n:
+            return fam
+    return "unknown"
+
+
+def attn_schema():
+    """the live options + default for the attention node, read on this box (a dated file). No live
+    file, no rule: the gate says so loudly instead of trusting the 2026-10-23 pinned dump (L4, L17)."""
+    if not os.path.isfile(LIVE_ATTN_SCHEMA):
+        return None
+    spec = json.load(open(LIVE_ATTN_SCHEMA, encoding="utf-8"))["ModelAttentionBackend"]["input"]["required"]["attention"][1]
+    return {"options": list(spec["options"]), "default": spec.get("default"), "file": LIVE_ATTN_SCHEMA}
+
+
+def attention_state(g):
+    name = g["unet"]["inputs"]["unet_name"]
+    path = os.path.join(MODEL_DIR, name)
+    exists = os.path.isfile(path)
+    return {"unet_name": name, "unet_path": path, "unet_exists": exists,
+            "unet_bytes": os.path.getsize(path) if exists else None,
+            "quant_family": unet_family(name), "attention": g["m_attn"]["inputs"]["attention"],
+            "schema": attn_schema(), "published": PUB,
+            "vsa": {"selection": g["m_vsa"]["inputs"].get("selection"),
+                    "keep_percent": g["m_vsa"]["inputs"].get("keep_percent"),
+                    "start_percent": g["m_vsa"]["inputs"].get("start_percent"),
+                    "recorded_for": "the dense backend is the fallback the sparse node names "
+                                    "(live ModelAttentionBackend description, 2026-10-25 23:32 CT)"}}
+
+
+def ck_attention(g, ctx):
+    """the published attention rule, keyed off the checkpoint's quant family and the live schema.
+    ComfyUI's H3 page (saved body): "Comfy Kitchen attention cannot run int8_convrot checkpoints; use a
+    bf16 build with that backend" (notes/web/02v_docs_h3.txt:80) and "Use default attention, or switch
+    UNETLoader to pruned_bf16 then change backend" (:201); the fp8/fp32/bf16 rows (:77-79) list CK as
+    available, so the bar is the int8 family only. A graph that asks for CK on an int8/convrot file is
+    the conflict this item settles; the paid arm-a graph reads red on it, by design."""
+    st = attention_state(g)
+    out = []
+    if not st["unet_exists"]:
+        out.append(f"ATTENTION-UNET-MISSING {st['unet_name']} is not in {MODEL_DIR}, so no queue can "
+                   f"load it. " + PUB["bf16_branch_out_of_reach"])
+    if st["schema"] is None:
+        out.append(f"ATTENTION-SCHEMA-UNREAD no live options file at {LIVE_ATTN_SCHEMA}; read one with "
+                   "notes/ali173_b2_objinfo.py --only ModelAttentionBackend --prefix <dated> (L4: a claim "
+                   "cites a source read on this box, and a schema-stale pin is L17)")
+        return out
+    opts = st["schema"]["options"]
+    if st["attention"] not in opts:
+        out.append(f"ATTENTION-VALUE-OUTSIDE-SCHEMA {st['attention']} is not one of {opts}. "
+                   + PUB["schema_defaults"])
+    if st["quant_family"] == "int8" and st["attention"] == CK:
+        out.append(f"ATTENTION-CK-INT8 {st['attention']} on {st['unet_name']} ({st['unet_bytes']} B, "
+                   "family int8 = the published int8_convrot family the checkpoint's author names). "
+                   + PUB["ck_no_int8"] + " | " + PUB["ck_is_int8_kernels"] + " | " +
+                   PUB["author_names_the_family"] + " | the published value for this family is "
+                   f"{st['schema']['default']} (the schema default); the other published branch (bf16) is "
+                   "out of reach on this box. " + PUB["bf16_branch_out_of_reach"])
+    return out
+
+
+def ck_ab(g, ctx):
+    """the A/B rule (L16: a cloned graph is only as safe as the diff you run on it). Arm b may differ
+    from the paid arm-a graph on disk by exactly the attention value and its own output prefix - one
+    variable, so any difference in the two clips belongs to the backend and to nothing else."""
+    if ctx.get("arm") != "b":
+        return []
+    ref = os.path.join(GRAPHS, NEW + ".api.json")
+    if not os.path.isfile(ref):
+        return [f"AB the A/B reference graph {ref} is not on disk, so the one-variable rule cannot be measured"]
+    d = A31.diff_paths(gload(NEW), g)
+    out = []
+    extra = sorted(p for p in d if p not in ARMS_DIFF)
+    missing = sorted(p for p in ARMS_DIFF if p not in d)
+    if extra:
+        out.append(f"AB {extra} changed too: the A/B moves one variable only (m_attn.attention + its own "
+                   "output prefix), else the pixels answer is not attributable")
+    if missing:
+        out.append(f"AB not an A/B: {missing} is identical in both arms")
+    return out
+
+
 CHECKS = [("state", ck_state), ("derive", ck_derive), ("frames", ck_frames), ("single", ck_single),
           ("sampler", ck_sampler), ("untouched", ck_untouched), ("refs_exist", ck_refs_exist),
           ("schema", ck_schema), ("jobs_static", ck_job_static), ("prompt_sync", ck_prompt_sync),
           ("words", ck_words), ("beats", ck_beats), ("camera", ck_camera), ("negation", ck_negation),
-          ("ages", ck_ages), ("card", ck_card), ("card_unsat", ck_card_unsat), ("no_judge", ck_no_judge)]
+          ("ages", ck_ages), ("card", ck_card), ("card_unsat", ck_card_unsat), ("no_judge", ck_no_judge),
+          ("attention", ck_attention), ("ab", ck_ab)]
 
 
 # ---------------------------------------------------------------------------- the record
-def measure(g):
-    b = doc_block()
+def measure(g, arm="a"):
+    aid = ARMS[arm]["id"]
+    b = doc_block(arm)
     n, fps = total_frames(g)
     card = HC.card_measure(SCENE, b["text"])
+    allowed = ARM_B_DIFF if arm == "b" else ALLOWED_DIFF
+    ref = os.path.join(GRAPHS, NEW + ".api.json")
     return {
         "as_of": "2026-10-25",
-        "item": "E5 EULER-5S",
+        "item": ARMS[arm]["item"],
+        "arm": arm,
         "scene": SCENE,
-        "graph": NEW,
-        "graph_path": os.path.join(GRAPHS, NEW + ".api.json"),
+        "graph": aid,
+        "graph_path": os.path.join(GRAPHS, aid + ".api.json"),
         "source_graph": SRC,
         "source_sha256": HC.sha(os.path.join(GRAPHS, SRC + ".api.json")),
         "graph_sha256": hashlib.sha256(json.dumps(g, sort_keys=True).encode()).hexdigest(),
         "nodes": len(g),
         "dropped_nodes": sorted(DROP),
-        "changed_paths": sorted(ALLOWED_DIFF),
+        "changed_paths": sorted(allowed),
+        "attention": attention_state(g),
+        "ab_reference_graph": NEW if arm == "b" else None,
+        "ab_diff_measured": sorted(A31.diff_paths(gload(NEW), g)) if arm == "b" and os.path.isfile(ref) else None,
         "prompt_doc": DOC,
         "prompt_keys": ["c0.inputs.prompt"],
         "prompt_words_main": len(b["sections"][MAIN].split()),
@@ -496,16 +662,17 @@ def measure(g):
         "card_known_unsatisfiable": list(CARD_KNOWN),
         "card_measurement": {k: v for k, v in card.items() if v},
         "render_command": (f"C:/AI/director/.venv/Scripts/python.exe {C}/scripts/run_graph_job.py "
-                           f"{os.path.join(RUNS, NEW)} {NEW} --frames {FRAMES}"),
+                           f"{os.path.join(RUNS, aid)} {aid} --frames {FRAMES}"),
     }
 
 
-def write_graph(g):
+def write_graph(g, arm="a"):
+    aid = ARMS[arm]["id"]
     data = json.dumps(g, indent=2)
-    os.makedirs(os.path.join(RUNS, NEW), exist_ok=True)
-    with open(os.path.join(GRAPHS, NEW + ".api.json"), "w", encoding="utf-8", newline="\n") as fh:
+    os.makedirs(os.path.join(RUNS, aid), exist_ok=True)
+    with open(os.path.join(GRAPHS, aid + ".api.json"), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(data)
-    with open(os.path.join(RUNS, NEW, "request.api.json"), "w", encoding="utf-8", newline="\n") as fh:
+    with open(os.path.join(RUNS, aid, "request.api.json"), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(data)
     return data
 
@@ -540,13 +707,42 @@ PAID_CASES = [{"name": n, "make": m, "want": w} for n, m, w in (
     ("half_paid_old_job_dir_only", ["rj"], "half-paid"))]
 
 
+# The attention rule is a live-disk + live-schema rule, so it gets behaviour probes, not text grepping
+# (L10): the PAID arm-a wiring must fire the named code, the built arm-b graph must be clean, and the
+# families the published docs do NOT bar (fp8) must stay clean against a real file. A rule with no
+# passing case is a ban, not a rule - that is what these probes check.
+def attn_probe_cases():
+    def mut(g, unet=None, attn=None):
+        g = copy.deepcopy(g)
+        if unet:
+            g["unet"]["inputs"]["unet_name"] = unet
+        if attn:
+            g["m_attn"]["inputs"]["attention"] = attn
+        return g
+    paid = os.path.join(GRAPHS, NEW + ".api.json")
+    return [
+        ("paid_arm_a_asks_ck_on_an_int8_unet", gload(NEW) if os.path.isfile(paid) else None,
+         ["ATTENTION-CK-INT8"]),
+        ("built_arm_b_uses_the_published_default", build("b"), []),
+        ("an_fp8_unet_may_use_ck_real_file_on_disk",
+         mut(build("b"), unet="FLUX-KLEIN-9B-FP8-NSFW.safetensors", attn=CK), []),
+        ("a_bf16_name_off_disk_names_the_missing_file",
+         mut(build("b"), unet="minimax_h3_pruned_bf16.safetensors", attn=CK),
+         ["ATTENTION-UNET-MISSING"]),
+    ]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--state", action="store_true")
     ap.add_argument("--emit", action="store_true")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--arm", choices=["a", "b"], default="a",
+                    help="a = the paid ...s51160001 (comfy kitchen attention); b = the CK-ATTN A/B "
+                         "...s51160002 (pytorch attention), one key from arm a")
     a = ap.parse_args()
+    aid = ARMS[a.arm]["id"]
     if a.state:
         run_state()
         return 0
@@ -555,7 +751,7 @@ def main():
     # on it. A seed whose named check stays silent is an ABORT: that is the L10 rule - a green check
     # that cannot fail is worthless, so every gate here is probed by the fault it exists to catch.
     def P(fn):                      # mutate the render payload (the graph's c0.prompt) from the doc text
-        return lambda g, man: g["c0"]["inputs"].update(prompt=fn(doc_block()["text"]))
+        return lambda g, man: g["c0"]["inputs"].update(prompt=fn(doc_block(a.arm)["text"]))
 
     seeds = [
         ("sampler_restored", lambda g, man: g["ksel"]["inputs"].update(sampler_name="res_multistep"),
@@ -583,33 +779,65 @@ def main():
              image="community/hc/NO_SUCH_CARD.jpg"), "refs_exist"),
         ("steps_raised", lambda g, man: g["s0_sched"]["inputs"].update(steps=12), "untouched"),
         ("shift_raised", lambda g, man: g["m_shift"]["inputs"].update(shift_video=12.0), "untouched"),
-        ("attention_changed",
-         lambda g, man: g["m_attn"]["inputs"].update(attention="pytorch attention"), "untouched"),
         ("canvas_changed", lambda g, man: g["c0"]["inputs"].update(width=1024), "untouched"),
         ("fps_changed", lambda g, man: g["mkvid"]["inputs"].update(fps=30), "frames"),
         ("seed_copied", lambda g, man: g["noise"]["inputs"].update(noise_seed=51150032), "untouched"),
         ("manifest_carries_a_judge_word",
          lambda g, man: man.update(keep="Derrick picks, so no row here may score the clip"), "no_judge"),
     ]
+    if a.arm == "a":
+        # arm a: the attention value is not an arm-a variable, so moving it is an UNTOUCHED fault.
+        seeds.append(("attention_value_moved_off_the_paid_wiring",
+                      lambda g, man: g["m_attn"]["inputs"].update(attention=PYTORCH), "untouched"))
+    else:
+        # arm b: the attention value IS the variable, so the seeds name the attention gate, and one seed
+        # restores the paid graph's wiring (the OLD value) - that is the L10 form: the detector fires on
+        # the fault it exists to catch, and the A/B seed proves a second moved key is caught too.
+        seeds += [
+            ("paid_ck_value_restored_on_the_int8_unet",
+             lambda g, man: g["m_attn"]["inputs"].update(attention=CK), "attention"),
+            ("attention_value_outside_the_live_schema",
+             lambda g, man: g["m_attn"]["inputs"].update(attention="sage attention"), "attention"),
+            ("unet_file_not_on_disk",
+             lambda g, man: g["unet"]["inputs"].update(unet_name="minimax_h3_pruned_bf16.safetensors"),
+             "attention"),
+            ("ab_moves_a_second_key",
+             lambda g, man: g["s0_sched"]["inputs"].update(steps=12), "ab"),
+        ]
 
     def findings(g, ctx, mut=lambda g, man: None):
-        man = measure(g)
+        man = measure(g, a.arm)
         mut(g, man)
         ctx = dict(ctx, manifest=man, prompt=g["c0"]["inputs"]["prompt"])
         return {name: fn(g, ctx) for name, fn in CHECKS}, man
 
-    ctx = {"block": doc_block()}
-    g = build()
+    ctx = {"block": doc_block(a.arm), "arm": a.arm}
+    g = build(a.arm)
 
     if a.selftest:
         base, _ = findings(g, ctx)
         real = {k: v for k, v in base.items() if v}
-        print(f"real artifact: {len(real)} checks fire {[list(v)[0][:70] for v in real.values()]}")
+        print(f"real artifact (arm {a.arm} {aid}): {len(real)} checks fire "
+              f"{[list(v)[0][:70] for v in real.values()]}")
         bad = []
+        # Arm a is the PAID graph, and the attention rule charges it the published conflict on purpose:
+        # that one named finding is the measured state this item exists to settle, disclosed in the record.
+        # So arm a's selftest requires that fire set to be exactly {attention: ATTENTION-CK-INT8} and 0
+        # others; arm b (the artifact under construction) must be clean on every gate.
+        paid_known = a.arm == "a"
+        if paid_known:
+            codes = [f.split()[0] for v in real.values() for f in v]
+            if sorted(real) != ["attention"] or codes != ["ATTENTION-CK-INT8"]:
+                bad.append(f"arm a: the paid graph's fire set is {sorted(real)} {codes}, want exactly "
+                           "['attention'] ['ATTENTION-CK-INT8'] - the disclosed conflict, and nothing else")
+            else:
+                print("  KNOWN   arm a paid graph: the disclosed CK-on-int8 conflict fires, 0 other findings")
+        elif real:
+            bad.append("the real artifact is not clean: " + json.dumps(real)[:300])
         for name, mut, want in seeds:
-            gs = build()
+            gs = build(a.arm)
             snap = (json.dumps(gs, sort_keys=True),
-                    json.dumps(measure(gs), sort_keys=True, default=str))
+                    json.dumps(measure(gs, a.arm), sort_keys=True, default=str))
             got, man = findings(gs, ctx, mut)
             if (json.dumps(gs, sort_keys=True), json.dumps(man, sort_keys=True, default=str)) == snap:
                 # a seed whose pattern does not match the artifact changes nothing, so it can never fire:
@@ -622,40 +850,49 @@ def main():
             if want not in fired:
                 bad.append(f"{name}: {want} did not fire, fired={fired} first={list(got.get(want, ['n/a']))[:1]}")
             print(f"  {tag:6s} {name:34s} expects {want:14s} fired={fired}")
-        if real:
-            bad.append("the real artifact is not clean: " + json.dumps(real)[:300])
         for case in PAID_CASES:
             tmp = tempfile.mkdtemp(prefix="top5_paid_")
             try:
                 for what in case["make"]:
-                    f = {"obj": os.path.join(tmp, "runs", NEW, "objective.json"),
-                         "log": os.path.join(tmp, "runs", NEW, "status.log"),
-                         "out": os.path.join(tmp, "out", NEW),
-                         "rj": os.path.join(tmp, "jobs", NEW + ".result.json")}[what]
+                    f = {"obj": os.path.join(tmp, "runs", aid, "objective.json"),
+                         "log": os.path.join(tmp, "runs", aid, "status.log"),
+                         "out": os.path.join(tmp, "out", aid),
+                         "rj": os.path.join(tmp, "jobs", aid + ".result.json")}[what]
                     os.makedirs(os.path.dirname(f), exist_ok=True)
                     if what == "out":
                         os.makedirs(f, exist_ok=True)
                     else:
                         open(f, "w").write("{}")
-                got = paid_state(NEW, roots=tmp)[0]
+                got = paid_state(aid, roots=tmp)[0]
                 print(f"  {'PROBE' if got == case['want'] else 'SILENT':6s} "
                       f"paid_state.{case['name']:27s} -> {got} (want {case['want']})")
                 if got != case["want"]:
                     bad.append(f"paid_state.{case['name']}: reads {got}, want {case['want']}")
             finally:
                 shutil.rmtree(tmp, ignore_errors=True)
+        for name, gprobe, want in attn_probe_cases():
+            if gprobe is None:
+                bad.append(f"attention.{name}: the paid graph {NEW}.api.json is not on disk to probe")
+                continue
+            codes = sorted(f.split()[0] for f in ck_attention(gprobe, ctx))
+            ok = codes == sorted(want)
+            print(f"  {'PROBE' if ok else 'SILENT':6s} attention.{name:44s} -> {codes} (want {sorted(want)})")
+            if not ok:
+                bad.append(f"attention.{name}: codes {codes}, want {sorted(want)}")
         if bad:
             print("SELFTEST ABORT " + json.dumps(bad, indent=1)[:2000])
             return 1
-        print(f"SELFTEST OK {len(seeds)} seeds fire their named check, 0 silent, 0 findings on the real graph, "
-              f"{len(PAID_CASES)} paid-state probes all read as designed")
+        print(f"SELFTEST OK arm {a.arm} {aid}: {len(seeds)} seeds fire their named check, 0 silent, "
+              f"{('the paid graph fires only the disclosed attention conflict' if paid_known else '0 findings on the real graph')}, "
+              f"{len(PAID_CASES)} paid-state probes and {len(attn_probe_cases())} attention behaviour "
+              "probes all read as designed")
         return 0
 
     if a.emit:
-        data = write_graph(g)
-        print(f"EMIT {NEW} {len(data)} bytes sha256 {hashlib.sha256(data.encode()).hexdigest()}")
-        print(f"  {os.path.join(GRAPHS, NEW + '.api.json')}")
-        print(f"  {os.path.join(RUNS, NEW, 'request.api.json')}")
+        data = write_graph(g, a.arm)
+        print(f"EMIT arm {a.arm} {aid} {len(data)} bytes sha256 {hashlib.sha256(data.encode()).hexdigest()}")
+        print(f"  {os.path.join(GRAPHS, aid + '.api.json')}")
+        print(f"  {os.path.join(RUNS, aid, 'request.api.json')}")
         return 0
 
     res, man = findings(g, ctx)
@@ -665,16 +902,21 @@ def main():
         print(("PASS " if not f else "FAIL ") + name + ("" if not f else " :: " + " | ".join(f)))
         n_ok += 0 if not f else 1
     man["checks"] = [{"name": k, "ok": not v, "detail": v} for k, v in res.items()]
-    with open(os.path.join(C, "notes", f"top5_manifest_{NEW}.json"), "w", encoding="utf-8",
+    with open(os.path.join(C, "notes", f"top5_manifest_{aid}.json"), "w", encoding="utf-8",
               newline="\n") as fh:
         json.dump(man, fh, indent=1, sort_keys=True)
-    print(f"MANIFEST notes/top5_manifest_{NEW}.json")
+    print(f"MANIFEST notes/top5_manifest_{aid}.json")
     print(f"clip {man['frames']} f at {man['fps']} fps = {man['seconds']} s, sampler {man['sampler']}, "
           f"{man['prompt_words_main']} words in the main field, beats {man['beats_s']}")
+    print(f"attention {man['attention']['attention']} on unet {man['attention']['unet_name']} "
+          f"family {man['attention']['quant_family']} exists={man['attention']['unet_exists']} "
+          f"schema_default={man['attention']['schema'] and man['attention']['schema']['default']}")
+    if man["ab_diff_measured"] is not None:
+        print(f"ab diff vs the paid arm-a graph: {man['ab_diff_measured']}")
     if n_ok:
         print(f"VERDICT NOT CLEAN {n_ok} of {len(CHECKS)} checks fail")
         return 1
-    print(f"VERDICT TOP5 CHECK CLEAN ({len(CHECKS)} checks, 0 findings)")
+    print(f"VERDICT TOP5 CHECK CLEAN ({len(CHECKS)} checks, 0 findings, arm {a.arm} {aid})")
     return 0
 
 

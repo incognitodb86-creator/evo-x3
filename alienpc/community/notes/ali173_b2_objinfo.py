@@ -8,7 +8,7 @@ allowed, and ComfyUI is woken ONLY through scripts/comfy_ctl.py (which refuses w
 render runs). ComfyUI and Forge's own model share the GPU through llama-swap, so wake + all
 reads happen in this one call; dumps go to notes/, the port is not touched again.
 """
-import json, os, subprocess, sys, time, urllib.request
+import argparse, json, os, subprocess, sys, time, urllib.request
 
 COMFY = "http://127.0.0.1:10004"
 CTL = r"C:\AI\community\scripts\comfy_ctl.py"
@@ -28,6 +28,19 @@ CLS = [
     "MarkdownNote", "Fast Groups Bypasser (rgthree)", "Power Lora Loader (rgthree)",
     "PreviewAny",
 ]
+# CK-ATTN (2026-10-25): a caller may ask for ONE SET of classes into a DATED prefix, so an attention
+# schema read does not overwrite the pinned full dump that the offline graph gates are validated against.
+# With no arguments the file behaves exactly as it did: same CLS list, same ali173_b2_* names.
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--only", default="", help="comma list of classes; empty = the shipped CLS list")
+_ap.add_argument("--prefix", default="ali173_b2_obj", help="output prefix for the per-class dumps")
+_ap.add_argument("--full-name", default="ali173_b2_object_info_full.json")
+_a = _ap.parse_args()
+if _a.only.strip():
+    CLS = [c.strip() for c in _a.only.split(",") if c.strip()]
+PREFIX = _a.prefix
+if _a.only.strip():
+    print("ONLY: " + ",".join(CLS) + " -> prefix " + PREFIX, flush=True)
 t0 = time.time()
 
 
@@ -81,13 +94,17 @@ if not ok:
 log("STEP 2 GET /object_info (full) + per-class dumps")
 full = get(COMFY + "/object_info", 600)
 names = sorted(full)
-json.dump(full, open(os.path.join(OUT, "ali173_b2_object_info_full.json"), "w", encoding="utf-8"))
-log(f"full object_info: {len(names)} classes")
+json.dump(full, open(os.path.join(OUT, _a.full_name), "w", encoding="utf-8"))
+log(f"full object_info: {len(names)} classes -> {_a.full_name}")
+if PREFIX != "ali173_b2_obj":
+    # the version/build the schema came from is part of the measurement (a schema-stale claim is L4/L17)
+    json.dump(get(COMFY + "/system_stats", 60),
+              open(os.path.join(OUT, PREFIX + "_system_stats.json"), "w", encoding="utf-8"))
 sel = {}
 for c in CLS:
     if c in full:
         sel[c] = full[c]
-        json.dump({c: full[c]}, open(os.path.join(OUT, "ali173_b2_obj_" + c.replace(" ", "_") + ".json"), "w", encoding="utf-8"))
+        json.dump({c: full[c]}, open(os.path.join(OUT, PREFIX + "_" + c.replace(" ", "_") + ".json"), "w", encoding="utf-8"))
 print("MISSING_CLASSES: " + ", ".join(c for c in CLS if c not in full), flush=True)
 print("MINIMAX_CLASSES: " + ", ".join(n for n in names if n.lower().startswith("minimax")), flush=True)
 print("CONTINUUM_CLASSES: " + ", ".join(n for n in names if n.startswith("H3Continuum") or n.startswith("H3Easy") or n.startswith("H3Decode")), flush=True)
