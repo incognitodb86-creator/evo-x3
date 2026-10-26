@@ -370,11 +370,20 @@ def build(tag):
     return data
 
 
-want = sys.argv[1:] or sorted(CLIPS)
-for tag in want:
-    build(tag)
-print("=" * 110)
-if fails:
-    print("CHECKS FAIL " + json.dumps(fails))
-    sys.exit(1)
-print(f"ALL CHECKS PASS ({n_pass} PASS lines, 11 numbered checks per clip: {want})")
+def main():
+    """CLI: build the clips named on argv (all of them with no argument) and report. Wrapped in a
+    __main__ guard (2026-10-25, E5) so notes/top5_build.py can import h3_schema/scan from this file
+    without running the R4G2 build; argv handling, output and exit codes are unchanged."""
+    want = sys.argv[1:] or sorted(CLIPS)
+    for tag in want:
+        build(tag)
+    print("=" * 110)
+    if fails:
+        print("CHECKS FAIL " + json.dumps(fails))
+        return 1
+    print(f"ALL CHECKS PASS ({n_pass} PASS lines, 11 numbered checks per clip: {want})")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

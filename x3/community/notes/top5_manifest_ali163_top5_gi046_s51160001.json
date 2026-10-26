@@ -1,0 +1,196 @@
+{
+ "ages": [
+  27,
+  34
+ ],
+ "as_of": "2026-10-25",
+ "beats_s": [
+  0.0,
+  1.4,
+  2.9,
+  4.2
+ ],
+ "canvas": [
+  1344,
+  768
+ ],
+ "card_fires": [
+  [
+   "F-CARD-POSE2",
+   "figure 2 opening beat says lying"
+  ]
+ ],
+ "card_known_unsatisfiable": [
+  "F-CARD-POSE2"
+ ],
+ "card_measurement": {
+  "beat0_ban": {
+   "1": [],
+   "2": [
+    "lying"
+   ]
+  },
+  "beat0_pose": {
+   "1": [],
+   "2": []
+  },
+  "card_figures": 2,
+  "subjects": 2
+ },
+ "changed_paths": [
+  "app1.NODE",
+  "c0.length",
+  "c0.prompt",
+  "c1.NODE",
+  "dec_a.samples",
+  "dec_v.samples",
+  "ksel.sampler_name",
+  "noise.noise_seed",
+  "s1_guide.NODE",
+  "s1_samp.NODE",
+  "s1_sched.NODE",
+  "save.filename_prefix",
+  "tail1.NODE",
+  "win1.NODE"
+ ],
+ "checks": [
+  {
+   "detail": [],
+   "name": "state",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "derive",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "frames",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "single",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "sampler",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "untouched",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "refs_exist",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "schema",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "jobs_static",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "prompt_sync",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "words",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "beats",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "camera",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "negation",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "ages",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "card",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "card_unsat",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "no_judge",
+   "ok": true
+  }
+ ],
+ "dropped_nodes": [
+  "app1",
+  "c1",
+  "s1_guide",
+  "s1_samp",
+  "s1_sched",
+  "tail1",
+  "win1"
+ ],
+ "fps": 24,
+ "frames": 124,
+ "graph": "ali163_top5_gi046_s51160001",
+ "graph_path": "C:/AI/community\\p7\\graphs\\ali163_top5_gi046_s51160001.api.json",
+ "graph_sha256": "7f745f584cd9c4ae69a79ec830c7b6137b13b72d3a821d69d62498dc781963c9",
+ "item": "E5 EULER-5S",
+ "negation_tokens": 1,
+ "nodes": 20,
+ "prompt_doc": "C:/AI/community\\notes\\top5_prompts.md",
+ "prompt_keys": [
+  "c0.inputs.prompt"
+ ],
+ "prompt_words_main": 497,
+ "prompt_words_total": 1202,
+ "ref_files": [
+  "community/hc/GI046.jpg",
+  "community/hc/GI046_w1_face.png"
+ ],
+ "ref_slots": [
+  "c0.ref_images.ref_image_1",
+  "c0.ref_images.ref_image_2"
+ ],
+ "render_command": "C:/AI/director/.venv/Scripts/python.exe C:/AI/community/scripts/run_graph_job.py C:/AI/community\\runs\\ali163_top5_gi046_s51160001 ali163_top5_gi046_s51160001 --frames 124",
+ "sampler": "euler",
+ "scene": "GI046",
+ "seconds": 5.166667,
+ "seed": 51160001,
+ "shift": [
+  10.0,
+  3.0
+ ],
+ "source_graph": "ali163_hc15_gi046_s51150032",
+ "source_sha256": "88fa0eeb26b2fec700d7ff032e1039ba53ca530e077b17b055f2857d3bcd08e6",
+ "steps": 8,
+ "summary_words": 109,
+ "word_band": [
+  350,
+  500
+ ]
+}
