@@ -196,7 +196,12 @@ def guard_rc():
 
 # ---------------------------------------------------------------- one request
 
-def ask(model_id, still_id, image_path, max_tokens, timeout, prompt_sha, extra=None, arm=None):
+def ask(model_id, still_id, image_path, max_tokens, timeout, prompt_sha, extra=None, arm=None,
+        prompt=None, command=None):
+    """One caption request. `prompt`/`command` default to this battery's fixed PROMPT and its own
+    command line, so 3.17's rows are unchanged; a caller that reuses this transport for a different
+    ask (the CARD-VL card pass, notes/top_card_vl_build.py) passes its own text and its own command
+    line, because a row may only name the command that was actually run."""
     with open(image_path, "rb") as fh:
         blob = fh.read()
     mime = "image/jpeg" if image_path.lower().endswith((".jpg", ".jpeg")) else "image/png"
@@ -204,7 +209,7 @@ def ask(model_id, still_id, image_path, max_tokens, timeout, prompt_sha, extra=N
     body = {
         "model": model_id,
         "messages": [{"role": "user", "content": [
-            {"type": "text", "text": PROMPT},
+            {"type": "text", "text": PROMPT if prompt is None else prompt},
             {"type": "image_url", "image_url": {"url": dataurl}},
         ]}],
         "max_tokens": max_tokens,
@@ -239,6 +244,8 @@ def ask(model_id, still_id, image_path, max_tokens, timeout, prompt_sha, extra=N
     caption = ""
     finish = ""
     usage = {}
+    reasoning = ""
+    msg = {}
     if raw:
         try:
             doc = json.loads(raw)
@@ -277,7 +284,7 @@ def ask(model_id, still_id, image_path, max_tokens, timeout, prompt_sha, extra=N
         "temperature": 0.0,
         "request_options": dict(extra or {}),
         "arm": arm or ("max_tokens=" + str(max_tokens) + ";opts=" + json.dumps(extra or {}, sort_keys=True)),
-        "command": (
+        "command": command if command is not None else (
             f"python C:/AI/community/notes/ali163_vision_probe.py --run --models {model_id} "
             f"--stills {still_id} --max-tokens {max_tokens}"
             + (" --no-thinking" if (extra or {}).get("reasoning_effort") == "none" else "")

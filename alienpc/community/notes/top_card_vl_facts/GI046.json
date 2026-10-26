@@ -1,0 +1,71 @@
+{
+ "card_title": "the orc (green-skinned humanoid) and the blonde woman on a rug in a living room",
+ "naming_source": "Max's naming sentence (notes/needs_derrick.md row 18, 2026-10-24 9:30 PM CT, quoted in the superseded card of 04:34 CT) names this scene 'the orc' and says 'a muscular green-skinned humanoid figure, behind a blonde woman on a rug in a living room'. The word 'orc' is a naming label, NOT a caption word: the model's own words are 'Green-skinned humanoid (Hulk-like)'. Everything else in this card is the model's own caption of the start still.",
+ "facts_extra": {
+  "naming_allowed": ["orc"],
+  "_naming_source": "The label 'orc' comes from Max's naming sentence (needs_derrick.md row 18). The caption's words are 'green-skinned humanoid (Hulk-like)'. Nothing is added to the picture from the naming sentence: the build, skin, wardrobe, pose and room all come from the two captions, each quoted in gate.evidence.",
+  "_alias_note": "The caption reports no hair for figure 2 and his head is out of frame, so figure 2's aliases carry no hair word; the word 'orc' is carried as an alias because Max's naming sentence uses it and gate.naming_allowed declares it."
+ },
+ "figures": [
+  {
+   "kind": "human",
+   "noun": "the blonde woman",
+   "species": "human female",
+   "build": "slim, toned (ask B adds 'curvaceous')",
+   "skin": "light, glossy",
+   "hair": "blonde, long and wavy",
+   "wardrobe": "silver chain-link bikini top and bottom, matching choker necklace, tiara",
+   "pose": "lying prone on stomach, upper body propped on forearms, hips lifted, legs slightly bent",
+   "position": "center-left foreground, facing camera",
+   "head_in_frame": true,
+   "visible": ["human female", "slim, toned", "light, glossy", "blonde, long and wavy", "silver chain-link bikini top and bottom", "choker necklace", "tiara", "lying prone on stomach", "propped on forearms", "hips lifted", "center-left foreground"],   "not_visible": ["genitals", "areola", "nipple", "erection", "the legs below the knee in ask B"]
+  },
+  {
+   "kind": "non-human",
+   "noun": "the green-skinned humanoid (Max's naming sentence calls this figure the orc)",
+   "species": "green-skinned humanoid (Hulk-like)",
+   "build": "extremely muscular, large hands and feet",
+   "skin": "green, textured with visible muscle definition",
+   "hair": "not visible (head mostly out of frame)",
+   "wardrobe": "black athletic shorts",
+   "pose": "kneeling behind figure 1, leaning forward with both hands placed on figure 1's lower back and thigh",
+   "position": "upper-right background, partially cropped at top and right edges",
+   "head_in_frame": false,
+   "visible": ["green-skinned humanoid", "extremely muscular", "large hands and feet", "green, textured with visible muscle definition", "black athletic shorts", "kneeling behind figure 1", "hands placed on figure 1's lower back and thigh", "upper-right background", "partially cropped at top and right edges"],
+   "not_visible": ["head", "face", "hair", "eyes", "genitals", "hands' fingers in detail"]
+  }
+ ],
+ "room": ["interior living space", "dark wood flooring", "beige shag rug", "beige upholstered sofa"],
+ "props": ["silver chain-link bikini and choker", "sparkling tiara", "black athletic shorts"],
+ "room_banned": ["bedroom", "kitchen", "bathroom", "office", "garage", "dungeon", "couch", "television", "balcony", "pool", "cellar"],
+ "light": ["soft, diffused lighting from front-left", "highlights on skin and metallic jewelry", "no direct sunlight"],
+ "light_banned": ["golden hour", "sunset", "candlelight", "firelight", "neon", "moonlight", "string lights", "fireplace", "camera flash"],
+ "camera": ["center-left foreground", "upper-right background", "sofa slightly out of focus"],
+ "core_tokens": ["blonde, long and wavy", "silver chain-link bikini top and bottom", "tiara", "lying prone on stomach", "green-skinned humanoid", "extremely muscular", "black athletic shorts", "kneeling behind figure 1", "beige shag rug", "interior living space", "soft, diffused lighting from front-left"],
+ "prompt_delta": {
+  "measured_facts": [
+   "ck_top_card fires on graph ali163_hc15_gi046_s51150031 c0 and c1: F-CARD-WORDS (no card word 'black athletic shorts', 'blonde, long and wavy', 'extremely muscular', 'green-skinned humanoid')",
+   "F-CARD-BANNED figure 1: 'nude', 'on all fours'; figure 2: 'dark grey shorts', 'grasped', 'grey shorts', 'on all fours'",
+   "F-CARD-POSE figure 1 opening beat lacks the card pose 'lying prone on stomach', 'propped on forearms'; figure 2 lacks 'kneeling behind figure 1'",
+   "F-CARD-ROOM: no card room/light word 'interior living space', 'dark wood flooring', 'beige upholstered sofa', 'silver chain-link bikini and choker'",
+   "TOP-MANIFEST card words in c0: 2/11 and in c1: 2/11 (the shipped prompts carry 2 of the 11 words the new card makes every chunk carry)",
+   "ck_top_facts PASSES on this facts file; the live gate measures 32/32 card quotes verbatim"
+  ],
+  "owner_of_the_fix": "the prompt-rewrite rows (ORC-ROBOT, SUBJECT-LABELS, CONT-BAN, CARD-HONESTY-RENDER): the words, poses, room words and banned words in the shipped prompts are what change, not the card"
+ },
+ "aliases": {
+  "1": ["she", "her", "hers", "herself", "woman", "blonde", "the blonde woman", "<subject 1>"],
+  "2": ["it", "its", "orc", "green", "green-skinned", "muscul", "kneel", "kneels", "kneeling", "the green-skinned humanoid", "he", "him", "his", "<subject 2>"]
+ },
+ "banned": {
+  "1": ["dark brown", "brunette", "black hair", "brown hair", "straight hair", "short hair", "blue eyes", "muscular", "athletic", "tall", "muscles", "on all fours", "nude", "topless", "genital exposure"],
+  "2": ["tusk", "tusked", "claw", "scar", "horn", "fang", "snout", "beast", "fur", "tail", "hoof", "vein", "bald", "short dark hair", "dark hair", "full head taller", "head taller", "head and shoulders", "muscle bellies", "old scars", "ridged", "knuckled", "dark grey shorts", "gray shorts", "grey shorts", "loincloth", "kilt"],
+  "any": ["the only person", "alone in the room", "standing alone", "the only bodies", "the only figure", "the only subject", "dark brown hair", "full head taller", "she is alone", "one person", "single figure", "a woman with dark brown hair", "on all fours", "grasped", "her hair in a ponytail"]
+ },
+ "head_allow": ["head out of frame", "head is out of frame", "stays out of frame", "outside the frame", "the frame crops him", "top edge crops him", "crops him at the neck", "above the top edge", "no head in frame", "partially cropped at top and right edges"],
+ "open_beat": {"1": ["lying prone on stomach", "propped on forearms"], "2": ["kneeling behind figure 1"]},
+ "open_beat_ban": {"1": ["stands up", "standing", "sits", "seated", "kneels up", "bent over the sofa", "rolls over"], "2": ["stands", "standing", "sits", "seated", "lies", "lying", "walks"]},
+ "consent_gate": {"ban": ["bound", "chained", "shackles", "restrained", "reluctant", "forced", "struggles", "resists", "consenting and eager", "enthusiastic"], "require": ["both of them consent"], "_note": "The two captions show no restraint: no rope, chain, cuff, gag, blindfold, furniture strap. The frame cannot settle consent either, so the prompt states the canon consent line and the card bans every restraint word and every eagerness claim."},
+ "solo_phrases": ["the only person", "alone in the room", "standing alone", "the only bodies", "the only figure", "the only subject", "she is alone", "one person", "single figure"],
+ "card_extra": "caption_conflict: ask A states figure 1's build as 'slim, toned'; ask B states 'curvaceous'. The card carries both with quotes and names the ask each came from. No prompt may state one as the settled build."
+}
