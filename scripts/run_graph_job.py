@@ -120,6 +120,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("arm_dir"); ap.add_argument("tag"); ap.add_argument("--frames", type=int, default=0)
     ap.add_argument("--frames-tol", type=int, default=0); ap.add_argument("--timeout", type=int, default=3600); ap.add_argument("--max-redo", type=int, default=2); a = ap.parse_args()
     D = a.arm_dir; SL = os.path.join(D, "status.log"); log = lambda m: comm.log(m, SL)
+    t_start = time.time()
     g0 = json.load(open(os.path.join(D, "request.api.json"), encoding="utf-8"))
     for n in g0.values():
         for s in comm.prompt_strings(n.get("inputs", {})):
@@ -187,5 +188,22 @@ def main():
         except Exception as e: log(f"unload note {str(e)[:120]}")
         gpu_unlock(log)   # RENDER-TIMEOUT: release C:/AI/locks/gpu-render.lock so the gate opens for the next job
         json.dump(res, open(os.path.join(D, "objective.json"), "w", encoding="utf-8"), indent=1)
+        try:
+            elapsed_min = round((time.time() - t_start) / 60.0, 1)
+            bpaths = [r"C:\Users\derek\5slock\ralph-community\logs\p7_budget.json"]
+            for bp in bpaths:
+                if os.path.exists(bp):
+                    with open(bp, "r", encoding="utf-8") as f:
+                        bdata = json.load(f)
+                    bdata["used_min"] = round(float(bdata.get("used_min", 0.0)) + elapsed_min, 1)
+                    bdata["jobs"] = int(bdata.get("jobs", 0)) + 1
+                    bdata["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+                    tmp_bp = bp + ".tmp"
+                    with open(tmp_bp, "w", encoding="utf-8") as f:
+                        json.dump(bdata, f, indent=4)
+                    os.replace(tmp_bp, bp)
+                    log(f"BUDGET updated {bp}: used_min={bdata['used_min']} jobs={bdata['jobs']}")
+        except Exception as e:
+            log(f"budget note {str(e)[:120]}")
     return rc
 if __name__ == "__main__": sys.exit(main())
