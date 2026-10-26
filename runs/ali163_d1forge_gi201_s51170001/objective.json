@@ -1,0 +1,25 @@
+{
+ "tag": "ali163_d1forge_gi201_s51170001",
+ "attempts": [
+  {
+   "frames": 124,
+   "w": 768,
+   "h": 1344,
+   "fps": "24/1",
+   "audio": true,
+   "duration": 5.166688,
+   "bytes": 2895848,
+   "tag": "ali163_d1forge_gi201_s51170001",
+   "file": "C:/AI/community/runs/ali163_d1forge_gi201_s51170001\\ali163_d1forge_gi201_s51170001.mp4",
+   "secs": 240.2,
+   "blackfreeze": [],
+   "image": false,
+   "outcome": "ok",
+   "collected_from_disk": false
+  }
+ ],
+ "ok": true,
+ "file": "C:/AI/community/runs/ali163_d1forge_gi201_s51170001\\ali163_d1forge_gi201_s51170001.mp4",
+ "contact_sheet": "C:/AI/community/runs/ali163_d1forge_gi201_s51170001\\ali163_d1forge_gi201_s51170001_stills_contact.png",
+ "image": false
+}
