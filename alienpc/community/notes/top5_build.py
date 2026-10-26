@@ -52,6 +52,7 @@ MODES
 No GPU, no queue, no network: the schema check is the offline clone of run_graph_job.static_check
 (ali163_hc_r4g2_build.h3_schema/scan, parsed from comfy_extras/nodes_minimax_h3.py)."""
 import sys, os, re, json, copy, hashlib, glob, argparse
+import shutil, tempfile                      # the paid-state probes build each disk state in a temp root
 
 C = "C:/AI/community"
 sys.path.insert(0, os.path.join(C, "notes"))
@@ -276,19 +277,41 @@ def ck_schema(g, ctx):
     return [f"SCHEMA {v}" for v in R4.scan(g, R4.h3_schema())]
 
 
+def paid_state(id_, roots=None):
+    """classify what a render left on disk. The three pieces of proof are the ones L20 names - `objective.json` +
+    `status.log` in the run dir + the ComfyUI output folder - NOT `p7/jobs/<id>.result.json`, which this render path
+    does not write (measured 2026-10-25 23:3x: the job wrote runs/<id>/{status.log,objective.json} and
+    ComfyUI/output/community/<id>/ and left no result.json; `p7/jobs/*.result.json` is the 38 older job-dir runs,
+    newest 2026-10-24). All three = PAID: collect the clip, never re-render it (L19). None of them and no
+    result.json = FREE, i.e. submittable (AGENTS.md: a request is submittable only while that file is absent).
+    Any other mix = HALF-PAID, which no gate may call clean: a half-collected run is not a paid clip.
+    `roots` lets --selftest probe every state on temp paths without touching the real run dir."""
+    ev = [os.path.join(RUNS, id_, "objective.json"), os.path.join(RUNS, id_, "status.log"),
+          os.path.join("C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community", id_)]
+    rj = os.path.join(C, "p7", "jobs", id_ + ".result.json")
+    if roots:
+        ev = [os.path.join(roots, "runs", id_, "objective.json"), os.path.join(roots, "runs", id_, "status.log"),
+              os.path.join(roots, "out", id_)]
+        rj = os.path.join(roots, "jobs", id_ + ".result.json")
+    have = [p for p in ev if os.path.exists(p)]
+    st = "paid" if len(have) == 3 else "free" if not have and not os.path.exists(rj) else "half-paid"
+    return st, have, ev + [rj]
+
+
 def ck_job_static(g, ctx):
-    """the offline clone of run_graph_job's frame gate: the graph's one pass must equal the --frames
-    value the render passes, and the id must be free (no result.json, no output folder, no request queued)."""
+    """the offline clone of run_graph_job's frame gate: the graph's ONE pass must total the --frames value the
+    render passes, and no job may be queued while it is checked. The id-free rule is a PRE-SUBMIT condition and is
+    asserted only while the id is unpaid: this item rendered its job, and the same three pieces of evidence that
+    made this check read red at 23:0x CT (`VERDICT NOT CLEAN 1 of 18`, the selftest ABORTing on the real artifact)
+    are the paid clip - a paid clip is never re-rendered (L19), so the gate must not demand the absence of the
+    evidence the item exists to produce. A HALF-PAID id is still a fault."""
     n, _ = total_frames(g)
     out = []
     if n != FRAMES:
         out.append(f"JOBS-static graph total {n} != the --frames value {FRAMES}")
-    for p, why in ((os.path.join(C, "p7", "jobs", NEW + ".result.json"), "a result.json exists"),
-                   (os.path.join(RUNS, NEW, "objective.json"), "an objective.json exists"),
-                   (os.path.join("C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community", NEW),
-                    "an output folder exists")):
-        if os.path.exists(p):
-            out.append(f"JOBS-static {NEW} is not free: {why} at {p}")
+    st, have, _ = paid_state(NEW)
+    if st == "half-paid":
+        out.append(f"JOBS-static {NEW} is half-paid: {len(have)} of 3 evidence files exist: {have}")
     if os.path.exists(os.path.join(C, "p7", "JOB_REQUEST.json")):
         out.append("JOBS-static p7/JOB_REQUEST.json is already queued")
     return out
@@ -506,6 +529,17 @@ def run_state():
     return rows
 
 
+# The paid-state rule is a live-disk rule, not an artifact rule, so it gets its own behaviour probe (L10: probe the
+# behaviour; a seed that mutates nothing is not allowed). Build each disk state in a temp root and read the
+# classification off paid_state(): `paid` and `free` are the two good states; one piece of evidence, and a lone
+# p7/jobs result.json (the older job-dir path), are HALF-PAID and must not read clean.
+PAID_CASES = [{"name": n, "make": m, "want": w} for n, m, w in (
+    ("paid_all_three", ["obj", "log", "out"], "paid"),
+    ("free_nothing_on_disk", [], "free"),
+    ("half_paid_one_piece", ["obj"], "half-paid"),
+    ("half_paid_old_job_dir_only", ["rj"], "half-paid"))]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--state", action="store_true")
@@ -590,10 +624,31 @@ def main():
             print(f"  {tag:6s} {name:34s} expects {want:14s} fired={fired}")
         if real:
             bad.append("the real artifact is not clean: " + json.dumps(real)[:300])
+        for case in PAID_CASES:
+            tmp = tempfile.mkdtemp(prefix="top5_paid_")
+            try:
+                for what in case["make"]:
+                    f = {"obj": os.path.join(tmp, "runs", NEW, "objective.json"),
+                         "log": os.path.join(tmp, "runs", NEW, "status.log"),
+                         "out": os.path.join(tmp, "out", NEW),
+                         "rj": os.path.join(tmp, "jobs", NEW + ".result.json")}[what]
+                    os.makedirs(os.path.dirname(f), exist_ok=True)
+                    if what == "out":
+                        os.makedirs(f, exist_ok=True)
+                    else:
+                        open(f, "w").write("{}")
+                got = paid_state(NEW, roots=tmp)[0]
+                print(f"  {'PROBE' if got == case['want'] else 'SILENT':6s} "
+                      f"paid_state.{case['name']:27s} -> {got} (want {case['want']})")
+                if got != case["want"]:
+                    bad.append(f"paid_state.{case['name']}: reads {got}, want {case['want']}")
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
         if bad:
             print("SELFTEST ABORT " + json.dumps(bad, indent=1)[:2000])
             return 1
-        print(f"SELFTEST OK {len(seeds)} seeds fire their named check, 0 silent, 0 findings on the real graph")
+        print(f"SELFTEST OK {len(seeds)} seeds fire their named check, 0 silent, 0 findings on the real graph, "
+              f"{len(PAID_CASES)} paid-state probes all read as designed")
         return 0
 
     if a.emit:
