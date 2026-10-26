@@ -1,0 +1,75 @@
+{
+  "scene": "GI063",
+  "card_kind": "candidate",
+  "built_by": "notes/orcrobot_card_build.py (ORC-ROBOT, 2026-10-26): every token below is a verbatim substring of the caption in notes/scenes/candidates/GI063.facts.json, which is the caption of the exact start still, not of a rendered frame, and is not a human-approved card (the live card stays in force until a person approves this one)",
+  "built_from": "notes/scenes/candidates/GI063.facts.json",
+  "caption_sha256": "eef27c40556b732c38eba6035df87a464765c13be0bbb7b63698538842ca782e",
+  "model": "coding_sc117_strata",
+  "captured_at": "2026-10-26 01:20 CT",
+  "refusal_truncated": false,
+  "figures": [1, 2],
+  "aliases": {
+    "1": ["subject 1", "the woman", "woman", "she", "her"],
+    "2": ["subject 2", "the robot", "robot", "the machine", "the metallic figure", "its hand", "its right hand", "its left arm"]
+  },
+  "alias_note": "the alias list is the naming words the caption itself uses. 'it' and 'its' alone are NOT aliases: in prose about a room and a bench, a bare 'it' matches almost any sentence, and an owner pattern that matches everything charges every figure's bans to every sentence. The robot is named in full in every sentence that describes it.",
+  "banned": {
+    "1": ["he", "tall"],
+    "2": ["her", "led screen head", "the robot's face", "a face of polished steel", "the machine has a face", "its face", "fur"],
+    "any": ["beautiful", "gorgeous", "handsome"]
+  },
+  "banned_note": "figure 1 'he' = the caption names the woman as 'A woman with long wavy blonde hair', she/her. figure 1 'tall' = the caption gives no height and a woman chained to a bench is not shown standing; 'tall' is a stock build word. figure 2 'her' = the caption names the robot 'its right hand gripping her right buttock': the robot is 'it', and a sentence that carries that required contact token with no robot naming word in it is a pronoun slip onto the human figure. figure 2 'led screen head' = the caption says 'a smooth dome head'; the start still, not a screen, is the head, and the room's TV is a separate object. figure 2's face phrases and 'fur' = the caption describes no face and no fur on the robot; those are the stock anthropomorphic build words, and the woman's face IS in the caption ('head turned toward the camera, mouth slightly open with visible drool'), so face words are never banned for figure 1 and never in the all-figures list - a ban on the word 'face' would make a caption-faithful prompt about a person unbuildable. 'any': the three judge words only.",
+  "per_chunk_tokens": [
+    "1 a human, appears caucasian",
+    "1 long wavy blonde hair, pink lace lingerie set, black fishnet stockings on her right leg, clear high-heeled sandals",
+    "1 prone on a black padded bench",
+    "1 head turned toward the camera, mouth slightly open, drool visible",
+    "1 chained at the wrists and ankles with heavy silver chains to the bench, not gagged",
+    "1 wearing a pink lace lingerie set",
+    "2 an anthropomorphic metallic robot",
+    "2 a metallic body, articulated limbs, black shorts",
+    "2 a smooth dome head",
+    "2 bent at the waist",
+    "2 its right hand gripping her right buttock",
+    "2 its left arm extended with a cylindrical metallic appendage"
+  ],
+  "head_bans": {},
+  "head_allow": ["the frame crops", "outside frame", "facial detail"],
+  "pose_required": {
+    "1": "prone on a black padded bench",
+    "2": "bent at the waist"
+  },
+  "pose_banned": {
+    "1": ["sitting upright on the bench", "standing beside the bench", "lying on her back"],
+    "2": ["standing upright", "sitting on the bench", "lying on the bench", "kneeling"]
+  },
+  "room_required": [
+    "a dark interior, likely a studio or interrogation-style chamber",
+    "matte black walls",
+    "indistinct equipment at the far edges",
+    "a black padded bench",
+    "heavy silver chains",
+    "a large flat-screen tv",
+    "displays a blurred image of a similar scene",
+    "16:9"
+  ],
+  "room_bans": ["bright daylight", "outdoors", "kitchen", "office", "bedroom", "bathroom", "stage", "neon", "vivid", "sunny", "white walls"],
+  "light_required": [
+    "strong directional lighting from the front-left",
+    "soft shadows under the bench",
+    "a cool blue glow from a light source on the right",
+    "a muted, high-contrast color palette"
+  ],
+  "light_bans": ["neon", "sunny", "flat lighting"],
+  "age_marker": "canon declaration",
+  "age_min": 21,
+  "consent_gate": {
+    "ban": ["anguished", "distressed", "eager", "willing", "consenting", "enjoying", "in love", "orgasm"],
+    "required": [
+      "the card record shows restraint and gives no consent evidence",
+      "notes/needs_derrick.md row 21"
+    ]
+  },
+  "consent_note": "the caption records the woman chained at the wrists and ankles to the bench and gives no consent signal, so this card asserts no consent state; its gate requires a prompt to say the record shows restraint and gives no consent evidence, and keeps the question in C:/AI/community/notes/needs_derrick.md row 21, which is Derrick's to rule. The card adds no feeling word of its own.",
+  "age_note": "the caption states no ages, so this card asserts none. age_min is the fiction lock's floor, 'every character is a fictional adult aged 21+' (C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md), and age_marker is the words a prompt must carry with any age it names: a canon declaration, not a sighting."
+}

@@ -1,0 +1,350 @@
+{
+ "ages": [
+  27,
+  31
+ ],
+ "as_of": "2026-10-26",
+ "attention": {
+  "attention": "pytorch attention",
+  "published": {
+   "author_names_the_family": "notes/web/hc15_tenstrip_readme.txt:47-48: the int8 builds are the \"10Eros-Max-h3-int8-convrot\" repo, so a file named *_int8* from that line is the published int8_convrot family",
+   "bf16_branch_out_of_reach": "the live /object_info UNETLoader list (notes/ckattn_20261025_obj_UNETLoader.json) offers 3 unet files and the only H3 one is the int8 file; pruned_bf16 is 40 GB and bf16 66 GB (notes/web/02v_docs_h3.txt:76,79) on a 16 GB RTX 5070 Ti",
+   "ck_allows_the_other_families": "notes/web/02v_docs_h3.txt:77-79 lists \"Comfy Kitchen attention\" as the attention for the fp8_scaled / fp32 / bf16 rows, so the published bar is the int8 family only",
+   "ck_is_int8_kernels": "notes/web/01_h3_ckpt_versions.txt:214 \"ComfyUI-Kitchen (comfy-kernel int8 attention)\" and :216 \"int8_convrot ... needs the int8 convrot mm kernel\"",
+   "ck_no_int8": "notes/web/02v_docs_h3.txt:201 \"Templates use int8_convrot checkpoints. Comfy Kitchen does not support them (issue #15529). Use default attention, or switch UNETLoader to pruned_bf16 then change backend.\" the same rule at :80 (\"Comfy Kitchen attention cannot run int8_convrot checkpoints; use a bf16 build with that backend\"), and the int8_convrot 21 GB row at :75",
+   "schema_defaults": "live /object_info read on this box 2026-10-25 23:32 CT, ComfyUI system 0.38.0 (notes/ckattn_20261025_obj_ModelAttentionBackend.json): options [\"pytorch attention\", \"comfy kitchen attention\"], default \"pytorch attention\", tooltip \"Comfy Kitchen attention uses quantized INT8 attention\""
+  },
+  "quant_family": "int8",
+  "schema": {
+   "default": "pytorch attention",
+   "file": "C:/AI/community\\notes\\ckattn_20261025_obj_ModelAttentionBackend.json",
+   "options": [
+    "pytorch attention",
+    "comfy kitchen attention"
+   ]
+  },
+  "unet_bytes": 21709633539,
+  "unet_exists": true,
+  "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+  "unet_path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/diffusion_models\\10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+  "vsa": {
+   "keep_percent": null,
+   "recorded_for": "the dense backend is the fallback the sparse node names (live ModelAttentionBackend description, 2026-10-25 23:32 CT)",
+   "selection": "vsa",
+   "start_percent": 0.2
+  }
+ },
+ "beats_s": [
+  0.0,
+  1.4,
+  2.9,
+  4.2
+ ],
+ "canvas": [
+  1344,
+  768
+ ],
+ "card_fires": [
+  [
+   "F-CARD-BANNED",
+   "figure 1: he, tall"
+  ],
+  [
+   "F-CARD-BANNED",
+   "figure 2: LED, face, fingers, fur"
+  ]
+ ],
+ "card_known_unsatisfiable": [],
+ "card_measurement": {
+  "banned_hits": {
+   "1": [
+    "he",
+    "tall",
+    "he",
+    "he",
+    "he",
+    "he",
+    "he",
+    "tall",
+    "he",
+    "he",
+    "tall",
+    "he",
+    "tall",
+    "he",
+    "tall",
+    "he",
+    "he",
+    "he",
+    "he",
+    "he"
+   ],
+   "2": [
+    "LED",
+    "he",
+    "face",
+    "he",
+    "his",
+    "tail",
+    "he",
+    "fur",
+    "glow",
+    "he",
+    "he",
+    "fingers",
+    "he"
+   ]
+  },
+  "beat0_ban": {
+   "1": [],
+   "2": []
+  },
+  "beat0_pose": {
+   "1": [],
+   "2": []
+  },
+  "card_figures": 2,
+  "subjects": 2
+ },
+ "changed_paths": [
+  "app1.NODE",
+  "c0.length",
+  "c0.prompt",
+  "c1.NODE",
+  "dec_a.samples",
+  "dec_v.samples",
+  "ksel.sampler_name",
+  "m_attn.attention",
+  "noise.noise_seed",
+  "s1_guide.NODE",
+  "s1_samp.NODE",
+  "s1_sched.NODE",
+  "save.filename_prefix",
+  "tail1.NODE",
+  "win1.NODE"
+ ],
+ "checks": [
+  {
+   "detail": [
+    "STATE the source ali163_hc15_gi063_s51150032 is not the shipped 27-node 243+119 res_multistep graph (27 nodes, 362 f) this item derives from",
+    "STATE no shipped 15 s graph is a paid 5-second clip: 17 graphs, clip lengths [15.083] s - the row-34 pair still needs a robot render"
+   ],
+   "name": "state",
+   "ok": false
+  },
+  {
+   "detail": [],
+   "name": "derive",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "frames",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "single",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "sampler",
+   "ok": true
+  },
+  {
+   "detail": [
+    "UNTOUCHED dec_a inputs changed",
+    "UNTOUCHED dec_v inputs changed"
+   ],
+   "name": "untouched",
+   "ok": false
+  },
+  {
+   "detail": [],
+   "name": "refs_exist",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "schema",
+   "ok": true
+  },
+  {
+   "detail": [
+    "STATIC no runs/ali163_top5_gi063_s51160003 dir, so the submit input is not staged",
+    "STATIC the source ali163_hc15_gi063_s51150032 is not paid, so this derives from an unrendered draft"
+   ],
+   "name": "jobs_static",
+   "ok": false
+  },
+  {
+   "detail": [],
+   "name": "prompt_sync",
+   "ok": true
+  },
+  {
+   "detail": [
+    "WORDS detailed_description is 537 words, outside the 350-500 band Derrick set"
+   ],
+   "name": "words",
+   "ok": false
+  },
+  {
+   "detail": [],
+   "name": "beats",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "camera",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "negation",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "ages",
+   "ok": true
+  },
+  {
+   "detail": [
+    "CARD F-CARD-BANNED figure 1: he, tall",
+    "CARD F-CARD-BANNED figure 2: LED, face, fingers, fur",
+    "CARD the firing set ['F-CARD-BANNED'] != the known set [] - the GI063 card asks for nothing unsatisfiable, so a prompt that breaks a card row is a prompt fault, and a row that cannot be met is a card fault"
+   ],
+   "name": "card",
+   "ok": false
+  },
+  {
+   "detail": [],
+   "name": "consent",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "no_judge",
+   "ok": true
+  },
+  {
+   "detail": [],
+   "name": "attention",
+   "ok": true
+  },
+  {
+   "detail": [
+    "HOLD no row 21 in C:/AI/community\\notes\\needs_derrick.md, so the GI063 hold cannot be measured off disk"
+   ],
+   "name": "hold",
+   "ok": false
+  },
+  {
+   "detail": [
+    "DELTA this block's main field is 537 words, outside the band"
+   ],
+   "name": "prompt_delta",
+   "ok": false
+  }
+ ],
+ "delta_vs_source_prompt": {
+  "source_banned_words_used": [
+   "anguished",
+   "blue eyes",
+   "crying",
+   "distressed",
+   "eyes",
+   "face",
+   "fingers",
+   "jaw",
+   "shoulders",
+   "skin",
+   "spine",
+   "toes"
+  ],
+  "source_beats": [
+   0.0,
+   2.4,
+   4.6,
+   6.8,
+   8.9
+  ],
+  "source_consent_line_present": true,
+  "source_frames": 362,
+  "source_light_required_covered": 0,
+  "source_main_words": 496,
+  "source_per_chunk_tokens_covered": 0,
+  "source_room_required_covered": 0,
+  "source_sampler": "res_multistep",
+  "source_seed": 51150032,
+  "this_beats": [
+   0.0,
+   1.4,
+   2.9,
+   4.2
+  ],
+  "this_consent_line_present": true,
+  "this_frames": 124,
+  "this_light_required_covered": 4,
+  "this_main_words": 537,
+  "this_per_chunk_tokens_covered": 12,
+  "this_room_required_covered": 8,
+  "this_sampler": "euler",
+  "this_seed": 51160003
+ },
+ "dropped_nodes": [
+  "app1",
+  "c1",
+  "s1_guide",
+  "s1_samp",
+  "s1_sched",
+  "tail1",
+  "win1"
+ ],
+ "fps": 24,
+ "frames": 124,
+ "graph": "ali163_top5_gi063_s51160003",
+ "graph_path": "C:/AI/community\\p7\\graphs\\ali163_top5_gi063_s51160003.api.json",
+ "graph_sha256": "2c9ccb1e9053c6728d58fc7dc0cc2ca88368cb4a7c661d2840dc28fe9a3abcc1",
+ "item": "ORC-ROBOT ROBOT-5S",
+ "negation_tokens": 2,
+ "nodes": 20,
+ "prompt_doc": "C:/AI/community\\notes\\orcrobot_prompts.md",
+ "prompt_keys": [
+  "c0.inputs.prompt"
+ ],
+ "prompt_words_main": 537,
+ "prompt_words_total": 1381,
+ "ref_files": [
+  "community/hc/GI063.jpg",
+  "community/hc/GI063_w1_face.png"
+ ],
+ "ref_slots": [
+  "c0.ref_images.ref_image_1",
+  "c0.ref_images.ref_image_2"
+ ],
+ "render_blocked_by": "needs_derrick.md row 21 UNANSWERED (fix_plan.md L33); row 34 render answer UNANSWERED",
+ "render_command": "C:/AI/director/.venv/Scripts/python.exe C:/AI/community/scripts/run_graph_job.py C:/AI/community\\runs\\ali163_top5_gi063_s51160003 ali163_top5_gi063_s51160003 --frames 124",
+ "render_state": "free",
+ "row_21_state": "absent",
+ "row_34_quote": "",
+ "row_34_state": "absent",
+ "sampler": "euler",
+ "scene": "GI063",
+ "seconds": 5.166667,
+ "seed": 51160003,
+ "shift": [
+  10.0,
+  3.0
+ ],
+ "source_graph": "ali163_hc15_gi063_s51150032",
+ "source_sha256": "8248a552b6ba37df60e361758d735d27b4b47fa5c78c428810a9a5c1ef8b6104",
+ "steps": 8,
+ "summary_words": 137,
+ "word_band": [
+  350,
+  500
+ ]
+}
