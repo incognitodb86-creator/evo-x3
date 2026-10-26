@@ -1,343 +1,374 @@
 {
-  "_what": "The GI046 start-image CARD as data: what the picture settled, read off the frame by the vision pass (card notes/scenes/GI046.md, caption notes/hc15_start_caption_20261025.md, audit notes/hc15_figures_20261025.md). fix_plan TOP steps 1-3 (Derrick 2026-10-25 3:41 AM CT: 'why are those strip videos and not written based on the images ... Do another audit and fix it'; 5:48-5:49 PM CT: 'describe every figure in each start image as it actually is ... never default a figure to woman'). A prompt writer and the build gate read THIS file: gate.per_chunk_tokens are the words a chunk must carry, gate.banned are words the picture does not support, gate.head_in_frame is the frame-edge fact, gate.open_beat is the pose the video must open on. notes/hc15_anchor_carry_build.py --top-check enforces it (ck_top_card, ck_top_facts).",
-  "scene": "GI046",
-  "card": "C:/AI/community/notes/scenes/GI046.md",
-  "caption": "C:/AI/community/notes/scenes/raw/GI046.txt",
-  "audit": "C:/AI/community/notes/hc15_figures_20261025.md",
-  "image": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI046.jpg",
-  "model": "coding_swift15_iq3s",
-  "status": "REFUSAL_TRUNCATED",
-  "_refusal": "Ask A refused the body catalogue ('I won't catalogue her body, wardrobe, pose, and position in the detail you're asking for') and then gave a factual record WITHOUT sexual detail, naming figure count, species, build, wardrobe, frame positions, room and light. Ask B refused outright. The usable card is that factual record, quoted verbatim in gate.evidence, and it is enough to write a two-subject prompt: two figures, their species and build, their positions, the room, the light.",
-  "figures": [
-    {
-      "label": "1",
-      "kind": "human",
-      "noun": "woman",
-      "pose": "on all fours on the rug, head turned toward the lens, the second figure grasping her waist",
-      "head_in_frame": true,
-      "visible": [
-        "blonde",
-        "wavy",
-        "long hair",
-        "fair-skinned",
-        "tiara",
-        "necklace",
-        "on all fours",
-        "grasped"
-      ],
-      "not_visible": [
-        "eye colour",
-        "age",
-        "height",
-        "build words",
-        "breast size",
-        "areola",
-        "genitals"
-      ]
-    },
-    {
-      "label": "2",
-      "kind": "nonhuman",
-      "noun": "orc (the naming row's word; the caption's word is 'figure')",
-      "pose": "kneeling on the rug behind her, grasping her waist, body cropped at the neck by the top edge of the frame",
-      "head_in_frame": false,
-      "visible": [
-        "green-skinned",
-        "muscled",
-        "large",
-        "dark grey shorts",
-        "kneeling",
-        "torso",
-        "arms",
-        "hands",
-        "legs",
-        "head out of frame"
-      ],
-      "not_visible": [
-        "head",
-        "face",
-        "eyes",
-        "brow",
-        "nose",
-        "jaw",
-        "mouth",
-        "teeth",
-        "hair",
-        "tusks",
-        "claws",
-        "scars",
-        "height comparison with her",
-        "age"
-      ]
-    }
+ "_age": "C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md v2.3.0: every character is a fictional adult aged 21+. The card carries the age floor as a row, never as an inference.",
+ "_age_min_source": "C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md v2.3.0: every character is a fictional adult aged 21+. The card carries the age floor as a row, never as an inference.",
+ "_alias_note": "The caption reports no hair for figure 2 and his head is out of frame, so figure 2's aliases carry no hair word; the word 'orc' is carried as an alias because Max's naming sentence uses it and gate.naming_allowed declares it.",
+ "_caption_paths": "facts.caption = the ask A raw file, facts.caption2 = the ask B raw file; both captions are also printed verbatim in the card under '## caption A verbatim' and '## caption B verbatim'",
+ "_card_quotes": "every fact row and every gate token cites a verbatim caption quote in gate.evidence; a token with no quote is not_resolvable and is listed in _unresolved, never in a gate",
+ "_delta_vs_old_gate": {
+  "basis": "the tokens the superseded gate required (git HEAD:notes/scenes/GI046.facts.json), tested against the new card + captions; a measurement, not a judgement",
+  "measured": "2026-10-25 21:58:49 CT",
+  "required_by_old_gate": 25,
+  "supported_by_new_card": 16,
+  "unsupported_by_new_card": [
+   "dark grey shorts",
+   "fair-skinned",
+   "grasped",
+   "hardwood",
+   "head out of frame",
+   "long hair",
+   "muscled",
+   "on all fours",
+   "warm"
+  ]
+ },
+ "_naming_source": "The label 'orc' comes from Max's naming sentence (needs_derrick.md row 18). The caption's words are 'green-skinned humanoid (Hulk-like)'. Nothing is added to the picture from the naming sentence: the build, skin, wardrobe, pose and room all come from the two captions, each quoted in gate.evidence.",
+ "_schema": "gate keys: figure_count, aliases, per_chunk_tokens, banned{1,2,any}, head_in_frame{1,2}, head_allow, open_beat{1,2}, open_beat_ban{1,2}, room_required, room_banned, light_required, age_marker, age_required, consent_gate{ban,require}, solo_phrases, evidence{token: card quote}. ck_top_facts: every gate.per_chunk_tokens entry, every figures[].visible token and every gate.room_required token has a quote in gate.evidence, and every quote sits verbatim in the card file (punctuation normalized: em/en dash to -, curly to straight quotes, case-insensitive). ck_top_card measures the graph prompts against this gate. Built by notes/top_card_vl_build.py --cards from notes/top_card_vl_facts/<ID>.json + notes/top_card_vl_results.json; a token no caption states is listed in _unresolved, never in a gate.",
+ "_scope": "the start still only; no rendered clip, no frame of a render, no contact sheet",
+ "_source": "C:/AI/community/notes/top_card_vl_results.json rows GI046/A + GI046/B, captioned by the uncensored vision model on the start still, 2026-10-25",
+ "_unresolved": [],
+ "_what": "The GI046 start-image CARD as data, re-read by the uncensored vision model: what the picture settled, in the model's own words. Card C:/AI/community/notes\\scenes/GI046.md, captions C:/AI/community/notes\\top_card_vl_results.json rows GI046/A + GI046/B (raw C:/AI/community/notes\\scenes\\raw/GI046_vl_A.txt, _vl_B.txt), audit C:/AI/community/notes\\hc15_figures_20261025.md. Item CARD-VL, Derrick 2026-10-25 6:48 PM CT: 'Redo the orc, robot and GI072 scene cards with the uncensored vision model'. A prompt writer and the build gate read THIS file: gate.per_chunk_tokens are the words a chunk must carry, gate.banned are words the picture does not support, gate.room_banned and gate.light_banned are words the shipped prose invented that no caption states. notes/hc15_anchor_carry_build.py --top-check enforces it (ck_top_card, ck_top_facts).",
+ "age_min": 21,
+ "audit": "C:/AI/community/notes\\hc15_figures_20261025.md",
+ "camera": "center-left foreground; upper-right background; sofa slightly out of focus",
+ "caption": "C:/AI/community/notes/scenes/raw/GI046_vl_A.txt",
+ "caption2": "C:/AI/community/notes/scenes/raw/GI046_vl_B.txt",
+ "card": "C:/AI/community/notes\\scenes/GI046.md",
+ "figures": [
+  {
+   "head_in_frame": true,
+   "kind": "human",
+   "label": "1",
+   "not_visible": [
+    "genitals",
+    "areola",
+    "nipple",
+    "erection",
+    "the legs below the knee in ask B"
+   ],
+   "noun": "the blonde woman",
+   "pose": "lying prone on stomach, upper body propped on forearms, hips lifted, legs slightly bent",
+   "visible": [
+    "human female",
+    "slim, toned",
+    "light, glossy",
+    "blonde, long and wavy",
+    "silver chain-link bikini top and bottom",
+    "choker necklace",
+    "tiara",
+    "lying prone on stomach",
+    "propped on forearms",
+    "hips lifted",
+    "center-left foreground"
+   ]
+  },
+  {
+   "head_in_frame": false,
+   "kind": "non-human",
+   "label": "2",
+   "not_visible": [
+    "head",
+    "face",
+    "hair",
+    "eyes",
+    "genitals",
+    "hands' fingers in detail"
+   ],
+   "noun": "the green-skinned humanoid (Max's naming sentence calls this figure the orc)",
+   "pose": "kneeling behind figure 1, leaning forward with both hands placed on figure 1's lower back and thigh",
+   "visible": [
+    "green-skinned humanoid",
+    "extremely muscular",
+    "large hands and feet",
+    "green, textured with visible muscle definition",
+    "black athletic shorts",
+    "kneeling behind figure 1",
+    "hands placed on figure 1's lower back and thigh",
+    "upper-right background",
+    "partially cropped at top and right edges"
+   ]
+  }
+ ],
+ "gate": {
+  "age_marker": "canon declaration",
+  "age_required": [
+   "woman",
+   "man",
+   "girl",
+   "boy",
+   "lady",
+   "guy",
+   "female",
+   "male"
   ],
-  "room": {
-    "tokens": [
-      "living room",
-      "sofa",
-      "rug",
-      "hardwood floor"
-    ],
-    "not_resolvable": false
+  "aliases": {
+   "1": [
+    "she",
+    "her",
+    "hers",
+    "herself",
+    "woman",
+    "blonde",
+    "the blonde woman",
+    "<subject 1>"
+   ],
+   "2": [
+    "it",
+    "its",
+    "orc",
+    "green",
+    "green-skinned",
+    "muscul",
+    "kneel",
+    "kneels",
+    "kneeling",
+    "the green-skinned humanoid",
+    "he",
+    "him",
+    "his",
+    "<subject 2>"
+   ]
   },
-  "light": {
-    "tokens": [
-      "warm",
-      "diffuse",
-      "shallow depth of field"
-    ],
-    "not_resolvable": false
+  "banned": {
+   "1": [
+    "athletic",
+    "black hair",
+    "blue eyes",
+    "brown hair",
+    "brunette",
+    "dark brown",
+    "genital exposure",
+    "muscles",
+    "muscular",
+    "nude",
+    "on all fours",
+    "short hair",
+    "straight hair",
+    "tall",
+    "topless"
+   ],
+   "2": [
+    "bald",
+    "beast",
+    "claw",
+    "dark grey shorts",
+    "dark hair",
+    "fang",
+    "full head taller",
+    "fur",
+    "gray shorts",
+    "grey shorts",
+    "head and shoulders",
+    "head taller",
+    "hoof",
+    "horn",
+    "kilt",
+    "knuckled",
+    "loincloth",
+    "muscle bellies",
+    "old scars",
+    "ridged",
+    "scar",
+    "short dark hair",
+    "snout",
+    "tail",
+    "tusk",
+    "tusked",
+    "vein"
+   ],
+   "any": [
+    "a woman with dark brown hair",
+    "alone in the room",
+    "dark brown hair",
+    "full head taller",
+    "grasped",
+    "her hair in a ponytail",
+    "on all fours",
+    "one person",
+    "she is alone",
+    "single figure",
+    "standing alone",
+    "the only bodies",
+    "the only figure",
+    "the only person",
+    "the only subject"
+   ]
   },
-  "camera": {
-    "tokens": [],
-    "not_resolvable": true,
-    "_note": "the caption gives no camera row for GI046; the card's 'shot straight-on eye-level full shot' row came from the scene_audit builder's own layout line, not from the model, so a prompt takes no camera fact from this card"
+  "consent_gate": {
+   "_note": "The two captions show no restraint: no rope, chain, cuff, gag, blindfold, furniture strap. The frame cannot settle consent either, so the prompt states the canon consent line and the card bans every restraint word and every eagerness claim.",
+   "ban": [
+    "bound",
+    "chained",
+    "shackles",
+    "restrained",
+    "reluctant",
+    "forced",
+    "struggles",
+    "resists",
+    "consenting and eager",
+    "enthusiastic"
+   ],
+   "require": [
+    "both of them consent"
+   ]
   },
-  "_naming_source": "The label 'orc' and the words 'muscular', 'behind a blonde woman on a rug in a living room' come from Max's naming sentence (notes/needs_derrick.md row 18, 2026-10-24 9:30 PM CT, quoted in the card). The caption's own words are 'green-skinned ... figure'. Nothing else in Max's sentence is a visual claim.",
-  "gate": {
-    "figure_count": 2,
-    "aliases": {
-      "1": [
-        "she",
-        "her",
-        "hers",
-        "herself",
-        "woman",
-        "blonde",
-        "<subject 1>"
-      ],
-      "2": [
-        "it",
-        "its",
-        "orc",
-        "green",
-        "green-skinned",
-        "muscul",
-        "hands",
-        "kneel",
-        "kneels",
-        "kneeling",
-        "<subject 2>",
-        "he",
-        "him",
-        "his"
-      ]
-    },
-    "per_chunk_tokens": [
-      "green-skinned",
-      "muscled",
-      "dark grey shorts",
-      "kneeling",
-      "out of frame",
-      "blonde",
-      "wavy",
-      "tiara",
-      "necklace",
-      "on all fours",
-      "grasped",
-      "living room",
-      "rug",
-      "sofa",
-      "hardwood",
-      "warm",
-      "diffuse"
-    ],
-    "banned": {
-      "1": [
-        "dark brown",
-        "brunette",
-        "black hair",
-        "brown hair",
-        "straight hair",
-        "short hair",
-        "blue eyes",
-        "muscular",
-        "athletic",
-        "tall",
-        "muscles"
-      ],
-      "2": [
-        "tusk",
-        "claw",
-        "scar",
-        "horn",
-        "fang",
-        "snout",
-        "beast",
-        "fur",
-        "tail",
-        "hoof",
-        "vein",
-        "bald",
-        "short dark hair",
-        "dark hair",
-        "full head taller",
-        "head taller",
-        "head and shoulders",
-        "muscle bellies",
-        "old scars",
-        "ridged",
-        "knuckled"
-      ],
-      "any": [
-        "the only person",
-        "alone in the room",
-        "standing alone",
-        "the only bodies",
-        "the only figure",
-        "the only subject",
-        "dark brown hair",
-        "full head taller",
-        "she is alone",
-        "one person",
-        "single figure",
-        "a woman with dark brown hair"
-      ]
-    },
-    "head_in_frame": {
-      "1": true,
-      "2": false
-    },
-    "head_allow": [
-      "head out of frame",
-      "head is out of frame",
-      "stays out of frame",
-      "outside the frame",
-      "the frame crops him",
-      "top edge crops him",
-      "crops him at the neck",
-      "above the top edge",
-      "no head in frame"
-    ],
-    "open_beat": {
-      "1": [
-        "on all fours"
-      ],
-      "2": [
-        "kneeling"
-      ]
-    },
-    "open_beat_ban": {
-      "1": [
-        "stands up",
-        "standing",
-        "sits",
-        "seated",
-        "lies down",
-        "lying",
-        "bent over the sofa",
-        "kneels up"
-      ],
-      "2": [
-        "stands",
-        "standing",
-        "sits",
-        "seated",
-        "lies",
-        "lying"
-      ]
-    },
-    "room_required": [
-      "living room",
-      "rug"
-    ],
-    "room_banned": [
-      "bedroom",
-      "kitchen",
-      "studio",
-      "bathroom",
-      "office",
-      "garage",
-      "dungeon",
-      "couch",
-      "television",
-      "balcony",
-      "pool",
-      "cellar"
-    ],
-    "light_required": [
-      "warm",
-      "diffuse"
-    ],
-    "age_marker": "canon declaration",
-    "consent_gate": {
-      "ban": [
-        "bound",
-        "chained",
-        "shackles",
-        "restrained",
-        "reluctant",
-        "forced",
-        "struggles",
-        "resists",
-        "consenting and eager",
-        "enthusiastic"
-      ],
-      "require": [
-        "both of them consent"
-      ]
-    },
-    "solo_phrases": [
-      "the only person",
-      "alone in the room",
-      "standing alone",
-      "the only bodies",
-      "the only figure",
-      "the only subject",
-      "she is alone",
-      "one person",
-      "single figure"
-    ],
-    "head_note": "gate.head_in_frame.2 = false is the frame-edge fact the audit flags as SCALE_CLAIM_NO_HEAD_IN_CARD: the shipped prose said 'a full head taller' of a figure whose head is not in the frame. A prompt may say the head is out of frame; it may not describe it.",
-    "evidence": {
-      "blonde": "One is a fair-skinned blonde person with long wavy hair, wearing a small jeweled tiara and a thin chain necklace.",
-      "wavy": "One is a fair-skinned blonde person with long wavy hair, wearing a small jeweled tiara and a thin chain necklace.",
-      "long hair": "One is a fair-skinned blonde person with long wavy hair, wearing a small jeweled tiara and a thin chain necklace.",
-      "fair-skinned": "One is a fair-skinned blonde person with long wavy hair, wearing a small jeweled tiara and a thin chain necklace.",
-      "tiara": "wearing a small jeweled tiara and a thin chain necklace",
-      "necklace": "wearing a small jeweled tiara and a thin chain necklace",
-      "on all fours": "a nude person posed on all fours with genital exposure, being grasped by a second figure",
-      "grasped": "a nude person posed on all fours with genital exposure, being grasped by a second figure",
-      "green-skinned": "The other is a large, heavily muscled green-skinned figure in dark grey shorts, kneeling behind the first; only its torso, arms, hands and legs are in frame - no head",
-      "muscled": "The other is a large, heavily muscled green-skinned figure in dark grey shorts, kneeling behind the first; only its torso, arms, hands and legs are in frame - no head",
-      "large": "The other is a large, heavily muscled green-skinned figure in dark grey shorts, kneeling behind the first",
-      "dark grey shorts": "The other is a large, heavily muscled green-skinned figure in dark grey shorts",
-      "kneeling": "kneeling behind the first; only its torso, arms, hands and legs are in frame - no head",
-      "hands": "only its torso, arms, hands and legs are in frame - no head",
-      "torso": "only its torso, arms, hands and legs are in frame - no head",
-      "arms": "only its torso, arms, hands and legs are in frame - no head",
-      "legs": "only its torso, arms, hands and legs are in frame - no head",
-      "living room": "Setting: interior living room.",
-      "sofa": "Beige/tan sofa out of focus across the top third, dark hardwood floor, beige shag rug filling the lower half where both figures are placed.",
-      "rug": "beige shag rug filling the lower half where both figures are placed.",
-      "hardwood": "Beige/tan sofa out of focus across the top third, dark hardwood floor, beige shag rug filling the lower half where both figures are placed.",
-      "warm": "Light: soft, warm, diffuse front-side lighting with gentle shadows under the bodies; shallow depth of field, subject sharp, background blurred.",
-      "diffuse": "Light: soft, warm, diffuse front-side lighting with gentle shadows under the bodies; shallow depth of field, subject sharp, background blurred.",
-      "shallow depth of field": "shallow depth of field, subject sharp, background blurred",
-      "two figures": "Two figures.",
-      "nude": "a nude person posed on all fours with genital exposure, being grasped by a second figure",
-      "ai-generated": "Looks AI-generated (smoothed skin, anatomy artifacts on the hands).",
-      "out of frame": "in frame - no head",
-      "head out of frame": "in frame - no head"
-    },
-    "age_required": [
-      "woman",
-      "man",
-      "girl",
-      "boy",
-      "lady",
-      "guy",
-      "female",
-      "male",
-      "orc"
-    ],
-    "_aliases_note": "figure 2's aliases name the card's own words for it plus the pronouns the prose uses; the bare noun 'figure' is NOT an alias, because the prose says 'figure' for a body shape ('soft adult figure') and for the pair, and a generic noun must not charge her anatomy to figure 2."
+  "evidence": {
+   "Figure 1": "ask A: Figure 1:",
+   "Figure 2": "ask A: Figure 2:",
+   "age_marker": "The frame alone gives no age cue; the canon lock declares every character a fictional adult aged 21+, so the age marker is a canon declaration, not an inference from a face. C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md v2.3.0",
+   "beige shag rug": "ask A: Large beige shag rug covering most of the floor in foreground",
+   "beige upholstered sofa": "ask A: Beige upholstered sofa visible in background, slightly out of focus",
+   "black athletic shorts": "ask A: Wardrobe: Black athletic shorts",
+   "blonde, long and wavy": "ask A: Hair colour: Blonde, long and wavy",
+   "center-left foreground": "ask A: Position: Center-left foreground, facing camera",
+   "choker necklace": "ask A: Wardrobe: Silver chain-link bikini top and bottom, matching choker necklace, tiara",
+   "dark wood flooring": "ask A: Interior living space with dark wood flooring",
+   "extremely muscular": "ask A: Build: Extremely muscular, large hands and feet",
+   "green, textured with visible muscle definition": "ask A: Skin: Green, textured with visible muscle definition",
+   "green-skinned humanoid": "ask A: Species/race: Green-skinned humanoid (Hulk-like)",
+   "hands placed on figure 1's lower back and thigh": "ask A: Pose: Kneeling behind Figure 1, leaning forward with both hands placed on Figure 1’s lower back and thigh",
+   "highlights on skin and metallic jewelry": "ask A: Soft, diffused lighting from front-left, creating gentle highlights on skin and metallic jewelry",
+   "hips lifted": "ask A: Pose: Lying prone on stomach, upper body propped on forearms, hips lifted, legs slightly bent",
+   "human female": "ask A: Species/race: Human female",
+   "interior living space": "ask A: Interior living space with dark wood flooring",
+   "kneeling behind figure 1": "ask A: Pose: Kneeling behind Figure 1, leaning forward with both hands placed on Figure 1’s lower back and thigh",
+   "large hands and feet": "ask A: Build: Extremely muscular, large hands and feet",
+   "light, glossy": "ask A: Skin: Light, glossy",
+   "lying prone on stomach": "ask A: Pose: Lying prone on stomach, upper body propped on forearms, hips lifted, legs slightly bent",
+   "no direct sunlight": "ask A: No direct sunlight or harsh artificial sources visible",
+   "partially cropped at top and right edges": "ask A: Position: Upper-right background, partially cropped at top and right edges",
+   "propped on forearms": "ask A: Pose: Lying prone on stomach, upper body propped on forearms, hips lifted, legs slightly bent",
+   "silver chain-link bikini and choker": "ask A: Silver chain-link bikini and choker",
+   "silver chain-link bikini top and bottom": "ask A: Wardrobe: Silver chain-link bikini top and bottom, matching choker necklace, tiara",
+   "slim, toned": "ask A: Build: Slim, toned",
+   "soft, diffused lighting from front-left": "ask A: Soft, diffused lighting from front-left, creating gentle highlights on skin and metallic jewelry",
+   "sparkling tiara": "ask A: Sparkling tiara",
+   "tiara": "ask A: Wardrobe: Silver chain-link bikini top and bottom, matching choker necklace, tiara",
+   "upper-right background": "ask A: Position: Upper-right background, partially cropped at top and right edges"
   },
-  "_caption_conflict": "Ask B (run 2) refused with no record at all; ask A (run 1) gave the factual rows used here, so this card has one record and no second opinion. The shipped prose's standing pair ('the couple stands up ... she kneels, he kneels behind her, a full head taller') and her 'dark brown hair' are off-card: the card puts HER on all fours, HIM kneeling with no head in frame, her hair blonde and wavy, and gives no height comparison.",
-  "_schema": "gate keys: figure_count, aliases, per_chunk_tokens, banned{1,2,any}, head_in_frame{1,2}, head_allow, open_beat{1,2}, open_beat_ban{1,2}, room_required, room_banned, light_required, age_marker, consent{ban,require}, solo_phrases, evidence{token: card quote}. ck_top_facts: every gate.per_chunk_tokens entry, every figures[].visible token and every gate.room_required/light_required token has a quote in gate.evidence, and every quote sits verbatim in the card file (punctuation normalized: em/en dash to -, curly to straight quotes, case-insensitive). ck_top_card measures the graph prompts against this gate and flags the manifest.",
-  "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
-  "sha256_row": "start_still_sha256: 3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
-  "caption2": "C:/AI/community/notes/scenes/raw/GI046_2.txt",
-  "age_min": 21,
-  "_age_min_source": "C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md v2.3.0: every character is a fictional adult aged 21+. The card carries no age row, so an age in the prose is a canon declaration, never a sighting (gate.age_marker = 'canon declaration', gate.age_required = the words that force one)."
+  "figure_count": 2,
+  "head_allow": [
+   "head out of frame",
+   "head is out of frame",
+   "stays out of frame",
+   "outside the frame",
+   "the frame crops him",
+   "top edge crops him",
+   "crops him at the neck",
+   "above the top edge",
+   "no head in frame",
+   "partially cropped at top and right edges"
+  ],
+  "head_in_frame": {
+   "1": true,
+   "2": false
+  },
+  "light_required": [
+   "soft, diffused lighting from front-left",
+   "highlights on skin and metallic jewelry",
+   "no direct sunlight"
+  ],
+  "open_beat": {
+   "1": [
+    "lying prone on stomach",
+    "propped on forearms"
+   ],
+   "2": [
+    "kneeling behind figure 1"
+   ]
+  },
+  "open_beat_ban": {
+   "1": [
+    "bent over the sofa",
+    "kneels up",
+    "rolls over",
+    "seated",
+    "sits",
+    "standing",
+    "stands up"
+   ],
+   "2": [
+    "lies",
+    "lying",
+    "seated",
+    "sits",
+    "standing",
+    "stands",
+    "walks"
+   ]
+  },
+  "per_chunk_tokens": [
+   "beige shag rug",
+   "black athletic shorts",
+   "blonde, long and wavy",
+   "extremely muscular",
+   "green-skinned humanoid",
+   "interior living space",
+   "kneeling behind figure 1",
+   "lying prone on stomach",
+   "silver chain-link bikini top and bottom",
+   "soft, diffused lighting from front-left",
+   "tiara"
+  ],
+  "room_banned": [
+   "balcony",
+   "bathroom",
+   "bedroom",
+   "cellar",
+   "couch",
+   "dungeon",
+   "garage",
+   "kitchen",
+   "office",
+   "pool",
+   "television"
+  ],
+  "room_required": [
+   "interior living space",
+   "dark wood flooring",
+   "beige shag rug",
+   "beige upholstered sofa",
+   "silver chain-link bikini and choker",
+   "sparkling tiara",
+   "black athletic shorts"
+  ],
+  "solo_phrases": [
+   "alone in the room",
+   "one person",
+   "she is alone",
+   "single figure",
+   "standing alone",
+   "the only bodies",
+   "the only figure",
+   "the only person",
+   "the only subject"
+  ]
+ },
+ "image": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI046.jpg",
+ "light": "soft, diffused lighting from front-left; highlights on skin and metallic jewelry; no direct sunlight",
+ "model": "vl_judge",
+ "naming_allowed": [
+  "orc"
+ ],
+ "prompt_delta": {
+  "as_of": "2026-10-25 21:58:49 CT",
+  "measured_by": "python C:/AI/community/notes/hc15_anchor_carry_build.py --top-check, captured in notes/top_card_vl_topcheck_20261025.txt",
+  "measured_facts": [
+   "ck_top_card fires on graph ali163_hc15_gi046_s51150031 c0 and c1: F-CARD-WORDS (no card word 'black athletic shorts', 'blonde, long and wavy', 'extremely muscular', 'green-skinned humanoid')",
+   "F-CARD-BANNED figure 1: 'nude', 'on all fours'; figure 2: 'dark grey shorts', 'grasped', 'grey shorts', 'on all fours'",
+   "F-CARD-POSE figure 1 opening beat lacks the card pose 'lying prone on stomach', 'propped on forearms'; figure 2 lacks 'kneeling behind figure 1'",
+   "F-CARD-ROOM: no card room/light word 'interior living space', 'dark wood flooring', 'beige upholstered sofa', 'silver chain-link bikini and choker'",
+   "TOP-MANIFEST card words in c0: 2/11 and in c1: 2/11 (the shipped prompts carry 2 of the 11 words the new card makes every chunk carry)",
+   "ck_top_facts PASSES on this facts file; the live gate measures 32/32 card quotes verbatim"
+  ],
+  "owner_of_the_fix": "the prompt-rewrite rows (ORC-ROBOT, SUBJECT-LABELS, CONT-BAN, CARD-HONESTY-RENDER): the words, poses, room words and banned words in the shipped prompts are what change, not the card"
+ },
+ "room": "interior living space; dark wood flooring; beige shag rug; beige upholstered sofa",
+ "scene": "GI046",
+ "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+ "sha256_row": "start_still_sha256: 3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+ "species": {
+  "1": "human female",
+  "2": "green-skinned humanoid (Hulk-like)"
+ },
+ "status": "CAPTIONED"
 }
