@@ -46,6 +46,17 @@ def guard_ok(t):
         if w in BAD or (w.endswith('s') and w[:-1] in BAD) or w in ('schoolgirls','minors','teens','kids','girls'): return False
     return True
 
+PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value")
+
+def prompt_strings(inputs):
+    """Yield all prompt-bearing string values from node inputs."""
+    if not isinstance(inputs, dict):
+        return
+    for k in PROMPT_KEYS:
+        v = inputs.get(k)
+        if isinstance(v, str):
+            yield v
+
 APPROVED = {  # ALI-80 approved adult stills only
  "D15": r"C:\Users\derek\5slock\approved_characters\D15\D15_Woman_in_bikini.jpg",
  "FD006": r"C:\Users\derek\5slock\approved_characters\FLOW_DARKHAIR_2026-10-19\FD006.jpg",
@@ -183,12 +194,12 @@ def ensure_comfy(logfile=None):
 def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=None):
     os.makedirs(outdir, exist_ok=True)
     # pre-check for the outcome record only; the block below is the gate that stops the queue, unchanged (RENDER-TIMEOUT)
-    if any(isinstance(n["inputs"].get("prompt"), str) and not guard_ok(n["inputs"]["prompt"]) for n in g.values()):
+    if any(any(not guard_ok(s) for s in prompt_strings(n.get("inputs", {}))) for n in g.values()):
         outcome(out, "guard", note="adults-only guard hit; the pinned gate below is what returns before the POST")
     for n in g.values():
-        p = n["inputs"].get("prompt")
-        if isinstance(p, str) and not guard_ok(p):
-            log(f"SKIP {tag} adults-only guard hit", logfile); return None
+        for s in prompt_strings(n.get("inputs", {})):
+            if not guard_ok(s):
+                log(f"SKIP {tag} adults-only guard hit", logfile); return None
     json.dump(g, open(os.path.join(outdir, tag + ".api.json"), "w", encoding="utf-8"), indent=1)
     t0 = time.time()
     try:
