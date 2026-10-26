@@ -32,3 +32,11 @@
 1. **Performance:** Both samplers perform at virtually identical runtime speeds on this hardware (~780.3 seconds for 362 frames at 1344x768).
 2. **Technical Quality:** Both produced valid, objective-passing MP4 files with zero black or frozen frames and complete 15.08s playback.
 3. **Default Policy:** Per Derrick's explicit directive (Oct 25 6:48 PM: "Go back to Euler..."), `euler` remains the active default in `comm.py:107` (`g["ksel"] = {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}}`). Derrick retains final decision on whether to adopt `res_multistep`.
+
+
+---
+
+## Hardware Erratum (2026-10-26 Argon Medium — M1c)
+
+- **Correction:** Line 9 above erroneously listed `NVIDIA RTX 4080 / 16 GB VRAM`. The actual GPU verified via `nvidia-smi` on AlienPc is **NVIDIA GeForce RTX 5070 Ti** (`16,303 MiB` / 16 GB GDDR7 VRAM).
+- **Sampler Confound Note (M9):** See `C:\AI\community\briefs\argon_medium_20261026\progress.md` (M9) for audit of `comm.py` vs graph template defaults and file paths for `ali163_s8_pytorch_s51150011` and `ali163_s9_euler_s51150011`.
