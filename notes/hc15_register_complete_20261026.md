@@ -59,6 +59,15 @@ No GPU, no queue, no render, no vision model, no KEEP, no score: every clip in s
 - `python notes/ali10_adults_probe.py` -> `VERDICT CLEAN`, `gate=return`, 3 findings (2.1b rows), `live_urls=['127.0.0.1:9']`.
 - `python -m py_compile notes/hc15_register_complete_build.py` -> clean.
 
+- `python notes/ali11_run_checks.py --pass` -> `manifest: notes\pass_checks\20261026-06.json all_green=True
+  rows=19`, `VERDICT this pass: tests GREEN (19 rows, manifest 20261026-06.json)` - the tier includes
+  `learnings_check`/`learnings_selftest` (both `RESULT CLEAN`, 45 lessons), `pytest_p6_review` 21 passed, the whole
+  suite 38 passed, `adults_probe_gate`, both secrets matrices, `loop_static` 69 seeded faults 0 silent, and
+  `loop_sandbox` 15/15. The two new register rows are NOT in the tier (item gates), and `shortplan_check` is not in
+  the tier either, which is why the tier is green while the plan gate is red for the pre-existing classes below.
+- `python notes/ali06_learnings_check.py` -> `AGENTS.md 39 lines (cap 39); 21 lesson lines (cap 320 chars);
+  45 write-up lessons; 0.2 rows live = 75/41/5` `RESULT CLEAN`.
+
 ## Disclosed: the shortplan gate is red for pre-existing reasons, and one rule needed a real fix
 
 `python notes/ali14d_shortplan_build.py --check` on the base plan (base `fb9968e`) is **NOT CLEAN before this
@@ -79,6 +88,17 @@ Two of my own measurements changed the plan builder, both with a measured counte
    `ValueError: max() iterable argument is empty` at the S10 `tail_prose` seed - base `fb9968e` carries no tail
    bucket with prose, so that seed has no target. It now prints a named skip and drops from the required list, the
    same shape the S12 `DONE_WHEN` seed already used, instead of crashing the whole selftest.
+
+3. **The gate is not idempotent across a tick commit, measured.** The base is `git show HEAD:fix_plan.md`, and a
+   receipt slug is `<id>-L<line number in the base>`. Before my commit the base was `fb9968e` and `--check` printed
+   426 findings (359 `RECEIPT_EXTRA`, 63 `RECEIPT_UNTRACKED`, 2 `IDS 'E5'`, 1 `NO_INVENT`). After the tick commit
+   the base is my own commit and the same command prints 488 findings, 486 of them `RECEIPT_MISSING`: every row now
+   demands `0.1-L41.md` while the 425 files on disk are `0.1-L37.md`..., because the emitted plan's line numbers moved
+   by 4. `RECEIPT_UNTRACKED` measured **0** after this commit, which is the part my pass controls. Reading the gate
+   correctly therefore means reading it **before** the tick commit, and the line-number key is the defect: a plan-row
+   identity that moves every time the plan is cut. That belongs to a future pass with its own measured cut rule
+   (L12/L43 already say an anchor must be computed, not grepped); it is not fixed here and not hand-edited into a
+   generated plan.
 
 ## Not this item
 
