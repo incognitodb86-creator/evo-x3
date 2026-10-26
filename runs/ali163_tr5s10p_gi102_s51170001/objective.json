@@ -1,0 +1,25 @@
+{
+ "tag": "ali163_tr5s10p_gi102_s51170001",
+ "attempts": [
+  {
+   "frames": 124,
+   "w": 1344,
+   "h": 768,
+   "fps": "24/1",
+   "audio": true,
+   "duration": 5.166688,
+   "bytes": 1752402,
+   "tag": "ali163_tr5s10p_gi102_s51170001",
+   "file": "C:/AI/community/runs/ali163_tr5s10p_gi102_s51170001\\ali163_tr5s10p_gi102_s51170001.mp4",
+   "secs": 240.1,
+   "blackfreeze": [],
+   "image": false,
+   "outcome": "ok",
+   "collected_from_disk": false
+  }
+ ],
+ "ok": true,
+ "file": "C:/AI/community/runs/ali163_tr5s10p_gi102_s51170001\\ali163_tr5s10p_gi102_s51170001.mp4",
+ "contact_sheet": "C:/AI/community/runs/ali163_tr5s10p_gi102_s51170001\\ali163_tr5s10p_gi102_s51170001_stills_contact.png",
+ "image": false
+}
