@@ -32,6 +32,18 @@ Modes:
   python C:/AI/community/notes/top_card_vl_build.py --check          # the record's own integrity, then VERDICT
   python C:/AI/community/notes/top_card_vl_build.py --selftest       # seeded faults must fire, 0 on the real record
   python C:/AI/community/notes/top_card_vl_build.py --cards          # write the cards + facts.json from a facts spec (verbatim-quote enforced)
+
+CARD-VL2 (Derrick 2026-10-26 7:08 AM CT "Yes, have Forge rebuild the GI063 card from the uncensored
+captions only" + 8:23 AM CT "yea it needs to have the vision model redo them") adds `--tag`: a caption
+pass with its OWN record, raw captions and facts spec, so the CARD-VL record of 2026-10-25 keeps the exact
+bytes the live cards and needs_derrick.md row 29 cite. `--tag` with no flag is the 2025 pass, unchanged;
+`--tag 2` = `notes/card_rebuild_results.json` + `notes/scenes/raw/<ID>_vl2_<ASK>.txt` +
+`notes/card_rebuild_facts/`. Ask C names the regions the 2025 cards left silent (head and face in frame,
+the groin and pelvic region as visible, anatomy form and colour if visible, the size relation, what each
+hand touches) - the gap needs_derrick.md row 28 measured on the GI046 card. A card this builder writes is
+judged by `scene_card_gate.selfconflicts` before it can ship: a card whose own required token carries its
+own ban is a CARD_SELF_CONFLICT, and the shipped gate charges that collision to the prompt (measured on
+the 2025 GI063 card: 12 self-contradictions at `scene_card_gate.py --table`; a card that can ship: 0).
 """
 
 import copy
@@ -44,6 +56,7 @@ import sys
 
 sys.path.insert(0, "C:/AI/community/notes")
 import ali163_vision_probe as vp  # the 3.17 instrument: transport, guard, vision table, dims, shas
+import scene_card_gate as scg     # the shipped card gate: its own selfconflicts is the self-consistency test
 
 NOTES = "C:/AI/community/notes"
 SCENES = ("GI046", "GI063", "GI072")          # the orc, the robot and GI072 - Derrick's three
@@ -54,6 +67,28 @@ CARD_DIR = os.path.join(NOTES, "scenes")
 RAW_DIR = os.path.join(CARD_DIR, "raw")
 OUT = os.path.join(NOTES, "top_card_vl_results.json")
 SPEC_DIR = os.path.join(NOTES, "top_card_vl_facts")
+# A caption pass is a TAG, and a tag owns its record, its raw captions and its facts spec. The 2025 record
+# is cited by the live cards and by needs_derrick.md row 29, so a later pass never writes over it. A pass
+# that wants its own record registers a tag here: card_vl2_build.py adds tag "2" (its own record, raw
+# captions, facts spec, ask C) at import, so the 2025 pass keeps the exact bytes the cards cite. The one
+# rule a tag cannot escape: the record, the raw captions and the spec are the tag's, never shared.
+TAGS = {
+    "": {"record": OUT, "spec_dir": SPEC_DIR, "raw_suf": "_vl_", "mark": "top_card_vl",
+         "asks": ["A", "B"], "item": "CARD-VL, Derrick 2026-10-25 6:48 PM CT"},
+}
+
+
+def ctx(tag=""):
+    """The paths a tag owns. An unknown tag stops the run: a pass that means to write tag 2 and lands on
+    tag \"\" would overwrite the 2025 record that the live cards cite as evidence."""
+    if tag not in TAGS:
+        raise SystemExit("RED unknown --tag %r (valid tags: %s)"
+                         % (tag, ",".join(repr(t) for t in sorted(TAGS))))
+    return TAGS[tag]
+
+
+def raw_path(scene, ask_id, tag=""):
+    return os.path.join(RAW_DIR, f"{scene}{ctx(tag)['raw_suf']}{ask_id}.txt")
 AUDIT = os.path.join(NOTES, "hc15_figures_20261025.md")   # the figures audit the cards cite
 SCHEMA = "top-card-vl-1"
 MODEL_DEFAULT = "vl_judge"
@@ -78,6 +113,10 @@ ASK_PROVENANCE = {
          "<path>.' replaced by 'Look at the attached image.'; the rest is byte-identical.",
     "B": "notes/scenes/GI072.md 'prompt_sent' (ask B, 2026-10-25 04:38 CT): same first-sentence "
          "substitution; the rest is byte-identical.",
+}
+CAPTION_HEAD = {  # the verbatim sections of a card, in ask order; card_faults reads the "## caption A" split
+    "A": "## caption A verbatim (full inventory ask)",
+    "B": "## caption B verbatim (non-sexual identity + composition ask)",
 }
 BANNED = set(vp.BANNED) | {"score", "rank", "keep", "best", "winner", "verdict", "judgement"}
 AGE_MIN = 21
@@ -144,29 +183,40 @@ def comfy_copy(scene):
     return os.path.join(COMFY_INPUT, scene + ".jpg")
 
 
-def load_doc():
-    if not os.path.isfile(OUT):
+def load_doc(tag=""):
+    p = ctx(tag)["record"]
+    if not os.path.isfile(p):
         return None
-    with open(OUT, "r", encoding="utf-8") as fh:
-        return json.load(fh)
+    with open(p, "r", encoding="utf-8") as fh:
+        doc = json.load(fh)
+    doc.setdefault("tag", tag)
+    return doc
 
 
-def save_doc(doc):
-    tmp = OUT + ".tmp"
+def save_doc(doc, tag=None):
+    p = ctx(doc.get("tag", "") if tag is None else tag)["record"]
+    tmp = p + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(doc, fh, indent=1, ensure_ascii=False, sort_keys=True)
         fh.write("\n")
-    os.replace(tmp, OUT)
+    os.replace(tmp, p)
 
 
-def new_doc(table):
+def new_doc(table, tag=""):
+    c = ctx(tag)
     return {
         "schema": SCHEMA,
+        "tag": tag,
         "goal": ("the GI046 (orc), GI063 (robot), GI072 scene cards re-read by the uncensored vision "
-                 "model - Derrick 2026-10-25 6:48 PM CT"),
+                 "model - Derrick 2026-10-25 6:48 PM CT" if tag == "" else
+                 "the GI063 (robot) and GI046 (orc) scene cards rebuilt from the uncensored captions only, "
+                 "the vision model redoning them - Derrick 2026-10-26 7:08 AM CT 'Yes, have Forge rebuild the "
+                 "GI063 card from the uncensored captions only' + 8:23 AM CT 'yea it needs to have the vision "
+                 "model redo them'; item " + c["item"]),
         "started": now(),
+        "scope": {"scenes": list(SCENES), "asks": list(c["asks"])},
         "asks": {k: {"text": v, "sha256": sha_text(v), "provenance": ASK_PROVENANCE[k]}
-                 for k, v in ASKS.items()},
+                 for k, v in ASKS.items() if k in c["asks"]},
         "model_evidence": {
             "id": MODEL_DEFAULT,
             "source": "C:/AI/director/config/llama-swap.yaml:74-86 read 2026-10-25",
@@ -210,7 +260,22 @@ def do_state(args):
               f"card_status={status} facts={'yes' if os.path.isfile(facts) else 'ABSENT'} "
               f"card_in_gate_registry={'yes' if os.path.isfile(facts) else 'no (CARDS is keyed on facts.json)'}")
         print(f"      card={card} mtime={mtime_iso(card) if os.path.isfile(card) else '-'}")
-    print(f"  record={OUT} exists={os.path.isfile(OUT)} spec_dir={SPEC_DIR} exists={os.path.isdir(SPEC_DIR)}")
+    print(f"  tag={args.tag!r} record={ctx(args.tag)['record']} exists={os.path.isfile(ctx(args.tag)['record'])} "
+          f"spec_dir={ctx(args.tag)['spec_dir']} exists={os.path.isdir(ctx(args.tag)['spec_dir'])}")
+    print(f"  raw_captions={RAW_DIR} suffix={ctx(args.tag)['raw_suf']!r} "
+          f"files={sorted(os.path.basename(p) for p in __import__('glob').glob(os.path.join(RAW_DIR, '*' + ctx(args.tag)['raw_suf'] + '*.txt')))}")
+    print("  self_conflicts (scene_card_gate.selfconflicts, the shipped gate's own test):")
+    for sc in SCENES:
+        fp = os.path.join(CARD_DIR, sc + ".facts.json")
+        if not os.path.isfile(fp):
+            print(f"    {sc}: no facts.json on disk")
+            continue
+        gt = scg.load_card(fp)
+        rows = scg.selfconflicts(gt)
+        print(f"    {sc} card={gt['_card_sha256'][:12]} bytes={gt['_card_bytes']} self-contradictions={len(rows)}")
+        for r in rows[:40]:
+            print(f"       {r['scope']} {r['figure']}: token {r['token']!r} carries the card's own ban "
+                  f"{r['banned_word']!r} ({r['reading']})")
     print(f"  audit_cited={AUDIT} exists={os.path.isfile(AUDIT)}")
     return 0
 
@@ -227,9 +292,10 @@ def do_run(args):
     if not UNCENSORED_RE.search(ev):
         print(f"REFUSE model {args.model} carries no 'Uncensored'/'abliterated' in its served file: {ev[:160]}")
         return 3
-    doc = load_doc() or new_doc(table)
+    doc = load_doc(args.tag) or new_doc(table, args.tag)
     extra = {"reasoning_effort": "none", "chat_template_kwargs": {"enable_thinking": False}}
-    command = (f"python C:/AI/community/notes/top_card_vl_build.py --run --model {args.model} "
+    tag_arg = f"--tag {args.tag} " if args.tag else ""
+    command = (f"python C:/AI/community/notes/top_card_vl_build.py --run {tag_arg}--model {args.model} "
                f"--scenes {','.join(args.scenes)} --asks {','.join(args.asks)} "
                f"--max-tokens {args.max_tokens} --no-thinking")
     done = {(r["scene"], r["ask_id"]) for r in doc["rows"]
@@ -262,19 +328,25 @@ def do_run(args):
             row["asked_at_local"] = now()
             raw = ""
             if row["http_status"] == 200 and row["caption"].strip():
-                raw = os.path.join(RAW_DIR, f"{sc}_vl_{ak}.txt").replace("\\", "/")
+                raw = raw_path(sc, ak, args.tag).replace("\\", "/")
                 os.makedirs(RAW_DIR, exist_ok=True)
                 with open(raw, "w", encoding="utf-8", newline="\n") as fh:
                     fh.write(row["caption"])
             row["raw_path"] = raw
             row["raw_sha256"] = sha_file(raw) if raw else ""
             doc["rows"] = [r for r in doc["rows"] if (r.get("scene"), r.get("ask_id")) != key] + [row]
+            # the scope is what this record covers, written from the run itself: the scenes it asked about
+            # plus any scene it already paid for, and the tag's asks as the contract. A run of 2 of 3
+            # scenes is 2 x asks, not 3 x asks, and a missing asked row stays ROW_MISSING.
+            doc["scope"] = {"scenes": sorted(set(args.scenes) | {r.get("scene") for r in doc["rows"]}),
+                            "asks": sorted(ctx(args.tag)["asks"])}
             save_doc(doc)
             print(f"{sc}/{ak}: http={row['http_status']} finish={row['finish_reason']} "
                   f"words={row['caption_words']} reasoning_words={row['reasoning_words']} "
                   f"wall={row['wall_s']}s declines={row['decline_markers']} guard_rc={row['guard_rc']} "
                   f"raw={raw or 'NONE'}")
-    print(f"record: {OUT} rows={len(doc['rows'])}")
+    print(f"record: {ctx(args.tag)['record']} rows={len(doc['rows'])} scope="
+          f"{doc.get('scope', 'none (the 2025 shape)')}")
     return 0
 
 
@@ -285,10 +357,11 @@ def doc_faults(doc, table):
     bad = []
     if doc.get("schema") != SCHEMA:
         bad.append("SCHEMA record schema %r" % doc.get("schema"))
-    for k in ASKS:
+    for k in scope_of(doc, "asks"):
         a = (doc.get("asks") or {}).get(k)
-        if not a or a.get("text") != ASKS[k] or a.get("sha256") != sha_text(ASKS[k]):
+        if not a or a.get("text") != ASKS.get(k) or a.get("sha256") != sha_text(ASKS.get(k, "")):
             bad.append("ASK_SHA ask %s text/sha in the record is not the ask this builder sends" % k)
+    bad += scope_faults(doc)
     ids = {r["id"] for r in table}
     ev = {r["id"]: r["evidence"] for r in table}
     rows = doc.get("rows") or []
@@ -302,7 +375,11 @@ def doc_faults(doc, table):
         if sc not in SCENES:
             bad.append("SCENE row %s is not one of the three cards this item names" % (sc,))
         if ak not in ASKS:
-            bad.append("ASK_ID row %s/%s is not ask A or B" % (sc, ak))
+            bad.append("ASK_ID row %s/%s is not a registered ask %s" % (sc, ak, sorted(ASKS)))
+        if ak not in scope_of(doc, "asks"):
+            bad.append("ASK_ROW_UNDECLARED row %s/%s: the record declares asks %s, this row is ask %r - "
+                       "an unasked caption in a record is an unasked word"
+                       % (sc, ak, scope_of(doc, "asks"), ak))
         if r.get("model_id") not in ids:
             bad.append("MODEL_NOT_VISION %s is not in the llama-swap vision set (never assume vision)" % r.get("model_id"))
         elif not UNCENSORED_RE.search(ev.get(r.get("model_id"), "")):
@@ -355,9 +432,15 @@ def doc_faults(doc, table):
             if p and re.search(r"output|\.mp4|contact|frame", str(p), re.I):
                 bad.append("RENDERED_CITED %s names %r - a card reads a START STILL only" % (sc, p))
     for sc in args_scenes(doc):
-        for ak in ASKS:
+        for ak in scope_of(doc, "asks"):
             if (sc, ak) not in have:
-                bad.append("ROW_MISSING no row for %s/%s (the item is 3 scenes x 2 asks)" % (sc, ak))
+                bad.append("ROW_MISSING no row for %s/%s (the record's scope is %s x %s)"
+                           % (sc, ak, args_scenes(doc), scope_of(doc, "asks")))
+    for key in have:
+        if key[0] not in args_scenes(doc):
+            bad.append("ROW_OUT_OF_SCOPE row %s names a scene outside the record's scope %s - a row for a "
+                       "scene this record never asked about is not evidence for these cards"
+                       % (list(key), args_scenes(doc)))
     if doc.get("gates"):
         for g in doc["gates"]:
             if int(g.get("gpu_guard_rc", 9)) != 0:
@@ -383,8 +466,43 @@ def _judge_keys(node, path=""):
     return hits
 
 
+def scope_of(doc, key):
+    """What a record declares it covers: {"scenes": [...], "asks": [...]}. The 2025 record carries no scope, so
+    it is judged against three scenes x asks A,B - its own contract, byte-for-byte unchanged. A record that
+    declares a scope is judged against that scope: 2 scenes x 3 asks is not 3 scenes x 3 asks, and
+    ROW_MISSING on a row nobody asked for is a phantom. A name outside the registry is SCOPE_RANGE, so a
+    scope can never hide a scene or an ask that does not exist."""
+    sc = doc.get("scope") or {}
+    if key == "scenes":
+        return list(sc.get("scenes") or SCENES)
+    return list(sc.get("asks") or ctx(doc.get("tag", ""))["asks"])
+
+
+def scope_faults(doc):
+    bad = []
+    sc = doc.get("scope")
+    if sc is None:
+        return bad
+    for key, valid in (("scenes", SCENES), ("asks", ASKS)):
+        for v in (sc.get(key) or []):
+            if v not in valid:
+                bad.append("SCOPE_RANGE scope.%s names %r, outside %s" % (key, v, list(valid)))
+    for key in sc:
+        if key not in ("scenes", "asks"):
+            bad.append("SCOPE_KEY scope carries %r; a scope names scenes and asks only" % key)
+    if not (sc.get("scenes") and sc.get("asks")):
+        bad.append("SCOPE_INCOMPLETE scope %r: a record states the scenes and the asks it covers, or "
+                   "carries no scope at all (the 2025 shape)" % (sc,))
+    declared = sorted(doc.get("asks") or {})
+    want = sorted(scope_of(doc, "asks"))
+    if declared and declared != want:
+        bad.append("ASKS_SCOPE the record declares asks %s and carries text for %s: a declared ask with no "
+                   "text is unaskable, text for an undeclared ask is an unasked word" % (want, declared))
+    return bad
+
+
 def args_scenes(doc):
-    return list(SCENES)
+    return scope_of(doc, "scenes")
 
 
 def caption_of(doc, scene, ask_id):
@@ -397,9 +515,10 @@ def caption_of(doc, scene, ask_id):
 def build_scene(scene, doc):
     """Rebuild a card + facts in memory from the record and the spec (no writes), so --cards, --check and
     --selftest all judge one composition."""
-    with open(os.path.join(SPEC_DIR, scene + ".json"), "r", encoding="utf-8") as fh:
+    spec_dir = ctx(doc.get("tag", ""))["spec_dir"]
+    with open(os.path.join(spec_dir, scene + ".json"), "r", encoding="utf-8") as fh:
         spec = json.load(fh)
-    caps = [("A", caption_of(doc, scene, "A")["caption"]), ("B", caption_of(doc, scene, "B")["caption"])]
+    caps = [(ak, caption_of(doc, scene, ak)["caption"]) for ak in scope_of(doc, "asks")]
     card_text, ev, unresolved = compose_card(scene, spec, doc, caps)
     return card_text, compose_facts(scene, spec, doc, card_text, ev, unresolved)
 
@@ -408,7 +527,8 @@ def disk_card_faults(doc):
     """Judge the cards that are ON DISK by the gate's own rules. Once the caption record is clean, a card
     that is not on disk is a fault: the item IS the cards."""
     bad = []
-    for scene in SCENES:
+    mark = ctx(doc.get("tag", "")).get("mark", "top_card_vl")
+    for scene in args_scenes(doc):
         card_p = os.path.join(CARD_DIR, scene + ".md")
         facts_p = os.path.join(CARD_DIR, scene + ".facts.json")
         if not (os.path.isfile(card_p) and os.path.isfile(facts_p)):
@@ -423,17 +543,18 @@ def disk_card_faults(doc):
         if not re.search(r"[A-Za-z]:[^\s,]+\.gguf", text):
             bad.append("CARD_NO_MODEL_FILE %s the card names no served .gguf, so it cannot prove which model "
                        "wrote the caption" % scene)
-        if "top_card_vl" not in text:
-            bad.append("CARD_NO_RECORD %s the card does not cite the caption record it came from" % scene)
+        if mark not in text:
+            bad.append("CARD_NO_RECORD %s the card does not cite the caption record it came from (mark %r)"
+                       % (scene, mark))
         bad += card_faults(facts, text)
     return bad
 
 
 def do_check(args):
     table = vp.vision_table()
-    doc = load_doc()
+    doc = load_doc(args.tag)
     if not doc:
-        print(f"RED no record at {OUT} (run --run)")
+        print(f"RED no record at {ctx(args.tag)['record']} (run --run --tag {args.tag})")
         return 2
     rc, text = vp.guard_rc()
     rows = doc.get("rows") or []
@@ -441,8 +562,10 @@ def do_check(args):
     declines = sum(1 for r in rows if r.get("decline_markers"))
     bad = doc_faults(doc, table) + disk_card_faults(doc)
     print(f"gpu_guard rc={rc} {text!r} (read at check time; every request row also carries its own)")
-    print(f"model={MODEL_DEFAULT} vision_ids_in_the_serving_config={len(table)} "
-          f"rows={len(rows)} captions={caps}/{len(SCENES) * len(ASKS)} declines={declines} "
+    print(f"tag={args.tag!r} record={ctx(args.tag)['record']} scope={scope_of(doc, 'scenes')}x{scope_of(doc, 'asks')} "
+          f"model={MODEL_DEFAULT} vision_ids_in_the_serving_config={len(table)} "
+          f"rows={len(rows)} captions={caps}/{len(args_scenes(doc)) * len(scope_of(doc, 'asks'))} "
+          f"declines={declines} "
           f"words={sorted(len((r.get('caption') or '').split()) for r in rows)}")
     print(f"integrity_faults={len(bad)}")
     for b in bad:
@@ -691,10 +814,11 @@ def model_files(doc, model_id):
 def resolve_describe(caps, value):
     """A descriptive row (species/build/skin/hair/wardrobe/pose/position) is a summary, so it is not a caption
     token. Build candidate phrases (the whole value with the 'ask B adds' annotations removed first, then its
-    comma and parenthetical parts) and quote the longest candidate a caption states verbatim. No candidate
+    comma and parenthetical parts, where an annotation may cite any registered ask (ask A, B, C...)) and
+    quote the longest candidate a caption states verbatim. No candidate
     supported -> the row is unresolvable and must not be in the card."""
-    base = re.sub(r"\s*\((?:ask [AB] adds[^)]*)\)", "", value)
-    base = re.sub(r"\s*;\s*ask [AB] adds.*$", "", base, flags=re.S)
+    base = re.sub(r"\s*\((?:ask [A-Z] adds[^)]*)\)", "", value)
+    base = re.sub(r"\s*;\s*ask [A-Z] adds.*$", "", base, flags=re.S)
     cands = [base]
     cands += [p.strip(" .,") for p in re.split(r",", base)]
     cands += [p.strip(" .,") for p in re.sub(r"\([^)]*\)", " ", base).split()]
@@ -736,17 +860,20 @@ def compose_card(scene, spec, doc, caps):
     add("read_scope: the start still ONLY. No rendered clip, no frame of a render, no contact sheet.")
     add("role: an objective record of the start still in the words of the uncensored vision model. No score, "
         "no rank, no keep, no judgement - KEEP is Derrick's alone.")
-    add(f"asks: A sha256 {doc['asks']['A']['sha256']} / B sha256 {doc['asks']['B']['sha256']} - the 04:34 CT "
-        "ask text with only the first sentence replaced (the pi read-tool sentence cannot apply to a request "
-        "that attaches the image), so the MODEL is the only variable")
+    add("asks: " + " / ".join(f"{k} sha256 {(doc.get('asks') or {}).get(k, {}).get('sha256', 'NONE')}"
+                              for k in scope_of(doc, "asks")))
+    for k in scope_of(doc, "asks"):
+        add(f"ask_{k}_provenance: {((doc.get('asks') or {}).get(k) or {}).get('provenance', 'UNDECLARED')}")
     add(f"command: {row['command']}")
-    add(f"record: {OUT.replace(chr(92), '/')}")
+    rec = ctx(doc.get("tag", ""))["record"].replace(chr(92), "/")
+    add(f"record: {rec}")
     add("caption_status: CAPTIONED")
     add(f"figures: {len(spec['figures'])}")
     add(f"age_rule: {AGE_MIN}+ (canon fiction-cond-lock v2.3.0), stated as a row, never inferred from a face")
     add(f"naming_source: {spec['naming_source']}")
-    add(f"supersedes: notes/scenes/{scene}.md of 2026-10-25 04:34-04:38 CT (caption_status REFUSAL_TRUNCATED, "
-        "coding_swift15_iq3s). Git history is the backup; no .bak.")
+    add(spec.get("supersedes",
+        f"supersedes: notes/scenes/{scene}.md of 2026-10-25 04:34-04:38 CT (caption_status REFUSAL_TRUNCATED, "
+        "coding_swift15_iq3s). Git history is the backup; no .bak."))
     add("")
     add("## facts read out of the model's own words (each cited verbatim below)")
     tok_fig = []
@@ -789,14 +916,11 @@ def compose_card(scene, spec, doc, caps):
     add("age_evidence: " + AGE_EVIDENCE)
     if spec.get("card_extra"):
         add(spec["card_extra"])
-    add("")
-    add("## caption A verbatim (full inventory ask)")
-    add("")
-    add(caps[0][1])
-    add("")
-    add("## caption B verbatim (non-sexual identity + composition ask)")
-    add("")
-    add(caps[1][1])
+    for ak, cap_text in caps:
+        add("")
+        add(CAPTION_HEAD.get(ak, f"## caption {ak} verbatim"))
+        add("")
+        add(cap_text)
     text = "\n".join(L).rstrip() + "\n"
     return text, ev, unresolved
 
@@ -828,6 +952,11 @@ def compose_facts(scene, spec, doc, card_text, ev, unresolved):
         "room_required": spec["room"] + spec.get("props", []),
         "room_banned": spec["room_banned"],
         "light_required": spec["light"],
+        # the shipped gate reads a card's light bans under `light_bans` (scene_card_gate.py:246,333) and a
+        # CARD-VL facts file names them `light_banned`, so on 2026-10-26 the shipped gate read 0 light bans
+        # off these cards and selfconflicts scored them 0. The rebuilt card carries both keys, so its light
+        # bans are enforced and its self-conflict census can see them: the card must be self-consistent.
+        "light_bans": spec["light_banned"],
         "age_marker": "canon declaration",
         "age_required": AGE_REQUIRED,
         "consent_gate": spec["consent_gate"],
@@ -839,6 +968,8 @@ def compose_facts(scene, spec, doc, card_text, ev, unresolved):
         "audit": AUDIT,
         "caption": caption_of(doc, scene, "A")["raw_path"],
         "caption2": caption_of(doc, scene, "B")["raw_path"],
+        "captions_all": {ak: caption_of(doc, scene, ak)["raw_path"] for ak in scope_of(doc, "asks")}
+        if all(caption_of(doc, scene, ak) for ak in scope_of(doc, "asks")) else {},
         "sha256_row": "start_still_sha256: " + caption_of(doc, scene, "A")["image_sha256"],
         "age_min": AGE_MIN,
         "_age_min_source": AGE_SOURCE,
@@ -860,8 +991,9 @@ def compose_facts(scene, spec, doc, card_text, ev, unresolved):
         "figures": figs,
         "room": "; ".join(spec["room"]), "light": "; ".join(spec["light"]),
         "camera": "; ".join(spec["camera"]), "gate": gate,
-        "_source": f"{OUT.replace(chr(92), '/')} rows {scene}/A + {scene}/B, captioned by the uncensored "
-                   "vision model on the start still, 2026-10-25",
+        "_source": f"{ctx(doc.get('tag', ''))['record'].replace(chr(92), '/')} rows "
+                   + " + ".join(f"{scene}/{ak}" for ak in scope_of(doc, "asks"))
+                   + ", captioned by the uncensored vision model on the start still",
         "_scope": "the start still only; no rendered clip, no frame of a render, no contact sheet",
         "_card_quotes": "every fact row and every gate token cites a verbatim caption quote in gate.evidence; "
                         "a token with no quote is not_resolvable and is listed in _unresolved, never in a gate",
@@ -1061,7 +1193,7 @@ def do_cards(args):
 def main(argv=None):
     argv = argv or sys.argv[1:]
     mode = argv[0] if argv else "--check"
-    ap = {"--model": MODEL_DEFAULT, "--scenes": list(SCENES), "--asks": ["A", "B"],
+    ap = {"--model": MODEL_DEFAULT, "--scenes": list(SCENES), "--asks": ["A", "B"], "--tag": "",
           "--max-tokens": 3000, "--timeout": 600, "--rerun": False}
     i = 1
     while i < len(argv):
@@ -1076,6 +1208,7 @@ def main(argv=None):
         else:
             i += 1
     ns = type("NS", (), {"model": ap["--model"], "scenes": ap["--scenes"], "asks": ap["--asks"],
+                         "tag": ap["--tag"],
                          "max_tokens": ap["--max-tokens"], "timeout": ap["--timeout"],
                          "rerun": ap["--rerun"]})()
     if mode == "--state":
@@ -1088,8 +1221,9 @@ def main(argv=None):
         return do_selftest(ns)
     if mode == "--cards":
         return do_cards(ns)
-    print("usage: --state | --run [--model vl_judge] [--scenes a,b] [--asks A,B] [--max-tokens N] "
-          "[--rerun] | --check | --selftest | --cards [--scenes a,b]")
+    print("usage: --state [--tag N] | --run [--tag N] [--model vl_judge] [--scenes a,b] [--asks A,B] "
+          "[--max-tokens N] [--rerun] | --check [--tag N] | --selftest [--tag N] | --cards [--tag N] "
+          "[--scenes a,b]")
     return 2
 
 
