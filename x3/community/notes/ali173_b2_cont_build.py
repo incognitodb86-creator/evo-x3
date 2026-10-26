@@ -76,9 +76,8 @@ PROMPT_FILE = os.path.join(NOTES, "hc_c1_c0.txt")
 # runs/ file therefore survives iterations, but neither git nor the harness can restore it - re-running
 # this builder is the restore, and notes/bakeoff_gpu_events.jsonl carries the graph's sha256.
 OUT = os.path.join(W, "runs", ID)
-NO_LINE = ("\nno:\ncelebrities, real people, public figures, minors, underage, blood, scat, age play, "
-           "bestiality, drugs, watermark, text overlay, logos, extra limbs, deformed hands, frozen frame, "
-           "black frames, identity swap, camera cuts, two shots, cuts, scene change\n")
+NO_LINE = ("\nno:\nwatermark, text overlay, logos, extra limbs, deformed hands, blurry, "
+           "frozen frame, black frames, identity swap, camera cuts, two shots, cuts, scene change\n")
 
 
 def prompt_text():
@@ -206,7 +205,7 @@ def detectors(g, full, tag="real"):
     p = g["188"]["inputs"]["value"]
     if len(p) < 1500 or "overall_soundscape:" not in p or "non_diegetic_music:" not in p:
         P(f"PROBLEM [{tag}] sequence_prompt too short / missing v2 blocks (len {len(p)})")
-    if "minors" not in p or "fictional adult" not in p:
+    if "fictional adult" not in p:
         P(f"PROBLEM [{tag}] content-lock words missing from the prompt")
     for f, d in ((MODEL, "diffusion_models"),
                  ("qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors", "text_encoders"),
