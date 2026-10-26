@@ -333,6 +333,7 @@ def b64(path):
 
 def http_chat(model, system, parts, max_tokens=900, timeout=900):
     body = {"model": model, "temperature": 0.0, "top_p": 1.0, "max_tokens": max_tokens, "response_format": {"type": "json_object"},
+            "reasoning_effort": "none", "chat_template_kwargs": {"enable_thinking": False},
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": parts}]}
     def post(b):
         req = urllib.request.Request(LS + "/v1/chat/completions", data=json.dumps(b).encode(), headers={"Content-Type": "application/json"})
