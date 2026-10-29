@@ -96,3 +96,21 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 `C:/AI/community/notes/hc_redo_research_20261023.md`, `notes/hc_face_research_20261023.md`,
 `notes/bakeoff_gpu_findings.md` + `notes/ali173_b2_object_info_full.json` (live schema dump),
 `notes/ali163_hc_bq1d_objective.json`, `notes/forge-learnings.md`, `C:/Users/derek/5slock/AGENTS.md` "## Check commands".
+
+## 6. Stock render path (moved verbatim from PROMPT.md by U5, 2026-10-29)
+Steps a-g for one render item, then script reuse and research rules:
+   - For a render item (stock path):
+     a. Pick one approved, never-animated still with C:\AI\community\notes\hc_pick_scan_20261023.py (unless named in MAX). GI063 render hold is RELEASED (Derrick 2026-10-27 9:09 AM CT — wrongly flagged by wrong model; do NOT treat GI063 as hold; keep youth guard on GI063).
+     b. Caption once with your own model (coding_swift15_iq3s_esp, the ralph.ps1 default): one ask, one image. Vision models exist and stay: the Forge vision model Swift via mmproj, the W7 and W8 writer mmproj files, and JoyCaption.
+     c. Write one natural-language 350-500 word H3 prompt from that caption. Count words; nothing else.
+     d. Check: C:\AI\director\.venv\Scripts\python.exe -m pytest -q C:\AI\community\scripts\tests\test_p6_review.py C:\AI\community\scripts\tests\test_guard_scope.py. comm.guard_ok also runs inside run_graph_job.py before /prompt POST; never loosen either.
+     e. Build graph: copy C:\AI\community\p7\graphs\default_b2_terrace_dom_q5guide_s51083007.api.json to <run_dir>\request.api.json and change only LoadImage path, c0.prompt, noise_seed, filename_prefix. That file IS the B2 setup (Derrick 2026-10-29 6:59 AM CT "Ok let's keep the b2 setup and make it default"): a byte-identical copy of runs\terrace_dom_q5guide_20261028_s51083007\request.api.json, sha256 8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e, 20072 B, 26 nodes = beta7 int8HQ, euler/simple, 8 steps full schedule + pass 2 beta/3/denoise 0.4, shift 12/3, VSA keep_percent 10, AddGuide frame 0 on both passes, ref_image_size max, 384x672 -> LatentUpscaler3D x2 -> 768x1344, 243 frames, 24 fps. Do not change any of those.
+     f. Render: C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_graph_job.py <run_dir> <id> --frames 243 (the number must equal c0.length in the graph you copied; the B2 default renders 243 f = 10.125 s at ~240 s GPU. runs gpu_guard and gpu lock).
+     g. Finish: commit once in each repo touched and append one line to notes\progress.md. Then stop.
+   - Script reuse: reuse the existing scripts, never repeat steps by hand - notes\bk26_writer_batch.py (prompt writer), notes\bk26_judge_harness.py + notes\bk26_judge_batch.py (judge), notes\p15_driver.py (driver); render/QC tools C:\AI\community\scripts\run_graph_job.py, verify_cell.py, prompt_stats.py, review_pack.py, finalize_encode.py. One manifest drives them. Prompt rules live in C:\AI\community\skills\h3-prompting\SKILL.md (cite its R numbers); render dials in C:\AI\community\skills\h3-hc-render\SKILL.md.
+
+2. Research rules: at most one fetch per URL, no retries. If saved in notes\web, reuse it. Fetch -> python C:\AI\community\scripts\check_web_saves.py -> git add notes\web && git commit in same iteration. Reading ComfyUI\custom_nodes with read tool is denied.
+
+
+### GPU lock and render window (moved from PROMPT.md rule 99999999)
+GPU lock: renders and start-image captioning go through llama-swap ComfyUI swap, ONE job at a time. Queue only via C:\AI\community\scripts\run_graph_job.py (comm.guard_ok enforced before POST). Gate before queuing: C:\AI\director\scripts\gpu_guard.ps1 rc 0 = IDLE, and python C:\AI\community\scripts\comfy_ctl.py status. Driver busy guard: while C:\AI\locks\gpu-render.lock is held by a test driver, Forge in interactive chats replies that a test is running and does not load models, render, or run GPU/heavy work; read-only questions are fine. While render runs: no second job, no ComfyUI restart, no llama-swap load/unload/upstream, no LLM requests (run_graph_job.py holds C:/AI/locks gpu-render lock; comfyui_auto exclusive main group ttl: 300). Client stall (exit 6) collects clip from ComfyUI\output\community\<id>\, never re-render. KEEP is Derrick's alone; no vision model judges, scores or picks rendered explicit output.
