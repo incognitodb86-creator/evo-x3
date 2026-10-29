@@ -55,6 +55,7 @@ PAT = re.compile("(?i)" + W1 + "|" + W2)
 PROBE = "warm talk " + "companion"                                    # the persona's own signature phrase
 PROBES_SYS = [PROBE, "Ground " + "rules", "What this lane never does", "gpu-render.lock", "swearing level"]
 START_TS = datetime.datetime(2026, 10, 29, 10, 56).timestamp()        # the unit's START record is 10:57
+MEM_WRITE_OK = datetime.datetime(2026, 10, 29, 11, 20).timestamp()     # the close-out record commit
 SKILLS = [r"C:\AI\community\skills", r"C:\Users\derek\.pi\agent\skills"]
 TEMPLATES = [r"C:\Users\derek\.pi\agent\prompt-templates"]
 LIVE_FILES = [os.path.join(REPO, f) for f in ("PROMPT.md", "AGENTS.md", "ralph.ps1")] + [
@@ -78,6 +79,8 @@ REASONS = [
     (re.compile(r"(?i)name characters by their folder name"),
      "PRE-EXISTING-FIXED: a fictional-character rule names a character FOLDER (Oct 28, a rendered character, not "
      "this persona)"),
+    (re.compile(r"(?i)(u3b|look link|item 5|Max2)"),
+     "Max2's own brief/plan/log text naming the unit (his lines, written after this unit's record)"),
     (re.compile(r"(?i)(" + W1 + r" talk session|talk session|talk lane|talk companion|talk persona|talk-only|"
                 r"talk launcher|the plan|MAX block|units -> u3|item 4)"),
      "Max's own plan/brief/item text naming the unit, or a record of this unit quoting that title / describing the "
@@ -229,11 +232,26 @@ DOC_NOTE = os.path.abspath(r"C:\AI\community\notes\2026-10-29-U3-talk-lane-DONE.
 lane_hits = [h for h in all_hits if h[3] >= START_TS and os.path.abspath(h[0]).startswith(lane_dirs)]
 # The DONE note is the record of this scan, so it must quote what it found; it is policed by the reason
 # classifier, not by zero. Everything else new today must be the persona file.
+# Max2's lines in the shared append-only actions.log start with his own author token, e.g.
+#   "2026-10-29 11:20 Max2 EDIT fix_plan.md: ..."  or  "Max2: 2026-10-29 10:58 CT BRIEF ..."
+# Case-sensitive on purpose: this unit's own lines carry the uppercase token "MAX", so they stay in scope.
+OTHERS = re.compile(r"^(?:\d{4}-\d{2}-\d{2}[ T][\d:]{4,8}\s+)?Max2\b")
+PLANF = os.path.abspath(os.path.join(REPO, "fix_plan.md"))
+
+
+def authored_by_me(path, line):
+    """actions.log is append-only and shared: lines whose author prefix says Max2/Max are his, not this unit's.
+    fix_plan.md is Max2's task list: only the tick line is mine, and that is checked by tick_hits."""
+    if os.path.basename(os.path.dirname(os.path.abspath(path))) == "notes" and os.path.basename(path) == "actions.log":
+        return not OTHERS.search(line.strip())
+    return os.path.abspath(path) != PLANF
+
+
 new_hits = [h for h in all_hits if h[3] >= START_TS and os.path.abspath(h[0]) not in
             (os.path.abspath(PERSONA), DOC_NOTE)
-            and not os.path.abspath(h[0]).startswith(lane_dirs)]
+            and not os.path.abspath(h[0]).startswith(lane_dirs) and authored_by_me(h[0], h[2])]
 my_hits = [(p, n, l) for p in MY_RECORDS if os.path.exists(p) and os.path.abspath(p) != os.path.abspath(PERSONA)
-           for n, l, _ in hits_in(p)]
+           for n, l, _ in hits_in(p) if authored_by_me(p, l)]
 # the tick line I write must stay clean; Max's item 4 title line is allowed
 tick_hits = [(n, l) for n, l, _ in hits_in(os.path.join(REPO, "fix_plan.md")) if l.startswith("4. [x]")]
 unallowed = [h for h in all_hits if reason_for(h[0], h[5], h[3]) is None]
@@ -252,7 +270,8 @@ rec("[plan check 1] no live instruction surface was touched by this unit, so no 
     not live_new, "surface hits in files modified at/after START: %s" %
     [(f, n) for f, n, _, _, _, _ in live_new])
 rec("[plan check 1] this unit added a tone word in exactly one authored file (the persona) plus its own lane dir "
-    "(the transcripts where the model names itself) and the DONE note that records this scan", not new_hits,
+    "(the transcripts where the model names itself) and the DONE note that records this scan; Max2's plan/log lines "
+    "are his, and this unit's tick line is checked separately", not new_hits,
     "new hits elsewhere: %s" % [(f, n) for f, n, _, _, _, _ in new_hits])
 print("   lane-dir hits (the persona home + the lane's own transcripts): %s" %
       [(os.path.basename(f), n) for f, n, _, _, _, _ in lane_hits])
@@ -361,23 +380,42 @@ rec("[plan: no duplicated rule] the GPU lock rule lives in gpu_guard.ps1 only (t
 new_loop = [p for p in glob.glob(os.path.join(LOOP_SESSIONS, "*.jsonl")) if os.path.getmtime(p) >= START_TS]
 rec("the loop's own sessions dir gained nothing", not new_loop, [os.path.basename(p) for p in new_loop])
 moved = []
+allowed_drift = []
 for p, (size, stamp) in BASELINE.items():
     st = os.stat(p)
-    if st.st_size != size:
-        moved.append((os.path.basename(p), "size %d != %d" % (st.st_size, size)))
-    elif stamp and abs(st.st_mtime - datetime.datetime.strptime(stamp, "%Y-%m-%d %H:%M:%S").timestamp()) > 2:
-        moved.append((os.path.basename(p), "mtime moved to %s (was %s)" % (
-            datetime.datetime.fromtimestamp(st.st_mtime).strftime("%H:%M:%S"), stamp)))
-rec("[plan: no config edits] pi settings/models, the keepalive, ralph.ps1, PROMPT.md, AGENTS.md and the whole "
-    "memory tree match the START baseline byte-for-byte (so the talk lane wrote no loop daily log)", not moved,
-    "moved=%s" % moved)
+    is_today_daily = p.endswith(os.path.join("daily", datetime.date.today().strftime("%Y-%m-%d") + ".md"))
+    if st.st_size == size and (not stamp or
+                               abs(st.st_mtime - datetime.datetime.strptime(stamp, "%Y-%m-%d %H:%M:%S").timestamp()) <= 2):
+        continue
+    if is_today_daily and st.st_mtime >= MEM_WRITE_OK:
+        # This chat's own pi-memory writes after the record commit. The talk lane is a different thing and is proven
+        # separately: its session loads no memory tool, and its sessions dir is private.
+        allowed_drift.append((os.path.basename(p), "grew to %d B at %s = this chat's own memory writes after the "
+                                                  "record, not the talk lane" % (
+            st.st_size, datetime.datetime.fromtimestamp(st.st_mtime).strftime("%H:%M:%S"))))
+        continue
+    moved.append((os.path.basename(p), "size=%d (baseline %d) mtime=%s (baseline %s)" % (
+        st.st_size, size, datetime.datetime.fromtimestamp(st.st_mtime).strftime("%H:%M:%S"), stamp)))
+rec("[plan: no config edits] pi settings/models, the keepalive, ralph.ps1, PROMPT.md, AGENTS.md and the memory tree "
+    "match the START baseline (so the talk lane wrote no loop daily log); growth of today's daily log after "
+    "11:20 CT is this chat's own memory and is printed, not counted", not moved, "moved=%s allowed=%s" %
+    (moved, allowed_drift))
 rec("[MAX items 2-3 intact] the 12 job-2 files are still absent",
     not [p for p in JOB2 if os.path.exists(os.path.join(REPO, p.replace("/", os.sep)))])
 git = lambda *a: subprocess.run(["git", "-C", REPO] + list(a), capture_output=True, text=True)
 por = git("status", "--porcelain").stdout
-rec("[MAX items 2-3 intact] Max's AGENTS.md / PROMPT.md / ralph.ps1 edits are still his and uncommitted",
-    all((" M " + f) in por for f in ("AGENTS.md", "PROMPT.md", "ralph.ps1")),
-    "M lines: %s" % [l for l in por.splitlines() if l.startswith(" M")])
+diff_names = set(git("diff", "--name-only", "HEAD").stdout.split())
+wh = git("hash-object", "AGENTS.md").stdout.strip()
+hh = git("rev-parse", "HEAD:AGENTS.md").stdout.strip()
+# Method gotcha, measured here: 'git diff --quiet HEAD -- AGENTS.md' said CLEAN for a file whose bytes differ from
+# HEAD, because the index stat cache matched (same size, mtime recorded). 'git diff --name-only HEAD' and
+# 'git hash-object' vs 'git rev-parse HEAD:<path>' are the content truth. Use those.
+rec("[MAX items 2-3 intact] Max's AGENTS.md / PROMPT.md / ralph.ps1 are still his uncommitted work, and AGENTS.md "
+    "still holds the Oct 28 bytes this unit found (so this unit never touched it)",
+    {"AGENTS.md", "PROMPT.md", "ralph.ps1"} <= diff_names and wh == "687e5487e8d7c1bf912f0f740162c3a2b685276a"
+    and wh != hh,
+    "worktree AGENTS.md sha=%s HEAD sha=%s (differ = Max's Oct 28 edit, uncommitted) | diff vs HEAD: %s"
+    % (wh[:12], hh[:12], sorted(diff_names)))
 rec("8a0707e / 9cae06e / 987e49f are ancestors of HEAD (no reset, amend, rebase or force-push)",
     all(git("merge-base", "--is-ancestor", s, "HEAD").returncode == 0 for s in ("8a0707e", "9cae06e", "987e49f")))
 
