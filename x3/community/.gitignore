@@ -24,3 +24,6 @@ tools/
 # copy Chrome loads is a work copy, not a durable artifact. Its 2026-10-24 code changes are recorded in
 # notes/gmd_ext_20261024/ (diff + status + new test + per-file tree manifest) and re-checked by notes/ali08_git_clean_check.py.
 incoming/gmd-dl-ext-2.5.6/
+
+# backup files (audit fix 2026-10-29)
+*.bak-*
