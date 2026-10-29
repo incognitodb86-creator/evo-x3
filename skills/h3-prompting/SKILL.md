@@ -72,8 +72,7 @@ cuts to ...`). Never use "then / after / afterwards / next" to move the story: t
 continuous shot is one `[Shot 1]`.
 
 **R9 - Length.** `detailed_description` has no word cap - long, literal, in time order beats short (TenStrip's own
-advice; a 6.5k-char prompt is about 1.7k tokens). The Ralph loop's per-pass target is 350-500 words (PROMPT.md 1c) -
-that is the loop's budget, not the model's. Overflow raises
+advice; a 6.5k-char prompt is about 1.7k tokens). No minimum or maximum word count anywhere (Derrick 2026-10-29). The only hard limit is the encoder: overflow raises
 `ValueError "MiniMax H3 text segment exceeds the supported prompt length"`; it never truncates
 (`comfy/text_encoders/minimax.py MiniMaxH3Tokenizer`, `embedding_size 5120`).
 
