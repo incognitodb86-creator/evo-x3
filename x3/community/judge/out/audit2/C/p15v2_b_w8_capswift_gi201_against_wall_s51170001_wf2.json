@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical mottled brown-black cave wall and dim ground from frame 1 to 8."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same build, skin tone, hair, and outfits across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing with no jump cut."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Frame 8 shows standing rear-entry pose against wall, with visible genital contact and thrusting motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals without fusion or missing parts."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.0006,
+  "target_reached": 0.8756,
+  "anatomy_defect": 0.0849
+ },
+ "finish": "stop",
+ "flags": [
+  "target_reached"
+ ],
+ "tag": "p15v2_b_w8_capswift_gi201_against_wall_s51170001_wf2"
+}

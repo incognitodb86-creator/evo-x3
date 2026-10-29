@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same bedroom with white linens and consistent background elements."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same woman and man appear throughout, matching hair, body type, and clothing."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with bodies in contact and act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0007,
+  "same_people": 0.0,
+  "start_kept": 0.2592,
+  "target_reached": 0.0097,
+  "anatomy_defect": 0.0032
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w7_img_gi102_missionary_s51170001_wf2"
+}

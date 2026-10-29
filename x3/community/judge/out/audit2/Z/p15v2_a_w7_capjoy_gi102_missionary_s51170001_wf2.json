@@ -1,0 +1,49 @@
+{
+ "frames": [
+  24,
+  54
+ ],
+ "diffs": [
+  8.12,
+  8.79
+ ],
+ "per_frame": [
+  {
+   "frame": 24,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background remains identical: same bed, pillows, headboard, and wall. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and genitalia are anatomically correct and properly attached. No melting, extra, or missing parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0002,
+    "anatomy_defect": 0.0007
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 54,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background remains identical: same bed, pillows, headboard, and wall. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, torsos, and genitalia are anatomically correct. No melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0004,
+    "anatomy_defect": 0.0002
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2"
+}

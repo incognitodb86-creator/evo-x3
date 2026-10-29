@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: rumpled sheets, pillow, headboard, muted wall, and lighting direction unchanged across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same woman (blonde hair, white bra) and man (dark curly hair, shirtless) appear in all frames without replacement or morphing."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, but by frame 2 she has shifted to a more reclined position, not maintaining the exact start pose."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows woman lying back, man on top, clear pelvic contact and thrusting motion, matching missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly proportioned limbs and genitalia without fusion, missing parts, or blob-like distortions."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0016,
+  "same_people": 0.0,
+  "start_kept": 0.6097,
+  "target_reached": 0.0015,
+  "anatomy_defect": 0.0054
+ },
+ "finish": "stop",
+ "flags": [
+  "start_kept"
+ ],
+ "tag": "p15v2_b_w8_capswift_gi102_missionary_s51170001_wf2"
+}

@@ -1,0 +1,37 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: same bed, beige headboard, and neutral wall across all frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "Subject 2 is a man in frame 1, not the short brown-haired woman from START IMAGE."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows a man on top, not the kneeling woman from START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows missionary position with bodies in contact, matching target pose description."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genital anatomy without fusion or missing parts."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.1243,
+  "same_people": 0.9312,
+  "start_kept": 0.9918,
+  "target_reached": 0.4868,
+  "anatomy_defect": 0.1778
+ },
+ "finish": "stop",
+ "flags": [
+  "same_people",
+  "start_kept"
+ ],
+ "tag": "p15v2_a_w2_capjoy_gi102_missionary_s51170001_wf2"
+}

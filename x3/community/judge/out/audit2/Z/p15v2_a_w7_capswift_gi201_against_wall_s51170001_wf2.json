@@ -1,0 +1,49 @@
+{
+ "frames": [
+  22,
+  240
+ ],
+ "diffs": [
+  41.17,
+  9.18
+ ],
+ "per_frame": [
+  {
+   "frame": 22,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and cave structure remain consistent. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionate. No melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0006,
+    "anatomy_defect": 0.0
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 240,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and cave structure remain identical. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionate. No melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0003,
+    "anatomy_defect": 0.0001
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_a_w7_capswift_gi201_against_wall_s51170001_wf2"
+}

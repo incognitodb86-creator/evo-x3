@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent dark cave with stone textures across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Characters retain identical features, clothing, and proportions throughout all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows both bodies in standing rear-entry pose against wall with visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All anatomy, hands, and genitalia appear correctly formed and intact in all frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0011,
+  "same_people": 0.0,
+  "start_kept": 0.0847,
+  "target_reached": 0.0026,
+  "anatomy_defect": 0.0041
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w2_capjoy_gi201_against_wall_s51170001_wf2"
+}
