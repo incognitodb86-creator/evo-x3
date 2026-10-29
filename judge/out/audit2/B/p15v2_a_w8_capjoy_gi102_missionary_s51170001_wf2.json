@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background consistently shows same beige headboard, white sheets, and neutral wall across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both subjects retain identical hair color, skin tone, body types, and clothing/props throughout all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or pose changes."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 clearly shows missionary position with intimate contact and visible penetration in target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly proportioned anatomy with no fused bodies, missing limbs, or malformed genitals."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0002,
+  "same_people": 0.0,
+  "start_kept": 0.011,
+  "target_reached": 0.0003,
+  "anatomy_defect": 0.0054
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w8_capjoy_gi102_missionary_s51170001_wf2"
+}

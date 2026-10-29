@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, greyish wall, same lighting and bed setup across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same two women appear throughout: blonde in white lace, brown-haired in black, matching hair/attire/body types."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, clothing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position: top woman on back, bottom woman on top, bodies in contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly formed limbs, hands, and genitalia without fusion or missing parts."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0054,
+  "same_people": 0.0011,
+  "start_kept": 0.0552,
+  "target_reached": 0.0403,
+  "anatomy_defect": 0.0278
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w7_capjoy_gi102_missionary_s51170001_wf2"
+}

@@ -67,3 +67,4 @@
 - venv C:\AI\community\judge\.venv (Python 3.12, separate from ComfyUI): pip install torch (CPU wheel, download.pytorch.org/whl/cpu), scenedetect, transformers, pillow, numpy (+ opencv-python as scenedetect dep). Versions: numpy==2.5.4, opencv-python==5.0.0.93, pillow==13.0.0, scenedetect==0.7.2, torch==2.15.0+cpu, transformers==5.22.0.
 - HF model downloads (default HF cache): facebook/dinov2-small, openai/clip-vit-base-patch32.
 - 2026-10-29 PM Max (judge refine): pip install mediapipe==1.2.0 into C:\AI\community\judge\.venv for a pose/anatomy trial; not used in the shipped judge (VLM zoom + CLIP ring + optical flow were tried instead and dropped).
+- 2026-10-29 14:22 Max audit2: downloaded mediapipe pose_landmarker_full.task (float16, Google storage) to C:\AI\community\judge\models\ (CPU pose sanity experiment)

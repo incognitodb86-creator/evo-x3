@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains dark cave with rough stone walls across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames with consistent features and clothing."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows orc thrusting into elf against wall, matching target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All anatomy, hands, and genitalia appear intact and correctly formed in all frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0013,
+  "same_people": 0.0,
+  "start_kept": 0.3841,
+  "target_reached": 0.0016,
+  "anatomy_defect": 0.0072
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w8_capjoy_gi201_against_wall_s51170001_wf2"
+}

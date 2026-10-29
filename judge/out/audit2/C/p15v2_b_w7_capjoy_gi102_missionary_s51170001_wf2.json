@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: same bed, white sheets, neutral grey wall, and lighting across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both subjects retain identical hair, skin tone, and outfits throughout all frames without identity or clothing drift."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly before motion begins."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with bodies in contact, matching target pose description."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, separate bodies with correct limbs, hands, and genitalia without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.003,
+  "same_people": 0.0005,
+  "start_kept": 0.1899,
+  "target_reached": 0.0622,
+  "anatomy_defect": 0.0627
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w7_capjoy_gi102_missionary_s51170001_wf2"
+}

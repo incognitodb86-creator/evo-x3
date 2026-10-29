@@ -1,0 +1,49 @@
+{
+ "frames": [
+  4,
+  288
+ ],
+ "diffs": [
+  41.01,
+  10.21
+ ],
+ "per_frame": [
+  {
+   "frame": 4,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and cave structure remain consistent. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionate. No melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0008,
+    "anatomy_defect": 0.0
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 288,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and cave structure remain consistent. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionate. No melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0009,
+    "anatomy_defect": 0.0004
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_a_w7_img_gi201_against_wall_s51170001_wf2"
+}

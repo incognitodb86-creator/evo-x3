@@ -15,7 +15,7 @@ cd C:\AI\community\judge
 .venv\Scripts\python.exe prechecks.py --match p15v2_      # CPU, ~100 s for 36 clips
 .venv\Scripts\python.exe vlm_judge.py --match p15v2_      # GPU, ~3 min for 36 clips
 ```
-`vlm_judge.py` waits until `gpu_guard.ps1` reports IDLE and `gpu_lock.ps1 -Acquire` succeeds (it polls every 60 s while a render holds the lock). When done it unloads `qwen3vl_judge` (`/api/models/unload/qwen3vl_judge`, with `/unload` as the fallback) and releases the lock. Inputs come from `C:\Users\derek\5slock\ralph-community\notes\p15v2_manifest.json`: the start image is `guides[0].image` under ComfyUI `input\`, and the prompt is `notes\p15_prompts\<prompt_file>`.
+`vlm_judge.py` waits until `gpu_guard.ps1` reports IDLE and `gpu_lock.ps1 -Acquire` succeeds (it polls every 60 s while a render holds the lock). When done it unloads `qwen3vl_judge` (POST `/api/models/unload/qwen3vl_judge`, this model only; it never calls the global `/unload`) and releases the lock. Inputs come from `C:\Users\derek\5slock\ralph-community\notes\p15v2_manifest.json`: the start image is `guides[0].image` under ComfyUI `input\`, and the prompt is `notes\p15_prompts\<prompt_file>`.
 
 ## Modes and thresholds (refined 2026-10-29 PM, see /workspace/audits/2026-10-29-judge-refine-results.md on the Grok box)
 **Default = two tiers.** Neither tier ever KEEPs.
@@ -31,6 +31,12 @@ Tried and dropped (no held-out gain on p15v2):
 - a second zoomed anatomy call (mid and last frame at full size): it still missed the anatomy blob;
 - CLIP similarity on a background-only ring;
 - Farneback optical-flow motion stall.
+
+## Audit 2 (2026-10-29 ~2:40 PM CT, report /workspace/audits/2026-10-29-judge-audit2-results.md on the Grok box)
+- **Recommended FLAG tier = `vlm_judge.py` hard answers OR the worst-frame zoom** (`vlm_variants.py --variants Z`, ~3 min GPU for 36 clips). The zoom picks the 2 most-changed frames by CPU frame differencing and asks the VLM to compare each one against the start image, region by region (scene + anatomy). It has no fitted threshold. On p15v2: 9/14 bad, 3/22 good (was 8/14, 3/22); it adds `b_w8_img_gi201` (background swap). Its anatomy question caught nothing.
+- The VLM is deterministic at temp 0: a rerun reproduced all 180 shipped answers.
+- Tried and dropped (out\audit2): an expert-reviewer persona in the system prompt (5/14 bad, 3/22), persona + defect rubric with pass/fail examples (6/14, 2/22), a 2-of-3 vote over the prompts, DINOv2 patch novelty (`patch_novelty.py`), and MediaPipe pose sanity (`pose_sanity.py`; it usually finds only 1 of the 2 bodies). The CPU features gave 15-21/22 false flags held out.
+- Precheck thresholds: leave-one-out CV gives 10/14 bad, 7/22 false flags; leave-one-writer-out gives 10/14, 13/22. They stay a REVIEW hint.
 
 ## Sources
 - VBench subject/background consistency (DINO / CLIP vs first and previous frame): https://arxiv.org/abs/2311.17982, https://github.com/Vchitect/VBench/blob/master/vbench/utils.py

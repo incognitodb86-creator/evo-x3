@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains bedroom with same bed, linens, and muted wall throughout all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and shirtless man appear consistently with matching build, hair, and skin tone."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, while START IMAGE shows her in same pose but man is behind her, not in front."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows man on top in missionary position, clearly penetrating woman with visible pelvic motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly proportioned bodies with no fused limbs, missing parts, or malformed genitalia."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.001,
+  "same_people": 0.0,
+  "start_kept": 0.6417,
+  "target_reached": 0.0293,
+  "anatomy_defect": 0.0136
+ },
+ "finish": "stop",
+ "flags": [
+  "start_kept"
+ ],
+ "tag": "p15v2_b_w7_capswift_gi102_missionary_s51170001_wf2"
+}

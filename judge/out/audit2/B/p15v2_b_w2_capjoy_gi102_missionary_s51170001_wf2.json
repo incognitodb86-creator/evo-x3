@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, greyish wall, same lighting and depth of field across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and man appear throughout; body types, hair, skin tone, and sex characteristics unchanged."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing exactly without jump cuts or composition changes."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position: woman supine, man on top, bodies in contact with visible pelvic motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly formed limbs, hands, and genitalia without fusion, missing parts, or blob-like distortions."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.006,
+  "same_people": 0.0241,
+  "start_kept": 0.2217,
+  "target_reached": 0.1515,
+  "anatomy_defect": 0.0231
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w2_capjoy_gi102_missionary_s51170001_wf2"
+}

@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bed, pillows, and background wall from frame 1 to 8."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both subjects retain same facial features, hair, skin tone, and clothing across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and outfit with no jump cut or pose change."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows woman on back, man kneeling over her, leg draped over shoulder, in missionary pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals with no melting or extra limbs visible."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0002,
+  "target_reached": 0.0013,
+  "anatomy_defect": 0.0106
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w2_capswift_gi102_missionary_s51170001_wf2"
+}
