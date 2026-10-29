@@ -77,6 +77,53 @@ Every file: header-probe before loading, sha-256 recorded, `models\loras` only, 
 2. **A Civitai API token** (civitai.com → account → API keys) to search name-reference LoRAs **per base model**, so the
    per-person question (the two names from chat, and popular name-references) can be answered with numbers instead of "not found".
 
-Unchanged from the previous task: the trigger decision is settled (*"Trigger as is is fine"*), the alias copies +
+## 5. Second and third pass, widened past Hugging Face (2026-10-29 ~17:45) - correction to §2
+
+Tools: `scripts\h3_lora_social_sweep.py`, `_2.py`, `_3.py` (read-only; console logs, raw JSON and the fetched web text are
+saved **outside git** in `C:\AI\lora\person_alias_2026-10-29\web_2026-10-29\` - the Reddit text names real people, so it is
+kept out of the shared trail; the console prints them masked). Engines: DuckDuckGo + Startpage, Civitai REST v1, Reddit via
+Arctic Shift, GitHub raw.
+
+**§2 was under-counted: it looked at Hugging Face only. Civitai does have a "MiniMax H3" base-model LoRA category.**
+Proof = `GET https://civitai.com/api/v1/models/{id}` (this endpoint works from this box):
+
+| Civitai id | what it is | proof fields |
+|---|---|---|
+| **2940916** FaceSwap - MiniMax REF2VA | replace the face identity in a reference video with reference face(s) - an H3 face-identity LoRA | `type=LORA`, **`baseModel="MiniMax H3"`**, `trainedWords=["Faceswap"]`, 3,176 downloads, `SS_FaceSwap_MiniMax_H3_REF2VA.safetensors` **64,085 KB (65.6 MB)** + a native-workflow zip 10.6 MB |
+| 2925394 Natural Face & Speech | face muscle dynamics + clear speech, t2v + i2v | `baseModel="MiniMax H3"`, 2,713 dl, 302 MB |
+| 2849726 Cinematic Style + Detail | style/detail | `baseModel="MiniMax H3"`, 713 dl, 151 MB |
+
+API mechanics found the hard way (recorded so the next pass does not repeat them): the Civitai **detail** endpoint works
+without a key; the **list** endpoint needs `sort=Most Downloaded` (with a space, not camelCase), and it **ignores** `search=`,
+`name=`, `trainedWords=` and `username=` (it returns generic most-downloaded lists; `username=TenStrip` returned exactly
+**1** model, so TenStrip's LoRA credits are not all exposed through the API) - **a full Civitai catalog needs an API token.**
+
+Reddit (Arctic Shift; it requires a `subreddit` per call and rate-limits at 422/429 when called fast): the FC-identity
+discussion for H3 is a real topic, e.g. r/StableDiffusion `1vufdh5` "known characters list v2" (score 370, 146 comments),
+`1vkdfqe` "what characters Minimax H3 knows" (508/225), `1vkz1d8` "references appear stronger than character LoRAs" (52/29),
+`1vzfwl9` "plastic skin" (40/49), plus `1vk68im` on voices and `1xi2pjg` "training a lora character with tattoos on minimax
+H3", `1xheihx` "Minimax H3 character identity question". The saved corpus is in the non-git folder above; the quote-extraction
+step printed 0 (parser bug: the saved comment files are flat lists, not the nested shape the parser expected) - **mining those
+quotes is an open follow-up**. Headline claims to verify by eye: reference images beat character LoRAs for identity, and a
+turbo LoRA is reported to weaken name-resemblance.
+
+Two things my HF queries missed, which proves the query set is not exhaustive: the community index
+**`AtlasCloudAI/awesome-minimax-h3`** (GitHub, README 32.8 KB saved; it has a "LoRAs and training" section to read) and
+**`vpakarinen/better-human-motion-h3-lora`** (436 dl / 72♥) inside an HF collection named for H3 LoRAs - collections and
+odd-keyword repos are not returned by the searches used in §2.
+
+**4chan: not reached.** No search API, and the search engines returned no archive hits for these queries from this box.
+It needs a manual look (or a link from you), so treat 4chan as unsearched, not as empty.
+
+Buy-list change: add **66 MB FaceSwap** (Civitai 2940916, trigger `Faceswap`, strength 1.0 per its card) to the 0.29 GB set;
+remover stays optional (+0.16 GB). Same gate as always: header-probe before loading, sha-256 recorded, your GO, no auto-queue.
+
+## 6. Naming (Derek, 17:35)
+File, note, script and script-title names are now neutral (`h3-lora-catalog-survey`, `h3_lora_*`), the prose is scrubbed, and
+the rule is in memory: never write that word in a shared name. 3 occurrences stay inside path strings for Max's Oct 17
+staged folder (the path must be spelled exactly to verify and delete it) in `scripts\verify_2026-10-29_lora_session.py`,
+`scripts\lora_alias_copy_2026-10-29.py` and one line of `notes\2026-10-29-lora-alias-verify-and-rename.md`.
+
+Status unchanged from the previous task: the trigger decision is settled (*"Trigger as is is fine"*), the alias copies +
 `FC_SYDNEY_h3_face_v1.safetensors` are in place and hash-verified, the scoped Max delete is still awaiting your confirm,
 GPU IDLE, nothing queued, judge default `qwen3vl_judge`. Restart handoff: `notes\2026-10-29-lora-session-state-for-restart.md`.
