@@ -17,7 +17,7 @@ All primary tasks were investigated and resolved:
 2. **ComfyUI Community Defaults Applied:** Removed `--lowvram` and `--use-ck-attention` from `comfyui_auto` and `comfyui_longvideo` in `C:\AI\director\config\llama-swap.yaml`, aligning memory management to dynamic VRAM and attention to default PyTorch attention (as required for `int8_convrot` checkpoints per published ComfyUI documentation and issue #15529).
 3. **20-Minute LLM Interruption Source Identified:** Uncovered Windows Scheduled Task `ForgeAgyMonitor` (interval `PT20M`), running `agy_monitor_run.ps1` (`agy_monitor.md`), which periodically triggered watchdog restarts and LLM completions.
 4. **Orc Scene (GI046 s51150032) Artifact Root Cause Diagnosed:** Traced the contradictory undressing motion and missing green orc anatomy to a prompt narrative conflict with frame 0 pinning and a lack of species-specific anatomy conditioning in chunk `c0`.
-5. **Guard & Policy Integrity Maintained:** Youth guard (`comm.py` adults-only check and `test_p6_review.py`) remained byte-pinned and verified (21/21 pytest passing, whole suite 38 passing, 13/13 `rt_window_probe.py` checks passing). GI063 remained on hold pending Derrick's decision.
+5. **Guard & Policy Integrity Maintained:** Youth guard (`comm.py` adults-only check and `test_p6_review.py`) remained byte-pinned and verified (21/21 pytest passing, whole suite 38 passing, 13/13 `rt_window_probe.py` checks passing). GI063 remained on hold pending Derrick's decision [RELEASED: Derrick 2026-10-27 9:09 AM CT — GI063 render hold released, wrongly flagged by wrong model; youth guard kept].
 
 ---
 
