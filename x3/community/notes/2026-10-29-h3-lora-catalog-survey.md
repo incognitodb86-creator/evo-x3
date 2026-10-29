@@ -1,14 +1,14 @@
-# Community survey 2026-10-29b - "more celeb LoRAs for H3 Max", TenStrip checked
+# Community survey 2026-10-29b - "more name-reference LoRAs for H3 Max", TenStrip checked
 
-Derek's ask: *research and find more celeb LoRAs for H3 Max, TenStrip*. Tool: `scripts\h3_celeb_lora_survey_2026-10-29b.py`
+Derek's ask: *research and find more name-reference LoRAs for H3 Max, TenStrip*. Tool: `scripts\h3_lora_catalog_survey_2026-10-29b.py`
 (read-only, Hugging Face API only: 189 repos for queries minimax-h3 / minimax h3 / 10eros / minimax_h3 / h3 lora + all of
-TenStrip's repos; every LoRA file listed with bytes and `lfs.oid`; model cards read for LoRA/celeb/identity/trigger lines).
+TenStrip's repos; every LoRA file listed with bytes and `lfs.oid`; model cards read for LoRA/name-reference/identity/trigger lines).
 Raw JSON: `C:\AI\lora\person_alias_2026-10-29\survey_h3_2026-10-29b.json` (outside git). Civitai is not queryable from this
 box (Cloudflare 403 for the browser, `Disallow: /api/*` + 400/404 for the API) - asks at the end. No real-person names in
 this file (fictional-names rule); the private mapping stays in `C:\AI\lora\person_alias_2026-10-29\TRIGGER_MAP_private.txt`.
 
 ## 1. TenStrip checked first (direct answer)
-TenStrip publishes **no H3 celebrity/person-identity LoRA**. Evidence, his own repos (API, dated):
+TenStrip publishes **no H3 name-reference/person-identity LoRA**. Evidence, his own repos (API, dated):
 
 | repo | last modified | what it is |
 |---|---|---|
@@ -26,7 +26,7 @@ possible "more LoRAs for H3 Max" list, and it is exactly what I cannot read from
 Consequence for loading: beta7 already contains merged LoRA character, so any added LoRA goes on **low** (our rule:
 concept 0.2-0.6, face 0.6-1.0, 0.2-0.4 if it fights the merge; no general NSFW LoRA on beta7; no cache/SLA/Spectrum).
 
-## 2. What "celeb identity on H3" actually exists (HF-verified, ranked by downloads/likes)
+## 2. What "name-reference identity on H3" actually exists (HF-verified, ranked by downloads/likes)
 
 | LoRA | size | dl/like | card facts that matter |
 |---|---|---|---|
@@ -34,12 +34,12 @@ concept 0.2-0.6, face 0.6-1.0, 0.2-0.4 if it fights the merge; no general NSFW L
 | `fal/MiniMax-H3-Realism-People-LoRA` → `h3-realism-people-t2v-i2v-r2v.safetensors` | 131,229,656 | 93,973 / 524 | Faces that hold in close-up, real skin texture, film light. **Trigger `r34l1sm`** (a synthetic token, no person word), author strength 1.0, **0.6-0.8 for a lighter touch** → we would use 0.3-0.5 on merged beta7. t2v + i2v + r2v. Successor of `fal/MiniMax-H3-Realism-LoRA`. Dataset 176 curated live-action clips, normalised 24.000 fps. |
 | `akatz-ai/MiniMax-H3-Person-Remover-LoRA` → `H3-Person-Remover-V1.safetensors` | 155,110,584 | 2,743 / 88 | removes a selected person; the inverse tool, same size class |
 
-**Per-celebrity identity LoRAs for H3: none on Hugging Face.** All 189 repos: 0 person-name identity LoRAs. The identity
+**per-name identity LoRAs for H3: none on Hugging Face.** All 189 repos: 0 person-name identity LoRAs. The identity
 work on H3 is done by (a) the reference-image path (Ref2VA - what we use), (b) Character-Swap, (c) own training. That is
 consistent with the private file we found: our archived face LoRA's header says `fizgig.minimax` + `ss_concept_dirs =
 dataset` = a private train, not a community release.
 
-Named-character (not celebrity) H3 LoRAs that do exist and load in the same size class:
+Named-character (not name-reference) H3 LoRAs that do exist and load in the same size class:
 `masafy/minimax-h3-masafy-lora` (ref2va, 155,110,312, checkpoints 300-700), `kalyaskye/h3-loras` (`zero_two_dance_h3`,
 `galaxyace_h3`, `h3_realism_slider` 77,580,824, `icy_realism_v1`, `heavy_breasts_physics_v1` 930,401,752),
 `WarmBloodAban/Minimax_H3_LoRAs` (`Minimax-h3_Third_person_view` 620,285,280), `ostris/minimax_h3_ref2va_jacked_lora`
@@ -63,7 +63,7 @@ full/larger-rank and fl2va variants. Compatibility claims from size must be conf
 ## 3. Buy-list proposal (nothing downloaded without Derek's GO; 156.6 GB free on C:)
 1. **0.29 GB, faces + skin (recommended first step):** `h3_character_swap_v1.5.safetensors` 155,110,792 +
    `h3-realism-people-t2v-i2v-r2v.safetensors` 131,229,656. No new base, our dials stay, and Character-Swap is the tool
-   that gives us "any face" from an approved reference image - the thing no celeb LoRA for H3 can do, because none exist.
+   that gives us "any face" from an approved reference image - the thing no name-reference LoRA for H3 can do, because none exist.
 2. +0.16 GB if wanted: `H3-Person-Remover-V1.safetensors`.
 3. Skips: all turbo/PTD/Acc LoRAs (beta7 is already distilled - stacking two distills is the known flicker/quality trap),
    SD1.5 and LTX-2.3 LoRAs (no base here), Z-Image/FLUX.1-dev LoRAs (no base here).
@@ -74,8 +74,8 @@ Every file: header-probe before loading, sha-256 recorded, `models\loras` only, 
    his Civitai profile's LoRA list and save the page to a text/html file (or paste the model names), I can enumerate the
    exact LoRAs 10Eros-Max is built from and turn them into an H3-compatible candidate table. That is the highest-value
    "more LoRAs for H3 Max" source in existence.
-2. **A Civitai API token** (civitai.com → account → API keys) to search celebrity LoRAs **per base model**, so the
-   per-person question (the two names from chat, and popular celebs) can be answered with numbers instead of "not found".
+2. **A Civitai API token** (civitai.com → account → API keys) to search name-reference LoRAs **per base model**, so the
+   per-person question (the two names from chat, and popular name-references) can be answered with numbers instead of "not found".
 
 Unchanged from the previous task: the trigger decision is settled (*"Trigger as is is fine"*), the alias copies +
 `FC_SYDNEY_h3_face_v1.safetensors` are in place and hash-verified, the scoped Max delete is still awaiting your confirm,
