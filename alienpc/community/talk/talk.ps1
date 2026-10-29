@@ -1,27 +1,45 @@
 <#
-talk.ps1 - the talk-only launcher (MAX block item 4 / U3 of C:\AI\community\notes\2026-10-29-forge-cleanup-plan.md).
+talk.ps1 - the talk-lane launcher. U3 (MAX block item 4) built it; U3c (MAX block item 6, Derrick 12:20 CT Oct 29:
+"keep them separate, but I want the 2nd Sydney to have full access and authority same as main chat") makes it
+full-access. The tone word for the lane name lives only in the persona file, never in this script (item 4's tone
+scan enforces that), so this header says "the talk lane".
 
-Starts a pi chat session that differs from the loop in exactly three ways:
-  1. --append-system-prompt <the talk persona file>  - tone lives in that one file and nowhere else.
-  2. its own --session-dir                            - the loop's own sessions dir is untouched.
-  3. -ne -e pi-permission-system -e pi-mobile          - extension discovery is OFF, so pi-memory is OFF and this
-                                                        session cannot write the loop daily logs; the permission
-                                                        system stays loaded, so secret-shaped reads are denied.
-Everything else is the loop's own entry: same --provider, same --model, same working directory, so the same
-AGENTS.md context loads. This script edits no config file.
+Access now equals the main chat's: this starts pi the way a plain interactive pi starts, so it loads normal
+extension discovery (every package in settings.json, which for this box is pi-permission-system, pi-subagents,
+pi-mobile, pi-memory, rpiv-todo, cc-safety-net), the same skills trees, the same MCP servers, the
+same prompt templates and themes, the same AGENTS.md context from the same working directory, the same default
+tools, and the SAME permission policy as the main chat: no PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR override, so
+pi-permission-system reads the user-level policy file the main chat reads (external_directory default deny with the
+named allows; the secret denies read:*/.env, read:C:/AI/secrets/*, *.key, *.pem, *rclone*, */sessions/*).
 
-GPU rule (one rule, one implementation): before sending anything it runs C:\AI\director\scripts\gpu_guard.ps1,
-the same read-only guard the render side uses. It NEVER takes C:\AI\locks\gpu-render.lock and never calls
-gpu_lock.ps1. While that window is busy this lane queues (bounded wait) and sends nothing; -NoWait refuses
-instead. One-shot turns are guarded per turn; an interactive session is guarded at start, and the persona file
-tells the session never to take the lock.
+It is still a separate chat. The talk-only additions are exactly two:
+  1. --append-system-prompt <the talk persona file>  - tone and look live in that one file and nowhere else.
+  2. its own --session-dir                            - the loop's and the main chat's sessions stay untouched.
+Same --provider, --model, working directory and settings as the loop and the main chat. This script edits no config
+file and writes no settings key.
+
+What U3c REMOVES from the U3 lane: -ne (extension discovery OFF) and the forced forge-policy permission dir. The
+lane can now edit files, write memory, run git, call subagents, use skills and request a render - the same
+authority as the main chat - under the same permission denials.
+-Restricted reproduces the pre-U3c lane exactly (-ne -e pi-permission-system -e pi-mobile plus
+PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR = the loop's forge-policy dir) so an A/B run of the same task is one switch.
+
+Kept by U3c (Derrick's keep list): the youth guard and fictional-adults-only rule stay in the persona and in the
+box's own checks; the GPU lock stays one render at a time across both chats - before sending anything this launcher
+runs C:\AI\director\scripts\gpu_guard.ps1, the render side's own read-only guard (one rule, one implementation),
+and it NEVER takes C:\AI\locks\gpu-render.lock and never calls gpu_lock.ps1, so a chat turn never fires an LLM
+request into a render window; while that window is busy this lane queues (bounded wait), and -NoWait refuses
+instead. A lane that renders must go through the render path that takes the lock, never around it. No secrets: the
+same secret-shaped reads are denied as in the main chat.
 
 Usage:
   .\talk.ps1 "one message"        # one turn, prints the answer, exit code = pi's
   .\talk.ps1                      # interactive chat in this terminal
   .\talk.ps1 -DryRun "x"          # print the argv that would run (persona contents are not echoed), run nothing
   .\talk.ps1 "x" -NoWait          # refuse (exit 3) instead of queueing while the GPU window is busy
-Switches: -PersonaFile -SessionDir -Provider -Model -PermExt -MobileExt -GuardPs1 -GpuLockPath -Waits -WaitSec
+  .\talk.ps1 "x" -Restricted      # the old U3 lane: extension discovery OFF, forge-policy permissions (A/B)
+Switches: -PersonaFile -SessionDir -LoopDir -Provider -Model -PermExt -MobileExt -GuardPs1 -GpuLockPath -Waits
+          -WaitSec -NoWait -DryRun -Restricted
 #>
 param(
   [string]$Message = '',
@@ -37,7 +55,8 @@ param(
   [int]$Waits = 30,
   [int]$WaitSec = 120,
   [switch]$NoWait,
-  [switch]$DryRun
+  [switch]$DryRun,
+  [switch]$Restricted          # U3c A/B: run the pre-U3c restricted lane exactly as U3 built it
 )
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $LoopDir                     # context parity: the loop's AGENTS.md loads from its cwd
@@ -46,12 +65,19 @@ $log = Join-Path $PSScriptRoot 'talk.log'
 function Log($m) { $l = "$(Get-Date -Format s) $m"; Add-Content -LiteralPath $log -Value $l -Encoding UTF8; Write-Host $l }
 
 if (-not (Test-Path -LiteralPath $PersonaFile)) { Log "ABORT: persona file is missing: $PersonaFile"; exit 4 }
-foreach ($x in @($PermExt, $MobileExt)) {
-  if (-not (Test-Path -LiteralPath $x)) { Log "ABORT: extension path is missing: $x"; exit 4 }
+if ($Restricted) {
+  foreach ($x in @($PermExt, $MobileExt)) {
+    if (-not (Test-Path -LiteralPath $x)) { Log "ABORT: extension path is missing: $x"; exit 4 }
+  }
 }
-# pi-permission-system reads its policy from this dir; the loop's passes set the same one, so a talk turn sees the
-# same "allow by default, deny secrets" rule. Setting an env var is not a config edit; this script writes no config.
-$env:PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR = 'C:\Users\derek\.pi\forge-policy'
+# Permissions (U3c): the default lane inherits the parent environment, so pi-permission-system reads the same
+# user-level policy file the main chat reads - same rules, same secret denies. -Restricted restores the loop's
+# forge-policy dir the way U3 did, for an A/B run. This script writes no config file; an env var is scoped to it.
+if ($Restricted) {
+  $env:PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR = 'C:\Users\derek\.pi\forge-policy'
+} else {
+  Remove-Item -LiteralPath 'Env:PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR' -Force -EA SilentlyContinue
+}
 
 # The render window outranks a chat turn. Ask the guard, never take the lock, queue while it is held.
 $gpuWait = 0; $busy = ''
@@ -76,18 +102,21 @@ if ($Message) { $a += @('--print') }                                  # one-shot
 $a += @('--provider', $Provider, '--model', $Model)                  # identical to ralph.ps1's entry
 $a += @('--session-dir', $SessionDir)                                # talk's own session dir
 $a += @('--append-system-prompt', $persona)                          # tone, from the one persona file
-$a += @('-ne', '-e', $PermExt, '-e', $MobileExt)                    # pi-memory OFF; permissions and mobile ON
+if ($Restricted) {
+  $a += @('-ne', '-e', $PermExt, '-e', $MobileExt)                  # the old U3 lane: discovery OFF, two pins
+}
+# full-access mode adds nothing here: plain discovery loads the same extensions, skills, MCP and tools as main chat
 if ($Message) { $a += @($Message) }
 
 if ($DryRun) {
   $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $PersonaFile).Hash.Substring(0, 8)
   $bytes = (Get-Item -LiteralPath $PersonaFile).Length
   $shown = $a | ForEach-Object { if ($_ -eq $persona) { '<persona {0} B sha8 {1}>' -f $bytes, $hash } else { $_ } }
-  Log "DRYRUN gpu_wait=$gpuWait lock_taken=no argv: pi $($shown -join ' ')"
+  Log "DRYRUN access=$(if ($Restricted) { 'restricted' } else { 'fullaccess' }) gpu_wait=$gpuWait lock_taken=no argv: pi $($shown -join ' ')"
   exit 0
 }
 
 & pi @a
 $rc = $LASTEXITCODE
-Log "talk rc=$rc mode=$(if ($Message) { 'print' } else { 'interactive' }) gpu_wait=$gpuWait lock_taken=no"
+Log "talk rc=$rc mode=$(if ($Message) { 'print' } else { 'interactive' }) access=$(if ($Restricted) { 'restricted' } else { 'fullaccess' }) gpu_wait=$gpuWait lock_taken=no"
 exit $rc
