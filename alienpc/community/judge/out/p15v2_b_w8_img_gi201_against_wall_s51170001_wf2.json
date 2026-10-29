@@ -1,0 +1,62 @@
+{
+ "tag": "p15v2_b_w8_img_gi201_against_wall_s51170001_wf2",
+ "mp4": "C:\\AI\\community\\runs\\p15v2_b_w8_img_gi201_against_wall_s51170001_wf2\\p15v2_b_w8_img_gi201_against_wall_s51170001_wf2.mp4",
+ "start_image": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\input\\community\\hc\\GI201.jpg",
+ "n_frames": 349,
+ "sampled": 16,
+ "cuts_adaptive": 0,
+ "cuts_content": 0,
+ "dino": {
+  "start_min": 0.6988,
+  "start_mean": 0.7828,
+  "start_last": 0.7033,
+  "prev_min": 0.8835,
+  "prev_mean": 0.951,
+  "per_frame_start": [
+   0.9203,
+   0.915,
+   0.9126,
+   0.9016,
+   0.7708,
+   0.7781,
+   0.784,
+   0.7553,
+   0.745,
+   0.7652,
+   0.7266,
+   0.715,
+   0.714,
+   0.7198,
+   0.6988,
+   0.7033
+  ]
+ },
+ "clip": {
+  "start_min": 0.8923,
+  "start_mean": 0.9304,
+  "start_last": 0.9072,
+  "prev_min": 0.9357,
+  "prev_mean": 0.9754,
+  "per_frame_start": [
+   0.9757,
+   0.976,
+   0.9754,
+   0.9638,
+   0.9596,
+   0.9376,
+   0.9345,
+   0.8923,
+   0.905,
+   0.9051,
+   0.9089,
+   0.8962,
+   0.9189,
+   0.9145,
+   0.9158,
+   0.9072
+  ]
+ },
+ "transition": true,
+ "info": [],
+ "flags": []
+}

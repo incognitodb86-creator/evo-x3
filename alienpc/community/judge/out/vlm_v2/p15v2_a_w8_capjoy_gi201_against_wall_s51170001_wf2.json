@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_a_w8_capjoy_gi201_against_wall_s51170001_wf2",
+ "secs": 4.4,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical rough cave wall background, no scene swaps detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Characters retain same blonde elf woman and green orc appearance across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cuts."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Final frame shows elf woman leaning back against wall, not standing upright as TARGET POSE."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or final image."
+  }
+ },
+ "flags": [
+  "target_reached"
+ ]
+}

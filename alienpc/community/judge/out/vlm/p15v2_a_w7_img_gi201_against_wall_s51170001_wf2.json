@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_a_w7_img_gi201_against_wall_s51170001_wf2",
+ "secs": 4.3,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Cave rock textures and lighting match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde elf woman and green orc appear consistently with matching features."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows orc gripping her hip, not wrists above head as START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall, act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame."
+  }
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

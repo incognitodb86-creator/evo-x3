@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w2_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 4.6,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical cave rock background and lighting, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Characters match START IMAGE: elf woman and orc man with correct skin, hair, attire, and body types."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or repositioning."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows bodies in target pose, in contact, with act visibly happening as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals/hands visible in any frame or Image 3."
+  }
+ },
+ "flags": []
+}

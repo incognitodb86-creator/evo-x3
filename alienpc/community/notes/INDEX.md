@@ -1,6 +1,7 @@
 # notes INDEX (folder -> purpose). Max2, U4, 2026-10-29. Keep under 60 lines. Derrick 11:55 CT: two roots, clear jobs (community way).
 
 ## Where is... (one hop)
+- Clip judge (flags only, no KEEP): C:\AI\community\judge\README.md (prechecks.py = scene-cut + DINO/CLIP vs start image, CPU; vlm_judge.py = qwen3vl_judge per-check yes/no, json_schema)
 - Prompt rules: C:\AI\community\skills\h3-prompting\SKILL.md (detail in its references\)
 - Render settings + stock render path: C:\AI\community\skills\h3-hc-render\SKILL.md section 6 (default graph C:\AI\community\p7\graphs\default_b2_terrace_dom_q5guide_s51083007.api.json)
 - Start Forge: herdr agent "forge" (started at logon by C:\AI\director\scripts\pi_herdr_at_logon.ps1); loop by hand: C:\Users\derek\5slock\ralph-community\ralph.ps1 -Max 10

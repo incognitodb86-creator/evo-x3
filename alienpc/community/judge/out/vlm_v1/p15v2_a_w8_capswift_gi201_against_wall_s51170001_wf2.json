@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w8_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 3.6,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show consistent cave rock wall background matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical elf woman and orc man appear across all frames with unchanged features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and lighting without jump cuts."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows both characters in standing rear-entry pose against wall as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, missing limbs, or malformed genitals visible in any frame."
+  }
+ },
+ "flags": []
+}

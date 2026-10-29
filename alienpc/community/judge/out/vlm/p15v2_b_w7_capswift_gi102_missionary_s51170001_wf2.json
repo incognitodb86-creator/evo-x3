@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_b_w7_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 4.5,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent bedroom with white linens and muted wall across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and shirtless man appear throughout, matching descriptions in START IMAGE."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, while START IMAGE shows her in same pose but frame 1 is not the START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman on back, man on top in missionary position with visible pelvic contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

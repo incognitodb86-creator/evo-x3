@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w7_img_gi102_missionary_s51170001_wf2",
+ "secs": 3.7,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom with white linens and consistent lighting, no scene change detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and muscular man appear in all frames with identical features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or repositioning."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 clearly shows missionary position with visible rhythmic act and body alignment."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, missing limbs, or malformed anatomy observed across all frames."
+  }
+ },
+ "flags": []
+}

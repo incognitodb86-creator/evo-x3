@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w8_img_gi102_missionary_s51170001_wf2",
+ "secs": 4.3,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same rumpled white bed and beige headboard as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and dark-haired man appear in all frames, matching START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cut."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with bodies in contact, act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame."
+  }
+ },
+ "flags": []
+}

@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w2_capjoy_gi201_against_wall_s51170001_wf2",
+ "secs": 4.7,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show the same dark cave background with consistent lighting and stone textures as the START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Characters retain identical features: elf woman's blonde hair, pointed ears, and orc's green skin, muscular build, and black shorts."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing with no jump or composition change."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows elf woman standing upright against wall, orc thrusting into her, both bodies in contact and act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, malformed genitals, or blob-like shapes visible in any frame or Image 3."
+  }
+ },
+ "flags": []
+}
