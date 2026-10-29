@@ -44,7 +44,7 @@ command string. `run_graph_job.py` runs `comm.guard_ok` before any POST - never 
 
 1. `subject_definitions:` - one line each for `<Picture N>`, `<Subject N>`, and the place if it must stay.
 2. `summary:` - starts with the task-type tag (R6), then one short paragraph: who, where, what happens, and the
-   transition if the start image is not already in position.
+   entry transition when the still is not already in position (R16).
 3. `retention_analysis:` - one line per label: `fully_preserved` / `partially_preserved` / `attribute_transfer` /
    `weak_reference`, naming which picture keeps face-and-hair and which keeps body/skin/wardrobe (R11, R13).
 4. `detailed_description:` - the shot, beat by beat in time order (R8, R9), then the plain audio cues (R7).
@@ -63,7 +63,8 @@ should be deleted. Prompt very normal audio queues in prompt or at the end of th
 `detailed_description`, one or two sentences naming the real sounds in the order they happen - room tone, breath
 through the nose, skin-on-skin impact, wet friction, fabric rustle, footfall - each tied to the action that makes
 it. No "soundscape", no soundtrack, no music unless Derek asks for it by name. (Old runs and old prompts keep their
-`overall_soundscape:` sections; they are history. Nothing is re-rendered from them.)
+`overall_soundscape:` sections: those blocks are **deleted** for anything written fresh on this box, and nothing is
+re-rendered from them.)
 
 **R8 - Shot headers and time, no transition words.** Camera/lens/light sentences come before `[Shot 1]`; beats carry
 clock ranges that total the clip duration (`[Shot 1] 00:00.000 - 00:04.000 ...`, `[Shot 2] At 00:05.000, the camera
@@ -162,8 +163,9 @@ closing smile. *(Derek 2026-10-28, runs/terrace_dom_20261028_s51083002: "she is 
 **R22 - A bare "she slaps her" lands on the face**, not the thigh or hip, unless Derek names a target. Write the
 mechanics: full palm to cheek and jaw, head snaps sideways about 45 degrees, hair whips, mouth opens on a punched
 breath, cheek flushes red and the flush stays. The face stays readable and `fully_preserved`: features, jaw line,
-eyes, brows, fringe unchanged, head returns square to the lens, no mark, no swelling, no bruise, no tear. One slap
-unless he asks for more. *(Derek 2026-10-28.)*
+eyes, brows, fringe unchanged, head returns square to the lens, the struck cheek stays smooth and unbroken, her eyes
+stay clear and dry, her face stays unwounded. One
+slap unless he asks for more. *(Derek 2026-10-28.)*
 
 **R23 - Camera line is one sentence, in natural English inside `[Shot 1]`:** `The camera holds a static shot.` -
 locked-off tripod, fixed framing, fixed focal length (MiniMax VIDEO_PROMPT_WRITING_GUIDE section 4.3). "Static
@@ -186,8 +188,9 @@ waxy, plastic, airbrushed, oiled, glossy or glistening; realistic proportions wi
 mass with weight on waist, hips, thighs and breasts, natural elbow and knee hinging, fluid physically plausible
 motion; shallow depth of field and the lighting the still shows. No hedge words ("may brace" becomes the action).
 
-**R26 - No audio/music/score vocabulary in the paste** beyond R7's plain cues: no "soundscape", no soundtrack, no
-foley list, no music description, no onomatopoeia words, no dialogue lines (H3 does not do speech on this lane).
+**R26 - Sound-word vocabulary.** Use only the real-sound nouns R7 names, each one bound to the action producing it.
+This rule is vocabulary only - the shape and placement of audio is R7 and is not repeated here. Never in the paste:
+score and foley terminology, onomatopoeia words, dialogue lines (H3 does not do speech on this lane).
 
 **R27 - Contradiction phrases must be absent** (they cancelled the body reference in measurement):
 `body proportions` inside crop sentences, `are new and are not taken from`,
@@ -231,18 +234,16 @@ for a LoRA that is not loaded (R31).
 
 ## 6. Worked examples
 
-Four examples: two are the winning prompts archived in
-`C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (verbatim - that file carries exactly two
-few-shots, so the remaining two are composed from this box's measured rules and named runs). **In the two archived
-examples the `overall_soundscape:` and `non_diegetic_music:` blocks are superseded by R7**: on reuse, move those
-sound sentences, unedited in wording, to the end of `detailed_description` and delete the two blocks. The
-`p15_writer_skill.md` file itself is not edited - it is the writer model's system prompt.
-
-The two **archived** winning prompts - both few-shots from `p15_writer_skill.md`, verbatim - are in the
-supporting file `references/examples_archived.md` in this skill directory (they are ~10 KB each: read them when
-a full paste is needed, they are not loaded with the skill). That file also carries the audio-supersession
-note. Together the skill package carries **4 worked examples**, inside the plan's 3-6 range. The two below are
-short, current-shape examples (audio inline, no soundscape block) built from this box's measured rules.
+Four examples: the two **archived** winning prompts - both few-shots from
+`C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md`, reproduced character-for-character
+(LF-normalized) - live in the supporting file `references/examples_archived.md` in this skill directory (9,749 B for
+both, measured 2026-10-29: read it when a full paste is needed, it is not loaded with the skill; that file carries
+the audio-supersession note). **In those two archived examples the `overall_soundscape:` and `non_diegetic_music:`
+blocks are superseded by R7**: on reuse, move those sound sentences, unedited in wording, to the end of
+`detailed_description` and delete the two blocks. The `p15_writer_skill.md` file itself is not edited - it is the
+writer model's system prompt. p15 carries exactly two few-shots, so the two below are composed from this box's
+measured rules and named runs, in the current shape (audio inline, no soundscape block), which makes the skill
+package total **4 worked examples**, inside the plan's 3-6 range.
 
 ### Example 1 - R21 `not into it` + R22 slap to the face + R12 clothing clause
 
@@ -264,7 +265,8 @@ retention_analysis:
 <Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - terrace stone, railing, warm evening light from the right, framing.
 
 detailed_description:
-[Shot 1] The camera holds a static shot, waist up, three-quarter view matching <Picture 1>, warm light from the right. 00:00.000 - 00:03.000: <Subject 2>'s left forearm presses her wrists together against the stone above her head, his right hand at her waist; her shoulders square to the lens, chin level, jaw set, arms straight at her sides once his forearm drops, hips stiff, knees not opening, her hands never touching him, breath tight through her nose. 00:03.000 - 00:05.000: his palm strikes her cheek and jaw - a full palm slap, her head snaps sideways about 45 degrees, hair whips, her mouth opens on a punched breath, her cheek flushes red and the flush stays; her face stays readable, her head returns square to the lens, her expression stays flat, no mark, no swelling, no bruise, no tear. 00:05.000 - 00:08.000: her chest rises and falls fast under the open blouse, stomach tightening, skin flush spreading at her throat, while her face stays flat, eyes on the lens, arms at her sides, hands never touching him; she ends the clip facing the lens, flat, breathing hard. The black silk blouse is unbuttoned and off her shoulders and lies on the stone bench beside her for the rest of the clip. Room tone of the terrace at dusk, the flat strike of his palm on her cheek, her punched breath through her nose, the stone's faint wind and the silk sliding onto the bench.
+[Shot 1] The camera holds a static shot, waist up, three-quarter view matching <Picture 1>, warm light from the right. 00:00.000 - 00:03.000: <Subject 2>'s left forearm presses her wrists together against the stone above her head, his right hand at her waist; her shoulders square to the lens, chin level, jaw set, arms straight at her sides once his forearm drops, hips stiff, knees not opening, her hands never touching him, breath tight through her nose. 00:03.000 - 00:05.000: his palm strikes her cheek and jaw - a full palm slap, her head snaps sideways about 45 degrees, hair whips, her mouth opens on a punched breath, her cheek flushes red and the flush stays; her face stays readable, her head returns square to the lens, her
+expression stays flat, the struck cheek stays smooth and unbroken, her eyes stay clear and dry. 00:05.000 - 00:08.000: her chest rises and falls fast under the open blouse, stomach tightening, skin flush spreading at her throat, while her face stays flat, eyes on the lens, arms at her sides, hands never touching him; she ends the clip facing the lens, flat, breathing hard. The black silk blouse is unbuttoned and off her shoulders and lies on the stone bench beside her for the rest of the clip. Room tone of the terrace at dusk, the flat strike of his palm on her cheek, her punched breath through her nose, the stone's faint wind and the silk sliding onto the bench.
 ```
 
 ### Example 2 - R16 get-into-position from a standing Cond, then R17 PRIMARY MOTION
@@ -275,7 +277,10 @@ to the R16/R17/R19 rules; the failure it prevents is the documented melt / float
 ```text
 subject_definitions:
 <Picture 1> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 1> and the bedroom, lighting and framing of this shot; it also shows <Subject 2>.
-<Subject 1> is the exact same woman shown in <Picture 1> ... a fictional adult aged 27 by canon declaration, in the navy camisole and matching shorts shown in <Picture 1>, standing with her back to the lens at the bedside.
+<Subject 1> is the exact same woman shown in <Picture 1> of the reference pictures and in the first 5 seconds of
+this clip, preserving her face, hairstyle, body, skin and figure with complete fidelity; a fictional adult aged 27 by
+canon declaration, in the navy camisole and matching shorts shown in <Picture 1>, standing with her back to the lens
+at the bedside.
 <Subject 2> is the adult man in <Picture 1>, a fictional adult aged 30 by canon declaration, shirtless, in grey sweatpants, standing behind her.
 
 summary:
@@ -297,7 +302,8 @@ detailed_description:
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
 - `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts; `alienpc-ltx-i2v-prompting` is the LTX baseline
   lane (its own POS rules) and is not a Max prompt source.
-- The writer model's system prompt `notes\p15_writer_skill.md` (both notes roots point at the same file) keeps its
+- The writer model's system prompt `C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (the only copy
+  on this box - `C:\AI\community\notes\` has none) keeps its
   own rubric and few-shots: it is a model prompt, not a rule file, so it is not merged and not edited here. Its
   `overall_soundscape:` instruction is superseded by R7 for anything written fresh on this box.
 

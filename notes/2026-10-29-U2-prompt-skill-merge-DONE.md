@@ -6,7 +6,9 @@ Brief: Max 09:56 CT on Derrick's go ("Go, brief Forge on step 2"). Plan unit:
 
 ## Verdict
 
-`C:/AI/community/notes/u2_check.py` -> **exit 0, ALL CLAUSES PASS (30/30)**, read-only.
+`C:/AI/community/notes/u2_check.py` -> **exit 0, ALL CLAUSES PASS (46/46) at the end of the FIX pass below**,
+read-only. (v1 reported 31/31 at 10:26 CT; Max's independent verify at 10:29 found real defects that v1 could not
+see, so v1's tick was premature - the tick line in `fix_plan.md` now carries the fix-pass evidence.)
 Run: `C:/AI/director/.venv/Scripts/python.exe C:/AI/community/notes/u2_check.py`
 
 The plan's U2 check is the literal instrument: **each rule string appears in exactly one skill.** The check parses
@@ -28,6 +30,49 @@ searches the first 90 normalised chars of every rule across **all 10 SKILL.md fi
 - `u2_writes_are_the_allowed_set` - the files written under `C:\AI\community` since the backups are exactly the
   home skill, its backup, the HF save, and my `notes/u2_*.py` scripts (+ a `.pytest_cache` from the guard run).
 
+## FIX pass (Max verify 10:29 CT, `notes\2026-10-29-max-U2-verify-FAIL.md`) - 10:3x-10:5x CT
+
+Max's verdict: "FAIL (close)" - backups, PROMPT.md L16, examples and the two short pointers PASS; the director still
+restated prompt rules and still sent writers to a second paste template that uses `overall_soundscape`; R26 overlapped
+R7; Example 2 shortened the R11 clause; R22/Example 1 used negative stacks against R24; the mid snapshot sat in the
+skill folder; and my check had been loosened. Every item is closed:
+
+| Max item | fix | clause that proves it |
+|---|---|---|
+| 1 director L122-128 | the "static hold vs full reveal" section is now one line: "Static hold / "reveal" / camera-fit moves / frame-0 behaviour / `ref_image_size`: **R6, R15, R23** in ..."; the restated sentences are gone | `no_rule_phrases_paraphrased_in_alienpc-hardcore-i2v-director`, `max_named_key_phrases_absent_from_pointers` ("does not pin frame 0", "zoom out" now appear in no pointer) |
+| 1 director L56, L95-96 | the pointer to `references/max-i2v-prompt-improve-v1.md` is marked **HISTORY, not a live guide** in both places, and the pack itself got a HISTORY header (with `.bak-20261029-u2fix`, sha8 612ec3b3) naming R7 and the HF #77 ruling; "read before writing a Max I2V paste" is gone | `every_skill_file_naming_audio_blocks_marks_it_superseded`, `no_rule_phrases_in_pointer_supporting_files` (23 archived rule phrases live there, allowed only because the file declares itself history) |
+| 1 director L63 | "only if loaded" -> "**R31** decides (a trigger word needs the LoRA in the graph)"; the Klein-side LoRA sentence was kept (I re-added it after one edit trimmed it) | `max_named_key_phrases_absent_from_pointers` ("only if loaded") |
+| 1 "another lane never enters Max TE" in one place | kept in the director (its lane), `ref2va-prompt` now points to it | `max_te_lane_rule_in_one_place` = exactly `alienpc-hardcore-i2v-director/SKILL.md` |
+| 2 ref2va L21-25, L27 | node-mixing -> (R6); "the still wins" -> (R28); the TE duplicate -> a pointer; gate item 3 -> "Run the **R30** diff gate" | `no_rule_phrases_paraphrased_in_ref2va-prompt` = 0 of 2,304 rule shingles |
+| 2 chain L62-63, L68, L78 | same-Cond and seed text -> (R29); the open-state mechanism -> "R16's open-state clause says what counts as a reference"; audit keeps only cites | `no_rule_phrases_paraphrased_in_h3-ref2va-prompt-chain` = 0 ("unique seed per cell" and the R29 wording are gone) |
+| 3 h3 R26 vs R7 | R26 is now **vocabulary only** (number kept so `R<n>` citations stay stable); the soundscape/no-music repeat is R7's alone | `home_rules_do_not_share_phrases` = no pair of home rules shares a 5-word phrase |
+| 3 Example 2 R11 clause | the full verbatim clause is in Example 2 (no "...") | `example2_carries_the_full_r11_clause` (scanned with whitespace normalised, so hard wrapping cannot hide a shortening) |
+| 3 R22 / Example 1 negatives | "no mark, no swelling, no bruise, no tear" -> "the struck cheek stays smooth and unbroken, her eyes stay clear and dry, her face stays unwounded" | `no_negatives_in_r22_or_examples` |
+| 3 "~10 KB each" | the home now states the measured **9,749 B for both** (the file is 9.7 KB total, not each) | `home_examples_sourced_as_planned` asserts the measured string is present |
+| 4 mid snapshot | `SKILL.md.mid-20261029-u2-examples` (36,481 B) moved to `C:\AI\community\notes\`; the skill folder holds SKILL.md + references only | `mid_snapshot_moved_out_of_skill_folder` |
+| 5 the check itself | see below | 46 clauses, exit 0 |
+
+Also fixed while in there: R5's summary line no longer restates R16's opening words (found by the new internal
+duplication clause), the director's content floor points at **R2** instead of repeating the adults-only wording (its
+canon-file gate stays), and the home's claim "both notes roots point at the same file" was **false** - p15 exists only
+in `C:\Users\derek\5slock\ralph-community\notes\`; the home now says that (`home_states_p15_single_copy_location`).
+
+### What I changed in the instrument (Max item 5), and why v1 missed this
+
+1. **A phrase check, not a prefix check.** v1 compared the first 90 normalised characters of each rule - it can only
+   find copies. v2 takes every 5-word shingle of every home rule (2,304 of them), masks paths, filenames, skill names
+   and `R<n>` citations (citing a rule is a pointer, not a restatement), drops shingles made only of function words,
+   and requires **zero** of them in any pointer SKILL.md. That is what caught the paraphrases in Max's check 2.
+2. **Key phrases**: the four phrases Max named are asserted absent from every pointer skill.
+3. **Internal duplication** inside the home is a FAIL (the R26/R7 overlap).
+4. **References scan**: every file under any skill dir naming the two audio blocks must mark them superseded/deleted
+   by R7 - this is the clause that would have caught the director pack on day one.
+5. **Audio pass-list**: "block", "history", "nothing" removed; the test works on **sentences** (v1 tested single
+   lines, which fails on hard-wrapped prose).
+6. **Restored scope clause** v1 dropped: nothing under `scripts/`, `p7/`, `p3/`, `runs/`, `specs/` may be written by
+   this unit (pytest caches excluded). Plus the 5 u2fix backups verified by sha prefix, the mid-snapshot location, and
+   the pointer-size guards (no pointer may grow more than 400 B in the fix pass, none may return to its pre-U2 size).
+
 ## What changed (5 files, all backed up first)
 
 | file | before | after | change |
@@ -38,9 +83,19 @@ searches the first 90 normalised chars of every rule across **all 10 SKILL.md fi
 | `C:\Users\derek\.pi\agent\skills\alienpc-hardcore-i2v-director\SKILL.md` | 19,545 B | 19,112 B | its 5 prompt-rule sections (Max POS craft, H3 prompt shape, frame-one identity, Static Shot vocab, static hold vs reveal) + the POS/one-act/Cond!=act bullets + the director-card paste line -> pointers; still->intent, fair loop, watch words, beta7 argv, ports, KEEP policy all kept |
 | `C:\Users\derek\5slock\ralph-community\PROMPT.md` L16 | 5,802 B | 6,122 B | dead `p15_writer_batch.py` / `p15_driver.ps1` replaced by real scripts; prompt-rule and render-dial pointers named by path |
 
-Backups: `SKILL.md.bak-20261029-u2` x4 + `PROMPT.md.bak-20261029-u2-l16`; the intermediate 36 KB SKILL.md is snapshotted as
-`SKILL.md.mid-20261029-u2-examples`. The `.pi` skills tree is **not a git repo**, so the `.bak` is the only
-rollback there; `C:\AI\community` and `ralph-community` are repos, so those two files also have git history.
+**After the FIX pass (10:5x CT):** home SKILL.md **28,753 B** (28,383 before the fix: +370 for the R26 rewrite,
+the positives wording and the corrected example/source notes); director SKILL.md **19,269 B** (pre-U2 19,545 -> -276;
+the fix pass removed the restated rule sentences and added cite + history lines); ref2va-prompt **3,029 B**
+(8,635 -> -5,606); h3-ref2va-prompt-chain **3,029 B** (3,533 -> -504); the director's history pack +596 B (its
+HISTORY header). Net: **no rule text is restated anywhere** - 0 of 2,304 home-rule 5-word shingles appear in any
+pointer skill, and none of the four key phrases Max named appears in any pointer.
+
+Backups: `SKILL.md.bak-20261029-u2` x4 + `PROMPT.md.bak-20261029-u2-l16` (the U2 edit) and `.bak-20261029-u2fix`
+for the five files the FIX pass touched (sha8 5a293990 / 47e69734 / 612ec3b3 / 3e534e78 / 54f8c402). The
+intermediate 36 KB SKILL.md snapshot is kept **out of the skill folder**, in
+`C:\AI\community\notes\SKILL.md.mid-20261029-u2-examples` (Max item 4). The `.pi` skills tree is **not a git repo**,
+so the `.bak` is the only rollback there; `C:\AI\community` and `ralph-community` are repos, so those two files also
+have git history.
 
 ### Context cost (measured, and what I did about it)
 
@@ -117,14 +172,19 @@ would trade one-file reading for a smaller load. Flagged for Max, not done unask
 
 ## Files written by this unit
 
-`C:\AI\community\skills\h3-prompting\SKILL.md` (+ `.bak-20261029-u2`, `.mid-20261029-u2-examples`) and its
+`C:\AI\community\skills\h3-prompting\SKILL.md` (+ `.bak-20261029-u2`, `.bak-20261029-u2fix`) and its
 supporting file `references\examples_archived.md`,
-the 3 `.pi` skills (+ `.bak-20261029-u2` each), `ralph-community\PROMPT.md` L16 (+ `.bak-20261029-u2-l16`),
+the 3 `.pi` skills (+ `.bak-20261029-u2` and `.bak-20261029-u2fix` each) and
+`alienpc-hardcore-i2v-director\references\max-i2v-prompt-improve-v1.md` (+ `.bak-20261029-u2fix`),
+`ralph-community\PROMPT.md` L16 (+ `.bak-20261029-u2-l16`),
 `C:\AI\community\notes\web\tenstrip_hf77_audio_20261029.md`,
 `C:\AI\community\notes\u2_start_record.py`, `u2_director_pointerize.py`, `u2_director_fixup.py`,
 `u2_audio_lines_probe.py`, `u2_rules_probe.py`, `u2_examples_move.py`, `u2_examples_normalize.py`,
-`u2_check.py`, `u2_closeout_record.py`, this note,
-`fix_plan.md` item 1 ticked (+ `fix_plan.md.bak-20261029-u2-tick`), `notes\actions.log`, `notes\progress.md`.
+`u2_check.py` (v1, then v2 after the verify), `u2_closeout_record.py`, `u2fix_start_record.py`,
+`u2fix_closeout_record.py`, this note,
+`C:\AI\community\notes\SKILL.md.mid-20261029-u2-examples` (moved out of the skill folder),
+`fix_plan.md` item 1 (tick line rewritten with the FIX-pass evidence; + `fix_plan.md.bak-20261029-u2-tick`),
+`notes\actions.log`, `notes\progress.md`.
 
 ## Stop
 
