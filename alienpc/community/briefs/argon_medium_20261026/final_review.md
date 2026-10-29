@@ -87,7 +87,7 @@ Source rule: official page or official repo only; if none was read, the column s
 
 ### Decisions Derrick still owes (from the brief; not decided here)
 1. **Sampler:** Euler (current `comm.py` default, your 6:48 PM Oct 25 pick) or `res_multistep` (official H3 template default; still used by the 15 s builders) — M9.
-2. **GI063 render go** (needs_derrick.md row 34a; row 21 consent question from Oct 25). Still on hold.
+2. **GI063 render go** (needs_derrick.md row 34a; row 21 consent question from Oct 25). [RELEASED: Derrick 2026-10-27 9:09 AM CT — wrongly flagged by wrong model; youth guard kept on GI063].
 3. **Forge paused or running** after this run (now paused: `\ForgeRalphLoop` Disabled).
 4. **pi-mobile:** who owns port 7878 (hub task vs pi extension), QR pairing, and a test from another tailnet device (M5).
 
