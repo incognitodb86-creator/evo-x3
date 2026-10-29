@@ -1,12 +1,12 @@
 ---
 name: h3-prompting
-description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box - output only the prompt, adults only (18+, fictional, minors = hard stop), the five prompt sections with plain audio cues at the end of the main prompt (no overall_soundscape block, TenStrip HF #77), the verbatim reference clauses that keep identity, get-into-position, PRIMARY MOTION and contact geometry, the response dial and slap-to-face, garment end states, <Video 1> continuation, positives-only plain wording, LoRA trigger hygiene, the detail checklist, the contradiction phrases to keep out and 4 worked examples. ref2va-prompt, h3-ref2va-prompt-chain and the director's prompt sections are pointers to this file. Use when writing, reviewing or auditing any H3 prompt text: notes/hc_*.txt, specs/prompt_v2, a run's prompt file, a MiniMaxH3ReferenceToVideo paste, a multi-cell chain, an I2V POS, or a Continuum sequence_prompt.
+description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box - output only the prompt, adults only (18+, fictional, minors = hard stop), the five prompt sections with plain audio cues at the end of the main prompt (no overall_soundscape block, TenStrip HF #77), the verbatim reference clauses that keep identity, get-into-position, PRIMARY MOTION and contact geometry, the response dial and slap-to-face, garment end states, <Video 1> continuation, positives-only plain wording, LoRA trigger hygiene, the detail checklist, the contradiction phrases to keep out and 4 worked examples. REF2VA single-clip and multi-cell chain lane facts are in references/ref2va-lane.md and references/ref2va-chain-lane.md; the director's prompt sections point to this file. Use when writing, reviewing or auditing any H3 prompt text: notes/hc_*.txt, specs/prompt_v2, a run's prompt file, a MiniMaxH3ReferenceToVideo paste, a multi-cell chain, an I2V POS, or a Continuum sequence_prompt.
 ---
 
 # H3 prompting - the single home (U2, 2026-10-29)
 
-Every MiniMax-H3 / 10Eros-Max prompt rule on this box lives in this file and only here. `ref2va-prompt`,
-`h3-ref2va-prompt-chain` and the `alienpc-hardcore-i2v-director` prompt sections point here and must not restate a
+Every MiniMax-H3 / 10Eros-Max prompt rule on this box lives in this file and only here. The REF2VA lane files in references\ (ref2va-lane.md, ref2va-chain-lane.md),
+and the `alienpc-hardcore-i2v-director` prompt sections point here and must not restate a
 rule; a rule duplicated in two skills is a defect (plan `C:\AI\community\notes\2026-10-29-forge-cleanup-plan.md`,
 unit U2, check "each rule string appears in exactly one skill"). Rule numbers are stable: cite them as `R11` in a
 review, a diff gate or a commit message, never the sentence.
@@ -120,102 +120,11 @@ cell after a watched mid-clip identity break, never as a silent default.
 
 ## 3. Motion, contact, anatomy
 
-**R16 - Get-into-position when the start image is not in position for the act.** Never jump straight to
-thrust/pump/bounce (that is where melt, floating join and orifice teleport come from). Write an ordered beat inside
-`[Shot 1]` before the act - STAND, TURN, KNEEL, BRACE, SETTLE - with clock ranges, then the act, in one continuous
-shot. Soften "preserve camera angle / framing" when the pose must change, and keep face/identity, wardrobe, light
-`fully_preserved`. If the transition is too long for one clip, unlock the still first
-(`alienpc-stills-pose-edit-prompting`), then paste. **Open state:** a cell whose only reference is `<Picture 1>` is
-independent of the cell before it - do not write "opens mid-[previous beat]" unless that pose is in the still, or
-you pass Multiframe / the previous clip's last frame, or the clip is a R10 continuation. Default: the first ~2
-seconds establish from `<Picture 1>` into the beat, then the timed phases; get off a standing pose fast when the
-beat needs pin or penetration.
-
-**R17 - Name ONE PRIMARY MOTION with tempo and amplitude**, e.g. `PRIMARY MOTION - continuous deep frontal thrust,
-about one full cycle every half second, full depth travel, hips staying in contact`, and keep that tempo for the
-timed phases. Contact beats dominate the clock time; compress approach theatre. Keep the motion alive on the final
-frame - end mid-energy, never a freeze tableau.
-
-**R18 - Body inventory is explicit:** exactly one adult man and one adult woman (or the number the still shows), two
-arms and two legs each, five fingers when hands are visible, one continuous torso each, breast size and body mass
-locked to `<Picture 1>`. Use literal anatomical words (penis, shaft, glans, vagina, vulva, breasts, buttocks, hips,
-thighs, groin, pelvis), not euphemism.
-
-**R19 - State the contact geometry, then lock it.** Say the join: hips stacked / flush / named orifice, and the
-supports (knees, hands, mattress, wall). For a vaginal cell: fully sheathed, hips flush (no tip-only, no miss, no
-float), measurable in-out depth each stroke. For an oral cell: shaft past the lips with deep oral travel on the deep
-stroke, not tip-lick-only. Keep the contact type constant per cell, and write the pull-out and reseat beat when the
-contact type changes. No wrong-orifice teleport. Standing tip-against-fabric, floating join and grind-without-entry
-are the usual FAILs even when the prose says "spear".
-
-**R20 - Motion verbs, not mush:** hips rock, deep stroke, thrust, bounce with impact jiggle, pelvis grinds, ribs
-move with breath. Phased contact beats ("lips seal mid-shaft, pull back until the tip clears, pause, re-seal") beat
-"passionate oral". Anti-melt positives: readable seam, wet contact, an air gap on peel cells.
-
-**R21 - The response dial is Derek's to name - never soften it.** In dominance/rough scenes he names the receiver's
-response, `eager` **or** `not into it`; write exactly the one he names. `not into it` = flat unsmiling face, eyes on
-the lens, chin level, jaw set, shoulders square, arms hanging at her sides, hips stiff, knees not opening, hands
-never touching the dominant, breath tight through her nose; her body may answer mechanically (flush, punched breath,
-stomach tightening) while her face stays flat, and she ends the clip the same way. State consent once in `summary`
-(her word, she keeps it). Never convert it into enjoyment, moaning, arching, leaning in, gripping the dominant or a
-closing smile. *(Derek 2026-10-28, runs/terrace_dom_20261028_s51083002: "she is not into it".)*
-
-**R22 - A bare "she slaps her" lands on the face**, not the thigh or hip, unless Derek names a target. Write the
-mechanics: full palm to cheek and jaw, head snaps sideways about 45 degrees, hair whips, mouth opens on a punched
-breath, cheek flushes red and the flush stays. The face stays readable and `fully_preserved`: features, jaw line,
-eyes, brows, fringe unchanged, head returns square to the lens, the struck cheek stays smooth and unbroken, her eyes
-stay clear and dry, her face stays unwounded. One
-slap unless he asks for more. *(Derek 2026-10-28.)*
-
-**R23 - Camera line is one sentence, in natural English inside `[Shot 1]`:** `The camera holds a static shot.` -
-locked-off tripod, fixed framing, fixed focal length (MiniMax VIDEO_PROMPT_WRITING_GUIDE section 4.3). "Static
-documentary framing" / "documentary porn framing" is not that vocab and still pushes in. No `[Static shot]` token
-syntax. A static hold cannot also reveal a person who starts outside the crop - do not write "reveal"; the trained
-way to fit a new full body is a zoom out, and in a static shot the entering person is cut by the existing frame
-edge.
+Moved verbatim to [references/motion-contact-anatomy.md](references/motion-contact-anatomy.md) (rules R10, R16, R17, R18, R19, R20, R21, R22, R23). Read it before writing motion, contact or body lines.
 
 ## 4. Wording
 
-**R24 - Positives only.** Describe what is seen and heard. No `no X / never X / without X / not / none` stacks in
-the prompt body, and a ban list is never the plan: the stock graph has no CFG/negative path (BasicGuider cfg 1),
-`H3ContinuumSamplerV39` has no negative key at all, so naming "no X" can add X. Locks are retention markers, not
-negatives. (A negative prompt needs `CFGGuider` + `NAGuidance`, about 2x per step - a separate, labelled arm.)
-
-**R25 - Plain concrete wording, no quality buzzwords and no style mash.** Write visible, mechanical, audible detail
-in time order; that is what "more descriptive" means. English prose, not JSON, not a POS template, not a thesaurus
-of adjectives; skin is matte with visible pores and fine vellus hair and only a soft natural sheen where damp, never
-waxy, plastic, airbrushed, oiled, glossy or glistening; realistic proportions with joint definition, real adult body
-mass with weight on waist, hips, thighs and breasts, natural elbow and knee hinging, fluid physically plausible
-motion; shallow depth of field and the lighting the still shows. No hedge words ("may brace" becomes the action).
-
-**R26 - Sound-word vocabulary.** Use only the real-sound nouns R7 names, each one bound to the action producing it.
-This rule is vocabulary only - the shape and placement of audio is R7 and is not repeated here. Never in the paste:
-score and foley terminology, onomatopoeia words, dialogue lines (H3 does not do speech on this lane).
-
-**R27 - Contradiction phrases must be absent** (they cancelled the body reference in measurement):
-`body proportions` inside crop sentences, `are new and are not taken from`,
-`used for the faces and the hair of the two women only`, `These two crops are the only visual references`,
-`carries no reference pictures at all`. Assert them absent in the builder gate, and prove the gate fires by
-restoring the old wording in a clone (self-destruct probe).
-
-**R28 - Labels keep one meaning** in every section; tags are 1-based by connection order; each subject, garment and
-place is described in full once (in `subject_definitions` and at first appearance) and referred to by label after
-that. Never describe who someone looks like. Never invent wardrobe, a location or a partner that is not in the
-reference - the still Derek attached or named wins.
-
-**R29 - One pose, one finish, one wardrobe path per cell**: no `or` / pick-one forks, no multi-act montage in one
-clip, no hedged alternatives. In a chain, subject definitions are identical on every cell, the same Cond still is
-used unless Derek supplies new refs, seeds are unique per cell, and the summary says cell N of M and what that cell
-must not do.
-
-**R30 - Write to a file, then gate.** Before queueing: re-check every section above, the R10 line on continued
-clips, the response dial Derek named (R21), the absence list (R27), the adults-only tests, and
-**diff against the baseline cell - only the one axis of this cell may change** (one-variable A/B). Keep section
-names and line counts identical to the baseline being compared, so a side-by-side changes references and wording,
-never structure.
-
-**R31 - LoRA trigger words only when that LoRA is loaded**, at weight 0.2-0.6 in the paste, and never a general
-NSFW LoRA (Mystic and friends) on beta 7. A trigger for a LoRA that is not in the graph is a defect, not a hint.
+Moved verbatim to [references/wording.md](references/wording.md) (rules R7, R10, R21, R24, R25, R26, R27, R28, R29, R30, R31). Read it before final wording.
 
 ## 5. Detail checklist (from `p15_writer_skill.md`'s self-refine rubric, audio line updated for R7)
 
@@ -234,69 +143,12 @@ for a LoRA that is not loaded (R31).
 
 ## 6. Worked examples
 
-Four examples: the two **archived** winning prompts - both few-shots from
-`C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md`, reproduced character-for-character
-(LF-normalized) - live in the supporting file `references/examples_archived.md` in this skill directory (9,749 B for
-both, measured 2026-10-29: read it when a full paste is needed, it is not loaded with the skill; that file carries
-the audio-supersession note). **In those two archived examples the `overall_soundscape:` and `non_diegetic_music:`
-blocks are superseded by R7**: on reuse, move those sound sentences, unedited in wording, to the end of
-`detailed_description` and delete the two blocks. The `p15_writer_skill.md` file itself is not edited - it is the
-writer model's system prompt. p15 carries exactly two few-shots, so the two below are composed from this box's
-measured rules and named runs, in the current shape (audio inline, no soundscape block), which makes the skill
-package total **4 worked examples**, inside the plan's 3-6 range.
-
-### Example 1 - R21 `not into it` + R22 slap to the face + R12 clothing clause
-
-(short shape for a 124-243 f dominance cell; the pose came from the Cond, so no get-into-position beat is needed -
-that is why R16 asks "is the still already in position?" first. Composed from Derek's 2026-10-28 corrections on
-`runs/terrace_dom_20261028_s51083002`.)
-
-```text
-subject_definitions:
-<Picture 1> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 1>, and the stone terrace, evening light and framing of this shot.
-<Subject 1> is the exact same woman shown in <Picture 1> of the reference pictures and in the first 5 seconds of this clip, preserving her face, hairstyle, body, skin and figure with complete fidelity; a fictional adult aged 26 by canon declaration, wearing the black silk blouse, grey trousers and brown belt shown in <Picture 1>.
-<Subject 2> is the adult man in <Picture 1>, a fictional adult aged 31 by canon declaration, short dark hair, bare forearms, wearing the dark trousers shown in <Picture 1>.
-
-summary:
-[reference generation] On the stone terrace the man pins the woman's wrists against the wall and slaps her face once, hard; she consents to the scene and takes it flatly, facing the lens.
-
-retention_analysis:
-<Subject 1> (appears in [Shot 1]): fully_preserved - face, jaw line, eyes, brows and fringe, and the black silk blouse and grey trousers, which are an action in the story: the blouse is unbuttoned during the shot and lies on the stone bench for the rest of the clip.
-<Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - terrace stone, railing, warm evening light from the right, framing.
-
-detailed_description:
-[Shot 1] The camera holds a static shot, waist up, three-quarter view matching <Picture 1>, warm light from the right. 00:00.000 - 00:03.000: <Subject 2>'s left forearm presses her wrists together against the stone above her head, his right hand at her waist; her shoulders square to the lens, chin level, jaw set, arms straight at her sides once his forearm drops, hips stiff, knees not opening, her hands never touching him, breath tight through her nose. 00:03.000 - 00:05.000: his palm strikes her cheek and jaw - a full palm slap, her head snaps sideways about 45 degrees, hair whips, her mouth opens on a punched breath, her cheek flushes red and the flush stays; her face stays readable, her head returns square to the lens, her
-expression stays flat, the struck cheek stays smooth and unbroken, her eyes stay clear and dry. 00:05.000 - 00:08.000: her chest rises and falls fast under the open blouse, stomach tightening, skin flush spreading at her throat, while her face stays flat, eyes on the lens, arms at her sides, hands never touching him; she ends the clip facing the lens, flat, breathing hard. The black silk blouse is unbuttoned and off her shoulders and lies on the stone bench beside her for the rest of the clip. Room tone of the terrace at dusk, the flat strike of his palm on her cheek, her punched breath through her nose, the stone's faint wind and the silk sliding onto the bench.
-```
-
-### Example 2 - R16 get-into-position from a standing Cond, then R17 PRIMARY MOTION
-
-(a standing Cond with the act not yet in position: the ordered beats come first, in the same `[Shot 1]`. Composed
-to the R16/R17/R19 rules; the failure it prevents is the documented melt / floating join / thrust-from-standing.)
-
-```text
-subject_definitions:
-<Picture 1> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 1> and the bedroom, lighting and framing of this shot; it also shows <Subject 2>.
-<Subject 1> is the exact same woman shown in <Picture 1> of the reference pictures and in the first 5 seconds of
-this clip, preserving her face, hairstyle, body, skin and figure with complete fidelity; a fictional adult aged 27 by
-canon declaration, in the navy camisole and matching shorts shown in <Picture 1>, standing with her back to the lens
-at the bedside.
-<Subject 2> is the adult man in <Picture 1>, a fictional adult aged 30 by canon declaration, shirtless, in grey sweatpants, standing behind her.
-
-summary:
-[reference generation] The woman turns and lowers herself onto the bed and the man joins her from behind into a rear-linked rhythm, in one continuous shot; the shorts are drawn aside during the shot.
-
-retention_analysis:
-<Subject 1> (appears in [Shot 1]): fully_preserved - face and hair, body, the navy camisole; the shorts are an action in the story and stay drawn aside at her thighs for the rest of the clip.
-<Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - bedroom, linens, warm front-left light, framing.
-
-detailed_description:
-[Shot 1] The camera holds a static shot, full body, matching <Picture 1>. 00:00.000 - 00:02.000: <Subject 1> turns on her heels toward the bed, plants both palms on the mattress, opens her feet wider and bends her knees, lowering her hips; <Subject 2> steps in close behind her, sets one knee onto the mattress and presses his hips flush against her buttocks. 00:02.000 - 00:04.000: his hand guides her hair aside and braces between her shoulders; her elbows bend and her forearms settle on the linens, palms flat, five fingers spread, her lower back arches. 00:04.000 - 00:08.000: PRIMARY MOTION - continuous dense rear thrust, about one full cycle every half second, full depth travel, his pelvis staying in contact with her buttocks; her head rocks forward on each deep stroke, her breasts swing under the camisole, the navy shorts stay drawn aside at her thighs and stay visible, her palms press and release on the linens. 00:08.000 - 00:10.000: the rhythm keeps its tempo to the last frame, her breath breaking into short audible exhales, her hips answering stroke for stroke. Warm room tone, the mattress springs under his knee, skin slapping against skin each stroke, wet friction at the join, her short exhales, his low breath through his nose.
-```
+Moved verbatim to [references/worked-examples.md](references/worked-examples.md).
 
 ## 7. Pointers (who defers to this file)
 
-- `ref2va-prompt`, `h3-ref2va-prompt-chain` (`.pi/agent/skills`) and `alienpc-hardcore-i2v-director` "Max POS
+- REF2VA lane facts: [references/ref2va-lane.md](references/ref2va-lane.md) (single clip) and [references/ref2va-chain-lane.md](references/ref2va-chain-lane.md) (multi-cell chain), folded in from the retired `ref2va-prompt` and `h3-ref2va-prompt-chain` skills.
+- `alienpc-hardcore-i2v-director` "Max POS
   craft / H3 prompt shape / Static Shot / static hold vs reveal / frame-one identity" - all point here; they keep
   only their lane (node wiring, chain scheduling, still→intent match, watch/triage, queue).
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
