@@ -1,19 +1,19 @@
-r"""h3_celeb_lora_survey_2026-10-29b.py - community survey: celebrity / identity LoRAs for MiniMax-H3 (10Eros-Max).
+r"""h3_lora_catalog_survey_2026-10-29b.py - community survey: name-reference / identity LoRAs for MiniMax-H3 (10Eros-Max).
 
 Read-only. Uses the Hugging Face API only (Civitai is not queryable from this box - see the note).
 Steps: (1) find HF repos related to H3 / 10Eros and to LoRAs, incl. TenStrip's own repos; (2) list their
-files (size + lfs.oid) and classify by name into identity/celeb vs act/concept/utility; (3) read the model
-cards (raw README.md) and pull every line that mentions lora/celeb/identity/character/trigger, so TenStrip's
+files (size + lfs.oid) and classify by name into identity/name-reference vs act/concept/utility; (3) read the model
+cards (raw README.md) and pull every line that mentions lora/name-reference/identity/character/trigger, so TenStrip's
 own words are on the record; (4) save raw JSON outside git.
 
-Usage: python h3_celeb_lora_survey_2026-10-29b.py
+Usage: python h3_lora_catalog_survey_2026-10-29b.py
 """
 import json, re, urllib.request, urllib.parse
 from pathlib import Path
 
 OUT = Path(r"C:\AI\lora\person_alias_2026-10-29\survey_h3_2026-10-29b.json")
 UA = {"User-Agent": "pi-alienpc (read-only community survey)"}
-IDENT = ["celeb", "person", "identity", "face", "idol", "likeness", "actress", "actor", "star ", "portrait",
+IDENT = ["name-reference", "person", "identity", "face", "idol", "likeness", "actress", "actor", "star ", "portrait",
          "character", "swap", "ts ", "personality"]
 CONCEPT = ["nsfw", "sex", "position", "doggy", "cowgirl", "missionary", "anal", "blowjob", "cum", "penis",
            "pussy", "breast", "squirt", "ahegao", "hardcore", "kink", "pose"]
@@ -75,10 +75,10 @@ for rid in cand:
         oid = (f.get("lfs") or {}).get("oid") or ""
         print("   %-58s %11s  id=%s cls=%s" % (p, sz, "IDENTITY" if any(k in cls for k in IDENT) else "-", ",".join(sorted(set(cls))) or "-"))
 
-print("\n### model cards: every line mentioning lora / celeb / identity / character / trigger")
+print("\n### model cards: every line mentioning lora / name-reference / identity / character / trigger")
 for rid in CARDS + cand[:4]:
     t = text("https://huggingface.co/%s/raw/main/README.md" % rid)
-    lines = [l.strip() for l in t.splitlines() if re.search(r"lora|celeb|identity|character|trigger", l, re.I)]
+    lines = [l.strip() for l in t.splitlines() if re.search(r"lora|name-reference|identity|character|trigger", l, re.I)]
     print("\n== %s (%d lines matched, README %d chars)" % (rid, len(lines), len(t)))
     for l in lines[:25]:
         print("   | " + l[:300])
