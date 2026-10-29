@@ -1,4 +1,4 @@
-# 2026-10-29 item 4 - B2's render setup is the default for new render runs (DONE except one blocked pointer)
+# 2026-10-29 item 4 - B2's render setup is the default for new render runs (DONE, closed 08:24 CT)
 
 Derrick 2026-10-29 6:59 AM CT: "Ok let's keep the b2 setup and make it default". fix_plan MAX item 4.
 No render, no GPU job, no ComfyUI/llama-swap call this pass. CPU only.
@@ -36,12 +36,15 @@ audio decoded from the pass-1 latent, `c0.length 243`, `mkvid.fps 24`. Start ima
 The old default is not deleted: `p7/graphs/stock_base_tenstrip10.api.json` (beta6 int8, 124 f, 1344x768,
 single-pass, shift 10/3, 10 steps - measured by the probe) stays on disk for reproducing those ids.
 
-## Blocked: the live pointer in PROMPT.md (needs Max / the operator)
-`C:/Users/derek/5slock/ralph-community/PROMPT.md` is a protected path for this agent
+## The live pointer in PROMPT.md - was blocked, RESOLVED at 08:24 CT
+`C:/Users/derek/5slock/ralph-community/PROMPT.md` was protected from this agent in the first pass
 (`edit` denied by policy: `matched 'edit:C:/Users/derek/5slock/ralph-community/PROMPT.md'`), and PROMPT.md
 item 1e is the real default the Ralph loop follows ("PROMPT.md is read fresh every pass", ralph.ps1:51 runs
-`pi --print ... @PROMPT.md`). Item 4 is therefore not fully closed by this pass. Paste-ready replacement for
-lines 13-14 (item 1e, 1f) - the old lines are in `PROMPT.md.bak-20261029-item4-b2default`:
+`pi --print ... @PROMPT.md`). Derek lifted it at 8:20 AM ("PROMPT.md is no longer protected ... Finish item 4"),
+so the two lines below were applied verbatim at 08:24 CT. Backups, both byte-identical to the pre-edit file
+(sha256 `62B6DE7863AEB6D9D6E3ED8DB74A7C7E87769F96B5E8792EC33D674EF018177B`, hash-checked before writing):
+`PROMPT.md.bak-20261029-item4-b2default` (first pass) and `PROMPT.md.bak-20261029-item4-apply` (this pass).
+Applied as lines 13-14 (item 1e, 1f):
 
 ```
      e. Build graph: copy C:\AI\community\p7\graphs\default_b2_terrace_dom_q5guide_s51083007.api.json to <run_dir>\request.api.json and change only LoadImage path, c0.prompt, noise_seed, filename_prefix. That file IS the B2 setup (Derrick 2026-10-29 6:59 AM CT "Ok let's keep the b2 setup and make it default"): a byte-identical copy of runs\terrace_dom_q5guide_20261028_s51083007\request.api.json, sha256 8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e, 20072 B, 26 nodes = beta7 int8HQ, euler/simple, 8 steps full schedule + pass 2 beta/3/denoise 0.4, shift 12/3, VSA keep_percent 10, AddGuide frame 0 on both passes, ref_image_size max, 384x672 -> LatentUpscaler3D x2 -> 768x1344, 243 frames, 24 fps. Do not change any of those.
@@ -51,14 +54,36 @@ lines 13-14 (item 1e, 1f) - the old lines are in `PROMPT.md.bak-20261029-item4-b
 `--frames 243` is not optional: `run_graph_job.py` fails the objective gate when `abs(frames - c0.length) > tol`,
 so a 243-frame default graph requested with `--frames 124` would burn a paid window and then redo twice.
 
+### Verification of the applied lines (CPU only, `notes/item4_verify_prompt_lines.py`)
+The check reads the live PROMPT.md, pulls the graph path, the `--frames` number, the sha256 and the byte/node
+claims out of lines 13-14, and tests them against the file on disk - it verifies the prompt, not my prose:
+
+```
+1e line 13, 748 chars / 1f line 14, 267 chars
+target = p7/graphs/default_b2_terrace_dom_q5guide_s51083007.api.json  exists True, 20,072 B,
+         sha256 8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e
+bytes match claim True | sha match True | node count match True (26)
+c0.length = 243 -> frames arg equals c0.length: True
+byte-identical to B2 request.api.json: True
+frozen settings in the default: beta7 int8HQ, 8 steps + simple, pass2 [beta, 3, 0.4], shift [12.0, 3.0],
+         vsa_keep 10, ref_image_size max, addguides [ag0, ag1], upscaler [scale by multiplier, 2.0], euler, fps 24
+old strings gone: 'stock_base_tenstrip10' False, '--frames 124' False
+diff vs backup: exactly 2 lines changed (the 1e and 1f replacements), nothing else in the 4,969 B file
+```
+
+fix_plan item 4 is now `[x]` with that evidence written into the line (backup `fix_plan.md.bak-20261029-item4-tick`);
+item 3's checkbox is left exactly as Max wrote it.
+
 ## Youth guard unchanged
-No edit to `scripts/comm.py`, `guard_ok`, `prompt_strings` or the tests. Proof run, CPU only:
-`python -m pytest -q scripts/tests/test_p6_review.py scripts/tests/test_guard_scope.py` -> **26 passed in 3.84 s**.
+No edit to `scripts/comm.py`, `guard_ok`, `prompt_strings` or the tests. Proof runs, CPU only, both before the
+PROMPT.md edit and again after it: `python -m pytest -q scripts/tests/test_p6_review.py scripts/tests/test_guard_scope.py`
+-> **26 passed in 3.84 s**, then **26 passed in 3.23 s**.
 The `comm.py` diff in `git status` is pre-existing (2026-10-28 beta7 UNET + shift 12, backup
 `comm.py.bak-20261028-1330-b7default`), not from this pass, and it agrees with B2's graph.
 
 ## Not touched / left for Max
-- Item 4's checkbox in the MAX block (Max ticks after re-checking evidence, as with items 1-2).
+- Item 4's checkbox: ticked by Pi at 08:24 CT on Derek's explicit "tick item 4 if done" (the earlier convention is
+  Max ticking after re-checking evidence, so the evidence is written inline in the line). Item 3 stays as Max left it.
 - The rest of `h3-hc-render/SKILL.md` section 2/3 (3-ref wiring, 1344x768 batch canvas) predates B2 and
   contradicts it; I only moved the base-graph pointer and flagged the rest in-line.
 - Any GPU comparison of B2 vs anything: no render was requested and none happened.
