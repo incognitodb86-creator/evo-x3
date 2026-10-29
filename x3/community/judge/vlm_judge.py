@@ -5,7 +5,9 @@ prompt/target pose, and a 2x4 storyboard of 8 evenly spaced frames (last frame i
 yes/no question per failure type, forced to a JSON schema (llama.cpp response_format json_schema),
 so the answer cannot be truncated. Technical defects only. Flags only; Derrick gives the only KEEP.
 GPU etiquette: gpu_guard IDLE -> gpu_lock.ps1 -Acquire (waits while held) -> judge -> unload -> release.
-Usage: .venv\\Scripts\\python.exe vlm_judge.py [--match p15v2_]
+The model and the output folder are options (--model, --out); the defaults are unchanged (qwen3vl_judge -> out\\vlm),
+and only the model named by --model is unloaded, never the global /unload.
+Usage: .venv\\Scripts\\python.exe vlm_judge.py [--match p15v2_] [--model qwen3vl_judge] [--out out\\vlm]
 """
 import argparse, base64, io, json, os, subprocess, sys, time, urllib.request
 from pathlib import Path
@@ -89,6 +91,26 @@ def answer_probs(res, ans):
         if pr["yes"] + pr["no"] > 0: out[k] = round(pr[bad] / (pr["yes"] + pr["no"]), 4)
     return out
 
+def parse_json(text):
+    """Strict parse of the answer. Only when that fails, take the first balanced JSON object (the same rule the server's
+    own extractor uses) and report "extracted", so a reply with a preamble is visible in the record, never silently kept."""
+    try:
+        return json.loads(text), "direct"
+    except Exception:
+        s = (text or "").strip()
+        if s.startswith("```"):
+            f = s.find("\n"); e = s.find("```", f + 1) if f != -1 else -1
+            if f != -1 and e != -1: s = s[f + 1:e].strip()
+        i = s.find("{")
+        if i == -1: raise
+        d = 0
+        for j in range(i, len(s)):
+            if s[j] == "{": d += 1
+            elif s[j] == "}":
+                d -= 1
+                if d == 0: return json.loads(s[i:j + 1]), "extracted"
+        raise
+
 def post(content, schema):
     body = {"model": MODEL, "temperature": 0.0, "max_tokens": 2048, "logprobs": True, "top_logprobs": 10,
             "chat_template_kwargs": {"enable_thinking": False},
@@ -96,8 +118,10 @@ def post(content, schema):
             "messages": [{"role": "user", "content": content}]}
     res = json.loads(urllib.request.urlopen(urllib.request.Request(f"{URL}/v1/chat/completions", json.dumps(body).encode(),
                      {"Content-Type": "application/json"}), timeout=900).read())
-    ans = json.loads(res["choices"][0]["message"]["content"])
-    return ans, answer_probs(res, ans), res["choices"][0].get("finish_reason")
+    ans, parse = parse_json(res["choices"][0]["message"]["content"])
+    try: probs = answer_probs(res, ans)  # p_defect is calibration only; a model without usable logprobs yields {}
+    except Exception as e: print("[logprobs note]", repr(e)[:120], flush=True); probs = {}
+    return ans, probs, res["choices"][0].get("finish_reason"), parse
 
 def ask(job):
     tag = job["tag"]; start = Image.open(INPUT / job["guides"][0]["image"]).convert("RGB")
@@ -112,23 +136,31 @@ def ask(job):
             "people or setting wrongly, so ignore it for those three checks. Use the prompt only for target_reached.\n"
             f"Answer each check with yes or no and a short reason (max 25 words) citing frame numbers:\n{q}")
     t0 = time.time()
-    ans, probs, fin = post([{"type": "text", "text": text}, {"type": "image_url", "image_url": {"url": b64(start)}},
-                            {"type": "image_url", "image_url": {"url": b64(grid, 1792)}},
-                            {"type": "image_url", "image_url": {"url": b64(last)}}], SCHEMA)
+    ans, probs, fin, parse = post([{"type": "text", "text": text}, {"type": "image_url", "image_url": {"url": b64(start)}},
+                                   {"type": "image_url", "image_url": {"url": b64(grid, 1792)}},
+                                   {"type": "image_url", "image_url": {"url": b64(last)}}], SCHEMA)
     # Flags come from the hard answers; p_defect (logprobs) is stored for later calibration only (see README).
     flags = [k for k, (_, bad) in CHECKS.items() if ans[k]["answer"] == bad]
-    return {"tag": tag, "secs": round(time.time() - t0, 1), "finish": fin,
+    return {"tag": tag, "model": MODEL, "secs": round(time.time() - t0, 1), "finish": fin, "parse": parse,
             "answers": ans, "p_defect": probs, "flags": flags}, grid
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("--match", default="p15v2_"); a = ap.parse_args()
-    OUT.mkdir(parents=True, exist_ok=True)
+    ap = argparse.ArgumentParser(); ap.add_argument("--match", default="p15v2_")
+    ap.add_argument("--model", default=MODEL, help="llama-swap model to ask (default: the judge model); only this model is unloaded at the end")
+    ap.add_argument("--out", default=None, help="output folder (default out\\vlm; a relative --out resolves against the current directory)")
+    a = ap.parse_args()
+    MODEL = a.model
+    if a.out: OUT = Path(a.out)
+    OUT.mkdir(parents=True, exist_ok=True); print("[model]", MODEL, "[out]", OUT, flush=True)
     jobs = [j for j in json.loads(MANIFEST.read_text())["jobs"] if a.match in j["tag"]]
     take_gpu(); t0 = time.time()
     try:
         for j in jobs:
-            r, grid = ask(j); grid.save(OUT / f"{j['tag']}_grid.jpg", quality=85)
+            try:
+                r, grid = ask(j); grid.save(OUT / f"{j['tag']}_grid.jpg", quality=85)
+            except Exception as e:  # one bad clip must not cost the whole run and the lock
+                r = {"tag": j["tag"], "model": MODEL, "secs": None, "error": repr(e)[:300]}
             (OUT / f"{j['tag']}.json").write_text(json.dumps(r, indent=1))
-            print(j["tag"], r["secs"], r["flags"] or "ok", flush=True)
+            print(j["tag"], r.get("secs"), r.get("flags", r.get("error")), flush=True)
     finally:
         release_gpu(); print(f"[TOTAL under lock] {time.time() - t0:.0f} s")
