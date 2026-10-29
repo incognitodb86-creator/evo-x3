@@ -47,7 +47,8 @@ SHA_LAUNCH = sha_of_marker(r"C:\AI\community", MARK_ARTIFACTS)
 SHA_PERSONA = sha_of_marker(REPO, MARK_PERSONA)
 assert SHA_LAUNCH and SHA_PERSONA, "the artifact commits must exist and be committed before the tick runs " \
                                    "(markers: %r / %r)" % (MARK_ARTIFACTS, MARK_PERSONA)
-verdict = open(CHECK_OUT, encoding="utf-8", errors="replace").read()
+vb = open(CHECK_OUT, "rb").read()
+verdict = vb.decode("utf-16") if vb[:2] in (b"\xff\xfe", b"\xfe\xff") else vb.decode("utf-8", "replace")
 assert "== 43/43 PASS" in verdict and "VERDICT: U3 IS PROVED" in verdict, "the check verdict is not on record"
 PERSONA = os.path.join(REPO, r"talk\talk-persona.md")
 psize, psha = os.path.getsize(PERSONA), hashlib.sha256(open(PERSONA, "rb").read()).hexdigest()[:8]
@@ -200,8 +201,19 @@ for p in (LOG, PROG, PLAN):
     print("%s: %d B, non-ASCII lines=%d (baseline %d)" % (os.path.basename(p), os.path.getsize(p), n, BASE[p]))
     ok &= n == BASE[p]
 por = git("status", "--porcelain")
-ok &= all((" M " + f) in por for f in ("AGENTS.md", "PROMPT.md", "ralph.ps1"))
-print("Max's tree intact:", [l for l in por.splitlines() if l.startswith(" M")])
+diff_names = set(git("diff", "--name-only", "HEAD").splitlines())
+print("git status (information):", [l for l in por.splitlines() if l.startswith(" M")])
+print("git diff --name-only HEAD (content truth):", sorted(diff_names))
+# Method gotcha, measured here: 'git diff --quiet HEAD -- AGENTS.md' reports CLEAN for a file whose bytes DO differ
+# from HEAD, because the index stat cache matches (same size, recorded mtime). 'git diff --name-only HEAD' and
+# 'git hash-object' vs 'git rev-parse HEAD:<path>' are the content truth, so use those. AGENTS.md carries Max's
+# Oct 28 edit (uncommitted, 1 line) and its bytes are the Oct 28 bytes: this unit never touched it.
+wh, hh = git("hash-object", "AGENTS.md"), git("rev-parse", "HEAD:AGENTS.md")
+ok &= {"AGENTS.md", "PROMPT.md", "ralph.ps1"} <= diff_names      # Max's edits, still his, uncommitted
+ok &= wh == "687e5487e8d7c1bf912f0f740162c3a2b685276a" and wh != hh   # the Oct 28 bytes = not mine
+ok &= {"fix_plan.md", "notes/progress.md"} <= diff_names                # only my two record files
+print("AGENTS.md worktree sha=%s HEAD sha=%s (differ = Max's Oct 28 edit; the bytes are the Oct 28 bytes = not mine)"
+      % (wh[:12], hh[:12]))
 print("plan state: %d items ticked (1-4), %d unticked" % (len(ticks), len(unticked)))
 print("VERDICT: %s" % ("ITEM 4 RECORDED AND TICKED" if ok else "PROBLEM"))
 sys.exit(0 if ok else 1)
