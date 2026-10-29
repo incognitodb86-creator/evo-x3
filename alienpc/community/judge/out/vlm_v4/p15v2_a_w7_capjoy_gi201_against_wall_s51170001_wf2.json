@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w7_capjoy_gi201_against_wall_s51170001_wf2",
+ "secs": 6.6,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical rocky cave background matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc man with matching features and clothing across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in target pose with visible intimate contact and act."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The green-skinned male has a muscular torso, arms, legs, and head with no fusion or melting. The female has a complete body with arms, legs, head,"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0594,
+  "target_reached": 0.0021,
+  "anatomy_defect": 0.0027,
+  "anatomy_zoom": 0.0011
+ },
+ "flags": []
+}

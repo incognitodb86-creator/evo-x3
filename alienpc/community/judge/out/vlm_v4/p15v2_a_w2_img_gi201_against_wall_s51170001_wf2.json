@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w2_img_gi201_against_wall_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical cave rock background and lighting as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc man appear in all frames with consistent features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cuts."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in target pose, in contact, with act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The female character has normal human-like proportions, including visible ears, arms, legs, and genitalia. The male character has a muscular, well"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.1978,
+  "target_reached": 0.0002,
+  "anatomy_defect": 0.0008,
+  "anatomy_zoom": 0.0013
+ },
+ "flags": []
+}

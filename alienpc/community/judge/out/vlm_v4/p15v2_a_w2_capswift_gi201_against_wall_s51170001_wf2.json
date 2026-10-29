@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w2_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 6.4,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical cave rock background and lighting as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same appearance, clothing, and sex characteristics across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows bodies in target pose, in contact, with act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The elf woman has normal human-like proportions with pointed ears, and the green-skinned orc has a muscular build with no visible fusion or maln. "
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.0024,
+  "target_reached": 0.0047,
+  "anatomy_defect": 0.0005,
+  "anatomy_zoom": 0.0006
+ },
+ "flags": []
+}

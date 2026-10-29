@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_b_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 6.2,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent bedroom with white sheets and grey wall across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same two women with matching hair, skin, and clothing appear in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with intimate contact and visible act."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both frames show two distinct adult female bodies in an intimate pose. All body regions are anatomically correct and clearly defined: heads, necks, shoulders, arms, hands, torsos, hips, legs, and feet"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0012,
+  "same_people": 0.0033,
+  "start_kept": 0.1093,
+  "target_reached": 0.0084,
+  "anatomy_defect": 0.0007,
+  "anatomy_zoom": 0.0019
+ },
+ "flags": []
+}

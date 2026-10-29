@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_b_w2_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 6.8,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains dark mottled cave wall across all frames, matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and green-skinned muscular figure appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall, with visible pelvic contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No malformed limbs, extra/missing body parts, or fused anatomy visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The elf woman has normal human-like proportions with pointed ears, and the green-skinned male has a muscular, humanoid form. There are no fusion,\u7194"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.387,
+  "target_reached": 0.0052,
+  "anatomy_defect": 0.0002,
+  "anatomy_zoom": 0.0021
+ },
+ "flags": []
+}

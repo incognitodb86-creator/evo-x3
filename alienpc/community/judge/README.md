@@ -17,15 +17,20 @@ cd C:\AI\community\judge
 ```
 `vlm_judge.py` waits until `gpu_guard.ps1` reports IDLE and `gpu_lock.ps1 -Acquire` succeeds (it polls every 60 s while a render holds the lock). When done it unloads `qwen3vl_judge` (`/api/models/unload/qwen3vl_judge`, with `/unload` as the fallback) and releases the lock. Inputs come from `C:\Users\derek\5slock\ralph-community\notes\p15v2_manifest.json`: the start image is `guides[0].image` under ComfyUI `input\`, and the prompt is `notes\p15_prompts\<prompt_file>`.
 
-## Thresholds (tuned once on the 36 p15v2 clips against Max's 10-29 scoring)
-A clip is flagged when ANY of these fires:
-- precheck `jump`: DINOv2-small min frame-to-previous cosine < **0.82** (16 evenly spaced frames). Catches an abrupt change: start abandoned, scene swap or identity swap.
-- precheck `static_no_transition`: only for transition clips (one ref, i.e. the start image is the OG still). DINOv2 last-frame-to-start cosine > **0.76**. The clip never left the start pose.
-- VLM: any check answered as a defect.
+## Modes and thresholds (refined 2026-10-29 PM, see /workspace/audits/2026-10-29-judge-refine-results.md on the Grok box)
+**Default = two tiers.** Neither tier ever KEEPs.
+- **FLAG**: any `vlm_judge.py` check answered as a defect (same_scene=no, same_people=no, start_kept=no, target_reached=no, anatomy_defect=yes). There is no threshold to fit. On p15v2 it flagged 8/14 bad clips and 3/22 good. Caveat: the v3 prompt wording was chosen on these same clips. The untuned v1 prompt flagged 5/14 bad and 2/22 good.
+- **REVIEW hint**: `prechecks.py` flags.
+  - `jump`: DINOv2 min frame-to-previous cosine < 0.82.
+  - `static_no_transition`: one-ref transition clips only, DINOv2 last-frame-to-start cosine > 0.76.
+  - These were fitted on the 36 clips. Under leave-one-writer-out CV they caught 10/14 bad clips but also 13/22 good ones, so treat them as "look here first", not as fails.
+- Cuts (PySceneDetect, stock defaults) are info only.
+- `p_defect` in each VLM JSON is the logprob probability of the defect answer. It is stored for future calibration and **not** used for flags: thresholding it under CV gave 11/14 bad but 12/22 good.
 
-Cuts (AdaptiveDetector/ContentDetector, stock defaults) are reported as info only. On p15v2 they fired on 3 good clips and 0 bad ones. Both thresholds sit on a plateau: 0.80-0.82 / 0.74-0.76 give the same result.
-
-p15v2 result (14 bad / 22 good): prechecks 11/14 caught with 6 false flags; VLM 8/14 with 3; combined 12/14 (10 of the 12 old-judge misses) with 8 false flags. The old judge caught 2/14. See `/workspace/audits/2026-10-29-judge-upgrade-results.md` (Grok box). Same data for tuning and testing, so expect lower recall on new clips.
+Tried and dropped (no held-out gain on p15v2):
+- a second zoomed anatomy call (mid and last frame at full size): it still missed the anatomy blob;
+- CLIP similarity on a background-only ring;
+- Farneback optical-flow motion stall.
 
 ## Sources
 - VBench subject/background consistency (DINO / CLIP vs first and previous frame): https://arxiv.org/abs/2311.17982, https://github.com/Vchitect/VBench/blob/master/vbench/utils.py
@@ -33,3 +38,6 @@ p15v2 result (14 bad / 22 good): prechecks 11/14 caught with 6 false flags; VLM 
 - llama.cpp server json_schema / response_format: https://github.com/ggml-org/llama.cpp/blob/HEAD/tools/server/README.md
 - Absolute rather than pairwise judging: https://arxiv.org/pdf/2504.14716
 - Models: facebook/dinov2-small, openai/clip-vit-base-patch32 (Hugging Face)
+- VBench-2.0 Human_Anatomy (YOLO-World + ViT anomaly classifiers), considered but not adopted: https://arxiv.org/html/2503.21755v2, https://github.com/Vchitect/VBench/tree/master/VBench-2.0/vbench2/third_party/ViTDetector
+- Per-body-part yes/no distortion prompts for MLLMs (Human-AGVQA): https://arxiv.org/html/2411.16619v3
+- llama.cpp OAI-compatible logprobs (pre-sampling): https://github.com/ggml-org/llama.cpp/pull/10783
