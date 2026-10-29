@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w8_img_gi201_against_wall_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Rock wall and cave environment consistent across all frames and start image."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc with identical features, clothing, and proportions in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches start image pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall with visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals/hands visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The elf woman has normal human-like proportions with pointed ears, and the green orc has a muscular humanoid form. Their bodies are not merged or "
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0111,
+  "target_reached": 0.0022,
+  "anatomy_defect": 0.0014,
+  "anatomy_zoom": 0.0015
+ },
+ "flags": []
+}

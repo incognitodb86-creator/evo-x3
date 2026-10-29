@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw
 MANIFEST = Path(r"C:\Users\derek\5slock\ralph-community\notes\p15v2_manifest.json")
 PROMPTS = Path(r"C:\Users\derek\5slock\ralph-community\notes\p15_prompts")
 RUNS, INPUT = Path(r"C:\AI\community\runs"), Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input")
-OUT = Path(__file__).parent / "out" / "vlm"
+OUT = Path(__file__).parent / "out" / os.environ.get("JUDGE_OUT", "vlm")
 URL, MODEL = "http://127.0.0.1:8080", "qwen3vl_judge"
 GUARD, LOCK = r"C:\AI\director\scripts\gpu_guard.ps1", r"C:\AI\director\scripts\gpu_lock.ps1"
 POSES = {"gi102_missionary": "missionary position (one partner lying on their back, the other on top facing them)",
@@ -45,8 +45,8 @@ def take_gpu():
         print("[GPU busy, waiting 60 s]", out[:120], flush=True); time.sleep(60)
 
 def release_gpu():
-    try: urllib.request.urlopen(urllib.request.Request(f"{URL}/api/models/unload/{MODEL}"), timeout=60).read()
-    except Exception: urllib.request.urlopen(f"{URL}/unload", timeout=60).read()
+    try: urllib.request.urlopen(urllib.request.Request(f"{URL}/api/models/unload/{MODEL}", data=b"", method="POST"), timeout=60).read()  # this model only
+    except Exception as e: print("[unload note]", e)  # never fall back to /unload (it would evict other agents' models)
     print("[GPU_LOCK]", ps(LOCK, "-Release", "-Owner", str(os.getpid()))[1])
 
 def b64(img, maxside=1024):
@@ -55,11 +55,13 @@ def b64(img, maxside=1024):
 
 def storyboard(mp4, k=8):
     cap = cv2.VideoCapture(str(mp4)); n = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); tiles = []
+    full = None
     for i in np.linspace(0, n - 1, k).round().astype(int):
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(i)); ok, f = cap.read()
         if ok:
-            t = Image.fromarray(cv2.cvtColor(f, cv2.COLOR_BGR2RGB)); t.thumbnail((448, 448)); tiles.append(t)
-    last = Image.fromarray(cv2.cvtColor(f, cv2.COLOR_BGR2RGB)); cap.release(); w, h = tiles[0].size
+            full = f; t = Image.fromarray(cv2.cvtColor(f, cv2.COLOR_BGR2RGB)); t.thumbnail((448, 448)); tiles.append(t)
+    if full is None: raise RuntimeError(f"no frames decoded from {mp4}")
+    last = Image.fromarray(cv2.cvtColor(full, cv2.COLOR_BGR2RGB)); cap.release(); w, h = tiles[0].size
     grid = Image.new("RGB", (w * 4, h * 2))
     for j, t in enumerate(tiles):
         grid.paste(t, ((j % 4) * w, (j // 4) * h))
@@ -67,6 +69,35 @@ def storyboard(mp4, k=8):
     d = ImageDraw.Draw(grid)
     for j in range(len(tiles)): d.rectangle([(j % 4) * w, (j // 4) * h, (j % 4) * w + 34, (j // 4) * h + 22], fill="black"); d.text(((j % 4) * w + 6, (j // 4) * h + 4), str(j + 1), fill="white")
     return grid, last
+
+def answer_probs(res, ans):
+    """P(defect) per check from the first token of each answer value (llama.cpp OAI logprobs); {} if unavailable."""
+    lp = (res["choices"][0].get("logprobs") or {}).get("content") or []
+    if not lp: return {}
+    text, spans = "", []
+    for t in lp: spans.append((len(text), t)); text += t["token"]
+    out, pos = {}, 0
+    for k in ans:
+        i = text.find('"answer"', text.find(f'"{k}"', pos)); j = text.find('"', text.find(":", i) + 1) + 1; pos = j
+        tok = next((t for st, t in spans if st <= j < st + len(t["token"])), None)
+        if not tok: continue
+        pr = {"yes": 0.0, "no": 0.0}
+        for c in tok.get("top_logprobs", []):
+            w = c["token"].strip().strip('"').lower()
+            if w in pr: pr[w] += float(np.exp(c["logprob"]))
+        bad = CHECKS[k][1]
+        if pr["yes"] + pr["no"] > 0: out[k] = round(pr[bad] / (pr["yes"] + pr["no"]), 4)
+    return out
+
+def post(content, schema):
+    body = {"model": MODEL, "temperature": 0.0, "max_tokens": 2048, "logprobs": True, "top_logprobs": 10,
+            "chat_template_kwargs": {"enable_thinking": False},
+            "response_format": {"type": "json_schema", "json_schema": {"name": "clip_checks", "strict": True, "schema": schema}},
+            "messages": [{"role": "user", "content": content}]}
+    res = json.loads(urllib.request.urlopen(urllib.request.Request(f"{URL}/v1/chat/completions", json.dumps(body).encode(),
+                     {"Content-Type": "application/json"}), timeout=900).read())
+    ans = json.loads(res["choices"][0]["message"]["content"])
+    return ans, answer_probs(res, ans), res["choices"][0].get("finish_reason")
 
 def ask(job):
     tag = job["tag"]; start = Image.open(INPUT / job["guides"][0]["image"]).convert("RGB")
@@ -80,20 +111,14 @@ def ask(job):
             "For same_scene, same_people and start_kept compare ONLY with the START IMAGE; the prompt text can describe the "
             "people or setting wrongly, so ignore it for those three checks. Use the prompt only for target_reached.\n"
             f"Answer each check with yes or no and a short reason (max 25 words) citing frame numbers:\n{q}")
-    body = {"model": MODEL, "temperature": 0.0, "max_tokens": 2048,
-            "chat_template_kwargs": {"enable_thinking": False},
-            "response_format": {"type": "json_schema", "json_schema": {"name": "clip_checks", "strict": True, "schema": SCHEMA}},
-            "messages": [{"role": "user", "content": [{"type": "text", "text": text},
-                         {"type": "image_url", "image_url": {"url": b64(start)}},
-                         {"type": "image_url", "image_url": {"url": b64(grid, 1792)}},
-                         {"type": "image_url", "image_url": {"url": b64(last)}}]}]}
     t0 = time.time()
-    res = json.loads(urllib.request.urlopen(urllib.request.Request(f"{URL}/v1/chat/completions", json.dumps(body).encode(),
-                     {"Content-Type": "application/json"}), timeout=900).read())
-    ans = json.loads(res["choices"][0]["message"]["content"])
+    ans, probs, fin = post([{"type": "text", "text": text}, {"type": "image_url", "image_url": {"url": b64(start)}},
+                            {"type": "image_url", "image_url": {"url": b64(grid, 1792)}},
+                            {"type": "image_url", "image_url": {"url": b64(last)}}], SCHEMA)
+    # Flags come from the hard answers; p_defect (logprobs) is stored for later calibration only (see README).
     flags = [k for k, (_, bad) in CHECKS.items() if ans[k]["answer"] == bad]
-    return {"tag": tag, "secs": round(time.time() - t0, 1), "finish": res["choices"][0].get("finish_reason"),
-            "answers": ans, "flags": flags}, grid
+    return {"tag": tag, "secs": round(time.time() - t0, 1), "finish": fin,
+            "answers": ans, "p_defect": probs, "flags": flags}, grid
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--match", default="p15v2_"); a = ap.parse_args()

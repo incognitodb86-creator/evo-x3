@@ -1,0 +1,47 @@
+{
+ "tag": "p15v2_a_w7_img_gi102_missionary_s51170001_wf2",
+ "secs": 6.3,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "no",
+   "reason": "Start image shows bed, frames 2-8 show cave background, scene changed."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same two individuals, matching hair, body, and clothing across all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows bed, frame 2 shows cave; pose and framing changed abruptly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Image 3 shows woman on hands and knees, man behind her, not missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "All body regions are anatomically correct and clearly defined. There are no fusion defects, missing or extra limbs, malformed genitals, or shapeless flesh blobs. The bodies are distinct and well-contu"
+  }
+ },
+ "p_defect": {
+  "same_scene": 1.0,
+  "same_people": 0.0005,
+  "start_kept": 0.9999,
+  "target_reached": 0.9119,
+  "anatomy_defect": 0.0127,
+  "anatomy_zoom": 0.002
+ },
+ "flags": [
+  "same_scene",
+  "start_kept",
+  "target_reached"
+ ]
+}

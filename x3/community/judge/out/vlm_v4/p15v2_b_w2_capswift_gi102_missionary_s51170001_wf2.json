@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_b_w2_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains bedroom with white sheets, headboard, and gray wall across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman in white bra and same nude man appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with bodies in contact and pelvic motion visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both frames show two distinct adult human bodies in a sexual position. All limbs, torsos, heads, and genitalia are anatomically correct and clearly defined. There are no fusion defects, missing limbs,"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.4425,
+  "target_reached": 0.0001,
+  "anatomy_defect": 0.0003,
+  "anatomy_zoom": 0.0007
+ },
+ "flags": []
+}

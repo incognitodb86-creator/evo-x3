@@ -19,7 +19,8 @@ RUNS = Path(r"C:\AI\community\runs")
 INPUT = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input")
 OUT = Path(__file__).parent / "out"
 DINO_ID, CLIP_ID = "facebook/dinov2-small", "openai/clip-vit-base-patch32"
-# Thresholds tuned on the 36 p15v2 clips (see README). A clip is flagged if ANY rule fires.
+# Thresholds fitted on the 36 p15v2 clips (see README). They are REVIEW hints, not fails: under
+# leave-one-writer-out CV they caught 10/14 bad clips but also 13/22 good ones.
 #   jump:   DINO min frame-to-previous-frame similarity < 0.82  (abrupt change: start abandoned, scene/identity swap)
 #   static: transition clips only (start image = OG still, one ref): DINO last-frame-to-start > 0.76
 #           (the clip never left the start pose, so the target pose was not reached)
@@ -61,6 +62,7 @@ def run(job, k):
     tag = job["tag"]; mp4 = RUNS / tag / f"{tag}.mp4"
     start = INPUT / job["guides"][0]["image"]
     frames, n = sample_frames(mp4, k)
+    if len(frames) < 2: raise RuntimeError(f"only {len(frames)} frames decoded from {mp4}")
     imgs = [Image.open(start).convert("RGB")] + frames
     d, c = embed(imgs)
     rec = {"tag": tag, "mp4": str(mp4), "start_image": str(start), "n_frames": n, "sampled": len(frames),
@@ -81,5 +83,6 @@ if __name__ == "__main__":
                      **{f"{m}_{s}": r[m][s] for m in ("dino", "clip") for s in ("start_min", "start_mean", "start_last", "prev_min")},
                      "flags": ";".join(r["flags"]), "info": ";".join(r["info"])})
         print(r["tag"], rows[-1]["flags"] or "ok", flush=True)
-    with open(OUT / "prechecks.csv", "w", newline="") as fh:
+    name = "prechecks.csv" if a.match == "p15v2_" else f"prechecks_{a.match.strip('_')}.csv"  # a subset run never overwrites the full CSV
+    with open(OUT / name, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)

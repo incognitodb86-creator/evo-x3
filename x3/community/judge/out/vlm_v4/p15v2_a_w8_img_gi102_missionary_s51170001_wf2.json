@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w8_img_gi102_missionary_s51170001_wf2",
+ "secs": 6.6,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same rumpled white bed and beige headboard as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical blonde woman and dark-haired man appear in all frames, matching START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cut."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with bodies in contact, matching target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both frames show two distinct, anatomically correct adult human bodies in a sexual position. There are no fusion defects, missing or extra limbs, malformed genitals, or shapeless flesh blobs. The body"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0002,
+  "same_people": 0.0,
+  "start_kept": 0.0196,
+  "target_reached": 0.0002,
+  "anatomy_defect": 0.0001,
+  "anatomy_zoom": 0.0008
+ },
+ "flags": []
+}
