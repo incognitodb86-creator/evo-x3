@@ -39,6 +39,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
   The 3-ref/1344x768 paragraphs below predate B2 and apply only when a brief asks for that shape.
 - Model `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, euler/simple, 8 steps, shift 12 (video) / 3 (audio), VSA 90% sparse, no SLA/cache/spectrum with reference (beta 7 settings from Derek's 2026-10-28 brief; beta 6 is deleted). Steps live in
   `s0_sched`/`s1_sched`, sampler in `ksel`, shift in `m_shift`; there is NO cfg key in these graphs at all.
+- beta7 background flicker (TenStrip HF 10Eros-Max #76/#79): mitigation = the 2-pass B2 graph we already use; watch #79.
 - **References (this is what fixed body quality): 3 slots on c0 AND c1.**
   `ref_images.ref_image_1` = the approved full-body start still (the body/scene reference, `<Picture 1>`),
   `ref_image_2`/`ref_image_3` = face crops (face + hair only, `<Picture 2>`/`<Picture 3>`). r3r-r6 used face crops
@@ -77,7 +78,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
   `C:/AI/community/p7/jobs/<id>.result.json` is absent. Never write proof/notes/audit files in a request pass.
 - One seed per clip. Never request a quality redo (harness redos = same seed, then seed+1).
 
-## 5. Proof (next pass, objective only, NO vision judge on explicit output)
+## 5. Proof (next pass, objective only; review = qwen3vl_judge + Z zoom, flag-only; Derrick gives the only KEEP)
 
 - `result.json` ok/rc; frames + rate + size:
   `ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets,r_frame_rate,width,height -of csv=p=0 <mp4>`
@@ -107,7 +108,7 @@ Steps a-g for one render item, then script reuse and research rules:
      e. Build graph: copy C:\AI\community\p7\graphs\default_b2_terrace_dom_q5guide_s51083007.api.json to <run_dir>\request.api.json and change only LoadImage path, c0.prompt, noise_seed, filename_prefix. That file IS the B2 setup (Derrick 2026-10-29 6:59 AM CT "Ok let's keep the b2 setup and make it default"): a byte-identical copy of runs\terrace_dom_q5guide_20261028_s51083007\request.api.json, sha256 8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e, 20072 B, 26 nodes = beta7 int8HQ, euler/simple, 8 steps full schedule + pass 2 beta/3/denoise 0.4, shift 12/3, VSA keep_percent 10, AddGuide frame 0 on both passes, ref_image_size max, 384x672 -> LatentUpscaler3D x2 -> 768x1344, 243 frames, 24 fps. Do not change any of those.
      f. Render: C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_graph_job.py <run_dir> <id> --frames 243 (the number must equal c0.length in the graph you copied; the B2 default renders 243 f = 10.125 s at ~240 s GPU. runs gpu_guard and gpu lock).
      g. Finish: commit once in each repo touched and append one line to notes\progress.md. Then stop.
-   - Script reuse: reuse the existing scripts, never repeat steps by hand - notes\bk26_writer_batch.py (prompt writer), notes\bk26_judge_harness.py + notes\bk26_judge_batch.py (judge), notes\p15_driver.py (driver); render/QC tools C:\AI\community\scripts\run_graph_job.py, verify_cell.py, prompt_stats.py, review_pack.py, finalize_encode.py. One manifest drives them. Prompt rules live in C:\AI\community\skills\h3-prompting\SKILL.md (cite its R numbers); render dials in C:\AI\community\skills\h3-hc-render\SKILL.md.
+   - Script reuse: reuse the existing scripts, never repeat steps by hand - notes\p15_driver.py writer stage is THE prompt writer (Swift captions -> Swift writes, h3-prompting rules; defaults --writer w2 --mode capswift; notes\bk26_writer_batch.py is bake-off history), p15_driver.py judge stage is the review (qwen3vl_judge + Z zoom via C:\AI\community\judge\vlm_variants.py, flag-only; bk26_judge_* are history); render/QC tools C:\AI\community\scripts\run_graph_job.py, verify_cell.py, prompt_stats.py, review_pack.py, finalize_encode.py. One manifest drives them. Prompt rules live in C:\AI\community\skills\h3-prompting\SKILL.md (cite its R numbers); render dials in C:\AI\community\skills\h3-hc-render\SKILL.md.
 
 2. Research rules: at most one fetch per URL, no retries. If saved in notes\web, reuse it. Fetch -> python C:\AI\community\scripts\check_web_saves.py -> git add notes\web && git commit in same iteration. Reading ComfyUI\custom_nodes with read tool is denied.
 
