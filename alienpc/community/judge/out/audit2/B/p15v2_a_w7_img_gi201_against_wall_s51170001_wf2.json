@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Cave rock textures and lighting match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames with consistent features."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows orc gripping her hip, not wrists above head as in START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Last frame shows orc thrusting into elf, both braced against wall, act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, malformed genitals, or extra limbs visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0008,
+  "same_people": 0.0,
+  "start_kept": 0.6397,
+  "target_reached": 0.0208,
+  "anatomy_defect": 0.0421
+ },
+ "finish": "stop",
+ "flags": [
+  "start_kept"
+ ],
+ "tag": "p15v2_a_w7_img_gi201_against_wall_s51170001_wf2"
+}

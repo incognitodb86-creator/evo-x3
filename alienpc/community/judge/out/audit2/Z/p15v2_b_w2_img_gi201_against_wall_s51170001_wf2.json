@@ -1,0 +1,49 @@
+{
+ "frames": [
+  65,
+  97
+ ],
+ "diffs": [
+  12.0,
+  11.63
+ ],
+ "per_frame": [
+  {
+   "frame": 65,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background walls, lighting, and overall environment remain consistent between frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies appear anatomically correct with no malformations or floating parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0003,
+    "anatomy_defect": 0.0002
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 97,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background remains consistent: same rocky cave walls, lighting, and no new structures or objects introduced."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All characters show intact, proportionate anatomy with no malformed limbs, floating parts, or extra/missing body parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0921,
+    "anatomy_defect": 0.0003
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_b_w2_img_gi201_against_wall_s51170001_wf2"
+}
