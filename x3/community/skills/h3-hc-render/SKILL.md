@@ -1,6 +1,6 @@
 ---
 name: h3-hc-render
-description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta6 int8) ComfyUI clip for the Forge Ralph loop - graph keys, reference-image wiring, frame/canvas math, the p7 budget gate, JOB_REQUEST.json, and the objective proof checks. Use when building a graph, requesting a render, checking a rendered clip, or touching p7/JOB_REQUEST.json.
+description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the Forge Ralph loop - graph keys, reference-image wiring, frame/canvas math, the p7 budget gate, JOB_REQUEST.json, and the objective proof checks. Use when building a graph, requesting a render, checking a rendered clip, or touching p7/JOB_REQUEST.json.
 ---
 
 # H3 hardcore render
@@ -27,9 +27,17 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 ## 2. Graph wiring (the part that has actually broken)
 
-- Base graph: copy `C:/AI/community/runs/ali147_pool_promptv2_s51080000/request.api.json` and change ONLY the
-  listed keys (`width`/`height` on c0+c1, the two prompts, `img.image`, `noise.noise_seed`, `save.filename_prefix`).
-- Model `10Eros_Max_h3_8stepTURBO_beta6_int8`, euler/simple, 10 steps, shift 10 (video) / 3 (audio). Steps live in
+- Base graph: copy `C:/AI/community/p7/graphs/default_b2_terrace_dom_q5guide_s51083007.api.json` - the B2 setup,
+  made the default by Derrick 2026-10-29 6:59 AM CT ("Ok let's keep the b2 setup and make it default") and a
+  byte-identical copy of `C:/AI/community/runs/terrace_dom_q5guide_20261028_s51083007/request.api.json`
+  (sha256 8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e, 20072 B, 26 nodes: two-pass, 384x672
+  -> LatentUpscaler3D x2 -> 768x1344 portrait, 243 frames, 24 fps, `MiniMaxH3AddGuide` frame 0 on both passes,
+  `ref_images.ref_image_1` only, pass 2 = `beta`/3/denoise 0.4). Change ONLY `img.image`, `c0.prompt`,
+  `noise.noise_seed`, `save.filename_prefix`, and request with `--frames 243` (= c0.length). The previous defaults
+  (`runs/ali147_pool_promptv2_s51080000/request.api.json`, then `p7/graphs/stock_base_tenstrip10.api.json`,
+  124 f 1344x768 single-pass beta6) are superseded for new runs; old ids keep their own graphs in `runs/`.
+  The 3-ref/1344x768 paragraphs below predate B2 and apply only when a brief asks for that shape.
+- Model `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, euler/simple, 8 steps, shift 12 (video) / 3 (audio), VSA 90% sparse, no SLA/cache/spectrum with reference (beta 7 settings from Derek's 2026-10-28 brief; beta 6 is deleted). Steps live in
   `s0_sched`/`s1_sched`, sampler in `ksel`, shift in `m_shift`; there is NO cfg key in these graphs at all.
 - **References (this is what fixed body quality): 3 slots on c0 AND c1.**
   `ref_images.ref_image_1` = the approved full-body start still (the body/scene reference, `<Picture 1>`),
