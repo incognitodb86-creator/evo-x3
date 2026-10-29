@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 4.2,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom with white sheets and beige headboard, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and brown-haired man appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, while target pose is supine; pose changes immediately."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman supine, man on top in missionary pose with visible genital contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or final image."
+  }
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

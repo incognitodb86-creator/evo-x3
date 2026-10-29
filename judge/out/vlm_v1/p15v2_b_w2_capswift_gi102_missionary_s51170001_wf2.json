@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w2_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 3.9,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom with rumpled sheets, headboard, and gray-brown wall background."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman in white bra and nude man with dark curly hair appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE: same pose, framing, lighting, and props without jump cuts."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows woman supine, man on top in missionary position with visible pelvic motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All bodies show correct anatomy: no fused limbs, malformed genitals, or blob-like shapes in any frame."
+  }
+ },
+ "flags": []
+}

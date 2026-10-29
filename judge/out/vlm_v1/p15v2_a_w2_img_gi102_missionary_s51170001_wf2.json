@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w2_img_gi102_missionary_s51170001_wf2",
+ "secs": 3.8,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom with beige headboard and white linens as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and muscular man appear in all frames with consistent features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows woman on back, man on top in missionary position with visible thrusting motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show clear, intact anatomy with no fused bodies, missing limbs, or malformed genitals."
+  }
+ },
+ "flags": []
+}

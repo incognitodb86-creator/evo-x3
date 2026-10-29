@@ -1,0 +1,32 @@
+{
+ "tag": "p15v2_a_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 4.6,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom with white sheets and beige headboard, matching START IMAGE background."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "START IMAGE shows two women; frames show a man and a woman, violating subject identity."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows a man on top, not the woman on all fours as in START IMAGE."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Image 3 shows man on top, not woman on top as in TARGET POSE (missionary)."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "flags": [
+  "same_people",
+  "start_kept",
+  "target_reached"
+ ]
+}

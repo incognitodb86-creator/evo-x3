@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w8_img_gi201_against_wall_s51170001_wf2",
+ "secs": 4.1,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical rough rock cave wall background, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames, matching START IMAGE appearance and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall, act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, malformed genitals, or extra limbs visible in any frame or Image 3."
+  }
+ },
+ "flags": []
+}

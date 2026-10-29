@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_b_w8_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 4.0,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent dark cave wall across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical characters appear in all frames with unchanged features."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Final frame shows standing rear-entry pose against wall with visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, malformed genitals, or extra limbs visible in any frame or final image."
+  }
+ },
+ "flags": [
+  "target_reached"
+ ]
+}

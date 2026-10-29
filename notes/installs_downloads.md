@@ -62,3 +62,7 @@
   `gpu: false` CPU encoder, is the server side that was already there), secrets, ComfyUI config.
 - Proof + control: `C:/Users/derek/5slock/ralph-community/notes/vis/vis_proof_after.md` (9/9 with the gates
   open, `VISION-FAILED` with `blockImages` restored).
+
+## 2026-10-29 Max (judge upgrade, Derrick approved 1:28 PM CT)
+- venv C:\AI\community\judge\.venv (Python 3.12, separate from ComfyUI): pip install torch (CPU wheel, download.pytorch.org/whl/cpu), scenedetect, transformers, pillow, numpy (+ opencv-python as scenedetect dep). Versions: numpy==2.5.4, opencv-python==5.0.0.93, pillow==13.0.0, scenedetect==0.7.2, torch==2.15.0+cpu, transformers==5.22.0.
+- HF model downloads (default HF cache): facebook/dinov2-small, openai/clip-vit-base-patch32.

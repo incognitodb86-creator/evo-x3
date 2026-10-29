@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_a_w7_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 4.5,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent cave rock wall across all frames, matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc man appear in all frames, matching START IMAGE's appearance."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows orc holding wrists above head, while START IMAGE has elf touching wall with both hands."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall, act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  }
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

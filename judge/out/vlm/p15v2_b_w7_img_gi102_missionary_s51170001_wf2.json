@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_b_w7_img_gi102_missionary_s51170001_wf2",
+ "secs": 4.6,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same bedroom with white linens and consistent background elements as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and muscular man appear in all frames, matching START IMAGE's appearance and sex characteristics."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, while START IMAGE shows her on all fours but man kneeling behind her, not transitioning to missionary."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman on back, man on top in missionary position with visible penetration and contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "flags": [
+  "start_kept"
+ ]
+}
