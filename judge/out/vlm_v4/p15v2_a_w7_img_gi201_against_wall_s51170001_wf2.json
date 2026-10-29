@@ -1,0 +1,45 @@
+{
+ "tag": "p15v2_a_w7_img_gi201_against_wall_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Cave rock textures and lighting match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde elf woman and green orc appear consistently with matching features."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows orc gripping her hip, not wrists above head as START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall, act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The green-skinned male has a muscular torso, arms, and legs with no fusion or melting. The female has a complete body with normal limbs, head, and"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.6892,
+  "target_reached": 0.0126,
+  "anatomy_defect": 0.0068,
+  "anatomy_zoom": 0.0009
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

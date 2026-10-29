@@ -1,0 +1,45 @@
+{
+ "tag": "p15v2_b_w8_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 6.4,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: bed, sheets, greyish wall, and lighting unchanged across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and man appear throughout; no replacements or body swaps detected."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, but START IMAGE shows her on all fours with head turned left, not matching."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with intimate face-to-face contact and pelvic grinding."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both bodies are anatomically correct with no fusion defects. Limbs are complete and properly attached, no extra or missing limbs, no malformed genitals, and no melting or shapeless flesh blobs. The sp"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0085,
+  "same_people": 0.498,
+  "start_kept": 0.6491,
+  "target_reached": 0.0746,
+  "anatomy_defect": 0.0085,
+  "anatomy_zoom": 0.0006
+ },
+ "flags": [
+  "start_kept"
+ ]
+}
