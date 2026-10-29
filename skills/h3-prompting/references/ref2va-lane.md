@@ -20,7 +20,7 @@ rule sentence into a brief - cite `R<n>`.
 
 - Node: `MiniMaxH3ReferenceToVideo` on Max via llama-swap :8080/comfyui. Which node is which, and what may not
   share one node, is **R6** in `C:\AI\community\skills\h3-prompting\SKILL.md`.
-- Multi-cell chains: the chain lane is `h3-ref2va-prompt-chain`. Single clips start here.
+- Multi-cell chains: the chain lane is `references/ref2va-chain-lane.md` (in h3-prompting). Single clips start here.
 - The cond is the still Derek named this turn (**R28** covers what may be invented). When the pose must be unlocked
   first, that work is the stills lane (`alienpc-stills-pose-edit-prompting`), then come back to the paste.
 - Which POS may enter Max TE at all is the director lane's rule (`alienpc-hardcore-i2v-director`, "Max POS craft"
