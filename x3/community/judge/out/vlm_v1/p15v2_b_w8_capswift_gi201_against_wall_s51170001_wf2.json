@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_b_w8_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 3.8,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical dark cave wall background and lighting as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and green humanoid appear in all frames with consistent features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and all visible clothing/props exactly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "By frame 8, they are not in standing rear-entry pose; woman is leaning back, not braced against wall."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, missing limbs, or malformed genitals/hands visible in any frame."
+  }
+ },
+ "flags": [
+  "target_reached"
+ ]
+}

@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w2_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 3.8,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames maintain the same dark cave wall background and warm lighting as the START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain identical appearance, clothing, and proportions across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and lighting without jump cuts or composition changes."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows woman braced against wall in standing rear-entry pose with visible pelvic contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, missing limbs, or malformed genitals/hands visible in any frame."
+  }
+ },
+ "flags": []
+}

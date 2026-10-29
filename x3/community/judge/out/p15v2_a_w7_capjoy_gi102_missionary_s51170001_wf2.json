@@ -1,0 +1,64 @@
+{
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "mp4": "C:\\AI\\community\\runs\\p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2\\p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2.mp4",
+ "start_image": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\input\\community\\p15_stills\\gi102_missionary_c2.png",
+ "n_frames": 243,
+ "sampled": 16,
+ "cuts_adaptive": 0,
+ "cuts_content": 0,
+ "dino": {
+  "start_min": 0.7986,
+  "start_mean": 0.8464,
+  "start_last": 0.8134,
+  "prev_min": 0.8183,
+  "prev_mean": 0.9634,
+  "per_frame_start": [
+   0.9883,
+   0.9505,
+   0.8809,
+   0.8377,
+   0.7986,
+   0.8261,
+   0.8408,
+   0.8169,
+   0.8201,
+   0.8168,
+   0.8405,
+   0.832,
+   0.8394,
+   0.832,
+   0.8087,
+   0.8134
+  ]
+ },
+ "clip": {
+  "start_min": 0.8957,
+  "start_mean": 0.9103,
+  "start_last": 0.9115,
+  "prev_min": 0.9292,
+  "prev_mean": 0.9813,
+  "per_frame_start": [
+   0.9593,
+   0.9303,
+   0.8998,
+   0.9052,
+   0.9038,
+   0.8985,
+   0.8986,
+   0.9184,
+   0.9138,
+   0.9244,
+   0.9033,
+   0.8961,
+   0.9078,
+   0.8957,
+   0.8984,
+   0.9115
+  ]
+ },
+ "transition": false,
+ "info": [],
+ "flags": [
+  "jump"
+ ]
+}

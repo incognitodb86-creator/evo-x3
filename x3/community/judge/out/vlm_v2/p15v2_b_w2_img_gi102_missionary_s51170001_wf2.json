@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w2_img_gi102_missionary_s51170001_wf2",
+ "secs": 4.5,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom setting with white rumpled linens and consistent background elements."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical blonde woman in white lace and dark-haired man appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or repositioning."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary pose with bodies in intimate contact and visible rhythmic motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show anatomically correct bodies with no fused limbs, missing parts, or malformed genitalia."
+  }
+ },
+ "flags": []
+}

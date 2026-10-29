@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w8_img_gi201_against_wall_s51170001_wf2",
+ "secs": 4.0,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical dark cave with rock walls and warm brazier lighting, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames, matching hair, skin, attire, and body types as START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing with no jump or composition change."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "By frame 8, elf woman's palms are flat against wall, orc's thrust is visible, and target pose is clearly achieved."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, malformed genitals, or extra limbs visible in any frame; anatomy remains consistent."
+  }
+ },
+ "flags": []
+}

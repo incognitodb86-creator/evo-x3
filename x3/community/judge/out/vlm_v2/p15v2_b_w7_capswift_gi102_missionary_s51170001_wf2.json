@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w7_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 4.4,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom with rumpled white sheets and muted wall, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and shirtless man appear consistently across all frames, matching descriptions."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE: same pose, framing, lighting, and character details."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with bodies in contact and pelvic motion visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy observed in any frame or final image."
+  }
+ },
+ "flags": []
+}
