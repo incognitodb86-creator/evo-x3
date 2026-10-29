@@ -1,6 +1,6 @@
 """vlm_variants.py - audit2 experiment (2026-10-29): persona / persona+rubric / worst-frame zoom variants of vlm_judge.
 Same model, inputs and schema as vlm_judge.py; flags only, never KEEPs. Rubric written once from generic defect
-definitions before any variant was scored (not tuned on p15v2). Usage: vlm_variants.py --variants A,B,C,Z [--match p15v2_]
+definitions before any variant was scored (not tuned on p15v2). Usage: vlm_variants.py --variants A,B,C,Z [--match p15v2_] [--model qwen3vl_judge] [--out out\\audit2]
 """
 import argparse, json, os, sys, time
 from pathlib import Path
@@ -73,7 +73,7 @@ def ask_zoom(job, wf=None):
                 "with a short reason (max 25 words):\n" + "\n".join(f'- "{k}": {v[0]}' for k, v in ZCHECKS.items()))
         msgs = [{"role": "user", "content": [{"type": "text", "text": text}, {"type": "image_url", "image_url": {"url": vj.b64(start)}},
                                              {"type": "image_url", "image_url": {"url": vj.b64(read_frame(mp4, i), 1344)}}]}]
-        ans, probs, fin = post(msgs, ZSCHEMA, ZCHECKS); res.append({"frame": i, "answers": ans, "p_defect": probs, "finish": fin})
+        ans, probs, fin, parse = post(msgs, ZSCHEMA, ZCHECKS); res.append({"frame": i, "answers": ans, "p_defect": probs, "finish": fin, "parse": parse})
     return {"frames": idx, "diffs": diffs, "per_frame": res}
 
 def post(msgs, schema, checks=None):
@@ -84,16 +84,22 @@ def post(msgs, schema, checks=None):
     import urllib.request
     res = json.loads(urllib.request.urlopen(urllib.request.Request(f"{vj.URL}/v1/chat/completions", json.dumps(body).encode(),
                      {"Content-Type": "application/json"}), timeout=900).read())
-    ans = json.loads(res["choices"][0]["message"]["content"])
+    ans, parse = vj.parse_json(res["choices"][0]["message"]["content"])
     saved = vj.CHECKS
     if checks: vj.CHECKS = checks
-    try: probs = vj.answer_probs(res, ans)
+    try:
+        probs = vj.answer_probs(res, ans)  # p_defect is calibration only; a model without usable logprobs yields {}
+    except Exception as e:
+        print("[logprobs note]", repr(e)[:120], flush=True); probs = {}
     finally: vj.CHECKS = saved
-    return ans, probs, res["choices"][0].get("finish_reason")
+    return ans, probs, res["choices"][0].get("finish_reason"), parse
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--match", default="p15v2_"); ap.add_argument("--variants", default="A,B,C,Z")
-    a = ap.parse_args(); base = Path(__file__).parent / "out" / "audit2"
+    ap.add_argument("--model", default=vj.MODEL, help="llama-swap model to ask (default: the judge model); only this model is unloaded at the end")
+    ap.add_argument("--out", default=None, help="output folder (default out\\audit2; a relative --out resolves against the current directory)")
+    a = ap.parse_args(); base = Path(a.out) if a.out else Path(__file__).parent / "out" / "audit2"
+    vj.MODEL = a.model; print("[model]", vj.MODEL, "[out]", base, flush=True)
     jobs = [j for j in json.loads(vj.MANIFEST.read_text())["jobs"] if a.match in j["tag"]]
     wf = {j['tag']: worst_frames(vj.RUNS / j['tag'] / f"{j['tag']}.mp4") for j in jobs} if 'Z' in a.variants else {}  # CPU, before the lock
     vj.take_gpu(); t0 = time.time()
@@ -101,16 +107,17 @@ if __name__ == "__main__":
         for v in a.variants.split(","):
             od = base / v; od.mkdir(parents=True, exist_ok=True); tv = time.time()
             for j in jobs:
+                tc = time.time()
                 try:
                     if v == "Z": r = ask_zoom(j, wf[j["tag"]])
                     else:
-                        ans, probs, fin = ask_variant(j, v)
-                        r = {"answers": ans, "p_defect": probs, "finish": fin,
+                        ans, probs, fin, parse = ask_variant(j, v)
+                        r = {"answers": ans, "p_defect": probs, "finish": fin, "parse": parse,
                              "flags": [k for k, (_, bad) in vj.CHECKS.items() if ans[k]["answer"] == bad]}
                 except Exception as e:
                     r = {"error": repr(e)[:300]}
-                r["tag"] = j["tag"]; (od / f"{j['tag']}.json").write_text(json.dumps(r, indent=1))
-                print(v, j["tag"], r.get("flags", r.get("error", "zoom")), flush=True)
+                r["tag"] = j["tag"]; r["model"] = vj.MODEL; r["secs"] = round(time.time() - tc, 1); (od / f"{j['tag']}.json").write_text(json.dumps(r, indent=1))
+                print(v, j["tag"], r["secs"], r.get("flags", r.get("error", "zoom")), flush=True)
             print(f"[variant {v}] {time.time() - tv:.0f} s", flush=True)
     finally:
         vj.release_gpu(); print(f"[TOTAL under lock] {time.time() - t0:.0f} s")
