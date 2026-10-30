@@ -1,6 +1,6 @@
 ---
 name: h3-hc-render
-description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the Forge Ralph loop - graph keys, reference-image wiring, frame/canvas math, the p7 budget gate, JOB_REQUEST.json, and the objective proof checks. Use when building a graph, requesting a render, checking a rendered clip, or touching p7/JOB_REQUEST.json.
+description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the Forge Ralph loop - graph keys, reference-image wiring, frame/canvas math and the objective proof checks. Use when building a graph, requesting a render or checking a rendered clip.
 ---
 
 # H3 hardcore render
@@ -16,7 +16,6 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 ## 1. Read the state before anything
 
 - `tail -n 15 C:/Users/derek/5slock/ralph-community/logs/ralph.log`.
-- Budget gate RETIRED: FIX 8 (commit 17e932f, 2026-10-26) removed the p7_budget.json GPU-minute ledger from run_graph_job.py and archived it. No budget file exists; a missing p7_budget.json is NOT a block. Limits now: one GPU job at a time (gpu lock) and Derrick's GO on the plan.
 - GPU lock: `python C:/AI/community/scripts/comfy_ctl.py status` (no arguments to gpu_guard). Never stop/restart
   ComfyUI while a render runs; after every start/restart continue only if `comfy_ok=True`.
 - Direct-HTTP renders (bakeoff arms only): wake + queue + wait + fetch in ONE script call, log the window in
@@ -67,12 +66,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
   `comfy_extras/nodes_minimax_h3.py`, no network). Every builder gets a **self-destruct probe**: restore the old
   wiring in a clone and require every detector to fire there and none on the real graph. A green check that cannot
   fail is worthless.
-- Test the id against every `ralph.ps1` `-notmatch` pattern before writing it (patterns at ralph.ps1:202 and :283).
-  To re-request a dead clip, clone its rendered `ok=True` sibling graph and change only the per-clip keys.
-- Write `C:/AI/community/p7/JOB_REQUEST.json` (ABSOLUTE path; a `ralph-community/p7/` folder must never exist):
-  `{"jobs": [{"id": "<id>", "kind": "graph", "frames": 243, "frames_tol": 0, "minutes": 60}]}` + trailing newline,
-  `python -m json.tool` it, tick the TASKS line, print DONE, EXIT. A request is submittable only while
-  `C:/AI/community/p7/jobs/<id>.result.json` is absent. Never write proof/notes/audit files in a request pass.
+- To re-request a dead clip, clone its rendered `ok=True` sibling graph and change only the per-clip keys.
 - One seed per clip. Never request a quality redo (harness redos = same seed, then seed+1).
 
 ## 5. Proof (next pass, objective only; review = qwen3vl_judge + Z zoom, flag-only; Derrick gives the only KEEP)
