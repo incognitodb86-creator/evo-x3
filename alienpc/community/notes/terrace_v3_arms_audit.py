@@ -29,7 +29,11 @@ ARM_SET = {"a0": {}, "s1a": {"ksel.sampler_name": "er_sde"}, "s1b": {"s0_sched.s
 ARM_DESC = {"a0": "B2 control (no setting change)", "s1a": "sampler er_sde, scheduler stays simple",
             "s1b": "scheduler sgm_uniform, sampler stays euler, pass 2 stays beta",
             "s2": "unet activation_learned_HQ", "s3": "latent upscaler fp16", "s6": "pass-1 steps 6",
-            "s8": "prompt only: the #74 line + '\\n' + the scene prompt"}
+            "s8": "prompt only: the line file bytes (incl. its own trailing LF) + '\\n' + the scene prompt "
+                  "= the v2 join (Max's correction 2026-10-30)"}
+# Max's expected sha256 of each S8 prompt, given with his 2026-10-30 correction. Used as a gate: a built s8
+# prompt that does not hash to its expected value is an audit failure, not a note.
+S8_SHA = {"terr": "46195643c6c6", "imgA": "5f335a68ee24", "imgB": "12e46703e6ca"}
 ARM_LINE = {"s8": True}
 REUSE = {("a0", "terr", 51083002): "b2_s51083002", ("a0", "terr", 51083012): "b2_s51083012",
          ("a0", "terr", 51083013): "b2_s51083013", ("s2", "terr", 51083002): "s2_s51083002",
@@ -81,7 +85,12 @@ def ffprobe(path):
 
 base = json.load(open(B2, encoding="utf-8"))
 W0, L0 = widgets(base), links(base)
-line = open(os.path.join(SRC, "s8_line_pic1_scene_identity.txt"), encoding="utf-8").read().rstrip("\r\n")
+line_raw = open(os.path.join(SRC, "s8_line_pic1_scene_identity.txt"), encoding="utf-8", newline="").read()
+line = line_raw.rstrip("\r\n")
+if hashlib.sha256(line.encode("utf-8")).hexdigest() != "dae7567438227802b08d6276faece019759c43958199f97cb2482c5daf8e2908":
+    raise SystemExit("the #74 line file is not the verified 335-char text")
+if len(line_raw) - len(line) != 1 or not line_raw.endswith("\n"):
+    raise SystemExit("the line file does not end in exactly one LF; the S8 join is file bytes + one LF")
 prompt_src = {s: open(f, encoding="utf-8", newline="").read() for s, (_i, f, _s) in SCENES.items()}
 rows, fails, inventory = [], [], []
 
@@ -102,7 +111,11 @@ for arm, aset in ARM_SET.items():
             if L0 != L1:
                 problems.append("link graph differs from B2 (%d keys)"
                                % len({k for k in set(L0) | set(L1) if L0.get(k) != L1.get(k)}))
-            want_prompt = (line + "\n" + prompt_src[scene]) if ARM_LINE.get(arm) else prompt_src[scene]
+            want_prompt = (line_raw + "\n" + prompt_src[scene]) if ARM_LINE.get(arm) else prompt_src[scene]
+            if ARM_LINE.get(arm):
+                psha = hashlib.sha256(want_prompt.encode("utf-8")).hexdigest()
+                if not psha.startswith(S8_SHA[scene]):
+                    problems.append("S8 prompt sha %s does not match Max's expected %s…" % (psha[:16], S8_SHA[scene]))
             expect = {"img.image": image, "c0.prompt": want_prompt, "c0.length": FRAMES,
                       "noise.noise_seed": seed,
                       "save.filename_prefix": "community/terrace_settings_v3_20261030/%s/%s" % (tag, tag)}
@@ -167,7 +180,9 @@ for arm, aset in ARM_SET.items():
 # this is the check that decides the reuse and proves the a0 control is the same instrument the winner rule compares
 # against. Expected delta: the output prefix only. For s8 the prompt string also differs, by exactly the one byte of
 # the join (brief8 words it line + "\n" + prompt; the v2 queue used "\n\n") - reported, never smoothed over.
-print("\n== control/reuse equivalence: each reused slot's v3 graph vs the v2 graph that made its clip ==")
+print("\n== control/reuse equivalence: each reused slot's v3 graph vs the v2 graph that made its clip ==\n"
+      "(after Max's 2026-10-30 correction the S8 join is the v2 join, so the allowed delta is the prefix ONLY, "
+      "for all seven slots)")
 equ = []
 for (arm, scene, seed), v2dir in sorted(REUSE.items()):
     tag = "%s_%s_s%d" % (arm, scene, seed)
@@ -177,7 +192,7 @@ for (arm, scene, seed), v2dir in sorted(REUSE.items()):
     W3, L3 = widgets(g), links(g)
     d = sorted({k for k in set(W2) | set(W3) if W2.get(k, "<gone>") != W3.get(k, "<new>")})
     links_same = L2 == L3
-    want = {"save.filename_prefix"} | ({"c0.prompt"} if arm == "s8" else set())
+    want = {"save.filename_prefix"}
     p2, p3 = get_w(v2g, "c0.prompt"), get_w(g, "c0.prompt")
     pbytes = len(p3.encode("utf-8")) - len(p2.encode("utf-8"))
     ok = set(d) == want and links_same and len(g) == len(v2g) == 26 \
@@ -248,10 +263,11 @@ with open(os.path.join(NOTES, "2026-10-30-brief8-arms-diff.md"), "w", encoding="
         f.write("| %s | %d | `%s` | PASS |\n" % ("、".join(sorted(arms)), n, s))
     f.write("\nEvery prompt embedded in a graph is byte-identical to the file it came from: the terrace prompt "
             "hashes to `e202e512…`, promptA to `97ed1361…`, promptB to `83efcf50…` - the same hashes brief8 names, "
-            "so what is submitted is what Max staged. `s8` is `line + \"\\n\" + prompt` exactly as brief8 words it; "
-            "the v1/v2 queue used `\"\\n\\n\"`, so s8_terr_s51083002 (reused) and the new s8 clips are not byte-"
-            "identical prompts - the line and the prompt are the same text, the join is one byte shorter. Flagged for "
-            "the CHECKED gate.\n")
+            "so what is submitted is what Max staged. The `s8` prompt is the line file's own bytes (the 335-char "
+            "line, sha256 of the text `dae75674…`, plus its own trailing LF) + one more LF + the scene prompt, per "
+            "Max's correction on 2026-10-30 - the same join the v1/v2 queue used. The built S8 prompts hash to the "
+            "three values Max supplied (`46195643c6c6…` terrace, `5f335a68ee24…` imgA, `12e46703e6ca…` imgB), and "
+            "the audit asserts those values: a mismatch is an audit failure, not a note.\n")
 print("wrote notes/2026-10-30-brief8-arms-diff.md")
 
 with open(os.path.join(NOTES, "2026-10-30-brief8-arms-diff.md"), "a", encoding="utf-8") as f:
@@ -264,13 +280,11 @@ with open(os.path.join(NOTES, "2026-10-30-brief8-arms-diff.md"), "a", encoding="
         f.write("| %s | `%s` | %s | %s | 124 = 124 | %s | %d → %d (%+d) | %s |\n"
                 % (tag, v2dir, ", ".join("`%s`" % x for x in d), "identical" if ls else "DIFFERS",
                    tag.rsplit("_s", 1)[1], n2, n3, pb, "same instrument" if ok else "PROBLEM"))
-    f.write("\nSo `a0` is byte-identical to the v2 B2 control except for where the file is written, and the setting "
-            "arms s2/s3/s6 are identical to the v2 graphs that made the reused clips. `s8` differs by the prompt "
-            "join: brief8 words it `line + \"\\n\" + prompt` (one LF), the v2 queue used two. The line and the "
-            "prompt text are the same, so the reused `s8_terr_s51083002` clip sits one byte of whitespace away from "
-            "the graph that would produce it. That is a decision for the CHECKED gate, not for me: the audit "
-            "reports both joins, and the s8 arm can be rebuilt on `\"\\n\\n\"` in one command if Max wants the "
-            "reuse to be exact.\n")
+    f.write("\nAll seven reused slots now differ from the v2 graphs that made their clips by the output prefix and "
+            "nothing else - `a0`, `s2`, `s3`, `s6` and (after Max's 2026-10-30 correction of the S8 join) `s8` too. "
+            "Every reused clip is therefore the same instrument as the graph queued for it, which is the evidence the "
+            "plan's reuse needs. The prompts are byte-identical to the v2 prompts (`+0 B` in the table), which is "
+            "what the corrected join is for.\n")
 
 with open(os.path.join(NOTES, "2026-10-30-brief8-arms-inventory.md"), "w", encoding="utf-8") as f:
     f.write("# brief8 Step A inventory - every built path with sha256 (49 graphs x 4 files)\n\n")
