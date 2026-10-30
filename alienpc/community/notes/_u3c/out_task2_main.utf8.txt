@@ -1,0 +1,20 @@
+Done.
+
+**1. Tool used:** `edit` (exact text replacement), plus `read` before/after to verify.
+
+**2. Call I made:**
+```
+edit(path="C:/AI/community/notes/_u3c/forge_taskB_target.txt",
+     edits=[{ oldText: "target = 3", newText: "target = 7" }])
+```
+→ `Successfully replaced 1 block(s)`
+
+**3. The 4 lines as they are now:**
+```
+# cell config - do not reorder
+mode = stock
+target = 7
+seed = 51083007
+```
+
+No render, no GPU, no git, no commit.
