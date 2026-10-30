@@ -191,14 +191,17 @@ def ensure_comfy(logfile=None):
     st = http(BASE + "/system_stats", timeout=300)
     log(f"COMFY ready v{st['system']['comfyui_version']} wait={time.time()-t0:.0f}s vram_free={st['devices'][0].get('vram_free',0)/2**30:.1f}GiB", logfile)
 
-def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=None):
+PENDING = "pending"  # fetch(): the prompt_id is not in /history yet
+
+def submit(g, tag, meta, outdir, logfile=None, out=None):
+    """Guard + save <tag>.api.json + POST /prompt. Returns the prompt_id, or None (the reason is in `out`; a guard
+    hit leaves `out` empty, as run() always did). run_queue.py calls this for every job of a batch up front."""
     os.makedirs(outdir, exist_ok=True)
     for n in g.values():
         for s in prompt_strings(n.get("inputs", {})):
             if not guard_ok(s):
                 log(f"SKIP {tag} adults-only guard hit", logfile); return None
     json.dump(g, open(os.path.join(outdir, tag + ".api.json"), "w", encoding="utf-8"), indent=1)
-    t0 = time.time()
     try:
         res = http(BASE + "/prompt", {"prompt": g, "client_id": "community-ali52",
                    "extra_data": {"extra_pnginfo": {"workflow": {"api_prompt": g, "community": meta}}}},
@@ -212,9 +215,36 @@ def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=Non
         log(f"JOB submit-stall {tag} {str(e)[:160]} (submit timeout {SUBMIT_TIMEOUT}s; the job may be running server-side)", logfile)
         return outcome(out, "submit_stall", note=str(e)[:160])
     pid = res.get("prompt_id"); log(f"JOB start {tag} prompt_id={pid}", logfile)
+    return pid
+
+def fetch(pid, tag, meta, outdir, t0, logfile=None, out=None):
+    """ONE /history/<pid> read (raises if the read fails). PENDING = not finished yet; side dict = success (output
+    copied next to the request, .json side file written); None = node error (recorded in `out`)."""
+    h = http(f"{BASE}/history/{pid}", timeout=POLL_TIMEOUT)
+    if pid not in h: return PENDING
+    st = h[pid].get("status", {}); outs = h[pid].get("outputs", {})
+    files = [(f.get("subfolder"), f.get("filename")) for o in outs.values() for k in ("images", "gifs", "videos") for f in o.get(k, [])]
+    dt = time.time() - t0
+    if st.get("status_str") == "success" and files:
+        src = os.path.join(C, "output", files[0][0] or "", files[0][1])
+        dst = os.path.join(outdir, tag + os.path.splitext(src)[1])
+        shutil.copyfile(src, dst)
+        side = dict(meta, tag=tag, secs=round(dt, 1), comfy_output=src, file=dst, prompt_id=pid,
+                    finished=datetime.datetime.now().strftime('%Y-%m-%d %H:%M CT'))
+        json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
+        log(f"JOB end {tag} ok secs={dt:.1f} file={dst}", logfile); return side
+    msgs = [m for m in st.get("messages", []) if m[0] == "execution_error"]
+    log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile)
+    return outcome(out, "node_error", pid, note=json.dumps(msgs)[:300])
+
+def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=None):
+    """One job, submit then wait (submit() + fetch() every `poll` s). Batches use run_queue.py's up-front queue."""
+    t0 = time.time()
+    pid = submit(g, tag, meta, outdir, logfile, out)
+    if pid is None: return None
     while time.time() - t0 < timeout:
         time.sleep(poll)
-        try: h = http(f"{BASE}/history/{pid}", timeout=POLL_TIMEOUT)
+        try: r = fetch(pid, tag, meta, outdir, t0, logfile, out)
         except Exception as e:
             log(f"poll warn {tag} {e}", logfile)
             if comfy_loaded() is False:
@@ -224,21 +254,8 @@ def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=Non
                 log(f"poll stop {tag} comfyui_auto is not running: prompt_id {pid} is in no live history", logfile)
                 return outcome(out, "evicted", pid, note="history lost with the comfyui_auto process")
             continue
-        if pid in h:
-            st = h[pid].get("status", {}); outs = h[pid].get("outputs", {})
-            files = [(f.get("subfolder"), f.get("filename")) for o in outs.values() for k in ("images", "gifs", "videos") for f in o.get(k, [])]
-            dt = time.time() - t0
-            if st.get("status_str") == "success" and files:
-                src = os.path.join(C, "output", files[0][0] or "", files[0][1])
-                dst = os.path.join(outdir, tag + os.path.splitext(src)[1])
-                shutil.copyfile(src, dst)
-                side = dict(meta, tag=tag, secs=round(dt, 1), comfy_output=src, file=dst, prompt_id=pid,
-                            finished=datetime.datetime.now().strftime('%Y-%m-%d %H:%M CT'))
-                json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
-                log(f"JOB end {tag} ok secs={dt:.1f} file={dst}", logfile); return side
-            msgs = [m for m in st.get("messages", []) if m[0] == "execution_error"]
-            log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile)
-            return outcome(out, "node_error", pid, note=json.dumps(msgs)[:300])
+        if r is PENDING: continue
+        return r
     log(f"JOB timeout {tag}", logfile)
     return outcome(out, "stalled", pid, note=f"no history in {timeout}s; the render may have landed in ComfyUI output")
 
