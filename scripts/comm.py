@@ -193,9 +193,6 @@ def ensure_comfy(logfile=None):
 
 def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=None):
     os.makedirs(outdir, exist_ok=True)
-    # pre-check for the outcome record only; the block below is the gate that stops the queue, unchanged (RENDER-TIMEOUT)
-    if any(any(not guard_ok(s) for s in prompt_strings(n.get("inputs", {}))) for n in g.values()):
-        outcome(out, "guard", note="adults-only guard hit; the pinned gate below is what returns before the POST")
     for n in g.values():
         for s in prompt_strings(n.get("inputs", {})):
             if not guard_ok(s):
