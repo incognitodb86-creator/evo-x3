@@ -1,4 +1,4 @@
-﻿# Forge brief: stage SS / LC / AIO test (NO RENDERS)  - 2026-10-30
+# Forge brief: stage SS / LC / AIO test (NO RENDERS)  - 2026-10-30
 
 Plan: brain 40_projects/max-fix-tests/plans/2026-10-30-seed-longclip-aio-test-plan.md (commit 8f7c549). Readable copy: C:\AI\community\runs\sslcaio_20261030\_inputs\plan.md
 Derrick, 2:26 PM CT: "Forge should pick a new thing and write a new scene" / "Use H3-Multishot" / "Yes, install the long-clip pack and download the All-In-One workflow" / "Hold for now". 2:54 PM CT: "Run the long-clip arms at low res, then rerun only the winner at full B2 res".
