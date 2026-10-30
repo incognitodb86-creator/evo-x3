@@ -1,0 +1,66 @@
+﻿clips: 36   (order: sasasttaan)  F = defect answered, . = not
+
+| clip | qwen A | swift A | qwen Z | swift Z | A+Z qwen | A+Z swift | q secs | swift secs | qZ secs | swiftZ secs |
+|---|---|---|---|---|---|---|---|---|---|---|
+| a_w2_capjoy_gi102_missionary | .FF.. F | .FF.. F |  |  | F | F | 4.2 | 19.0 | None | 27.2 |
+| a_w2_capjoy_gi201_against_wall | .....  | .F... F |  | Fsame_scene,anatomy_defect |  | F | 4.6 | 19.0 | None | 27.3 |
+| a_w2_capswift_gi102_missionary | .....  | .....  |  |  |  |  | 4.6 | 19.2 | None | 27.0 |
+| a_w2_capswift_gi201_against_wall | .....  | .....  |  |  |  |  | 4.3 | 18.9 | None | 27.0 |
+| a_w2_img_gi102_missionary | .....  | .....  |  |  |  |  | 4.5 | 19.0 | None | 27.0 |
+| a_w2_img_gi201_against_wall | .....  | ..F.. F |  |  |  | F | 4.3 | 18.9 | None | 27.1 |
+| a_w7_capjoy_gi102_missionary | ..F.. F | .FF.. F |  | Fanatomy_defect | F | F | 4.8 | 19.1 | None | 26.9 |
+| a_w7_capjoy_gi201_against_wall | .....  | .F... F |  | Fanatomy_defect |  | F | 4.3 | 19.3 | None | 27.1 |
+| a_w7_capswift_gi102_missionary | .....  | ...FF F |  |  |  | F | 10.5 | 25.3 | None | 33.2 |
+| a_w7_capswift_gi201_against_wall | ..F.. F | ..F.. F |  |  | F | F | 4.5 | 24.8 | None | 32.7 |
+| a_w7_img_gi102_missionary | F.FF. F | FFFFF F | Fsame_scene | Fsame_scene,anatomy_defect | F | F | 4.0 | 19.3 | None | 27.0 |
+| a_w7_img_gi201_against_wall | ..F.. F | .FF.. F |  | Fanatomy_defect | F | F | 4.3 | 18.9 | None | 27.1 |
+| a_w8_capjoy_gi102_missionary | .....  | .....  |  |  |  |  | 4.5 | 19.1 | None | 27.2 |
+| a_w8_capjoy_gi201_against_wall | .....  | .....  |  |  |  |  | 4.3 | 18.7 | None | 27.2 |
+| a_w8_capswift_gi102_missionary | .....  | .....  |  |  |  |  | 4.5 | 18.9 | None | 27.2 |
+| a_w8_capswift_gi201_against_wall | .....  | .....  |  | Fanatomy_defect |  | F | 4.3 | 18.7 | None | 27.0 |
+| a_w8_img_gi102_missionary | .....  | .....  |  |  |  |  | 4.3 | 19.1 | None | 26.9 |
+| a_w8_img_gi201_against_wall | .....  | ..F.. F |  |  |  | F | 4.3 | 19.1 | None | 27.0 |
+| b_w2_capjoy_gi102_missionary | .....  | .F... F |  |  |  | F | 4.1 | 19.0 | None | 27.1 |
+| b_w2_capjoy_gi201_against_wall | .....  | .....  |  |  |  |  | 4.5 | 18.7 | None | 26.8 |
+| b_w2_capswift_gi102_missionary | .....  | .....  |  |  |  |  | 4.4 | 18.9 | None | 27.0 |
+| b_w2_capswift_gi201_against_wall | .....  | ...FF F |  |  |  | F | 4.4 | 19.0 | None | 27.2 |
+| b_w2_img_gi102_missionary | .....  | .....  |  | Fanatomy_defect |  | F | 4.5 | 19.0 | None | 27.0 |
+| b_w2_img_gi201_against_wall | .....  | ...FF F |  | Fsame_scene,anatomy_defect |  | F | 4.3 | 19.4 | None | 27.0 |
+| b_w7_capjoy_gi102_missionary | .....  | .F... F |  | Fsame_scene,anatomy_defect |  | F | 3.9 | 18.9 | None | 27.2 |
+| b_w7_capjoy_gi201_against_wall | .....  | .....  |  | Fanatomy_defect |  | F | 4.4 | 19.1 | None | 27.0 |
+| b_w7_capswift_gi102_missionary | ..F.. F | ...F. F |  |  | F | F | 4.5 | 24.6 | None | 32.6 |
+| b_w7_capswift_gi201_against_wall | ...F. F | ...FF F |  |  | F | F | 4.4 | 25.5 | None | 33.7 |
+| b_w7_img_gi102_missionary | ..F.. F | ...FF F |  | Fanatomy_defect | F | F | 4.6 | 18.8 | None | 27.1 |
+| b_w7_img_gi201_against_wall | .....  | .....  |  |  |  |  | 4.4 | 18.9 | None | 26.8 |
+| b_w8_capjoy_gi102_missionary | ..F.. F | .F... F |  |  | F | F | 4.1 | 18.9 | None | 26.8 |
+| b_w8_capjoy_gi201_against_wall | ..F.. F | .....  |  | Fsame_scene,anatomy_defect | F | F | 4.6 | 19.5 | None | 26.9 |
+| b_w8_capswift_gi102_missionary | .....  | ...FF F |  |  |  | F | 4.3 | 19.0 | None | 27.0 |
+| b_w8_capswift_gi201_against_wall | ...F. F | ...FF F |  |  | F | F | 4.2 | 19.0 | None | 26.8 |
+| b_w8_img_gi102_missionary | .....  | .....  |  |  |  |  | 4.4 | 18.9 | None | 26.9 |
+| b_w8_img_gi201_against_wall | .....  | .....  | Fsame_scene | Fsame_scene,anatomy_defect | F | F | 4.5 | 18.9 | None | 27.5 |
+
+## totals
+  qwen  vlm_judge  : flagged 11/36
+  swift vlm_judge  : flagged 20/36
+  qwen  vlm_judge+Z: flagged 12/36
+  swift vlm_judge+Z: flagged 25/36
+  qwen  zoom_Z     : flagged 2/36
+  swift zoom_Z     : flagged 13/36
+  qwen  vlm_judge per-clip secs: n 36 min 3.9 med 4.4 max 10.5  sum 163.6 s of 36 clips
+  qwen  zoom_Z    per-clip secs: not recorded (that run predates r["secs"]); see out\audit2\run.log for the variant total
+  swift vlm_judge per-clip secs: n 36 min 18.7 med 19.0 max 25.5  sum 708.3 s of 36 clips
+  swift zoom_Z    per-clip secs: n 36 min 26.8 med 27.0 max 33.7  sum 997.5 s of 36 clips
+  qwen  vlm_judge truncated/invalid/errored: 0 []
+  qwen  zoom_Z    truncated/invalid/errored: 0 []
+  swift vlm_judge truncated/invalid/errored: 0 []
+  swift zoom_Z    truncated/invalid/errored: 0 []
+
+## per-check agreement swift vs qwen (vlm_judge, 36 clips)
+  same_scene:36/36  same_people:28/36  start_kept:30/36  target_reached:30/36  anatomy_defect:28/36
+  qwen  vlm_judge answered-as-defect: same_scene:1  same_people:1  start_kept:9  target_reached:3  anatomy_defect:0   zoom_Z: same_scene:2  anatomy_defect:0
+  swift vlm_judge answered-as-defect: same_scene:1  same_people:9  start_kept:7  target_reached:9  anatomy_defect:8   zoom_Z: same_scene:6  anatomy_defect:13
+
+## same-input notes
+  all 36 storyboard jpgs byte-identical and all zoom frame indices identical
+
+wrote C:\AI\community\judge\out\swift_compare.csv

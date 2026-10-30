@@ -1,0 +1,53 @@
+{
+ "frames": [
+  207,
+  237
+ ],
+ "diffs": [
+  5.4,
+  5.77
+ ],
+ "per_frame": [
+  {
+   "frame": 207,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background elements, including the beige headboard, white bedding, and lighting conditions, remain consistent between both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The anatomy appears natural with no visible defects such as extra limbs, detached parts, or malformed features in the generated frame."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0062,
+    "anatomy_defect": 0.6379
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 237,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background elements, including the beige headboard, white bedding, and lighting conditions, remain consistent between both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The anatomy appears realistic with no visible defects such as extra limbs, detached parts, or malformed features in the generated frame."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0024,
+    "anatomy_defect": 0.602
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.2
+}

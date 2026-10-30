@@ -1,0 +1,13 @@
+diff --git "a/C:\\AI\\community\\notes\\ralph.ps1.bak-20261023-audit" "b/C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1"
+index 962c1ae..08d853e 100644
+--- "a/C:\\AI\\community\\notes\\ralph.ps1.bak-20261023-audit"
++++ "b/C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1"
+@@ -324,7 +324,7 @@ while($i -lt $Max){
+     elseif($ch.Full -match '\.json$'){ $o = @(& $py -m json.tool $ch.Full 2>&1 | ForEach-Object { "$_".Trim() } | Where-Object { $_ }); if($LASTEXITCODE -ne 0){ $fails += "json.tool $($ch.Full): $($o | Select-Object -Last 1)" } }
+   }
+   # ali160 A8 backpressure (ghuntley.com/ralph): the community tests must pass before a task counts
+-  $pt = @(& $DPy -m pytest -q "$C\scripts\tests\test_p6_review.py" 2>&1 | ForEach-Object { "$_" }); $ptFail = ($LASTEXITCODE -ne 0)
++  $pt = @(& $DPy -m pytest -q "$C\scripts\tests" 2>&1 | ForEach-Object { "$_" }); $ptFail = ($LASTEXITCODE -ne 0)
+   if($ptFail){ $fails += "pytest: $(($pt | Select-Object -Last 2) -join ' / ')" }
+   # --- scope check: ralph-community may change TASKS.md, STOP_RALPH, notes\* only; C:\AI\community is the work dir
+   $viol += @(KScope $chg $n)

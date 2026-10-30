@@ -1,0 +1,53 @@
+{
+ "frames": [
+  40,
+  66
+ ],
+ "diffs": [
+  12.56,
+  16.29
+ ],
+ "per_frame": [
+  {
+   "frame": 40,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting conditions, and character costumes remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomical structures appear intact; no fused limbs, extra appendages, or malformed body parts are visible in this frame."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0195,
+    "anatomy_defect": 0.5662
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 66,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "The background changes from a dark cave to a scene with bright orange fire lighting on the right side."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The woman's hand in Image 2 is severely malformed, appearing as a blurry, fused flesh mass without distinct fingers."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.5162,
+    "anatomy_defect": 0.8173
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w8_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 26.9
+}

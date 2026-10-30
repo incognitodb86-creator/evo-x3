@@ -1,0 +1,53 @@
+{
+ "frames": [
+  192,
+  223
+ ],
+ "diffs": [
+  8.25,
+  8.05
+ ],
+ "per_frame": [
+  {
+   "frame": 192,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background, lighting, and bed sheets are consistent between the two images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "No visible anatomical defects; limbs, bodies, and contact areas appear structurally normal in Image 2."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0489,
+    "anatomy_defect": 0.619
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 223,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background, lighting, and bed linens remain consistent between the two images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The anatomy appears natural with no visible defects such as extra limbs, detached parts, or malformed features."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0369,
+    "anatomy_defect": 0.709
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w8_capswift_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.0
+}

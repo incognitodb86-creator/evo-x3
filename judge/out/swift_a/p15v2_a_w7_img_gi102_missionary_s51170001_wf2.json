@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w7_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.3,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "no",
+   "reason": "The scene changes from a bedroom (Image 1, Frame 1) to a cave environment in frames 2-8."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "The woman's hair color and clothing change drastically from blonde lace lingerie to brunette chain bikini."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 matches the start, but frames 2-8 jump to a completely different pose, setting, and wardrobe."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "The final frame shows a doggy-style position from behind, not the required missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "yes",
+   "reason": "In frames 2-8 and Image 3, the man's legs are fused with the woman's boots/legs in a nonsensical way."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.9839,
+  "same_people": 0.8602,
+  "start_kept": 0.8236,
+  "target_reached": 0.9971,
+  "anatomy_defect": 0.4354
+ },
+ "flags": [
+  "same_scene",
+  "same_people",
+  "start_kept",
+  "target_reached",
+  "anatomy_defect"
+ ]
+}

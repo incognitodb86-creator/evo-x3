@@ -1,0 +1,53 @@
+{
+ "frames": [
+  95,
+  149
+ ],
+ "diffs": [
+  9.58,
+  10.75
+ ],
+ "per_frame": [
+  {
+   "frame": 95,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background, lighting, and bed linens remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The woman's raised leg in Image 2 is severely malformed, appearing as a distorted, fused shape."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0252,
+    "anatomy_defect": 0.8754
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 149,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background elements, including the bed, pillows, headboard, and lighting conditions, remain consistent between both images."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "In Image 2, the man's arm appears to merge into the woman's leg area, creating a fused, indistinct shape."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0167,
+    "anatomy_defect": 0.8843
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w2_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.0
+}

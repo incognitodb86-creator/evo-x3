@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_a_w8_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.1,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The background (bed, headboard, lighting) is consistent across all frames and matches the start image."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain their identities, clothing, and physical characteristics throughout the sequence."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 is identical to the start image, showing the exact same pose and composition."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the couple in missionary position with the man on top of the woman, matching the target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects are visible; limbs and bodies appear structurally correct."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0072,
+  "same_people": 0.0184,
+  "start_kept": 0.08,
+  "target_reached": 0.0091,
+  "anatomy_defect": 0.4008
+ },
+ "flags": []
+}

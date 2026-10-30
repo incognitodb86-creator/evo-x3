@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_a_w7_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The cave background and lighting remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "The elf's face changes significantly from the start image to the video frames, indicating a character swap."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows a completely different pose (arms down) compared to the start image (arms raised)."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "The final frame depicts the characters in the specified standing rear-entry position against the wall."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0904,
+  "same_people": 0.2278,
+  "start_kept": 0.8259,
+  "target_reached": 0.0276,
+  "anatomy_defect": 0.6219
+ },
+ "flags": [
+  "same_people",
+  "start_kept"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_b_w7_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.1,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The dark cave background and lighting remain consistent throughout all frames, matching the start image."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain their identities, clothing, and physical traits (elf woman, green orc) across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image's pose, framing, and character positions perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the characters in a rear-entry position against a wall with visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0219,
+  "same_people": 0.0279,
+  "start_kept": 0.0534,
+  "target_reached": 0.1133,
+  "anatomy_defect": 0.5823
+ },
+ "flags": []
+}

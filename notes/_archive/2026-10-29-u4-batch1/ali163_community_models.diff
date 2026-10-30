@@ -1,0 +1,34 @@
+--- a/models.json
++++ b/models.json
+@@ -71,6 +71,31 @@
+               "presence_penalty": 1.5
+             }
+           }
++        },
++        {
++          "id": "coding_swift15_iq3s",
++          "name": "Swift 1.5 Qwen3.8-Flash-Next IQ3_S (stock, no ESP) via llama-swap (AlienPc)",
++          "reasoning": true,
++          "input": [
++            "text"
++          ],
++          "contextWindow": 92160,
++          "maxTokens": 16384,
++          "samplingParams": {
++            "temperature": 1.0,
++            "top_p": 0.95,
++            "top_k": 20,
++            "min_p": 0,
++            "presence_penalty": 0,
++            "experimental_speed_projection": false
++          },
++          "samplingParamsByThinkingLevel": {
++            "off": {
++              "temperature": 0.7,
++              "top_p": 0.8,
++              "presence_penalty": 1.5
++            }
++          }
+         }
+       ]
+     }

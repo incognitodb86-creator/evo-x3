@@ -1,0 +1,53 @@
+{
+ "frames": [
+  24,
+  102
+ ],
+ "diffs": [
+  38.63,
+  9.62
+ ],
+ "per_frame": [
+  {
+   "frame": 24,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of identical rock textures, lighting conditions, and environmental details in both frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomy is consistent; limbs are distinct, hands have correct digit counts, and no melting or floating parts are visible."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0178,
+    "anatomy_defect": 0.23
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 102,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rock textures, lighting conditions, and environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomy appears consistent with no visible melting, extra limbs, detached parts, or malformed hands/genitals."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0231,
+    "anatomy_defect": 0.3913
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w2_capswift_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.0
+}

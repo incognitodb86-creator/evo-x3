@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_b_w7_capswift_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 25.5,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The dark cave background and lighting remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde elf woman and green-skinned man are the same characters throughout."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image pose, framing, and clothing perfectly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "The final frame shows a frontal embrace, not the required rear-entry position against a wall."
+  },
+  "anatomy_defect": {
+   "answer": "yes",
+   "reason": "In frames 5-8 and Image 3, the man's arm merges into the woman's raised arm."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0094,
+  "same_people": 0.0552,
+  "start_kept": 0.0162,
+  "target_reached": 0.3503,
+  "anatomy_defect": 0.3668
+ },
+ "flags": [
+  "target_reached",
+  "anatomy_defect"
+ ]
+}

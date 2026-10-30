@@ -1,0 +1,55 @@
+=== 1. the weights ===
+file C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/loras/FC_SYDNEY_h3_face_v1.safetensors  155131760 bytes
+tensors in file: 624
+  prefix lora_unet_blocks_0_attn_out_proj 3
+  prefix lora_unet_blocks_0_attn_qkv_proj 3
+  prefix lora_unet_blocks_0_mlp_fc1   3
+  prefix lora_unet_blocks_0_mlp_fc2   3
+  prefix lora_unet_blocks_10_attn_out_proj 3
+  prefix lora_unet_blocks_10_attn_qkv_proj 3
+  prefix lora_unet_blocks_10_mlp_fc1  3
+  prefix lora_unet_blocks_10_mlp_fc2  3
+  prefix lora_unet_blocks_11_attn_out_proj 3
+  prefix lora_unet_blocks_11_attn_qkv_proj 3
+  prefix lora_unet_blocks_11_mlp_fc1  3
+  prefix lora_unet_blocks_11_mlp_fc2  3
+metadata keys present: 46
+  modelspec.architecture     MiniMax-H3/lora
+  modelspec.title            MM-H3 - Sydney Sweeney
+  modelspec.trigger_phrase   Sydney Sweeney
+  ss_network_module          fizgig.minimax (lora_unet, transformer blocks)
+  ss_network_dim             16
+  ss_network_alpha           16.0
+  ss_base_checkpoint         minimax_h3_ref2va_pruned_int8_convrot.safetensors
+  ss_steps                   3440
+  modelspec.usage_hint       Include 'Sydney Sweeney' in your prompt.
+  trigger-ish metadata keys: ['modelspec.trigger_phrase', 'modelspec.usage_hint', 'ss_caption_dropout']
+  transformer-side tensors 624 ; text-encoder-side tensors 0
+
+=== 2. trigger word, from the private map and the usage card ===
+trigger token (private map, from the file header): 'Sydney Sweeney'
+  [TRIGGER_MAP_private.txt] trigger : "Sydney Sweeney"  - modelspec.trigger_phrase + usage_hint "Include 'Sydney Sweeney' in your prompt."
+
+=== 3. the submitted graph ===
+node lora: lora_name=FC_SYDNEY_h3_face_v1.safetensors strength_model=0.7 strength_clip=1.0 model=['unet', 0] clip=['clip', 0]
+nodes that consume [unet,0] directly: ['lora']
+model chain: unet -> lora -> m_attn -> m_shift -> guiders s0_guide/s1_guide
+m_attn model input = ['lora', 0] ; guiders model input = ['m_shift', 0],['m_shift', 0]
+trained dim/alpha -> built-in scale 1.0 ; effective node scale = strength_model x built-in = 0.7
+
+=== 4. the submitted prompt ===
+chars 7014 ; identical to the no-LoRA cell b1: True
+occurrences of the trigger token in the prompt: 0
+occurrences of the alias FC_SYDNEY in the prompt: 0
+seed 51083020 (b1 seed 51083020) ; frames 124 ; unet 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors
+
+=== 5. did the node execute? ===
+JOB end lines: ['2026-10-30 12:16:33 CT JOB end bj_pov_b5_s51083020_lora ok secs=180.3 file=C:/AI/community/runs/bj_pov_20261030/b5_s51083020_lora\\bj_pov_b5_s51083020_lora.mp4']
+node_errors / error lines: none
+objective ok=True frames=124 size=768x1344 audio=True bytes=2347345
+same seed, same prompt, same start frame as b1; output bytes differ (2347345 vs 2396790) -> the LoRA changed pixels
+
+=== 6. measured effect (the face instrument, from the record note) ===
+a03 (no LoRA) ArcFace cos mean 0.4057 floor 0.2456, first face frame 32 (1.33 s)
+a01 (LoRA 0.7, same seed/prompt/start) cos mean 0.4059 floor 0.2859, first face frame 36 (1.50 s)
+a02 (her face in frame 0, no LoRA) cos mean 0.5495 floor 0.4481, face in 31/31 probes from frame 0

@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_b_w8_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting with white linens and lighting remains consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde woman in the bra and the shirtless man remain the same characters throughout."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image pose, framing, and clothing perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the man on top of the woman in missionary position with visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, extra limbs, or fusion issues are visible in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0032,
+  "same_people": 0.0533,
+  "start_kept": 0.0273,
+  "target_reached": 0.0582,
+  "anatomy_defect": 0.3525
+ },
+ "flags": []
+}
