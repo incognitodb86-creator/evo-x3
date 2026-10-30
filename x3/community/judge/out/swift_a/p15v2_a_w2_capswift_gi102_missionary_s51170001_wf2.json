@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_a_w2_capswift_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.2,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The background (bed, headboard, sheets) is consistent across all frames and matches the start image."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain consistent appearance (blonde woman in white lingerie, shirtless man) throughout the sequence."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 is identical to the start image, showing the exact same pose and composition."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the man on top of the woman in a missionary position with visible contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0017,
+  "same_people": 0.0222,
+  "start_kept": 0.065,
+  "target_reached": 0.0268,
+  "anatomy_defect": 0.4971
+ },
+ "flags": []
+}

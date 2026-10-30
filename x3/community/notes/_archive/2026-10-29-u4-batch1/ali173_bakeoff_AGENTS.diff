@@ -1,0 +1,10 @@
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -14,6 +14,7 @@
+ 
+ ## The GPU is off-limits
+ - Never call llama-swap (127.0.0.1:8080), /upstream/*, /load, /unload, ComfyUI (:8188, :8189, :1000x) or Strata. One request unloads you and kills a running render.
++- BAKEOFF exception (ALI-173, Derrick 1:07 PM CT): for BAKEOFF lines only, ComfyUI API on :10004/:8188/:8189 (read + queue), llama-swap /v1, and python C:/AI/community/scripts/comfy_ctl.py start|stop|restart|status (never during a render; comfy_ok after every restart). See PROMPT.md.
+ - Never run render scripts (p3-p6*.py, batch_queue.py, sy_1min.py, p6_variants.ps1, p6_rerun.ps1, chain.ps1). Compile-check them only.
+ - Hard guards block these. Do not retry or work around a block; note it in your result (or BLOCKED + STOP_RALPH).
+ 

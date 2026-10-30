@@ -1,0 +1,346 @@
+{
+ "id": "ali163_hc15_gi046_s51150031",
+ "kind": "graph",
+ "graph": "C:/AI/community/p7/graphs/ali163_hc15_gi046_s51150031.api.json",
+ "still": "GI046",
+ "take": "A",
+ "take_a": "ali163_hc15_gi046_s51150031",
+ "take_b": "ali163_hc15_gi046_s51150032",
+ "source_clip": "ali163_hc15_gi046_s51150014",
+ "source_graph_sha256": "ea84b857a009072f8992c33fc0286d68cddb631b2810b08f21aec8a794b74643",
+ "prompt_record": "C:/AI/community\\notes\\hc15_top_prompts_20261025.md",
+ "prompt_record_sha256": "fc8929517b04185cb14762e9b660666927990c0ce89f8f04fc1692120e127d2f",
+ "seed": 51150031,
+ "seed_rule": "the take seed is the id number (take A 51150031, take B 51150032); the two takes of one still differ by the seed alone (fix_plan TOP: 'render 2-3 takes per still'). The CARRY seed rule (seed carried from the source clip) belongs to the IM1 settings before/after and does not apply to a new prompt",
+ "shape": {
+  "guide_frame_idx": 0,
+  "passes": 2,
+  "c0_length": 243,
+  "extension_frames": 119,
+  "overlap_frames": 22,
+  "frames_total": 362,
+  "fps": 24,
+  "canvas": [
+   1344,
+   768
+  ],
+  "sampler": "res_multistep",
+  "steps": 8,
+  "scheduler": "simple",
+  "cfg_keys": 0
+ },
+ "windows": {
+  "c0": [
+   0.0,
+   10.125
+  ],
+  "c1": [
+   10.125,
+   15.083333
+  ]
+ },
+ "prompts": {
+  "c0": {
+   "words": 1177,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ]
+  },
+  "c1": {
+   "words": 1123,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "integrated_multimodal_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ]
+  }
+ },
+ "prompts_full": {
+  "c0": {
+   "words": 1177,
+   "main_words": 482,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ],
+   "neg": 0,
+   "ages": [
+    27,
+    34
+   ],
+   "camera_moves": [
+    "Push In",
+    "Static Shot"
+   ],
+   "amplitude": true,
+   "speed": true,
+   "video1": false,
+   "picture1_first_frame": true
+  },
+  "c1": {
+   "words": 1123,
+   "main_words": 457,
+   "beats": 5,
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "integrated_multimodal_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ],
+   "neg": 0,
+   "ages": [
+    27,
+    34
+   ],
+   "camera_moves": [
+    "Arc Shot",
+    "Push In"
+   ],
+   "amplitude": true,
+   "speed": true,
+   "video1": true,
+   "picture1_first_frame": true
+  }
+ },
+ "species": {
+  "tokens": [
+   "orc",
+   "green",
+   "muscled",
+   "hands"
+  ],
+  "hits": {
+   "c0": 4,
+   "c1": 4
+  }
+ },
+ "default_figure_clauses": {
+  "c0": 0,
+  "c1": 0
+ },
+ "card": {
+  "facts": "C:/AI/community/notes/scenes/GI046.facts.json",
+  "facts_sha256": "c2f7da2b4a7eb717092de9269bbc9e9111d40bb648c0053a85bd74bf9bf39cb4",
+  "card": "C:/AI/community/notes/scenes/GI046.md",
+  "card_sha256": "d990679a658b95fe537d3329105b234232c5b39b49e83d48568be6a2dbb89b54",
+  "card_still_sha256": "3be40b2aeef5dc98",
+  "model": "coding_swift15_iq3s",
+  "status": "REFUSAL_TRUNCATED",
+  "scope_ok": true,
+  "figures": 2,
+  "evidence_rows": 29,
+  "evidence_verbatim": 29,
+  "per_chunk_tokens": 17,
+  "tokens_per_chunk": {
+   "c0": 17,
+   "c1": 17
+  },
+  "banned_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "head_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "solo_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "gate_hits": {
+   "c0": 0,
+   "c1": 0
+  },
+  "fires": {
+   "c0": [],
+   "c1": []
+  },
+  "flags": {
+   "c0": {
+    "subjects": 2,
+    "card_figures": 2,
+    "missing_tokens": [],
+    "solo_hits": [],
+    "banned_hits": {},
+    "head_hits": {},
+    "beat0_pose": {
+     "1": [],
+     "2": []
+    },
+    "beat0_ban": {
+     "1": [],
+     "2": []
+    },
+    "room_missing": [],
+    "room_hits": [],
+    "age_no_marker": [],
+    "age_missing": [],
+    "consent_hits": [],
+    "consent_missing": []
+   },
+   "c1": {
+    "subjects": 2,
+    "card_figures": 2,
+    "missing_tokens": [],
+    "solo_hits": [],
+    "banned_hits": {},
+    "head_hits": {},
+    "beat0_pose": {
+     "1": [],
+     "2": []
+    },
+    "beat0_ban": {
+     "1": [],
+     "2": []
+    },
+    "room_missing": [],
+    "room_hits": [],
+    "age_no_marker": [],
+    "age_missing": [],
+    "consent_hits": [],
+    "consent_missing": []
+   }
+  }
+ },
+ "slots": {
+  "ref_images.ref_image_1": [
+   "img",
+   0
+  ],
+  "ref_images.ref_image_2": [
+   "img2",
+   0
+  ]
+ },
+ "images": {
+  "img": "community/hc/GI046.jpg",
+  "img2": "community/hc/GI046_w1_face.png"
+ },
+ "diff_paths": [
+  "[inputs].filename_prefix|save|",
+  "[inputs].noise_seed|noise|",
+  "[inputs].prompt|c0|",
+  "[inputs].prompt|c1|"
+ ],
+ "prose_strings": 2,
+ "gate_ok_all_prose": true,
+ "gate": "comm.guard_ok allow on every prompt-bearing string; scripts/tests/test_p6_review.py 21 passed (run 2026-10-25)",
+ "static_scan_defects": 0,
+ "graph_sha256": "5b7bf8c93e0976fb88c64f18c5758846d832f9033f5ab2b5b7022e1826dd5a62",
+ "graph_bytes": 20278,
+ "run_dir_request_sha256": "5b7bf8c93e0976fb88c64f18c5758846d832f9033f5ab2b5b7022e1826dd5a62",
+ "rendered": {
+  "prose": "the shipped pre-card-fidelity prose: the record was rewritten by TOP-SCENE on 2026-10-25 06:35:37 CT (measured mtime of hc15_top_prompts_20261025.md) and this mp4 predates the rewrite, so it is NOT a render of the current prose record",
+  "select": "the selection is Derrick's alone; no vision judge, no score, no choice by the forge",
+  "shape": "1344x768 24/1 362 f measured by ffprobe -select_streams v:0",
+  "queue": "p7/jobs/<id>.result.json is absent, runs/<id>/ has no mp4 (the clip was collected from the ComfyUI output dir), objective.json is attempts=[] and status.log ends in poll-warn timeouts 04:15-04:23 CT: the id is spent by file evidence, not by a queue receipt",
+  "evidence": {
+   "status_tokens": [
+    "poll warn",
+    "timed out"
+   ],
+   "result_json": false,
+   "runs_mp4": false
+  },
+  "record": "notes/needs_derrick.md row 21c",
+  "file": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi046_s51150031/ali163_hc15_gi046_s51150031_00001_.mp4",
+  "bytes": 8087674,
+  "sha256": "ade76d01fabd94e5d60f40f4be0cf3b5c9d1488bf274b54afa46861b51e9e7e4",
+  "written": "2026-10-25 04:04:52 CT",
+  "queue_result": false
+ },
+ "budget_at_build": {
+  "used_min": 472.9,
+  "jobs": 38,
+  "cap_min": 615,
+  "job_cap": 45,
+  "updated": "2026-10-23T18:53:47"
+ },
+ "est_min": 30,
+ "arm": {
+  "armed": false,
+  "request": "p7/JOB_REQUEST.json",
+  "jobs": [],
+  "naming": {
+   "file": "C:/AI/community/notes/needs_derrick.md",
+   "row": 18,
+   "who": "Max 2026-10-24 9:30 PM CT",
+   "still": "GI046",
+   "text": "GI046 is the orc (large green-skinned muscular orc, behind a blonde woman on a rug in a living room)",
+   "order": "render GI046 and GI063 first, GI046 first of the two"
+  },
+  "staged_unarmed": [
+   "ali163_hc15_gi046_s51150031",
+   "ali163_hc15_gi046_s51150032",
+   "ali163_hc15_gi063_s51150031",
+   "ali163_hc15_gi063_s51150032"
+  ],
+  "displaced": "ali163_hc15_bd002_s51150021",
+  "restore": "python C:/AI/community/notes/hc15_anchor_fix_build.py --now-build",
+  "queue_math": "0 job x 30 min = 0 min on top of the ledger; arming all 4 takes = 120 min would overdraw the standing cap 615 min, and a take with a render receipt on disk is spent and is never a queue entry, so the staged set is ali163_hc15_gi046_s51150031, ali163_hc15_gi046_s51150032, ali163_hc15_gi063_s51150031, ali163_hc15_gi063_s51150032 (notes/needs_derrick.md rows 18, 21, 26)"
+ },
+ "citations": [
+  "C:/AI/community\\notes\\hc15_top_prompts_20261025.md",
+  "C:/AI/community\\notes\\prompt_guide_20261024.md",
+  "C:/AI/community\\notes\\hc15_figures_20261025.md",
+  "C:/AI/community\\notes\\needs_derrick.md",
+  "C:/AI/community\\notes\\web\\hc15_tenstrip_readme.txt",
+  "C:/Users/derek/5slock/approved_characters/ORC_POOL_EDGE/CHARACTER.md",
+  "C:/Users/derek/5slock/ralph-community/fix_plan.md",
+  "C:\\AI\\community\\notes\\hc15_anchor_carry_build.py",
+  "C:/AI/community\\notes\\hc15_anchor_fix_build.py",
+  "C:/AI/community\\scripts\\tests\\test_p6_review.py"
+ ],
+ "notes": "staged in a Ralph pass: graph, run-dir request copy, manifest, and (take A only) the request file. No render, no queue, no GPU, no vision judge, no llama-swap call.",
+ "note": "TOP GI046 take A (fix_plan TOP, Derrick 2026-10-24 8:39 PM CT: 'the two videos the orc and the robot fucking video ... Like hardcore sex'), figure named by Max 2026-10-24 9:30 PM CT, verbatim in fix_plan.md line 2 and notes/hc15_figures_20261025.md \u00a71, answers needs_derrick.md row 18: GI046 is the orc (large green-skinned muscular orc, behind a blonde woman on a rug in a living room). Seed 51150031 = the id number; the takes of a still differ by the seed alone. Graph 27 nodes 20278 B sha256 5b7bf8c93e0976fb88c64f18c5758846d832f9033f5ab2b5b7022e1826dd5a62, 4 changed paths vs source ali163_hc15_gi046_s51150014 only: MiniMaxH3AddGuide frame_idx 0 on the c0 edge, res_multistep/simple/8, 243 + 119-frame window = 362 f, 24 fps 15.083333 s, 1344x768, audio intact, 2 SamplerCustomAdvanced, 0 cfg keys, ref slots + LoadImage as carried. Prose from hc15_top_prompts_20261025.md byte-for-byte: c0 detailed_description 1177w / 5 beats 0.000-10.125s, c1 integrated_multimodal_description 1123w / 5 beats 10.125-15.083s, 0 negation tokens, ages [27, 34] fictional, species words orc/green/muscled/hands in 4/2 chunks, default-figure clauses 0 (defect hc15_figures_20261025.md r2-3). Structure prompt_guide_20261024.md + TenStrip card. Gate: comm.guard_ok True on 2 prose strings, tests/test_p6_review.py 21 passed. id SPENT: ali163_hc15_gi046_s51150031_00001_.mp4 8087674 B sha ade76d01fabd94e5 written 2026-10-25 04:04:52 CT off the prose row the shipped pre-card-fidelity prose: the record was rewritten by TOP-SCENE on 2026-10-25 06:35:37 CT (measured mtime of hc15_top_prompts_20261025.md) and this mp4 predates the rewrite, so it is NOT a render of the current prose record; result.json absent, 0 result.json; no GPU call in this pass; this prose record has 1 render of GI046 (ali163_hc15_gi046_s51150032); this take is not a render of that record. minutes=30 (clip 1-6 measured 24.0 min/job +25% contingency); receipts --top-check/--top-selftest. Arm: staged (free take of each still, Max's row-18 order, rest staged; ledger 472.9/615 min 38/45 jobs stamp 2026-10-23T18:53:47). card 3be40b2aeef5dc98 start-image card, card gate REFUSAL_TRUNCATED: 2 figures, 29/29 card quotes verbatim, 17 card words 2/2 chunks, 0 gate hits, read by coding_swift15_iq3s off the start still (ck_top_card/ck_top_facts). The selection is Derrick's alone; no vision judge on explicit output.",
+ "checks": {
+  "ck_control": 0,
+  "ck_diff": 0,
+  "ck_top_diff": 0,
+  "ck_guide": 0,
+  "ck_shape": 0,
+  "ck_prose": 0,
+  "ck_top_species": 0,
+  "ck_top_age": 0,
+  "ck_top_words": 0,
+  "ck_top_beats": 0,
+  "ck_top_neg": 0,
+  "ck_top_sync": 0,
+  "ck_top_seed": 0,
+  "ck_gate": 0,
+  "ck_slots": 0,
+  "ck_inputs": 0,
+  "ck_idfree": 0,
+  "ck_schema": 0,
+  "ck_prefix": 0,
+  "ck_seed": 0,
+  "ck_rundir": 0,
+  "ck_graphfile": 0,
+  "ck_manifest": 0,
+  "ck_top_manifest": 0,
+  "ck_top_arm": 0,
+  "ck_top_card": 0,
+  "ck_top_facts": 0,
+  "ck_top_md": 0,
+  "ck_nogpu": 0
+ },
+ "check_failures": {},
+ "checks_all_clean": true
+}

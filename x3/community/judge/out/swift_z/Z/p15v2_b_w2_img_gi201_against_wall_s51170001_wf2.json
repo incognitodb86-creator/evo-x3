@@ -1,0 +1,53 @@
+{
+ "frames": [
+  65,
+  97
+ ],
+ "diffs": [
+  12.0,
+  11.63
+ ],
+ "per_frame": [
+  {
+   "frame": 65,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting, and setting remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "No anatomical defects are visible; limbs, bodies, and hands appear structurally normal in both images."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0305,
+    "anatomy_defect": 0.5812
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 97,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "Image 2 introduces a prominent rock wall on the right side that is not present in Image 1's background."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The orc's left hand (viewer's right) has fused, malformed fingers, and the woman's raised arm appears detached from her body."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.6374,
+    "anatomy_defect": 0.8339
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w2_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.0
+}

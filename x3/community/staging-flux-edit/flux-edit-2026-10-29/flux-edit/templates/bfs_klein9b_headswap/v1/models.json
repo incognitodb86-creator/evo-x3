@@ -1,0 +1,30 @@
+{
+ "models": [
+  {
+   "bytes": 331379568,
+   "name": "bfs_head_v1_flux-klein_9b_step3750_rank64.safetensors",
+   "role": "lora",
+   "sha256": "49907a240602488d2846861d7570dd95d80609f44be7e3347965735712b1be16"
+  },
+  {
+   "bytes": 9078614520,
+   "name": "FLUX-KLEIN-9B-FP8-NSFW.safetensors",
+   "role": "unet",
+   "sha256": "UNVERIFIED_FULL_HASH",
+   "sha256_prefix": "39e16031",
+   "sha256_suffix": "3d3b"
+  },
+  {
+   "bytes": 336213556,
+   "name": "flux2-vae.safetensors",
+   "role": "vae",
+   "sha256": "UNVERIFIED"
+  },
+  {
+   "name": "qwen_3_8b_fp8mixed.safetensors",
+   "role": "clip",
+   "sha256": "UNVERIFIED",
+   "type": "flux2"
+  }
+ ]
+}
