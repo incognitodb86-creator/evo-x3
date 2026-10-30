@@ -1,0 +1,64 @@
+{
+ "tag": "tr29_s5_s51083002",
+ "mp4": "C:\\AI\\community\\review\\terrace-retest-2026-10-29\\judge_runs\\tr29_s5_s51083002\\tr29_s5_s51083002.mp4",
+ "start_image": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\input\\community\\TERRACE2_768x1344.png",
+ "n_frames": 124,
+ "sampled": 16,
+ "cuts_adaptive": 0,
+ "cuts_content": 0,
+ "dino": {
+  "start_min": 0.861,
+  "start_mean": 0.9125,
+  "start_last": 0.9043,
+  "prev_min": 0.8995,
+  "prev_mean": 0.95,
+  "per_frame_start": [
+   0.9794,
+   0.9714,
+   0.936,
+   0.9298,
+   0.8921,
+   0.915,
+   0.9279,
+   0.8984,
+   0.861,
+   0.8974,
+   0.8753,
+   0.9115,
+   0.8904,
+   0.9004,
+   0.909,
+   0.9043
+  ]
+ },
+ "clip": {
+  "start_min": 0.8132,
+  "start_mean": 0.8596,
+  "start_last": 0.8494,
+  "prev_min": 0.9075,
+  "prev_mean": 0.947,
+  "per_frame_start": [
+   0.9612,
+   0.9439,
+   0.9012,
+   0.8483,
+   0.8439,
+   0.8434,
+   0.8413,
+   0.8647,
+   0.836,
+   0.8612,
+   0.8132,
+   0.8509,
+   0.8278,
+   0.8309,
+   0.8368,
+   0.8494
+  ]
+ },
+ "transition": true,
+ "info": [],
+ "flags": [
+  "static_no_transition"
+ ]
+}
