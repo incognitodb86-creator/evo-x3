@@ -1,0 +1,37 @@
+{
+ "tag": "tr2v2_b2_s51083002",
+ "model": "qwen3vl_judge",
+ "secs": 18.2,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background elements like balustrade, wall, trees, and wet floor match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both women retain identical hair, skin tone, body proportions, and facial features from START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 shows identical pose, framing, and clothing as START IMAGE with no jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear physical contact and intimate act between both women as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.246,
+  "target_reached": 0.1103,
+  "anatomy_defect": 0.001
+ },
+ "flags": []
+}
