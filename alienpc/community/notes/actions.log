@@ -310,3 +310,106 @@ Max2: 2026-10-29 10:58 CT BRIEF items 2-3: remove 8a0707e job-2 files + fix hand
 2026-10-30T12:55:29-05:00 run_queue rq_p2test: BATCH closed rc=2 reason=pytest gate failed (pytest rc=4) done=0/1: nothing queued
 2026-10-30T12:55:41-05:00 run_queue rq_p2test: ERROR batch lock tool error: gpu_lock.ps1 rc=9 simulated tool error
 2026-10-30T12:55:41-05:00 run_queue rq_p2test: BATCH closed rc=8 reason=lock tool error (gpu_lock.ps1 rc=9) done=0/1: nothing queued
+2026-10-30T14:02:00-05:00 Forge strip-tease interactive request (Derek "pick an image, 5 second strip tease"): START tag=strip_tease_bedroom01_s51103001 scene=BEDROOM01 seed=51103001 frames=124 pick=approved_characters\BEDROOM01\01_BEDROOM_LINGERIE.jpg (0 prior graphs, uncropped copy sha 91cbcc123635a46cfa11982888930d38835cb2ee1af4892162de10d6e60aac3d)
+2026-10-30T14:17:21-05:00 Forge strip-tease: START render tag=strip_tease_bedroom01_s51103001 gpu_guard IDLE rc=0, gpu_lock acquired pid 11532, pytest 26 passed, guard_ok True, GATE PASS (notes\strip_tease_20261030_gate.py), graph diff = the five per-run fields only
+2026-10-30T14:20:22-05:00 Forge strip-tease: DONE tag=strip_tease_bedroom01_s51103001 ok 768x1344 124f audio yes dur=5.167s wall=139.5s (1.125 s/frame, runner secs=180.1 poll-quantized) bytes=1195673 sha256=4d57992416df2d662d9dfa1b08e51e826a687e16324114d5a676b54e1f2b0efd retry=False blackfreeze=[]
+2026-10-30T14:30:03-05:00 Forge strip-tease: DONE qnap put /pi-drop/strip-tease-2026-10-30/strip_tease_bedroom01_s51103001.mp4 verified 1195673 B; lock released, comfyui_auto unloaded, no config change, B2 default unchanged, nothing killed
+2026-10-30T14:31:00-05:00 Forge strip-tease: FIX record-only (no file changed): submitted this single clip through run_graph_job.py per the skill text I read at 14:03; Max bb1290f 14:05:41 names run_queue.py --run-dir --detach as the only render path. Clip is paid and objective-ok, so NOT re-rendered; next single clip goes through run_queue.py. Details notes\2026-10-30-strip-tease-bedroom01-DONE.md s6
+2026-10-30T15:33:28-05:00 run_queue flux_p1_20261030: BATCH open: 61 clips, lock held, comfyui_auto kept loaded
+2026-10-30T15:33:28-05:00 run_queue flux_p1_20261030: START pos=1 tag=p1_canary_D21_s432262096973493 arm=L scene=D21 seed=432262096973493
+2026-10-30T15:42:47-05:00 run_queue flux_p1_20261030: DONE pos=1 tag=p1_canary_D21_s432262096973493 ok 752x1360 still png wall=?s bytes=1103741 retry=False
+2026-10-30T15:42:47-05:00 run_queue flux_p1_20261030: START pos=2 tag=p1_L_BD002_s432262096973493 arm=L scene=BD002 seed=432262096973493
+2026-10-30T15:43:49-05:00 run_queue flux_p1_20261030: DONE pos=2 tag=p1_L_BD002_s432262096973493 ok 1360x752 still png wall=?s bytes=1280159 retry=False
+2026-10-30T15:43:49-05:00 run_queue flux_p1_20261030: START pos=3 tag=p1_L_BD002_s20261028 arm=L scene=BD002 seed=20261028
+2026-10-30T15:44:51-05:00 run_queue flux_p1_20261030: DONE pos=3 tag=p1_L_BD002_s20261028 ok 1360x752 still png wall=?s bytes=1249559 retry=False
+2026-10-30T15:44:51-05:00 run_queue flux_p1_20261030: START pos=4 tag=p1_L_BD004_s432262096973493 arm=L scene=BD004 seed=432262096973493
+2026-10-30T15:45:53-05:00 run_queue flux_p1_20261030: DONE pos=4 tag=p1_L_BD004_s432262096973493 ok 1360x752 still png wall=?s bytes=1355110 retry=False
+2026-10-30T15:45:53-05:00 run_queue flux_p1_20261030: START pos=5 tag=p1_L_BD004_s20261028 arm=L scene=BD004 seed=20261028
+2026-10-30T15:46:54-05:00 run_queue flux_p1_20261030: DONE pos=5 tag=p1_L_BD004_s20261028 ok 1360x752 still png wall=?s bytes=1336427 retry=False
+2026-10-30T15:46:54-05:00 run_queue flux_p1_20261030: START pos=6 tag=p1_L_BD006_s432262096973493 arm=L scene=BD006 seed=432262096973493
+2026-10-30T15:47:57-05:00 run_queue flux_p1_20261030: DONE pos=6 tag=p1_L_BD006_s432262096973493 ok 1360x752 still png wall=?s bytes=1337373 retry=False
+2026-10-30T15:47:57-05:00 run_queue flux_p1_20261030: START pos=7 tag=p1_L_BD006_s20261028 arm=L scene=BD006 seed=20261028
+2026-10-30T15:48:59-05:00 run_queue flux_p1_20261030: DONE pos=7 tag=p1_L_BD006_s20261028 ok 1360x752 still png wall=?s bytes=1328165 retry=False
+2026-10-30T15:48:59-05:00 run_queue flux_p1_20261030: START pos=8 tag=p1_L_BD007_s432262096973493 arm=L scene=BD007 seed=432262096973493
+2026-10-30T15:50:01-05:00 run_queue flux_p1_20261030: DONE pos=8 tag=p1_L_BD007_s432262096973493 ok 1360x752 still png wall=?s bytes=1407295 retry=False
+2026-10-30T15:50:01-05:00 run_queue flux_p1_20261030: START pos=9 tag=p1_L_BD007_s20261028 arm=L scene=BD007 seed=20261028
+2026-10-30T15:51:03-05:00 run_queue flux_p1_20261030: DONE pos=9 tag=p1_L_BD007_s20261028 ok 1360x752 still png wall=?s bytes=1420644 retry=False
+2026-10-30T15:51:03-05:00 run_queue flux_p1_20261030: START pos=10 tag=p1_L_BD013_s432262096973493 arm=L scene=BD013 seed=432262096973493
+2026-10-30T15:52:05-05:00 run_queue flux_p1_20261030: DONE pos=10 tag=p1_L_BD013_s432262096973493 ok 1360x752 still png wall=?s bytes=1296326 retry=False
+2026-10-30T15:52:05-05:00 run_queue flux_p1_20261030: START pos=11 tag=p1_L_BD013_s20261028 arm=L scene=BD013 seed=20261028
+2026-10-30T15:53:07-05:00 run_queue flux_p1_20261030: DONE pos=11 tag=p1_L_BD013_s20261028 ok 1360x752 still png wall=?s bytes=1305372 retry=False
+2026-10-30T15:53:07-05:00 run_queue flux_p1_20261030: START pos=12 tag=p1_L_M01_s432262096973493 arm=L scene=M01 seed=432262096973493
+2026-10-30T15:54:09-05:00 run_queue flux_p1_20261030: DONE pos=12 tag=p1_L_M01_s432262096973493 ok 752x1360 still png wall=?s bytes=1368370 retry=False
+2026-10-30T15:54:09-05:00 run_queue flux_p1_20261030: START pos=13 tag=p1_L_M01_s20261028 arm=L scene=M01 seed=20261028
+2026-10-30T15:55:11-05:00 run_queue flux_p1_20261030: DONE pos=13 tag=p1_L_M01_s20261028 ok 752x1360 still png wall=?s bytes=1354565 retry=False
+2026-10-30T15:55:11-05:00 run_queue flux_p1_20261030: START pos=14 tag=p1_L_M02_s432262096973493 arm=L scene=M02 seed=432262096973493
+2026-10-30T15:56:14-05:00 run_queue flux_p1_20261030: DONE pos=14 tag=p1_L_M02_s432262096973493 ok 752x1360 still png wall=?s bytes=1429114 retry=False
+2026-10-30T15:56:14-05:00 run_queue flux_p1_20261030: START pos=15 tag=p1_L_M02_s20261028 arm=L scene=M02 seed=20261028
+2026-10-30T15:57:16-05:00 run_queue flux_p1_20261030: DONE pos=15 tag=p1_L_M02_s20261028 ok 752x1360 still png wall=?s bytes=1442591 retry=False
+2026-10-30T15:57:16-05:00 run_queue flux_p1_20261030: START pos=16 tag=p1_L_M04_s432262096973493 arm=L scene=M04 seed=432262096973493
+2026-10-30T15:58:18-05:00 run_queue flux_p1_20261030: DONE pos=16 tag=p1_L_M04_s432262096973493 ok 752x1360 still png wall=?s bytes=1450006 retry=False
+2026-10-30T15:58:18-05:00 run_queue flux_p1_20261030: START pos=17 tag=p1_L_M04_s20261028 arm=L scene=M04 seed=20261028
+2026-10-30T15:59:20-05:00 run_queue flux_p1_20261030: DONE pos=17 tag=p1_L_M04_s20261028 ok 752x1360 still png wall=?s bytes=1454078 retry=False
+2026-10-30T15:59:20-05:00 run_queue flux_p1_20261030: START pos=18 tag=p1_L_M05_s432262096973493 arm=L scene=M05 seed=432262096973493
+2026-10-30T16:00:22-05:00 run_queue flux_p1_20261030: DONE pos=18 tag=p1_L_M05_s432262096973493 ok 752x1360 still png wall=?s bytes=1394548 retry=False
+2026-10-30T16:00:22-05:00 run_queue flux_p1_20261030: START pos=19 tag=p1_L_M05_s20261028 arm=L scene=M05 seed=20261028
+2026-10-30T16:01:24-05:00 run_queue flux_p1_20261030: DONE pos=19 tag=p1_L_M05_s20261028 ok 752x1360 still png wall=?s bytes=1402206 retry=False
+2026-10-30T16:01:24-05:00 run_queue flux_p1_20261030: START pos=20 tag=p1_L_B01_s432262096973493 arm=L scene=B01 seed=432262096973493
+2026-10-30T16:02:26-05:00 run_queue flux_p1_20261030: DONE pos=20 tag=p1_L_B01_s432262096973493 ok 752x1360 still png wall=?s bytes=1486432 retry=False
+2026-10-30T16:02:26-05:00 run_queue flux_p1_20261030: START pos=21 tag=p1_L_B01_s20261028 arm=L scene=B01 seed=20261028
+2026-10-30T16:03:28-05:00 run_queue flux_p1_20261030: DONE pos=21 tag=p1_L_B01_s20261028 ok 752x1360 still png wall=?s bytes=1509524 retry=False
+2026-10-30T16:03:28-05:00 run_queue flux_p1_20261030: START pos=22 tag=p1_L_B02_s432262096973493 arm=L scene=B02 seed=432262096973493
+2026-10-30T16:04:30-05:00 run_queue flux_p1_20261030: DONE pos=22 tag=p1_L_B02_s432262096973493 ok 752x1360 still png wall=?s bytes=1379632 retry=False
+2026-10-30T16:04:30-05:00 run_queue flux_p1_20261030: START pos=23 tag=p1_L_B02_s20261028 arm=L scene=B02 seed=20261028
+2026-10-30T16:05:32-05:00 run_queue flux_p1_20261030: DONE pos=23 tag=p1_L_B02_s20261028 ok 752x1360 still png wall=?s bytes=1371704 retry=False
+2026-10-30T16:05:32-05:00 run_queue flux_p1_20261030: START pos=24 tag=p1_L_B03_s432262096973493 arm=L scene=B03 seed=432262096973493
+2026-10-30T16:06:34-05:00 run_queue flux_p1_20261030: DONE pos=24 tag=p1_L_B03_s432262096973493 ok 752x1360 still png wall=?s bytes=1492312 retry=False
+2026-10-30T16:06:34-05:00 run_queue flux_p1_20261030: START pos=25 tag=p1_L_B03_s20261028 arm=L scene=B03 seed=20261028
+2026-10-30T16:07:36-05:00 run_queue flux_p1_20261030: DONE pos=25 tag=p1_L_B03_s20261028 ok 752x1360 still png wall=?s bytes=1492374 retry=False
+2026-10-30T16:07:36-05:00 run_queue flux_p1_20261030: START pos=26 tag=p1_L_B04_s432262096973493 arm=L scene=B04 seed=432262096973493
+2026-10-30T16:08:38-05:00 run_queue flux_p1_20261030: DONE pos=26 tag=p1_L_B04_s432262096973493 ok 752x1360 still png wall=?s bytes=1324623 retry=False
+2026-10-30T16:08:38-05:00 run_queue flux_p1_20261030: START pos=27 tag=p1_L_B04_s20261028 arm=L scene=B04 seed=20261028
+2026-10-30T16:09:40-05:00 run_queue flux_p1_20261030: DONE pos=27 tag=p1_L_B04_s20261028 ok 752x1360 still png wall=?s bytes=1309393 retry=False
+2026-10-30T16:09:40-05:00 run_queue flux_p1_20261030: START pos=28 tag=p1_L_B05_s432262096973493 arm=L scene=B05 seed=432262096973493
+2026-10-30T16:10:42-05:00 run_queue flux_p1_20261030: DONE pos=28 tag=p1_L_B05_s432262096973493 ok 752x1360 still png wall=?s bytes=1375869 retry=False
+2026-10-30T16:10:42-05:00 run_queue flux_p1_20261030: START pos=29 tag=p1_L_B05_s20261028 arm=L scene=B05 seed=20261028
+2026-10-30T16:11:44-05:00 run_queue flux_p1_20261030: DONE pos=29 tag=p1_L_B05_s20261028 ok 752x1360 still png wall=?s bytes=1398428 retry=False
+2026-10-30T16:11:44-05:00 run_queue flux_p1_20261030: START pos=30 tag=p1_L_B06_s432262096973493 arm=L scene=B06 seed=432262096973493
+2026-10-30T16:12:46-05:00 run_queue flux_p1_20261030: DONE pos=30 tag=p1_L_B06_s432262096973493 ok 752x1360 still png wall=?s bytes=1300294 retry=False
+2026-10-30T16:12:46-05:00 run_queue flux_p1_20261030: START pos=31 tag=p1_L_B06_s20261028 arm=L scene=B06 seed=20261028
+2026-10-30T16:13:48-05:00 run_queue flux_p1_20261030: DONE pos=31 tag=p1_L_B06_s20261028 ok 752x1360 still png wall=?s bytes=1301738 retry=False
+2026-10-30T16:13:48-05:00 run_queue flux_p1_20261030: START pos=32 tag=p1_L_B07_s432262096973493 arm=L scene=B07 seed=432262096973493
+2026-10-30T16:14:50-05:00 run_queue flux_p1_20261030: DONE pos=32 tag=p1_L_B07_s432262096973493 ok 752x1360 still png wall=?s bytes=1402320 retry=False
+2026-10-30T16:14:50-05:00 run_queue flux_p1_20261030: START pos=33 tag=p1_L_B07_s20261028 arm=L scene=B07 seed=20261028
+2026-10-30T16:15:52-05:00 run_queue flux_p1_20261030: DONE pos=33 tag=p1_L_B07_s20261028 ok 752x1360 still png wall=?s bytes=1385295 retry=False
+2026-10-30T16:15:52-05:00 run_queue flux_p1_20261030: START pos=34 tag=p1_L_B08_s432262096973493 arm=L scene=B08 seed=432262096973493
+2026-10-30T16:16:54-05:00 run_queue flux_p1_20261030: DONE pos=34 tag=p1_L_B08_s432262096973493 ok 752x1360 still png wall=?s bytes=1441872 retry=False
+2026-10-30T16:16:54-05:00 run_queue flux_p1_20261030: START pos=35 tag=p1_L_B08_s20261028 arm=L scene=B08 seed=20261028
+2026-10-30T16:17:56-05:00 run_queue flux_p1_20261030: DONE pos=35 tag=p1_L_B08_s20261028 ok 752x1360 still png wall=?s bytes=1447751 retry=False
+2026-10-30T16:17:56-05:00 run_queue flux_p1_20261030: START pos=36 tag=p1_L_C01_s432262096973493 arm=L scene=C01 seed=432262096973493
+2026-10-30T16:18:58-05:00 run_queue flux_p1_20261030: DONE pos=36 tag=p1_L_C01_s432262096973493 ok 752x1360 still png wall=?s bytes=1461358 retry=False
+2026-10-30T16:18:58-05:00 run_queue flux_p1_20261030: START pos=37 tag=p1_L_C01_s20261028 arm=L scene=C01 seed=20261028
+2026-10-30T16:20:00-05:00 run_queue flux_p1_20261030: DONE pos=37 tag=p1_L_C01_s20261028 ok 752x1360 still png wall=?s bytes=1469492 retry=False
+2026-10-30T16:20:00-05:00 run_queue flux_p1_20261030: START pos=38 tag=p1_L_C03_s432262096973493 arm=L scene=C03 seed=432262096973493
+2026-10-30T16:21:01-05:00 run_queue flux_p1_20261030: DONE pos=38 tag=p1_L_C03_s432262096973493 ok 752x1360 still png wall=?s bytes=1620710 retry=False
+2026-10-30T16:21:01-05:00 run_queue flux_p1_20261030: START pos=39 tag=p1_L_C03_s20261028 arm=L scene=C03 seed=20261028
+2026-10-30T16:22:03-05:00 run_queue flux_p1_20261030: DONE pos=39 tag=p1_L_C03_s20261028 ok 752x1360 still png wall=?s bytes=1619320 retry=False
+2026-10-30T16:22:03-05:00 run_queue flux_p1_20261030: START pos=40 tag=p1_L_C06_s432262096973493 arm=L scene=C06 seed=432262096973493
+2026-10-30T16:23:05-05:00 run_queue flux_p1_20261030: DONE pos=40 tag=p1_L_C06_s432262096973493 ok 752x1360 still png wall=?s bytes=1611373 retry=False
+2026-10-30T16:23:05-05:00 run_queue flux_p1_20261030: START pos=41 tag=p1_L_C06_s20261028 arm=L scene=C06 seed=20261028
+2026-10-30T16:24:07-05:00 run_queue flux_p1_20261030: DONE pos=41 tag=p1_L_C06_s20261028 ok 752x1360 still png wall=?s bytes=1594736 retry=False
+2026-10-30T16:24:07-05:00 run_queue flux_p1_20261030: START pos=42 tag=p1_L_C08_s432262096973493 arm=L scene=C08 seed=432262096973493
+2026-10-30T16:25:09-05:00 run_queue flux_p1_20261030: DONE pos=42 tag=p1_L_C08_s432262096973493 ok 752x1360 still png wall=?s bytes=1477655 retry=False
+2026-10-30T16:25:09-05:00 run_queue flux_p1_20261030: START pos=43 tag=p1_L_C08_s20261028 arm=L scene=C08 seed=20261028
+2026-10-30T16:26:11-05:00 run_queue flux_p1_20261030: DONE pos=43 tag=p1_L_C08_s20261028 ok 752x1360 still png wall=?s bytes=1473352 retry=False
+2026-10-30T16:26:11-05:00 run_queue flux_p1_20261030: START pos=44 tag=p1_L_C09_s432262096973493 arm=L scene=C09 seed=432262096973493
+2026-10-30T16:27:13-05:00 run_queue flux_p1_20261030: DONE pos=44 tag=p1_L_C09_s432262096973493 ok 752x1360 still png wall=?s bytes=1379261 retry=False
+2026-10-30T16:27:13-05:00 run_queue flux_p1_20261030: START pos=45 tag=p1_L_C09_s20261028 arm=L scene=C09 seed=20261028
+2026-10-30T16:28:15-05:00 run_queue flux_p1_20261030: DONE pos=45 tag=p1_L_C09_s20261028 ok 752x1360 still png wall=?s bytes=1382379 retry=False
+2026-10-30T16:28:15-05:00 run_queue flux_p1_20261030: START pos=46 tag=p1_L_D01_s432262096973493 arm=L scene=D01 seed=432262096973493
+2026-10-30T16:29:17-05:00 run_queue flux_p1_20261030: DONE pos=46 tag=p1_L_D01_s432262096973493 ok 752x1360 still png wall=?s bytes=1350498 retry=False
+2026-10-30T16:29:17-05:00 run_queue flux_p1_20261030: START pos=47 tag=p1_L_D01_s20261028 arm=L scene=D01 seed=20261028
+2026-10-30T16:30:19-05:00 run_queue flux_p1_20261030: DONE pos=47 tag=p1_L_D01_s20261028 ok 752x1360 still png wall=?s bytes=1345537 retry=False
+2026-10-30T16:30:19-05:00 run_queue flux_p1_20261030: STOP file seen: halted before pos=48 tag=p1_L_D05_s432262096973493
+2026-10-30T16:30:20-05:00 run_queue flux_p1_20261030: BATCH closed rc=1 reason=STOP file before pos=48 done=47/61: comfyui_auto unloaded, lock released
+2026-10-30T16:39:45-05:00 Forge: sslcaio item 0 (installs, GO=HOLD) DONE - 3 node packs cloned into TestRuntime custom_nodes (Multishot v2.7.2=d7d19770, SelfLift 835c3cf, UniBlockSwap 95bb6d9), Tritant Extender confirmed pre-installed (0861230/v3.0.13), 6 AIO LoRAs downloaded from the graph author's public HF mirror (2,018.7 MB, sha256 in notes/item0_lora_hashes_20261030.json), 0 banned-face hits, no pip, restart pending for Max; adults tests 26 passed; 0 renders, no lock, ComfyUI untouched.
