@@ -1,0 +1,4 @@
+pack_id,run,axis,bytes,face_frames_probed,arcface_cos_mean,arcface_cos_min,first_face_frame
+a01,b5_s51083020_lora,"face LoRA 0.7 on, POV start, same prompt and seed as b1",2347345,"(31, 22)",0.4059,0.2859,36
+a02,b4_s51083021,"her close-up crop as the start frame, his penis from the prompt",2394931,"(31, 31)",0.5495,0.4481,0
+a03,b1_s51083020,"his POV lap shot as start frame, she enters the frame",2396790,31/22,0.4057,0.2456,32

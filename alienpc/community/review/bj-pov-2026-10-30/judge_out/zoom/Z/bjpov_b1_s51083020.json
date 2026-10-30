@@ -1,0 +1,53 @@
+{
+ "frames": [
+  39,
+  83
+ ],
+ "diffs": [
+  24.62,
+  24.29
+ ],
+ "per_frame": [
+  {
+   "frame": 39,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background walls, carpet, and lighting remain consistent. No new objects or structural changes observed."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and genitalia appear anatomically correct and properly attached without malformations."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.083,
+    "anatomy_defect": 0.01
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 83,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background wall and lighting consistent. No new objects or structures added."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and genitalia appear anatomically correct and properly attached."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0138,
+    "anatomy_defect": 0.0063
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "bjpov_b1_s51083020",
+ "model": "qwen3vl_judge",
+ "secs": 186.1
+}
