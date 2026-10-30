@@ -413,3 +413,35 @@ Max2: 2026-10-29 10:58 CT BRIEF items 2-3: remove 8a0707e job-2 files + fix hand
 2026-10-30T16:30:19-05:00 run_queue flux_p1_20261030: STOP file seen: halted before pos=48 tag=p1_L_D05_s432262096973493
 2026-10-30T16:30:20-05:00 run_queue flux_p1_20261030: BATCH closed rc=1 reason=STOP file before pos=48 done=47/61: comfyui_auto unloaded, lock released
 2026-10-30T16:39:45-05:00 Forge: sslcaio item 0 (installs, GO=HOLD) DONE - 3 node packs cloned into TestRuntime custom_nodes (Multishot v2.7.2=d7d19770, SelfLift 835c3cf, UniBlockSwap 95bb6d9), Tritant Extender confirmed pre-installed (0861230/v3.0.13), 6 AIO LoRAs downloaded from the graph author's public HF mirror (2,018.7 MB, sha256 in notes/item0_lora_hashes_20261030.json), 0 banned-face hits, no pip, restart pending for Max; adults tests 26 passed; 0 renders, no lock, ComfyUI untouched.
+2026-10-30T16:49:41-05:00 run_queue flux_p1_20261030: BATCH open: 14 clips, lock held, comfyui_auto kept loaded
+2026-10-30T16:49:41-05:00 run_queue flux_p1_20261030: START pos=48 tag=p1_L_D05_s432262096973493 arm=L scene=D05 seed=432262096973493
+2026-10-30T16:49:44-05:00 run_queue flux_p1_20261030: START pos=49 tag=p1_L_D05_s20261028 arm=L scene=D05 seed=20261028
+2026-10-30T16:49:48-05:00 run_queue flux_p1_20261030: START pos=50 tag=p1_L_D07_s432262096973493 arm=L scene=D07 seed=432262096973493
+2026-10-30T16:49:50-05:00 run_queue flux_p1_20261030: START pos=51 tag=p1_L_D07_s20261028 arm=L scene=D07 seed=20261028
+2026-10-30T16:49:54-05:00 run_queue flux_p1_20261030: START pos=52 tag=p1_L_D12_s432262096973493 arm=L scene=D12 seed=432262096973493
+2026-10-30T16:49:58-05:00 run_queue flux_p1_20261030: START pos=53 tag=p1_L_D12_s20261028 arm=L scene=D12 seed=20261028
+2026-10-30T16:50:01-05:00 run_queue flux_p1_20261030: START pos=54 tag=p1_L_D15_s432262096973493 arm=L scene=D15 seed=432262096973493
+2026-10-30T16:50:05-05:00 run_queue flux_p1_20261030: START pos=55 tag=p1_L_D15_s20261028 arm=L scene=D15 seed=20261028
+2026-10-30T16:50:08-05:00 run_queue flux_p1_20261030: START pos=56 tag=p1_L_E11_s432262096973493 arm=L scene=E11 seed=432262096973493
+2026-10-30T16:50:10-05:00 run_queue flux_p1_20261030: START pos=57 tag=p1_L_E11_s20261028 arm=L scene=E11 seed=20261028
+2026-10-30T16:50:13-05:00 run_queue flux_p1_20261030: START pos=58 tag=p1_L_E2_s432262096973493 arm=L scene=E2 seed=432262096973493
+2026-10-30T16:50:16-05:00 run_queue flux_p1_20261030: START pos=59 tag=p1_L_E2_s20261028 arm=L scene=E2 seed=20261028
+2026-10-30T16:50:18-05:00 run_queue flux_p1_20261030: START pos=60 tag=p1_L_E3_s432262096973493 arm=L scene=E3 seed=432262096973493
+2026-10-30T16:50:21-05:00 run_queue flux_p1_20261030: START pos=61 tag=p1_L_E3_s20261028 arm=L scene=E3 seed=20261028
+2026-10-30T16:50:25-05:00 run_queue flux_p1_20261030: DONE pos=48 tag=p1_L_D05_s432262096973493 ok 752x1360 still png wall=?s bytes=1293905 retry=False
+2026-10-30T16:50:35-05:00 run_queue flux_p1_20261030: DONE pos=49 tag=p1_L_D05_s20261028 ok 752x1360 still png wall=?s bytes=1296999 retry=False
+2026-10-30T16:50:47-05:00 run_queue flux_p1_20261030: DONE pos=50 tag=p1_L_D07_s432262096973493 ok 752x1360 still png wall=?s bytes=1538857 retry=False
+2026-10-30T16:50:59-05:00 run_queue flux_p1_20261030: DONE pos=51 tag=p1_L_D07_s20261028 ok 752x1360 still png wall=?s bytes=1533962 retry=False
+2026-10-30T16:51:14-05:00 run_queue flux_p1_20261030: DONE pos=52 tag=p1_L_D12_s432262096973493 ok 752x1360 still png wall=?s bytes=1245702 retry=False
+2026-10-30T16:51:26-05:00 run_queue flux_p1_20261030: DONE pos=53 tag=p1_L_D12_s20261028 ok 752x1360 still png wall=?s bytes=1240874 retry=False
+2026-10-30T16:51:38-05:00 run_queue flux_p1_20261030: DONE pos=54 tag=p1_L_D15_s432262096973493 ok 752x1360 still png wall=?s bytes=1404240 retry=False
+2026-10-30T16:51:50-05:00 run_queue flux_p1_20261030: DONE pos=55 tag=p1_L_D15_s20261028 ok 752x1360 still png wall=?s bytes=1416478 retry=False
+2026-10-30T16:52:06-05:00 run_queue flux_p1_20261030: DONE pos=56 tag=p1_L_E11_s432262096973493 ok 752x1360 still png wall=?s bytes=1440365 retry=False
+2026-10-30T16:52:18-05:00 run_queue flux_p1_20261030: DONE pos=57 tag=p1_L_E11_s20261028 ok 752x1360 still png wall=?s bytes=1453587 retry=False
+2026-10-30T16:52:30-05:00 run_queue flux_p1_20261030: DONE pos=58 tag=p1_L_E2_s432262096973493 ok 752x1360 still png wall=?s bytes=1438828 retry=False
+2026-10-30T16:52:42-05:00 run_queue flux_p1_20261030: DONE pos=59 tag=p1_L_E2_s20261028 ok 752x1360 still png wall=?s bytes=1420943 retry=False
+2026-10-30T16:52:57-05:00 run_queue flux_p1_20261030: DONE pos=60 tag=p1_L_E3_s432262096973493 ok 752x1360 still png wall=?s bytes=1431253 retry=False
+2026-10-30T16:53:09-05:00 run_queue flux_p1_20261030: DONE pos=61 tag=p1_L_E3_s20261028 ok 752x1360 still png wall=?s bytes=1422257 retry=False
+2026-10-30T16:53:10-05:00 run_queue flux_p1_20261030: BATCH closed rc=0 reason=all queued clips DONE ok done=61/61: comfyui_auto unloaded, lock released
+2026-10-30T17:04:30-05:00 Forge MAX flux F1 (model downloads, GO=HOLD): START - both plans read (2026-10-30-miraclein-43-ab-test-plan.md, 2026-10-30-klein9b-kv-bfs-test-plan.md); disk C: 236.2 GB free = the >=12 GB/file bar met; target dir = TestRuntime models\diffusion_models (where the baseline UNET resolves)
+2026-10-30T17:17:17-05:00 Forge MAX flux F1: DONE - flux-2-klein-9b-kv-fp8.safetensors downloaded + verified 9,818,935,984 B sha256 33f7da5625a00798349a719742999d3c7dd20c1a7eda14663922c363640728f1 (equals HF X-Linked-ETag + X-Linked-Size) into models\diffusion_models; Miraclein 4.3 FP8 9.14 GB (model 2453960 / v3272965 / file 3158025) = Civitai HTTP 401 login gate + paidAccess, exact URLs handed to Max in notes\needs_derrick.md, no keys sought; adults tests 26 passed in 3.28s; 0 renders, no GPU lock, ComfyUI never started/restarted, nothing deleted or overwritten
