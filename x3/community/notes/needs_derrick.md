@@ -53,3 +53,16 @@ Per hard line 7 ("If an item has no community version, write one line in notes\n
 - Out of item 0 scope (not a LoRA, not a node), graph-pinned model file, public, NOT downloaded: `h3_upscaler_lms_v0.1.safetensors` (690.6 MB) named in SelfLiftH3Sampler's widget; source per graph Note 131: https://huggingface.co/Alissonerdx/Minimax-H3-ComfyUI/resolve/main/latent_upscaler/h3_upscaler_lms_v0.1.safetensors (tree body saved notes/web/hf_alissonerdx_tree_20261030.json). NOT blocking: models/latent_upscale_models already holds two working H3 latent upscalers and the SelfLift node auto-selects the first filename containing "h3"; item 3's AIO template wires that widget to an installed file. Max: fetch it only if you want the exact pinned file.
 - Banned face nodes (d): 0 hits in the three packs installed this item, nothing to refuse.
 - Restart pending: TestRuntime ComfyUI must be restarted (by Max) before H3-Multishot, SelfLift, UniBlockSwap nodes appear in object_info; then regenerate notes/objinfo.
+
+
+## 2026-10-30 Forge (flux Item F1) - one of the two flux models is behind the Civitai login gate; Max fetches it
+- **Miraclein 4.3 FP8 (the 9.14 GB file) requires a logged-in Civitai account.**
+  - Model page: https://civitai.com/models/2453960 ("Miraclein NSFW [Generation & Edit] [Flux2Klein]", author 6tZ)
+  - Version: 4.3, id 3272965, published 2026-08-27 -> https://civitai.com/models/2453960?modelVersionId=3272965
+  - Direct file URL (this is what the gate answers): https://civitai.com/api/download/models/3272965?fileId=3158025&type=Model
+  - Evidence measured 17:10 CT: that URL returns **HTTP 401** with body `{"error":"Unauthorized","message":"The creator of this asset requires you to be logged in to download it"}`, and the API marks the version `paidAccess.permanent = true` (paid/subscription access). The model's own description also offers a paid mirror, https://subscripteon.com/creator/content?id=39/miraclein-4-3 (recorded as data, no action taken). Per the item's rule I did NOT look for API keys, tokens or credentials.
+  - Exact file to fetch: `miracleinNSFWGeneration_43_3158025.safetensors`, API `metadata.fp = "fp8"`, sizeKB 9,142,971.4462890625 = **9,362,402,761 B** (page shows 9.14 GB). v4.3's full file list so the right one is picked: fp8 3158025 (9.14 GB, **this one**) / 3158029 (8.87) / 3157985 (5.06); int8 3158021 (8.87); bf16 3157002 (17.73); GGUF 3157984 (Q4_0), 3158027 (Q8_0).
+  - Where it goes so F2 resolves it: `C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\diffusion_models\miracleinNSFWGeneration_43_3158025.safetensors` (bare `unet_name` resolution = the same directory as the baseline `FLUX-KLEIN-9B-FP8-NSFW.safetensors`). Item F2 will stage M4/M8/M12 against this exact filename and mark it pending until the file lands.
+- **Klein 9B-KV fp8 is NOT gated and IS installed** by this item: `flux-2-klein-9b-kv-fp8.safetensors`, 9,818,935,984 B, sha256 `33f7da5625a00798349a719742999d3c7dd20c1a7eda14663922c363640728f1` in the same `models\diffusion_models\` folder (full record: `notes/installs_downloads.md`, F1 section). Nothing is needed from Derrick for it; the FLUX Non-Commercial License is covered by Derrick's 4:33 PM CT "nothing from this lane is commercial".
+- State: 0 renders, no GPU lock, ComfyUI never started/restarted, no config touched, nothing deleted or overwritten.
+

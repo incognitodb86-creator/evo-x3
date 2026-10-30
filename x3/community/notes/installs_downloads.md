@@ -102,3 +102,22 @@ Total 2,018,742,906 B. C: free was 239 GB, now ~237 GB. Nothing was behind a Civ
 - Banned face nodes scan (d): rg for InsightFace/ReActor/PuLID/InstantID/FaceDetailer/AutoCropFaces in the three new packs = 0 files. (Pre-existing PuLID/face packs in the runtime predate this item and are not in the AIO graph.)
 - Adults tests named in AGENTS.md: 26 passed (run before the records).
 - Renders: 0. GPU lock never touched. ComfyUI start/restart: no. Config: no.
+
+
+## 2026-10-30 Forge (flux Item F1, model downloads; Derrick 5:06 PM CT; GO=HOLD, NO render)
+Target = C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI (llama-swap comfyui_auto, the render runtime). Disk checked before any bytes moved: C: free 236.2 GB, so the ">= ~12 GB free per file" bar is met; after the download 228.96 GB free.
+Placement rule used: UNETLoader takes a bare `unet_name`, and the baseline `FLUX-KLEIN-9B-FP8-NSFW.safetensors` + `flux-2-klein-4b-fp8.safetensors` already resolve from `models\diffusion_models\`, so both F1 files go there. `models\unet\` in this runtime holds only `.json` sidecars, no weights.
+
+### Downloaded (public, no login, no token, no licence gate enforced)
+- **flux-2-klein-9b-kv-fp8.safetensors** - 9,818,935,984 B (9.82 GB, matches the plan exactly) - sha256 `33f7da5625a00798349a719742999d3c7dd20c1a7eda14663922c363640728f1` - path `C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\diffusion_models\flux-2-klein-9b-kv-fp8.safetensors`
+  - URL: `https://huggingface.co/black-forest-labs/FLUX.2-klein-9b-kv-fp8/resolve/main/flux-2-klein-9b-kv-fp8.safetensors` (repo `black-forest-labs/FLUX.2-klein-9b-kv-fp8`, commit 8430c03ee457ea86907ed31a009cd56280df003d). HF API for that repo reads `gated: false`, `private: false`, licence tag `license:other` = the FLUX Non-Commercial License the plan cites; no key/token was needed and none was sought (item rule).
+  - Transfer: 17:11 CT 25 s probe landed 1,077,199,829 B, then `curl -L --fail --retry 3 -C -` into `*.part` finished it in 3 min 12 s (~43 MB/s, resumed from the probe bytes, no restart of the stream), renamed with `mv -n` (nothing overwritten, nothing deleted).
+  - Proof: `Get-FileHash SHA256` (13 s) = `33F7DA56...728F1`, byte-for-byte equal to HF's own `X-Linked-ETag` for that file, and on-disk size equals HF's `X-Linked-Size` 9,818,935,984 B. So F3's model file is present and verified; the F3 run dir can name it.
+
+### Not downloaded (Civitai login gate - per the item, no keys sought, URL handed to Max)
+- **Miraclein 4.3 FP8, the 9.14 GB fp8 safetensors** (author 6tZ) - Civitai model 2453960, version 4.3 = 3272965, **file 3158025** `miracleinNSFWGeneration_43_3158025.safetensors`, API metadata `{"format":"SafeTensor","fp":"fp8"}`, sizeKB 9,142,971.4462890625 = **9,362,402,761 B** (the page shows it as 9.14 GB). Gate evidence and the full v4.3 file list (fp8 9.14/8.87/5.06, int8 8.87, bf16 17.73, GGUF Q4_0 + Q8_0) are in `notes/needs_derrick.md`, F1 section. Disambiguation done against the API's own `fp` tags: 3158025 is the only 9.14 GB fp8 file, 3158021 is the int8 8.87 GB, 3158029 the fp8 8.87 GB, 3157985 the fp8 5.06 GB.
+
+### Checks
+- AGENTS.md adults tests (`scripts/tests/test_p6_review.py` + `test_guard_scope.py`): **26 passed in 3.28 s**, run before the records.
+- Renders: 0. GPU lock: never taken. ComfyUI: never started/restarted, no request sent. Config: untouched. No file deleted, no existing file overwritten (`mv -n`, `curl` into a `.part`).
+
