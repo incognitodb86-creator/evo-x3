@@ -90,12 +90,16 @@ def wake(log):
 # Lifted for the flux stills plan ONLY for face_sim (C-ID) and T2 MediaPipe face boxes (Derrick 2026-10-30 2:34 PM CT:
 # "Yes, lift the face-detection ban for the flux stills plan too, keep face_sim and T2"); neither is in BANNED.
 BANNED = ("insightface", "reactor", "pulid", "instantid", "faceid", "auraface", "facedetailer", "ultralytics",
-          "bbox_detector", "segm_detector", "autocropfaces", "faceanalysis", "faceswap", "facerestore", "yolo")
+          "bbox_detector", "segm_detector", "autocropfaces", "faceanalysis", "faceswap", "facerestore",
+          "face_yolo", "yolov8n-face", "yolov8s-face", "yolo-face", "yolo_face", "faceyolo")  # face-only yolo (audit FP-1):
+# pose detectors such as DWPose's yolox_l.onnx stay allowed; any other "*face*yolo*" name is caught by banned_nodes()
 def banned_nodes(g):
     bad = []
     for k, n in g.items():
         ct = str(n.get("class_type", "")).lower()
         bad += [f"{k}: banned class {n.get('class_type')} ({w})" for w in BANNED if w in ct][:1]
+        bad += [f"{k}.{a}: banned model {v} (face yolo)" for a, v in n.get("inputs", {}).items() if isinstance(v, str)
+                and "face" in v.lower() and "yolo" in v.lower() and not any(w in v.lower() for w in BANNED)][:1]
         bad += [f"{k}.{a}: banned model {v} ({w})" for a, v in n.get("inputs", {}).items() if isinstance(v, str)
                 for w in BANNED if w in v.lower() and v.lower().endswith((".safetensors", ".pt", ".pth", ".onnx", ".bin", ".ckpt"))][:1]
     return bad

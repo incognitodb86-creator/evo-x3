@@ -60,6 +60,13 @@ class TestBanned(unittest.TestCase):
         g = {"1": {"class_type": "UNETLoader", "inputs": {"unet_name": "pulid/pulid_flux2_klein_v2.safetensors"}}}
         self.assertTrue(rgj.banned_nodes(g))
 
+    def test_pose_yolox_allowed_face_yolo_banned(self):  # audit FP-1
+        ok = {"1": {"class_type": "DWPreprocessor", "inputs": {"bbox_detector": "yolox_l.onnx", "pose_estimator": "dw-ll_ucoco_384.onnx"}}}
+        self.assertEqual(rgj.banned_nodes(ok), [])
+        for m in ("bbox/face_yolov8m.pt", "yolov8n-face.pt", "my_face_detect_yolo11.pt"):
+            g = {"1": {"class_type": "SomeLoader", "inputs": {"model_name": m}}}
+            self.assertTrue(rgj.banned_nodes(g), m)
+
     def test_face_sim_and_mediapipe_face_allowed(self):
         for ct in ("MediaPipe-FaceMeshPreprocessor", "face_sim"):
             self.assertEqual(rgj.banned_nodes({"1": {"class_type": ct, "inputs": {}}}), [], ct)
