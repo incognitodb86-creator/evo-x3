@@ -5,6 +5,11 @@ Plan `plans/2026-10-30-0700-terrace-proper-settings-test-plan.md`, sha256 `5d5fa
 — verified equal to the copy in `C:\Users\derek\_max2_s8chk\`, so I ran the plan the brief names.
 **PAUSED here: no GPU, no queue, no `gpu-render.lock`, no model load, no render, no scoring, nothing deleted.**
 
+**Update 08:55–08:59 CT — Max answered this note (§8 records his answers).** Item 1 changed the build: S8 is now the
+line **file's own bytes including its trailing LF**, then one more LF, then the prompt — the v2 double-LF join. All 21
+S8 graphs and prompt files were rebuilt, re-audited, and both scripts now **assert Max's three expected sha256s**
+(§4). Nothing else in the 49 changed; the render order is unchanged (tags unchanged).
+
 ## Verdicts (every script re-runnable, every output on disk)
 
 | step | result |
@@ -17,6 +22,7 @@ Plan `plans/2026-10-30-0700-terrace-proper-settings-test-plan.md`, sha256 `5d5fa
 | contact sheet of the start frames | `notes/2026-10-30-brief8-start-frames.png` (1170×828; PIL geometry only, no vision model, no caption) |
 | Step B render order, drawn now | `runs/terrace_settings_v3_20261030/_render_order.json` — interleave check **PASS** |
 | drift instrument | `notes/terrace_v3_drift_check.py` → `notes/2026-10-30-brief8-environment.txt`; a real gap found, §7 |
+| **S8 rebuild after Max's answer** | **BUILD PASS + AUDIT PASS 49/49** — the three S8 prompts hash to Max's expected `46195643c6c6… / 5f335a68ee24… / 12e46703e6ca…` (asserted as a gate in both scripts), and `s8_terr_s51083002` is byte-identical to the v2 graph that made the reused clip except `save.filename_prefix` |
 
 ## 1. Inputs — I copied them, I edited none
 
@@ -80,15 +86,19 @@ graph that made its clip. Same instrument, demonstrated rather than asserted.
 | terrace B2v2 (a0, s1a, s1b, s2, s3, s6) | 13,823 | `e202e512249f2f1cf823d0bcd56702522d9ee5ac603ab5f07079309cddaae0b5` |
 | promptA (same arms, imgA) | 12,297 | `97ed1361923b62a0dad9ae4c53ab48e80a5c0eee3805be90fa199f83f9e68e51` |
 | promptB (same arms, imgB) | 12,975 | `83efcf50adea32d778f5b3a181192c0cd9098f322eff4ea87c46bc3fc128e8fe` |
-| s8 terrace | 14,159 | `695f73ecaa64…` |
-| s8 imgA | 12,633 | `7cf3bf93fd07…` |
-| s8 imgB | 13,311 | `5c20e17b40ef…` |
+| s8 terrace | 14,160 | `46195643c6c613165a3855ae325862ac6c0088b414a2004630d18029d29cc894` |
+| s8 imgA | 12,634 | `5f335a68ee249ab7087baf24bd86ead0d4097234d8e6b91ebb54621bd26649d5` |
+| s8 imgB | 13,312 | `12e46703e6ca8268e72be760d8bb10e340eed96b15f8dc353557829bbc0c0217` |
 
-**Decision for the CHECKED gate (the one thing I built to the letter of brief8 and want confirmed):** brief8 words
-S8 as `line + "\n" + prompt` (one LF). The v1/v2 queue joined with two. Measured consequence: `s8_terr_s51083002`
-is **1 byte** from the graph that produced the reused clip (14,160 → 14,159 chars), so that one reuse is "one
-whitespace away" rather than exact. Options: (a) keep brief8's join; (b) I rebuild s8 on `"\n\n"` in one command
-before Step B, and the reuse becomes byte-exact. I built what brief8 says and flagged the difference — not my call.
+**Resolved by Max on 2026-10-30 (his words: his brief wording was wrong).** The S8 prompt is the line file's own
+bytes — the 335-char text (sha256 of the text `dae75674…`) **plus its own trailing LF** — then **one more LF**, then
+the scene prompt: the v2 join. Builder and audit now treat Max's three values as a gate: a built S8 prompt that does
+not hash to `46195643c6c6…` / `5f335a68ee24…` / `12e46703e6ca…` fails, and the audit re-derives the string from
+the file, not from my builder. The rebuilt lengths (14,160 / 12,634 / 13,312 = prompt + 337) match the v2 S8 prompt
+length exactly, and `s8_terr_s51083002` is now `+0 B` against the v2 graph (§5), so the reuse is byte-exact. The
+S8 graph shas moved accordingly, e.g. `s8_terr_s51083002/request.api.json` → `31d1bbd0b829ef9f…`,
+`s8_imgA_s51083012` → `d474ae2e4fb5f457…`, `s8_imgB_s51083002` → `4c083bcfa7a70aa7…`; `_arms_table.json` →
+`cdefdad7ae6da4b5…`; the diff/inventory records regenerated (`de397058ddb6edc5…` / `b96444d7fb933b9c…`).
 
 ## 5. The 7 reused clips: verified, and the graphs are the same instrument
 
@@ -98,10 +108,12 @@ before Step B, and the reuse becomes byte-exact. I built what brief8 says and fl
 | s2_terr_s51083002 | `…/s2_s51083002` | `save.filename_prefix` only | identical | idem |
 | s3_terr_s51083002 | `…/s3_s51083002` | `save.filename_prefix` only | identical | idem |
 | s6_terr_s51083002 | `…/s6_s51083002` | `save.filename_prefix` only | identical | idem |
-| s8_terr_s51083002 | `…/s8_s51083002` | `save.filename_prefix` + `c0.prompt` (−1 byte, §4) | identical | idem |
+| s8_terr_s51083002 | `…/s8_s51083002` | `save.filename_prefix` only (after the §4 rebuild) | identical | idem |
 
-Clip sha256s are in `notes/2026-10-30-brief8-arms-diff.md`. The v2 `s1` arm is not reused (it moved two settings at
-once) — `s1a`/`s1b` are the plan's split, and all 14 of their clips render.
+Clip sha256s are in `notes/2026-10-30-brief8-arms-diff.md`. All seven slots are byte-identical to the v2 graphs that
+made the reused clips apart from the output prefix, so the reuse is the same instrument in every case. The v2 `s1`
+arm is not reused (it moved two settings at once) — `s1a`/`s1b` are the plan's split, and all 14 of their clips
+render.
 
 ## 6. Step B order, drawn now (so the gate can read it before a frame is rendered)
 
@@ -113,8 +125,8 @@ time from the **measured** v2 walls (110.7–144.7 s per 124 f clip), one job at
 (77.5–101.3 min)**.
 The plan's gates sit inside this order: pos 1–2 are the pilots (plan step 2, which asks for a pilot GO **separate**
 from the GO for the other 40), the drift check runs before pos 3, and the plan asks for **Derrick's GO for the other
-40**. brief8's 8:31 AM GO — does it cover the pilots and the 40, or do the plan's separate GOs still apply? Say so
-in `notes/2026-10-30-brief8-arms-CHECKED.md` and Step B follows it exactly.
+40**. **Answered by Max: Derek's 8:31 AM CT GO covers both pilots and all 42 new renders; no separate plan GOs.** So
+Step B runs pos 1 → pos 42 with no further GO, starting with the drift check (§7, option (a): record, no re-render).
 
 ## 7. Drift check: I ran the instrument, and it found a gap
 
@@ -129,23 +141,23 @@ them, minutes each); `GET /system_stats` through the llama-swap proxy **timed ou
 
 **The plan's step 3 says "compare with v2", and it cannot be run as written: the v1/v2 queues wrote no environment
 record** (searched `notes/` for driver/commit/custom-node/model-sha records — none). So the plan's own fallback
-applies, and the decision is Max's/Derek's: (a) accept the 7 v2 clips — supported by much stronger evidence than an
-environment dump: byte-identical graphs (§5), core code predating v2, identical model references; (b) re-render the 7
-(+7 clips, ~13–17 min, the plan says this needs a GO); (c) add one A0 Terrace control. **My recommendation: (a)**,
-with this record as the baseline for the next run. Not my decision, and I will not start (b) unasked.
+applies. **Answered by Max: option (a) — the 7 reused clips are accepted**, and my DONE note must state that v2
+never logged its environment; it will, in those words, with this section as the evidence. My recommendation was (a)
+on the strength of the byte-identical graphs (§5) plus core code predating v2 and identical model references; option
+(b), the plan's +7 re-renders (~13–17 min), and (c), one extra A0 control, are on the record and not started.
 
-## 8. Open items for the CHECKED gate (all of them are Max's/Derek's calls, none made here)
+## 8. The CHECKED items, with Max's 2026-10-30 answers
 
-1. S8 join `"\n"` vs `"\n\n"` (§4) — one command either way.
-2. Which GO covers the 2 pilots and the 40 main jobs (§6).
-3. Drift/reuse option (a)/(b)/(c) (§7).
-4. Flicker metric, plan L27: grayscale mean-absolute frame difference on a per-scene background mask "drawn once on
-   frame 0, people excluded". The mask is a visual act; this brief gives me no vision permission and standing rules
-   need permission for vision on media. Who draws the masks, with what? Tell me the mask (a polygon, a file, a
-   permission for a vision subagent) and I implement the metric; the code part is straightforward.
-5. Plan L26 scoring uses a vision model ("Forge's vision model or a fresh vision subagent") and L28 the blind pack to
-   the QNAP: not in this brief ("No scoring in this brief"), so untouched — the word to start.
-6. Plan L41 image content acceptance: gate 1, Max's (§1 states exactly what I verified objectively).
+1. **S8 join — resolved, and the build changed.** Max: his brief wording was wrong; use the line file bytes including
+   its own trailing LF, then one more LF, then the prompt. Rebuilt, re-audited, his three expected sha256s are now a
+   gate in both scripts (§4).
+2. **GO scope — answered.** Derek's 8:31 AM CT GO covers both pilots and all 42 new renders; no separate plan GOs.
+3. **Drift — answered: option (a)**, accept the 7 reused clips; the DONE note will record that v2 never logged its
+   environment (§7).
+4. **Flicker masks — out of brief8.** Not built, not run; I do not draw the masks and I do not score.
+5. **Scoring and the blind pack — out of brief8.** Not started; Forge scores nothing in this brief.
+6. **Plan L41 image content acceptance — unchanged:** gate 1 is Max's. §1 states exactly what I verified objectively
+   (exact 768×1344, ratio 4:7, no stretch, PNG integrity, hashes) and nothing more.
 
 Text for the plan's "their paths go here" line (L11-12 area — the plan is Max's file, I do not edit it):
 `Image A: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input\community\imageA_768x1344_crop.png (sha256 4d07281de511581a36736c7d1fd9a3835e96cd502555046b211a533bd4fd95d0);
@@ -163,4 +175,7 @@ untouched), no config and no default-graph change, B2 default unchanged, nothing
 `notes/2026-10-30-brief8-arms-inventory.md`, `notes/2026-10-30-brief8-environment.txt`,
 `notes/2026-10-30-brief8-start-frames.png`.
 
-**PAUSED. Step B starts when `notes/2026-10-30-brief8-arms-CHECKED.md` exists, and follows §6's order verbatim.**
+**PAUSED. Step B starts when `notes/2026-10-30-brief8-arms-CHECKED.md` exists, and follows §6's order verbatim:**
+drift check recorded first (option (a), no re-render), then pos 1–42, one job at a time under `gpu-render.lock`,
+the pre-render pytest + `guard_ok` gate on every submit, retry once on the same graph and seed, then the plan's
+failure rule.
