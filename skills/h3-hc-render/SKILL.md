@@ -69,8 +69,8 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 - To re-request a dead clip, clone its rendered `ok=True` sibling graph and change only the per-clip keys.
 - One seed per clip. Never request a quality redo (harness redos = same seed, then seed+1).
 - Single clip = a batch of one: `run_queue.py --run-dir <run_dir> --frames <n> --detach`. run_graph_job.py is an internal helper run_queue imports; never run it directly.
-- "Pick an image" (Derrick): pick straight from `C:/Users/derek/5slock/approved_characters/INDEX.csv`; no novelty, history or never-animated scan (skip hc_pick_scan). Seed default: a random int made in code (`random.randint(1, 2**31-1)`); never grep runs for uniqueness.
-- Prompt: model it on Example 1 (short shape) in `skills/h3-prompting/references/worked-examples.md`; for length/stats reuse `scripts/prompt_stats.py`. No per-clip check scripts.
+- "Pick an image" (Derrick): pick from `C:/Users/derek/5slock/approved_characters/INDEX.csv`; a quick check for stills not used recently is OK (Derrick 2:52 PM CT: "eh i am ok with them searching"). Seed default: a random int made in code (`random.randint(1, 2**31-1)`); never grep runs for uniqueness.
+- Prompt: use Example 1 for structure only (beat order, clause shape), not its content or tone; write the scene from what Derrick asked for. Example 1 is in `skills/h3-prompting/references/worked-examples.md`; for length/stats reuse `scripts/prompt_stats.py`. No per-clip check scripts.
 
 ## 5. Proof (next pass, objective only; no vision model judges, scores or picks rendered explicit output; Derrick gives the only KEEP)
 
