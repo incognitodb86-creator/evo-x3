@@ -11,6 +11,10 @@ Renders every clip in a run's order file back to back in ONE GPU window:
 A file named STOP in the run dir halts the batch after the clip in flight. Results append to <run>/_render_queue.log
 in the same START/DONE format as the per-test queue scripts, so runs stay comparable.
 It reuses comm.py and run_graph_job.py helpers; it does not change them.
+job_type "still" (flux Phase 1, Derrick 2026-10-30 2:52 PM CT): an order entry with "job_type": "still" (and its
+expected "size": "WxH") is an image job: the same guard, lock, STOP, retry and log lines, but its check is PNG output
++ size only (no frames/audio/black-freeze/contact sheet) and its prompt is read from the Klein edit text node
+(CLIPTextEncode titled "positive"). Entries without job_type are H3 video clips, unchanged.
 
 Usage:
   python scripts\run_queue.py --run-dir <run dir> [--queue <run dir>\_render_order.json] [--resume] [--dry-run]
@@ -95,6 +99,38 @@ def guard_graph(g):
     return all(comm.guard_ok(s) for n in g.values() for s in comm.prompt_strings(n.get("inputs", {})))
 
 
+def still_prompt(g):
+    """job_type still: the Klein edit prompt = CLIPTextEncode titled 'positive' (else the first CLIPTextEncode)."""
+    enc = [n for n in g.values() if n.get("class_type") == "CLIPTextEncode"]
+    pos = [n for n in enc if n.get("_meta", {}).get("title") == "positive"] or enc
+    return pos[0]["inputs"].get("text", "") if pos else ""
+
+
+def still_done(run_dir, job, tag, f, g0, size, t0, retry, slog):
+    """job_type still: PNG output + size check only, then the same render_ok.json and DONE line shape as a clip."""
+    if job.get("size"):
+        size = tuple(int(x) for x in str(job["size"]).lower().split("x"))
+    p = rgj.probe(f)
+    why = [] if p["bytes"] > 0 else ["0-byte file"]
+    if not f.lower().endswith(".png"): why.append("not a png (%s)" % os.path.basename(f))
+    if (p["w"], p["h"]) != size: why.append("size %sx%s != %dx%d" % (p["w"], p["h"], size[0], size[1]))
+    if why:
+        qlog(run_dir, "FAIL pos=%d tag=%s objective %s" % (job["pos"], tag, "; ".join(why))); return False
+    slog("OBJECTIVE ok %s still png size=%sx%s bytes=%d" % (tag, p["w"], p["h"], p["bytes"]))
+    outs = [os.path.join(OUT_ROOT, tag, x) for x in os.listdir(os.path.join(OUT_ROOT, tag))] if os.path.isdir(os.path.join(OUT_ROOT, tag)) else []
+    wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None
+    prompt = still_prompt(g0)
+    json.dump({"tag": tag, "pos": job["pos"], "arm": job.get("arm"), "scene": job.get("scene"), "seed": job.get("seed"),
+               "job_type": "still", "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+               "image_sha256": hashlib.sha256(open(f, "rb").read()).hexdigest(), "image": os.path.relpath(f, run_dir),
+               "bytes": p["bytes"], "w": p["w"], "h": p["h"], "wall_seconds_output_mtime": round(wall, 1) if wall else None,
+               "rendered_at": time.strftime("%Y-%m-%d %H:%M:%S CT"), "retry": retry, "driver": "run_queue.py"},
+              open(os.path.join(run_dir, tag, "render_ok.json"), "w", encoding="utf-8"), indent=1)
+    qlog(run_dir, "DONE pos=%d tag=%s ok %dx%d still png wall=%ss bytes=%d retry=%s" % (job["pos"], tag, p["w"], p["h"],
+         ("%.1f" % wall) if wall else "?", p["bytes"], retry))
+    return True
+
+
 def render_clip(run_dir, job, frames, size, retry, slog):
     """One clip, ONE render attempt inside the open GPU window (S8: the caller gives exactly one unchanged retry)."""
     tag, d = job["tag"], os.path.join(run_dir, job["tag"])
@@ -123,6 +159,8 @@ def render_clip(run_dir, job, frames, size, retry, slog):
         dst = os.path.join(d, t + os.path.splitext(src)[1]); shutil.copyfile(src, dst); s = {"file": dst}
     if not s:
         qlog(run_dir, "FAIL pos=%d tag=%s job error (%s)" % (job["pos"], tag, out.get("outcome"))); return False
+    if job.get("job_type") == "still":
+        return still_done(run_dir, job, tag, s["file"], g0, size, t0, retry, slog)
     p, bf = rgj.probe(s["file"]), rgj.blackfreeze(s["file"])
     why = [] if p["bytes"] > 0 else ["0-byte file"]
     if (p["w"], p["h"]) != size: why.append("size %sx%s" % (p["w"], p["h"]))
@@ -159,7 +197,7 @@ def attempt(run_dir, job, frames, size, retry, slog):
 def main():
     ap = argparse.ArgumentParser(description="reusable batch render queue (one GPU window per batch)")
     ap.add_argument("--run-dir", required=True)
-    ap.add_argument("--queue", help="order file (default <run-dir>/_render_order.json): {'order': [{pos, tag, arm, scene, seed}]}")
+    ap.add_argument("--queue", help="order file (default <run-dir>/_render_order.json): {'order': [{pos, tag, arm, scene, seed[, job_type, size]}]}")
     ap.add_argument("--resume", action="store_true", help="skip tags already DONE ok in _render_queue.log")
     ap.add_argument("--dry-run", action="store_true", help="list the clips; no lock, GPU or HTTP call")
     ap.add_argument("--frames", type=int, default=124)

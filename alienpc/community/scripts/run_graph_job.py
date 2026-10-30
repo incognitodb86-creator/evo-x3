@@ -85,8 +85,23 @@ def wake(log):
         if comfy_ok(): return True
         time.sleep(5)
     return False
+# Face-detection ban (director plan L7/17/238): no graph may hold a face detector, identity model or auto-crop, and no
+# graph may load a banned model file (models\pulid\pulid_flux2_klein_v2.safetensors stays on disk, never loaded).
+# Lifted for the flux stills plan ONLY for face_sim (C-ID) and T2 MediaPipe face boxes (Derrick 2026-10-30 2:34 PM CT:
+# "Yes, lift the face-detection ban for the flux stills plan too, keep face_sim and T2"); neither is in BANNED.
+BANNED = ("insightface", "reactor", "pulid", "instantid", "faceid", "auraface", "facedetailer", "ultralytics",
+          "bbox_detector", "segm_detector", "autocropfaces", "faceanalysis", "faceswap", "facerestore", "yolo")
+def banned_nodes(g):
+    bad = []
+    for k, n in g.items():
+        ct = str(n.get("class_type", "")).lower()
+        bad += [f"{k}: banned class {n.get('class_type')} ({w})" for w in BANNED if w in ct][:1]
+        bad += [f"{k}.{a}: banned model {v} ({w})" for a, v in n.get("inputs", {}).items() if isinstance(v, str)
+                for w in BANNED if w in v.lower() and v.lower().endswith((".safetensors", ".pt", ".pth", ".onnx", ".bin", ".ckpt"))][:1]
+    return bad
 def static_check(g):
-    oi = json.loads(urllib.request.urlopen(COMFY + "/object_info", timeout=120).read()); bad = []
+    bad = banned_nodes(g)
+    oi = json.loads(urllib.request.urlopen(COMFY + "/object_info", timeout=120).read())
     for k, n in g.items():
         ct = n.get("class_type")
         if ct not in oi: bad.append(f"{k}: unknown class {ct}"); continue
