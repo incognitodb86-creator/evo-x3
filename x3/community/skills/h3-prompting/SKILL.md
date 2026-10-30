@@ -114,8 +114,8 @@ Name each garment's **end state** and say it stays visible ("the top falls to th
 stays there"); a garment that moves or comes off gets its own `<Subject N>` and a `retention_analysis` line. Copy
 wardrobe and jewellery words from the panel prompt word for word: one colour, one item, one place.
 
-**R15 - `ref_image_size` default is `match`** (the production argv). `max` only as a labelled one-axis identity
-cell after a watched mid-clip identity break, never as a silent default.
+**R15 - `ref_image_size` default is `max`** (B2, Derrick 2026-10-30; `max` only downscales sides over 2048). `match` (caps a
+reference to the canvas pixels) is a labelled pre-B2 option only, used when a brief names it; never a silent default.
 
 ## 3. Motion, contact, anatomy
 
