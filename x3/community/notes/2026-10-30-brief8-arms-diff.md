@@ -26,7 +26,7 @@ The only LoadImage node is `img`, and it feeds `c0.ref_images.ref_image_1` and b
 | s2 | unet activation_learned_HQ | unet.unet_name → `10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors` | 7 | 6 | 1 |
 | s3 | latent upscaler fp16 | lsu3.model_name → `minimax_h3_latent_upscaler_3d_fp16.safetensors` | 7 | 6 | 1 |
 | s6 | pass-1 steps 6 | s0_sched.steps → `6` | 7 | 6 | 1 |
-| s8 | prompt only: the #74 line + '\n' + the scene prompt | prompt text (see the note above) | 7 | 6 | 1 |
+| s8 | prompt only: the line file bytes (incl. its own trailing LF) + '\n' + the scene prompt = the v2 join (Max's correction 2026-10-30) | prompt text (see the note above) | 7 | 6 | 1 |
 
 `a0` and `s8` change no widget: they are the control and the prompt-only arm. `s1a`/`s1b` split the old v2 `s1` arm, which moved two settings at once and is therefore not reusable.
 
@@ -46,14 +46,14 @@ The only LoadImage node is `img`, and it feeds `c0.ref_images.ref_image_1` and b
 
 | prompt | chars | sha256 | guard_ok |
 |---|---|---|---|
-| s8 | 13311 | `5c20e17b40ef7891fcdd39d3220cfca5b5566bb607681f070fb71a185a376856` | PASS |
-| s8 | 14159 | `695f73ecaa6423376f195d5cc036b155b9de76582381830c1fbbc386c46bcd07` | PASS |
-| s8 | 12633 | `7cf3bf93fd077ce1a0cd5b73521afa6a835c5a39503bc56a9a0dd5f000799484` | PASS |
+| s8 | 13312 | `12e46703e6ca8268e72be760d8bb10e340eed96b15f8dc353557829bbc0c0217` | PASS |
+| s8 | 14160 | `46195643c6c613165a3855ae325862ac6c0088b414a2004630d18029d29cc894` | PASS |
+| s8 | 12634 | `5f335a68ee249ab7087baf24bd86ead0d4097234d8e6b91ebb54621bd26649d5` | PASS |
 | a0、s1a、s1b、s2、s3、s6 | 12975 | `83efcf50adea32d778f5b3a181192c0cd9098f322eff4ea87c46bc3fc128e8fe` | PASS |
 | a0、s1a、s1b、s2、s3、s6 | 12297 | `97ed1361923b62a0dad9ae4c53ab48e80a5c0eee3805be90fa199f83f9e68e51` | PASS |
 | a0、s1a、s1b、s2、s3、s6 | 13823 | `e202e512249f2f1cf823d0bcd56702522d9ee5ac603ab5f07079309cddaae0b5` | PASS |
 
-Every prompt embedded in a graph is byte-identical to the file it came from: the terrace prompt hashes to `e202e512…`, promptA to `97ed1361…`, promptB to `83efcf50…` - the same hashes brief8 names, so what is submitted is what Max staged. `s8` is `line + "\n" + prompt` exactly as brief8 words it; the v1/v2 queue used `"\n\n"`, so s8_terr_s51083002 (reused) and the new s8 clips are not byte-identical prompts - the line and the prompt are the same text, the join is one byte shorter. Flagged for the CHECKED gate.
+Every prompt embedded in a graph is byte-identical to the file it came from: the terrace prompt hashes to `e202e512…`, promptA to `97ed1361…`, promptB to `83efcf50…` - the same hashes brief8 names, so what is submitted is what Max staged. The `s8` prompt is the line file's own bytes (the 335-char line, sha256 of the text `dae75674…`, plus its own trailing LF) + one more LF + the scene prompt, per Max's correction on 2026-10-30 - the same join the v1/v2 queue used. The built S8 prompts hash to the three values Max supplied (`46195643c6c6…` terrace, `5f335a68ee24…` imgA, `12e46703e6ca…` imgB), and the audit asserts those values: a mismatch is an audit failure, not a note.
 
 ## is each reused clip really the same instrument? (the check that decides the reuse)
 
@@ -67,6 +67,6 @@ The plan's baseline is the v2 B2 graph, so every reused slot's v3 graph is compa
 | s2_terr_s51083002 | `s2_s51083002` | `save.filename_prefix` | identical | 124 = 124 | 51083002 | 13823 → 13823 (+0) | same instrument |
 | s3_terr_s51083002 | `s3_s51083002` | `save.filename_prefix` | identical | 124 = 124 | 51083002 | 13823 → 13823 (+0) | same instrument |
 | s6_terr_s51083002 | `s6_s51083002` | `save.filename_prefix` | identical | 124 = 124 | 51083002 | 13823 → 13823 (+0) | same instrument |
-| s8_terr_s51083002 | `s8_s51083002` | `c0.prompt`, `save.filename_prefix` | identical | 124 = 124 | 51083002 | 14160 → 14159 (-1) | same instrument |
+| s8_terr_s51083002 | `s8_s51083002` | `save.filename_prefix` | identical | 124 = 124 | 51083002 | 14160 → 14160 (+0) | same instrument |
 
-So `a0` is byte-identical to the v2 B2 control except for where the file is written, and the setting arms s2/s3/s6 are identical to the v2 graphs that made the reused clips. `s8` differs by the prompt join: brief8 words it `line + "\n" + prompt` (one LF), the v2 queue used two. The line and the prompt text are the same, so the reused `s8_terr_s51083002` clip sits one byte of whitespace away from the graph that would produce it. That is a decision for the CHECKED gate, not for me: the audit reports both joins, and the s8 arm can be rebuilt on `"\n\n"` in one command if Max wants the reuse to be exact.
+All seven reused slots now differ from the v2 graphs that made their clips by the output prefix and nothing else - `a0`, `s2`, `s3`, `s6` and (after Max's 2026-10-30 correction of the S8 join) `s8` too. Every reused clip is therefore the same instrument as the graph queued for it, which is the evidence the plan's reuse needs. The prompts are byte-identical to the v2 prompts (`+0 B` in the table), which is what the corrected join is for.
