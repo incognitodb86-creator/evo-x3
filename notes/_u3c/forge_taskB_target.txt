@@ -1,0 +1,4 @@
+# cell config - do not reorder
+mode = stock
+target = 3
+seed = 51083007
