@@ -1,0 +1,37 @@
+{
+ "tag": "tr2v2_s1_s51083002",
+ "model": "qwen3vl_judge",
+ "secs": 4.2,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background elements like balustrade, wall, trees, and wet floor match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both women retain identical hair, skin tone, body proportions, and facial features from START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 shows identical pose, framing, and clothing as START IMAGE with no jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear physical contact, with Subject 1 pinning Subject 2 and both bodies in motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0656,
+  "target_reached": 0.0707,
+  "anatomy_defect": 0.0004
+ },
+ "flags": []
+}
