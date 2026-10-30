@@ -1,0 +1,53 @@
+--- a/headless-guard-allowlist.json
++++ b/headless-guard-allowlist.json
+@@ -1,6 +1,41 @@
+ {
+ 	"_about": "ALI-160 K4 (Derrick 2026-10-23 7:01 AM CT: \"Keep PowerShell, allowlist in our guard\"). Read by headless-guard-and-truncate.ts. Deny by default: in headless runs every bash/powershell command segment (split on ; | && || & newlines, plus $( ), { } and ( ) bodies) must start with a command listed here. The guard's denylist and protected-paths.ts still run first and win. Commands are lowercase; .exe is stripped; full paths are matched by file name. Edit this file to widen or narrow; no code change needed.",
+ 	"applyInUI": false,
++	"_community": "Derrick 2026-10-23 11:49 AM CT \"Yes, switch Forge to the community permissions (1, 2, 4, 5)\": mode denylist = the per-command allowlist below is OFF for Forge; any command runs unless it is a hazard (SHELL_RULES in the .ts + denylist.commands), and denylist.argChecked commands keep argument rules (git: no push/reset/checkout/clean/history rewrite, commit needs a real -m; curl: GET to web.domains only; copy-item: images output/approved -> ComfyUI/input only; ffmpeg/ffprobe local only; certutil -hashfile only; find no -delete/-exec; nested powershell checked). The commands/aliases lists stay for mode \"allowlist\" (rollback = set mode to \"allowlist\").",
++	"mode": "denylist",
++	"denylistCwdRoots": ["C:/Users/derek/5slock", "C:/AI/community"],
++	"denylist": {
++		"commands": {
++			"invoke-expression": "iex runs arbitrary text as code (hides commands from the guard).",
++			"eval": "eval runs arbitrary text as code (hides commands from the guard).",
++			"start-process": "Start-Process launches detached programs outside the guard (renders/loops are the harness's).",
++			"invoke-command": "Invoke-Command runs script blocks outside the guard.",
++			"invoke-webrequest": "use curl.exe GET to the allowed docs domains (bare curl/iwr/wget in PowerShell = Invoke-WebRequest).",
++			"invoke-restmethod": "use curl.exe GET to the allowed docs domains.",
++			"wget": "use curl GET to the allowed docs domains.",
++			"start-bitstransfer": "downloads/uploads go through curl GET only.",
++			"bitsadmin": "downloads/uploads go through curl GET only.",
++			"scp": "no uploads: web access is curl GET only.",
++			"sftp": "no uploads: web access is curl GET only.",
++			"ssh": "no remote shells.",
++			"xargs": "xargs runs other commands out of the guard's sight; loop in python or PowerShell instead.",
++			"bash": "nested shells hide commands from the guard; run the command directly.",
++			"sh": "nested shells hide commands from the guard; run the command directly.",
++			"cmd": "nested shells hide commands from the guard; run the command directly.",
++			"source": "sourcing scripts is not allowed.",
++			"format-volume": "disk tools are never allowed.",
++			"diskpart": "disk tools are never allowed.",
++			"taskkill": "killing processes can kill a render or the loop; the supervisor owns processes.",
++			"stop-process": "killing processes can kill a render or the loop; the supervisor owns processes.",
++			"shutdown": "never.",
++			"restart-computer": "never."
++		},
++		"argChecked": ["git", "curl", "copy-item", "ffmpeg", "ffprobe", "certutil", "find", "powershell", "pwsh"]
++	},
++	"web": {
++		"domains": ["github.com", "githubusercontent.com", "huggingface.co", "docs.comfy.org", "civitai.com", "reddit.com"],
++		"outputRoots": ["C:/AI/community/notes", "C:/Users/derek/5slock/ralph-community/notes"]
++	},
+ 	"tools": ["bash", "powershell"],
+ 	"commands": {
+ 		"bash": [
+@@ -49,7 +84,7 @@
+ 		"source": "sourcing scripts is not allowed."
+ 	},
+ 	"git": {
+-		"subcommands": ["status", "diff", "log", "show", "rev-parse", "ls-files", "blame", "grep", "shortlog", "describe", "cat-file"]
++		"subcommands": ["status", "diff", "log", "show", "rev-parse", "ls-files", "blame", "grep", "shortlog", "describe", "cat-file", "add", "commit"], "denySubcommands": ["push", "reset", "checkout", "clean", "restore", "rebase", "filter-branch", "update-ref", "gc", "prune"]
+ 	},
+ 	"_ali163": "Derrick 2026-10-23 batch (ALI-163): powershell copy-item = one literal approved still -> the hc input folder only, no flags but -Path/-LiteralPath/-Destination, never overwrite; ffmpeg/ffprobe = local files only (no URLs/protocols, -y, -listen). Checked in headless-guard-and-truncate.ts checkArgs.",
+ 	"_ali163_copywide": "Derrick 2026-10-23 11:09 AM CT \"Yes don't be so restrictive to forge wtf\": Copy-Item may copy image files (.png/.jpg/.jpeg/.webp, wildcards ok) from ComfyUI/output (any subfolder) or approved_characters into ComfyUI/input (any subfolder). Limits: destination under ComfyUI/input only; approved_characters is never written.",

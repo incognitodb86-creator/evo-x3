@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_a_w8_capswift_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The background (bed, headboard) and lighting remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain their identities, clothing, and physical characteristics throughout the sequence."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the pose, framing, and composition of the start image perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the missionary position with pelvic contact and visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0057,
+  "same_people": 0.0159,
+  "start_kept": 0.02,
+  "target_reached": 0.0181,
+  "anatomy_defect": 0.3235
+ },
+ "flags": []
+}

@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_a_w7_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.3,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The background in all frames (1-8) and Image 3 is the same rocky cave environment as seen in the START IMAGE."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "In frames 2-8, the orc's clothing changes from armor to shorts, and his skin texture becomes smoother, deviating from the START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 is identical to the START IMAGE in pose, framing, and character appearance, showing a direct continuation."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the characters in the target standing rear-entry pose against the wall with visible intimate contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in any of the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.1837,
+  "same_people": 0.2928,
+  "start_kept": 0.449,
+  "target_reached": 0.0295,
+  "anatomy_defect": 0.5061
+ },
+ "flags": [
+  "same_people"
+ ]
+}

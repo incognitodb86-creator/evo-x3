@@ -1,0 +1,27 @@
+diff --git a/pi-permissions.jsonc.bak-20261023-readme b/pi-permissions.jsonc
+index ba94a55..8f2489c 100644
+--- a/pi-permissions.jsonc.bak-20261023-readme
++++ b/pi-permissions.jsonc
+@@ -270,7 +270,10 @@
+     "edit:C:/AI/security/skillspector/TASK.md": "deny",
+     "write:C:/AI/security/skillspector/TASK.md": "deny",
+     "edit:C:/AI/security/skillspector/REVIEW.md": "deny",
+-    "write:C:/AI/security/skillspector/REVIEW.md": "deny"
++    "write:C:/AI/security/skillspector/REVIEW.md": "deny",
++    // readme (ALI-163, 2026-10-23 11:07 AM CT, Derrick "Yes do it"): custom_nodes README*.md are read-only for Forge (read/grep via special.external_directory below).
++    "edit:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*.md": "deny",
++    "write:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*.md": "deny"
+   },
+ 
+   "mcp": {
+@@ -592,6 +595,9 @@
+     "external_directory:C:/AI/ORGANIZE_PLAN_2026-10-21.md": "allow",
+     // skillspector (ALI-151, 2026-10-21 CT, Derek via Grok Bot: Forge installs NVIDIA SkillSpector and scans read-only, report only): file tools may reach the SkillSpector work folder. Scan targets are read via the powershell tool only (no new external_directory for them).
+     "external_directory:C:/AI/security/skillspector": "allow",
+-    "external_directory:C:/AI/security/skillspector/*": "allow"
++    "external_directory:C:/AI/security/skillspector/*": "allow",
++    // readme (ALI-163, 2026-10-23 11:07 AM CT, Derrick "Yes do it"): file tools may open custom_nodes/**/README*.md only (edit/write denied in tools). Nothing else in HardcoreNSFW-TestRuntime.
++    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*.md": "allow",
++    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*/*": "deny" // README* must be the file, not a folder
+   }
+ }

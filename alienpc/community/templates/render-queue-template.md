@@ -18,5 +18,5 @@ Stage first (before asking for a go), then use the AGENTS.md Render launch line 
     C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_queue.py --run-dir <run dir> [--resume] [--frames <n>] --detach
 
 The dry run lists the clips and makes no lock, GPU or HTTP call. `--detach` prints the batch PID; output goes to `<run dir>\_run_queue.out.log`.
-`--frames` (default 124) must equal c0.length in the request graphs; the frame check only confirms each clip came out at that length. `--size` defaults to 768x1344.
+Set `--frames` per clip from the plan; it must equal c0.length in the request (124 is only run_queue's fallback when omitted); the frame check only confirms each clip came out at that length. `--size` defaults to 768x1344.
 Exit codes (run_queue.py docstring): 0 done, 1 STOP file, 2 pytest gate failed, 4 ComfyUI down, 5 a clip failed twice (others still rendered), 6 clips missing a DONE ok line, 7 GPU busy (lock held), 8 uncaught error (incl. a lock-tool error), 9 a previous batch was killed or never closed, 130 Ctrl-C.

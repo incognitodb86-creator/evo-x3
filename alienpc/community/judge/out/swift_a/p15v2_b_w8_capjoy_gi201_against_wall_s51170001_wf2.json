@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_b_w8_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.5,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The background in all frames (1-8) and Image 3 is the same dark cave interior with rough stone walls as seen in the START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde elf woman and green orc man remain consistent in appearance, clothing, and body type across all frames (1-8) and Image 3."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the START IMAGE exactly, showing the same pose with arms raised and the orc gripping her wrists."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the elf woman standing against the wall with the orc behind her, penis inserted, matching the target pose description."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects are visible in any frame; hands, limbs, and bodies appear structurally correct and consistent."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.1632,
+  "same_people": 0.0171,
+  "start_kept": 0.0702,
+  "target_reached": 0.0185,
+  "anatomy_defect": 0.1782
+ },
+ "flags": []
+}

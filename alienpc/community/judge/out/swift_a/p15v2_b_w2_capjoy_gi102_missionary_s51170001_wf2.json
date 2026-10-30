@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_b_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.0,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, white sheets, and lighting conditions remain consistent throughout the frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "The second person changes from a woman (start image) to a man (frames 1-8), violating character consistency."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image's pose, framing, and clothing exactly, continuing directly from it."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the couple in a missionary position with one partner on top of the other, matching the target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, limb distortions, or fusion issues are visible in the provided frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0028,
+  "same_people": 0.9484,
+  "start_kept": 0.219,
+  "target_reached": 0.025,
+  "anatomy_defect": 0.252
+ },
+ "flags": [
+  "same_people"
+ ]
+}

@@ -4,12 +4,14 @@ Reads the graph, the objective sidecar, the mp4 sidecar and status.log, and chec
 claim made in notes/2026-10-28-terrace-dom-DONE.md: model, sampler, steps, shift, VSA, attention,
 ref_image_size, canvas, length, fps, seed, cond, prompt identity (graph prompt == prompt_seg0.txt),
 frames, duration, bytes, render seconds, contact sheet presence, and the QNAP size if given.
-usage: python verify_cell.py <run_dir> [qnap_bytes]
+usage: python verify_cell.py <run_dir> [qnap_bytes|-] [frames]
+Expected frames = the [frames] argument, else the request's c0.length (frames are set per run by the plan).
+The seed / still / render-secs / single-pass checks are specific to the 2026-10-28 terrace_dom cell.
 """
 import sys, os, json, hashlib, re
 
 D = sys.argv[1]
-qbytes = int(sys.argv[2]) if len(sys.argv) > 2 else None
+qbytes = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2] != "-" else None
 tag = os.path.basename(D)
 rows = []
 
@@ -24,6 +26,7 @@ def sha(p):
 
 g = json.load(open(os.path.join(D, "request.api.json"), encoding="utf-8"))
 i = lambda k, f: g[k]["inputs"].get(f)
+F = int(sys.argv[3]) if len(sys.argv) > 3 else i("c0", "length")
 mp4 = os.path.join(D, tag + ".mp4")
 mp4j = json.load(open(mp4 + ".json", encoding="utf-8")) if os.path.exists(mp4 + ".json") else {}
 obj = json.load(open(os.path.join(D, "objective.json"), encoding="utf-8")) if os.path.exists(os.path.join(D, "objective.json")) else {}
@@ -40,7 +43,7 @@ chk("VSA keep_percent 10 (90% sparsity)", i("m_vsa", "selection") == "vsa" and i
     "%s/%s" % (i("m_vsa", "selection"), i("m_vsa", "selection.keep_percent")))
 chk("comfy kitchen attention", i("m_attn", "attention") == "comfy kitchen attention", i("m_attn", "attention"))
 chk("ref_image_size = max", i("c0", "ref_image_size") == "max", i("c0", "ref_image_size"))
-chk("canvas 768x1344, length 243, fps 24", (i("c0", "width"), i("c0", "height"), i("c0", "length")) == (768, 1344, 243)
+chk("canvas 768x1344, length %s, fps 24" % F, (i("c0", "width"), i("c0", "height"), i("c0", "length")) == (768, 1344, F)
     and i("mkvid", "fps") == 24, "%sx%s len=%s fps=%s" % (i("c0", "width"), i("c0", "height"), i("c0", "length"), i("mkvid", "fps")))
 chk("seed 51083002", i("noise", "noise_seed") == 51083002, i("noise", "noise_seed"))
 chk("cond = TERRACE2 staged still", i("img", "image") == "community/TERRACE2_768x1344.png", i("img", "image"))
@@ -50,12 +53,13 @@ chk("no loras / no upscale / no RIFE", not any(n["class_type"] in ("LoraLoaderMo
     and not any(t in n["class_type"] for n in g.values() for t in ("Upscal", "RIFE", "SLA", "Cache", "Spectrum")))
 chk("single chunk (no continuation nodes)", not any(n["class_type"] in ("MiniMaxH3GuidedContinuationWindow",
     "MiniMaxH3AppendContinuation", "MiniMaxH3LatentTailGuide") for n in g.values()))
-chk("mp4 exists, size 3881931", os.path.exists(mp4) and os.path.getsize(mp4) == 3881931,
+chk("mp4 exists, non-empty", os.path.exists(mp4) and os.path.getsize(mp4) > 0,
     os.path.getsize(mp4) if os.path.exists(mp4) else "missing")
 a = (obj.get("attempts") or [{}])[-1] if isinstance(obj, dict) else {}
-chk("objective: 243 frames, 768x1344, 24 fps, audio, 10.125 s, 3881931 B",
-    a.get("frames") == 243 and a.get("w") == 768 and a.get("h") == 1344 and a.get("fps") == "24/1"
-    and a.get("audio") is True and abs(float(a.get("duration", 0)) - 10.125) < 1e-6 and a.get("bytes") == 3881931,
+chk("objective: %s frames, 768x1344, 24 fps, audio, %s s, bytes = mp4" % (F, round(F / 24, 6)),
+    a.get("frames") == F and a.get("w") == 768 and a.get("h") == 1344 and a.get("fps") == "24/1"
+    and a.get("audio") is True and abs(float(a.get("duration", 0)) - F / 24) < 1e-3
+    and os.path.exists(mp4) and a.get("bytes") == os.path.getsize(mp4),
     "frames=%s %sx%s fps=%s audio=%s dur=%s bytes=%s" % (a.get("frames"), a.get("w"), a.get("h"),
     a.get("fps"), a.get("audio"), a.get("duration"), a.get("bytes")))
 chk("objective: no black/frozen frames flagged", isinstance(obj, dict) and ("blackfreeze" not in obj or obj["blackfreeze"] == []),

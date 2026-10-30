@@ -1,0 +1,121 @@
+ali163_hc15_gi046_s51150031 take A nodes 27 clean False
+  PASS ck_control
+  PASS ck_diff
+  PASS ck_top_diff
+  PASS ck_guide
+  PASS ck_shape
+  PASS ck_prose
+  PASS ck_top_species
+  PASS ck_top_age
+  PASS ck_top_words
+  PASS ck_top_beats
+  PASS ck_top_neg
+  PASS ck_top_sync
+  PASS ck_top_seed
+  PASS ck_gate
+  PASS ck_slots
+  PASS ck_inputs
+  PASS ck_idfree
+  PASS ck_schema
+  PASS ck_prefix
+  PASS ck_seed
+  PASS ck_rundir
+  PASS ck_graphfile
+  PASS ck_manifest
+  FAIL ck_top_manifest :: TOP-MANIFEST card receipt drifted from the card/facts/graph bytes on disk; TOP-MANIFEST card gate fires on c0: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM; TOP-MANIFEST card words in c0: 2/11; TOP-MANIFEST card gate fires on c1: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM; TOP-MANIFEST card words in c1: 2/11; TOP-MANIFEST note has no card receipt '32/32 card quotes verbatim'; TOP-MANIFEST note has no card receipt 'card gate CAPTIONED'
+  PASS ck_top_arm
+  FAIL ck_top_card :: F-CARD c0 F-CARD-WORDS: no card word black athletic shorts, blonde, long and wavy, extremely muscular, green-skinned humanoid; F-CARD c0 F-CARD-BANNED: figure 1: nude, on all fours; F-CARD c0 F-CARD-BANNED: figure 2: dark grey shorts, grasped, grey shorts, on all fours; F-CARD c0 F-CARD-POSE: figure 1 opening beat lacks the card pose lying prone on stomach, propped on forearms; F-CARD c0 F-CARD-POSE: figure 2 opening beat lacks the card pose kneeling behind figure 1; F-CARD c0 F-CARD-ROOM: no card room/light word interior living space, dark wood flooring, beige upholstered sofa, silver chain-link bikini and choker; F-CARD c1 F-CARD-WORDS: no card word black athletic shorts, blonde, long and wavy, extremely muscular, green-skinned humanoid; F-CARD c1 F-CARD-BANNED: figure 1: grasped, on all fours; F-CARD c1 F-CARD-BANNED: figure 2: dark grey shorts, grey shorts, on all fours; F-CARD c1 F-CARD-POSE: figure 1 opening beat lacks the card pose lying prone on stomach, propped on forearms; F-CARD c1 F-CARD-POSE: figure 2 opening beat lacks the card pose kneeling behind figure 1; F-CARD c1 F-CARD-ROOM: no card room/light word interior living space, dark wood flooring, beige upholstered sofa, silver chain-link bikini and choker
+  PASS ck_top_facts
+  PASS ck_top_md
+  PASS ck_nogpu
+ali163_hc15_gi046_s51150032 take B nodes 27 clean False
+  PASS ck_control
+  PASS ck_diff
+  PASS ck_top_diff
+  PASS ck_guide
+  PASS ck_shape
+  PASS ck_prose
+  PASS ck_top_species
+  PASS ck_top_age
+  PASS ck_top_words
+  PASS ck_top_beats
+  PASS ck_top_neg
+  PASS ck_top_sync
+  PASS ck_top_seed
+  PASS ck_gate
+  PASS ck_slots
+  PASS ck_inputs
+  PASS ck_idfree
+  PASS ck_schema
+  PASS ck_prefix
+  PASS ck_seed
+  PASS ck_rundir
+  PASS ck_graphfile
+  PASS ck_manifest
+  FAIL ck_top_manifest :: TOP-MANIFEST card receipt drifted from the card/facts/graph bytes on disk; TOP-MANIFEST card gate fires on c0: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM; TOP-MANIFEST card words in c0: 2/11; TOP-MANIFEST card gate fires on c1: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM; TOP-MANIFEST card words in c1: 2/11; TOP-MANIFEST note has no card receipt '32/32 card quotes verbatim'; TOP-MANIFEST note has no card receipt 'card gate CAPTIONED'
+  PASS ck_top_arm
+  FAIL ck_top_card :: F-CARD c0 F-CARD-WORDS: no card word black athletic shorts, blonde, long and wavy, extremely muscular, green-skinned humanoid; F-CARD c0 F-CARD-BANNED: figure 1: nude, on all fours; F-CARD c0 F-CARD-BANNED: figure 2: dark grey shorts, grasped, grey shorts, on all fours; F-CARD c0 F-CARD-POSE: figure 1 opening beat lacks the card pose lying prone on stomach, propped on forearms; F-CARD c0 F-CARD-POSE: figure 2 opening beat lacks the card pose kneeling behind figure 1; F-CARD c0 F-CARD-ROOM: no card room/light word interior living space, dark wood flooring, beige upholstered sofa, silver chain-link bikini and choker; F-CARD c1 F-CARD-WORDS: no card word black athletic shorts, blonde, long and wavy, extremely muscular, green-skinned humanoid; F-CARD c1 F-CARD-BANNED: figure 1: grasped, on all fours; F-CARD c1 F-CARD-BANNED: figure 2: dark grey shorts, grey shorts, on all fours; F-CARD c1 F-CARD-POSE: figure 1 opening beat lacks the card pose lying prone on stomach, propped on forearms; F-CARD c1 F-CARD-POSE: figure 2 opening beat lacks the card pose kneeling behind figure 1; F-CARD c1 F-CARD-ROOM: no card room/light word interior living space, dark wood flooring, beige upholstered sofa, silver chain-link bikini and choker
+  PASS ck_top_facts
+  PASS ck_top_md
+  PASS ck_nogpu
+ali163_hc15_gi063_s51150031 take A nodes 27 clean False
+  PASS ck_control
+  PASS ck_diff
+  PASS ck_top_diff
+  PASS ck_guide
+  PASS ck_shape
+  PASS ck_prose
+  PASS ck_top_species
+  PASS ck_top_age
+  PASS ck_top_words
+  PASS ck_top_beats
+  PASS ck_top_neg
+  PASS ck_top_sync
+  PASS ck_top_seed
+  PASS ck_gate
+  PASS ck_slots
+  PASS ck_inputs
+  PASS ck_idfree
+  PASS ck_schema
+  PASS ck_prefix
+  PASS ck_seed
+  PASS ck_rundir
+  PASS ck_graphfile
+  PASS ck_manifest
+  FAIL ck_top_manifest :: TOP-MANIFEST card receipt drifted from the card/facts/graph bytes on disk; TOP-MANIFEST card gate fires on c0: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM,F-CARD-CONSENT,F-CARD-CONSENT2; TOP-MANIFEST card words in c0: 0/12; TOP-MANIFEST card gate fires on c1: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM,F-CARD-CONSENT,F-CARD-CONSENT2; TOP-MANIFEST card words in c1: 0/12; TOP-MANIFEST note has no card receipt '39/39 card quotes verbatim'; TOP-MANIFEST note has no card receipt 'card gate CAPTIONED'
+  PASS ck_top_arm
+  FAIL ck_top_card :: F-CARD c0 F-CARD-WORDS: no card word anthropomorphic metallic robot, bent at waist, black tight-fitting shorts, chained at wrists; F-CARD c0 F-CARD-BANNED: figure 1: anguished, crying, distressed, he; F-CARD c0 F-CARD-BANNED: figure 2: LED, anguished, face, he; F-CARD c0 F-CARD-POSE: figure 1 opening beat lacks the card pose prone on a black padded bench, chained at wrists; F-CARD c0 F-CARD-POSE: figure 2 opening beat lacks the card pose bent at waist; F-CARD c0 F-CARD-ROOM: no card room/light word dark interior, matte black, studio or interrogation-style chamber, indistinct equipment or furniture silhouettes; F-CARD c0 F-CARD-CONSENT: anguished, distressed, crying; F-CARD c0 F-CARD-CONSENT2: no card-honesty line the card record shows restraint and gives no consent evidence; F-CARD c1 F-CARD-WORDS: no card word anthropomorphic metallic robot, bent at waist, black tight-fitting shorts, chained at wrists; F-CARD c1 F-CARD-BANNED: figure 1: anguished, crying, distressed, he; F-CARD c1 F-CARD-BANNED: figure 2: he, skin, tail; F-CARD c1 F-CARD-POSE: figure 1 opening beat lacks the card pose prone on a black padded bench, chained at wrists; F-CARD c1 F-CARD-POSE: figure 2 opening beat lacks the card pose bent at waist; F-CARD c1 F-CARD-ROOM: no card room/light word dark interior, matte black, studio or interrogation-style chamber, indistinct equipment or furniture silhouettes; F-CARD c1 F-CARD-CONSENT: anguished, distressed, crying; F-CARD c1 F-CARD-CONSENT2: no card-honesty line the card record shows restraint and gives no consent evidence
+  PASS ck_top_facts
+  PASS ck_top_md
+  PASS ck_nogpu
+ali163_hc15_gi063_s51150032 take B nodes 27 clean False
+  PASS ck_control
+  PASS ck_diff
+  PASS ck_top_diff
+  PASS ck_guide
+  PASS ck_shape
+  PASS ck_prose
+  PASS ck_top_species
+  PASS ck_top_age
+  PASS ck_top_words
+  PASS ck_top_beats
+  PASS ck_top_neg
+  PASS ck_top_sync
+  PASS ck_top_seed
+  PASS ck_gate
+  PASS ck_slots
+  PASS ck_inputs
+  PASS ck_idfree
+  PASS ck_schema
+  PASS ck_prefix
+  PASS ck_seed
+  PASS ck_rundir
+  PASS ck_graphfile
+  PASS ck_manifest
+  FAIL ck_top_manifest :: TOP-MANIFEST card receipt drifted from the card/facts/graph bytes on disk; TOP-MANIFEST card gate fires on c0: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM,F-CARD-CONSENT,F-CARD-CONSENT2; TOP-MANIFEST card words in c0: 0/12; TOP-MANIFEST card gate fires on c1: F-CARD-WORDS,F-CARD-BANNED,F-CARD-BANNED,F-CARD-POSE,F-CARD-POSE,F-CARD-ROOM,F-CARD-CONSENT,F-CARD-CONSENT2; TOP-MANIFEST card words in c1: 0/12; TOP-MANIFEST note has no card receipt '39/39 card quotes verbatim'; TOP-MANIFEST note has no card receipt 'card gate CAPTIONED'
+  PASS ck_top_arm
+  FAIL ck_top_card :: F-CARD c0 F-CARD-WORDS: no card word anthropomorphic metallic robot, bent at waist, black tight-fitting shorts, chained at wrists; F-CARD c0 F-CARD-BANNED: figure 1: anguished, crying, distressed, he; F-CARD c0 F-CARD-BANNED: figure 2: LED, anguished, face, he; F-CARD c0 F-CARD-POSE: figure 1 opening beat lacks the card pose prone on a black padded bench, chained at wrists; F-CARD c0 F-CARD-POSE: figure 2 opening beat lacks the card pose bent at waist; F-CARD c0 F-CARD-ROOM: no card room/light word dark interior, matte black, studio or interrogation-style chamber, indistinct equipment or furniture silhouettes; F-CARD c0 F-CARD-CONSENT: anguished, distressed, crying; F-CARD c0 F-CARD-CONSENT2: no card-honesty line the card record shows restraint and gives no consent evidence; F-CARD c1 F-CARD-WORDS: no card word anthropomorphic metallic robot, bent at waist, black tight-fitting shorts, chained at wrists; F-CARD c1 F-CARD-BANNED: figure 1: anguished, crying, distressed, he; F-CARD c1 F-CARD-BANNED: figure 2: he, skin, tail; F-CARD c1 F-CARD-POSE: figure 1 opening beat lacks the card pose prone on a black padded bench, chained at wrists; F-CARD c1 F-CARD-POSE: figure 2 opening beat lacks the card pose bent at waist; F-CARD c1 F-CARD-ROOM: no card room/light word dark interior, matte black, studio or interrogation-style chamber, indistinct equipment or furniture silhouettes; F-CARD c1 F-CARD-CONSENT: anguished, distressed, crying; F-CARD c1 F-CARD-CONSENT2: no card-honesty line the card record shows restraint and gives no consent evidence
+  PASS ck_top_facts
+  PASS ck_top_md
+  PASS ck_nogpu
+ledger 472.9 / 615 min 38 / 45 jobs; arm []

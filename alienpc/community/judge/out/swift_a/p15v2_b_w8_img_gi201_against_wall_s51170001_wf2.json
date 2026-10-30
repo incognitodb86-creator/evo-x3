@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_b_w8_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The cave environment, rock walls, and lighting remain consistent throughout all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters maintain their identity, clothing, and physical traits consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image's pose, framing, and character positions perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the characters in the target pose with contact and the act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomy defects, fusion issues, or malformed features are visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0938,
+  "same_people": 0.0468,
+  "start_kept": 0.0679,
+  "target_reached": 0.1474,
+  "anatomy_defect": 0.2348
+ },
+ "flags": []
+}

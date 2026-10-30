@@ -1,0 +1,40 @@
+﻿diff --git "a/C:\\AI\\community\\notes\\protected-paths.ts.bak-20261023-forgeopen" "b/C:\\AI\\director\\.pi\\extensions\\protected-paths.ts"
+index 3b7508e..f4f8cc2 100644
+--- "a/C:\\AI\\community\\notes\\protected-paths.ts.bak-20261023-forgeopen"
++++ "b/C:\\AI\\director\\.pi\\extensions\\protected-paths.ts"
+@@ -17,6 +17,10 @@
+  * a protected path internally is not seen here. Pure helpers are exported for tests/pi/protected-paths.test.mjs.
+  */
+ 
++import { readFileSync } from "node:fs";
++import { fileURLToPath } from "node:url";
++import { dirname } from "node:path";
++import { join } from "node:path";
+ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+ import { appendFileSync, mkdirSync } from "node:fs";
+ import { homedir, tmpdir } from "node:os";
+@@ -139,9 +143,24 @@ function logEvent(event: Record<string, unknown>): void {
+ 	}
+ }
+ 
++// forgeopen 2026-10-23 (ALI-163, Derrick 1:53 PM CT "Really anything secrets cause it's gotta do the finance stuff"): headless Forge sessions
++// skip these path rules; headless-guard-and-truncate blocks secrets for them. Same switch as the guard ("forgeOpen" in headless-guard-allowlist.json).
++export function forgeOpenCwd(cwd: string): boolean {
++	if (process.env.PI_GUARD_FORGE_OPEN === "0") return false;
++	try {
++		const f = join(dirname(fileURLToPath(import.meta.url)), "headless-guard-allowlist.json");
++		const al = JSON.parse(readFileSync(f, "utf8"));
++		if (al.forgeOpen === false) return false;
++		const roots: string[] = al.denylistCwdRoots ?? ["C:/Users/derek/5slock", "C:/AI/community"];
++		const c = cwd.replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
++		return roots.some((r) => { const x = r.replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase(); return c === x || c.startsWith(x + "/"); });
++	} catch { return false; }
++}
++
+ export default function protectedPaths(pi: ExtensionAPI): void {
+ 	pi.on("tool_call", async (event, ctx) => {
+ 		try {
++			if (ctx.hasUI === false && forgeOpenCwd(ctx.cwd || process.cwd())) return undefined; // forgeopen: the headless guard owns Forge (secrets only)
+ 			const v = evaluate(event.toolName, event.input, ctx.cwd || process.cwd());
+ 			if (!v) return undefined;
+ 			logEvent({ kind: "block", tool: event.toolName, rule: v.id, path: v.path });

@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_a_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.0,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, white sheets, and headboard remain consistent throughout the video frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "The second person is a male in all frames, replacing the short brown-haired female from the start image."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows a completely different pose (missionary) and character composition compared to the start image."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 clearly depicts the missionary position with the male on top of the female, matching the target pose description."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "The anatomy in Image 3 and the storyboard frames appears structurally correct without obvious fusion or limb defects."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0531,
+  "same_people": 0.9748,
+  "start_kept": 0.9961,
+  "target_reached": 0.1283,
+  "anatomy_defect": 0.2794
+ },
+ "flags": [
+  "same_people",
+  "start_kept"
+ ]
+}

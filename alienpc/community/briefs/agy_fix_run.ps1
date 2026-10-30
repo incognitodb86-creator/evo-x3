@@ -1,0 +1,2 @@
+﻿Set-Location C:\Users\derek\5slock\ralph-community
+& 'C:\Users\derek\AppData\Local\agy\bin\agy.exe' -p "Read and carry out the brief at C:\AI\community\briefs\agy_fix_20261025.md." --model gemini-3.8-flash-medium --dangerously-skip-permissions --add-dir C:\AI --add-dir C:\Users\derek\5slock --add-dir C:\Users\derek\.pi --print-timeout 0 --log-file C:\AI\community\briefs\agy_fix_20261025.agy.log *> C:\AI\community\briefs\agy_fix_20261025.out.txt

@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_a_w8_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.1,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The background in all frames (1-8) and Image 3 is the same cave setting as the start image."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters remain consistent throughout, matching the elf woman and green orc from the start image."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 is a completely different pose (standing rear-entry) compared to the start image (sitting)."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the characters in the target standing rear-entry position against the wall, with the act visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects are visible; bodies and limbs appear structurally sound across all frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0293,
+  "same_people": 0.0732,
+  "start_kept": 0.2984,
+  "target_reached": 0.0258,
+  "anatomy_defect": 0.3531
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

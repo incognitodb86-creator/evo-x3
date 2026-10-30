@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_a_w2_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.0,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, beige headboard, and white linens are consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde woman in white lingerie and the muscular man remain the same characters throughout."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the pose, framing, and clothing of the start image perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the man kneeling over the woman in a missionary position with visible contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0024,
+  "same_people": 0.0128,
+  "start_kept": 0.0358,
+  "target_reached": 0.0118,
+  "anatomy_defect": 0.2491
+ },
+ "flags": []
+}

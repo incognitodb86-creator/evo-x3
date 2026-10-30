@@ -1,5 +1,5 @@
 terrace settings test v3 - environment record (the plan's step 3 drift check)
-captured 2026-10-30 08:46:29 Central Daylight Time by notes/terrace_v3_drift_check.py
+captured 2026-10-30 09:10:35 Central Daylight Time by notes/terrace_v3_drift_check.py
 purpose: prove the v3 queue runs on the same instrument as the v2 queue, before 42 renders
 comfyui HEAD 6b747c0428c343e1417219641db93a4fb7cb69ae
 comfyui HEAD date 2026-09-29T14:46:44-04:00
@@ -46,7 +46,7 @@ custom_nodes:
   comfyui-storyboard                             git=42b45db version=version = "1.0.2" dir_mtime=2026-10-16
   rgthree-comfy                                  git=738105a version=version = "1.0.2605082257" dir_mtime=2026-06-18
 nvidia-smi: NVIDIA GeForce RTX 5070 Ti, 616.92, 16303 MiB
-system_stats: system_stats unavailable: TimeoutError('timed out')
+system_stats: {"system": {"os": "win32", "ram_total": 68403589120, "ram_free": 55985868800, "comfyui_version": "0.38.0", "required_frontend_version": "1.53.6", "installed_templates_version": "0.11.70", "required_templates_version": "0.11.70", "comfy_package_versions": [{"name": "comfyui-frontend-package", "installed": "1.53.6", "required": "1.53.6"}, {"name": "comfyui-workflow-templates", "installed": "0.11.70", "required": "0.11.70"}, {"name": "comfyui-embedded-docs", "installed": "0.5.12", "required": "0.5.12"}, {"name": "comfy-kitchen", "installed": "0.2.36", "required": "0.2.36"}, {"name": "comfy-aimdo", "installed": "0.5.5", "required": "0.5.5"}], "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]", "pytorch_version": "2.15.0.dev20260928+cu130", "embedded_python": false, "deploy_environment": "local-git", "argv": ["C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\main.py", "--listen", "127.0.0.1", "--port", "10003", "--disable-async-offload", "--disable-pinned-memory"]}, "devices": [{"name": "cuda:0 NVIDIA GeForce RTX 5070 Ti : cudaMallocAsync", "type": "cuda", "index": 0, "vram_total": 17066033152, "vram_free": 15767437312, "torch_vram
 models referenced by the v3 graphs: 7; by the v2 graphs: 7; identical sets: True
   10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors    18691644302 B mtime 2026-10-28 21:45 sha256 not hashed (over 2 GB; --all-models to hash)
   10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors                   22893150024 B mtime 2026-10-28 09:17 sha256 not hashed (over 2 GB; --all-models to hash)
