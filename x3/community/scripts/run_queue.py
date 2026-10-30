@@ -2,15 +2,23 @@ r"""run_queue.py - THE reusable render-queue template (simplify plan S4 + S8, 20
 
 Renders every clip in a run's order file back to back in ONE GPU window:
   once per batch : pytest gate, take gpu-render.lock (held = rc 7 GPU_BUSY), unload the LLM, wake comfyui_auto
-  every clip     : comm.guard_ok on every prompt string, wake/keep-alive touch (/comfyui/system_stats, also unloads
-                   any LLM that got swapped in), static check, ONE render attempt, OBJECTIVE check
-                   (ffprobe size/frames/audio, black/freeze); a failed or stalled clip gets exactly one unchanged
-                   retry, then is logged FAIL and skipped (phase 2 S8, 2026-10-30: was up to 6 renders per clip)
+  submit (all)   : for every clip up front: comm.guard_ok on every prompt string, wake/keep-alive touch
+                   (/comfyui/system_stats, also unloads any LLM that got swapped in), static check, then POST /prompt
+                   (comm.submit) so ComfyUI's own queue renders them back to back, one at a time on the GPU
+                   (queue fix, Derrick 2026-10-30 4:28 PM CT: was submit one, wait, submit the next, ~62 s per still)
+  collect        : every QPOLL_SEC (3 s) one GET /comfyui/queue; a prompt that left the queue is read from /history
+                   (comm.fetch) and gets its OBJECTIVE check as it finishes (ffprobe size/frames/audio, black/freeze;
+                   PNG + size for stills). The per-job timeout (JOB_TIMEOUT) counts from when ComfyUI starts the job,
+                   not from submit. A prompt gone from both queue and history (comfyui_auto restarted) is "evicted"
+                   and, like a stall, is looked for on disk first (never re-rendered if its output landed)
+  retry          : clips that failed or stalled get exactly one unchanged retry, submitted together as a second
+                   wave after the first, then are logged FAIL and skipped (phase 2 S8, 2026-10-30)
   at the end     : unload comfyui_auto and release the lock in `finally` (also on error and Ctrl-C), then log
                    "BATCH closed rc=<n> reason=<why> done=<ok>/<queued>" (phase 2 S13)
-A file named STOP in the run dir halts the batch after the clip in flight. Results append to <run>/_render_queue.log
+A file named STOP in the run dir halts the batch: no more submits or collecting, ComfyUI's pending queue is cleared
+(POST /queue {"clear": true}) and the running prompt interrupted (POST /interrupt). Results append to <run>/_render_queue.log
 in the same START/DONE format as the per-test queue scripts, so runs stay comparable.
-It reuses comm.py and run_graph_job.py helpers; it does not change them.
+It reuses comm.py (submit/fetch/run) and run_graph_job.py helpers.
 job_type "still" (flux Phase 1, Derrick 2026-10-30 2:52 PM CT): an order entry with "job_type": "still" (and its
 expected "size": "WxH") is an image job: the same guard, lock, STOP, retry and log lines, but its check is PNG output
 + size only (no frames/audio/black-freeze/contact sheet) and its prompt is read from the Klein edit text node
@@ -41,6 +49,9 @@ PY = sys.executable
 PYTEST_FILES = [os.path.join("scripts", "tests", "test_p6_review.py"), os.path.join("scripts", "tests", "test_guard_scope.py")]
 ACTIONS = os.path.join(ROOT, "notes", "actions.log")
 OUT_ROOT = os.path.join(comm.C, "output", "community")
+QPOLL_SEC = 3        # collect poll inside a batch (lock held, comfyui_auto kept loaded, so a poll is no extra wake)
+JOB_TIMEOUT = 3600   # per job, counted from when ComfyUI starts it (was from submit with one job at a time)
+EVICT_MISSES = 10    # polls a prompt may be in neither /queue nor /history before it counts as evicted (~30 s)
 
 
 def qlog(run_dir, line):
@@ -131,27 +142,45 @@ def still_done(run_dir, job, tag, f, g0, size, t0, retry, slog):
     return True
 
 
-def render_clip(run_dir, job, frames, size, retry, slog):
-    """One clip, ONE render attempt inside the open GPU window (S8: the caller gives exactly one unchanged retry)."""
+def prepare(run_dir, job, retry, slog):
+    """START line + the per-clip checks before a submit. Returns the graph, or None after logging the FAIL."""
     tag, d = job["tag"], os.path.join(run_dir, job["tag"])
     graph = os.path.join(d, "request.api.json")
     qlog(run_dir, "START pos=%d tag=%s arm=%s scene=%s seed=%s%s" % (job["pos"], tag, job.get("arm"), job.get("scene"),
          job.get("seed"), " (the one allowed unchanged retry)" if retry else ""))
     if not os.path.exists(graph):
-        qlog(run_dir, "FAIL pos=%d tag=%s no graph" % (job["pos"], tag)); return False
+        qlog(run_dir, "FAIL pos=%d tag=%s no graph" % (job["pos"], tag)); return None
     g0 = json.load(open(graph, encoding="utf-8"))
     if not guard_graph(g0):  # adults-only guard before EVERY clip
-        qlog(run_dir, "GATE-FAIL pos=%d tag=%s adults guard" % (job["pos"], tag)); return False
+        qlog(run_dir, "GATE-FAIL pos=%d tag=%s adults guard" % (job["pos"], tag)); return None
     if not rgj.wake(slog):   # keep-alive touch of /comfyui/system_stats (ttl 300) + unload any LLM swapped in
-        qlog(run_dir, "FAIL pos=%d tag=%s ComfyUI down" % (job["pos"], tag)); return False
+        qlog(run_dir, "FAIL pos=%d tag=%s ComfyUI down" % (job["pos"], tag)); return None
     bad = rgj.static_check(g0)
     if bad:
-        qlog(run_dir, "FAIL pos=%d tag=%s static %s" % (job["pos"], tag, " | ".join(bad[:4]))); return False
+        qlog(run_dir, "FAIL pos=%d tag=%s static %s" % (job["pos"], tag, " | ".join(bad[:4]))); return None
+    return g0
+
+
+def render_clip(run_dir, job, frames, size, retry, slog):
+    """One clip, ONE render attempt, submit and wait (single-job path; the batch uses run_wave)."""
+    g0 = prepare(run_dir, job, retry, slog)
+    if g0 is None:
+        return False
+    tag, d = job["tag"], os.path.join(run_dir, job["tag"])
     t0 = time.time()
-    t = tag  # same graph, same seed, same tag: the retry is unchanged
     out, t_att = {}, time.time()
-    s = comm.run(copy.deepcopy(g0), t, {"run": tag, "attempt": int(retry), "label": "METHOD_ONLY", "plan": "run_queue"}, d,
-                 logfile=os.path.join(d, "status.log"), timeout=3600, out=out)
+    s = comm.run(copy.deepcopy(g0), tag, meta(job, retry), d, logfile=os.path.join(d, "status.log"), timeout=JOB_TIMEOUT, out=out)
+    return finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att)
+
+
+def meta(job, retry):
+    return {"run": job["tag"], "attempt": int(retry), "label": "METHOD_ONLY", "plan": "run_queue"}
+
+
+def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
+    """After a job ends (or stalls/evicts): disk fallback, then the OBJECTIVE check and the DONE line."""
+    tag, d = job["tag"], os.path.join(run_dir, job["tag"])
+    t = tag
     if not s and out.get("outcome") in ("stalled", "evicted", "submit_stall"):
         src = rgj.collect_from_disk(t, t_att, slog)
         if not src:
@@ -192,6 +221,97 @@ def attempt(run_dir, job, frames, size, retry, slog):
     except Exception as e:
         qlog(run_dir, "FAIL pos=%d tag=%s error %s: %s" % (job["pos"], job["tag"], type(e).__name__, str(e)[:160].replace("\n", " ")))
         return False
+
+
+def stop_seen(run_dir):
+    return os.path.exists(os.path.join(run_dir, "STOP"))
+
+
+def stop_comfy(run_dir, slog, n_open):
+    """STOP: drop everything still queued in ComfyUI and interrupt the running prompt."""
+    for path, body in (("/queue", {"clear": True}), ("/interrupt", {})):
+        try: comm.http(comm.BASE + path, body, timeout=60); slog("STOP POST %s ok" % path)
+        except Exception as e: slog("STOP POST %s note %s" % (path, str(e)[:120]))
+    qlog(run_dir, "STOP file seen: stopped collecting with %d submitted clip(s) unfinished; ComfyUI queue cleared and running prompt interrupted" % n_open)
+
+
+def settle(run_dir, e, s, frames, size, retry, slog):
+    """finish() for one submitted job; an error is a failed attempt, as in attempt()."""
+    try:
+        return finish(run_dir, e["job"], frames, size, retry, slog, s, e["out"], e["g0"], e.get("started", e["t0"]), e["t_att"])
+    except Exception as ex:
+        qlog(run_dir, "FAIL pos=%d tag=%s error %s: %s" % (e["job"]["pos"], e["job"]["tag"], type(ex).__name__, str(ex)[:160].replace("\n", " ")))
+        return False
+
+
+def run_wave(run_dir, jobs, frames, size, retry, slog):
+    """Submit every job to ComfyUI's /prompt queue up front, then collect each as it finishes.
+    Returns (failed jobs, stopped)."""
+    failed, live = [], {}
+    for j in jobs:
+        if stop_seen(run_dir):
+            qlog(run_dir, "STOP file seen: halted before submitting pos=%d tag=%s" % (j["pos"], j["tag"]))
+            stop_comfy(run_dir, slog, len(live)); return failed, True
+        d = os.path.join(run_dir, j["tag"])
+        e = {"job": j, "out": {}, "t_att": time.time(), "log": os.path.join(d, "status.log")}
+        try:
+            e["g0"] = prepare(run_dir, j, retry, slog)
+            if e["g0"] is None:
+                failed.append(j); continue
+            e["t0"] = time.time()
+            pid = comm.submit(copy.deepcopy(e["g0"]), j["tag"], meta(j, retry), d, logfile=e["log"], out=e["out"])
+        except Exception as ex:
+            qlog(run_dir, "FAIL pos=%d tag=%s error %s: %s" % (j["pos"], j["tag"], type(ex).__name__, str(ex)[:160].replace("\n", " ")))
+            failed.append(j); continue
+        if pid is None:  # guard hit, POST rejected or submit stall: settled now, exactly as the one-job path does
+            if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(j)
+            continue
+        live[pid] = e
+    slog("QUEUE submitted %d clip(s) to ComfyUI up front" % len(live))
+    while live:
+        if stop_seen(run_dir):
+            stop_comfy(run_dir, slog, len(live)); return failed, True
+        time.sleep(QPOLL_SEC)
+        try:
+            q = comm.http(comm.BASE + "/queue", timeout=comm.POLL_TIMEOUT)
+            running = {x[1] for x in q.get("queue_running", [])}
+            pending = {x[1] for x in q.get("queue_pending", [])}
+        except Exception as ex:
+            slog("poll warn queue %s" % str(ex)[:160])
+            if comm.comfy_loaded() is False:  # same rule as comm.run: the history went with the process
+                for pid, e in list(live.items()):
+                    comm.log(f"poll stop {e['job']['tag']} comfyui_auto is not running: prompt_id {pid} is in no live history", e["log"])
+                    comm.outcome(e["out"], "evicted", pid, note="history lost with the comfyui_auto process")
+                    if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(e["job"])
+                    del live[pid]
+            continue
+        now = time.time()
+        for pid, e in list(live.items()):
+            tag = e["job"]["tag"]
+            if pid in running:
+                if "started" not in e:
+                    e["started"] = now; comm.log(f"JOB running {tag} prompt_id={pid} queued={now - e['t0']:.0f}s", e["log"])
+                elif now - e["started"] > JOB_TIMEOUT:
+                    comm.log(f"JOB timeout {tag}", e["log"])
+                    comm.outcome(e["out"], "stalled", pid, note=f"no history {JOB_TIMEOUT}s after ComfyUI started it; the render may have landed in ComfyUI output")
+                    if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(e["job"])
+                    del live[pid]
+                continue
+            if pid in pending:
+                continue
+            try:
+                s = comm.fetch(pid, tag, meta(e["job"], retry), os.path.join(run_dir, tag), e.get("started", e["t0"]), e["log"], e["out"])
+            except Exception as ex:
+                comm.log(f"poll warn {tag} {ex}", e["log"]); continue
+            if s is comm.PENDING:
+                e["miss"] = e.get("miss", 0) + 1
+                if e["miss"] < EVICT_MISSES:
+                    continue
+                comm.log(f"poll stop {tag} prompt_id {pid} is in neither /queue nor /history (comfyui_auto restarted?)", e["log"])
+                comm.outcome(e["out"], "evicted", pid, note="history lost with the comfyui_auto process")
+            if not settle(run_dir, e, s, frames, size, retry, slog): failed.append(e["job"])
+            del live[pid]
+    return failed, False
 
 
 def main():
@@ -250,13 +370,14 @@ def main():
             rc, reason = 4, "ComfyUI down at batch start"
             qlog(run_dir, "FAIL batch ComfyUI down"); return rc
         qlog(run_dir, "BATCH open: %d clips, lock held, comfyui_auto kept loaded" % len(todo))
-        for j in todo:
-            if os.path.exists(os.path.join(run_dir, "STOP")):
-                qlog(run_dir, "STOP file seen: halted before pos=%d tag=%s" % (j["pos"], j["tag"]))
-                rc, reason = 1, "STOP file before pos=%d" % j["pos"]; break
-            if not attempt(run_dir, j, a.frames, size, False, slog) and not attempt(run_dir, j, a.frames, size, True, slog):
+        first, stopped = run_wave(run_dir, todo, a.frames, size, False, slog)
+        if first and not stopped:
+            again, stopped = run_wave(run_dir, first, a.frames, size, True, slog)
+            for j in again:
                 qlog(run_dir, "FAIL pos=%d tag=%s failed twice (one unchanged retry used) - skipped" % (j["pos"], j["tag"]))
                 failed.append(j["tag"])
+        if stopped:
+            rc, reason = 1, "STOP file"
         if failed and rc == 0:
             rc, reason = 5, "%d clip(s) failed twice: %s" % (len(failed), " ".join(failed))
     except KeyboardInterrupt:
