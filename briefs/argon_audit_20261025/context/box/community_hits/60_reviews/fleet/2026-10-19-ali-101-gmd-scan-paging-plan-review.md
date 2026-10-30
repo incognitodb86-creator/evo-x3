@@ -166,7 +166,7 @@ The edits are reversible: they're uncommitted in git and a backup exists. So the
 1. **Out-of-lane / post-pause edits:** AlienPc Local AI, or an unattributed actor, kept editing GMD source at 3:03–3:04 PM CT after the "paused at 2:59" claim.
 2. **Builder choice:** Backup or AlienPc Local AI, plus which LOC budget.
 3. **Loading the unpacked extension** into Fork-5 (store build to unpacked 2.5.6+patch), and accepting no auto-updates afterward.
-4. **Upstream bug report** to tomsonlee150/GrokMediaDownloader or support@kario-studio.com (external post).
+4. **Upstream bug report** to tomsonlee150/GrokMediaDownloader or [redacted-email] (external post).
 5. **Confirm or deny** the relayed 2:59 PM CT approval quote.
 6. Still open from ALI-99: the routine `gmd-fork-5-auto-resume` (delete or keep paused), the nested 13G tree, disk.
 
