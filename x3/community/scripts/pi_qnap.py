@@ -10,8 +10,9 @@ import subprocess, sys, os
 IN = r"C:\AI\community\qnap_in"
 def bad(p): return ".." in p.replace("\\", "/").split("/") or p.startswith("-")
 def q(p): return "qnap:" + p.lstrip("/")
-def run(a): r = subprocess.run(["rclone"] + a, capture_output=True, text=True, timeout=3600); print((r.stdout + r.stderr).strip()[-4000:]); return r.returncode
+def run(a): r = subprocess.run(["rclone"] + a, capture_output=True, text=True, timeout=(3600 if a and a[0] in ("copy", "copyto", "moveto", "purge") else 120)); print((r.stdout + r.stderr).strip()[-4000:]); return r.returncode
 a = sys.argv[1:]
+if not a or a[0] in ("-h", "--help", "help"): print(__doc__); sys.exit(0)
 if len(a) < 2 or any(bad(x) for x in a[1:] if not os.path.exists(x)): print(__doc__); sys.exit(2)
 c = a[0]
 if c == "ls": sys.exit(run(["lsl", q(a[1]), "--max-depth", "1"]))
