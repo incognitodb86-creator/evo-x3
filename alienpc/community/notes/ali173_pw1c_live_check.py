@@ -20,7 +20,23 @@ import json
 import sys
 import urllib.request
 
-PORT = sys.argv[1] if len(sys.argv) > 1 else "10002"  # Max2 audit-fix #13: comfyui_auto own port (gpu_guard.ps1:12-13); 10004 was the old derived port
+def comfy_port_live():
+    """Max2 audit-fix2 #2 (2026-10-29): ComfyUI's live port the way gpu_guard.ps1 does it - from the ComfyUI main.py
+    command line - read via llama-swap GET /running (read-only; never the /comfyui wake route). None = ComfyUI not loaded."""
+    import json as _j, re as _r, urllib.request as _u
+    try: run = _j.loads(_u.urlopen("http://127.0.0.1:8080/running", timeout=6).read()).get("running", [])
+    except Exception: return None
+    for m in run:
+        cmd = str(m.get("cmd", ""))
+        if "ComfyUI" in cmd and "main.py" in cmd:
+            g = _r.search(r"--port\s+(\d+)", cmd) or _r.search(r":(\d+)$", str(m.get("proxy", "")))
+            if g: return int(g.group(1))
+    return None
+PORT = sys.argv[1] if len(sys.argv) > 1 else comfy_port_live()  # Max2 audit-fix2 #2: no hard-coded port
+if not PORT:
+    print("ComfyUI is not loaded in llama-swap (/running) - nothing checked, nothing written; wake it in the same call first or pass the port")
+    sys.exit(2)
+PORT = str(PORT)
 BASE = "http://127.0.0.1:" + PORT
 OUT = r"C:/AI/community/notes/pw1c_live_objective.json"
 NEEDLE = ("Qwen2.5-Omni-7B", "LoRA-Omni", "on disk:", "ollama:", "no Qwen2.5-Omni")
@@ -51,6 +67,7 @@ try:
                            "comfyui": one.get("comfyui_version"),
                            "devices": [d.get("name") for d in devs if isinstance(d, dict)]}
     print("system_stats: %s" % json.dumps(rep["system_stats"], ensure_ascii=True)[:300], flush=True)
+    if not one.get("comfyui_version"): print("port %s is not ComfyUI (no comfyui_version) - stop" % PORT); sys.exit(2)
 except Exception as e:
     rep["system_stats_error"] = str(e)
     print("system_stats: %s" % e, flush=True)

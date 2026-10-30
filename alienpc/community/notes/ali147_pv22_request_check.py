@@ -76,8 +76,11 @@ for f in ["p7/jobs/%s.result.json" % ID, "p7/jobs/%s.out" % ID, "p7/jobs/%s.err.
     chk(not os.path.exists(C + "/" + f), "absent (id free, no prior render): " + f)
 b = json.load(open(BUDGET, encoding="utf-8")) if __import__("os").path.exists(BUDGET) else None  # Max2 audit-fix #2: budget retired (17e932f)
 p("p7_budget.json %s" % json.dumps(b))
-chk(b["used_min"] < b["cap_min"], "used_min %s < cap_min %s (this job ~14 min at the 481-frame baseline)" % (b["used_min"], b["cap_min"]))
-chk(b["jobs"] < b["job_cap"], "jobs %s < job_cap %s" % (b["jobs"], b["job_cap"]))
+if b is None:  # Max2 audit-fix2 #1: missing p7_budget.json = budget gate retired (17e932f) = gate open, not a crash
+    chk(True, "budget gate retired (17e932f): no p7_budget.json -> gate open")
+else:
+    chk(b["used_min"] < b["cap_min"], "used_min %s < cap_min %s (this job ~14 min at the 481-frame baseline)" % (b["used_min"], b["cap_min"]))
+    chk(b["jobs"] < b["job_cap"], "jobs %s < job_cap %s" % (b["jobs"], b["job_cap"]))
 
 chk(all(guard_ok(g[k]["inputs"]["prompt"]) for k in ("c0", "c1")), "comm.guard_ok passes on both prompts (the harness's own pre-render call)")
 src = json.loads(open(SRC, "rb").read().decode("utf-8"))
