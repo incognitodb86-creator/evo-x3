@@ -1,3 +1,4 @@
+# HISTORICAL one-shot record (U3), not a reusable check: hard-coded paths/sizes/dates from that day; do not re-run as a live gate. Max2 audit-fix #20, 2026-10-29.
 """MAX block item 4 (U3, the talk lane) self-verifying check - Max brief 11:0x CT; plan U3 = file/check source.
 
 The plan's two checks:

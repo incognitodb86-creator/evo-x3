@@ -1,3 +1,4 @@
+﻿# HISTORICAL one-shot record (U3b/U3c/U5), not a reusable check: hard-coded paths/sizes/dates from that day; do not re-run as a live gate. Max2 audit-fix #19, 2026-10-29.
 """MAX block items 5 (U3b) and 6 (U3c) + the U5 second check - self-verifying, no LLM call, safe for Max to re-run.
 Max's brief of 2026-10-29 19:0x CT, on Derrick's go 5:29 PM CT. Plan: C:/AI/community/notes/2026-10-29-forge-cleanup-plan.md
 (U3b, U3c, U5) + fix_plan.md items 5-6. The Oct 29 5:32 PM rule says Max cannot read the lane's own folders, so every
@@ -449,7 +450,7 @@ pol = read(POLICY_USER)
 rec("[item 6 keep: no secrets] the shared policy carries the secret-shaped denies (counted; values never printed)",
     pol.count("deny") >= 4 and ".env" in pol and "secret" in pol.lower(), "deny mentions=%d" % pol.count("deny"))
 named_pkgs = sorted(set(re.findall(r"pi-permission-system|pi-subagents|pi-mobile|pi-memory|rpiv-todo|cc-safety-net", launch)))
-PKG_ROOTS = [PKGS, r"C:\Users\derek\AppData\Roaming\npm\node_modules"]
+PKG_ROOTS = [PKGS, r"C:\Users\derek\AppData\Roaming\npm\node_modules"]; PKG_ROOTS += [os.path.join(r, "@" + s) for r in list(PKG_ROOTS) for s in sorted(set(re.findall(r"npm:@([a-z0-9._-]+)/", read(r"C:\Users\derek\.pi\agent\settings.json"))))]  # Max2 8:3x PM: rpiv-todo is scoped (@juicesharp)
 installed = [p for p in named_pkgs if any(os.path.isdir(os.path.join(r, p)) for r in PKG_ROOTS)]
 rec("[item 6] every package the launcher's header names is installed here (the parity claim is not aspirational)",
     len(named_pkgs) >= 6 and installed == named_pkgs, "named=%d installed=%d missing=%s" %

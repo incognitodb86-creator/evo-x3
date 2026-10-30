@@ -201,8 +201,8 @@ for i, pat in enumerate(gates):
     chk(re.match(pat, ID) is not None, f"51.{i} ralph.ps1 id gate {i+1} accepts {ID}")
 
 # 10 budget gate (TASKS.md R3-R9 gate: used_min >= 475 or jobs >= 35 -> no request)
-b = json.loads(open(r"C:/Users/derek/5slock/ralph-community/logs/p7_budget.json", encoding="utf-8").read())
-chk(b["used_min"] < 475 and b["jobs"] < 35, "52 budget gate open", f"used_min {b['used_min']}/{b['cap_min']} jobs {b['jobs']}/{b['job_cap']}")
+_bp = r"C:/Users/derek/5slock/ralph-community/logs/p7_budget.json"; b = json.loads(open(_bp, encoding="utf-8").read()) if __import__("os").path.exists(_bp) else None  # Max2 audit-fix #2: budget retired (17e932f), missing file = no block
+chk(b is None or (b["used_min"] < 475 and b["jobs"] < 35), "52 budget gate open", "budget gate retired (17e932f): no p7_budget.json" if b is None else f"used_min {b['used_min']}/{b['cap_min']} jobs {b['jobs']}/{b['job_cap']}")
 
 # 11 offline clone of run_graph_job.static_check (on-disk H3 schema, no network)
 sch = h3_schema()

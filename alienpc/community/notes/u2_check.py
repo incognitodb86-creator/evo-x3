@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
+# HISTORICAL one-shot record (U2), not a reusable check: hard-coded paths/sizes/dates from that day; do not re-run as a live gate. Max2 audit-fix #19, 2026-10-29.
 """U2 close-out check (2026-10-29, MAX block item 1): the "single home for prompt rules" test.
 
 Version 2 (2026-10-29 10:3x CT) - tightened after Max's independent verify

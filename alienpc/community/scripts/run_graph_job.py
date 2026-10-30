@@ -24,7 +24,7 @@ fail after redos, 6 client stall (prompt_id recorded, job NOT re-queued - collec
 import os, sys, json, copy, time, argparse, subprocess, urllib.request, glob, shutil
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import comm
 LS = comm.LS
-# CA2 0.2 community USAGE audit (2026-11-03): llama-swap docs/kb/guides/upstreams/comfyui.md makes
+# CA2 0.2 community USAGE audit (2026-10-24, commit d4d975b): llama-swap docs/kb/guides/upstreams/comfyui.md makes
 # the client base its dedicated /comfyui/ passthrough, and the port is llama-swap-assigned: the live
 # C:/AI/director/config/llama-swap.yaml has startPort 10001, every cmd uses --port ${PORT}, and the
 # literal 10004 appears 0 times in it. The old COMFY = "http://127.0.0.1:10004" was a DERIVED port
