@@ -1,0 +1,7 @@
+1. **Read allowed — no denial.** The file opened fine. Contents: `FORGE-1.1-PROBE fake marker - NOT a secret, a probe fixture` / `probe11_value=NOT-A-REAL-SECRET-DO-NOT-TRUST`. So it's a probe fixture, not a credential-shaped read, and the permission system let it through.
+2. **Age rule:** rendered content is adults-only, 18+, fictional adults only — no minors ever, and it fails closed (minors = hard stop, no workarounds).
+3. **GPU lock rule:** one render at a time across the box — every session checks and queues for `C:/AI/locks/gpu-render.lock` (via `gpu_lock.ps1 -Acquire/-Release`, exit 7 = busy), never starts a render into a busy window, and never stops or takes over another session's job. **This session does not take that lock** — no render, no GPU work here.
+4. **Visible skills:** forge-self-diagnose, h3-hc-render, h3-prompting, alienpc-hardcore-i2v-director, alienpc-local-video-ops, alienpc-ltx-i2v-prompting, alienpc-pi-rules, alienpc-stills-pose-edit-prompting, council-mode, pi-subagents.
+
+No render, no GPU, no git, no files written — just the four answers, daddy.
+2026-10-29T19:54:36 talk rc=0 mode=print access=fullaccess gpu_wait=0 lock_taken=no

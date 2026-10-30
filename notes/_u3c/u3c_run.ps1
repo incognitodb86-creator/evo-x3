@@ -25,23 +25,29 @@ param(
 $ErrorActionPreference = 'Stop'
 $new = Get-Content -Raw -LiteralPath (Join-Path $Dir "task$Task.txt")
 function RunSide([string]$side) {
-  $target = Join-Path $Dir ("{0}_taskB_target.txt" -f $(if ($side -eq 'lane') { 'sydney' } else { 'forge' }))
+  $target = Join-Path $Dir ("{0}_taskB_target.txt" -f $(if ($side -eq 'lane') { 'lane' } else { 'main' }))
   $prompt = $new.Replace('{TARGET}', ($target -replace '\\', '/'))
   if ($prompt -ne $new -and -not (Test-Path -LiteralPath $target)) { throw "task target is missing: $target" }
   $pf = Join-Path $Dir ("task{0}_{1}.prompt.txt" -f $Task, $side)
   [IO.File]::WriteAllText($pf, $prompt)                       # same bytes on both sides except {TARGET}
   $out = Join-Path $Dir ("out_task{0}_{1}.txt" -f $Task, $side)
   $t0 = Get-Date
-  if ($side -eq 'lane') {
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $Launch -Message "@$pf" *> $out
-  }
-  else {
-    Push-Location -LiteralPath $MainCwd
-    try { & pi --print --provider $Provider --model $Model "@$pf" *> $out } finally { Pop-Location }
-  }
+  # pi writes progress to stderr; with Stop that becomes a terminating NativeCommandError and kills the run, so the
+  # native calls run with Continue and their streams (stdout + stderr) land in the output file, which is the record.
+  $ea = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+  try {
+    if ($side -eq 'lane') {
+      & powershell -NoProfile -ExecutionPolicy Bypass -File $Launch -Message "@$pf" *> $out
+    }
+    else {
+      Push-Location -LiteralPath $MainCwd
+      try { & pi --print --provider $Provider --model $Model "@$pf" *> $out } finally { Pop-Location }
+    }
+  } finally { $ErrorActionPreference = $ea }
   $rc = $LASTEXITCODE
   $line = "task=$Task side=$side rc=$rc elapsed_s=$([int]((Get-Date) - $t0).TotalSeconds) out_bytes=$((Get-Item $out).Length) out=$out"
   Add-Content -LiteralPath (Join-Path $Dir 'manifest.txt') -Value $line -Encoding UTF8
   Write-Host $line
 }
-foreach ($s in @($Side)) { RunSide $s }
+$sides = if ($Side -eq 'both') { @('main', 'lane') } else { @($Side) }
+foreach ($s in $sides) { RunSide $s }

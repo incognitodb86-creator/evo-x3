@@ -1,0 +1,13 @@
+﻿task=1 side=main rc=0 elapsed_s=235 out_bytes=20318 out=C:\AI\community\notes\_u3c\out_task1_main.txt
+task=1 side=lane rc=0 elapsed_s=171 out_bytes=26320 out=C:\AI\community\notes\_u3c\out_task1_lane.txt
+task=2 side=main rc=0 elapsed_s=19 out_bytes=966 out=C:\AI\community\notes\_u3c\out_task2_main.txt
+task=3 side=main rc=0 elapsed_s=43 out_bytes=2332 out=C:\AI\community\notes\_u3c\out_task3_main.txt
+task=3 side=lane rc=0 elapsed_s=23 out_bytes=1336 out=C:\AI\community\notes\_u3c\out_task3_lane.txt
+task=4 side=main rc=0 elapsed_s=21 out_bytes=1386 out=C:\AI\community\notes\_u3c\out_task4_main.txt
+task=4 side=lane rc=0 elapsed_s=25 out_bytes=2362 out=C:\AI\community\notes\_u3c\out_task4_lane.txt
+task=2 side=main rc=0 elapsed_s=28 out_bytes=2028 out=C:\AI\community\notes\_u3c\out_task2_main.txt
+task=2 side=lane rc=0 elapsed_s=32 out_bytes=2628 out=C:\AI\community\notes\_u3c\out_task2_lane.txt
+task=2 side=main rc=0 elapsed_s=16 out_bytes=924 out=C:\AI\community\notes\_u3c\out_task2_main.txt
+task=2 side=lane rc=0 elapsed_s=20 out_bytes=1322 out=C:\AI\community\notes\_u3c\out_task2_lane.txt
+task=5 side=main rc=0 elapsed_s=24 out_bytes=2262 out=C:\AI\community\notes\_u3c\out_task5_main.txt
+task=5 side=lane rc=0 elapsed_s=21 out_bytes=2692 out=C:\AI\community\notes\_u3c\out_task5_lane.txt

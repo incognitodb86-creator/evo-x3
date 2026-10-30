@@ -1,0 +1,23 @@
+```
+Add notes/u3b_folder_check.py: persona folder path proved, 14/14
+
+Adds a self-verifying check script (14 checks, no model call, no render, no
+GPU lock). Run result: 14/14 PASS, VERDICT clean, exit 0.
+
+What it proves against disk, not by assertion:
+- C:\Users\derek\5slock\approved_characters\<the one folder named in the talk
+  persona> exists as a directory, with its character card and start frame;
+- the older folder of the same kind exists (so the check is not vacuous) and
+  is NOT named in the persona - 0 matches for its path in the persona text;
+- the scan for the two chat-tone words over the live instruction surfaces
+  (loop PROMPT.md, AGENTS.md, fix_plan.md, ralph.ps1, both launchers, the
+  runner, both skill trees, prompt templates, memory, specs) and over
+  C:\AI\community\notes and the loop's notes finds no hit outside the persona
+  file itself.
+
+The two words and the persona probes are built from fragments inside the
+script so it cannot match itself. Paths checked:
+C:\Users\derek\5slock\ralph-community\talk\talk-persona.md,
+C:\Users\derek\5slock\approved_characters,
+C:\AI\community\notes\u3b_folder_check.py.
+```
