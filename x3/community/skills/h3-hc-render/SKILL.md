@@ -29,7 +29,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
   beta7 int8HQ unet, qwen3vl nvfp4_awq TE, two-pass 384x672 -> `minimax_h3_latent_upscaler_3d_conv_v1_bf16` 2x ->
   768x1344 portrait, 24 fps, euler/simple 8 steps, pass 2 `beta`/3/denoise 0.4, shift 12/3, ref_image_size max,
   `MiniMaxH3AddGuide` frame 0 on both passes (ag0, ag1), `ref_images.ref_image_1` only. `--frames` on
-  run_graph_job.py / run_queue.py must equal c0.length; the frame check only confirms the clip came out at that length.
+  run_queue.py must equal c0.length; the frame check only confirms the clip came out at that length.
   Superseded for new runs: copying old run graphs, `p7/graphs/default_b2_terrace_dom_q5guide_s51083007.api.json`
   (c0.length 243) and `runs/terrace_retest_v2_20261030/_build_b2_arms.py`; old ids keep their own graphs in `runs/`.
   The 3-ref/1344x768 paragraphs below predate B2 and apply only when a brief asks for that shape.
