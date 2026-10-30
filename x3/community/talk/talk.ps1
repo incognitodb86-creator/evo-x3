@@ -1,6 +1,7 @@
 <#
 talk.ps1 - the talk-lane launcher. U3 (MAX block item 4) built it; U3c (MAX block item 6, Derrick 12:20 CT Oct 29:
-"keep them separate, but I want the 2nd Sydney to have full access and authority same as main chat") makes it
+"keep them separate, but I want the 2nd <this lane> to have full access and authority same as main chat" - the name of
+the lane is written in the persona file only, so it is elided here) makes it
 full-access. The tone word for the lane name lives only in the persona file, never in this script (item 4's tone
 scan enforces that), so this header says "the talk lane".
 

@@ -1,4 +1,4 @@
 # cell config - do not reorder
 mode = stock
-target = 3
+target = 7
 seed = 51083007
