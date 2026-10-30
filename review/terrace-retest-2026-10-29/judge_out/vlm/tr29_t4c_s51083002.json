@@ -1,0 +1,39 @@
+{
+ "tag": "tr29_t4c_s51083002",
+ "model": "qwen3vl_judge",
+ "secs": 4.4,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background elements like balustrade, wall, trees, and wet floor match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both women retain identical hair, skin tone, body proportions, and facial features from START IMAGE."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows Subject 1 striding forward, not static as in START IMAGE (frame 1)."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows Subject 1 pinning Subject 2 against balustrade, with Subject 2's bikini removed and bodies in contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, extra limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.7539,
+  "target_reached": 0.2356,
+  "anatomy_defect": 0.0012
+ },
+ "flags": [
+  "start_kept"
+ ]
+}
