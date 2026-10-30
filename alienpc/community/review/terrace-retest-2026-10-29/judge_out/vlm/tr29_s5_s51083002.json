@@ -1,0 +1,39 @@
+{
+ "tag": "tr29_s5_s51083002",
+ "model": "qwen3vl_judge",
+ "secs": 4.2,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background elements like balustrade, wall, trees, and wet floor match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both women retain identical hair, skin tone, body proportions, and facial features from START IMAGE."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows Subject 1 striding forward, breaking the static pose of START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear physical contact: Subject 1's hands on Subject 2's hips, bras discarded on floor."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.5837,
+  "target_reached": 0.4146,
+  "anatomy_defect": 0.0019
+ },
+ "flags": [
+  "start_kept"
+ ]
+}
