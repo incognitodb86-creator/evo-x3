@@ -13,4 +13,4 @@ Derrick decision(s) this comes from: <quote + CT time>
 
 Small, easy-to-undo jobs skip this. One review round at most, saved only in 60_reviews/.
 
-**Render queue:** use the template `scripts\run_queue.py`; see `templates\render-queue-template.md`.
+**Render queue:** build each request with `scripts\make_b2_request.py` (from `templates\b2.api.json`, the B2 default), then the AGENTS.md Render launch line (`run_queue.py ... --detach`); see `templates\render-queue-template.md`. Frames: <n> (c0.length = run_queue --frames).

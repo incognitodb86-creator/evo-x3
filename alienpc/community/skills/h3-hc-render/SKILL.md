@@ -16,27 +16,27 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 ## 1. Read the state before anything
 
 - `tail -n 15 C:/Users/derek/5slock/ralph-community/logs/ralph.log`.
-- GPU lock: `python C:/AI/community/scripts/comfy_ctl.py status` (no arguments to gpu_guard). Never stop/restart
+- GPU state: `python C:/AI/community/scripts/comfy_ctl.py status`. Never stop/restart
   ComfyUI while a render runs; after every start/restart continue only if `comfy_ok=True`.
-- Direct-HTTP renders (bakeoff arms only): wake + queue + wait + fetch in ONE script call, log the window in
-  `C:/AI/community/notes/bakeoff_gpu_ledger.md`.
 
 ## 2. Graph wiring (the part that has actually broken)
 
-- Base graph: copy `C:/AI/community/p7/graphs/default_b2_terrace_dom_q5guide_s51083007.api.json` - the B2 setup,
-  made the default by Derrick 2026-10-29 6:59 AM CT ("Ok let's keep the b2 setup and make it default") and a
-  byte-identical copy of `C:/AI/community/runs/terrace_dom_q5guide_20261028_s51083007/request.api.json`
-  (sha256 8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e, 20072 B, 26 nodes: two-pass, 384x672
-  -> LatentUpscaler3D x2 -> 768x1344 portrait, 243 frames, 24 fps, `MiniMaxH3AddGuide` frame 0 on both passes,
-  `ref_images.ref_image_1` only, pass 2 = `beta`/3/denoise 0.4). Change ONLY `img.image`, `c0.prompt`,
-  `noise.noise_seed`, `save.filename_prefix`, and request with `--frames 243` (= c0.length). The previous defaults
-  (`runs/ali147_pool_promptv2_s51080000/request.api.json`, then `p7/graphs/stock_base_tenstrip10.api.json`,
-  124 f 1344x768 single-pass beta6) are superseded for new runs; old ids keep their own graphs in `runs/`.
+- Request graph (default; Derrick 2026-10-30 "Only make the B2 template file the default"): build it with
+  `C:/AI/director/.venv/Scripts/python.exe C:/AI/community/scripts/make_b2_request.py` from
+  `C:/AI/community/templates/b2.api.json` (see `templates/b2.README.md`). It patches only the per-run fields
+  `c0.prompt`, `noise.noise_seed`, `img.image`, `save.filename_prefix` and `c0.length` (frames, set by the plan; the
+  template's 124 is only an example, not part of B2). B2 itself is locked (decision 2026-10-30-keep-b2-render-settings):
+  beta7 int8HQ unet, qwen3vl nvfp4_awq TE, two-pass 384x672 -> `minimax_h3_latent_upscaler_3d_conv_v1_bf16` 2x ->
+  768x1344 portrait, 24 fps, euler/simple 8 steps, pass 2 `beta`/3/denoise 0.4, shift 12/3, ref_image_size max,
+  `MiniMaxH3AddGuide` frame 0 on both passes (ag0, ag1), `ref_images.ref_image_1` only. `--frames` on
+  run_graph_job.py / run_queue.py must equal c0.length; the frame check only confirms the clip came out at that length.
+  Superseded for new runs: copying old run graphs, `p7/graphs/default_b2_terrace_dom_q5guide_s51083007.api.json`
+  (c0.length 243) and `runs/terrace_retest_v2_20261030/_build_b2_arms.py`; old ids keep their own graphs in `runs/`.
   The 3-ref/1344x768 paragraphs below predate B2 and apply only when a brief asks for that shape.
 - Model `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, euler/simple, 8 steps, shift 12 (video) / 3 (audio), VSA 90% sparse, no SLA/cache/spectrum with reference (beta 7 settings from Derek's 2026-10-28 brief; beta 6 is deleted). Steps live in
   `s0_sched`/`s1_sched`, sampler in `ksel`, shift in `m_shift`; there is NO cfg key in these graphs at all.
 - beta7 background flicker (TenStrip HF 10Eros-Max #76/#79): mitigation = the 2-pass B2 graph we already use; watch #79.
-- **References (this is what fixed body quality): 3 slots on c0 AND c1.**
+- **Pre-B2 / 1344x768 only (B2 uses ref_image_1 + two AddGuides): references were 3 slots on c0 AND c1.**
   `ref_images.ref_image_1` = the approved full-body start still (the body/scene reference, `<Picture 1>`),
   `ref_image_2`/`ref_image_3` = face crops (face + hair only, `<Picture 2>`/`<Picture 3>`). r3r-r6 used face crops
   only and the start still was not in the graph at all - that is the failure Derrick rejected. Builder:
@@ -55,21 +55,21 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 ## 3. Frame / canvas math
 
-- Batch canvas 1344x768 (16:9), 24 fps. Community length: **243 frames = 10.125 s**, grid `(frames - 5) % 17 == 0`
-  (c0 `length` 124 = 17*7+5; window overlap 22 + extension 119; c1 141 generated / 22 hidden; 124 + 119 = 243 =
-  17*14+5). 481 f = 20 s is the shape Derrick rejected. `duration = round(frames/24, 6)`.
+- Canvas 768x1344 portrait (B2), 24 fps. Length is a per-run choice from the plan; H3 grid `(frames - 5) % 17 == 0`
+  (124 = 17*7+5 = 5.17 s; 243 = 17*14+5 = 10.125 s). Pre-B2 continuation math: c0 124 + extension 119 = 243
+  (window overlap 22; c1 141 generated / 22 hidden). 481 f = 20 s is the shape Derrick rejected. `duration = round(frames/24, 6)`.
   Sources: `notes/hc_redo_research_20261023.md` (row table), `notes/ali147_summary.md`.
 
 ## 4. Static self-check, then request
 
-- Offline clone of `run_graph_job.static_check`: `notes/ali163_hc_r4g2_build.py` check 11 (schema parsed from
+- Static check: `run_graph_job.static_check` (runs inside run_graph_job.py before submit; schema parsed from
   `comfy_extras/nodes_minimax_h3.py`, no network). Every builder gets a **self-destruct probe**: restore the old
   wiring in a clone and require every detector to fire there and none on the real graph. A green check that cannot
   fail is worthless.
 - To re-request a dead clip, clone its rendered `ok=True` sibling graph and change only the per-clip keys.
 - One seed per clip. Never request a quality redo (harness redos = same seed, then seed+1).
 
-## 5. Proof (next pass, objective only; review = qwen3vl_judge + Z zoom, flag-only; Derrick gives the only KEEP)
+## 5. Proof (next pass, objective only; no vision model judges, scores or picks rendered explicit output; Derrick gives the only KEEP)
 
 - `result.json` ok/rc; frames + rate + size:
   `ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets,r_frame_rate,width,height -of csv=p=0 <mp4>`
@@ -87,7 +87,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 `C:/AI/community/notes/hc_redo_research_20261023.md`, `notes/hc_face_research_20261023.md`,
 `notes/bakeoff_gpu_findings.md` + `notes/ali173_b2_object_info_full.json` (live schema dump),
-`notes/ali163_hc_bq1d_objective.json`, `notes/forge-learnings.md`, `C:/Users/derek/5slock/AGENTS.md` "## Check commands".
+`notes/ali163_hc_bq1d_objective.json`, `notes/forge-learnings.md`, `C:/Users/derek/5slock/AGENTS.md` "## Test".
 
 ## 6. Stock render path (moved verbatim from PROMPT.md by U5, 2026-10-29)
 Steps a-g for one render item, then script reuse and research rules:
@@ -96,14 +96,14 @@ Steps a-g for one render item, then script reuse and research rules:
      b. Caption once with your own model (coding_swift15_iq3s_esp, the ralph.ps1 default): one ask, one image. Vision models exist and stay: the Forge vision model Swift via mmproj, the W7 and W8 writer mmproj files, and JoyCaption.
      c. Write one natural-language H3 prompt from that caption, following h3-prompting (no word cap; long, literal, in time order).
      d. Check: C:\AI\director\.venv\Scripts\python.exe -m pytest -q C:\AI\community\scripts\tests\test_p6_review.py C:\AI\community\scripts\tests\test_guard_scope.py. comm.guard_ok also runs inside run_graph_job.py before /prompt POST; never loosen either.
-     e. Build graph: copy C:\AI\community\p7\graphs\default_b2_terrace_dom_q5guide_s51083007.api.json to <run_dir>\request.api.json and change only LoadImage path, c0.prompt, noise_seed, filename_prefix. That file IS the B2 setup (Derrick 2026-10-29 6:59 AM CT "Ok let's keep the b2 setup and make it default"): a byte-identical copy of runs\terrace_dom_q5guide_20261028_s51083007\request.api.json, sha256 8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e, 20072 B, 26 nodes = beta7 int8HQ, euler/simple, 8 steps full schedule + pass 2 beta/3/denoise 0.4, shift 12/3, VSA keep_percent 10, AddGuide frame 0 on both passes, ref_image_size max, 384x672 -> LatentUpscaler3D x2 -> 768x1344, 243 frames, 24 fps. Do not change any of those.
-     f. Render: C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_graph_job.py <run_dir> <id> --frames 243 (the number must equal c0.length in the graph you copied; the B2 default renders 243 f = 10.125 s at ~240 s GPU. runs gpu_guard and gpu lock).
-        Frame override (Max2 audit-fix2 #3, 2026-10-29): a filled, GO-approved plan in C:\AI\community\plans\ may set another frame count (e.g. 124 for the terrace retest); then c0.length / Duration and --frames both use the plan's number, and they must still be equal.
+     e. Build graph: C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\make_b2_request.py --arm-dir <run_dir> --prompt-file <txt> --seed <n> --image <ComfyUI input path> --prefix <sub/name> [--frames <n>] writes <run_dir>\request.api.json from C:\AI\community\templates\b2.api.json (the B2 recipe, Derrick decision 2026-10-30; details in templates\b2.README.md). Only prompt, seed, start image, filename prefix and frames change; everything else is locked.
+     f. Render one clip: C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_graph_job.py <run_dir> <id> --frames <n> (n must equal c0.length in the request; takes gpu-render.lock). Batches: run_queue.py --detach (AGENTS.md Render).
+        Frames: the plan sets the frame count per run (e.g. 124 for the terrace retest); c0.length and --frames must be equal.
      g. Finish: commit once in each repo touched and append one line to notes\progress.md. Then stop.
-   - Script reuse: reuse the existing scripts, never repeat steps by hand - notes\p15_driver.py writer stage is THE prompt writer (Swift captions -> Swift writes, h3-prompting rules; defaults --writer w2 --mode capswift; notes\bk26_writer_batch.py is bake-off history), p15_driver.py judge stage is the review (qwen3vl_judge + Z zoom via C:\AI\community\judge\vlm_variants.py, flag-only; bk26_judge_* are history); render/QC tools C:\AI\community\scripts\run_graph_job.py, verify_cell.py, prompt_stats.py, review_pack.py, finalize_encode.py. One manifest drives them. Prompt rules live in C:\AI\community\skills\h3-prompting\SKILL.md (cite its R numbers); render dials in C:\AI\community\skills\h3-hc-render\SKILL.md.
+   - Script reuse: reuse the existing scripts, never repeat steps by hand - render/QC tools C:\AI\community\scripts\make_b2_request.py, run_graph_job.py, run_queue.py, verify_cell.py, prompt_stats.py, review_pack.py, finalize_encode.py. Prompt rules live in C:\AI\community\skills\h3-prompting\SKILL.md (cite its R numbers); render dials in C:\AI\community\skills\h3-hc-render\SKILL.md. Review is objective checks only; Derrick gives the only KEEP.
 
 2. Research rules: at most one fetch per URL, no retries. If saved in notes\web, reuse it. Fetch -> python C:\AI\community\scripts\check_web_saves.py -> git add notes\web && git commit in same iteration. Reading ComfyUI\custom_nodes with read tool is denied.
 
 
 ### GPU lock and render window (moved from PROMPT.md rule 99999999)
-GPU lock: renders and start-image captioning go through llama-swap ComfyUI swap, ONE job at a time. Queue only via C:\AI\community\scripts\run_graph_job.py (comm.guard_ok enforced before POST). Gate before queuing: C:\AI\director\scripts\gpu_guard.ps1 rc 0 = IDLE, and python C:\AI\community\scripts\comfy_ctl.py status. Driver busy guard: while C:\AI\locks\gpu-render.lock is held by a test driver, Forge in interactive chats replies that a test is running and does not load models, render, or run GPU/heavy work; read-only questions are fine. While render runs: no second job, no ComfyUI restart, no llama-swap load/unload/upstream, no LLM requests (run_graph_job.py holds C:/AI/locks gpu-render lock; comfyui_auto exclusive main group ttl: 300). Client stall (exit 6) collects clip from ComfyUI\output\community\<id>\, never re-render. KEEP is Derrick's alone; no vision model judges, scores or picks rendered explicit output.
+GPU lock: renders and start-image captioning go through llama-swap ComfyUI swap, ONE job at a time. Single clip: run_graph_job.py; batch: run_queue.py --detach (AGENTS.md Render). Both enforce comm.guard_ok before POST and take the gpu-render lock (rc 7 = busy); the lock decides, there is no gpu_guard step. State: python C:\AI\community\scripts\comfy_ctl.py status. Driver busy guard: while C:\AI\locks\gpu-render.lock is held by a test driver, Forge in interactive chats replies that a test is running and does not load models, render, or run GPU/heavy work; read-only questions are fine. While render runs: no second job, no ComfyUI restart, no llama-swap load/unload/upstream, no LLM requests (run_graph_job.py holds C:/AI/locks gpu-render lock; comfyui_auto exclusive main group ttl: 300). Client stall (exit 6) collects clip from ComfyUI\output\community\<id>\, never re-render. KEEP is Derrick's alone; no vision model judges, scores or picks rendered explicit output.
