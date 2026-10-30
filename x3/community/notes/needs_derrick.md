@@ -66,3 +66,15 @@ Per hard line 7 ("If an item has no community version, write one line in notes\n
 - **Klein 9B-KV fp8 is NOT gated and IS installed** by this item: `flux-2-klein-9b-kv-fp8.safetensors`, 9,818,935,984 B, sha256 `33f7da5625a00798349a719742999d3c7dd20c1a7eda14663922c363640728f1` in the same `models\diffusion_models\` folder (full record: `notes/installs_downloads.md`, F1 section). Nothing is needed from Derrick for it; the FLUX Non-Commercial License is covered by Derrick's 4:33 PM CT "nothing from this lane is commercial".
 - State: 0 renders, no GPU lock, ComfyUI never started/restarted, no config touched, nothing deleted or overwritten.
 
+
+
+## 2026-10-30 Forge (flux Item F2 STAGED) - the Miraclein 4.3 A/B batch is ready for Max to launch; one file is still pending
+- **Run dir:** `C:\AI\community\runs\miraclein43_ab_20261030` (README.md there is the full staging record). **STAGED, NOT QUEUED** - GO = HOLD, so nothing was rendered and no lock, GPU or HTTP call was made.
+- **Queues:** `_render_order.json` = 23 jobs (arm B = 3 baseline warm re-renders for timing, M4 = 10, M8 = 10); `_render_order_M12_conditional.json` = 10 jobs, **run only if M4 and M8 show broken limbs** (Derrick 4:33 PM CT). Saved dry runs: `_dry_run_main.txt`, `_dry_run_M12_conditional.txt`.
+- **Launch lines (Max):**
+  `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_queue.py --run-dir C:\AI\community\runs\miraclein43_ab_20261030 --detach`
+  and for M12 only: same line plus `--queue C:\AI\community\runs\miraclein43_ab_20261030\_render_order_M12_conditional.json`.
+- **Still needed from you (not Derrick): the model file.** The M4/M8/M12 requests name `miracleinNSFWGeneration_43_3158025.safetensors` in `C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\diffusion_models\` (F1 URLs in the section above). If it is absent when the batch runs, only the M-arms fail (ComfyUI rejects the UNET name); B and the staging stay valid. No new nodes are needed.
+- **Fixed input (the plan's first 10):** Phase 1 `_render_order.json` pos 1-10 verbatim, canary D21 included = 10 tiles / 6 ref pairs / 2 seeds, listed in `_phase1_first10.csv`. Same prompts (sha256 `04a1d47cabe3…`/`430f08feef20…` in `prompt_positive.txt`/`prompt_negative.txt`), same BODY+HEAD refs (`_inputs/refs.csv`), approved stills copied to `_inputs/approved/` as the face_sim reference.
+- **Baseline for the pass bar (face_sim >= baseline mean, Derrick 4:33 PM CT):** the 10 Phase 1 images, path + bytes + sha256 verified against each `render_ok.json`, in `_arm_key.csv` - the labelled side-by-side key the plan's Done-when asks for (baseline | M4 | M8 | M12 per seed).
+- **Instrument note:** `scripts/make_bfs_request.py` gained the three optional arm dials the plan's table names (`--unet`, `--steps`, `--cfg`); omitted they change nothing (Phase 1 baseline). `scripts/tests/test_phase1_still.py` pins that an arm can change nothing beyond `1.unet_name` / `19.steps` / `17.cfg`. No new audit/gate scripts. Adults tests 26 passed; `guard_graph` allow on all 33 graphs; ComfyUI never started/restarted, config untouched, nothing deleted or overwritten.

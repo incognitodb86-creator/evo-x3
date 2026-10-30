@@ -44,8 +44,24 @@ class TestPatcher(unittest.TestCase):
         self.assertEqual(diff, {("7", "image"), ("8", "image"), ("20", "noise_seed"), ("24", "filename_prefix")})
 
     def test_refuses_other_fields(self):
-        with self.assertRaises(ValueError):
-            mbr.build(TPL, steps=8)
+        for field in ("sampler", "clip", "lora", "noise_seed", "scheduler"):
+            with self.assertRaises(ValueError):
+                mbr.build(TPL, **{field: 8})
+
+    def test_arm_dials_patch_only_their_keys(self):  # Miraclein 4.3 A/B arms M4/M8/M12 (plan 2026-10-30)
+        base = {"body": "community/p/b.png", "head": "community/p/h.png", "seed": 20261028, "prefix": "community/p/t"}
+        job_keys = {("7", "image"), ("8", "image"), ("20", "noise_seed"), ("24", "filename_prefix")}
+        allowed = {("1", "unet_name"), ("19", "steps"), ("17", "cfg")}
+        for dial in ({"unet": "x.safetensors", "steps": 4}, {"unet": "x.safetensors", "steps": 8},
+                     {"unet": "x.safetensors", "steps": 12, "cfg": 1.1}, {}):
+            g = mbr.build(TPL, **dict(base, **dial))
+            diff = {(k, f) for k in g for f in g[k]["inputs"] if g[k]["inputs"][f] != TPL[k]["inputs"][f]}
+            self.assertLessEqual(diff - job_keys, allowed, str(dial))  # an arm changes nothing beyond the plan's dials
+            for node, key, dial_key in (("1", "unet_name", "unet"), ("19", "steps", "steps"), ("17", "cfg", "cfg")):
+                self.assertEqual(g[node]["inputs"][key], dial.get(dial_key, TPL[node]["inputs"][key]), str(dial))
+        plain = mbr.build(TPL, **base)  # no dial = the Phase 1 baseline dials stay as shipped
+        self.assertEqual((plain["19"]["inputs"]["steps"], plain["17"]["inputs"]["cfg"], plain["1"]["inputs"]["unet_name"]),
+                         (4, 1.0, TPL["1"]["inputs"]["unet_name"]))
 
     def test_expected_size(self):
         self.assertEqual(mbr.expected_size(768, 1376), (752, 1360))
