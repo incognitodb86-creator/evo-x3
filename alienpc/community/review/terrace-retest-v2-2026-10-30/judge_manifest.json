@@ -1,0 +1,228 @@
+{
+ "jobs": [
+  {
+   "tag": "tr2v2_b2_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "b2_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\b2_s51083002\\terrace_retest_v2_b2_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_b2_s51083012",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "b2_s51083012",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\b2_s51083012\\terrace_retest_v2_b2_s51083012.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_b2_s51083013",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "b2_s51083013",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\b2_s51083013\\terrace_retest_v2_b2_s51083013.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s1_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s1_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s1_s51083002\\terrace_retest_v2_s1_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s2_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s2_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s2_s51083002\\terrace_retest_v2_s2_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s3_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s3_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s3_s51083002\\terrace_retest_v2_s3_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s4_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s4_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s4_s51083002\\terrace_retest_v2_s4_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s5_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s5_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s5_s51083002\\terrace_retest_v2_s5_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s6_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s6_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s6_s51083002\\terrace_retest_v2_s6_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s7_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s7_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s7_s51083002\\terrace_retest_v2_s7_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_s8_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "s8_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "s8_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\s8_s51083002\\terrace_retest_v2_s8_s51083002.mp4",
+   "judged_size": "768x1344"
+  },
+  {
+   "tag": "tr2v2_t4c_s51083002",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "t4c_s51083002",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\t4c_s51083002\\t4c_s51083002_raw.mp4",
+   "judged_size": "768x1344 raw (pre-RTX, pre-post-process)"
+  },
+  {
+   "tag": "tr2v2_t4c_s51083012",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "t4c_s51083012",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\t4c_s51083012\\t4c_s51083012_raw.mp4",
+   "judged_size": "768x1344 raw (pre-RTX, pre-post-process)"
+  },
+  {
+   "tag": "tr2v2_t4c_s51083013",
+   "guides": [
+    {
+     "image": "community/TERRACE2_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/TERRACE2_768x1344.png"
+   ],
+   "prompt_file": "b2v2_prompt.txt",
+   "pose": "this cell has no target pose - the terrace scene from the start image continues as prompted; the target_reached check is not applicable here and its answer is not used as a flag",
+   "arm": "t4c_s51083013",
+   "judged_file": "C:\\AI\\community\\runs\\terrace_retest_v2_20261030\\t4c_s51083013\\t4c_s51083013_raw.mp4",
+   "judged_size": "768x1344 raw (pre-RTX, pre-post-process)"
+  }
+ ]
+}
