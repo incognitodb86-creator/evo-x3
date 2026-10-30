@@ -63,6 +63,36 @@ class TestPatcher(unittest.TestCase):
         self.assertEqual((plain["19"]["inputs"]["steps"], plain["17"]["inputs"]["cfg"], plain["1"]["inputs"]["unet_name"]),
                          (4, 1.0, TPL["1"]["inputs"]["unet_name"]))
 
+    def test_kv_plan_dials_patch_only_their_keys(self):  # Klein 9B-KV + BFS plan rows G/KP/KC (plan 2026-10-30)
+        base = {"body": "community/p/b.png", "head": "community/p/h.png", "seed": 20261028, "prefix": "community/p/t"}
+        job_keys = {("7", "image"), ("8", "image"), ("20", "noise_seed"), ("24", "filename_prefix")}
+        allowed = {("1", "unet_name"), ("2", "strength_model"), ("17", "model"), ("26", "model")}
+        kvfile = "flux-2-klein-9b-kv-fp8.safetensors"
+        for dial in ({"unet": kvfile}, {"unet": kvfile, "kv": True}, {"unet": kvfile, "strength": 0.0},
+                     {"unet": kvfile, "strength": 0.0, "kv": True}):
+            g = mbr.build(TPL, **dict(base, **dial))
+            diff = {(k, f) for k in g for f in g[k]["inputs"]
+                    if k in TPL and g[k]["inputs"][f] != TPL[k]["inputs"][f]}
+            self.assertLessEqual(diff - job_keys, allowed, str(dial))  # a KV-plan arm changes nothing beyond the plan's dials
+            self.assertEqual(g["1"]["inputs"]["unet_name"], dial["unet"])
+            self.assertEqual(g["2"]["inputs"]["strength_model"], dial.get("strength", 1.0))
+            self.assertEqual(g["19"]["inputs"]["steps"], 4)  # fixed: 4 steps, cfg 1.0, lcm on every KV-plan row
+            self.assertEqual(g["17"]["inputs"]["cfg"], 1.0)
+            self.assertEqual(g["18"]["inputs"]["sampler_name"], "lcm")
+            self.assertEqual(rgj.banned_nodes(g), [])
+            if dial.get("kv"):
+                self.assertEqual(g["26"]["class_type"], mbr.KV_CLASS)
+                self.assertEqual(g["26"]["inputs"], {"model": ["2", 0]})  # LoRA (node 2) loads BEFORE the KV node
+                self.assertEqual(g["17"]["inputs"]["model"], ["26", 0])
+            else:
+                self.assertNotIn("26", g)
+                self.assertEqual(g["17"]["inputs"]["model"], ["2", 0])
+        plain = mbr.build(TPL, **base)  # no dial = the baseline: base UNET, strength 1.0, no KV node
+        self.assertNotIn("26", plain)
+        self.assertEqual((plain["1"]["inputs"]["unet_name"], plain["2"]["inputs"]["strength_model"], plain["17"]["inputs"]["model"]),
+                         (TPL["1"]["inputs"]["unet_name"], 1.0, ["2", 0]))
+        self.assertTrue(rq.guard_graph(mbr.build(TPL, **dict(base, unet=kvfile, kv=True, strength=0.0))))
+
     def test_expected_size(self):
         self.assertEqual(mbr.expected_size(768, 1376), (752, 1360))
         self.assertEqual(mbr.expected_size(1376, 768), (1360, 752))
