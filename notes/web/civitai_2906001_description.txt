@@ -1,0 +1,13 @@
+This is a MiniMax H3 workflow focusing on a few problems I've been trying to fix: the oily/plastic look from acceleration LoRAs, blurry distant faces, and quality loss in high-motion scenes. I also added a two-stage latent upscale workflow, so you can generate a quick low-res preview first, find a good seed, and then refine it to around 1080p. This saves quite a bit of time compared to doing the full-resolution generation every time. The workflow also uses a merged H3 model, so text-to-video, image-to-video, first/last frame, and multi-reference generation can all be handled in basically the same workflow.
+For more details, please check the note within the workflow.If you don't have the hardware to run this workflow locally, you could try this online (Free 48GB GPU）.Links:
+Dmad+SelfLift:
+https://www.runninghub.ai/post/2112077694410633218
+Cinematic Version:
+https://www.runninghub.ai/post/2101654857613963265
+V1:
+https://www.runninghub.ai/post/2094673232666742786
+
+Check the tutorial video for instructions before using this workflow:
+Dmad+SelfLift Version:
+Cinematic Version:
+V1:
