@@ -191,10 +191,21 @@ def main():
     slog = lambda m: comm.log(m, os.path.join(run_dir, "status.log"))
     r = subprocess.run([PY, "-m", "pytest", *PYTEST_FILES, "-q", "-p", "no:cacheprovider"], cwd=ROOT, capture_output=True, text=True)
     if r.returncode:
-        qlog(run_dir, "GATE-FAIL batch pytest rc=%d" % r.returncode); return 2
+        qlog(run_dir, "GATE-FAIL batch pytest rc=%d" % r.returncode)
+        qlog(run_dir, "BATCH closed rc=2 reason=pytest gate failed (pytest rc=%d) done=%d/%d: nothing queued" % (r.returncode, ok_count(run_dir, jobs), len(jobs)))
+        return 2
     # #18: the lock alone decides (a live PID in gpu-render.lock = GPU_BUSY rc 7); gpu_guard pre-check dropped 2026-10-30
-    if not rgj.gpu_lock(slog, "run_queue " + os.path.basename(run_dir)):
-        qlog(run_dir, "GPU_BUSY batch: gpu-render.lock held by a live PID - nothing queued (rc 7)"); return 7
+    # gpu_lock.ps1 -Acquire: exit 0 = acquired, exit 1 = HELD by a live PID (busy); anything else = the lock tool failed
+    lrc, lout = rgj.ps_run(rgj.GPU_LOCK_PS, "-Acquire", "-Owner", str(os.getpid()), "-Note", "run_queue " + os.path.basename(run_dir))
+    slog("gpu_lock acquire rc=%d %s" % (lrc, lout[:140]))
+    if lrc == 1:
+        qlog(run_dir, "GPU_BUSY batch: gpu-render.lock held by a live PID - nothing queued (rc 7)")
+        qlog(run_dir, "BATCH closed rc=7 reason=GPU busy (gpu-render.lock held by a live PID) done=%d/%d: nothing queued" % (ok_count(run_dir, jobs), len(jobs)))
+        return 7
+    if lrc != 0:
+        qlog(run_dir, "ERROR batch lock tool error: gpu_lock.ps1 rc=%d %s" % (lrc, lout[:140]))
+        qlog(run_dir, "BATCH closed rc=8 reason=lock tool error (gpu_lock.ps1 rc=%d) done=%d/%d: nothing queued" % (lrc, ok_count(run_dir, jobs), len(jobs)))
+        return 8
     rc, reason, failed = 0, "all queued clips DONE ok", []
     try:
         if not rgj.wake(slog):  # unload the LLM once, wake ComfyUI once
@@ -218,8 +229,11 @@ def main():
     finally:
         try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
         except Exception as e: slog("unload note %s" % str(e)[:120])
-        rgj.gpu_unlock(slog)
-        n_ok = ok_count(run_dir, jobs)
+        try: rgj.gpu_unlock(slog)
+        except Exception as e: slog("unlock note %s" % str(e)[:120])
+        try: n_ok = ok_count(run_dir, jobs)
+        except Exception as e:
+            n_ok = 0; slog("ok_count note %s" % str(e)[:120])
         if rc == 0 and n_ok < len(jobs):  # never rc=0 while a queued clip lacks a DONE ok line
             rc, reason = 6, "ended with %d queued clip(s) missing a DONE ok line" % (len(jobs) - n_ok)
         qlog(run_dir, "BATCH closed rc=%d reason=%s done=%d/%d: comfyui_auto unloaded, lock released" % (rc, reason, n_ok, len(jobs)))
