@@ -1,9 +1,11 @@
 ---
 name: forge-self-diagnose
-description: Diagnose the Forge Ralph loop after every iteration - read ralph.log and notes/denies.log, write notes/self_diagnosis.md, split a task that ticked 0, handle guard denies (web saves, protected paths, credential-shaped env names), keep TASKS.md ticks machine-readable, and commit. Use at the start of every pass, and after any TIMEOUT, ticks=+0, checkfails, scope fail or deny.
+description: RETIRED 2026-10-29 - old headless-guard / TASKS.md harness; do NOT use at pass start, follow ralph-community AGENTS.md + PROMPT.md. Historical: diagnose the Forge Ralph loop after every iteration - read ralph.log and notes/denies.log, write notes/self_diagnosis.md, split a task that ticked 0, handle guard denies (web saves, protected paths, credential-shaped env names), keep TASKS.md ticks machine-readable, and commit. Use at the start of every pass, and after any TIMEOUT, ticks=+0, checkfails, scope fail or deny.
 ---
 
 # Forge self-diagnose (the loop is the product)
+
+> RETIRED 2026-10-29 (Max2 audit-fix #10, Derrick's go 8:40 PM CT). History only. headless-guard, TASKS.md, notes/denies.log, PROMPT.md STEP 0 / SELF-DIAGNOSE and 'ralph.ps1/PROMPT.md stay Max's' no longer apply: Forge owns ralph.ps1, PROMPT.md and AGENTS.md (PROMPT.md item 4). Action log = C:\AI\community\notes\actions.log; blockers = C:\AI\community\notes\<date>-forge-blocker.md.
 
 ghuntley.com/ralph: "loop back is everything"; "each time Ralph does something bad, Ralph gets tuned - like a
 guitar". PROMPT.md makes this a per-iteration duty. ralph.ps1, PROMPT.md, TASKS caps' harness flags and every

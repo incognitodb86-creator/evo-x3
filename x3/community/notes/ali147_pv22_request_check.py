@@ -74,7 +74,7 @@ for f in ["p7/jobs/%s.result.json" % ID, "p7/jobs/%s.out" % ID, "p7/jobs/%s.err.
           "runs/%s/status.log" % ID, "runs/%s/objective.json" % ID, "runs/%s/%s.mp4" % (ID, ID),
           "runs/%s/%s.api.json" % (ID, ID), "p7/jobs/%s.result.json.failed-20261022" % ID]:
     chk(not os.path.exists(C + "/" + f), "absent (id free, no prior render): " + f)
-b = json.load(open(BUDGET, encoding="utf-8"))
+b = json.load(open(BUDGET, encoding="utf-8")) if __import__("os").path.exists(BUDGET) else None  # Max2 audit-fix #2: budget retired (17e932f)
 p("p7_budget.json %s" % json.dumps(b))
 chk(b["used_min"] < b["cap_min"], "used_min %s < cap_min %s (this job ~14 min at the 481-frame baseline)" % (b["used_min"], b["cap_min"]))
 chk(b["jobs"] < b["job_cap"], "jobs %s < job_cap %s" % (b["jobs"], b["job_cap"]))

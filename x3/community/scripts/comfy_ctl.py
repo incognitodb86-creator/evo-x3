@@ -5,7 +5,7 @@ ComfyUI (comfyui_auto) is a llama-swap member in the exclusive "main" group with
   stop    = refused while a render runs (gpu_guard.ps1 BUSY = ComfyUI queue / render process / GPU lock); else
             POST http://127.0.0.1:8080/api/models/unload/comfyui_auto (llama-swap runs comfy_graceful_stop.ps1, which also waits for the queue)
   restart = stop, then start, then comfy_ok (needed after installing custom nodes)
-  status  = comfy_ok (GET :10004/system_stats), ComfyUI /queue counts, gpu_guard verdict, llama-swap /running
+  status  = comfy_ok (GET http://127.0.0.1:8080/comfyui/system_stats, llama-swap route), ComfyUI /queue counts, gpu_guard verdict, llama-swap /running
 Exit: 0 ok (prints COMFY_OK on start/restart), 3 refused (render running), 4 ComfyUI down after start/restart, 2 usage.
 Never /upstream. This file is harness-owned (Max): Forge must not edit it."""
 import json, subprocess, sys, time, urllib.request

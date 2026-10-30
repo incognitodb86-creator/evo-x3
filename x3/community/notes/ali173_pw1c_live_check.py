@@ -20,7 +20,7 @@ import json
 import sys
 import urllib.request
 
-PORT = sys.argv[1] if len(sys.argv) > 1 else "10004"
+PORT = sys.argv[1] if len(sys.argv) > 1 else "10002"  # Max2 audit-fix #13: comfyui_auto own port (gpu_guard.ps1:12-13); 10004 was the old derived port
 BASE = "http://127.0.0.1:" + PORT
 OUT = r"C:/AI/community/notes/pw1c_live_objective.json"
 NEEDLE = ("Qwen2.5-Omni-7B", "LoRA-Omni", "on disk:", "ollama:", "no Qwen2.5-Omni")
