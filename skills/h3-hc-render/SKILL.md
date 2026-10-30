@@ -15,11 +15,8 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 ## 1. Read the state before anything
 
-- `tail -n 15 C:/Users/derek/5slock/ralph-community/logs/ralph.log` (TIMEOUT / same-FAIL breaker: PROMPT.md STEP 0).
-- Budget gate `C:/Users/derek/5slock/ralph-community/logs/p7_budget.json` -> `used_min`, `jobs`, `cap_min 615`,
-  `job_cap 45`. R-lines stop at the original 495 min / 35 jobs; the extra 120 min / 10 jobs are the ALI-173
-  bakeoff. There is NO `p7_budget.json` under `C:/AI/community` - never quote an assumed count.
-  Request only while `jobs < cap` and `used_min + 10 <= cap_min`, else `[!] BLOCKED: budget` + STOP_RALPH.
+- `tail -n 15 C:/Users/derek/5slock/ralph-community/logs/ralph.log`.
+- Budget gate RETIRED: FIX 8 (commit 17e932f, 2026-10-26) removed the p7_budget.json GPU-minute ledger from run_graph_job.py and archived it. No budget file exists; a missing p7_budget.json is NOT a block. Limits now: one GPU job at a time (gpu lock) and Derrick's GO on the plan.
 - GPU lock: `python C:/AI/community/scripts/comfy_ctl.py status` (no arguments to gpu_guard). Never stop/restart
   ComfyUI while a render runs; after every start/restart continue only if `comfy_ok=True`.
 - Direct-HTTP renders (bakeoff arms only): wake + queue + wait + fetch in ONE script call, log the window in
