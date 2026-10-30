@@ -33,3 +33,4 @@
 - Finished clips: upload to QNAP pi-drop with pi_qnap.py put and tell Derrick the filename; never start a web or file server.
 - Show Derrick an image in chat: call the read tool on the image file.
 - Learnings (live): C:\AI\community\notes\forge-learnings.md (h3-prompting cites it). The 10-28 updates note is archived in C:\AI\_archive\2026-10-30-forge-simplify\ (read only when needed).
+- Multi-step briefs (more than ~3 steps, each checkable): use the ralph-loop skill (C:\AI\community\agent-shared\skills\ralph-loop\SKILL.md) instead of doing them in one chat session.
