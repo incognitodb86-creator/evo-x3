@@ -62,12 +62,15 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 ## 4. Static self-check, then request
 
-- Static check: `run_graph_job.static_check` (runs inside run_graph_job.py before submit; schema parsed from
+- Static check: `run_graph_job.static_check` (runs inside run_queue.py before submit; schema parsed from
   `comfy_extras/nodes_minimax_h3.py`, no network). Every builder gets a **self-destruct probe**: restore the old
   wiring in a clone and require every detector to fire there and none on the real graph. A green check that cannot
   fail is worthless.
 - To re-request a dead clip, clone its rendered `ok=True` sibling graph and change only the per-clip keys.
 - One seed per clip. Never request a quality redo (harness redos = same seed, then seed+1).
+- Single clip = a batch of one: `run_queue.py --run-dir <run_dir> --frames <n> --detach`. run_graph_job.py is an internal helper run_queue imports; never run it directly.
+- "Pick an image" (Derrick): pick straight from `C:/Users/derek/5slock/approved_characters/INDEX.csv`; no novelty, history or never-animated scan (skip hc_pick_scan). Seed default: a random int made in code (`random.randint(1, 2**31-1)`); never grep runs for uniqueness.
+- Prompt: model it on Example 1 (short shape) in `skills/h3-prompting/references/worked-examples.md`; for length/stats reuse `scripts/prompt_stats.py`. No per-clip check scripts.
 
 ## 5. Proof (next pass, objective only; no vision model judges, scores or picks rendered explicit output; Derrick gives the only KEEP)
 
