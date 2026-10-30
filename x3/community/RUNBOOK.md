@@ -4,12 +4,12 @@ Written 2026-10-20 for Derrick, plain words. No GPU job was run to write this pa
 
 ## Way A - one clip by hand (App Mode form)
 1. Open the ComfyUI UI at http://127.0.0.1:10002 and use App Mode. If nothing answers, ComfyUI is asleep; it wakes when anything asks llama-swap for it (http://127.0.0.1:8080/upstream/comfyui_auto). Wake-up measured 22-23 s.
-2. Open C:\AI\community\p3\Community_H3_I2V_beta6.app.json. The community settings are already inside it: 10Eros beta6 int8 UNET, euler sampler + simple scheduler, 10 steps, shift 10 video / 3 audio, VSA (keep_percent 10, start 0.2) on comfy kitchen attention, no LoRA node at all, 5 s, seed 51050001.
+2. Open C:\AI\community\p3\Community_H3_I2V_beta6.app.json. The community settings are already inside it: 10Eros beta7 int8HQ UNET (10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors; swapped from beta6 2026-10-30), euler sampler + simple scheduler, 10 steps, shift 10 video / 3 audio, VSA (keep_percent 10, start 0.2) on comfy kitchen attention, no LoRA node at all, 5 s, seed 51050001.
 3. The form shows only 5 fields: start image, prompt, length in seconds, seed, megapixels.
 4. Start image: pick community/FD006_768x1344.png - it is already in ComfyUI\input\community\. For a different still: approved adult (21+) only, already cropped to the output aspect, copied into ComfyUI\input\community\ first.
 5. Queue. The clip lands in ComfyUI\output\community\app_h3_i2v_00001_.mp4.
 
-Ignore the template's own help text on the right: it still says "FastVideo FastH3 8-Step V2 / 8 steps". That is stock template prose, not a setting; the graph runs beta6 int8 at 10 steps.
+Ignore the template's own help text on the right: it still says "FastVideo FastH3 8-Step V2 / 8 steps". That is stock template prose, not a setting; the graph runs beta7 int8HQ at 10 steps.
 
 ## Way B - a batch (shot list + queue script)
     cd C:\AI\community\scripts
