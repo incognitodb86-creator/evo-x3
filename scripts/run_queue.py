@@ -177,12 +177,28 @@ def meta(job, retry):
     return {"run": job["tag"], "attempt": int(retry), "label": "METHOD_ONLY", "plan": "run_queue"}
 
 
+def disk_output(run_dir, tag, since):
+    """Evict/stall disk fallback for run_queue jobs (fix 2026-10-31, backup run_queue.py.bak-0735). Their SaveImage/SaveVideo
+    prefix is community/<run>/<tag>, so ComfyUI writes FLAT files output/community/<run>/<tag>_00001_.png|.mp4;
+    rgj.collect_from_disk only looks in output/community/<tag>/ and missed all 9 landed Klein N12 stills (06:59 evict).
+    Exact '<tag>_NNNNN_' match (E1 never matches E11), mtime >= submit-5 s; newest wins. None if nothing landed."""
+    import glob
+    d = os.path.join(OUT_ROOT, os.path.basename(os.path.normpath(run_dir)))
+    pat = re.compile(re.escape(tag) + r"_\d{5}_?\.(png|mp4)$", re.I)
+    try:
+        c = [p for p in glob.glob(os.path.join(glob.escape(d), glob.escape(tag) + "_*"))
+             if pat.match(os.path.basename(p)) and os.path.getmtime(p) >= since - 5]
+    except OSError:
+        return None
+    return max(c, key=os.path.getmtime) if c else None
+
+
 def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     """After a job ends (or stalls/evicts): disk fallback, then the OBJECTIVE check and the DONE line."""
     tag, d = job["tag"], os.path.join(run_dir, job["tag"])
     t = tag
     if not s and out.get("outcome") in ("stalled", "evicted", "submit_stall"):
-        src = rgj.collect_from_disk(t, t_att, slog)
+        src = disk_output(run_dir, t, t_att) or rgj.collect_from_disk(t, t_att, slog)
         if not src:
             qlog(run_dir, "FAIL pos=%d tag=%s stall %s prompt_id=%s" % (job["pos"], tag, out["outcome"], out.get("prompt_id"))); return False
         dst = os.path.join(d, t + os.path.splitext(src)[1]); shutil.copyfile(src, dst); s = {"file": dst}
