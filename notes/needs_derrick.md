@@ -106,3 +106,58 @@ Setup finished 15:26 CT: all 32 files, 119.94 GiB (128.8 GB), every file checked
 - Two facts you should know, both fixed inside the approved scope: the brain had **no `notes/` directory**, so the October hook never logged on this box (its shell error was printed into every commit); and the tracked hook was mode 644, so it would be silently skipped on the Linux clone. Both fixed; `notes/security-hook.log` is git-ignored.
 - One thing your other bots will feel: the gate is now fail-closed, so **any commit in `C:\AI\fleet-brain` needs `C:\AI\tools\gitleaks` on PATH**. It is in the User PATH for new logins; a session started before 08:05 CT must add it. The block message names the path and this note.
 - Going on, per your 07:42 CT: GAP4 (parity self-check + mirror proof), GAP5 (UniFi MCP -> @owine/unifi-network-mcp@3, stays disabled until Household's key exists), GAP6 (one question tool), GAP7 (pin CE to a release tag), llama-swap header fix + commit, GAP8 (drop `coding_sc117_strata`). No renders, no GPU, no model restart in any of them.
+
+## 2026-11-01 11:05 CT - FORGE: GAP6 (one question tool) = PARTIAL, carded, item stopped
+
+Both of the item's own stop conditions fired, so **nothing was changed**: no `pi remove`, no
+settings.json write, no npm manifest edit, no install, no pi restart, nothing deleted. Read-only
+probe `C:\Users\derek\5slock\ralph-community\notes\_gap6\gap6_probe.py` (output `gap6_probe.log`);
+the full evidence list + reproduce commands are in `notes\_gap6\GAP6-FINDINGS.md`.
+
+1. **The state GAP6 asks for already exists, and your own approval created it.** `pi list` = 13
+   packages: no `@juicesharp/rpiv-ask-user-question`, no `pi-ask-user` (only `@juicesharp/rpiv-todo`,
+   a todo tool); `settings.json /packages` = 13 entries with neither registered; this pass's own tool
+   list has no `ask_user` and no `ask_user_question`. The removal is recorded and **approved**:
+   `C:\AI\fleet-brain\60_reviews\fleet\2026-10-31-forge-ask-user-removal.md` - your card, 2026-10-31
+   19:31 CT, removed **both** ask-user add-ons (the rpiv one **and** `pi-ask-user`), added the
+   AGENTS.md plain-chat rule and restarted Forge's pi; backups in
+   `C:\AI\_archive\2026-10-31-max2-ask-user-removal\`. Reason there: pi-mobile 0.4.0 only mirrors
+   select/confirm/input dialogs, so rpiv's TUI questionnaire leaves the phone at "Needs you in the
+   terminal" (pi-mobile #12).
+2. **The item's text predates that decision** ("keep pi-ask-user"), so its Pass line cannot be met
+   as written: "pi list no longer shows the rpiv ask package" = **true already**; "a fresh pass can
+   still call pi-ask-user" = **not satisfiable**, pi-ask-user is not configured and AGENTS.md:17 now
+   says never use a TUI questionnaire or ask-user tool.
+3. **References found** (the item's first stop clause, listed as it asks): AGENTS.md **line 17** (the
+   plain-chat rule, added by that approved removal); **0** references in every skills dir
+   (community, agent-shared, brain `20_skills/current`, `.pi\agent\skills`); **0** in ralph-community
+   `PROMPT.md`; **0** in the loose extensions (`herdr-agent-state.ts`, `loop-guard.ts`,
+   `pi-permission-system/`, `subagent/`). Everything else is package self-reference and records:
+   `@juicesharp/rpiv-ask-user-question` 192 lines of its own source, `pi-ask-user` 127 (incl. its
+   `ask-user` skill), `@juicesharp/rpiv-todo` 77 (`config.ts:71` names the question package in a
+   comment), `@juicesharp/rpiv-config` 40, plannotator 9 (`AskUserQuestion`), cc-safety-net 5, the
+   lock file 465; the CE plugin `README.md:349` `pi install npm:pi-ask-user` (upstream install doc,
+   not a rule) + 2 CHANGELOG lines; plus past records (fix_plan OPT2 and the CE RESULT, `notes/_gap4`,
+   the brain `60_reviews` files above).
+4. **Bundling** (the item's second stop clause): `@juicesharp/rpiv-ask-user-question@2.15.0` depends
+   on `@juicesharp/rpiv-config@^2.15.0`, and the installed `@juicesharp/rpiv-todo@2.15.0` depends on
+   that same package. A removal touches a package rpiv-todo shares.
+5. **The real residue is the npm manifest, not settings.json**:
+   `C:\Users\derek\.pi\agent\npm\package.json` still declares `@juicesharp/rpiv-ask-user-question
+   ^2.15.0` and `pi-ask-user ^0.17.1`, and both dirs are on disk. Same pattern for 3 more entries
+   that are not registered: `@tmustier/pi-ralph-wiggum 0.2.4`, `comfyui-mcp-server-node 2.1.1`,
+   `pi-hermes-memory 0.9.11`. `pi remove` has no target for an unregistered source (pi docs:
+   `pi list` shows configured packages, installs live in `settings.json`, `pi update --extensions`
+   reconciles installations), and AGENTS.md needs your yes for any `pi remove`/`pi install` anyway.
+
+**The ask - pick one line, Forge recommends 1+2+4 now and 3 as its own item:**
+1. **(a) Close GAP6 as already met by the approved 2026-10-31 19:31 CT removal** - the next pass
+   ticks it with today's proof, no config change.
+2. **(b) Also close the OPT2 pin clause as unverifiable** (a pin on a package that is not configured).
+3. **(c) Yes to a new carded item for Max: clean `npm\package.json`** - drop the two question lines
+   with a backup first, and rule on the 3 other unregistered entries. Nothing is deleted until you say yes.
+4. **(d) Reword the item's Pass line** to today's rule: no question package in `pi list` **and** a
+   fresh pass asks in plain chat.
+
+No GPU, no lock, no render, no model load, no llama-swap/ComfyUI/strata/pi process touched, no
+settings.json/mcp.json/models.json write, no credential read, no PATH change, nothing deleted.
