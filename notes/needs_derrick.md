@@ -161,3 +161,78 @@ the full evidence list + reproduce commands are in `notes\_gap6\GAP6-FINDINGS.md
 
 No GPU, no lock, no render, no model load, no llama-swap/ComfyUI/strata/pi process touched, no
 settings.json/mcp.json/models.json write, no credential read, no PATH change, nothing deleted.
+
+### 11:15 CT addendum - live-config drift DURING the GAP6 pass (not made by this pass)
+
+While GAP6 ran, pi's personal settings file changed under me. Proof: 10:52 CT in
+`notes\_gap6\gap6_probe.log`, 11:15 CT in `notes\_gap6\drift_probe.py` -> `drift_probe.log`.
+**I changed nothing**: no settings.json write, no `pi remove`/`pi install`, no copy, no delete.
+
+1. **10:52 CT (this pass' probe): 15,642 bytes, mtime 2026-10-31 21:21:44.** That generation has
+   `theme: grapeyache`, `compaction.transport: "sse"`, `images.autoResize: true`, the 7-dir skills list
+   (Max's 12:37 CT work), `extensions[]` = **16 npm extension sources enabled** (material-theme,
+   hermes-memory, review-loop, material-theme, subagents, canvas, web-access, browser-use, computer-use,
+   pi-search, **rpiv (the whole suite)**, codex-subagents, plannotator, safety-net, mobile,
+   permission-system), and `packages[]` = 13: `git:github.com/t-maurer/pi-subagents@1.4.1`, pi-canvas,
+   **pi-material-theme**, **pi-search**, plannotator, **pi-ghostty-shell**, rpiv-todo,
+   **pi-codex-subagents**, **pi-hermes-memory**, **pi-review-loop**, and pi-web-access / pi-browser-use /
+   pi-computer-use as `{"source": ..., "pinned": true}` objects.
+2. **11:15 CT (after): 2,803 bytes, mtime 2026-10-31 19:33:30.** No `theme`, no `transport`,
+   `images.blockImages: false`, the 10-dir + 7-minus skills list (the 10:20 CT work),
+   `extensions[]` = only `["-builtin:llama.cpp", "C:/AI/community/agent-shared/extensions"]`, and
+   `packages[]` = 13: `pi-permission-system@0.8.0`, **`pi-subagents@0.83.1` (npm, pinned)**,
+   `pi-mobile@0.4.0`, `@juicesharp/rpiv-todo@2.15.0`, `cc-safety-net@2.7.0`, `pi-memory@0.4.2`,
+   `@plannotator/pi-extension@0.28.40`, `{"source":"npm:pi-browser-use@0.12.15", 7 skills exclusions}`,
+   `pi-canvas@0.1.1`, `pi-web-access@0.46.0`, `@injaneity/pi-computer-use@0.5.1`,
+   `{"source":"git:github.com/EveryInc/compound-engineering-plugin", 12 skills exclusions}` = **the CE
+   source with no `ref`/`version` (unpinned)**, `pi-say@1.1.1`.
+3. **Identity of the new file, proved arithmetically.** Against
+   `C:\AI\_archive\2026-10-31-max2-ask-user-removal\settings.json.20261031-193313.bak` (2,886 bytes,
+   content mtime 12:36:42): **identical key sets**, only `packages` differs, and the only two entries in
+   the backup and not in the live file are exactly
+   `"npm:@juicesharp/rpiv-ask-user-question@2.15.0"` and `"npm:pi-ask-user@0.17.1"`, with **zero** entries
+   added, byte delta 83. So the live file is **the 19:33:30-yesterday post-removal state** - the live config
+   was rolled back to that generation during my pass, which drops the whole 12:37-21:21 CT 10-31 generation.
+4. **Collateral:** `C:\Users\derek\5slock\.pi\agent\settings.json` - present in this session's
+   start-of-run directory tree - is gone; that `.pi` now holds only `bin\ps-ladder.cmd`. And the
+   15,642-byte generation is on disk **nowhere**: 0 files contain `grapeyache`, `pi-material-theme`,
+   `pi-ghostty-shell` or `pi-codex-subagents` (scope: `*.json`/`*.bak`/`*.md`/`*.txt`/`*.jsonc` under
+   `C:\Users\derek\.pi` and `C:\AI`, `node_modules`/`.git`/`outbox`/`logs` excluded, files under 400 KB).
+   **If that generation was the intended config it has no restore path on disk** - it exists only in this
+   session's context.
+5. **A second writer is active on this box right now.** `C:\AI\community` has uncommitted edits by other
+   agents (`.gitignore`, `agent-shared/AGENTS.md`, `agent-shared/skills/ralph-loop/SKILL.md`,
+   `scripts/comm.py`, `skills/h3-hc-render/SKILL.md`, `notes/objinfo/*`, `D notes/ali173_pw1d_run.py`).
+   That is a second reason not to touch any config in this pass.
+
+Consequences, stated as facts:
+1. **The next pass runs with fewer tools than this one.** `pi-material-theme`, `pi-search`,
+   `pi-ghostty-shell`, `pi-codex-subagents`, `pi-hermes-memory`, `pi-review-loop` are in neither
+   `packages[]` nor `extensions[]` of the live file, and the theme / `compaction.transport=sse` /
+   `images.autoResize` settings are gone; `pi-subagents` is npm **0.83.1 pinned** where this session loaded
+   the git `@1.4.1` source. The tools this pass used that come from the removed set: the material theme,
+   pi-search, review-loop, hermes-memory (memory_* here is pi-memory, which is registered), codex-subagents.
+   web-access, browser-use, canvas, computer-use, subagents, memory, say, plannotator, rpiv-todo, CE skills
+   all stay (they are in the live `packages[]`).
+2. **GAP7 (the next item) premise shifts, and stays real.** The CE git source is present and unpinned in the
+   live file. But GAP7's context assumed `pi list` would show the git `pi-subagents@1.4.1`; it now shows npm
+   `pi-subagents@0.83.1` pinned. Re-read `pi list` + settings.json before writing anything, and back up
+   settings.json first - the current 2,803-byte content is now the restore path.
+3. **One of my own claims is corrected (useful for every package item).** "A package that is not in
+   `settings.json packages[]` registers no tool" is **not true on this box**: `extensions[]` is a second,
+   independent enabler (it names sources and directories, `-` = disable), and this session's tool set matches
+   the old generation's 16-name `extensions[]` list, not the packages list. So: `pi list`/`pi remove` act on
+   **configured sources** (pi docs `packages.md:17,19`), the load set = `packages[]` **plus** `extensions[]`,
+   and **"not in `pi list`" must never be used as proof a package is not loaded.** For a question tool the
+   sound control is all three: not in `packages[]`, not named in `extensions[]` (verified: the live
+   `extensions[]` contains no "ask", "question" or "rpiv" string), and a fresh pass' tool inventory. The
+   brain learning is amended to exactly that, and **GAP6's conclusion is unchanged** - it rests on `pi list`
+   (13, no question package), the AGENTS.md:17 rule, the approved 19:31 CT removal record, the shared
+   `rpiv-config` dependency and the npm-manifest residue, none of which move.
+4. **The residue the item is about is still there and untouched:** `C:\Users\derek\.pi\agent\npm\package.json`
+   declares both question packages. That is option 3 of the ask.
+
+**The ask stays the 4 numbered options above. If you want the 15,642-byte generation brought back, tell me
+which deltas to restore (`theme`, `compaction.transport=sse`, `images.autoResize`, the 7-dir skills list, the
+16-name `extensions[]` list, the 7 package registrations, the git `pi-subagents@1.4.1` source) and I will
+write a restore brief for Max. I will not write `settings.json` myself.**
