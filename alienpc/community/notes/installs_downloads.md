@@ -121,3 +121,10 @@ Placement rule used: UNETLoader takes a bare `unet_name`, and the baseline `FLUX
 - AGENTS.md adults tests (`scripts/tests/test_p6_review.py` + `test_guard_scope.py`): **26 passed in 3.28 s**, run before the records.
 - Renders: 0. GPU lock: never taken. ComfyUI: never started/restarted, no request sent. Config: untouched. No file deleted, no existing file overwritten (`mv -n`, `curl` into a `.part`).
 
+
+## 2026-10-31 00:0x CT Max (long-video-queue lease): ComfyUI-H3-Continuum installed
+- git clone https://github.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum into C:\AI\comfy-longvideo\ComfyUI\custom_nodes, detached at 308653cff108061a94381cef446fef985384b214 = tag v3.10.2, 27.6 MB. No pip install run. Derrick yes 12:01 AM CT Oct 31.
+- ComfyUI restart PENDING (Klein run holds gpu-render.lock). Rollback: remove folder, restart.
+
+
+| gitleaks | 8.30.1 (windows_x64) | GitHub release `v8.30.1` `gitleaks_8.30.1_windows_x64.zip` + `gitleaks_8.30.1_checksums.txt` | SHA-256 `d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e` = official checksums.txt (MATCH True) | `C:\AI\tools\gitleaks` + User `Path` (17 -> 18) | 2026-11-01 08:05 CT | `gitleaks --version` -> 8.30.1; used by `C:\AI\fleet-brain\.githooks\pre-commit` (GAP3, fail-closed). Version pinned per the 2026-10-31 22:30 CT card; do not `--update` it. |
