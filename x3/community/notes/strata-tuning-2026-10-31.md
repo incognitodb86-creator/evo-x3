@@ -109,3 +109,103 @@ Answer to the axis: **fewer workers is not free.** On this box 8 workers = 12% s
 +0.25 GB RAM free, no accuracy change. 13 stays; the slot keeps answering.
 
 Next (not run here): OPT4b `--pool-affinity` all/auto/p-cores/measure at the kept count 13, same method.
+
+---
+
+## OPT4b - `--pool-affinity` at the kept worker count 13 (Forge, ralph pass 2026-10-31 20:48 → 21:19 CT)
+
+Scope: one variable, `--pool-affinity`, on `coding_swift15_iq3s_esp` at the worker count kept by OPT4a
+(`--pool-workers 13`). Values on engine `strata 0.1.54` are `all` (default, = the flag omitted), `auto`,
+`p-cores`, `measure` - `none` is not a value. Box: Core Ultra 7 265KF, 8 P-cores + 12 E-cores, 20 logical.
+GPU lock held for the whole item, released in a `finally`, `NO LOCK` at the end.
+
+The four arms were measured by the previous pass (detached run pid 35784, 20:48:23 → 21:05:18,
+`result-2048.json`, `error: None`, duration 1015 s). That pass ended (ralph logged `PI_NONZERO rc=1` at
+20:57) before any record was written. This pass re-read the raw files itself
+(`notes\_opt4b\verify_data_opt4b.py` → `RESULT: PASS`): 3 timed rows per arm, medians recomputed from
+`bench.jsonl` equal to what `arms.jsonl` recorded, BQ counts recomputed from `bq_p_*.jsonl` equal to the
+recorded counts, and the sweep config proved byte-equal to `.bak-opt4a` plus the affinity pair only.
+
+### The table
+
+| arm | flag | live proof (PID, live args) | pp t/s med | tg t/s med | tg vs P-all | wall s | BQ tools | BQ code | first-try | RAM min | VRAM peak | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **P-all** | absent (= `all`) | pid 16584, pw=13, pa=ABSENT | 1684.8 | **117.6** (103.7/124.6) | baseline | 3.31 | 8/10 | 5/5 | 3/5 | 1.34 GB | 14317 MiB | baseline row |
+| **P-auto** | `auto` | pid 30812, pw=13, pa=auto | 1710.8 | 124.9 (119.1/126.6) | **+6.2%** | 3.17 | 9/10 | 4/5 | 3/5 | 3.64 GB (15 samples) | 14269 MiB | passes the bar as written; **not a real effect** (identical placement) |
+| **P-pcores** | `p-cores` | pid 26404, pw=13, pa=p-cores | 1618.1 | 112.3 (103.3/116.8) | **-4.5%** | 3.46 | 9/10 | 4/5 | 3/5 | 1.36 GB (17 samples) | 14257 MiB | REJECT (real placement change, costs decode) |
+| **P-measure** | `measure` | pid 21808, pw=13, pa=measure | 1665.4 | 124.4 (99.2/125.6) | +5.8% | 3.21 | 8/10 | 4/5 | 3/5 | 0.75 GB (18 samples) | 14252 MiB | REJECT (answer bar fail; ran p-cores placement) |
+
+Engine self-test choice, recorded as the item requires (P-measure's own start log):
+`strata generate: --pool-affinity measure: 2 experts x 4 tokens per layer over 48 layers: all (13 workers)
+5.16 ms, p-cores (13 workers) 5.26 ms (medians of 3) -> p-cores` — a 2% margin, and it chose `p-cores`.
+
+### Live CPU placement (the engine's own lines, not my inference)
+
+| arm | engine line | workers | placement |
+|---|---|---|---|
+| P-all | `13 pool workers on logical processors 1,2,3,4,5,6,7,8,9,10,11,18,19, the host thread on 0` | 13 | all non-host logicals |
+| P-auto | identical line, identical list | 13 | **the same placement as P-all** |
+| P-pcores | `13 pool workers on logical processors 1,6,7,8,9,18,19, the host thread on 0` | 13 onto 7 | P-cores + siblings only |
+| P-measure | same line as P-pcores | 13 onto 7 | the p-cores placement it self-selected |
+
+### What this axis is worth in plain words
+
+- `auto` at 13 workers on this box is **not a distinct configuration**: the engine places exactly the same
+  13 workers on the same 13 logical processors as the default. The +6.2% that P-auto measured over P-all is
+  measurement movement, not a gain.
+- The two arms that *do* share a placement (P-pcores and P-measure, both 13 workers on 7 logical processors)
+  differ by **+10.8%** in median tg. So this instrument's noise floor at identical placement is **6.2-10.8%**,
+  i.e. wider than the 5% keep bar. No 5% claim from 3-run medians on this box is trustworthy; n≥5 with
+  paired A/B/A is the minimum.
+- The only real effect measured: `p-cores` puts 13 workers on 8 physical P-cores (oversubscribed) and costs
+  **4.5%** decode speed with no answer gain. `measure` inherits that placement because its own micro-benchmark
+  rated p-cores 2% faster, and its arm failed the answer bar (tools 8/10).
+- Answer quality never decided this axis: every arm is 8-9/10 tools and 4-5/5 code at temp 0, within
+  1-of-10 task movement of the 18:31 CT baseline (9/10, 4/5). The speed axis decided it, and the speed axis
+  is noise.
+
+### Kept configuration and its proof
+
+Kept = **P-all: `--pool-workers 13`, no `--pool-affinity`** (the item's rule: inside 5% keep P-all, the
+default with no extra flag; and if nothing passes, restore the flag-free `.bak-opt4a` state and say so).
+
+- Config written through the byte gate: `notes\_opt4b\cfg_edit_opt4b.py` `op=remove` 3268 → 3202 B,
+  `--pool-workers` 13 in both `args` and `args_written`, affinity pair removed from both, CRLF kept, no BOM;
+  `cfg bytes == .bak-opt4a` **True** (3202 B).
+- Live proof after the reload (engine started **after** the config write): `strata.exe` **pid 26492 @21:16:59**
+  with `--pool-workers=13`, `--pool-affinity` **ABSENT**, `--max-context 131072`, placement
+  `13 pool workers on logical processors 1,2..11,18,19, the host thread on 0`.
+- `/running` = `coding_swift15_iq3s_esp ready`, `/v1/models` lists the slot, **one chat request 200 in 368 ms**
+  (content `OPT4B-P-ALL-OK`, model `swift-1.5-iq3_s-esp`) - `proof-2119.json`.
+- GPU lock: ACQUIRED/RELEASED pid 30620, 31780, 34372, 19960, 9148 (each in a `finally`), `NO LOCK` at end.
+  No render, no llama-swap / ComfyUI / strata process restart, no other flag touched.
+- Backup for the state: `C:\AI\strata-0.2.7\strata-swift15-iq3s-esp.json.bak-opt4a` (3202 B) is the kept
+  state, byte-identical to the live file.
+
+### Instrument facts this pass paid for
+
+1. The sweep folder now mixes encodings: `bench.jsonl` is **UTF-16LE**, `arms.jsonl` and `bq_*.jsonl` are
+   **UTF-8 with BOM**. A reader that assumes one encoding parses **zero rows and stays silent** (my first
+   verifier reported `rows=0` for every arm). Sniff the BOM.
+2. `POST /api/models/unload/<name>` through PowerShell 5.1 `Invoke-WebRequest` returns **404**; the identical
+   curl POST returns **200 OK** (GET on the route returns 405, so the route is real). Do the unload with curl.
+3. `/v1/models` is not the slot registry: it lists only what llama-swap currently has loaded, and it read
+   without the slot right after a reload. Readiness = `/running` + the live args of the engine + a chat 200.
+4. After an unload, the agent session's own next generation relaunches the slot from the config on disk (that
+   is what happened at 21:16:59). So a live-args proof must assert "**engine started after the config
+   write**", not "a PID new to my pre-load list" - the second form fails a run that actually succeeded.
+5. The answer-gate raw rows are 15 per arm (`tools_*` 10, `code` 5) with `pass` booleans and per-try
+   `tries[]`; the long-form part of BQ-15 is not written per arm, so the per-arm gate here is the tool/code
+   part only. Say that when quoting "BQ" counts.
+6. The RAM/VRAM columns are only comparable inside one run's sampling: P-all sampled 84 times, the other arms
+   15-18 times, so P-auto's "3.64 GB free" is a shorter observation window, not a memory win. P-measure's
+   0.75 GB minimum is under the 1.0 GB floor the TUNE-S plan uses - one more reason that arm is not keepable.
+7. The `min` of each arm's 3 runs is the warm-up artifact (pp 1116/1210/1100 for arms 2-4, 1651 for P-all);
+   the medians are the comparable numbers, same as OPT4a.
+
+### Status of the OPT4 block
+
+OPT4a (worker count 13 vs 8) kept **13**. OPT4b (placement at 13) kept **the default, no flag**. The
+`--pool-affinity` axis is closed as a no-op on this box; TUNE-S stays dropped per Derek 7:52 PM CT.
+For a real gain, the next axis worth measuring is the one that changes where work runs and is not noise:
+worker count *below* the P-core count with `p-cores` (e.g. 7 workers + `p-cores`), with n≥5 paired runs.
