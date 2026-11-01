@@ -120,3 +120,5 @@ interruptions** of the model pi and Sydney talk on. Back-to-back in one evening;
 `tools\append_actions_log.py`), fix_plan ticks, config backup `strata-swift15-iq3s-esp.json.bak-<time>`,
 brain record + learning (tagged unreviewed), commit + push. Max's open OPT4a/OPT4b items are
 untouched (they are covered by T1-T5 and reported to him).
+
+**STATUS: DROPPED by Derek 2026-10-31 7:52 PM CT** - his words: "Drop the TUNE-S sweep for now and don't run it. Finish only the two open items in your fix_plan.md, OPT4a and OPT4b." Nothing from this plan was run and it touched no config. The live-model work he asked for is the two existing items OPT4a (pool-workers 13 vs 8) and OPT4b (worker CPU affinity); their text in `C:\Users\derek\5slock\ralph-community\fix_plan.md` now carries the corrected method - engine 0.1.54 affinity values are all / auto / p-cores / measure, "none" is not one of them (omitting the flag = all) - plus the per-arm answer gate, on his rule "Accuracy comes before speed". The 11-arm table design stays here for reference only.
