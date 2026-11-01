@@ -236,3 +236,36 @@ Consequences, stated as facts:
 which deltas to restore (`theme`, `compaction.transport=sse`, `images.autoResize`, the 7-dir skills list, the
 16-name `extensions[]` list, the 7 package registrations, the git `pi-subagents@1.4.1` source) and I will
 write a restore brief for Max. I will not write `settings.json` myself.**
+
+### 11:35 CT pass 3 - the ask is still unanswered, so the item is gated on you, not on work
+
+This pass changed nothing (no `pi remove`, no settings.json write, no npm edit, no install, no restart,
+nothing deleted). It closed the one evidence leg that only a fresh pass can observe, and re-checked the
+card for your answer: `notes\needs_derrick.md` (24,346 B, mtime 11:22 CT) and
+`C:\AI\community\notes\needs_derrick.md` (61,582 B, mtime 11:22 CT) both end at my own 11:15 CT addendum -
+no `[x]`, no answer line - and there is no newer brief than 2026-10-31-1220.
+
+What is now proved, all three legs of the sound control, on the live config (2,803 B, mtime 2026-10-31
+19:33:30) - `notes\_gap6\gap6_probe_pass3.py` -> `gap6_probe_pass3.log`, `tool_inventory_pass3.md`:
+1. `packages[]` = 13, no `rpiv-ask-user-question`, no `pi-ask-user` (the only `rpiv` string is `rpiv-todo`).
+2. `extensions[]` = `-builtin:llama.cpp` + `C:/AI/community/agent-shared/extensions`, and that directory
+   **exists and is empty (0 children)**, so it enables nothing. With an empty dir the load set ==
+   `packages[]`; that is the check the 11:15 CT caveat asks for (a non-empty dir would re-open it).
+3. This fresh pass' tool inventory: 41 tools, every one mapping to a registered source, **no `ask_user`,
+   no `ask_user_question`, no questionnaire/overlay tool**. Positive controls so the negative means
+   something: `rpiv-ask-user-question\ask-user-question.ts:86,477` register `ask_user_question` and
+   `pi-ask-user\index.ts:3053` registers `ask_user`; both packages are on disk, neither is registered.
+
+Result on the item's own Pass line: clause 1 ("`pi list` no longer shows the rpiv ask package") is **TRUE**,
+proved on both config generations. Clause 2 ("a fresh pass can still call pi-ask-user") is **FALSE and
+unreachable as written** - it needs a re-install against AGENTS.md:17 and against your own approved
+2026-10-31 19:31 CT removal. The item's stop clause ("references found -> list them in needs_derrick.md and
+stop") was met at 11:05 CT, so the only thing that can move GAP6 is your answer to the four options there:
+(a) close as already met, (b) close OPT2's pin as unverifiable, (c) a separate item for the
+`npm\package.json` clean (5 declared-but-unregistered entries: both question packages + pi-ralph-wiggum +
+comfyui-mcp-server-node + pi-hermes-memory), (d) reword the Pass line to the plain-chat rule.
+Recommendation unchanged: (a)+(b)+(d) now, (c) as its own item.
+
+The 11:15 CT drift ask (name the deltas to restore) is also open; I do not write `settings.json`.
+One stale fact retired: GAP4's "`actions.log` lines start with a literal `%s`" does not describe the current
+log (the GAP6 lines start with timestamps) and the append script has no `%`-format in it.
