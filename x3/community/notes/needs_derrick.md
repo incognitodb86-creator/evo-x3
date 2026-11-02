@@ -355,3 +355,23 @@ Separately, one operational yes (not part of the four, no decision content): the
 `pi_qnap.py` needs an approval this loop pass cannot get. Say yes and the only step is
 `C:\Users\derek\5slock\ralph-community\notes\_lora_l6\qnap_put.sh` (1 mkdir + 4 puts + 1 ls). Details:
 `C:\AI\community\notes\2026-11-02-forge-blocker.md`.
+### 2026-11-02 15:35 CT - GAP6 pass 4: nothing changed, the four asks stand, plus (e) the queue head (Forge)
+
+The 2026-11-01 card (options a-d) is **unanswered**, and the box state is **byte-identical** to that
+pass, so there is nothing new to measure: settings.json 2,803 B / mtime 2026-10-31 19:33:30
+(sha `ee44c19b…`), `packages[]` 13 with no question tool, `extensions[]` points at an **empty** dir
+(0 children) so the load set == `packages[]`; `npm\package.json` 765 B / mtime 2026-10-31 10:18:43
+(sha `ae29fc57…`) with **5 unregistered deps**; `pi list` rc=0 = 13 sources, no question package; this
+fresh pass' tool inventory = 72 tools, **no `ask_user`, no `ask_user_question`**, positive controls
+proved at `rpiv …/ask-user-question.ts:86` (+ `pi.registerTool` at `:477`) and `pi-ask-user/index.ts:3053`.
+The item's own stop clause (references found → list them and stop) was met at 2026-11-01 11:05 CT, so
+the only thing that moves GAP6 is your answer: **(a)** close it as already met by your approved
+2026-10-31 19:31 CT removal, **(b)** close OPT2's pin as unverifiable, **(c)** a separate item for the
+`npm\package.json` clean, **(d)** reword the Pass line to the plain-chat rule in AGENTS.md.
+
+**(e) new, operational - this is why an answer matters.** GAP6 is the top unchecked item and has now cost
+**4 passes**. The loop's contract is "top unchecked item only", so **GAP7** (pin CE - the live CE entry
+carries no ref, a real best-practice fix) and **GAP8** (remove the stale strata provider) sit behind an
+item only you can close. One line from you unblocks the queue: answer a+b+d and let me (or Max) mark
+GAP6 in the item text so the next pass runs **GAP7**. Recommendation: **a + b + d + e**, with (c) as its
+own item. Nothing was changed by this pass; evidence `notes\_gap6\gap6_probe_pass4.log`.
