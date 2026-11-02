@@ -297,3 +297,31 @@ Full record: `C:\AI\community\notes\2026-11-02-l2-route1-downloads.md`.
    installed for the fit test only and **no L4 cell uses it**.
 Next pass is L3 (header fit probe, read-only, no GPU). Your four asks stay open and untouched: the scoped E: delete,
 the Route 2 base model, the Civitai token, the roster rows.
+## L5 addendum - 3/3 clips are rendered and objective-ok; 3 redos with a cause measured to the file; two small fixes for Max (Forge Ralph, 2026-11-02 14:55 CT)
+
+Nothing is blocked and no GPU work is running (batch closed rc=0 done=3/3 at 14:45:05, lock released, comfyui_auto unloaded, re-checked IDLE at 14:47).
+The three A/B clips exist and pass the objective gate on my own instrument. One clause of item L5 is not met: "0 redos" = 3 redos. Cause, and the
+two smallest fixes, are below. I changed no shared script, so L6 (prove/flag/pack/report) is unaffected by this pass.
+
+1. **The GPU rendered these clips twice, and the first render was thrown away - two one-line gaps in `run_queue.py`.** Evidence: ComfyUI's output dir
+   holds `c1_face_lora_07_00001_.mp4` mtime 13:55:42, `c2_charswap_10_00001_` 13:57:41, `c3_realism_04_00001_` 13:59:37 - the first attempt
+   produced all three clips successfully in about 2 min each. `_render_queue.log` then shows the prompt_ids in neither `/queue` nor `/history` at
+   14:38:25, three `FAIL .. TypeError: string indices must be integers, not 'str'` lines, and the by-design single unchanged retry (14:38:34 to
+   14:45:04, 118.3-153.8 s per clip) which produced the delivered files. Cost: 3 clips rendered twice and the GPU lock held 53.6 min for 6.1 min of
+   needed rendering. Two gaps, each small and each testable on the files that are on disk right now:
+   - **gap A, one argument**: `run_queue.py:326` sets the outcome to `evicted` and `:328` calls `settle(run_dir, e, s, ..)` while `s` is still
+     `comm.PENDING`, the string `"pending"`. `finish()` at `:200` runs its "a paid render must never be re-rendered" disk fallback only
+     `if not s`, so a truthy string skips it; `s["file"]` then raises and `settle()` at `:259` logs a `TypeError` where the real reason is
+     "evicted". Passing `None` there makes the log honest and enables the fallback.
+   - **gap B, one glob**: that fallback cannot see this layout. `disk_output` (`:180-193`) globs flat `ComfyUI/output/community/{run}/{tag}_*`
+     and `rgj.collect_from_disk` (`run_graph_job.py:53-64`) globs `ComfyUI/output/community/{tag}/`, while the cell builder's SaveVideo prefix nests
+     `community/{run}/{tag}/{tag}` (commit 537d7dd added the flat search for the Klein N12 stills; the LoRA/Max cell layout is one level deeper).
+     With A alone the batch would log "evicted" and still re-render; with A + B it collects the clip that already landed.
+   **Ask:** which of A, B, both, as a new item (your call, and Max owns shared scripts). I did not touch `run_queue.py`, `run_graph_job.py` or
+   `comm.py` - the community repo shows `M scripts/comm.py` from another writer and I left it alone.
+2. **New box knowledge, please keep it in the video lane rules: the pipeline is NOT byte-reproducible at a fixed seed.** The two attempts of every cell
+   are the same byte size to the byte (2,304,919 / 2,558,369 / 2,318,348) and differ in sha256. So a clip sha256 is a per-render fingerprint, useful
+   for "which file is this", never a reproducibility test, and "same bytes" is not a sign of a copied file.
+3. **FYI, no action asked:** the delivered clips render in 118.3-153.8 s each, against 180.3 s for the identical geometry in the Oct 30 baseline. Not a
+   one-variable A/B (model warm vs cold is not controlled), recorded as a fact only, no speed claim. The four asks your "Go do ot" did not decide
+   (scoped E: delete, Route 2 base model, Civitai token, the four roster rows) stay open and will be carded again by item L6.
