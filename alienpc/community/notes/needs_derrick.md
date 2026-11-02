@@ -269,3 +269,31 @@ Recommendation unchanged: (a)+(b)+(d) now, (c) as its own item.
 The 11:15 CT drift ask (name the deltas to restore) is also open; I do not write `settings.json`.
 One stale fact retired: GAP4's "`actions.log` lines start with a literal `%s`" does not describe the current
 log (the GAP6 lines start with timestamps) and the append script has no `%`-format in it.
+
+## L2 addendum - FYI, no decision needed to keep going (Forge Ralph, 2026-11-02 12:56 CT)
+
+L2 ran on your "Go do ot": the three public HuggingFace H3 LoRAs are downloaded, byte- and hash-verified (3/3 exact,
+0 tolerance) and installed in `models\loras` as `H3_charswap_v15` / `H3_realism_people_v1` / `H3_person_remover_v1`.
+Nothing in `models\loras` moved, renamed, overwritten or deleted; ComfyUI was not started; no GPU, no render.
+Full record: `C:\AI\community\notes\2026-11-02-l2-route1-downloads.md`.
+
+1. **FYI, licence (no action asked):** all three files are under the **MiniMax H3 Community License Agreement**
+   (the three LICENSE texts fetched from the repos are byte-identical, sha256 `59b99642…`). Its "Applicable Territory"
+   **excludes the EU, UK, Republic of Korea and the United States**, and it says you may not use the works outside that
+   territory; users in an excluded territory are pointed to MiniMax for a separate grant. **This box is in the US.**
+   The base model already on the box (10Eros-Max, built on MiniMax H3) is under the same text, so this is not new
+   exposure - it is now on the record because these are new files. Use here is personal and non-commercial; commercial
+   use above $20M/yr revenue needs MiniMax's written authorization. Stated as a fact, not legal advice; nothing to do
+   for the LORA block, and I will not act on it.
+2. **Civitai 2940916 is blocked by sign-in, not by the network.** The detail API answers keyless (200, 5,541 B: expected
+   65,623,904 B, SHA256 `1E032CF5…`, baseModel MiniMax H3, trigger `Faceswap`, licence field null), and the download
+   endpoint returns **http 200 after a redirect to `auth.civitai.com/login?reason=download-auth`** whose body is a
+   9,787 B HTML login page. Recorded and skipped per the item, one attempt, no browser loop. **The Civitai API token ask
+   (ask 3 of the four) is the only thing that can unblock it.** L4's three cells do not need that file.
+3. Author facts recorded for L3/L4, so no page reads are needed later: Realism trigger `r34l1sm` scale 1.0 (0.6-0.8
+   lighter); Character-Swap has **no trigger word** (it works on `<Video 1>` + `<Picture 1>`) at strength 1.0, and its
+   published 8-step/CFG 1/`er_sde` + turbo-LoRA recipe is **not adopted** here (TenStrip sampler rule, beta7 is a
+   distill, our Euler/simple dials stay); Person-Remover needs SAM 3.1 and a 22-frame `er_sde` relay workflow, so it is
+   installed for the fit test only and **no L4 cell uses it**.
+Next pass is L3 (header fit probe, read-only, no GPU). Your four asks stay open and untouched: the scoped E: delete,
+the Route 2 base model, the Civitai token, the roster rows.
