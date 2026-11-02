@@ -1,0 +1,8 @@
+MiniMax H3 is licensed under the MiniMax H3 Community License Agreement, Copyright © 2026 MiniMax. All Rights Reserved.
+
+Modified by Akatz Labs: character-swap LoRA fine-tuning, 1,000 updates, September 2026. This repository contains adapter weights, not base-model weights.
+
+Additional modification by Akatz Labs: H3 Character Swap V1.5,
+continued from V1 for 1,000 additional optimizer updates, October 2026.
+V1.5 is the development checkpoint V2-1000. Adapter weights only;
+base-model and training-assistant weights are not included.
