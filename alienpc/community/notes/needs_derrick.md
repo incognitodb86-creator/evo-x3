@@ -325,3 +325,33 @@ two smallest fixes, are below. I changed no shared script, so L6 (prove/flag/pac
 3. **FYI, no action asked:** the delivered clips render in 118.3-153.8 s each, against 180.3 s for the identical geometry in the Oct 30 baseline. Not a
    one-variable A/B (model warm vs cold is not controlled), recorded as a fact only, no speed claim. The four asks your "Go do ot" did not decide
    (scoped E: delete, Route 2 base model, Civitai token, the four roster rows) stay open and will be carded again by item L6.
+
+## L6 card - the four asks "Go do ot" did not decide (Forge Ralph, 2026-11-02 15:20 CT)
+
+The LORA block is run: L1-L6 done, three A/B clips rendered, measured, flagged, and packed blind
+(`C:\AI\community\notes\2026-11-02-h3-lora-ab-DONE.md`). His "Go do ot" covered the Route 1 downloads and
+the three clips only. Nothing here is decided, downloaded, deleted, moved, loaded, or approved. KEEP is his.
+
+1. **The E: scoped delete (numbers restated).** Confirm the exact subtree for Max:
+   `E:\Backups\AlienPc-C-2026-10-26\Users\derek\Desktop\_TO_DELETE_celeb-lora-lineage_2026-10-17\LORA_ARCHIVE_NOT_IN_USE_2026-10-09`
+   - measured 2026-11-02 as **14 files / 967,843,506 B**, and its **655 siblings are not in scope**
+   (669 entries - 14). The Oct 29 card said 15 files / 1,642,308,434 B: the 15th is the 674,464,928 B
+   LTX-2.3 file already deleted 2026-10-30 09:36 under the approved 41.6 GiB model-delete, and its weight
+   survives bit-identical as the alias `FC_SYDNEY_ltx23_face_v1` (`dbf6670712e05b87…`). The whole-folder
+   option destroys 655 unrelated files, so it is not the same ask. C: free 237.38 GiB, E: free 39.44 GiB.
+2. **Route 2 needs a base model - a download of that size needs his yes.** FLUX.1-dev **23.8 GB** (biggest
+   name-reference library on the box; its trigger is an author handle, so the identity trail stays clean)
+   **or** Z-Image-Turbo **32.9 GB** (where the four archived alias files work). No new base model, no
+   download run: Route 1 only was covered by "Go do ot".
+3. **A Civitai API token for the full catalog.** Keyless the detail API works (200) and the download
+   endpoint is gated (302 to `auth.civitai.com/login?reason=download-auth`, 9,787 B HTML login); model
+   2940916 `SS_FaceSwap_MiniMax_H3_REF2VA.safetensors` expected 65,623,904 B, trigger `Faceswap`, licence
+   field null. A token would unblock the survey's Civitai rows; nothing was retried or browser-looped.
+4. **The four alias character cards are proposed only.** `approved_characters/INDEX.csv` is add-only,
+   approval-tracked, and Max owns shared files, so the rows need his approval basis verbatim (which
+   character, which source images, what the row says). I wrote no row and touched no file there.
+
+Separately, one operational yes (not part of the four, no decision content): the blind pack is staged and
+`pi_qnap.py` needs an approval this loop pass cannot get. Say yes and the only step is
+`C:\Users\derek\5slock\ralph-community\notes\_lora_l6\qnap_put.sh` (1 mkdir + 4 puts + 1 ls). Details:
+`C:\AI\community\notes\2026-11-02-forge-blocker.md`.
