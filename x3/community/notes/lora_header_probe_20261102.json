@@ -1,0 +1,175 @@
+[
+ {
+  "file": "H3-Person-Remover-V1.safetensors",
+  "bytes": 155110584,
+  "sha256": "b01dc9fe888c2f4e455a8eb3b4878dfd4038ee0e2320a7b186c7935e65c93ba5",
+  "tensors": 416,
+  "metadata_keys_present": {
+   "format": "pt",
+   "pilot_training_authorized": "true",
+   "ss_base_model_version": "minimax_h3_ref2va",
+   "ss_output_name": "h3_mixed_B_resume1500_to2000"
+  },
+  "all_metadata_keys": [
+   "checkpoint_every",
+   "experiment",
+   "final_dataset_acceptance",
+   "format",
+   "internal_routing_tick",
+   "parent_sha256",
+   "pilot_training_authorized",
+   "resume_step",
+   "seed",
+   "software",
+   "ss_base_model_version",
+   "ss_output_name",
+   "sshs_legacy_hash",
+   "sshs_model_hash",
+   "stop_step",
+   "training_info"
+  ],
+  "tensor_prefix_counts": {
+   "diffusion_model": 416
+  },
+  "tensor_prefix_shapes_sample": {
+   "diffusion_model": [
+    [
+     16,
+     5376
+    ],
+    [
+     16,
+     7168
+    ],
+    [
+     16,
+     14336
+    ],
+    [
+     5376,
+     16
+    ]
+   ]
+  },
+  "shape_set": [
+   "(16, 14336)",
+   "(16, 5376)",
+   "(16, 7168)",
+   "(21504, 16)",
+   "(28672, 16)",
+   "(5376, 16)"
+  ]
+ },
+ {
+  "file": "h3-realism-people-t2v-i2v-r2v.safetensors",
+  "bytes": 131229656,
+  "sha256": "acc529601d2da117fb81179e76c56e488a3beab1171659d305f04fa3655b787e",
+  "tensors": 208,
+  "metadata_keys_present": {
+   "base_model": "minimax-h3-fl2va",
+   "trainer": "minimax-h3-trainer"
+  },
+  "all_metadata_keys": [
+   "base_model",
+   "first_frame_conditioning_p",
+   "global_step",
+   "lora_rank",
+   "trainer",
+   "training_strategy"
+  ],
+  "tensor_prefix_counts": {
+   "diffusion_model": 208
+  },
+  "tensor_prefix_shapes_sample": {
+   "diffusion_model": [
+    [
+     32,
+     5376
+    ],
+    [
+     32,
+     7168
+    ],
+    [
+     5376,
+     32
+    ],
+    [
+     21504,
+     32
+    ]
+   ]
+  },
+  "shape_set": [
+   "(21504, 32)",
+   "(32, 5376)",
+   "(32, 7168)",
+   "(5376, 32)"
+  ]
+ },
+ {
+  "file": "h3_character_swap_v1.5.safetensors",
+  "bytes": 155110792,
+  "sha256": "8f2c3c3eba161df8d0c6099598b4730f641f5ce01e04cd16d2427cff8a35218f",
+  "tensors": 416,
+  "metadata_keys_present": {
+   "authorization_revision": "2",
+   "format": "pt",
+   "name": "h3-character-swap-v2",
+   "source_audio_guide_guard": "true",
+   "ss_base_model_version": "minimax_h3_ref2va",
+   "ss_output_name": "h3_character_swap_v2_train_20261013_01"
+  },
+  "all_metadata_keys": [
+   "authorization_revision",
+   "checkpoint_accounting",
+   "dataset_export_manifest",
+   "format",
+   "mode",
+   "name",
+   "new_v2_optimizer_steps",
+   "pilot_gate_steps",
+   "render_evaluation",
+   "software",
+   "source_audio_guide_guard",
+   "ss_base_model_version",
+   "ss_output_name",
+   "sshs_legacy_hash",
+   "sshs_model_hash",
+   "stock_reg_cadence",
+   "training_info",
+   "upstream_commit"
+  ],
+  "tensor_prefix_counts": {
+   "diffusion_model": 416
+  },
+  "tensor_prefix_shapes_sample": {
+   "diffusion_model": [
+    [
+     16,
+     5376
+    ],
+    [
+     16,
+     7168
+    ],
+    [
+     16,
+     14336
+    ],
+    [
+     5376,
+     16
+    ]
+   ]
+  },
+  "shape_set": [
+   "(16, 14336)",
+   "(16, 5376)",
+   "(16, 7168)",
+   "(21504, 16)",
+   "(28672, 16)",
+   "(5376, 16)"
+  ]
+ }
+]
