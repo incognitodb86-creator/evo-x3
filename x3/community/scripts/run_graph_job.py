@@ -57,7 +57,8 @@ def collect_from_disk(tag, since, log):
     p7/jobs/...result.json was never written. Returns the newest media file written at/after `since`, else None."""
     d = os.path.join(comm.C, "output", "community", tag)
     try:
-        cands = [p for p in glob.glob(os.path.join(d, "*"))
+        pats = [os.path.join(d, "*"), os.path.join(d, tag, "*")]
+        cands = [p for p_pat in pats for p in glob.glob(p_pat)
                  if p.lower().endswith((".mp4", ".png")) and os.path.getmtime(p) >= since - 5]
     except OSError:
         return None
