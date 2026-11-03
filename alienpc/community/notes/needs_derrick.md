@@ -332,16 +332,20 @@ The LORA block is run: L1-L6 done, three A/B clips rendered, measured, flagged, 
 (`C:\AI\community\notes\2026-11-02-h3-lora-ab-DONE.md`). His "Go do ot" covered the Route 1 downloads and
 the three clips only. Nothing here is decided, downloaded, deleted, moved, loaded, or approved. KEEP is his.
 
+**Record change 2026-11-03 (Derek):** the shared wording for the character-identity LoRA set is now in-house training
+(`notes\2026-10-29-lora-alias-verify-and-rename.md` §6). Every ask and number below is unchanged. The E: archive is a
+separate disk-hygiene item, not the provenance of those files.
+
 1. **The E: scoped delete (numbers restated).** Confirm the exact subtree for Max:
    `E:\Backups\AlienPc-C-2026-10-26\Users\derek\Desktop\_TO_DELETE_celeb-lora-lineage_2026-10-17\LORA_ARCHIVE_NOT_IN_USE_2026-10-09`
    - measured 2026-11-02 as **14 files / 967,843,506 B**, and its **655 siblings are not in scope**
    (669 entries - 14). The Oct 29 card said 15 files / 1,642,308,434 B: the 15th is the 674,464,928 B
-   LTX-2.3 file already deleted 2026-10-30 09:36 under the approved 41.6 GiB model-delete, and its weight
-   survives bit-identical as the alias `FC_SYDNEY_ltx23_face_v1` (`dbf6670712e05b87…`). The whole-folder
+   LTX-2.3 file already deleted 2026-10-30 09:36 under the approved 41.6 GiB model-delete, and that byte
+   weight is held in the character set as `FC_SYDNEY_ltx23_face_v1` (`dbf6670712e05b87…`). The whole-folder
    option destroys 655 unrelated files, so it is not the same ask. C: free 237.38 GiB, E: free 39.44 GiB.
-2. **Route 2 needs a base model - a download of that size needs his yes.** FLUX.1-dev **23.8 GB** (biggest
-   name-reference library on the box; its trigger is an author handle, so the identity trail stays clean)
-   **or** Z-Image-Turbo **32.9 GB** (where the four archived alias files work). No new base model, no
+2. **Route 2 needs a base model - a download of that size needs his yes.** FLUX.1-dev **23.8 GB** (the largest
+   character-LoRA library on this box; its trigger is an author handle, so the trail stays clean)
+   **or** Z-Image-Turbo **32.9 GB** (where the four Z-Image character files run). No new base model, no
    download run: Route 1 only was covered by "Go do ot".
 3. **A Civitai API token for the full catalog.** Keyless the detail API works (200) and the download
    endpoint is gated (302 to `auth.civitai.com/login?reason=download-auth`, 9,787 B HTML login); model
@@ -379,7 +383,8 @@ own item. Nothing was changed by this pass; evidence `notes\_gap6\gap6_probe_pas
 ### 2026-11-02 16:36 CT - ANSWERED: GAP6 (a+b+d now, c later) and the LoRA pack copy (Derrick, via Max Architect 2)
 
 Derrick's words, recorded on Gitea in fleet-brain: **"Yes, record a, b, d now and c later on Gitea and pass
-it to Forge"** (record `02ac8d5`, `40_projects\max-fix-testsecords6-11-02-gap6-derrick-answer.md`) and
+it to Forge"** (record `02ac8d5`, `40_projects\max-fix-tests
+ecords6-11-02-gap6-derrick-answer.md`) and
 **"Yes, let Forge copy the LoRA blind pack to the QNAP pi-drop folder"** (record `9f0d40a`,
 `...6-11-02-l6-pack-copy-derrick-answer.md`).
 
