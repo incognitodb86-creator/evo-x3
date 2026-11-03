@@ -58,11 +58,11 @@ def prompt_strings(inputs):
             yield v
 
 APPROVED = {  # ALI-80 approved adult stills only
- "D15": r"C:\Users\derek\5slock\approved_characters\D15\D15_Woman_in_bikini.jpg",
- "FD006": r"C:\Users\derek\5slock\approved_characters\FLOW_DARKHAIR_2026-10-19\FD006.jpg",
- "FD003": r"C:\Users\derek\5slock\approved_characters\FLOW_DARKHAIR_2026-10-19\FD003.jpg",
- "D12": r"C:\Users\derek\5slock\approved_characters\D12\D12_Woman_posing_in_bikini.jpg",
- "POOL": r"C:\Users\derek\5slock\approved_characters\POOL\COND_POOL_BIKINI_PORTRAIT.jpg",  # pool-20261021: Derek-approved (approved_characters\INDEX.csv id POOL); P7 fixed still from 2026-10-21
+ "D15": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\D15\D15_Woman_in_bikini.jpg",
+ "FD006": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\FLOW_DARKHAIR_2026-10-19\FD006.jpg",
+ "FD003": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\FLOW_DARKHAIR_2026-10-19\FD003.jpg",
+ "D12": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\D12\D12_Woman_posing_in_bikini.jpg",
+ "POOL": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\POOL\COND_POOL_BIKINI_PORTRAIT.jpg",  # pool-20261021: Derek-approved (approved_characters\INDEX.csv id POOL); P7 fixed still from 2026-10-21
 }
 
 def stage(key, w, h):
@@ -228,7 +228,11 @@ def fetch(pid, tag, meta, outdir, t0, logfile=None, out=None):
     if st.get("status_str") == "success" and files:
         src = os.path.join(C, "output", files[0][0] or "", files[0][1])
         dst = os.path.join(outdir, tag + os.path.splitext(src)[1])
-        shutil.copyfile(src, dst)
+        try:
+            if os.path.exists(dst): os.remove(dst)
+            os.link(src, dst)
+        except OSError:
+            shutil.copyfile(src, dst)
         side = dict(meta, tag=tag, secs=round(dt, 1), comfy_output=src, file=dst, prompt_id=pid,
                     finished=datetime.datetime.now().strftime('%Y-%m-%d %H:%M CT'))
         json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
