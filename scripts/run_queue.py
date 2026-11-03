@@ -206,7 +206,13 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
         src = disk_output(run_dir, t, t_att) or rgj.collect_from_disk(t, t_att, slog)
         if not src:
             qlog(run_dir, "FAIL pos=%d tag=%s stall %s prompt_id=%s" % (job["pos"], tag, out["outcome"], out.get("prompt_id"))); return False
-        dst = os.path.join(d, t + os.path.splitext(src)[1]); shutil.copyfile(src, dst); s = {"file": dst}
+        dst = os.path.join(d, t + os.path.splitext(src)[1])
+        try:
+            if os.path.exists(dst): os.remove(dst)
+            os.link(src, dst)
+        except OSError:
+            shutil.copyfile(src, dst)
+        s = {"file": dst}
     if not s:
         qlog(run_dir, "FAIL pos=%d tag=%s job error (%s)" % (job["pos"], tag, out.get("outcome"))); return False
     if job.get("job_type") == "still":
