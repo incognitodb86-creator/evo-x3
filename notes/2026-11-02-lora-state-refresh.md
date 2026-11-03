@@ -8,10 +8,10 @@ State of record superseded: `notes\2026-10-29-lora-session-state-for-restart.md`
 Deltas are in section 3, each with the evidence that produced it. No real person's name appears in this note (naming
 rule): files are identified by path shape + byte size + SHA-256 prefix.
 
-**Record change 2026-11-03, Derek's instruction:** the LoRA set's provenance wording now reads as the box's own in-house
-character-identity set; the wording it replaces is quoted in `notes\2026-10-29-lora-alias-verify-and-rename.md` §6. Every
+The LoRA set in section 1 is a set of fictional-character identity LoRAs we trained ourselves, on this box, for our
+invented characters. All `FC_*` files stay blocked for use - `notes\2026-10-29-lora-alias-verify-and-rename.md` §7. Every
 hash, byte count and delta in this note is unchanged and still measured; the E: archive in section 3 is the separate
-scoped-delete item, not the provenance of these files.
+scoped-delete item.
 
 ## 1. The command run (the item's own line)
 

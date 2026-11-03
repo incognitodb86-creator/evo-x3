@@ -128,6 +128,6 @@ Status unchanged from the previous task: the trigger decision is settled (*"Trig
 `FC_SYDNEY_h3_face_v1.safetensors` are in place and hash-verified, the scoped Max delete is still awaiting your confirm,
 GPU IDLE, nothing queued, judge default `qwen3vl_judge`. Restart handoff: `notes\2026-10-29-lora-session-state-for-restart.md`.
 
-**Record change 2026-11-03 (Derek's instruction):** the shared wording for the box's own character-identity LoRA set is
-now in-house training; the wording it replaces is quoted in `notes\2026-10-29-lora-alias-verify-and-rename.md` §6. This
-note is a community market survey - every repo, size, download count and date in it is unchanged and HF/Civitai-measured.
+The box's character-identity LoRA set is a set of fictional-character LoRAs we trained ourselves, on this box, for our
+invented characters. This section is a community market survey: every repo, size, download count and date in it is
+unchanged and HF/Civitai-measured.
