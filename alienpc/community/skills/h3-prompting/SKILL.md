@@ -1,6 +1,10 @@
 ---
 name: h3-prompting
-description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box - output only the prompt, adults only (18+, fictional, minors = hard stop), the five prompt sections with plain audio cues at the end of the main prompt (no overall_soundscape block, TenStrip HF #77), the verbatim reference clauses that keep identity, get-into-position, PRIMARY MOTION and contact geometry, the response dial and slap-to-face, garment end states, <Video 1> continuation, positives-only plain wording, LoRA trigger hygiene, the detail checklist, the contradiction phrases to keep out and 4 worked examples. REF2VA single-clip and multi-cell chain lane facts are in references/ref2va-lane.md and references/ref2va-chain-lane.md; the director's prompt sections point to this file. Use when writing, reviewing or auditing any H3 prompt text: notes/hc_*.txt, specs/prompt_v2, a run's prompt file, a MiniMaxH3ReferenceToVideo paste, a multi-cell chain, an I2V POS, or a Continuum sequence_prompt.
+description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box - output only the prompt, adults only (18+, fictional, minors = hard stop), the five prompt sections with plain audio cues at the end of the main prompt (no overall_soundscape block, TenStrip HF #77), the verbatim reference clauses that keep identity, get-into-position, PRIMARY MOTION and contact geometry, the response dial and slap-to-face, garment end states, <Video 1> continuation, positives-only plain wording, LoRA trigger hygiene, the detail checklist, the contradiction phrases to keep out and 4 worked examples. The REF2VA lane (single clip and multi-cell chain) is the separate skill
+`h3-max-ref2va-prompt` (rules R32-R44); references/ref2va-lane.md and references/ref2va-chain-lane.md are pointers to
+it. The director's prompt sections point to this file. Use when writing, reviewing or auditing any H3 prompt text: notes/hc_*.txt, specs/prompt_v2, a run's prompt file, a MiniMaxH3ReferenceToVideo paste, a multi-cell chain, an I2V POS, or a Continuum sequence_prompt. Since 2026-11-03 the REF2VA lane (the standing Max lane) is its own skill,
+`h3-max-ref2va-prompt`, with REF2VA-specific rules R32-R44; this file keeps R1-R31 (all lanes) and the rule index, and
+no rule sentence is duplicated between the two.
 ---
 
 # H3 prompting - the single home (U2, 2026-10-29)
@@ -16,6 +20,12 @@ detail, clean grammar, no filler, no plot summary, one act per clip; say what ha
 
 Model/lane facts (beta7 dials, node names, ports, queue, watch/triage, KEEP policy) stay in `h3-hc-render`,
 `alienpc-local-video-ops` and the director - this file is prompt text only.
+
+**Lane split (2026-11-03).** The REF2VA paste lane for H3-Max is the skill `h3-max-ref2va-prompt`
+(`C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md`, rules R32-R44, chain lane in its `references\chain-lane.md`);
+REF2VA is the standing Max lane unless Derek names another lane. This file keeps R1-R31, which apply to every lane
+including REF2VA, plus the rule index (section 9). A rule sentence lives in exactly one file; numbers are box-unique
+and stable; a REF2VA paste is gated by section 5 here **and** section 5 of the REF2VA skill.
 
 ## 0. Output contract
 
@@ -139,6 +149,8 @@ Moved verbatim to [references/wording.md](references/wording.md) (rules R7, R10,
 10. Response dial is the one Derek named (R21); a bare slap is to the face (R22); garments have named end states.
 11. Nothing outside the prompt was output (R1); the diff gate shows only this cell's axis (R30); no trigger word
 for a LoRA that is not loaded (R31).
+12. **REF2VA pastes only:** run the additional gate in section 5 of `h3-max-ref2va-prompt` (labels vs wired inputs,
+task-type tags, role-scoped retention lines, frame anchors, style opening, language, no `<scenetrans>`, speech form).
 
 ## 6. Worked examples
 
@@ -146,7 +158,12 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
 
 ## 7. Pointers (who defers to this file)
 
-- REF2VA lane facts: [references/ref2va-lane.md](references/ref2va-lane.md) (single clip) and [references/ref2va-chain-lane.md](references/ref2va-chain-lane.md) (multi-cell chain), folded in from the retired `ref2va-prompt` and `h3-ref2va-prompt-chain` skills.
+- **REF2VA (the standing Max lane): skill `h3-max-ref2va-prompt`** - `C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md`
+  (rules R32-R44, its own gate, paste skeleton) and `...\references\chain-lane.md` (multi-cell chains). Its section 2
+  is the REF2VA reading of R5, R6, R8-R15; it never restates a rule of this file. The two files this pointer replaces
+  are archived at `C:\AI\community\archive\2026-11-03-ref2va-split\`; thin pointers remain at
+  [references/ref2va-lane.md](references/ref2va-lane.md) and [references/ref2va-chain-lane.md](references/ref2va-chain-lane.md)
+  so old citations resolve.
 - `alienpc-hardcore-i2v-director` "Max POS
   craft / H3 prompt shape / Static Shot / static hold vs reveal / frame-one identity" - all point here; they keep
   only their lane (node wiring, chain scheduling, still→intent match, watch/triage, queue).
@@ -171,3 +188,21 @@ few-shots), `C:\AI\community\notes\hc_face_research_20261023.md`, `notes/hc_redo
 `C:\AI\community\specs\prompt_v2\*.txt`, `C:\AI\community\runs\terrace_dom_q5guide_20261028_s51083007\prompt_seg0.txt`
 (the current B2 KEEP paste, with the old audio blocks), `C:\AI\community\skills\h3-hc-render\SKILL.md`,
 the 2026-10-28 prompt corrections in MEMORY (slap-to-face, the response dial, beta 7 dials).
+Upstream (read 2026-11-03): MiniMax-AI/MiniMax-H3 `skills/h3-prompt-writing/references/ref-en.txt` and `base-en.txt`
+(local clone, HEAD `199b7d0`, 2026-10-28) - the source of the REF2VA rules R32-R41 in `h3-max-ref2va-prompt`; the
+reason our paste shape differs from the hosted format is **R32** there. Reviews: `notes\2026-11-03-h3-upstream-prompt-skill-review.md`,
+`notes\2026-11-03-h3-ref2va-skill-split.md`.
+
+## 9. Rule index and rule homes (citations resolve from this table)
+
+| Numbers | Where the rule text lives |
+| --- | --- |
+| R1-R4, R7-R9, R16-R31 | this file, sections 0-4 (R16-R23 in `references/motion-contact-anatomy.md`, R24-R31 in `references/wording.md`) |
+| R5, R6, R10-R15 | this file, sections 1-2; the REF2VA reading of them is section 2 of `h3-max-ref2va-prompt\SKILL.md` |
+| R32-R44 | `C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md` - REF2VA on H3-Max only: R32 hosted audio fields,
+R33 label set and wired inputs, R34 task-type tags, R35 role-scoped retention, R36 frame anchors and the alignment line,
+R37 speech form, R38 language and visible text, R39 style opening, R40 continuity tokens, R41 length provenance,
+R42 the graph contract, R43 the chain lane, R44 the REF2VA gate |
+| Render dials, graph wiring, queue | `h3-hc-render`, `alienpc-local-video-ops` (never prompt rules) |
+
+A new rule is added in the file that owns its lane and gets the next box-unique number; never renumber an old rule.

@@ -16,7 +16,9 @@ motion; shallow depth of field and the lighting the still shows. No hedge words 
 
 **R26 - Sound-word vocabulary.** Use only the real-sound nouns R7 names, each one bound to the action producing it.
 This rule is vocabulary only - the shape and placement of audio is R7 and is not repeated here. Never in the paste:
-score and foley terminology, onomatopoeia words, dialogue lines (H3 does not do speech on this lane).
+score and foley terminology, onomatopoeia words, dialogue lines (dialogue is off by default on every lane; the speech
+arm, its exact form and its token status are **R37** of
+`C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md`, and visible on-screen text is **R38** there).
 
 **R27 - Contradiction phrases must be absent** (they cancelled the body reference in measurement):
 `body proportions` inside crop sentences, `are new and are not taken from`,
