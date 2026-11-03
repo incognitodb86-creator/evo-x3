@@ -5,15 +5,9 @@ description: Use when a brief has more than ~3 steps that can each be checked, o
 
 # Ralph loop (Forge)
 
-Based on the community Ralph pattern: https://github.com/ghuntley/how-to-ralph-wiggum
+Based on the community Ralph pattern: https://github.com/ghuntley/how-to-ralph-wiggum , https://github.com/snarktank/ralph
 and the pi-ralph-loop skill: https://github.com/lnilluv/pi-ralph-loop/blob/main/skills/ralph-loop/SKILL.md
 (wording only; the add-on is not installed).
-
-## The idea
-- Each pass is a fresh `pi --print` with a clean context. Nothing carries over in memory.
-- The plan on disk (fix_plan.md) is the memory. Git history and notes\progress.md are the record.
-- One task per pass. Do it, check it, mark it, commit, stop.
-- Cap the passes. Tests and check commands are the backpressure: an item is not done until its check passes.
 
 ## When to loop
 
@@ -29,29 +23,13 @@ Rule of thumb: more than ~3 passes, or you can write a command that measures pro
 If a step needs Derrick's decision, put it as the last item ("STOP and report"), or split the loop there.
 
 ## Writing fix_plan.md items
-- One task per item, self-contained: a fresh pass must do it from the item text alone (full paths, inputs, outputs).
-- Each item names its check ("Done when ..." plus a command or file that proves it).
-- Done = item changed to `- [x]` with a one-line RESULT, one commit per repo touched, one line in notes\progress.md.
-- Order matters: the pass takes the top open `- [ ]` item. Put blockers first.
-- Max owns the MAX block and replaces it; never stack a second block.
-- If an item can't finish, mark it partial with the reason (or add a needs_derrick.md line) and stop; don't loop on it.
+- One task per item, sized small enough to fit cleanly in one context window, self-contained: a fresh pass must do it from the item text alone (full paths, inputs, outputs).
+- Each item names its check ("Done when ..." / "Pass:" plus a command or file that proves it).
+- Verify before ticking: item is changed to `- [x]` with a one-line RESULT ONLY when every clause of its check passes; otherwise change its checkbox from `- [ ]` to `- [PARTIAL]` or `- [BLOCKED]` with one line why (never leave `- [ ]` on a partial or blocked item). Keep one concern per commit per repo touched, and append one line in notes\progress.md.
+- Do simple edits and checks directly — never write one-off helper or probe scripts for one-off edits; only keep scripts meant to be reused.
+- Order matters: the pass takes the top open `- [ ]` item (skipping `- [PARTIAL]`, `- [BLOCKED]`, and items with a `PARTIAL`/`BLOCKED` sub-bullet). Put blockers first.
+- Blocks: one "## <OWNER> (<who>, <date time>; brief <path>)" header per brief. Max replaces only his MAX block; Forge adds a FORGE block for its own briefs above older open blocks; never edit another owner's open items.
+- If an item can't finish, change its checkbox to `- [PARTIAL]` or `- [BLOCKED]` with the reason (or add a needs_derrick.md line) and stop; don't loop on it.
 
-## Starting our loop
-From C:\Users\derek\5slock\ralph-community:
 
-    .\ralph.ps1 -Max N
-
-- Pick N = open items + 1 or 2 spare (sensible cap: 3-12; default is 10). Never uncapped.
-- Each pass runs `pi --print --provider llama-swap --model <model> @PROMPT.md`; PROMPT.md says: read fix_plan.md, do the open MAX item, check, mark [x], commit, stop.
-- Per-pass output goes to logs\iter-*.log; logs\DONE.txt shows the last pass; IterationTimeoutSec (default 7200) kills a hung pass.
-- Only one ralph.ps1 at a time. Check before starting: `Get-CimInstance Win32_Process | ? CommandLine -match 'ralph.ps1'`.
-
-## Never
-- Never start a loop (ralph.ps1, or any nested pi loop) from inside a loop pass. A pass does its one item and exits.
-- Never edit ralph.ps1 or PROMPT.md from inside a pass.
-- Never tick an item whose check did not pass.
-
-## GPU rule
-- One GPU job at a time, held under C:\AI\locks\gpu-render.lock (the lock names a live PID).
-- A GPU render can't overlap Forge's own LLM work: ralph.ps1 waits (GpuWaits x GpuWaitSec) while a live render holds the lock and skips the pass if it outlasts that. Don't start a render from a pass while the loop's next pass will need the LLM; render items are staged, and the render is launched outside the loop.
-- A dead PID in the lock is stale and is ignored.
+Start (only this): Invoke-CimMethod Win32_Process -MethodName Create -Arguments @{CommandLine='powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\derek\5slock\ralph-community\ralph.ps1 -Max N'; CurrentDirectory='C:\Users\derek\5slock\ralph-community'} then reply `PID=<ProcessId>, log ralph-community\logs\ralph.log`; cap N = item count + 2 (max 12). Long items (benchmarks, renders): add -PassLimitSec 3600. ralph.ps1 refuses a second copy (logs\ralph.lock, exit 4), loads LLAMA_SWAP_KEY from User scope if missing (exit 3), and stops on PLAN_COMPLETE or NO_PROGRESS (same item still open after two passes).
