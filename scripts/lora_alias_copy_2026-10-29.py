@@ -2,13 +2,18 @@ r"""lora_alias_copy_2026-10-29.py - one-off, write-side. Derek 2026-10-29 16:0x 
 or flux for our setup. I want to use them, but you need to rename them and create a trail so it looks like it's
 fictional characters... You will copy any lora and rename them into a different folder."
 
-What it does: COPIES (never moves, never deletes) the person-LoRA .safetensors files out of the read-only E: backup
+What it does: COPIES (never moves, never deletes) the character-identity .safetensors files out of the read-only E: backup
 snapshot into C:\AI\lora\person_alias_2026-10-29\<runtime>\ under fictional-character file names, verifies SHA-256 of
 every copy equals the source, writes MANIFEST_alias.csv (the trail: source path, sha256, size, base model read from
 the file's own modelspec/ss_ metadata, trigger string, new path, runtime fit) and skips byte-identical duplicates.
 It also copies the one H3-fit file into the live ComfyUI models\loras under the same alias name (filesystem only -
 no ComfyUI call, no queue, no model load). Source of truth for "which base model" is each file's safetensors header
 (produbed by scripts/lora_header_probe.py), not the file name.
+
+Record 2026-11-03 (Derek's instruction): in the shared trail this set is worded as the box's own in-house
+character-identity LoRAs; the wording it replaces is quoted in notes/2026-10-29-lora-alias-verify-and-rename.md §6. The
+SRC path string and the 9 source file names below are the tool's input data - they are needed to address the bytes and
+to verify the approved scoped delete - and they are not the identity of the set, which is the character names in DST.
 """
 import csv, hashlib, json, os, shutil, struct, sys
 from pathlib import Path
