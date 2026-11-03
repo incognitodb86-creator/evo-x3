@@ -186,7 +186,12 @@ def disk_output(run_dir, tag, since):
     d = os.path.join(OUT_ROOT, os.path.basename(os.path.normpath(run_dir)))
     pat = re.compile(re.escape(tag) + r"_\d{5}_?\.(png|mp4)$", re.I)
     try:
-        c = [p for p in glob.glob(os.path.join(glob.escape(d), glob.escape(tag) + "_*"))
+        pats = [
+            os.path.join(glob.escape(d), glob.escape(tag) + "_*"),
+            os.path.join(glob.escape(d), glob.escape(tag), glob.escape(tag) + "_*"),
+        ]
+        cands = [p for p_pat in pats for p in glob.glob(p_pat)]
+        c = [p for p in cands
              if pat.match(os.path.basename(p)) and os.path.getmtime(p) >= since - 5]
     except OSError:
         return None
@@ -325,6 +330,7 @@ def run_wave(run_dir, jobs, frames, size, retry, slog):
                     continue
                 comm.log(f"poll stop {tag} prompt_id {pid} is in neither /queue nor /history (comfyui_auto restarted?)", e["log"])
                 comm.outcome(e["out"], "evicted", pid, note="history lost with the comfyui_auto process")
+                s = None
             if not settle(run_dir, e, s, frames, size, retry, slog): failed.append(e["job"])
             del live[pid]
     return failed, False
