@@ -5,6 +5,10 @@ That is the same two-node diff proven on this box on 2026-10-30 (`../b2_fc_sydne
 `b2.api.json` is untouched: the generator asserts its text is byte-identical before and after, and refuses to run
 if it ever carries a `lora` node of its own.
 
+**Alias form (Derek, 2026-11-03).** A face's shared name is `FC_<FIRST NAME>` so a shared record says which face it
+means. The first name is taken from the author's own published words for that LoRA; the trained phrase itself stays in
+the private map and is injected at build time. `FC_SYDNEY` is the 2026-10-29 alias, unchanged.
+
 | What | Value | Why |
 |---|---|---|
 | `lora_name` | `FC_<ALIAS>_h3_face_v1.safetensors` | the invented alias is the shared name for a face |

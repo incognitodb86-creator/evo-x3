@@ -1,7 +1,8 @@
 # h3_face_prompt_cards.md - four copy-paste cards for face-LoRA clips (built 2026-11-03)
 
 The fast path for "make me a clip of this face": pick a card, fill the blanks, run one command.
-A face is named by its `FC_*` alias. The words that the LoRA
+A face is named by its `FC_*` alias, and the alias carries a first name (`FC_MEGAN`, `FC_SYDNEY`) so you always know
+which face a card is for. The words that the LoRA
 listens for (its trigger phrase) are **injected by the builder** from the private map, at a `{TRIGGER}` token
 in place, or at the front of the paste when there is no token. Do not type the words yourself in a card.
 
