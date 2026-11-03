@@ -198,12 +198,101 @@ def disk_output(run_dir, tag, since):
     return max(c, key=os.path.getmtime) if c else None
 
 
+# --- (c) 2026-11-02 (brief 2026-11-02-2010): prompt_ids saved at submit, harvested before any re-submit ---------------
+PIDS_FILE = "_prompt_ids.json"
+
+
+def expected_prefix(g):
+    """filename_prefix of the graph's SaveVideo/SaveImage node (where ComfyUI will write the output), else None."""
+    for n in (g or {}).values():
+        if n.get("class_type") in ("SaveVideo", "SaveImage") and isinstance(n.get("inputs", {}).get("filename_prefix"), str):
+            return n["inputs"]["filename_prefix"]
+    return None
+
+
+def load_pids(run_dir):
+    p = os.path.join(run_dir, PIDS_FILE)
+    try:
+        return json.load(open(p, encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def save_pid(run_dir, tag, pid, prefix, retry):
+    """Written right after each POST /prompt, so a driver/Shell death or an eviction never loses the prompt_id."""
+    d = load_pids(run_dir)
+    d[tag] = {"prompt_id": pid, "tag": tag, "expected_prefix": prefix, "submitted_at": time.time(),
+              "submitted_at_ct": time.strftime("%Y-%m-%d %H:%M:%S CT"), "retry": bool(retry)}
+    tmp = os.path.join(run_dir, PIDS_FILE + ".tmp")
+    json.dump(d, open(tmp, "w", encoding="utf-8"), indent=1)
+    os.replace(tmp, os.path.join(run_dir, PIDS_FILE))
+
+
+def prefix_output(prefix, since):
+    """Disk look-up by the saved expected prefix: output/<prefix>_NNNNN_.ext, flat or one folder down. Newest wins."""
+    import glob
+    if not prefix:
+        return None
+    base = os.path.join(comm.C, "output", *prefix.replace("\\", "/").split("/"))
+    stem = os.path.basename(base)
+    pat = re.compile(re.escape(stem) + r"_\d{5}_?\.(png|mp4)$", re.I)
+    pats = [glob.escape(base) + "_*", os.path.join(glob.escape(base), glob.escape(stem) + "_*")]
+    try:
+        c = [p for pp in pats for p in glob.glob(pp) if pat.match(os.path.basename(p)) and os.path.getmtime(p) >= since - 5]
+    except OSError:
+        return None
+    return max(c, key=os.path.getmtime) if c else None
+
+
+def harvest(run_dir, jobs, frames, size, slog, queue_ids=None):
+    """Before submitting, look for each job's earlier prompt_id: still in ComfyUI's queue -> adopt it (collect, do not
+    re-submit); in /history -> collect; gone -> look on disk by the expected prefix. Returns (to_submit, adopted, done)
+    where adopted = {prompt_id: entry} for run_wave to keep collecting."""
+    rec = load_pids(run_dir)
+    if not rec:
+        return list(jobs), {}, []
+    if queue_ids is None:
+        try:
+            q = comm.http(comm.BASE + "/queue", timeout=comm.POLL_TIMEOUT)
+            queue_ids = {x[1] for x in q.get("queue_running", []) + q.get("queue_pending", [])}
+        except Exception as ex:
+            slog("harvest warn queue %s" % str(ex)[:120]); queue_ids = set()
+    todo, adopted, done = [], {}, []
+    for j in jobs:
+        r = rec.get(j["tag"])
+        if not r or not r.get("prompt_id"):
+            todo.append(j); continue
+        pid, d = r["prompt_id"], os.path.join(run_dir, j["tag"])
+        e = {"job": j, "out": {}, "t_att": r.get("submitted_at", 0), "t0": r.get("submitted_at", 0),
+             "log": os.path.join(d, "status.log"), "g0": json.load(open(os.path.join(d, "request.api.json"), encoding="utf-8"))}
+        if pid in queue_ids:
+            qlog(run_dir, "HARVEST pos=%d tag=%s prompt_id=%s still in ComfyUI queue - adopted, not re-submitted" % (j["pos"], j["tag"], pid))
+            adopted[pid] = e; continue
+        s = None
+        try:
+            s = comm.fetch(pid, j["tag"], meta(j, False), d, e["t0"], e["log"], e["out"])
+        except Exception as ex:
+            slog("harvest warn history %s %s" % (j["tag"], str(ex)[:120]))
+        if s is comm.PENDING or s is None and not e["out"]:
+            s = None
+            src = prefix_output(r.get("expected_prefix"), e["t_att"]) or disk_output(run_dir, j["tag"], e["t_att"])
+            if src:
+                comm.outcome(e["out"], "evicted", pid, note="harvested from disk by expected prefix")
+        if s or e["out"].get("outcome") == "evicted":
+            qlog(run_dir, "HARVEST pos=%d tag=%s prompt_id=%s collected from %s - not re-submitted" % (
+                j["pos"], j["tag"], pid, "history" if s else "disk"))
+            if settle(run_dir, e, s, frames, size, False, slog):
+                done.append(j); continue
+        todo.append(j)
+    return todo, adopted, done
+
+
 def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     """After a job ends (or stalls/evicts): disk fallback, then the OBJECTIVE check and the DONE line."""
     tag, d = job["tag"], os.path.join(run_dir, job["tag"])
     t = tag
     if not s and out.get("outcome") in ("stalled", "evicted", "submit_stall"):
-        src = disk_output(run_dir, t, t_att) or rgj.collect_from_disk(t, t_att, slog)
+        src = prefix_output(expected_prefix(g0), t_att) or disk_output(run_dir, t, t_att) or rgj.collect_from_disk(t, t_att, slog)
         if not src:
             qlog(run_dir, "FAIL pos=%d tag=%s stall %s prompt_id=%s" % (job["pos"], tag, out["outcome"], out.get("prompt_id"))); return False
         dst = os.path.join(d, t + os.path.splitext(src)[1])
@@ -271,10 +360,11 @@ def settle(run_dir, e, s, frames, size, retry, slog):
         return False
 
 
-def run_wave(run_dir, jobs, frames, size, retry, slog):
+def run_wave(run_dir, jobs, frames, size, retry, slog, adopt=None):
     """Submit every job to ComfyUI's /prompt queue up front, then collect each as it finishes.
+    adopt = {prompt_id: entry} from harvest(): jobs already in ComfyUI's queue, collected without a re-submit.
     Returns (failed jobs, stopped)."""
-    failed, live = [], {}
+    failed, live = [], dict(adopt or {})
     for j in jobs:
         if stop_seen(run_dir):
             qlog(run_dir, "STOP file seen: halted before submitting pos=%d tag=%s" % (j["pos"], j["tag"]))
@@ -293,6 +383,8 @@ def run_wave(run_dir, jobs, frames, size, retry, slog):
         if pid is None:  # guard hit, POST rejected or submit stall: settled now, exactly as the one-job path does
             if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(j)
             continue
+        try: save_pid(run_dir, j["tag"], pid, expected_prefix(e["g0"]), retry)
+        except Exception as ex: slog("prompt_ids note %s" % str(ex)[:120])
         live[pid] = e
     slog("QUEUE submitted %d clip(s) to ComfyUI up front" % len(live))
     while live:
@@ -370,6 +462,7 @@ def main():
     if a.dry_run:
         for j in todo:
             print("  pos %2d %s" % (j["pos"], j["tag"]))
+        print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
         print("dry run: no lock, GPU or HTTP call made")
         return 0
     if not todo:
@@ -398,7 +491,10 @@ def main():
             rc, reason = 4, "ComfyUI down at batch start"
             qlog(run_dir, "FAIL batch ComfyUI down"); return rc
         qlog(run_dir, "BATCH open: %d clips, lock held, comfyui_auto kept loaded" % len(todo))
-        first, stopped = run_wave(run_dir, todo, a.frames, size, False, slog)
+        adopted = {}
+        if a.resume or stale:  # (c) a resumed or killed batch: collect earlier prompt_ids before any re-submit
+            todo, adopted, _h = harvest(run_dir, todo, a.frames, size, slog)
+        first, stopped = run_wave(run_dir, todo, a.frames, size, False, slog, adopt=adopted)
         if first and not stopped:
             again, stopped = run_wave(run_dir, first, a.frames, size, True, slog)
             for j in again:
@@ -414,6 +510,7 @@ def main():
         rc, reason = 8, "error %s: %s" % (type(e).__name__, str(e)[:160].replace("\n", " "))
         qlog(run_dir, "ERROR batch %s" % reason)
     finally:
+        comm.mark_collected()  # (c) graceful-stop may stop comfyui_auto now: every output this batch will collect is in
         try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
         except Exception as e: slog("unload note %s" % str(e)[:120])
         try: rgj.gpu_unlock(slog)
