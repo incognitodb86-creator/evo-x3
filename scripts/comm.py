@@ -193,6 +193,26 @@ def ensure_comfy(logfile=None):
     st = http(BASE + "/system_stats", timeout=300)
     log(f"COMFY ready v{st['system']['comfyui_version']} wait={time.time()-t0:.0f}s vram_free={st['devices'][0].get('vram_free',0)/2**30:.1f}GiB", logfile)
 
+def free_comfy(logfile: str | None = None) -> dict | None:
+    """Free ComfyUI model weights and memory via POST /api/free (Discussion #962)."""
+    if comfy_loaded() is False:
+        log("COMFY free: comfyui_auto is not loaded, skip", logfile)
+        return None
+    data = {"unload_models": True, "free_memory": True}
+    try:
+        res = http(BASE + "/api/free", data=data, timeout=30, method="POST")
+        log("COMFY free /api/free ok", logfile)
+        return res if isinstance(res, dict) else {"status": "ok"}
+    except Exception as e:
+        log(f"COMFY free /api/free note: {e}", logfile)
+        try:
+            res = http(BASE + "/free", data=data, timeout=30, method="POST")
+            log("COMFY free /free ok", logfile)
+            return res if isinstance(res, dict) else {"status": "ok"}
+        except Exception as e2:
+            log(f"COMFY free /free note: {e2}", logfile)
+            return None
+
 PENDING = "pending"  # fetch(): the prompt_id is not in /history yet
 
 def submit(g, tag, meta, outdir, logfile=None, out=None):

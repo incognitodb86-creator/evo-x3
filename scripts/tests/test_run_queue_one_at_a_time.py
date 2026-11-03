@@ -240,6 +240,33 @@ class TestRunQueueOneAtATime(unittest.TestCase):
         queue_delete_calls = [c for c in calls if "/queue" in c[0] and c[2] == "POST" and c[1] == {"delete": ["pid_clip1"]}]
         self.assertEqual(len(queue_delete_calls), 1)
 
+    def test_free_comfy_calls_api_free_when_loaded(self) -> None:
+        """Cover Fix 1 finish: comm.free_comfy() calls ComfyUI /api/free with unload_models and free_memory."""
+        calls = []
+
+        def fake_http(url, data=None, timeout=60, method=None):
+            calls.append((url, data, method))
+            return {"status": "ok"}
+
+        # 1. When comfyui_auto is NOT loaded, free_comfy should skip without HTTP call
+        with mock.patch.object(comm, "comfy_loaded", return_value=False), \
+             mock.patch.object(comm, "http", side_effect=fake_http):
+            res = comm.free_comfy()
+            self.assertIsNone(res)
+            self.assertEqual(calls, [])
+
+        # 2. When comfyui_auto IS loaded, free_comfy should POST to /api/free with unload_models & free_memory
+        calls.clear()
+        with mock.patch.object(comm, "comfy_loaded", return_value=True), \
+             mock.patch.object(comm, "http", side_effect=fake_http):
+            res = comm.free_comfy()
+            self.assertIsNotNone(res)
+            self.assertEqual(len(calls), 1)
+            url, data, method = calls[0]
+            self.assertTrue(url.endswith("/api/free"))
+            self.assertEqual(method, "POST")
+            self.assertEqual(data, {"unload_models": True, "free_memory": True})
+
 
 if __name__ == "__main__":
     unittest.main()

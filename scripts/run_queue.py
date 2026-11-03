@@ -556,6 +556,8 @@ def main():
         qlog(run_dir, "ERROR batch %s" % reason)
     finally:
         comm.mark_collected()  # (c) graceful-stop may stop comfyui_auto now: every output this batch will collect is in
+        try: comm.free_comfy(slog)
+        except Exception as e: slog("free_comfy note %s" % str(e)[:120])
         try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
         except Exception as e: slog("unload note %s" % str(e)[:120])
         try: rgj.gpu_unlock(slog)
