@@ -263,7 +263,54 @@ def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=Non
     log(f"JOB timeout {tag}", logfile)
     return outcome(out, "stalled", pid, note=f"no history in {timeout}s; the render may have landed in ComfyUI output")
 
+# --- (b) 2026-11-02: no LLM/llama-swap chat call while a render holds the GPU lock -------------------------------
+# Same lock rule as gpu_guard.ps1 / ralph.ps1 GpuBusy: a lock file whose first number is a live PID = held; a dead PID is
+# stale and ignored. The holder itself (os.getpid() or GPU_LOCK_DRIVER_PID, e.g. a VLM judge that took the lock) may call.
+GPU_LOCK_FILE = r"C:\AI\locks\gpu-render.lock"
+GPU_COLLECTED_FILE = r"C:\AI\locks\gpu-render.collected"
+
+class GpuBusy(RuntimeError):
+    pass
+
+def _pid_alive(pid):
+    if pid <= 0: return False
+    if os.name == "nt":
+        import ctypes
+        h = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h: return False
+        code = ctypes.c_ulong(); ctypes.windll.kernel32.GetExitCodeProcess(h, ctypes.byref(code)); ctypes.windll.kernel32.CloseHandle(h)
+        return code.value == 259  # STILL_ACTIVE
+    try: os.kill(pid, 0); return True
+    except OSError: return False
+
+def gpu_lock_holder(lock_file=None, alive=None):
+    """PID holding the GPU lock (live), else None. A lock without a PID counts as held (-1), as in ralph.ps1."""
+    alive = alive or _pid_alive
+    lf = lock_file or GPU_LOCK_FILE
+    try: raw = open(lf, encoding="utf-8", errors="replace").read()
+    except OSError: return None
+    m = re.search(r"(\d+)", raw)
+    if not m: return -1
+    pid = int(m.group(1))
+    return pid if alive(pid) else None
+
+def llm_gate(lock_file=None, alive=None, me=None):
+    """Raise GpuBusy if a render (any live PID but this process / its declared driver) holds the GPU lock."""
+    h = gpu_lock_holder(lock_file, alive)
+    if h is None: return
+    mine = {me or os.getpid()}
+    if os.environ.get("GPU_LOCK_DRIVER_PID", "").isdigit(): mine.add(int(os.environ["GPU_LOCK_DRIVER_PID"]))
+    if h in mine: return
+    raise GpuBusy(f"GPU lock {lock_file or GPU_LOCK_FILE} held by pid {h}: no LLM call while a render holds the GPU")
+
+def mark_collected(pid=None, path=None):
+    """(c) the lock holder says 'outputs collected': comfy_graceful_stop.ps1 may stop comfyui_auto before the lock goes."""
+    try:
+        with open(path or GPU_COLLECTED_FILE, "w", encoding="ascii") as f: f.write("%d %s\n" % (pid or os.getpid(), time.strftime("%Y-%m-%dT%H:%M:%S")))
+    except OSError: pass
+
 def llm(system, user, max_tokens=3000, temperature=0.6, model="coding_swift15_iq3s_esp"):
+    llm_gate()
     body = {"model": model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
             "max_tokens": max_tokens, "temperature": temperature}
     r = http(LS + "/v1/chat/completions", body, timeout=1200)
