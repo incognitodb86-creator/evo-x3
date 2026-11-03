@@ -1,4 +1,4 @@
-﻿# Regression (2026-10-31 Klein N12): an evicted/stalled job whose output already landed flat in
+# Regression (2026-10-31 Klein N12): an evicted/stalled job whose output already landed flat in
 # ComfyUI output/community/<run>/<tag>_00001_.ext is collected as DONE, never failed/retried. Offline.
 import os, sys, tempfile, time, unittest
 from unittest import mock
@@ -19,7 +19,9 @@ class TestEvictDiskFallback(unittest.TestCase):
         open(os.path.join(self.out, "R1", tag + "1_00001_" + ext), "wb").write(b"x")  # near-miss tag must be ignored
         open(os.path.join(self.out, "R1", tag + "_00001_" + ext), "wb").write(b"x" * 10)
         job = {"pos": 4, "tag": tag, "job_type": job_type}
-        with mock.patch.object(rq, "OUT_ROOT", self.out), mock.patch.object(rq.rgj, "probe", return_value=probe), \
+        with mock.patch.object(rq, "OUT_ROOT", self.out), \
+             mock.patch.object(rq, "ACTIONS", os.path.join(self.tmp.name, "actions.log")), \
+             mock.patch.object(rq.rgj, "probe", return_value=probe), \
              mock.patch.object(rq.rgj, "blackfreeze", return_value=[]), \
              mock.patch.object(rq.rgj, "collect_from_disk", return_value=None):
             try:

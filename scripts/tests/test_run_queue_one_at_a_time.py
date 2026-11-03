@@ -267,6 +267,42 @@ class TestRunQueueOneAtATime(unittest.TestCase):
             self.assertEqual(method, "POST")
             self.assertEqual(data, {"unload_models": True, "free_memory": True})
 
+    def test_output_landed_on_disk_during_stopping_is_collected_immediately(self) -> None:
+        """Cover Fix 3b: when comfyui_auto is stopping and /queue times out, output on disk is discovered and settled."""
+        j1 = self._make_job("clip1", 1)
+        logged_msgs = []
+
+        def fake_submit(g, tag, meta, outdir, logfile=None, out=None):
+            return "pid_clip1"
+
+        def fake_http(url, data=None, timeout=60, method=None):
+            if "/queue" in url:
+                raise urllib.error.URLError("timed out")
+            return {}
+
+        src = os.path.join(self.out_root, "clip1_00001_.mp4")
+        with open(src, "wb") as f:
+            f.write(b"mp4_rendered_content")
+
+        with mock.patch.object(rq, "ACTIONS", self.actions_log), \
+             mock.patch.object(rq, "OUT_ROOT", self.out_root), \
+             mock.patch.object(comm, "submit", side_effect=fake_submit), \
+             mock.patch.object(comm, "http", side_effect=fake_http), \
+             mock.patch.object(comm, "comfy_loaded", return_value=True), \
+             mock.patch.object(comm, "comfy_stopping", return_value=True), \
+             mock.patch.object(rq, "prefix_output", return_value=src), \
+             mock.patch.object(rq.rgj, "wake", return_value=True), \
+             mock.patch.object(rq.rgj, "static_check", return_value=[]), \
+             mock.patch.object(rq.rgj, "probe", return_value={"bytes": 100, "w": 768, "h": 1344, "frames": 124, "audio": True, "duration": 5.0}), \
+             mock.patch.object(rq.rgj, "blackfreeze", return_value=[]), \
+             mock.patch.object(rq.rgj, "contact_sheet", return_value=None), \
+             mock.patch.object(rq.time, "sleep", return_value=None):
+            failed, stopped = rq.run_wave(self.run_dir, [j1], 124, (768, 1344), False, logged_msgs.append)
+
+        self.assertEqual(failed, [])
+        self.assertFalse(stopped)
+        self.assertTrue(any("DISCOVERY" in m for m in logged_msgs))
+
 
 if __name__ == "__main__":
     unittest.main()

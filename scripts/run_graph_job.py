@@ -77,11 +77,15 @@ def wake(log):
     for n in names:
         if n and n != "comfyui_auto": log(f"UNLOAD LLM {n}"); post(f"{LS}/api/models/unload/{n}")
     if not comfy_ok():
-        # docs/comfyui.md: GET to the exact route root is IN the fixed ignore set and "returns 404
-        # while the model is not loaded", so it cannot wake anything; a non-ignored path "starts it
-        # as usual" and llama-swap blocks up to healthCheckTimeout (1200 in the live config). So the
-        # root GET is gone and the poll below runs on a starting path (/system_stats) for 240 x 5 s.
-        log("wake: GET /comfyui/ is ignored by llama-swap (docs/comfyui.md); polling /comfyui/system_stats")
+        # upstream.ignorePaths lists '^/system_stats$', so GET /comfyui/system_stats is an ignored path
+        # and does NOT wake comfyui_auto. Per docs/kb/guides/upstreams/comfyui.md, a GET to the route root
+        # /comfyui/ is NOT in ignorePaths and starts comfyui_auto as usual.
+        log("wake: triggering comfyui_auto start via GET /comfyui/")
+        try:
+            urllib.request.urlopen(COMFY + "/", timeout=10).read()
+        except Exception as ex:
+            log(f"wake: start trigger sent ({ex})")
+        log("wake: polling /comfyui/system_stats for readiness (status GET polls readiness once started)")
     for _ in range(240):
         if comfy_ok(): return True
         time.sleep(5)

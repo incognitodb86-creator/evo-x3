@@ -170,6 +170,12 @@ def comfy_loaded():
     if not isinstance(r, dict) or "error" in r: return None
     return any(x.get("model") == "comfyui_auto" for x in (r.get("running") or []))
 
+def comfy_stopping() -> bool:
+    """True when llama-swap answers /running and comfyui_auto is in 'stopping' state."""
+    r = running()
+    if not isinstance(r, dict) or "error" in r: return False
+    return any(x.get("model") == "comfyui_auto" and x.get("state") == "stopping" for x in (r.get("running") or []))
+
 def outcome(out, kind, pid=None, note=""):
     """RENDER-TIMEOUT: comm.run keeps its contract (side dict on success, None on failure) and records WHY it failed
     in the caller's dict, so the runner can tell a node error (an objective failure, so the redo rule applies) from
