@@ -421,10 +421,18 @@ def run_wave(run_dir, jobs, frames, size, retry, slog, adopt=None):
         except Exception as ex:
             queue_timeouts += 1
             slog("poll warn queue %s" % str(ex)[:160])
-            if queue_timeouts >= 2:
+            if queue_timeouts >= 2 or comm.comfy_stopping():
                 if not stopping:
                     stopping = True
                     slog("comfyui_auto looks like it is being stopped (%d /queue timeouts)" % queue_timeouts)
+                # While comfyui_auto is stopping, ComfyUI may finish rendering or output already landed
+                for pid, e in list(live.items()):
+                    src = prefix_output(expected_prefix(e["g0"]), e["t_att"]) or disk_output(run_dir, e["job"]["tag"], e["t_att"]) or rgj.collect_from_disk(e["job"]["tag"], e["t_att"], slog)
+                    if src:
+                        slog("DISCOVERY pos=%d tag=%s prompt_id=%s found output on disk during /queue timeout" % (e["job"]["pos"], e["job"]["tag"], pid))
+                        comm.outcome(e["out"], "evicted", pid, note="found output on disk during comfyui stop/stall")
+                        if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(e["job"])
+                        del live[pid]
             if comm.comfy_loaded() is False:  # same rule as comm.run: the history went with the process
                 for pid, e in list(live.items()):
                     comm.log(f"poll stop {e['job']['tag']} comfyui_auto is not running: prompt_id {pid} is in no live history", e["log"])
