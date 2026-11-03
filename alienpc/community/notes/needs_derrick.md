@@ -332,9 +332,10 @@ The LORA block is run: L1-L6 done, three A/B clips rendered, measured, flagged, 
 (`C:\AI\community\notes\2026-11-02-h3-lora-ab-DONE.md`). His "Go do ot" covered the Route 1 downloads and
 the three clips only. Nothing here is decided, downloaded, deleted, moved, loaded, or approved. KEEP is his.
 
-**Record change 2026-11-03 (Derek):** the shared wording for the character-identity LoRA set is now in-house training
-(`notes\2026-10-29-lora-alias-verify-and-rename.md` §6). Every ask and number below is unchanged. The E: archive is a
-separate disk-hygiene item, not the provenance of those files.
+The box's character-identity LoRA set is a set of fictional-character LoRAs we trained ourselves, on this box, for our
+invented characters. All `FC_*` files stay blocked for use (`notes\2026-10-29-lora-alias-verify-and-rename.md` §7);
+nothing in this card unblocks a file. Every ask and number below is unchanged. The E: archive is a separate disk-hygiene
+item.
 
 1. **The E: scoped delete (numbers restated).** Confirm the exact subtree for Max:
    `E:\Backups\AlienPc-C-2026-10-26\Users\derek\Desktop\_TO_DELETE_celeb-lora-lineage_2026-10-17\LORA_ARCHIVE_NOT_IN_USE_2026-10-09`

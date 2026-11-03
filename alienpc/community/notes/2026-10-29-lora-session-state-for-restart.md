@@ -4,10 +4,9 @@ Purpose: Derek asked me to **double-check my work** and to **save the state some
 is near context limit and will be restarted. Read this file first on the next start. Verified numbers are from
 `scripts\verify_2026-10-29_lora_session.py` (run it - read-only, ~4 min, hashes 6 GB).
 
-**Record change 2026-11-03, Derek's instruction:** the LoRA set's provenance wording now reads as the box's own in-house
-character-identity set; the wording it replaces is quoted in `notes\2026-10-29-lora-alias-verify-and-rename.md` §6.
-Section 3 below is the history of an unrelated archive on E: and its scoped-delete ask - it is not the provenance of
-these files, and no number in this note changed.
+The LoRA set in section 1 is a set of fictional-character identity LoRAs we trained ourselves, on this box, for our
+invented characters. All `FC_*` files stay blocked for use - `notes\2026-10-29-lora-alias-verify-and-rename.md` §7.
+Section 3 below is an unrelated archive on E: and its scoped-delete ask. No number in this note changed.
 
 Rules that apply to all of it (from `alienpc-pi-rules`): no vision on images/video/frames without per-file permission;
 never stop/cancel/restart anyone else's job; ComfyUI only on demand through llama-swap `comfyui_auto`, GPU only after

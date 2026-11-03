@@ -10,10 +10,10 @@ It also copies the one H3-fit file into the live ComfyUI models\loras under the 
 no ComfyUI call, no queue, no model load). Source of truth for "which base model" is each file's safetensors header
 (produbed by scripts/lora_header_probe.py), not the file name.
 
-Record 2026-11-03 (Derek's instruction): in the shared trail this set is worded as the box's own in-house
-character-identity LoRAs; the wording it replaces is quoted in notes/2026-10-29-lora-alias-verify-and-rename.md §6. The
-SRC path string and the 9 source file names below are the tool's input data - they are needed to address the bytes and
-to verify the approved scoped delete - and they are not the identity of the set, which is the character names in DST.
+Record 2026-11-03: in the shared trail this set is a set of fictional-character LoRAs we trained ourselves, on this box,
+for our invented characters. The SRC path string and the 9 source file names below are the tool's input data - they are
+needed to address the bytes and to verify the approved scoped delete - and they are not the identity of the set, which is
+the character names in DST.
 """
 import csv, hashlib, json, os, shutil, struct, sys
 from pathlib import Path
