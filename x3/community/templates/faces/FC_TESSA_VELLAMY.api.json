@@ -1,0 +1,398 @@
+{
+  "ag0": {
+    "_meta": {
+      "title": "Add Guide for MiniMax H3 (frame 0 = start image) [pass 1]"
+    },
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "frame_idx": 0,
+      "image": [
+        "img",
+        0
+      ],
+      "latent": [
+        "c0",
+        1
+      ],
+      "positive": [
+        "c0",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "ag1": {
+    "_meta": {
+      "title": "Add Guide for MiniMax H3 (frame 0 = start image) [pass 2]"
+    },
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "frame_idx": 0,
+      "image": [
+        "img",
+        0
+      ],
+      "latent": [
+        "s1_cat",
+        0
+      ],
+      "positive": [
+        "c0",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "avae": {
+    "_meta": {},
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "c0": {
+    "_meta": {},
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 672,
+      "length": 124,
+      "prompt": "subject_definitions:\n<Picture 1> is the composition and identity anchor for [Shot 1]: two adult women (18+) standing side by side on a wet stone terrace beside a carved limestone balustrade, both facing the lens, framed head to feet in a vertical frame, warm late-afternoon sun and the sea horizon behind them, exactly as in the start image.\n<Subject 1> is the adult woman (18+) at the left of <Picture 1>: long centre-parted wavy blonde hair, a sheer white bra with thin shoulder straps and seam-taped cups, white low-rise bikini bottoms, her right palm resting flat on the balustrade cap, weight on one leg, barefoot. Her face and ID, hair, skin tone, body proportions and wardrobe come from <Picture 1>. She is the dominant one: she takes the space, she moves first, she sets the pace and the pressure, and her body never goes still while she is handling the other woman.\n<Subject 2> is the adult woman (18+) at the right of <Picture 1>: long straight blonde hair with a full straight fringe, a sheer warm-beige bra with thin shoulder straps and seam-taped cups, matching warm-beige low-rise bikini bottoms, one palm resting on her own outer thigh, barefoot. Her face and ID, hair, skin, body proportions and wardrobe come from <Picture 1>. She is the one being handled and she is clearly, visibly willing and she is enjoying it, shown as a living, loose, eager, upright body, not a still object: her face stays open and smiling, her chin stays lifted, her eyes stay on <Subject 1> and on the lens, and her body keeps moving the whole clip - she turns her head toward her, she shifts her weight, she sets her feet, she breathes fast, her ribs and shoulders move, she nods once and smiles before the first hand lands, she takes a hand off her thigh and puts it on <Subject 1>'s forearm, she leans into the pin, she closes the last inch of space herself, and her hands keep finding <Subject 1> with intent.\n<Subject 3> is the beige mesh bra worn by <Subject 2> in <Picture 1>: a single whole garment with two thin shoulder straps, two seam-taped cups and an underband, one piece of fabric that leaves her body during [Shot 1].\n<Subject 4> is the beige bikini bottoms worn by <Subject 2> in <Picture 1>: a single whole garment with two side straps at the hips, a low waistband and leg openings, one piece of fabric that leaves her body during [Shot 1].\n<Subject 5> is the terrace in <Picture 1>: the carved limestone balustrade and its cap, the dark panelled wall and stone canopy above, the two olive trees at the frame edges, the wet reflective tile floor with its water shimmering and running, the sea horizon at the left with moving water, and the low warm sun.\n\nsummary:\n[reference generation] <Subject 1>, the woman at the left of <Picture 1>, takes control of <Subject 2>, the woman at the right, on <Subject 5> in one continuous ten-second shot, and the movement starts in the first frame: she is already striding across the gap at frame one. She crosses to <Subject 2>, pins her against the balustrade cap with a flat palm on her sternum, lands one hard full-force open-palm slap straight across her face, then strips <Subject 3> and <Subject 4> off her body in two fast hard pulls, and then gropes her hard and keeps groping: one hand gripping and kneading her bare breast, the other working between her thighs, both hands moving continuously to the last frame. This is a dynamic video with fluid natural motion and high-amplitude, continuous, unbroken movement: both women's bodies move every frame, hair swings, fabric stretches and falls, skin gloss shifts, wet tile and sea water keep moving, and no figure in the frame is a statue at any point. Both garments leave the frame intact and stay visible on the wet tile. Faces, hair, <Subject 1>'s white wardrobe, framing, light and place stay exactly as in <Picture 1>. <Subject 2> gave her word that she would be handled this way and she keeps it gladly: she stays on her mark, she takes every hand, she answers every hand with a real body movement, and her face says yes all the way through - her expression stays bright, her jaw is slack with pleasure, she smiles into the first hand, and her enjoyment grows with every touch.\n\nretention_analysis:\n<Picture 1> ([Shot 1] opening composition / identity source): fully_preserved - the two standing placements at frame one, the camera height, the head-to-feet vertical crop and the framing guide [Shot 1]; the action develops forward from that opening without rewriting identities.\n<Subject 1> (appears in [Shot 1]): fully_preserved - face and ID, centre-parted wavy blonde hair, skin gloss, body proportions, sheer white bra and white bikini bottoms kept on her body every frame; her pose changes only by the action described and her body keeps moving continuously.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face and ID, straight blonde hair with full fringe, skin gloss, body proportions and body scale kept every frame; her face stays visible to the lens. Her head snaps sideways once from the slap and comes straight back square, with her features, jaw line, eyes, nose, brows and fringe unchanged; her cheek flushes red and the flush stays, with no mark, no swelling, no bruise, no injury and no tear. Her body keeps moving every frame - weight, feet, breath, ribs, shoulders, hands - and her expression stays open, pleased and smiling the whole clip.\n<Subject 3> (appears in [Shot 1]): attribute_transfer - the beige mesh bra leaves <Subject 2>'s body in one hard pull as one whole garment, straps, cups and underband intact, and lies on the wet tile beside her feet where it stays visible for the rest of the clip.\n<Subject 4> (appears in [Shot 1]): attribute_transfer - the beige bikini bottoms slide down <Subject 2>'s thighs and off her feet in one fast pull as one whole garment and land on top of the bra, visible for the rest of the clip.\n<Subject 5> (appears in [Shot 1]): fully_preserved - balustrade and cap, dark panelled wall, stone canopy, olive trees, wet tile with its moving reflections, sea horizon with moving water and the warm late-sun colour cast kept.\n\ndetailed_description:\nPhotoreal live-action hardcore film, one continuous take, a dynamic video with fluid natural motion and continuous unbroken movement in every frame, real skin weight with a wet gloss highlight along collarbones, shoulders, belly, breasts and thighs, sharp specular on wet skin and on the wet tile, warm low sun from the left, shallow depth of field behind the two women, hands that read as solid five-finger hands with visible finger separation and skin that dents under pressure. Every named action is performed at full force with fast, sharp, large-amplitude body movement, and secondary motion follows every impact: hair swinging, fabric stretching and dropping, breasts and thighs jolting, water on the tile rippling, olive leaves trembling.\n[Shot 1] The camera holds a static shot. The clip opens in motion: at frame one <Subject 1> is already mid-stride off the stone cap, her palm leaving the balustrade, her body moving across the gap, while <Subject 2> turns her head toward her, shifts her weight onto her back foot and nods at her with a knowing smile, both women framed head to feet as in <Picture 1>. Limb inventory: exactly two adult women (18+); each has one continuous torso, exactly two arms and exactly two legs, and five fingers on each open hand; the two bodies stay separate with a readable outline wherever they touch, and no limb of one woman ever merges into the other. Both women keep their faces turned to the lens so their expressions are readable.\nBEAT ONE, 0.0-2.0s (cross and pin, moving from frame one): <Subject 1> pushes her palm off the stone cap, closes the gap in two long fast strides, plants her feet wide, and slaps her flat left palm onto <Subject 2>'s sternum to drive her back. <Subject 2> steps back twice, her hips hitting the balustrade base, then meets the pin: she sets her feet shoulder-width apart, presses her heels into the tile, rolls her shoulders under the flat palm and leans her spine back against the stone into it, lifts her chin, keeps her eyes bright on <Subject 1>, lifts her arms and opens her hands at her sides, and nods up at her. Her breast and stomach rock forward from the impact and settle. Her face is lit and smiling.\nBEAT TWO, 2.0-3.0s (the slap, to the face, one hard full-force blow): <Subject 1> whips her right hand back and lands one hard open-palm slap straight across <Subject 2>'s face. Her whole palm contacts her cheek and jaw, the skin of her cheek and the side of her neck ripples from the impact, <Subject 2>'s head snaps sideways about forty-five degrees, her long hair whips across her shoulder and swings back, and her mouth opens once on a punched breath. Her body answers the blow: her torso jerks sideways on the stone, her arms lift an inch off her thighs, her fingers spread, her shoulders rise, and her ribs contract hard on the breath. Then her head comes straight back to square, chin level, and she turns her eyes straight to <Subject 1> and grins, holding her gaze, her arms drop back down and her fingers uncurl one at a time, and the flush on her cheek deepens red and stays. Her face stays readable through the whole slap: eyes open and shining, brow raised with delight, she takes the blow, a laughing breath leaves her, and her smile widens.\nBEAT THREE, 3.0-6.0s (the strip, two fast hard pulls): <Subject 1> hooks both thumbs into the neckline of <Subject 3> at <Subject 2>'s sternum, braces her feet, and pulls one time, hard, sideways and down, fast. <Subject 3> leaves her body as one whole garment: straps stretched over her shoulders, cups and underband intact, no shreds and no pieces left behind, the mesh stretched thin where the light passes through it, and it falls to the wet tile beside <Subject 2>'s feet. <Subject 2>'s bare breasts are free and jolt with the pull, her skin gloss catches the sun, her nipples tighten, her stomach contracts in the open air, her chest rises fast with quick breathing, and her right hand comes off her thigh and lifts to help, fingers hooking the stretched strap of <Subject 3> and pulling it clear of her own shoulder to speed the strip. <Subject 1> takes the side straps of <Subject 4> at her hips with one hand and with a second fast yank pulls them down her thighs and off her feet in one continuous slide; <Subject 4> leaves as one whole garment and lands on top of the bra, and both garments stay visible on the tile. <Subject 2>'s hips lift into the second pull, her thigh muscles tense, she shifts her weight onto one leg and her toes grip the wet tile, her arms come down and her hands rest warm on <Subject 1>'s forearms, guiding her hands, her face flushed and delighted.\nBEAT FOUR, 6.0-10.0s (PRIMARY MOTION, the grope, sustained and unbroken to the last frame): <Subject 1> grips <Subject 2>'s left breast in her right hand and works it hard and continuously, fingers spreading, lifting, squeezing and releasing, then transferring that grip to the other breast for three beats, knuckles pressing into her ribs as she moves, her own hips rolling forward with each squeeze. At the same time her left arm comes up under <Subject 2>'s waist, her forearm pinning her against the stone cap, and her left hand slides from her ribs over her hip and between her thighs, palm pressing firm against the front of her vulva, fingers working her labia, thumb circling her mons, keeping a wet, audible, continuous contact. <Subject 2> meets every bit of it and she is fully alive in it: her breasts ride up under the gripping hand, her back arches into it, her ribs expand and fall with fast open breathing, her shoulders rise and drop, her weight rolls from one hip to the other, her calf muscles flex, her toes keep gripping the tile, her fingertips press and drag into her own thighs, her fingers dig into her own hip, her head tips back, her eyes fall half-closed and her breath comes soft and breathy. Her hips turn open toward the working hand and her thighs part around it, her knees opening for it, her chin drops and lifts with the breath, her mouth falls open around small moans, her eyes flutter and find the lens again, and her hands come up to hold <Subject 1>'s wrist and pull her closer. Her body answers openly where <Subject 1>'s hand is - skin flushing, ribs tightening, a shoulder tensing, a thigh trembling, her belly quivering with each breath - and her face is turned to the lens, flushed, smiling, half-closed and pleasure-lit. <Subject 1> keeps her own hips forward and low, taking the space, unhurried, her face steady and commanding at the lens, her hand never stopping, reading the answer in the way <Subject 2> opens toward her. Tempo is about one clear large movement every half second, each one with real pressure and visible body movement, skin gloss shifting and hair swinging with every impact. End the clip in the middle of this, both women still moving: <Subject 1> fully dressed in white and still gripping her, <Subject 2> bare from the waist up with her bare legs visible, breathing hard, weight shifted, thighs open, eyes half-closed, smiling with pleasure at the lens with her red cheek, <Subject 3> and <Subject 4> on the tile, framing and <Subject 5> unchanged.\n\noverall_soundscape:\nOpen terrace air and a soft moving sea wash, the dry crack of a flat palm on a face, wet mesh stretching and tearing free of skin, fabric slapping onto wet tile, continuous skin sounds from the gripping hand and the wet contact between her thighs, <Subject 2>'s single punched breath at the slap followed by fast open breathing, then soft breathy moans as the hands work, a short laughing breath when the top comes off, and her voice open with pleasure through the last seconds, no intelligible speech.\n\nnon_diegetic_music:\nN/A",
+      "ref_image_size": "max",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 384
+    }
+  },
+  "clip": {
+    "_meta": {},
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "dec_a": {
+    "_meta": {},
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "s0_sep",
+        1
+      ],
+      "vae": [
+        "avae",
+        0
+      ]
+    }
+  },
+  "dec_v": {
+    "_meta": {},
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "s1_samp",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "img": {
+    "_meta": {},
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/TERRACE2_768x1344.png"
+    }
+  },
+  "ksel": {
+    "_meta": {},
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    }
+  },
+  "lsu3": {
+    "_meta": {},
+    "class_type": "MinimaxH3LatentUpscaler3D",
+    "inputs": {
+      "align": 32,
+      "device": "cuda",
+      "enable_temporal_chunking": true,
+      "force_unload": true,
+      "latent": [
+        "s0_sep",
+        0
+      ],
+      "mode": "scale by multiplier",
+      "mode.scale": 2.0,
+      "model_name": "minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors",
+      "precision": "fp16"
+    }
+  },
+  "m_attn": {
+    "_meta": {},
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "comfy kitchen attention",
+      "model": [
+        "lora",
+        0
+      ]
+    }
+  },
+  "m_shift": {
+    "_meta": {},
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "m_vsa",
+        0
+      ],
+      "shift_audio": 3.0,
+      "shift_video": 12.0
+    }
+  },
+  "m_vsa": {
+    "_meta": {},
+    "class_type": "BlockSparseAttention",
+    "inputs": {
+      "dense_blocks": "0,1",
+      "end_percent": 1.0,
+      "extra_tokens": 256,
+      "min_tokens": 12288,
+      "model": [
+        "m_attn",
+        0
+      ],
+      "selection": "vsa",
+      "selection.keep_percent": 10,
+      "sink_conditioning": "exact_kv_and_rows",
+      "start_percent": 0.0,
+      "verbose": false
+    }
+  },
+  "mkvid": {
+    "_meta": {},
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "dec_a",
+        0
+      ],
+      "fps": 24,
+      "images": [
+        "dec_v",
+        0
+      ]
+    }
+  },
+  "noise": {
+    "_meta": {},
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 51083002
+    }
+  },
+  "p2sched": {
+    "_meta": {
+      "title": "Scheduler Second Pass (published: beta, 3, 0.4)"
+    },
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 0.4,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 3
+    }
+  },
+  "s0_guide": {
+    "_meta": {},
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "ag0",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s0_samp": {
+    "_meta": {},
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s0_guide",
+        0
+      ],
+      "latent_image": [
+        "c0",
+        1
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s0_sched",
+        0
+      ]
+    }
+  },
+  "s0_sched": {
+    "_meta": {},
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8
+    }
+  },
+  "s0_sep": {
+    "_meta": {},
+    "class_type": "LTXVSeparateAVLatent",
+    "inputs": {
+      "av_latent": [
+        "s0_samp",
+        0
+      ]
+    }
+  },
+  "s1_cat": {
+    "_meta": {},
+    "class_type": "LTXVConcatAVLatent",
+    "inputs": {
+      "audio_latent": [
+        "s0_sep",
+        1
+      ],
+      "video_latent": [
+        "lsu3",
+        0
+      ]
+    }
+  },
+  "s1_guide": {
+    "_meta": {},
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "ag1",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s1_samp": {
+    "_meta": {},
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s1_guide",
+        0
+      ],
+      "latent_image": [
+        "s1_cat",
+        0
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "p2sched",
+        0
+      ]
+    }
+  },
+  "save": {
+    "_meta": {},
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "community/terrace_retest_v2_20261030/b2_s51083002/b2_s51083002",
+      "format": "auto",
+      "video": [
+        "mkvid",
+        0
+      ]
+    }
+  },
+  "unet": {
+    "_meta": {},
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "vvae": {
+    "_meta": {},
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+    }
+  },
+  "lora": {
+    "_meta": {
+      "title": "FC_TESSA_VELLAMY_h3_face_v1.safetensors face LoRA on the model chain (B2 diff, 2026-11-03)"
+    },
+    "class_type": "LoraLoader",
+    "inputs": {
+      "lora_name": "FC_TESSA_VELLAMY_h3_face_v1.safetensors",
+      "strength_model": 1.0,
+      "strength_clip": 1.0,
+      "model": [
+        "unet",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ]
+    }
+  }
+}
