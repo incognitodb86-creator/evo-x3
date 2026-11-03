@@ -263,7 +263,14 @@ def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=Non
         if r is PENDING: continue
         return r
     log(f"JOB timeout {tag}", logfile)
-    return outcome(out, "stalled", pid, note=f"no history in {timeout}s; the render may have landed in ComfyUI output")
+    try:
+        http(BASE + "/interrupt", data={}, timeout=10, method="POST")
+        if pid:
+            http(BASE + "/queue", data={"delete": [pid]}, timeout=10, method="POST")
+        log(f"JOB cancelled via /interrupt and /queue delete {tag} prompt_id={pid}", logfile)
+    except Exception as ex_cancel:
+        log(f"JOB cancel error {tag}: {ex_cancel}", logfile)
+    return outcome(out, "stalled", pid, note=f"no history in {timeout}s; cancelled via /interrupt; the render may have landed in ComfyUI output")
 
 # --- (b) 2026-11-02: no LLM/llama-swap chat call while a render holds the GPU lock -------------------------------
 # Same lock rule as gpu_guard.ps1 / ralph.ps1 GpuBusy: a lock file whose first number is a live PID = held; a dead PID is
