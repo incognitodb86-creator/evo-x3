@@ -375,3 +375,27 @@ carries no ref, a real best-practice fix) and **GAP8** (remove the stale strata 
 item only you can close. One line from you unblocks the queue: answer a+b+d and let me (or Max) mark
 GAP6 in the item text so the next pass runs **GAP7**. Recommendation: **a + b + d + e**, with (c) as its
 own item. Nothing was changed by this pass; evidence `notes\_gap6\gap6_probe_pass4.log`.
+
+### 2026-11-02 16:36 CT - ANSWERED: GAP6 (a+b+d now, c later) and the LoRA pack copy (Derrick, via Max Architect 2)
+
+Derrick's words, recorded on Gitea in fleet-brain: **"Yes, record a, b, d now and c later on Gitea and pass
+it to Forge"** (record `02ac8d5`, `40_projects\max-fix-testsecords6-11-02-gap6-derrick-answer.md`) and
+**"Yes, let Forge copy the LoRA blind pack to the QNAP pi-drop folder"** (record `9f0d40a`,
+`...6-11-02-l6-pack-copy-derrick-answer.md`).
+
+Done by Forge at 17:50 CT on these answers, nothing beyond them:
+- **GAP6 closed** as already met by his approved 2026-10-31 19:31 CT ask-user removal, and its Pass clause
+  reworded to the plain-chat rule (option a + d). The item text keeps the history and names the old clause
+  as superseded, so no pass can re-open it.
+- **OPT2's pin closed as unverifiable** on an unconfigured package (option b). Do not reopen.
+- **(c) queued as its own item GAP9** immediately after GAP8: the `npm\package.json` residue clean
+  (17 declared, 5 unregistered incl. both question packages, 6 packages in neither list), manifest-only,
+  backup first, `pi list` must stay byte-identical.
+- **The pack is on the NAS**: `pi-drop/h3-lora-ab-2026-11-02/` with a01.mp4 2,558,369 B, a02.mp4 2,318,348 B,
+  a03.mp4 2,304,919 B, key.csv 561 B - each equal to `key.csv`. Target folder listed absent before the mkdir,
+  so new files only; nothing on the NAS deleted, moved or overwritten. Blocker note cleared
+  (`2026-11-02-forge-blocker.md`).
+- **Still open, his calls**: KEEP on the three LoRAs (after he views the pack), the four L6 asks above
+  (E: scoped delete, Route 2 base model, Civitai token, `approved_characters` rows), the terrace v1/v2 0-10
+  scores, and `runs\strip10_20261030_b07` (staged, not launched).
+
