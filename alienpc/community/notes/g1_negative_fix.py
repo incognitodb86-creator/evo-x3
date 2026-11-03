@@ -57,7 +57,7 @@ if not check:
 ok = 0; tj = jobs()
 for t in tj:
     g = json.load(open(os.path.join(RUN, t.replace("/", os.sep), "request.api.json"), encoding="utf-8"))
-    r = run_queue.guard_graph(g); ok += r
+    r = run_queue.guard_graph(g, require_adult=True); ok += r
     print("guard", t, r)
 print("GUARD %d/%d" % (ok, len(tj)))
 sys.exit(0 if ok == len(tj) else 4)
