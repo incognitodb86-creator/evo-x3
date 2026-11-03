@@ -41,3 +41,17 @@ Base = `runs/bj_pov_kf_20261102/d1_kf/request.api.json` (B2 REF2VA, standing bet
 ## Next
 
 Render needs Derek's GO (R30): harness up, then `python scripts/run_queue.py --run-dir runs/bj_pov_len_20261103`. Judging is by eyes per R17-R19, with wall time recorded per arm.
+
+
+## Axis 2 added 2026-11-03 07:05 CT - Derek's own three hosted-format prompts
+
+Derrick sent three complete prompts (V1 short / V2 medium / V3 long, upstream hosted style with
+`overall_soundscape:` and `non_diegetic_music:`) and said "Add 3 more videos with these prompts."
+Staged as `v1_hosted`, `v2_hosted`, `v3_long_hosted` in the same run dir, verbatim except the
+mandatory adult clause (`She is a fictional adult woman, aged 28 by canon declaration, a grown
+adult 18+.`) - proved necessary: `adult_stated` False -> True, `run_queue.guard_graph` False -> True.
+Wiring follows his label order: `<Picture 1>` = start_pov (penis/hand), `<Picture 2>` = start_bj (her look);
+27 nodes, 362 f, seeds 51083133/34/35, builder `build_graphs_hosted.py`.
+Queue order now 6 clips, dry-run lists all 6, no GPU call. Word counts 484/573/759 (his, hosted style)
+vs 1,502/2,404/2,888 (local skills format). His format breaks R8/R17/R18/R23/R25/R32/R36/R39 by design -
+that is the second axis. No render, no GO, GPU idle, no lock.
