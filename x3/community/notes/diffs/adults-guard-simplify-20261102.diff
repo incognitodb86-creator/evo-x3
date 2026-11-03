@@ -1,0 +1,117 @@
+--- C:\AI\community\scripts\comm.py.bak-guard-2108
++++ C:\AI\community\scripts\comm.py
+@@ -35,18 +35,20 @@
+     try: return json.loads(raw)
+     except Exception: return raw.decode("utf-8", "replace")
+ 
+-# --- adults-only guard (same rule as ALI-80 run_all.py) ---
+-EXC = ['cowgirl','girlfriend','eighteen','kidnap','old-school','childhood']
+-BAD = {'girl','teen','school','schoolgirl','underage','minor','kid','child','loli','children'}
++# --- adults-only guard: one denylist regex, fail closed (simplified 2026-11-02, Derek 9:00 PM CT) ---
++# A word counts only when it stands alone (no letter on either side), so cowgirl/girlfriend/eighteen/kidnap/childhood pass
++# without an exception list. Anything that is not a string fails.
++_BAD_RE = re.compile(r"(?<![a-z])(?:girl|teen|school|schoolgirl|underage|minor|kid|child|children"
++                     r"|loli)s?(?![a-z])|barely\s+legal", re.I)
++_ADULT_RE = re.compile(r"(?<![a-z])adults?(?![a-z])", re.I)
+ def guard_ok(t):
+-    t = t.lower()
+-    for e in EXC: t = t.replace(e, ' ')
+-    if 'barely legal' in t: return False
+-    for w in re.split(r"[^a-z]+", t):
+-        if w in BAD or (w.endswith('s') and w[:-1] in BAD) or w in ('schoolgirls','minors','teens','kids','girls'): return False
+-    return True
+-
+-PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value")
++    """True when the text names no minor-coded word. Non-strings fail (fail closed)."""
++    return isinstance(t, str) and not _BAD_RE.search(t)
++def adult_stated(t):
++    """True when the text states an adult (the one positive check)."""
++    return isinstance(t, str) and bool(_ADULT_RE.search(t))
++
++PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value", "script")
+ 
+ def prompt_strings(inputs):
+     """Yield all prompt-bearing string values from node inputs."""
+--- C:\AI\community\scripts\run_queue.py.bak-guard-2108
++++ C:\AI\community\scripts\run_queue.py
+@@ -106,8 +106,15 @@
+     return 0
+ 
+ 
+-def guard_graph(g):
+-    return all(comm.guard_ok(s) for n in g.values() for s in comm.prompt_strings(n.get("inputs", {})))
++def guard_graph(g, require_adult=False):
++    """Adults-only gate. Every prompt string must pass comm.guard_ok; with require_adult, at least one must state an adult.
++    A malformed graph fails (fail closed)."""
++    if not isinstance(g, dict) or not all(isinstance(n, dict) for n in g.values()):
++        return False
++    ss = [s for n in g.values() for s in comm.prompt_strings(n.get("inputs", {}))]
++    if not all(comm.guard_ok(s) for s in ss):
++        return False
++    return any(comm.adult_stated(s) for s in ss) if require_adult else True
+ 
+ 
+ def still_prompt(g):
+--- C:\AI\community\notes\g1_negative_fix.py.bak-guard-2108
++++ C:\AI\community\notes\g1_negative_fix.py
+@@ -57,7 +57,7 @@
+ ok = 0; tj = jobs()
+ for t in tj:
+     g = json.load(open(os.path.join(RUN, t.replace("/", os.sep), "request.api.json"), encoding="utf-8"))
+-    r = run_queue.guard_graph(g); ok += r
++    r = run_queue.guard_graph(g, require_adult=True); ok += r
+     print("guard", t, r)
+ print("GUARD %d/%d" % (ok, len(tj)))
+ sys.exit(0 if ok == len(tj) else 4)
+--- C:\AI\community\scripts\tests\test_guard_scope.py.bak-guard-2108
++++ C:\AI\community\scripts\tests\test_guard_scope.py
+@@ -12,7 +12,7 @@
+ 
+ class TestGuardScope(unittest.TestCase):
+     def test_prompt_keys_tuple(self):
+-        expected = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value")
++        expected = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value", "script")
+         for k in expected:
+             self.assertIn(k, comm.PROMPT_KEYS)
+ 
+--- /dev/null
++++ C:\AI\community\scripts\tests\test_adults_guard.py
+@@ -0,0 +1,38 @@
++# Text-only stub tests for the simplified adults guard (2026-11-02). No images are created, read or stored.
++import os, sys, unittest
++HERE = os.path.dirname(os.path.abspath(__file__)); SCRIPTS = os.path.dirname(HERE)
++if SCRIPTS not in sys.path: sys.path.insert(0, SCRIPTS)
++import comm, run_queue as rq
++
++def g(*texts):
++    return {str(i): {"class_type": "CLIPTextEncode", "inputs": {"text": t}} for i, t in enumerate(texts)}
++
++class TestAdultsGuard(unittest.TestCase):
++    def test_blocks_minor_coded_words(self):
++        for w in ("girl", "Girls", "teen", "school", "schoolgirls", "underage", "minor", "kids",
++                  "child", "children", "loli", "barely  legal", "girl2", "a_teen"):
++            self.assertFalse(comm.guard_ok("a woman, " + w + ", outdoors"), w)
++    def test_allows_adult_words_that_contain_bad_substrings(self):
++        for w in ("cowgirl", "girlfriend", "eighteen", "kidnap", "childhood"):
++            self.assertTrue(comm.guard_ok("an adult woman, " + w), w)
++    def test_non_string_fails_closed(self):
++        self.assertFalse(comm.guard_ok(None)); self.assertFalse(comm.guard_ok(123))
++    def test_adult_stated(self):
++        self.assertTrue(comm.adult_stated("a fictional adult age twenty-eight"))
++        self.assertFalse(comm.adult_stated("a woman on a terrace"))
++        self.assertFalse(comm.adult_stated("adulthood"))
++    def test_graph_bad_word_anywhere_fails(self):
++        self.assertFalse(rq.guard_graph(g("a fictional adult woman", "Negative: child")))
++    def test_graph_require_adult(self):
++        self.assertTrue(rq.guard_graph(g("a fictional adult woman")))
++        self.assertTrue(rq.guard_graph(g("a woman")))  # default: denylist only
++        self.assertFalse(rq.guard_graph(g("a woman"), require_adult=True))
++        self.assertTrue(rq.guard_graph(g("a fictional adult woman"), require_adult=True))
++        self.assertFalse(rq.guard_graph({}, require_adult=True))  # nothing to check -> fail closed
++    def test_graph_malformed_fails_closed(self):
++        self.assertFalse(rq.guard_graph(None)); self.assertFalse(rq.guard_graph({"1": "x"}))
++    def test_script_key_is_scanned(self):
++        self.assertFalse(rq.guard_graph({"30": {"class_type": "H3MultishotMemorySampler", "inputs": {"script": "a teen"}}}))
++
++if __name__ == "__main__":
++    unittest.main()
