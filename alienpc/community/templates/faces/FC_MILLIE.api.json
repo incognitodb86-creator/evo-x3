@@ -378,11 +378,11 @@
   },
   "lora": {
     "_meta": {
-      "title": "FC_SUKI_RAVENNA_h3_face_v1.safetensors face LoRA on the model chain (B2 diff, 2026-11-03)"
+      "title": "FC_MILLIE_h3_face_v1.safetensors face LoRA on the model chain (B2 diff, 2026-11-03)"
     },
     "class_type": "LoraLoader",
     "inputs": {
-      "lora_name": "FC_SUKI_RAVENNA_h3_face_v1.safetensors",
+      "lora_name": "FC_MILLIE_h3_face_v1.safetensors",
       "strength_model": 1.0,
       "strength_clip": 1.0,
       "model": [
