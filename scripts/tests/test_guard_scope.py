@@ -12,7 +12,7 @@ import comm
 
 class TestGuardScope(unittest.TestCase):
     def test_prompt_keys_tuple(self):
-        expected = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value")
+        expected = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value", "script")
         for k in expected:
             self.assertIn(k, comm.PROMPT_KEYS)
 

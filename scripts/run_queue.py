@@ -106,8 +106,15 @@ def detach(argv, run_dir):
     return 0
 
 
-def guard_graph(g):
-    return all(comm.guard_ok(s) for n in g.values() for s in comm.prompt_strings(n.get("inputs", {})))
+def guard_graph(g, require_adult=False):
+    """Adults-only gate. Every prompt string must pass comm.guard_ok; with require_adult, at least one must state an adult.
+    A malformed graph fails (fail closed)."""
+    if not isinstance(g, dict) or not all(isinstance(n, dict) for n in g.values()):
+        return False
+    ss = [s for n in g.values() for s in comm.prompt_strings(n.get("inputs", {}))]
+    if not all(comm.guard_ok(s) for s in ss):
+        return False
+    return any(comm.adult_stated(s) for s in ss) if require_adult else True
 
 
 def still_prompt(g):

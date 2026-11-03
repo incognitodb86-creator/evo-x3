@@ -35,18 +35,20 @@ def http(url, data=None, timeout=60, method=None):
     try: return json.loads(raw)
     except Exception: return raw.decode("utf-8", "replace")
 
-# --- adults-only guard (same rule as ALI-80 run_all.py) ---
-EXC = ['cowgirl','girlfriend','eighteen','kidnap','old-school','childhood']
-BAD = {'girl','teen','school','schoolgirl','underage','minor','kid','child','loli','children'}
+# --- adults-only guard: one denylist regex, fail closed (simplified 2026-11-02, Derek 9:00 PM CT) ---
+# A word counts only when it stands alone (no letter on either side), so cowgirl/girlfriend/eighteen/kidnap/childhood pass
+# without an exception list. Anything that is not a string fails.
+_BAD_RE = re.compile(r"(?<![a-z])(?:girl|teen|school|schoolgirl|underage|minor|kid|child|children"
+                     r"|loli)s?(?![a-z])|barely\s+legal", re.I)
+_ADULT_RE = re.compile(r"(?<![a-z])adults?(?![a-z])", re.I)
 def guard_ok(t):
-    t = t.lower()
-    for e in EXC: t = t.replace(e, ' ')
-    if 'barely legal' in t: return False
-    for w in re.split(r"[^a-z]+", t):
-        if w in BAD or (w.endswith('s') and w[:-1] in BAD) or w in ('schoolgirls','minors','teens','kids','girls'): return False
-    return True
+    """True when the text names no minor-coded word. Non-strings fail (fail closed)."""
+    return isinstance(t, str) and not _BAD_RE.search(t)
+def adult_stated(t):
+    """True when the text states an adult (the one positive check)."""
+    return isinstance(t, str) and bool(_ADULT_RE.search(t))
 
-PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value")
+PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value", "script")
 
 def prompt_strings(inputs):
     """Yield all prompt-bearing string values from node inputs."""
