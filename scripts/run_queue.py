@@ -2,10 +2,11 @@ r"""run_queue.py - THE reusable render-queue template (simplify plan S4 + S8, 20
 
 Renders every clip in a run's order file back to back in ONE GPU window:
   once per batch : pytest gate, take gpu-render.lock (held = rc 7 GPU_BUSY), unload the LLM, wake comfyui_auto
-  submit (all)   : for every clip up front: comm.guard_ok on every prompt string, wake/keep-alive touch
-                   (/comfyui/system_stats, also unloads any LLM that got swapped in), static check, then POST /prompt
-                   (comm.submit) so ComfyUI's own queue renders them back to back, one at a time on the GPU
-                   (queue fix, Derrick 2026-10-30 4:28 PM CT: was submit one, wait, submit the next, ~62 s per still)
+  submit (one at a time) : at most MAX_IN_FLIGHT = 1 clip in ComfyUI at a time (FIX 3, 2026-11-03: was submit all
+                   up front; up-front submit risked losing queued jobs when llama-swap swapped/killed ComfyUI).
+                   Submits the next clip right after the current one settles (minimal gap between jobs).
+                   Guards every prompt string, keep-alive touch, static check, then POST /prompt (comm.submit).
+                   ComfyUI renders at most one prompt at a time, protecting the queue if swapped out.
   collect        : every QPOLL_SEC (3 s) one GET /comfyui/queue; a prompt that left the queue is read from /history
                    (comm.fetch) and gets its OBJECTIVE check as it finishes (ffprobe size/frames/audio, black/freeze;
                    PNG + size for stills). The per-job timeout (JOB_TIMEOUT) counts from when ComfyUI starts the job,
@@ -52,6 +53,8 @@ OUT_ROOT = os.path.join(comm.C, "output", "community")
 QPOLL_SEC = 3        # collect poll inside a batch (lock held, comfyui_auto kept loaded, so a poll is no extra wake)
 JOB_TIMEOUT = 3600   # per job, counted from when ComfyUI starts it (was from submit with one job at a time)
 EVICT_MISSES = 10    # polls a prompt may be in neither /queue nor /history before it counts as evicted (~30 s)
+MAX_IN_FLIGHT = 1    # at most ONE prompt of this batch in ComfyUI at a time (FIX 3a, 2026-11-03)
+QUEUE_TIMEOUT_STOPPING = 10  # short /queue timeout (s) after repeated timeouts indicate ComfyUI stopping (FIX 3b)
 
 
 def qlog(run_dir, line):
@@ -106,7 +109,7 @@ def detach(argv, run_dir):
     return 0
 
 
-def guard_graph(g, require_adult=False):
+def guard_graph(g, require_adult=True):  # Derek 2026-11-03 6:15 AM CT: require_adult is the default
     """Adults-only gate. Every prompt string must pass comm.guard_ok; with require_adult, at least one must state an adult.
     A malformed graph fails (fail closed)."""
     if not isinstance(g, dict) or not all(isinstance(n, dict) for n in g.values()):
@@ -368,42 +371,60 @@ def settle(run_dir, e, s, frames, size, retry, slog):
 
 
 def run_wave(run_dir, jobs, frames, size, retry, slog, adopt=None):
-    """Submit every job to ComfyUI's /prompt queue up front, then collect each as it finishes.
+    """Submit clips to ComfyUI one at a time (MAX_IN_FLIGHT = 1), then collect each as it finishes.
     adopt = {prompt_id: entry} from harvest(): jobs already in ComfyUI's queue, collected without a re-submit.
     Returns (failed jobs, stopped)."""
     failed, live = [], dict(adopt or {})
-    for j in jobs:
+    pending = list(jobs)
+    queue_timeouts = 0
+    stopping = False
+    while pending or live:
         if stop_seen(run_dir):
-            qlog(run_dir, "STOP file seen: halted before submitting pos=%d tag=%s" % (j["pos"], j["tag"]))
+            if pending:
+                qlog(run_dir, "STOP file seen: halted before submitting pos=%d tag=%s" % (pending[0]["pos"], pending[0]["tag"]))
             stop_comfy(run_dir, slog, len(live)); return failed, True
-        d = os.path.join(run_dir, j["tag"])
-        e = {"job": j, "out": {}, "t_att": time.time(), "log": os.path.join(d, "status.log")}
-        try:
-            e["g0"] = prepare(run_dir, j, retry, slog)
-            if e["g0"] is None:
+        while len(live) < MAX_IN_FLIGHT and pending:
+            j = pending.pop(0)
+            if stop_seen(run_dir):
+                qlog(run_dir, "STOP file seen: halted before submitting pos=%d tag=%s" % (j["pos"], j["tag"]))
+                stop_comfy(run_dir, slog, len(live)); return failed, True
+            d = os.path.join(run_dir, j["tag"])
+            e = {"job": j, "out": {}, "t_att": time.time(), "log": os.path.join(d, "status.log")}
+            try:
+                e["g0"] = prepare(run_dir, j, retry, slog)
+                if e["g0"] is None:
+                    failed.append(j); continue
+                e["t0"] = time.time()
+                pid = comm.submit(copy.deepcopy(e["g0"]), j["tag"], meta(j, retry), d, logfile=e["log"], out=e["out"])
+            except Exception as ex:
+                qlog(run_dir, "FAIL pos=%d tag=%s error %s: %s" % (j["pos"], j["tag"], type(ex).__name__, str(ex)[:160].replace("\n", " ")))
                 failed.append(j); continue
-            e["t0"] = time.time()
-            pid = comm.submit(copy.deepcopy(e["g0"]), j["tag"], meta(j, retry), d, logfile=e["log"], out=e["out"])
-        except Exception as ex:
-            qlog(run_dir, "FAIL pos=%d tag=%s error %s: %s" % (j["pos"], j["tag"], type(ex).__name__, str(ex)[:160].replace("\n", " ")))
-            failed.append(j); continue
-        if pid is None:  # guard hit, POST rejected or submit stall: settled now, exactly as the one-job path does
-            if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(j)
-            continue
-        try: save_pid(run_dir, j["tag"], pid, expected_prefix(e["g0"]), retry)
-        except Exception as ex: slog("prompt_ids note %s" % str(ex)[:120])
-        live[pid] = e
-    slog("QUEUE submitted %d clip(s) to ComfyUI up front" % len(live))
-    while live:
-        if stop_seen(run_dir):
-            stop_comfy(run_dir, slog, len(live)); return failed, True
+            if pid is None:  # guard hit, POST rejected or submit stall: settled now, exactly as the one-job path does
+                if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(j)
+                continue
+            try: save_pid(run_dir, j["tag"], pid, expected_prefix(e["g0"]), retry)
+            except Exception as ex: slog("prompt_ids note %s" % str(ex)[:120])
+            live[pid] = e
+            slog("QUEUE submitted pos=%d tag=%s prompt_id=%s (in-flight %d/%d)" % (j["pos"], j["tag"], pid, len(live), MAX_IN_FLIGHT))
+        if not live:
+            break
         time.sleep(QPOLL_SEC)
+        q_timeout = QUEUE_TIMEOUT_STOPPING if stopping else comm.POLL_TIMEOUT
         try:
-            q = comm.http(comm.BASE + "/queue", timeout=comm.POLL_TIMEOUT)
+            q = comm.http(comm.BASE + "/queue", timeout=q_timeout)
+            queue_timeouts = 0
+            if stopping:
+                stopping = False
+                slog("comfyui_auto answered /queue; stopping state cleared")
             running = {x[1] for x in q.get("queue_running", [])}
-            pending = {x[1] for x in q.get("queue_pending", [])}
+            pending_ids = {x[1] for x in q.get("queue_pending", [])}
         except Exception as ex:
+            queue_timeouts += 1
             slog("poll warn queue %s" % str(ex)[:160])
+            if queue_timeouts >= 2:
+                if not stopping:
+                    stopping = True
+                    slog("comfyui_auto looks like it is being stopped (%d /queue timeouts)" % queue_timeouts)
             if comm.comfy_loaded() is False:  # same rule as comm.run: the history went with the process
                 for pid, e in list(live.items()):
                     comm.log(f"poll stop {e['job']['tag']} comfyui_auto is not running: prompt_id {pid} is in no live history", e["log"])
@@ -419,11 +440,28 @@ def run_wave(run_dir, jobs, frames, size, retry, slog, adopt=None):
                     e["started"] = now; comm.log(f"JOB running {tag} prompt_id={pid} queued={now - e['t0']:.0f}s", e["log"])
                 elif now - e["started"] > JOB_TIMEOUT:
                     comm.log(f"JOB timeout {tag}", e["log"])
-                    comm.outcome(e["out"], "stalled", pid, note=f"no history {JOB_TIMEOUT}s after ComfyUI started it; the render may have landed in ComfyUI output")
+                    try:
+                        comm.http(comm.BASE + "/interrupt", data={}, timeout=10, method="POST")
+                        comm.http(comm.BASE + "/queue", data={"delete": [pid]}, timeout=10, method="POST")
+                        comm.log(f"JOB cancelled via /interrupt and /queue delete {tag} prompt_id={pid}", e["log"])
+                    except Exception as ex_cancel:
+                        comm.log(f"JOB cancel error {tag}: {ex_cancel}", e["log"])
+                    comm.outcome(e["out"], "stalled", pid, note=f"no history {JOB_TIMEOUT}s after ComfyUI started it; cancelled via /interrupt; the render may have landed in ComfyUI output")
                     if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(e["job"])
                     del live[pid]
                 continue
-            if pid in pending:
+            if pid in pending_ids:
+                if now - e["t0"] > 900:
+                    comm.log(f"JOB pending timeout {tag} (>15m unstarted)", e["log"])
+                    try:
+                        comm.http(comm.BASE + "/interrupt", data={}, timeout=10, method="POST")
+                        comm.http(comm.BASE + "/queue", data={"delete": [pid]}, timeout=10, method="POST")
+                        comm.log(f"JOB cancelled via /interrupt and /queue delete {tag} prompt_id={pid}", e["log"])
+                    except Exception as ex_cancel:
+                        comm.log(f"JOB cancel error {tag}: {ex_cancel}", e["log"])
+                    comm.outcome(e["out"], "stalled", pid, note="no progress for >15m in queue; cancelled via /interrupt")
+                    if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(e["job"])
+                    del live[pid]
                 continue
             try:
                 s = comm.fetch(pid, tag, meta(e["job"], retry), os.path.join(run_dir, tag), e.get("started", e["t0"]), e["log"], e["out"])
