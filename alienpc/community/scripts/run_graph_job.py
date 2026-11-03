@@ -204,6 +204,7 @@ def main():
         else:
             log(f"STUCK {a.tag} objective failure after {a.max_redo} redos - flagged for Derrick")
     finally:
+        comm.mark_collected()  # (c) 2026-11-02: outputs collected; comfy_graceful_stop.ps1 need not wait for the lock
         try: post(f"{LS}/api/models/unload/comfyui_auto", 300); log("UNLOAD comfyui_auto (POST /api/models/unload)")
         except Exception as e: log(f"unload note {str(e)[:120]}")
         gpu_unlock(log)   # RENDER-TIMEOUT: release C:/AI/locks/gpu-render.lock so the gate opens for the next job

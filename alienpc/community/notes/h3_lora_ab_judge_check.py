@@ -24,6 +24,7 @@
 #   ... --pack     # build the blinded pack + key.csv (no model, no GPU)
 import argparse
 import csv
+import hashlib
 import json
 import os
 import random
@@ -56,6 +57,35 @@ FACE_DIR = JOUT  # face_curve_*.json written by notes/bj_pov_face_curve.py via t
 
 def cells():
     return json.loads(ORDER.read_text(encoding="utf-8"))["order"]
+
+
+def sha256_file(path):
+    """(d) 2026-11-02: clip_sha256 from the clip bytes, same digest as run_queue.py:235 (was written as "")."""
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def backfill_clip_sha(key_csv=None, runs=None):
+    """(d) fill empty clip_sha256 cells in an existing key.csv from <runs>/<cell>/<cell>.mp4. CPU only, no rescoring;
+    every other column is left byte-for-byte as it was. Returns the number of rows filled."""
+    key_csv, runs = Path(key_csv or STAGE / "key.csv"), Path(runs or RUNS)
+    with open(key_csv, newline="", encoding="utf-8") as fh:
+        rd = csv.DictReader(fh)
+        fields, rows = rd.fieldnames, list(rd)
+    n = 0
+    for r in rows:
+        if not r.get("clip_sha256"):
+            src = runs / r["cell"] / (r["cell"] + ".mp4")
+            r["clip_sha256"] = sha256_file(src)
+            n += 1
+    with open(key_csv, "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields)
+        w.writeheader()
+        w.writerows(rows)
+    return n
 
 
 def face_summary(cell):
@@ -157,7 +187,7 @@ def build_pack(summary):
         j = next(x for x in cells() if x["tag"] == cell)
         row = {"pack_id": pid, "cell": cell, "lora": j["lora"], "strength_model": j["strength_model"],
                "bytes": src.stat().st_size, "seed": j["seed"], "prompt_sha256": j["prompt_sha256"][:16],
-               "clip_sha256": "", "packaged_as": pid + ".mp4"}
+               "clip_sha256": sha256_file(src), "packaged_as": pid + ".mp4"}
         row.update(face_summary(cell))
         s = summary.get(PREFIX + cell, {})
         row["precheck_flags"] = ";".join(s.get("flags", []))
@@ -179,7 +209,11 @@ def main():
     ap.add_argument("--vlm", action="store_true", help="VLM flag tier (takes gpu-render.lock)")
     ap.add_argument("--pack", action="store_true", help="build the blinded pack + key.csv")
     ap.add_argument("--frames", type=int, default=16)
+    ap.add_argument("--backfill-sha", action="store_true", help="(d) only fill empty clip_sha256 in key.csv; no judge, no GPU")
     a = ap.parse_args()
+    if a.backfill_sha:
+        print("clip_sha256 backfilled rows:", backfill_clip_sha())
+        return 0
     jobs = stage()
     summary = run_prechecks(jobs, a.frames)
     if a.vlm:
