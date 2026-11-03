@@ -31,4 +31,4 @@ All seven files came from that same backup subtree as copies, with hashes verifi
 - The same public profile has 19 more H3 face LoRAs of the same shape and size class, so they are siblings of the file we already run: any of them is a one-file, ~148 MiB test, and each needs Derrick's GO.
 
 ## Private trail
-Real-person strings, the exact source file names and the old disk paths live only in `C:\AI\lora\character-set-private-2026-11-03\` (`MANIFEST_alias.csv`, `README.md`). Nothing in that folder was changed today.
+The trained words, the exact source file names and the old disk paths live only in `C:\AI\lora\character-set-private-2026-11-03\` (`MANIFEST_alias.csv`, `README.md`) and in the lane record `C:\Users\derek\sydney\notes\2026-11-03-fc-face-set-private.md`. Nothing in that folder was changed today.
