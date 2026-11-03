@@ -33,14 +33,15 @@ way as for the default recipe. Frames stay a per-run choice; `--frames` must equ
 
 ## LoRA notes
 - File: `FC_SYDNEY_h3_face_v1.safetensors` (155,131,760 B, sha256 head `8fdc5f54`), `modelspec.architecture = MiniMax-H3/lora`,
-  `ss_base_checkpoint = minimax_h3_ref2va_pruned_int8_convrot`, dim 16 / alpha 16 - the only one of the archived set
-  that fits this base model (`notes/2026-10-29-lora-alias-verify-and-rename.md` §2).
+  `ss_base_checkpoint = minimax_h3_ref2va_pruned_int8_convrot`, dim 16 / alpha 16 - the only one of the seven character
+  LoRAs that fits this base model (`notes/2026-10-29-lora-alias-verify-and-rename.md` §2).
 - Strength 0.7 is inside the face range 0.6-0.8 for a merged beta7 (`C:/AI/lora/person_alias_2026-10-29/h3/USAGE_FC_SYDNEY_h3.md`);
   drop to 0.4 if it fights the merge. No general NSFW LoRA on beta7 (h3-prompting R31).
 - Trigger hygiene (R31): this LoRA carries a trained trigger string; it is recorded in the private
   `C:/AI/lora/person_alias_2026-10-29/TRIGGER_MAP_private.txt` and is named in a prompt **only** for a request built
   from this template, never for a plain B2 request. Which prompts name it is Derek's call; his standing rule for the
-  shared trail is that real-person names stay out of shared names and shared notes, so prompt files for this template
+  shared trail is that the trained token stays in the private file and only the character name appears in shared names
+  and shared notes, so prompt files for this template
   live in the talk lane (`C:/Users/derek/sydney/prompts/`), and run dirs are gitignored.
 - Measured effect of this LoRA on one earlier cell (`notes/2026-10-30-bj-pov-three-methods-DONE.md`): at 0.7 with no
   trigger and no face in frame 0 it moved face similarity by noise (+0.0002 mean); the start frame is the driver of
