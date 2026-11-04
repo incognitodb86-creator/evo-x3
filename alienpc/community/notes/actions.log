@@ -2674,3 +2674,96 @@ Max2: 2026-10-29 10:58 CT BRIEF items 2-3: remove 8a0707e job-2 files + fix hand
 {0} sydney-lane BLOCKED run=lora_conv_e10_20261103 detail=0 clips rendered; ComfyUI 8188 no listener after lane wake; queue died in readiness poll; lock pid 32420 was stale and is RELEASED; record=notes\2026-11-03-lora-conv-e10-blocker.md
 2026-11-03T15:53:00-05:00 sydney-lane DONE survey=playtime-ai-hf detail=read-only web survey of HF org Playtime-AI: 82 repos, 20 female-face LoRAs for a MiniMax H3 base, 0 datasets, 0 spaces, no audio/TTS/voice model; Sydney file 155,131,760 B sha256 8fdc5f54...; record=notes\2026-11-03-playtime-ai-hf-survey.md
 2026-11-03T15:56:44-05:00 sydney-lane DONE probe=fc_sydney_lora_provenance detail=provenance measured: sha256 8fdc5f54... of FC_SYDNEY_h3_face_v1 equals the public HF H3 LoRA (155,131,760 B); MANIFEST_alias.csv shows a 2026-10-29 copy from the 2026-10-26 E: backup of a file in a folder marked not-in-use 2026-10-09; header says trained 2026-08-24 by a community author (dim16, 624 tensors, int8 ref2va base). Set adopted and renamed, not trained here. record=notes\2026-11-03-fc-sydney-lora-provenance.md
+2026-11-03T16:13:32-05:00 run_queue lora_conv_e10_20261103: BATCH open: 3 clips, lock held, comfyui_auto kept loaded
+2026-11-03T16:13:32-05:00 run_queue lora_conv_e10_20261103: START pos=1 tag=a0_words arm=a0_words scene=e10_strip_facefront_lora_conv seed=250233929
+2026-11-03T16:15:41-05:00 run_queue lora_conv_e10_20261103: DONE pos=1 tag=a0_words ok 768x1344 124f audio yes wall=?s bytes=1781920 retry=False
+2026-11-03T16:15:41-05:00 run_queue lora_conv_e10_20261103: START pos=2 tag=a1_lora05 arm=a1_lora05 scene=e10_strip_facefront_lora_conv seed=250233929
+2026-11-03T16:17:23-05:00 run_queue lora_conv_e10_20261103: DONE pos=2 tag=a1_lora05 ok 768x1344 124f audio yes wall=?s bytes=1669380 retry=False
+2026-11-03T16:17:23-05:00 run_queue lora_conv_e10_20261103: START pos=3 tag=a2_lora08 arm=a2_lora08 scene=e10_strip_facefront_lora_conv seed=250233929
+2026-11-03T16:19:04-05:00 run_queue lora_conv_e10_20261103: DONE pos=3 tag=a2_lora08 ok 768x1344 124f audio yes wall=?s bytes=1565313 retry=False
+2026-11-03T16:19:06-05:00 run_queue lora_conv_e10_20261103: BATCH closed rc=0 reason=all queued clips DONE ok done=3/3: comfyui_auto unloaded, lock released
+2026-11-03 23:16:26UTC | DONE | sydney-lane: face-LoRA pipeline renamed to FC_<FIRST NAME> (24 installed, 25/25 FIT header-only, 24 templates at 1.0, builder+cards); shared records carry alias + fictional-character line only, full-name trigger stays in the private map; brain db8f03e pushed, community c5ca31a; lane rules in notes/2026-11-03-fc-face-set-private.md; no render (no GO)
+2026-11-03T17:23:35-05:00 run_queue face_pov_bj_20261103: BATCH open: 3 clips, lock held, comfyui_auto kept loaded
+2026-11-03T17:23:35-05:00 run_queue face_pov_bj_20261103: START pos=1 tag=fc_millie_s51083202 arm=fc_millie_s51083202 scene=pov_bj seed=51083202
+2026-11-03T17:26:01-05:00 run_queue face_pov_bj_20261103: DONE pos=1 tag=fc_millie_s51083202 ok 768x1344 124f audio yes wall=?s bytes=2233317 retry=False
+2026-11-03T17:26:01-05:00 run_queue face_pov_bj_20261103: START pos=2 tag=fc_megan_s51083202 arm=fc_megan_s51083202 scene=pov_bj seed=51083202
+2026-11-03T17:28:04-05:00 run_queue face_pov_bj_20261103: DONE pos=2 tag=fc_megan_s51083202 ok 768x1344 124f audio yes wall=?s bytes=2119014 retry=False
+2026-11-03T17:28:04-05:00 run_queue face_pov_bj_20261103: START pos=3 tag=fc_sydney_s51083202 arm=fc_sydney_s51083202 scene=pov_bj seed=51083202
+2026-11-03T17:30:06-05:00 run_queue face_pov_bj_20261103: DONE pos=3 tag=fc_sydney_s51083202 ok 768x1344 124f audio yes wall=?s bytes=2398351 retry=False
+2026-11-03T17:30:08-05:00 run_queue face_pov_bj_20261103: BATCH closed rc=0 reason=all queued clips DONE ok done=3/3: comfyui_auto unloaded, lock released
+2026-11-03T17:44:42-05:00 run_queue face_pov_bj_20261103: BATCH open: 6 clips, lock held, comfyui_auto kept loaded
+2026-11-03T17:44:42-05:00 run_queue face_pov_bj_20261103: START pos=1 tag=fc_millie_s51083202_str08 arm=fc_millie_s51083202_str08 scene=pov_bj seed=51083202
+2026-11-03T17:47:12-05:00 run_queue face_pov_bj_20261103: DONE pos=1 tag=fc_millie_s51083202_str08 ok 768x1344 124f audio yes wall=?s bytes=2359286 retry=False
+2026-11-03T17:47:12-05:00 run_queue face_pov_bj_20261103: START pos=2 tag=fc_megan_s51083202_str08 arm=fc_megan_s51083202_str08 scene=pov_bj seed=51083202
+2026-11-03T17:49:18-05:00 run_queue face_pov_bj_20261103: DONE pos=2 tag=fc_megan_s51083202_str08 ok 768x1344 124f audio yes wall=?s bytes=2080852 retry=False
+2026-11-03T17:49:18-05:00 run_queue face_pov_bj_20261103: START pos=3 tag=fc_sydney_s51083202_str08 arm=fc_sydney_s51083202_str08 scene=pov_bj seed=51083202
+2026-11-03T17:51:21-05:00 run_queue face_pov_bj_20261103: DONE pos=3 tag=fc_sydney_s51083202_str08 ok 768x1344 124f audio yes wall=?s bytes=2218181 retry=False
+2026-11-03T17:51:21-05:00 run_queue face_pov_bj_20261103: START pos=4 tag=fc_millie_s51083202_str01 arm=fc_millie_s51083202_str01 scene=pov_bj seed=51083202
+2026-11-03T17:53:27-05:00 run_queue face_pov_bj_20261103: DONE pos=4 tag=fc_millie_s51083202_str01 ok 768x1344 124f audio yes wall=?s bytes=2090248 retry=False
+2026-11-03T17:53:27-05:00 run_queue face_pov_bj_20261103: START pos=5 tag=fc_megan_s51083202_str01 arm=fc_megan_s51083202_str01 scene=pov_bj seed=51083202
+2026-11-03T17:55:32-05:00 run_queue face_pov_bj_20261103: DONE pos=5 tag=fc_megan_s51083202_str01 ok 768x1344 124f audio yes wall=?s bytes=2048441 retry=False
+2026-11-03T17:55:32-05:00 run_queue face_pov_bj_20261103: START pos=6 tag=fc_sydney_s51083202_str01 arm=fc_sydney_s51083202_str01 scene=pov_bj seed=51083202
+2026-11-03T17:57:38-05:00 run_queue face_pov_bj_20261103: DONE pos=6 tag=fc_sydney_s51083202_str01 ok 768x1344 124f audio yes wall=?s bytes=2525359 retry=False
+2026-11-03T17:57:40-05:00 run_queue face_pov_bj_20261103: BATCH closed rc=0 reason=all queued clips DONE ok done=6/6: comfyui_auto unloaded, lock released
+2026-11-03 18:05:00 DONE | sydney-lane: face POV strength test 9 clips (3 FC_* faces x strength 0.1/0.5/0.8), one seed 51083202, 124f 768x1344, Derek photo as only ref; measured: 0.1 = no face, 0.5 = type only, 0.8 = first setting where a face landed; judge on _cmp/cmp_<face>.png face-loft frames; rc=0 both batches, 26 gate tests passed, 9 clips + 2 keys on QNAP pi-drop/face-pov-bj-2026-11-03; standing form rule: no mp4 in chat, stills only; learning 20_learnings/max-video/2026-11-03-face-lora-strength-floor-measured.md; lane note 2026-11-03-face-pov-bj-strength-test.md
+2026-11-03T18:27:00-05:00 run_queue face_pov_bj_v2_20261103: BATCH open: 9 clips, lock held, comfyui_auto kept loaded
+2026-11-03T18:27:00-05:00 run_queue face_pov_bj_v2_20261103: START pos=1 tag=fc_millie_v2_str07 arm=fc_millie_v2_str07 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:29:27-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=1 tag=fc_millie_v2_str07 ok 768x1344 124f audio yes wall=?s bytes=2479238 retry=False
+2026-11-03T18:29:27-05:00 run_queue face_pov_bj_v2_20261103: START pos=2 tag=fc_megan_v2_str07 arm=fc_megan_v2_str07 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:31:39-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=2 tag=fc_megan_v2_str07 ok 768x1344 124f audio yes wall=?s bytes=2209692 retry=False
+2026-11-03T18:31:39-05:00 run_queue face_pov_bj_v2_20261103: START pos=3 tag=fc_sydney_v2_str07 arm=fc_sydney_v2_str07 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:33:50-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=3 tag=fc_sydney_v2_str07 ok 768x1344 124f audio yes wall=?s bytes=2366612 retry=False
+2026-11-03T18:33:50-05:00 run_queue face_pov_bj_v2_20261103: START pos=4 tag=fc_millie_v2_str09 arm=fc_millie_v2_str09 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:35:55-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=4 tag=fc_millie_v2_str09 ok 768x1344 124f audio yes wall=?s bytes=2564114 retry=False
+2026-11-03T18:35:55-05:00 run_queue face_pov_bj_v2_20261103: START pos=5 tag=fc_megan_v2_str09 arm=fc_megan_v2_str09 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:38:01-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=5 tag=fc_megan_v2_str09 ok 768x1344 124f audio yes wall=?s bytes=2341176 retry=False
+2026-11-03T18:38:01-05:00 run_queue face_pov_bj_v2_20261103: START pos=6 tag=fc_sydney_v2_str09 arm=fc_sydney_v2_str09 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:40:10-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=6 tag=fc_sydney_v2_str09 ok 768x1344 124f audio yes wall=?s bytes=2354144 retry=False
+2026-11-03T18:40:10-05:00 run_queue face_pov_bj_v2_20261103: START pos=7 tag=fc_millie_v2_str10 arm=fc_millie_v2_str10 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:42:15-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=7 tag=fc_millie_v2_str10 ok 768x1344 124f audio yes wall=?s bytes=2615202 retry=False
+2026-11-03T18:42:15-05:00 run_queue face_pov_bj_v2_20261103: START pos=8 tag=fc_megan_v2_str10 arm=fc_megan_v2_str10 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:44:27-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=8 tag=fc_megan_v2_str10 ok 768x1344 124f audio yes wall=?s bytes=2361331 retry=False
+2026-11-03T18:44:27-05:00 run_queue face_pov_bj_v2_20261103: START pos=9 tag=fc_sydney_v2_str10 arm=fc_sydney_v2_str10 scene=pov_bj_v2 seed=51083202
+2026-11-03T18:46:35-05:00 run_queue face_pov_bj_v2_20261103: DONE pos=9 tag=fc_sydney_v2_str10 ok 768x1344 124f audio yes wall=?s bytes=2405179 retry=False
+2026-11-03T18:46:37-05:00 run_queue face_pov_bj_v2_20261103: BATCH closed rc=0 reason=all queued clips DONE ok done=9/9: comfyui_auto unloaded, lock released
+2026-11-03T18:57:30-05:00 | DONE | sydney-lane: face POV v2 - strength curve 0.7/0.9/1.0 x FC_MILLIE/FC_MEGAN/FC_SYDNEY, seed 51083202, 124f 768x1344, Derek photo as only ref, improved prompt (face-lift beat at 00:04.2, facial geometry, skin/hair detail, light blue eyes for FC_MEGAN per his ask). 9/9 ok rc=0, prompt_sha256 identical across strengths (single axis). Judged on comparison sheets: 0.7 best on all three, 0.9 close, 1.0 washed; the face-lift beat is what made the face judgeable. Measured audio: f0 329.9-344.1 Hz across all 10 clips, one generic voice, no speaker conditioning in the graph. Pack pi-drop/face-pov-bj-v2-2026-11-03 (13 files verified). Notes: C:\Users\derek\sydney\notes\2026-11-03-face-pov-bj-v2-strength-curve.md + learning merge. GPU free, lock released.
+2026-11-03T19:12:40-05:00 | FIX | sydney-lane: face strength default 1.0 -> 0.7 per Derek's keep .7; make_face_templates.py STRENGTH_MODEL=0.7, 24 templates regenerated and verified (0.7/1.0, one LoraLoader, m_attn<-lora, no trigger text, b2 clean), render_face_clip.py default reports 0.7 (template); README + prompt cards + brain FC status updated with the measurement, R31 note rewritten, one shared card line de-themed. Community 6a04b8e, brain status pushed, lane commit follows.
+2026-11-03T19:35:00-05:00 | DONE | sydney-lane: research-core STANDARD (15 calls) on existing community ways for face + voice. Found and verified from primary docs: MiniMaxH3ReferenceToVideo ref_audios + <Audio 1> voice-timbre reference + reference/fully_copy markers, audio_vae required; ref_image_size max = 2048px identity fidelity; prompt-native <d>[English] line</d> lip-sync; TTS-Audio-Suite (19 engines, RVC 100-300MB) and GPT-SoVITS (5s zero-shot) as the word-level layer. Corrected my own 19:0x claim that voice identity is post-process only. Lane note 2026-11-03-research-voice-and-face-community-ways.md, learning 2026-11-03-h3-ref2va-reference-audio-and-identity-inputs.md, brain pushed, lane commit follows. No GPU, no installs.
+2026-11-03T19:43:51-05:00 run_queue face_take_20261103: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-03T19:43:51-05:00 run_queue face_take_20261103: START pos=1 tag=fc_sydney_s51083401 arm=fc_sydney scene=None seed=51083401
+2026-11-03T19:48:04-05:00 run_queue face_take_20261103: FAIL pos=1 tag=fc_sydney_s51083401 objective frames 243 != 124
+2026-11-03T19:48:04-05:00 run_queue face_take_20261103: START pos=1 tag=fc_sydney_s51083401 arm=fc_sydney scene=None seed=51083401 (the one allowed unchanged retry)
+2026-11-03T19:48:08-05:00 run_queue face_take_20261103: FAIL pos=1 tag=fc_sydney_s51083401 objective frames 243 != 124
+2026-11-03T19:48:08-05:00 run_queue face_take_20261103: FAIL pos=1 tag=fc_sydney_s51083401 failed twice (one unchanged retry used) - skipped
+2026-11-03T19:48:10-05:00 run_queue face_take_20261103: BATCH closed rc=5 reason=1 clip(s) failed twice: fc_sydney_s51083401 done=0/1: comfyui_auto unloaded, lock released
+2026-11-03T19:43:30-05:00 | START | sydney-lane: face_take_20261103 - 243f (10.125s) FC_SYDNEY at 0.7, seed 51083401, Derek's own scene photo as the only reference, run_queue detached PID 23448, lock acquired, adults gates 26 passed.
+2026-11-03T19:58:00-05:00 | FIX | sydney-lane: pilot 243f clip probed clean (768x1344, 243f, 10.125s, 247.2s wall) and was marked FAIL only by the objective gate: render_face_clip.py hands run_queue no --frames, so the check ran against its default 124. Fix is item 0 of the new 10-cell plan (plans/2026-11-03-1955-fc-take-chain-10-plan.md); pilot kept as cell 1.
+2026-11-03T20:04:16-05:00 run_queue take_chain_20261104: BATCH open: 10 clips, lock held, comfyui_auto kept loaded
+2026-11-03T20:04:16-05:00 run_queue take_chain_20261104: START pos=1 tag=c01_s51083401 arm=fc_sydney scene=None seed=51083401
+2026-11-03T20:08:25-05:00 run_queue take_chain_20261104: DONE pos=1 tag=c01_s51083401 ok 768x1344 243f audio yes wall=?s bytes=3449152 retry=False
+2026-11-03T20:08:25-05:00 run_queue take_chain_20261104: START pos=2 tag=c02_s51083402 arm=fc_sydney scene=None seed=51083402
+2026-11-03T20:12:13-05:00 run_queue take_chain_20261104: DONE pos=2 tag=c02_s51083402 ok 768x1344 243f audio yes wall=?s bytes=3738480 retry=False
+2026-11-03T20:12:13-05:00 run_queue take_chain_20261104: START pos=3 tag=c03_s51083403 arm=fc_sydney scene=None seed=51083403
+2026-11-03T20:16:01-05:00 run_queue take_chain_20261104: DONE pos=3 tag=c03_s51083403 ok 768x1344 243f audio yes wall=?s bytes=4003742 retry=False
+2026-11-03T20:16:01-05:00 run_queue take_chain_20261104: START pos=4 tag=c04_s51083404 arm=fc_sydney scene=None seed=51083404
+2026-11-03T20:19:49-05:00 run_queue take_chain_20261104: DONE pos=4 tag=c04_s51083404 ok 768x1344 243f audio yes wall=?s bytes=3719203 retry=False
+2026-11-03T20:19:49-05:00 run_queue take_chain_20261104: START pos=5 tag=c05_s51083405 arm=fc_sydney scene=None seed=51083405
+2026-11-03T20:23:37-05:00 run_queue take_chain_20261104: DONE pos=5 tag=c05_s51083405 ok 768x1344 243f audio yes wall=?s bytes=2858715 retry=False
+2026-11-03T20:23:37-05:00 run_queue take_chain_20261104: START pos=6 tag=c06_s51083406 arm=fc_sydney scene=None seed=51083406
+2026-11-03T20:27:25-05:00 run_queue take_chain_20261104: DONE pos=6 tag=c06_s51083406 ok 768x1344 243f audio yes wall=?s bytes=3255380 retry=False
+2026-11-03T20:27:25-05:00 run_queue take_chain_20261104: START pos=7 tag=c07_s51083407 arm=fc_sydney scene=None seed=51083407
+2026-11-03T20:31:13-05:00 run_queue take_chain_20261104: DONE pos=7 tag=c07_s51083407 ok 768x1344 243f audio yes wall=?s bytes=3537926 retry=False
+2026-11-03T20:31:13-05:00 run_queue take_chain_20261104: START pos=8 tag=c08_s51083408 arm=fc_sydney scene=None seed=51083408
+2026-11-03T20:35:01-05:00 run_queue take_chain_20261104: DONE pos=8 tag=c08_s51083408 ok 768x1344 243f audio yes wall=?s bytes=3533072 retry=False
+2026-11-03T20:35:01-05:00 run_queue take_chain_20261104: START pos=9 tag=c09_s51083409 arm=fc_sydney scene=None seed=51083409
+2026-11-03T20:38:52-05:00 run_queue take_chain_20261104: DONE pos=9 tag=c09_s51083409 ok 768x1344 243f audio yes wall=?s bytes=3036942 retry=False
+2026-11-03T20:38:52-05:00 run_queue take_chain_20261104: START pos=10 tag=c10_s51083410 arm=fc_sydney scene=None seed=51083410
+2026-11-03T20:42:41-05:00 run_queue take_chain_20261104: DONE pos=10 tag=c10_s51083410 ok 768x1344 243f audio yes wall=?s bytes=2975327 retry=False
+2026-11-03T20:42:42-05:00 run_queue take_chain_20261104: BATCH closed rc=0 reason=all queued clips DONE ok done=10/10: comfyui_auto unloaded, lock released
+2026-11-03T20:04:30-05:00 | START | sydney-lane: take_chain_20261104 - 10 cells x 243f (10.125s each, 101.25s of film) FC_SYDNEY at 0.7, seeds 51083401-51083410, one axis per cell, Derek's own scene photo as the only reference in all ten, built prompts name-injected 10/10, shared subject block sha a8a70d22b6ad identical in all ten (R28/R30 proof), run_queue --frames 243 detached PID 12328, lock acquired. Item 0 fixed: render_face_clip.py now passes --frames and takes --append-order (lane commit today).
+2026-11-04T02:52:00-05:00 | FIX | take_chain_stitch.py built (scripts\queue): concat-demuxer hard cuts + 60 ms acrossfade per seam, uniform-cell proof by ffprobe, key.csv + review_grid, exits 0 only when film duration == sum(cells). First run caught a real bug: mux mapped 0:v:0 from the cell list so -shortest truncated the film to one cell (dur=10.125 want=101.250); fixed to input 0 = _video_only.mp4, audio from 1..n.
+2026-11-04T02:53:00-05:00 | DONE | sydney-lane take_chain_20261104 stitch + pack: film _stitch\fc_take_chain_20261104.mp4 101.250000 s, 2430 frames, 768x1344@24, aac 32k stereo, 34522215 B sha a62ecd6cd622..., delta +0.000 vs sum(cells), audio bed 0.540 s shorter by design (9x60 ms) with apad tail; key.csv 10 rows sha 0d12aff6...; review_grid.png 1536x1108 sha 198956e1...; pack pi-drop/fc-take-chain-2026-11-04 = 26 files 82.798 MiB, 26/26 transferred, NAS listing byte-identical to local. Records notes\2026-11-04-fc-take-chain-stitch-DONE.md + needs_derrick.md ask (score 10 cells 0-10, name KEEP). No GPU, no model load, no lock, no render, no delete, no config write. agent=forge chat=chat
+2026-11-04T03:00:51-05:00 run_queue take_wide_20261104: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-04T03:00:51-05:00 run_queue take_wide_20261104: START pos=1 tag=w01_s51083411 arm=fc_sydney scene=None seed=51083411
+2026-11-04T03:05:04-05:00 run_queue take_wide_20261104: DONE pos=1 tag=w01_s51083411 ok 1344x768 243f audio yes wall=?s bytes=3162827 retry=False
+2026-11-04T03:05:06-05:00 run_queue take_wide_20261104: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released

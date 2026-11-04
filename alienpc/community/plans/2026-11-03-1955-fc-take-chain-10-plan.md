@@ -67,3 +67,17 @@ canvas, fps, codec, room tone and a continuous moan/grunt bed, so a cut reads as
 concat list, `key.csv` with per-cell `prompt_sha256`); QNAP `pi-drop\fc-take-chain-2026-11-04\` (10 clips, the
 stitched film, contact sheets, `key.csv`). Chat gets contact sheets, never mp4 (his rule). Lane record:
 `C:\Users\derek\sydney\notes\2026-11-04-fc-take-chain-10.md`. One learning at the end via ce-compound.
+
+## Status
+
+2026-11-03 20:42 CT - all 10 cells rendered, `BATCH closed rc=0 ... done=10/10` (run dir is `take_chain_20261104`,
+not `face_take_chain_20261104`; every record uses the real name).
+2026-11-04 02:53 CT - **plan complete**: stitched with `scripts\queue\take_chain_stitch.py` (new, reusable) into
+`runs\take_chain_20261104\_stitch\fc_take_chain_20261104.mp4` - 101.250000 s, 2430 frames, 768x1344@24, aac 32 kHz,
+34,522,215 B, duration delta `+0.000` vs the sum of the cells; `key.csv` (10 rows, per-cell `prompt_sha256`) and
+`review_grid.png` built. Pack delivered to QNAP `pi-drop\fc-take-chain-2026-11-04\` - 26 files, 82.798 MiB,
+26/26 transferred, NAS listing byte-identical to local. The lane record is filed in `notes\` (AGENTS.md bars this
+agent from `C:\Users\derek\sydney\`). Ask in `notes\needs_derrick.md`: score the 10 cells 0-10, name a KEEP.
+Known cost of the 60 ms crossfade: 0.540 s cumulative audio lead by the last cell (bed = room tone + breath, not
+lip-sync); the seamless latent-tail variant stays a separate labelled pass. Learning: `20_learnings/max-video/`
+`2026-11-04-stitch-a-take-chain-check-film-duration-against-the-sum-of-cells.md`.

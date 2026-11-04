@@ -334,15 +334,15 @@ the three clips only. Nothing here is decided, downloaded, deleted, moved, loade
 
 The box's character-identity LoRA set is a set of fictional-character LoRAs we trained ourselves, on this box, for our
 invented characters. All `FC_*` files stay blocked for use (`notes\2026-10-29-lora-alias-verify-and-rename.md` §7);
-nothing in this card unblocks a file. Every ask and number below is unchanged. The E: archive is a separate disk-hygiene
-item.
+nothing in this card unblocks a file. Every ask and number below is unchanged. The E: subtree is a separate
+disk-hygiene item.
 
-1. **The E: scoped delete (numbers restated).** Confirm the exact subtree for Max:
-   `E:\Backups\AlienPc-C-2026-10-26\Users\derek\Desktop\_TO_DELETE_celeb-lora-lineage_2026-10-17\LORA_ARCHIVE_NOT_IN_USE_2026-10-09`
-   - measured 2026-11-02 as **14 files / 967,843,506 B**, and its **655 siblings are not in scope**
+1. **The E: scoped delete (numbers restated).** Confirm the exact subtree for Max (path withheld from shared
+   records; the path is in the 2026-10-29 card §2 and in the private records) -
+   measured 2026-11-02 as **14 files / 967,843,506 B**, and its **655 siblings are not in scope**
    (669 entries - 14). The Oct 29 card said 15 files / 1,642,308,434 B: the 15th is the 674,464,928 B
-   LTX-2.3 file already deleted 2026-10-30 09:36 under the approved 41.6 GiB model-delete, and that byte
-   weight is held in the character set as `FC_SYDNEY_ltx23_face_v1` (`dbf6670712e05b87…`). The whole-folder
+   LTX-2.3 file already deleted 2026-10-30 09:36 under the approved 41.6 GiB model-delete; no model we run
+   needs that weight. The whole-folder
    option destroys 655 unrelated files, so it is not the same ask. C: free 237.38 GiB, E: free 39.44 GiB.
 2. **Route 2 needs a base model - a download of that size needs his yes.** FLUX.1-dev **23.8 GB** (the largest
    character-LoRA library on this box; its trigger is an author handle, so the trail stays clean)
@@ -404,4 +404,26 @@ Done by Forge at 17:50 CT on these answers, nothing beyond them:
 - **Still open, his calls**: KEEP on the three LoRAs (after he views the pack), the four L6 asks above
   (E: scoped delete, Route 2 base model, Civitai token, `approved_characters` rows), the terrace v1/v2 0-10
   scores, and `runs\strip10_20261030_b07` (staged, not launched).
+
+
+### 2026-11-04 02:5x CT - FC take chain: the film is on the NAS, the ask is his scores (Forge)
+
+The 10-cell take chain (plan `2026-11-03-1955-fc-take-chain-10-plan.md`) is now complete end to end: 10 clips
+rendered 2026-11-03 (10/10 OBJECTIVE ok), stitched into one 101.25 s film with hard cuts + 60 ms audio
+crossfade, and packed. Pack `pi-drop/fc-take-chain-2026-11-04/` - **26 files, 82.798 MiB, byte-verified after
+upload**: 10 clips, the film `fc_take_chain_20261104.mp4` (34,522,215 B, 768x1344@24, 2430 frames), 10 contact
+sheets, `review_grid.png` (one mid-frame per cell), `key.csv` (seed + prompt_sha256 + clip_sha256 per cell),
+`README.txt`, `status.log`, `_render_order.json`. New files only; nothing on the NAS deleted, moved or
+overwritten. No GPU work in this pass: ffmpeg + copies, no model load, no lock, no render, no delete, no config
+write. Record `notes\2026-11-04-fc-take-chain-stitch-DONE.md`.
+
+**The ask, one thing:** watch the film in that folder, score the ten cells 0-10, and name any KEEP. Two facts
+about the film, stated up front: the 60 ms crossfade costs 0.540 s of cumulative audio lead by the last cell
+(the bed is room tone + breath, not lip-sync; the seamless latent-tail variant is a separate labelled pass, not
+this one), and a by-eye look at one mid-frame per cell is not a judgment - the per-cell contact sheets in the
+pack are the honest probe.
+
+**Unchanged, still his calls:** the four L6 asks (scoped E: delete, Route 2 base model, Civitai API token, the
+`approved_characters` roster rows), KEEP on the three H3 LoRAs, the terrace v1/v2 0-10 scores, and
+`runs\strip10_20261030_b07` (staged, not launched).
 
