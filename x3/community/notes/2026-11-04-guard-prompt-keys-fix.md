@@ -51,3 +51,29 @@ The tested sandbox and the patch file: `C:\Users\derek\sydney\work\guard-fix-202
   through the state blob; the denylist scans it too, which is the point of adding it.
 - Never poll a detached render on `OBJECTIVE` alone: a gate-failed clip never writes that line. Poll with
   a terminal condition (`BATCH closed` / `FAIL` / `rc=`) and a wall cap, and report the first queue log line.
+
+## 12:1x CT - the second bug this fix exposed, same family (Derek: "1")
+The gate fix let the clip through: `runs/pw_strip_20261104c/fc_sydney_strip` rendered well - `OBJECTIVE ok
+frames=124 size=768x1344 audio=True bytes=1954116`, ffprobe h264 768x1344 124f 5.1667 s + aac, delivered to
+`/pi-drop/pw-strip-2026-11-04/fc_sydney_strip_s51083510.mp4` - and the batch still closed `rc=5`, because the
+journal step crashed: `FAIL pos=1 tag=fc_sydney_strip error AttributeError: 'list' object has no attribute 'encode'`.
+Cause: `run_queue.py` built `prompt_sha256` as `hashlib.sha256(prompt.encode("utf-8"))` where `prompt` is read
+from `c0.inputs.prompt`. In a writer-routed graph that value is the link `["pw", 0]`, not a string. So a good
+render was marked failed, twice, and done=0/1. Same root shape as the gate bug: harness code that assumes the
+prompt text sits plainly in `c0`. `still_done` had the same pattern on the Klein text input.
+**Fix:** `run_queue.prompt_behind(g, value)` returns the prompt string behind an input - plain text, or the text
+of the node a link points to, via `comm.prompt_items`; `run_queue.prompt_sha` returns
+`("unresolved", why)` instead of raising, and the queue logs `NOTE ... prompt_sha256 unresolved: <why>`.
+Both call sites use it.
+**Proof:** writer graph `runs/pw_strip_20261104c` -> `b85d945825850e65...`, byte-identical to the sha the
+builder tool reports for the same prompt (`prompt_sha256 b85d9458`), so the journal and the builder agree.
+Plain-prompt graph `runs/take_wide_20261104/w01_s51083411` -> `5d0540d49ca39427...`, identical to what the old
+code produced: no regression for normal graphs. Old code on the writer graph: `AttributeError`.
+**Tests:** `scripts/tests/test_run_queue_prompt_sha.py` (6 tests, green) covers plain text, the writer link, the
+Klein `CLIPTextEncode` link through `still_prompt`, and the unresolvable shapes (missing node, empty string,
+non-string, node with no prompt key) as notes rather than crashes.
+Suite `test_adults_guard + test_guard_scope + test_p6_review + test_phase1_still + test_run_queue_prompt_sha`:
+before this change 6 failed / 50 passed, after 6 failed / **56 passed** - the 6 are the same pre-existing ones.
+Rollback: `scripts/run_queue.py.bak-sha-20261104-1212`.
+Not touched, on purpose: `free_comfy note expected str, bytes or os.PathLike object, not function` in the same
+writer-graph path (caught and logged, cosmetic) and the 6 pre-existing test expectations Max owns.
