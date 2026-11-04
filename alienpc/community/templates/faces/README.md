@@ -9,8 +9,9 @@ run if it ever carries a `lora` node). The same two-node diff was proven on this
   private map
   `C:\Users\derek\sydney\tools\MANIFEST_fc_alias_h3_private.csv`, and the builder injects it at a `{TRIGGER}` token
   (or at the head of the paste). Never type it into a shared card, prompt, graph, note, log or commit.
-- `strength_model` **1.0**, `strength_clip` 1.0 - the owner's rule for this set (2026-11-03). `--strength` is there
-  for a labelled A/B against 0.6/0.8.
+- `strength_model` **0.7**, `strength_clip` 1.0 - the owner's setting for this set (Derek, 2026-11-03), measured the
+  same day: three faces, one seed, the dial only (`prompt_sha256` identical per face) gave **0.7 >= 0.9 > 1.0**, so
+  the top of the dial washes the face it should impose. `--strength` is there for a labelled A/B cell.
 - Fit: 25/25 FIT (the set plus the 2026-10-30 face LoRA as positive control), 100% key-map and 0 bad shapes against
   the resident `10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors`, with the L3 header instrument
   (`C:\Users\derek\5slock\ralph-community\notes\_lora_l3\l3_fit_analysis.py`). No model load, no GPU. Output:
@@ -35,5 +36,7 @@ C:\AI\director\.venv\Scripts\python.exe C:\Users\derek\sydney\tools\render_face_
 ```
 
 Prompt cards: `h3_face_prompt_cards.md` here. Records, maps and test runs: `C:\Users\derek\sydney\`.
-**Open, for the skill owner:** `skills/h3-prompting` R31 caps face-LoRA strength at 0.2-0.6 from the 2026-10-30 test
-line; 1.0 here is the owner's newer instruction for this set. R31 is Max's file, so it is not edited.
+**Open, for the skill owner:** `skills/h3-prompting` R31 caps the in-paste face weight at 0.2-0.6 from the
+2026-10-30 test line. The graph dial here is 0.7, just above that cap, and it is the measured optimum for these
+files on this base (0.1 gives no face at all, 0.5 gives a type, 1.0 washes it). R31 is Max's file, so it is not
+edited; `--strength` keeps every A/B one flag away, and the number goes in the run record.
