@@ -383,7 +383,7 @@
     "class_type": "LoraLoader",
     "inputs": {
       "lora_name": "FC_ALAN_h3_face_v1.safetensors",
-      "strength_model": 1.0,
+      "strength_model": 0.7,
       "strength_clip": 1.0,
       "model": [
         "unet",
