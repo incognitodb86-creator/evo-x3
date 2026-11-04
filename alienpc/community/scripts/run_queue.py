@@ -122,6 +122,33 @@ def still_prompt(g):
     return pos[0]["inputs"].get("text", "") if pos else ""
 
 
+def prompt_behind(g, value):
+    """The prompt STRING behind a node input: plain text, or the text of the node a link points to.
+    A writer-routed graph wires c0.prompt as ["pw", 0] (measured 2026-11-04, runs/pw_strip_20261104c:
+    hashing that value crashed the journal step with "'list' object has no attribute 'encode'", which
+    marked a clip that had rendered well as failed). Returns (text, note); text is "" when it cannot be
+    resolved - never an exception, the caller logs the note."""
+    if isinstance(value, str):
+        return value, ("empty prompt string" if not value else "")
+    if isinstance(value, list) and len(value) == 2 and isinstance(value[0], str):
+        n = g.get(value[0]) if isinstance(g, dict) else None
+        if not isinstance(n, dict):
+            return "", "link to node %s which is not in the graph" % value[0]
+        for _k, s in comm.prompt_items(n.get("inputs") or {}):
+            return s, ""
+        return "", "link to node %s (%s) which carries no prompt-bearing key" % (value[0], n.get("class_type"))
+    return "", "prompt input is neither text nor a node link (%s)" % type(value).__name__
+
+
+def prompt_sha(g, value):
+    """(sha256 of the prompt text behind an input, ""); ("unresolved", why) when it cannot be read.
+    The sha a journal needs is of the TEXT, so it matches the sha the builder tool reports."""
+    t, note = prompt_behind(g, value)
+    if not t:
+        return "unresolved", (note or "no prompt text")
+    return hashlib.sha256(t.encode("utf-8")).hexdigest(), ""
+
+
 def still_done(run_dir, job, tag, f, g0, size, t0, retry, slog):
     """job_type still: PNG output + size check only, then the same render_ok.json and DONE line shape as a clip."""
     if job.get("size"):
@@ -135,9 +162,11 @@ def still_done(run_dir, job, tag, f, g0, size, t0, retry, slog):
     slog("OBJECTIVE ok %s still png size=%sx%s bytes=%d" % (tag, p["w"], p["h"], p["bytes"]))
     outs = [os.path.join(OUT_ROOT, tag, x) for x in os.listdir(os.path.join(OUT_ROOT, tag))] if os.path.isdir(os.path.join(OUT_ROOT, tag)) else []
     wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None
-    prompt = still_prompt(g0)
+    psha, pnote = prompt_sha(g0, still_prompt(g0))
+    if pnote:
+        qlog(run_dir, "NOTE pos=%d tag=%s prompt_sha256 unresolved: %s" % (job["pos"], tag, pnote))
     json.dump({"tag": tag, "pos": job["pos"], "arm": job.get("arm"), "scene": job.get("scene"), "seed": job.get("seed"),
-               "job_type": "still", "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+               "job_type": "still", "prompt_sha256": psha,
                "image_sha256": hashlib.sha256(open(f, "rb").read()).hexdigest(), "image": os.path.relpath(f, run_dir),
                "bytes": p["bytes"], "w": p["w"], "h": p["h"], "wall_seconds_output_mtime": round(wall, 1) if wall else None,
                "rendered_at": time.strftime("%Y-%m-%d %H:%M:%S CT"), "retry": retry, "driver": "run_queue.py"},
@@ -324,9 +353,12 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     rgj.contact_sheet(s["file"], os.path.join(d, tag + "_stills_contact.png"), p["duration"])
     outs = [os.path.join(OUT_ROOT, t, f) for f in os.listdir(os.path.join(OUT_ROOT, t))] if os.path.isdir(os.path.join(OUT_ROOT, t)) else []
     wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None
-    prompt = next((n["inputs"].get("prompt", "") for n in g0.values() if n.get("class_type") == "MiniMaxH3ReferenceToVideo"), "")
+    psha, pnote = prompt_sha(g0, next((n["inputs"].get("prompt", "") for n in g0.values()
+                                      if n.get("class_type") == "MiniMaxH3ReferenceToVideo"), ""))
+    if pnote:
+        qlog(run_dir, "NOTE pos=%d tag=%s prompt_sha256 unresolved: %s" % (job["pos"], tag, pnote))
     json.dump({"tag": tag, "pos": job["pos"], "arm": job.get("arm"), "scene": job.get("scene"), "seed": job.get("seed"),
-               "frames": frames, "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+               "frames": frames, "prompt_sha256": psha,
                "clip_sha256": hashlib.sha256(open(s["file"], "rb").read()).hexdigest(), "clip": os.path.relpath(s["file"], run_dir),
                "bytes": p["bytes"], "w": p["w"], "h": p["h"], "audio": True, "wall_seconds_output_mtime": round(wall, 1) if wall else None,
                "rendered_at": time.strftime("%Y-%m-%d %H:%M:%S CT"), "retry": retry, "driver": "run_queue.py"},
