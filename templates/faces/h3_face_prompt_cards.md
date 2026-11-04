@@ -67,7 +67,8 @@ detailed_description:
 
 ## Card 3 - face and eye-line close (identity test cell)
 
-For checking a face at strength 1.0 with the least story around it. Keep it a tight portrait, one shot,
+For checking a face at the template strength (0.7, the measured best for this set) with the least story around it.
+Keep it a tight portrait, one shot,
 no wardrobe change, no occluders over the face, and a plain background, so a score measures the identity.
 
 ```
@@ -103,7 +104,7 @@ state who touches what.> <plain audio cues.>
 
 ## Before submitting (the short check)
 
-- `guard_ok` runs on every submit through `run_queue.py`; a clip of a **real** person is Derek's ask and GO (R2).
+- `guard_ok` runs on every submit through `run_queue.py`; a face clip is Derek's ask and GO (R2).
 - One GPU job at a time: `run_queue.py` takes `gpu-render.lock`; a build into a busy window is refused.
-- Strength lives in the template (`templates/faces/<FC>.api.json`, `strength_model 1.0`), and the trigger comes
+- Strength lives in the template (`templates/faces/<FC>.api.json`, `strength_model 0.7`), and the trigger comes
   from the private map. `--strength` is for a labelled A/B cell only, and the number goes in the run record.
