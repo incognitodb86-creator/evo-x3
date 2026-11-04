@@ -111,13 +111,8 @@ def detach(argv, run_dir):
 
 def guard_graph(g, require_adult=True):  # Derek 2026-11-03 6:15 AM CT: require_adult is the default
     """Adults-only gate. Every prompt string must pass comm.guard_ok; with require_adult, at least one must state an adult.
-    A malformed graph fails (fail closed)."""
-    if not isinstance(g, dict) or not all(isinstance(n, dict) for n in g.values()):
-        return False
-    ss = [s for n in g.values() for s in comm.prompt_strings(n.get("inputs", {}))]
-    if not all(comm.guard_ok(s) for s in ss):
-        return False
-    return any(comm.adult_stated(s) for s in ss) if require_adult else True
+    A malformed graph fails (fail closed). Thin bool wrapper over comm.guard_reason - the reason is what to log."""
+    return comm.guard_reason(g, require_adult)[0]
 
 
 def still_prompt(g):
@@ -161,8 +156,9 @@ def prepare(run_dir, job, retry, slog):
     if not os.path.exists(graph):
         qlog(run_dir, "FAIL pos=%d tag=%s no graph" % (job["pos"], tag)); return None
     g0 = json.load(open(graph, encoding="utf-8"))
-    if not guard_graph(g0):  # adults-only guard before EVERY clip
-        qlog(run_dir, "GATE-FAIL pos=%d tag=%s adults guard" % (job["pos"], tag)); return None
+    ok, why = comm.guard_reason(g0)  # adults-only guard before EVERY clip
+    if not ok:
+        qlog(run_dir, "GATE-FAIL pos=%d tag=%s adults guard: %s" % (job["pos"], tag, why)); return None
     if not rgj.wake(slog):   # keep-alive touch of /comfyui/system_stats (ttl 300) + unload any LLM swapped in
         qlog(run_dir, "FAIL pos=%d tag=%s ComfyUI down" % (job["pos"], tag)); return None
     bad = rgj.static_check(g0)

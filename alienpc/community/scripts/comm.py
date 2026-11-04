@@ -40,7 +40,14 @@ def http(url, data=None, timeout=60, method=None):
 # without an exception list. Anything that is not a string fails.
 _BAD_RE = re.compile(r"(?<![a-z])(?:girl|teen|school|schoolgirl|underage|minor|kid|child|children"
                      r"|loli)s?(?![a-z])|barely\s+legal", re.I)
-_ADULT_RE = re.compile(r"(?<![a-z])adults?(?![a-z])", re.I)
+# The positive check accepts the word adult, and an unambiguous age 18-99 stated as an age:
+# "28-year-old", "28 years old", "28 yo", "age 28", "21+". "17 years old" and "in her twenties"
+# do NOT count - the number must be 18+ and stated as an age, so an unclear text stays blocked.
+_ADULT_RE = re.compile(r"(?<![a-z])adults?(?![a-z])"
+                      r"|\b(?:1[89]|[2-9]\d)[- ](?:years?|yrs?|yo)[- ]old\b"
+                      r"|\b(?:1[89]|[2-9]\d)\s*(?:years?|yrs?|yo)\b"
+                      r"|\bage\s+(?:1[89]|[2-9]\d)\b"
+                      r"|\b(?:1[89]|[2-9]\d)\+", re.I)
 def guard_ok(t):
     """True when the text names no minor-coded word. Non-strings fail (fail closed)."""
     return isinstance(t, str) and not _BAD_RE.search(t)
@@ -48,16 +55,42 @@ def adult_stated(t):
     """True when the text states an adult (the one positive check)."""
     return isinstance(t, str) and bool(_ADULT_RE.search(t))
 
-PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value", "script")
+# prompt_text / builder_state: node MiniMaxH3PromptBuilder carries the clip prompt there (measured
+# 2026-11-04 on runs/pw_strip_20261104b: the key list missed it, the guard collected 0 strings and
+# the gate failed closed, so a clean prompt was reported as "adults guard").
+PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value", "script", "prompt_text", "builder_state")
 
 def prompt_strings(inputs):
     """Yield all prompt-bearing string values from node inputs."""
+    for _, v in prompt_items(inputs):
+        yield v
+
+def prompt_items(inputs):
+    """Yield (key, value) for every prompt-bearing string input of a node."""
     if not isinstance(inputs, dict):
         return
     for k in PROMPT_KEYS:
         v = inputs.get(k)
         if isinstance(v, str):
-            yield v
+            yield k, v
+
+def guard_reason(g, require_adult=True):
+    """(ok, reason) for the adults-only gate; reason is "" when ok. Fail closed.
+    The reason names WHY it failed - a graph whose prompt text is invisible to PROMPT_KEYS says so,
+    instead of reporting the generic adults failure a wording problem would produce."""
+    if not isinstance(g, dict) or not all(isinstance(n, dict) for n in g.values()):
+        return False, "malformed graph"
+    items = [(nid, n.get("class_type"), k, v)
+             for nid, n in g.items() for k, v in prompt_items(n.get("inputs", {}))]
+    if not items:
+        return False, ("no prompt text visible to the guard "
+                       "(every node input is outside PROMPT_KEYS - check the node's key names)")
+    bad = [(nid, ct, k) for nid, ct, k, v in items if not guard_ok(v)]
+    if bad:
+        return False, "minor-coded word in node %s (%s).%s" % bad[0]
+    if require_adult and not any(adult_stated(v) for _, _, _, v in items):
+        return False, "no adult stated in %d prompt string(s)" % len(items)
+    return True, ""
 
 APPROVED = {  # ALI-80 approved adult stills only
  "D15": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\D15\D15_Woman_in_bikini.jpg",
