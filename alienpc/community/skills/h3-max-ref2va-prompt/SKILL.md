@@ -234,3 +234,8 @@ and R11's clauses are copied verbatim from there.
 - Review and patch records: `C:\AI\community\notes\2026-11-03-h3-upstream-prompt-skill-review.md`,
   `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
 - Everything else (R1-R31 evidence) stays in `h3-prompting` section 8.
+
+
+## Sibling: parody / INDEX identity
+Named INDEX+RefMod parody runs: load `h3-parody-identity` (name + description + RefMod). Do not fold those rules into this file.
+
