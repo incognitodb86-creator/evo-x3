@@ -20,6 +20,8 @@ patch record `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
 
 ## 1. The shared rules (h3-prompting, unchanged, all apply)
 
+R2. Render rules (adults only, no real likeness, guard_ok) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
+
 `C:\AI\community\skills\h3-prompting\SKILL.md` is the single home for the cross-lane rules; read it first, do not
 restate it here.
 

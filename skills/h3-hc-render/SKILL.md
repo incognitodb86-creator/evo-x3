@@ -5,6 +5,8 @@ description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int
 
 # H3 hardcore render
 
+R2. Render rules (adults only, no real likeness, guard_ok) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
+
 Work the loop in this order. One job per pass. Never mix a request pass with a proof pass.
 
 ## 0. When to use this skill
@@ -69,7 +71,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 - To re-request a dead clip, clone its rendered `ok=True` sibling graph and change only the per-clip keys.
 - One seed per clip. Never request a quality redo (harness redos = same seed, then seed+1).
 - Single clip = a batch of one: `run_queue.py --run-dir <run_dir> --frames <n> --detach`. run_graph_job.py is an internal helper run_queue imports; never run it directly.
-- "Pick an image" (Derrick): pick from `C:/Users/derek/5slock/approved_characters/INDEX.csv`; a quick check for stills not used recently is OK (Derrick 2:52 PM CT: "eh i am ok with them searching"). Seed default: a random int made in code (`random.randint(1, 2**31-1)`); never grep runs for uniqueness.
+- "Pick an image" (Derrick): pick from `//NAS4CBE37.local/home/AlienPc-approved/approved_characters/INDEX.csv`; a quick check for stills not used recently is OK (Derrick 2:52 PM CT: "eh i am ok with them searching"). Seed default: a random int made in code (`random.randint(1, 2**31-1)`); never grep runs for uniqueness.
 - Search narrowly: use `rg` inside the folder the brief names (notes, templates, scripts, or one run dir); never `grep -r` or `find` across C:\AI\community, C:\ or /c. Set PYTHONIOENCODING=utf-8 when printing workflow text.
 - For node inputs, `rg <Node> notes\objinfo\NODE_INDEX.txt` or read NODE_INPUTS.md; never parse custom-node Python source.
 - Prompt: use Example 1 for structure only (beat order, clause shape), not its content or tone; write the scene from what Derrick asked for. Example 1 is in `skills/h3-prompting/references/worked-examples.md`; for length/stats reuse `scripts/prompt_stats.py`. No per-clip check scripts.
