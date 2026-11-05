@@ -30,6 +30,10 @@ Usage:
         [--frames 124] [--size 768x1344] [--detach]
 --resume skips tags with a "DONE ... ok" line in _render_queue.log. --dry-run lists what would render and makes no
 lock, GPU or HTTP call.
+--frames/--size (item 10, 2026-11-04): the clip objective check compares the probe against the frames and canvas the
+submitted graph states (the MiniMaxH3ReferenceToVideo node's length/width/height), because the graph is what was
+submitted. A flag that differs from the graph logs one "NOTE pos=.. tag=.. cli frames=.. size=.. vs graph .." line and
+is then ignored; the flag is used only where the graph states no literal value. Stills jobs keep their own size check.
 --detach (phase 2 S11): relaunch this same command through WMI (Win32_Process.Create), so the batch runs outside the
 caller's process tree and job object and survives the pi/herdr pane closing; prints the batch PID and returns at once.
 Output goes to <run dir>\_run_queue.out.log. Forge launch line (then end the turn; no waits or checks):
@@ -245,6 +249,17 @@ def expected_prefix(g):
     return None
 
 
+def graph_expect(g):
+    """(frames, (w, h)) as the submitted graph asks for, from the MiniMaxH3ReferenceToVideo node's
+    length/width/height; None for a value the graph does not state as a literal. The graph is the truth
+    of what was submitted; --frames/--size are only what the caller asked for (item 10, 2026-11-04)."""
+    n = next((x for x in (g or {}).values() if x.get("class_type") == "MiniMaxH3ReferenceToVideo"), None)
+    i = (n or {}).get("inputs", {})
+    num = lambda v: int(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+    f, w, h = num(i.get("length")), num(i.get("width")), num(i.get("height"))
+    return f, (w, h) if w and h else None
+
+
 def load_pids(run_dir):
     p = os.path.join(run_dir, PIDS_FILE)
     try:
@@ -341,10 +356,15 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
         qlog(run_dir, "FAIL pos=%d tag=%s job error (%s)" % (job["pos"], tag, out.get("outcome"))); return False
     if job.get("job_type") == "still":
         return still_done(run_dir, job, tag, s["file"], g0, size, t0, retry, slog)
+    gf, gs = graph_expect(g0)
+    ef, es = gf or frames, gs or size
+    if (ef, es) != (frames, size):
+        qlog(run_dir, "NOTE pos=%d tag=%s cli frames=%s size=%sx%s vs graph frames=%s size=%sx%s (graph is the authority)" % (
+            job["pos"], tag, frames, size[0], size[1], ef, es[0], es[1]))
     p, bf = rgj.probe(s["file"]), rgj.blackfreeze(s["file"])
     why = [] if p["bytes"] > 0 else ["0-byte file"]
-    if (p["w"], p["h"]) != size: why.append("size %sx%s" % (p["w"], p["h"]))
-    if p["frames"] != frames: why.append("frames %d != %d" % (p["frames"], frames))
+    if (p["w"], p["h"]) != es: why.append("size %sx%s" % (p["w"], p["h"]))
+    if p["frames"] != ef: why.append("frames %d != %d" % (p["frames"], ef))
     if not p["audio"]: why.append("no audio stream")
     why += ["detect " + x for x in bf]
     if why:
