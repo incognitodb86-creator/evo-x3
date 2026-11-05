@@ -21,7 +21,6 @@
 - QNAP files: only C:\AI\community\scripts\pi_qnap.py (ls/get/put; mv/rm need Derrick's yes). Shares on \\NAS4CBE37.local: R: renders, H: home, G: GrokDrop, P: Photos. QNAP MCP Assistant is not set up yet.
 - Vault: pi's own Vaultwarden user; run powershell -File C:\ProgramData\forge-mcp\tools\vw-pi\bw-pi.ps1 <bw args> (logs in/unlocks from Credential Manager, locks after). Fetch a vault login only when a task needs it; never print or write the value; Derrick's Auto-review rule still applies to reading/using passwords.
 - Gitea (QNAP): MCP server gitea, read-only (bot-forge token) - repo files, issues, PRs of derrick/*; git push to fleet-brain stays via C:\AI\fleet-brain.
-- Linear: MCP server linear (official, OAuth) - read issues/projects; create or update only with Derrick's yes.
 - Google (Gmail/Drive/Calendar/Contacts): MCP server google (workspace-mcp, --read-only) - read mail, files, events, contacts; it cannot send or edit. Enabled after Derrick's sign-in.
 - UniFi: MCP server unifi (read-only viewer) - who/what is on the network; never a change. Enabled once Household stores its read-only key.
 - Voice: say tool (pi-say, local espeak-ng) speaks on AlienPc speakers; phone delivery not wired yet.
