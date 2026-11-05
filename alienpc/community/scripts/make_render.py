@@ -8,8 +8,10 @@ C:\AI\community\render\used.txt (the pick is appended there). approved_character
 Still default (Derrick 1:16 AM CT Oct 31, S2): templates\flux_stills_s2_kv.api.json then flux_stills_s2_bfs.api.json
 (two batches; see still_s2). Still --words: write them per the FLUX prompt skill
 alienpc-stills-pose-edit-prompting (C:\Users\derek\.pi\agent\skills\alienpc-stills-pose-edit-prompting\SKILL.md): change -> keep -> light/style. Old single-pass still template (still used for video candidate stills):
-templates\bfs_klein9b.api.json (fields changed: picture1_body.image, picture2_head.image = the
-approved still, noise.noise_seed, save.filename_prefix, positive.text only if --words).
+templates\flux_stills_s2_bfs.api.json (the graph that used to be templates\bfs_klein9b.api.json; that
+name is retired - cleanup phase 2, 2026-11-05 - and the merged file carries the S2 pass-2 shape). Fields changed:
+picture1_body.image, picture2_head.image = the
+approved still, noise.noise_seed, save.filename_prefix, positive.text only if --words.
 Video template: runs\strip_tease_20261030_bedroom01\<tag>\request.api.json via make_b2_request.py (img.image,
 noise.noise_seed, save.filename_prefix, c0.length, c0.prompt only if --words).
 Video (Derrick 7:22 PM CT): per video, 2 varied-pose stills are rendered first, scored against the approved still
@@ -39,7 +41,8 @@ PY = sys.executable
 IMG_EXT = (".jpg", ".jpeg", ".png", ".webp")
 POLL = 3
 # Stills without --words: one entry per still, no repeats within a request (rotated by seed). Same wording as the
-# bfs_klein9b template prompt; only the pose / camera angle / setting part differs from it.
+# S2 BFS template prompt (templates\flux_stills_s2_bfs.api.json; that file was bfs_klein9b.api.json before the
+# 2026-11-05 merge); only the pose / camera angle / setting part differs from it.
 VARIETY = [
     "sitting on the edge of a bed, front view, in a softly lit bedroom",
     "kneeling on a rug, three-quarter view, in a bright living room",
