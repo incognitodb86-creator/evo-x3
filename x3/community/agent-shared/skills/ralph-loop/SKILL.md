@@ -33,3 +33,8 @@ If a step needs Derrick's decision, put it as the last item ("STOP and report"),
 
 
 Start (only this): Invoke-CimMethod Win32_Process -MethodName Create -Arguments @{CommandLine='powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\derek\5slock\ralph-community\ralph.ps1 -Max N'; CurrentDirectory='C:\Users\derek\5slock\ralph-community'} then reply `PID=<ProcessId>, log ralph-community\logs\ralph.log`; cap N = item count + 2 (max 12). Long items (benchmarks, renders): add -PassLimitSec 3600. ralph.ps1 refuses a second copy (logs\ralph.lock, exit 4), loads LLAMA_SWAP_KEY from User scope if missing (exit 3), and stops on PLAN_COMPLETE or NO_PROGRESS (same item still open after two passes).
+
+## Moved from global AGENTS.md line 11 (2026-11-05, Derrick)
+- Multi-step briefs (4+ checkable steps, or a command can measure progress): do NOT do them in chat. Load skill ralph-loop, write the steps as fix_plan.md items, commit, start ralph.ps1 in the background (skill "Start"), reply with PID + logs\ralph.log, end the turn. One-off fixes and questions stay inline.
+
+Render items: start the item line with `[render]` after the checkbox (e.g. `- [ ] [render] FLX-05 ...`); ralph.ps1 then runs that pass with cwd C:\AI\render so the render rules in C:\AI\render\AGENTS.md load.

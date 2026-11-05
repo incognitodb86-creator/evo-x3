@@ -4,11 +4,10 @@
 - Loop: C:\Users\derek\5slock\ralph-community\ralph.ps1 (runs pi --print on PROMPT.md, one fix_plan item per pass; logs in ralph-community\logs). When to use it: Route "Multi-step" line.
 - Write pi-permissions.jsonc, settings.json and mcp.json without a UTF-8 BOM. Append logs with Add-Content -Encoding UTF8.
 ## Route (load the named skill before the work; pi lists skills by description, force one with /skill:name)
-- Image renders (FLUX stills, pose edits, scoring, character sheets): load skill image-render (companion: alienpc-stills-pose-edit-prompting).
-- Video renders (I2V / H3 clips, batches, scoring, character sheets): load skill video-render (companions: alienpc-hardcore-i2v-director, h3-prompting (R1-R31, all lanes), h3-max-ref2va-prompt (R32-R44, the standing REF2VA lane for Max: use it unless Derrick names another lane), h3-hc-render, alienpc-local-video-ops).
+- Image or video render work: run it from C:\AI\render; its AGENTS.md holds the render rules.
 - Before planning any build, fix, script or new method: skill research-core (community way first, cite it).
 - Plans and briefs: C:\AI\community\briefs\ (newest first), C:\AI\community\plans\ (_TEMPLATE.md), C:\AI\fleet-brain\40_projects\ (pull first).
-- Multi-step briefs (4+ checkable steps, or a command can measure progress): do NOT do them in chat. Load skill ralph-loop, write the steps as fix_plan.md items, commit, start ralph.ps1 in the background (skill "Start"), reply with PID + logs\ralph.log, end the turn. One-off fixes and questions stay inline.
+- Multi-step briefs (4+ checkable steps, or a command can measure progress): load skill ralph-loop and follow it; one-off fixes and questions stay inline.
 - Brain sync (Forge is a fleet bot: same brain, rules, packs, skills as the Grok Bots): C:\AI\fleet-brain = Gitea derrick/fleet-brain, master, pushes as bot-forge. Start of each pass: git pull --rebase. Read 10_packs\fleet\derricks-standing-rules.md, 10_packs\max\max-briefing.md and 20_learnings\ (grep the topic). After each item commit + push your records there. Never GitHub, never secrets/IPs.
 - CE: installed (pi list: git:github.com/EveryInc/compound-engineering-plugin + npm:pi-subagents); ce-* skills load. Use ce-plan for multi-step work, ce-work to execute, ce-code-review before calling code done, ce-debug for failures, ce-handoff on handoffs, ce-compound to save lessons into C:\AI\fleet-brain\20_learnings\<category>\<slug>.md (tag unreviewed; none is normal; never only private memory). Research on pi: pi-web-access (SearXNG), not Firecrawl/Apify.
 - Verify before done: run the item's check/tests before calling any task or fix_plan item done; tick only after the item's check passes.
@@ -29,9 +28,7 @@
 - No pi route yet (say so, ask Max): Pi-hole, Uptime Kuma, Tailscale admin, ntfy/phone notify, QNAP MCP.
 ## Keeps (Derrick; these four stay on)
 - Secrets: never read, print or send .env* files, API keys, tokens, SSH keys, rclone config, auth.json or credential stores.
-- Fictional adults (18+) only, no real-person likeness; guard_ok runs on every submit. Never edit scripts\tests\test_p6_review.py; never loosen guard_ok.
-- One GPU job at a time: run_graph_job.py and run_queue.py take C:\AI\locks\gpu-render.lock (rc 7 = GPU_BUSY). While it is held: no subagents, no model loads, no second job; read-only answers are fine.
-- While C:\AI\locks\gpu-render.lock exists, send no model requests; wait for the render to finish.
+- One GPU job at a time: run_graph_job.py and run_queue.py take C:\AI\locks\gpu-render.lock (rc 7 = GPU_BUSY). While it is held: no subagents, no model loads, no model requests, no second job; wait for the render to finish; read-only answers are fine.
 - Ask Derrick first and wait: any Home Assistant or UniFi change, any NAS/QNAP delete or overwrite (QNAP only via C:\AI\community\scripts\pi_qnap.py), anything with money.
 ## Fixed rules (Derrick)
 - Community way first, smallest fix. No deletes without Derrick's OK; move to an _archive folder instead.
