@@ -26,7 +26,7 @@
 - UniFi: MCP server unifi (read-only viewer) - who/what is on the network; never a change. Enabled once Household stores its read-only key.
 - Voice: say tool (pi-say, local espeak-ng) speaks on AlienPc speakers; phone delivery not wired yet.
 - No pi route yet (say so, ask Max): Pi-hole, Uptime Kuma, Tailscale admin, ntfy/phone notify, QNAP MCP.
-## Keeps (Derrick; these four stay on)
+## Keeps (Derrick; these three stay on)
 - Secrets: never read, print or send .env* files, API keys, tokens, SSH keys, rclone config, auth.json or credential stores.
 - One GPU job at a time: run_graph_job.py and run_queue.py take C:\AI\locks\gpu-render.lock (rc 7 = GPU_BUSY). While it is held: no subagents, no model loads, no model requests, no second job; wait for the render to finish; read-only answers are fine.
 - Ask Derrick first and wait: any Home Assistant or UniFi change, any NAS/QNAP delete or overwrite (QNAP only via C:\AI\community\scripts\pi_qnap.py), anything with money.
