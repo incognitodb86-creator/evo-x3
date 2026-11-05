@@ -1,6 +1,6 @@
 ---
 name: h3-prompting
-description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box - output only the prompt, adults only (18+, fictional, minors = hard stop), the five prompt sections with plain audio cues at the end of the main prompt (no overall_soundscape block, TenStrip HF #77), the verbatim reference clauses that keep identity, get-into-position, PRIMARY MOTION and contact geometry, the response dial and slap-to-face, garment end states, <Video 1> continuation, positives-only plain wording, LoRA trigger hygiene, the detail checklist, the contradiction phrases to keep out and 4 worked examples. The REF2VA lane (single clip and multi-cell chain) is the separate skill
+description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box - output only the prompt, render rules in C:\AI\render\AGENTS.md (R2), the five prompt sections with plain audio cues at the end of the main prompt (no overall_soundscape block, TenStrip HF #77), the verbatim reference clauses that keep identity, get-into-position, PRIMARY MOTION and contact geometry, the response dial and slap-to-face, garment end states, <Video 1> continuation, positives-only plain wording, LoRA trigger hygiene, the detail checklist, the contradiction phrases to keep out and 4 worked examples. The REF2VA lane (single clip and multi-cell chain) is the separate skill
 `h3-max-ref2va-prompt` (rules R32-R44); references/ref2va-lane.md and references/ref2va-chain-lane.md are pointers to
 it. The director's prompt sections point to this file. Use when writing, reviewing or auditing any H3 prompt text: notes/hc_*.txt, specs/prompt_v2, a run's prompt file, a MiniMaxH3ReferenceToVideo paste, a multi-cell chain, an I2V POS, or a Continuum sequence_prompt. Since 2026-11-03 the REF2VA lane (the standing Max lane) is its own skill,
 `h3-max-ref2va-prompt`, with REF2VA-specific rules R32-R44; this file keeps R1-R31 (all lanes) and the rule index, and
@@ -34,10 +34,7 @@ options, no explanation, no self-review, no word count in the paste. Write it to
 dir's prompt file) first, then embed it in the builder, so prompts stay diffable and the prompt/graph variables stay
 separable. Counting words is a private check, never output (PROMPT.md item 1c: "Count words; nothing else").
 
-**R2 - Adults only, 18+.** Every subject is a **fictional adult**; the canon age declared inside the prompt stays
-**21+ with a stated age** (the p15 writer-skill convention: "a grown woman aged 28 by canon declaration"). Minors
-are a **hard stop**: pause any item whose image shows a minor. Never sexual content of a real identifiable person;
-character labels are folder names, not real people.
+R2. Render rules (adults only, no real likeness, guard_ok) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
 
 **R3 - Fiction and policy text never enter the paste.** No governance/safety/consent-policy sentences, no "this is
 fiction", no age-rating boilerplate, no model-name instructions. Consent, when Derek states it, is one plain clause
