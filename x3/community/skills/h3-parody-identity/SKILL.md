@@ -18,7 +18,7 @@ Do **not** load for ordinary approved-still REF2VA pastes that only use `<Pictur
 ## Hard bans (Derrick)
 
 1. **Stills / conds / refs only from `approved_characters`.** That folder is the whole likeness gate (movie/TV screenshots OK once they are in the pool after the one-time adults-only check). No separate "no real-person photos" rule.
-2. Image/adults-only rules live only in the ComfyUI/render folder `AGENTS.md` - do not add new Forge global `AGENTS.md` rules without Derrick's card yes.
+2. Lane image/adults-only/likeness rules live in `ComfyUI\LANE_IMAGE_RULES.md` (coding `AGENTS.md` stays coding-only) - do not add new Forge global `AGENTS.md` rules without Derrick's card yes.
 3. Never Sydney paths.
 4. KEEP dials unchanged (B2 / REF2VA 10strip eros beta7 stock). No 9th RefMod slot (loader max 8).
 
