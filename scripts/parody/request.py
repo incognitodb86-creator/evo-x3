@@ -69,6 +69,12 @@ def parse_request(input_data: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
         else:
             stills = []
 
+        desc_raw = input_data.get("description") or input_data.get("bio")
+        if desc_raw and str(desc_raw).strip():
+            description: Optional[str] = str(desc_raw).strip()
+        else:
+            description = None
+
         if not names:
             raise ValueError("Missing identity name in request: at least one character or actor must be specified.")
 
@@ -79,12 +85,20 @@ def parse_request(input_data: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
             "tone": tone,
             "length_s": length_s,
             "stills": stills,
+            "description": description,
         }
 
     if isinstance(input_data, str):
         text = input_data.strip()
         if not text:
             raise ValueError("Missing identity name in request: input text is empty.")
+
+        # Extract bio/description if present, e.g. "bio: ...", "description: ..."
+        description = None
+        m_bio = re.search(r"\b(?:bio|desc|description):\s*(.+)$", text, re.IGNORECASE)
+        if m_bio:
+            description = m_bio.group(1).strip()
+            text = text[:m_bio.start()].strip()
 
         # Extract duration if present, e.g. "10s", "5s", "15 seconds"
         length_s = 10
@@ -119,6 +133,7 @@ def parse_request(input_data: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
             "tone": tone,
             "length_s": length_s,
             "stills": [],
+            "description": description,
         }
 
     raise TypeError(f"Expected str or dict for input_data, got {type(input_data).__name__}")

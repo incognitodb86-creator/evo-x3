@@ -38,6 +38,7 @@ def submit_parody_job(
     name: str,
     character: Optional[str] = None,
     actor: Optional[str] = None,
+    description: Optional[str] = None,
     tone: str = "parody",
     dialogue: Optional[str] = None,
     scene: Optional[str] = None,
@@ -49,6 +50,9 @@ def submit_parody_job(
     template_path: Path = DEFAULT_REFMOD_TEMPLATE,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
+    if not description or not str(description).strip():
+        raise ValueError("Biometric description (--description) is required for submit.")
+
     index_dir = Path(r"C:\AI\community\index\h3-known-characters")
     refmods_dir = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
     aliases_path = PARODY_DIR / "aliases.json"
@@ -60,6 +64,7 @@ def submit_parody_job(
         "actor": actor,
         "tone": tone,
         "length_s": int(round(frames / 24)),
+        "description": str(description).strip(),
     }
     resolved = resolve_identities(
         req_dict,
@@ -158,6 +163,7 @@ def main(argv=None) -> int:
     parser.add_argument("--name", required=True, help="Identity / celeb name")
     parser.add_argument("--character", help="Character name")
     parser.add_argument("--actor", help="Actor name")
+    parser.add_argument("--description", "--bio", dest="description", required=True, help="Biometric/wardrobe description (required)")
     parser.add_argument("--tone", default="parody", help="Tone")
     parser.add_argument("--dialogue", help="Dialogue line")
     parser.add_argument("--scene", help="Scene summary")
@@ -172,6 +178,7 @@ def main(argv=None) -> int:
         name=args.name,
         character=args.character,
         actor=args.actor,
+        description=args.description,
         tone=args.tone,
         dialogue=args.dialogue,
         scene=args.scene,

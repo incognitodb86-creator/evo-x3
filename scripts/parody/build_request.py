@@ -38,7 +38,12 @@ def format_parody_prompt(
     primary_name = character or actor or (names[0] if names else "Subject")
     voice_name = actor or character or primary_name
 
-    desc = resolved.get("description", f"featuring {primary_name}, exact likeness and natural vocal timbre.")
+    desc = resolved.get("description")
+    if not desc or not str(desc).strip():
+        raise ValueError(
+            f"Resolved identity for '{primary_name}' is missing 'description'. "
+            "A concrete biometric description is required."
+        )
 
     scene_summary = scene or f"{primary_name} stands calmly, looking into the camera before delivering a statement"
     dialogue_text = dialogue or "I have a message for everyone listening, and I will only say it once."
@@ -172,6 +177,7 @@ def main(argv=None) -> int:
     parser.add_argument("--name", action="append", dest="names", help="Subject name(s)")
     parser.add_argument("--character", help="Character name")
     parser.add_argument("--actor", help="Actor name")
+    parser.add_argument("--description", "--bio", dest="description", required=True, help="Biometric/wardrobe description")
     parser.add_argument("--tone", default="parody", help="Tone (parody, adult, etc.)")
 
     args = parser.parse_args(argv)
@@ -188,6 +194,7 @@ def main(argv=None) -> int:
         "actor": args.actor,
         "tone": args.tone,
         "length_s": int(args.frames / 24),
+        "description": args.description,
     }
 
     resolved = resolve_identities(
