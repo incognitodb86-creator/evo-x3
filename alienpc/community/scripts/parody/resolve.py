@@ -11,6 +11,9 @@ from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+DEFAULT_APPROVED_STILLS_DIR = Path(r"C:\Users\derek\5slock\approved_characters")
+KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
+
 
 def _normalize_key(name: str) -> str:
     """Normalize string for fuzzy/case-insensitive matching."""
@@ -187,7 +190,7 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
 
     Args:
         stills: List of still image file path strings.
-        approved_dir: Path to approved characters pool directory.
+        approved_dir: Approved characters pool directory. None uses DEFAULT_APPROVED_STILLS_DIR.
 
     Returns:
         List of validated resolved path strings.
@@ -199,21 +202,21 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
     if not stills:
         return valid_paths
 
+    pool_dir = DEFAULT_APPROVED_STILLS_DIR if approved_dir is None else approved_dir
+    app_dir_res = pool_dir.resolve()
     for s in stills:
         p = Path(s).resolve()
         # Sydney isolation rule: never touch Sydney assets
         if "sydney" in str(p).lower() or p.name.upper() == "SYDNEY":
             raise ValueError(f"Sydney paths are strictly prohibited: {s}")
 
-        if approved_dir is not None:
-            app_dir_res = approved_dir.resolve()
-            try:
-                # Check containment
-                p.relative_to(app_dir_res)
-            except ValueError:
-                raise ValueError(
-                    f"Still path '{s}' is not within the approved_characters pool: '{approved_dir}'"
-                )
+        try:
+            # Check containment; omitted approved_dir still fails closed to the default pool.
+            p.relative_to(app_dir_res)
+        except ValueError:
+            raise ValueError(
+                f"Still path '{s}' is not within the approved_characters pool: '{pool_dir}'"
+            )
 
         if not p.is_file():
             raise ValueError(f"Still file does not exist: {s}")
@@ -345,9 +348,10 @@ def resolve_identities(
         slot_key = f"mod_{i}"
         if i - 1 < len(kept_refmods):
             rf_path, _, _ = kept_refmods[i - 1]
-            slots[slot_key] = {"path": str(rf_path), "strength": 1.0}
+            strength = KD17_REFMOD_STRENGTHS[min(i - 1, len(KD17_REFMOD_STRENGTHS) - 1)]
+            slots[slot_key] = {"path": str(rf_path), "strength": strength, "copies": 1}
         else:
-            slots[slot_key] = {"path": "(none)", "strength": 1.0}
+            slots[slot_key] = {"path": "(none)", "strength": 1.0, "copies": 1}
 
     # 6. Build written identity description (KD3)
     raw_bio = request.get("description") or request.get("bio")
