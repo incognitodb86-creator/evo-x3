@@ -1,4 +1,4 @@
-﻿---
+---
 name: h3-parody-identity
 description: INDEX + RefMod parody/identity lane for MiniMax H3 — use when a run names a character or actor from Malcolm's known-characters INDEX (or equivalent), stacks RefMods, and needs name + biometric description in the prompt. Not for ordinary picture-ref REF2VA pastes (h3-max-ref2va-prompt) or shared R1–R31 paste shape (h3-prompting).
 ---
@@ -17,9 +17,9 @@ Do **not** load for ordinary approved-still REF2VA pastes that only use `<Pictur
 
 ## Hard bans (Derrick)
 
-1. **No real-person photos** as refs/conds (no celeb stills into `ref_images` / LoadImage / encode inputs).
-2. Image/adults-only rules live only in the ComfyUI/render folder `AGENTS.md` — do not add new Forge global `AGENTS.md` rules without Derrick's card yes.
-3. Optional stills only from `approved_characters` (fictional pool). Never Sydney paths.
+1. **Stills / conds / refs only from `approved_characters`.** That folder is the whole likeness gate (movie/TV screenshots OK once they are in the pool after the one-time adults-only check). No separate "no real-person photos" rule.
+2. Image/adults-only rules live only in the ComfyUI/render folder `AGENTS.md` - do not add new Forge global `AGENTS.md` rules without Derrick's card yes.
+3. Never Sydney paths.
 4. KEEP dials unchanged (B2 / REF2VA 10strip eros beta7 stock). No 9th RefMod slot (loader max 8).
 
 ## INDEX status → what is native
@@ -53,7 +53,7 @@ On this box for parody:
 
 1. Put the **INDEX name** (character and/or actor as the resolver chose) in `subject_definitions`.
 2. Add a **short description** (face/hair/body/wardrobe cues) — name alone is incomplete.
-3. With RefMods loaded, do **not** rely on `<Picture N> is the reference image defining…` for that subject's face (that is the picture-ref lane). Optional approved_characters stills are scene/body/wardrobe conds only, never real-person photos.
+3. With RefMods loaded, do **not** rely on `<Picture N> is the reference image defining…` for that subject's face (that is the picture-ref lane). Optional stills come only from approved_characters (scene/body/wardrobe or Cond/start — including movie/TV screenshots already in the pool).
 4. Still obey shared motion/adults/speech rules from `h3-prompting` (R1–R31) and REF2VA section order from `h3-max-ref2va-prompt` when the graph is REF2VA — only the **identity binding** changes here.
 
 ## RefMod wiring (reminder)
@@ -73,13 +73,25 @@ Community: Malcolm `ComfyUI-MiniMaxH3RefLoRA` (one `.safetensors` = LoRA weights
 - **KEEP B2 unchanged:** graph is grafted from `templates/b2_refmod.api.json`; `reflora.frozen_diff` allows only identity/Cond/run fields. Pack example render settings are not adopted. Derived reference: `templates/b2_reflora.api.json`.
 - GPU smoke (Megan Fox / Jennifer Check bad-row A/B + Daenerys control) needs Derrick's separate GPU GO.
 
+## Cinema / cuts / poses (not this skill)
+
+Community (Malcolm H3 Prompting Guide + TenStrip HF 10Eros-Max notes) puts **camera angles, in-clip cuts, transitions, and motion** in the shared prompting rules - not in a separate identity doc. On this box that means:
+
+- Shot headers, cut verbs, camera vocab (R8 / R23), speech, adults floor: `h3-prompting`
+- REF2VA section order, style opening (R39), TenStrip retention/audio shape: `h3-max-ref2va-prompt`
+- Cond still -> intent / director card / package triage: `alienpc-hardcore-i2v-director`
+- Still pose unlock before I2V: `alienpc-stills-pose-edit-prompting`
+
+This skill only changes **identity binding** (INDEX + RefMod + name/description). It does not invent a second camera grammar.
+
 ## Sibling skills
 
-- `h3-prompting` — shared R1–R31
-- `h3-max-ref2va-prompt` — picture-ref REF2VA paste / R32–R44
-- `h3-hc-render` / `comfy-render` / `video-render` — dials and submit
-
+- `h3-prompting` - shared R1-R31 (includes camera / cuts)
+- `h3-max-ref2va-prompt` - picture-ref REF2VA paste / R32-R44 / TenStrip-shaped retention+audio
+- `alienpc-hardcore-i2v-director` - Cond-to-clip director card (angles as intent + camera hold)
+- `alienpc-stills-pose-edit-prompting` - pose unlock on stills
+- `h3-hc-render` / `comfy-render` / `video-render` - dials and submit
 ## Sources
 
 - Malcolm: `MINIMAX_H3_REFMODS_INSTALLATION_AND_USAGE_GUIDE.md` §6 Prompting with RefMods; `MINIMAX_H3_PROMPTING_GUIDE.md` subject_definitions name pattern; `known-characters/INDEX.md`
-- Box decisions: Derrick Nov 5 2026 INDEX good/bad/fence + always INDEX+RefMod; FP-1 name likeness OK, no real photos as refs/conds
+- Box decisions: Derrick Nov 5 2026 INDEX good/bad/fence + always INDEX+RefMod; Derrick Nov 5 ~2:25 CT: likeness gate = approved_characters only (screenshots OK in pool)
