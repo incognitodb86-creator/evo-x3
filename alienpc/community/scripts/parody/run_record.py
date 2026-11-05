@@ -42,6 +42,7 @@ def build_assets_record(
         "character": resolved.get("character"),
         "actor": resolved.get("actor"),
         "tone": resolved.get("tone", "parody"),
+        "description": resolved.get("description"),
         "index_rows": resolved.get("index_rows", []),
         "refmod_slots": resolved.get("refmod_slots", {}),
         "loaded_refmods": resolved.get("loaded_refmods", []),

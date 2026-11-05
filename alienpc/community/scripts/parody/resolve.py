@@ -17,6 +17,75 @@ def _normalize_key(name: str) -> str:
     return re.sub(r"[^a-z0-9]", "", name.lower())
 
 
+BANNED_GENERICS: Tuple[str, ...] = (
+    "exact likeness",
+    "distinctive facial features",
+    "natural authentic human appearance",
+)
+
+
+def validate_biometric_description(bio: Optional[str]) -> str:
+    """Validate biometric / wardrobe description against empty and generic-only inputs.
+
+    Args:
+        bio: Input description string.
+
+    Returns:
+        Cleaned, non-empty description string containing concrete biometric/wardrobe details.
+
+    Raises:
+        ValueError: If bio is missing/empty, matches banned generics alone,
+            or contains only generic phrasing without concrete details.
+    """
+    if bio is None:
+        raise ValueError("Biometric description / bio is required: cannot be None.")
+
+    text = str(bio).strip()
+    if not text:
+        raise ValueError("Biometric description / bio is required: cannot be empty or whitespace.")
+
+    norm = re.sub(r"[^\w\s]", " ", text.lower())
+    norm_words = norm.split()
+    norm_clean = " ".join(norm_words)
+
+    # 1. Exact match to banned generic phrases alone
+    for banned in BANNED_GENERICS:
+        banned_norm = " ".join(re.sub(r"[^\w\s]", " ", banned.lower()).split())
+        if norm_clean == banned_norm:
+            raise ValueError(
+                f"Biometric description matches banned generic phrase alone: {text!r}. "
+                "Must provide concrete biometric/wardrobe details."
+            )
+
+    # 2. Check if residual after removing banned phrases and generic filler words is empty
+    residual = norm_clean
+    extended_banned = list(BANNED_GENERICS) + [
+        "exact likeness and vocal timbre",
+        "distinctive facial features and vocal timbre",
+        "natural authentic human appearance",
+        "authentic human appearance",
+        "natural human appearance",
+        "natural vocal timbre",
+        "vocal timbre",
+    ]
+    for banned in sorted(extended_banned, key=len, reverse=True):
+        banned_norm = " ".join(re.sub(r"[^\w\s]", " ", banned.lower()).split())
+        residual = residual.replace(banned_norm, " ")
+
+    filler_words = {
+        "and", "with", "the", "a", "an", "of", "in", "to", "for", "styled", "tone",
+        "features", "appearance", "likeness", "facial", "vocal", "timbre", "natural",
+        "authentic", "exact", "distinctive", "human", "alone", "only", "just",
+    }
+    residual_tokens = [w for w in residual.split() if w not in filler_words]
+    if not residual_tokens:
+        raise ValueError(
+            f"Biometric description contains only generic phrasing without concrete details: {text!r}."
+        )
+
+    return text
+
+
 def load_index_files(index_dir: Path) -> List[Dict[str, Any]]:
     """Parse INDEX.md and INDEX_BAD.md into a list of row dicts.
 
@@ -281,12 +350,15 @@ def resolve_identities(
             slots[slot_key] = {"path": "(none)", "strength": 1.0}
 
     # 6. Build written identity description (KD3)
+    raw_bio = request.get("description") or request.get("bio")
+    valid_bio = validate_biometric_description(raw_bio)
+
     primary_name = candidates[0] if candidates else "subject"
     char_part = f"character {character_input}" if character_input else ""
     actor_part = f"actor {actor_input}" if actor_input else ""
     parts = [p for p in [char_part, actor_part] if p]
     id_spec = f"featuring {primary_name}" + (f" ({', '.join(parts)})" if parts else "")
-    description = f"{id_spec}, distinctive facial features, exact likeness and vocal timbre, styled in {request.get('tone', 'parody')} tone."
+    description = f"{id_spec}, {valid_bio}, styled in {request.get('tone', 'parody')} tone."
 
     return {
         "names": names,

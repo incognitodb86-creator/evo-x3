@@ -56,7 +56,7 @@ class TestParodyPhase1(unittest.TestCase):
 
     def test_u2_r2_good_row_native_face_voice(self):
         """R2: Good row (Daenerys / Emilia Clarke) gives mode native_face_voice with RefMod slots."""
-        req = parse_request("Daenerys parody, 10s")
+        req = parse_request("Daenerys parody, 10s, bio: platinum-blonde braided hair, fantasy scale top")
         res = resolve_identities(
             req,
             index_dir=self.index_dir,
@@ -71,11 +71,17 @@ class TestParodyPhase1(unittest.TestCase):
         self.assertIn("mod_1", res["refmod_slots"])
         self.assertTrue(any("emiliaclarke" in s["path"] for s in res["refmod_slots"].values()))
         self.assertIn("Daenerys", res["description"])
+        self.assertIn("platinum-blonde", res["description"])
 
     def test_u2_r3_bad_and_fence_rows(self):
         """R3: Bad and onthefence rows produce mode native_voice_refmod_look."""
         # Lara Croft is onthefence in INDEX.md
-        req_fence = parse_request({"character": "Lara Croft", "tone": "parody", "length_s": 10})
+        req_fence = parse_request({
+            "character": "Lara Croft",
+            "tone": "parody",
+            "length_s": 10,
+            "description": "brunette braid, athletic explorer gear",
+        })
         res_fence = resolve_identities(
             req_fence,
             index_dir=self.index_dir,
@@ -87,7 +93,12 @@ class TestParodyPhase1(unittest.TestCase):
         self.assertIn(res_fence["index_status"], ("onthefence", "good"))  # Angelina Jolie is good, Lara is onthefence
 
         # Agent Dale Cooper is bad in INDEX_BAD.md
-        req_bad = parse_request({"character": "Agent Dale Cooper", "tone": "parody", "length_s": 10})
+        req_bad = parse_request({
+            "character": "Agent Dale Cooper",
+            "tone": "parody",
+            "length_s": 10,
+            "description": "neat dark suit, trenchcoat, coffee cup",
+        })
         res_bad = resolve_identities(
             req_bad,
             index_dir=self.index_dir,
@@ -100,7 +111,12 @@ class TestParodyPhase1(unittest.TestCase):
 
     def test_u2_kd15_not_in_index(self):
         """KD15: Identity not in INDEX treated as bad (refmod look) and flagged index:none."""
-        req = parse_request({"character": "UnknownFictionalPersona999", "tone": "parody", "length_s": 10})
+        req = parse_request({
+            "character": "UnknownFictionalPersona999",
+            "tone": "parody",
+            "length_s": 10,
+            "description": "masked figure in silver cape",
+        })
         res = resolve_identities(
             req,
             index_dir=self.index_dir,
@@ -114,7 +130,13 @@ class TestParodyPhase1(unittest.TestCase):
 
     def test_u2_r4_dual_match_stacking(self):
         """R4: Dual match stacks both character and actor assets."""
-        req = parse_request({"character": "Rachel Green", "actor": "Jennifer Aniston", "tone": "adult", "length_s": 10})
+        req = parse_request({
+            "character": "Rachel Green",
+            "actor": "Jennifer Aniston",
+            "tone": "adult",
+            "length_s": 10,
+            "description": "layered 90s blonde hair, cafe denim vest",
+        })
         res = resolve_identities(
             req,
             index_dir=self.index_dir,
@@ -126,6 +148,7 @@ class TestParodyPhase1(unittest.TestCase):
         # Check both are mentioned in description and loaded
         self.assertIn("Rachel Green", res["description"])
         self.assertIn("Jennifer Aniston", res["description"])
+        self.assertIn("layered 90s blonde hair", res["description"])
         self.assertTrue(any("jenniferaniston" in s["path"] for s in res["refmod_slots"].values()))
 
     def test_u2_kd14_over_8_slots_truncation(self):
@@ -141,7 +164,15 @@ class TestParodyPhase1(unittest.TestCase):
 
         # Request matching all 10
         names = [f"char{i}" for i in range(1, 11)]
-        req = {"names": names, "character": "char1", "actor": None, "tone": "parody", "length_s": 10, "stills": []}
+        req = {
+            "names": names,
+            "character": "char1",
+            "actor": None,
+            "tone": "parody",
+            "length_s": 10,
+            "stills": [],
+            "description": "short brown hair, athletic green flight suit",
+        }
         res = resolve_identities(
             req,
             index_dir=self.index_dir,
