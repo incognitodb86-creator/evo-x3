@@ -41,12 +41,14 @@ class TestParodyPhase3(unittest.TestCase):
             "character": "Daenerys Targaryen",
             "tone": "dramatic parody",
             "length_s": 5,
+            "description": "platinum-blonde braided hair, pale skin, violet-leaning eyes, fantasy scale top",
         }
         self.bad_req = {
             "names": ["Megan Fox"],
             "character": "Jennifer Check",
             "tone": "satirical adult parody",
             "length_s": 15,
+            "description": "long dark wavy hair, cheer jacket, heart earrings",
         }
         self.resolved_good = resolve_identities(
             self.good_req, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH
@@ -164,6 +166,87 @@ class TestParodyPhase3(unittest.TestCase):
             self.assertEqual(assets_data["mode"], "native_face_voice")
             self.assertEqual(assets_data["index_status"], "good")
             self.assertIn("minimaxh3_emiliaclarke_v1_refmod.safetensors", assets_data["loaded_refmods"][0])
+
+    def test_biometric_description_required(self):
+        """Fails when biometric description is missing or empty."""
+        # 1. Missing description key
+        req_missing = {"names": ["Emilia Clarke"], "character": "Daenerys Targaryen", "tone": "parody"}
+        with self.assertRaises(ValueError) as ctx:
+            resolve_identities(req_missing, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
+        self.assertIn("required", str(ctx.exception).lower())
+
+        # 2. None description
+        req_none = dict(req_missing, description=None)
+        with self.assertRaises(ValueError) as ctx:
+            resolve_identities(req_none, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
+        self.assertIn("required", str(ctx.exception).lower())
+
+        # 3. Empty string description
+        req_empty = dict(req_missing, description="   ")
+        with self.assertRaises(ValueError) as ctx:
+            resolve_identities(req_empty, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
+        self.assertIn("required", str(ctx.exception).lower())
+
+    def test_biometric_description_rejects_generic_only(self):
+        """Rejects banned generic phrases and generic-only descriptions."""
+        banned_samples = [
+            "exact likeness",
+            "distinctive facial features",
+            "natural authentic human appearance",
+            "distinctive facial features, exact likeness and vocal timbre",
+            "exact likeness and natural vocal timbre",
+            "natural authentic human appearance alone",
+        ]
+        base_req = {"names": ["Emilia Clarke"], "character": "Daenerys Targaryen", "tone": "parody"}
+        for sample in banned_samples:
+            req = dict(base_req, description=sample)
+            with self.assertRaises(ValueError, msg=f"Should reject generic: {sample}") as ctx:
+                resolve_identities(req, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
+            self.assertTrue(
+                "generic" in str(ctx.exception).lower() or "banned" in str(ctx.exception).lower(),
+                f"Exception should mention generic/banned for {sample}: {ctx.exception}",
+            )
+
+    def test_biometric_description_passes_with_real_short_bio(self):
+        """Passes with real short bio, embedding it in prompt without banned generics."""
+        bio = "platinum-blonde braided hair, pale skin, violet-leaning eyes, fantasy scale top with dark crisscross straps, golden-hour stone colonnade"
+        req = {
+            "names": ["Emilia Clarke"],
+            "character": "Daenerys Targaryen",
+            "tone": "dramatic parody",
+            "length_s": 5,
+            "description": bio,
+        }
+        res = resolve_identities(req, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
+        self.assertIn(bio, res["description"])
+
+        graph, prompt = build_parody_request(
+            resolved=res,
+            seed=51083601,
+            prefix="community/parody_test/clip",
+            frames=124,
+            dialogue="I will take what is mine with fire and blood, but today we feast.",
+            scene="standing tall in a grand stone hall at golden hour",
+        )
+
+        # Must contain the concrete bio
+        self.assertIn(bio, prompt)
+        # Must NOT contain banned generic phrases
+        self.assertNotIn("distinctive facial features", prompt)
+        self.assertNotIn("exact likeness", prompt)
+        self.assertNotIn("natural authentic human appearance", prompt)
+
+    def test_submit_requires_description(self):
+        """submit_parody_job rejects call when description is missing."""
+        from submit_parody_run import submit_parody_job
+        with self.assertRaises(ValueError) as ctx:
+            submit_parody_job(
+                name="Emilia Clarke",
+                character="Daenerys Targaryen",
+                description=None,
+                dry_run=True,
+            )
+        self.assertIn("description", str(ctx.exception).lower())
 
 
 if __name__ == "__main__":
