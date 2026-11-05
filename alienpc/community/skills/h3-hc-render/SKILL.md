@@ -112,5 +112,5 @@ Steps a-g for one render item, then script reuse and research rules:
 2. Research rules: at most one fetch per URL, no retries. If saved in notes\web, reuse it. Fetch -> python C:\AI\community\scripts\check_web_saves.py -> git add notes\web && git commit in same iteration. Reading ComfyUI\custom_nodes with read tool is denied.
 
 
-### GPU lock and render window (moved from PROMPT.md rule 99999999)
-GPU lock: renders and start-image captioning go through llama-swap ComfyUI swap, ONE job at a time. Every render, one clip or a batch: run_queue.py --detach (AGENTS.md Render). It enforces comm.guard_ok before POST and take the gpu-render lock (rc 7 = busy); the lock decides, there is no gpu_guard step. State: python C:\AI\community\scripts\comfy_ctl.py status. Driver busy guard: while C:\AI\locks\gpu-render.lock is held by a test driver, Forge in interactive chats replies that a test is running and does not load models, render, or run GPU/heavy work; read-only questions are fine. While render runs: no second job, no ComfyUI restart, no llama-swap load/unload/upstream, no LLM requests (run_queue.py holds C:/AI/locks gpu-render lock; comfyui_auto exclusive main group ttl: 300). Client stall (exit 6) collects clip from ComfyUI\output\community\<id>\, never re-render. KEEP is Derrick's alone; no vision model judges, scores or picks rendered explicit output.
+### GPU lock and render window
+GPU lock: renders and start-image captioning go through llama-swap ComfyUI swap, ONE job at a time. Full rule lives in C:\AI\render\AGENTS.md.
