@@ -20,6 +20,23 @@ from typing import Any, Dict, List, Optional
 RUNS_ROOT = Path(r"C:\AI\community\runs")
 
 
+def build_refmod_ledger(resolved: Dict[str, Any], graph: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Return the submitted loader slot ledger with the resolver path for each slot."""
+    inputs = graph.get("refmods", {}).get("inputs", {})
+    slots = resolved.get("refmod_slots", {})
+    ledger: List[Dict[str, Any]] = []
+    for i in range(1, 9):
+        key = f"mod_{i}"
+        ledger.append({
+            "slot": i,
+            "mod": inputs.get(key),
+            "path": slots.get(key, {}).get("path", "(none)"),
+            "strength": inputs.get(f"strength_{i}"),
+            "copies": inputs.get(f"copies_{i}"),
+        })
+    return ledger
+
+
 def build_assets_record(
     resolved: Dict[str, Any],
     graph: Dict[str, Any],
@@ -45,6 +62,7 @@ def build_assets_record(
         "description": resolved.get("description"),
         "index_rows": resolved.get("index_rows", []),
         "refmod_slots": resolved.get("refmod_slots", {}),
+        "refmod_ledger": build_refmod_ledger(resolved, graph),
         "loaded_refmods": resolved.get("loaded_refmods", []),
         "dropped_refmods": resolved.get("dropped_refmods", []),
         "stills": resolved.get("stills", []),

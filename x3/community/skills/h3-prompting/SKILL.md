@@ -195,7 +195,7 @@ reason our paste shape differs from the hosted format is **R32** there. Reviews:
 R33 label set and wired inputs, R34 task-type tags, R35 role-scoped retention, R36 frame anchors and the alignment line,
 R37 speech form, R38 language and visible text, R39 style opening, R40 continuity tokens, R41 length provenance,
 R42 the graph contract, R43 the chain lane, R44 the REF2VA gate |
-| Render dials, graph wiring, queue | `h3-hc-render`, `alienpc-local-video-ops` (never prompt rules) |
+| Render dials, graph wiring, queue | `h3-hc-render` (never prompt rules) |
 
 A new rule is added in the file that owns its lane and gets the next box-unique number; never renumber an old rule.
 
