@@ -1,6 +1,8 @@
 """make_bfs_request.py - build one BFS head-swap still request from C:\\AI\\community\\templates\\flux_stills_s2_bfs.api.json.
 
 Flux Phase 1 (Derrick 2026-10-30 2:52 PM CT: "...building bfs_klein9b.api.json and a small request patcher...").
+That template name is retired (cleanup phase 2, 2026-11-05): it is templates\flux_stills_s2_bfs.api.json, the file
+this tool reads today.
 Modelled on make_b2_request.py. It patches ONLY the per-job fields and nothing else:
   body (Picture 1) 7.image   head (Picture 2) 8.image   seed 20.noise_seed   prefix 24.filename_prefix
   mp (size, ~1 MP) 25 + 9 resize_type.megapixels
