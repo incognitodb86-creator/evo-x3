@@ -29,11 +29,13 @@ if str(PARODY_DIR) not in sys.path:
 from build_request import DEFAULT_REFMOD_TEMPLATE, build_parody_request
 from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities
+from reflora import DEFAULT_REFLORA_DIR
 from run_record import RUNS_ROOT, save_run_record
 
 INDEX_DIR = Path(r"C:\AI\community\index\h3-known-characters")
 REFMODS_DIR = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
 ALIASES_PATH = PARODY_DIR / "aliases.json"
+REFLORA_DIR = DEFAULT_REFLORA_DIR
 RUN_QUEUE_PY = SCRIPTS_DIR / "run_queue.py"
 QUEUE_PYTHON = Path(r"C:\AI\director\.venv\Scripts\python.exe")
 QUEUE_TAG = "clip"
@@ -66,6 +68,7 @@ def submit_parody_job(
     run_dir_override: Optional[Path] = None,
     dry_run: bool = False,
     template_path: Path = DEFAULT_REFMOD_TEMPLATE,
+    image: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
@@ -89,6 +92,7 @@ def submit_parody_job(
         index_dir=index_dir,
         refmods_dir=refmods_dir,
         aliases_path=aliases_path,
+        reflora_dir=REFLORA_DIR,
     )
 
     # 2. Plan C2V continuation if needed
@@ -116,6 +120,7 @@ def submit_parody_job(
         dialogue=dialogue,
         scene=scene,
         template_path=template_path,
+        image=image,
     )
 
     # 5. Save initial run record (request.api.json, prompt.txt, assets.json)
@@ -150,6 +155,8 @@ def submit_parody_job(
         print(f"  Mode:         {resolved.get('mode')}")
         print(f"  INDEX status: {resolved.get('index_status')}")
         print(f"  RefMods:      {resolved.get('loaded_refmods')}")
+        print(f"  Layers:       {resolved.get('identity_layers')}")
+        print(f"  RefLoRA:      {[h['lora_name'] for h in (resolved.get('reflora') or {}).get('hybrids', [])]}")
         print(f"  Frames:       {frames}")
         return {
             "dry_run": True,
@@ -207,6 +214,7 @@ def main(argv=None) -> int:
     parser.add_argument("--slug", help="Optional run slug")
     parser.add_argument("--run-dir", help="Direct run directory override")
     parser.add_argument("--dry-run", action="store_true", help="Validate and prepare without submitting")
+    parser.add_argument("--image", help="Approved Cond still inside ComfyUI/input (required when a RefLoRA matches)")
     args = parser.parse_args(argv)
 
     res = submit_parody_job(
@@ -222,6 +230,7 @@ def main(argv=None) -> int:
         slug=args.slug,
         run_dir_override=Path(args.run_dir) if args.run_dir else None,
         dry_run=args.dry_run,
+        image=args.image,
     )
     print(json.dumps(res, indent=2))
     if res.get("gpu_busy"):

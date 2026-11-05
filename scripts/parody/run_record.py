@@ -37,6 +37,11 @@ def build_refmod_ledger(resolved: Dict[str, Any], graph: Dict[str, Any]) -> List
     return ledger
 
 
+def _reflora_ledger(graph: Dict[str, Any]) -> List[Dict[str, Any]]:
+    from reflora import reflora_ledger
+    return reflora_ledger(graph)
+
+
 def build_assets_record(
     resolved: Dict[str, Any],
     graph: Dict[str, Any],
@@ -73,6 +78,11 @@ def build_assets_record(
             "canvas": f"{width}x{height}",
             "seed": seed,
         },
+        "identity_layers": resolved.get("identity_layers", []),
+        "reflora": resolved.get("reflora", {}),
+        "reflora_ledger": _reflora_ledger(graph),
+        "cond_picture": graph.get("img", {}).get("inputs", {}).get("image")
+        if graph.get("c0", {}).get("inputs", {}).get("ref_images.ref_image_1") == ["img", 0] else None,
         "chain_plan": chain_plan,
     }
 
