@@ -15,7 +15,7 @@ review, a diff gate or a commit message, never the sentence.
 detail, clean grammar, no filler, no plot summary, one act per clip; say what happens.
 
 Model/lane facts (beta7 dials, node names, ports, queue, watch/triage, KEEP policy) stay in `h3-hc-render`,
-`alienpc-local-video-ops` and the director - this file is prompt text only.
+`video-render` and the director - this file is prompt text only.
 
 **Lane split (2026-11-03).** The REF2VA paste lane for H3-Max is the skill `h3-max-ref2va-prompt`
 (`C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md`, rules R32-R44, chain lane in its `references\chain-lane.md`);
