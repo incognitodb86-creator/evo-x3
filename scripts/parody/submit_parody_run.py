@@ -1,11 +1,8 @@
 """Submit and execute H3 parody runs under GPU lock (U8).
 
-Builds resolved request, saves run record, submits via run_graph_job / comfy-render
-under C:\\AI\\locks\\gpu-render.lock, and verifies final delivery of:
-- clip.mp4
-- prompt.txt
-- assets.json
-- request.api.json
+Builds resolved request, saves run record, writes a one-clip run_queue manifest, and
+submits through run_queue.py --detach. run_queue owns gpu-render.lock; rc 7 means GPU busy.
+The detached batch later writes clip output and its result to _render_queue.log.
 """
 
 from __future__ import annotations
@@ -15,6 +12,7 @@ import datetime
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 from typing import Any, Dict, Optional
@@ -31,7 +29,27 @@ if str(PARODY_DIR) not in sys.path:
 from build_request import DEFAULT_REFMOD_TEMPLATE, build_parody_request
 from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities
-from run_record import RUNS_ROOT, save_run_record, verify_run_artifacts
+from run_record import RUNS_ROOT, save_run_record
+
+INDEX_DIR = Path(r"C:\AI\community\index\h3-known-characters")
+REFMODS_DIR = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
+ALIASES_PATH = PARODY_DIR / "aliases.json"
+RUN_QUEUE_PY = SCRIPTS_DIR / "run_queue.py"
+QUEUE_PYTHON = Path(r"C:\AI\director\.venv\Scripts\python.exe")
+QUEUE_TAG = "clip"
+GPU_BUSY_RC = 7
+
+
+def queue_outcome(run_dir: Path) -> Optional[Dict[str, Any]]:
+    """Read the newest BATCH closed rc from a detached run_queue log."""
+    log = Path(run_dir) / "_render_queue.log"
+    if not log.is_file():
+        return None
+    matches = re.findall(r" BATCH closed rc=(\d+)\b", log.read_text(encoding="utf-8"))
+    if not matches:
+        return None
+    rc = int(matches[-1])
+    return {"rc": rc, "gpu_busy": rc == GPU_BUSY_RC}
 
 
 def submit_parody_job(
@@ -53,9 +71,9 @@ def submit_parody_job(
     if not description or not str(description).strip():
         raise ValueError("Biometric description (--description) is required for submit.")
 
-    index_dir = Path(r"C:\AI\community\index\h3-known-characters")
-    refmods_dir = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
-    aliases_path = PARODY_DIR / "aliases.json"
+    index_dir = INDEX_DIR
+    refmods_dir = REFMODS_DIR
+    aliases_path = ALIASES_PATH
 
     # 1. Resolve identity
     req_dict = {
@@ -87,7 +105,7 @@ def submit_parody_job(
         run_dir = RUNS_ROOT / run_name
 
     run_dir.mkdir(parents=True, exist_ok=True)
-    prefix = f"community/{run_name}/clip"
+    prefix = f"community/{run_name}/{QUEUE_TAG}"
 
     # 4. Build request graph and prompt
     graph, prompt = build_parody_request(
@@ -110,6 +128,23 @@ def submit_parody_job(
         clip_source=None,
     )
 
+    queue_job_dir = run_dir / QUEUE_TAG
+    queue_job_dir.mkdir(parents=True, exist_ok=True)
+    (queue_job_dir / "request.api.json").write_text(
+        json.dumps(graph, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    order = {
+        "order": [{
+            "pos": 1,
+            "tag": QUEUE_TAG,
+            "arm": "parody",
+            "scene": character or actor or name,
+            "seed": seed,
+        }]
+    }
+    order_file = run_dir / "_render_order.json"
+    order_file.write_text(json.dumps(order, indent=2, ensure_ascii=False), encoding="utf-8")
+
     if dry_run:
         print(f"[DRY-RUN] Parody request prepared at {run_dir}")
         print(f"  Mode:         {resolved.get('mode')}")
@@ -123,39 +158,39 @@ def submit_parody_job(
             "resolved": resolved,
         }
 
-    # 6. Execute render via run_graph_job.py
-    run_graph_py = SCRIPTS_DIR / "run_graph_job.py"
+    # 6. Submit through the shared queue route. Detach returns after the batch PID is created.
+    python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
     cmd = [
-        sys.executable,
+        python,
         "-u",
-        str(run_graph_py),
+        str(RUN_QUEUE_PY),
+        "--run-dir",
         str(run_dir),
-        "clip",
         "--frames",
         str(frames),
+        "--detach",
     ]
 
-    print(f"Submitting render job: {' '.join(cmd)}")
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+    print(f"Submitting render queue: {' '.join(cmd)}")
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
     print(proc.stdout)
     if proc.stderr:
         print(proc.stderr, file=sys.stderr)
 
-    if proc.returncode != 0:
-        raise RuntimeError(f"run_graph_job.py failed with returncode {proc.returncode}")
-
-    # 7. Verify all R8 artifacts present
-    checks = verify_run_artifacts(run_dir, require_clip=True)
-    all_ok = all(checks.values())
-    print(f"Artifact verification: {checks}")
-
-    return {
-        "success": all_ok,
+    base = {
+        "returncode": proc.returncode,
         "run_dir": str(run_dir),
-        "checks": checks,
+        "queue_order": str(order_file),
+        "queue_log": str(run_dir / "_render_queue.log"),
         "artifacts": {k: str(v) for k, v in artifacts.items()},
         "resolved": resolved,
     }
+    if proc.returncode == GPU_BUSY_RC:
+        return dict(base, submitted=False, detached=False, gpu_busy=True)
+    if proc.returncode != 0:
+        raise RuntimeError(f"run_queue.py --detach failed with returncode {proc.returncode}")
+
+    return dict(base, submitted=True, detached=True, gpu_busy=False)
 
 
 def main(argv=None) -> int:
@@ -189,7 +224,9 @@ def main(argv=None) -> int:
         dry_run=args.dry_run,
     )
     print(json.dumps(res, indent=2))
-    return 0 if res.get("dry_run") or res.get("success") else 1
+    if res.get("gpu_busy"):
+        return GPU_BUSY_RC
+    return 0 if res.get("dry_run") or res.get("submitted") else 1
 
 
 if __name__ == "__main__":
