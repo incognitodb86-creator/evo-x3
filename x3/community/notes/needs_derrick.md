@@ -427,3 +427,19 @@ pack are the honest probe.
 `approved_characters` roster rows), KEEP on the three H3 LoRAs, the terrace v1/v2 0-10 scores, and
 `runs\strip10_20261030_b07` (staged, not launched).
 
+
+## 2026-11-05 13:00 CT - FORGE: F2a (cleanup card item 2) = PARTIAL, three asks
+
+Item: `fix_plan.md` FORGE F2a - `make_b2_request.py` gains `--lora`/`--strength` and replaces the retired per-face `FC_*.api.json` templates. Record `notes\2026-11-05-cleanup-F2a-PARTIAL.md`, evidence `notes\_f2a\`.
+
+The CPU side is done and measured: the `--lora`/`--strength` dials (built by the agy U6 lane) reproduce the retired `FC_ARIANA.api.json` graph node for node (27 = 27, same LoRA wiring); a real defect is fixed - a literal `--lora none` built a LoraLoader named "none" (27 nodes vs `templates\b2.api.json` 26) and now builds the plain b2 graph (26 nodes, no LoRA node, only the 4 documented per-run fields differ); new offline test `scripts\tests\test_b2_lora_param.py` 5 passed; full suite 7 failed / 108 passed (+5, no new failures). The retired name is gone from live paths: 4 scripts now name `templates\flux_stills_s2_bfs.api.json`.
+
+**Ask 1 - GO for F2a's 2 GPU test cells.** The item's Pass clause needs one face-LoRA clip and one `--lora none` clip, each printing `OBJECTIVE ok` in its `status.log` (about 2 min GPU each, 22 frames, staged graphs are ready in `notes\_f2a\`). Gate measured free at 12:30: `gpu-render.lock` absent, ComfyUI guard `IDLE`. Answer yes = "run the F2a test cells". I did not render: a render needs your GO.
+
+**Ask 2 - the 7 red tests that pre-date the cleanup.** `tests\test_phase1_still.py` (6) and `tests\test_adults_guard.py::test_graph_require_adult` fail with an identical name list at `8428dcc` (2026-11-04, the item's own baseline commit) and at HEAD, so this cleanup did not break them. `test_shipped_values` asserts the retired `bfs_klein9b` shipped values (`strength_model` 1.0) against the merged S2 template (0.5). F2a's "pytest stays green" clause cannot pass while they are red. Pick one: (a) the FLX lane updates those tests to the merged S2 values; (b) Max sets the S2 spec first; (c) record them as a known-failing baseline and drop the clause from F2a/F2b. Forge will not edit another lane's tests unasked.
+
+**Ask 3 - FYI for F6c (no decision needed to keep going).** `scripts\queue\` had 9 untracked files. The 2 I edited (`queue_klein_explicit.py`, `queue_storyboard.py`, both implement approved plan arms) are now tracked in `95de74c`; 7 remain untracked (`README.md`, `chain_long_video.ps1`, `queue_all.ps1`, `queue_flux_replan.py`, `queue_klein9b_kv_bfs.py`, `s2_dryrun_check.py`, `watch_forge_brief.ps1`).
+
+Also recorded, no ask: F2a's archive placement is not how phase 2 landed - `templates\_archive\` holds only `README.md`, that README points at `C:\AI\community\_archive\2026-11-04-superseded\templates\`, which does not exist, and the retired copy is at `C:\AI\_archive\2026-11-05-cleanup\7\bfs_klein9b.api.json`. F2b's Do owns that file and README; left untouched.
+
+answered:

@@ -1,0 +1,44 @@
+{
+ "added": [],
+ "class_changes": [],
+ "input_diffs": [
+  {
+   "class": "LoraLoaderModelOnly",
+   "field": "strength_model",
+   "new": 0.5,
+   "node": "2",
+   "old": 1.0
+  },
+  {
+   "class": "RandomNoise",
+   "field": "noise_seed",
+   "new": 0,
+   "node": "20",
+   "old": 432262096973493
+  },
+  {
+   "class": "SaveImage",
+   "field": "filename_prefix",
+   "new": "community/flux_s2/TAG",
+   "node": "24",
+   "old": "community/flux_p1/TAG"
+  },
+  {
+   "class": "LoadImage",
+   "field": "image",
+   "new": "community/flux_s2/TAG_kv_00001_.png [output]",
+   "node": "7",
+   "old": "community/flux_p1/BODY.png"
+  },
+  {
+   "class": "LoadImage",
+   "field": "image",
+   "new": "community/flux_s2/HEAD.png",
+   "node": "8",
+   "old": "community/flux_p1/HEAD.png"
+  }
+ ],
+ "new_nodes": 25,
+ "old_nodes": 25,
+ "removed": []
+}
