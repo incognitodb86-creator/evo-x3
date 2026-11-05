@@ -1,6 +1,6 @@
 ---
 name: h3-max-ref2va-prompt
-description: The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 on this box - the standing Max lane unless Derek directs otherwise. Use for any paste into MiniMaxH3ReferenceToVideo: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / alienpc-local-video-ops), FLUX stills (alienpc-stills-pose-edit-prompting) or LTX (alienpc-ltx-i2v-prompting).
+description: The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 on this box - the standing Max lane unless Derek directs otherwise. Use for any paste into MiniMaxH3ReferenceToVideo: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / alienpc-local-video-ops) or FLUX stills (alienpc-stills-pose-edit-prompting).
 ---
 
 # H3-Max REF2VA prompt lane (AlienPc setup)
@@ -14,7 +14,7 @@ patch record `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
 ## 0. Lane status
 
 - **REF2VA is the standing Max lane.** A Max clip is a REF2VA paste into `MiniMaxH3ReferenceToVideo` unless Derek
-  directs another lane by name (first-frame I2V, LTX, stills).
+  directs another lane by name (first-frame I2V, stills).
 - This skill owns only REF2VA-specific rules, numbered R32-R44. Rule numbers are box-unique and stable: cite
   `R<n>` in a review, a gate or a commit message, never the sentence.
 

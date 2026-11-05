@@ -1,10 +1,6 @@
 ---
 name: h3-prompting
-description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box - output only the prompt, render rules in C:\AI\render\AGENTS.md (R2), the five prompt sections with plain audio cues at the end of the main prompt (no overall_soundscape block, TenStrip HF #77), the verbatim reference clauses that keep identity, get-into-position, PRIMARY MOTION and contact geometry, the response dial and slap-to-face, garment end states, <Video 1> continuation, positives-only plain wording, LoRA trigger hygiene, the detail checklist, the contradiction phrases to keep out and 4 worked examples. The REF2VA lane (single clip and multi-cell chain) is the separate skill
-`h3-max-ref2va-prompt` (rules R32-R44); references/ref2va-lane.md and references/ref2va-chain-lane.md are pointers to
-it. The director's prompt sections point to this file. Use when writing, reviewing or auditing any H3 prompt text: notes/hc_*.txt, specs/prompt_v2, a run's prompt file, a MiniMaxH3ReferenceToVideo paste, a multi-cell chain, an I2V POS, or a Continuum sequence_prompt. Since 2026-11-03 the REF2VA lane (the standing Max lane) is its own skill,
-`h3-max-ref2va-prompt`, with REF2VA-specific rules R32-R44; this file keeps R1-R31 (all lanes) and the rule index, and
-no rule sentence is duplicated between the two.
+description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box. Covers output prompt formatting, five prompt sections with plain audio cues (TenStrip HF #77), verbatim identity clauses, position/motion/contact geometry, response dials, garment states, <Video 1> continuation, wording, LoRA hygiene, checklist, and worked examples. Use when writing, reviewing, or auditing H3 prompt text, run prompt files, MiniMaxH3ReferenceToVideo pastes, multi-cell chains, I2V POS, or Continuum sequence_prompts. (REF2VA lane is in h3-max-ref2va-prompt; render rules are in C:\AI\render\AGENTS.md).
 ---
 
 # H3 prompting - the single home (U2, 2026-10-29)
@@ -165,8 +161,7 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
   craft / H3 prompt shape / Static Shot / static hold vs reveal / frame-one identity" - all point here; they keep
   only their lane (node wiring, chain scheduling, still→intent match, watch/triage, queue).
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
-- `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts; `alienpc-ltx-i2v-prompting` is the LTX baseline
-  lane (its own POS rules) and is not a Max prompt source.
+- `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts.
 - The writer model's system prompt `C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (the only copy
   on this box - `C:\AI\community\notes\` has none) keeps its
   own rubric and few-shots: it is a model prompt, not a rule file, so it is not merged and not edited here. Its
