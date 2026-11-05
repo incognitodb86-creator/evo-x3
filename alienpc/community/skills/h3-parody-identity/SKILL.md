@@ -60,6 +60,19 @@ On this box for parody:
 
 `MiniMaxH3RefModsLoader` (mod_1…mod_8) → `MiniMaxH3RefModApply` on the REF2VA / I2V conditioning path. Prefer 2–3 RefMods per persona when available. Unused slots = `(none)`.
 
+## RefLoRA (dual-half hybrid) - all three layers when a match exists
+
+Community: Malcolm `ComfyUI-MiniMaxH3RefLoRA` (one `.safetensors` = LoRA weights + RefMod reference). Installed at ComfyUI `custom_nodes/ComfyUI-MiniMaxH3RefLoRA`; hybrids live in `models/loras/MinimaxH3/reflora/` (verified copies, never junctions).
+
+- **Automatic:** `resolve_identities(..., reflora_dir=...)` looks for the exact pair `<id>_refmod` -> `<id>_reflora.safetensors`. Present + valid -> **INDEX + RefMod + RefLoRA**. Absent -> **INDEX + RefMod** fallback (reason recorded in `assets.json`). Present but broken (no LoRA tensors, stripped weights, unknown member equivalence) -> **block**, no fallback, no auto-download.
+- **INDEX is never dropped** when RefLoRA is on: name + biometric description stay in `subject_definitions`; good/bad/fence voice semantics are unchanged.
+- **Visual members only** (`components=Visual`); packed audio is never loaded - native voice stays with INDEX.
+- **One injection route:** Load H3 RefLoRA patches MODEL (+CLIP) after the B2 model stack; its `mods` go to one `Apply H3 RefLoRA` chained after the RefMod Apply; `attach_to_model=false`. Never also load the hybrid in a generic LoRA loader.
+- **Provenance:** a standalone RefMod byte-identical to the packed member is injected once (from the hybrid); distinct ones are both kept; total references stay <= 8.
+- **Cond required:** the RefLoRA branch needs an approved still (`--image community/<file>.png`, staged from `approved_characters`) on the REF2VA Picture input; missing Cond blocks.
+- **KEEP B2 unchanged:** graph is grafted from `templates/b2_refmod.api.json`; `reflora.frozen_diff` allows only identity/Cond/run fields. Pack example render settings are not adopted. Derived reference: `templates/b2_reflora.api.json`.
+- GPU smoke (Megan Fox / Jennifer Check bad-row A/B + Daenerys control) needs Derrick's separate GPU GO.
+
 ## Sibling skills
 
 - `h3-prompting` — shared R1–R31
