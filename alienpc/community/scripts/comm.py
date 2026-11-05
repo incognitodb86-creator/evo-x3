@@ -3,7 +3,7 @@ import json, os, re, sys, time, shutil, urllib.request, urllib.error, datetime, 
 W = r"C:\AI\community"
 C = r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI"
 LS = "http://127.0.0.1:8080"
-BASE = LS + "/comfyui"
+BASE = LS + "/upstream/comfyui_auto"
 UNET = "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors"
 TE = "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
 VVAE = "minimax_h3_video_vae_int8_convrot.safetensors"
