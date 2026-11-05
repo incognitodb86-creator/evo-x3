@@ -198,3 +198,8 @@ R42 the graph contract, R43 the chain lane, R44 the REF2VA gate |
 | Render dials, graph wiring, queue | `h3-hc-render`, `alienpc-local-video-ops` (never prompt rules) |
 
 A new rule is added in the file that owns its lane and gets the next box-unique number; never renumber an old rule.
+
+
+## Sibling: parody / INDEX identity
+Named INDEX+RefMod parody runs: load `h3-parody-identity` (name + description + RefMod). Do not fold those rules into this file.
+
