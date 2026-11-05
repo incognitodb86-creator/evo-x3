@@ -34,7 +34,7 @@ FIELDS = {
 REFMOD_FIELD = ("refmods", "mod_1")
 
 
-def build(tpl, refmod=None, **vals):
+def build(tpl, refmod=None, lora=None, strength=0.7, **vals):
     unknown = set(vals) - set(FIELDS)
     if unknown:
         raise ValueError("refused field(s): %s" % ", ".join(sorted(unknown)))
@@ -50,6 +50,24 @@ def build(tpl, refmod=None, **vals):
         if node not in g or field not in g[node].get("inputs", {}):
             raise ValueError("template has no %s.%s (not a RefMod template)" % (node, field))
         g[node]["inputs"][field] = refmod
+    if lora is not None:
+        if "lora" in g:
+            g["lora"]["inputs"]["lora_name"] = lora
+            g["lora"]["inputs"]["strength_model"] = float(strength)
+        else:
+            g["lora"] = {
+                "_meta": {"title": "Face LoRA on model chain (B2 parameter)"},
+                "class_type": "LoraLoader",
+                "inputs": {
+                    "lora_name": lora,
+                    "strength_model": float(strength),
+                    "strength_clip": 1.0,
+                    "model": ["unet", 0],
+                    "clip": ["clip", 0],
+                },
+            }
+            if "m_attn" in g and "inputs" in g["m_attn"]:
+                g["m_attn"]["inputs"]["model"] = ["lora", 0]
     return g
 
 
@@ -64,6 +82,8 @@ def main(argv=None):
                                     "only for a template with an img node")
     ap.add_argument("--refmod", help="set refmods.inputs.mod_1, e.g. minimaxh3_sydneysweeney_v1_refmod "
                                      "(a file inside ComfyUI/models/refmods); RefMod templates only")
+    ap.add_argument("--lora", help="set or inject face LoRA, e.g. FC_ARIANA_h3_face_v1.safetensors")
+    ap.add_argument("--strength", type=float, default=0.7, help="LoRA model strength (default: 0.7)")
     ap.add_argument("--prefix", required=True, help="SaveVideo filename_prefix, e.g. community/<run>/<tag>")
     ap.add_argument("--frames", type=int, default=None, help="c0.length; default = template value (example only)")
     ap.add_argument("--template", default=TEMPLATE)
@@ -93,7 +113,7 @@ def main(argv=None):
               file=sys.stderr)
 
     g = build(tpl, prompt=prompt, seed=a.seed, image=a.image, prefix=a.prefix, frames=frames,
-              refmod=a.refmod)
+              refmod=a.refmod, lora=a.lora, strength=a.strength)
     os.makedirs(a.arm_dir, exist_ok=True)
     out = os.path.join(a.arm_dir, "request.api.json")
     if os.path.exists(out) and not a.force:
@@ -101,8 +121,8 @@ def main(argv=None):
         return 3
     with open(out, "w", encoding="utf-8", newline="\n") as f:
         json.dump(g, f, indent=1, ensure_ascii=False)
-    print("wrote %s frames=%d refmod=%s (use --frames %d with run_graph_job.py / run_queue.py)"
-          % (out, frames, a.refmod or "none", frames))
+    print("wrote %s frames=%d refmod=%s lora=%s (use --frames %d with run_graph_job.py / run_queue.py)"
+          % (out, frames, a.refmod or "none", a.lora or "none", frames))
     return 0
 
 

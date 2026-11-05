@@ -1,4 +1,4 @@
-"""make_bfs_request.py - build one BFS head-swap still request from C:\\AI\\community\\templates\\bfs_klein9b.api.json.
+"""make_bfs_request.py - build one BFS head-swap still request from C:\\AI\\community\\templates\\flux_stills_s2_bfs.api.json.
 
 Flux Phase 1 (Derrick 2026-10-30 2:52 PM CT: "...building bfs_klein9b.api.json and a small request patcher...").
 Modelled on make_b2_request.py. It patches ONLY the per-job fields and nothing else:
@@ -21,7 +21,7 @@ Usage:
 """
 import argparse, copy, json, math, os, sys
 
-TEMPLATE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates", "bfs_klein9b.api.json")
+TEMPLATE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates", "flux_stills_s2_bfs.api.json")
 # per-job field -> [(node id, input key)]. Nothing else may change.
 FIELDS = {
     "body": [("7", "image")],
