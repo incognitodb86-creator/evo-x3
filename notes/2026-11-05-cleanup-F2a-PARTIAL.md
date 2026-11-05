@@ -64,3 +64,27 @@ No GPU work, no model, no service, no loop, no ComfyUI, no llama-swap, no pi pro
 12:30 CT: `git pull --rebase --autostash` in `C:\AI\fleet-brain` failed (qnap.tailf242b2.ts.net:443), pushes rc 128, `nslookup github.com` DNS timeout, `https://github.com` -> 000, SearXNG `192.168.0.147:8888` -> 000. Worked from local briefs/plans/learnings and the cached web copies (PROMPT 0a).
 
 12:56 CT, re-measured: public DNS and internet are back (`github.com` -> 140.82.114.3, https 200); the QNAP/Tailscale path is still down - `qnap.tailf242b2.ts.net:443` no connection after 21 s, SearXNG `192.168.0.147:8888` -> 000. So every push is blocked: `git push gitea master` in `C:\AI\community` -> the 443 failure (the remote is named **`gitea`** in `C:\AI\community` and `C:\Users\derek\5slock\ralph-community`, not `origin`; my first two attempts used `origin` and their rc 128 was my command, stated not hidden). `C:\AI\fleet-brain` pushes to `origin` on the same host. Card: `notes\2026-11-05-forge-blocker.md` 12:56 CT.
+
+## The records SHAs (2026-11-05 13:10 CT, written after the final commits, per the F6a lesson)
+
+This record's own commits, and the rest of the item's, in final form:
+
+| repo | SHA | what |
+| --- | --- | --- |
+| C:\AI\community | `50dda24` | code: the `--lora none` off-switch fix + `scripts\tests\test_b2_lora_param.py` (5 passed) |
+| C:\AI\community | `95de74c` | docs: the merged S2 graph named, retired `bfs_klein9b` path removed from live scripts |
+| C:\AI\community | `30f88c4` | records: this file + `notes\_f2a\` evidence + progress + needs_derrick card + blocker card |
+| C:\AI\community | `e4c5489` | `notes\actions.log` DONE line |
+| C:\Users\derek\5slock\ralph-community | `6990bfc` | `fix_plan.md`: F2a -> `- [PARTIAL]` + RESULT (only that path; `notes\heartbeat.txt` left to the loop) |
+| C:\AI\fleet-brain | `93877bc` | the F2a section merged into the job's one learning file + the status mirror |
+
+Push, when the QNAP path is back (all three failed at 13:09 CT, `qnap.tailf242b2.ts.net:443`, 21 s each):
+
+```
+git -C C:\AI\community push gitea master
+git -C C:\Users\derek\5slock\ralph-community push gitea master
+git -C C:\AI\fleet-brain push origin master
+```
+
+No force-push, no GitHub. The item stays `- [PARTIAL]` in both plans until the two GPU cells run on a GO.
+
