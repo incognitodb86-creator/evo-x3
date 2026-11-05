@@ -162,6 +162,7 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
   only their lane (node wiring, chain scheduling, still→intent match, watch/triage, queue).
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
 - `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts.
+- **Long-clip beat sheet & multi-shot continuity**: [references/longclip-beat-sheet.md](references/longclip-beat-sheet.md) (beat sheet fields, in-clip [Shot N] preference, one primary beat per clip; C2V runtime marked UNPROVEN).
 - The writer model's system prompt `C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (the only copy
   on this box - `C:\AI\community\notes\` has none) keeps its
   own rubric and few-shots: it is a model prompt, not a rule file, so it is not merged and not edited here. Its

@@ -232,8 +232,13 @@ def resolve_identities(
     refmods_dir: Path,
     approved_stills_dir: Optional[Path] = None,
     aliases_path: Optional[Path] = None,
+    reflora_dir: Optional[Path] = None,
 ) -> Dict[str, Any]:
     """Resolve normalized request against INDEX and RefMods.
+
+    When ``reflora_dir`` is given, matching local ``*_reflora`` hybrids are selected
+    (INDEX + RefMod + RefLoRA); absent hybrids keep the INDEX + RefMod fallback; a present
+    but invalid hybrid raises (RefLoRA arm R8 / KTD4).
 
     Args:
         request: Normalized request dict from request.py.
@@ -241,6 +246,7 @@ def resolve_identities(
         refmods_dir: Directory containing *.safetensors RefMod files.
         approved_stills_dir: Approved pool directory for stills gate.
         aliases_path: Path to aliases.json.
+        reflora_dir: RefLoRA home (models/loras/MinimaxH3/reflora); None skips lookup.
 
     Returns:
         Resolved dictionary with mode, INDEX rows, RefMod slots (1..8), description.
@@ -342,6 +348,18 @@ def resolve_identities(
     kept_refmods = sorted_refmods[:8]
     dropped_refmods = sorted_refmods[8:]
 
+    # 5b. RefLoRA hybrids (RefLoRA arm): packed visual member replaces a provably identical
+    # standalone slot; distinct standalones are retained; effective budget stays 8.
+    if reflora_dir is not None:
+        from reflora import select_reflora
+        reflora = select_reflora([str(m[0]) for m in kept_refmods], Path(reflora_dir))
+        keep_set = set(reflora["standalone_kept"])
+        budget_drop = set(reflora["standalone_dropped_for_budget"])
+        dropped_refmods = dropped_refmods + [m for m in kept_refmods if str(m[0]) in budget_drop]
+        kept_refmods = [m for m in kept_refmods if str(m[0]) in keep_set]
+    else:
+        reflora = {"enabled": False, "hybrids": [], "fallback_reason": "reflora lookup not requested"}
+
     # Build 8 fixed loader slots (F3)
     slots: Dict[str, Dict[str, Any]] = {}
     for i in range(1, 9):
@@ -379,4 +397,6 @@ def resolve_identities(
         "loaded_refmods": [str(m[0]) for m in kept_refmods],
         "dropped_refmods": [str(m[0]) for m in dropped_refmods],
         "stills": validated_stills,
+        "reflora": reflora,
+        "identity_layers": ["INDEX"] + (["RefMod"] if (kept_refmods or reflora.get("enabled")) else []) + (["RefLoRA"] if reflora.get("enabled") else []),
     }

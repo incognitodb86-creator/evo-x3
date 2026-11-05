@@ -12,7 +12,7 @@ import copy
 import json
 from pathlib import Path
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add community scripts to path for make_b2_request and comm
 SCRIPTS_DIR = Path(r"C:\AI\community\scripts")
@@ -23,6 +23,9 @@ import comm
 from make_b2_request import build as make_b2_build
 
 DEFAULT_REFMOD_TEMPLATE = Path(r"C:\AI\community\templates\b2_refmod.api.json")
+# Committed derived template (reflora.derive_reflora_template(b2_refmod)); documentation +
+# fixture anchor. Requests are grafted from the frozen b2_refmod so dials have one source.
+DEFAULT_REFLORA_TEMPLATE = Path(r"C:\AI\community\templates\b2_reflora.api.json")
 
 
 def format_parody_prompt(
@@ -131,8 +134,14 @@ def build_parody_request(
     scene: Optional[str] = None,
     audio_ref: Optional[str] = None,
     template_path: Path = DEFAULT_REFMOD_TEMPLATE,
+    image: Optional[str] = None,
 ) -> Tuple[Dict[str, Any], str]:
     """Build request API graph and prompt text for a parody run.
+
+    ``image`` is the approved Cond still as a ComfyUI/input-relative name
+    (e.g. ``community/X_768x1344.png``); it is wired to the REF2VA Picture input.
+    When the resolver selected RefLoRA hybrids, Cond is required (R10) and the graph gets
+    one Load H3 RefLoRA + Apply per hybrid on top of the frozen B2 RefMod template.
 
     Returns:
         (graph_dict, prompt_str)
@@ -156,6 +165,18 @@ def build_parody_request(
     # Populate all 8 slots from resolved
     populate_refmod_slots(graph, resolved.get("refmod_slots", {}))
 
+    hybrids = (resolved.get("reflora") or {}).get("hybrids") or []
+    if hybrids:
+        from reflora import add_cond_picture, graft_reflora, verify_reflora_graph
+        if not image:
+            raise ValueError("RefLoRA arm requires an approved Cond still (--image); missing Cond blocks (R10).")
+        base = graph
+        graph = add_cond_picture(graft_reflora(base, hybrids), image)
+        verify_reflora_graph(graph, tpl, len(hybrids))
+    elif image:
+        from reflora import add_cond_picture
+        graph = add_cond_picture(graph, image)
+
     # Verify KEEP dials
     verify_keep_dials(graph)
 
@@ -172,6 +193,7 @@ def main(argv=None) -> int:
     parser.add_argument("--scene", help="Optional scene summary")
     parser.add_argument("--template", default=str(DEFAULT_REFMOD_TEMPLATE), help="Template JSON path")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
+    parser.add_argument("--image", help="Approved Cond still inside ComfyUI/input, e.g. community/X_768x1344.png")
 
     # Request specification args
     parser.add_argument("--name", action="append", dest="names", help="Subject name(s)")
@@ -187,6 +209,7 @@ def main(argv=None) -> int:
     index_dir = Path(r"C:\AI\community\index\h3-known-characters")
     refmods_dir = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
     aliases_path = Path(__file__).parent / "aliases.json"
+    from reflora import DEFAULT_REFLORA_DIR
 
     req_dict = {
         "names": args.names or [],
@@ -202,6 +225,7 @@ def main(argv=None) -> int:
         index_dir=index_dir,
         refmods_dir=refmods_dir,
         aliases_path=aliases_path,
+        reflora_dir=DEFAULT_REFLORA_DIR,
     )
 
     graph, prompt = build_parody_request(
@@ -212,6 +236,7 @@ def main(argv=None) -> int:
         dialogue=args.dialogue,
         scene=args.scene,
         template_path=Path(args.template),
+        image=args.image,
     )
 
     arm_dir = Path(args.arm_dir)
