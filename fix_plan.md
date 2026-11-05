@@ -1,0 +1,1 @@
+# Render fix plan (C:\AI\render). New render/video items only (Derrick 2026-11-05 9:21 AM CT). One "## <OWNER> (<who>, <date time>; brief <path>)" header per brief; items are `- [ ]` lines with a Pass:/Done when: check.
