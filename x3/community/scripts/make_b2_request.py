@@ -98,6 +98,9 @@ def main(argv=None):
         ap.error("--image refused: this template has no img node (a RefMod arm takes no reference image)")
     if a.refmod and ("refmods" not in tpl or "mod_1" not in tpl["refmods"].get("inputs", {})):
         ap.error("--refmod refused: this template has no refmods.mod_1 (not a RefMod template)")
+    # "none" is the documented off switch: --lora none must build the plain b2 graph (no LoraLoader node).
+    if a.lora is not None and a.lora.strip().lower() == "none":
+        a.lora = None
     if a.prompt is not None:
         prompt = a.prompt
     else:
