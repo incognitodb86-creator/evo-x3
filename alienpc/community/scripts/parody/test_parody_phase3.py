@@ -23,6 +23,7 @@ from build_request import (
     populate_refmod_slots,
     verify_keep_dials,
 )
+import comm
 
 def build_parody_request(*a, **k):
     k.setdefault("require_cond", False)
@@ -102,15 +103,146 @@ class TestParodyPhase3(unittest.TestCase):
         self.assertIn("refapply", graph)
 
     def test_r7c_tone_passthrough_and_guard(self):
-        """R7-c: Tone passes through and prompt satisfies adults guard."""
+        """R7-c: The resolved description reaches the paste and the prompt satisfies the adults guard."""
         prompt = format_parody_prompt(
             self.resolved_bad,
             dialogue="You have no idea what is coming next.",
             scene="standing in a dimly lit hallway at night",
         )
         self.assertIn("Jennifer Check", prompt)
-        self.assertIn("Adult cast, adults-only, fictional 18+ adult scene", prompt)
+        self.assertIn(self.resolved_bad["description"], prompt)
+        self.assertIn("adults-only", prompt)
         self.assertIn("You have no idea what is coming next", prompt)
+        self.assertTrue(comm.guard_ok(prompt))
+        self.assertTrue(comm.adult_stated(prompt))
+
+    # ---- item 2 (2026-11-05): the paste shape of h3-prompting R5-R31 + R32-R44 + h3-parody-identity ----
+    REQ_SHAPE = {
+        "names": ["Emilia Clarke"],
+        "character": "Daenerys Targaryen",
+        "tone": "parody",
+        "length_s": 5,
+        "description": "dark curly hair, pale skin, standing at a late-night counter in a red uniform",
+    }
+
+    SECTION_ORDER = [
+        "subject_definitions:",
+        "summary:",
+        "retention_analysis:",
+        "detailed_description:",
+    ]
+    BANNED = [
+        "overall_soundscape", "non_diegetic_music", "<scenedirect>", "no_dubs", "Non-speaking characters",
+        "[static medium shot", "natural speaking voice", "no music", "no songs", "No singing", "never",
+        "then ", "after ", "afterwards", "next ", "<Picture 2>", "<Audio 1>", "<Video 2>", "age 28+",
+    ]
+
+    def _resolved(self):
+        # RefMod lookup points at a dir that does not exist, so the prompt-shape fixture never
+        # depends on installed assets (the graph side is covered by test_r7a).
+        return resolve_identities(
+            dict(self.REQ_SHAPE), index_dir=INDEX_DIR,
+            refmods_dir=Path(r"C:\AI\community\runs\_refmods_absent"), aliases_path=ALIASES_PATH
+        )
+
+    def _sections(self, prompt):
+        """[(section_name, lines)] split on the R5 section headers; R5 allows nothing else."""
+        found = [(name, prompt.index(name)) for name in self.SECTION_ORDER]
+        self.assertEqual([a for _, a in found], sorted(a for _, a in found), "R5 section order")
+        out = []
+        for i, (name, at) in enumerate(found):
+            end = found[i + 1][1] if i + 1 < len(found) else len(prompt)
+            out.append((name, prompt[at + len(name):end].strip().splitlines()))
+        self.assertEqual(prompt[: found[0][1]].strip(), "", "text before subject_definitions")
+        return out
+
+    def test_prompt_shape_sections_and_required_lines(self):
+        """R5/R6/R11/R33/R35/R36/R39/R8: five sections, the labels and the frames-derived clock."""
+        prompt = format_parody_prompt(
+            self._resolved(),
+            dialogue="Welcome back, honey. I have your table ready, and I will only say it once",
+            scene="A waitress at the late-night Hooters counter faces the camera and answers a regular",
+            frames=124,
+            cond_wired=True,
+        )
+        sections = dict(self._sections(prompt))
+        self.assertTrue(any(l.startswith("<Subject 1> is the woman in <Video 1>.") for l in sections["subject_definitions:"]))
+        self.assertTrue(any("<Subject 1> Daenerys Targaryen, a fictional adult, canon age 28," in l and "the only person in the clip" in l
+                            for l in sections["subject_definitions:"]))
+        self.assertIn("<Picture 1> is the start frame of [Shot 1] for setting, light and framing",
+                      sections["subject_definitions:"])
+        joined_summary = "\n".join(sections["summary:"])
+        self.assertTrue(joined_summary.startswith("[reference generation] "), "R6/R34 task tag")
+        self.assertIn("adults-only", joined_summary)
+        self.assertIn("<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, body, skin, wardrobe",
+                      sections["retention_analysis:"])
+        self.assertIn("<Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - setting, light, framing",
+                      sections["retention_analysis:"])
+        detail = "\n".join(sections["detailed_description:"])
+        self.assertTrue(detail.splitlines()[0].startswith("The target video is a realistic photographic portrait"), "R39 style opening")
+        self.assertIn("The camera holds a static shot.", detail.splitlines()[1])
+        self.assertIn("[Shot 1] 00:00.000 - 00:05.167", detail)
+        self.assertIn("PRIMARY MOTION", detail)
+        self.assertIn("<d>[English] Welcome back, honey. I have your table ready, and I will only say it once.</d>", detail)
+        self.assertIn("Her lips and jaw shape each word", detail)
+        for banned in self.BANNED:
+            self.assertNotIn(banned, prompt, f"banned string in paste: {banned!r}")
+        self.assertTrue(comm.guard_ok(prompt))
+        self.assertTrue(comm.adult_stated(prompt))
+
+    def test_prompt_shape_no_dialogue_has_no_speech(self):
+        """R37: no dialogue means no `<d>` block and no `(S1)` speaker ID."""
+        prompt = format_parody_prompt(self._resolved(), scene="standing in a stone hall at golden hour")
+        self.assertNotIn("<d>", prompt)
+        self.assertNotIn("</d>", prompt)
+        self.assertNotIn("(S1)", prompt)
+        self.assertNotIn("<Picture 1>", prompt)
+        self.assertIn("[Shot 1] 00:00.000 - 00:05.167", prompt)
+        self.assertTrue(any(l.startswith("<Subject 1> is the woman in <Video 1>.") for l in self._sections(prompt)[0][1]))
+        self.assertTrue(comm.guard_ok(prompt))
+
+    def test_prompt_shape_clock_follows_frames(self):
+        """R8: the [Shot 1] end clock equals frames / 24 fps for other frame counts too."""
+        for frames, clock in ((124, "00:05.167"), (193, "00:08.042"), (49, "00:02.042")):
+            prompt = format_parody_prompt(self._resolved(), frames=frames)
+            self.assertIn(f"[Shot 1] 00:00.000 - {clock}", prompt)
+            self.assertEqual(prompt.count("[Shot 1]"), 2, "R8: one continuous shot, timed once")
+
+    def test_prompt_shape_audio_ref_emits_no_audio_label(self):
+        """R33/R42: an unwired `<Audio N>` label never enters the paste."""
+        prompt = format_parody_prompt(self._resolved(), audio_ref="some_voice.wav")
+        self.assertNotIn("<Audio", prompt)
+
+    def test_graph_built_prompt_carries_the_picture_label(self):
+        """R42 gate item 1: `<Picture 1>` in the paste only when the graph wires ref_image_1."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pool = Path(tmp_dir) / "pool"
+            pool.mkdir()
+            input_dir = Path(tmp_dir) / "input"
+            input_dir.mkdir()
+            staged = pool / "hoot_start.jpg"
+            staged.write_bytes(b"parity fixture bytes for the cond provenance gate")
+            common = dict(
+                seed=51083601,
+                prefix="community/shape_test/clip",
+                frames=124,
+                dialogue="Welcome back, honey. I have your table ready, and I will only say it once.",
+                scene="A waitress at the late-night Hooters counter faces the camera and answers a regular",
+                image=staged.name,
+                cond_source=str(staged),
+                comfy_input=input_dir,
+                approved_pool=pool,
+            )
+            graph, prompt = build_parody_request(resolved=self.resolved_good, stage_cond=True, **common)
+            self.assertEqual(graph["c0"]["inputs"]["ref_images.ref_image_1"], ["img", 0])
+            self.assertIn("<Picture 1> is the start frame of [Shot 1]", prompt)
+            self.assertIn("<Picture 1> ([Shot 1] scene/identity anchor): fully_preserved", prompt)
+            # No Cond at all (require_cond=False): the label must be absent from the paste too.
+            no_cond = {k: v for k, v in common.items() if k not in ("image", "cond_source")}
+            graph2, prompt2 = build_parody_request(resolved=self.resolved_good, **no_cond)
+            self.assertNotIn("ref_images.ref_image_1", graph2["c0"]["inputs"])
+            self.assertNotIn("<Picture 1>", prompt2)
+            self.assertIn("<Subject 1> is the woman in <Video 1>.", prompt2)
 
     def test_r7d_short_request_single_clip(self):
         """R7-d: Short request (<= 8s) generates a single clip plan."""

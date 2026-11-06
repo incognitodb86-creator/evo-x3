@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import shutil
 from pathlib import Path
 import sys
@@ -139,18 +140,63 @@ def resolve_cond_provenance(
     }
 
 
+# R23 camera line, verbatim; 24 fps is the box's clip rate (R8: beat ranges total the clip).
+CAMERA_LINE = "The camera holds a static shot."
+FPS = 24.0
+
+
+def _shot_end_clock(frames: int) -> str:
+    """End clock of `[Shot 1]` = frames / fps, e.g. 124 -> `00:05.167` (R8)."""
+    millis = int(round(int(frames) / FPS * 1000))
+    return f"{millis // 60000:02d}:{(millis // 1000) % 60:02d}.{millis % 1000:03d}"
+
+
+def _speech_sentence(name: str, words: str) -> str:
+    """R37 speech form: the subject label keeps identity, `(S1)` is the speaker, inside `<d>` only
+    the language tag and the words, punctuation limited to `, . ? !`, statements ending in `.`."""
+    text = " ".join(str(words).split())
+    for ch in "~–—…'*\"()[]|/\\;:":
+        text = text.replace(ch, "")
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        raise ValueError("dialogue is empty after the R37 punctuation strip")
+    if not text.endswith((".", "?", "!")):
+        text += "."
+    return (
+        f"<Subject 1> {name} (S1) keeps her eyes on the lens, chin level, and says, "
+        f"<d>[English] {text}</d> Her lips and jaw shape each word and return to rest between the "
+        f"phrases, breath moving visibly through her nose."
+    )
+
+
 def format_parody_prompt(
     resolved: Dict[str, Any],
     dialogue: Optional[str] = None,
     scene: Optional[str] = None,
     audio_ref: Optional[str] = None,
+    frames: int = 124,
+    cond_wired: bool = False,
 ) -> str:
-    """Format prompt adhering to Malcolm sample block standards and adults-only guard."""
+    r"""Format the five-section H3-Max paste (R5) for the INDEX + RefMod parody lane.
+
+    Shape: `h3-prompting` R5-R9, R11, R14, R16-R17, R23-R28 and R32-R42 of
+    `h3-max-ref2va-prompt`, plus `h3-parody-identity`: the identity binding is the INDEX name +
+    the resolved biometric description in `subject_definitions`, and the installed RefMod is cited
+    in the RefMod route's own form `<Subject 1> is the woman in <Video 1>.` (REFMODS.md:464-487).
+    On this box that label is fed by `MiniMaxH3RefModsLoader` + `MiniMaxH3RefModApply`
+    (conditioning); `ref_videos` is not wired - the same deviation `C:\AI\community\runs\rv_20261105\CARD.md` states.
+
+    Labels only for what the graph feeds (R33, R42): `<Picture 1>` only when `cond_wired` (the
+    builder calls `reflora.add_cond_picture`, which wires `ref_images.ref_image_1`); exactly one
+    `<Video 1>`; no `<Picture N>` face-identity clause (parody lane item 3). `audio_ref` is kept
+    for caller compatibility and emits no `<Audio N>`, because no builder path wires `ref_audios`.
+
+    Default is no speech (R37): the `(S1)` ID and the `<d>` block appear only when `dialogue` is given.
+    """
     character = resolved.get("character")
     actor = resolved.get("actor")
     names = resolved.get("names", [])
     primary_name = character or actor or (names[0] if names else "Subject")
-    voice_name = actor or character or primary_name
 
     desc = resolved.get("description")
     if not desc or not str(desc).strip():
@@ -159,31 +205,81 @@ def format_parody_prompt(
             "A concrete biometric description is required."
         )
 
-    scene_summary = scene or f"{primary_name} stands calmly, looking into the camera before delivering a statement"
-    dialogue_text = dialogue or "I have a message for everyone listening, and I will only say it once."
+    # summary: the scene line, the R16 entry transition, adults-only stated once (R5 item 2, R21).
+    # No R3 policy prose and no negatives in the body (R3, R24).
+    if scene:
+        setting = " ".join(str(scene).split())
+        if not setting.endswith((".", "?", "!")):
+            setting += "."
+    else:
+        setting = (f"<Subject 1> {primary_name} stands behind a service counter at night, in the light "
+                   "and framing of the start frame.")
+    scene_summary = (
+        f"{setting} <Subject 1> {primary_name} settles into position facing the camera, stays squared to "
+        "the lens with her face in frame the whole time, and holds the last frame in the same stance "
+        "with her shoulders moving on her breath. One adult performer, adults-only."
+    )
 
-    audio_timbre_line = ""
-    if audio_ref:
-        audio_timbre_line = "\n<Audio 1> is the voice-timbre reference for <Subject 1>."
+    # subject_definitions: RefMod citation, identity binding described in full once (R28), and the
+    # Cond prose anchor only when the graph wires ref_image_1 (R36).
+    subject_lines = [
+        "<Subject 1> is the woman in <Video 1>.",
+        f"<Subject 1> {primary_name}, a fictional adult, canon age 28, {str(desc).strip()}, "
+        "the only person in the clip",
+    ]
+    if cond_wired:
+        subject_lines.append("<Picture 1> is the start frame of [Shot 1] for setting, light and framing")
 
-    prompt = f"""subject_definitions:
-(S1) {primary_name} - an adult performer, age 28+, {desc}{audio_timbre_line}
+    # R11 lead-ins with R35 role scope; `(Sx)` never appears here; new action is not a fidelity loss.
+    retention_lines = [
+        "<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, body, skin, wardrobe"
+    ]
+    if cond_wired:
+        retention_lines.append(
+            "<Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - setting, light, framing"
+        )
 
-summary:
-(S1) {scene_summary}. Adult cast, adults-only, fictional 18+ adult scene. Non-speaking characters: none. No singing, no rapping, no songs, no music, no narration, no voice-over.
+    # R39 style opening built from the start image's text records (the resolved description, R14),
+    # the R23 camera line verbatim, then the timed beat (R8, R16, R17). The `<Picture 1>` citation in
+    # the style line only rides when the graph feeds ref_image_1 (R42 gate item 1).
+    if cond_wired:
+        style = (
+            f"The target video is a realistic photographic portrait of {primary_name} with the same "
+            "light, setting and framing as <Picture 1>, shot at eye level with a shallow depth of field "
+            "and fine film grain."
+        )
+        entry = "begins in the standing position of the start frame"
+    else:
+        style = (
+            f"The target video is a realistic photographic portrait of {primary_name}, lit by the "
+            "practical lights of the room at eye level, with a shallow depth of field and fine film grain."
+        )
+        entry = "stands facing the camera"
+    beat = (
+        f"[Shot 1] 00:00.000 - {_shot_end_clock(frames)} <Subject 1> {primary_name} {entry}, weight "
+        "even on both feet, hands resting lightly at her sides, chin level, eyes on the lens, and she "
+        "settles square to the camera inside the first two seconds. PRIMARY MOTION - small steady "
+        "upper-body sway, about one gentle cycle every three seconds, a few centimetres of travel, "
+        "shoulders and hips staying on the frame line, her face staying in the same light. She keeps her "
+        "gaze on the lens, and her chest rises and falls on the last frame."
+    )
+    sounds = (
+        "Her voice sits close and dry in the foreground, recorded in the room with the camera. The room "
+        "tone is a low hum of ventilation, with a soft glass clink on the counter and her shoes shifting "
+        "once on the tile."
+    )
 
-detailed_description:
-[static medium shot, eye level, 50mm lens, shallow depth of field]
-(S1) stands in position, late afternoon ambient lighting, soft key on face, subtle fill. Camera locked off, no zoom, no pan.
-<scenedirect>
-(S1): <d>[English in {voice_name}'s natural speaking voice] {dialogue_text}</d>
-</scenedirect>
-She holds eye contact, gives a small nod at the end, and stops talking. Her mouth movements stop completely after the sentence. Her speaking voice, accent and cadence are the one natural voice she uses in this scene, used consistently in every clip of this character.
+    detail_lines = [style, CAMERA_LINE, beat]
+    if dialogue:
+        # Speech rides inside [Shot 1] (R37); plain real-sound sentences close the section (R7, R26).
+        detail_lines.append(_speech_sentence(primary_name, dialogue))
 
-overall_soundscape:
-quiet room ambience, soft natural room tone; the single close-micd human voice in the foreground.
-no_dubs: no extra dubbing, no studio VO, no dubbing actors, no voice actors.
-No music, no songs, no score, no soundtrack."""
+    prompt = (
+        "subject_definitions:\n" + "\n".join(subject_lines)
+        + "\n\nsummary:\n[reference generation] " + scene_summary
+        + "\n\nretention_analysis:\n" + "\n".join(retention_lines)
+        + "\n\ndetailed_description:\n" + "\n".join(detail_lines) + "\n" + sounds
+    )
 
     if not comm.guard_ok(prompt):
         raise ValueError(f"Prompt failed comm.guard_ok check:\n{prompt}")
@@ -295,7 +391,10 @@ def build_parody_request(
     with open(template_path, "r", encoding="utf-8") as f:
         tpl = json.load(f)
 
-    prompt = format_parody_prompt(resolved, dialogue=dialogue, scene=scene, audio_ref=audio_ref)
+    prompt = format_parody_prompt(
+        resolved, dialogue=dialogue, scene=scene, audio_ref=audio_ref,
+        frames=frames, cond_wired=bool(cond_image),
+    )
 
     graph = make_b2_build(
         tpl,
