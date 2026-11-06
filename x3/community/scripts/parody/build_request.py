@@ -32,6 +32,18 @@ _STAGE_CUE_RE = re.compile(
 )
 _FEATURING_RE = re.compile(r"\bfeaturing\s+", re.IGNORECASE)
 DEFAULT_SCENE_ACTION = "faces the camera with relaxed, natural body language"
+DEFAULT_LIGHTING = "late afternoon ambient lighting, soft key on face, subtle fill"
+# R6: scene text that already implies lighting suppresses the stock late-afternoon lighting.
+_LIGHTING_CUE_RE = re.compile(
+    r"\b(neon|lit|lighting|lamp|lamps|2\s*am|midnight|dark|sunlight|daylight|bulb|bulbs|glow|candle|"
+    r"candlelight|moonlit|moonlight|spotlight|backlit|fluorescent|dusk|dawn|sunset|sunrise)\b",
+    re.IGNORECASE,
+)
+# R7: satire/parody tone clause ("styled in (a) satirical adult parody tone").
+_TONE_CLAUSE_RE = re.compile(
+    r"\s*,?\s*styled in (?:an? )?(?:[a-z-]+ ){0,4}?parody tone\b\.?",
+    re.IGNORECASE,
+)
 
 
 def validate_spoken_dialogue(dialogue: Optional[str]) -> Optional[str]:
@@ -63,11 +75,33 @@ def dedupe_featuring(desc: str) -> str:
     return _FEATURING_RE.sub(_keep_first, desc)
 
 
+def scene_implies_lighting(scene_action: Optional[str]) -> bool:
+    """R6: True when the scene text already carries a lighting cue (neon, 2 AM, bulb, dark, ...)."""
+    return bool(scene_action and _LIGHTING_CUE_RE.search(str(scene_action)))
+
+
+def dedupe_satire_tone(text: str) -> str:
+    """R7: keep only the last (canonical, resolver-appended) parody tone clause."""
+    matches = list(_TONE_CLAUSE_RE.finditer(text))
+    if len(matches) <= 1:
+        return text
+    out = text
+    for m in reversed(matches[:-1]):
+        out = out[: m.start()] + out[m.end():]
+    out = re.sub(r"\s+,", ",", out)
+    out = re.sub(r",\s*,", ",", out)
+    out = re.sub(r"^\s*,\s*", "", out)
+    if matches[-1].group(0).lstrip(" ,").lower().startswith("styled") and not re.search(r",\s*styled in", out, re.IGNORECASE):
+        out = re.sub(r"\s+(styled in )", r", \1", out, count=1, flags=re.IGNORECASE)
+    return out.strip()
+
+
 def format_parody_prompt(
     resolved: Dict[str, Any],
     dialogue: Optional[str] = None,
     scene: Optional[str] = None,
     audio_ref: Optional[str] = None,
+    lighting: Optional[str] = None,
 ) -> str:
     """Format prompt adhering to Malcolm sample block standards and adults-only guard.
 
@@ -87,12 +121,19 @@ def format_parody_prompt(
             f"Resolved identity for '{primary_name}' is missing 'description'. "
             "A concrete biometric description is required."
         )
-    desc = dedupe_featuring(str(desc).strip())
+    desc = dedupe_satire_tone(dedupe_featuring(str(desc).strip()))
 
     spoken = validate_spoken_dialogue(dialogue)
     scene_text = str(scene).strip() if scene and str(scene).strip() else None
     scene_summary = scene_text or f"{primary_name} stands calmly, looking into the camera before delivering a statement"
-    scene_action = scene_text or DEFAULT_SCENE_ACTION
+    scene_action = (scene_text or DEFAULT_SCENE_ACTION).rstrip().rstrip(".").rstrip()
+    lighting_text = str(lighting).strip().rstrip(".") if lighting and str(lighting).strip() else None
+    if lighting_text:
+        scene_line = f"{scene_action}, {lighting_text}"
+    elif scene_implies_lighting(scene_action):
+        scene_line = scene_action
+    else:
+        scene_line = f"{scene_action}, {DEFAULT_LIGHTING}"
 
     audio_timbre_line = ""
     if audio_ref:
@@ -123,7 +164,7 @@ summary:
 
 detailed_description:
 [static medium shot, eye level, 50mm lens, shallow depth of field]
-(S1) {scene_action}, late afternoon ambient lighting, soft key on face, subtle fill. Camera locked off, no zoom, no pan.
+(S1) {scene_line}. Camera locked off, no zoom, no pan.
 {speech_block}
 
 overall_soundscape:

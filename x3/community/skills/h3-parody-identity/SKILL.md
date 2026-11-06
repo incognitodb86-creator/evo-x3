@@ -58,16 +58,19 @@ No music, no songs, no score, no soundtrack.
 ```
 
 1. **Full facial, hair & scenario outfit in `--description`:** Write concrete celebrity facial features (eyes, brows, cheekbones, lips, skin tone), hair color/cut/styling, and scenario-matched adult wardrobe. Do **not** begin `--description` with `"featuring"` (`resolve.py` prepends the `featuring` header automatically, and `build_request.py` dedupes accidental repeats).
-2. **Open scenario pose & adult setting in `--scene`:** Write a concrete adult setting (e.g., velvet cocktail lounge, penthouse balcony, upscale hotel bar, marble vanity dressing room, neon diner booth) and natural body language/head/eye action (keep hands relaxed off hips or out of foreground focus). **Never** use minor-coded words (`girl`, `teen`, `school`, `high school`, `cheerleader`, `dorm`, `student`) — `comm.guard_ok` blocks them on every submit.
+2. **Open scenario pose & adult setting in `--scene`:** Write a concrete adult setting (e.g., velvet cocktail lounge, penthouse balcony, upscale hotel bar, marble vanity dressing room, neon diner booth) and natural body language/head/eye action. Let `--scene` carry specific lighting when you want it (e.g. `2 AM neon booth light`, `warm vanity bulbs`) — the builder then drops its default late-afternoon lighting. **Never** use minor-coded words (`girl`, `teen`, `school`, `high school`, `cheerleader`, `dorm`, `student`) — `comm.guard_ok` blocks them on every submit.
 3. **Spoken words only in `--dialogue`:** Voice framing prefers `--character` when given (`[English in Jennifer Check's natural speaking voice]`) and falls back to `--actor` / `--name` (`[English in Sydney Sweeney's natural speaking voice]`). Keep spoken lines ~8–15 words so speech ends cleanly inside `124` frames with natural mouth closure. Never include timestamps (`t=0`, `00:00`), `<d>` tags, backticks, `"No speech"`, or `"room tone"` — `build_request.py` rejects stage cues. Omit `--dialogue` only when a silent clip is requested.
+4. **Prop-anchored hands (always):** Anchor hands on a concrete prop in `--scene` (`holding a cocktail glass stem`, `holding a makeup brush`, `holding a purse strap`, `holding a phone edge`, `fingers on a jacket lapel`) or keep them relaxed in the lap / at her sides. Never write open fingers splayed on hips, counters, or tabletops — they warp in 8-step single-pass H3.
+5. **No duplicate tone:** Do not write `styled in (a) satirical adult parody tone` inside `--description`; `resolve.py` already appends the tone clause (`build_request.py` collapses repeats as a safety net).
 
 ## Autonomous chat execution recipe (Forge in `C:\AI\render`)
 
 When Derrick asks in chat for a parody video of a named character or celebrity, his message **is** the go for **one `124`-frame (~5.2s) `768x1344` clip** (`LANE_IMAGE_RULES.md` / `fiction-cond-lock` rule 3). Do **not** ask to stage first unless he asks for a multi-clip batch or a missing model download.
 
-1. **Check alias / identity mapping** (read `C:\AI\community\scripts\parody\aliases.json` if a character name is given, e.g. `Jennifer Check` → `--name "Megan Fox" --character "Jennifer Check" --actor "Megan Fox"`; for a celebrity alone such as `Sydney Sweeney` → `--name "Sydney Sweeney" --actor "Sydney Sweeney"`).
-2. **Invent missing details:** If Derrick gives only a name or asks for a random scenario, invent a fitting adult satirical scenario, scenario-matched outfit, natural pose/action, and witty spoken line in character.
-3. **Submit, wait, copy MP4, and upload to QNAP in ONE blocking PowerShell call** (never detach and return to the LLM mid-render — an LLM turn while ComfyUI holds the GPU evicts `comfyui_auto` from VRAM; avoid shell redirects in command strings):
+**Fast path — one tool call after this skill loads.** `submit_parody_run.py` already resolves `aliases.json`, `INDEX.md`, and installed `RefMods` in Python. So for a named parody clip, do **not** spend turns reading or grepping `aliases.json`, `INDEX.md`, `resolve.py`, or `comm.py`, and do **not** load `h3-hc-render` or `h3-prompting`. Go straight from this skill to step 1 and then the single PowerShell call in step 2. Only read `aliases.json` / list `RefMods` if Derrick explicitly asks what characters or RefMods exist, or if `submit_parody_run.py` fails on an unknown spelling.
+
+1. **Map the name and invent the details in your head (no tool call):** Character name given (e.g. `Jennifer Check`) → `--name "Megan Fox" --character "Jennifer Check" --actor "Megan Fox"`; celebrity alone (e.g. `Sydney Sweeney`) → `--name "Sydney Sweeney" --actor "Sydney Sweeney"`. If Derrick gives only a name or a loose scenario, invent a fitting adult satirical scenario, scenario-matched outfit, prop-anchored pose, and witty spoken line in character.
+2. **Submit, wait, copy MP4, and upload to QNAP in ONE blocking PowerShell call** (never detach and return to the LLM mid-render — an LLM turn while ComfyUI holds the GPU evicts `comfyui_auto` from VRAM; avoid shell redirects in command strings):
 
 ```powershell
 $ts = Get-Date -Format 'yyyyMMdd_HHmmss'
@@ -83,7 +86,7 @@ $argsList = @(
   '--frames', '124',
   '--run-dir', $runDir,
   '--description', '<concrete facial features, hair, eyes, lips, and scenario-matched adult outfit>',
-  '--scene', '<adult setting and natural pose/expression, hands relaxed off hips>',
+  '--scene', '<adult setting, optional specific lighting, natural pose/expression, hands holding a prop or relaxed in lap>',
   '--dialogue', '<spoken words only, ~8-15 words>'
 )
 & $py @argsList
@@ -101,10 +104,11 @@ $comfyOut = Get-ChildItem "C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\outpu
 $finalMp4 = Join-Path $runDir 'clip.mp4'
 Copy-Item $comfyOut.FullName $finalMp4 -Force
 & $py 'C:\AI\community\scripts\pi_qnap.py' put $finalMp4 "pi-drop/$runName.mp4"
+Select-String -Path (Join-Path $runDir 'status.log') -Pattern 'OBJECTIVE' | Select-Object -Last 1 | ForEach-Object { $_.Line }
 ```
 
-4. **Stop cleanly on missing RefMod or busy GPU:** If `submit_parody_run.py` raises `ValueError` (no local RefMod for a non-`good` celebrity) or returns `rc=7` (`GPU_BUSY`), report that exact reason in chat and stop without retrying or downloading weights.
-5. **Reply right after `OBJECTIVE ok` + QNAP upload:** Give Derrick `<run_dir>\clip.mp4`, `pi-drop/<runName>.mp4`, the `OBJECTIVE` line, and a 1-sentence description of the scene and spoken line (never crown `KEEP` or numeric scores).
+3. **Stop cleanly on missing RefMod or busy GPU:** If `submit_parody_run.py` raises `ValueError` (no local RefMod for a non-`good` celebrity) or returns `rc=7` (`GPU_BUSY`), report that exact reason in chat and stop without retrying or downloading weights.
+4. **Reply right after `OBJECTIVE ok` + QNAP upload:** Do **not** run a follow-up `ffprobe`, `ls`, or any other tool call — reply directly in chat. Give Derrick `<run_dir>\clip.mp4`, `pi-drop/<runName>.mp4`, the `OBJECTIVE` line, and a 1-sentence description of the scene and spoken line (never crown `KEEP` or numeric scores).
 
 ## Sibling skills & sources
 

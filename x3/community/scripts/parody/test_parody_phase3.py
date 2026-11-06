@@ -425,5 +425,78 @@ class TestU1SubmitGateAndSydneyFixture(unittest.TestCase):
         self.assertIn("perched on a penthouse bar stool", prompt.split("detailed_description:")[1])
         self.assertEqual(_u1_subject_block(prompt).lower().count("featuring"), 1)
 
+class TestU3LightingAndTone(unittest.TestCase):
+    """U3 (R6/R7): lighting-cue gate and satire tone dedupe in format_parody_prompt."""
+
+    def _detailed(self, prompt):
+        return prompt.split("detailed_description:")[1].split("overall_soundscape:")[0]
+
+    def test_default_scene_keeps_late_afternoon_lighting(self):
+        p = format_parody_prompt(_u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE)
+        self.assertIn("late afternoon ambient lighting, soft key on face, subtle fill. Camera locked off", self._detailed(p))
+        p2 = format_parody_prompt(
+            _u1_resolved(character="Jennifer Check", actor="Megan Fox"),
+            dialogue=U1_LINE,
+            scene="perched on a bar stool, holding a cocktail glass stem.",
+        )
+        d2 = self._detailed(p2)
+        self.assertIn(
+            "perched on a bar stool, holding a cocktail glass stem, late afternoon ambient lighting, soft key on face, subtle fill.",
+            d2,
+        )
+        self.assertNotIn(".,", d2)
+
+    def test_neon_2am_scene_omits_default_lighting(self):
+        scene = "sits in a 2 AM neon-lit diner booth, holding a milkshake glass"
+        p = format_parody_prompt(_u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE, scene=scene)
+        d = self._detailed(p)
+        self.assertNotIn("late afternoon ambient lighting", p)
+        self.assertIn(f"(S1) {scene}. Camera locked off, no zoom, no pan.", d)
+        self.assertTrue(comm.guard_ok(p))
+
+    def test_explicit_lighting_kwarg_wins(self):
+        p = format_parody_prompt(
+            _u1_resolved(character="Jennifer Check", actor="Megan Fox"),
+            dialogue=U1_LINE,
+            scene="leans on a vanity counter, holding a makeup brush",
+            lighting="warm vanity bulb light",
+        )
+        self.assertIn("holding a makeup brush, warm vanity bulb light. Camera locked off", self._detailed(p))
+        self.assertNotIn("late afternoon ambient lighting", p)
+
+    def test_duplicate_satire_tone_collapsed_through_resolve(self):
+        res = resolve_identities(
+            {
+                "names": ["Megan Fox"],
+                "character": "Jennifer Check",
+                "actor": "Megan Fox",
+                "tone": "satirical adult parody",
+                "length_s": 5,
+                "description": "long dark wavy hair, cropped leather jacket, styled in a satirical adult parody tone",
+            },
+            index_dir=INDEX_DIR,
+            refmods_dir=REFMODS_DIR,
+            aliases_path=ALIASES_PATH,
+        )
+        p = format_parody_prompt(res, dialogue=U1_LINE)
+        self.assertEqual(p.lower().count("parody tone"), 1, _u1_subject_block(p))
+        self.assertIn("styled in satirical adult parody tone.", _u1_subject_block(p))
+        self.assertIn("long dark wavy hair, cropped leather jacket", _u1_subject_block(p))
+
+    def test_duplicate_satire_tone_collapsed_direct(self):
+        r = _u1_resolved(
+            character="Jennifer Check",
+            actor="Megan Fox",
+            description=(
+                "featuring Megan Fox, long dark wavy hair, styled in a satirical adult parody tone, "
+                "styled in satirical adult parody tone."
+            ),
+        )
+        subj = _u1_subject_block(format_parody_prompt(r, dialogue=U1_LINE))
+        self.assertEqual(subj.lower().count("parody tone"), 1, subj)
+        self.assertIn("long dark wavy hair, styled in satirical adult parody tone.", subj)
+        self.assertNotIn(",,", subj)
+
+
 if __name__ == "__main__":
     unittest.main()
