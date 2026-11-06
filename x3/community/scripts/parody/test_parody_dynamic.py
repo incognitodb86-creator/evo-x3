@@ -398,6 +398,31 @@ class TestWaitFinalize(unittest.TestCase):
         self.assertIn("--name", run.call_args[0][0])
         self.assertIn("stitched", run.call_args[0][0])
 
+    def test_finalize_prefers_upscaled_cell_mp4_not_raw(self):
+        """MA-13: after RTX 2x, finalize stitches <cell>/<cell>.mp4 (1536x..) not <cell>_raw.mp4."""
+        t1, t2 = "c01_s51083610", "c02_s51083611"
+        for t in (t1, t2):
+            d = self.run / t
+            d.mkdir(parents=True)
+            (d / f"{t}_raw.mp4").write_bytes(b"RAW768")
+            (d / f"{t}.mp4").write_bytes(b"UPSCALED1536")
+        def fake_run(cmd, **kw):
+            # stitcher must receive cell dirs that already hold the upscaled mp4 names
+            self.assertTrue((self.run / t1 / f"{t1}.mp4").is_file())
+            self.assertEqual((self.run / t1 / f"{t1}.mp4").read_bytes(), b"UPSCALED1536")
+            self.assertEqual((self.run / t1 / f"{t1}_raw.mp4").read_bytes(), b"RAW768")
+            (self.run / "_stitch").mkdir(exist_ok=True)
+            (self.run / "_stitch" / "stitched.mp4").write_bytes(b"FILM1536")
+            return mock.Mock(returncode=0, stdout="PROOF film ok video=1536x2688@24/1\nSTITCH OK cells=2", stderr="")
+        with mock.patch("subprocess.run", side_effect=fake_run) as run:
+            out = spr.finalize_clip(self.run, [t1, t2], "python")
+        self.assertTrue(out["stitched"])
+        self.assertEqual(Path(out["final_mp4"]).read_bytes(), b"FILM1536")
+        self.assertIn("take_chain_stitch.py", " ".join(run.call_args[0][0]))
+        # raw preserved beside upscaled
+        self.assertTrue((self.run / t1 / f"{t1}_raw.mp4").is_file())
+        self.assertTrue((self.run / t2 / f"{t2}_raw.mp4").is_file())
+
     def test_finalize_missing_cell_refuses(self):
         (self.run / "c01_s51083601").mkdir()
         (self.run / "c01_s51083601" / "c01_s51083601.mp4").write_bytes(b"cell")
