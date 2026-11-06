@@ -68,7 +68,11 @@ def _container(pack_dir: Path = PACK_DIR):
         return _CONTAINER
     src = Path(pack_dir) / "container.py"
     if not src.is_file():
-        raise RefLoRAError(f"RefLoRA pack container.py not found at {src}; pack not installed.")
+        alt = Path(str(pack_dir) + ".disabled") / "container.py"
+        if alt.is_file():
+            src = alt
+        else:
+            raise RefLoRAError(f"RefLoRA pack container.py not found at {src}; pack not installed.")
     spec = importlib.util.spec_from_file_location("h3_reflora_container", src)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -541,18 +545,23 @@ def drop_cond_picture(graph: Dict[str, Any]) -> Dict[str, Any]:
     (``MiniMaxH3ReferenceToVideo`` lists ``ref_images`` under ``optional``), and feed both guiders
     from the ONE conditioning injection. Fails closed if that injection is not in the graph.
     """
+    apply_nid = PARODY_REF_APPLY
     apply_node = graph.get(PARODY_REF_APPLY)
     if not apply_node or apply_node.get("class_type") != APPLY_CLASS:
-        raise ValueError(
-            f"drop_cond_picture needs the single conditioning injection {PARODY_REF_APPLY!r} "
-            f"({APPLY_CLASS}); the no-photo graph has no other identity feed")
+        rm_node = graph.get("refapply")
+        if rm_node and rm_node.get("class_type") == "MiniMaxH3RefModApply":
+            apply_nid = "refapply"
+        else:
+            raise ValueError(
+                f"drop_cond_picture needs the single conditioning injection {PARODY_REF_APPLY!r} "
+                f"({APPLY_CLASS}) or 'refapply' (MiniMaxH3RefModApply); the no-photo graph has no other identity feed")
     for nid in NO_PHOTO_DROP_NODES:
         graph.pop(nid, None)
     graph.setdefault("c0", {}).setdefault("inputs", {}).pop("ref_images.ref_image_1", None)
     for nid in GUIDER_NODES:
         if "conditioning" not in (graph.get(nid) or {}).get("inputs", {}):
             raise ValueError(f"drop_cond_picture: {nid} has no conditioning input to rewire")
-        graph[nid]["inputs"]["conditioning"] = [PARODY_REF_APPLY, 0]
+        graph[nid]["inputs"]["conditioning"] = [apply_nid, 0]
     return graph
 
 

@@ -503,7 +503,12 @@ def build_parody_request(
     # so the requirement is dropped for exactly that case; any supplied photo still goes through
     # resolve_cond_provenance (approved_characters + SHA256, FG-2/FG-11) unchanged, and the other
     # graph modes keep requiring Cond.
-    no_photo_parody = bool(parody and not image and not cond_source)
+    has_standalone_refmod = bool(resolved.get("loaded_refmods"))
+    has_hybrid = bool((resolved.get("reflora") or {}).get("hybrids"))
+    no_photo_parody = bool(
+        (parody or (mode == "two-pass" and not has_hybrid and has_standalone_refmod))
+        and not image and not cond_source
+    )
     cond_meta = resolve_cond_provenance(
         image=image,
         cond_source=cond_source,
@@ -544,35 +549,51 @@ def build_parody_request(
             verify_parody_2pass_graph,
         )
         if not hybrids:
-            raise ValueError(
-                "the two-pass parody graph needs one RefLoRA hybrid (the LoRA half of the identity); "
-                "no hybrid resolved for this subject - use --graph-mode two-pass for a RefMod-only run")
-        hyb = {"lora_name": str(hybrids[0]["lora_name"]),
-               "members": str(hybrids[0].get("member_selection") or "all")}
-        b2_tpl = json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8"))
-        verify_kwargs = {"pass1_lora_strength": p1, "pass2_lora_strength": p2,
-                         "cond_wired": bool(cond_image)}
-        try:
-            # --template plumbing: `graph` is the template file with this run's prompt/seed/prefix/
-            # frames applied by make_b2_build above; use it as-is when it verifies at the run's dials.
-            verify_parody_2pass_graph(graph, b2_tpl, **verify_kwargs)
-        except ValueError:
-            # dials/shape the committed template does not carry (a non-default dial, or the no-photo
-            # shape of B2-5): regenerate from the LIVE b2.api.json.
+            if not resolved.get("loaded_refmods"):
+                raise ValueError(
+                    "two-pass parody without RefLoRA requires at least one resolved standalone RefMod; "
+                    "neither a RefLoRA hybrid nor a standalone RefMod resolved for this subject")
+            from reflora import derive_refmod_2pass_graph, frozen_diff_2pass, frozen_diff_no_photo
+            b2_tpl = json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8"))
             base_b2 = make_b2_build(b2_tpl, prompt=prompt, seed=seed, prefix=prefix, frames=frames,
                                     refmod=None, lora=None)
-            graph = derive_parody_2pass_graph(base_b2, hyb, pass1_lora_strength=p1,
-                                             pass2_lora_strength=p2)
-        for node in graph.values():
-            if node.get("class_type") == LOADER_CLASS:
-                node["inputs"]["reflora_name"] = hyb["lora_name"]
-                node["inputs"]["members"] = hyb["members"]
-        populate_refmod_slots(graph, resolved.get("refmod_slots", {}))
-        if cond_image:
-            graph = add_cond_picture(graph, cond_image)
+            graph = derive_refmod_2pass_graph(base_b2)
+            populate_refmod_slots(graph, resolved.get("refmod_slots", {}))
+            if cond_image:
+                graph = add_cond_picture(graph, cond_image)
+                drift = frozen_diff_2pass(graph, b2_tpl)
+            else:
+                graph = drop_cond_picture(graph)
+                drift = frozen_diff_no_photo(graph, b2_tpl)
+            if drift:
+                raise ValueError("two-pass-parody RefMod-only frozen_diff: " + " | ".join(drift))
         else:
-            graph = drop_cond_picture(graph)
-        verify_parody_2pass_graph(graph, b2_tpl, **verify_kwargs)
+            hyb = {"lora_name": str(hybrids[0]["lora_name"]),
+                   "members": str(hybrids[0].get("member_selection") or "all")}
+            b2_tpl = json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8"))
+            verify_kwargs = {"pass1_lora_strength": p1, "pass2_lora_strength": p2,
+                             "cond_wired": bool(cond_image)}
+            try:
+                # --template plumbing: `graph` is the template file with this run's prompt/seed/prefix/
+                # frames applied by make_b2_build above; use it as-is when it verifies at the run's dials.
+                verify_parody_2pass_graph(graph, b2_tpl, **verify_kwargs)
+            except ValueError:
+                # dials/shape the committed template does not carry (a non-default dial, or the no-photo
+                # shape of B2-5): regenerate from the LIVE b2.api.json.
+                base_b2 = make_b2_build(b2_tpl, prompt=prompt, seed=seed, prefix=prefix, frames=frames,
+                                        refmod=None, lora=None)
+                graph = derive_parody_2pass_graph(base_b2, hyb, pass1_lora_strength=p1,
+                                                 pass2_lora_strength=p2)
+            for node in graph.values():
+                if node.get("class_type") == LOADER_CLASS:
+                    node["inputs"]["reflora_name"] = hyb["lora_name"]
+                    node["inputs"]["members"] = hyb["members"]
+            populate_refmod_slots(graph, resolved.get("refmod_slots", {}))
+            if cond_image:
+                graph = add_cond_picture(graph, cond_image)
+            else:
+                graph = drop_cond_picture(graph)
+            verify_parody_2pass_graph(graph, b2_tpl, **verify_kwargs)
     elif two_pass:
         from reflora import (
             add_cond_picture,
@@ -599,9 +620,16 @@ def build_parody_request(
             verify_reflora_graph(graph, json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8")),
                                  len(hybrids), two_pass=True)
         else:
+            from reflora import drop_cond_picture, frozen_diff_no_photo
+            b2_tpl = json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8"))
             if cond_image:
                 graph = add_cond_picture(graph, cond_image)
-            drift = frozen_diff_2pass(graph, json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8")))
+                drift = frozen_diff_2pass(graph, b2_tpl)
+            else:
+                if not resolved.get("loaded_refmods"):
+                    raise ValueError("two-pass no-photo RefMod-only requires at least one resolved standalone RefMod")
+                graph = drop_cond_picture(graph)
+                drift = frozen_diff_no_photo(graph, b2_tpl)
             if drift:
                 raise ValueError("two-pass RefMod-only frozen_diff_2pass: " + " | ".join(drift))
     else:
@@ -630,7 +658,7 @@ def build_parody_request(
     if isinstance(rec, dict):
         rec["unet_name"] = effective_unet
         rec["unet_allowlist"] = list(BETA7_UNET_ALLOWLIST)
-        if parody:
+        if parody and hybrids:
             rec["parody_dials"] = {
                 "pass1_lora_strength": p1, "pass2_lora_strength": p2,
                 "start_photo": bool(cond_image),
