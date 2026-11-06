@@ -80,3 +80,12 @@ identity passed per commit (`-c user.name=Forge -c user.email=forge@alienpc.loca
 18:4x attempt, so the QNAP Gitea service has been unhealthy across at least 20 minutes; the ahead counts in the
 section above are unchanged by this pass's records. **Nothing is lost and nothing needs a force-push**: the commits
 are on the box and push at the first 200.
+
+### Citation correction (18:5x CT)
+
+The v2 plan of record cited in this file and in the card addendum is
+**`C:\Users\derek\5slock\ralph-community\notes\2026-11-05-forge-cleanup-v2.md`** - not a file under
+`C:\AI\community\notes\`, where it does not exist. Verified: `grep -n 'b2_fc_sydney_lora' ` in that file returns
+line 22 ("**Every FC_SYDNEY and b2_fc_sydney_lora* file stays.**") and line 28 ("F2b must not move
+b2_fc_sydney_lora*"), so the quotations and line numbers used above are correct; only the directory in my shorthand
+was ambiguous, and it is made absolute here. Records-only edit; nothing else in this pass changes.
