@@ -1,6 +1,6 @@
-# ComfyUI node inputs (from object_info_20261030.json)
+# ComfyUI node inputs (from object_info_20261105.json)
 
-2338 node classes. Regenerate: `python notes\objinfo\_make_index.py`.
+1786 node classes. Regenerate: `python notes\objinfo\_make_index.py`.
 
 ## AddLabel
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/text
@@ -38,13 +38,6 @@ module: comfy_extras.nodes_compositor | category: image
   - flip_h: BOOLEAN default=False
   - flip_v: BOOLEAN default=False
 - outputs: LAYERS:LAYERS
-
-## AddMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - mask1: MASK
-  - mask2: MASK
-- outputs: MASK:MASK
 
 ## AddNoise
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/noise
@@ -94,6 +87,15 @@ module: comfy_extras.nodes_dataset | category: image/adjustments
   - factor: FLOAT default=1.0 min=0.0 max=2.0
 - outputs: images:IMAGE
 
+## AIO_Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
+- required:
+  - image: IMAGE
+- optional:
+  - preprocessor: COMBO[none, AnimeFace_SemSegPreprocessor, AnyLineArtPreprocessor_aux, BinaryPreprocessor, CannyEdgePreprocessor, ColorPreprocessor, DensePosePreprocessor, DepthAnythingPreprocessor, Zoe_DepthAnythingPreprocessor, DepthAnythingV2Preprocessor, ... +37] default='none'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
 ## AlignYourStepsScheduler
 module: comfy_extras.nodes_align_your_steps | category: model/sampling/schedulers
 - required:
@@ -101,17 +103,6 @@ module: comfy_extras.nodes_align_your_steps | category: model/sampling/scheduler
   - steps: INT default=10 min=1 max=10000
   - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
 - outputs: SIGMAS:SIGMAS
-
-## AMT VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[amt-s.pth, amt-l.pth, amt-g.pth, gopro_amt-s.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=1 min=1 max=100
-  - multiplier: INT default=2 min=2 max=1000
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
 
 ## AnimaLLLiteApply
 module: comfy_extras.nodes_model_patch | category: model/patch/anima
@@ -126,19 +117,49 @@ module: comfy_extras.nodes_model_patch | category: model/patch/anima
   - mask: MASK
 - outputs: MODEL:MODEL
 
-## AnimeLineArt_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+## AnimalPosePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Faces and Poses Estimators
+- required:
+  - image: IMAGE
+- optional:
+  - bbox_detector: COMBO[None, yolox_l.torchscript.pt, yolox_l.onnx, yolo_nas_l_fp16.onnx, yolo_nas_m_fp16.onnx, yolo_nas_s_fp16.onnx] default='yolox_l.torchscript.pt'
+  - pose_estimator: COMBO[rtmpose-m_ap10k_256_bs5.torchscript.pt, rtmpose-m_ap10k_256.onnx] default='rtmpose-m_ap10k_256_bs5.torchscript.pt'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE, POSE_KEYPOINT:POSE_KEYPOINT
+
+## AnimeFace_SemSegPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Semantic Segmentation
+- required:
+  - image: IMAGE
+- optional:
+  - remove_background_using_abg: BOOLEAN default=True
+  - resolution: INT default=512 min=512 max=512 step=64
+- outputs: IMAGE:IMAGE, ABG_CHARACTER_MASK (MASK):MASK
+
+## AnimeLineArtPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## Any Switch (rgthree)
 module: custom_nodes.rgthree-comfy | category: rgthree
 - outputs: *:*
 
-## AnyPipeToBasic
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
+## AnyLineArtPreprocessor_aux
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
 - required:
-  - any_pipe: *
-- outputs: basic_pipe:BASIC_PIPE
+  - image: IMAGE
+- optional:
+  - merge_with_lineart: COMBO[lineart_standard, lineart_realisitic, lineart_anime, manga_line] default='lineart_standard'
+  - resolution: INT default=1280 min=64 max=16384 step=8
+  - lineart_lower_bound: FLOAT default=0 min=0 max=1 step=0.01
+  - lineart_upper_bound: FLOAT default=1 min=0 max=1 step=0.01
+  - object_min_size: INT default=36 min=1 max=16384 step=1
+  - object_connectivity: INT default=1 min=1 max=16384 step=1
+- outputs: image:IMAGE
 
 ## Anything Everywhere
 module: custom_nodes.cg-use-everywhere | category: everywhere
@@ -201,16 +222,6 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/segmentation
   - blur: INT default=0 min=0 max=64 step=1
 - outputs: MASK:MASK
 
-## ApplyLBW //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/LoraBlockWeight
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - strength_model: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - strength_clip: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lbw_model: LBW_MODEL
-- outputs: MODEL:MODEL, CLIP:CLIP
-
 ## ApplyPulidFlux
 module: custom_nodes.ComfyUI_PuLID_Flux_ll | category: pulid
 - required:
@@ -239,13 +250,6 @@ module: custom_nodes.ComfyUI-PuLID-Flux2 | category: PuLID-Flux2
 - optional:
   - face_index: INT default=0 min=0 max=9
   - debug_mode: BOOLEAN default=False
-- outputs: MODEL:MODEL
-
-## ApplyRegionalIPAdapters //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - ipadapter_pipe: IPADAPTER_PIPE
-  - regional_ipadapter1: REGIONAL_IPADAPTER
 - outputs: MODEL:MODEL
 
 ## ApplyRifleXRoPE_HunuyanVideo
@@ -287,18 +291,6 @@ module: comfy_extras.nodes_ar_video | category: model/conditioning/autoregressiv
   - length: INT default=81 min=1 max=1024 step=4
   - batch_size: INT default=1 min=1 max=64
 - outputs: MODEL:MODEL, LATENT:LATENT
-
-## ATM VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[atm-vfi-base.pt, atm-vfi-lite.pt, atm-vfi-base-pct.pt]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=2
-  - global_motion: COMBO[On, On with Ensemble (slowest), Off (fastest)]
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
 
 ## AudioAdjustVolume
 module: comfy_extras.nodes_audio | category: audio
@@ -367,6 +359,14 @@ module: comfy_extras.nodes_audio | category: audio
   - merge_method: COMBO[add, mean, subtract, multiply]
 - outputs: AUDIO:AUDIO
 
+## BAE-NormalMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
 ## BakeAmbientOcclusion
 module: comfy_extras.nodes_mesh_postprocess | category: 3d/texturing
 - required:
@@ -405,35 +405,6 @@ module: comfy_extras.nodes_custom_sampler | category: model/sampling/guiders
   - model: MODEL
   - conditioning: CONDITIONING
 - outputs: GUIDER:GUIDER
-
-## BasicPipeToDetailerPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - basic_pipe: BASIC_PIPE
-  - bbox_detector: BBOX_DETECTOR
-  - wildcard: STRING
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-- optional:
-  - sam_model_opt: SAM_MODEL
-  - segm_detector_opt: SEGM_DETECTOR
-  - detailer_hook: DETAILER_HOOK
-- outputs: detailer_pipe:DETAILER_PIPE
-
-## BasicPipeToDetailerPipeSDXL
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - base_basic_pipe: BASIC_PIPE
-  - refiner_basic_pipe: BASIC_PIPE
-  - bbox_detector: BBOX_DETECTOR
-  - wildcard: STRING
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-- optional:
-  - sam_model_opt: SAM_MODEL
-  - segm_detector_opt: SEGM_DETECTOR
-  - detailer_hook: DETAILER_HOOK
-- outputs: detailer_pipe:DETAILER_PIPE
 
 ## BasicScheduler
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/schedulers
@@ -533,29 +504,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/masking
   - combined_bounding_box: BBOX default=None
 - outputs: IMAGE:IMAGE
 
-## BboxDetectorCombined_v2
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - bbox_detector: BBOX_DETECTOR
-  - image: IMAGE
-  - threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - dilation: INT default=4 min=-512 max=512 step=1
-- outputs: MASK:MASK
-
-## BboxDetectorSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - bbox_detector: BBOX_DETECTOR
-  - image: IMAGE
-  - threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - dilation: INT default=10 min=-512 max=512 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - labels: STRING default='all'
-- optional:
-  - detailer_hook: DETAILER_HOOK
-- outputs: SEGS:SEGS
-
 ## BboxToInt
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/masking
 - required:
@@ -622,35 +570,14 @@ module: comfy_extras.nodes_custom_sampler | category: model/sampling/schedulers
   - beta: FLOAT default=0.6 min=0.0 max=50.0 step=0.01
 - outputs: SIGMAS:SIGMAS
 
-## BindImageListPromptList //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
+## BinaryPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
 - required:
-  - images: IMAGE
-  - zipped_prompts: ZIPPED_PROMPT
-  - default_positive: STRING
-  - default_negative: STRING
-- outputs: image:IMAGE, positive:STRING, negative:STRING, prompt_label:STRING
-
-## BitwiseAndMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - mask1: MASK
-  - mask2: MASK
-- outputs: MASK:MASK
-
-## BitwiseAndMaskForEach
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - base_segs: SEGS
-  - mask_segs: SEGS
-- outputs: SEGS:SEGS
-
-## BlackPatchRetryHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - mean_thresh: INT default=10 min=0 max=255
-  - var_thresh: INT default=5 min=0 max=255
-- outputs: DETAILER_HOOK:DETAILER_HOOK
+  - image: IMAGE
+- optional:
+  - bin_threshold: INT default=100 min=0 max=255 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## BlockifyMask
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/masking
@@ -1075,49 +1002,6 @@ module: comfy_api_nodes.nodes_bytedance | category: partner/video/ByteDance
   - bitrate_level: COMBO[low, medium, high] default='medium'
 - outputs: VIDEO:VIDEO
 
-## CacheBackendData //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: STRING
-  - tag: STRING
-  - data: *
-- outputs: data opt:*
-
-## CacheBackendDataList //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: STRING
-  - tag: STRING
-  - data: *
-- outputs: data opt:*
-
-## CacheBackendDataNumberKey //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: INT default=0 min=0 max=18446744073709551615
-  - tag: STRING
-  - data: *
-- outputs: data opt:*
-
-## CacheBackendDataNumberKeyList //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: INT default=0 min=0 max=18446744073709551615
-  - tag: STRING
-  - data: *
-- outputs: data opt:*
-
-## CAIN VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[pretrained_cain.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=1000
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
-
 ## CameraPoseVisualizer
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/misc
 - required:
@@ -1140,12 +1024,15 @@ module: comfy_extras.nodes_canny | category: image/filters
   - high_threshold: FLOAT default=0.8 min=0.01 max=0.99 step=0.01
 - outputs: IMAGE:IMAGE
 
-## Canny_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## CannyEdgePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
 - required:
-  - low_threshold: FLOAT default=0.4 min=0.01 max=0.99 step=0.01
-  - high_threshold: FLOAT default=0.8 min=0.01 max=0.99 step=0.01
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - image: IMAGE
+- optional:
+  - low_threshold: INT default=100 min=0 max=255 step=1
+  - high_threshold: INT default=200 min=0 max=255 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## CaseConverter
 module: comfy_extras.nodes_string | category: text
@@ -1189,13 +1076,6 @@ module: comfy_extras.nodes_custom_sampler | category: model/sampling/guiders
   - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
 - outputs: MODEL:MODEL
 
-## CfgScheduleHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - schedule_for_iteration: COMBO[simple]
-  - target_cfg: FLOAT default=3.0 min=0.0 max=100.0
-- outputs: PK_HOOK:PK_HOOK
-
 ## CFGZeroStar
 module: comfy_extras.nodes_cfg | category: advanced/guidance
 - required:
@@ -1209,22 +1089,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/experimental
   - use_zero_init: BOOLEAN default=True
   - zero_init_steps: INT default=0 min=0
 - outputs: MODEL:MODEL
-
-## ChangeImageBatchSize //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - image: IMAGE
-  - batch_size: INT default=1 min=1 max=4096 step=1
-  - mode: COMBO[simple]
-- outputs: IMAGE:IMAGE
-
-## ChangeLatentBatchSize //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - latent: LATENT
-  - batch_size: INT default=1 min=1 max=4096 step=1
-  - mode: COMBO[simple]
-- outputs: LATENT:LATENT
 
 ## CheckpointLoader
 module: nodes | category: model/loaders
@@ -1249,15 +1113,6 @@ module: nodes | category: model/loaders
 - required:
   - ckpt_name: COMBO[]
 - outputs: MODEL:MODEL, CLIP:CLIP, VAE:VAE
-
-## CheckpointLoaderSimpleShared //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - ckpt_name: COMBO[]
-  - key_opt: STRING
-- optional:
-  - mode: COMBO[Auto, Override Cache, Read Only]
-- outputs: model:MODEL, clip:CLIP, vae:VAE, cache key:STRING
 
 ## CheckpointLoader|pysssss
 module: custom_nodes.ComfyUI-Custom-Scripts | category: model/loaders
@@ -1363,15 +1218,6 @@ module: comfy_extras.nodes_model_merging | category: model/merging
   - clip: CLIP
   - filename_prefix: STRING default='clip/ComfyUI'
 - outputs: 
-
-## CLIPSegDetectorProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - text: STRING
-  - blur: FLOAT default=7 min=0 max=15 step=0.1
-  - threshold: FLOAT default=0.4 min=0 max=1 step=0.05
-  - dilation_factor: INT default=4 min=0 max=10 step=1
-- outputs: BBOX_DETECTOR:BBOX_DETECTOR
 
 ## CLIPSetLastLayer
 module: nodes | category: model/conditioning
@@ -1489,15 +1335,6 @@ module: comfy_extras.nodes_clip_sdxl | category: model/conditioning/stable diffu
   - height: INT default=1024 min=0 max=16384
   - text: STRING
   - clip: CLIP
-- outputs: CONDITIONING:CONDITIONING
-
-## CLIPTextEncodeWithWeight //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - text: STRING
-  - clip: CLIP
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - add_weight: FLOAT default=0.0 min=-10.0 max=10.0 step=0.01
 - outputs: CONDITIONING:CONDITIONING
 
 ## CLIPVisionEncode
@@ -1892,28 +1729,6 @@ module: custom_nodes.ComfyMath | category: math/vec4
   - a: VEC4 default=[0.0, 0.0, 0.0, 0.0]
 - outputs: VEC4:VEC4
 
-## Color_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
-
-## ColorMapToMasks //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - color_map: IMAGE
-  - min_pixels: INT default=500 min=1 max=18446744073709551615 step=1
-  - max_count: INT default=5 min=0 max=1000 step=1
-- outputs: MASK:MASK
-
-## ColorMaskToDepthMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - color_mask: IMAGE
-  - spec: STRING default='#FF0000:1.0\n#000000:1.0'
-  - base_value: FLOAT default=0.0 min=0.0 max=1.0
-  - dilation: INT default=0 min=-512 max=512 step=1
-  - flatten_method: COMBO[override, sum, max]
-- outputs: MASK:MASK
-
 ## ColorMatch
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 - required:
@@ -1934,6 +1749,14 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
   - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
   - multithread: BOOLEAN default=True
 - outputs: image:IMAGE
+
+## ColorPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/T2IAdapter-only
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## ColorToMask
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/masking
@@ -1991,12 +1814,6 @@ module: comfy_extras.nodes_hooks | category: advanced/hooks/combine
   - hooks_G: HOOKS
   - hooks_H: HOOKS
 - outputs: HOOKS:HOOKS
-
-## CombineRegionalPrompts
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Regional
-- required:
-  - regional_prompts1: REGIONAL_PROMPTS
-- outputs: REGIONAL_PROMPTS:REGIONAL_PROMPTS
 
 ## Combo Clone
 module: custom_nodes.cg-use-everywhere | category: everywhere
@@ -2126,24 +1943,6 @@ module: comfy_extras.nodes_logic | category: utilities/logic
   - on_false: COMFY_MATCHTYPE_V3
   - on_true: COMFY_MATCHTYPE_V3
 - outputs: output:COMFY_MATCHTYPE_V3
-
-## CompositeNoise //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - destination: NOISE_IMAGE
-  - source: NOISE_IMAGE
-  - mode: COMBO[center, left-top, right-top, left-bottom, right-bottom, xy]
-  - x: INT default=0 min=0 max=16384 step=8
-  - y: INT default=0 min=0 max=16384 step=8
-- outputs: NOISE_IMAGE:NOISE_IMAGE
-
-## ConcatConditioningsWithMultiplier //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/__for_testing
-- required:
-  - conditioning1: CONDITIONING
-- optional:
-  - multiplier1: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-- outputs: CONDITIONING:CONDITIONING
 
 ## ConcatenateVideo
 module: comfy_extras.nodes_video | category: video
@@ -2391,29 +2190,12 @@ module: comfy_extras.nodes_audio | category: model/conditioning/stable audio
   - seconds_total: FLOAT default=47.0 min=0.0 max=1000.0 step=0.1
 - outputs: positive:CONDITIONING, negative:CONDITIONING
 
-## ConditioningStretch //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/conditioning
-- required:
-  - conditioning: CONDITIONING
-  - resolutionX: INT default=512 min=64 max=16384 step=64
-  - resolutionY: INT default=512 min=64 max=16384 step=64
-  - newWidth: INT default=512 min=64 max=16384 step=64
-  - newHeight: INT default=512 min=64 max=16384 step=64
-- outputs: CONDITIONING:CONDITIONING
-
 ## ConditioningTimestepsRange
 module: comfy_extras.nodes_hooks | category: advanced/hooks
 - required:
   - start_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
   - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
 - outputs: TIMESTEPS_RANGE:TIMESTEPS_RANGE, BEFORE_RANGE:TIMESTEPS_RANGE, AFTER_RANGE:TIMESTEPS_RANGE
-
-## ConditioningUpscale //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/conditioning
-- required:
-  - conditioning: CONDITIONING
-  - scalar: INT default=2 min=1 max=100 step=0.5
-- outputs: CONDITIONING:CONDITIONING
 
 ## ConditioningZeroOut
 module: nodes | category: model/conditioning/transform
@@ -2599,6 +2381,13 @@ module: comfy_extras.nodes_sd3 | category: model/conditioning/controlnet
   - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
 - outputs: positive:CONDITIONING, negative:CONDITIONING
 
+## ControlNetAuxSimpleAddText
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
+- required:
+  - image: IMAGE
+  - text: STRING default=''
+- outputs: IMAGE:IMAGE
+
 ## ControlNetInpaintingAliMamaApply
 module: comfy_extras.nodes_controlnet | category: model/conditioning/controlnet
 - required:
@@ -2619,6 +2408,12 @@ module: nodes | category: model/loaders
   - control_net_name: COMBO[]
 - outputs: CONTROL_NET:CONTROL_NET
 
+## ControlNetPreprocessorSelector
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
+- required:
+  - preprocessor: COMBO[none, AnimeFace_SemSegPreprocessor, AnyLineArtPreprocessor_aux, BinaryPreprocessor, CannyEdgePreprocessor, ColorPreprocessor, DensePosePreprocessor, DepthAnythingPreprocessor, Zoe_DepthAnythingPreprocessor, DepthAnythingV2Preprocessor, ... +37]
+- outputs: preprocessor:['none', 'AnimeFace_SemSegPreprocessor', 'AnyLineArtPreprocessor_aux', 'BinaryPreprocessor', 'CannyEdgePreprocessor', 'ColorPreprocessor', 'DensePosePreprocessor', 'DepthAnythingPreprocessor', 'Zoe_DepthAnythingPreprocessor', 'DepthAnythingV2Preprocessor', 'DSINE-NormalMapPreprocessor', 'DWPreprocessor', 'AnimalPosePreprocessor', 'HEDPreprocessor', 'FakeScribblePreprocessor', 'LeReS-DepthMapPreprocessor', 'LineArtPreprocessor', 'AnimeLineArtPreprocessor', 'LineartStandardPreprocessor', 'Manga2Anime_LineArt_Preprocessor', 'MediaPipe-FaceMeshPreprocessor', 'MeshGraphormer-DepthMapPreprocessor', 'Metric3D-DepthMapPreprocessor', 'Metric3D-NormalMapPreprocessor', 'MiDaS-NormalMapPreprocessor', 'MiDaS-DepthMapPreprocessor', 'M-LSDPreprocessor', 'BAE-NormalMapPreprocessor', 'OneFormer-COCO-SemSegPreprocessor', 'OneFormer-ADE20K-SemSegPreprocessor', 'OpenposePreprocessor', 'PiDiNetPreprocessor', 'PyraCannyPreprocessor', 'ImageLuminanceDetector', 'ImageIntensityDetector', 'ScribblePreprocessor', 'Scribble_XDoG_Preprocessor', 'Scribble_PiDiNet_Preprocessor', 'SAMPreprocessor', 'ShufflePreprocessor', 'TEEDPreprocessor', 'TilePreprocessor', 'TTPlanet_TileGF_Preprocessor', 'TTPlanet_TileSimple_Preprocessor', 'UniFormer-SemSegPreprocessor', 'SemSegPreprocessor', 'Zoe-DepthMapPreprocessor']
+
 ## ConvertArrayToString
 module: comfy_extras.nodes_string | category: text
 - required:
@@ -2632,12 +2427,6 @@ module: comfy_extras.nodes_string | category: text
   - dictionary: DICT
   - indent: INT default=2 min=0 max=8
 - outputs: STRING:STRING
-
-## CoreMLDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - mode: COMBO[512x512, 768x768, 512x768, 768x512]
-- outputs: DETAILER_HOOK:DETAILER_HOOK
 
 ## CosmosImageToVideoLatent
 module: comfy_extras.nodes_cosmos | category: model/conditioning/cosmos
@@ -2797,7 +2586,7 @@ module: comfy_extras.nodes_hooks | category: advanced/hooks/scheduling
 ## CreateHookLora
 module: comfy_extras.nodes_hooks | category: advanced/hooks/create
 - required:
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model: FLOAT default=1.0 min=-20.0 max=20.0 step=0.01
   - strength_clip: FLOAT default=1.0 min=-20.0 max=20.0 step=0.01
 - optional:
@@ -2807,7 +2596,7 @@ module: comfy_extras.nodes_hooks | category: advanced/hooks/create
 ## CreateHookLoraModelOnly
 module: comfy_extras.nodes_hooks | category: advanced/hooks/create
 - required:
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model: FLOAT default=1.0 min=-20.0 max=20.0 step=0.01
 - optional:
   - prev_hooks: HOOKS
@@ -3035,12 +2824,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/controlnet
   - cn_extras: CN_WEIGHTS_EXTRAS
   - autosize: ACNAUTOSIZE
 - outputs: CN_WEIGHTS:CONTROL_NET_WEIGHTS, TK_SHORTCUT:TIMESTEP_KEYFRAME
-
-## CustomSamplerDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - sampler: SAMPLER
-- outputs: DETAILER_HOOK:DETAILER_HOOK
 
 ## CustomSigmas
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/noise
@@ -3471,7 +3254,7 @@ module: custom_nodes.ComfyUI-DaSiWa-Nodes | category: DaSiWa/Scaling
 module: custom_nodes.ComfyUI-DaSiWa-Nodes | category: DaSiWa/Video
 - required:
   - images: IMAGE
-  - watermark_path: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2816]
+  - watermark_path: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2817]
   - position: COMBO[bottom-right, bottom-left, top-right, top-left, center] default='bottom-right'
   - scale: FLOAT default=0.2 min=0.01 max=1.0 step=0.01
   - resampling: COMBO[bicubic, bilinear, nearest, area, nearest-exact] default='bicubic'
@@ -3659,218 +3442,33 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
   - audio_vae: VAE
 - outputs: 
 
-## DenoiseScheduleHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - schedule_for_iteration: COMBO[simple]
-  - target_denoise: FLOAT default=0.2 min=0.0 max=1.0 step=0.01
-- outputs: PK_HOOK:PK_HOOK
-
-## DenoiseSchedulerDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - schedule_for_cycle: COMBO[simple]
-  - target_denoise: FLOAT default=0.3 min=0.0 max=1.0 step=0.01
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
-## DetailerForEach
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
+## DensePosePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Faces and Poses Estimators
 - required:
   - image: IMAGE
-  - segs: SEGS
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - wildcard: STRING
-  - cycle: INT default=1 min=1 max=10 step=1
 - optional:
-  - detailer_hook: DETAILER_HOOK
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tiled_encode: BOOLEAN default=False
-  - tiled_decode: BOOLEAN default=False
+  - model: COMBO[densepose_r50_fpn_dl.torchscript, densepose_r101_fpn_dl.torchscript] default='densepose_r50_fpn_dl.torchscript'
+  - cmap: COMBO[Viridis (MagicAnimate), Parula (CivitAI)] default='Viridis (MagicAnimate)'
+  - resolution: INT default=512 min=64 max=16384 step=64
 - outputs: IMAGE:IMAGE
 
-## DetailerForEachAutoRetry
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
+## DepthAnythingPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
 - required:
   - image: IMAGE
-  - segs: SEGS
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - wildcard: STRING
-  - cycle: INT default=1 min=1 max=10 step=1
-  - max_retries: INT default=1 min=1 max=10 step=1
 - optional:
-  - detailer_hook: DETAILER_HOOK
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tiled_encode: BOOLEAN default=False
-  - tiled_decode: BOOLEAN default=False
+  - ckpt_name: COMBO[depth_anything_vitl14.pth, depth_anything_vitb14.pth, depth_anything_vits14.pth] default='depth_anything_vitl14.pth'
+  - resolution: INT default=512 min=64 max=16384 step=64
 - outputs: IMAGE:IMAGE
 
-## DetailerForEachDebug
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
+## DepthAnythingV2Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
 - required:
   - image: IMAGE
-  - segs: SEGS
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - wildcard: STRING
-  - cycle: INT default=1 min=1 max=10 step=1
 - optional:
-  - detailer_hook: DETAILER_HOOK
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tiled_encode: BOOLEAN default=False
-  - tiled_decode: BOOLEAN default=False
-- outputs: image:IMAGE, cropped:IMAGE, cropped_refined:IMAGE, cropped_refined_alpha:IMAGE, cnet_images:IMAGE
-
-## DetailerForEachDebugPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - image: IMAGE
-  - segs: SEGS
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - basic_pipe: BASIC_PIPE
-  - wildcard: STRING
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - detailer_hook: DETAILER_HOOK
-  - refiner_basic_pipe_opt: BASIC_PIPE
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tiled_encode: BOOLEAN default=False
-  - tiled_decode: BOOLEAN default=False
-- outputs: image:IMAGE, segs:SEGS, basic_pipe:BASIC_PIPE, cropped:IMAGE, cropped_refined:IMAGE, cropped_refined_alpha:IMAGE, cnet_images:IMAGE
-
-## DetailerForEachPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - image: IMAGE
-  - segs: SEGS
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - basic_pipe: BASIC_PIPE
-  - wildcard: STRING
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - detailer_hook: DETAILER_HOOK
-  - refiner_basic_pipe_opt: BASIC_PIPE
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tiled_encode: BOOLEAN default=False
-  - tiled_decode: BOOLEAN default=False
-- outputs: image:IMAGE, segs:SEGS, basic_pipe:BASIC_PIPE, cnet_images:IMAGE
-
-## DetailerForEachPipeForAnimateDiff
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - image_frames: IMAGE
-  - segs: SEGS
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - basic_pipe: BASIC_PIPE
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-- optional:
-  - detailer_hook: DETAILER_HOOK
-  - refiner_basic_pipe_opt: BASIC_PIPE
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: image:IMAGE, segs:SEGS, basic_pipe:BASIC_PIPE, cnet_images:IMAGE
-
-## DetailerHookCombine
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - hook1: DETAILER_HOOK
-  - hook2: DETAILER_HOOK
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
-## DetailerPipeToBasicPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - detailer_pipe: DETAILER_PIPE
-- outputs: base_basic_pipe:BASIC_PIPE, refiner_basic_pipe:BASIC_PIPE
+  - ckpt_name: COMBO[depth_anything_v2_vitg.pth, depth_anything_v2_vitl.pth, depth_anything_v2_vitb.pth, depth_anything_v2_vits.pth] default='depth_anything_v2_vitl.pth'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## DiffControlNetLoader
 module: nodes | category: model/loaders
@@ -3902,10 +3500,20 @@ module: nodes | category: model/loaders
   - model_path: COMBO[]
 - outputs: MODEL:MODEL, CLIP:CLIP, VAE:VAE
 
+## DiffusionEdge_Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - environment: COMBO[indoor, urban, natrual] default='indoor'
+  - patch_batch_size: INT default=4 min=1 max=16 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
 ## DiffusionModelLoaderKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/model_loaders
 - required:
-  - model_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-4b-fp8.safetensors]
+  - model_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-9b-kv-fp8.safetensors]
   - weight_dtype: COMBO[default, fp8_e4m3fn, fp8_e4m3fn_fast, fp8_e5m2, fp16, bf16, fp32]
   - compute_dtype: COMBO[default, fp16, bf16, fp32] default='default'
   - patch_cublaslinear: BOOLEAN default=False
@@ -3918,7 +3526,7 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/model_loaders
 ## DiffusionModelSelector
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/model_loaders
 - required:
-  - model_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-4b-fp8.safetensors]
+  - model_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-9b-kv-fp8.safetensors]
 - outputs: model_path:STRING
 
 ## DisableNoise
@@ -3950,7 +3558,7 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/lora
   - model: MODEL
   - strength_model: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
 - optional:
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - opt_lora_path: STRING
   - blocks: SELECTEDDITBLOCKS
 - outputs: model:MODEL, rank:STRING
@@ -4010,11 +3618,15 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/text
   - img_composite: IMAGE
 - outputs: IMAGE:IMAGE, MASK:MASK
 
-## DropItems //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/List
+## DSINE-NormalMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
 - required:
-  - item_list: ITEM_LIST
-- outputs: ITEM_LIST:*
+  - image: IMAGE
+- optional:
+  - fov: FLOAT default=60.0 min=0 max=365.0 step=0.01
+  - iterations: INT default=5 min=1 max=20 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## DualCFGGuider
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/guiders
@@ -4063,2799 +3675,19 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/misc
   - any_input: *
 - outputs: *:*
 
-## DWPreprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## DWPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Faces and Poses Estimators
 - required:
-  - detect_hand: BOOLEAN default=True
-  - detect_body: BOOLEAN default=True
-  - detect_face: BOOLEAN default=True
-  - resolution_upscale_by: FLOAT default=1.0 min=0.5 max=100 step=0.1
-  - bbox_detector: COMBO[yolox_l.torchscript.pt, yolox_l.onnx, yolo_nas_l_fp16.onnx, yolo_nas_m_fp16.onnx, yolo_nas_s_fp16.onnx] default='yolox_l.onnx'
+  - image: IMAGE
+- optional:
+  - detect_hand: COMBO[enable, disable] default='enable'
+  - detect_body: COMBO[enable, disable] default='enable'
+  - detect_face: COMBO[enable, disable] default='enable'
+  - resolution: INT default=512 min=64 max=16384 step=64
+  - bbox_detector: COMBO[None, yolox_l.torchscript.pt, yolox_l.onnx, yolo_nas_l_fp16.onnx, yolo_nas_m_fp16.onnx, yolo_nas_s_fp16.onnx] default='yolox_l.onnx'
   - pose_estimator: COMBO[dw-ll_ucoco_384_bs5.torchscript.pt, dw-ll_ucoco_384.onnx, dw-ll_ucoco.onnx] default='dw-ll_ucoco_384_bs5.torchscript.pt'
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
-
-## dynamicThresholdingFull
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - model: MODEL
-  - mimic_scale: FLOAT default=7.0 min=0.0 max=100.0 step=0.5
-  - threshold_percentile: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - mimic_mode: COMBO[Constant, Linear Down, Cosine Down, Half Cosine Down, Linear Up, Cosine Up, Half Cosine Up, Power Up, Power Down, Linear Repeating, ... +2]
-  - mimic_scale_min: FLOAT default=0.0 min=0.0 max=100.0 step=0.5
-  - cfg_mode: COMBO[Constant, Linear Down, Cosine Down, Half Cosine Down, Linear Up, Cosine Up, Half Cosine Up, Power Up, Power Down, Linear Repeating, ... +2]
-  - cfg_scale_min: FLOAT default=0.0 min=0.0 max=100.0 step=0.5
-  - sched_val: FLOAT default=1.0 min=0.0 max=100.0 step=0.01
-  - separate_feature_channels: COMBO[enable, disable]
-  - scaling_startpoint: COMBO[MEAN, ZERO]
-  - variability_measure: COMBO[AD, STD]
-  - interpolate_phi: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- outputs: MODEL:MODEL
-
-## easy a1111Loader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - clip_skip: INT default=-2 min=-24 max=0 step=1
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='512 x 512'
-  - empty_latent_width: INT default=512 min=64 max=16384 step=8
-  - empty_latent_height: INT default=512 min=64 max=16384 step=8
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - batch_size: INT default=1 min=1 max=4096
-- optional:
-  - optional_lora_stack: LORA_STACK
-  - optional_controlnet_stack: CONTROL_NET_STACK
-  - a1111_prompt_style: BOOLEAN default=False
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy ab
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - A or B: BOOLEAN default=True
-  - in: *
-- outputs: A:*, B:*
-
-## easy anythingIndexSwitch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Index Switch
-- required:
-  - index: INT default=0 min=0 max=9 step=1
-- optional:
-  - value0: *
-  - value1: *
-  - value2: *
-  - value3: *
-  - value4: *
-  - value5: *
-  - value6: *
-  - value7: *
-  - value8: *
-  - value9: *
-  - value10: *
-  - value11: *
-  - value12: *
-  - value13: *
-  - value14: *
-  - value15: *
-  - value16: *
-  - value17: *
-  - value18: *
-  - value19: *
-- outputs: value:*
-
-## easy anythingInversedSwitch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - index: INT default=0 min=0 max=9 step=1
-  - in: *
-- outputs: out0:*, out1:*, out2:*, out3:*, out4:*, out5:*, out6:*, out7:*, out8:*, out9:*, out10:*, out11:*, out12:*, out13:*, out14:*, out15:*, out16:*, out17:*, out18:*, out19:*
-
-## easy applyBrushNet
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Inpaint
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - mask: MASK
-  - brushnet: COMBO[]
-  - dtype: COMBO[float16, bfloat16, float32, float64]
-  - scale: FLOAT default=1.0 min=0.0 max=10.0
-  - start_at: INT default=0 min=0 max=10000
-  - end_at: INT default=10000 min=0 max=10000
-- outputs: pipe:PIPE_LINE
-
-## easy applyFooocusInpaint
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Inpaint
-- required:
-  - model: MODEL
-  - latent: LATENT
-  - head: COMBO[fooocus_inpaint_head]
-  - patch: COMBO[inpaint_v26 (1.32GB), inpaint_v25 (2.58GB), inpaint (1.32GB)]
-- outputs: model:MODEL
-
-## easy applyInpaint
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Inpaint
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - mask: MASK
-  - inpaint_mode: COMBO[normal, fooocus_inpaint, brushnet_random, brushnet_segmentation, powerpaint]
-  - encode: COMBO[none, vae_encode_inpaint, inpaint_model_conditioning, different_diffusion] default='none'
-  - grow_mask_by: INT default=6 min=0 max=64 step=1
-  - dtype: COMBO[float16, bfloat16, float32, float64]
-  - fitting: FLOAT default=1.0 min=0.3 max=1.0
-  - function: COMBO[text guided, shape guided, object removal, context aware, image outpainting]
-  - scale: FLOAT default=1.0 min=0.0 max=10.0
-  - start_at: INT default=0 min=0 max=10000
-  - end_at: INT default=10000 min=0 max=10000
-- optional:
-  - noise_mask: BOOLEAN default=True
-- outputs: pipe:PIPE_LINE
-
-## easy applyPowerPaint
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Inpaint
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - mask: MASK
-  - powerpaint_model: COMBO[]
-  - powerpaint_clip: COMBO[]
-  - dtype: COMBO[float16, bfloat16, float32, float64]
-  - fitting: FLOAT default=1.0 min=0.3 max=1.0
-  - function: COMBO[text guided, shape guided, object removal, context aware, image outpainting]
-  - scale: FLOAT default=1.0 min=0.0 max=10.0
-  - start_at: INT default=0 min=0 max=10000
-  - end_at: INT default=10000 min=0 max=10000
-  - save_memory: COMBO[none, auto, max]
-- outputs: pipe:PIPE_LINE
-
-## easy batchAnything
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - any_1: *
-  - any_2: *
-- outputs: batch:*
-
-## easy blocker
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - continue: BOOLEAN default=False
-  - in: *
-- outputs: out:*
-
-## easy boolean
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Type
-- required:
-  - value: BOOLEAN default=False
-- outputs: boolean:BOOLEAN
-
-## easy cascadeKSampler
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model_c: MODEL
-- outputs: pipe:PIPE_LINE, image:IMAGE
-
-## easy cascadeLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - stage_c: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-4b-fp8.safetensors]
-  - stage_b: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-4b-fp8.safetensors]
-  - stage_a: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - clip_name: COMBO[None, clip_l.safetensors, qwen3vl_32b_minimax_h3_int4_convrot.safetensors, qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors, qwen_3_4b.safetensors, qwen_3_8b_fp8mixed.safetensors, umt5_xxl_fp8_e4m3fn_scaled.safetensors]
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='1024 x 1024'
-  - empty_latent_width: INT default=1024 min=16 max=16384 step=8
-  - empty_latent_height: INT default=1024 min=16 max=16384 step=8
-  - compression: INT default=42 min=32 max=64 step=1
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - batch_size: INT default=1 min=1 max=64
-- optional:
-  - optional_lora_stack: LORA_STACK
-- outputs: pipe:PIPE_LINE, model_c:MODEL, latent_c:LATENT, vae:VAE
-
-## easy ckptNames
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Util
-- required:
-  - ckpt_name: COMBO[]
-- outputs: ckpt_name:*
-
-## easy cleanGpuUsed
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - anything: *
-- outputs: output:*
-
-## easy clearCacheAll
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - anything: *
-- outputs: output:*
-
-## easy clearCacheKey
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - anything: *
-  - cache_key: STRING default='*'
-- outputs: output:*
-
-## easy comfyLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - clip_skip: INT default=-2 min=-24 max=0 step=1
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='512 x 512'
-  - empty_latent_width: INT default=512 min=64 max=16384 step=8
-  - empty_latent_height: INT default=512 min=64 max=16384 step=8
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - batch_size: INT default=1 min=1 max=4096
-- optional:
-  - optional_lora_stack: LORA_STACK
-  - optional_controlnet_stack: CONTROL_NET_STACK
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy compare
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Math
-- optional:
-  - a: *
-  - b: *
-  - comparison: COMBO[a == b, a != b, a < b, a > b, a <= b, a >= b, a > 0, a <= 0, b > 0, b <= 0] default='a == b'
-- outputs: boolean:BOOLEAN
-
-## easy conditioningIndexSwitch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Index Switch
-- required:
-  - index: INT default=0 min=0 max=9 step=1
-- optional:
-  - cond0: CONDITIONING
-  - cond1: CONDITIONING
-  - cond2: CONDITIONING
-  - cond3: CONDITIONING
-  - cond4: CONDITIONING
-  - cond5: CONDITIONING
-  - cond6: CONDITIONING
-  - cond7: CONDITIONING
-  - cond8: CONDITIONING
-  - cond9: CONDITIONING
-  - cond10: CONDITIONING
-  - cond11: CONDITIONING
-  - cond12: CONDITIONING
-  - cond13: CONDITIONING
-  - cond14: CONDITIONING
-  - cond15: CONDITIONING
-  - cond16: CONDITIONING
-  - cond17: CONDITIONING
-  - cond18: CONDITIONING
-  - cond19: CONDITIONING
-- outputs: conditioning:CONDITIONING
-
-## easy controlnetLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - control_net_name: COMBO[]
-- optional:
-  - control_net: CONTROL_NET
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - scale_soft_weights: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- outputs: pipe:PIPE_LINE, positive:CONDITIONING, negative:CONDITIONING
-
-## easy controlnetLoader++
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - control_net_name: COMBO[]
-- optional:
-  - control_net: CONTROL_NET
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - start_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - scale_soft_weights: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - union_type: COMBO[auto, openpose, depth, hed/pidi/scribble/ted, canny/lineart/anime_lineart/mlsd, normal, segment, tile, repaint]
-- outputs: pipe:PIPE_LINE, positive:CONDITIONING, negative:CONDITIONING
-
-## easy controlnetLoaderADV
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - control_net_name: COMBO[]
-- optional:
-  - control_net: CONTROL_NET
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - start_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - scale_soft_weights: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- outputs: pipe:PIPE_LINE, positive:CONDITIONING, negative:CONDITIONING
-
-## easy controlnetNames
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Util
-- required:
-  - controlnet_name: COMBO[]
-- outputs: controlnet_name:*
-
-## easy controlnetStack
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - toggle: BOOLEAN
-  - mode: COMBO[simple, advanced]
-  - num_controlnet: INT default=1 min=1 max=3
-- optional:
-  - optional_controlnet_stack: CONTROL_NET_STACK
-  - controlnet_1: COMBO[None] default='None'
-  - controlnet_1_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - start_percent_1: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_percent_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - scale_soft_weight_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - image_1: IMAGE
-  - controlnet_2: COMBO[None] default='None'
-  - controlnet_2_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - start_percent_2: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_percent_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - scale_soft_weight_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - image_2: IMAGE
-  - controlnet_3: COMBO[None] default='None'
-  - controlnet_3_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - start_percent_3: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_percent_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - scale_soft_weight_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - image_3: IMAGE
-- outputs: controlnet_stack:CONTROL_NET_STACK
-
-## easy controlnetStackApply
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - controlnet_stack: CONTROL_NET_STACK
-  - pipe: PIPE_LINE
-- outputs: pipe:PIPE_LINE
-
-## easy convertAnything
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - *: *
-  - output_type: COMBO[string, int, float, boolean] default='string'
-- outputs: output:*
-
-## easy detailerFix
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Fix
-- required:
-  - pipe: PIPE_LINE
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model: MODEL
-- outputs: pipe:PIPE_LINE, image:IMAGE, cropped_refined:IMAGE, cropped_enhanced_alpha:IMAGE
-
-## easy float
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Type
-- required:
-  - value: FLOAT default=0 min=-18446744073709551615 max=18446744073709551615 step=0.01
-- outputs: float:FLOAT
-
-## easy fluxLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[None]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='1024 x 1024'
-  - empty_latent_width: INT default=1024 min=64 max=16384 step=8
-  - empty_latent_height: INT default=1024 min=64 max=16384 step=8
-  - positive: STRING default=''
-  - batch_size: INT default=1 min=1 max=64
-- optional:
-  - model_override: MODEL
-  - clip_override: CLIP
-  - vae_override: VAE
-  - optional_lora_stack: LORA_STACK
-  - optional_controlnet_stack: CONTROL_NET_STACK
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy forLoopEnd
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/For Loop
-- required:
-  - flow: FLOW_CONTROL
-- optional:
-  - initial_value1: *
-  - initial_value2: *
-  - initial_value3: *
-  - initial_value4: *
-  - initial_value5: *
-  - initial_value6: *
-  - initial_value7: *
-  - initial_value8: *
-  - initial_value9: *
-  - initial_value10: *
-  - initial_value11: *
-  - initial_value12: *
-  - initial_value13: *
-  - initial_value14: *
-  - initial_value15: *
-  - initial_value16: *
-  - initial_value17: *
-  - initial_value18: *
-  - initial_value19: *
-- outputs: value1:*, value2:*, value3:*, value4:*, value5:*, value6:*, value7:*, value8:*, value9:*, value10:*, value11:*, value12:*, value13:*, value14:*, value15:*, value16:*, value17:*, value18:*, value19:*
-
-## easy forLoopStart
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/For Loop
-- required:
-  - total: INT default=1 min=1 max=100000 step=1
-- optional:
-  - initial_value1: *
-  - initial_value2: *
-  - initial_value3: *
-  - initial_value4: *
-  - initial_value5: *
-  - initial_value6: *
-  - initial_value7: *
-  - initial_value8: *
-  - initial_value9: *
-  - initial_value10: *
-  - initial_value11: *
-  - initial_value12: *
-  - initial_value13: *
-  - initial_value14: *
-  - initial_value15: *
-  - initial_value16: *
-  - initial_value17: *
-  - initial_value18: *
-  - initial_value19: *
-- outputs: flow:FLOW_CONTROL, index:INT, value1:*, value2:*, value3:*, value4:*, value5:*, value6:*, value7:*, value8:*, value9:*, value10:*, value11:*, value12:*, value13:*, value14:*, value15:*, value16:*, value17:*, value18:*, value19:*
-
-## easy fullCascadeKSampler
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - encode_vae_name: COMBO[None, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - decode_vae_name: COMBO[None, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=4.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='euler_ancestral'
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal] default='simple'
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save]
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-  - seed: INT default=0 min=0 max=1125899906842624
-- optional:
-  - image_to_latent_c: IMAGE
-  - latent_c: LATENT
-  - model_c: MODEL
-- outputs: pipe:PIPE_LINE, model_b:MODEL, latent_b:LATENT
-
-## easy fullkSampler
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, align_your_steps, ... +1]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save, None]
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - seed: INT default=0 min=0 max=1125899906842624
-  - model: MODEL
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - latent: LATENT
-  - vae: VAE
-  - clip: CLIP
-  - xyPlot: XYPLOT
-  - image: IMAGE
-- outputs: pipe:PIPE_LINE, image:IMAGE, model:MODEL, positive:CONDITIONING, negative:CONDITIONING, latent:LATENT, vae:VAE, clip:CLIP, seed:INT
-
-## easy fullLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[None]
-  - config_name: COMBO[Default, anything_v3.yaml, v1-inference.yaml, v1-inference_clip_skip_2.yaml, v1-inference_clip_skip_2_fp16.yaml, v1-inference_fp16.yaml, v1-inpainting-inference.yaml, v2-inference-v.yaml, v2-inference-v_fp32.yaml, v2-inference.yaml, ... +2] default='Default'
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - clip_skip: INT default=-2 min=-24 max=0 step=1
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='512 x 512'
-  - empty_latent_width: INT default=512 min=64 max=16384 step=8
-  - empty_latent_height: INT default=512 min=64 max=16384 step=8
-  - positive: STRING default=''
-  - positive_token_normalization: COMBO[none, mean, length, length+mean]
-  - positive_weight_interpretation: COMBO[comfy, A1111, comfy++, compel, fixed attention]
-  - negative: STRING default=''
-  - negative_token_normalization: COMBO[none, mean, length, length+mean]
-  - negative_weight_interpretation: COMBO[comfy, A1111, comfy++, compel, fixed attention]
-  - batch_size: INT default=1 min=1 max=4096
-- optional:
-  - model_override: MODEL
-  - clip_override: CLIP
-  - vae_override: VAE
-  - optional_lora_stack: LORA_STACK
-  - optional_controlnet_stack: CONTROL_NET_STACK
-  - a1111_prompt_style: BOOLEAN default=False
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE, clip:CLIP, positive:CONDITIONING, negative:CONDITIONING, latent:LATENT
-
-## easy globalSeed
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Seed
-- required:
-  - value: INT default=0 min=0 max=1125899906842624
-  - mode: BOOLEAN default=True
-  - action: COMBO[fixed, increment, decrement, randomize, increment for each node, decrement for each node, randomize for each node]
-  - last_seed: STRING default=''
-- outputs: 
-
-## easy hiresFix
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Fix
-- required:
-  - model_name: COMBO[4x-UltraSharp.pth, 4x-UltraSharp.safetensors, 4x_foolhardy_Remacri.pth]
-  - rescale_after_model: COMBO[False, True] default=True
-  - rescale_method: COMBO[nearest-exact, bilinear, area, bicubic, lanczos, bislerp]
-  - rescale: COMBO[by percentage, to Width/Height, to longer side - maintain aspect]
-  - percent: INT default=50 min=0 max=1000 step=1
-  - width: INT default=1024 min=64 max=16384 step=8
-  - height: INT default=1024 min=64 max=16384 step=8
-  - longer_side: INT default=1024 min=64 max=16384 step=8
-  - crop: COMBO[disabled, center]
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - vae: VAE
-- outputs: pipe:PIPE_LINE, image:IMAGE, latent:LATENT
-
-## easy humanSegmentation
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Segmentation
-- required:
-  - image: IMAGE
-  - method: COMBO[selfie_multiclass_256x256, human_parsing_lip, human_parts (deeplabv3p), segformer_b3_clothes, segformer_b3_fashion, face_parsing]
-  - confidence: FLOAT default=0.4 min=0.05 max=0.95 step=0.01
-  - crop_multi: FLOAT default=0.0 min=0.0 max=10.0 step=0.001
-  - mask_components: EASY_COMBO
-- outputs: image:IMAGE, mask:MASK, bbox:BBOX
-
-## easy hunyuanDiTLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='1024 x 1024'
-  - empty_latent_width: INT default=1024 min=64 max=16384 step=8
-  - empty_latent_height: INT default=1024 min=64 max=16384 step=8
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - batch_size: INT default=1 min=1 max=64
-- optional:
-  - optional_lora_stack: LORA_STACK
-  - optional_controlnet_stack: CONTROL_NET_STACK
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy icLightApply
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - mode: COMBO[Foreground, Foreground&Background]
-  - model: MODEL
-  - image: IMAGE
-  - vae: VAE
-  - lighting: COMBO[None, Left Light, Right Light, Top Light, Bottom Light, Circle Light] default='None'
-  - source: COMBO[Use Background Image, Use Flipped Background Image, Left Light, Right Light, Top Light, Bottom Light, Ambient] default='Use Background Image'
-  - remove_bg: BOOLEAN default=True
-- outputs: model:MODEL, lighting_image:IMAGE
-
-## easy if
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - any: *
-  - if: *
-  - else: *
-- outputs: ?:*
-
-## easy ifElse
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - boolean: BOOLEAN
-  - on_true: *
-  - on_false: *
-- outputs: *:*
-
-## easy imageBatchToImageList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-- outputs: IMAGE:IMAGE
-
-## easy imageChooser
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - mode: COMBO[Always Pause, Keep Last Selection] default='Always Pause'
-  - preview_rescale: FLOAT default=1.0 min=0.05 max=1.0 step=0.05
-- optional:
-  - images: IMAGE
-- outputs: image:IMAGE
-
-## easy imageColorMatch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image_ref: IMAGE
-  - image_target: IMAGE
-  - method: COMBO[wavelet, adain, mkl, hm, reinhard, mvgd, hm-mvgd-hm, hm-mkl-hm]
-  - image_output: COMBO[Hide, Preview, Save, Hide/Save] default='Preview'
-  - save_prefix: STRING default='ComfyUI'
-- outputs: image:IMAGE
-
-## easy imageConcat
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image1: IMAGE
-  - image2: IMAGE
-  - direction: COMBO[right, down, left, up] default='right'
-  - match_image_size: BOOLEAN default=False
-- outputs: IMAGE:IMAGE
-
-## easy imageCount
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-- outputs: count:INT
-
-## easy imageCropFromMask
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-  - mask: MASK
-  - image_crop_multi: FLOAT default=1.0 min=0.0 max=10.0 step=0.001
-  - mask_crop_multi: FLOAT default=1.0 min=0.0 max=10.0 step=0.001
-  - bbox_smooth_alpha: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- outputs: crop_image:IMAGE, crop_mask:MASK, bbox:BBOX
-
-## easy imageDetailTransfer
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - target: IMAGE
-  - source: IMAGE
-  - mode: COMBO[add, multiply, screen, overlay, soft_light, hard_light, color_dodge, color_burn, difference, exclusion, ... +1] default='add'
-  - blur_sigma: FLOAT default=1.0 min=0.1 max=100.0 step=0.01
-  - blend_factor: FLOAT default=1.0 min=-10.0 max=10.0 step=0.001
-  - image_output: COMBO[Hide, Preview, Save, Hide/Save] default='Preview'
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## easy imageIndexSwitch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Index Switch
-- required:
-  - index: INT default=0 min=0 max=9 step=1
-- optional:
-  - image0: IMAGE
-  - image1: IMAGE
-  - image2: IMAGE
-  - image3: IMAGE
-  - image4: IMAGE
-  - image5: IMAGE
-  - image6: IMAGE
-  - image7: IMAGE
-  - image8: IMAGE
-  - image9: IMAGE
-  - image10: IMAGE
-  - image11: IMAGE
-  - image12: IMAGE
-  - image13: IMAGE
-  - image14: IMAGE
-  - image15: IMAGE
-  - image16: IMAGE
-  - image17: IMAGE
-  - image18: IMAGE
-  - image19: IMAGE
-- outputs: image:IMAGE
-
-## easy imageInsetCrop
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-  - measurement: COMBO[Pixels, Percentage]
-  - left: INT default=0 min=0 max=16384 step=8
-  - right: INT default=0 min=0 max=16384 step=8
-  - top: INT default=0 min=0 max=16384 step=8
-  - bottom: INT default=0 min=0 max=16384 step=8
-- outputs: IMAGE:IMAGE
-
-## easy imageInterrogator
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-  - mode: COMBO[fast, classic, best, negative]
-  - use_lowvram: BOOLEAN default=True
-- outputs: prompt:STRING
-
-## easy imageListToImageBatch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-- outputs: IMAGE:IMAGE
-
-## easy imagePixelPerfect
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-  - resize_mode: COMBO[Just Resize, Crop and Resize, Resize and Fill] default='Just Resize'
-- outputs: resolution:INT
-
-## easy imageRatio
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-- outputs: width_ratio_int:INT, height_ratio_int:INT, width_ratio_float:FLOAT, height_ratio_float:FLOAT
-
-## easy imageRemBg
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-  - rem_mode: COMBO[RMBG-2.0, RMBG-1.4, Inspyrenet, BEN2] default='RMBG-1.4'
-  - image_output: COMBO[Hide, Preview, Save, Hide/Save] default='Preview'
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - torchscript_jit: BOOLEAN default=False
-  - add_background: COMBO[none, white, black] default='none'
-  - refine_foreground: BOOLEAN default=False
-- outputs: image:IMAGE, mask:MASK
-
-## easy imageSave
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-  - filename_prefix: STRING default='ComfyUI'
-  - only_preview: BOOLEAN default=False
-- outputs: 
-
-## easy imageScaleDown
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-  - width: INT default=512 min=1 max=16384 step=1
-  - height: INT default=512 min=1 max=16384 step=1
-  - crop: COMBO[disabled, center]
-- outputs: IMAGE:IMAGE
-
-## easy imageScaleDownBy
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-  - scale_by: FLOAT default=0.5 min=0.01 max=1.0 step=0.01
-- outputs: IMAGE:IMAGE
-
-## easy imageScaleDownToSize
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-  - size: INT default=512 min=1 max=16384 step=1
-  - mode: BOOLEAN default=True
-- outputs: IMAGE:IMAGE
-
-## easy imageScaleToNormPixels
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-  - upscale_method: COMBO[nearest-exact, bilinear, area, bicubic, lanczos]
-  - scale_by: FLOAT default=1.0 min=0.01 max=8.0 step=0.01
-- outputs: image:IMAGE
-
-## easy imagesCountInDirectory
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - directory: STRING
-  - start_index: INT default=0 min=0 step=1
-  - limit: INT default=-1 min=-1 max=10000
-- outputs: count:INT
-
-## easy imageSize
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-- outputs: width_int:INT, height_int:INT
-
-## easy imageSizeByLongerSide
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-- outputs: resolution:INT
-
-## easy imageSizeBySide
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-  - side: COMBO[Longest, Shortest]
-- outputs: resolution:INT
-
-## easy imageSplitGrid
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-  - row: INT default=1 min=1 max=10 step=1
-  - column: INT default=1 min=1 max=10 step=1
-- outputs: images:IMAGE
-
-## easy imageSplitList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-- outputs: images:IMAGE, images:IMAGE, images:IMAGE
-
-## easy imageSplitTiles
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-  - overlap_ratio: FLOAT default=0 min=0 max=0.5 step=0.01
-  - overlap_offset: INT default=0 min=-8192 max=8192 step=1
-  - tiles_rows: INT default=2 min=1 max=50 step=1
-  - tiles_cols: INT default=2 min=1 max=50 step=1
-- optional:
-  - norm: BOOLEAN default=True
-- outputs: tiles:IMAGE, masks:MASK, overlap:OVERLAP, total:INT
-
-## easy imagesSplitImage
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-- outputs: image1:IMAGE, image2:IMAGE, image3:IMAGE, image4:IMAGE, image5:IMAGE
-
-## easy imageSwitch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Switch
-- required:
-  - image_a: IMAGE
-  - image_b: IMAGE
-  - boolean: BOOLEAN default=False
-- outputs: IMAGE:IMAGE
-
-## easy imageTilesFromBatch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - tiles: IMAGE
-  - masks: MASK
-  - overlap: OVERLAP
-  - index: INT default=0 min=0 max=10000 step=1
-- outputs: image:IMAGE, mask:MASK, x:INT, y:INT
-
-## easy imageToBase64
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image: IMAGE
-- outputs: STRING:STRING
-
-## easy imageToMask
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - image: IMAGE
-  - channel: COMBO[red, green, blue]
-- outputs: MASK:MASK
-
-## easy imageUncropFromBBOX
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - original_image: IMAGE
-  - crop_image: IMAGE
-  - bbox: BBOX
-  - border_blending: FLOAT default=0.25 min=0.0 max=1.0 step=0.01
-  - use_square_mask: BOOLEAN default=True
-- optional:
-  - optional_mask: MASK
-- outputs: image:IMAGE
-
-## easy indexAnything
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - any: *
-  - index: INT default=0 min=-1000000 max=1000000 step=1
-- outputs: out:*
-
-## easy injectNoiseToLatent
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - strength: FLOAT default=0.1 min=0.0 max=200.0 step=0.0001
-  - normalize: BOOLEAN default=False
-  - average: BOOLEAN default=False
-- optional:
-  - pipe_to_noise: PIPE_LINE
-  - image_to_latent: IMAGE
-  - latent: LATENT
-  - noise: LATENT
-  - mask: MASK
-  - mix_randn_amount: FLOAT default=0.0 min=0.0 max=1000.0 step=0.001
-  - seed: INT default=123 min=0 max=18446744073709551615 step=1
-- outputs: LATENT:LATENT
-
-## easy instantIDApply
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - instantid_file: COMBO[]
-  - insightface: COMBO[CPU, CUDA, ROCM]
-  - control_net_name: COMBO[]
-  - cn_strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - cn_soft_weights: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - weight: FLOAT default=0.8 min=0.0 max=5.0 step=0.01
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - noise: FLOAT default=0.35 min=0.0 max=1.0 step=0.05
-- optional:
-  - image_kps: IMAGE
-  - mask: MASK
-  - control_net: CONTROL_NET
-- outputs: pipe:PIPE_LINE, model:MODEL, positive:CONDITIONING, negative:CONDITIONING
-
-## easy instantIDApplyADV
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - instantid_file: COMBO[]
-  - insightface: COMBO[CPU, CUDA, ROCM]
-  - control_net_name: COMBO[]
-  - cn_strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - cn_soft_weights: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - weight: FLOAT default=0.8 min=0.0 max=5.0 step=0.01
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - noise: FLOAT default=0.35 min=0.0 max=1.0 step=0.05
-- optional:
-  - image_kps: IMAGE
-  - mask: MASK
-  - control_net: CONTROL_NET
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-- outputs: pipe:PIPE_LINE, model:MODEL, positive:CONDITIONING, negative:CONDITIONING
-
-## easy int
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Type
-- required:
-  - value: INT default=0 min=-999999 max=999999
-- outputs: int:INT
-
-## easy ipadapterApply
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - image: IMAGE
-  - preset: COMBO[LIGHT - SD1.5 only (low strength), STANDARD (medium strength), VIT-G (medium strength), PLUS (high strength), PLUS (kolors genernal), REGULAR - FLUX and SD3.5 only (high strength), PLUS FACE (portraits), FULL FACE - SD1.5 only (portraits stronger), COMPOSITION, FACEID, ... +5]
-  - lora_strength: FLOAT default=0.6 min=0 max=1 step=0.01
-  - provider: COMBO[CPU, CUDA, ROCM, DirectML, OpenVINO, CoreML] default='CUDA'
-  - weight: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - weight_faceidv2: FLOAT default=1.0 min=-1 max=5.0 step=0.05
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - cache_mode: COMBO[insightface only, clip_vision only, ipadapter only, all, none] default='all'
-  - use_tiled: BOOLEAN default=False
-- optional:
-  - attn_mask: MASK
-  - optional_ipadapter: IPADAPTER
-- outputs: model:MODEL, images:IMAGE, masks:MASK, ipadapter:IPADAPTER
-
-## easy ipadapterApplyADV
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - image: IMAGE
-  - preset: COMBO[LIGHT - SD1.5 only (low strength), STANDARD (medium strength), VIT-G (medium strength), PLUS (high strength), PLUS (kolors genernal), REGULAR - FLUX and SD3.5 only (high strength), PLUS FACE (portraits), FULL FACE - SD1.5 only (portraits stronger), COMPOSITION, FACEID, ... +5]
-  - lora_strength: FLOAT default=0.6 min=0 max=1 step=0.01
-  - provider: COMBO[CPU, CUDA, ROCM, DirectML, OpenVINO, CoreML] default='CUDA'
-  - weight: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - weight_faceidv2: FLOAT default=1.0 min=-1 max=5.0 step=0.05
-  - weight_type: COMBO[linear, ease in, ease out, ease in-out, reverse in-out, weak input, weak output, weak middle, strong middle, style transfer, ... +4]
-  - combine_embeds: COMBO[concat, add, subtract, average, norm average]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - embeds_scaling: COMBO[V only, K+V, K+V w/ C penalty, K+mean(V) w/ C penalty]
-  - cache_mode: COMBO[insightface only, clip_vision only, ipadapter only, all, none] default='all'
-  - use_tiled: BOOLEAN default=False
-  - use_batch: BOOLEAN default=False
-  - sharpening: FLOAT default=0.0 min=0.0 max=1.0 step=0.05
-- optional:
-  - image_negative: IMAGE
-  - attn_mask: MASK
-  - clip_vision: CLIP_VISION
-  - optional_ipadapter: IPADAPTER
-  - layer_weights: STRING default=''
-- outputs: model:MODEL, images:IMAGE, masks:MASK, ipadapter:IPADAPTER
-
-## easy ipadapterApplyEmbeds
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - clip_vision: CLIP_VISION
-  - ipadapter: IPADAPTER
-  - pos_embed: EMBEDS
-  - weight: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - weight_type: COMBO[linear, ease in, ease out, ease in-out, reverse in-out, weak input, weak output, weak middle, strong middle, style transfer, ... +4]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - embeds_scaling: COMBO[V only, K+V, K+V w/ C penalty, K+mean(V) w/ C penalty]
-- optional:
-  - neg_embed: EMBEDS
-  - attn_mask: MASK
-- outputs: model:MODEL, ipadapter:IPADAPTER
-
-## easy ipadapterApplyEncoder
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - clip_vision: CLIP_VISION
-  - image1: IMAGE
-  - preset: COMBO[LIGHT - SD1.5 only (low strength), STANDARD (medium strength), VIT-G (medium strength), PLUS (high strength), PLUS (kolors genernal), REGULAR - FLUX and SD3.5 only (high strength), PLUS FACE (portraits), FULL FACE - SD1.5 only (portraits stronger), COMPOSITION]
-  - num_embeds: INT default=2 min=1 max=4
-- optional:
-  - image2: IMAGE
-  - image3: IMAGE
-  - image4: IMAGE
-  - mask1: MASK
-  - weight1: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - mask2: MASK
-  - weight2: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - mask3: MASK
-  - weight3: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - mask4: MASK
-  - weight4: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - combine_method: COMBO[concat, add, subtract, average, norm average, max, min]
-  - optional_ipadapter: IPADAPTER
-  - pos_embeds: EMBEDS
-  - neg_embeds: EMBEDS
-- outputs: model:MODEL, clip_vision:CLIP_VISION, ipadapter:IPADAPTER, pos_embed:EMBEDS, neg_embed:EMBEDS
-
-## easy ipadapterApplyFaceIDKolors
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - image: IMAGE
-  - preset: COMBO[FACEID PLUS KOLORS] default='FACEID PLUS KOLORS'
-  - lora_strength: FLOAT default=0.6 min=0 max=1 step=0.01
-  - provider: COMBO[CPU, CUDA, ROCM, DirectML, OpenVINO, CoreML] default='CUDA'
-  - weight: FLOAT default=0.8 min=-1 max=3 step=0.05
-  - weight_faceidv2: FLOAT default=1.0 min=-1 max=5.0 step=0.05
-  - weight_kolors: FLOAT default=0.8 min=-1 max=5.0 step=0.05
-  - weight_type: COMBO[linear, ease in, ease out, ease in-out, reverse in-out, weak input, weak output, weak middle, strong middle, style transfer, ... +4]
-  - combine_embeds: COMBO[concat, add, subtract, average, norm average]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - embeds_scaling: COMBO[V only, K+V, K+V w/ C penalty, K+mean(V) w/ C penalty]
-  - cache_mode: COMBO[insightface only, clip_vision only, ipadapter only, all, none] default='all'
-  - use_tiled: BOOLEAN default=False
-  - use_batch: BOOLEAN default=False
-  - sharpening: FLOAT default=0.0 min=0.0 max=1.0 step=0.05
-- optional:
-  - image_negative: IMAGE
-  - attn_mask: MASK
-  - clip_vision: CLIP_VISION
-  - optional_ipadapter: IPADAPTER
-- outputs: model:MODEL, images:IMAGE, masks:MASK, ipadapter:IPADAPTER
-
-## easy ipadapterApplyFromParams
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - preset: COMBO[LIGHT - SD1.5 only (low strength), STANDARD (medium strength), VIT-G (medium strength), PLUS (high strength), PLUS (kolors genernal), REGULAR - FLUX and SD3.5 only (high strength), PLUS FACE (portraits), FULL FACE - SD1.5 only (portraits stronger), COMPOSITION]
-  - ipadapter_params: IPADAPTER_PARAMS
-  - combine_embeds: COMBO[concat, add, subtract, average, norm average, max, min]
-  - embeds_scaling: COMBO[V only, K+V, K+V w/ C penalty, K+mean(V) w/ C penalty]
-  - cache_mode: COMBO[insightface only, clip_vision only, ipadapter only, all, none] default='insightface only'
-- optional:
-  - optional_ipadapter: IPADAPTER
-  - image_negative: IMAGE
-- outputs: model:MODEL, ipadapter:IPADAPTER
-
-## easy ipadapterApplyRegional
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - pipe: PIPE_LINE
-  - image: IMAGE
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - image_weight: FLOAT default=1.0 min=-1.0 max=3.0 step=0.05
-  - prompt_weight: FLOAT default=1.0 min=0.0 max=10.0 step=0.05
-  - weight_type: COMBO[linear, ease in, ease out, ease in-out, reverse in-out, weak input, weak output, weak middle, strong middle, style transfer, ... +4]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- optional:
-  - mask: MASK
-  - optional_ipadapter_params: IPADAPTER_PARAMS
-- outputs: pipe:PIPE_LINE, ipadapter_params:IPADAPTER_PARAMS, positive:CONDITIONING, negative:CONDITIONING
-
-## easy ipadapterStyleComposition
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - image_style: IMAGE
-  - preset: COMBO[LIGHT - SD1.5 only (low strength), STANDARD (medium strength), VIT-G (medium strength), PLUS (high strength), PLUS (kolors genernal), REGULAR - FLUX and SD3.5 only (high strength), PLUS FACE (portraits), FULL FACE - SD1.5 only (portraits stronger), COMPOSITION]
-  - weight_style: FLOAT default=1.0 min=-1 max=5 step=0.05
-  - weight_composition: FLOAT default=1.0 min=-1 max=5 step=0.05
-  - expand_style: BOOLEAN default=False
-  - combine_embeds: COMBO[concat, add, subtract, average, norm average] default='average'
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - embeds_scaling: COMBO[V only, K+V, K+V w/ C penalty, K+mean(V) w/ C penalty]
-  - cache_mode: COMBO[insightface only, clip_vision only, ipadapter only, all, none] default='all'
-- optional:
-  - image_composition: IMAGE
-  - image_negative: IMAGE
-  - attn_mask: MASK
-  - clip_vision: CLIP_VISION
-  - optional_ipadapter: IPADAPTER
-- outputs: model:MODEL, ipadapter:IPADAPTER
-
-## easy isFileExist
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - file_path: STRING default=''
-  - file_name: STRING default=''
-  - file_extension: STRING default=''
-- outputs: boolean:BOOLEAN
-
-## easy isMaskEmpty
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - mask: MASK
-- outputs: boolean:BOOLEAN
-
-## easy isNone
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - any: *
-- outputs: boolean:BOOLEAN
-
-## easy isSDXL
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- optional:
-  - optional_pipe: PIPE_LINE
-  - optional_clip: CLIP
-- outputs: boolean:BOOLEAN
-
-## easy joinImageBatch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - images: IMAGE
-  - mode: COMBO[horizontal, vertical] default='horizontal'
-- outputs: image:IMAGE
-
-## easy joyCaption2API
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/API
-- required:
-  - image: IMAGE
-  - do_sample: COMBO[True, False]
-  - temperature: FLOAT default=0.5 min=0.0 max=2.0 step=0.01
-  - max_tokens: INT default=256 min=16 max=512 step=16
-  - caption_type: COMBO[Descriptive, Descriptive (Informal), Training Prompt, MidJourney, Booru tag list, Booru-like tag list, Art Critic, Product Listing, Social Media Post]
-  - caption_length: COMBO[any, very short, short, medium-length, long, very long, 20, 30, 40, 50, ... +21]
-  - extra_options: STRING
-  - name_input: STRING default=''
-  - custom_prompt: STRING default=''
-- optional:
-  - apikey_override: STRING default=''
-- outputs: caption:STRING
-
-## easy joyCaption3API
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/API
-- required:
-  - image: IMAGE
-  - do_sample: COMBO[True, False]
-  - temperature: FLOAT default=0.5 min=0.0 max=2.0 step=0.01
-  - max_tokens: INT default=256 min=16 max=512 step=16
-  - caption_type: COMBO[Descriptive, Descriptive (Informal), Training Prompt, MidJourney, Booru tag list, Booru-like tag list, Art Critic, Product Listing, Social Media Post]
-  - caption_length: COMBO[any, very short, short, medium-length, long, very long, 20, 30, 40, 50, ... +21]
-  - extra_options: STRING
-  - name_input: STRING default=''
-  - custom_prompt: STRING default=''
-- optional:
-  - apikey_override: STRING default=''
-- outputs: caption:STRING
-
-## easy kolorsLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - unet_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-4b-fp8.safetensors]
-  - vae_name: COMBO[flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - chatglm3_name: COMBO[MiniMax-H3-Prompt-Rewriter-LoRA-Omni\adapter_model.safetensors]
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='1024 x 576'
-  - empty_latent_width: INT default=1024 min=64 max=16384 step=8
-  - empty_latent_height: INT default=1024 min=64 max=16384 step=8
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - batch_size: INT default=1 min=1 max=64
-- optional:
-  - model_override: MODEL
-  - vae_override: VAE
-  - optional_lora_stack: LORA_STACK
-  - auto_clean_gpu: BOOLEAN default=False
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy kSampler
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save, None] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model: MODEL
-- outputs: pipe:PIPE_LINE, image:IMAGE
-
-## easy kSamplerCustom
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save, None] default='None'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model: MODEL
-- outputs: pipe:PIPE_LINE, output:LATENT, denoised_output:LATENT, image:IMAGE
-
-## easy kSamplerDownscaleUnet
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - downscale_mode: COMBO[None, Auto, Custom] default='Auto'
-  - block_number: INT default=3 min=1 max=32 step=1
-  - downscale_factor: FLOAT default=2.0 min=0.1 max=9.0 step=0.001
-  - start_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_percent: FLOAT default=0.35 min=0.0 max=1.0 step=0.001
-  - downscale_after_skip: BOOLEAN default=True
-  - downscale_method: COMBO[bicubic, nearest-exact, bilinear, area, bislerp]
-  - upscale_method: COMBO[bicubic, nearest-exact, bilinear, area, bislerp]
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model: MODEL
-- outputs: pipe:PIPE_LINE, image:IMAGE
-
-## easy kSamplerInpainting
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - grow_mask_by: INT default=6 min=0 max=64 step=1
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-  - additional: COMBO[None, InpaintModelCond, Differential Diffusion, Fooocus Inpaint, Fooocus Inpaint + DD, Brushnet Random, Brushnet Random + DD, Brushnet Segmentation, Brushnet Segmentation + DD] default='None'
-- optional:
-  - model: MODEL
-  - mask: MASK
-- outputs: pipe:PIPE_LINE, image:IMAGE, vae:VAE
-
-## easy kSamplerLayerDiffusion
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model: MODEL
-- outputs: pipe:PIPE_LINE, final_image:IMAGE, original_image:IMAGE, alpha:MASK
-
-## easy kSamplerSDTurbo
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model: MODEL
-- outputs: pipe:PIPE_LINE, image:IMAGE
-
-## easy kSamplerTiled
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - pipe: PIPE_LINE
-  - tile_size: INT default=512 min=320 max=4096 step=64
-  - image_output: COMBO[Hide, Preview, Save, Hide&Save, Sender, Sender&Save, None] default='Preview'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_prefix: STRING default='ComfyUI'
-- optional:
-  - model: MODEL
-- outputs: pipe:PIPE_LINE, image:IMAGE
-
-## easy latentCompositeMaskedWithCond
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - pipe: PIPE_LINE
-  - text_combine: LIST
-  - source_latent: LATENT
-  - source_mask: MASK
-  - destination_mask: MASK
-  - text_combine_mode: COMBO[add, replace, cover] default='add'
-  - replace_text: STRING default=''
-- outputs: pipe:PIPE_LINE, latent:LATENT, conditioning:CONDITIONING
-
-## easy latentNoisy
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - steps: INT default=10000 min=0 max=10000
-  - start_at_step: INT default=0 min=0 max=10000
-  - end_at_step: INT default=10000 min=1 max=10000
-  - source: COMBO[CPU, GPU]
-  - seed: INT default=0 min=0 max=18446744073709551615
-- optional:
-  - pipe: PIPE_LINE
-  - optional_model: MODEL
-  - optional_latent: LATENT
-- outputs: pipe:PIPE_LINE, latent:LATENT, sigma:FLOAT
-
-## easy lengthAnything
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - any: *
-- outputs: length:INT
-
-## easy LLLiteLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - model: MODEL
-  - model_name: COMBO[]
-  - cond_image: IMAGE
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - steps: INT default=0 min=0 max=200 step=1
-  - start_percent: FLOAT default=0.0 min=0.0 max=100.0 step=0.1
-  - end_percent: FLOAT default=0.0 min=0.0 max=100.0 step=0.1
-- outputs: MODEL:MODEL
-
-## easy loadImageBase64
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image/LoadImage
-- required:
-  - base64_data: STRING default=''
-  - image_output: COMBO[Hide, Preview, Save, Hide/Save] default='Preview'
-  - save_prefix: STRING default='ComfyUI'
-- outputs: IMAGE:IMAGE, MASK:MASK
-
-## easy loadImagesForLoop
-module: custom_nodes.ComfyUI-Easy-Use | category: image
-- required:
-  - directory: STRING default=''
-- optional:
-  - start_index: INT default=0 min=0 step=1
-  - limit: INT default=-1 min=-1 max=10000
-  - initial_value1: *
-  - initial_value2: *
-- outputs: flow:FLOW_CONTROL, index:INT, image:IMAGE, mask:MASK, name:STRING, value1:*, value2:*
-
-## easy loraNames
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Util
-- required:
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
-- outputs: lora_name:*
-
-## easy loraPromptApply
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - positive: STRING default=''
-- optional:
-  - negative: STRING default=''
-- outputs: model:MODEL, clip:CLIP, positive:STRING, negative:STRING
-
-## easy loraStack
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - toggle: BOOLEAN
-  - mode: COMBO[simple, advanced]
-  - num_loras: INT default=1 min=1 max=10
-- optional:
-  - optional_lora_stack: LORA_STACK
-  - lora_1_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_1_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_1_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_1_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_2_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_2_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_2_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_2_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_3_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_3_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_3_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_3_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_4_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_4_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_4_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_4_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_5_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_5_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_5_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_5_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_6_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_6_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_6_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_6_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_7_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_7_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_7_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_7_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_8_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_8_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_8_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_8_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_9_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_9_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_9_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_9_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_10_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_10_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_10_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_10_clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-- outputs: lora_stack:LORA_STACK
-
-## easy loraStackApply
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - lora_stack: LORA_STACK
-  - model: MODEL
-- optional:
-  - optional_clip: CLIP
-- outputs: model:MODEL, clip:CLIP
-
-## easy loraSwitcher
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - toggle: BOOLEAN
-  - select: INT default=1 min=1 max=50
-  - num_loras: INT default=1 min=1 max=50
-  - lora_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-- optional:
-  - optional_lora_stack: LORA_STACK
-  - lora_1_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_2_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_3_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_4_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_5_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_6_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_7_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_8_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_9_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_10_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_11_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_12_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_13_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_14_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_15_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_16_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_17_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_18_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_19_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_20_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_21_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_22_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_23_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_24_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_25_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_26_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_27_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_28_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_29_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_30_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_31_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_32_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_33_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_34_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_35_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_36_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_37_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_38_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_39_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_40_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_41_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_42_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_43_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_44_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_45_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_46_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_47_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_48_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_49_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - lora_50_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-- outputs: lora_stack:LORA_STACK, lora_name:*
-
-## easy makeImageForICLora
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - image_1: IMAGE
-  - direction: COMBO[top-bottom, left-right] default='left-right'
-  - pixels: INT default=0 min=0 max=16384 step=8
-  - method: COMBO[uniform height, uniform width, auto] default='auto'
-- optional:
-  - image_2: IMAGE
-  - mask_1: MASK
-  - mask_2: MASK
-- outputs: image:IMAGE, mask:MASK, context_mask:MASK, width:INT, height:INT, x:INT, y:INT
-
-## easy mathFloat
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Math
-- required:
-  - a: FLOAT default=0 min=-999999999999.0 max=999999999999.0 step=0.01
-  - b: FLOAT default=0 min=-999999999999.0 max=999999999999.0 step=0.01
-  - operation: COMBO[add, subtract, multiply, divide, modulo, power]
-- outputs: FLOAT:FLOAT
-
-## easy mathInt
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Math
-- required:
-  - a: INT default=0 min=-18446744073709551615 max=18446744073709551615 step=1
-  - b: INT default=0 min=-18446744073709551615 max=18446744073709551615 step=1
-  - operation: COMBO[add, subtract, multiply, divide, modulo, power]
-- outputs: INT:INT
-
-## easy mathString
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Math
-- required:
-  - a: STRING
-  - b: STRING
-  - operation: COMBO[a == b, a != b, a IN b, a MATCH REGEX(b), a BEGINSWITH b, a ENDSWITH b]
-  - case_sensitive: BOOLEAN default=True
-- outputs: BOOLEAN:BOOLEAN
-
-## easy mochiLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors] default='mochi_vae.safetensors'
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='width x height (custom)'
-  - empty_latent_width: INT default=848 min=64 max=16384 step=8
-  - empty_latent_height: INT default=480 min=64 max=16384 step=8
-  - length: INT default=25 min=7 max=16384 step=6
-  - batch_size: INT default=1 min=1 max=4096
-- optional:
-  - model_override: MODEL
-  - clip_override: CLIP
-  - vae_override: VAE
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy multiAngle
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- optional:
-  - multi_angle: EASY_MULTI_ANGLE
-- outputs: prompt:STRING, params:EASY_MULTI_ANGLE
-
-## easy negative
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - negative: STRING default=''
-- outputs: negative:STRING
-
-## easy outputToList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - tuple: *
-- outputs: list:*
-
-## easy pipeBatchIndex
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- required:
-  - pipe: PIPE_LINE
-  - batch_index: INT default=0 min=0 max=63
-  - length: INT default=1 min=1 max=64
-- outputs: pipe:PIPE_LINE
-
-## easy pipeEdit
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- required:
-  - clip_skip: INT default=-1 min=-24 max=0 step=1
-  - optional_positive: STRING default=''
-  - positive_token_normalization: COMBO[none, mean, length, length+mean]
-  - positive_weight_interpretation: COMBO[comfy, A1111, comfy++, compel, fixed attention]
-  - optional_negative: STRING default=''
-  - negative_token_normalization: COMBO[none, mean, length, length+mean]
-  - negative_weight_interpretation: COMBO[comfy, A1111, comfy++, compel, fixed attention]
-  - a1111_prompt_style: BOOLEAN default=False
-  - conditioning_mode: COMBO[replace, concat, combine, average, timestep] default='replace'
-  - average_strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - old_cond_start: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - old_cond_end: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - new_cond_start: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - new_cond_end: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- optional:
-  - pipe: PIPE_LINE
-  - model: MODEL
-  - pos: CONDITIONING
-  - neg: CONDITIONING
-  - latent: LATENT
-  - vae: VAE
-  - clip: CLIP
-  - image: IMAGE
-- outputs: pipe:PIPE_LINE, model:MODEL, pos:CONDITIONING, neg:CONDITIONING, latent:LATENT, vae:VAE, clip:CLIP, image:IMAGE
-
-## easy pipeEditPrompt
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- required:
-  - pipe: PIPE_LINE
-  - positive: STRING default=''
-  - negative: STRING default=''
-- outputs: pipe:PIPE_LINE
-
-## easy pipeIn
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- optional:
-  - pipe: PIPE_LINE
-  - model: MODEL
-  - pos: CONDITIONING
-  - neg: CONDITIONING
-  - latent: LATENT
-  - vae: VAE
-  - clip: CLIP
-  - image: IMAGE
-  - xyPlot: XYPLOT
-- outputs: pipe:PIPE_LINE
-
-## easy pipeOut
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- required:
-  - pipe: PIPE_LINE
-- outputs: pipe:PIPE_LINE, model:MODEL, pos:CONDITIONING, neg:CONDITIONING, latent:LATENT, vae:VAE, clip:CLIP, image:IMAGE, seed:INT
-
-## easy pipeToBasicPipe
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- required:
-  - pipe: PIPE_LINE
-- outputs: basic_pipe:BASIC_PIPE
-
-## easy pixArtLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - model_name: COMBO[PixArtMS_XL_2, PixArtMS_Sigma_XL_2, PixArtMS_Sigma_XL_2_900M, PixArtMS_Sigma_XL_2_2K, PixArt_XL_2, ControlPixArtHalf, ControlPixArtMSHalf]
-  - vae_name: COMBO[flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - t5_type: COMBO[sd3]
-  - clip_name: COMBO[clip_l.safetensors, qwen3vl_32b_minimax_h3_int4_convrot.safetensors, qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors, qwen_3_4b.safetensors, qwen_3_8b_fp8mixed.safetensors, umt5_xxl_fp8_e4m3fn_scaled.safetensors]
-  - padding: INT default=1 min=1 max=300
-  - t5_name: COMBO[]
-  - device: COMBO[auto, cpu, gpu] default='cpu'
-  - dtype: COMBO[default, auto (comfy), FP32, FP16, BF16]
-  - lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - lora_model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - ratio: COMBO[custom, 0.25, 0.26, 0.27, 0.28, 0.32, 0.33, 0.35, 0.40, 0.42, ... +31] default='1.00'
-  - empty_latent_width: INT default=1024 min=64 max=16384 step=8
-  - empty_latent_height: INT default=1024 min=64 max=16384 step=8
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - batch_size: INT default=1 min=1 max=64
-- optional:
-  - optional_lora_stack: LORA_STACK
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy pixels
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21]
-  - width: INT default=512 min=64 max=16384 step=8
-  - height: INT default=512 min=64 max=16384 step=8
-  - scale: FLOAT default=2.0 min=0.001 max=10 step=0.001
-  - flip_w/h: BOOLEAN default=False
-- outputs: width_norm:INT, height_norm:INT, width:*, height:*, scale_factor:*
-
-## easy portraitMaster
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - shot: COMBO[-, Head portrait, Head and shoulders portrait, Half-length portrait, Full-length portrait, Face, Portrait, Full body, Close-up]
-  - shot_weight: FLOAT default=0 min=0 max=1.95 step=0.05
-  - gender: COMBO[-, Man, Woman] default='Woman'
-  - age: INT default=30 min=18 max=90 step=1
-  - nationality_1: COMBO[-, Afghan, Albanian, Algerian, Andorran, Angolan, Antiguans Barbudans, Argentine, Armenian, Australian, ... +184] default='Chinese'
-  - nationality_2: COMBO[-, Afghan, Albanian, Algerian, Andorran, Angolan, Antiguans Barbudans, Argentine, Armenian, Australian, ... +184]
-  - nationality_mix: FLOAT default=0 min=0 max=1.95 step=0.05
-  - body_type: COMBO[-, Underweight, Normal weight, Overweight, Obese]
-  - body_type_weight: FLOAT default=0 min=0 max=1.95 step=0.05
-  - model_pose: COMBO[-, Power Pose, Walking Pose, The Over-the-Shoulder Look, S-curve Pose, Sitting Pose, Close-Up Beauty Shot Pose, Leaning Pose, Arms Up Pose, Casual Stroll Pose, ... +9]
-  - eyes_color: COMBO[-, Brown, Blue, Green, Hazel, Gray, Amber, Red, Violet]
-  - facial_expression: COMBO[-, Happy, Sad, Angry, Surprised, Fearful, Disgusted, Contemptuous, Excited, Nervous, ... +15]
-  - facial_expression_weight: FLOAT default=0 min=0 max=1.95 step=0.05
-  - face_shape: COMBO[-, Oval, Round, Square, Heart-shaped, Long, Rectangle, Triangle, Inverted Triangle, Pear-shaped, ... +3]
-  - face_shape_weight: FLOAT default=0 min=0 max=1.95 step=0.05
-  - facial_asymmetry: FLOAT default=0 min=0 max=1.95 step=0.05
-  - hair_style: COMBO[-, Asymmetrical cut, Blunt cut, Bob cut, Braided bob, Buzz cut, Choppy cut, Curly bob, Curtain bangs, Faux hawk, ... +30]
-  - hair_color: COMBO[-, Black, Brown, Blonde, Red, Auburn, Chestnut, Gray, White, Salt and pepper]
-  - disheveled: FLOAT default=0 min=0 max=1.95 step=0.05
-  - beard: COMBO[-, Stubble Beard, Goatee, Full Beard, Van Dyke Beard, Soul Patch, Garibaldi Beard, Mutton Chops, Circle Beard, Corporate Beard, ... +11]
-  - skin_details: FLOAT default=0 min=0 max=1.95 step=0.05
-  - skin_pores: FLOAT default=0 min=0 max=1.95 step=0.05
-  - dimples: FLOAT default=0 min=0 max=1.95 step=0.05
-  - freckles: FLOAT default=0 min=0 max=1.95 step=0.05
-  - moles: FLOAT default=0 min=0 max=1.95 step=0.05
-  - skin_imperfections: FLOAT default=0 min=0 max=1.95 step=0.05
-  - skin_acne: FLOAT default=0 min=0 max=1.95 step=0.05
-  - tanned_skin: FLOAT default=0 min=0 max=1.95 step=0.05
-  - eyes_details: FLOAT default=0 min=0 max=1.95 step=0.05
-  - iris_details: FLOAT default=0 min=0 max=1.95 step=0.05
-  - circular_iris: FLOAT default=0 min=0 max=1.95 step=0.05
-  - circular_pupil: FLOAT default=0 min=0 max=1.95 step=0.05
-  - light_type: COMBO[-, Natural sunlight, Soft ambient light, Harsh sunlight, Overcast sky, Sunset glow, Sunrise warmth, Twilight hues, Candlelight, Incandescent lighting, ... +23]
-  - light_direction: COMBO[-, top, bottom, right, left, front, rear, top-right, top-left, bottom-right, ... +1]
-  - light_weight: FLOAT default=0 min=0 max=1.95 step=0.05
-  - photorealism_improvement: COMBO[enable, disable]
-  - prompt_start: STRING default='raw photo, (realistic:1.5)'
-  - prompt_additional: STRING default=''
-  - prompt_end: STRING default=''
-  - negative_prompt: STRING default=''
-- outputs: positive:STRING, negative:STRING
-
-## easy poseEditor
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - image: STRING default=''
-- outputs: 
-
-## easy positive
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - positive: STRING default=''
-- outputs: positive:STRING
-
-## easy preDetailerFix
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Fix
-- required:
-  - pipe: PIPE_LINE
-  - guide_size: FLOAT default=256 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=768 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, align_your_steps]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - wildcard: STRING
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - bbox_segm_pipe: PIPE_LINE
-  - sam_pipe: PIPE_LINE
-  - optional_image: IMAGE
-- outputs: pipe:PIPE_LINE
-
-## easy preMaskDetailerFix
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Fix
-- required:
-  - pipe: PIPE_LINE
-  - mask: MASK
-  - guide_size: FLOAT default=384 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - mask_mode: BOOLEAN default=True
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=10 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-  - batch_size: INT default=1 min=1 max=100
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - optional_image: IMAGE
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-- outputs: pipe:PIPE_LINE
-
-## easy preSampling
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, align_your_steps, ... +1]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - seed: INT default=0 min=0 max=1125899906842624
-- optional:
-  - image_to_latent: IMAGE
-  - latent: LATENT
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingAdvanced
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, align_your_steps, ... +1]
-  - start_at_step: INT default=0 min=0 max=10000
-  - end_at_step: INT default=10000 min=0 max=10000
-  - add_noise: COMBO[enable (CPU), enable (GPU=A1111), disable] default='enable (CPU)'
-  - seed: INT default=0 min=0 max=1125899906842624
-  - return_with_leftover_noise: COMBO[disable, enable]
-- optional:
-  - image_to_latent: IMAGE
-  - latent: LATENT
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingCascade
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - encode_vae_name: COMBO[None, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - decode_vae_name: COMBO[None, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=4.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='euler_ancestral'
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal] default='simple'
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - seed: INT default=0 min=0 max=1125899906842624
-- optional:
-  - image_to_latent_c: IMAGE
-  - latent_c: LATENT
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingCustom
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - guider: COMBO[CFG, DualCFG, Basic, IP2P+CFG, IP2P+DualCFG, IP2P+Basic] default='Basic'
-  - cfg: FLOAT default=3.5 min=0.0 max=100.0
-  - cfg_negative: FLOAT default=1.5 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +36]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, karrasADV, ... +6]
-  - coeff: FLOAT default=1.2 min=0.8 max=1.5 step=0.05
-  - steps: INT default=20 min=1 max=10000
-  - sigma_max: FLOAT default=14.614642 min=0.0 max=1000.0 step=0.01
-  - sigma_min: FLOAT default=0.0291675 min=0.0 max=1000.0 step=0.01
-  - rho: FLOAT default=7.0 min=0.0 max=100.0 step=0.01
-  - beta_d: FLOAT default=19.9 min=0.0 max=1000.0 step=0.01
-  - beta_min: FLOAT default=0.1 min=0.0 max=1000.0 step=0.01
-  - eps_s: FLOAT default=0.001 min=0.0 max=1.0 step=0.0001
-  - flip_sigmas: BOOLEAN default=False
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - add_noise: COMBO[enable (CPU), enable (GPU=A1111), disable] default='enable (CPU)'
-  - seed: INT default=0 min=0 max=1125899906842624
-- optional:
-  - image_to_latent: IMAGE
-  - latent: LATENT
-  - optional_sampler: SAMPLER
-  - optional_sigmas: SIGMAS
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingDynamicCFG
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - cfg_mode: COMBO[Constant, Linear Down, Cosine Down, Half Cosine Down, Linear Up, Cosine Up, Half Cosine Up, Power Up, Power Down, Linear Repeating, ... +2]
-  - cfg_scale_min: FLOAT default=3.5 min=0.0 max=100.0 step=0.5
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, align_your_steps, ... +1]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - seed: INT default=0 min=0 max=1125899906842624
-- optional:
-  - image_to_latent: IMAGE
-  - latent: LATENT
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingLayerDiffusion
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - method: COMBO[Attention Injection, Conv Injection, Everything, Foreground, Background]
-  - weight: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='euler'
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, align_your_steps, ... +1] default='normal'
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - seed: INT default=0 min=0 max=1125899906842624
-- optional:
-  - image: IMAGE
-  - blended_image: IMAGE
-  - mask: MASK
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingLayerDiffusionADDTL
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - foreground_prompt: STRING default=''
-  - background_prompt: STRING default=''
-  - blended_prompt: STRING default=''
-- optional:
-  - optional_fg_cond: CONDITIONING
-  - optional_bg_cond: CONDITIONING
-  - optional_blended_cond: CONDITIONING
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingNoiseIn
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - factor: FLOAT default=0.1 min=0.0 max=1.0 step=0.01
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, align_your_steps, ... +1]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - seed: INT default=0 min=0 max=1125899906842624
-- optional:
-  - optional_noise_seed: INT
-  - optional_latent: LATENT
-- outputs: pipe:PIPE_LINE
-
-## easy preSamplingSdTurbo
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/PreSampling
-- required:
-  - pipe: PIPE_LINE
-  - steps: INT default=1 min=1 max=10
-  - cfg: FLOAT default=1.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - eta: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - s_noise: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - upscale_ratio: FLOAT default=2.0 min=0.0 max=16.0 step=0.01
-  - start_step: INT default=5 min=0 max=1000 step=1
-  - end_step: INT default=15 min=0 max=1000 step=1
-  - upscale_n_step: INT default=3 min=0 max=1000 step=1
-  - unsharp_kernel_size: INT default=3 min=1 max=21 step=1
-  - unsharp_sigma: FLOAT default=0.5 min=0.0 max=10.0 step=0.01
-  - unsharp_strength: FLOAT default=0.0 min=0.0 max=10.0 step=0.01
-  - seed: INT default=0 min=0 max=1125899906842624
-- outputs: pipe:PIPE_LINE
-
-## easy prompt
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - text: STRING default=''
-  - prefix: COMBO[Select the prefix add to the text, Detailed photo of, Amateur photo of, Flicker 2008 photo of, Fantastic artwork of, Vintage photograph of, Unreal 5 render of, Surrealist painting of, Professional advertising design of] default='Select the prefix add to the text'
-  - subject: COMBO[👤Select the subject add to the text, a man, a woman, a young man, a young woman, a handsome man, a beautiful woman, a monster, a toy, a product, ... +3] default='👤Select the subject add to the text'
-  - action: COMBO[🎬Select the action add to the text, looking at viewer, looking away, looking up, looking down, looking back, open mouth, half-closed mouth, closed mouth, open eyes, ... +18] default='🎬Select the action add to the text'
-  - clothes: COMBO[👚Select the clothes add to the text, underwear, clothed, casual, dress, swimsuit, uniform, bikini, one-piece swimsuit, shirt, ... +138] default='👚Select the clothes add to the text'
-  - environment: COMBO[☀️Select the illumination environment add to the text, sunshine from window, neon night, city, sunset over sea, golden time, sci-fi RGB glowing, cyberpunk, natural lighting, warm atmosphere, at home, bedroom, magic lit, evil, gothic, in a cave, ... +58] default='☀️Select the illumination environment add to the text'
-  - background: COMBO[🎞️Select the background add to the text, cars and people, a cozy bed and a lamp, a forest clearing with mist, a bustling marketplace, a quiet beach at dusk, an old, cobblestone street, a futuristic cityscape, a tranquil lake with mountains, a mysterious cave entrance, ... +59] default='🎞️Select the background add to the text'
-  - nsfw: COMBO[🔞Select the nsfw add to the text, nude, breast, small breast, middle breast, large breast, nipples, clothes lift, pussy juice trail, pussy juice puddle, ... +18] default='🔞️Select the nsfw add to the text'
-- outputs: prompt:STRING
-
-## easy promptAwait
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - now: *
-  - prompt: STRING default=''
-  - toolbar: EASY_PROMPT_AWAIT_BAR
-- optional:
-  - prev: *
-- outputs: output:*, prompt:STRING, continue:BOOLEAN, seed:INT
-
-## easy promptConcat
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- optional:
-  - prompt1: STRING default=''
-  - prompt2: STRING default=''
-  - separator: STRING default=''
-- outputs: prompt:STRING
-
-## easy promptLine
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - prompt: STRING default='text'
-  - start_index: INT default=0 min=0 max=9999
-  - max_rows: INT default=1000 min=1 max=9999
-  - remove_empty_lines: BOOLEAN default=True
-- outputs: STRING:STRING, COMBO:COMBO
-
-## easy promptList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - prompt_1: STRING default=''
-  - prompt_2: STRING default=''
-  - prompt_3: STRING default=''
-  - prompt_4: STRING default=''
-  - prompt_5: STRING default=''
-- optional:
-  - optional_prompt_list: LIST
-- outputs: prompt_list:LIST, prompt_strings:STRING
-
-## easy promptReplace
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - prompt: STRING default=''
-- optional:
-  - find1: STRING default=''
-  - replace1: STRING default=''
-  - find2: STRING default=''
-  - replace2: STRING default=''
-  - find3: STRING default=''
-  - replace3: STRING default=''
-- outputs: prompt:STRING
-
-## easy pulIDApply
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - pulid_file: COMBO[pulid_flux2_klein_v2.safetensors]
-  - insightface: COMBO[CPU, CUDA, ROCM]
-  - image: IMAGE
-  - method: COMBO[fidelity, style, neutral]
-  - weight: FLOAT default=1.0 min=-1.0 max=5.0 step=0.05
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- optional:
-  - attn_mask: MASK
-- outputs: model:MODEL
-
-## easy pulIDApplyADV
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - pulid_file: COMBO[pulid_flux2_klein_v2.safetensors]
-  - insightface: COMBO[CPU, CUDA, ROCM]
-  - image: IMAGE
-  - weight: FLOAT default=1.0 min=-1.0 max=5.0 step=0.05
-  - projection: COMBO[ortho_v2, ortho, none] default='ortho_v2'
-  - fidelity: INT default=8 min=0 max=32 step=1
-  - noise: FLOAT default=0.0 min=-1.0 max=1.0 step=0.1
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- optional:
-  - attn_mask: MASK
-- outputs: model:MODEL
-
-## easy rangeFloat
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Type
-- required:
-  - range_mode: COMBO[step, num_steps] default='step'
-  - start: FLOAT default=0 min=-4096 max=4096 step=0.1
-  - stop: FLOAT default=1.0 min=-4096 max=4096 step=0.1
-  - step: FLOAT default=1.0 min=-4096 max=4096 step=0.1
-  - num_steps: INT default=1 min=-4096 max=4096 step=1
-  - end_mode: COMBO[Inclusive, Exclusive] default='Inclusive'
-- outputs: range:FLOAT, range_sizes:INT
-
-## easy rangeInt
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Type
-- required:
-  - range_mode: COMBO[step, num_steps] default='step'
-  - start: INT default=0 min=-4096 max=4096 step=1
-  - stop: INT default=1 min=-4096 max=4096 step=1
-  - step: INT default=1 min=-4096 max=4096 step=1
-  - num_steps: INT default=0 min=-4096 max=4096 step=1
-  - end_mode: COMBO[Inclusive, Exclusive] default='Inclusive'
-- outputs: range:INT, range_sizes:INT
-
-## easy removeLocalImage
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Image
-- required:
-  - any: *
-  - file_name: STRING default=''
-- outputs: 
-
-## easy samLoaderPipe
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Fix
-- required:
-  - model_name: COMBO[sam_vit_b_01ec64.pth]
-  - device_mode: COMBO[AUTO, Prefer GPU, CPU] default='AUTO'
-  - sam_detection_hint: COMBO[center-1, horizontal-2, vertical-2, rect-4, diamond-4, mask-area, mask-points, mask-point-bbox, none]
-  - sam_dilation: INT default=0 min=-512 max=512 step=1
-  - sam_threshold: FLOAT default=0.93 min=0.0 max=1.0 step=0.01
-  - sam_bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - sam_mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-  - sam_mask_hint_use_negative: COMBO[False, Small, Outter]
-- outputs: sam_pipe:PIPE_LINE
-
-## easy saveImageLazy
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - images: IMAGE
-  - filename_prefix: STRING default='ComfyUI'
-  - save_metadata: BOOLEAN default=True
-- outputs: images:IMAGE
-
-## easy saveText
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - text: STRING default=''
-  - output_file_path: STRING default=''
-  - file_name: STRING default=''
-  - file_extension: COMBO[txt, csv]
-  - overwrite: BOOLEAN default=True
-- optional:
-  - image: IMAGE
-- outputs: text:STRING, image:IMAGE
-
-## easy saveTextLazy
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - text: STRING default=''
-  - output_file_path: STRING default=''
-  - file_name: STRING default=''
-  - file_extension: COMBO[txt, csv]
-  - overwrite: BOOLEAN default=True
-- optional:
-  - image: IMAGE
-- outputs: text:STRING, image:IMAGE
-
-## easy seed
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Seed
-- required:
-  - seed: INT default=0 min=0 max=1125899906842624
-- outputs: seed:INT
-
-## easy seedList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Seed
-- required:
-  - min_num: INT default=0 min=0 max=1125899906842624
-  - max_num: INT default=1125899906842624 min=0 max=1125899906842624
-  - method: COMBO[random, increment, decrement] default='random'
-  - total: INT default=1 min=1 max=100000
-  - seed: INT default=0 min=0 max=1125899906842624
-- outputs: seed:INT, total:INT
-
-## easy showAnything
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- optional:
-  - anything: *
-- outputs: output:*
-
-## easy showAnythingLazy
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- optional:
-  - anything: *
-- outputs: output:*
-
-## easy showLoaderSettingsNames
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Util
-- required:
-  - pipe: PIPE_LINE
-- outputs: ckpt_name:STRING, vae_name:STRING, lora_name:STRING
-
-## easy showSpentTime
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - pipe: PIPE_LINE
-- outputs: 
-
-## easy showTensorShape
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - tensor: *
-- outputs: 
-
-## easy simpleMath
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Math
-- required:
-  - value: STRING default=''
-- optional:
-  - a: *
-  - b: *
-  - c: *
-- outputs: int:INT, float:FLOAT, boolean:BOOLEAN
-
-## easy simpleMathDual
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Math
-- required:
-  - value1: STRING default=''
-  - value2: STRING default=''
-- optional:
-  - a: *
-  - b: *
-  - c: *
-  - d: *
-- outputs: int1:INT, float1:FLOAT, int2:INT, float2:FLOAT
-
-## easy sleep
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - any: *
-  - delay: FLOAT default=1.0 min=0.0 max=1000000 step=0.1
-- outputs: out:*
-
-## easy sliderControl
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Util
-- required:
-  - mode: COMBO[ipadapter layer weights]
-  - model_type: COMBO[sdxl, sd1]
-- outputs: layer_weights:STRING
-
-## easy stableDiffusion3API
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/🚫 Deprecated
-- required:
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - model: COMBO[sd3, sd3-turbo]
-  - aspect_ratio: COMBO[16:9, 1:1, 21:9, 2:3, 3:2, 4:5, 5:4, 9:16, 9:21]
-  - seed: INT default=0 min=0 max=4294967294
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0
-- optional:
-  - optional_image: IMAGE
-- outputs: image:IMAGE
-
-## easy string
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Type
-- required:
-  - value: STRING default=''
-- outputs: string:STRING
-
-## easy stringJoinLines
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - string: STRING default=''
-  - delimiter: STRING default=' | '
-- outputs: STRING:STRING
-
-## easy stringToFloatList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - string: STRING default='1, 2, 3'
-- outputs: FLOAT:FLOAT
-
-## easy stringToIntList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - string: STRING default='1, 2, 3'
-- outputs: INT:INT
-
-## easy styleAlignedBatchAlign
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Adapter
-- required:
-  - model: MODEL
-  - share_norm: COMBO[both, group, layer, disabled]
-  - share_attn: COMBO[q+k, q+k+v, disabled]
-  - scale: FLOAT default=1 min=0 max=1.0 step=0.1
-- outputs: MODEL:MODEL
-
-## easy stylesSelector
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - styles: COMBO[fooocus_styles] default='fooocus_styles'
-- optional:
-  - positive: STRING default=''
-  - negative: STRING default=''
-  - select_styles: EASY_PROMPT_STYLES
-- outputs: positive:STRING, negative:STRING
-
-## easy sv3dLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - init_image: IMAGE
-  - empty_latent_width: INT default=576 min=16 max=16384 step=8
-  - empty_latent_height: INT default=576 min=16 max=16384 step=8
-  - batch_size: INT default=21 min=1 max=4096
-  - interp_easing: COMBO[linear, ease_in, ease_out, ease_in_out] default='linear'
-  - easing_mode: COMBO[azimuth, elevation, custom] default='azimuth'
-- optional:
-  - scheduler: STRING default=''
-- outputs: pipe:PIPE_LINE, model:MODEL, interp_log:STRING
-
-## easy svdLoader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - clip_name: COMBO[None, clip_l.safetensors, qwen3vl_32b_minimax_h3_int4_convrot.safetensors, qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors, qwen_3_4b.safetensors, qwen_3_8b_fp8mixed.safetensors, umt5_xxl_fp8_e4m3fn_scaled.safetensors]
-  - init_image: IMAGE
-  - resolution: COMBO[width x height (custom), 512 x 512, 512 x 768, 576 x 1024, 768 x 512, 768 x 768, 768 x 1024, 768 x 1280, 768 x 1344, 768 x 1536, ... +21] default='1024 x 576'
-  - empty_latent_width: INT default=256 min=16 max=16384 step=8
-  - empty_latent_height: INT default=256 min=16 max=16384 step=8
-  - video_frames: INT default=14 min=1 max=4096
-  - motion_bucket_id: INT default=127 min=1 max=1023
-  - fps: INT default=6 min=1 max=1024
-  - augmentation_level: FLOAT default=0.0 min=0.0 max=10.0 step=0.01
-- optional:
-  - optional_positive: STRING default=''
-  - optional_negative: STRING default=''
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
-
-## easy tableEditor
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Util
-- required:
-  - table_data: EASY_TABLE_EDITOR
-- outputs: markdown:STRING, image:IMAGE
-
-## easy textIndexSwitch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Index Switch
-- required:
-  - index: INT default=0 min=0 max=9 step=1
-- optional:
-  - text0: STRING
-  - text1: STRING
-  - text2: STRING
-  - text3: STRING
-  - text4: STRING
-  - text5: STRING
-  - text6: STRING
-  - text7: STRING
-  - text8: STRING
-  - text9: STRING
-  - text10: STRING
-  - text11: STRING
-  - text12: STRING
-  - text13: STRING
-  - text14: STRING
-  - text15: STRING
-  - text16: STRING
-  - text17: STRING
-  - text18: STRING
-  - text19: STRING
-- outputs: text:STRING
-
-## easy textSwitch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/Switch
-- required:
-  - input: INT default=1 min=1 max=2
-- optional:
-  - text1: STRING
-  - text2: STRING
-- outputs: STRING:STRING
-
-## easy ultralyticsDetectorPipe
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Fix
-- required:
-  - model_name: COMBO[bbox/face_yolov8m.pt, bbox/face_yolov9c.pt, bbox/hand_yolov8n.pt]
-  - bbox_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - bbox_dilation: INT default=10 min=-512 max=512 step=1
-  - bbox_crop_factor: FLOAT default=3.0 min=1.0 max=10 step=0.1
-- outputs: bbox_segm_pipe:PIPE_LINE
-
-## easy unSampler
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Sampler
-- required:
-  - steps: INT default=20 min=1 max=10000
-  - end_at_step: INT default=0 min=0 max=10000
-  - cfg: FLOAT default=1.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - normalize: COMBO[disable, enable]
-- optional:
-  - pipe: PIPE_LINE
-  - optional_model: MODEL
-  - optional_positive: CONDITIONING
-  - optional_negative: CONDITIONING
-  - optional_latent: LATENT
-- outputs: pipe:PIPE_LINE, latent:LATENT
-
-## easy whileLoopEnd
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/While Loop
-- required:
-  - flow: FLOW_CONTROL
-  - condition: BOOLEAN
-- optional:
-  - initial_value0: *
-  - initial_value1: *
-  - initial_value2: *
-  - initial_value3: *
-  - initial_value4: *
-  - initial_value5: *
-  - initial_value6: *
-  - initial_value7: *
-  - initial_value8: *
-  - initial_value9: *
-  - initial_value10: *
-  - initial_value11: *
-  - initial_value12: *
-  - initial_value13: *
-  - initial_value14: *
-  - initial_value15: *
-  - initial_value16: *
-  - initial_value17: *
-  - initial_value18: *
-  - initial_value19: *
-- outputs: value0:*, value1:*, value2:*, value3:*, value4:*, value5:*, value6:*, value7:*, value8:*, value9:*, value10:*, value11:*, value12:*, value13:*, value14:*, value15:*, value16:*, value17:*, value18:*, value19:*
-
-## easy whileLoopStart
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic/While Loop
-- required:
-  - condition: BOOLEAN default=True
-- optional:
-  - initial_value0: *
-  - initial_value1: *
-  - initial_value2: *
-  - initial_value3: *
-  - initial_value4: *
-  - initial_value5: *
-  - initial_value6: *
-  - initial_value7: *
-  - initial_value8: *
-  - initial_value9: *
-  - initial_value10: *
-  - initial_value11: *
-  - initial_value12: *
-  - initial_value13: *
-  - initial_value14: *
-  - initial_value15: *
-  - initial_value16: *
-  - initial_value17: *
-  - initial_value18: *
-  - initial_value19: *
-- outputs: flow:FLOW_CONTROL, value0:*, value1:*, value2:*, value3:*, value4:*, value5:*, value6:*, value7:*, value8:*, value9:*, value10:*, value11:*, value12:*, value13:*, value14:*, value15:*, value16:*, value17:*, value18:*, value19:*
-
-## easy wildcards
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - text: STRING default=''
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text, __example__]
-  - seed: INT default=0 min=0 max=1125899906842624
-  - multiline_mode: BOOLEAN default=False
-- outputs: text:STRING, populated_text:STRING
-
-## easy wildcardsMatrix
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Prompt
-- required:
-  - text: STRING default=''
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text, __example__]
-  - offset: INT default=0 min=0 max=1125899906842624 step=1
-- optional:
-  - output_limit: INT default=1 min=-1 step=1
-- outputs: populated_text:STRING, total:INT, factors:INT
-
-## easy xyAny
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Logic
-- required:
-  - X: *
-  - Y: *
-  - direction: COMBO[horizontal, vertical] default='horizontal'
-- outputs: X:*, Y:*
-
-## easy XYInputs: CFG Scale
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - batch_count: INT default=3 min=0 max=50
-  - first_cfg: FLOAT default=7.0 min=0.0 max=100.0
-  - last_cfg: FLOAT default=9.0 min=0.0 max=100.0
-- outputs: X or Y:X_Y
-
-## easy XYInputs: Checkpoint
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - input_mode: COMBO[Ckpt Names, Ckpt Names+ClipSkip, Ckpt Names+ClipSkip+VAE]
-  - ckpt_count: INT default=3 min=0 max=10 step=1
-  - ckpt_name_1: COMBO[None]
-  - clip_skip_1: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_1: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_2: COMBO[None]
-  - clip_skip_2: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_2: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_3: COMBO[None]
-  - clip_skip_3: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_3: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_4: COMBO[None]
-  - clip_skip_4: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_4: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_5: COMBO[None]
-  - clip_skip_5: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_5: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_6: COMBO[None]
-  - clip_skip_6: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_6: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_7: COMBO[None]
-  - clip_skip_7: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_7: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_8: COMBO[None]
-  - clip_skip_8: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_8: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_9: COMBO[None]
-  - clip_skip_9: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_9: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - ckpt_name_10: COMBO[None]
-  - clip_skip_10: INT default=-1 min=-24 max=-1 step=1
-  - vae_name_10: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-- optional:
-  - optional_lora_stack: LORA_STACK
-- outputs: X or Y:X_Y
-
-## easy XYInputs: ControlNet
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - control_net_name: COMBO[]
-  - image: IMAGE
-  - target_parameter: COMBO[strength, start_percent, end_percent]
-  - batch_count: INT default=3 min=1 max=30
-  - first_strength: FLOAT default=0.0 min=0.0 max=10.0 step=0.01
-  - last_strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - first_start_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - last_start_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - first_end_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - last_end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - start_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- optional:
-  - control_net: CONTROL_NET
-- outputs: X or Y:X_Y
-
-## easy XYInputs: Denoise
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - batch_count: INT default=3 min=0 max=50
-  - first_denoise: FLOAT default=0.5 min=0.0 max=1.0 step=0.1
-  - last_denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.1
-- outputs: X or Y:X_Y
-
-## easy XYInputs: FluxGuidance
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - batch_count: INT default=3 min=0 max=50
-  - first_guidance: FLOAT default=1.0 min=0.0 max=100.0
-  - last_guidance: FLOAT default=3.5 min=0.0 max=100.0
-- outputs: X or Y:X_Y
-
-## easy XYInputs: Lora
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - input_mode: COMBO[Lora Names, Lora Names+Weights]
-  - lora_count: INT default=3 min=0 max=10 step=1
-  - model_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_1: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_1: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_1: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_2: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_2: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_2: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_3: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_3: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_3: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_4: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_4: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_4: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_5: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_5: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_5: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_6: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_6: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_6: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_7: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_7: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_7: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_8: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_8: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_8: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_9: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_9: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_9: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_name_10: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - model_str_10: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - clip_str_10: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-- optional:
-  - optional_lora_stack: LORA_STACK
-  - display_trigger_word: BOOLEAN
-- outputs: X or Y:X_Y
-
-## easy XYInputs: ModelMergeBlocks
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - ckpt_name_1: COMBO[]
-  - ckpt_name_2: COMBO[]
-  - vae_use: COMBO[Use Model 1, Use Model 2, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors] default='Use Model 1'
-  - preset: COMBO[Preset, MMB-ALL:1,1,1, MMB-IN:1,0,0, MMB-MID:0,1,0, MMB-OUT:0,0,1, MMB-INMID:1,1,0, MMB-INOUT:1,0,1, MMB-MIDOUT:0,1,1, MMB-NONE:0,0,0, @MMBN-FULL-TEST:27] default='preset'
-  - values: STRING default='1,0,0; \n0,1,0; \n0,0,1; \n1,1,0; \n1,0,1; \n0,1,1; '
-- outputs: X or Y:X_Y
-
-## easy XYInputs: NegativeCond
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- optional:
-  - negative_1: CONDITIONING
-  - negative_2: CONDITIONING
-  - negative_3: CONDITIONING
-  - negative_4: CONDITIONING
-- outputs: X or Y:X_Y
-
-## easy XYInputs: NegativeCondList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - negative: CONDITIONING
-- outputs: X or Y:X_Y
-
-## easy XYInputs: PositiveCond
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- optional:
-  - positive_1: CONDITIONING
-  - positive_2: CONDITIONING
-  - positive_3: CONDITIONING
-  - positive_4: CONDITIONING
-- outputs: X or Y:X_Y
-
-## easy XYInputs: PositiveCondList
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - positive: CONDITIONING
-- outputs: X or Y:X_Y
-
-## easy XYInputs: PromptSR
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - target_prompt: COMBO[positive, negative]
-  - search_txt: STRING default=''
-  - replace_all_text: BOOLEAN default=False
-  - replace_count: INT default=3 min=1 max=29
-  - replace_1: STRING default=''
-  - replace_2: STRING default=''
-  - replace_3: STRING default=''
-  - replace_4: STRING default=''
-  - replace_5: STRING default=''
-  - replace_6: STRING default=''
-  - replace_7: STRING default=''
-  - replace_8: STRING default=''
-  - replace_9: STRING default=''
-  - replace_10: STRING default=''
-  - replace_11: STRING default=''
-  - replace_12: STRING default=''
-  - replace_13: STRING default=''
-  - replace_14: STRING default=''
-  - replace_15: STRING default=''
-  - replace_16: STRING default=''
-  - replace_17: STRING default=''
-  - replace_18: STRING default=''
-  - replace_19: STRING default=''
-  - replace_20: STRING default=''
-  - replace_21: STRING default=''
-  - replace_22: STRING default=''
-  - replace_23: STRING default=''
-  - replace_24: STRING default=''
-  - replace_25: STRING default=''
-  - replace_26: STRING default=''
-  - replace_27: STRING default=''
-  - replace_28: STRING default=''
-  - replace_29: STRING default=''
-- outputs: X or Y:X_Y
-
-## easy XYInputs: Sampler/Scheduler
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - target_parameter: COMBO[sampler, scheduler, sampler & scheduler]
-  - input_count: INT default=1 min=1 max=30 step=1
-  - sampler_1: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_1: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_2: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_2: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_3: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_3: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_4: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_4: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_5: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_5: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_6: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_6: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_7: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_7: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_8: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_8: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_9: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_9: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_10: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_10: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_11: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_11: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_12: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_12: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_13: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_13: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_14: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_14: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_15: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_15: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_16: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_16: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_17: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_17: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_18: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_18: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_19: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_19: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_20: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_20: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_21: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_21: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_22: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_22: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_23: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_23: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_24: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_24: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_25: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_25: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_26: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_26: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_27: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_27: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_28: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_28: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_29: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_29: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - sampler_30: COMBO[None, euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, ... +36]
-  - scheduler_30: COMBO[None, simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-- outputs: X or Y:X_Y
-
-## easy XYInputs: Seeds++ Batch
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - batch_count: INT default=3 min=1 max=50
-- outputs: X or Y:X_Y
-
-## easy XYInputs: Steps
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/XY Inputs
-- required:
-  - target_parameter: COMBO[steps, start_at_step, end_at_step]
-  - batch_count: INT default=3 min=0 max=50
-  - first_step: INT default=10 min=1 max=10000
-  - last_step: INT default=20 min=1 max=10000
-  - first_start_step: INT default=0 min=0 max=10000
-  - last_start_step: INT default=10 min=0 max=10000
-  - first_end_step: INT default=10 min=0 max=10000
-  - last_end_step: INT default=20 min=0 max=10000
-- outputs: X or Y:X_Y
-
-## easy XYPlot
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- required:
-  - grid_spacing: INT default=0 min=0 max=500 step=5
-  - output_individuals: COMBO[False, True] default='False'
-  - flip_xy: COMBO[False, True] default='False'
-  - x_axis: COMBO[None, ---------------------, preSampling: steps, preSampling: cfg, preSampling: sampler_name, preSampling: scheduler, preSampling: denoise, preSampling: seed, ---------------------, loader: ckpt_name, ... +7] default='None'
-  - x_values: STRING default=''
-  - y_axis: COMBO[None, ---------------------, preSampling: steps, preSampling: cfg, preSampling: sampler_name, preSampling: scheduler, preSampling: denoise, preSampling: seed, ---------------------, loader: ckpt_name, ... +7] default='None'
-  - y_values: STRING default=''
-- optional:
-  - pipe: PIPE_LINE
-- outputs: pipe:PIPE_LINE
-
-## easy XYPlotAdvanced
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Pipe
-- required:
-  - pipe: PIPE_LINE
-  - grid_spacing: INT default=0 min=0 max=500 step=5
-  - output_individuals: COMBO[False, True] default='False'
-  - flip_xy: COMBO[False, True] default='False'
-- optional:
-  - X: X_Y
-  - Y: X_Y
-  - font: COMBO[None, AGENCYB.TTF, AGENCYR.TTF, ALGER.TTF, alienware_caret_font.ttf, ANTQUAB.TTF, ANTQUABI.TTF, ANTQUAI.TTF, arial.ttf, arialbd.ttf, ... +320]
-- outputs: pipe:PIPE_LINE
-
-## easy zero123Loader
-module: custom_nodes.ComfyUI-Easy-Use | category: EasyUse/Loaders
-- required:
-  - ckpt_name: COMBO[]
-  - vae_name: COMBO[Baked VAE, flux2-vae-128ch.safetensors, flux2-vae.FAKE_FLUX1_AE.safetensors, flux2-vae.safetensors, lumina2_vae_fp32.safetensors, minimax_h3_audio_vae_fp32.safetensors, minimax_h3_video_vae_int8_convrot.safetensors, sdxl_vae.safetensors]
-  - init_image: IMAGE
-  - empty_latent_width: INT default=256 min=16 max=16384 step=8
-  - empty_latent_height: INT default=256 min=16 max=16384 step=8
-  - batch_size: INT default=1 min=1 max=64
-  - elevation: FLOAT default=0.0 min=-180.0 max=180.0
-  - azimuth: FLOAT default=0.0 min=-180.0 max=180.0
-- outputs: pipe:PIPE_LINE, model:MODEL, vae:VAE
+  - scale_stick_for_xinsr_cn: COMBO[disable, enable] default='disable'
+- outputs: IMAGE:IMAGE, POSE_KEYPOINT:POSE_KEYPOINT
 
 ## EasyCache
 module: comfy_extras.nodes_easycache | category: advanced/debug
@@ -6884,60 +3716,6 @@ module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/Sampling
   - preset: COMBO[official, bridge, minimal, 10step, 11step, 12step, custom] default='official'
   - custom_sigmas: STRING default='1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421...'
 - outputs: sigmas:SIGMAS
-
-## EditBasicPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - basic_pipe: BASIC_PIPE
-- optional:
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-- outputs: basic_pipe:BASIC_PIPE
-
-## EditDetailerPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - detailer_pipe: DETAILER_PIPE
-  - wildcard: STRING
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-- optional:
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - bbox_detector: BBOX_DETECTOR
-  - sam_model: SAM_MODEL
-  - segm_detector: SEGM_DETECTOR
-  - detailer_hook: DETAILER_HOOK
-- outputs: detailer_pipe:DETAILER_PIPE
-
-## EditDetailerPipeSDXL
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - detailer_pipe: DETAILER_PIPE
-  - wildcard: STRING
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-- optional:
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - refiner_model: MODEL
-  - refiner_clip: CLIP
-  - refiner_positive: CONDITIONING
-  - refiner_negative: CONDITIONING
-  - bbox_detector: BBOX_DETECTOR
-  - sam_model: SAM_MODEL
-  - segm_detector: SEGM_DETECTOR
-  - detailer_hook: DETAILER_HOOK
-- outputs: detailer_pipe:DETAILER_PIPE
 
 ## ElevenLabsAudioIsolation
 module: comfy_api_nodes.nodes_elevenlabs | category: partner/audio/ElevenLabs
@@ -7200,10 +3978,6 @@ module: comfy_extras.nodes_sd3 | category: model/latent/stable diffusion
   - batch_size: INT default=1 min=1 max=4096
 - outputs: LATENT:LATENT
 
-## EmptySegs
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- outputs: SEGS:SEGS
-
 ## EmptyTrellis2LatentStructure
 module: comfy_extras.nodes_trellis2 | category: model/latent/trellis
 - required:
@@ -7253,6 +4027,14 @@ module: comfy_extras.nodes_eps | category: model/patch/unet
   - scaling_factor: FLOAT default=1.005 min=0.5 max=1.5 step=0.001
 - outputs: MODEL:MODEL
 
+## ExecuteAllControlNetPreprocessors
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
 ## ExponentialScheduler
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/schedulers
 - required:
@@ -7297,88 +4079,6 @@ module: custom_nodes.ComfyUI_FaceAnalysis | category: FaceAnalysis
   - index: INT default=-1 min=-1 max=4096 step=1
 - outputs: IMAGE:IMAGE, x:INT, y:INT, width:INT, height:INT
 
-## FaceDetailer
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Simple
-- required:
-  - image: IMAGE
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - bbox_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - bbox_dilation: INT default=10 min=-512 max=512 step=1
-  - bbox_crop_factor: FLOAT default=3.0 min=1.0 max=10 step=0.1
-  - sam_detection_hint: COMBO[center-1, horizontal-2, vertical-2, rect-4, diamond-4, mask-area, mask-points, mask-point-bbox, none]
-  - sam_dilation: INT default=0 min=-512 max=512 step=1
-  - sam_threshold: FLOAT default=0.93 min=0.0 max=1.0 step=0.01
-  - sam_bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - sam_mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-  - sam_mask_hint_use_negative: COMBO[False, Small, Outter]
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - bbox_detector: BBOX_DETECTOR
-  - wildcard: STRING
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - sam_model_opt: SAM_MODEL
-  - segm_detector_opt: SEGM_DETECTOR
-  - detailer_hook: DETAILER_HOOK
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tiled_encode: BOOLEAN default=False
-  - tiled_decode: BOOLEAN default=False
-- outputs: image:IMAGE, cropped_refined:IMAGE, cropped_enhanced_alpha:IMAGE, mask:MASK, detailer_pipe:DETAILER_PIPE, cnet_images:IMAGE
-
-## FaceDetailerPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Simple
-- required:
-  - image: IMAGE
-  - detailer_pipe: DETAILER_PIPE
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - bbox_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - bbox_dilation: INT default=10 min=-512 max=512 step=1
-  - bbox_crop_factor: FLOAT default=3.0 min=1.0 max=10 step=0.1
-  - sam_detection_hint: COMBO[center-1, horizontal-2, vertical-2, rect-4, diamond-4, mask-area, mask-points, mask-point-bbox, none]
-  - sam_dilation: INT default=0 min=-512 max=512 step=1
-  - sam_threshold: FLOAT default=0.93 min=0.0 max=1.0 step=0.01
-  - sam_bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - sam_mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-  - sam_mask_hint_use_negative: COMBO[False, Small, Outter]
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tiled_encode: BOOLEAN default=False
-  - tiled_decode: BOOLEAN default=False
-- outputs: image:IMAGE, cropped_refined:IMAGE, cropped_enhanced_alpha:IMAGE, mask:MASK, detailer_pipe:DETAILER_PIPE, cnet_images:IMAGE
-
 ## FaceEmbedDistance
 module: custom_nodes.ComfyUI_FaceAnalysis | category: FaceAnalysis
 - required:
@@ -7413,11 +4113,28 @@ module: custom_nodes.ComfyUI_FaceAnalysis | category: FaceAnalysis
   - blur: INT default=13 min=1 max=4096 step=2
 - outputs: IMAGE:IMAGE, MASK:MASK
 
-## FakeScribblePreprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## FacialPartColoringFromPoseKps
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Pose Keypoint Postprocess
 - required:
-  - safe: BOOLEAN default=True
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - pose_kps: POSE_KEYPOINT
+  - mode: COMBO[point, polygon] default='polygon'
+  - skin: STRING default='rgb(0, 153, 255)'
+  - left_eye: STRING default='rgb(0, 204, 153)'
+  - right_eye: STRING default='rgb(255, 153, 0)'
+  - nose: STRING default='rgb(255, 102, 255)'
+  - upper_lip: STRING default='rgb(102, 0, 51)'
+  - inner_mouth: STRING default='rgb(255, 204, 255)'
+  - lower_lip: STRING default='rgb(255, 0, 102)'
+- outputs: IMAGE:IMAGE
+
+## FakeScribblePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - safe: COMBO[enable, disable] default='enable'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## FallbackAnyBatch
 module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
@@ -7486,17 +4203,6 @@ module: comfy_extras.nodes_mesh_postprocess | category: 3d/mesh
   - fill_chains: BOOLEAN default=False
 - outputs: mesh:MESH
 
-## FILM VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[film_net_fp32.pt]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=1000
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
-
 ## FilterZeroMasksAndCorrespondingImages
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/masking
 - required:
@@ -7540,18 +4246,6 @@ module: custom_nodes.ComfyUI_PuLID_Flux_ll | category: pulid
   - model: MODEL
 - outputs: MODEL:MODEL
 
-## FLAVR VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[FLAVR_2x.pth, FLAVR_4x.pth, FLAVR_8x.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=2
-  - duplicate_first_last_frames: BOOLEAN default=False
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
-
 ## FlipSigmas
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/sigmas
 - required:
@@ -7572,16 +4266,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/constants
 - required:
   - value: FLOAT default=0.0 min=-18446744073709551615 max=18446744073709551615 step=1e-05
 - outputs: value:FLOAT
-
-## FloatRange //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/List
-- required:
-  - start: FLOAT default=0.0 min=-100.0 max=100.0 step=1e-09
-  - stop: FLOAT default=1.0 min=-100.0 max=100.0 step=1e-09
-  - step: FLOAT default=0.01 min=0.0 max=100.0 step=1e-09
-  - limit: INT default=100 min=2 max=4096 step=1
-  - ensure_end: BOOLEAN default=True
-- outputs: FLOAT:FLOAT
 
 ## FloatToMask
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/masking/generate
@@ -7962,22 +4646,6 @@ module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
   - save_output_to: STRING default=''
 - outputs: output:*
 
-## ForeachListBegin //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/List
-- required:
-  - item_list: ITEM_LIST
-- optional:
-  - initial_input: *
-- outputs: flow_control:FOREACH_LIST_CONTROL, remained_list:ITEM_LIST, item:*, intermediate_output:*
-
-## ForeachListEnd //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/List
-- required:
-  - flow_control: FOREACH_LIST_CONTROL
-  - remained_list: ITEM_LIST
-  - intermediate_output: *
-- outputs: result:*
-
 ## FrameInterpolate
 module: comfy_extras.nodes_frame_interpolation | category: video
 - required:
@@ -8020,42 +4688,6 @@ module: comfy_extras.nodes_fresca | category: experimental
   - scale_high: FLOAT default=1.25 min=0 max=10 step=0.01
   - freq_cutoff: INT default=20 min=1 max=10000 step=1
 - outputs: MODEL:MODEL
-
-## FromBasicPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - basic_pipe: BASIC_PIPE
-- outputs: model:MODEL, clip:CLIP, vae:VAE, positive:CONDITIONING, negative:CONDITIONING
-
-## FromBasicPipe_v2
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - basic_pipe: BASIC_PIPE
-- outputs: basic_pipe:BASIC_PIPE, model:MODEL, clip:CLIP, vae:VAE, positive:CONDITIONING, negative:CONDITIONING
-
-## FromDetailerPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - detailer_pipe: DETAILER_PIPE
-- outputs: model:MODEL, clip:CLIP, vae:VAE, positive:CONDITIONING, negative:CONDITIONING, bbox_detector:BBOX_DETECTOR, sam_model_opt:SAM_MODEL, segm_detector_opt:SEGM_DETECTOR, detailer_hook:DETAILER_HOOK
-
-## FromDetailerPipe_v2
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - detailer_pipe: DETAILER_PIPE
-- outputs: detailer_pipe:DETAILER_PIPE, model:MODEL, clip:CLIP, vae:VAE, positive:CONDITIONING, negative:CONDITIONING, bbox_detector:BBOX_DETECTOR, sam_model_opt:SAM_MODEL, segm_detector_opt:SEGM_DETECTOR, detailer_hook:DETAILER_HOOK
-
-## FromDetailerPipeSDXL
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - detailer_pipe: DETAILER_PIPE
-- outputs: detailer_pipe:DETAILER_PIPE, model:MODEL, clip:CLIP, vae:VAE, positive:CONDITIONING, negative:CONDITIONING, bbox_detector:BBOX_DETECTOR, sam_model_opt:SAM_MODEL, segm_detector_opt:SEGM_DETECTOR, detailer_hook:DETAILER_HOOK, refiner_model:MODEL, refiner_clip:CLIP, refiner_positive:CONDITIONING, refiner_negative:CONDITIONING
-
-## FromIPAdapterPipe //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - ipadapter_pipe: IPADAPTER_PIPE
-- outputs: ipadapter:IPADAPTER, model:MODEL, clip_vision:CLIP_VISION, insight_face:INSIGHTFACE
 
 ## GarbageCollector
 module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
@@ -8352,13 +4984,6 @@ module: comfy_extras.nodes_gits | category: model/sampling/schedulers
   - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
 - outputs: SIGMAS:SIGMAS
 
-## GITSSchedulerFuncProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/sampling
-- required:
-  - coeff: FLOAT default=1.2 min=0.8 max=1.5 step=0.05
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- outputs: SCHEDULER_FUNC:SCHEDULER_FUNC
-
 ## GLIGENLoader
 module: nodes | category: model/loaders
 - required:
@@ -8393,22 +5018,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/experimental
   - size_multiplier: FLOAT default=[1.0]
 - outputs: conditioning:CONDITIONING, coord_preview:IMAGE
 
-## GlobalSampler //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-- outputs: 
-
-## GlobalSeed //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - value: INT default=0 min=0 max=18446744073709551615
-  - mode: BOOLEAN default=True
-  - action: COMBO[fixed, increment, decrement, randomize, increment for each node, decrement for each node, randomize for each node]
-  - last_seed: STRING default=''
-- outputs: 
-
 ## GLSLShader
 module: comfy_extras.nodes_glsl | category: image/shader
 - required:
@@ -8420,17 +5029,6 @@ module: comfy_extras.nodes_glsl | category: image/shader
   - bools: COMFY_AUTOGROW_V3
   - curves: COMFY_AUTOGROW_V3
 - outputs: IMAGE0:IMAGE, IMAGE1:IMAGE, IMAGE2:IMAGE, IMAGE3:IMAGE
-
-## GMFSS Fortuna VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[GMFSS_fortuna_union, GMFSS_fortuna]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=1000
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
 
 ## GradientToFloat
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
@@ -8551,6 +5149,86 @@ module: custom_nodes.ComfyUI-H3-PowerLoraStack | category: MiniMax-H3/lora
   - text: FLOAT default=1.0 min=0.0 max=2.0 step=0.05
   - audio: FLOAT default=1.0 min=0.0 max=2.0 step=0.05
 - outputs: adaln_modality:H3_MODALITY, info:STRING
+
+## H3AnySwitch
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/episode
+- required:
+  - use_on: BOOLEAN
+- optional:
+  - off_path: *
+  - on_path: *
+- outputs: value:*
+
+## H3AudioTrimStart
+module: custom_nodes.ComfyUI-H3-Multishot | category: audio
+- required:
+  - audio: AUDIO
+  - seconds: FLOAT default=0.04167 min=0.0 max=10.0 step=1e-05
+- outputs: AUDIO:AUDIO
+
+## H3AutoRefs
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - max_per_character: INT default=3 min=1 max=9
+- optional:
+  - prompt_text: STRING
+  - refs_root: STRING default=''
+  - characters: STRING default=''
+  - overrides: STRING default=''
+  - on_no_match: COMBO[error, no_reference] default='no_reference'
+  - enabled: BOOLEAN
+  - extra_text: STRING
+- outputs: ref_1:IMAGE, ref_2:IMAGE, ref_3:IMAGE, ref_4:IMAGE, ref_5:IMAGE, ref_6:IMAGE, ref_7:IMAGE, ref_8:IMAGE, ref_9:IMAGE, prompt_out:STRING, report:STRING, refs_batch:IMAGE, found:BOOLEAN
+
+## H3CartridgeLoader
+module: custom_nodes.ComfyUI-H3-Multishot | category: loaders/minimax
+- required:
+  - cartridge: COMBO[(no cartridges in input/riftcast/)]
+  - max_refs: INT default=9 min=1 max=9
+- optional:
+  - manual_path: STRING default=''
+- outputs: ref_1:IMAGE, ref_2:IMAGE, ref_3:IMAGE, ref_4:IMAGE, ref_5:IMAGE, ref_6:IMAGE, ref_7:IMAGE, ref_8:IMAGE, ref_9:IMAGE, voice:AUDIO, subject_block:STRING, dna_text:STRING, speaker_tag:STRING, accent_line:STRING, rooms_text:STRING, ref_count:INT, report:STRING
+
+## H3ChainNormalize
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - images: IMAGE
+  - baseline_seconds: FLOAT default=10.0 min=2.0 max=30.0 step=0.5
+  - skip_seconds: FLOAT default=2.0 min=0.0 max=10.0 step=0.5
+  - fps: FLOAT default=24.0 min=1.0 max=120.0
+  - strength: FLOAT default=1.0 min=0.0 max=2.0 step=0.05
+  - deadband: FLOAT default=1.06 min=1.0 max=1.5 step=0.01
+  - ema: FLOAT default=0.1 min=0.01 max=1.0 step=0.01
+  - colour_match: BOOLEAN default=True
+- outputs: images:IMAGE
+
+## H3ClipLoaderAny
+module: custom_nodes.ComfyUI-H3-Multishot | category: loaders/minimax
+- required:
+  - clip_name: COMBO[clip_l.safetensors, qwen3vl_32b_minimax_h3_int4_convrot.safetensors, qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors, qwen_3_4b.safetensors, qwen_3_8b_fp8mixed.safetensors, umt5_xxl_fp8_e4m3fn_scaled.safetensors]
+  - type: COMBO[stable_diffusion, stable_cascade, sd3, stable_audio, mochi, ltxv, pixart, cosmos, lumina2, wan, ... +19]
+- optional:
+  - mmproj_name: COMBO[(auto)] default='(auto)'
+- outputs: CLIP:CLIP
+
+## H3ConcatAV
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - images_a: IMAGE
+  - audio_a: AUDIO
+- optional:
+  - images_b: IMAGE
+  - audio_b: AUDIO
+  - match_b: COMBO[match_to_a, off] default='match_to_a'
+- outputs: images:IMAGE, audio:AUDIO
+
+## H3ConditionStrength
+module: custom_nodes.ComfyUI-H3-Multishot | category: conditioning/video_models
+- required:
+  - conditioning: CONDITIONING
+  - visual_strength: FLOAT default=0.999 min=0.0 max=1.0 step=0.001
+  - audio_strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
+- outputs: CONDITIONING:CONDITIONING
 
 ## H3ContinuumAssembleSeamV35
 module: custom_nodes.ComfyUI-H3-Continuum | category: MiniMax H3/Continuum
@@ -8773,13 +5451,109 @@ module: custom_nodes.ComfyUI-H3-Continuum | category: MiniMax H3/Continuum
 ## H3EasyLoadImage
 module: custom_nodes.ComfyUI-H3-Continuum | category: MiniMax H3/Continuum
 - required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2816]
+  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2817]
 - outputs: IMAGE:IMAGE, MASK:MASK
+
+## H3EpisodeSplit
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - script: STRING default=''
+  - bindings: STRING default=''
+- outputs: block1_prompt:STRING, rest_script:STRING, info:STRING
+
+## H3ExtendTake
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/episode
+- required:
+  - take_seconds: FLOAT default=30.0 min=3.0 max=600.0 step=0.5
+  - window: COMBO[auto, 243, 226, 209, 192, 175, 158, 141, 124, 107, ... +1] default='auto'
+  - width: INT default=736 min=64 max=2048 step=16
+  - height: INT default=1280 min=64 max=2048 step=16
+  - fps: INT default=24 min=1 max=60
+  - pin_frames: INT default=22 min=0 max=56
+- optional:
+  - model: MODEL
+- outputs: num_shots:INT, frames_per_shot:INT, total_frames:INT, summary:STRING
+
+## H3FreeTextEncoder
+module: custom_nodes.ComfyUI-H3-Multishot | category: conditioning/video_models
+- required:
+  - conditioning: CONDITIONING
+  - clip: CLIP
+- outputs: CONDITIONING:CONDITIONING
+
+## H3InfiniteTakeSampler
+module: custom_nodes.ComfyUI-H3-Multishot | category: sampling/minimax
+- required:
+  - model: MODEL
+  - clip: CLIP
+  - video_vae: VAE
+  - audio_vae: VAE
+  - script: STRING default=''
+  - width: INT default=768 min=32 max=4096 step=32
+  - height: INT default=1344 min=32 max=4096 step=32
+  - total_frames: INT default=719 min=39 max=3600 step=17
+  - window_frames: INT default=243 min=90 max=480 step=17
+  - overlap_frames: INT default=34 min=17 max=170 step=17
+  - seed: INT default=0 min=0 max=18446744073709551615
+  - steps: INT default=10 min=1 max=100
+  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='euler'
+  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal] default='simple'
+  - activation_reserve_gb: FLOAT default=8.0 min=2.0 max=22.0 step=0.5
+- optional:
+  - derive_length_from_script: BOOLEAN default=False
+- outputs: frames:IMAGE, audio:AUDIO, windows:INT
+
+## H3IntScale
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/episode
+- required:
+  - value: INT
+  - divide_by: FLOAT default=1.5 min=0.1 max=16.0 step=0.05
+  - multiple: INT default=32 min=1 max=256
+- outputs: value:INT
+
+## H3KeyframeInject
+module: custom_nodes.ComfyUI-H3-Multishot | category: model/conditioning/minimax
+- required:
+  - conditioning: CONDITIONING
+  - vae: VAE
+  - start_image: IMAGE
+  - width: INT default=544 min=32 max=4096 step=32
+  - height: INT default=960 min=32 max=4096 step=32
+  - length: INT default=362 min=5 max=3600 step=17
+- optional:
+  - end_image: IMAGE
+- outputs: CONDITIONING:CONDITIONING
+
+## H3Keyframes
+module: custom_nodes.ComfyUI-H3-Multishot | category: conditioning/video_models
+- required:
+  - clip: CLIP
+  - vae: VAE
+  - prompt: STRING default=''
+  - width: INT default=960 min=32 max=4096 step=32
+  - height: INT default=544 min=32 max=4096 step=32
+  - length: INT default=243 min=5 max=3600 step=17
+  - positions: STRING default='0%, 50%'
+- optional:
+  - image_1: IMAGE
+  - image_2: IMAGE
+  - image_3: IMAGE
+  - image_4: IMAGE
+  - image_5: IMAGE
+  - image_6: IMAGE
+  - images_batch: IMAGE
+- outputs: positive:CONDITIONING, latent:LATENT, info:STRING
+
+## H3LastFrame
+module: custom_nodes.ComfyUI-H3-Multishot | category: image/batch
+- required:
+  - images: IMAGE
+- outputs: IMAGE:IMAGE
 
 ## H3LoraInspector
 module: custom_nodes.ComfyUI-H3-PowerLoraStack | category: MiniMax-H3/lora
 - required:
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
 - outputs: info:STRING
 
 ## H3LoraSchedule
@@ -8798,6 +5572,150 @@ module: custom_nodes.ComfyUI-H3-PowerLoraStack | category: MiniMax-H3/lora
   - schedule: H3_SCHEDULE
 - outputs: schedule:H3_SCHEDULE, info:STRING
 
+## H3LoraStack
+module: custom_nodes.ComfyUI-H3-Multishot | category: loaders/minimax
+- required:
+  - model: MODEL
+  - lora_1: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
+  - strength_1: FLOAT default=1.0 min=-2.0 max=2.0 step=0.05
+  - lora_2: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
+  - strength_2: FLOAT default=1.0 min=-2.0 max=2.0 step=0.05
+  - lora_3: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
+  - strength_3: FLOAT default=1.0 min=-2.0 max=2.0 step=0.05
+  - lora_4: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
+  - strength_4: FLOAT default=1.0 min=-2.0 max=2.0 step=0.05
+- outputs: model:MODEL
+
+## H3LTXTakeControls
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/episode
+- required:
+  - width: INT default=960 min=256 max=1920 step=32
+  - height: INT default=544 min=256 max=1920 step=32
+  - take_seconds: FLOAT default=8.0 min=1.0 max=60.0 step=0.5
+  - beat_seconds: FLOAT default=8.0 min=3.0 max=20.0 step=0.5
+  - upscale: COMBO[auto, x2, x1.5, none] default='auto'
+- optional:
+  - vram_gb: FLOAT default=0.0 min=0.0 max=200.0 step=1.0
+- outputs: pass1_width:INT, pass1_height:INT, frames:INT, two_pass:BOOLEAN, use_x15:BOOLEAN, beats:INT, beat_frames:INT, summary:STRING
+
+## H3ModelLoaderAny
+module: custom_nodes.ComfyUI-H3-Multishot | category: loaders/minimax
+- required:
+  - model_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-9b-kv-fp8.safetensors]
+- optional:
+  - activation_reserve_gb: FLOAT default=0.0 min=-1.0 max=128.0 step=0.5
+- outputs: MODEL:MODEL
+
+## H3MultishotMemorySampler
+module: custom_nodes.ComfyUI-H3-Multishot | category: sampling/minimax
+- required:
+  - model: MODEL
+  - clip: CLIP
+  - video_vae: VAE
+  - audio_vae: VAE
+  - script: STRING default=''
+  - shot_count: INT default=0 min=0 max=64
+  - width: INT default=768 min=32 max=4096 step=32
+  - height: INT default=1344 min=32 max=4096 step=32
+  - frames_per_shot: INT default=243 min=5 max=1450 step=17
+  - seed: INT default=0 min=0 max=18446744073709551615
+  - steps: INT default=20 min=1 max=50
+  - seed_per_shot: BOOLEAN default=True
+  - memory_frames: INT default=0 min=0 max=3
+  - anchor_frames: INT default=1 min=0 max=9
+- optional:
+  - start_image: IMAGE
+  - keyframe_images: IMAGE
+  - guide_audio: AUDIO
+  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='res_multistep'
+  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal] default='simple'
+  - bank_pinned: INT default=1 min=0 max=3
+  - chain_gain_control: COMBO[off, flatten, match_output, flatten_pin, refresh_pin, level_pin] default='off'
+  - continuity: COMBO[cut, seamless, seamless_tail, latent_handoff, first_frame, flf_chain, context_pin] default='cut'
+  - bank_clip_frames: INT default=22 min=5 max=124 step=17
+  - color_level: COMBO[off, scene, mvgd] default='off'
+  - join_anchor_noise: FLOAT default=0.0 min=0.0 max=0.05 step=0.005
+  - join_blend: BOOLEAN default=False
+  - handoff_release: FLOAT default=0.3 min=0.0 max=1.0 step=0.05
+  - bank_ref_noise: FLOAT default=0.0 min=0.0 max=0.05 step=0.005
+  - end_anchor: BOOLEAN default=False
+  - join_fx: COMBO[off, vhs_glitch] default='off'
+  - audio_lock: BOOLEAN default=True
+  - handoff_taper: INT default=0 min=0 max=10
+  - handoff_depth: COMBO[block, bootstrap] default='block'
+  - reference_images: IMAGE
+  - voice_ref: AUDIO
+  - sampler_override: STRING
+  - scheduler_override: STRING
+  - self_anchor_voice: BOOLEAN default=False
+  - reference_image_size: COMBO[match, max] default='match'
+  - preview_first_shot: BOOLEAN default=False
+  - output_scale: FLOAT default=1.0 min=1.0 max=4.0 step=0.05
+  - sigmas: SIGMAS
+  - save_every_shot: BOOLEAN default=False
+  - upscale_model_name: COMBO[(none), (H3 latent x2), (H3 latent x1.5), 4x-UltraSharp.pth, 4x-UltraSharp.safetensors, 4x_foolhardy_Remacri.pth] default='(none)'
+  - master_normalize: COMBO[off, luma, luma+contrast] default='luma+contrast'
+  - pin_frames: COMBO[22, 5, 39, 56] default='22'
+  - pin_noise: FLOAT default=0.05 min=0.0 max=0.1 step=0.005
+  - pin_renorm: BOOLEAN default=True
+  - reference_subjects: STRING default=''
+  - reference_video: IMAGE
+  - reference_video_audio: AUDIO
+  - low_ram_master: BOOLEAN default=False
+  - audio_pin_frames: INT default=0 min=0 max=240 step=1
+  - pin_noise_audio: BOOLEAN default=False
+  - audio_tone_control: BOOLEAN default=False
+  - x0_texture_clamp: FLOAT default=0.0 min=0.0 max=0.3 step=0.005
+  - refresh_renoise: BOOLEAN default=False
+  - pin_noise_ramp: BOOLEAN default=False
+  - auto_chunk_ffn: BOOLEAN default=False
+  - x0_clamp_window: FLOAT default=0.3 min=0.1 max=0.7 step=0.05
+  - sampler_2: STRING default='(off)'
+  - sampler_2_at: FLOAT default=0.4 min=0.05 max=0.95 step=0.05
+  - voice_ref_2: AUDIO
+  - voice_ref_3: AUDIO
+- outputs: master_frames:IMAGE, master_audio:AUDIO, shots_rendered:INT, video_latents:LATENT, audio_latents:LATENT, head_frames:INT, master_path:STRING
+
+## H3MultishotSampler
+module: custom_nodes.ComfyUI-H3-Multishot | category: sampling/minimax
+- required:
+  - model: MODEL
+  - clip: CLIP
+  - video_vae: VAE
+  - audio_vae: VAE
+  - script: STRING default='Shot 1 prompt goes here.\n---\nShot 2 prompt goes here.\n---\nSh...'
+  - shot_count: INT default=0 min=0 max=8
+  - width: INT default=768 min=32 max=4096 step=32
+  - height: INT default=1344 min=32 max=4096 step=32
+  - frames_per_shot: INT default=243 min=5 max=481 step=17
+  - seed: INT default=0 min=0 max=18446744073709551615
+  - steps: INT default=20 min=1 max=50
+  - seed_per_shot: BOOLEAN default=True
+- optional:
+  - start_image: IMAGE
+  - reference_images: IMAGE
+  - voice_ref: AUDIO
+  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='res_multistep'
+  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal] default='simple'
+  - sampler_override: STRING
+  - scheduler_override: STRING
+  - self_anchor_voice: BOOLEAN default=False
+  - output_scale: FLOAT default=1.0 min=1.0 max=4.0 step=0.05
+  - upscale_model: UPSCALE_MODEL
+  - sigmas: SIGMAS
+  - save_every_shot: BOOLEAN default=False
+  - voice_ref_2: AUDIO
+  - voice_ref_3: AUDIO
+- outputs: master_frames:IMAGE, master_audio:AUDIO, shots_rendered:INT, first_shot_frames:IMAGE, first_shot_audio:AUDIO
+
+## H3OptionalImage
+module: custom_nodes.ComfyUI-H3-Multishot | category: utils/minimax
+- required:
+  - enabled: BOOLEAN default=True
+- optional:
+  - image: IMAGE
+- outputs: image:IMAGE
+
 ## H3PowerLoraStack
 module: custom_nodes.ComfyUI-H3-PowerLoraStack | category: MiniMax-H3/lora
 - optional:
@@ -8807,6 +5725,145 @@ module: custom_nodes.ComfyUI-H3-PowerLoraStack | category: MiniMax-H3/lora
   - adaln_modality: H3_MODALITY
   - schedule: H3_SCHEDULE
 - outputs: MODEL:MODEL, report:STRING
+
+## H3QGraftPatch
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/experimental
+- required:
+  - model: MODEL
+  - gains_file: STRING default=''
+  - dose: FLOAT default=0.0 min=0.0 max=1.5 step=0.05
+- outputs: MODEL:MODEL
+
+## H3RefBatch
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - prompt: STRING
+- optional:
+  - reference_image: IMAGE
+  - picked_path: STRING default=''
+- outputs: ref_1:IMAGE, ref_2:IMAGE, ref_3:IMAGE, ref_4:IMAGE, ref_5:IMAGE, ref_6:IMAGE, ref_7:IMAGE, ref_8:IMAGE, ref_9:IMAGE, prompt_out:STRING, report:STRING
+
+## H3ReferenceAudio
+module: custom_nodes.ComfyUI-H3-Multishot | category: conditioning/video_models
+- required:
+  - audio: AUDIO
+  - max_seconds: FLOAT default=10.0 min=0.5 max=60.0 step=0.5
+- outputs: AUDIO:AUDIO
+
+## H3ReferenceVideo
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - frames: IMAGE
+  - start_seconds: FLOAT default=0.0 min=0.0 max=600.0 step=0.5
+  - seconds: FLOAT default=3.0 min=0.5 max=20.0 step=0.5
+  - source_fps: FLOAT default=24.0 min=1.0 max=120.0 step=1.0
+- optional:
+  - audio: AUDIO
+- outputs: ref_frames:IMAGE, ref_audio:AUDIO, info:STRING
+
+## H3RefFolder
+module: custom_nodes.ComfyUI-H3-Multishot | category: loaders/minimax
+- required:
+  - refs_root: STRING default=''
+  - pick: COMBO[first_n, by_seed, newest] default='first_n'
+  - seed: INT default=0 min=0 max=18446744073709551615
+  - max_refs: INT default=3 min=1 max=9
+- optional:
+  - character: STRING default=''
+- outputs: ref_1:IMAGE, ref_2:IMAGE, ref_3:IMAGE, ref_4:IMAGE, ref_5:IMAGE, ref_6:IMAGE, ref_7:IMAGE, ref_8:IMAGE, ref_9:IMAGE, count:INT, picked:STRING
+
+## H3RemoteTextEncoderClip
+module: custom_nodes.ComfyUI-H3-Multishot | category: loaders/minimax
+- required:
+  - endpoint: STRING default='http://OTHER-PC:8188'
+  - clip_name: STRING default='qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors'
+  - timeout_seconds: INT default=600 min=30 max=86400
+  - clip_type: STRING default='minimax'
+- outputs: clip:CLIP
+
+## H3Retake
+module: custom_nodes.ComfyUI-H3-Multishot | category: conditioning/minimax
+- required:
+  - model: MODEL
+  - clip: CLIP
+  - video_vae: VAE
+  - audio_vae: VAE
+  - images: IMAGE
+  - audio: AUDIO
+  - prompt: STRING default=''
+  - start_seconds: FLOAT default=0.0 min=0.0 max=600.0 step=0.1
+  - end_seconds: FLOAT default=3.0 min=0.1 max=600.0 step=0.1
+  - mode: COMBO[video + audio (redo the moment), video only (keep the performance), audio only (keep the picture)] default='video + audio (redo the moment)'
+  - seed: INT default=0 min=0 max=18446744073709551615
+  - sampler: SAMPLER
+  - sigmas: SIGMAS
+- outputs: images:IMAGE, audio:AUDIO, info:STRING
+
+## H3SamplerByName
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - sampler_name: STRING
+- outputs: SAMPLER:SAMPLER
+
+## H3ScriptSplit
+module: custom_nodes.ComfyUI-H3-Multishot | category: conditioning/minimax
+- required:
+  - script: STRING default='Shot 1 prompt goes here.\n---\nShot 2 prompt goes here.\n---\nSh...'
+  - shot_count: INT default=0 min=0 max=3
+- outputs: shot_1:STRING, shot_2:STRING, shot_3:STRING, shot_4:STRING, shot_count:INT
+
+## H3SigmasByName
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - model: MODEL
+  - scheduler: STRING
+  - steps: INT default=12 min=1 max=100
+  - denoise: FLOAT default=1.0 min=0.0 max=1.0
+- outputs: SIGMAS:SIGMAS
+
+## H3SpeedBoosters
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - model: MODEL
+  - spectrum: BOOLEAN default=False
+  - teacache: BOOLEAN default=False
+  - teacache_strength: FLOAT default=0.15 min=0.0 max=0.5 step=0.01
+  - blockcache: BOOLEAN default=False
+  - easycache: BOOLEAN default=False
+  - blockcache_threshold: FLOAT default=0.12 min=0.0 max=1.0 step=0.01
+- outputs: MODEL:MODEL
+
+## H3StudioControls
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - width: INT default=768 min=32 max=4096 step=32
+  - height: INT default=1344 min=32 max=4096 step=32
+  - frames_per_shot: INT default=362 min=5 max=481 step=17
+  - steps: INT default=12 min=1 max=50
+  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='euler'
+  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal] default='beta'
+- optional:
+  - shot_count: INT default=0 min=0 max=30
+  - use_file_prompts: BOOLEAN default=False
+  - take_seconds: FLOAT default=0.0 min=0.0 max=600.0 step=0.5
+  - window: COMBO[auto, fit this card (VRAM auto), 243, 226, 209, 192, 175, 158, 141, 124, ... +2] default='auto'
+  - model: MODEL
+- outputs: width:INT, height:INT, frames_per_shot:INT, steps:INT, sampler_name:STRING, scheduler:STRING, shot_count:INT, use_file_prompts:BOOLEAN
+
+## H3StudioSwitches
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/episode
+- required:
+  - sol_attn: BOOLEAN default=False
+  - chunk_ffn: BOOLEAN default=False
+  - remote_encoder: BOOLEAN default=False
+- outputs: two_pass (removed):BOOLEAN, sol_attn:BOOLEAN, chunk_ffn:BOOLEAN, spectrum (see Speed Boosters):BOOLEAN, block_cache (see Speed Boosters):BOOLEAN, dual_clock (removed):BOOLEAN, hybrid_cond (removed):BOOLEAN, remote_encoder:BOOLEAN
+
+## H3TAEDecode
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/minimax
+- required:
+  - samples: LATENT
+  - tae_name: COMBO[taeh3.safetensors]
+- outputs: frames:IMAGE
 
 ## HaltExecution
 module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
@@ -8865,11 +5922,14 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
   - input_space: COMBO[logc3, linear, srgb] default='logc3'
 - outputs: image:IMAGE
 
-## HEDPreprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## HEDPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
 - required:
-  - safe: BOOLEAN default=True
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - image: IMAGE
+- optional:
+  - safe: COMBO[enable, disable] default='enable'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## HeyGenAvatarVideoNode
 module: comfy_api_nodes.nodes_heygen | category: partner/video/HeyGen
@@ -8946,6 +6006,15 @@ module: comfy_extras.nodes_hidream_o1 | category: model/conditioning/hidream
 - optional:
   - images: COMFY_AUTOGROW_V3
 - outputs: positive:CONDITIONING, negative:CONDITIONING
+
+## HintImageEnchance
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
+- required:
+  - hint_image: IMAGE
+  - image_gen_width: INT default=512 min=64 max=8192 step=8
+  - image_gen_height: INT default=512 min=64 max=8192 step=8
+  - resize_mode: COMBO[Just Resize, Crop and Resize, Resize and Fill] default='Just Resize'
+- outputs: IMAGE:IMAGE
 
 ## HitPawGeneralImageEnhance
 module: comfy_api_nodes.nodes_hitpaw | category: partner/image/HitPaw
@@ -9152,17 +6221,6 @@ module: comfy_extras.nodes_hypertile | category: model/patch/unet
   - scale_depth: BOOLEAN default=False
 - outputs: MODEL:MODEL
 
-## HyperTile //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/__for_testing
-- required:
-  - model: MODEL
-  - tile_size: INT default=256 min=1 max=2048
-  - swap_size: INT default=2 min=1 max=128
-  - max_depth: INT default=0 min=0 max=10
-  - scale_depth: BOOLEAN default=False
-  - seed: INT default=0 min=0 max=18446744073709551615
-- outputs: MODEL:MODEL
-
 ## Ideogram4OptimizationsKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/experimental
 - required:
@@ -9258,31 +6316,6 @@ module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
   - TRUE_IN: *
   - FALSE_IN: *
 - outputs: *:*
-
-## IFRNet VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[IFRNet_S_Vimeo90K.pth, IFRNet_L_Vimeo90K.pth, IFRNet_S_GoPro.pth, IFRNet_L_GoPro.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=1000
-  - scale_factor: COMBO[0.25, 0.5, 1.0, 2.0, 4.0] default=1.0
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
-
-## IFUnet VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[IFUNet.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=1000
-  - scale_factor: FLOAT default=1.0 min=0.1 max=100 step=0.1
-  - ensemble: BOOLEAN default=True
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
 
 ## Image Comparer (rgthree)
 module: custom_nodes.rgthree-comfy | category: rgthree
@@ -9427,13 +6460,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 - optional:
   - mask: MASK
 - outputs: IMAGE:IMAGE, MASK:MASK
-
-## ImageBatchSplitter //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - images: IMAGE
-  - split_count: INT default=4 min=0 max=50 step=1
-- outputs: IMAGE:IMAGE
 
 ## ImageBatchTestPattern
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/text
@@ -9730,6 +6756,18 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/image batch
   - length: INT default=-1 min=-1 step=1
 - outputs: IMAGE:IMAGE
 
+## ImageGenResolutionFromImage
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
+- required:
+  - image: IMAGE
+- outputs: IMAGE_GEN_WIDTH (INT):INT, IMAGE_GEN_HEIGHT (INT):INT
+
+## ImageGenResolutionFromLatent
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
+- required:
+  - latent: LATENT
+- outputs: IMAGE_GEN_WIDTH (INT):INT, IMAGE_GEN_HEIGHT (INT):INT
+
 ## ImageGrabPIL
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 - required:
@@ -9798,6 +6836,15 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/image processing
   - device: COMBO[auto, cpu, gpu]
 - outputs: IMAGE:IMAGE
 
+## ImageIntensityDetector
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Recolor
+- required:
+  - image: IMAGE
+- optional:
+  - gamma_correction: FLOAT default=1.0 min=0.1 max=2.0 step=0.01
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
 ## ImageInvert
 module: nodes | category: image/color
 - required:
@@ -9810,26 +6857,14 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/image batch
   - image: IMAGE
 - outputs: IMAGE:IMAGE
 
-## ImageListToImageBatch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
+## ImageLuminanceDetector
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Recolor
 - required:
-  - images: IMAGE
-- outputs: IMAGE:IMAGE
-
-## ImageMaskSwitch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - select: INT default=1 min=1 max=4 step=1
-  - images1: IMAGE
+  - image: IMAGE
 - optional:
-  - mask1_opt: MASK
-  - images2_opt: IMAGE
-  - mask2_opt: MASK
-  - images3_opt: IMAGE
-  - mask3_opt: MASK
-  - images4_opt: IMAGE
-  - mask4_opt: MASK
-- outputs: IMAGE:IMAGE, MASK:MASK
+  - gamma_correction: FLOAT default=1.0 min=0.1 max=2.0 step=0.01
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## ImageMergeTileList
 module: comfy_extras.nodes_images | category: image/batch
@@ -9975,16 +7010,6 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/image manipulatio
   - variation: FLOAT default=0.1 min=0.0 max=1.0 step=0.05
 - outputs: IMAGE:IMAGE
 
-## ImageReceiver
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2894]
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - save_to_workflow: BOOLEAN default=False
-  - image_data: STRING
-  - trigger_always: BOOLEAN default=False
-- outputs: IMAGE:IMAGE, MASK:MASK
-
 ## ImageRemoveAlpha+
 module: custom_nodes.ComfyUI_essentials | category: essentials/image utils
 - required:
@@ -10111,14 +7136,6 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/image manipulatio
   - keep_mask: MASK
   - drop_mask: MASK
 - outputs: IMAGE:IMAGE
-
-## ImageSender
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - images: IMAGE
-  - filename_prefix: STRING default='ImgSender'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-- outputs: images:IMAGE
 
 ## ImageSharpen
 module: comfy_extras.nodes_post_processing | category: image/filters
@@ -10263,717 +7280,6 @@ module: comfy_extras.nodes_morphology | category: image/color
   - V: IMAGE
 - outputs: IMAGE:IMAGE
 
-## ImpactAssembleSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - seg_header: SEGS_HEADER
-  - seg_elt: SEG_ELT
-- outputs: SEGS:SEGS
-
-## ImpactBoolean
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - value: BOOLEAN default=False
-- outputs: BOOLEAN:BOOLEAN
-
-## ImpactCombineConditionings
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - conditioning1: CONDITIONING
-- outputs: CONDITIONING:CONDITIONING
-
-## ImpactCompare
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - cmp: COMBO[a = b, a <> b, a > b, a < b, a >= b, a <= b, tt, ff]
-  - a: *
-  - b: *
-- outputs: BOOLEAN:BOOLEAN
-
-## ImpactConcatConditionings
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - conditioning1: CONDITIONING
-- outputs: CONDITIONING:CONDITIONING
-
-## ImpactConditionalBranch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - cond: BOOLEAN
-  - tt_value: *
-  - ff_value: *
-- outputs: *:*
-
-## ImpactConditionalBranchSelMode
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - cond: BOOLEAN
-- optional:
-  - tt_value: *
-  - ff_value: *
-- outputs: *:*
-
-## ImpactConditionalStopIteration
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - cond: BOOLEAN
-- outputs: 
-
-## ImpactControlBridge
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - value: *
-  - mode: BOOLEAN default=True
-  - behavior: COMBO[Stop, Mute, Bypass]
-- outputs: value:*
-
-## ImpactControlNetApplyAdvancedSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - control_net: CONTROL_NET
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - start_percent: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- optional:
-  - segs_preprocessor: SEGS_PREPROCESSOR
-  - control_image: IMAGE
-  - vae: VAE
-- outputs: SEGS:SEGS
-
-## ImpactControlNetApplySEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - control_net: CONTROL_NET
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-- optional:
-  - segs_preprocessor: SEGS_PREPROCESSOR
-  - control_image: IMAGE
-- outputs: SEGS:SEGS
-
-## ImpactControlNetClearSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: SEGS:SEGS
-
-## ImpactConvertDataType
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - value: *
-- outputs: STRING:STRING, FLOAT:FLOAT, INT:INT, BOOLEAN:BOOLEAN
-
-## ImpactCount_Elts_in_SEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: INT:INT
-
-## ImpactDecomposeSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: SEGS_HEADER:SEGS_HEADER, SEG_ELT:SEG_ELT
-
-## ImpactDilate_Mask_SEG_ELT
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - seg_elt: SEG_ELT
-  - dilation: INT default=10 min=-512 max=512 step=1
-- outputs: SEG_ELT:SEG_ELT
-
-## ImpactDilateMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - mask: MASK
-  - dilation: INT default=10 min=-512 max=512 step=1
-- outputs: MASK:MASK
-
-## ImpactDilateMaskInSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - dilation: INT default=10 min=-512 max=512 step=1
-- outputs: SEGS:SEGS
-
-## ImpactDummyInput
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Debug
-- outputs: *:*
-
-## ImpactEdit_SEG_ELT
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - seg_elt: SEG_ELT
-- optional:
-  - cropped_image_opt: IMAGE
-  - cropped_mask_opt: MASK
-  - crop_region_opt: SEG_ELT_crop_region
-  - bbox_opt: SEG_ELT_bbox
-  - control_net_wrapper_opt: SEG_ELT_control_net_wrapper
-  - confidence_opt: FLOAT min=0 max=1.0 step=0.1
-  - label_opt: STRING
-- outputs: SEG_ELT:SEG_ELT
-
-## ImpactExecutionOrderController
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - signal: *
-  - value: *
-- outputs: signal:*, value:*
-
-## ImpactFlattenMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - masks: MASK
-- outputs: MASK:MASK
-
-## ImpactFloat
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - value: FLOAT default=1.0 min=-3.402823466e+38 max=3.402823466e+38
-- outputs: FLOAT:FLOAT
-
-## ImpactFrom_SEG_ELT
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - seg_elt: SEG_ELT
-- outputs: seg_elt:SEG_ELT, cropped_image:IMAGE, cropped_mask:MASK, crop_region:SEG_ELT_crop_region, bbox:SEG_ELT_bbox, control_net_wrapper:SEG_ELT_control_net_wrapper, confidence:FLOAT, label:STRING
-
-## ImpactFrom_SEG_ELT_bbox
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - bbox: SEG_ELT_bbox
-- outputs: left:INT, top:INT, right:INT, bottom:INT
-
-## ImpactFrom_SEG_ELT_crop_region
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - crop_region: SEG_ELT_crop_region
-- outputs: left:INT, top:INT, right:INT, bottom:INT
-
-## ImpactGaussianBlurMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - mask: MASK
-  - kernel_size: INT default=10 min=0 max=100 step=1
-  - sigma: FLOAT default=10.0 min=0.1 max=100.0 step=0.1
-- outputs: MASK:MASK
-
-## ImpactGaussianBlurMaskInSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - kernel_size: INT default=10 min=0 max=100 step=1
-  - sigma: FLOAT default=10.0 min=0.1 max=100.0 step=0.1
-- outputs: SEGS:SEGS
-
-## ImpactHFTransformersClassifierProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/HuggingFace
-- required:
-  - preset_repo_id: COMBO[rizvandwiki/gender-classification-2, NTQAI/pedestrian_gender_recognition, Leilab/gender_class, ProjectPersonal/GenderClassifier, crangana/trained-gender, cledoux42/GenderNew_v002, ivensamdh/genderage2, Manual repo id]
-  - manual_repo_id: STRING
-  - device_mode: COMBO[AUTO, Prefer GPU, CPU]
-- outputs: TRANSFORMERS_CLASSIFIER:TRANSFORMERS_CLASSIFIER
-
-## ImpactIfNone
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- optional:
-  - signal: *
-  - any_input: *
-- outputs: signal_opt:*, bool:BOOLEAN
-
-## ImpactImageBatchToImageList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - image: IMAGE
-- outputs: IMAGE:IMAGE
-
-## ImpactImageInfo
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - value: IMAGE
-- outputs: batch:INT, height:INT, width:INT, channel:INT
-
-## ImpactInt
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - value: INT default=0 min=0 max=9223372036854775807 step=1
-- outputs: INT:INT
-
-## ImpactInversedSwitch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - select: INT default=1 min=1 max=999999 step=1
-  - input: *
-- optional:
-  - sel_mode: BOOLEAN default=False
-- outputs: *:*
-
-## ImpactIPAdapterApplySEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - ipadapter_pipe: IPADAPTER_PIPE
-  - weight: FLOAT default=0.7 min=-1 max=3 step=0.05
-  - noise: FLOAT default=0.4 min=0.0 max=1.0 step=0.01
-  - weight_type: COMBO[original, linear, channel penalty] default='channel penalty'
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=0.9 min=0.0 max=1.0 step=0.001
-  - unfold_batch: BOOLEAN default=False
-  - faceid_v2: BOOLEAN default=False
-  - weight_v2: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - context_crop_factor: FLOAT default=1.2 min=1.0 max=100 step=0.1
-  - reference_image: IMAGE
-- optional:
-  - combine_embeds: COMBO[concat, add, subtract, average, norm average]
-  - neg_image: IMAGE
-- outputs: SEGS:SEGS
-
-## ImpactIsNotEmptySEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - segs: SEGS
-- outputs: BOOLEAN:BOOLEAN
-
-## ImpactKSamplerAdvancedBasicPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/sampling
-- required:
-  - basic_pipe: BASIC_PIPE
-  - add_noise: BOOLEAN default=True
-  - noise_seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - latent_image: LATENT
-  - start_at_step: INT default=0 min=0 max=10000
-  - end_at_step: INT default=10000 min=0 max=10000
-  - return_with_leftover_noise: BOOLEAN default=False
-- optional:
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: BASIC_PIPE:BASIC_PIPE, LATENT:LATENT, VAE:VAE
-
-## ImpactKSamplerBasicPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/sampling
-- required:
-  - basic_pipe: BASIC_PIPE
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - latent_image: LATENT
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- optional:
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: BASIC_PIPE:BASIC_PIPE, LATENT:LATENT, VAE:VAE
-
-## ImpactLatentInfo
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - value: LATENT
-- outputs: batch:INT, height:INT, width:INT, channel:INT
-
-## ImpactListBridge
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - list_input: *
-- outputs: list_output:*
-
-## ImpactLogger
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Debug
-- required:
-  - data: *
-  - text: STRING
-- outputs: 
-
-## ImpactLogicalOperators
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - operator: COMBO[and, or, xor]
-  - bool_a: BOOLEAN
-  - bool_b: BOOLEAN
-- outputs: BOOLEAN:BOOLEAN
-
-## ImpactMakeAnyList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- optional:
-  - value1: *
-- outputs: *:*
-
-## ImpactMakeImageBatch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- optional:
-  - image1: IMAGE
-- outputs: IMAGE:IMAGE
-
-## ImpactMakeImageList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- optional:
-  - image1: IMAGE
-- outputs: IMAGE:IMAGE
-
-## ImpactMakeMaskBatch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- optional:
-  - mask1: MASK
-- outputs: MASK:MASK
-
-## ImpactMakeMaskList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - mask1: MASK
-- outputs: MASK:MASK
-
-## ImpactMakeTileSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/__for_testing
-- required:
-  - images: IMAGE
-  - bbox_size: INT default=512 min=64 max=4096 step=8
-  - crop_factor: FLOAT default=3.0 min=1.0 max=10 step=0.01
-  - min_overlap: INT default=5 min=0 max=512 step=1
-  - filter_segs_dilation: INT default=20 min=-255 max=255 step=1
-  - mask_irregularity: FLOAT default=0 min=0 max=1.0 step=0.01
-  - irregular_mask_mode: COMBO[Reuse fast, Reuse quality, All random fast, All random quality]
-- optional:
-  - filter_in_segs_opt: SEGS
-  - filter_out_segs_opt: SEGS
-- outputs: SEGS:SEGS
-
-## ImpactMinMax
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - mode: BOOLEAN default=True
-  - a: *
-  - b: *
-- outputs: INT:INT
-
-## ImpactNeg
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - value: BOOLEAN
-- outputs: BOOLEAN:BOOLEAN
-
-## ImpactNegativeConditioningPlaceholder
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/sampling
-- outputs: CONDITIONING:CONDITIONING
-
-## ImpactNodeSetMuteState
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - signal: *
-  - node_id: INT default=0 min=0 max=18446744073709551615
-  - set_state: BOOLEAN default=True
-- outputs: signal_opt:*
-
-## ImpactQueueTrigger
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - signal: *
-  - mode: BOOLEAN default=True
-- outputs: signal_opt:*
-
-## ImpactQueueTriggerCountdown
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - count: INT default=0 min=0 max=18446744073709551615
-  - total: INT default=10 min=1 max=18446744073709551615
-  - mode: BOOLEAN default=True
-- optional:
-  - signal: *
-- outputs: signal_opt:*, count:INT, total:INT
-
-## ImpactRemoteBoolean
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - node_id: INT default=0 min=0 max=18446744073709551615
-  - widget_name: STRING
-  - value: BOOLEAN default=True
-- outputs: 
-
-## ImpactRemoteInt
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - node_id: INT default=0 min=0 max=18446744073709551615
-  - widget_name: STRING
-  - value: INT default=0 min=-18446744073709551615 max=18446744073709551615
-- outputs: 
-
-## ImpactSAM2VideoDetectorSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - image_frames: IMAGE
-  - bbox_detector: BBOX_DETECTOR
-  - sam2_model: SAM_MODEL
-  - bbox_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - sam2_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-- outputs: SEGS:SEGS
-
-## ImpactScaleBy_BBOX_SEG_ELT
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - seg: SEG_ELT
-  - scale_by: FLOAT default=1.0 min=0.01 max=8.0 step=0.01
-- outputs: SEG_ELT:SEG_ELT
-
-## ImpactSchedulerAdapter
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - extra_scheduler: COMBO[None, AYS SDXL, AYS SD1, AYS SVD, GITS[coeff=1.2], LTXV[default], OSS FLUX, OSS Wan, OSS Chroma]
-- outputs: scheduler:['simple', 'sgm_uniform', 'karras', 'exponential', 'ddim_uniform', 'beta', 'normal', 'linear_quadratic', 'kl_optimal', 'AYS SDXL', 'AYS SD1', 'AYS SVD', 'GITS[coeff=1.2]', 'LTXV[default]', 'OSS FLUX', 'OSS Wan', 'OSS Chroma']
-
-## ImpactSegsAndMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - segs: SEGS
-  - mask: MASK
-- outputs: SEGS:SEGS
-
-## ImpactSegsAndMaskForEach
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - segs: SEGS
-  - masks: MASK
-- outputs: SEGS:SEGS
-
-## ImpactSEGSClassify
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/HuggingFace
-- required:
-  - classifier: TRANSFORMERS_CLASSIFIER
-  - segs: SEGS
-  - preset_expr: COMBO[#Female > #Male, #Female < #Male, female > 0.5, male > 0.5, Age16to25 > 0.1, Age50to69 > 0.1, Manual expr]
-  - manual_expr: STRING
-- optional:
-  - ref_image_opt: IMAGE
-- outputs: filtered_SEGS:SEGS, remained_SEGS:SEGS, detected_labels:STRING
-
-## ImpactSEGSConcat
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs1: SEGS
-- outputs: SEGS:SEGS
-
-## ImpactSEGSIntersectionFilter
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs1: SEGS
-  - segs2: SEGS
-  - ioa_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-- outputs: filtered_SEGS:SEGS
-
-## ImpactSEGSLabelAssign
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - labels: STRING
-- outputs: SEGS:SEGS
-
-## ImpactSEGSLabelFilter
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - preset: COMBO[all, hand, face, mouth, eyes, eyebrows, pupils, left_eyebrow, left_eye, left_pupil, ... +96]
-  - labels: STRING
-- outputs: filtered_SEGS:SEGS, remained_SEGS:SEGS
-
-## ImpactSEGSMerge
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: SEGS:SEGS
-
-## ImpactSEGSNMSFilter
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - iou_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-- outputs: filtered_SEGS:SEGS
-
-## ImpactSEGSOrderedFilter
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - target: COMBO[area(=w*h), width, height, x1, y1, x2, y2, confidence, none]
-  - order: BOOLEAN default=True
-  - take_start: INT default=0 min=0 max=9223372036854775807 step=1
-  - take_count: INT default=1 min=0 max=9223372036854775807 step=1
-- outputs: filtered_SEGS:SEGS, remained_SEGS:SEGS
-
-## ImpactSEGSPicker
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - picks: STRING
-  - segs: SEGS
-- optional:
-  - fallback_image_opt: IMAGE
-- outputs: SEGS:SEGS
-
-## ImpactSEGSRangeFilter
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - target: COMBO[area(=w*h), width, height, x1, y1, x2, y2, length_percent, confidence(0-100)]
-  - mode: BOOLEAN default=True
-  - min_value: INT default=0 min=0 max=9223372036854775807 step=1
-  - max_value: INT default=67108864 min=0 max=9223372036854775807 step=1
-- outputs: filtered_SEGS:SEGS, remained_SEGS:SEGS
-
-## ImpactSEGSToMaskBatch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: MASK:MASK
-
-## ImpactSEGSToMaskList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: MASK:MASK
-
-## ImpactSelectNthItemOfAnyList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - any_list: *
-  - index: INT default=0 min=-9223372036854775807 max=9223372036854775807 step=1
-- outputs: *:*
-
-## ImpactSetWidgetValue
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - signal: *
-  - node_id: INT default=0 min=0 max=18446744073709551615
-  - widget_name: STRING
-- optional:
-  - boolean_value: BOOLEAN
-  - int_value: INT
-  - float_value: FLOAT
-  - string_value: STRING
-- outputs: signal_opt:*
-
-## ImpactSimpleDetectorSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - bbox_detector: BBOX_DETECTOR
-  - image: IMAGE
-  - bbox_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - bbox_dilation: INT default=0 min=-512 max=512 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - sub_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - sub_dilation: INT default=0 min=-512 max=512 step=1
-  - sub_bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - sam_mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-- optional:
-  - post_dilation: INT default=0 min=-512 max=512 step=1
-  - sam_model_opt: SAM_MODEL
-  - segm_detector_opt: SEGM_DETECTOR
-- outputs: SEGS:SEGS
-
-## ImpactSimpleDetectorSEGS_for_AD
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - bbox_detector: BBOX_DETECTOR
-  - image_frames: IMAGE
-  - bbox_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - bbox_dilation: INT default=0 min=-255 max=255 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - sub_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - sub_dilation: INT default=0 min=-255 max=255 step=1
-  - sub_bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - sam_mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-- optional:
-  - masking_mode: COMBO[Pivot SEGS, Combine neighboring frames, Don't combine]
-  - segs_pivot: COMBO[Combined mask, 1st frame mask]
-  - sam_model_opt: SAM_MODEL
-  - segm_detector_opt: SEGM_DETECTOR
-- outputs: SEGS:SEGS
-
-## ImpactSimpleDetectorSEGSPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - detailer_pipe: DETAILER_PIPE
-  - image: IMAGE
-  - bbox_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - bbox_dilation: INT default=0 min=-512 max=512 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - sub_threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - sub_dilation: INT default=0 min=-512 max=512 step=1
-  - sub_bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - sam_mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-- optional:
-  - post_dilation: INT default=0 min=-512 max=512 step=1
-- outputs: SEGS:SEGS
-
-## ImpactSleep
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic/_for_test
-- required:
-  - signal: *
-  - seconds: FLOAT default=0.5 min=0 max=3600
-- outputs: signal_opt:*
-
-## ImpactStringSelector
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - strings: STRING
-  - multiline: BOOLEAN default=False
-  - select: INT default=0 min=0 max=9223372036854775807 step=1
-- outputs: STRING:STRING
-
-## ImpactSwitch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - select: INT default=1 min=1 max=999999 step=1
-  - sel_mode: BOOLEAN default=False
-- optional:
-  - input1: *
-- outputs: selected_value:*, selected_label:STRING, selected_index:INT
-
-## ImpactValueReceiver
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - typ: COMBO[STRING, INT, FLOAT, BOOLEAN]
-  - value: STRING default=''
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-- outputs: *:*
-
-## ImpactValueSender
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Logic
-- required:
-  - value: *
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-- optional:
-  - signal_opt: *
-- outputs: signal:*
-
-## ImpactWildcardEncode
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Prompt
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - wildcard_text: STRING
-  - populated_text: STRING
-  - mode: COMBO[populate, fixed, reproduce]
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-  - seed: INT default=0 min=0 max=18446744073709551615
-- outputs: model:MODEL, clip:CLIP, conditioning:CONDITIONING, populated_text:STRING
-
-## ImpactWildcardProcessor
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Prompt
-- required:
-  - wildcard_text: STRING
-  - populated_text: STRING
-  - mode: COMBO[populate, fixed, reproduce] default='populate'
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-- outputs: processed text:STRING
-
 ## InjectLatentNoise+
 module: custom_nodes.ComfyUI_essentials | category: essentials/sampling
 - required:
@@ -11010,11 +7316,14 @@ module: nodes | category: model/conditioning
   - noise_mask: BOOLEAN default=True
 - outputs: positive:CONDITIONING, negative:CONDITIONING, latent:LATENT
 
-## InpaintPreprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## InpaintPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/others
+- required:
+  - image: IMAGE
+  - mask: MASK
 - optional:
   - black_pixel_for_xinsir_cn: BOOLEAN default=False
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+- outputs: IMAGE:IMAGE
 
 ## InsertImageBatchByIndexes
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
@@ -11077,51 +7386,6 @@ module: comfy_extras.nodes_mask | category: image/mask
   - mask: MASK
 - outputs: MASK:MASK
 
-## IPAdapterModelHelper //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/models
-- required:
-  - model: MODEL
-  - preset: COMBO[SD1.5, SD1.5 Light v11, SD1.5 Light, SD1.5 Plus, SD1.5 Plus Face, SD1.5 Full Face, SD1.5 ViT-G, SDXL, SDXL ViT-H, SDXL Plus ViT-H, ... +14]
-  - lora_strength_model: FLOAT default=1.0 min=-20.0 max=20.0 step=0.01
-  - lora_strength_clip: FLOAT default=1.0 min=-20.0 max=20.0 step=0.01
-  - insightface_provider: COMBO[CPU, CUDA, ROCM]
-  - cache_mode: COMBO[insightface only, clip_vision only, all, none] default='insightface only'
-- optional:
-  - clip: CLIP
-  - insightface_model_name: COMBO[buffalo_l, antelopev2]
-- outputs: IPADAPTER_PIPE:IPADAPTER_PIPE, IPADAPTER:IPADAPTER, CLIP_VISION:CLIP_VISION, INSIGHTFACE:INSIGHTFACE, MODEL:MODEL, CLIP:CLIP, insightface_cache_key:STRING, clip_vision_cache_key:STRING
-
-## IsCached //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: STRING
-- outputs: BOOLEAN:BOOLEAN
-
-## IterativeImageUpscale
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - pixels: IMAGE
-  - upscale_factor: FLOAT default=1.5 min=1 max=10000 step=0.1
-  - steps: INT default=3 min=1 max=10000 step=1
-  - temp_prefix: STRING default=''
-  - upscaler: UPSCALER
-  - vae: VAE
-  - step_mode: COMBO[simple, geometric] default='simple'
-  - vae_compression: INT default=8 min=0 max=256 step=8
-- outputs: image:IMAGE
-
-## IterativeLatentUpscale
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - samples: LATENT
-  - upscale_factor: FLOAT default=1.5 min=1 max=10000 step=0.1
-  - steps: INT default=3 min=1 max=10000 step=1
-  - temp_prefix: STRING default=''
-  - upscaler: UPSCALER
-  - step_mode: COMBO[simple, geometric] default='simple'
-  - vae_compression: INT default=8 min=0 max=256 step=8
-- outputs: latent:LATENT, vae:VAE
-
 ## JoinAudioChannels
 module: comfy_extras.nodes_audio | category: audio
 - required:
@@ -11155,6 +7419,25 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/text
   - string1: STRING default=''
   - string2: STRING default=''
 - outputs: STRING:STRING
+
+## JoyEcho_PromptSource
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/script
+- required:
+  - source_file: COMBO[(no prompt files found)]
+- optional:
+  - load_cap: INT default=0 min=0
+  - start_index: INT default=0 min=0
+  - character_override: STRING default=''
+  - manual_path: STRING default=''
+  - folder: COMBO[(all)] default='(all)'
+  - walk_folder: BOOLEAN default=False
+- outputs: story_idea:STRING, character:STRING, count:INT
+
+## JoyEcho_ScriptPicker
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/script
+- required:
+  - script: COMBO[(no .json in input/joyecho_prompts)]
+- outputs: prompts_json:STRING, path:STRING, speakers:STRING
 
 ## JSON comparator [Crystools]
 module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/Utils
@@ -11457,29 +7740,6 @@ module: nodes | category: model/sampling
   - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
 - outputs: LATENT:LATENT
 
-## KSampler //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/a1111_compat
-- required:
-  - model: MODEL
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - latent_image: LATENT
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - noise_mode: COMBO[GPU(=A1111), CPU, GPU+internal_seed, CPU+internal_seed]
-  - batch_seed_mode: COMBO[incremental, comfy, variation str inc:0.01, variation str inc:0.05]
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-- optional:
-  - variation_method: COMBO[linear, slerp]
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - internal_seed: INT default=0 min=0 max=18446744073709551615
-- outputs: LATENT:LATENT
-
 ## KSampler Config (rgthree)
 module: custom_nodes.rgthree-comfy | category: rgthree
 - required:
@@ -11489,25 +7749,6 @@ module: custom_nodes.rgthree-comfy | category: rgthree
   - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
   - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
 - outputs: STEPS:INT, REFINER_STEP:INT, CFG:FLOAT, SAMPLER:['euler', 'euler_cfg_pp', 'euler_ancestral', 'euler_ancestral_cfg_pp', 'heun', 'heunpp2', 'exp_heun_2_x0', 'exp_heun_2_x0_sde', 'dpm_2', 'dpm_2_ancestral', 'lms', 'dpm_fast', 'dpm_adaptive', 'dpmpp_2s_ancestral', 'dpmpp_2s_ancestral_cfg_pp', 'dpmpp_sde', 'dpmpp_sde_gpu', 'dpmpp_2m', 'dpmpp_2m_cfg_pp', 'dpmpp_2m_sde', 'dpmpp_2m_sde_gpu', 'dpmpp_2m_sde_heun', 'dpmpp_2m_sde_heun_gpu', 'dpmpp_3m_sde', 'dpmpp_3m_sde_gpu', 'ddpm', 'lcm', 'ipndm', 'ipndm_v', 'deis', 'cfgpp_ud10_ab', 'res_multistep', 'res_multistep_cfg_pp', 'res_multistep_ancestral', 'res_multistep_ancestral_cfg_pp', 'gradient_estimation', 'gradient_estimation_cfg_pp', 'er_sde', 'seeds_2', 'seeds_3', 'sa_solver', 'sa_solver_pece', 'ddim', 'uni_pc', 'uni_pc_bh2'], SCHEDULER:['simple', 'sgm_uniform', 'karras', 'exponential', 'ddim_uniform', 'beta', 'normal', 'linear_quadratic', 'kl_optimal']
-
-## KSampler Gradually Adding More Denoise (efficient)
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/others
-- required:
-  - model: MODEL
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - latent_image: LATENT
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - start_denoise: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - denoise_increment: FLOAT default=0.1 min=0.0 max=1.0 step=0.1
-  - denoise_increment_steps: INT default=20 min=1 max=10000
-- optional:
-  - optional_vae: VAE
-- outputs: MODEL:MODEL, CONDITIONING+:CONDITIONING, CONDITIONING-:CONDITIONING, LATENT:LATENT, VAE:VAE
 
 ## KSamplerAdvanced
 module: nodes | category: model/sampling
@@ -11526,150 +7767,6 @@ module: nodes | category: model/sampling
   - end_at_step: INT default=10000 min=0 max=10000
   - return_with_leftover_noise: COMBO[disable, enable]
 - outputs: LATENT:LATENT
-
-## KSamplerAdvanced //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/a1111_compat
-- required:
-  - model: MODEL
-  - add_noise: BOOLEAN default=True
-  - noise_seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0 step=0.5
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - latent_image: LATENT
-  - start_at_step: INT default=0 min=0 max=10000
-  - end_at_step: INT default=10000 min=0 max=10000
-  - noise_mode: COMBO[GPU(=A1111), CPU, GPU+internal_seed, CPU+internal_seed]
-  - return_with_leftover_noise: BOOLEAN default=False
-  - batch_seed_mode: COMBO[incremental, comfy, variation str inc:0.01, variation str inc:0.05]
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-- optional:
-  - variation_method: COMBO[linear, slerp]
-  - noise_opt: NOISE_IMAGE
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - internal_seed: INT default=0 min=0 max=18446744073709551615
-- outputs: LATENT:LATENT
-
-## KSamplerAdvancedPipe //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/a1111_compat
-- required:
-  - basic_pipe: BASIC_PIPE
-  - add_noise: BOOLEAN default=True
-  - noise_seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0 step=0.5
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - latent_image: LATENT
-  - start_at_step: INT default=0 min=0 max=10000
-  - end_at_step: INT default=10000 min=0 max=10000
-  - noise_mode: COMBO[GPU(=A1111), CPU, GPU+internal_seed, CPU+internal_seed]
-  - return_with_leftover_noise: BOOLEAN default=False
-  - batch_seed_mode: COMBO[incremental, comfy, variation str inc:0.01, variation str inc:0.05]
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-- optional:
-  - noise_opt: NOISE_IMAGE
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - internal_seed: INT default=0 min=0 max=18446744073709551615
-- outputs: LATENT:LATENT, VAE:VAE
-
-## KSamplerAdvancedProgress //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/analysis
-- required:
-  - model: MODEL
-  - add_noise: BOOLEAN default=True
-  - noise_seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0 step=0.5
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - latent_image: LATENT
-  - start_at_step: INT default=0 min=0 max=10000
-  - end_at_step: INT default=10000 min=0 max=10000
-  - noise_mode: COMBO[GPU(=A1111), CPU, GPU+internal_seed, CPU+internal_seed]
-  - return_with_leftover_noise: BOOLEAN default=False
-  - interval: INT default=1 min=1 max=10000
-  - omit_start_latent: BOOLEAN default=False
-  - omit_final_latent: BOOLEAN default=False
-- optional:
-  - prev_progress_latent_opt: LATENT
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: latent:LATENT, progress_latent:LATENT
-
-## KSamplerAdvancedProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Sampler
-- required:
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - sigma_factor: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - basic_pipe: BASIC_PIPE
-- optional:
-  - sampler_opt: SAMPLER
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: KSAMPLER_ADVANCED:KSAMPLER_ADVANCED
-
-## KSamplerPipe //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/a1111_compat
-- required:
-  - basic_pipe: BASIC_PIPE
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - latent_image: LATENT
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - noise_mode: COMBO[GPU(=A1111), CPU, GPU+internal_seed, CPU+internal_seed]
-  - batch_seed_mode: COMBO[incremental, comfy, variation str inc:0.01, variation str inc:0.05]
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-- optional:
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - internal_seed: INT default=0 min=0 max=18446744073709551615
-- outputs: LATENT:LATENT, VAE:VAE
-
-## KSamplerProgress //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/analysis
-- required:
-  - model: MODEL
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - latent_image: LATENT
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - noise_mode: COMBO[GPU(=A1111), CPU, GPU+internal_seed, CPU+internal_seed]
-  - interval: INT default=1 min=1 max=10000
-  - omit_start_latent: BOOLEAN default=True
-  - omit_final_latent: BOOLEAN default=False
-- optional:
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: latent:LATENT, progress_latent:LATENT
-
-## KSamplerProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Sampler
-- required:
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - basic_pipe: BASIC_PIPE
-- optional:
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: KSAMPLER:KSAMPLER
 
 ## KSamplerSelect
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/samplers
@@ -11710,14 +7807,6 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/sampling
   - variation_seed: INT:seed default=12345 min=0 max=18446744073709551615
   - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
 - outputs: LATENT:LATENT
-
-## LamaRemoverDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - mask_threshold: INT default=250 min=0 max=255 step=1
-  - gaussblur_radius: INT default=8 min=0 max=20 step=1
-  - skip_sampling: BOOLEAN default=True
-- outputs: DETAILER_HOOK:DETAILER_HOOK
 
 ## LaplaceScheduler
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/schedulers
@@ -11762,13 +7851,6 @@ module: comfy_extras.nodes_latent | category: model/latent/advanced
 - required:
   - samples: LATENT
   - seed_behavior: COMBO[random, fixed] default='fixed'
-- outputs: LATENT:LATENT
-
-## LatentBatchSplitter //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - latent: LATENT
-  - split_count: INT default=4 min=0 max=50 step=1
 - outputs: LATENT:LATENT
 
 ## LatentBlend
@@ -11923,26 +8005,6 @@ module: comfy_extras.nodes_latent | category: model/latent/advanced/operations
   - multiplier: FLOAT default=1.0 min=0.0 max=100.0 step=0.01
 - outputs: LATENT_OPERATION:LATENT_OPERATION
 
-## LatentPixelScale
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - samples: LATENT
-  - scale_method: COMBO[nearest-exact, bilinear, lanczos, area]
-  - scale_factor: FLOAT default=1.5 min=0.1 max=10000 step=0.05
-  - vae: VAE
-  - use_tiled_vae: BOOLEAN default=False
-- optional:
-  - upscale_model_opt: UPSCALE_MODEL
-- outputs: LATENT:LATENT, IMAGE:IMAGE
-
-## LatentReceiver
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - latent: COMBO[]
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - trigger_always: BOOLEAN default=False
-- outputs: LATENT:LATENT
-
 ## LatentRotate
 module: nodes | category: model/latent/transform
 - required:
@@ -11950,30 +8012,12 @@ module: nodes | category: model/latent/transform
   - rotation: COMBO[none, 90 degrees, 180 degrees, 270 degrees]
 - outputs: LATENT:LATENT
 
-## LatentSender
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - samples: LATENT
-  - filename_prefix: STRING default='latents/LatentSender'
-  - link_id: INT default=0 min=0 max=9223372036854775807 step=1
-  - preview_method: COMBO[Latent2RGB-FLUX.1, Latent2RGB-SDXL, Latent2RGB-SD15, Latent2RGB-SD3, Latent2RGB-SD-X4, Latent2RGB-Playground-2.5, Latent2RGB-SC-Prior, Latent2RGB-SC-B, Latent2RGB-LTXV, TAEF1, ... +3]
-- outputs: 
-
 ## LatentSubtract
 module: comfy_extras.nodes_latent | category: model/latent/advanced
 - required:
   - samples1: LATENT
   - samples2: LATENT
 - outputs: LATENT:LATENT
-
-## LatentSwitch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - select: INT default=1 min=1 max=999999 step=1
-  - sel_mode: BOOLEAN default=False
-- optional:
-  - input1: *
-- outputs: selected_value:*, selected_label:STRING, selected_index:INT
 
 ## LatentTemporalInpainter
 module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/Latents
@@ -12027,859 +8071,6 @@ module: comfy_extras.nodes_hunyuan | category: model/loaders
   - model_name: COMBO[minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors, minimax_h3_latent_upscaler_3d_fp16.safetensors]
 - outputs: LATENT_UPSCALE_MODEL:LATENT_UPSCALE_MODEL
 
-## LayerColor: AutoAdjust
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - strength: INT default=100 min=0 max=100 step=1
-  - brightness: INT default=0 min=-100 max=100 step=1
-  - contrast: INT default=0 min=-100 max=100 step=1
-  - saturation: INT default=0 min=-100 max=100 step=1
-  - red: INT default=0 min=-100 max=100 step=1
-  - green: INT default=0 min=-100 max=100 step=1
-  - blue: INT default=0 min=-100 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerColor: AutoAdjustV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - strength: INT default=100 min=0 max=100 step=1
-  - brightness: INT default=0 min=-100 max=100 step=1
-  - contrast: INT default=0 min=-100 max=100 step=1
-  - saturation: INT default=0 min=-100 max=100 step=1
-  - red: INT default=0 min=-100 max=100 step=1
-  - green: INT default=0 min=-100 max=100 step=1
-  - blue: INT default=0 min=-100 max=100 step=1
-  - mode: COMBO[RGB, lum + sat, mono, luminance, saturation]
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## LayerColor: AutoBrightness
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - strength: INT default=75 min=0 max=100 step=1
-  - saturation: INT default=8 min=-255 max=255 step=1
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## LayerColor: Brightness & Contrast
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - brightness: FLOAT default=1 min=0.0 max=3 step=0.01
-  - contrast: FLOAT default=1 min=0.0 max=3 step=0.01
-  - saturation: FLOAT default=1 min=0.0 max=3 step=0.01
-- outputs: image:IMAGE
-
-## LayerColor: BrightnessContrastV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - brightness: FLOAT default=1 min=0.0 max=3 step=0.01
-  - contrast: FLOAT default=1 min=0.0 max=3 step=0.01
-  - saturation: FLOAT default=1 min=0.0 max=3 step=0.01
-- outputs: image:IMAGE
-
-## LayerColor: Color of Shadow & Highlight
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - shadow_brightness: FLOAT default=1 min=0.0 max=3 step=0.01
-  - shadow_saturation: FLOAT default=1 min=0.0 max=3 step=0.01
-  - shadow_hue: INT default=0 min=-255 max=255 step=1
-  - shadow_level_offset: INT default=0 min=-99 max=99 step=1
-  - shadow_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-  - highlight_brightness: FLOAT default=1 min=0.0 max=3 step=0.01
-  - highlight_saturation: FLOAT default=1 min=0.0 max=3 step=0.01
-  - highlight_hue: INT default=0 min=-255 max=255 step=1
-  - highlight_level_offset: INT default=0 min=-99 max=99 step=1
-  - highlight_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## LayerColor: ColorAdapter
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - color_ref_image: IMAGE
-  - opacity: INT default=75 min=0 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerColor: ColorBalance
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - cyan_red: FLOAT default=0 min=-1.0 max=1.0 step=0.001
-  - magenta_green: FLOAT default=0 min=-1.0 max=1.0 step=0.001
-  - yellow_blue: FLOAT default=0 min=-1.0 max=1.0 step=0.001
-- outputs: image:IMAGE
-
-## LayerColor: ColorofShadowHighlightV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - shadow_brightness: FLOAT default=1 min=0.0 max=3 step=0.01
-  - shadow_saturation: FLOAT default=1 min=0.0 max=3 step=0.01
-  - shadow_hue: INT default=0 min=-255 max=255 step=1
-  - shadow_level_offset: INT default=0 min=-99 max=99 step=1
-  - shadow_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-  - highlight_brightness: FLOAT default=1 min=0.0 max=3 step=0.01
-  - highlight_saturation: FLOAT default=1 min=0.0 max=3 step=0.01
-  - highlight_hue: INT default=0 min=-255 max=255 step=1
-  - highlight_level_offset: INT default=0 min=-99 max=99 step=1
-  - highlight_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## LayerColor: ColorTemperature
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - temperature: FLOAT default=0 min=-100 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerColor: Exposure
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - exposure: INT default=20 min=-100 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerColor: Gamma
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - gamma: FLOAT default=1 min=0.1 max=10 step=0.01
-- outputs: image:IMAGE
-
-## LayerColor: HSV
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - H: INT default=0 min=-255 max=255 step=1
-  - S: INT default=0 min=-255 max=255 step=1
-  - V: INT default=0 min=-255 max=255 step=1
-- outputs: image:IMAGE
-
-## LayerColor: LAB
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - L: INT default=0 min=-255 max=255 step=1
-  - A: INT default=0 min=-255 max=255 step=1
-  - B: INT default=0 min=-255 max=255 step=1
-- outputs: image:IMAGE
-
-## LayerColor: Levels
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - channel: COMBO[RGB, red, green, blue]
-  - black_point: INT default=0 min=0 max=255 step=1
-  - white_point: INT default=255 min=0 max=255 step=1
-  - gray_point: FLOAT default=1 min=0.01 max=9.99 step=0.01
-  - output_black_point: INT default=0 min=0 max=255 step=1
-  - output_white_point: INT default=255 min=0 max=255 step=1
-- outputs: image:IMAGE
-
-## LayerColor: LUT Apply
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - LUT: COMBO[BlueArchitecture.cube]
-  - color_space: COMBO[linear, log]
-  - strength: INT default=100 min=0 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerColor: Negative
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - negative_channel: COMBO[RGB, Mono, R, G, B]
-- outputs: image:IMAGE
-
-## LayerColor: RGB
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - R: INT default=0 min=-255 max=255 step=1
-  - G: INT default=0 min=-255 max=255 step=1
-  - B: INT default=0 min=-255 max=255 step=1
-- outputs: image:IMAGE
-
-## LayerColor: YUV
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - image: IMAGE
-  - Y: INT default=0 min=-255 max=255 step=1
-  - U: INT default=0 min=-255 max=255 step=1
-  - V: INT default=0 min=-255 max=255 step=1
-- outputs: image:IMAGE
-
-## LayerFilter: AddGrain
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - grain_power: FLOAT default=0.5 min=0 max=1 step=0.01
-  - grain_scale: FLOAT default=1 min=0.1 max=10 step=0.1
-  - grain_sat: FLOAT default=1 min=0 max=1 step=0.01
-- outputs: image:IMAGE
-
-## LayerFilter: ChannelShake
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - distance: INT default=20 min=1 max=999 step=1
-  - angle: FLOAT default=40 min=-360 max=360 step=0.1
-  - mode: COMBO[RGB, RBG, BGR, BRG, GBR, GRB]
-- outputs: image:IMAGE
-
-## LayerFilter: ColorMap
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - color_map: COMBO[autumn, bone, jet, winter, rainbow, ocean, summer, sprint, cool, HSV, ... +12]
-  - opacity: INT default=100 min=0 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerFilter: DistortDisplace
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - material_image: IMAGE
-  - distort_strength: FLOAT default=50 min=-999 max=999 step=0.1
-  - smoothness: INT default=8 min=0 max=99 step=1
-  - anti_aliasing: INT default=2 min=1 max=16 step=1
-  - shadow_blend_mode: COMBO[linear burn, multiply, normal, dissolve, darken, color burn, darker color, lighten, screen, color dodge, ... +20]
-  - shadow_strength: INT default=75 min=0 max=100 step=1
-  - highlight_blend_mode: COMBO[screen, linear dodge(add), normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, ... +20]
-  - highlight_strength: INT default=30 min=0 max=100 step=1
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE, displaced_material:IMAGE
-
-## LayerFilter: Film
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - center_x: FLOAT default=0.5 min=0 max=1 step=0.01
-  - center_y: FLOAT default=0.5 min=0 max=1 step=0.01
-  - saturation: FLOAT default=1 min=0.01 max=3 step=0.01
-  - vignette_intensity: FLOAT default=0.5 min=0 max=1 step=0.01
-  - grain_power: FLOAT default=0.15 min=0 max=1 step=0.01
-  - grain_scale: FLOAT default=1.0 min=0.1 max=10 step=0.1
-  - grain_sat: FLOAT default=0.5 min=0 max=1 step=0.01
-  - grain_shadows: FLOAT default=0.6 min=0 max=1 step=0.01
-  - grain_highs: FLOAT default=0.2 min=0 max=1 step=0.01
-  - blur_strength: INT default=90 min=0 max=256 step=1
-  - blur_focus_spread: FLOAT default=2.2 min=0.1 max=8 step=0.1
-  - focal_depth: FLOAT default=0.9 min=0.0 max=1 step=0.01
-- optional:
-  - depth_map: IMAGE
-- outputs: image:IMAGE
-
-## LayerFilter: FilmV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - center_x: FLOAT default=0.5 min=0 max=1 step=0.01
-  - center_y: FLOAT default=0.5 min=0 max=1 step=0.01
-  - saturation: FLOAT default=1 min=0.01 max=3 step=0.01
-  - vignette_intensity: FLOAT default=0.5 min=0 max=1 step=0.01
-  - grain_method: COMBO[fastgrain, filmgrainer]
-  - grain_power: FLOAT default=0.15 min=0 max=1 step=0.01
-  - grain_scale: FLOAT default=1 min=0.1 max=10 step=0.1
-  - grain_sat: FLOAT default=0.5 min=0 max=1 step=0.01
-  - filmgrainer_shadows: FLOAT default=0.6 min=0 max=1 step=0.01
-  - filmgrainer_highs: FLOAT default=0.2 min=0 max=1 step=0.01
-  - blur_strength: INT default=90 min=0 max=256 step=1
-  - blur_focus_spread: FLOAT default=2.2 min=0.1 max=8 step=0.1
-  - focal_depth: FLOAT default=0.9 min=0.0 max=1 step=0.01
-- optional:
-  - depth_map: IMAGE
-- outputs: image:IMAGE
-
-## LayerFilter: GaussianBlur
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - blur: INT default=20 min=1 max=999 step=1
-- outputs: image:IMAGE
-
-## LayerFilter: GaussianBlurV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - blur: FLOAT default=20 min=0 max=1000 step=0.05
-- outputs: image:IMAGE
-
-## LayerFilter: HalfTone
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - dot_size: INT default=10 min=4 max=100 step=1
-  - angle: FLOAT default=45 min=-90 max=90 step=0.1
-  - shape: COMBO[circle, diamond, square]
-  - dot_color: STRING default='#000000'
-  - background_color: STRING default='#FFFFFF'
-  - anti_aliasing: INT default=1 min=0 max=4 step=1
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## LayerFilter: HDREffects
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE default=None
-  - hdr_intensity: FLOAT default=0.5 min=0.0 max=5.0 step=0.01
-  - shadow_intensity: FLOAT default=0.25 min=0.0 max=1.0 step=0.01
-  - highlight_intensity: FLOAT default=0.75 min=0.0 max=1.0 step=0.01
-  - gamma_intensity: FLOAT default=0.25 min=0.0 max=1.0 step=0.01
-  - contrast: FLOAT default=0.1 min=0.0 max=1.0 step=0.01
-  - enhance_color: FLOAT default=0.25 min=0.0 max=1.0 step=0.01
-- outputs: image:IMAGE
-
-## LayerFilter: LightLeak
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - light: COMBO[random, 1, 2, 3, 4, 5, 6, 7, 8, 9, ... +23]
-  - corner: COMBO[left_top, right_top, left_bottom, right_bottom]
-  - hue: INT default=0 min=-255 max=255 step=1
-  - saturation: INT default=0 min=-255 max=255 step=1
-  - opacity: INT default=100 min=0 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerFilter: MotionBlur
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - angle: INT default=0 min=-90 max=90 step=1
-  - blur: INT default=20 min=1 max=999 step=1
-- outputs: image:IMAGE
-
-## LayerFilter: Sharp & Soft
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - images: IMAGE
-  - enhance: COMBO[very sharp, sharp, soft, very soft, None]
-- outputs: image:IMAGE
-
-## LayerFilter: SkinBeauty
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - smooth: INT default=20 min=1 max=64 step=1
-  - threshold: INT default=-10 min=-255 max=255 step=1
-  - opacity: INT default=100 min=0 max=100 step=1
-- outputs: image:IMAGE, beauty_mask:MASK
-
-## LayerFilter: SoftLight
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - soft: FLOAT default=1 min=0.2 max=10 step=0.01
-  - threshold: INT default=-10 min=-255 max=255 step=1
-  - opacity: INT default=100 min=0 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerFilter: WaterColor
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerFilter
-- required:
-  - image: IMAGE
-  - line_density: INT default=50 min=1 max=100 step=1
-  - opacity: INT default=100 min=0 max=100 step=1
-- outputs: image:IMAGE
-
-## LayerMask: BlendIf Mask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_if: COMBO[gray, red, green, blue]
-  - black_point: INT default=0 min=0 max=254 step=1
-  - black_range: INT default=0 min=0 max=255 step=1
-  - white_point: INT default=255 min=1 max=255 step=1
-  - white_range: INT default=0 min=0 max=255 step=1
-- optional:
-  - mask: MASK
-- outputs: mask:MASK
-
-## LayerMask: CreateGradientMask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - width: INT default=512 min=4 max=99999 step=1
-  - height: INT default=512 min=4 max=99999 step=1
-  - gradient_side: COMBO[bottom, top, left, right, center]
-  - gradient_scale: INT default=100 min=1 max=9999 step=1
-  - gradient_offset: INT default=0 min=-9999 max=9999 step=1
-  - opacity: INT default=100 min=0 max=100 step=1
-- optional:
-  - size_as: *
-- outputs: mask:MASK
-
-## LayerMask: DrawRoundedRectangle
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - rounded_rect_radius: INT default=50 min=0 max=100 step=1
-  - anti_aliasing: INT default=2 min=0 max=16 step=1
-  - width: INT default=1024 min=8 max=100000000.0 step=1
-  - height: INT default=1024 min=8 max=100000000.0 step=1
-- optional:
-  - size_as: *
-- outputs: mask:MASK
-
-## LayerMask: ImageToMask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - channel: COMBO[L(LAB), A(Lab), B(Lab), R(RGB), G(RGB), B(RGB), alpha, Y(YUV), U(YUV), V(YUV), ... +3]
-  - black_point: INT default=0 min=0 max=255 step=1
-  - white_point: INT default=255 min=0 max=255 step=1
-  - gray_point: FLOAT default=1.0 min=0.01 max=9.99 step=0.01
-  - invert_output_mask: BOOLEAN default=False
-- optional:
-  - mask: MASK
-- outputs: mask:MASK
-
-## LayerMask: LoadSegformerModel
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - model_name: COMBO[segformer_b3_clothes, segformer_b2_clothes, segformer_b3_fashion]
-  - device: COMBO[cuda, cpu]
-- outputs: segfromer_model:LS_SEGFORMER_MODEL
-
-## LayerMask: MaskBoxDetect
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - detect: COMBO[min_bounding_rect, max_inscribed_rect, mask_area]
-  - x_adjust: INT default=0 min=-9999 max=9999 step=1
-  - y_adjust: INT default=0 min=-9999 max=9999 step=1
-  - scale_adjust: FLOAT default=1.0 min=0.01 max=100 step=0.01
-- outputs: box_preview:IMAGE, x_percent:FLOAT, y_percent:FLOAT, width:INT, height:INT, x:INT, y:INT, crop_box:BOX
-
-## LayerMask: MaskBoxExtend
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - crop_box: BOX
-  - top_extend: FLOAT default=10 min=-9999 max=9999 step=0.1
-  - bottem_extend: FLOAT default=10 min=-9999 max=9999 step=0.1
-  - left_extend: FLOAT default=10 min=-9999 max=9999 step=0.1
-  - right_extend: FLOAT default=10 min=-9999 max=9999 step=0.1
-- outputs: mask:MASK, x_percent:FLOAT, y_percent:FLOAT, width:INT, height:INT, x:INT, y:INT, crop_box:BOX
-
-## LayerMask: MaskByColor
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - color: COLOR default='#FFFFFF'
-  - color_in_HEX: STRING default=''
-  - threshold: INT default=50 min=0 max=100 step=1
-  - fix_gap: INT default=2 min=0 max=32 step=1
-  - fix_threshold: FLOAT default=0.75 min=0.01 max=0.99 step=0.01
-  - invert_mask: BOOLEAN default=False
-- optional:
-  - mask: MASK
-- outputs: mask:MASK
-
-## LayerMask: MaskEdgeShrink
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - invert_mask: BOOLEAN default=True
-  - shrink_level: INT default=4 min=0 max=16 step=1
-  - soft: INT default=6 min=0 max=64 step=1
-  - edge_shrink: INT default=1 min=0 max=999 step=1
-  - edge_reserve: INT default=25 min=0 max=100 step=1
-- outputs: mask:MASK
-
-## LayerMask: MaskEdgeUltraDetail
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - mask: MASK
-  - method: COMBO[PyMatting, OpenCV-GuidedFilter]
-  - mask_grow: INT default=0 min=-999 max=999 step=1
-  - fix_gap: INT default=0 min=0 max=32 step=1
-  - fix_threshold: FLOAT default=0.75 min=0.01 max=0.99 step=0.01
-  - detail_range: INT default=12 min=1 max=256 step=1
-  - black_point: FLOAT default=0.01 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: MaskEdgeUltraDetail V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - mask: MASK
-  - method: COMBO[VITMatte, VITMatte(local), vitmatte-base-composition-1k, PyMatting, GuidedFilter]
-  - mask_grow: INT default=0 min=0 max=256 step=1
-  - fix_gap: INT default=0 min=0 max=32 step=1
-  - fix_threshold: FLOAT default=0.75 min=0.01 max=0.99 step=0.01
-  - edge_erode: INT default=6 min=1 max=255 step=1
-  - edte_dilate: INT default=6 min=1 max=255 step=1
-  - black_point: FLOAT default=0.01 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-  - device: COMBO[cuda, cpu]
-  - max_megapixels: FLOAT default=2.0 min=1 max=999 step=0.1
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: MaskEdgeUltraDetail V3
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - mask: MASK
-  - method: COMBO[VITMatte, VITMatte(local), vitmatte-base-composition-1k, PyMatting, GuidedFilter]
-  - mask_grow: INT default=0 min=0 max=256 step=1
-  - fix_gap: INT default=0 min=0 max=32 step=1
-  - fix_threshold: FLOAT default=0.75 min=0.01 max=0.99 step=0.01
-  - mask_edge_erode: INT default=6 min=1 max=512 step=1
-  - mask_edge_dilate: INT default=4 min=1 max=512 step=1
-  - transparent_trimap_erode: INT default=72 min=1 max=1024 step=1
-  - transparent_trimap_dilate: INT default=64 min=1 max=1024 step=1
-  - trimap_blur: INT default=4 min=1 max=512 step=1
-  - black_point: FLOAT default=0.01 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-  - spread_mask_grow: INT default=0 min=-999 max=999 step=1
-  - device: COMBO[cuda, cpu]
-  - max_megapixels: FLOAT default=3.0 min=1 max=999 step=0.1
-- optional:
-  - transparent_trimap: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: MaskGradient
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - invert_mask: BOOLEAN default=True
-  - gradient_side: COMBO[top, bottom, left, right]
-  - gradient_scale: INT default=100 min=1 max=9999 step=1
-  - gradient_offset: INT default=0 min=-9999 max=9999 step=1
-  - opacity: INT default=100 min=0 max=100 step=1
-- outputs: mask:MASK
-
-## LayerMask: MaskGrain
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - grain: INT default=6 min=0 max=127 step=1
-  - invert_mask: BOOLEAN default=False
-- outputs: mask:MASK
-
-## LayerMask: MaskGrow
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - invert_mask: BOOLEAN default=True
-  - grow: INT default=4 min=-999 max=999 step=1
-  - blur: INT default=4 min=0 max=999 step=1
-- outputs: mask:MASK
-
-## LayerMask: MaskInvert
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-- outputs: mask:MASK
-
-## LayerMask: MaskMotionBlur
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - invert_mask: BOOLEAN default=True
-  - blur: INT default=20 min=1 max=9999 step=1
-  - angle: FLOAT default=0 min=-360 max=360 step=0.1
-- outputs: mask:MASK
-
-## LayerMask: MaskPreview
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-- outputs: images:IMAGE
-
-## LayerMask: MaskStroke
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - mask: MASK
-  - invert_mask: BOOLEAN default=True
-  - stroke_grow: INT default=0 min=-999 max=999 step=1
-  - stroke_width: INT default=20 min=0 max=999 step=1
-  - blur: INT default=6 min=0 max=100 step=1
-- outputs: mask:MASK
-
-## LayerMask: PixelSpread
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - invert_mask: BOOLEAN default=False
-  - mask_grow: INT default=0 min=-999 max=999 step=1
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## LayerMask: RemBgUltra
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - detail_range: INT default=8 min=1 max=256 step=1
-  - black_point: FLOAT default=0.01 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-  - process_detail: BOOLEAN default=True
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: RmBgUltra V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - detail_method: COMBO[VITMatte, VITMatte(local), vitmatte-base-composition-1k, PyMatting, GuidedFilter]
-  - detail_erode: INT default=6 min=1 max=255 step=1
-  - detail_dilate: INT default=6 min=1 max=255 step=1
-  - black_point: FLOAT default=0.01 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-  - process_detail: BOOLEAN default=True
-  - device: COMBO[cuda, cpu]
-  - max_megapixels: FLOAT default=2.0 min=1 max=999 step=0.1
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: SegformerB2ClothesUltra
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - face: BOOLEAN default=False
-  - hair: BOOLEAN default=False
-  - hat: BOOLEAN default=False
-  - sunglass: BOOLEAN default=False
-  - left_arm: BOOLEAN default=False
-  - right_arm: BOOLEAN default=False
-  - left_leg: BOOLEAN default=False
-  - right_leg: BOOLEAN default=False
-  - upper_clothes: BOOLEAN default=False
-  - skirt: BOOLEAN default=False
-  - pants: BOOLEAN default=False
-  - dress: BOOLEAN default=False
-  - belt: BOOLEAN default=False
-  - shoe: BOOLEAN default=False
-  - bag: BOOLEAN default=False
-  - scarf: BOOLEAN default=False
-  - detail_method: COMBO[VITMatte, VITMatte(local), vitmatte-base-composition-1k, PyMatting, GuidedFilter]
-  - detail_erode: INT default=12 min=1 max=255 step=1
-  - detail_dilate: INT default=6 min=1 max=255 step=1
-  - black_point: FLOAT default=0.15 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-  - process_detail: BOOLEAN default=True
-  - device: COMBO[cuda, cpu]
-  - max_megapixels: FLOAT default=2.0 min=1 max=999 step=0.1
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: SegformerClothesPipelineLoader
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - model: COMBO[segformer_b3_clothes, segformer_b2_clothes]
-  - face: BOOLEAN default=False
-  - hair: BOOLEAN default=False
-  - hat: BOOLEAN default=False
-  - sunglass: BOOLEAN default=False
-  - left_arm: BOOLEAN default=False
-  - right_arm: BOOLEAN default=False
-  - left_leg: BOOLEAN default=False
-  - right_leg: BOOLEAN default=False
-  - left_shoe: BOOLEAN default=False
-  - right_shoe: BOOLEAN default=False
-  - upper_clothes: BOOLEAN default=False
-  - skirt: BOOLEAN default=False
-  - pants: BOOLEAN default=False
-  - dress: BOOLEAN default=False
-  - belt: BOOLEAN default=False
-  - bag: BOOLEAN default=False
-  - scarf: BOOLEAN default=False
-- outputs: segformer_pipeline:SegPipeline
-
-## LayerMask: SegformerClothesSetting
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - face: BOOLEAN default=False
-  - hair: BOOLEAN default=False
-  - hat: BOOLEAN default=False
-  - sunglass: BOOLEAN default=False
-  - left_arm: BOOLEAN default=False
-  - right_arm: BOOLEAN default=False
-  - left_leg: BOOLEAN default=False
-  - right_leg: BOOLEAN default=False
-  - left_shoe: BOOLEAN default=False
-  - right_shoe: BOOLEAN default=False
-  - upper_clothes: BOOLEAN default=False
-  - skirt: BOOLEAN default=False
-  - pants: BOOLEAN default=False
-  - dress: BOOLEAN default=False
-  - belt: BOOLEAN default=False
-  - bag: BOOLEAN default=False
-  - scarf: BOOLEAN default=False
-- outputs: segformer_clothes_setting:LS_SEGFORMER_SETTING
-
-## LayerMask: SegformerFashionPipelineLoader
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - model: COMBO[segformer_b3_fashion]
-  - shirt: BOOLEAN default=False
-  - top: BOOLEAN default=False
-  - sweater: BOOLEAN default=False
-  - cardigan: BOOLEAN default=False
-  - jacket: BOOLEAN default=False
-  - vest: BOOLEAN default=False
-  - pants: BOOLEAN default=False
-  - shorts: BOOLEAN default=False
-  - skirt: BOOLEAN default=False
-  - coat: BOOLEAN default=False
-  - dress: BOOLEAN default=False
-  - jumpsuit: BOOLEAN default=False
-  - cape: BOOLEAN default=False
-  - glasses: BOOLEAN default=False
-  - hat: BOOLEAN default=False
-  - hairaccessory: BOOLEAN default=False
-  - tie: BOOLEAN default=False
-  - glove: BOOLEAN default=False
-  - watch: BOOLEAN default=False
-  - belt: BOOLEAN default=False
-  - legwarmer: BOOLEAN default=False
-  - tights: BOOLEAN default=False
-  - sock: BOOLEAN default=False
-  - shoe: BOOLEAN default=False
-  - bagwallet: BOOLEAN default=False
-  - scarf: BOOLEAN default=False
-  - umbrella: BOOLEAN default=False
-  - hood: BOOLEAN default=False
-  - collar: BOOLEAN default=False
-  - lapel: BOOLEAN default=False
-  - epaulette: BOOLEAN default=False
-  - sleeve: BOOLEAN default=False
-  - pocket: BOOLEAN default=False
-  - neckline: BOOLEAN default=False
-  - buckle: BOOLEAN default=False
-  - zipper: BOOLEAN default=False
-  - applique: BOOLEAN default=False
-  - bead: BOOLEAN default=False
-  - bow: BOOLEAN default=False
-  - flower: BOOLEAN default=False
-  - fringe: BOOLEAN default=False
-  - ribbon: BOOLEAN default=False
-  - rivet: BOOLEAN default=False
-  - ruffle: BOOLEAN default=False
-  - sequin: BOOLEAN default=False
-  - tassel: BOOLEAN default=False
-- outputs: segformer_pipeline:SegPipeline
-
-## LayerMask: SegformerFashionSetting
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - shirt: BOOLEAN default=False
-  - top: BOOLEAN default=False
-  - sweater: BOOLEAN default=False
-  - cardigan: BOOLEAN default=False
-  - jacket: BOOLEAN default=False
-  - vest: BOOLEAN default=False
-  - pants: BOOLEAN default=False
-  - shorts: BOOLEAN default=False
-  - skirt: BOOLEAN default=False
-  - coat: BOOLEAN default=False
-  - dress: BOOLEAN default=False
-  - jumpsuit: BOOLEAN default=False
-  - cape: BOOLEAN default=False
-  - glasses: BOOLEAN default=False
-  - hat: BOOLEAN default=False
-  - hairaccessory: BOOLEAN default=False
-  - tie: BOOLEAN default=False
-  - glove: BOOLEAN default=False
-  - watch: BOOLEAN default=False
-  - belt: BOOLEAN default=False
-  - legwarmer: BOOLEAN default=False
-  - tights: BOOLEAN default=False
-  - sock: BOOLEAN default=False
-  - shoe: BOOLEAN default=False
-  - bagwallet: BOOLEAN default=False
-  - scarf: BOOLEAN default=False
-  - umbrella: BOOLEAN default=False
-  - hood: BOOLEAN default=False
-  - collar: BOOLEAN default=False
-  - lapel: BOOLEAN default=False
-  - epaulette: BOOLEAN default=False
-  - sleeve: BOOLEAN default=False
-  - pocket: BOOLEAN default=False
-  - neckline: BOOLEAN default=False
-  - buckle: BOOLEAN default=False
-  - zipper: BOOLEAN default=False
-  - applique: BOOLEAN default=False
-  - bead: BOOLEAN default=False
-  - bow: BOOLEAN default=False
-  - flower: BOOLEAN default=False
-  - fringe: BOOLEAN default=False
-  - ribbon: BOOLEAN default=False
-  - rivet: BOOLEAN default=False
-  - ruffle: BOOLEAN default=False
-  - sequin: BOOLEAN default=False
-  - tassel: BOOLEAN default=False
-- outputs: segformer_fashion_setting:LS_SEGFORMER_SETTING
-
-## LayerMask: SegformerUltraV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - segformer_pipeline: SegPipeline
-  - detail_method: COMBO[VITMatte, VITMatte(local), vitmatte-base-composition-1k, PyMatting, GuidedFilter]
-  - detail_erode: INT default=8 min=1 max=255 step=1
-  - detail_dilate: INT default=6 min=1 max=255 step=1
-  - black_point: FLOAT default=0.01 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-  - process_detail: BOOLEAN default=True
-  - device: COMBO[cuda, cpu]
-  - max_megapixels: FLOAT default=2.0 min=1 max=999 step=0.1
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: SegformerUltraV3
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - segformer_model: LS_SEGFORMER_MODEL
-  - segformer_setting: LS_SEGFORMER_SETTING
-  - detail_method: COMBO[VITMatte, VITMatte(local), vitmatte-base-composition-1k, PyMatting, GuidedFilter]
-  - detail_erode: INT default=8 min=1 max=255 step=1
-  - detail_dilate: INT default=6 min=1 max=255 step=1
-  - black_point: FLOAT default=0.01 min=0.01 max=0.98 step=0.01
-  - white_point: FLOAT default=0.99 min=0.02 max=0.99 step=0.01
-  - process_detail: BOOLEAN default=True
-  - max_megapixels: FLOAT default=2.0 min=1 max=999 step=0.1
-- outputs: image:IMAGE, mask:MASK
-
-## LayerMask: Shadow & Highlight Mask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - shadow_level_offset: INT default=0 min=-99 max=99 step=1
-  - shadow_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-  - highlight_level_offset: INT default=0 min=-99 max=99 step=1
-  - highlight_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-- optional:
-  - mask: MASK
-- outputs: shadow_mask:MASK, highlight_mask:MASK
-
-## LayerMask: ShadowHighlightMaskV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerMask
-- required:
-  - image: IMAGE
-  - shadow_level_offset: INT default=0 min=-99 max=99 step=1
-  - shadow_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-  - highlight_level_offset: INT default=0 min=-99 max=99 step=1
-  - highlight_range: FLOAT default=0.25 min=0.01 max=0.99 step=0.01
-- optional:
-  - mask: MASK
-- outputs: shadow_mask:MASK, highlight_mask:MASK
-
 ## LayersFromBoundingBoxes
 module: comfy_extras.nodes_compositor | category: image
 - required:
@@ -12892,1231 +8083,6 @@ module: comfy_extras.nodes_compositor | category: image
   - canvas_width: INT default=0 min=0 max=16384
   - canvas_height: INT default=0 min=0 max=16384
 - outputs: LAYERS:LAYERS
-
-## LayerStyle: ColorOverlay
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, multply, screen, add, subtract, difference, darker, lighter, color_burn, color_dodge, ... +9]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - color: STRING default='#FFBF30'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: ColorOverlay V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - color: STRING default='#FFBF30'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: DropShadow
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, multply, screen, add, subtract, difference, darker, lighter, color_burn, color_dodge, ... +9]
-  - opacity: INT default=50 min=0 max=100 step=1
-  - distance_x: INT default=25 min=-9999 max=9999 step=1
-  - distance_y: INT default=25 min=-9999 max=9999 step=1
-  - grow: INT default=6 min=-9999 max=9999 step=1
-  - blur: INT default=18 min=0 max=100 step=1
-  - shadow_color: STRING default='#000000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: DropShadow V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=50 min=0 max=100 step=1
-  - distance_x: INT default=25 min=-9999 max=9999 step=1
-  - distance_y: INT default=25 min=-9999 max=9999 step=1
-  - grow: INT default=6 min=-9999 max=9999 step=1
-  - blur: INT default=18 min=0 max=100 step=1
-  - shadow_color: STRING default='#000000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: DropShadow V3
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=50 min=0 max=100 step=1
-  - distance_x: INT default=25 min=-9999 max=9999 step=1
-  - distance_y: INT default=25 min=-9999 max=9999 step=1
-  - grow: INT default=6 min=-9999 max=9999 step=1
-  - blur: INT default=18 min=0 max=1000 step=1
-  - shadow_color: STRING default='#000000'
-- optional:
-  - background_image: IMAGE
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: Gradient Map
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - image: IMAGE
-  - start_color: STRING default='#015A52'
-  - mid_color: STRING default='#02AF9F'
-  - end_color: STRING default='#7FFFEC'
-  - mid_point: FLOAT default=0.6 min=0.0 max=1.0 step=0.01
-  - opacity: INT default=100 min=0 max=100 step=1
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE, gradient:IMAGE
-
-## LayerStyle: GradientOverlay
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, multply, screen, add, subtract, difference, darker, lighter, color_burn, color_dodge, ... +9]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - start_color: STRING default='#FFBF30'
-  - start_alpha: INT default=255 min=0 max=255 step=1
-  - end_color: STRING default='#FE0000'
-  - end_alpha: INT default=255 min=0 max=255 step=1
-  - angle: INT default=0 min=-180 max=180 step=1
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: GradientOverlay V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - start_color: STRING default='#FFBF30'
-  - start_alpha: INT default=255 min=0 max=255 step=1
-  - end_color: STRING default='#FE0000'
-  - end_alpha: INT default=255 min=0 max=255 step=1
-  - angle: INT default=0 min=-180 max=180 step=1
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: InnerGlow
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[screen, add, lighter, normal, multply, subtract, difference, darker, color_burn, color_dodge, ... +9]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - brightness: INT default=5 min=2 max=20 step=1
-  - glow_range: INT default=48 min=-9999 max=9999 step=1
-  - blur: INT default=25 min=0 max=9999 step=1
-  - light_color: STRING default='#FFBF30'
-  - glow_color: STRING default='#FE0000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: InnerGlow V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[screen, linear dodge(add), color dodge, lighten, dodge, hard light, linear light, normal, dissolve, darken, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - brightness: INT default=5 min=2 max=20 step=1
-  - glow_range: INT default=48 min=-9999 max=9999 step=1
-  - blur: INT default=25 min=0 max=9999 step=1
-  - light_color: STRING default='#FFBF30'
-  - glow_color: STRING default='#FE0000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: InnerShadow
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, multply, screen, add, subtract, difference, darker, lighter, color_burn, color_dodge, ... +9]
-  - opacity: INT default=50 min=0 max=100 step=1
-  - distance_x: INT default=5 min=-9999 max=9999 step=1
-  - distance_y: INT default=5 min=-9999 max=9999 step=1
-  - grow: INT default=2 min=-9999 max=9999 step=1
-  - blur: INT default=15 min=0 max=100 step=1
-  - shadow_color: STRING default='#000000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: InnerShadow V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=50 min=0 max=100 step=1
-  - distance_x: INT default=5 min=-9999 max=9999 step=1
-  - distance_y: INT default=5 min=-9999 max=9999 step=1
-  - grow: INT default=2 min=-9999 max=9999 step=1
-  - blur: INT default=15 min=0 max=100 step=1
-  - shadow_color: STRING default='#000000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: OuterGlow
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[screen, add, lighter, normal, multply, subtract, difference, darker, color_burn, color_dodge, ... +9]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - brightness: INT default=5 min=2 max=20 step=1
-  - glow_range: INT default=48 min=-9999 max=9999 step=1
-  - blur: INT default=25 min=0 max=9999 step=1
-  - light_color: STRING default='#FFBF30'
-  - glow_color: STRING default='#FE0000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: OuterGlow V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[screen, linear dodge(add), color dodge, lighten, dodge, hard light, linear light, normal, dissolve, darken, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - brightness: INT default=5 min=2 max=20 step=1
-  - glow_range: INT default=48 min=-9999 max=9999 step=1
-  - blur: INT default=25 min=0 max=9999 step=1
-  - light_color: STRING default='#FFBF30'
-  - glow_color: STRING default='#FE0000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: Stroke
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, multply, screen, add, subtract, difference, darker, lighter, color_burn, color_dodge, ... +9]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - stroke_grow: INT default=0 min=-999 max=999 step=1
-  - stroke_width: INT default=8 min=0 max=999 step=1
-  - blur: INT default=0 min=0 max=100 step=1
-  - stroke_color: STRING default='#FF0000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerStyle: Stroke V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerStyle
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - stroke_grow: INT default=0 min=-999 max=999 step=1
-  - stroke_width: INT default=8 min=0 max=999 step=1
-  - blur: INT default=0 min=0 max=100 step=1
-  - stroke_color: STRING default='#FF0000'
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerUtility: AnyRerouter
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - any: *
-- outputs: any:*
-
-## LayerUtility: BatchSelector
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/SystemIO
-- required:
-  - select: STRING default='0,'
-- optional:
-  - images: IMAGE
-  - masks: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: Boolean
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - bool_value: BOOLEAN default=False
-- outputs: boolean:BOOLEAN, string:STRING
-
-## LayerUtility: BooleanOperator
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - a: *
-  - b: *
-  - operator: COMBO[==, !=, >, <, >=, <=, and, or, xor, not(a), ... +2]
-- outputs: output:BOOLEAN
-
-## LayerUtility: BooleanOperatorV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - a_value: STRING default=''
-  - b_value: STRING default=''
-  - operator: COMBO[==, !=, >, <, >=, <=, and, or, xor, not(a), ... +2]
-- optional:
-  - a: *
-  - b: *
-- outputs: output:BOOLEAN, string:STRING
-
-## LayerUtility: CheckMask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - mask: MASK
-  - white_point: INT default=1 min=1 max=254 step=1
-  - area_percent: INT default=1 min=1 max=99 step=1
-- outputs: bool:BOOLEAN
-
-## LayerUtility: CheckMaskV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - mask: MASK
-  - method: COMBO[simple, detect_percent]
-  - white_point: INT default=1 min=1 max=254 step=1
-  - area_percent: FLOAT default=0.01 min=0 max=100 step=0.01
-- outputs: bool:BOOLEAN
-
-## LayerUtility: ChoiceTextPreset
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - text_preset: LS_TEXT_PRESET
-  - choice_title: STRING default=''
-  - random_choice: BOOLEAN default=False
-  - default: INT default=0 min=0 max=10000.0 step=1
-  - seed: INT default=0 min=0 max=1e+18 step=1
-- outputs: title:STRING, content:STRING
-
-## LayerUtility: ColorImage
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - width: INT default=512 min=4 max=99999 step=1
-  - height: INT default=512 min=4 max=99999 step=1
-  - color: STRING default='#000000'
-- outputs: image:IMAGE
-
-## LayerUtility: ColorImage V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - size: COMBO[custom, 1024 x 1024, 768 x 512, 512 x 768, 1280 x 720, 720 x 1280, 1344 x 768, 768 x 1344, 1536 x 640, 640 x 1536]
-  - custom_width: INT default=512 min=4 max=99999 step=1
-  - custom_height: INT default=512 min=4 max=99999 step=1
-  - color: STRING default='#000000'
-- optional:
-  - size_as: *
-- outputs: image:IMAGE
-
-## LayerUtility: ColorName
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - color: STRING default='#000000'
-  - palette: COMBO[xkcd, wiki_color, flux_sdxl, css4, css3, html4]
-- outputs: color_name:STRING
-
-## LayerUtility: ColorPicker
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - color: COLOR default='#FFFFFF'
-  - mode: COMBO[HEX, DEC]
-- outputs: value:STRING
-
-## LayerUtility: CropBoxResolve
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - crop_box: BOX
-- outputs: x:INT, y:INT, width:INT, height:INT
-
-## LayerUtility: CropByMask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - mask_for_crop: MASK
-  - invert_mask: BOOLEAN default=False
-  - detect: COMBO[min_bounding_rect, max_inscribed_rect, mask_area]
-  - top_reserve: INT default=20 min=-9999 max=9999 step=1
-  - bottom_reserve: INT default=20 min=-9999 max=9999 step=1
-  - left_reserve: INT default=20 min=-9999 max=9999 step=1
-  - right_reserve: INT default=20 min=-9999 max=9999 step=1
-- outputs: croped_image:IMAGE, croped_mask:MASK, crop_box:BOX, box_preview:IMAGE
-
-## LayerUtility: CropByMask V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - mask: MASK
-  - invert_mask: BOOLEAN default=False
-  - detect: COMBO[mask_area, min_bounding_rect, max_inscribed_rect]
-  - top_reserve: INT default=20 min=-9999 max=9999 step=1
-  - bottom_reserve: INT default=20 min=-9999 max=9999 step=1
-  - left_reserve: INT default=20 min=-9999 max=9999 step=1
-  - right_reserve: INT default=20 min=-9999 max=9999 step=1
-  - round_to_multiple: COMBO[8, 16, 32, 64, 128, 256, 512, None]
-- optional:
-  - crop_box: BOX
-- outputs: croped_image:IMAGE, croped_mask:MASK, crop_box:BOX, box_preview:IMAGE
-
-## LayerUtility: CropByMask V3
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - mask: MASK
-  - invert_mask: BOOLEAN default=False
-  - detect: COMBO[mask_area, min_bounding_rect, max_inscribed_rect]
-  - top_reserve: INT default=20 min=-9999 max=9999 step=1
-  - bottom_reserve: INT default=20 min=-9999 max=9999 step=1
-  - left_reserve: INT default=20 min=-9999 max=9999 step=1
-  - right_reserve: INT default=20 min=-9999 max=9999 step=1
-  - round_to_multiple: COMBO[8, 16, 32, 64, 128, 256, 512, None]
-- optional:
-  - crop_box: BOX
-- outputs: croped_image:IMAGE, croped_mask:MASK, crop_box:BOX, box_preview:IMAGE
-
-## LayerUtility: ExtendCanvas
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - top: INT default=0 min=0 max=99999 step=1
-  - bottom: INT default=0 min=0 max=99999 step=1
-  - left: INT default=0 min=0 max=99999 step=1
-  - right: INT default=0 min=0 max=99999 step=1
-  - color: COLOR default='#000000'
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: ExtendCanvasV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - top: INT default=0 min=-99999 max=99999 step=1
-  - bottom: INT default=0 min=-99999 max=99999 step=1
-  - left: INT default=0 min=-99999 max=99999 step=1
-  - right: INT default=0 min=-99999 max=99999 step=1
-  - color: STRING default='#000000'
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: Float
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - float_value: FLOAT default=0 min=-1e+18 max=1e+18 step=1e-05
-- outputs: float:FLOAT, string:STRING
-
-## LayerUtility: FluxKontextImageScale
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-- outputs: IMAGE:IMAGE
-
-## LayerUtility: GetImageSize
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-- outputs: width:INT, height:INT, original_size:BOX
-
-## LayerUtility: GetMainColors
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - k_means_algorithm: COMBO[lloyd, elkan]
-- outputs: preview_image:IMAGE, color_1:STRING, color_2:STRING, color_3:STRING, color_4:STRING, color_5:STRING
-
-## LayerUtility: GetMainColorsV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - k_means_algorithm: COMBO[lloyd, elkan]
-- outputs: preview_image:IMAGE, color_1:STRING, color_2:STRING, color_3:STRING, color_4:STRING, color_5:STRING
-
-## LayerUtility: GradientImage
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - width: INT default=512 min=4 max=99999 step=1
-  - height: INT default=512 min=4 max=99999 step=1
-  - angle: INT default=0 min=-360 max=360 step=1
-  - start_color: STRING default='#FFFFFF'
-  - end_color: STRING default='#000000'
-- outputs: image:IMAGE
-
-## LayerUtility: GradientImage V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - size: COMBO[custom, 1024 x 1024, 768 x 512, 512 x 768, 1280 x 720, 720 x 1280, 1344 x 768, 768 x 1344, 1536 x 640, 640 x 1536]
-  - custom_width: INT default=512 min=4 max=99999 step=1
-  - custom_height: INT default=512 min=4 max=99999 step=1
-  - angle: INT default=0 min=-360 max=360 step=1
-  - start_color: STRING default='#FFFFFF'
-  - end_color: STRING default='#000000'
-- optional:
-  - size_as: *
-- outputs: image:IMAGE
-
-## LayerUtility: GrayValue
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - color_value: *
-- outputs: gray(256_level):INT, gray(100_level):INT
-
-## LayerUtility: HLFrequencyDetailRestore
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - detail_image: IMAGE
-  - keep_high_freq: INT default=64 min=0 max=1023
-  - erase_low_freq: INT default=32 min=0 max=1023
-  - mask_blur: INT default=16 min=0 max=1023
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE
-
-## LayerUtility: HSV Value
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - color_value: *
-- outputs: H:INT, S:INT, V:INT
-
-## LayerUtility: ICMask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - first_image: IMAGE
-  - patch_mode: COMBO[auto, patch_right, patch_bottom] default='auto'
-  - output_length: INT default=1536
-  - patch_color: COMBO[#FF0000, #00FF00, #0000FF, #FFFFFF] default='#FFFFFF'
-- optional:
-  - first_mask: MASK
-  - second_image: IMAGE
-  - second_mask: MASK
-- outputs: image:IMAGE, mask:MASK, icmask_data:ICMASK_DATA
-
-## LayerUtility: ICMaskCropBack
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - icmask_data: ICMASK_DATA
-- outputs: IMAGE:IMAGE
-
-## LayerUtility: If 
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - if_condition: *
-  - when_TRUE: *
-  - when_FALSE: *
-- outputs: ?:*
-
-## LayerUtility: ImageBatchToList
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - image: IMAGE
-  - batch_size: INT default=6 min=1 max=64 step=1
-- outputs: image:IMAGE
-
-## LayerUtility: ImageBlend
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, multply, screen, add, subtract, difference, darker, lighter, color_burn, color_dodge, ... +9]
-  - opacity: INT default=100 min=0 max=100 step=1
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerUtility: ImageBlend V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE
-
-## LayerUtility: ImageBlendAdvance
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, multply, screen, add, subtract, difference, darker, lighter, color_burn, color_dodge, ... +9]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - x_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - y_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - mirror: COMBO[None, horizontal, vertical]
-  - scale: FLOAT default=1 min=0.01 max=100 step=0.01
-  - aspect_ratio: FLOAT default=1 min=0.01 max=100 step=0.01
-  - rotate: FLOAT default=0 min=-999999 max=999999 step=0.01
-  - transform_method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - anti_aliasing: INT default=0 min=0 max=16 step=1
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: ImageBlendAdvance V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - x_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - y_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - mirror: COMBO[None, horizontal, vertical]
-  - scale: FLOAT default=1 min=0.01 max=100 step=0.01
-  - aspect_ratio: FLOAT default=1 min=0.01 max=100 step=0.01
-  - rotate: FLOAT default=0 min=-999999 max=999999 step=0.01
-  - transform_method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - anti_aliasing: INT default=0 min=0 max=16 step=1
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: ImageBlendAdvance V3
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - blend_mode: COMBO[normal, dissolve, darken, multiply, color burn, linear burn, darker color, lighten, screen, color dodge, ... +20]
-  - opacity: INT default=100 min=0 max=100 step=1
-  - x_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - y_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - mirror: COMBO[None, horizontal, vertical]
-  - scale: FLOAT default=1 min=0.01 max=100 step=0.01
-  - aspect_ratio: FLOAT default=1 min=0.01 max=100 step=0.01
-  - rotate: FLOAT default=0 min=-999999 max=999999 step=0.01
-  - transform_method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - anti_aliasing: INT default=0 min=0 max=16 step=1
-- optional:
-  - background_image: IMAGE
-  - layer_mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: ImageChannelMerge
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - channel_1: IMAGE
-  - channel_2: IMAGE
-  - channel_3: IMAGE
-  - mode: COMBO[RGBA, YCbCr, LAB, HSV]
-- optional:
-  - channel_4: IMAGE
-- outputs: image:IMAGE
-
-## LayerUtility: ImageChannelSplit
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - mode: COMBO[RGBA, YCbCr, LAB, HSV]
-- outputs: channel_1:IMAGE, channel_2:IMAGE, channel_3:IMAGE, channel_4:IMAGE
-
-## LayerUtility: ImageCombineAlpha
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - RGB_image: IMAGE
-  - mask: MASK
-- outputs: RGBA_image:IMAGE
-
-## LayerUtility: ImageCompositeHandleMask
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - invert_mask: BOOLEAN default=True
-  - opacity: INT default=100 min=0 max=100 step=1
-  - x_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - y_percent: FLOAT default=50 min=-999 max=999 step=0.01
-  - scale: FLOAT default=1.0 min=0.001 max=10000.0 step=0.001
-  - rotate: FLOAT default=0 min=-360 max=360 step=0.01
-  - mirror: COMBO[None, horizontal, vertical]
-  - anti_aliasing: INT default=0 min=0 max=8 step=1
-  - handle_detect: COMBO[mask_area, layer_bbox]
-  - top_handle: FLOAT default=0.3 min=0 max=5 step=0.01
-  - bottom_handle: FLOAT default=0.3 min=0 max=5 step=0.01
-  - left_handle: FLOAT default=0.3 min=0 max=5 step=0.01
-  - right_handle: FLOAT default=0.3 min=0 max=5 step=0.01
-  - handle_mask_outradius: INT default=128 min=8 max=9999 step=1
-  - top_reserve: INT default=0 min=-9999 max=9999 step=1
-  - bottom_reserve: INT default=0 min=-9999 max=9999 step=1
-  - left_reserve: INT default=0 min=-9999 max=9999 step=1
-  - right_reserve: INT default=0 min=-9999 max=9999 step=1
-  - round_to_multiple: COMBO[8, 16, 32, 64, 128, 256, 512, None]
-- optional:
-  - layer_mask: MASK
-- outputs: image:IMAGE, mask:MASK, layer_bbox_mask:MASK, handle_mask:MASK, handle_crop_box:BOX, handle_overrange:STRING
-
-## LayerUtility: ImageHub
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - output: INT default=1 min=1 max=9 step=1
-  - random_output: BOOLEAN default=False
-- optional:
-  - input1_image: IMAGE
-  - input1_mask: MASK
-  - input2_image: IMAGE
-  - input2_mask: MASK
-  - input3_image: IMAGE
-  - input3_mask: MASK
-  - input4_image: IMAGE
-  - input4_mask: MASK
-  - input5_image: IMAGE
-  - input5_mask: MASK
-  - input6_image: IMAGE
-  - input6_mask: MASK
-  - input7_image: IMAGE
-  - input7_mask: MASK
-  - input8_image: IMAGE
-  - input8_mask: MASK
-  - input9_image: IMAGE
-  - input9_mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: ImageListToBatch
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - image: IMAGE
-- outputs: image:IMAGE
-
-## LayerUtility: ImageMaskScaleAs
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - scale_as: *
-  - fit: COMBO[letterbox, crop, fill]
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-- optional:
-  - image: IMAGE
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK, original_size:BOX, widht:INT, height:INT
-
-## LayerUtility: ImageMaskScaleAsV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - scale_as: *
-  - fit: COMBO[letterbox, crop, fill]
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - background_color: STRING default='#FFFFFF'
-- optional:
-  - image: IMAGE
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK, original_size:BOX, widht:INT, height:INT
-
-## LayerUtility: ImageOpacity
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - opacity: INT default=100 min=0 max=100 step=1
-  - invert_mask: BOOLEAN default=True
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: ImageReel
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image1: IMAGE
-  - image1_text: STRING default='image1'
-  - image2_text: STRING default='image2'
-  - image3_text: STRING default='image3'
-  - image4_text: STRING default='image4'
-  - reel_height: INT default=512 min=64 max=2048
-  - border: INT default=32 min=8 max=512
-- optional:
-  - image2: IMAGE
-  - image3: IMAGE
-  - image4: IMAGE
-- outputs: reel:Reel
-
-## LayerUtility: ImageReelComposit
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - reel_1: Reel
-  - font_file: COMBO[Alibaba-PuHuiTi-Heavy.ttf]
-  - font_size: INT default=40 min=4 max=1024
-  - border: INT default=32 min=8 max=512
-  - color_theme: COMBO[light, dark]
-- optional:
-  - reel_2: Reel
-  - reel_3: Reel
-  - reel_4: Reel
-- outputs: image1:IMAGE
-
-## LayerUtility: ImageRemoveAlpha
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - RGBA_image: IMAGE
-  - fill_background: BOOLEAN default=False
-  - background_color: STRING default='#000000'
-- optional:
-  - mask: MASK
-- outputs: RGB_image:IMAGE
-
-## LayerUtility: ImageScaleByAspectRatio
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - aspect_ratio: COMBO[original, custom, 1:1, 3:2, 4:3, 16:9, 2:3, 3:4, 9:16]
-  - proportional_width: INT default=2 min=1 max=999 step=1
-  - proportional_height: INT default=1 min=1 max=999 step=1
-  - fit: COMBO[letterbox, crop, fill]
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - round_to_multiple: COMBO[8, 16, 32, 64, 128, 256, 512, None]
-  - scale_to_longest_side: BOOLEAN default=False
-  - longest_side: INT default=1024 min=4 max=999999 step=1
-- optional:
-  - image: IMAGE
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK, original_size:BOX, width:INT, height:INT
-
-## LayerUtility: ImageScaleByAspectRatio V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - aspect_ratio: COMBO[original, custom, 1:1, 3:2, 4:3, 16:9, 2:3, 3:4, 9:16]
-  - proportional_width: INT default=1 min=1 max=100000000.0 step=1
-  - proportional_height: INT default=1 min=1 max=100000000.0 step=1
-  - fit: COMBO[letterbox, crop, fill]
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - round_to_multiple: COMBO[8, 16, 32, 64, 128, 256, 512, None]
-  - scale_to_side: COMBO[None, longest, shortest, width, height, total_pixel(kilo pixel)]
-  - scale_to_length: INT default=1024 min=4 max=100000000.0 step=1
-  - background_color: STRING default='#000000'
-- optional:
-  - image: IMAGE
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK, original_size:BOX, width:INT, height:INT
-
-## LayerUtility: ImageScaleRestore
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - scale: FLOAT default=1 min=0.01 max=100 step=0.01
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - scale_by_longest_side: BOOLEAN default=False
-  - longest_side: INT default=1024 min=4 max=999999 step=1
-- optional:
-  - mask: MASK
-  - original_size: BOX
-- outputs: image:IMAGE, mask:MASK, original_size:BOX, width:INT, height:INT
-
-## LayerUtility: ImageScaleRestore V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - scale: FLOAT default=1 min=0.01 max=100 step=0.01
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - scale_by: COMBO[by_scale, longest, shortest, width, height, total_pixel(kilo pixel)]
-  - scale_by_length: INT default=1024 min=4 max=99999999 step=1
-- optional:
-  - mask: MASK
-  - original_size: BOX
-- outputs: image:IMAGE, mask:MASK, original_size:BOX, width:INT, height:INT
-
-## LayerUtility: ImageShift
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - shift_x: INT default=256 min=-9999 max=9999 step=1
-  - shift_y: INT default=256 min=-9999 max=9999 step=1
-  - cyclic: BOOLEAN default=True
-  - background_color: STRING default='#000000'
-  - border_mask_width: INT default=20 min=0 max=999 step=1
-  - border_mask_blur: INT default=12 min=0 max=999 step=1
-- optional:
-  - mask: MASK
-- outputs: image:IMAGE, mask:MASK, border_mask:MASK
-
-## LayerUtility: ImageTaggerSave
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/SystemIO
-- required:
-  - image: IMAGE
-  - tag_text: STRING default=''
-  - custom_path: STRING default=''
-  - filename_prefix: STRING default='comfyui'
-  - timestamp: COMBO[None, second, millisecond]
-  - format: COMBO[png, jpg]
-  - quality: INT default=80 min=10 max=100 step=1
-  - preview: BOOLEAN default=True
-- outputs: 
-
-## LayerUtility: ImageTaggerSaveV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/SystemIO
-- required:
-  - image: IMAGE
-  - tag_text: STRING default=''
-  - custom_path: STRING default=''
-  - custom_filename: STRING default=''
-  - remove_custom_filename_ext: BOOLEAN default=True
-  - filename_prefix: STRING default='comfyui'
-  - timestamp: COMBO[None, second, millisecond]
-  - format: COMBO[png, jpg]
-  - quality: INT default=80 min=10 max=100 step=1
-  - preview: BOOLEAN default=True
-- outputs: 
-
-## LayerUtility: Integer
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - int_value: INT default=0 min=-1e+18 max=1e+18 step=1
-- outputs: int:INT, string:STRING
-
-## LayerUtility: LayerImageTransform
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - x: INT default=0 min=-99999 max=99999 step=1
-  - y: INT default=0 min=-99999 max=99999 step=1
-  - mirror: COMBO[None, horizontal, vertical]
-  - scale: FLOAT default=1 min=0.01 max=100 step=0.01
-  - aspect_ratio: FLOAT default=1 min=0.01 max=100 step=0.01
-  - rotate: FLOAT default=0 min=-999999 max=999999 step=0.01
-  - transform_method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - anti_aliasing: INT default=2 min=0 max=16 step=1
-- outputs: image:IMAGE
-
-## LayerUtility: LayerMaskTransform
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - mask: MASK
-  - x: INT default=0 min=-99999 max=99999 step=1
-  - y: INT default=0 min=-99999 max=99999 step=1
-  - mirror: COMBO[None, horizontal, vertical]
-  - scale: FLOAT default=1 min=0.01 max=100 step=0.01
-  - aspect_ratio: FLOAT default=1 min=0.01 max=100 step=0.01
-  - rotate: FLOAT default=0 min=-999999 max=999999 step=0.01
-  - transform_method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-  - anti_aliasing: INT default=2 min=0 max=16 step=1
-- outputs: mask:MASK
-
-## LayerUtility: LoadImagesFromPath
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/SystemIO
-- required:
-  - path: STRING
-- optional:
-  - image_load_cap: INT default=0 min=0 max=999999 step=1
-  - select_every_nth: INT default=1 min=1 max=999999 step=1
-- outputs: images:IMAGE, masks:MASK, file_name:STRING, frame_count:INT
-
-## LayerUtility: LoadVQAModel
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - model: COMBO[blip-vqa-base, blip-vqa-capfilt-large]
-  - precision: COMBO[fp16, fp32]
-  - device: COMBO[cuda, cpu]
-- outputs: vqa_model:VQA_MODEL
-
-## LayerUtility: NameToColor
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerColor
-- required:
-  - color_name: STRING default='white'
-  - palette: COMBO[xkcd, wiki_color, flux_sdxl, css4, css3, html4]
-  - in_palette_only: BOOLEAN default=False
-  - default_color: STRING default='#000000'
-  - size: COMBO[custom, 1024 x 1024, 768 x 512, 512 x 768, 1280 x 720, 720 x 1280, 1344 x 768, 768 x 1344, 1536 x 640, 640 x 1536]
-  - custom_width: INT default=512 min=4 max=99999 step=1
-  - custom_height: INT default=512 min=4 max=99999 step=1
-- optional:
-  - size_as: *
-- outputs: image:IMAGE, color:STRING
-
-## LayerUtility: NanoBananaImageScale
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - method: COMBO[lanczos, bicubic, hamming, bilinear, box, nearest]
-- outputs: IMAGE:IMAGE
-
-## LayerUtility: NumberCalculator
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - a: *
-  - b: *
-  - operator: COMBO[+, -, *, /, **, //, %, nth_root, min, max]
-- outputs: int:INT, float:FLOAT
-
-## LayerUtility: NumberCalculatorV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - a_value: STRING default=''
-  - b_value: STRING default=''
-  - operator: COMBO[+, -, *, /, **, //, %, nth_root, min, max]
-- optional:
-  - a: *
-  - b: *
-- outputs: int:INT, float:FLOAT, string:STRING
-
-## LayerUtility: PrintInfo
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - anything: *
-- outputs: text:STRING
-
-## LayerUtility: PurgeVRAM
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/SystemIO
-- required:
-  - anything: *
-  - purge_cache: BOOLEAN default=True
-  - purge_models: BOOLEAN default=True
-- outputs: 
-
-## LayerUtility: PurgeVRAM V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/SystemIO
-- required:
-  - anything: *
-  - purge_cache: BOOLEAN default=True
-  - purge_models: BOOLEAN default=True
-- outputs: any:*
-
-## LayerUtility: QueueStop
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/SystemIO
-- required:
-  - any: *
-  - mode: COMBO[stop, continue]
-  - stop: BOOLEAN default=True
-- outputs: any:*
-
-## LayerUtility: RandomGenerator
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - min_value: FLOAT default=0 min=-100000000000000.0 max=100000000000000.0 step=0.01
-  - max_value: FLOAT default=10 min=-100000000000000.0 max=100000000000000.0 step=0.01
-  - float_decimal_places: INT default=1 min=1 max=14 step=1
-  - fix_seed: BOOLEAN default=False
-- optional:
-  - image: IMAGE
-- outputs: int:INT, float:FLOAT, bool:BOOLEAN
-
-## LayerUtility: RandomGeneratorV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - min_value: FLOAT default=0 min=-100000000000000.0 max=100000000000000.0 step=0.01
-  - max_value: FLOAT default=10 min=-100000000000000.0 max=100000000000000.0 step=0.01
-  - least: FLOAT default=0 min=0 max=100000000000000.0 step=0.01
-  - float_decimal_places: INT default=1 min=1 max=14 step=1
-  - seed: INT default=0 min=0 max=100000000000000.0 step=1
-- optional:
-  - image: IMAGE
-- outputs: int:INT, float:FLOAT, bool:BOOLEAN
-
-## LayerUtility: RestoreCropBox
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - background_image: IMAGE
-  - croped_image: IMAGE
-  - invert_mask: BOOLEAN default=False
-  - crop_box: BOX
-- optional:
-  - croped_mask: MASK
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: RGB Value
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - color_value: *
-- outputs: R:INT, G:INT, B:INT
-
-## LayerUtility: RoundedRectangle
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - rounded_rect_radius: INT default=50 min=0 max=100 step=1
-  - anti_aliasing: INT default=2 min=0 max=16 step=1
-  - top: FLOAT default=8 min=-100 max=100 step=0.1
-  - bottom: FLOAT default=8 min=-100 max=100 step=0.1
-  - left: FLOAT default=8 min=-100 max=100 step=0.1
-  - right: FLOAT default=8 min=-100 max=100 step=0.1
-  - detect: COMBO[mask_area, min_bounding_rect, max_inscribed_rect]
-  - obj_ext_top: FLOAT default=8 min=-100 max=100 step=0.1
-  - obj_ext_bottom: FLOAT default=8 min=-100 max=100 step=0.1
-  - obj_ext_left: FLOAT default=8 min=-100 max=100 step=0.1
-  - obj_ext_right: FLOAT default=8 min=-100 max=100 step=0.1
-- optional:
-  - object_mask: MASK
-  - crop_box: BOX
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: Seed
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - seed: INT default=0 min=0 max=1e+18 step=1
-- outputs: seed:INT
-
-## LayerUtility: SimpleTextImage
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - text: STRING default='text'
-  - font_file: COMBO[Alibaba-PuHuiTi-Heavy.ttf]
-  - align: COMBO[center, left, right]
-  - char_per_line: INT default=80 min=1 max=8096 step=1
-  - leading: INT default=8 min=0 max=8096 step=1
-  - font_size: INT default=72 min=1 max=2500 step=1
-  - text_color: STRING default='#FFFFFF'
-  - stroke_width: INT default=0 min=0 max=8096 step=1
-  - stroke_color: STRING default='#FF8000'
-  - x_offset: INT default=0 min=0 max=8096 step=1
-  - y_offset: INT default=0 min=0 max=8096 step=1
-  - width: INT default=512 min=1 max=8096 step=1
-  - height: INT default=512 min=1 max=8096 step=1
-- optional:
-  - size_as: *
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: String
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - string: STRING
-- outputs: string:STRING
-
-## LayerUtility: StringCondition
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - text: STRING
-  - condition: COMBO[include, exclude, equal]
-  - sub_string: STRING
-- outputs: output:BOOLEAN, string:STRING
-
-## LayerUtility: SwitchCase
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - switch_condition: STRING default=''
-  - case_1: STRING default=''
-  - case_2: STRING default=''
-  - case_3: STRING default=''
-  - input_default: *
-- optional:
-  - input_1: *
-  - input_2: *
-  - input_3: *
-- outputs: ?:*
-
-## LayerUtility: TextBox
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - text: STRING
-- outputs: text:STRING
-
-## LayerUtility: TextImage
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - text: STRING default='Text'
-  - font_file: COMBO[Alibaba-PuHuiTi-Heavy.ttf]
-  - spacing: INT default=0 min=-9999 max=9999 step=1
-  - leading: INT default=0 min=-9999 max=9999 step=1
-  - horizontal_border: FLOAT default=5 min=-100 max=100 step=0.1
-  - vertical_border: FLOAT default=5 min=-100 max=100 step=0.1
-  - scale: FLOAT default=80 min=0.1 max=999 step=0.01
-  - variation_range: INT default=0 min=0 max=100 step=1
-  - variation_seed: INT default=123 min=0 max=999999999999 step=1
-  - layout: COMBO[horizontal, vertical]
-  - width: INT default=512 min=4 max=999999 step=1
-  - height: INT default=512 min=4 max=999999 step=1
-  - text_color: STRING default='#FFA000'
-  - background_color: STRING default='#FFFFFF'
-- optional:
-  - size_as: *
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: TextImage V2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - text: STRING default='Text'
-  - font_file: COMBO[Alibaba-PuHuiTi-Heavy.ttf]
-  - spacing: INT default=0 min=-9999 max=9999 step=1
-  - leading: INT default=0 min=-9999 max=9999 step=1
-  - horizontal_border: FLOAT default=5 min=-100 max=100 step=0.1
-  - vertical_border: FLOAT default=5 min=-100 max=100 step=0.1
-  - scale: FLOAT default=80 min=0.1 max=999 step=0.01
-  - variation_range: INT default=0 min=0 max=100 step=1
-  - variation_seed: INT default=123 min=0 max=999999999999 step=1
-  - layout: COMBO[horizontal, vertical]
-  - width: INT default=512 min=4 max=999999 step=1
-  - height: INT default=512 min=4 max=999999 step=1
-  - text_color: STRING default='#FFA000'
-  - background_color: STRING default='#FFFFFF'
-- optional:
-  - size_as: *
-- outputs: image:IMAGE, mask:MASK
-
-## LayerUtility: TextJoin
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - text_1: STRING default=''
-- optional:
-  - text_2: STRING default=''
-  - text_3: STRING default=''
-  - text_4: STRING default=''
-- outputs: text:STRING
-
-## LayerUtility: TextJoinV2
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - text_1: STRING default=''
-  - delimiter: STRING default=','
-- optional:
-  - text_2: STRING default=''
-  - text_3: STRING default=''
-  - text_4: STRING default=''
-- outputs: text:STRING
-
-## LayerUtility: TextPreseter
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - title: STRING default=''
-  - content: STRING default=''
-- optional:
-  - text_preset: LS_TEXT_PRESET
-- outputs: text_preset:LS_TEXT_PRESET
-
-## LayerUtility: VQAPrompt
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility
-- required:
-  - image: IMAGE
-  - vqa_model: VQA_MODEL
-  - question: STRING default='{age number} years old {ethnicity} {gender}, weared {garment...'
-- outputs: text:STRING
-
-## LayerUtility: XY to Percent
-module: custom_nodes.ComfyUI_LayerStyle | category: 😺dzNodes/LayerUtility/Data
-- required:
-  - background_image: IMAGE
-  - layer_image: IMAGE
-  - x: INT default=0 min=-99999 max=99999 step=1
-  - y: INT default=0 min=-99999 max=99999 step=1
-- outputs: x_percent:FLOAT, y_percent:FLOAT
 
 ## LazyCache
 module: comfy_extras.nodes_easycache | category: advanced/debug
@@ -14147,20 +8113,35 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/hunyuanvideo
   - strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.001
 - outputs: MODEL:MODEL
 
-## LeRes_DepthMap_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## LeReS-DepthMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
 - required:
-  - rm_nearest: FLOAT default=0.0 min=0.0 max=100 step=0.1
-  - rm_background: FLOAT default=0.0 min=0.0 max=100 step=0.1
+  - image: IMAGE
 - optional:
-  - boost: BOOLEAN default=False
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - rm_nearest: FLOAT default=0 min=0 max=100.0 step=0.01
+  - rm_background: FLOAT default=0 min=0 max=100.0 step=0.01
+  - boost: COMBO[disable, enable] default='disable'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
-## LineArt_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## LineArtPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
 - required:
-  - coarse: BOOLEAN default=False
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - image: IMAGE
+- optional:
+  - coarse: COMBO[disable, enable] default='disable'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## LineartStandardPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - guassian_sigma: FLOAT default=6.0 min=0 max=100.0 step=0.01
+  - intensity_threshold: INT default=8 min=0 max=16 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## List of any [Crystools]
 module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/List
@@ -14189,17 +8170,10 @@ module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/List
   - delimiter: STRING default=' '
 - outputs: concatenated:STRING, list_string:ListString
 
-## ListCounter //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - signal: *
-  - base_value: INT default=0 min=0 max=18446744073709551615
-- outputs: INT:INT
-
 ## Load image with metadata [Crystools]
 module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/Image
 - required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +3036]
+  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +3069]
 - outputs: image:IMAGE, mask:MASK, prompt:JSON, Metadata RAW:METADATA_RAW
 
 ## Load3D
@@ -14223,7 +8197,7 @@ module: comfy_extras.nodes_load_3d | category: 3d
 ## LoadAndResizeImage
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 - required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2894]
+  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2895]
   - resize: BOOLEAN default=False
   - width: INT default=512 min=0 max=16384 step=8
   - height: INT default=512 min=0 max=16384 step=8
@@ -14239,17 +8213,6 @@ module: comfy_extras.nodes_audio | category: audio
 - required:
   - audio: COMBO[5slock_ext_SB1r3.mp4, 5slock_lcv_SB1r3_24fps.mp4, MAX5S_ORC_B0_ST6_1344x768_noRIFE_s2015873178_00001_.mp4, MAXOPT_R3b_full_simple_sA_s43029049_00001_.mp4, MAXOPT_R3b_sA_tail2s_for_hop.mp4, MAX_1MIN_T0_PRIOR.mp4, MAX_REF_ORC_BJ_OPT_SCH_WARM_BETA_s25102401_00001_.mp4, c04_cell1_native.mp4, c04_cell1_tail22.mp4, c04_cell2_native.mp4, ... +66]
 - outputs: AUDIO:AUDIO
-
-## LoadAudioUI
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - audio: COMBO[5slock_ext_SB1r3.mp4, 5slock_lcv_SB1r3_24fps.mp4, MAX5S_ORC_B0_ST6_1344x768_noRIFE_s2015873178_00001_.mp4, MAXOPT_R3b_full_simple_sA_s43029049_00001_.mp4, MAXOPT_R3b_sA_tail2s_for_hop.mp4, MAX_1MIN_T0_PRIOR.mp4, MAX_REF_ORC_BJ_OPT_SCH_WARM_BETA_s25102401_00001_.mp4, c04_cell1_native.mp4, c04_cell1_tail22.mp4, c04_cell2_native.mp4, ... +66]
-  - start_time: FLOAT default=0.0 min=0.0 max=100000.0 step=0.01
-  - end_time: FLOAT default=0.0 min=0.0 max=100000.0 step=0.01
-  - duration: FLOAT default=0.0 min=0.0 max=100000.0 step=0.01
-- optional:
-  - audioUI: AUDIO_UI
-- outputs: audio:AUDIO, duration:FLOAT
 
 ## LoadBackgroundRemovalModel
 module: comfy_extras.nodes_bg_removal | category: model/loaders
@@ -14268,49 +8231,22 @@ module: comfy_extras.nodes_depth_anything_3 | category: model/loaders
   - weight_dtype: COMBO[default, fp16, bf16, fp32] default='default'
 - outputs: DA3_MODEL:DA3_MODEL
 
-## LoadDiffusionModelShared //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - model_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-4b-fp8.safetensors]
-  - weight_dtype: COMBO[default, fp8_e4m3fn, fp8_e4m3fn_fast, fp8_e5m2]
-  - key_opt: STRING
-  - mode: COMBO[Auto, Override Cache, Read Only]
-- outputs: model:MODEL, cache key:STRING
-
 ## LoadImage
 module: nodes | category: image
 - required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2816]
-- outputs: IMAGE:IMAGE, MASK:MASK
-
-## LoadImage //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/image
-- required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2895]
-  - image_data: STRING
+  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2817]
 - outputs: IMAGE:IMAGE, MASK:MASK
 
 ## LoadImageDataSetFromFolder
 module: comfy_extras.nodes_dataset | category: image
 - required:
-  - folder: COMBO[3d, community, community/bj_pov_20261030, community/flux_p1_20261030, community/hc, community/p15_poses, community/p15_stills, community/strip_tease_20261030_bedroom01, max_fair_cond, reference_images]
+  - folder: COMBO[3d, community, community/2026-10-31_klein_explicit_0010, community/bj_pov_20261030, community/bj_pov_20261102, community/flux_p1_20261030, community/flux_redo_20261030, community/hc, community/lora_conv_e10_20261103, community/p15_poses, ... +10]
 - outputs: images:IMAGE
-
-## LoadImageListFromDir //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: image
-- required:
-  - directory: STRING default=''
-- optional:
-  - image_load_cap: INT default=0 min=0 step=1
-  - start_index: INT default=0 min=0 max=18446744073709551615 step=1
-  - load_always: BOOLEAN default=False
-  - sort_method: COMBO[None, Alphabetical (ASC), Alphabetical (DESC), Numerical (ASC), Numerical (DESC), Datetime (ASC), Datetime (DESC)]
-- outputs: IMAGE:IMAGE, MASK:MASK, FILE PATH:STRING
 
 ## LoadImageMask
 module: nodes | category: image
 - required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2816]
+  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2817]
   - channel: COMBO[alpha, red, green, blue]
 - outputs: MASK:MASK
 
@@ -14319,17 +8255,6 @@ module: nodes | category: image
 - required:
   - image: COMBO
 - outputs: IMAGE:IMAGE, MASK:MASK
-
-## LoadImagesFromDir //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: image
-- required:
-  - directory: STRING default=''
-- optional:
-  - image_load_cap: INT default=0 min=0 step=1
-  - start_index: INT default=0 min=-1 max=18446744073709551615 step=1
-  - load_always: BOOLEAN default=False
-  - sort_method: COMBO[None, Alphabetical (ASC), Alphabetical (DESC), Numerical (ASC), Numerical (DESC), Datetime (ASC), Datetime (DESC)]
-- outputs: IMAGE:IMAGE, MASK:MASK, INT:INT
 
 ## LoadImagesFromFolderKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
@@ -14347,7 +8272,7 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 ## LoadImageTextDataSetFromFolder
 module: comfy_extras.nodes_dataset | category: image
 - required:
-  - folder: COMBO[3d, community, community/bj_pov_20261030, community/flux_p1_20261030, community/hc, community/p15_poses, community/p15_stills, community/strip_tease_20261030_bedroom01, max_fair_cond, reference_images]
+  - folder: COMBO[3d, community, community/2026-10-31_klein_explicit_0010, community/bj_pov_20261030, community/bj_pov_20261102, community/flux_p1_20261030, community/flux_redo_20261030, community/hc, community/lora_conv_e10_20261103, community/p15_poses, ... +10]
 - outputs: images:IMAGE, texts:STRING
 
 ## LoadLatent
@@ -14355,12 +8280,6 @@ module: nodes | category: model/latent
 - required:
   - latent: COMBO[]
 - outputs: LATENT:LATENT
-
-## LoadLBW //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/LoraBlockWeight
-- required:
-  - lbw_model: COMBO[]
-- outputs: LBW_MODEL:LBW_MODEL
 
 ## LoadMediaPipeFaceLandmarker
 module: comfy_extras.nodes_mediapipe | category: model/loaders
@@ -14373,49 +8292,6 @@ module: comfy_extras.nodes_moge | category: model/loaders
 - required:
   - model_name: COMBO[]
 - outputs: MOGE_MODEL:MOGE_MODEL
-
-## LoadPromptsFromDir //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - prompt_dir: COMBO[example]
-- optional:
-  - reload: BOOLEAN default=False
-  - load_cap: INT default=0 min=0 step=1
-  - start_index: INT default=0 min=-1 max=18446744073709551615 step=1
-- outputs: zipped_prompt:ZIPPED_PROMPT, count:INT, remaining_count:INT
-
-## LoadPromptsFromFile //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - prompt_file: COMBO[example\prompt1.txt, example\prompt2.txt]
-- optional:
-  - text_data_opt: STRING
-  - reload: BOOLEAN default=False
-  - load_cap: INT default=0 min=0 step=1
-  - start_index: INT default=0 min=-1 max=18446744073709551615 step=1
-- outputs: zipped_prompt:ZIPPED_PROMPT, count:INT, remaining_count:INT
-
-## LoadSinglePromptFromFile //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - prompt_file: COMBO[example\prompt1.txt, example\prompt2.txt]
-  - index: INT default=0 min=0 max=18446744073709551615
-- optional:
-  - text_data_opt: STRING
-- outputs: ZIPPED_PROMPT:ZIPPED_PROMPT
-
-## LoadTextEncoderShared //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - model_name1: COMBO[clip_l.safetensors, qwen3vl_32b_minimax_h3_int4_convrot.safetensors, qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors, qwen_3_4b.safetensors, qwen_3_8b_fp8mixed.safetensors, umt5_xxl_fp8_e4m3fn_scaled.safetensors]
-  - model_name2: COMBO[None, clip_l.safetensors, qwen3vl_32b_minimax_h3_int4_convrot.safetensors, qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors, qwen_3_4b.safetensors, qwen_3_8b_fp8mixed.safetensors, umt5_xxl_fp8_e4m3fn_scaled.safetensors]
-  - model_name3: COMBO[None, clip_l.safetensors, qwen3vl_32b_minimax_h3_int4_convrot.safetensors, qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors, qwen_3_4b.safetensors, qwen_3_8b_fp8mixed.safetensors, umt5_xxl_fp8_e4m3fn_scaled.safetensors]
-  - type: COMBO[stable_diffusion, stable_cascade, sd3, stable_audio, mochi, ltxv, pixart, cosmos, sdxl, flux, ... +1]
-  - key_opt: STRING
-  - mode: COMBO[Auto, Override Cache, Read Only]
-- optional:
-  - device: COMBO[default, cpu]
-- outputs: clip:CLIP, cache key:STRING
 
 ## LoadText|pysssss
 module: custom_nodes.ComfyUI-Custom-Scripts | category: utils
@@ -14439,7 +8315,7 @@ module: comfy_extras.nodes_video | category: video
 ## LoadVideoDataSetFromFolder
 module: comfy_extras.nodes_dataset | category: video
 - required:
-  - folder: COMBO[3d, community, community/bj_pov_20261030, community/flux_p1_20261030, community/hc, community/p15_poses, community/p15_stills, community/strip_tease_20261030_bedroom01, max_fair_cond, reference_images]
+  - folder: COMBO[3d, community, community/2026-10-31_klein_explicit_0010, community/bj_pov_20261030, community/bj_pov_20261102, community/flux_p1_20261030, community/flux_redo_20261030, community/hc, community/lora_conv_e10_20261103, community/p15_poses, ... +10]
 - outputs: videos:VIDEO
 
 ## LoadVideosFromFolder
@@ -14460,29 +8336,8 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/misc
 ## LoadVideoTextDataSetFromFolder
 module: comfy_extras.nodes_dataset | category: video
 - required:
-  - folder: COMBO[3d, community, community/bj_pov_20261030, community/flux_p1_20261030, community/hc, community/p15_poses, community/p15_stills, community/strip_tease_20261030_bedroom01, max_fair_cond, reference_images]
+  - folder: COMBO[3d, community, community/2026-10-31_klein_explicit_0010, community/bj_pov_20261030, community/bj_pov_20261102, community/flux_p1_20261030, community/flux_redo_20261030, community/hc, community/lora_conv_e10_20261103, community/p15_poses, ... +10]
 - outputs: videos:VIDEO, texts:STRING
-
-## LoadVideoUI
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - video: STRING default=''
-  - start_time: FLOAT default=0.0 min=0.0 max=100000.0 step=0.01
-  - end_time: FLOAT default=0.0 min=0.0 max=100000.0 step=0.01
-  - duration: FLOAT default=0.0 min=0.0 max=100000.0 step=0.01
-  - start_frame: INT default=0 min=0 max=10000000 step=1
-  - end_frame: INT default=0 min=0 max=10000000 step=1
-  - duration_frames: INT default=0 min=0 max=10000000 step=1
-  - resize_method: COMBO[maintain aspect ratio, stretch to fit, pad, crop] default='maintain aspect ratio'
-  - custom_width: INT default=0 min=0 max=100000 step=8
-  - custom_height: INT default=0 min=0 max=100000 step=8
-  - frame_rate: INT default=24 min=1 max=120 step=1
-  - display_mode: COMBO[seconds, frames] default='seconds'
-  - crop_x: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - crop_y: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - crop_w: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - crop_h: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-- outputs: images:IMAGE, audio:AUDIO, duration:FLOAT, frame_count:INT
 
 ## LokkenVideoPostProcessing
 module: custom_nodes.ComfyUI-Lokken-VideoTools | category: Lokken/Video
@@ -14571,24 +8426,15 @@ module: custom_nodes.rgthree-comfy | category: rgthree
 - required:
   - model: MODEL
   - clip: CLIP
-  - lora_01: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
+  - lora_01: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49]
   - strength_01: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_02: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
+  - lora_02: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49]
   - strength_02: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_03: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
+  - lora_03: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49]
   - strength_03: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_04: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
+  - lora_04: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49]
   - strength_04: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
 - outputs: MODEL:MODEL, CLIP:CLIP
-
-## LoraBlockInfo //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/LoraBlockWeight
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
-  - block_info: STRING
-- outputs: 
 
 ## LoraExtractKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/lora
@@ -14611,35 +8457,17 @@ module: nodes | category: model/loaders
 - required:
   - model: MODEL
   - clip: CLIP
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
   - strength_clip: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
 - outputs: MODEL:MODEL, CLIP:CLIP
-
-## LoraLoaderBlockWeight //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/LoraBlockWeight
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - category_filter: COMBO[All, ]
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
-  - strength_model: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - strength_clip: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - inverse: BOOLEAN default=False
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - A: FLOAT default=4.0 min=-10.0 max=10.0 step=0.01
-  - B: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - preset: COMBO[Preset, SD-NONE:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, SD-ALL:1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, SD-INS:1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, SD-IND:1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0, SD-INALL:1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0, SD-MIDD:1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0, SD-MIDD0.2:1,0,0,0,0,0,0.2,0.4,0.4,0.2,0,0,0,0,0,0,0, SD-MIDD0.8:1,0,0,0,0,0.5,0.8,0.8,0.4,0,0,0,0,0,0,0,0, SD-MOUT:1,0,0,0,0,0,1,1,1,1,1,1,1,1,0.5,0,0, ... +32]
-  - block_vector: STRING default='1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1'
-  - bypass: BOOLEAN default=False
-- outputs: model:MODEL, clip:CLIP, populated_vector:STRING
 
 ## LoraLoaderBypass
 module: comfy_extras.nodes_lora_debug | category: model/loaders
 - required:
   - model: MODEL
   - clip: CLIP
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
   - strength_clip: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
 - outputs: MODEL:MODEL, CLIP:CLIP
@@ -14648,7 +8476,7 @@ module: comfy_extras.nodes_lora_debug | category: model/loaders
 module: comfy_extras.nodes_lora_debug | category: model/loaders
 - required:
   - model: MODEL
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
 - outputs: MODEL:MODEL
 
@@ -14656,7 +8484,7 @@ module: comfy_extras.nodes_lora_debug | category: model/loaders
 module: nodes | category: model/loaders
 - required:
   - model: MODEL
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
 - outputs: MODEL:MODEL
 
@@ -14665,7 +8493,7 @@ module: custom_nodes.ComfyUI-Custom-Scripts | category: model/loaders
 - required:
   - model: MODEL
   - clip: CLIP
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
   - strength_clip: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
 - optional:
@@ -14684,7 +8512,7 @@ module: comfy_extras.nodes_train | category: model/loaders
 ## LoraReduceRankKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/lora
 - required:
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - new_rank: INT default=8 min=1 max=4096 step=1
   - dynamic_method: COMBO[disabled, sv_ratio, sv_cumulative, sv_fro, sv_knee] default='disabled'
   - dynamic_param: FLOAT default=0.2 min=0.0 max=2.0 step=0.01
@@ -14707,7 +8535,7 @@ module: comfy_extras.nodes_lora_extract | category: experimental
 ## LoraSelector
 module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
 - required:
-  - lora_name: COMBO[aidmaNSFWunlock_v2.safetensors, bfs_head_v1_flux-klein_9b_step3750_rank64.safetensors, clothes_remover_v0.safetensors, FC_SYDNEY_h3_face_v1.safetensors, h3_antiburn_universal_v1.safetensors, hm_nsfw_mis_doggy_only_v16_r32_384_minimax-h3_epoch170.safetensors, HMNSFW-AIO-V2.5.safetensors, klein_snofs_v1_1.safetensors, klein_snofs_v1_4.safetensors, Kutan Megamalamar Transformation.safetensors, ... +14]
+  - lora_name: COMBO[aidmaNSFWunlock_v2.safetensors, bfs_head_v1_flux-klein_9b_step3750_rank64.safetensors, clothes_remover_v0.safetensors, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, ... +48]
 - optional:
   - run_after: * default=''
 - outputs: LoRA:*
@@ -14715,7 +8543,7 @@ module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
 ## LorasForFluxParams+
 module: custom_nodes.ComfyUI_essentials | category: essentials/sampling
 - required:
-  - lora_1: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_1: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - strength_model_1: STRING default='1.0'
 - outputs: LORA_PARAMS:LORA_PARAMS
 
@@ -14729,6 +8557,38 @@ module: comfy_extras.nodes_train | category: model/training
 ## LotusConditioning
 module: comfy_extras.nodes_lotus | category: model/conditioning/lotus
 - outputs: conditioning:CONDITIONING
+
+## LTX25MultishotSampler
+module: custom_nodes.ComfyUI-H3-Multishot | category: video/ltx
+- required:
+  - model: MODEL
+  - clip: CLIP
+  - video_vae: VAE
+  - audio_vae: VAE
+  - prompts: STRING default=''
+  - negative: STRING default='pc game, console game, video game, cartoon, childish, ugly'
+  - width: INT default=960 min=256 max=1920 step=32
+  - height: INT default=544 min=256 max=1920 step=32
+  - frames_per_shot: INT default=193 min=25 max=1441 step=8
+  - shot_count: INT default=0 min=0 max=64
+  - join: COMBO[continue (AV extend: seamless take), cut (voice extends, new picture), fresh (independent shots)] default='continue (AV extend: seamless take)'
+  - overlap: INT default=3 min=1 max=12
+  - seed: INT default=553010 min=0 max=18446744073709551615
+  - seed_per_shot: BOOLEAN default=True
+  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35] default='euler_ancestral'
+  - sigmas_pass1: STRING default='1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421...'
+  - two_pass: BOOLEAN default=True
+  - sigmas_pass2: STRING default='0.85, 0.7250, 0.4219, 0.0'
+  - video_cfg: FLOAT default=1.0 min=0.0 max=20.0 step=0.05
+  - audio_cfg: FLOAT default=1.0 min=0.0 max=20.0 step=0.05
+  - frame_rate: FLOAT default=24.0 min=12.0 max=60.0 step=1.0
+  - save_every_shot: BOOLEAN default=False
+- optional:
+  - upscale_model: LATENT_UPSCALE_MODEL
+  - start_image: IMAGE
+  - shot_images: IMAGE
+  - image_strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.05
+- outputs: images:IMAGE, audio:AUDIO, info:STRING
 
 ## LTX2_NAG
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/ltxv
@@ -14818,7 +8678,7 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/ltxv
 ## LTX2LoraLoaderAdvanced
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/ltxv
 - required:
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
   - model: MODEL
   - strength_model: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
   - video: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
@@ -14930,71 +8790,6 @@ module: comfy_extras.nodes_lt_audio | category: model/loaders
   - device: COMBO[default, cpu]
 - outputs: CLIP:CLIP
 
-## LTXDirector
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - start_second: FLOAT default=0.0 min=0.0 max=1000.0 step=0.01
-  - end_second: FLOAT default=5.0 min=0.0 max=1000.0 step=0.01
-  - duration_seconds: FLOAT default=5.0 min=0.1 max=1000.0 step=0.01
-  - start_frame: INT default=0 min=0 max=10000 step=1
-  - end_frame: INT default=120 min=1 max=10000 step=1
-  - duration_frames: INT default=120 min=1 max=10000 step=1
-  - timeline_data: STRING default=''
-  - local_prompts: STRING default=''
-  - segment_lengths: STRING default=''
-  - epsilon: FLOAT default=0.001 min=0.0001 max=0.99 step=0.0001
-  - guide_strength: STRING default=''
-- optional:
-  - audio_vae: VAE
-  - optional_latent: LATENT
-  - global_prompt: STRING default=''
-  - use_custom_audio: BOOLEAN default=False
-  - use_custom_motion: BOOLEAN default=True
-  - inpaint_audio: BOOLEAN default=True
-  - frame_rate: FLOAT default=24 min=1 max=240 step=1
-  - display_mode: COMBO[frames, seconds] default='seconds'
-  - custom_width: INT default=0 min=0 max=8192 step=1
-  - custom_height: INT default=0 min=0 max=8192 step=1
-  - resize_method: COMBO[maintain aspect ratio, stretch to fit, pad, pad green, crop] default='maintain aspect ratio'
-  - divisible_by: INT default=32 min=1 max=256 step=1
-  - img_compression: INT default=18 min=0 max=100 step=1
-  - override_audio: BOOLEAN default=False
-- outputs: model:MODEL, positive:CONDITIONING, video_latent:LATENT, audio_latent:LATENT, guide_data:GUIDE_DATA, motion_guide_data:MOTION_GUIDE_DATA, frame_rate:FLOAT, combined_audio:AUDIO
-
-## LTXDirectorCropGuides
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - latent: LATENT
-- outputs: positive:CONDITIONING, negative:CONDITIONING, latent:LATENT
-
-## LTXDirectorGuide
-module: custom_nodes.LTX_Director | category: sd
-- required:
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - vae: VAE
-  - latent: LATENT
-  - guide_data: GUIDE_DATA
-- optional:
-  - motion_guide_data: MOTION_GUIDE_DATA
-  - model: MODEL
-  - ic_lora_name: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
-  - ic_lora_strength: FLOAT default=1.0 min=-100.0 max=100.0 step=0.01
-  - scale_by: FLOAT default=1.0 min=0.01 max=8.0 step=0.01
-  - upscale_method: COMBO[nearest-exact, bilinear, area, bicubic, bislerp] default='bicubic'
-  - image_attention_strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - crop: COMBO[disabled, center] default='center'
-  - auto_snap_ic_grid: BOOLEAN default=True
-  - use_tiled_encode: BOOLEAN default=False
-  - tile_size: INT default=256 min=64 max=512 step=32
-  - tile_overlap: INT default=64 min=16 max=256 step=16
-  - retake_mode: BOOLEAN default=False
-- outputs: positive:CONDITIONING, negative:CONDITIONING, latent:LATENT, model:MODEL, latent_downscale_factor:FLOAT
-
 ## LTXFaceDetector
 module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/Identity
 - required:
@@ -15004,116 +8799,6 @@ module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/Identity
   - fallback_bbox: STRING default=''
   - debug: BOOLEAN default=False
 - outputs: face_bbox:STRING
-
-## LTXKeyframer
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - vae: VAE
-  - latent: LATENT
-  - multi_input: IMAGE
-  - num_images: INT default=1 min=0 max=50 step=1
-- optional:
-  - insert_frame_1: INT default=0 min=-9999 max=9999 step=1
-  - strength_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_2: INT default=0 min=-9999 max=9999 step=1
-  - strength_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_3: INT default=0 min=-9999 max=9999 step=1
-  - strength_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_4: INT default=0 min=-9999 max=9999 step=1
-  - strength_4: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_5: INT default=0 min=-9999 max=9999 step=1
-  - strength_5: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_6: INT default=0 min=-9999 max=9999 step=1
-  - strength_6: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_7: INT default=0 min=-9999 max=9999 step=1
-  - strength_7: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_8: INT default=0 min=-9999 max=9999 step=1
-  - strength_8: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_9: INT default=0 min=-9999 max=9999 step=1
-  - strength_9: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_10: INT default=0 min=-9999 max=9999 step=1
-  - strength_10: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_11: INT default=0 min=-9999 max=9999 step=1
-  - strength_11: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_12: INT default=0 min=-9999 max=9999 step=1
-  - strength_12: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_13: INT default=0 min=-9999 max=9999 step=1
-  - strength_13: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_14: INT default=0 min=-9999 max=9999 step=1
-  - strength_14: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_15: INT default=0 min=-9999 max=9999 step=1
-  - strength_15: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_16: INT default=0 min=-9999 max=9999 step=1
-  - strength_16: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_17: INT default=0 min=-9999 max=9999 step=1
-  - strength_17: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_18: INT default=0 min=-9999 max=9999 step=1
-  - strength_18: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_19: INT default=0 min=-9999 max=9999 step=1
-  - strength_19: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_20: INT default=0 min=-9999 max=9999 step=1
-  - strength_20: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_21: INT default=0 min=-9999 max=9999 step=1
-  - strength_21: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_22: INT default=0 min=-9999 max=9999 step=1
-  - strength_22: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_23: INT default=0 min=-9999 max=9999 step=1
-  - strength_23: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_24: INT default=0 min=-9999 max=9999 step=1
-  - strength_24: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_25: INT default=0 min=-9999 max=9999 step=1
-  - strength_25: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_26: INT default=0 min=-9999 max=9999 step=1
-  - strength_26: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_27: INT default=0 min=-9999 max=9999 step=1
-  - strength_27: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_28: INT default=0 min=-9999 max=9999 step=1
-  - strength_28: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_29: INT default=0 min=-9999 max=9999 step=1
-  - strength_29: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_30: INT default=0 min=-9999 max=9999 step=1
-  - strength_30: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_31: INT default=0 min=-9999 max=9999 step=1
-  - strength_31: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_32: INT default=0 min=-9999 max=9999 step=1
-  - strength_32: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_33: INT default=0 min=-9999 max=9999 step=1
-  - strength_33: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_34: INT default=0 min=-9999 max=9999 step=1
-  - strength_34: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_35: INT default=0 min=-9999 max=9999 step=1
-  - strength_35: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_36: INT default=0 min=-9999 max=9999 step=1
-  - strength_36: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_37: INT default=0 min=-9999 max=9999 step=1
-  - strength_37: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_38: INT default=0 min=-9999 max=9999 step=1
-  - strength_38: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_39: INT default=0 min=-9999 max=9999 step=1
-  - strength_39: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_40: INT default=0 min=-9999 max=9999 step=1
-  - strength_40: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_41: INT default=0 min=-9999 max=9999 step=1
-  - strength_41: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_42: INT default=0 min=-9999 max=9999 step=1
-  - strength_42: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_43: INT default=0 min=-9999 max=9999 step=1
-  - strength_43: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_44: INT default=0 min=-9999 max=9999 step=1
-  - strength_44: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_45: INT default=0 min=-9999 max=9999 step=1
-  - strength_45: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_46: INT default=0 min=-9999 max=9999 step=1
-  - strength_46: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_47: INT default=0 min=-9999 max=9999 step=1
-  - strength_47: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_48: INT default=0 min=-9999 max=9999 step=1
-  - strength_48: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_49: INT default=0 min=-9999 max=9999 step=1
-  - strength_49: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_50: INT default=0 min=-9999 max=9999 step=1
-  - strength_50: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- outputs: latent:LATENT
 
 ## LTXLatentAnchor
 module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/Identity
@@ -15244,51 +8929,51 @@ module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/LoRA
   - model: MODEL
   - num_loras: INT default=1 min=1 max=12 step=1
 - optional:
-  - lora_1: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_1: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_1: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_1: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_1: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_2: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_2: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_2: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_2: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_2: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_3: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_3: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_3: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_3: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_3: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_4: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_4: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_4: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_4: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_4: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_5: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_5: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_5: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_5: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_5: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_6: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_6: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_6: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_6: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_6: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_7: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_7: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_7: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_7: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_7: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_8: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_8: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_8: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_8: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_8: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_9: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_9: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_9: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_9: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_9: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_10: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_10: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_10: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_10: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_10: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_11: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_11: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_11: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_11: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_11: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - lora_12: COMBO[None, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15] default='None'
+  - lora_12: COMBO[None, FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, ... +49] default='None'
   - strength_12: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - audio_weight_12: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
   - video_weight_12: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
@@ -15341,170 +9026,6 @@ module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/Debug
 - required:
   - model: MODEL
 - outputs: model:MODEL, report:STRING
-
-## LTXSequencer
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - vae: VAE
-  - latent: LATENT
-  - multi_input: IMAGE
-  - num_images: INT default=1 min=0 max=50 step=1
-  - insert_mode: COMBO[frames, seconds] default='frames'
-  - frame_rate: INT default=24 min=1 max=120 step=1
-- optional:
-  - insert_frame_1: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_1: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_2: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_2: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_3: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_3: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_4: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_4: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_4: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_5: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_5: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_5: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_6: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_6: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_6: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_7: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_7: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_7: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_8: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_8: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_8: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_9: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_9: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_9: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_10: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_10: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_10: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_11: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_11: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_11: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_12: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_12: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_12: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_13: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_13: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_13: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_14: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_14: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_14: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_15: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_15: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_15: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_16: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_16: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_16: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_17: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_17: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_17: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_18: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_18: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_18: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_19: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_19: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_19: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_20: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_20: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_20: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_21: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_21: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_21: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_22: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_22: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_22: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_23: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_23: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_23: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_24: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_24: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_24: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_25: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_25: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_25: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_26: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_26: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_26: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_27: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_27: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_27: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_28: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_28: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_28: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_29: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_29: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_29: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_30: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_30: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_30: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_31: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_31: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_31: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_32: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_32: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_32: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_33: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_33: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_33: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_34: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_34: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_34: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_35: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_35: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_35: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_36: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_36: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_36: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_37: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_37: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_37: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_38: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_38: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_38: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_39: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_39: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_39: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_40: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_40: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_40: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_41: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_41: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_41: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_42: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_42: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_42: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_43: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_43: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_43: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_44: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_44: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_44: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_45: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_45: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_45: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_46: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_46: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_46: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_47: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_47: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_47: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_48: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_48: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_48: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_49: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_49: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_49: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - insert_frame_50: INT default=0 min=-9999 max=9999 step=1
-  - insert_second_50: FLOAT default=0.0 min=0.0 max=9999.0 step=0.1
-  - strength_50: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- outputs: positive:CONDITIONING, negative:CONDITIONING, latent:LATENT
 
 ## LTXTextAttentionAmplifier
 module: custom_nodes.10S-Comfy-nodes | category: 10S Nodes/Identity
@@ -16020,15 +9541,14 @@ module: comfy_api_nodes.nodes_luma | category: partner/video/Luma
   - luma_concepts: LUMA_CONCEPTS
 - outputs: VIDEO:VIDEO
 
-## M2M VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
+## M-LSDPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
 - required:
-  - ckpt_name: COMBO[M2M.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=1000
+  - image: IMAGE
 - optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
+  - score_threshold: FLOAT default=0.1 min=0.01 max=2.0 step=0.01
+  - dist_threshold: FLOAT default=0.1 min=0.01 max=20.0 step=0.01
+  - resolution: INT default=512 min=64 max=16384 step=64
 - outputs: IMAGE:IMAGE
 
 ## MagnificImageRelightNode
@@ -16102,50 +9622,6 @@ module: comfy_extras.nodes_mahiro | category: experimental
   - model: MODEL
 - outputs: patched_model:MODEL
 
-## Make Interpolation State List
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - frame_indices: STRING default='1,2,3'
-  - is_skip_list: BOOLEAN default=True
-- outputs: INTERPOLATION_STATES:INTERPOLATION_STATES
-
-## MakeBasicPipe //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - ckpt_name: COMBO[]
-  - ckpt_key_opt: STRING
-  - positive_wildcard_text: STRING
-  - negative_wildcard_text: STRING
-  - Add selection to: BOOLEAN default=True
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-  - wildcard_mode: COMBO[populate, fixed, reproduce] default='populate'
-  - positive_populated_text: STRING
-  - negative_populated_text: STRING
-  - token_normalization: COMBO[none, mean, length, length+mean]
-  - weight_interpretation: COMBO[comfy, A1111, compel, comfy++, down_weight] default='comfy++'
-  - stop_at_clip_layer: INT default=-2 min=-24 max=-1 step=1
-  - seed: INT default=0 min=0 max=18446744073709551615
-- optional:
-  - vae_opt: VAE
-- outputs: basic_pipe:BASIC_PIPE, cache_key:STRING
-
-## MakeLBW //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/LoraBlockWeight
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - category_filter: COMBO[All, ]
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
-  - inverse: BOOLEAN default=False
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - A: FLOAT default=4.0 min=-10.0 max=10.0 step=0.01
-  - B: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - preset: COMBO[Preset, SD-NONE:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, SD-ALL:1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, SD-INS:1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, SD-IND:1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0, SD-INALL:1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0, SD-MIDD:1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0, SD-MIDD0.2:1,0,0,0,0,0,0.2,0.4,0.4,0.2,0,0,0,0,0,0,0, SD-MIDD0.8:1,0,0,0,0,0.5,0.8,0.8,0.4,0,0,0,0,0,0,0,0, SD-MOUT:1,0,0,0,0,0,1,1,1,1,1,1,1,1,0.5,0,0, ... +32]
-  - block_vector: STRING default='1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1'
-  - bypass: BOOLEAN default=False
-- outputs: lbw_model:LBW_MODEL, populated_vector:STRING
-
 ## MakeTrainingDataset
 module: comfy_extras.nodes_dataset | category: model/training
 - required:
@@ -16156,9 +9632,13 @@ module: comfy_extras.nodes_dataset | category: model/training
   - texts: STRING
 - outputs: latents:LATENT, conditioning:CONDITIONING
 
-## Manga2Anime_LineArt_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+## Manga2Anime_LineArt_Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## ManualSigmas
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/sigmas
@@ -16215,38 +9695,6 @@ module: comfy_extras.nodes_mask | category: image/mask
   - y: INT default=0 min=0 max=16384 step=1
   - operation: COMBO[multiply, add, subtract, and, or, xor]
 - outputs: MASK:MASK
-
-## MaskDetailerPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - image: IMAGE
-  - mask: MASK
-  - basic_pipe: BASIC_PIPE
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=1024 min=64 max=16384 step=8
-  - mask_mode: BOOLEAN default=True
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=10 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-  - batch_size: INT default=1 min=1 max=100
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - refiner_basic_pipe_opt: BASIC_PIPE
-  - detailer_hook: DETAILER_HOOK
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - bbox_fill: BOOLEAN default=False
-  - contour_fill: BOOLEAN default=True
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: image:IMAGE, cropped_refined:IMAGE, cropped_enhanced_alpha:IMAGE, basic_pipe:BASIC_PIPE, refiner_basic_pipe_opt:BASIC_PIPE
 
 ## MaskExpandBatch+
 module: custom_nodes.ComfyUI_essentials | category: essentials/mask batch
@@ -16321,11 +9769,12 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/mask
   - fill_holes: BOOLEAN default=False
 - outputs: MASK:MASK
 
-## MaskListToMaskBatch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
+## MaskOptFlow
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Optical Flow
 - required:
+  - optical_flow: OPTICAL_FLOW
   - mask: MASK
-- outputs: MASK:MASK
+- outputs: OPTICAL_FLOW:OPTICAL_FLOW, PREVIEW_IMAGE:IMAGE
 
 ## MaskOrImageToWeight
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/weights
@@ -16348,28 +9797,6 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/mask
   - mask: MASK
 - outputs: images:IMAGE
 
-## MaskRectArea
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - x: INT default=0 min=0 max=100 step=1
-  - y: INT default=0 min=0 max=100 step=1
-  - width: INT default=50 min=0 max=100 step=1
-  - height: INT default=50 min=0 max=100 step=1
-  - blur_radius: INT default=0 min=0 step=1
-- outputs: MASK:MASK
-
-## MaskRectAreaAdvanced
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - x: INT default=0 min=0 step=1
-  - y: INT default=0 min=0 step=1
-  - width: INT default=256 min=0 step=1
-  - height: INT default=320 min=0 step=1
-  - image_width: INT default=512 min=1 step=1
-  - image_height: INT default=320 min=1 step=1
-  - blur_radius: INT default=0 min=0 step=1
-- outputs: MASK:MASK
-
 ## MaskSmooth+
 module: custom_nodes.ComfyUI_essentials | category: essentials/mask
 - required:
@@ -16377,39 +9804,11 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/mask
   - amount: INT default=0 min=0 max=127 step=1
 - outputs: MASK:MASK
 
-## MasksToMaskList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- optional:
-  - masks: MASK
-- outputs: MASK:MASK
-
 ## MaskToImage
 module: comfy_extras.nodes_mask | category: image/mask
 - required:
   - mask: MASK
 - outputs: IMAGE:IMAGE
-
-## MaskToSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - mask: MASK
-  - combined: BOOLEAN default=False
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - bbox_fill: BOOLEAN default=False
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - contour_fill: BOOLEAN default=False
-- outputs: SEGS:SEGS
-
-## MaskToSEGS_for_AnimateDiff
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - mask: MASK
-  - combined: BOOLEAN default=False
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - bbox_fill: BOOLEAN default=False
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - contour_fill: BOOLEAN default=False
-- outputs: SEGS:SEGS
 
 ## MathExpression|pysssss
 module: custom_nodes.ComfyUI-Custom-Scripts | category: utils
@@ -16421,13 +9820,15 @@ module: custom_nodes.ComfyUI-Custom-Scripts | category: utils
   - c: *
 - outputs: INT:INT, FLOAT:FLOAT
 
-## MediaPipe_FaceMesh_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## MediaPipe-FaceMeshPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Faces and Poses Estimators
 - required:
+  - image: IMAGE
+- optional:
   - max_faces: INT default=10 min=1 max=50 step=1
-  - min_confidence: FLOAT default=0.5 min=0.01 max=1.0 step=0.01
-  - resolution_upscale_by: FLOAT default=1.0 min=0.5 max=100 step=0.1
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - min_confidence: FLOAT default=0.5 min=0.1 max=1 step=0.01
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## MediaPipeFaceLandmarker
 module: comfy_extras.nodes_mediapipe | category: image/detection
@@ -16446,39 +9847,6 @@ module: comfy_extras.nodes_mediapipe | category: image/detection
   - face_landmarks: FACE_LANDMARKS
   - regions: COMFY_DYNAMICCOMBO_V3
 - outputs: MASK:MASK
-
-## MediaPipeFaceMeshDetectorProvider //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Detector
-- required:
-  - max_faces: INT default=10 min=1 max=50 step=1
-  - face: BOOLEAN default=True
-  - mouth: BOOLEAN default=False
-  - left_eyebrow: BOOLEAN default=False
-  - left_eye: BOOLEAN default=False
-  - left_pupil: BOOLEAN default=False
-  - right_eyebrow: BOOLEAN default=False
-  - right_eye: BOOLEAN default=False
-  - right_pupil: BOOLEAN default=False
-- outputs: BBOX_DETECTOR:BBOX_DETECTOR, SEGM_DETECTOR:SEGM_DETECTOR
-
-## MediaPipeFaceMeshToSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - image: IMAGE
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - bbox_fill: BOOLEAN default=False
-  - crop_min_size: INT default=50 min=10 max=16384 step=1
-  - drop_size: INT default=1 min=1 max=16384 step=1
-  - dilation: INT default=0 min=-512 max=512 step=1
-  - face: BOOLEAN default=True
-  - mouth: BOOLEAN default=False
-  - left_eyebrow: BOOLEAN default=False
-  - left_eye: BOOLEAN default=False
-  - left_pupil: BOOLEAN default=False
-  - right_eyebrow: BOOLEAN default=False
-  - right_eye: BOOLEAN default=False
-  - right_pupil: BOOLEAN default=False
-- outputs: SEGS:SEGS
 
 ## MediaPipeFaceMeshVisualize
 module: comfy_extras.nodes_mediapipe | category: image/detection
@@ -16536,9 +9904,36 @@ module: comfy_extras.nodes_dataset | category: text
   - texts: STRING
 - outputs: texts:STRING
 
-## MeshGraphormerDepthMapPreprocessorProvider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+## MeshGraphormer+ImpactDetector-DepthMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
+- required:
+  - image: IMAGE
+  - bbox_detector: BBOX_DETECTOR
+- optional:
+  - bbox_threshold: FLOAT default=0.5 min=0.1 max=1 step=0.01
+  - bbox_dilation: INT default=10 min=-512 max=512 step=1
+  - bbox_crop_factor: FLOAT default=3.0 min=1.0 max=10.0 step=0.01
+  - drop_size: INT default=10 min=1 max=16384 step=1
+  - mask_bbox_padding: INT default=30 min=0 max=100 step=1
+  - mask_type: COMBO[based_on_depth, tight_bboxes, original] default='based_on_depth'
+  - mask_expand: INT default=5 min=-16384 max=16384 step=1
+  - rand_seed: INT default=88 min=0 max=18446744073709551615 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE, INPAINTING_MASK:MASK
+
+## MeshGraphormer-DepthMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
+- required:
+  - image: IMAGE
+- optional:
+  - mask_bbox_padding: INT default=30 min=0 max=100
+  - resolution: INT default=512 min=64 max=16384 step=64
+  - mask_type: COMBO[based_on_depth, tight_bboxes, original] default='based_on_depth'
+  - mask_expand: INT default=5 min=-16384 max=16384 step=1
+  - rand_seed: INT default=88 min=0 max=18446744073709551615 step=1
+  - detect_thr: FLOAT default=0.6 min=0.1 max=1 step=0.01
+  - presence_thr: FLOAT default=0.6 min=0.1 max=1 step=0.01
+- outputs: IMAGE:IMAGE, INPAINTING_MASK:MASK
 
 ## MeshSmoothNormals
 module: comfy_extras.nodes_mesh_postprocess | category: 3d/mesh
@@ -16681,12 +10076,47 @@ module: comfy_api_nodes.nodes_meta | category: partner/image/Meta
   - model: COMFY_DYNAMICCOMBO_V3
 - outputs: IMAGE:IMAGE
 
-## MiDaS_DepthMap_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## Metric3D-DepthMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
 - required:
-  - a: FLOAT default=6.283185307179586 min=0.0 max=15.707963267948966 step=0.05
-  - bg_threshold: FLOAT default=0.1 min=0 max=1 step=0.05
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - image: IMAGE
+- optional:
+  - backbone: COMBO[vit-small, vit-large, vit-giant2] default='vit-small'
+  - fx: INT default=1000 min=1 max=16384 step=1
+  - fy: INT default=1000 min=1 max=16384 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## Metric3D-NormalMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
+- required:
+  - image: IMAGE
+- optional:
+  - backbone: COMBO[vit-small, vit-large, vit-giant2] default='vit-small'
+  - fx: INT default=1000 min=1 max=16384 step=1
+  - fy: INT default=1000 min=1 max=16384 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## MiDaS-DepthMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
+- required:
+  - image: IMAGE
+- optional:
+  - a: FLOAT default=6.283185307179586 min=0.0 max=15.707963267948966 step=0.01
+  - bg_threshold: FLOAT default=0.1 min=0 max=1 step=0.01
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## MiDaS-NormalMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
+- required:
+  - image: IMAGE
+- optional:
+  - a: FLOAT default=6.283185307179586 min=0.0 max=15.707963267948966 step=0.01
+  - bg_threshold: FLOAT default=0.1 min=0 max=1 step=0.01
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## MiniMaxH3AddGuide
 module: comfy_extras.nodes_minimax_h3 | category: model/conditioning/minimax
@@ -16811,6 +10241,174 @@ module: custom_nodes.ComfyUI_MiniMax_H3_Extender | category: MiniMax H3
   - sigmas: SIGMAS
   - continue_existing_video: VIDEO
 - outputs: cache:H3_MOTION_DISK_CACHE, clip_count:INT, validated_count:INT, status:STRING, cache_size_mb:FLOAT, build:STRING
+
+## MiniMaxH3FantasticEditComposite
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - images: IMAGE
+  - references: H3_REFS
+  - blend: INT default=8 min=0 max=64 step=1
+  - max_size: INT default=0 min=0 max=8192 step=32
+- outputs: images:IMAGE
+
+## MiniMaxH3FantasticObjectMask
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - model: MODEL
+  - clip: CLIP
+  - video: STRING default=''
+  - text: STRING default=''
+  - points: STRING default=''
+  - start: FLOAT default=0.0 min=0.0 max=36000.0 step=0.001
+  - end: FLOAT default=0.0 min=0.0 max=36000.0 step=0.001
+  - threshold: FLOAT default=0.5 min=0.05 max=0.95 step=0.05
+  - max_objects: INT default=4 min=1 max=16
+- optional:
+  - mode: COMBO[replace, add, subtract] default='replace'
+  - base: STRING default=''
+  - every_frame: BOOLEAN default=False
+  - subject: BOOLEAN default=False
+  - max_frames: INT default=0 min=0 max=100000
+  - pictures: STRING default=''
+- outputs: 
+
+## MiniMaxH3FantasticReferenceCache
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - model: MODEL
+  - cache: COMBO[references, references and prompt] default='references'
+  - refresh_every: INT default=2 min=2 max=16
+  - store_8bit: BOOLEAN default=False
+- outputs: MODEL:MODEL
+
+## MiniMaxH3FantasticReferenceMap
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- optional:
+  - mods: H3_REF_MODS
+  - references: H3_REFS
+- outputs: reference_map:STRING
+
+## MiniMaxH3FantasticRefModApply
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - conditioning: CONDITIONING
+  - mods: H3_REF_MODS
+  - retention: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - max_total_tokens: INT default=0 min=0 max=2147483647
+- outputs: conditioning:CONDITIONING
+
+## MiniMaxH3FantasticRefModCreate
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - name: STRING default=''
+  - subfolder: STRING default=''
+  - mode: COMBO[Full Reference, Compressed Reference] default='Full Reference'
+  - ref_resolution: INT default=768 min=256 max=2048 step=32
+  - grid: INT default=16 min=2 max=64 step=2
+  - latent_frames: INT default=22 min=1 max=1024
+  - refinement_steps: INT default=500 min=0 max=5000
+  - max_tokens: INT default=5120 min=0 max=1048576
+  - audio_max_seconds: FLOAT default=30.0 min=0.5 max=600.0 step=0.5
+  - concept_type: COMBO[generic, identity, pose_motion, clothing, background, voice, singing, music_style, sound_fx, ambience, ... +1] default='generic'
+  - description: STRING default=''
+  - write_preview: BOOLEAN default=True
+  - source: STRING default=''
+- optional:
+  - subject_name: STRING default=''
+  - appearance: STRING default=''
+  - voice_description: STRING default=''
+  - retained_attributes: STRING default=''
+  - image: IMAGE
+  - audio: AUDIO
+  - vae: VAE
+  - audio_vae: VAE
+- outputs: mods:H3_REF_MODS, saved:STRING
+
+## MiniMaxH3FantasticRefModEdit
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - file: STRING default=''
+  - frames: STRING default=''
+  - add: STRING default=''
+  - voice: STRING default=''
+  - latent_frames: INT default=22 min=1 max=1024
+  - audio_max_seconds: FLOAT default=30.0 min=0.5 max=600.0 step=0.5
+  - save_as: STRING default=''
+- optional:
+  - vae: VAE
+  - audio_vae: VAE
+  - subject_name: STRING default=''
+  - appearance: STRING default=''
+  - voice_description: STRING default=''
+  - retained_attributes: STRING default=''
+  - stored_blur: STRING default=''
+- outputs: saved:STRING
+
+## MiniMaxH3FantasticRefModInspect
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - file: STRING default=''
+  - view: COMBO[frames, video] default='frames'
+  - strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.05
+  - audio_seconds: FLOAT default=30.0 min=0.5 max=600.0 step=0.5
+- optional:
+  - mods: H3_REF_MODS
+  - index: INT default=0 min=0 max=10000
+  - vae: VAE
+  - audio_vae: VAE
+  - stored_blur: STRING default=''
+- outputs: details:STRING, frames:IMAGE, audio:AUDIO
+
+## MiniMaxH3FantasticRefModStoreFrames
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - files: STRING default=''
+  - vae: VAE
+- outputs: 
+
+## MiniMaxH3FantasticRefModTextEncode
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - clip: CLIP
+  - prompt: STRING
+  - width: INT default=1344 min=32 max=16384 step=32
+  - height: INT default=768 min=32 max=16384 step=32
+  - length: INT default=124 min=5 max=3600 step=17
+  - ref_image_size: COMBO[match, max] default='match'
+  - reference_fps: FLOAT default=24.0 min=1.0 max=120.0
+  - max_total_tokens: INT default=0 min=0 max=2147483647
+- optional:
+  - mods: H3_REF_MODS
+  - references: H3_REFS
+  - vae: VAE
+  - audio_vae: VAE
+  - voice_description_at_label: BOOLEAN default=False
+  - stack_pictures: COMBO[every 4th, up to N, all] default='every 4th'
+  - stack_pictures_n: INT default=8 min=1 max=1024
+- outputs: conditioning:CONDITIONING, reference_map:STRING, latent:LATENT
+
+## MiniMaxH3FantasticVideoEditLatent
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - vae: VAE
+  - images: IMAGE
+  - mask: MASK
+  - grow: INT default=16 min=0 max=256 step=1
+  - keep_audio: BOOLEAN default=True
+- optional:
+  - audio_vae: VAE
+  - audio: AUDIO
+  - megapixels: FLOAT default=0.98 min=0.0 max=16.0 step=0.01
+- outputs: latent:LATENT, width:INT, height:INT, length:INT
+
+## MiniMaxH3FilenamePrefix
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - folder: STRING default=''
+  - subfolder: STRING default=''
+  - date_folder: COMBO[off, YYYY-MM-DD, YYYY_MM_DD, YYYYMMDD, YYYY-MM, YYYY/MM/DD, YYYY-MM-DD_HH-MM] default='YYYY-MM-DD'
+  - filename: STRING default='vid'
+- outputs: filename_prefix:STRING
 
 ## MiniMaxH3FunControlNetApply
 module: comfy_extras.nodes_minimax_h3 | category: model/patch/minimax
@@ -17017,6 +10615,12 @@ module: custom_nodes.ComfyUI-MiniMaxH3_LatentUpscaler | category: latent/minimax
   - audio: AUDIO
 - outputs: latent:LATENT, positive:CONDITIONING, negative:CONDITIONING, package_path:STRING
 
+## MiniMaxH3MediaLoader
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - media_state: STRING default='[]'
+- outputs: references:H3_REFS
+
 ## MiniMaxH3MotionContextDiskFinalDecode
 module: custom_nodes.ComfyUI_MiniMax_H3_Extender | category: MiniMax H3
 - required:
@@ -17091,6 +10695,34 @@ module: custom_nodes.ComfyUI-MiniMaxH3_LatentUpscaler | category: latent/minimax
   - reference_steps: INT default=8 min=1 max=10000
   - base_scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal] default='normal'
 - outputs: SIGMAS:SIGMAS
+
+## MiniMaxH3PromptBuilder
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - prompt_text: STRING default=''
+  - builder_state: STRING default='{}'
+- optional:
+  - references: H3_REFS
+  - mods: H3_REF_MODS
+  - picture_1: IMAGE
+  - picture_2: IMAGE
+  - picture_3: IMAGE
+  - picture_4: IMAGE
+  - picture_5: IMAGE
+  - picture_6: IMAGE
+  - picture_7: IMAGE
+  - picture_8: IMAGE
+  - picture_9: IMAGE
+  - video_1: IMAGE
+  - video_2: IMAGE
+  - video_3: IMAGE
+  - video_audio_1: AUDIO
+  - video_audio_2: AUDIO
+  - video_audio_3: AUDIO
+  - audio_1: AUDIO
+  - audio_2: AUDIO
+  - audio_3: AUDIO
+- outputs: prompt:STRING, picture_1:IMAGE, picture_2:IMAGE, picture_3:IMAGE, picture_4:IMAGE, picture_5:IMAGE, picture_6:IMAGE, picture_7:IMAGE, picture_8:IMAGE, picture_9:IMAGE, video_1:IMAGE, video_2:IMAGE, video_3:IMAGE, video_audio_1:AUDIO, video_audio_2:AUDIO, video_audio_3:AUDIO, audio_1:AUDIO, audio_2:AUDIO, audio_3:AUDIO, references:H3_REFS, mods:H3_REF_MODS
 
 ## MiniMaxH3PromptCheck
 module: custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI | category: MiniMax-H3
@@ -17394,6 +11026,12 @@ module: custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI | category: MiniMax-H3
   - soundtracks: BOOLEAN default=False
 - outputs: picture_1:IMAGE, picture_2:IMAGE, picture_3:IMAGE, picture_4:IMAGE, picture_5:IMAGE, picture_6:IMAGE, picture_7:IMAGE, picture_8:IMAGE, picture_9:IMAGE, video_1:IMAGE, video_2:IMAGE, video_3:IMAGE, video_audio_1:AUDIO, video_audio_2:AUDIO, video_audio_3:AUDIO, audio_1:AUDIO, audio_2:AUDIO, audio_3:AUDIO, summary:STRING
 
+## MiniMaxH3ReferenceSplitter
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - references: H3_REFS
+- outputs: picture_1:IMAGE, picture_2:IMAGE, picture_3:IMAGE, picture_4:IMAGE, picture_5:IMAGE, picture_6:IMAGE, picture_7:IMAGE, picture_8:IMAGE, picture_9:IMAGE, video_1:IMAGE, video_2:IMAGE, video_3:IMAGE, video_audio_1:AUDIO, video_audio_2:AUDIO, video_audio_3:AUDIO, audio_1:AUDIO, audio_2:AUDIO, audio_3:AUDIO
+
 ## MiniMaxH3ReferenceToVideo
 module: comfy_extras.nodes_minimax_h3 | category: model/conditioning/minimax
 - required:
@@ -17411,6 +11049,384 @@ module: comfy_extras.nodes_minimax_h3 | category: model/conditioning/minimax
   - ref_video_audios: COMFY_AUTOGROW_V3
   - ref_audios: COMFY_AUTOGROW_V3
 - outputs: positive:CONDITIONING, LATENT:LATENT
+
+## MiniMaxH3RefLoRAApply
+module: custom_nodes.ComfyUI-MiniMaxH3RefLoRA | category: MiniMax-H3/reflora
+- required:
+  - conditioning: CONDITIONING
+  - mods: H3_REF_MODS
+  - retention: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+- optional:
+  - max_total_tokens: INT default=0 min=0 max=1048576
+- outputs: conditioning:CONDITIONING
+
+## MiniMaxH3RefLoRAInspect
+module: custom_nodes.ComfyUI-MiniMaxH3RefLoRA | category: MiniMax-H3/reflora
+- required:
+  - reflora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
+  - verify_bytes: BOOLEAN default=False
+- outputs: report:STRING
+
+## MiniMaxH3RefLoRALoader
+module: custom_nodes.ComfyUI-MiniMaxH3RefLoRA | category: MiniMax-H3/reflora
+- required:
+  - model: MODEL
+  - reflora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
+  - lora_strength: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
+  - refmod_retention: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - members: STRING default='all'
+  - attach_to_model: BOOLEAN default=False
+- optional:
+  - clip: CLIP
+  - lora_strength_clip: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
+  - components: COMBO[All, Visual, Audio] default='All'
+  - max_total_tokens: INT default=0 min=0 max=1048576
+  - show_info: BOOLEAN default=True
+- outputs: model:MODEL, clip:CLIP, mods:H3_REF_MODS, info:STRING
+
+## MiniMaxH3RefLoRAPack
+module: custom_nodes.ComfyUI-MiniMaxH3RefLoRA | category: MiniMax-H3/reflora
+- required:
+  - lora_name: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +48]
+  - output_name: STRING default=''
+  - subfolder: STRING default='MinimaxH3/reflora'
+  - overwrite: BOOLEAN default=False
+  - refmod_1: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+  - refmod_2: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+  - refmod_3: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+  - refmod_4: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+  - refmod_5: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+  - refmod_6: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+  - refmod_7: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+  - refmod_8: COMBO[(none), minimaxh3_aaliyah_v1_refmod.safetensors, minimaxh3_aarontaylorjohnson_v1_refmod.safetensors, minimaxh3_abbiecornish_v1_refmod.safetensors, minimaxh3_abby_v1_refmod.safetensors, minimaxh3_abbyshapiro_v1_refmod.safetensors, minimaxh3_abigailcowen_v1_refmod.safetensors, minimaxh3_abigailratchford_v1_refmod.safetensors, minimaxh3_abigailspencer_v1_refmod.safetensors, minimaxh3_acropolis_v1_refmod.safetensors, ... +1486]
+- outputs: path:STRING, report:STRING
+
+## MiniMaxH3RefModApply
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - conditioning: COMFY_MATCHTYPE_V3
+  - mods: H3_REF_MODS
+  - override: BOOLEAN default=False
+  - retention: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - curve_direction: COMBO[constant, concept_at_start, concept_at_middle, concept_at_end, concept_at_ends] default='constant'
+  - scramble_seed: INT default=-1 min=-1 max=2147483647 step=1
+  - curve_shape: COMBO[linear, ease, sigmoid, tanh, quadratic, cubic, exponential, stair, elastic, bump, ... +1] default='linear'
+  - curve_value: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+- optional:
+  - graph_preset: COMBO[(none)] default='(none)'
+  - scramble_mode: COMBO[shuffle, subset, legacy_subset] default='shuffle'
+  - scramble_keep: INT default=1 min=1 max=80
+  - max_total_tokens: INT default=0 min=0 max=1048576
+  - save_preset_as: STRING default=''
+- outputs: conditioning:COMFY_MATCHTYPE_V3, curve graph:IMAGE
+
+## MiniMaxH3RefModAudioExtract
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - audio: AUDIO
+  - audio_vae: VAE
+  - name: STRING default='audio_refmod'
+  - max_seconds: FLOAT default=30.0 min=0.025 max=600.0
+  - max_tokens: INT default=5120 min=0 max=2147483647
+  - budget_policy: COMBO[error, truncate]
+  - concept_type: COMBO[voice, singing, music_style, sound_fx, ambience]
+  - description: STRING default=''
+  - subfolder: STRING default=''
+  - save: BOOLEAN default=True
+- outputs: H3_REF_MODS:H3_REF_MODS
+
+## MiniMaxH3RefModBridgeDisarm
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - trigger: INT default=0 min=0 max=4294967295
+- outputs: status:STRING
+
+## MiniMaxH3RefModBundleSave
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - mods: H3_REF_MODS
+  - name: STRING default='character'
+  - subfolder: STRING default=''
+- outputs: mods:H3_REF_MODS, saved_path:STRING
+
+## MiniMaxH3RefModConfig
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - mods: H3_REF_MODS
+  - retention: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - curve_direction: COMBO[constant, concept_at_start, concept_at_middle, concept_at_end, concept_at_ends] default='concept_at_end'
+  - curve_shape: COMBO[linear, ease, sigmoid, tanh, quadratic, cubic, exponential, stair, elastic, bump, ... +1] default='ease'
+  - curve_value: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - step_curve_direction: COMBO[constant, concept_at_start, concept_at_middle, concept_at_end, concept_at_ends] default='concept_at_end'
+  - step_curve_shape: COMBO[linear, ease, sigmoid, tanh, quadratic, cubic, exponential, stair, elastic, bump, ... +1] default='ease'
+  - step_curve_value: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+- outputs: mods:H3_REF_MODS
+
+## MiniMaxH3RefModContinuumBridge
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - model: MODEL
+  - mods: H3_REF_MODS
+  - enable: BOOLEAN default=True
+  - retention: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - curve_direction: COMBO[constant, concept_at_start, concept_at_middle, concept_at_end, concept_at_ends] default='constant'
+  - curve_shape: COMBO[linear, ease, sigmoid, tanh, quadratic, cubic, exponential, stair, elastic, bump, ... +1] default='linear'
+  - curve_value: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - scramble_seed: INT default=-1 min=-1 max=2147483647 step=1
+- optional:
+  - scramble_mode: COMBO[shuffle, subset, legacy_subset] default='shuffle'
+  - scramble_keep: INT default=1 min=1 max=80
+  - max_total_tokens: INT default=0 min=0 max=1048576
+- outputs: model:MODEL, mods:H3_REF_MODS, status:STRING
+
+## MiniMaxH3RefModExtract
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - name: STRING default='my_concept'
+  - mode: COMBO[Compressed Reference, Full Reference, training, encode] default='Compressed Reference'
+  - concept_type: COMBO[generic, identity, pose_motion, clothing, background, voice, singing, music_style, sound_fx, ambience, ... +1] default='generic'
+  - background_retention: FLOAT default=0.0 min=0.0 max=1.0 step=0.05
+  - ref_resolution: INT default=1024 min=256 max=2048 step=64
+  - pool_h: INT default=16 min=2 max=64 step=2
+  - pool_w: INT default=16 min=2 max=64 step=2
+  - latent_frames: INT default=16 min=1 max=2147483647
+  - identity: INT default=500 min=0 max=2000 step=50
+  - merge: BOOLEAN default=False
+  - motion_only: BOOLEAN default=False
+  - multiplier: INT default=1 min=1 max=10 step=1
+  - max_tokens: INT default=5120 min=0 max=2147483647 step=512
+  - description: STRING default=''
+  - save: BOOLEAN default=True
+- optional:
+  - refs_image: COMFY_AUTOGROW_V3
+  - refs_video: COMFY_AUTOGROW_V3
+  - refs_bundle: H3_REF_LIST
+  - mask: MASK
+  - av_encoder: MINIMAX_H3_AV_ENCODER
+  - vae: VAE
+  - extraction_preset: COMBO[manual, identity_encode, style_experimental, motion_sequence] default='manual'
+  - subfolder: STRING default=''
+  - mask_list: H3_MASK_LIST
+  - budget_policy: COMBO[truncate, error] default='truncate'
+- outputs: mods:H3_REF_MODS, details:STRING
+
+## MiniMaxH3RefModFolderLoader
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - folder: STRING default=''
+  - max_items: INT default=32 min=1 max=256 step=1
+  - max_frames: INT default=240 min=2 max=4800 step=1
+  - max_edge: INT default=1024 min=256 max=4096 step=64
+- outputs: refs:H3_REF_LIST, count:INT
+
+## MiniMaxH3RefModInspect
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - mods: H3_REF_MODS
+  - index: INT default=0 min=0 max=10000
+  - preview: COMBO[off, stored, compare_strength]
+  - strength: FLOAT default=0.5 min=0.0 max=1.0
+- optional:
+  - vae: VAE
+  - visual_preview: COMBO[first_frame, full_video] default='first_frame'
+- outputs: details:STRING, image_preview:IMAGE, audio_preview:AUDIO, reference_map:STRING
+
+## MiniMaxH3RefModMaskList
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - masks: MASK
+- outputs: mask_list:H3_MASK_LIST
+
+## MiniMaxH3RefModMasterExtract
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - name: STRING default='my_concept'
+  - mode: COMBO[Compressed Reference, Full Reference, training, encode] default='Compressed Reference'
+  - concept_type: COMBO[generic, identity, pose_motion, clothing, background, voice, singing, music_style, sound_fx, ambience, ... +1] default='generic'
+  - background_retention: FLOAT default=0.0 min=0.0 max=1.0 step=0.05
+  - ref_resolution: INT default=1024 min=256 max=2048 step=64
+  - pool_h: INT default=16 min=2 max=64 step=2
+  - pool_w: INT default=16 min=2 max=64 step=2
+  - latent_frames: INT default=16 min=1 max=2147483647
+  - identity: INT default=500 min=0 max=2000 step=50
+  - merge: BOOLEAN default=False
+  - motion_only: BOOLEAN default=False
+  - multiplier: INT default=1 min=1 max=10 step=1
+  - max_tokens: INT default=5120 min=0 max=2147483647 step=512
+  - description: STRING default=''
+  - save: BOOLEAN default=True
+  - audio_max_seconds: FLOAT default=30.0 min=0.025 max=600.0
+  - audio_max_tokens: INT default=5120 min=0 max=2147483647
+  - audio_budget_policy: COMBO[error, truncate] default='error'
+  - audio_concept_type: COMBO[voice, singing, music_style, sound_fx, ambience] default='voice'
+  - max_total_tokens: INT default=0 min=0 max=1048576
+- optional:
+  - refs_image: COMFY_AUTOGROW_V3
+  - refs_video: COMFY_AUTOGROW_V3
+  - refs_bundle: H3_REF_LIST
+  - mask: MASK
+  - av_encoder: MINIMAX_H3_AV_ENCODER
+  - vae: VAE
+  - extraction_preset: COMBO[manual, identity_encode, style_experimental, motion_sequence] default='manual'
+  - subfolder: STRING default=''
+  - mask_list: H3_MASK_LIST
+  - audio: AUDIO
+  - audio_vae: VAE
+  - budget_policy: COMBO[truncate, error] default='truncate'
+  - save_layout: COMBO[separate_files, bundle] default='separate_files'
+- outputs: mods:H3_REF_MODS, details:STRING
+
+## MiniMaxH3RefModSave
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - mods: H3_REF_MODS
+  - filename_prefix: STRING default=''
+  - subfolder: STRING default=''
+- outputs: mods:H3_REF_MODS, saved_paths:STRING
+
+## MiniMaxH3RefModsAxis
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - show_info: BOOLEAN default=False
+  - mod_a_1: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_1: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_1: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+  - mod_a_2: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_2: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_2: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+  - mod_a_3: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_3: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_3: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+  - mod_a_4: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_4: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_4: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+  - mod_a_5: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_5: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_5: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+  - mod_a_6: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_6: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_6: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+  - mod_a_7: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_7: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_7: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+  - mod_a_8: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - mod_b_8: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - value_8: FLOAT default=0.0 min=-1.0 max=1.0 step=0.01
+- optional:
+  - max_total_tokens: INT default=0 min=0 max=1048576
+  - components_1: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_2: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_3: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_4: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_4: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_4: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_5: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_5: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_5: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_6: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_6: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_6: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_7: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_7: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_7: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_8: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_8: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_8: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+- outputs: mods:H3_REF_MODS, prompt_hint:STRING
+
+## MiniMaxH3RefModsLoader
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - show_info: BOOLEAN default=False
+  - mod_1: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_1: INT default=1 min=1 max=10 step=1
+  - mod_2: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_2: INT default=1 min=1 max=10 step=1
+  - mod_3: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_3: INT default=1 min=1 max=10 step=1
+  - mod_4: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_4: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_4: INT default=1 min=1 max=10 step=1
+  - mod_5: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_5: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_5: INT default=1 min=1 max=10 step=1
+  - mod_6: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_6: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_6: INT default=1 min=1 max=10 step=1
+  - mod_7: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_7: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_7: INT default=1 min=1 max=10 step=1
+  - mod_8: COMBO[(none), minimaxh3_aaliyah_v1_refmod, minimaxh3_aarontaylorjohnson_v1_refmod, minimaxh3_abbiecornish_v1_refmod, minimaxh3_abby_v1_refmod, minimaxh3_abbyshapiro_v1_refmod, minimaxh3_abigailcowen_v1_refmod, minimaxh3_abigailratchford_v1_refmod, minimaxh3_abigailspencer_v1_refmod, minimaxh3_acropolis_v1_refmod, ... +1475]
+  - strength_8: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - copies_8: INT default=1 min=1 max=10 step=1
+- optional:
+  - max_total_tokens: INT default=0 min=0 max=1048576
+  - components_1: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_1: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_2: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_2: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_3: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_3: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_4: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_4: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_4: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_5: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_5: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_5: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_6: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_6: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_6: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_7: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_7: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_7: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - components_8: COMBO[All, Visual, Audio] default='All'
+  - visual_strength_8: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+  - audio_strength_8: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+- outputs: mods:H3_REF_MODS, prompt_hint:STRING
+
+## MiniMaxH3RefModStack
+module: custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder | category: conditioning/video_models
+- required:
+  - stack_state: STRING default='{}'
+- optional:
+  - mods: H3_REF_MODS
+- outputs: mods:H3_REF_MODS, labels:STRING
+
+## MiniMaxH3RefModStepCurve
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - model: MODEL
+  - override: BOOLEAN default=False
+  - curve_direction: COMBO[constant, concept_at_start, concept_at_middle, concept_at_end, concept_at_ends] default='constant'
+  - curve_shape: COMBO[linear, ease, sigmoid, tanh, quadratic, cubic, exponential, stair, elastic, bump, ... +1] default='linear'
+  - curve_value: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
+- optional:
+  - mods: H3_REF_MODS
+- outputs: model:MODEL
+
+## MiniMaxH3RefModTextEncode
+module: custom_nodes.ComfyUI-MiniMaxH3Mod | category: MiniMax-H3/mod
+- required:
+  - clip: CLIP
+  - mods: H3_REF_MODS
+  - prompt: STRING
+  - reference_fps: FLOAT default=24.0 min=1.0 max=120.0
+  - max_total_tokens: INT default=0 min=0 max=2147483647
+- optional:
+  - vae: VAE
+- outputs: conditioning:CONDITIONING, reference_map:STRING
 
 ## MiniMaxH3RewriterOptions
 module: custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI | category: MiniMax-H3
@@ -18696,18 +12712,6 @@ module: comfy_extras.nodes_moge | category: image/geometry estimation
   - output: COMBO[depth, depth_colored, normal_opengl, normal_directx, mask] default='depth'
 - outputs: IMAGE:IMAGE
 
-## MOMO VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[momo-base.pth, momo-lite.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=2
-  - num_inference_steps: INT default=8 min=2 max=20
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
-
 ## Morphology
 module: comfy_extras.nodes_morphology | category: image/filters
 - required:
@@ -18722,18 +12726,6 @@ module: comfy_extras.nodes_multigpu | category: advanced/multigpu
   - model: MODEL
   - max_gpus: INT default=2 min=1 step=1
 - outputs: MODEL:MODEL
-
-## MultiImageLoader
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - image_paths: STRING default=''
-  - width: INT default=0 min=0 max=8192 step=1
-  - height: INT default=0 min=0 max=8192 step=1
-  - interpolation: COMBO[lanczos, nearest, bilinear, bicubic, area, nearest-exact]
-  - resize_method: COMBO[keep proportion, stretch, pad, crop]
-  - multiple_of: INT default=32 min=0 max=512 step=1
-  - img_compression: INT default=18 min=0 max=100 step=1
-- outputs: multi_output:IMAGE, image_1:IMAGE, image_2:IMAGE, image_3:IMAGE, image_4:IMAGE, image_5:IMAGE, image_6:IMAGE, image_7:IMAGE, image_8:IMAGE, image_9:IMAGE, image_10:IMAGE, image_11:IMAGE, image_12:IMAGE, image_13:IMAGE, image_14:IMAGE, image_15:IMAGE, image_16:IMAGE, image_17:IMAGE, image_18:IMAGE, image_19:IMAGE, image_20:IMAGE, image_21:IMAGE, image_22:IMAGE, image_23:IMAGE, image_24:IMAGE, image_25:IMAGE, image_26:IMAGE, image_27:IMAGE, image_28:IMAGE, image_29:IMAGE, image_30:IMAGE, image_31:IMAGE, image_32:IMAGE, image_33:IMAGE, image_34:IMAGE, image_35:IMAGE, image_36:IMAGE, image_37:IMAGE, image_38:IMAGE, image_39:IMAGE, image_40:IMAGE, image_41:IMAGE, image_42:IMAGE, image_43:IMAGE, image_44:IMAGE, image_45:IMAGE, image_46:IMAGE, image_47:IMAGE, image_48:IMAGE, image_49:IMAGE, image_50:IMAGE
 
 ## NABLA_AttentionKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/experimental
@@ -18772,26 +12764,6 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/image utils
 - optional:
   - noise_mask: IMAGE
 - outputs: IMAGE:IMAGE
-
-## NoiseInjectionDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - schedule_for_cycle: COMBO[skip_start, from_start]
-  - source: COMBO[CPU, GPU]
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - start_strength: FLOAT default=2.0 min=0.0 max=200.0 step=0.01
-  - end_strength: FLOAT default=1.0 min=0.0 max=200.0 step=0.01
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
-## NoiseInjectionHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - schedule_for_iteration: COMBO[simple]
-  - source: COMBO[CPU, GPU]
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - start_strength: FLOAT default=1.0 min=0.0 max=200.0 step=0.01
-  - end_strength: FLOAT default=1.0 min=0.0 max=200.0 step=0.01
-- outputs: PK_HOOK:PK_HOOK
 
 ## NormalizedAmplitudeToFloatList
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/audio
@@ -18869,25 +12841,21 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/audio
   - angle_multiplier: FLOAT default=0.0 min=-1.0 max=1.0 step=0.001
 - outputs: mask:MASK
 
-## ONNXDetectorProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack
+## OneFormer-ADE20K-SemSegPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Semantic Segmentation
 - required:
-  - model_name: COMBO[face_det.onnx, face_landmark.onnx]
-- outputs: BBOX_DETECTOR:BBOX_DETECTOR
-
-## ONNXDetectorSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - bbox_detector: BBOX_DETECTOR
   - image: IMAGE
-  - threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - dilation: INT default=10 min=-512 max=512 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - labels: STRING default='all'
 - optional:
-  - detailer_hook: DETAILER_HOOK
-- outputs: SEGS:SEGS
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## OneFormer-COCO-SemSegPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Semantic Segmentation
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## OpenAIChatConfig
 module: comfy_api_nodes.nodes_openai | category: partner/text/OpenAI
@@ -18945,14 +12913,17 @@ module: comfy_api_nodes.nodes_openai | category: partner/text/OpenAI
   - OPENAI_INPUT_FILES: OPENAI_INPUT_FILES
 - outputs: OPENAI_INPUT_FILES:OPENAI_INPUT_FILES
 
-## OpenPose_Preprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
+## OpenposePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Faces and Poses Estimators
 - required:
-  - detect_hand: BOOLEAN default=True
-  - detect_body: BOOLEAN default=True
-  - detect_face: BOOLEAN default=True
-  - resolution_upscale_by: FLOAT default=1.0 min=0.5 max=100 step=0.1
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - image: IMAGE
+- optional:
+  - detect_hand: COMBO[enable, disable] default='enable'
+  - detect_body: COMBO[enable, disable] default='enable'
+  - detect_face: COMBO[enable, disable] default='enable'
+  - resolution: INT default=512 min=64 max=16384 step=64
+  - scale_stick_for_xinsr_cn: COMBO[disable, enable] default='disable'
+- outputs: IMAGE:IMAGE, POSE_KEYPOINT:POSE_KEYPOINT
 
 ## OpenRouterImageNode
 module: comfy_api_nodes.nodes_openrouter | category: partner/image/OpenRouter
@@ -19164,6 +13135,15 @@ module: comfy_extras.nodes_pid | category: model/conditioning
   - degrade_sigma: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
 - outputs: CONDITIONING:CONDITIONING
 
+## PiDiNetPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - safe: COMBO[enable, disable] default='enable'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
 ## Pipe from any [Crystools]
 module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/Pipe
 - required:
@@ -19202,56 +13182,6 @@ module: comfy_extras.nodes_trellis2 | category: model/conditioning/trellis
   - right: IMAGE
 - outputs: positive:CONDITIONING, negative:CONDITIONING
 
-## PixelKSampleHookCombine
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - hook1: PK_HOOK
-  - hook2: PK_HOOK
-- outputs: PK_HOOK:PK_HOOK
-
-## PixelKSampleUpscalerProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - scale_method: COMBO[nearest-exact, bilinear, lanczos, area]
-  - model: MODEL
-  - vae: VAE
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - use_tiled_vae: BOOLEAN default=False
-  - tile_size: INT default=512 min=320 max=4096 step=64
-- optional:
-  - upscale_model_opt: UPSCALE_MODEL
-  - pk_hook_opt: PK_HOOK
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: UPSCALER:UPSCALER
-
-## PixelKSampleUpscalerProviderPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - scale_method: COMBO[nearest-exact, bilinear, lanczos, area]
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - use_tiled_vae: BOOLEAN default=False
-  - basic_pipe: BASIC_PIPE
-  - tile_size: INT default=512 min=320 max=4096 step=64
-- optional:
-  - upscale_model_opt: UPSCALE_MODEL
-  - pk_hook_opt: PK_HOOK
-  - scheduler_func_opt: SCHEDULER_FUNC
-  - tile_cnet_opt: CONTROL_NET
-  - tile_cnet_strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- outputs: UPSCALER:UPSCALER
-
 ## PixelOEPixelize+
 module: custom_nodes.ComfyUI_essentials | category: essentials/image processing
 - required:
@@ -19264,51 +13194,14 @@ module: custom_nodes.ComfyUI_essentials | category: essentials/image processing
   - upscale: BOOLEAN default=True
 - outputs: IMAGE:IMAGE
 
-## PixelTiledKSampleUpscalerProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
+## PixelPerfectResolution
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors
 - required:
-  - scale_method: COMBO[nearest-exact, bilinear, lanczos, area]
-  - model: MODEL
-  - vae: VAE
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - tile_width: INT default=512 min=320 max=16384 step=64
-  - tile_height: INT default=512 min=320 max=16384 step=64
-  - tiling_strategy: COMBO[random, padded, simple]
-- optional:
-  - upscale_model_opt: UPSCALE_MODEL
-  - pk_hook_opt: PK_HOOK
-  - tile_cnet_opt: CONTROL_NET
-  - tile_cnet_strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - overlap: INT default=64 min=0 max=4096 step=32
-- outputs: UPSCALER:UPSCALER
-
-## PixelTiledKSampleUpscalerProviderPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - scale_method: COMBO[nearest-exact, bilinear, lanczos, area]
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - tile_width: INT default=512 min=320 max=16384 step=64
-  - tile_height: INT default=512 min=320 max=16384 step=64
-  - tiling_strategy: COMBO[random, padded, simple]
-  - basic_pipe: BASIC_PIPE
-- optional:
-  - upscale_model_opt: UPSCALE_MODEL
-  - pk_hook_opt: PK_HOOK
-  - tile_cnet_opt: CONTROL_NET
-  - tile_cnet_strength: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-- outputs: UPSCALER:UPSCALER
+  - original_image: IMAGE
+  - image_gen_width: INT default=512 min=64 max=8192 step=8
+  - image_gen_height: INT default=512 min=64 max=8192 step=8
+  - resize_mode: COMBO[Just Resize, Crop and Resize, Resize and Fill] default='Just Resize'
+- outputs: RESOLUTION (INT):INT
 
 ## PixverseImageToVideoNode
 module: comfy_api_nodes.nodes_pixverse | category: partner/video/PixVerse
@@ -19494,7 +13387,7 @@ module: custom_nodes.rgthree-comfy | category: rgthree
 - optional:
   - opt_model: MODEL
   - opt_clip: CLIP
-  - insert_lora: COMBO[CHOOSE, DISABLE LORAS, FC_SYDNEY_h3_face_v1, HMNSFW-AIO-V2.5, Kutan Megamalamar Transformation, MM-H3 - Blowjob v3, MS_real_and_Details_klein, Mesh_dress_experimental, MysticXXX_MMH3-V4, Mystic_XXX_RuinedFocus, ... +16]
+  - insert_lora: COMBO[CHOOSE, DISABLE LORAS, FC_ACE_h3_face_v1, FC_ALAN_h3_face_v1, FC_ANYA_h3_face_v1, FC_ARIANA_h3_face_v1, FC_BETTY_h3_face_v1, FC_CHUCK_h3_face_v1, FC_DOLLY_h3_face_v1, FC_DUDE_h3_face_v1, ... +50]
   - insert_embedding: COMBO[CHOOSE]
   - insert_saved: COMBO[CHOOSE]
 - outputs: CONDITIONING:CONDITIONING, MODEL:MODEL, CLIP:CLIP, TEXT:STRING
@@ -19566,34 +13459,6 @@ module: comfy_extras.nodes_audio | category: audio
 - required:
   - audio: AUDIO
 - outputs: audio:AUDIO
-
-## PreviewBridge
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - images: IMAGE
-  - image: STRING default=''
-- optional:
-  - block: BOOLEAN default=False
-  - restore_mask: COMBO[never, always, if_same_size]
-- outputs: IMAGE:IMAGE, MASK:MASK
-
-## PreviewBridgeLatent
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - latent: LATENT
-  - image: STRING default=''
-  - preview_method: COMBO[Latent2RGB-FLUX.1, Latent2RGB-SDXL, Latent2RGB-SD15, Latent2RGB-SD3, Latent2RGB-SD-X4, Latent2RGB-Playground-2.5, Latent2RGB-SC-Prior, Latent2RGB-SC-B, Latent2RGB-LTXV, TAEF1, ... +3]
-- optional:
-  - vae_opt: VAE
-  - block: BOOLEAN default=False
-  - restore_mask: COMBO[never, always, if_same_size]
-- outputs: LATENT:LATENT, MASK:MASK
-
-## PreviewDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - quality: INT default=95 min=20 max=100
-- outputs: DETAILER_HOOK:DETAILER_HOOK, UPSCALER_HOOK:UPSCALER_HOOK
 
 ## PreviewGaussianSplat
 module: comfy_extras.nodes_load_3d | category: 3d
@@ -19706,23 +13571,6 @@ module: comfy_extras.nodes_primitive | category: utilities/primitive
   - value: STRING
 - outputs: STRING:STRING
 
-## PromptBuilder //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - category: COMBO[Angle of View, Artists, Character Types, Colors, Composition, Composition Form, Lighting, Negative, Picture Effect, Picture Quality, ... +4]
-  - preset: COMBO[#PRESET]
-  - text: STRING
-- outputs: STRING:STRING
-
-## PromptExtractor //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - image: COMBO[01_BEDROOM_LINGERIE.jpg, 32.jpg, 33.jpg, 5slock_B07ref.jpg, 5slock_E10.jpg, 5slock_E10ref.jpg, 5slock_O3.png, 5slock_ORIG01ref.png, 5slock_POOLref.jpg, 5slock_chain_O1_twoshot.png, ... +2894]
-  - positive_id: STRING
-  - negative_id: STRING
-  - info: STRING
-- outputs: positive:STRING, negative:STRING
-
 ## Prompts Everywhere
 module: custom_nodes.cg-use-everywhere | category: everywhere/deprecated
 - optional:
@@ -19804,6 +13652,16 @@ module: custom_nodes.ComfyUI-PuLID-Flux2 | category: PuLID-Flux2
 - required:
   - pulid_file: COMBO[pulid_flux2_klein_v2.safetensors]
 - outputs: PULID_MODEL:PULID_MODEL
+
+## PyraCannyPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - low_threshold: INT default=64 min=0 max=255 step=1
+  - high_threshold: INT default=128 min=0 max=255 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## QuadrupleCLIPLoader
 module: comfy_extras.nodes_hidream | category: model/loaders
@@ -19898,13 +13756,6 @@ module: comfy_extras.nodes_dataset | category: image/transform
   - seed: INT default=0 min=0 max=18446744073709551615
 - outputs: images:IMAGE
 
-## RandomGeneratorForList //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - signal: *
-  - seed: INT default=0 min=0 max=18446744073709551615
-- outputs: signal:*, random_value:INT
-
 ## RandomImageFromBatch
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 - required:
@@ -19922,19 +13773,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/noise
 - required:
   - noise_seed: INT default=0 min=0 max=18446744073709551615
-- outputs: NOISE:NOISE
-
-## RandomNoise //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/a1111_compat
-- required:
-  - noise_seed: INT default=0 min=0 max=18446744073709551615
-  - noise_mode: COMBO[GPU(=A1111), CPU]
-  - batch_seed_mode: COMBO[incremental, comfy, variation str inc:0.01, variation str inc:0.05]
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-- optional:
-  - variation_method: COMBO[linear, slerp]
-  - internal_seed: INT default=0 min=0 max=18446744073709551615
 - outputs: NOISE:NOISE
 
 ## Read JSON file [Crystools]
@@ -20146,27 +13984,6 @@ module: comfy_api_nodes.nodes_recraft | category: partner/image/Recraft
   - image: IMAGE
 - outputs: SVG:SVG
 
-## ReencodeLatent
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - samples: LATENT
-  - tile_mode: COMBO[None, Both, Decode(input) only, Encode(output) only]
-  - input_vae: VAE
-  - output_vae: VAE
-  - tile_size: INT default=512 min=320 max=4096 step=64
-- optional:
-  - overlap: INT default=64 min=0 max=4096 step=32
-- outputs: LATENT:LATENT
-
-## ReencodeLatentPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - samples: LATENT
-  - tile_mode: COMBO[None, Both, Decode(input) only, Encode(output) only]
-  - input_basic_pipe: BASIC_PIPE
-  - output_basic_pipe: BASIC_PIPE
-- outputs: LATENT:LATENT
-
 ## ReferenceLatent
 module: comfy_extras.nodes_edit_model | category: model/conditioning
 - required:
@@ -20218,217 +14035,6 @@ module: comfy_extras.nodes_string | category: text
   - count: INT default=0 min=0 max=100
 - outputs: STRING:STRING
 
-## RegionalCFG //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - model: MODEL
-  - mask: MASK
-- outputs: MODEL:MODEL
-
-## RegionalConditioningColorMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - clip: CLIP
-  - color_mask: IMAGE
-  - mask_color: STRING default='#FFFFFF'
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - set_cond_area: COMBO[default, mask bounds]
-  - prompt: STRING
-- optional:
-  - dilation: INT default=0 min=-512 max=512 step=1
-- outputs: CONDITIONING:CONDITIONING, MASK:MASK
-
-## RegionalConditioningSimple //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - clip: CLIP
-  - mask: MASK
-  - strength: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-  - set_cond_area: COMBO[default, mask bounds]
-  - prompt: STRING
-- outputs: CONDITIONING:CONDITIONING
-
-## RegionalIPAdapterColorMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - color_mask: IMAGE
-  - mask_color: STRING default='#FFFFFF'
-  - image: IMAGE
-  - weight: FLOAT default=0.7 min=-1 max=3 step=0.05
-  - noise: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - weight_type: COMBO[IPAdapterPlus is not installed]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - unfold_batch: BOOLEAN default=False
-- optional:
-  - faceid_v2: BOOLEAN default=False
-  - weight_v2: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - combine_embeds: COMBO[concat, add, subtract, average, norm average]
-  - neg_image: IMAGE
-- outputs: REGIONAL_IPADAPTER:REGIONAL_IPADAPTER, MASK:MASK
-
-## RegionalIPAdapterEncodedColorMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - color_mask: IMAGE
-  - mask_color: STRING default='#FFFFFF'
-  - embeds: EMBEDS
-  - weight: FLOAT default=0.7 min=-1 max=3 step=0.05
-  - weight_type: COMBO[IPAdapterPlus is not installed]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - unfold_batch: BOOLEAN default=False
-- optional:
-  - neg_embeds: EMBEDS
-- outputs: REGIONAL_IPADAPTER:REGIONAL_IPADAPTER, MASK:MASK
-
-## RegionalIPAdapterEncodedMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - mask: MASK
-  - embeds: EMBEDS
-  - weight: FLOAT default=0.7 min=-1 max=3 step=0.05
-  - weight_type: COMBO[IPAdapterPlus is not installed]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - unfold_batch: BOOLEAN default=False
-- optional:
-  - neg_embeds: EMBEDS
-- outputs: REGIONAL_IPADAPTER:REGIONAL_IPADAPTER
-
-## RegionalIPAdapterMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - mask: MASK
-  - image: IMAGE
-  - weight: FLOAT default=0.7 min=-1 max=3 step=0.05
-  - noise: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - weight_type: COMBO[IPAdapterPlus is not installed]
-  - start_at: FLOAT default=0.0 min=0.0 max=1.0 step=0.001
-  - end_at: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
-  - unfold_batch: BOOLEAN default=False
-- optional:
-  - faceid_v2: BOOLEAN default=False
-  - weight_v2: FLOAT default=1.0 min=-1 max=3 step=0.05
-  - combine_embeds: COMBO[concat, add, subtract, average, norm average]
-  - neg_image: IMAGE
-- outputs: REGIONAL_IPADAPTER:REGIONAL_IPADAPTER
-
-## RegionalPrompt
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Regional
-- required:
-  - mask: MASK
-  - advanced_sampler: KSAMPLER_ADVANCED
-- optional:
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - variation_method: COMBO[linear, slerp]
-- outputs: REGIONAL_PROMPTS:REGIONAL_PROMPTS
-
-## RegionalPromptColorMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - basic_pipe: BASIC_PIPE
-  - color_mask: IMAGE
-  - mask_color: STRING default='#FFFFFF'
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - wildcard_prompt: STRING
-  - controlnet_in_pipe: BOOLEAN default=False
-  - sigma_factor: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-- optional:
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - variation_method: COMBO[linear, slerp]
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: REGIONAL_PROMPTS:REGIONAL_PROMPTS, MASK:MASK
-
-## RegionalPromptSimple //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - basic_pipe: BASIC_PIPE
-  - mask: MASK
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - wildcard_prompt: STRING
-  - controlnet_in_pipe: BOOLEAN default=False
-  - sigma_factor: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
-- optional:
-  - variation_seed: INT default=0 min=0 max=18446744073709551615
-  - variation_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - variation_method: COMBO[linear, slerp]
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: REGIONAL_PROMPTS:REGIONAL_PROMPTS
-
-## RegionalSampler
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Regional
-- required:
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - seed_2nd: INT default=0 min=0 max=18446744073709551615
-  - seed_2nd_mode: COMBO[ignore, fixed, seed+seed_2nd, seed-seed_2nd, increment, decrement, randomize]
-  - steps: INT default=20 min=1 max=10000
-  - base_only_steps: INT default=2 min=0 max=10000
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - samples: LATENT
-  - base_sampler: KSAMPLER_ADVANCED
-  - regional_prompts: REGIONAL_PROMPTS
-  - overlap_factor: INT default=10 min=0 max=10000
-  - restore_latent: BOOLEAN default=True
-  - additional_mode: COMBO[DISABLE, ratio additional, ratio between] default='ratio between'
-  - additional_sampler: COMBO[AUTO, euler, heun, heunpp2, dpm_2, dpm_fast, dpmpp_2m, ddpm]
-  - additional_sigma_ratio: FLOAT default=0.3 min=0.0 max=1.0 step=0.01
-- outputs: LATENT:LATENT
-
-## RegionalSamplerAdvanced
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Regional
-- required:
-  - add_noise: BOOLEAN default=True
-  - noise_seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - start_at_step: INT default=0 min=0 max=10000
-  - end_at_step: INT default=10000 min=0 max=10000
-  - overlap_factor: INT default=10 min=0 max=10000
-  - restore_latent: BOOLEAN default=True
-  - return_with_leftover_noise: BOOLEAN default=False
-  - latent_image: LATENT
-  - base_sampler: KSAMPLER_ADVANCED
-  - regional_prompts: REGIONAL_PROMPTS
-  - additional_mode: COMBO[DISABLE, ratio additional, ratio between] default='ratio between'
-  - additional_sampler: COMBO[AUTO, euler, heun, heunpp2, dpm_2, dpm_fast, dpmpp_2m, ddpm]
-  - additional_sigma_ratio: FLOAT default=0.3 min=0.0 max=1.0 step=0.01
-- outputs: LATENT:LATENT
-
-## RegionalSeedExplorerColorMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - color_mask: IMAGE
-  - mask_color: STRING default='#FFFFFF'
-  - noise: NOISE_IMAGE
-  - seed_prompt: STRING
-  - enable_additional: BOOLEAN default=True
-  - additional_seed: INT default=0 min=0 max=18446744073709551615
-  - additional_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - noise_mode: COMBO[GPU(=A1111), CPU]
-- optional:
-  - variation_method: COMBO[linear, slerp]
-- outputs: NOISE_IMAGE:NOISE_IMAGE, MASK:MASK
-
-## RegionalSeedExplorerMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Regional
-- required:
-  - mask: MASK
-  - noise: NOISE_IMAGE
-  - seed_prompt: STRING
-  - enable_additional: BOOLEAN default=True
-  - additional_seed: INT default=0 min=0 max=18446744073709551615
-  - additional_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - noise_mode: COMBO[GPU(=A1111), CPU]
-- optional:
-  - variation_method: COMBO[linear, slerp]
-- outputs: NOISE_IMAGE:NOISE_IMAGE
-
 ## RemapImageRange
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
 - required:
@@ -20467,22 +14073,6 @@ module: comfy_extras.nodes_mesh_postprocess | category: 3d/mesh
   - precluster_max_verts: INT default=20000000 min=0 max=100000000
 - outputs: mesh:MESH
 
-## RemoveBackendData //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: STRING
-- optional:
-  - signal_opt: *
-- outputs: signal:*
-
-## RemoveBackendDataNumberKey //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: INT default=0 min=0 max=18446744073709551615
-- optional:
-  - signal_opt: *
-- outputs: signal:*
-
 ## RemoveBackground
 module: comfy_extras.nodes_bg_removal | category: image/background removal
 - required:
@@ -20490,35 +14080,17 @@ module: comfy_extras.nodes_bg_removal | category: image/background removal
   - image: IMAGE
 - outputs: mask:MASK
 
-## RemoveControlNet //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - conditioning: CONDITIONING
-- outputs: CONDITIONING:CONDITIONING
-
-## RemoveControlNetFromRegionalPrompts //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - regional_prompts: REGIONAL_PROMPTS
-- outputs: REGIONAL_PROMPTS:REGIONAL_PROMPTS
-
-## RemoveImageFromSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: SEGS:SEGS
-
 ## RemoveLatentMask+
 module: custom_nodes.ComfyUI_essentials | category: essentials/utilities
 - required:
   - samples: LATENT
 - outputs: LATENT:LATENT
 
-## RemoveNoiseMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
+## RenderAnimalKps
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Pose Keypoint Postprocess
 - required:
-  - samples: LATENT
-- outputs: LATENT:LATENT
+  - kps: POSE_KEYPOINT
+- outputs: IMAGE:IMAGE
 
 ## RenderMesh
 module: comfy_extras.nodes_mesh_postprocess | category: 3d/mesh
@@ -20532,6 +14104,15 @@ module: comfy_extras.nodes_mesh_postprocess | category: 3d/mesh
   - model_3d_info: LOAD3D_MODEL_INFO
   - camera_info: LOAD3D_CAMERA
 - outputs: image:IMAGE, mask:MASK
+
+## RenderPeopleKps
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Pose Keypoint Postprocess
+- required:
+  - kps: POSE_KEYPOINT
+  - render_body: BOOLEAN default=True
+  - render_hand: BOOLEAN default=True
+  - render_face: BOOLEAN default=True
+- outputs: IMAGE:IMAGE
 
 ## RenderSplat
 module: comfy_extras.nodes_gaussian_splat | category: 3d/splat
@@ -20690,18 +14271,6 @@ module: comfy_extras.nodes_resolution | category: utilities
   - preview: RESOLUTION_PREVIEW
 - outputs: width:INT, height:INT
 
-## RetrieveBackendData //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: STRING
-- outputs: data:*
-
-## RetrieveBackendDataNumberKey //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - key: INT default=0 min=0 max=18446744073709551615
-- outputs: data:*
-
 ## ReveImageCreateNode
 module: comfy_api_nodes.nodes_reve | category: partner/image/Reve
 - required:
@@ -20740,28 +14309,32 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
   - images: IMAGE
 - outputs: IMAGE:IMAGE
 
-## RGB_HexToHSV //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
+## RiftEngineScript
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/script
 - required:
-  - rgb_hex: STRING
-- outputs: hue:FLOAT, saturation:FLOAT, value:FLOAT
-
-## RIFE VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[sudo_rife4_269.662_testV1_scale1.pth, rife47.pth, rife49.pth, rife417.pth, rife426.pth] default='rife49.pth'
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=1
-  - fast_mode: BOOLEAN default=True
-  - ensemble: BOOLEAN default=True
-  - scale_factor: COMBO[0.25, 0.5, 1.0, 2.0, 4.0] default=1.0
-  - dtype: COMBO[float32, float16, bfloat16] default='float32'
-  - torch_compile: BOOLEAN default=False
-  - batch_size: INT default=1 min=1 max=64
+  - script: STRING default=''
 - optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
+  - ltx_shot_label: STRING default='Then, without moving the camera,'
+- outputs: h3_script:STRING, ltx_prompt:STRING, shot_count:INT
+
+## RiftPromptSource
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/script
+- required:
+  - source_file: COMBO[(no prompt files found)]
+- optional:
+  - load_cap: INT default=0 min=0
+  - start_index: INT default=0 min=0
+  - character_override: STRING default=''
+  - manual_path: STRING default=''
+  - folder: COMBO[(all)] default='(all)'
+  - walk_folder: BOOLEAN default=False
+- outputs: story_idea:STRING, character:STRING, count:INT
+
+## RiftScriptPicker
+module: custom_nodes.ComfyUI-H3-Multishot | category: H3/script
+- required:
+  - script: COMBO[(no .json in input/joyecho_prompts)]
+- outputs: prompts_json:STRING, path:STRING, speakers:STRING
 
 ## Rodin3D_Detail
 module: comfy_api_nodes.nodes_rodin | category: partner/3d/Rodin
@@ -21054,41 +14627,6 @@ module: comfy_extras.nodes_sam3d_body | category: image/detection
   - rotation_threshold_degrees: FLOAT default=30.0 min=0.0 max=90.0 step=1.0
 - outputs: mhr_pose_data:MHR_POSE_DATA
 
-## SAMDetectorCombined
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - sam_model: SAM_MODEL
-  - segs: SEGS
-  - image: IMAGE
-  - detection_hint: COMBO[center-1, horizontal-2, vertical-2, rect-4, diamond-4, mask-area, mask-points, mask-point-bbox, none]
-  - dilation: INT default=0 min=-512 max=512 step=1
-  - threshold: FLOAT default=0.93 min=0.0 max=1.0 step=0.01
-  - bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-  - mask_hint_use_negative: COMBO[False, Small, Outter]
-- outputs: MASK:MASK
-
-## SAMDetectorSegmented
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - sam_model: SAM_MODEL
-  - segs: SEGS
-  - image: IMAGE
-  - detection_hint: COMBO[center-1, horizontal-2, vertical-2, rect-4, diamond-4, mask-area, mask-points, mask-point-bbox, none]
-  - dilation: INT default=0 min=-512 max=512 step=1
-  - threshold: FLOAT default=0.93 min=0.0 max=1.0 step=0.01
-  - bbox_expansion: INT default=0 min=0 max=1000 step=1
-  - mask_hint_threshold: FLOAT default=0.7 min=0.0 max=1.0 step=0.01
-  - mask_hint_use_negative: COMBO[False, Small, Outter]
-- outputs: combined_mask:MASK, batch_masks:MASK
-
-## SAMLoader
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack
-- required:
-  - model_name: COMBO[sam_vit_b_01ec64.pth]
-  - device_mode: COMBO[AUTO, Prefer GPU, CPU]
-- outputs: SAM_MODEL:SAM_MODEL
-
 ## SamplerARVideo
 module: comfy_extras.nodes_ar_video | category: model/sampling/samplers
 - required:
@@ -21311,6 +14849,14 @@ module: comfy_extras.nodes_custom_sampler | category: model/sampling/sigmas
   - return_actual_sigma: BOOLEAN default=False
 - outputs: sigma_value:FLOAT
 
+## SAMPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/others
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
 ## Save image with extra metadata [Crystools]
 module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/Image
 - required:
@@ -21479,13 +15025,6 @@ module: nodes | category: model/latent
   - filename_prefix: STRING default='latents/ComfyUI'
 - outputs: samples:LATENT
 
-## SaveLBW //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/LoraBlockWeight
-- required:
-  - lbw_model: LBW_MODEL
-  - filename_prefix: STRING default='ComfyUI'
-- outputs: 
-
 ## SaveLoRA
 module: comfy_extras.nodes_train | category: model/merging
 - required:
@@ -21507,6 +15046,13 @@ module: comfy_extras.nodes_save_3d | category: 3d
   - model_3d_info: LOAD3D_MODEL_INFO
   - camera_info: LOAD3D_CAMERA
 - outputs: model_3d:FILE_3D_POINT_CLOUD_ANY, model_3d_info:LOAD3D_MODEL_INFO, camera_info:LOAD3D_CAMERA, width:INT, height:INT
+
+## SavePoseKpsAsJsonFile
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Pose Keypoint Postprocess
+- required:
+  - pose_kps: POSE_KEYPOINT
+  - filename_prefix: STRING default='PoseKeypoint'
+- outputs: 
 
 ## SaveStringKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/misc
@@ -21623,32 +15169,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/experimental
   - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
 - outputs: GUIDER:GUIDER
 
-## ScheduledCFGGuider //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: sampling/custom_sampling/guiders
-- required:
-  - model: MODEL
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - sigmas: SIGMAS
-  - from_cfg: FLOAT default=6.5 min=0.0 max=100.0 step=0.1
-  - to_cfg: FLOAT default=1.0 min=0.0 max=100.0 step=0.1
-  - schedule: COMBO[linear, log, exp, cos] default='log'
-- outputs: GUIDER:GUIDER, SIGMAS:SIGMAS
-
-## ScheduledPerpNegCFGGuider //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: sampling/custom_sampling/guiders
-- required:
-  - model: MODEL
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - empty_conditioning: CONDITIONING
-  - neg_scale: FLOAT default=1.0 min=0.0 max=100.0 step=0.01
-  - sigmas: SIGMAS
-  - from_cfg: FLOAT default=6.5 min=0.0 max=100.0 step=0.1
-  - to_cfg: FLOAT default=1.0 min=0.0 max=100.0 step=0.1
-  - schedule: COMBO[linear, log, exp, cos] default='log'
-- outputs: GUIDER:GUIDER, SIGMAS:SIGMAS
-
 ## SchedulerSelectHelper+
 module: custom_nodes.ComfyUI_essentials | category: essentials/sampling
 - required:
@@ -21681,6 +15201,32 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/image
   - crop_width: INT default=1 min=1 max=16384 step=1
   - crop_height: INT default=1 min=1 max=16384 step=1
 - outputs: image:IMAGE
+
+## Scribble_PiDiNet_Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - safe: COMBO[enable, disable]
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## Scribble_XDoG_Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - threshold: INT default=32 min=1 max=64 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## ScribblePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## SD3AttentionSeekerLG+
 module: custom_nodes.ComfyUI_essentials | category: essentials/conditioning
@@ -21846,7 +15392,7 @@ module: custom_nodes.rgthree-comfy | category: rgthree
   - opt_clip: CLIP
   - opt_clip_width: INT default=1024.0 min=0 max=16384
   - opt_clip_height: INT default=1024.0 min=0 max=16384
-  - insert_lora: COMBO[CHOOSE, DISABLE LORAS, FC_SYDNEY_h3_face_v1, HMNSFW-AIO-V2.5, Kutan Megamalamar Transformation, MM-H3 - Blowjob v3, MS_real_and_Details_klein, Mesh_dress_experimental, MysticXXX_MMH3-V4, Mystic_XXX_RuinedFocus, ... +16]
+  - insert_lora: COMBO[CHOOSE, DISABLE LORAS, FC_ACE_h3_face_v1, FC_ALAN_h3_face_v1, FC_ANYA_h3_face_v1, FC_ARIANA_h3_face_v1, FC_BETTY_h3_face_v1, FC_CHUCK_h3_face_v1, FC_DOLLY_h3_face_v1, FC_DUDE_h3_face_v1, ... +50]
   - insert_embedding: COMBO[CHOOSE]
   - insert_saved: COMBO[CHOOSE]
   - target_width: INT default=-1 min=-1 max=16384
@@ -21893,29 +15439,6 @@ module: custom_nodes.cg-use-everywhere | category: everywhere/deprecated
   - seed: INT default=0 min=0 max=18446744073709551615
 - outputs: int:INT
 
-## SeedExplorer //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - latent: LATENT
-  - seed_prompt: STRING
-  - enable_additional: BOOLEAN default=True
-  - additional_seed: INT default=0 min=0 max=18446744073709551615
-  - additional_strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-  - noise_mode: COMBO[GPU(=A1111), CPU]
-  - initial_batch_seed_mode: COMBO[incremental, comfy]
-- optional:
-  - variation_method: COMBO[linear, slerp]
-  - model: MODEL
-- outputs: NOISE_IMAGE:NOISE_IMAGE
-
-## SeedLogger //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - seeds: STRING
-  - limit: INT default=5 min=0 max=18446744073709551615
-- outputs: 
-
 ## SeedNode
 module: comfy_extras.nodes_seed | category: utilities
 - required:
@@ -21958,208 +15481,6 @@ module: comfy_extras.nodes_seedvr | category: model/latent/seedvr
   - temporal_overlap: INT default=0 min=0 max=16384
 - outputs: latent:LATENT
 
-## SegmDetectorCombined_v2
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - segm_detector: SEGM_DETECTOR
-  - image: IMAGE
-  - threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - dilation: INT default=0 min=-512 max=512 step=1
-- outputs: MASK:MASK
-
-## SegmDetectorSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detector
-- required:
-  - segm_detector: SEGM_DETECTOR
-  - image: IMAGE
-  - threshold: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
-  - dilation: INT default=10 min=-512 max=512 step=1
-  - crop_factor: FLOAT default=3.0 min=1.0 max=100 step=0.1
-  - drop_size: INT default=10 min=1 max=16384 step=1
-  - labels: STRING default='all'
-- optional:
-  - detailer_hook: DETAILER_HOOK
-- outputs: SEGS:SEGS
-
-## SEGSDetailer
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - image: IMAGE
-  - segs: SEGS
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=768 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - noise_mask: BOOLEAN default=True
-  - force_inpaint: BOOLEAN default=True
-  - basic_pipe: BASIC_PIPE
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-  - batch_size: INT default=1 min=1 max=100
-  - cycle: INT default=1 min=1 max=10 step=1
-- optional:
-  - refiner_basic_pipe_opt: BASIC_PIPE
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: segs:SEGS, cnet_images:IMAGE
-
-## SEGSDetailerForAnimateDiff
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - image_frames: IMAGE
-  - segs: SEGS
-  - guide_size: FLOAT default=512 min=64 max=16384 step=8
-  - guide_size_for: BOOLEAN default=True
-  - max_size: FLOAT default=768 min=64 max=16384 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - basic_pipe: BASIC_PIPE
-  - refiner_ratio: FLOAT default=0.2 min=0.0 max=1.0
-- optional:
-  - refiner_basic_pipe_opt: BASIC_PIPE
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: segs:SEGS, cnet_images:IMAGE
-
-## SEGSLabelFilterDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - preset: COMBO[all, hand, face, mouth, eyes, eyebrows, pupils, left_eyebrow, left_eye, left_pupil, ... +96]
-  - labels: STRING
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
-## SEGSOrderedFilterDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - target: COMBO[area(=w*h), width, height, x1, y1, x2, y2]
-  - order: BOOLEAN default=True
-  - take_start: INT default=0 min=0 max=9223372036854775807 step=1
-  - take_count: INT default=1 min=0 max=9223372036854775807 step=1
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
-## SEGSPaste
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - image: IMAGE
-  - segs: SEGS
-  - feather: INT default=5 min=0 max=100 step=1
-  - alpha: INT default=255 min=0 max=255 step=1
-- optional:
-  - ref_image_opt: IMAGE
-- outputs: IMAGE:IMAGE
-
-## SEGSPreview
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - alpha_mode: BOOLEAN default=True
-  - min_alpha: FLOAT default=0.2 min=0.0 max=1.0 step=0.01
-- optional:
-  - fallback_image_opt: IMAGE
-- outputs: IMAGE:IMAGE
-
-## SEGSPreviewCNet
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- outputs: IMAGE:IMAGE
-
-## SEGSRangeFilterDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - target: COMBO[area(=w*h), width, height, x1, y1, x2, y2, length_percent]
-  - mode: BOOLEAN default=True
-  - min_value: INT default=0 min=0 max=9223372036854775807 step=1
-  - max_value: INT default=67108864 min=0 max=9223372036854775807 step=1
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
-## SEGSSwitch
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - select: INT default=1 min=1 max=999999 step=1
-  - sel_mode: BOOLEAN default=False
-- optional:
-  - input1: *
-- outputs: selected_value:*, selected_label:STRING, selected_index:INT
-
-## SegsToCombinedMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - segs: SEGS
-- outputs: MASK:MASK
-
-## SEGSToImageList
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-- optional:
-  - fallback_image_opt: IMAGE
-- outputs: IMAGE:IMAGE
-
-## SEGSUpscaler
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - image: IMAGE
-  - segs: SEGS
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - rescale_factor: FLOAT default=2 min=0.01 max=100.0 step=0.01
-  - resampling_method: COMBO[lanczos, nearest, bilinear, bicubic]
-  - supersample: COMBO[true, false]
-  - rounding_modulus: INT default=8 min=8 max=1024 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-- optional:
-  - upscale_model_opt: UPSCALE_MODEL
-  - upscaler_hook_opt: UPSCALER_HOOK
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: IMAGE:IMAGE
-
-## SEGSUpscalerPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - image: IMAGE
-  - segs: SEGS
-  - basic_pipe: BASIC_PIPE
-  - rescale_factor: FLOAT default=2 min=0.01 max=100.0 step=0.01
-  - resampling_method: COMBO[lanczos, nearest, bilinear, bicubic]
-  - supersample: COMBO[true, false]
-  - rounding_modulus: INT default=8 min=8 max=1024 step=8
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal, AYS SDXL, ... +7]
-  - denoise: FLOAT default=0.5 min=0.0001 max=1.0 step=0.01
-  - feather: INT default=5 min=0 max=100 step=1
-  - inpaint_model: BOOLEAN default=False
-  - noise_mask_feather: INT default=20 min=0 max=100 step=1
-- optional:
-  - upscale_model_opt: UPSCALE_MODEL
-  - upscaler_hook_opt: UPSCALER_HOOK
-  - scheduler_func_opt: SCHEDULER_FUNC
-- outputs: IMAGE:IMAGE
-
 ## SelectCLIPDevice
 module: comfy_extras.nodes_multigpu | category: advanced/multigpu
 - required:
@@ -22173,13 +15494,6 @@ module: comfy_extras.nodes_multigpu | category: advanced/multigpu
   - model: MODEL
   - device: COMBO[default, cpu]
 - outputs: MODEL:MODEL
-
-## SelectNthMask //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - masks: MASK
-  - idx: INT default=0 min=0 max=18446744073709551615 step=1
-- outputs: MASK:MASK
 
 ## SelectVAEDevice
 module: comfy_extras.nodes_multigpu | category: advanced/multigpu
@@ -22195,6 +15509,68 @@ module: comfy_extras.nodes_sag | category: experimental
   - scale: FLOAT default=0.5 min=-2.0 max=5.0 step=0.01
   - blur_sigma: FLOAT default=2.0 min=0.0 max=10.0 step=0.1
 - outputs: MODEL:MODEL
+
+## SelfLiftH3Sampler
+module: custom_nodes.comfyui-SelfLift | category: selflift
+- required:
+  - model: MODEL
+  - positive: CONDITIONING
+  - negative: CONDITIONING
+  - vae: VAE
+  - latent_image: LATENT
+  - sampler: SAMPLER
+  - sigmas: SIGMAS
+  - seed: INT default=0 min=0 max=18446744073709551615
+  - cfg: FLOAT default=5.0 min=0.0 max=100.0 step=0.1
+  - transition_step: INT default=6 min=1 max=10000
+  - lowres_scale: FLOAT default=0.5 min=0.25 max=1.0 step=0.05
+  - rho: FLOAT default=0.0 min=0.0 max=1.0 step=0.05
+  - w_min: FLOAT default=0.5 min=0.0 max=1.0 step=0.05
+  - w_max: FLOAT default=1.0 min=0.0 max=1.0 step=0.05
+  - upscaler_model: COMBO[none, minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors, minimax_h3_latent_upscaler_3d_fp16.safetensors] default='minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors'
+- optional:
+  - model_hires: MODEL
+  - highres_tiling: BOOLEAN default=False
+  - upscaler_unload: BOOLEAN default=True
+- outputs: LATENT:LATENT
+
+## SelfLiftH3TST
+module: custom_nodes.comfyui-SelfLift | category: selflift
+- required:
+  - model: MODEL
+  - tau: FLOAT default=0.2 min=0.0 max=1.0 step=0.05
+  - log_diagnostics: BOOLEAN default=True
+- outputs: MODEL:MODEL
+
+## SelfLiftImageSampler
+module: custom_nodes.comfyui-SelfLift | category: selflift
+- required:
+  - model: MODEL
+  - positive: CONDITIONING
+  - negative: CONDITIONING
+  - vae: VAE
+  - latent_image: LATENT
+  - sampler: SAMPLER
+  - sigmas: SIGMAS
+  - seed: INT default=0 min=0 max=18446744073709551615
+  - cfg: FLOAT default=1.0 min=0.0 max=100.0 step=0.1
+  - transition_step: INT default=6 min=1 max=10000
+  - lowres_scale: FLOAT default=0.5 min=0.25 max=1.0 step=0.05
+  - rho: FLOAT default=0.3 min=0.0 max=1.0 step=0.05
+  - w_min: FLOAT default=0.5 min=0.0 max=1.0 step=0.05
+  - w_max: FLOAT default=1.0 min=0.0 max=1.0 step=0.05
+  - latent_upsample: COMBO[nearest, bilinear] default='nearest'
+- optional:
+  - model_hires: MODEL
+- outputs: LATENT:LATENT
+
+## SemSegPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Semantic Segmentation
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## SenseNovaSamplingOptions
 module: comfy_extras.nodes_sensenova | category: model/patch/sensenova
@@ -22213,17 +15589,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/masking
   - max_poly_points: INT default=8 min=3 max=32 step=1
 - outputs: mask:MASK
 
-## Sepconv VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[sepconv.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=1000
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
-
 ## SetClipHooks
 module: comfy_extras.nodes_hooks | category: advanced/hooks/clip
 - required:
@@ -22233,14 +15598,6 @@ module: comfy_extras.nodes_hooks | category: advanced/hooks/clip
 - optional:
   - hooks: HOOKS
 - outputs: CLIP:CLIP
-
-## SetDefaultImageForSEGS
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - segs: SEGS
-  - image: IMAGE
-  - override: BOOLEAN default=True
-- outputs: SEGS:SEGS
 
 ## SetFirstSigma
 module: comfy_extras.nodes_custom_sampler | category: model/sampling/sigmas
@@ -22301,13 +15658,6 @@ module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/Debugger
   - any_value: *
 - outputs: string:STRING
 
-## ShowCachedInfo //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - cache_info: STRING default=''
-  - key: STRING default=''
-- outputs: 
-
 ## ShowText|pysssss
 module: custom_nodes.ComfyUI-Custom-Scripts | category: utils
 - required:
@@ -22335,6 +15685,15 @@ module: comfy_extras.nodes_dataset | category: image/batch
   - texts: STRING
   - seed: INT default=0 min=0 max=18446744073709551615
 - outputs: images:IMAGE, texts:STRING
+
+## ShufflePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/T2IAdapter-only
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+  - seed: INT default=0 min=0 max=18446744073709551615
+- outputs: IMAGE:IMAGE
 
 ## ShuffleVideoDataset
 module: comfy_extras.nodes_dataset | category: video/batch
@@ -22564,16 +15923,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/audio
   - normalize: BOOLEAN default=False
 - outputs: sound_level:FLOAT, sound_level_int:INT
 
-## SpeechLengthCalculator
-module: custom_nodes.LTX_Director | category: WhatDreamsCost
-- required:
-  - text: STRING default='Enter your script here. "Make sure to put spoken words insid...'
-  - fps: INT default=24 min=1 max=120 step=1
-  - additional_time: FLOAT default=0.0 min=0.0 step=0.1
-- optional:
-  - text_input: STRING
-- outputs: slow_frame_count:INT, average_frame_count:INT, fast_frame_count:INT, text:STRING
-
 ## SplatToFile3D
 module: comfy_extras.nodes_gaussian_splat | category: 3d/splat
 - required:
@@ -22660,16 +16009,6 @@ module: comfy_extras.nodes_custom_sampler | category: model/sampling/sigmas
   - sigmas: SIGMAS
   - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
 - outputs: high_sigmas:SIGMAS, low_sigmas:SIGMAS
-
-## StableCascade_CheckpointLoader //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Backend
-- required:
-  - stage_b: COMBO[] default=''
-  - key_opt_b: STRING
-  - stage_c: COMBO[] default=''
-  - key_opt_c: STRING
-  - cache_mode: COMBO[none, stage_b, stage_c, all] default='none'
-- outputs: b_model:MODEL, b_vae:VAE, c_model:MODEL, c_vae:VAE, c_clip_vision:CLIP_VISION, clip:CLIP, key_b:STRING, key_c:STRING
 
 ## StableCascade_EmptyLatentImage
 module: comfy_extras.nodes_stable_cascade | category: model/latent/stable cascade
@@ -22770,25 +16109,6 @@ module: custom_nodes.ComfyUI-Crystools | category: crystools 🪛/Utils
   - latent: LATENT
 - outputs: latent:LATENT
 
-## StepsScheduleHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - schedule_for_iteration: COMBO[simple]
-  - target_steps: INT default=20 min=1 max=10000
-- outputs: PK_HOOK:PK_HOOK
-
-## STMFNet VFI
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation/VFI
-- required:
-  - ckpt_name: COMBO[stmfnet.pth]
-  - frames: IMAGE
-  - clear_cache_after_n_frames: INT default=10 min=1 max=1000
-  - multiplier: INT default=2 min=2 max=2
-  - duplicate_first_last_frames: BOOLEAN default=False
-- optional:
-  - optional_interpolation_states: INTERPOLATION_STATES
-- outputs: IMAGE:IMAGE
-
 ## StoryboardImageGen
 module: custom_nodes.comfyui-storyboard | category: Storyboard
 - required:
@@ -22866,13 +16186,6 @@ module: comfy_extras.nodes_string | category: text
   - string: STRING
 - outputs: length:INT
 
-## StringListToString
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - join_with: STRING default='\\n'
-  - string_list: STRING
-- outputs: STRING:STRING
-
 ## StringOperation
 module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
 - required:
@@ -22948,20 +16261,6 @@ module: nodes | category: model/loaders
 - required:
   - style_model_name: COMBO[]
 - outputs: STYLE_MODEL:STYLE_MODEL
-
-## SubtractMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - mask1: MASK
-  - mask2: MASK
-- outputs: MASK:MASK
-
-## SubtractMaskForEach
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - base_segs: SEGS
-  - mask_segs: SEGS
-- outputs: SEGS:SEGS
 
 ## Superprompt
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/text
@@ -23119,6 +16418,15 @@ module: comfy_extras.nodes_tcfg | category: advanced/guidance
 - required:
   - model: MODEL
 - outputs: patched_model:MODEL
+
+## TEEDPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Line Extractors
+- required:
+  - image: IMAGE
+- optional:
+  - safe_steps: INT default=2 min=0 max=10 step=1
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## TemporalScoreRescaling
 module: comfy_extras.nodes_eps | category: model/patch/unet
@@ -23385,26 +16693,14 @@ module: comfy_extras.nodes_mask | category: image/mask
   - value: FLOAT default=0.5 min=0.0 max=1.0 step=0.01
 - outputs: MASK:MASK
 
-## TiledKSamplerProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Sampler
+## TilePreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/tile
 - required:
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - cfg: FLOAT default=8.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - tile_width: INT default=512 min=320 max=16384 step=64
-  - tile_height: INT default=512 min=320 max=16384 step=64
-  - tiling_strategy: COMBO[random, padded, simple]
-  - basic_pipe: BASIC_PIPE
-- outputs: KSAMPLER:KSAMPLER
-
-## TilePreprocessor_Provider_for_SEGS //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/SEGS/ControlNet
-- required:
+  - image: IMAGE
+- optional:
   - pyrUp_iters: INT default=3 min=1 max=10 step=1
-- outputs: SEGS_PREPROCESSOR:SEGS_PREPROCESSOR
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## TimerNodeKJ
 module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/misc
@@ -23415,73 +16711,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/misc
 - optional:
   - timer: TIMER
 - outputs: any_output:*, timer:TIMER, time:INT
-
-## ToBasicPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-- outputs: basic_pipe:BASIC_PIPE
-
-## ToBinaryMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Operation
-- required:
-  - mask: MASK
-  - threshold: INT default=20 min=1 max=255
-- outputs: MASK:MASK
-
-## ToDetailerPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - bbox_detector: BBOX_DETECTOR
-  - wildcard: STRING
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-- optional:
-  - sam_model_opt: SAM_MODEL
-  - segm_detector_opt: SEGM_DETECTOR
-  - detailer_hook: DETAILER_HOOK
-- outputs: detailer_pipe:DETAILER_PIPE
-
-## ToDetailerPipeSDXL
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Pipe
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - vae: VAE
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - refiner_model: MODEL
-  - refiner_clip: CLIP
-  - refiner_positive: CONDITIONING
-  - refiner_negative: CONDITIONING
-  - bbox_detector: BBOX_DETECTOR
-  - wildcard: STRING
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-- optional:
-  - sam_model_opt: SAM_MODEL
-  - segm_detector_opt: SEGM_DETECTOR
-  - detailer_hook: DETAILER_HOOK
-- outputs: detailer_pipe:DETAILER_PIPE
-
-## ToIPAdapterPipe //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Util
-- required:
-  - ipadapter: IPADAPTER
-  - model: MODEL
-- optional:
-  - clip_vision: CLIP_VISION
-  - insightface: INSIGHTFACE
-- outputs: IPADAPTER_PIPE:IPADAPTER_PIPE
 
 ## TomePatchModel
 module: comfy_extras.nodes_tomesd | category: model/patch/unet
@@ -23675,7 +16904,7 @@ module: comfy_extras.nodes_train | category: model/training
   - gradient_checkpointing: BOOLEAN default=True
   - checkpoint_depth: INT default=1 min=1 max=5
   - offloading: BOOLEAN default=False
-  - existing_lora: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +15] default='[None]'
+  - existing_lora: COMBO[FC_ACE_h3_face_v1.safetensors, FC_ALAN_h3_face_v1.safetensors, FC_ANYA_h3_face_v1.safetensors, FC_ARIANA_h3_face_v1.safetensors, FC_BETTY_h3_face_v1.safetensors, FC_CHUCK_h3_face_v1.safetensors, FC_DOLLY_h3_face_v1.safetensors, FC_DUDE_h3_face_v1.safetensors, FC_JENNIFER_h3_face_v1.safetensors, FC_KIERNAN_h3_face_v1.safetensors, ... +49] default='[None]'
   - bucket_mode: BOOLEAN default=False
   - bypass_mode: BOOLEAN default=False
 - outputs: lora:LORA_MODEL, loss_map:LOSS_MAP, steps:INT
@@ -24149,65 +17378,26 @@ module: comfy_extras.nodes_dataset | category: text
   - max_length: INT default=77 min=1 max=10000
 - outputs: texts:STRING
 
-## TwoAdvancedSamplersForMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Sampler
+## TTPlanet_TileGF_Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/tile
 - required:
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - steps: INT default=20 min=1 max=10000
-  - denoise: FLOAT default=1.0 min=0.0 max=1.0 step=0.01
-  - samples: LATENT
-  - base_sampler: KSAMPLER_ADVANCED
-  - mask_sampler: KSAMPLER_ADVANCED
-  - mask: MASK
-  - overlap_factor: INT default=10 min=0 max=10000
-- outputs: LATENT:LATENT
-
-## TwoSamplersForMask
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Sampler
-- required:
-  - latent_image: LATENT
-  - base_sampler: KSAMPLER
-  - mask_sampler: KSAMPLER
-  - mask: MASK
-- outputs: LATENT:LATENT
-
-## TwoSamplersForMaskUpscalerProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - scale_method: COMBO[nearest-exact, bilinear, lanczos, area]
-  - full_sample_schedule: COMBO[none, interleave1, interleave2, interleave3, last1, last2, interleave1+last1, interleave2+last1, interleave3+last1]
-  - use_tiled_vae: BOOLEAN default=False
-  - base_sampler: KSAMPLER
-  - mask_sampler: KSAMPLER
-  - mask: MASK
-  - vae: VAE
-  - tile_size: INT default=512 min=320 max=4096 step=64
+  - image: IMAGE
 - optional:
-  - full_sampler_opt: KSAMPLER
-  - upscale_model_opt: UPSCALE_MODEL
-  - pk_hook_base_opt: PK_HOOK
-  - pk_hook_mask_opt: PK_HOOK
-  - pk_hook_full_opt: PK_HOOK
-- outputs: UPSCALER:UPSCALER
+  - scale_factor: FLOAT default=1.0 min=1.0 max=8.0 step=0.01
+  - blur_strength: FLOAT default=2.0 min=1.0 max=10.0 step=0.01
+  - radius: INT default=7 min=1 max=20 step=1
+  - eps: FLOAT default=0.01 min=0.001 max=0.1 step=0.001
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
-## TwoSamplersForMaskUpscalerProviderPipe
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
+## TTPlanet_TileSimple_Preprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/tile
 - required:
-  - scale_method: COMBO[nearest-exact, bilinear, lanczos, area]
-  - full_sample_schedule: COMBO[none, interleave1, interleave2, interleave3, last1, last2, interleave1+last1, interleave2+last1, interleave3+last1]
-  - use_tiled_vae: BOOLEAN default=False
-  - base_sampler: KSAMPLER
-  - mask_sampler: KSAMPLER
-  - mask: MASK
-  - basic_pipe: BASIC_PIPE
-  - tile_size: INT default=512 min=320 max=4096 step=64
+  - image: IMAGE
 - optional:
-  - full_sampler_opt: KSAMPLER
-  - upscale_model_opt: UPSCALE_MODEL
-  - pk_hook_base_opt: PK_HOOK
-  - pk_hook_mask_opt: PK_HOOK
-  - pk_hook_full_opt: PK_HOOK
-- outputs: UPSCALER:UPSCALER
+  - scale_factor: FLOAT default=1.0 min=1.0 max=8.0 step=0.01
+  - blur_strength: FLOAT default=2.0 min=1.0 max=10.0 step=0.01
+- outputs: IMAGE:IMAGE
 
 ## UltimateSDUpscale
 module: custom_nodes.ComfyUI_UltimateSDUpscale | category: image/upscaling
@@ -24303,12 +17493,6 @@ module: custom_nodes.ComfyUI_UltimateSDUpscale | category: image/upscaling
   - batch_size: INT default=1 min=1 max=4096 step=1
 - outputs: IMAGE:IMAGE
 
-## UltralyticsDetectorProvider
-module: custom_nodes.ComfyUI-Impact-Subpack | category: ImpactPack
-- required:
-  - model_name: COMBO[bbox/face_yolov8m.pt, bbox/face_yolov9c.pt, bbox/hand_yolov8n.pt]
-- outputs: BBOX_DETECTOR:BBOX_DETECTOR, SEGM_DETECTOR:SEGM_DETECTOR
-
 ## unCLIPCheckpointLoader
 module: nodes | category: model/loaders
 - required:
@@ -24337,7 +17521,7 @@ module: comfy_extras.nodes_attention_multiply | category: experimental/attention
 ## UNETLoader
 module: nodes | category: model/loaders
 - required:
-  - unet_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-4b-fp8.safetensors]
+  - unet_name: COMBO[10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors, 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors, FLUX-KLEIN-9B-FP8-NSFW.safetensors, flux-2-klein-9b-kv-fp8.safetensors]
   - weight_dtype: COMBO[default, fp8_e4m3fn, fp8_e4m3fn_fast, fp8_e5m2]
 - outputs: MODEL:MODEL
 
@@ -24376,6 +17560,45 @@ module: comfy_extras.nodes_attention_multiply | category: experimental/attention
   - cross_temporal: FLOAT default=1.0 min=0.0 max=10.0 step=0.01
 - outputs: MODEL:MODEL
 
+## UniBlockSwap
+module: custom_nodes.ComfyUI_UniBlockSwap | category: model/loaders
+- required:
+  - model: MODEL
+- optional:
+  - num_blocks: INT default=-1 min=-1 max=10000 step=1
+- outputs: model:MODEL
+
+## UniBlockSwapCacheControl
+module: custom_nodes.ComfyUI_UniBlockSwap | category: model/loaders
+- required:
+  - model: MODEL
+- outputs: model:MODEL
+
+## UniBlockSwapTE
+module: custom_nodes.ComfyUI_UniBlockSwap | category: model/loaders
+- required:
+  - clip: CLIP
+- optional:
+  - num_blocks: INT default=-1 min=-1 max=10000 step=1
+- outputs: clip:CLIP
+
+## UniFormer-SemSegPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Semantic Segmentation
+- required:
+  - image: IMAGE
+- optional:
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## Unimatch_OptFlowPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Optical Flow
+- required:
+  - image: IMAGE
+  - ckpt_name: COMBO[gmflow-scale1-mixdata.pth, gmflow-scale2-mixdata.pth, gmflow-scale2-regrefine6-mixdata.pth] default='gmflow-scale2-regrefine6-mixdata.pth'
+  - backward_flow: BOOLEAN default=False
+  - bidirectional_flow: BOOLEAN default=False
+- outputs: OPTICAL_FLOW:OPTICAL_FLOW, PREVIEW_IMAGE:IMAGE
+
 ## UniversalSwitch
 module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
 - required:
@@ -24399,38 +17622,6 @@ module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
   - ForceUnload: BOOLEAN default=False
 - outputs: Output:*
 
-## UnsamplerDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - model: MODEL
-  - steps: INT default=25 min=1 max=10000
-  - start_end_at_step: INT default=21 min=0 max=10000
-  - end_end_at_step: INT default=24 min=0 max=10000
-  - cfg: FLOAT default=1.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - normalize: COMBO[disable, enable]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - schedule_for_cycle: COMBO[skip_start, from_start]
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
-## UnsamplerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Upscale
-- required:
-  - model: MODEL
-  - steps: INT default=25 min=1 max=10000
-  - start_end_at_step: INT default=21 min=0 max=10000
-  - end_end_at_step: INT default=24 min=0 max=10000
-  - cfg: FLOAT default=1.0 min=0.0 max=100.0
-  - sampler_name: COMBO[euler, euler_cfg_pp, euler_ancestral, euler_ancestral_cfg_pp, heun, heunpp2, exp_heun_2_x0, exp_heun_2_x0_sde, dpm_2, dpm_2_ancestral, ... +35]
-  - scheduler: COMBO[simple, sgm_uniform, karras, exponential, ddim_uniform, beta, normal, linear_quadratic, kl_optimal]
-  - normalize: COMBO[disable, enable]
-  - positive: CONDITIONING
-  - negative: CONDITIONING
-  - schedule_for_iteration: COMBO[simple]
-- outputs: PK_HOOK:PK_HOOK
-
 ## UnwrapMesh
 module: comfy_extras.nodes_mesh_postprocess | category: 3d/texturing
 - required:
@@ -24441,11 +17632,20 @@ module: comfy_extras.nodes_mesh_postprocess | category: 3d/texturing
   - weld_distance: FLOAT default=0.0 min=0.0 max=1.0 step=0.0001
 - outputs: mesh:MESH
 
-## UnzipPrompt //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
+## UpperBodyTrackingFromPoseKps
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Pose Keypoint Postprocess
 - required:
-  - zipped_prompt: ZIPPED_PROMPT
-- outputs: positive:STRING, negative:STRING, name:STRING
+  - pose_kps: POSE_KEYPOINT
+  - id_include: STRING default=''
+  - Head_width_height: STRING default='256, 256'
+  - Neck_width_height: STRING default='100, 100'
+  - Shoulder_width_height: STRING default=''
+  - Torso_width_height: STRING default='350, 450'
+  - RArm_width_height: STRING default='128, 256'
+  - RForearm_width_height: STRING default='128, 256'
+  - LArm_width_height: STRING default='128, 256'
+  - LForearm_width_height: STRING default='128, 256'
+- outputs: tracking:TRACKING, prompt:STRING
 
 ## UpscaleModelLoader
 module: comfy_extras.nodes_upscale_model | category: model/loaders
@@ -24615,13 +17815,6 @@ module: custom_nodes.ControlFlowUtils | category: 🐺 VykosX-ControlFlowUtils
   - run_after: * default=''
 - outputs: VAE Name:*
 
-## VariationNoiseDetailerHookProvider
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Detailer
-- required:
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - strength: FLOAT default=0.0 min=0.0 max=1.0 step=0.01
-- outputs: DETAILER_HOOK:DETAILER_HOOK
-
 ## Veo3FirstLastFrameNode
 module: comfy_api_nodes.nodes_veo2 | category: partner/video/Veo
 - required:
@@ -24653,12 +17846,6 @@ module: comfy_api_nodes.nodes_veo2 | category: partner/video/Veo
   - model: COMBO[veo-3.1-generate, veo-3.1-fast-generate, veo-3.1-lite]
   - generate_audio: BOOLEAN default=False
 - outputs: VIDEO:VIDEO
-
-## VFI FloatToInt
-module: custom_nodes.ComfyUI-Frame-Interpolation | category: ComfyUI-Frame-Interpolation
-- required:
-  - float: FLOAT default=0 min=0 step=0.01
-- outputs: INT:INT
 
 ## VHS_AudioToVHSAudio
 module: custom_nodes.ComfyUI-VideoHelperSuite | category: Video Helper Suite 🎥🅥🅗🅢/audio
@@ -24742,7 +17929,7 @@ module: custom_nodes.ComfyUI-VideoHelperSuite | category: Video Helper Suite �
 ## VHS_LoadImages
 module: custom_nodes.ComfyUI-VideoHelperSuite | category: Video Helper Suite 🎥🅥🅗🅢
 - required:
-  - directory: COMBO[3d, community, max_fair_cond, reference_images]
+  - directory: COMBO[3d, community, joyecho_prompts, max_fair_cond, reference_images, rift_prompts]
 - optional:
   - image_load_cap: INT default=0 min=0 max=9007199254740991 step=1
   - skip_first_images: INT default=0 min=0 max=9007199254740991 step=1
@@ -26091,57 +19278,6 @@ module: custom_nodes.ComfyUI-KJNodes | category: KJNodes/text
   - allowed_float_decimals: INT default=2 min=0 max=10
 - outputs: STRING:STRING
 
-## WildcardEncode //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
-- required:
-  - model: MODEL
-  - clip: CLIP
-  - token_normalization: COMBO[none, mean, length, length+mean]
-  - weight_interpretation: COMBO[comfy, A1111, compel, comfy++, down_weight] default='comfy++'
-  - wildcard_text: STRING
-  - populated_text: STRING
-  - mode: COMBO[populate, fixed, reproduce] default='populate'
-  - Select to add LoRA: COMBO[Select the LoRA to add to the text, FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, ... +15]
-  - Select to add Wildcard: COMBO[Select the Wildcard to add to the text]
-  - seed: INT default=0 min=0 max=18446744073709551615
-- outputs: model:MODEL, clip:CLIP, conditioning:CONDITIONING, populated_text:STRING
-
-## WildcardPromptFromString
-module: custom_nodes.ComfyUI-Impact-Pack | category: ImpactPack/Util
-- required:
-  - string: STRING
-  - delimiter: STRING default='\\n'
-  - prefix_all: STRING
-  - postfix_all: STRING
-  - restrict_to_tags: STRING
-  - exclude_tags: STRING
-- outputs: wildcard:STRING, segs_labels:STRING
-
-## WorklistToItemList //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/List
-- required:
-  - item: *
-- outputs: item_list:ITEM_LIST
-
-## XY Input: Lora Block Weight //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/LoraBlockWeight
-- required:
-  - category_filter: COMBO[All, ]
-  - lora_name: COMBO[FC_SYDNEY_h3_face_v1.safetensors, HMNSFW-AIO-V2.5.safetensors, Kutan Megamalamar Transformation.safetensors, MM-H3 - Blowjob v3.safetensors, MS_real_and_Details_klein.safetensors, Mesh_dress_experimental.safetensors, MysticXXX_MMH3-V4.safetensors, Mystic_XXX_RuinedFocus.safetensors, NSFW_MASTER_FLUX.safetensors, PenisV2_minimax-h3_epoch60.safetensors, ... +14]
-  - strength_model: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - strength_clip: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - inverse: BOOLEAN default=False
-  - seed: INT default=0 min=0 max=18446744073709551615
-  - A: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - B: FLOAT default=1.0 min=-10.0 max=10.0 step=0.01
-  - preset: COMBO[Preset, SD-NONE:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, SD-ALL:1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, SD-INS:1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, SD-IND:1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0, SD-INALL:1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0, SD-MIDD:1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0, SD-MIDD0.2:1,0,0,0,0,0,0.2,0.4,0.4,0.2,0,0,0,0,0,0,0, SD-MIDD0.8:1,0,0,0,0,0.5,0.8,0.8,0.4,0,0,0,0,0,0,0,0, SD-MOUT:1,0,0,0,0,0,1,1,1,1,1,1,1,1,0.5,0,0, ... +113]
-  - block_vectors: STRING default='SD-NONE/SD-ALL\nSD-ALL/SD-ALL\nSD-INS/SD-ALL\nSD-IND/SD-ALL\nSD-...'
-  - heatmap_palette: COMBO[viridis, magma, plasma, inferno, cividis]
-  - heatmap_alpha: FLOAT default=0.8 min=0.0 max=1.0 step=0.01
-  - heatmap_strength: FLOAT default=1.5 min=0.0 max=10.0 step=0.01
-  - xyplot_mode: COMBO[Simple, Diff, Diff+Heatmap]
-- outputs: X (vectors):XY, Y (effect_compares):XY
-
 ## YuE2GenerateABC
 module: comfy_extras.nodes_yue2 | category: model/conditioning/yue2
 - required:
@@ -26191,23 +19327,29 @@ module: comfy_extras.nodes_model_patch | category: model/patch
   - end_percent: FLOAT default=1.0 min=0.0 max=1.0 step=0.001
 - outputs: MODEL:MODEL
 
-## ZipPrompt //Inspire
-module: custom_nodes.ComfyUI-Inspire-Pack | category: InspirePack/Prompt
+## Zoe-DepthMapPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
 - required:
-  - positive: STRING
-  - negative: STRING
+  - image: IMAGE
 - optional:
-  - name_opt: STRING
-- outputs: ZIPPED_PROMPT:ZIPPED_PROMPT
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
+
+## Zoe_DepthAnythingPreprocessor
+module: custom_nodes.comfyui_controlnet_aux | category: ControlNet Preprocessors/Normal and Depth Estimators
+- required:
+  - image: IMAGE
+- optional:
+  - environment: COMBO[indoor, outdoor] default='indoor'
+  - resolution: INT default=512 min=64 max=16384 step=64
+- outputs: IMAGE:IMAGE
 
 ## AIO workflow coverage (civitai 2906001)
-Node types used: 32; found in object_info: 24.
-Used and installed: BasicScheduler, BlockSparseAttention, CLIPLoader, ComfyMathExpression, ComfySwitchNode, ConditioningZeroOut, KSamplerSelect, LoadImage, LoraLoaderModelOnly, MiniMaxH3ReferenceToVideo, MiniMaxH3SigmaShift, ModelAttentionBackend, ModelPreviewOverrideKJ, PrimitiveBoolean, PrimitiveFloat, PrimitiveStringMultiline, ResolutionSelector, UNETLoader, VAEDecode, VAEDecodeAudio, VAELoader, VHS_LoadAudioUpload, VHS_LoadVideo, VHS_VideoCombine
+Node types used: 32; found in object_info: 26.
+Used and installed: BasicScheduler, BlockSparseAttention, CLIPLoader, ComfyMathExpression, ComfySwitchNode, ConditioningZeroOut, KSamplerSelect, LoadImage, LoraLoaderModelOnly, MiniMaxH3ReferenceToVideo, MiniMaxH3SigmaShift, ModelAttentionBackend, ModelPreviewOverrideKJ, PrimitiveBoolean, PrimitiveFloat, PrimitiveStringMultiline, ResolutionSelector, SelfLiftH3Sampler, UNETLoader, UniBlockSwap, VAEDecode, VAEDecodeAudio, VAELoader, VHS_LoadAudioUpload, VHS_LoadVideo, VHS_VideoCombine
 
 ### NOT in object_info (not installed)
 - Fast Groups Bypasser (rgthree)
 - GetNode
 - Label (rgthree)
-- SelfLiftH3Sampler
 - SetNode
-- UniBlockSwap

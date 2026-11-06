@@ -1,0 +1,41 @@
+{
+ "checked": [
+  {
+   "name": "MinimaxH3LatentUpscaler3D",
+   "partial": [
+    "MinimaxH3LatentUpscaler3D"
+   ],
+   "present_exact": true
+  },
+  {
+   "name": "MiniMaxH3RefLoRALoader",
+   "partial": [
+    "MiniMaxH3RefLoRALoader"
+   ],
+   "present_exact": true
+  },
+  {
+   "name": "MiniMaxH3RefLoRAApply",
+   "partial": [
+    "MiniMaxH3RefLoRAApply"
+   ],
+   "present_exact": true
+  },
+  {
+   "name": "MiniMaxH3RefModsLoader",
+   "partial": [
+    "MiniMaxH3RefModsLoader"
+   ],
+   "present_exact": true
+  },
+  {
+   "name": "MiniMaxH3RefModApply",
+   "partial": [
+    "MiniMaxH3RefModApply"
+   ],
+   "present_exact": true
+  }
+ ],
+ "dump": "C:/AI/community/notes/objinfo/object_info_20261105.json",
+ "entries": 1786
+}
