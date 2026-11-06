@@ -18,11 +18,19 @@ import unittest
 
 from build_request import (
     DEFAULT_REFMOD_TEMPLATE,
-    build_parody_request,
+    build_parody_request as _build_parody_request,
     format_parody_prompt,
     populate_refmod_slots,
     verify_keep_dials,
 )
+
+def build_parody_request(*a, **k):
+    k.setdefault("require_cond", False)
+    out = _build_parody_request(*a, **k)
+    # Compat: older asserts unpack 2-tuple
+    if isinstance(out, tuple) and len(out) == 3:
+        return out[0], out[1]
+    return out
 from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities
 from run_record import build_assets_record, save_run_record, verify_run_artifacts

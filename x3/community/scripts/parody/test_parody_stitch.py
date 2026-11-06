@@ -27,6 +27,7 @@ QUEUE_DIR = REPO_ROOT / "scripts" / "queue"
 if str(QUEUE_DIR) not in sys.path:
     sys.path.insert(0, str(QUEUE_DIR))
 import take_chain_stitch
+import c2v_chain
 from c2v_chain import bridge_parody_stitch
 
 
@@ -170,10 +171,14 @@ class TestParodyStitch(unittest.TestCase):
         self._create_synthetic_cell("c01_s1001", delivered=124)
         self._create_synthetic_cell("c02_s1002", delivered=124)
         completed_mock = mock.MagicMock(returncode=0, stderr="", stdout="")
-        with mock.patch.object(take_chain_stitch, "probe", side_effect=self._fake_probe(248)), \
-             mock.patch.object(take_chain_stitch, "sh", return_value=completed_mock) as mock_sh:
-            result = bridge_parody_stitch(self.root, expected_frames=248, expected_duration_s=248 / 24,
-                                          fps=24, name="parody_final")
+        c2v_chain.FRAME_COUNT_HOOK = lambda p: 248
+        try:
+            with mock.patch.object(take_chain_stitch, "probe", side_effect=self._fake_probe(248)), \
+                 mock.patch.object(take_chain_stitch, "sh", return_value=completed_mock) as mock_sh:
+                result = bridge_parody_stitch(self.root, expected_frames=248, expected_duration_s=248 / 24,
+                                              fps=24, name="parody_final")
+        finally:
+            c2v_chain.FRAME_COUNT_HOOK = None
         self.assertEqual(result["cells"], 2)
         self.assertEqual(result["total_delivered_frames"], 248)
         self.assertEqual(result["n_actual"], 248)
@@ -186,10 +191,15 @@ class TestParodyStitch(unittest.TestCase):
         self._create_synthetic_cell("c01_s1001", delivered=124)
         self._create_synthetic_cell("c02_s1002", delivered=124)
         completed_mock = mock.MagicMock(returncode=0, stderr="", stdout="")
-        with mock.patch.object(take_chain_stitch, "probe", side_effect=self._fake_probe(124)), \
-             mock.patch.object(take_chain_stitch, "sh", return_value=completed_mock):
-            with self.assertRaisesRegex(ValueError, "N_actual"):
-                bridge_parody_stitch(self.root, expected_frames=248, fps=24, name="parody_final")
+        c2v_chain.FRAME_COUNT_HOOK = lambda p: 124
+        try:
+            with mock.patch.object(take_chain_stitch, "probe", side_effect=self._fake_probe(124)), \
+                 mock.patch.object(take_chain_stitch, "sh", return_value=completed_mock):
+                with self.assertRaisesRegex(ValueError, "N_actual"):
+                    bridge_parody_stitch(self.root, expected_frames=248, expected_duration_s=248 / 24,
+                                         fps=24, name="parody_final")
+        finally:
+            c2v_chain.FRAME_COUNT_HOOK = None
 
     def test_planned_cut_partial_delivery_refused(self) -> None:
         self._create_synthetic_cell("c01_s1001", delivered=124)

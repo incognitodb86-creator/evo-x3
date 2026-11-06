@@ -1,4 +1,4 @@
-﻿"""BA-5c CPU fixtures: default still gate, KD17 slot ledger and U8 queue route.
+"""BA-5c CPU fixtures: default still gate, KD17 slot ledger and U8 queue route.
 
 Synthetic temp files only. No GPU, network, process launch, live run or approved-pool read.
 """
@@ -46,7 +46,7 @@ class TestBA5cFixes(unittest.TestCase):
         self.refmods.mkdir()
         for name in (
             "minimaxh3_testachar_v1_refmod",
-            "minimaxh3_testachar_alt_v1_refmod",
+            "minimaxh3_testaextra_v1_refmod",
             "minimaxh3_testaactor_v1_refmod",
         ):
             (self.refmods / f"{name}.safetensors").write_bytes(b"fixture")
@@ -62,7 +62,7 @@ class TestBA5cFixes(unittest.TestCase):
 
     def request(self, stills=()):
         return {
-            "names": ["Testa Char"],
+            "names": ["Testa Char", "Testa Extra"],
             "character": "Testa Char",
             "actor": "Testa Actor",
             "tone": "parody",
@@ -98,7 +98,7 @@ class TestBA5cFixes(unittest.TestCase):
         for i in range(4, 9):
             self.assertEqual(slots[f"mod_{i}"], {"path": "(none)", "strength": 1.0, "copies": 1})
 
-        graph, _ = build_parody_request(res, seed=7, prefix="community/fixture/clip", frames=124)
+        graph, _, _ = build_parody_request(res, seed=7, prefix="community/fixture/clip", frames=124, require_cond=False)
         inputs = graph["refmods"]["inputs"]
         ledger = build_assets_record(res, graph)["refmod_ledger"]
         self.assertEqual(len(ledger), 8)
@@ -115,6 +115,7 @@ class TestBA5cFixes(unittest.TestCase):
         with mock.patch.object(spr, "INDEX_DIR", self.index), mock.patch.object(
             spr, "REFMODS_DIR", self.refmods
         ), mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json"), mock.patch.object(
+            spr, "REFLORA_DIR", None), mock.patch.object(
             spr.subprocess, "run", return_value=done
         ) as run:
             result = spr.submit_parody_job(
@@ -125,6 +126,8 @@ class TestBA5cFixes(unittest.TestCase):
                 seed=11,
                 frames=124,
                 run_dir_override=run_dir,
+                require_cond=False,
+                refmod_only=True,
             )
         return run_dir, result, run.call_args.args[0]
 
@@ -138,7 +141,7 @@ class TestBA5cFixes(unittest.TestCase):
         self.assertTrue(result["detached"])
         self.assertFalse(result.get("gpu_busy", False))
         order = json.loads((run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertEqual(order["order"], [{"pos": 1, "tag": "clip", "arm": "parody", "scene": "Testa Char", "seed": 11}])
+        self.assertEqual(order["order"], [{"pos": 1, "tag": "clip", "arm": "parody", "scene": "Testa Char", "seed": 11, "graph_mode": "single-pass", "refmod_only": True}])
         self.assertEqual(
             json.loads((run_dir / "clip" / "request.api.json").read_text(encoding="utf-8")),
             json.loads((run_dir / "request.api.json").read_text(encoding="utf-8")),

@@ -18,7 +18,7 @@ Do **not** load for ordinary approved-still REF2VA pastes that only use `<Pictur
 ## Hard bans (Derrick)
 
 1. **Stills / conds / refs only from `approved_characters`.** That folder is the whole likeness gate (movie/TV screenshots OK once they are in the pool after the one-time adults-only check). No separate "no real-person photos" rule.
-2. Lane image/adults-only/likeness rules live in `ComfyUI\LANE_IMAGE_RULES.md` (coding `AGENTS.md` stays coding-only) - do not add new Forge global `AGENTS.md` rules without Derrick's card yes.
+2. Image/adults-only rules live only in the ComfyUI/render folder `AGENTS.md` - do not add new Forge global `AGENTS.md` rules without Derrick's card yes.
 3. Never Sydney paths.
 4. KEEP dials unchanged (B2 / REF2VA 10strip eros beta7 stock). No 9th RefMod slot (loader max 8).
 
@@ -60,19 +60,6 @@ On this box for parody:
 
 `MiniMaxH3RefModsLoader` (mod_1…mod_8) → `MiniMaxH3RefModApply` on the REF2VA / I2V conditioning path. Prefer 2–3 RefMods per persona when available. Unused slots = `(none)`.
 
-## RefLoRA (dual-half hybrid) - all three layers when a match exists
-
-Community: Malcolm `ComfyUI-MiniMaxH3RefLoRA` (one `.safetensors` = LoRA weights + RefMod reference). Installed at ComfyUI `custom_nodes/ComfyUI-MiniMaxH3RefLoRA`; hybrids live in `models/loras/MinimaxH3/reflora/` (verified copies, never junctions).
-
-- **Automatic:** `resolve_identities(..., reflora_dir=...)` looks for the exact pair `<id>_refmod` -> `<id>_reflora.safetensors`. Present + valid -> **INDEX + RefMod + RefLoRA**. Absent -> **INDEX + RefMod** fallback (reason recorded in `assets.json`). Present but broken (no LoRA tensors, stripped weights, unknown member equivalence) -> **block**, no fallback, no auto-download.
-- **INDEX is never dropped** when RefLoRA is on: name + biometric description stay in `subject_definitions`; good/bad/fence voice semantics are unchanged.
-- **Visual members only** (`components=Visual`); packed audio is never loaded - native voice stays with INDEX.
-- **One injection route:** Load H3 RefLoRA patches MODEL (+CLIP) after the B2 model stack; its `mods` go to one `Apply H3 RefLoRA` chained after the RefMod Apply; `attach_to_model=false`. Never also load the hybrid in a generic LoRA loader.
-- **Provenance:** a standalone RefMod byte-identical to the packed member is injected once (from the hybrid); distinct ones are both kept; total references stay <= 8.
-- **Cond required:** the RefLoRA branch needs an approved still (`--image community/<file>.png`, staged from `approved_characters`) on the REF2VA Picture input; missing Cond blocks.
-- **KEEP B2 unchanged:** graph is grafted from `templates/b2_refmod.api.json`; `reflora.frozen_diff` allows only identity/Cond/run fields. Pack example render settings are not adopted. Derived reference: `templates/b2_reflora.api.json`.
-- GPU smoke (Megan Fox / Jennifer Check bad-row A/B + Daenerys control) needs Derrick's separate GPU GO.
-
 ## Cinema / cuts / poses (not this skill)
 
 Community (Malcolm H3 Prompting Guide + TenStrip HF 10Eros-Max notes) puts **camera angles, in-clip cuts, transitions, and motion** in the shared prompting rules - not in a separate identity doc. On this box that means:
@@ -90,7 +77,58 @@ This skill only changes **identity binding** (INDEX + RefMod + name/description)
 - `h3-max-ref2va-prompt` - picture-ref REF2VA paste / R32-R44 / TenStrip-shaped retention+audio
 - `alienpc-hardcore-i2v-director` - Cond-to-clip director card (angles as intent + camera hold)
 - `alienpc-stills-pose-edit-prompting` - pose unlock on stills
-- `h3-hc-render` / `comfy-render` / `video-render` - dials and submit
+- `h3-hc-render` / `comfy-render` - dials and submit (use `h3-hc-render`, not a missing `video-render`)
+
+## RefLoRA hybrid (U5) + Cond provenance
+
+Always INDEX + RefMod **with Cond** (R10 / FG-11). Cond still must come from `approved_characters` and match `ComfyUI/input/<basename>` by SHA256 (FG-2).
+
+### CLI (`scripts/parody/build_request.py` + `submit_parody_run.py`)
+
+| Flag | Purpose |
+|---|---|
+| `--image <name>` | ComfyUI/input-relative Cond filename (e.g. `hoot_start.jpg`) |
+| `--cond-source <path>` | Absolute/relative path **inside** `approved_characters` (required for fail-closed provenance; if omitted with `--image`, resolver only accepts the file when it uniquely exists under the pool) |
+| `--stage-cond` | Copy validated `--cond-source` → `ComfyUI/input/<basename>` and verify SHA256 |
+| `--graph-mode single-pass` | Default. Community single-pass `b2_refmod.api.json` (768×1344, 8-step) |
+| `--graph-mode two-pass` | KEEP Lokken `b2.api.json` (384×672 → 2× upscale, AddGuide, pass-2 beta/3/0.4) |
+| `--refmod-only` / `--disable-reflora` | Skip RefLoRA lookup so Arm A stays RefMod-only even when `*_reflora.safetensors` is on disk |
+| `--dry-run` | (`submit_parody_run.py`) build + record only; never queue |
+
+### U5 beta7 smoke arms (Derrick FG-1 keep-both, via Forge)
+
+Cond for all arms: `approved_characters/HOOTERS01/hoot_start.jpg` → `ComfyUI/input/hoot_start.jpg`.
+
+```text
+# Arm A — Megan Fox / Jennifer Check, RefMod-only, single-pass
+python scripts/parody/submit_parody_run.py --dry-run --refmod-only --graph-mode single-pass \
+  --name "Megan Fox" --character "Jennifer Check" --actor "Megan Fox" \
+  --description "<Forge vision caption of hoot_start.jpg>" \
+  --image hoot_start.jpg --cond-source "C:/Users/derek/5slock/approved_characters/HOOTERS01/hoot_start.jpg" --stage-cond
+
+# Arm B — Megan Fox + RefLoRA hybrid, single-pass
+python scripts/parody/submit_parody_run.py --dry-run --graph-mode single-pass \
+  --name "Megan Fox" --character "Jennifer Check" --actor "Megan Fox" \
+  --description "<same caption>" \
+  --image hoot_start.jpg --cond-source "C:/Users/derek/5slock/approved_characters/HOOTERS01/hoot_start.jpg"
+
+# Arm B-2pass — Megan Fox + RefLoRA, Lokken two-pass b2.api.json
+python scripts/parody/submit_parody_run.py --dry-run --graph-mode two-pass \
+  --name "Megan Fox" --character "Jennifer Check" --actor "Megan Fox" \
+  --description "<same caption>" \
+  --image hoot_start.jpg --cond-source "C:/Users/derek/5slock/approved_characters/HOOTERS01/hoot_start.jpg"
+
+# Arm D — Emilia Clarke / Daenerys + RefLoRA, single-pass
+python scripts/parody/submit_parody_run.py --dry-run --graph-mode single-pass \
+  --name "Emilia Clarke" --character "Daenerys Targaryen" --actor "Emilia Clarke" \
+  --description "<same or per-arm caption>" \
+  --image hoot_start.jpg --cond-source "C:/Users/derek/5slock/approved_characters/HOOTERS01/hoot_start.jpg"
+```
+
+Drop `--dry-run` only after Derrick's scoped GPU GO; Forge runs `run_queue.py` end-to-end (not this skill's job to start `ralph.ps1`).
+
+Exact RefMod/RefLoRA id match: `minimaxh3_<id>_v<N>_refmod.safetensors` ↔ `..._reflora.safetensors`. Multi-version ambiguity blocks unless pinned.
+
 ## Sources
 
 - Malcolm: `MINIMAX_H3_REFMODS_INSTALLATION_AND_USAGE_GUIDE.md` §6 Prompting with RefMods; `MINIMAX_H3_PROMPTING_GUIDE.md` subject_definitions name pattern; `known-characters/INDEX.md`
