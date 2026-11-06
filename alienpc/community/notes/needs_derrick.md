@@ -530,3 +530,36 @@ B2-7 is `- [PARTIAL]` for one clause; the two asks below are the cause and one m
 3. Drop `RefMod` from `identity_layers` for subjects whose INDEX row has no refmod, so the assets ledger stops over-claiming, and re-open the RefMod wiring as its own item later.
 
 **No action taken by Forge:** no code, template, skill, config, settings, GPU, queue, network, pool file, INDEX file, model/LoRA download, or Sydney path touched; nothing deleted, no `.bak`, no branch change, no force-push. Gitea push route still answers **502** (13th occurrence since 19:28 CT; the B2-4/5/6/7 commits are local-only and push at the first 200).
+
+## 2026-11-06 01:1x CT - Forge - B2-8 DONE: the two asks above are still open, and B2-9's "winner dial set" now needs your pick
+
+**Result (no action was taken on the two asks above; B2-8 ran the default the plan pre-authorized).** The three-clip
+verify batch closed clean: `BATCH closed rc=0 reason=all queued clips DONE ok done=3/3`, all three probes
+`w=768 h=1344 frames=124 audio=True bytes>0 blackfreeze=[]`, the `COMFY free /api/free ok` line present, ComfyUI
+unloaded (no `comfyui_auto` in `GET /running`, `comfy_ctl.py status` `comfy_ok=False queue=None guard=(0, ['IDLE'])`)
+and the GPU lock released (`RELEASED pid 33748`). Full record: `notes/2026-11-06-b2-8-DONE.md`.
+
+**Ask 1 (B2-7, 00:17 CT) - unanswered, so your option (2) is in effect by default:** the A/B arm's shape proof is
+`verify_keep_dials` only; the built A/B graph is not shape-verified by `verify_parody_2pass_graph`/`frozen_diff*` (the
+CLI applies `--unet` after the builder's verify).
+
+**Ask 2 (B2-7, 00:17 CT) - unanswered, so your option (2) is in effect by default:** the three clips carry INDEX + the
+one RefLoRA + the description; the RefMod layer stayed inert, so the A/B result measures the RefLoRA lane.
+
+**New ask, for B2-9 (its Do text asks for "the winner dial set from B2-8").** B2-8 did not crown a winner and cannot
+with this data: the controlled pair (identical prompt SHA, seed 51083601, dials, canvas) is int8HQ 135.1 s / 1,023,281 B
+vs learned_HQ 166.4 s / 1,023,656 B, and the two int8HQ arms differ from each other by 24.2 s, so n=1 per arm separates
+a checkpoint effect from run-to-run variation. Options (Forge takes none of them without your yes):
+1. **Recommended, unblocks B2-9 now, no GPU:** use the control arm's dials as the working set for the 35-clip build
+   (`beta7_int8HQ`, `pass1_lora_strength 0.0`, `pass2_lora_strength 1.0`) and state in the beat sheet that no winner was
+   selected and why.
+2. **Say "run repeats":** I add a repeat set (e.g. 3 takes per arm, same seed) before B2-9 so the A/B has n=3. GPU cost
+   per the measured numbers: each repeat is one clip (110.9-166.4 s render) plus one ~21 min model wake per batch.
+3. **You pick the checkpoint** from the measured numbers in the DONE note. The only measured deltas are +31.3 s wall and
+   +375 B; nothing about look, identity, voice or the parody read is measured by Forge (contact sheets on request).
+
+**No action taken by Forge in this pass:** no code, template, skill, config, graph, prompt, model/LoRA download, GPU job,
+queue, network, QNAP/HA/UniFi/vault/Google call; nothing deleted, no `.bak`, no process killed/stopped/restarted, no
+config write, no `git add -A`, no force-push, never GitHub, no prompt text in any record. Gitea:
+`git pull --rebase --autostash` at the top of this pass answered **502** (at least the 15th since 2026-11-05 19:28 CT;
+the B2-4..B2-8 commits are local-only and push at the first 200).
