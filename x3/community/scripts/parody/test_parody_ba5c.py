@@ -32,7 +32,8 @@ INDEX_MD = """## Folder: `good`
 | :--- | :--- | :--- | :--- | :--- |
 | **Testa Char** | Testa Actor | Fixture Show | fixture.mp4 | 2026-11-05 |
 """
-BIO = "short silver bob haircut, green eyes, navy blazer"
+# B2-6: a fixture bio must state an adult age (the builder refuses one that does not).
+BIO = "a woman of 30 years, short silver bob haircut, green eyes, navy blazer"
 
 
 class TestBA5cFixes(unittest.TestCase):

@@ -12,6 +12,10 @@ checkpoints (the A/B); it is validated against BETA7_UNET_ALLOWLIST before anyth
 B2-5: in two-pass-parody a start photo is OPTIONAL - with neither --image nor --cond-source the
 graph carries no LoadImage and no MiniMaxH3AddGuide and the RefMod/RefLoRA conditioning is the
 only identity feed; a photo in any mode keeps the approved_characters + SHA256 gate (FG-2/FG-11).
+B2-6: the named-actress paste carries NO guard/meta boilerplate (no canon-age clause, no adults-only
+meta line, no (character, actor) parenthetical, no tone label); the identity text is the resolved
+bio of the named subject and nothing else, and the adults-only compliance lives in run_record.json
+(run_record.py). The builder still refuses a guard failure (raise, never a softened prompt).
 """
 
 from __future__ import annotations
@@ -232,6 +236,16 @@ def format_parody_prompt(
     for caller compatibility and emits no `<Audio N>`, because no builder path wires `ref_audios`.
 
     Default is no speech (R37): the `(S1)` ID and the `<d>` block appear only when `dialogue` is given.
+
+    B2-6 (the clean named-actress paste). No guard/meta boilerplate: no canon-age clause, no
+    "one adult performer"-style meta line, no `(character ..., actor ...)` parenthetical, no tone
+    label. `<Subject 1>` is the INDEX name + the resolved bio and nothing else - one full
+    description (R28), never another woman's facial caption on a named actress - and the bio is
+    where the adult age lives (see the guard at the end). No `overall_soundscape:` /
+    `non_diegetic_music:` block (R7/R32): the audio stays the plain room-tone/voice sentences the
+    R39/R40 shape needs, with no named songs and no score. Adults-only compliance is a RECORD, not
+    paste text: `run_record.py` writes `guard_ok` / `adult_stated` / tone / character / actor /
+    `description_sha256` into `run_record.json`.
     """
     character = resolved.get("character")
     actor = resolved.get("actor")
@@ -245,8 +259,8 @@ def format_parody_prompt(
             "A concrete biometric description is required."
         )
 
-    # summary: the scene line, the R16 entry transition, adults-only stated once (R5 item 2, R21).
-    # No R3 policy prose and no negatives in the body (R3, R24).
+    # summary: the scene line and the R16 entry transition. No R3 policy prose, no negatives in the
+    # body (R3, R24), and no compliance meta line (B2-6): adults-only is recorded, not pasted.
     if scene:
         setting = " ".join(str(scene).split())
         if not setting.endswith((".", "?", "!")):
@@ -257,15 +271,16 @@ def format_parody_prompt(
     scene_summary = (
         f"{setting} <Subject 1> {primary_name} settles into position facing the camera, stays squared to "
         "the lens with her face in frame the whole time, and holds the last frame in the same stance "
-        "with her shoulders moving on her breath. One adult performer, adults-only."
+        "with her shoulders moving on her breath."
     )
 
     # subject_definitions: RefMod citation, identity binding described in full once (R28), and the
-    # Cond prose anchor only when the graph wires ref_image_1 (R36).
+    # Cond prose anchor only when the graph wires ref_image_1 (R36). B2-6: the identity text is the
+    # resolved bio ONLY - no canon-age clause, no tone label, no (character, actor) parenthetical,
+    # and no second caption (one full description per R28). The adult age is part of the bio.
     subject_lines = [
         "<Subject 1> is the woman in <Video 1>.",
-        f"<Subject 1> {primary_name}, a fictional adult, canon age 28, {str(desc).strip()}, "
-        "the only person in the clip",
+        f"<Subject 1> {primary_name}, {str(desc).strip()}, the only person in the clip",
     ]
     if cond_wired:
         subject_lines.append("<Picture 1> is the start frame of [Shot 1] for setting, light and framing")
@@ -321,8 +336,27 @@ def format_parody_prompt(
         + "\n\ndetailed_description:\n" + "\n".join(detail_lines) + "\n" + sounds
     )
 
+    # B2-6: the builder still refuses a guard failure - it never softens the paste to pass, and the
+    # message carries NO prompt text (the block's record rule). Two fail-closed checks:
+    #  1. `comm.guard_ok` - no minor-coded word anywhere in the paste.
+    #  2. `comm.adult_stated` - the paste must state one adult age, because run_queue.py's per-clip
+    #     gate (`comm.guard_reason(g0)`, `require_adult=True` at run_queue.py:192) reads THIS string
+    #     out of the graph before every submit. The age lives in the resolved bio (R28), which is the
+    #     only identity text this lane pastes, so a bio without an 18+ age blocks the build here
+    #     instead of dying as GATE-FAIL at submit time.
     if not comm.guard_ok(prompt):
-        raise ValueError(f"Prompt failed comm.guard_ok check:\n{prompt}")
+        raise ValueError(
+            f"prompt for '{primary_name}' failed comm.guard_ok: a minor-coded word is present in the "
+            "scene/dialogue/description text (no prompt text printed; see comm._BAD_RE)"
+        )
+    if not comm.adult_stated(prompt):
+        raise ValueError(
+            f"prompt for '{primary_name}' states no adult age (comm.adult_stated is False): the "
+            "resolved --description must state the subject's adult age (18+ as an age, e.g. "
+            "'a woman of 28 years'), because run_queue.py's per-clip adults gate requires one adult "
+            "statement in the built paste; compliance metadata is recorded in run_record.json "
+            "(run_record.py), never pasted (B2-6)"
+        )
 
     return prompt
 
@@ -588,6 +622,10 @@ def build_parody_request(
     # below checks the same allowlist, so an unaccepted checkpoint never reaches a request.
     effective_unet = validate_unet_name(unet_name) if unet_name is not None else DEFAULT_UNET
     graph.setdefault("unet", {}).setdefault("inputs", {})["unet_name"] = effective_unet
+    # B2-6: record WHICH template this request came from, by path + SHA256 (a hash, never prompt
+    # text), so run_record.json can carry the template SHA256 B2-7/B2-10 ask for and the two
+    # hash-locked frozen templates are provably untouched by any run.
+    resolved["parody_template"] = {"path": str(template_path), "sha256": _sha256_file(template_path)}
     rec = resolved.setdefault("reflora", {})
     if isinstance(rec, dict):
         rec["unet_name"] = effective_unet
