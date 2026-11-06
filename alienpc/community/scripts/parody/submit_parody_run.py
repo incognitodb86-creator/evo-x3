@@ -91,6 +91,14 @@ def submit_parody_job(
         aliases_path=aliases_path,
     )
 
+    # KTD3 / R8: fail closed before any run artifact when a non-good identity has no local RefMod.
+    if resolved.get("index_status") != "good" and not resolved.get("loaded_refmods"):
+        who = character or actor or name
+        raise ValueError(
+            f"No local RefMod installed for '{who}' ({resolved.get('index_flag')}) in {refmods_dir}; "
+            "refusing to queue a render without identity assets (install a RefMod or use an INDEX good identity)."
+        )
+
     # 2. Plan C2V continuation if needed
     chain_plan = plan_c2v_chain(total_length_s=frames / 24, clip_frames=frames)
 
