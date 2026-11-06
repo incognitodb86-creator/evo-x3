@@ -83,6 +83,9 @@ def build_assets_record(
         "reflora_ledger": _reflora_ledger(graph),
         "cond_picture": graph.get("img", {}).get("inputs", {}).get("image")
         if graph.get("c0", {}).get("inputs", {}).get("ref_images.ref_image_1") == ["img", 0] else None,
+        "cond_source_path": (resolved.get("cond") or {}).get("cond_source_path"),
+        "cond_input_name": (resolved.get("cond") or {}).get("cond_input_name"),
+        "cond_sha256": (resolved.get("cond") or {}).get("cond_sha256"),
         "chain_plan": chain_plan,
     }
 
@@ -94,6 +97,7 @@ def save_run_record(
     graph: Dict[str, Any],
     chain_plan: Optional[Dict[str, Any]] = None,
     clip_source: Optional[Path] = None,
+    cond_meta: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Path]:
     """Write all standard run artifacts into run_dir.
 
@@ -110,6 +114,9 @@ def save_run_record(
     prompt_file = run_dir / "prompt.txt"
     prompt_file.write_text(prompt, encoding="utf-8")
 
+    if cond_meta:
+        resolved = dict(resolved)
+        resolved["cond"] = cond_meta
     # 3. assets.json
     assets_data = build_assets_record(resolved, graph, chain_plan)
     assets_file = run_dir / "assets.json"

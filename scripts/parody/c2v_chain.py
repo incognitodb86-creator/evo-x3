@@ -442,7 +442,7 @@ def validate_continuation_context(
         )
 
     # 5. Changed identity hash (fail-closed: at least one identity key must be on both sides)
-    id_keys = ("identity_hash", "identity_sha256", "refmod_hash", "prompt_sha256_base")
+    id_keys = ("identity_hash", "identity_sha256", "refmod_hash", "prompt_sha256_base", "reflora_sha256")
     if not any(k in predecessor_meta and k in current_meta for k in id_keys):
         raise ValueError("fail-closed: no identity hash recorded on both sides of the seam")
     for id_key in id_keys:
@@ -453,6 +453,37 @@ def validate_continuation_context(
                     f"{predecessor_meta[id_key]} != {current_meta[id_key]}"
                 )
 
+
+
+FRAME_COUNT_HOOK = None  # unit tests may inject a callable(path)->int (FG-5)
+
+def count_decoded_video_frames(path: Path, ffprobe_cmd: Optional[list] = None) -> int:
+    """Count decoded video frames via ffprobe ``nb_read_frames`` (KTD3 / FG-5).
+
+    ``ffprobe_cmd`` or module ``FRAME_COUNT_HOOK`` may be injected by unit tests;
+    production always shells out to ffprobe.
+    """
+    if FRAME_COUNT_HOOK is not None and ffprobe_cmd is None:
+        return int(FRAME_COUNT_HOOK(path))
+    import subprocess
+    cmd = ffprobe_cmd or [
+        "ffprobe", "-v", "error",
+        "-select_streams", "v:0",
+        "-count_frames",
+        "-show_entries", "stream=nb_read_frames",
+        "-of", "default=noprint_wrappers=1:nokey=1",
+        str(path),
+    ]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    except Exception as exc:
+        raise ValueError(f"ffprobe frame-count failed for {path}: {exc}") from exc
+    if r.returncode != 0:
+        raise ValueError(f"ffprobe frame-count failed rc={r.returncode} for {path}: {(r.stderr or '')[:300]}")
+    raw = (r.stdout or "").strip().splitlines()
+    if not raw or not raw[0].strip().isdigit():
+        raise ValueError(f"ffprobe returned no nb_read_frames for {path}: {r.stdout!r}")
+    return int(raw[0].strip())
 
 def bridge_parody_stitch(
     run_dir: Union[Path, str],
@@ -468,26 +499,9 @@ def bridge_parody_stitch(
 
     Builds the cell list, verifies expected duration and invariants, refuses
     method-smoke inputs, and delegates stitching to scripts/queue/take_chain_stitch.py.
-    No second stitcher.
-
-    Args:
-        run_dir: Root run directory containing cell folders (cNN_sSEED).
-        expected_frames: Target frame count invariant (sum of delivered frames).
-        expected_duration_s: Target duration invariant in seconds.
-        fps: Expected frame rate (default: 24).
-        name: Stem for the stitched output film.
-        xfade: Audio crossfade duration in seconds.
-        is_smoke: If True, method-smoke inputs are refused.
-        method: Method string (e.g. 'smoke', 'method-smoke' refused).
-
-    Returns:
-        Dict with stitched film metadata.
-
-    Raises:
-        ValueError: If method-smoke inputs, missing clips, double-trim, mixed streams,
-                    or expected duration invariants fail.
+    No second stitcher. Entire stitch body converts SystemExit -> ValueError (FG-6).
+    ``expected_duration_s`` is required; N_actual comes from decoded frame count (FG-5).
     """
-    # Refuse method-smoke inputs
     if is_smoke or method in ("smoke", "method-smoke", "test-smoke"):
         raise ValueError("method-smoke inputs refused")
 
@@ -495,88 +509,80 @@ def bridge_parody_stitch(
     if not run_path.is_dir():
         raise ValueError(f"Run directory not found: {run_path}")
 
-    # Import existing take_chain_stitch without creating a second stitcher
     queue_dir = Path(__file__).resolve().parents[1] / "queue"
     if str(queue_dir) not in sys.path:
         sys.path.insert(0, str(queue_dir))
     import take_chain_stitch
 
-    # 1. Discover cells via existing stitcher (its SystemExit on a missing clip becomes ValueError)
     try:
         cs = take_chain_stitch.cells(run_path)
-    except SystemExit as exc:
-        raise ValueError(f"stitch refused: {exc}") from exc
-    if len(cs) < 2:
-        raise ValueError(f"Need at least 2 cells to stitch chain, found {len(cs)}")
+        if len(cs) < 2:
+            raise ValueError(f"Need at least 2 cells to stitch chain, found {len(cs)}")
 
-    # 2. Inspect cells for method-smoke, double-trim, and stream integrity
-    trimmed_contexts = 0
-    total_delivered = 0
+        trimmed_contexts = 0
+        total_delivered = 0
 
-    for i, c in enumerate(cs):
-        meta = c.get("meta", {})
-        if meta.get("is_smoke") or meta.get("method") in ("smoke", "method-smoke", "test-smoke"):
-            raise ValueError("method-smoke inputs refused")
+        for i, c in enumerate(cs):
+            meta = c.get("meta", {})
+            if meta.get("is_smoke") or meta.get("method") in ("smoke", "method-smoke", "test-smoke"):
+                raise ValueError("method-smoke inputs refused")
 
-        if not meta:
-            raise ValueError(f"stitch refused: {c['cell']} has no render_ok.json ledger")
-        is_cont = bool(meta.get("is_continuation")) or int(meta.get("context", meta.get("context_length_frames", 0)) or 0) > 0
-        if is_cont and not C2V_AVAILABLE:
-            raise ValueError(f"stitch refused: {c['cell']} is a C2V continuation but {C2V_UNAVAILABLE_REASON}")
+            if not meta:
+                raise ValueError(f"stitch refused: {c['cell']} has no render_ok.json ledger")
+            is_cont = bool(meta.get("is_continuation")) or int(
+                meta.get("context", meta.get("context_length_frames", 0)) or 0) > 0
+            if is_cont and not C2V_AVAILABLE:
+                raise ValueError(
+                    f"stitch refused: {c['cell']} is a C2V continuation but {C2V_UNAVAILABLE_REASON}")
 
-        # Double trim check: each continuation cell head removed exactly once
-        if i > 0:
-            trim_count = meta.get("trim_count", 1 if not is_cont else None)
-            if trim_count not in (0, 1) or (is_cont and trim_count != 1) or meta.get("double_trim", False):
-                raise ValueError("double-trim detected: continuation context must be removed exactly once")
-            trimmed_contexts += 1
+            if i > 0:
+                trim_count = meta.get("trim_count", 1 if not is_cont else None)
+                if trim_count not in (0, 1) or (is_cont and trim_count != 1) or meta.get("double_trim", False):
+                    raise ValueError(
+                        "double-trim detected: continuation context must be removed exactly once")
+                trimmed_contexts += 1
 
-        if "delivered" in meta:
-            deliv = int(meta["delivered"])
-        elif "effective_frames" in meta:
-            deliv = int(meta["effective_frames"])
-        elif "frames" in meta:
-            deliv = int(meta["frames"])
-        else:
-            raise ValueError(f"stitch refused: {c['cell']} ledger has no delivered/frames count")
-        if not is_cont and "frames" in meta and int(meta["frames"]) != deliv:
+            if "delivered" in meta:
+                deliv = int(meta["delivered"])
+            elif "effective_frames" in meta:
+                deliv = int(meta["effective_frames"])
+            elif "frames" in meta:
+                deliv = int(meta["frames"])
+            else:
+                raise ValueError(f"stitch refused: {c['cell']} ledger has no delivered/frames count")
+            if not is_cont and "frames" in meta and int(meta["frames"]) != deliv:
+                raise ValueError(
+                    f"stitch refused: planned-cut cell {c['cell']} delivered {deliv} != generated "
+                    f"{meta['frames']} (no head trim exists for a cut)")
+            total_delivered += deliv
+
+        if expected_frames is not None and total_delivered != expected_frames:
             raise ValueError(
-                f"stitch refused: planned-cut cell {c['cell']} delivered {deliv} != generated {meta['frames']} "
-                "(no head trim exists for a cut)")
-        total_delivered += deliv
+                f"Sum of delivered frames ({total_delivered}) does not match expected_frames "
+                f"({expected_frames})")
 
-    # 3. Expected length / duration invariant checks
-    if expected_frames is not None:
-        if total_delivered != expected_frames:
-            raise ValueError(
-                f"Sum of delivered frames ({total_delivered}) does not match expected_frames ({expected_frames})"
-            )
-
-    if expected_duration_s is not None:
+        if expected_duration_s is None:
+            raise ValueError("expected_duration_s is required for product assembly (FG-5 / KTD3)")
         intended = calculate_intended_length(expected_duration_s, fps)
         if total_delivered != intended["n_target"]:
             raise ValueError(
-                f"Sum of delivered frames ({total_delivered}) does not match N_target ({intended['n_target']})"
-            )
+                f"Sum of delivered frames ({total_delivered}) does not match N_target "
+                f"({intended['n_target']})")
 
-    # 4. Check uniformity (mixed streams check)
-    provs = take_chain_stitch.uniform(cs)
-
-    # 5. Output directory & key
-    out_dir = run_path / "_stitch"
-    out_dir.mkdir(exist_ok=True)
-    take_chain_stitch.write_key(run_path, cs, out_dir)
-
-    # 6. Build film via existing stitcher
-    film = take_chain_stitch.build_film(cs, provs, out_dir, name, xfade)
-
-    want_dur = sum(p["duration"] for p in provs)
-    got = take_chain_stitch.probe(film)
-    n_actual = int(round(got["duration"] * fps))
-    if n_actual != total_delivered:
-        raise ValueError(
-            f"assembly invariant failed: N_actual={n_actual} (film {got['duration']:.3f}s @ {fps}) != "
-            f"sum(delivered)={total_delivered}")
+        provs = take_chain_stitch.uniform(cs)
+        out_dir = run_path / "_stitch"
+        out_dir.mkdir(exist_ok=True)
+        take_chain_stitch.write_key(run_path, cs, out_dir)
+        film = take_chain_stitch.build_film(cs, provs, out_dir, name, xfade)
+        want_dur = sum(p["duration"] for p in provs)
+        got = take_chain_stitch.probe(film)
+        n_actual = count_decoded_video_frames(film)
+        if n_actual != total_delivered:
+            raise ValueError(
+                f"assembly invariant failed: N_actual={n_actual} (decoded frames) != "
+                f"sum(delivered)={total_delivered} (film duration={got['duration']:.3f}s @ {fps})")
+    except SystemExit as exc:
+        raise ValueError(f"stitch refused: {exc}") from exc
 
     return {
         "film": film,
@@ -588,6 +594,7 @@ def bridge_parody_stitch(
         "n_actual": n_actual,
         "key_path": out_dir / "key.csv",
     }
+
 
 
 def plan_c2v_chain(

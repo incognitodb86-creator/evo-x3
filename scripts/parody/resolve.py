@@ -2,6 +2,8 @@
 
 Resolves requested identities against Malcolm INDEX mirror and local RefMods,
 enforcing good/bad/fence rules, slot stacking, >8 truncation, and stills gate.
+FG-3: exact ``minimaxh3_<id>_v<N>_refmod`` token match + ambiguity block.
+FG-9: refuse symlinks and junctions on stills.
 """
 
 from __future__ import annotations
@@ -14,10 +16,33 @@ from typing import Any, Dict, List, Optional, Tuple
 DEFAULT_APPROVED_STILLS_DIR = Path(r"C:\Users\derek\5slock\approved_characters")
 KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
 
+# Exact asset filename (shared with reflora.parse_ref_asset_name)
+REF_ASSET_RE = re.compile(
+    r"^minimaxh3_([a-z0-9]+)_v(\d+)_(refmod|reflora)\.safetensors$",
+    re.IGNORECASE,
+)
+
 
 def _normalize_key(name: str) -> str:
-    """Normalize string for fuzzy/case-insensitive matching."""
+    """Normalize string for case-insensitive exact matching."""
     return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+def _name_tokens(name: str) -> set:
+    """Individual word tokens from a display name (fallback INDEX match)."""
+    return {_normalize_key(t) for t in re.split(r"[^A-Za-z0-9]+", name) if t and _normalize_key(t)}
+
+
+def _is_link_or_junction(path: Path) -> bool:
+    if path.is_symlink():
+        return True
+    is_j = getattr(path, "is_junction", None)
+    if callable(is_j):
+        try:
+            return bool(is_j())
+        except OSError:
+            return False
+    return False
 
 
 BANNED_GENERICS: Tuple[str, ...] = (
@@ -28,18 +53,7 @@ BANNED_GENERICS: Tuple[str, ...] = (
 
 
 def validate_biometric_description(bio: Optional[str]) -> str:
-    """Validate biometric / wardrobe description against empty and generic-only inputs.
-
-    Args:
-        bio: Input description string.
-
-    Returns:
-        Cleaned, non-empty description string containing concrete biometric/wardrobe details.
-
-    Raises:
-        ValueError: If bio is missing/empty, matches banned generics alone,
-            or contains only generic phrasing without concrete details.
-    """
+    """Validate biometric / wardrobe description against empty and generic-only inputs."""
     if bio is None:
         raise ValueError("Biometric description / bio is required: cannot be None.")
 
@@ -51,7 +65,6 @@ def validate_biometric_description(bio: Optional[str]) -> str:
     norm_words = norm.split()
     norm_clean = " ".join(norm_words)
 
-    # 1. Exact match to banned generic phrases alone
     for banned in BANNED_GENERICS:
         banned_norm = " ".join(re.sub(r"[^\w\s]", " ", banned.lower()).split())
         if norm_clean == banned_norm:
@@ -60,7 +73,6 @@ def validate_biometric_description(bio: Optional[str]) -> str:
                 "Must provide concrete biometric/wardrobe details."
             )
 
-    # 2. Check if residual after removing banned phrases and generic filler words is empty
     residual = norm_clean
     extended_banned = list(BANNED_GENERICS) + [
         "exact likeness and vocal timbre",
@@ -90,20 +102,7 @@ def validate_biometric_description(bio: Optional[str]) -> str:
 
 
 def load_index_files(index_dir: Path) -> List[Dict[str, Any]]:
-    """Parse INDEX.md and INDEX_BAD.md into a list of row dicts.
-
-    Args:
-        index_dir: Directory containing INDEX.md and INDEX_BAD.md.
-
-    Returns:
-        List of character dictionaries with keys:
-            - character: character name
-            - actor: real actor name
-            - franchise: franchise / show
-            - clips: list of clip filenames
-            - date_added: date string
-            - status: "good", "onthefence", or "bad"
-    """
+    """Parse INDEX.md and INDEX_BAD.md into a list of row dicts."""
     rows: List[Dict[str, Any]] = []
 
     index_main = index_dir / "INDEX.md"
@@ -167,18 +166,95 @@ def load_aliases(aliases_path: Optional[Path]) -> Dict[str, str]:
     return {}
 
 
-def find_refmods_for_name(norm_name: str, refmods_dir: Path) -> List[Path]:
-    """Find local .safetensors RefMod files matching normalized name."""
-    matches: List[Path] = []
-    if not refmods_dir.is_dir():
-        return matches
+def parse_ref_asset_name(filename: str) -> Optional[Tuple[str, int, str]]:
+    m = REF_ASSET_RE.match(Path(filename).name)
+    if not m:
+        return None
+    return m.group(1).lower(), int(m.group(2)), m.group(3).lower()
 
+
+def find_refmods_for_name(
+    norm_name: str,
+    refmods_dir: Path,
+    version: Optional[int] = None,
+) -> List[Path]:
+    """Find RefMod files whose ``<id>`` token equals ``norm_name`` exactly (FG-3).
+
+    Raises ValueError on ambiguous multi-version / multi-id hits without an explicit pin.
+    """
+    if not refmods_dir.is_dir() or not norm_name:
+        return []
+
+    by_id: Dict[str, List[Tuple[int, Path]]] = {}
     for f in refmods_dir.glob("*.safetensors"):
-        fname_norm = _normalize_key(f.stem)
-        # Check if name is part of filename, e.g. "emiliaclarke" in "minimaxh3_emiliaclarke_v1_refmod"
-        if norm_name in fname_norm:
-            matches.append(f)
-    return matches
+        parsed = parse_ref_asset_name(f.name)
+        if parsed is None:
+            continue
+        file_id, ver, kind = parsed
+        if kind != "refmod":
+            continue
+        if file_id != norm_name:
+            continue
+        by_id.setdefault(file_id, []).append((ver, f))
+
+    if not by_id:
+        return []
+
+    # Exact id equality => at most one id key
+    versions = sorted(by_id[norm_name], key=lambda t: t[0])
+    if version is not None:
+        matched = [p for v, p in versions if v == version]
+        if not matched:
+            raise ValueError(
+                f"no RefMod for id {norm_name!r} version v{version} under {refmods_dir}"
+            )
+        return matched
+
+    distinct_vers = sorted({v for v, _ in versions})
+    if len(distinct_vers) > 1:
+        names = [p.name for _, p in versions]
+        raise ValueError(
+            f"ambiguous RefMod versions for id {norm_name!r}: {distinct_vers} "
+            f"({', '.join(names)}); pin an explicit version"
+        )
+    return [versions[0][1]]
+
+
+def match_index_rows(query: str, index_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Exact normalized character/actor match; word-token fallback blocks on ambiguity (FG-3)."""
+    norm_q = _normalize_key(query)
+    if not norm_q:
+        return []
+
+    exact = [
+        r for r in index_rows
+        if norm_q == _normalize_key(r["character"]) or norm_q == _normalize_key(r["actor"])
+    ]
+    if exact:
+        return exact
+
+    hits: List[Dict[str, Any]] = []
+    for r in index_rows:
+        tokens = _name_tokens(r["character"]) | _name_tokens(r["actor"])
+        if norm_q in tokens:
+            hits.append(r)
+
+    # Distinct rows by (character, actor)
+    uniq: List[Dict[str, Any]] = []
+    seen = set()
+    for r in hits:
+        key = (_normalize_key(r["character"]), _normalize_key(r["actor"]))
+        if key not in seen:
+            seen.add(key)
+            uniq.append(r)
+
+    if len(uniq) > 1:
+        labels = [f"{r['character']} / {r['actor']}" for r in uniq[:8]]
+        raise ValueError(
+            f"ambiguous INDEX match for {query!r}: {len(uniq)} rows ({', '.join(labels)}"
+            f"{'...' if len(uniq) > 8 else ''}); use the full character or actor name"
+        )
+    return uniq
 
 
 def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str]:
@@ -187,31 +263,30 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
     Enforces:
     - Rejection of any path referencing Sydney (FP-10).
     - Containment within approved_characters pool (U3 / KD10).
-
-    Args:
-        stills: List of still image file path strings.
-        approved_dir: Approved characters pool directory. None uses DEFAULT_APPROVED_STILLS_DIR.
-
-    Returns:
-        List of validated resolved path strings.
-
-    Raises:
-        ValueError: If a still path violates security or pool containment.
+    - Non-symlink / non-junction (FG-9).
     """
     valid_paths: List[str] = []
     if not stills:
         return valid_paths
 
-    pool_dir = DEFAULT_APPROVED_STILLS_DIR if approved_dir is None else approved_dir
+    pool_dir = DEFAULT_APPROVED_STILLS_DIR if approved_dir is None else Path(approved_dir)
+    if _is_link_or_junction(pool_dir):
+        raise ValueError(f"Approved stills pool is a symlink/junction (refused): {pool_dir}")
     app_dir_res = pool_dir.resolve()
     for s in stills:
-        p = Path(s).resolve()
-        # Sydney isolation rule: never touch Sydney assets
+        raw = Path(s)
+        if _is_link_or_junction(raw):
+            raise ValueError(f"Still path is a symlink/junction (refused): {s}")
+        # Sydney isolation: check the raw string before resolve
+        if "sydney" in str(raw).lower() or raw.name.upper() == "SYDNEY":
+            raise ValueError(f"Sydney paths are strictly prohibited: {s}")
+        p = raw.resolve()
         if "sydney" in str(p).lower() or p.name.upper() == "SYDNEY":
             raise ValueError(f"Sydney paths are strictly prohibited: {s}")
+        if _is_link_or_junction(p):
+            raise ValueError(f"Still path resolves to a symlink/junction (refused): {s}")
 
         try:
-            # Check containment; omitted approved_dir still fails closed to the default pool.
             p.relative_to(app_dir_res)
         except ValueError:
             raise ValueError(
@@ -239,28 +314,16 @@ def resolve_identities(
     When ``reflora_dir`` is given, matching local ``*_reflora`` hybrids are selected
     (INDEX + RefMod + RefLoRA); absent hybrids keep the INDEX + RefMod fallback; a present
     but invalid hybrid raises (RefLoRA arm R8 / KTD4).
-
-    Args:
-        request: Normalized request dict from request.py.
-        index_dir: Directory containing INDEX.md and INDEX_BAD.md.
-        refmods_dir: Directory containing *.safetensors RefMod files.
-        approved_stills_dir: Approved pool directory for stills gate.
-        aliases_path: Path to aliases.json.
-        reflora_dir: RefLoRA home (models/loras/MinimaxH3/reflora); None skips lookup.
-
-    Returns:
-        Resolved dictionary with mode, INDEX rows, RefMod slots (1..8), description.
     """
     index_rows = load_index_files(index_dir)
     aliases = load_aliases(aliases_path)
 
-    # 1. Validate stills (U3)
     validated_stills = validate_stills(request.get("stills", []), approved_stills_dir)
 
-    # 2. Gather candidate identities
     names = request.get("names", [])
     character_input = request.get("character")
     actor_input = request.get("actor")
+    version_pin = request.get("refmod_version")  # optional int
 
     candidates: List[str] = []
     for n in names:
@@ -271,8 +334,7 @@ def resolve_identities(
     if actor_input and actor_input not in candidates:
         candidates.append(actor_input)
 
-    # Expand aliases (KD2 stacking)
-    expanded_candidates: List[Tuple[str, str]] = []  # (name, role: "character" | "actor" | "query")
+    expanded_candidates: List[Tuple[str, str]] = []
     for c in candidates:
         norm_c = _normalize_key(c)
         expanded_candidates.append((c, "character" if c == character_input else "query"))
@@ -281,25 +343,17 @@ def resolve_identities(
             if resolved_actor not in [ec[0] for ec in expanded_candidates]:
                 expanded_candidates.append((resolved_actor, "actor"))
 
-    # 3. Match against INDEX rows
     matched_index_rows: List[Dict[str, Any]] = []
-    for c_name, role in expanded_candidates:
-        norm_c = _normalize_key(c_name)
-        for r in index_rows:
-            norm_char = _normalize_key(r["character"])
-            norm_act = _normalize_key(r["actor"])
-            if norm_c == norm_char or norm_c == norm_act or norm_c in norm_char or norm_c in norm_act:
-                if r not in matched_index_rows:
-                    matched_index_rows.append(r)
-                    # If matched character, also add its actor if not present
-                    if r["actor"] and r["actor"] != r["character"]:
-                        actor_cand = (r["actor"], "actor")
-                        if actor_cand not in expanded_candidates:
-                            expanded_candidates.append(actor_cand)
+    for c_name, role in list(expanded_candidates):
+        rows = match_index_rows(c_name, index_rows)
+        for r in rows:
+            if r not in matched_index_rows:
+                matched_index_rows.append(r)
+                if r["actor"] and r["actor"] != r["character"]:
+                    actor_cand = (r["actor"], "actor")
+                    if actor_cand not in expanded_candidates:
+                        expanded_candidates.append(actor_cand)
 
-    # Determine overall INDEX status
-    # Priority: if a character is explicitly requested and matched in index, its status governs.
-    # Otherwise: good > onthefence > bad > none
     status_priority = {"good": 3, "onthefence": 2, "bad": 1}
     best_status = "none"
     if matched_index_rows:
@@ -313,32 +367,27 @@ def resolve_identities(
             sorted_statuses = sorted(statuses, key=lambda s: status_priority.get(s, 0), reverse=True)
             best_status = sorted_statuses[0]
 
-    # Mode determination (KD9, KD13, KD15)
     if best_status == "good":
         mode = "native_face_voice"
     elif best_status in ("bad", "onthefence"):
         mode = "native_voice_refmod_look"
     else:
-        mode = "native_voice_refmod_look"  # Not in INDEX treated as bad per KD15
+        mode = "native_voice_refmod_look"
 
-    # 4. Find RefMod files
-    matched_refmods: List[Tuple[Path, str, str]] = []  # (path, role, status)
+    matched_refmods: List[Tuple[Path, str, str]] = []
     for c_name, role in expanded_candidates:
         norm_c = _normalize_key(c_name)
-        # Find index status for this specific candidate if any
         c_status = "bad"
         for r in matched_index_rows:
             if norm_c == _normalize_key(r["character"]) or norm_c == _normalize_key(r["actor"]):
                 c_status = r["status"]
                 break
 
-        files = find_refmods_for_name(norm_c, refmods_dir)
+        files = find_refmods_for_name(norm_c, refmods_dir, version=version_pin)
         for f in files:
             if not any(f == m[0] for m in matched_refmods):
                 matched_refmods.append((f, role, c_status))
 
-    # 5. Over 8 RefMods truncation (KD14):
-    # Keep character matches first, then fill with highest INDEX status (good > fence > bad), drop rest
     def _refmod_sort_key(item: Tuple[Path, str, str]) -> Tuple[int, int]:
         role_weight = 1 if item[1] == "character" else 0
         stat_weight = status_priority.get(item[2], 0)
@@ -348,8 +397,6 @@ def resolve_identities(
     kept_refmods = sorted_refmods[:8]
     dropped_refmods = sorted_refmods[8:]
 
-    # 5b. RefLoRA hybrids (RefLoRA arm): packed visual member replaces a provably identical
-    # standalone slot; distinct standalones are retained; effective budget stays 8.
     if reflora_dir is not None:
         from reflora import select_reflora
         reflora = select_reflora([str(m[0]) for m in kept_refmods], Path(reflora_dir))
@@ -360,7 +407,6 @@ def resolve_identities(
     else:
         reflora = {"enabled": False, "hybrids": [], "fallback_reason": "reflora lookup not requested"}
 
-    # Build 8 fixed loader slots (F3)
     slots: Dict[str, Dict[str, Any]] = {}
     for i in range(1, 9):
         slot_key = f"mod_{i}"
@@ -371,7 +417,6 @@ def resolve_identities(
         else:
             slots[slot_key] = {"path": "(none)", "strength": 1.0, "copies": 1}
 
-    # 6. Build written identity description (KD3)
     raw_bio = request.get("description") or request.get("bio")
     valid_bio = validate_biometric_description(raw_bio)
 
