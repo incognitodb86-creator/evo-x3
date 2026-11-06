@@ -2,7 +2,7 @@
 
 Builds resolved request, saves run record, writes a one-clip run_queue manifest, and
 submits through run_queue.py --detach. run_queue owns gpu-render.lock; rc 7 means GPU busy.
-The detached batch later writes clip output and its result to _render_queue.log.
+Supports --graph-mode, --cond-source, --refmod-only for U5 A/B/B-2pass/D arms.
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ import subprocess
 import sys
 from typing import Any, Dict, Optional
 
-# Add community scripts to path
 SCRIPTS_DIR = Path(r"C:\AI\community\scripts")
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
@@ -67,18 +66,18 @@ def submit_parody_job(
     slug: Optional[str] = None,
     run_dir_override: Optional[Path] = None,
     dry_run: bool = False,
-    template_path: Path = DEFAULT_REFMOD_TEMPLATE,
+    template_path: Optional[Path] = None,
     image: Optional[str] = None,
+    cond_source: Optional[str] = None,
+    graph_mode: str = "single-pass",
+    stage_cond: bool = False,
+    refmod_only: bool = False,
+    require_cond: bool = True,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
         raise ValueError("Biometric description (--description) is required for submit.")
 
-    index_dir = INDEX_DIR
-    refmods_dir = REFMODS_DIR
-    aliases_path = ALIASES_PATH
-
-    # 1. Resolve identity
     req_dict = {
         "names": [name] if name else [],
         "character": character,
@@ -89,16 +88,14 @@ def submit_parody_job(
     }
     resolved = resolve_identities(
         req_dict,
-        index_dir=index_dir,
-        refmods_dir=refmods_dir,
-        aliases_path=aliases_path,
-        reflora_dir=REFLORA_DIR,
+        index_dir=INDEX_DIR,
+        refmods_dir=REFMODS_DIR,
+        aliases_path=ALIASES_PATH,
+        reflora_dir=None if refmod_only else REFLORA_DIR,
     )
 
-    # 2. Plan C2V continuation if needed
     chain_plan = plan_c2v_chain(total_length_s=frames / 24, clip_frames=frames)
 
-    # 3. Determine run folder and prefix
     if run_dir_override:
         run_dir = Path(run_dir_override)
         run_name = run_dir.name
@@ -111,8 +108,7 @@ def submit_parody_job(
     run_dir.mkdir(parents=True, exist_ok=True)
     prefix = f"community/{run_name}/{QUEUE_TAG}"
 
-    # 4. Build request graph and prompt
-    graph, prompt = build_parody_request(
+    graph, prompt, cond_meta = build_parody_request(
         resolved=resolved,
         seed=seed,
         prefix=prefix,
@@ -121,9 +117,13 @@ def submit_parody_job(
         scene=scene,
         template_path=template_path,
         image=image,
+        cond_source=cond_source,
+        graph_mode=graph_mode,
+        stage_cond=stage_cond,
+        require_cond=require_cond,
     )
+    resolved["cond"] = cond_meta
 
-    # 5. Save initial run record (request.api.json, prompt.txt, assets.json)
     artifacts = save_run_record(
         run_dir=run_dir,
         resolved=resolved,
@@ -131,6 +131,7 @@ def submit_parody_job(
         graph=graph,
         chain_plan=chain_plan,
         clip_source=None,
+        cond_meta=cond_meta,
     )
 
     queue_job_dir = run_dir / QUEUE_TAG
@@ -145,6 +146,8 @@ def submit_parody_job(
             "arm": "parody",
             "scene": character or actor or name,
             "seed": seed,
+            "graph_mode": graph_mode,
+            "refmod_only": refmod_only,
         }]
     }
     order_file = run_dir / "_render_order.json"
@@ -157,24 +160,25 @@ def submit_parody_job(
         print(f"  RefMods:      {resolved.get('loaded_refmods')}")
         print(f"  Layers:       {resolved.get('identity_layers')}")
         print(f"  RefLoRA:      {[h['lora_name'] for h in (resolved.get('reflora') or {}).get('hybrids', [])]}")
+        print(f"  graph_mode:   {graph_mode}")
+        print(f"  refmod_only:  {refmod_only}")
+        print(f"  Cond:         {cond_meta}")
         print(f"  Frames:       {frames}")
         return {
             "dry_run": True,
             "run_dir": str(run_dir),
             "artifacts": {k: str(v) for k, v in artifacts.items()},
             "resolved": resolved,
+            "cond": cond_meta,
+            "graph_mode": graph_mode,
+            "refmod_only": refmod_only,
         }
 
-    # 6. Submit through the shared queue route. Detach returns after the batch PID is created.
     python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
     cmd = [
-        python,
-        "-u",
-        str(RUN_QUEUE_PY),
-        "--run-dir",
-        str(run_dir),
-        "--frames",
-        str(frames),
+        python, "-u", str(RUN_QUEUE_PY),
+        "--run-dir", str(run_dir),
+        "--frames", str(frames),
         "--detach",
     ]
 
@@ -191,6 +195,9 @@ def submit_parody_job(
         "queue_log": str(run_dir / "_render_queue.log"),
         "artifacts": {k: str(v) for k, v in artifacts.items()},
         "resolved": resolved,
+        "cond": cond_meta,
+        "graph_mode": graph_mode,
+        "refmod_only": refmod_only,
     }
     if proc.returncode == GPU_BUSY_RC:
         return dict(base, submitted=False, detached=False, gpu_busy=True)
@@ -205,7 +212,8 @@ def main(argv=None) -> int:
     parser.add_argument("--name", required=True, help="Identity / celeb name")
     parser.add_argument("--character", help="Character name")
     parser.add_argument("--actor", help="Actor name")
-    parser.add_argument("--description", "--bio", dest="description", required=True, help="Biometric/wardrobe description (required)")
+    parser.add_argument("--description", "--bio", dest="description", required=True,
+                        help="Biometric/wardrobe description (required)")
     parser.add_argument("--tone", default="parody", help="Tone")
     parser.add_argument("--dialogue", help="Dialogue line")
     parser.add_argument("--scene", help="Scene summary")
@@ -214,7 +222,16 @@ def main(argv=None) -> int:
     parser.add_argument("--slug", help="Optional run slug")
     parser.add_argument("--run-dir", help="Direct run directory override")
     parser.add_argument("--dry-run", action="store_true", help="Validate and prepare without submitting")
-    parser.add_argument("--image", help="Approved Cond still inside ComfyUI/input (required when a RefLoRA matches)")
+    parser.add_argument("--image", help="ComfyUI/input-relative Cond name (e.g. hoot_start.jpg)")
+    parser.add_argument("--cond-source",
+                        help="Path inside approved_characters for Cond provenance (FG-2)")
+    parser.add_argument("--stage-cond", action="store_true",
+                        help="Copy validated Cond into ComfyUI/input and verify SHA256")
+    parser.add_argument("--graph-mode", choices=("single-pass", "two-pass"), default="single-pass",
+                        help="single-pass=b2_refmod; two-pass=KEEP b2.api.json Lokken refine")
+    parser.add_argument("--refmod-only", "--disable-reflora", dest="refmod_only", action="store_true",
+                        help="Skip RefLoRA lookup (Arm A even when hybrid is on disk)")
+    parser.add_argument("--template", default=None, help="Optional template path override")
     args = parser.parse_args(argv)
 
     res = submit_parody_job(
@@ -230,9 +247,14 @@ def main(argv=None) -> int:
         slug=args.slug,
         run_dir_override=Path(args.run_dir) if args.run_dir else None,
         dry_run=args.dry_run,
+        template_path=Path(args.template) if args.template else None,
         image=args.image,
+        cond_source=args.cond_source,
+        graph_mode=args.graph_mode,
+        stage_cond=args.stage_cond,
+        refmod_only=args.refmod_only,
     )
-    print(json.dumps(res, indent=2))
+    print(json.dumps(res, indent=2, default=str))
     if res.get("gpu_busy"):
         return GPU_BUSY_RC
     return 0 if res.get("dry_run") or res.get("submitted") else 1
