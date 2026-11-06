@@ -104,7 +104,10 @@ class TestParodyPhase3(unittest.TestCase):
             scene="standing in a dimly lit hallway at night",
         )
         self.assertIn("Jennifer Check", prompt)
-        self.assertIn("Adult cast, adults-only, fictional 18+ adult scene", prompt)
+        # t261u: the redundant summary filler is gone; subject_definitions still states the adult (age 28+).
+        self.assertNotIn("Adult cast, adults-only, fictional 18+ adult scene", prompt)
+        self.assertIn("an adult performer, age 28+", prompt)
+        self.assertTrue(comm.adult_stated(prompt))
         self.assertIn("You have no idea what is coming next", prompt)
 
     def test_r7d_short_request_single_clip(self):

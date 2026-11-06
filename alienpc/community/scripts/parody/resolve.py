@@ -13,6 +13,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 DEFAULT_APPROVED_STILLS_DIR = Path(r"C:\Users\derek\5slock\approved_characters")
 KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
+NAS_APPROVED_STILLS_DIR = Path(r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters")
+APPROVED_IMAGE_POOLS: Tuple[Path, ...] = (DEFAULT_APPROVED_STILLS_DIR, NAS_APPROVED_STILLS_DIR)
+REFERENCE_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
+MAX_REFERENCE_IMAGES = 4
 
 
 def _normalize_key(name: str) -> str:
@@ -224,6 +228,61 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
         valid_paths.append(str(p))
 
     return valid_paths
+
+
+def validate_reference_images(
+    images: Optional[List[str]],
+    pools: Optional[Tuple[Path, ...]] = None,
+) -> List[str]:
+    """U2: --image gate (LANE_IMAGE_RULES.md). Every image must live inside an approved_characters pool.
+
+    Accepts a full path, or a sub-path / filename relative to a pool. Rejects any path that mentions
+    'sydney' (case-insensitive), anything outside the pools, missing files, non-image extensions, and > 4 images.
+    """
+    if not images:
+        return []
+    imgs = [str(x).strip() for x in images if x and str(x).strip()]
+    if len(imgs) > MAX_REFERENCE_IMAGES:
+        raise ValueError(f"at most {MAX_REFERENCE_IMAGES} --image references per clip (got {len(imgs)})")
+    pool_list = tuple(Path(x) for x in (pools if pools is not None else APPROVED_IMAGE_POOLS))
+    out: List[str] = []
+    for raw in imgs:
+        if "sydney" in raw.lower():
+            raise ValueError(f"Sydney paths are strictly prohibited as reference images: {raw}")
+        cand = Path(raw)
+        tries = [cand] if cand.is_absolute() or str(cand).startswith("\\\\") else [pl / cand for pl in pool_list]
+        found = None
+        for t in tries:
+            try:
+                rp = t.resolve()
+            except OSError:
+                continue
+            if "sydney" in str(rp).lower():
+                raise ValueError(f"Sydney paths are strictly prohibited as reference images: {raw}")
+            inside = False
+            for pl in pool_list:
+                try:
+                    rp.relative_to(pl.resolve())
+                    inside = True
+                    break
+                except (ValueError, OSError):
+                    continue
+            if not inside:
+                if cand.is_absolute():
+                    raise ValueError(
+                        f"--image '{raw}' is not inside an approved_characters pool "
+                        f"({', '.join(str(x) for x in pool_list)})"
+                    )
+                continue
+            if rp.is_file():
+                found = rp
+                break
+        if found is None:
+            raise ValueError(f"--image '{raw}' not found inside an approved_characters pool")
+        if found.suffix.lower() not in REFERENCE_IMAGE_EXTS:
+            raise ValueError(f"--image '{raw}' must be one of {', '.join(REFERENCE_IMAGE_EXTS)}")
+        out.append(str(found))
+    return out
 
 
 def resolve_identities(
