@@ -29,7 +29,7 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
 - Length: `--frames N` (H3 grid, ≤ 243) or `--seconds S` (`snap_h3_frames`: `(f-5) % 17 == 0`, 56..243). `--beat` (repeat) + `--beat-dialogue` / `--beat-camera` / `--beat-seconds` → cells.
 - Canvas: `--aspect 9:16|16:9|1:1|4:3|3:4|portrait|landscape|widescreen|square` (768x1344, 1344x768, 1024x1024, 1152x864, 864x1152) or `--size WxH` (multiples of 32, 256..2048).
 - Camera: `--camera "<framing, lens, motion>"`; motion words (push, pull, pan, tilt, track, dolly, handheld, orbit, crane, zoom, follow, move, sweep, arc) drop `Camera locked off, no zoom, no pan.`; default `[static medium shot, eye level, 50mm lens, shallow depth of field]` + locked-off tail.
-- Images (U2): `--image` 1..4, full path or sub-path inside `C:\Users\derek\5slock\approved_characters` or `\\NAS4CBE37.local\home\AlienPc-approved\approved_characters`; any `sydney` path or anything outside the pools → `ValueError`. Staged to `ComfyUI\input\community\parody_ref_<sha10>_<stem>.<ext>`, wired as `img_N` LoadImage → `c0.ref_images.ref_image_N`; prompt gains `<Picture N> is the <--image-role> for [Shot 1].`, `[reference generation]` in summary and a `retention_analysis:` block. No `--image` → zero LoadImage nodes and zero `<Picture N>` tags (R33).
+- Images (U2, live `d53e082` / Nov 6): `--image` takes **exactly one** `approved_characters` path (full path or sub-path inside `C:\Users\derek\5slock\approved_characters` or `\\NAS4CBE37.local\home\AlienPc-approved\approved_characters`); `>1` raises `ValueError`; any `sydney` path or anything outside the pools → `ValueError`. Staged to `ComfyUI\input\community\parody_ref_<sha10>_<stem>.<ext>`, wired as `img_1: LoadImage` → `add_guide: MiniMaxH3AddGuide` (`frame_idx=0`) → `refapply: MiniMaxH3RefModApply` (conditioning chain `c0 → add_guide → refapply → s0_guide`). **No** `c0.ref_images`, **no** `<Picture N>` / `[reference generation]` / `retention_analysis:` in the prompt — Qwen sees text-only, so voice stays intact. Derrick (`t314u`, watched clips): `RefMod` still drives the celebrity's face likeness onto the AddGuide shot (e.g. Emilia Clarke face on a generic apartment still) while keeping voice. Omit `--image` for RefMod-only composition; pass `--image` to pin frame-0 composition/wardrobe/pose/setting.
 - Second subject (U4): `--name2 --character2 --actor2 --description2 --dialogue2 --pronoun2`; RefMods merge 4 + 4 into `mod_1..mod_8` (spare slots go to whoever has more); `(S2)` line in `subject_definitions`, accurate `Non-speaking characters:`, `(S2): <d>…</d>` when it speaks; the scene/summary drop the `(S1)` prefix, so write `(S1)`/`(S2)` inside `--scene`.
 - Run control: `--seed`, `--slug`, `--run-dir`, `--dry-run`, `--wait`, `--qnap-put`, `--wait-timeout` (default 3 h).
 
@@ -40,17 +40,24 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
 ### 0.4 `--wait --qnap-put` and the shared-anchor stitch flow
 1. All graphs are built in memory first (guard, KEEP dials and the frame cap fail before `run_dir` exists).
 2. Single clip → tag `clip`. Cells → `c01_s<seed>`, `c02_s<seed+1>`, … (each with its own `request.api.json` + `prompt.txt`), same resolved identity, RefMod slots, canvas and staged images; `_render_order.json` carries `"cell_contract": true` so `run_queue.py` renders all of them in ONE lock window.
-3. `run_queue.py --size WxH --frames N --detach` (graph is the OBJECTIVE authority), then poll `_render_queue.log` for a new `BATCH closed rc=N`.
+3. `run_queue.py --size WxH --frames N --detach` (graph is the OBJECTIVE authority), then poll `_render_queue.log` for a new `BATCH closed rc=N`. Default post-pass (`be7fd28`): NVIDIA `RTX Video Super Resolution ULTRA 2x @ 24fps` (e.g. `768x1344` → `1536x2688`); keeps `<tag>_raw.mp4` beside the upscaled `<tag>.mp4`; `--no-upscale` opts out.
 4. rc 0: single → copy `<run>\clip\clip.mp4` (fallback newest `ComfyUI\output\community\<run>\clip_*.mp4`) to `<run>\clip.mp4`; cells → ensure each `<run>\<cell>\<cell>.mp4` (run_queue copies them; fallback from ComfyUI output), run `scripts\queue\take_chain_stitch.py <run> --name stitched` (hard cuts + 60 ms audio crossfade, ffprobe-uniform check; discovers cells by `^c\d{2}_s\d+$`, `render_ok.json` optional), copy `_stitch\stitched.mp4` to `clip.mp4`.
 5. `--qnap-put` → `pi_qnap.py put <run>\clip.mp4 pi-drop/<run>.mp4`. JSON out: `batch_rc`, `objective`, `final_mp4`, `qnap_path`, `wait_seconds`, compact `resolved`. Exit 0 only when the batch and finalize (and upload, if asked) succeed; 7 = GPU busy.
 
 ### 0.5 Review notes
 - `wide10s` (243f 1344x768 dolly push-in) review: hands lifting a mug to sip warped the thumb at the rim and the sip got cut off → the skill now says hands rest still on a prop and no sipping, including in `--end-action`.
 - The 50mm static default crops hands out of frame; when hands matter, frame waist-up with the tabletop at 35mm.
+- **Nov 6 afternoon voice findings** (`acoustic.py` + Derrick `t314u` watched the clips; `videoReview` was wrong on both face and voice):
+  - `MiniMaxH3AddGuide frame_idx=0` does **not** shift pitch register on a byte-identical Daenerys pair (`172 Hz` nophoto vs `176 Hz` photo) and **does not** wipe RefMod face — Clip 2 with a generic apartment still still looked like Emilia Clarke; RefMod carries face likeness onto the AddGuide shot while keeping voice.
+  - Upbeat expression cues (`"amused, teasing"`) shift median F0 **+30–45 Hz**; calm/composed cues (`"a wry tired smile"`, `"calm deadpan poise"`) + explicit vocal-timbre phrasing keep pitch stable (~`200 Hz` on Sweeney/Cassie).
+  - Pairing the actor with their iconic INDEX character (`--character` + `--actor`, e.g. Cassie Howard + Sydney Sweeney, Daenerys Targaryen + Emilia Clarke) produces **stronger voice likeness** than the actor name alone — Derrick confirmed Cassie Howard beat Sydney-alone — even on `INDEX: bad` rows. RefMod (`kind: video`) carries no audio tokens; character+actor naming in the prompt is the voice lever.
+  - Builder now emits `<d>[English, using {actor}'s exact {character} voice and signature vocal timbre] …` when character ≠ actor, else `{name}'s exact voice`.
 
 ### 0.6 History
 - 2026-11-06 10:47 `9cfab36`: lighting-cue gate + tone dedupe + one-call fast path (PowerShell recipe).
 - 2026-11-06 T1: dynamic pipeline above; the PowerShell polling recipe is replaced by `submit_parody_run.py … --wait --qnap-put`; the 11.4 KB skill (brain `ac28bee`) was trimmed to < 6,000 B with these internals moved here.
+- 2026-11-06 `be7fd28`: `run_queue.py` default NVIDIA RTX VSR ULTRA 2x @ 24fps post-pass (keeps `<tag>_raw.mp4`; `--no-upscale` opt-out).
+- 2026-11-06 afternoon: AddGuide U2 wiring documented; Derrick `t314u` confirmed RefMod face survives AddGuide + character/actor pairing improves voice; prompt-builder voice/end-action hygiene upgrade.
 
 ---
 

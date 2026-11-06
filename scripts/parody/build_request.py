@@ -208,23 +208,69 @@ def _clean_end(text: str) -> str:
     return str(text).strip().rstrip(".").rstrip()
 
 
-def _speaker_lines(label: str, pr: Dict[str, str], spoken: Optional[str], end_action: Optional[str]) -> str:
+def _format_end_action(subj: str, end_action: str) -> str:
+    """MA-6: turn --end-action into a clean '{She|He|They} <phrase>' clause (no double subject)."""
+    rest = _clean_end(end_action)
+    # Drop a leading subject pronoun the caller already typed.
+    rest = re.sub(r"^(She|He|They)\s+", "", rest, count=1, flags=re.IGNORECASE).strip()
+    if re.match(r"^[Aa]n?\s+", rest):
+        verb = "give" if subj == "They" else "gives"
+        return f"{subj} {verb} {rest[0].lower() + rest[1:] if rest[:1].isupper() else rest}"
+    if rest[:1].isupper() and (len(rest) == 1 or not rest[1].isupper()):
+        # Leading uppercase verb -> lowercase after pronoun ("Holds..." -> "holds...")
+        rest = rest[0].lower() + rest[1:]
+    return f"{subj} {rest}"
+
+
+def _voice_target(resolved: Dict[str, Any], voice_name: str) -> str:
+    """Prefer '{actor}'s exact {character} voice' when both differ; else '{voice_name}'s exact voice'."""
+    character = resolved.get("character")
+    actor = resolved.get("actor")
+    if (
+        character
+        and actor
+        and str(character).strip()
+        and str(actor).strip()
+        and str(character).strip().lower() != str(actor).strip().lower()
+    ):
+        return f"{actor}'s exact {character} voice"
+    return f"{voice_name}'s exact voice"
+
+
+def _ensure_vocal_timbre(desc: str) -> str:
+    """Inject the vocal-timbre anchor after the featuring (...) prefix when missing."""
+    if "vocal timbre" in desc.lower():
+        return desc
+    m = re.match(r"(featuring\s+.+?(?:\([^)]*\))?),\s*", desc, re.IGNORECASE | re.DOTALL)
+    if m:
+        return f"{m.group(1)}, distinctive facial features, exact likeness and vocal timbre, {desc[m.end():]}"
+    return f"distinctive facial features, exact likeness and vocal timbre, {desc}"
+
+
+def _speaker_lines(
+    label: str,
+    pr: Dict[str, str],
+    spoken: Optional[str],
+    end_action: Optional[str],
+    voice_target: Optional[str] = None,
+) -> str:
     """Post-speech / silent lines for one subject with clean pronoun grammar."""
     S, poss, Poss, s, does = pr["subj"], pr["poss"], pr["Poss"], pr["s"], pr["does"]
     pre = f"{label} " if label else ""
+    use = "use" if S == "They" else "uses"
+    vt = voice_target or "their exact voice"
     if spoken:
         if end_action:
-            first = f"{S} {_clean_end(end_action)}. "
+            first = f"{_format_end_action(S, end_action)}. "
         else:
             first = f"{S} hold{s} eye contact, give{s} a small nod at the end, and stop{s} talking. "
         return (
             f"{pre}{first}{Poss} mouth movements stop completely after the sentence. "
-            f"{Poss} speaking voice, accent and cadence are the one natural voice {S.lower()} use{s} in this scene, "
-            "used consistently in every clip of this character."
+            f"{S} {use} {vt}, accent, and signature vocal timbre consistently throughout the entire clip."
         )
     line = f"{pre}{S} {does} not speak; {poss} lips stay closed and relaxed for the whole shot."
     if end_action:
-        line += f" {S} {_clean_end(end_action)}."
+        line += f" {_format_end_action(S, end_action)}."
     return line
 
 
@@ -273,13 +319,15 @@ def format_parody_prompt(
     U4: --camera, --pronoun, --end-action, optional (S2). No word caps anywhere (t263u).
     """
     primary_name, voice_name = _subject_name(resolved)
-    desc = _subject_desc(resolved, primary_name)
+    desc = _ensure_vocal_timbre(_subject_desc(resolved, primary_name))
+    vt1 = _voice_target(resolved, voice_name)
     pr1 = _pronoun(pronoun)
 
     two = resolved2 is not None
     if two:
         name2, voice2 = _subject_name(resolved2)
-        desc2 = _subject_desc(resolved2, name2)
+        desc2 = _ensure_vocal_timbre(_subject_desc(resolved2, name2))
+        vt2 = _voice_target(resolved2, voice2)
         pr2 = _pronoun(pronoun2)
     spoken = validate_spoken_dialogue(dialogue)
     spoken2 = validate_spoken_dialogue(dialogue2) if two else None
@@ -321,14 +369,14 @@ def format_parody_prompt(
     blocks = []
     d_lines = []
     if spoken:
-        d_lines.append(f"(S1): <d>[English in {voice_name}'s natural speaking voice] {spoken}</d>")
+        d_lines.append(f"(S1): <d>[English, using {vt1} and signature vocal timbre] {spoken}</d>")
     if spoken2:
-        d_lines.append(f"(S2): <d>[English in {voice2}'s natural speaking voice] {spoken2}</d>")
+        d_lines.append(f"(S2): <d>[English, using {vt2} and signature vocal timbre] {spoken2}</d>")
     if d_lines:
         blocks.append("<scenedirect>\n" + "\n".join(d_lines) + "\n</scenedirect>")
-    blocks.append(_speaker_lines(label1, pr1, spoken, end_action))
+    blocks.append(_speaker_lines(label1, pr1, spoken, end_action, voice_target=vt1))
     if two:
-        blocks.append(_speaker_lines("(S2)", pr2, spoken2, None))
+        blocks.append(_speaker_lines("(S2)", pr2, spoken2, None, voice_target=vt2))
     speech_block = "\n".join(blocks)
 
     n_voices = int(bool(spoken)) + int(bool(spoken2))
