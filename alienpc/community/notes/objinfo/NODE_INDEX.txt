@@ -1,18 +1,19 @@
 AddLabel	custom_nodes.ComfyUI-KJNodes	image text_x text_y height font_size font_color label_color font text direction caption?
 AddLayer	comfy_extras.nodes_compositor	image layers? mask? name? x? y? opacity? blend_mode? rotation? width? height? z_index? flip_h? flip_v?
-AddMask	custom_nodes.ComfyUI-Impact-Pack	mask1 mask2
 AddNoise	comfy_extras.nodes_custom_sampler	model noise sigmas latent_image
 AddNoiseToTrackPath	custom_nodes.ComfyUI-KJNodes	tracks strength seed noise_x_ratio noise_y_ratio noise_temporal_ratio
 AddTextPrefix	comfy_extras.nodes_dataset	texts prefix
 AddTextSuffix	comfy_extras.nodes_dataset	texts suffix
 AdjustBrightness	comfy_extras.nodes_dataset	images factor
 AdjustContrast	comfy_extras.nodes_dataset	images factor
+AIO_Preprocessor	custom_nodes.comfyui_controlnet_aux	image preprocessor? resolution?
 AlignYourStepsScheduler	comfy_extras.nodes_align_your_steps	model_type steps denoise
-AMT VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier optional_interpolation_states?
 AnimaLLLiteApply	comfy_extras.nodes_model_patch	model model_patch image strength start_percent end_percent mask?
-AnimeLineArt_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	
+AnimalPosePreprocessor	custom_nodes.comfyui_controlnet_aux	image bbox_detector? pose_estimator? resolution?
+AnimeFace_SemSegPreprocessor	custom_nodes.comfyui_controlnet_aux	image remove_background_using_abg? resolution?
+AnimeLineArtPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 Any Switch (rgthree)	custom_nodes.rgthree-comfy	
-AnyPipeToBasic	custom_nodes.ComfyUI-Impact-Pack	any_pipe
+AnyLineArtPreprocessor_aux	custom_nodes.comfyui_controlnet_aux	image merge_with_lineart? resolution? lineart_lower_bound? lineart_upper_bound? object_min_size? object_connectivity?
 Anything Everywhere	custom_nodes.cg-use-everywhere	anything?
 Anything Everywhere3	custom_nodes.cg-use-everywhere	anything? anything2? anything3?
 Anything Everywhere?	custom_nodes.cg-use-everywhere	anything? title_regex? input_regex? group_regex?
@@ -20,15 +21,12 @@ APG	comfy_extras.nodes_apg	model eta norm_threshold momentum
 AppendInstanceDiffusionTracking	custom_nodes.ComfyUI-KJNodes	tracking_1 tracking_2 prompt_1? prompt_2?
 AppendStringsToList	custom_nodes.ComfyUI-KJNodes	string1 string2
 ApplyCLIPSeg+	custom_nodes.ComfyUI_essentials	clip_seg image prompt threshold smooth dilate blur
-ApplyLBW //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model clip strength_model strength_clip lbw_model
 ApplyPulidFlux	custom_nodes.ComfyUI_PuLID_Flux_ll	model pulid_flux eva_clip face_analysis image weight start_at end_at attn_mask? options?
 ApplyPuLIDFlux2	custom_nodes.ComfyUI-PuLID-Flux2	model pulid_model strength eva_clip face_analysis image face_index? debug_mode?
-ApplyRegionalIPAdapters //Inspire	custom_nodes.ComfyUI-Inspire-Pack	ipadapter_pipe regional_ipadapter1
 ApplyRifleXRoPE_HunuyanVideo	custom_nodes.ComfyUI-KJNodes	model latent k
 ApplyRifleXRoPE_WanVideo	custom_nodes.ComfyUI-KJNodes	model latent k
 ApplyTextureToMesh	comfy_extras.nodes_mesh_postprocess	mesh base_color metallic? roughness? occlusion? normal_map?
 ARVideoI2V	comfy_extras.nodes_ar_video	model vae start_image width height length batch_size
-ATM VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier global_motion optional_interpolation_states?
 AudioAdjustVolume	comfy_extras.nodes_audio	audio volume
 AudioConcat	comfy_extras.nodes_audio	audio1 audio2 direction
 AudioConcatenate	custom_nodes.ComfyUI-KJNodes	audio1 audio2 direction
@@ -37,12 +35,11 @@ AudioEncoderLoader	comfy_extras.nodes_audio_encoder	audio_encoder_name
 AudioEqualizer3Band	comfy_extras.nodes_audio	audio low_gain_dB low_freq mid_gain_dB mid_freq mid_q high_gain_dB high_freq
 AudioLatentStretch	custom_nodes.10S-Comfy-nodes	audio_latent source_fps target_fps interp_mode?
 AudioMerge	comfy_extras.nodes_audio	audio1 audio2 merge_method
+BAE-NormalMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 BakeAmbientOcclusion	comfy_extras.nodes_mesh_postprocess	low_poly high_poly resolution samples max_distance strength bias
 BakeNormalMapFromMesh	comfy_extras.nodes_mesh_postprocess	low_poly high_poly resolution cage_distance ignore_backfaces
 BakeTextureFromVoxel	comfy_extras.nodes_mesh_postprocess	mesh voxel_colors texture_size reference_mesh?
 BasicGuider	comfy_extras.nodes_custom_sampler	model conditioning
-BasicPipeToDetailerPipe	custom_nodes.ComfyUI-Impact-Pack	basic_pipe bbox_detector wildcard Select to add LoRA Select to add Wildcard sam_model_opt? segm_detector_opt? detailer_hook?
-BasicPipeToDetailerPipeSDXL	custom_nodes.ComfyUI-Impact-Pack	base_basic_pipe refiner_basic_pipe bbox_detector wildcard Select to add LoRA Select to add Wildcard sam_model_opt? segm_detector_opt? detailer_hook?
 BasicScheduler	comfy_extras.nodes_custom_sampler	model scheduler steps denoise
 BatchCLIPSeg	custom_nodes.ComfyUI-KJNodes	images text threshold binary_mask combine_mask use_cuda blur_sigma? opt_model? prev_mask? image_bg_level? invert?
 BatchCount+	custom_nodes.ComfyUI_essentials	batch
@@ -53,18 +50,13 @@ BatchLatentsNode	comfy_extras.nodes_post_processing	latents
 BatchMasksNode	comfy_extras.nodes_post_processing	masks
 BatchUncrop	custom_nodes.ComfyUI-KJNodes	original_images cropped_images bboxes border_blending crop_rescale border_top border_bottom border_left border_right
 BatchUncropAdvanced	custom_nodes.ComfyUI-KJNodes	original_images cropped_images cropped_masks combined_crop_mask bboxes border_blending crop_rescale use_combined_mask use_square_mask combined_bounding_box?
-BboxDetectorCombined_v2	custom_nodes.ComfyUI-Impact-Pack	bbox_detector image threshold dilation
-BboxDetectorSEGS	custom_nodes.ComfyUI-Impact-Pack	bbox_detector image threshold dilation crop_factor drop_size labels detailer_hook?
 BboxToInt	custom_nodes.ComfyUI-KJNodes	bboxes index
 BboxVisualize	custom_nodes.ComfyUI-KJNodes	images bboxes line_width bbox_format
 BeebleSwitchXImageEdit	comfy_api_nodes.nodes_beeble	image prompt alpha_mode max_resolution seed reference_image?
 BeebleSwitchXVideoEdit	comfy_api_nodes.nodes_beeble	video prompt alpha_mode max_resolution seed reference_image?
 BerniniConditioning	comfy_extras.nodes_bernini	positive negative vae width height length batch_size source_video? reference_video? reference_images? ref_max_size?
 BetaSamplingScheduler	comfy_extras.nodes_custom_sampler	model steps alpha beta
-BindImageListPromptList //Inspire	custom_nodes.ComfyUI-Inspire-Pack	images zipped_prompts default_positive default_negative
-BitwiseAndMask	custom_nodes.ComfyUI-Impact-Pack	mask1 mask2
-BitwiseAndMaskForEach	custom_nodes.ComfyUI-Impact-Pack	base_segs mask_segs
-BlackPatchRetryHookProvider	custom_nodes.ComfyUI-Impact-Pack	mean_thresh var_thresh
+BinaryPreprocessor	custom_nodes.comfyui_controlnet_aux	image bin_threshold? resolution?
 BlockifyMask	custom_nodes.ComfyUI-KJNodes	masks block_size device?
 BlockSparseAttention	comfy_extras.nodes_sparse_attention	model selection start_percent end_percent dense_blocks min_tokens extra_tokens sink_conditioning verbose
 BOOLConstant	custom_nodes.ComfyUI-KJNodes	value
@@ -107,28 +99,19 @@ ByteDanceSeedreamNodeV2	comfy_api_nodes.nodes_bytedance	prompt model seed waterm
 ByteDanceSeedreamNodeV3	comfy_api_nodes.nodes_bytedance	prompt model
 ByteDanceTextToVideoNode	comfy_api_nodes.nodes_bytedance	model prompt resolution aspect_ratio duration seed? camera_fixed? watermark? generate_audio?
 ByteDanceVideoEnhanceNode	comfy_api_nodes.nodes_bytedance	video tool_version resolution fps bitrate_level
-CacheBackendData //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key tag data
-CacheBackendDataList //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key tag data
-CacheBackendDataNumberKey //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key tag data
-CacheBackendDataNumberKeyList //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key tag data
-CAIN VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier optional_interpolation_states?
 CameraPoseVisualizer	custom_nodes.ComfyUI-KJNodes	pose_file_path base_xval zval scale use_exact_fx relative_c2w use_viewer cameractrl_poses?
 Canny	comfy_extras.nodes_canny	image low_threshold high_threshold
-Canny_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	low_threshold high_threshold
+CannyEdgePreprocessor	custom_nodes.comfyui_controlnet_aux	image low_threshold? high_threshold? resolution?
 CaseConverter	comfy_extras.nodes_string	string mode
 CenterCropImages	comfy_extras.nodes_dataset	images width height
 CFGGuider	comfy_extras.nodes_custom_sampler	model positive negative cfg
 CFGNorm	comfy_extras.nodes_cfg	model strength pre_cfg?
 CFGOverride	comfy_extras.nodes_custom_sampler	model cfg start_percent end_percent
-CfgScheduleHookProvider	custom_nodes.ComfyUI-Impact-Pack	schedule_for_iteration target_cfg
 CFGZeroStar	comfy_extras.nodes_cfg	model
 CFGZeroStarAndInit	custom_nodes.ComfyUI-KJNodes	model use_zero_init zero_init_steps
-ChangeImageBatchSize //Inspire	custom_nodes.ComfyUI-Inspire-Pack	image batch_size mode
-ChangeLatentBatchSize //Inspire	custom_nodes.ComfyUI-Inspire-Pack	latent batch_size mode
 CheckpointLoader	nodes	config_name ckpt_name
 CheckpointLoaderKJ	custom_nodes.ComfyUI-KJNodes	ckpt_name weight_dtype compute_dtype patch_cublaslinear sage_attention enable_fp16_accumulation
 CheckpointLoaderSimple	nodes	ckpt_name
-CheckpointLoaderSimpleShared //Inspire	custom_nodes.ComfyUI-Inspire-Pack	ckpt_name key_opt mode?
 CheckpointLoader|pysssss	custom_nodes.ComfyUI-Custom-Scripts	ckpt_name prompt?
 CheckpointPerturbWeights	custom_nodes.ComfyUI-KJNodes	model joint_blocks final_layer rest_of_the_blocks seed
 CheckpointSave	comfy_extras.nodes_model_merging	model clip vae filename_prefix
@@ -141,7 +124,6 @@ CLIPMergeAdd	comfy_extras.nodes_model_merging	clip1 clip2
 CLIPMergeSimple	comfy_extras.nodes_model_merging	clip1 clip2 ratio
 CLIPMergeSubtract	comfy_extras.nodes_model_merging	clip1 clip2 multiplier
 CLIPSave	comfy_extras.nodes_model_merging	clip filename_prefix
-CLIPSegDetectorProvider	custom_nodes.ComfyUI-Impact-Pack	text blur threshold dilation_factor
 CLIPSetLastLayer	nodes	clip stop_at_clip_layer
 CLIPTextEncode	nodes	text clip
 CLIPTextEncodeControlnet	comfy_extras.nodes_cond	clip conditioning text
@@ -155,7 +137,6 @@ CLIPTextEncodeSD3	comfy_extras.nodes_sd3	clip clip_l clip_g t5xxl empty_padding
 CLIPTextEncodeSDXL	comfy_extras.nodes_clip_sdxl	clip width height crop_w crop_h target_width target_height text_g text_l
 CLIPTextEncodeSDXL+	custom_nodes.ComfyUI_essentials	width height size_cond_factor text clip
 CLIPTextEncodeSDXLRefiner	comfy_extras.nodes_clip_sdxl	ascore width height text clip
-CLIPTextEncodeWithWeight //Inspire	custom_nodes.ComfyUI-Inspire-Pack	text clip strength add_weight
 CLIPVisionEncode	nodes	clip_vision image crop
 CLIPVisionLoader	nodes	clip_name
 CM_BoolBinaryOperation	custom_nodes.ComfyMath	op a b
@@ -211,18 +192,15 @@ CM_Vec4ToScalarBinaryOperation	custom_nodes.ComfyMath	op a b
 CM_Vec4ToScalarUnaryOperation	custom_nodes.ComfyMath	op a
 CM_Vec4UnaryCondition	custom_nodes.ComfyMath	op a
 CM_Vec4UnaryOperation	custom_nodes.ComfyMath	op a
-Color_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	
-ColorMapToMasks //Inspire	custom_nodes.ComfyUI-Inspire-Pack	color_map min_pixels max_count
-ColorMaskToDepthMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	color_mask spec base_value dilation flatten_method
 ColorMatch	custom_nodes.ComfyUI-KJNodes	image_ref image_target method strength? multithread?
 ColorMatchV2	custom_nodes.ComfyUI-KJNodes	image_target image_ref method strength multithread
+ColorPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 ColorToMask	custom_nodes.ComfyUI-KJNodes	images invert red green blue threshold per_batch
 ColorToRGBInt	comfy_extras.nodes_color	color
 ColorTransfer	comfy_extras.nodes_post_processing	image_target image_ref method source_stats strength
 CombineHooks2	comfy_extras.nodes_hooks	hooks_A? hooks_B?
 CombineHooks4	comfy_extras.nodes_hooks	hooks_A? hooks_B? hooks_C? hooks_D?
 CombineHooks8	comfy_extras.nodes_hooks	hooks_A? hooks_B? hooks_C? hooks_D? hooks_E? hooks_F? hooks_G? hooks_H?
-CombineRegionalPrompts	custom_nodes.ComfyUI-Impact-Pack	regional_prompts1
 Combo Clone	custom_nodes.cg-use-everywhere	combo
 ComfyAndNode	comfy_extras.nodes_logic	values
 ComfyCloudFlux2TextToImageNode	comfy_api_nodes.nodes_comfy_cloud	prompt seed aspect_ratio megapixels turbo
@@ -238,8 +216,6 @@ ComfyNotNode	comfy_extras.nodes_logic	value
 ComfyNumberConvert	comfy_extras.nodes_number_convert	value
 ComfyOrNode	comfy_extras.nodes_logic	values
 ComfySwitchNode	comfy_extras.nodes_logic	switch on_false? on_true?
-CompositeNoise //Inspire	custom_nodes.ComfyUI-Inspire-Pack	destination source mode x y
-ConcatConditioningsWithMultiplier //Inspire	custom_nodes.ComfyUI-Inspire-Pack	conditioning1 multiplier1?
 ConcatenateVideo	comfy_extras.nodes_video	videos codec complete_audio?
 ConditioningAverage	nodes	conditioning_to conditioning_from conditioning_to_strength
 ConditioningCombine	nodes	conditioning_1 conditioning_2
@@ -262,9 +238,7 @@ ConditioningSetProperties	comfy_extras.nodes_hooks	cond_NEW strength set_cond_ar
 ConditioningSetPropertiesAndCombine	comfy_extras.nodes_hooks	cond cond_NEW strength set_cond_area mask? hooks? timesteps?
 ConditioningSetTimestepRange	nodes	conditioning start end
 ConditioningStableAudio	comfy_extras.nodes_audio	positive negative seconds_start seconds_total
-ConditioningStretch //Inspire	custom_nodes.ComfyUI-Inspire-Pack	conditioning resolutionX resolutionY newWidth newHeight
 ConditioningTimestepsRange	comfy_extras.nodes_hooks	start_percent end_percent
-ConditioningUpscale //Inspire	custom_nodes.ComfyUI-Inspire-Pack	conditioning scalar
 ConditioningZeroOut	nodes	conditioning
 CondPassThrough	custom_nodes.ComfyUI-KJNodes	positive? negative?
 ConsoleDebug+	custom_nodes.ComfyUI_essentials	value prefix?
@@ -282,11 +256,12 @@ ContextWindowsVisualizerKJ	custom_nodes.ComfyUI-KJNodes	frame_units dim temporal
 ControlNetApply	nodes	conditioning control_net image strength
 ControlNetApplyAdvanced	nodes	positive negative control_net image strength start_percent end_percent vae?
 ControlNetApplySD3	comfy_extras.nodes_sd3	positive negative control_net vae image strength start_percent end_percent
+ControlNetAuxSimpleAddText	custom_nodes.comfyui_controlnet_aux	image text
 ControlNetInpaintingAliMamaApply	comfy_extras.nodes_controlnet	positive negative control_net vae image mask strength start_percent end_percent
 ControlNetLoader	nodes	control_net_name
+ControlNetPreprocessorSelector	custom_nodes.comfyui_controlnet_aux	preprocessor
 ConvertArrayToString	comfy_extras.nodes_string	array indent
 ConvertDictionaryToString	comfy_extras.nodes_string	dictionary indent
-CoreMLDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	mode
 CosmosImageToVideoLatent	comfy_extras.nodes_cosmos	vae width height length batch_size start_image? end_image?
 CosmosPredict2ImageToVideoLatent	comfy_extras.nodes_cosmos	vae width height length batch_size start_image? end_image?
 CreateAudioMask	custom_nodes.ComfyUI-KJNodes	invert frames scale audio_path width height
@@ -321,7 +296,6 @@ CrossFadeImagesMulti	custom_nodes.ComfyUI-KJNodes	inputcount image_1 interpolati
 CurveEditor	comfy_extras.nodes_curve	curve histogram?
 CustomCombo	comfy_extras.nodes_logic	choice
 CustomControlNetWeightsFluxFromList	custom_nodes.ComfyUI-KJNodes	list_of_floats uncond_multiplier? cn_extras? autosize?
-CustomSamplerDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	sampler
 CustomSigmas	custom_nodes.ComfyUI-KJNodes	sigmas_string interpolate_to_steps
 CutAndDragOnPath	custom_nodes.ComfyUI-KJNodes	image coordinates mask frame_width frame_height inpaint bg_image?
 Cycle	custom_nodes.ControlFlowUtils	start step end manual_reset? auto_reset?
@@ -365,20 +339,14 @@ DataMonitor	custom_nodes.ControlFlowUtils	text output_type passthrough? aux? aux
 DebugTensorShape+	custom_nodes.ComfyUI_essentials	tensor
 DecimateMesh	comfy_extras.nodes_mesh_postprocess	mesh target_face_count placement_mode
 DecodeAndSaveVideo	custom_nodes.ComfyUI-KJNodes	video_latent fps filename_prefix format codec video_vae tiling audio_latent? audio_vae?
-DenoiseScheduleHookProvider	custom_nodes.ComfyUI-Impact-Pack	schedule_for_iteration target_denoise
-DenoiseSchedulerDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	schedule_for_cycle target_denoise
-DetailerForEach	custom_nodes.ComfyUI-Impact-Pack	image segs model clip vae guide_size guide_size_for max_size seed steps cfg sampler_name scheduler positive negative denoise feather noise_mask force_inpaint wildcard cycle detailer_hook? inpaint_model? noise_mask_feather? scheduler_func_opt? tiled_encode? tiled_decode?
-DetailerForEachAutoRetry	custom_nodes.ComfyUI-Impact-Pack	image segs model clip vae guide_size guide_size_for max_size seed steps cfg sampler_name scheduler positive negative denoise feather noise_mask force_inpaint wildcard cycle max_retries detailer_hook? inpaint_model? noise_mask_feather? scheduler_func_opt? tiled_encode? tiled_decode?
-DetailerForEachDebug	custom_nodes.ComfyUI-Impact-Pack	image segs model clip vae guide_size guide_size_for max_size seed steps cfg sampler_name scheduler positive negative denoise feather noise_mask force_inpaint wildcard cycle detailer_hook? inpaint_model? noise_mask_feather? scheduler_func_opt? tiled_encode? tiled_decode?
-DetailerForEachDebugPipe	custom_nodes.ComfyUI-Impact-Pack	image segs guide_size guide_size_for max_size seed steps cfg sampler_name scheduler denoise feather noise_mask force_inpaint basic_pipe wildcard refiner_ratio cycle detailer_hook? refiner_basic_pipe_opt? inpaint_model? noise_mask_feather? scheduler_func_opt? tiled_encode? tiled_decode?
-DetailerForEachPipe	custom_nodes.ComfyUI-Impact-Pack	image segs guide_size guide_size_for max_size seed steps cfg sampler_name scheduler denoise feather noise_mask force_inpaint basic_pipe wildcard refiner_ratio cycle detailer_hook? refiner_basic_pipe_opt? inpaint_model? noise_mask_feather? scheduler_func_opt? tiled_encode? tiled_decode?
-DetailerForEachPipeForAnimateDiff	custom_nodes.ComfyUI-Impact-Pack	image_frames segs guide_size guide_size_for max_size seed steps cfg sampler_name scheduler denoise feather basic_pipe refiner_ratio detailer_hook? refiner_basic_pipe_opt? noise_mask_feather? scheduler_func_opt?
-DetailerHookCombine	custom_nodes.ComfyUI-Impact-Pack	hook1 hook2
-DetailerPipeToBasicPipe	custom_nodes.ComfyUI-Impact-Pack	detailer_pipe
+DensePosePreprocessor	custom_nodes.comfyui_controlnet_aux	image model? cmap? resolution?
+DepthAnythingPreprocessor	custom_nodes.comfyui_controlnet_aux	image ckpt_name? resolution?
+DepthAnythingV2Preprocessor	custom_nodes.comfyui_controlnet_aux	image ckpt_name? resolution?
 DiffControlNetLoader	nodes	model control_net_name
 DifferentialDiffusion	comfy_extras.nodes_differential_diffusion	model strength?
 DifferentialDiffusionAdvanced	custom_nodes.ComfyUI-KJNodes	model samples mask multiplier
 DiffusersLoader	nodes	model_path
+DiffusionEdge_Preprocessor	custom_nodes.comfyui_controlnet_aux	image environment? patch_batch_size? resolution?
 DiffusionModelLoaderKJ	custom_nodes.ComfyUI-KJNodes	model_name weight_dtype compute_dtype patch_cublaslinear sage_attention enable_fp16_accumulation extra_state_dict?
 DiffusionModelSelector	custom_nodes.ComfyUI-KJNodes	model_name
 DisableNoise	comfy_extras.nodes_custom_sampler	
@@ -391,227 +359,17 @@ DrawBBoxes	comfy_extras.nodes_rtdetr	bboxes image?
 DrawInstanceDiffusionTracking	custom_nodes.ComfyUI-KJNodes	image tracking box_line_width draw_text font font_size
 DrawMaskOnImage	custom_nodes.ComfyUI-KJNodes	image mask color device?
 DrawText+	custom_nodes.ComfyUI_essentials	text font size color background_color shadow_distance shadow_blur shadow_color horizontal_align vertical_align offset_x offset_y direction img_composite?
-DropItems //Inspire	custom_nodes.ComfyUI-Inspire-Pack	item_list
+DSINE-NormalMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image fov? iterations? resolution?
 DualCFGGuider	comfy_extras.nodes_custom_sampler	model cond1 cond2 negative cfg_conds cfg_cond2_negative style
 DualCLIPLoader	nodes	clip_name1 clip_name2 type device?
 DualCLIPLoaderGGUF	custom_nodes.ComfyUI-GGUF	clip_name1 clip_name2 type
 DualModelGuider	comfy_extras.nodes_custom_sampler	model positive cfg model_negative? negative?
 DummyOut	custom_nodes.ComfyUI-KJNodes	any_input
-DWPreprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	detect_hand detect_body detect_face resolution_upscale_by bbox_detector pose_estimator
-dynamicThresholdingFull	custom_nodes.ComfyUI-Easy-Use	model mimic_scale threshold_percentile mimic_mode mimic_scale_min cfg_mode cfg_scale_min sched_val separate_feature_channels scaling_startpoint variability_measure interpolate_phi
-easy a1111Loader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name clip_skip lora_name lora_model_strength lora_clip_strength resolution empty_latent_width empty_latent_height positive negative batch_size optional_lora_stack? optional_controlnet_stack? a1111_prompt_style?
-easy ab	custom_nodes.ComfyUI-Easy-Use	A or B in
-easy anythingIndexSwitch	custom_nodes.ComfyUI-Easy-Use	index value0? value1? value2? value3? value4? value5? value6? value7? value8? value9? value10? value11? value12? value13? value14? value15? value16? value17? value18? value19?
-easy anythingInversedSwitch	custom_nodes.ComfyUI-Easy-Use	index in
-easy applyBrushNet	custom_nodes.ComfyUI-Easy-Use	pipe image mask brushnet dtype scale start_at end_at
-easy applyFooocusInpaint	custom_nodes.ComfyUI-Easy-Use	model latent head patch
-easy applyInpaint	custom_nodes.ComfyUI-Easy-Use	pipe image mask inpaint_mode encode grow_mask_by dtype fitting function scale start_at end_at noise_mask?
-easy applyPowerPaint	custom_nodes.ComfyUI-Easy-Use	pipe image mask powerpaint_model powerpaint_clip dtype fitting function scale start_at end_at save_memory
-easy batchAnything	custom_nodes.ComfyUI-Easy-Use	any_1 any_2
-easy blocker	custom_nodes.ComfyUI-Easy-Use	continue in
-easy boolean	custom_nodes.ComfyUI-Easy-Use	value
-easy cascadeKSampler	custom_nodes.ComfyUI-Easy-Use	pipe image_output link_id save_prefix model_c?
-easy cascadeLoader	custom_nodes.ComfyUI-Easy-Use	stage_c stage_b stage_a clip_name lora_name lora_model_strength lora_clip_strength resolution empty_latent_width empty_latent_height compression positive negative batch_size optional_lora_stack?
-easy ckptNames	custom_nodes.ComfyUI-Easy-Use	ckpt_name
-easy cleanGpuUsed	custom_nodes.ComfyUI-Easy-Use	anything
-easy clearCacheAll	custom_nodes.ComfyUI-Easy-Use	anything
-easy clearCacheKey	custom_nodes.ComfyUI-Easy-Use	anything cache_key
-easy comfyLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name clip_skip lora_name lora_model_strength lora_clip_strength resolution empty_latent_width empty_latent_height positive negative batch_size optional_lora_stack? optional_controlnet_stack?
-easy compare	custom_nodes.ComfyUI-Easy-Use	a? b? comparison?
-easy conditioningIndexSwitch	custom_nodes.ComfyUI-Easy-Use	index cond0? cond1? cond2? cond3? cond4? cond5? cond6? cond7? cond8? cond9? cond10? cond11? cond12? cond13? cond14? cond15? cond16? cond17? cond18? cond19?
-easy controlnetLoader	custom_nodes.ComfyUI-Easy-Use	pipe image control_net_name control_net? strength? scale_soft_weights?
-easy controlnetLoader++	custom_nodes.ComfyUI-Easy-Use	pipe image control_net_name control_net? strength? start_percent? end_percent? scale_soft_weights? union_type?
-easy controlnetLoaderADV	custom_nodes.ComfyUI-Easy-Use	pipe image control_net_name control_net? strength? start_percent? end_percent? scale_soft_weights?
-easy controlnetNames	custom_nodes.ComfyUI-Easy-Use	controlnet_name
-easy controlnetStack	custom_nodes.ComfyUI-Easy-Use	toggle mode num_controlnet optional_controlnet_stack? controlnet_1? controlnet_1_strength? start_percent_1? end_percent_1? scale_soft_weight_1? image_1? controlnet_2? controlnet_2_strength? start_percent_2? end_percent_2? scale_soft_weight_2? image_2? controlnet_3? controlnet_3_strength? start_percent_3? end_percent_3? scale_soft_weight_3? image_3?
-easy controlnetStackApply	custom_nodes.ComfyUI-Easy-Use	controlnet_stack pipe
-easy convertAnything	custom_nodes.ComfyUI-Easy-Use	* output_type
-easy detailerFix	custom_nodes.ComfyUI-Easy-Use	pipe image_output link_id save_prefix model?
-easy float	custom_nodes.ComfyUI-Easy-Use	value
-easy fluxLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name lora_name lora_model_strength lora_clip_strength resolution empty_latent_width empty_latent_height positive batch_size model_override? clip_override? vae_override? optional_lora_stack? optional_controlnet_stack?
-easy forLoopEnd	custom_nodes.ComfyUI-Easy-Use	flow initial_value1? initial_value2? initial_value3? initial_value4? initial_value5? initial_value6? initial_value7? initial_value8? initial_value9? initial_value10? initial_value11? initial_value12? initial_value13? initial_value14? initial_value15? initial_value16? initial_value17? initial_value18? initial_value19?
-easy forLoopStart	custom_nodes.ComfyUI-Easy-Use	total initial_value1? initial_value2? initial_value3? initial_value4? initial_value5? initial_value6? initial_value7? initial_value8? initial_value9? initial_value10? initial_value11? initial_value12? initial_value13? initial_value14? initial_value15? initial_value16? initial_value17? initial_value18? initial_value19?
-easy fullCascadeKSampler	custom_nodes.ComfyUI-Easy-Use	pipe encode_vae_name decode_vae_name steps cfg sampler_name scheduler denoise image_output link_id save_prefix seed image_to_latent_c? latent_c? model_c?
-easy fullkSampler	custom_nodes.ComfyUI-Easy-Use	pipe steps cfg sampler_name scheduler denoise image_output link_id save_prefix seed? model? positive? negative? latent? vae? clip? xyPlot? image?
-easy fullLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name config_name vae_name clip_skip lora_name lora_model_strength lora_clip_strength resolution empty_latent_width empty_latent_height positive positive_token_normalization positive_weight_interpretation negative negative_token_normalization negative_weight_interpretation batch_size model_override? clip_override? vae_override? optional_lora_stack? optional_controlnet_stack? a1111_prompt_style?
-easy globalSeed	custom_nodes.ComfyUI-Easy-Use	value mode action last_seed
-easy hiresFix	custom_nodes.ComfyUI-Easy-Use	model_name rescale_after_model rescale_method rescale percent width height longer_side crop image_output link_id save_prefix pipe? image? vae?
-easy humanSegmentation	custom_nodes.ComfyUI-Easy-Use	image method confidence crop_multi mask_components
-easy hunyuanDiTLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name lora_name lora_model_strength lora_clip_strength resolution empty_latent_width empty_latent_height positive negative batch_size optional_lora_stack? optional_controlnet_stack?
-easy icLightApply	custom_nodes.ComfyUI-Easy-Use	mode model image vae lighting source remove_bg
-easy if	custom_nodes.ComfyUI-Easy-Use	any if else
-easy ifElse	custom_nodes.ComfyUI-Easy-Use	boolean on_true on_false
-easy imageBatchToImageList	custom_nodes.ComfyUI-Easy-Use	image
-easy imageChooser	custom_nodes.ComfyUI-Easy-Use	mode preview_rescale images?
-easy imageColorMatch	custom_nodes.ComfyUI-Easy-Use	image_ref image_target method image_output save_prefix
-easy imageConcat	custom_nodes.ComfyUI-Easy-Use	image1 image2 direction match_image_size
-easy imageCount	custom_nodes.ComfyUI-Easy-Use	images
-easy imageCropFromMask	custom_nodes.ComfyUI-Easy-Use	image mask image_crop_multi mask_crop_multi bbox_smooth_alpha
-easy imageDetailTransfer	custom_nodes.ComfyUI-Easy-Use	target source mode blur_sigma blend_factor image_output save_prefix mask?
-easy imageIndexSwitch	custom_nodes.ComfyUI-Easy-Use	index image0? image1? image2? image3? image4? image5? image6? image7? image8? image9? image10? image11? image12? image13? image14? image15? image16? image17? image18? image19?
-easy imageInsetCrop	custom_nodes.ComfyUI-Easy-Use	image measurement left right top bottom
-easy imageInterrogator	custom_nodes.ComfyUI-Easy-Use	image mode use_lowvram
-easy imageListToImageBatch	custom_nodes.ComfyUI-Easy-Use	images
-easy imagePixelPerfect	custom_nodes.ComfyUI-Easy-Use	image resize_mode
-easy imageRatio	custom_nodes.ComfyUI-Easy-Use	image
-easy imageRemBg	custom_nodes.ComfyUI-Easy-Use	images rem_mode image_output save_prefix torchscript_jit? add_background? refine_foreground?
-easy imageSave	custom_nodes.ComfyUI-Easy-Use	images filename_prefix only_preview
-easy imageScaleDown	custom_nodes.ComfyUI-Easy-Use	images width height crop
-easy imageScaleDownBy	custom_nodes.ComfyUI-Easy-Use	images scale_by
-easy imageScaleDownToSize	custom_nodes.ComfyUI-Easy-Use	images size mode
-easy imageScaleToNormPixels	custom_nodes.ComfyUI-Easy-Use	image upscale_method scale_by
-easy imagesCountInDirectory	custom_nodes.ComfyUI-Easy-Use	directory start_index limit
-easy imageSize	custom_nodes.ComfyUI-Easy-Use	image
-easy imageSizeByLongerSide	custom_nodes.ComfyUI-Easy-Use	image
-easy imageSizeBySide	custom_nodes.ComfyUI-Easy-Use	image side
-easy imageSplitGrid	custom_nodes.ComfyUI-Easy-Use	images row column
-easy imageSplitList	custom_nodes.ComfyUI-Easy-Use	images
-easy imageSplitTiles	custom_nodes.ComfyUI-Easy-Use	image overlap_ratio overlap_offset tiles_rows tiles_cols norm?
-easy imagesSplitImage	custom_nodes.ComfyUI-Easy-Use	images
-easy imageSwitch	custom_nodes.ComfyUI-Easy-Use	image_a image_b boolean
-easy imageTilesFromBatch	custom_nodes.ComfyUI-Easy-Use	tiles masks overlap index
-easy imageToBase64	custom_nodes.ComfyUI-Easy-Use	image
-easy imageToMask	custom_nodes.ComfyUI-Easy-Use	image channel
-easy imageUncropFromBBOX	custom_nodes.ComfyUI-Easy-Use	original_image crop_image bbox border_blending use_square_mask optional_mask?
-easy indexAnything	custom_nodes.ComfyUI-Easy-Use	any index
-easy injectNoiseToLatent	custom_nodes.ComfyUI-Easy-Use	strength normalize average pipe_to_noise? image_to_latent? latent? noise? mask? mix_randn_amount? seed?
-easy instantIDApply	custom_nodes.ComfyUI-Easy-Use	pipe image instantid_file insightface control_net_name cn_strength cn_soft_weights weight start_at end_at noise image_kps? mask? control_net?
-easy instantIDApplyADV	custom_nodes.ComfyUI-Easy-Use	pipe image instantid_file insightface control_net_name cn_strength cn_soft_weights weight start_at end_at noise image_kps? mask? control_net? positive? negative?
-easy int	custom_nodes.ComfyUI-Easy-Use	value
-easy ipadapterApply	custom_nodes.ComfyUI-Easy-Use	model image preset lora_strength provider weight weight_faceidv2 start_at end_at cache_mode use_tiled attn_mask? optional_ipadapter?
-easy ipadapterApplyADV	custom_nodes.ComfyUI-Easy-Use	model image preset lora_strength provider weight weight_faceidv2 weight_type combine_embeds start_at end_at embeds_scaling cache_mode use_tiled use_batch sharpening image_negative? attn_mask? clip_vision? optional_ipadapter? layer_weights?
-easy ipadapterApplyEmbeds	custom_nodes.ComfyUI-Easy-Use	model clip_vision ipadapter pos_embed weight weight_type start_at end_at embeds_scaling neg_embed? attn_mask?
-easy ipadapterApplyEncoder	custom_nodes.ComfyUI-Easy-Use	model clip_vision image1 preset num_embeds image2? image3? image4? mask1? weight1? mask2? weight2? mask3? weight3? mask4? weight4? combine_method? optional_ipadapter? pos_embeds? neg_embeds?
-easy ipadapterApplyFaceIDKolors	custom_nodes.ComfyUI-Easy-Use	model image preset lora_strength provider weight weight_faceidv2 weight_kolors weight_type combine_embeds start_at end_at embeds_scaling cache_mode use_tiled use_batch sharpening image_negative? attn_mask? clip_vision? optional_ipadapter?
-easy ipadapterApplyFromParams	custom_nodes.ComfyUI-Easy-Use	model preset ipadapter_params combine_embeds embeds_scaling cache_mode optional_ipadapter? image_negative?
-easy ipadapterApplyRegional	custom_nodes.ComfyUI-Easy-Use	pipe image positive negative image_weight prompt_weight weight_type start_at end_at mask? optional_ipadapter_params?
-easy ipadapterStyleComposition	custom_nodes.ComfyUI-Easy-Use	model image_style preset weight_style weight_composition expand_style combine_embeds start_at end_at embeds_scaling cache_mode image_composition? image_negative? attn_mask? clip_vision? optional_ipadapter?
-easy isFileExist	custom_nodes.ComfyUI-Easy-Use	file_path file_name file_extension
-easy isMaskEmpty	custom_nodes.ComfyUI-Easy-Use	mask
-easy isNone	custom_nodes.ComfyUI-Easy-Use	any
-easy isSDXL	custom_nodes.ComfyUI-Easy-Use	optional_pipe? optional_clip?
-easy joinImageBatch	custom_nodes.ComfyUI-Easy-Use	images mode
-easy joyCaption2API	custom_nodes.ComfyUI-Easy-Use	image do_sample temperature max_tokens caption_type caption_length extra_options name_input custom_prompt apikey_override?
-easy joyCaption3API	custom_nodes.ComfyUI-Easy-Use	image do_sample temperature max_tokens caption_type caption_length extra_options name_input custom_prompt apikey_override?
-easy kolorsLoader	custom_nodes.ComfyUI-Easy-Use	unet_name vae_name chatglm3_name lora_name lora_model_strength lora_clip_strength resolution empty_latent_width empty_latent_height positive negative batch_size model_override? vae_override? optional_lora_stack? auto_clean_gpu?
-easy kSampler	custom_nodes.ComfyUI-Easy-Use	pipe image_output link_id save_prefix model?
-easy kSamplerCustom	custom_nodes.ComfyUI-Easy-Use	pipe image_output link_id save_prefix model?
-easy kSamplerDownscaleUnet	custom_nodes.ComfyUI-Easy-Use	pipe downscale_mode block_number downscale_factor start_percent end_percent downscale_after_skip downscale_method upscale_method image_output link_id save_prefix model?
-easy kSamplerInpainting	custom_nodes.ComfyUI-Easy-Use	pipe grow_mask_by image_output link_id save_prefix additional model? mask?
-easy kSamplerLayerDiffusion	custom_nodes.ComfyUI-Easy-Use	pipe image_output link_id save_prefix model?
-easy kSamplerSDTurbo	custom_nodes.ComfyUI-Easy-Use	pipe image_output link_id save_prefix model?
-easy kSamplerTiled	custom_nodes.ComfyUI-Easy-Use	pipe tile_size image_output link_id save_prefix model?
-easy latentCompositeMaskedWithCond	custom_nodes.ComfyUI-Easy-Use	pipe text_combine source_latent source_mask destination_mask text_combine_mode replace_text
-easy latentNoisy	custom_nodes.ComfyUI-Easy-Use	sampler_name scheduler steps start_at_step end_at_step source seed pipe? optional_model? optional_latent?
-easy lengthAnything	custom_nodes.ComfyUI-Easy-Use	any
-easy LLLiteLoader	custom_nodes.ComfyUI-Easy-Use	model model_name cond_image strength steps start_percent end_percent
-easy loadImageBase64	custom_nodes.ComfyUI-Easy-Use	base64_data image_output save_prefix
-easy loadImagesForLoop	custom_nodes.ComfyUI-Easy-Use	directory start_index? limit? initial_value1? initial_value2?
-easy loraNames	custom_nodes.ComfyUI-Easy-Use	lora_name
-easy loraPromptApply	custom_nodes.ComfyUI-Easy-Use	model clip positive negative?
-easy loraStack	custom_nodes.ComfyUI-Easy-Use	toggle mode num_loras optional_lora_stack? lora_1_name? lora_1_strength? lora_1_model_strength? lora_1_clip_strength? lora_2_name? lora_2_strength? lora_2_model_strength? lora_2_clip_strength? lora_3_name? lora_3_strength? lora_3_model_strength? lora_3_clip_strength? lora_4_name? lora_4_strength? lora_4_model_strength? lora_4_clip_strength? lora_5_name? lora_5_strength? lora_5_model_strength? lora_5_clip_strength? lora_6_name? lora_6_strength? lora_6_model_strength? lora_6_clip_strength? lora_7_name? lora_7_strength? lora_7_model_strength? lora_7_clip_strength? lora_8_name? lora_8_strength? lora_8_model_strength? lora_8_clip_strength? lora_9_name? lora_9_strength? lora_9_model_strength? lora_9_clip_strength? lora_10_name? lora_10_strength? lora_10_model_strength? lora_10_clip_strength?
-easy loraStackApply	custom_nodes.ComfyUI-Easy-Use	lora_stack model optional_clip?
-easy loraSwitcher	custom_nodes.ComfyUI-Easy-Use	toggle select num_loras lora_strength optional_lora_stack? lora_1_name? lora_2_name? lora_3_name? lora_4_name? lora_5_name? lora_6_name? lora_7_name? lora_8_name? lora_9_name? lora_10_name? lora_11_name? lora_12_name? lora_13_name? lora_14_name? lora_15_name? lora_16_name? lora_17_name? lora_18_name? lora_19_name? lora_20_name? lora_21_name? lora_22_name? lora_23_name? lora_24_name? lora_25_name? lora_26_name? lora_27_name? lora_28_name? lora_29_name? lora_30_name? lora_31_name? lora_32_name? lora_33_name? lora_34_name? lora_35_name? lora_36_name? lora_37_name? lora_38_name? lora_39_name? lora_40_name? lora_41_name? lora_42_name? lora_43_name? lora_44_name? lora_45_name? lora_46_name? lora_47_name? lora_48_name? lora_49_name? lora_50_name?
-easy makeImageForICLora	custom_nodes.ComfyUI-Easy-Use	image_1 direction pixels method image_2? mask_1? mask_2?
-easy mathFloat	custom_nodes.ComfyUI-Easy-Use	a b operation
-easy mathInt	custom_nodes.ComfyUI-Easy-Use	a b operation
-easy mathString	custom_nodes.ComfyUI-Easy-Use	a b operation case_sensitive
-easy mochiLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name positive negative resolution empty_latent_width empty_latent_height length batch_size model_override? clip_override? vae_override?
-easy multiAngle	custom_nodes.ComfyUI-Easy-Use	multi_angle?
-easy negative	custom_nodes.ComfyUI-Easy-Use	negative
-easy outputToList	custom_nodes.ComfyUI-Easy-Use	tuple
-easy pipeBatchIndex	custom_nodes.ComfyUI-Easy-Use	pipe batch_index length
-easy pipeEdit	custom_nodes.ComfyUI-Easy-Use	clip_skip optional_positive positive_token_normalization positive_weight_interpretation optional_negative negative_token_normalization negative_weight_interpretation a1111_prompt_style conditioning_mode average_strength old_cond_start old_cond_end new_cond_start new_cond_end pipe? model? pos? neg? latent? vae? clip? image?
-easy pipeEditPrompt	custom_nodes.ComfyUI-Easy-Use	pipe positive negative
-easy pipeIn	custom_nodes.ComfyUI-Easy-Use	pipe? model? pos? neg? latent? vae? clip? image? xyPlot?
-easy pipeOut	custom_nodes.ComfyUI-Easy-Use	pipe
-easy pipeToBasicPipe	custom_nodes.ComfyUI-Easy-Use	pipe
-easy pixArtLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name model_name vae_name t5_type clip_name padding t5_name device dtype lora_name lora_model_strength ratio empty_latent_width empty_latent_height positive negative batch_size optional_lora_stack?
-easy pixels	custom_nodes.ComfyUI-Easy-Use	resolution width height scale flip_w/h
-easy portraitMaster	custom_nodes.ComfyUI-Easy-Use	shot shot_weight gender age nationality_1 nationality_2 nationality_mix body_type body_type_weight model_pose eyes_color facial_expression facial_expression_weight face_shape face_shape_weight facial_asymmetry hair_style hair_color disheveled beard skin_details skin_pores dimples freckles moles skin_imperfections skin_acne tanned_skin eyes_details iris_details circular_iris circular_pupil light_type light_direction light_weight photorealism_improvement prompt_start prompt_additional prompt_end negative_prompt
-easy poseEditor	custom_nodes.ComfyUI-Easy-Use	image
-easy positive	custom_nodes.ComfyUI-Easy-Use	positive
-easy preDetailerFix	custom_nodes.ComfyUI-Easy-Use	pipe guide_size guide_size_for max_size seed steps cfg sampler_name scheduler denoise feather noise_mask force_inpaint drop_size wildcard cycle bbox_segm_pipe? sam_pipe? optional_image?
-easy preMaskDetailerFix	custom_nodes.ComfyUI-Easy-Use	pipe mask guide_size guide_size_for max_size mask_mode seed steps cfg sampler_name scheduler denoise feather crop_factor drop_size refiner_ratio batch_size cycle optional_image? inpaint_model? noise_mask_feather?
-easy preSampling	custom_nodes.ComfyUI-Easy-Use	pipe steps cfg sampler_name scheduler denoise seed image_to_latent? latent?
-easy preSamplingAdvanced	custom_nodes.ComfyUI-Easy-Use	pipe steps cfg sampler_name scheduler start_at_step end_at_step add_noise seed return_with_leftover_noise image_to_latent? latent?
-easy preSamplingCascade	custom_nodes.ComfyUI-Easy-Use	pipe encode_vae_name decode_vae_name steps cfg sampler_name scheduler denoise seed image_to_latent_c? latent_c?
-easy preSamplingCustom	custom_nodes.ComfyUI-Easy-Use	pipe guider cfg cfg_negative sampler_name scheduler coeff steps sigma_max sigma_min rho beta_d beta_min eps_s flip_sigmas denoise add_noise seed image_to_latent? latent? optional_sampler? optional_sigmas?
-easy preSamplingDynamicCFG	custom_nodes.ComfyUI-Easy-Use	pipe steps cfg cfg_mode cfg_scale_min sampler_name scheduler denoise seed image_to_latent? latent?
-easy preSamplingLayerDiffusion	custom_nodes.ComfyUI-Easy-Use	pipe method weight steps cfg sampler_name scheduler denoise seed image? blended_image? mask?
-easy preSamplingLayerDiffusionADDTL	custom_nodes.ComfyUI-Easy-Use	pipe foreground_prompt background_prompt blended_prompt optional_fg_cond? optional_bg_cond? optional_blended_cond?
-easy preSamplingNoiseIn	custom_nodes.ComfyUI-Easy-Use	pipe factor steps cfg sampler_name scheduler denoise seed optional_noise_seed? optional_latent?
-easy preSamplingSdTurbo	custom_nodes.ComfyUI-Easy-Use	pipe steps cfg sampler_name eta s_noise upscale_ratio start_step end_step upscale_n_step unsharp_kernel_size unsharp_sigma unsharp_strength seed
-easy prompt	custom_nodes.ComfyUI-Easy-Use	text prefix subject action clothes environment background nsfw
-easy promptAwait	custom_nodes.ComfyUI-Easy-Use	now prompt toolbar prev?
-easy promptConcat	custom_nodes.ComfyUI-Easy-Use	prompt1? prompt2? separator?
-easy promptLine	custom_nodes.ComfyUI-Easy-Use	prompt start_index max_rows remove_empty_lines
-easy promptList	custom_nodes.ComfyUI-Easy-Use	prompt_1 prompt_2 prompt_3 prompt_4 prompt_5 optional_prompt_list?
-easy promptReplace	custom_nodes.ComfyUI-Easy-Use	prompt find1? replace1? find2? replace2? find3? replace3?
-easy pulIDApply	custom_nodes.ComfyUI-Easy-Use	model pulid_file insightface image method weight start_at end_at attn_mask?
-easy pulIDApplyADV	custom_nodes.ComfyUI-Easy-Use	model pulid_file insightface image weight projection fidelity noise start_at end_at attn_mask?
-easy rangeFloat	custom_nodes.ComfyUI-Easy-Use	range_mode start stop step num_steps end_mode
-easy rangeInt	custom_nodes.ComfyUI-Easy-Use	range_mode start stop step num_steps end_mode
-easy removeLocalImage	custom_nodes.ComfyUI-Easy-Use	any file_name
-easy samLoaderPipe	custom_nodes.ComfyUI-Easy-Use	model_name device_mode sam_detection_hint sam_dilation sam_threshold sam_bbox_expansion sam_mask_hint_threshold sam_mask_hint_use_negative
-easy saveImageLazy	custom_nodes.ComfyUI-Easy-Use	images filename_prefix save_metadata
-easy saveText	custom_nodes.ComfyUI-Easy-Use	text output_file_path file_name file_extension overwrite image?
-easy saveTextLazy	custom_nodes.ComfyUI-Easy-Use	text output_file_path file_name file_extension overwrite image?
-easy seed	custom_nodes.ComfyUI-Easy-Use	seed
-easy seedList	custom_nodes.ComfyUI-Easy-Use	min_num max_num method total seed
-easy showAnything	custom_nodes.ComfyUI-Easy-Use	anything?
-easy showAnythingLazy	custom_nodes.ComfyUI-Easy-Use	anything?
-easy showLoaderSettingsNames	custom_nodes.ComfyUI-Easy-Use	pipe
-easy showSpentTime	custom_nodes.ComfyUI-Easy-Use	pipe
-easy showTensorShape	custom_nodes.ComfyUI-Easy-Use	tensor
-easy simpleMath	custom_nodes.ComfyUI-Easy-Use	value a? b? c?
-easy simpleMathDual	custom_nodes.ComfyUI-Easy-Use	value1 value2 a? b? c? d?
-easy sleep	custom_nodes.ComfyUI-Easy-Use	any delay
-easy sliderControl	custom_nodes.ComfyUI-Easy-Use	mode model_type
-easy stableDiffusion3API	custom_nodes.ComfyUI-Easy-Use	positive negative model aspect_ratio seed denoise optional_image?
-easy string	custom_nodes.ComfyUI-Easy-Use	value
-easy stringJoinLines	custom_nodes.ComfyUI-Easy-Use	string delimiter
-easy stringToFloatList	custom_nodes.ComfyUI-Easy-Use	string
-easy stringToIntList	custom_nodes.ComfyUI-Easy-Use	string
-easy styleAlignedBatchAlign	custom_nodes.ComfyUI-Easy-Use	model share_norm share_attn scale
-easy stylesSelector	custom_nodes.ComfyUI-Easy-Use	styles positive? negative? select_styles?
-easy sv3dLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name init_image empty_latent_width empty_latent_height batch_size interp_easing easing_mode scheduler?
-easy svdLoader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name clip_name init_image resolution empty_latent_width empty_latent_height video_frames motion_bucket_id fps augmentation_level optional_positive? optional_negative?
-easy tableEditor	custom_nodes.ComfyUI-Easy-Use	table_data
-easy textIndexSwitch	custom_nodes.ComfyUI-Easy-Use	index text0? text1? text2? text3? text4? text5? text6? text7? text8? text9? text10? text11? text12? text13? text14? text15? text16? text17? text18? text19?
-easy textSwitch	custom_nodes.ComfyUI-Easy-Use	input text1? text2?
-easy ultralyticsDetectorPipe	custom_nodes.ComfyUI-Easy-Use	model_name bbox_threshold bbox_dilation bbox_crop_factor
-easy unSampler	custom_nodes.ComfyUI-Easy-Use	steps end_at_step cfg sampler_name scheduler normalize pipe? optional_model? optional_positive? optional_negative? optional_latent?
-easy whileLoopEnd	custom_nodes.ComfyUI-Easy-Use	flow condition initial_value0? initial_value1? initial_value2? initial_value3? initial_value4? initial_value5? initial_value6? initial_value7? initial_value8? initial_value9? initial_value10? initial_value11? initial_value12? initial_value13? initial_value14? initial_value15? initial_value16? initial_value17? initial_value18? initial_value19?
-easy whileLoopStart	custom_nodes.ComfyUI-Easy-Use	condition initial_value0? initial_value1? initial_value2? initial_value3? initial_value4? initial_value5? initial_value6? initial_value7? initial_value8? initial_value9? initial_value10? initial_value11? initial_value12? initial_value13? initial_value14? initial_value15? initial_value16? initial_value17? initial_value18? initial_value19?
-easy wildcards	custom_nodes.ComfyUI-Easy-Use	text Select to add LoRA Select to add Wildcard seed multiline_mode
-easy wildcardsMatrix	custom_nodes.ComfyUI-Easy-Use	text Select to add LoRA Select to add Wildcard offset output_limit?
-easy xyAny	custom_nodes.ComfyUI-Easy-Use	X Y direction
-easy XYInputs: CFG Scale	custom_nodes.ComfyUI-Easy-Use	batch_count first_cfg last_cfg
-easy XYInputs: Checkpoint	custom_nodes.ComfyUI-Easy-Use	input_mode ckpt_count ckpt_name_1 clip_skip_1 vae_name_1 ckpt_name_2 clip_skip_2 vae_name_2 ckpt_name_3 clip_skip_3 vae_name_3 ckpt_name_4 clip_skip_4 vae_name_4 ckpt_name_5 clip_skip_5 vae_name_5 ckpt_name_6 clip_skip_6 vae_name_6 ckpt_name_7 clip_skip_7 vae_name_7 ckpt_name_8 clip_skip_8 vae_name_8 ckpt_name_9 clip_skip_9 vae_name_9 ckpt_name_10 clip_skip_10 vae_name_10 optional_lora_stack?
-easy XYInputs: ControlNet	custom_nodes.ComfyUI-Easy-Use	control_net_name image target_parameter batch_count first_strength last_strength first_start_percent last_start_percent first_end_percent last_end_percent strength start_percent end_percent control_net?
-easy XYInputs: Denoise	custom_nodes.ComfyUI-Easy-Use	batch_count first_denoise last_denoise
-easy XYInputs: FluxGuidance	custom_nodes.ComfyUI-Easy-Use	batch_count first_guidance last_guidance
-easy XYInputs: Lora	custom_nodes.ComfyUI-Easy-Use	input_mode lora_count model_strength clip_strength lora_name_1 model_str_1 clip_str_1 lora_name_2 model_str_2 clip_str_2 lora_name_3 model_str_3 clip_str_3 lora_name_4 model_str_4 clip_str_4 lora_name_5 model_str_5 clip_str_5 lora_name_6 model_str_6 clip_str_6 lora_name_7 model_str_7 clip_str_7 lora_name_8 model_str_8 clip_str_8 lora_name_9 model_str_9 clip_str_9 lora_name_10 model_str_10 clip_str_10 optional_lora_stack? display_trigger_word?
-easy XYInputs: ModelMergeBlocks	custom_nodes.ComfyUI-Easy-Use	ckpt_name_1 ckpt_name_2 vae_use preset values
-easy XYInputs: NegativeCond	custom_nodes.ComfyUI-Easy-Use	negative_1? negative_2? negative_3? negative_4?
-easy XYInputs: NegativeCondList	custom_nodes.ComfyUI-Easy-Use	negative
-easy XYInputs: PositiveCond	custom_nodes.ComfyUI-Easy-Use	positive_1? positive_2? positive_3? positive_4?
-easy XYInputs: PositiveCondList	custom_nodes.ComfyUI-Easy-Use	positive
-easy XYInputs: PromptSR	custom_nodes.ComfyUI-Easy-Use	target_prompt search_txt replace_all_text replace_count replace_1 replace_2 replace_3 replace_4 replace_5 replace_6 replace_7 replace_8 replace_9 replace_10 replace_11 replace_12 replace_13 replace_14 replace_15 replace_16 replace_17 replace_18 replace_19 replace_20 replace_21 replace_22 replace_23 replace_24 replace_25 replace_26 replace_27 replace_28 replace_29
-easy XYInputs: Sampler/Scheduler	custom_nodes.ComfyUI-Easy-Use	target_parameter input_count sampler_1 scheduler_1 sampler_2 scheduler_2 sampler_3 scheduler_3 sampler_4 scheduler_4 sampler_5 scheduler_5 sampler_6 scheduler_6 sampler_7 scheduler_7 sampler_8 scheduler_8 sampler_9 scheduler_9 sampler_10 scheduler_10 sampler_11 scheduler_11 sampler_12 scheduler_12 sampler_13 scheduler_13 sampler_14 scheduler_14 sampler_15 scheduler_15 sampler_16 scheduler_16 sampler_17 scheduler_17 sampler_18 scheduler_18 sampler_19 scheduler_19 sampler_20 scheduler_20 sampler_21 scheduler_21 sampler_22 scheduler_22 sampler_23 scheduler_23 sampler_24 scheduler_24 sampler_25 scheduler_25 sampler_26 scheduler_26 sampler_27 scheduler_27 sampler_28 scheduler_28 sampler_29 scheduler_29 sampler_30 scheduler_30
-easy XYInputs: Seeds++ Batch	custom_nodes.ComfyUI-Easy-Use	batch_count
-easy XYInputs: Steps	custom_nodes.ComfyUI-Easy-Use	target_parameter batch_count first_step last_step first_start_step last_start_step first_end_step last_end_step
-easy XYPlot	custom_nodes.ComfyUI-Easy-Use	grid_spacing output_individuals flip_xy x_axis x_values y_axis y_values pipe?
-easy XYPlotAdvanced	custom_nodes.ComfyUI-Easy-Use	pipe grid_spacing output_individuals flip_xy X? Y? font?
-easy zero123Loader	custom_nodes.ComfyUI-Easy-Use	ckpt_name vae_name init_image empty_latent_width empty_latent_height batch_size elevation azimuth
+DWPreprocessor	custom_nodes.comfyui_controlnet_aux	image detect_hand? detect_body? detect_face? resolution? bbox_detector? pose_estimator? scale_stick_for_xinsr_cn?
 EasyCache	comfy_extras.nodes_easycache	model reuse_threshold start_percent end_percent verbose
 EchoDMDSampler	custom_nodes.10S-Comfy-nodes	
 EchoDMDSigmaRemap	custom_nodes.10S-Comfy-nodes	sigmas method
 EchoDMDSigmas	custom_nodes.10S-Comfy-nodes	preset custom_sigmas
-EditBasicPipe	custom_nodes.ComfyUI-Impact-Pack	basic_pipe model? clip? vae? positive? negative?
-EditDetailerPipe	custom_nodes.ComfyUI-Impact-Pack	detailer_pipe wildcard Select to add LoRA Select to add Wildcard model? clip? vae? positive? negative? bbox_detector? sam_model? segm_detector? detailer_hook?
-EditDetailerPipeSDXL	custom_nodes.ComfyUI-Impact-Pack	detailer_pipe wildcard Select to add LoRA Select to add Wildcard model? clip? vae? positive? negative? refiner_model? refiner_clip? refiner_positive? refiner_negative? bbox_detector? sam_model? segm_detector? detailer_hook?
 ElevenLabsAudioIsolation	comfy_api_nodes.nodes_elevenlabs	audio
 ElevenLabsInstantVoiceClone	comfy_api_nodes.nodes_elevenlabs	files remove_background_noise
 ElevenLabsSpeechToSpeech	comfy_api_nodes.nodes_elevenlabs	voice audio stability model output_format seed remove_background_noise
@@ -643,24 +401,23 @@ EmptyMiniMaxMusic3LatentAudio	comfy_extras.nodes_minimax_music	seconds batch_siz
 EmptyMochiLatentVideo	comfy_extras.nodes_mochi	width height length batch_size
 EmptyQwenImageLayeredLatentImage	comfy_extras.nodes_qwen	width height layers batch_size
 EmptySD3LatentImage	comfy_extras.nodes_sd3	width height batch_size
-EmptySegs	custom_nodes.ComfyUI-Impact-Pack	
 EmptyTrellis2LatentStructure	comfy_extras.nodes_trellis2	batch_size
 EmptyYuE2LatentAudio	comfy_extras.nodes_yue2	seconds batch_size
 EncodeVideoComponents	custom_nodes.ComfyUI-KJNodes	video vae width height max_frames upscale_method keep_proportion
 EndLoop	comfy_extras.nodes_loop	accumulate output_value? next_iteration_value? terminations?
 EndRecordCUDAMemoryHistory	custom_nodes.ComfyUI-KJNodes	input output_path
 Epsilon Scaling	comfy_extras.nodes_eps	model scaling_factor
+ExecuteAllControlNetPreprocessors	custom_nodes.comfyui_controlnet_aux	image resolution?
 ExponentialScheduler	comfy_extras.nodes_custom_sampler	steps sigma_max sigma_min
 ExtendIntermediateSigmas	comfy_extras.nodes_custom_sampler	sigmas steps start_at_sigma end_at_sigma spacing
 FaceAlign	custom_nodes.ComfyUI_FaceAnalysis	analysis_models image_from image_to?
 FaceAnalysisModels	custom_nodes.ComfyUI_FaceAnalysis	library provider
 FaceBoundingBox	custom_nodes.ComfyUI_FaceAnalysis	analysis_models image padding padding_percent index
-FaceDetailer	custom_nodes.ComfyUI-Impact-Pack	image model clip vae guide_size guide_size_for max_size seed steps cfg sampler_name scheduler positive negative denoise feather noise_mask force_inpaint bbox_threshold bbox_dilation bbox_crop_factor sam_detection_hint sam_dilation sam_threshold sam_bbox_expansion sam_mask_hint_threshold sam_mask_hint_use_negative drop_size bbox_detector wildcard cycle sam_model_opt? segm_detector_opt? detailer_hook? inpaint_model? noise_mask_feather? scheduler_func_opt? tiled_encode? tiled_decode?
-FaceDetailerPipe	custom_nodes.ComfyUI-Impact-Pack	image detailer_pipe guide_size guide_size_for max_size seed steps cfg sampler_name scheduler denoise feather noise_mask force_inpaint bbox_threshold bbox_dilation bbox_crop_factor sam_detection_hint sam_dilation sam_threshold sam_bbox_expansion sam_mask_hint_threshold sam_mask_hint_use_negative drop_size refiner_ratio cycle inpaint_model? noise_mask_feather? scheduler_func_opt? tiled_encode? tiled_decode?
 FaceEmbedDistance	custom_nodes.ComfyUI_FaceAnalysis	analysis_models reference image similarity_metric filter_thresh filter_best generate_image_overlay
 FaceSegmentation	custom_nodes.ComfyUI_FaceAnalysis	analysis_models image area grow grow_tapered blur
 FaceWarp	custom_nodes.ComfyUI_FaceAnalysis	analysis_models image_from image_to keypoints grow blur
-FakeScribblePreprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	safe
+FacialPartColoringFromPoseKps	custom_nodes.comfyui_controlnet_aux	pose_kps mode skin left_eye right_eye nose upper_lip inner_mouth lower_lip
+FakeScribblePreprocessor	custom_nodes.comfyui_controlnet_aux	image safe? resolution?
 FallbackAnyBatch	custom_nodes.ControlFlowUtils	method_for_images input1? input2? input3? input4? input5? input6?
 FallbackImagePreviewer	custom_nodes.ControlFlowUtils	images fallback_width? fallback_height? save_image? filename_prefix?
 FastPreview	custom_nodes.ComfyUI-KJNodes	image format max_size
@@ -668,18 +425,15 @@ FastPreviewBatch	custom_nodes.ComfyUI-KJNodes	input max_thumb_size crf max_grid_
 FeatherMask	comfy_extras.nodes_mask	mask left top right bottom
 File3DToSplat	comfy_extras.nodes_gaussian_splat	model_3d
 FillHoles	comfy_extras.nodes_mesh_postprocess	mesh max_perimeter weld_epsilon_rel max_vertices fill_chains
-FILM VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier optional_interpolation_states?
 FilterZeroMasksAndCorrespondingImages	custom_nodes.ComfyUI-KJNodes	masks original_images?
 FishAudioInstantVoiceClone	comfy_api_nodes.nodes_fishaudio	files enhance_audio_quality
 FishAudioSpeechToText	comfy_api_nodes.nodes_fishaudio	audio language precise_timestamps
 FishAudioTextToSpeech	comfy_api_nodes.nodes_fishaudio	text model seed
 FishAudioVoiceSelector	comfy_api_nodes.nodes_fishaudio	voice
 FixPulidFluxPatch	custom_nodes.ComfyUI_PuLID_Flux_ll	model
-FLAVR VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier duplicate_first_last_frames optional_interpolation_states?
 FlipSigmas	comfy_extras.nodes_custom_sampler	sigmas
 FlipSigmasAdjusted	custom_nodes.ComfyUI-KJNodes	sigmas divide_by_last_sigma divide_by offset_by
 FloatConstant	custom_nodes.ComfyUI-KJNodes	value
-FloatRange //Inspire	custom_nodes.ComfyUI-Inspire-Pack	start stop step limit ensure_end
 FloatToMask	custom_nodes.ComfyUI-KJNodes	input_values width height
 FloatToSigmas	custom_nodes.ComfyUI-KJNodes	float_list
 Flux2ImageNode	comfy_api_nodes.nodes_bfl	prompt model seed
@@ -708,19 +462,11 @@ FluxVideoEditNode	comfy_api_nodes.nodes_bfl	video prompt auto_downscale safety_t
 FluxVideoUpscaleNode	comfy_api_nodes.nodes_bfl	video upscale_factor mode prompt auto_downscale safety_tolerance seed
 FluxVTONode	comfy_api_nodes.nodes_bfl	person garment prompt seed
 FolderSearch	custom_nodes.ControlFlowUtils	folder_path search_mask output_type recursive include_directories return_full_path relative_filenames save_output_to?
-ForeachListBegin //Inspire	custom_nodes.ComfyUI-Inspire-Pack	item_list initial_input?
-ForeachListEnd //Inspire	custom_nodes.ComfyUI-Inspire-Pack	flow_control remained_list intermediate_output
 FrameInterpolate	comfy_extras.nodes_frame_interpolation	interp_model images multiplier
 FrameInterpolationModelLoader	comfy_extras.nodes_frame_interpolation	model_name
 FreeU	comfy_extras.nodes_freelunch	model b1 b2 s1 s2
 FreeU_V2	comfy_extras.nodes_freelunch	model b1 b2 s1 s2
 FreSca	comfy_extras.nodes_fresca	model scale_low scale_high freq_cutoff
-FromBasicPipe	custom_nodes.ComfyUI-Impact-Pack	basic_pipe
-FromBasicPipe_v2	custom_nodes.ComfyUI-Impact-Pack	basic_pipe
-FromDetailerPipe	custom_nodes.ComfyUI-Impact-Pack	detailer_pipe
-FromDetailerPipe_v2	custom_nodes.ComfyUI-Impact-Pack	detailer_pipe
-FromDetailerPipeSDXL	custom_nodes.ComfyUI-Impact-Pack	detailer_pipe
-FromIPAdapterPipe //Inspire	custom_nodes.ComfyUI-Inspire-Pack	ipadapter_pipe
 GarbageCollector	custom_nodes.ControlFlowUtils	Input RAM Mode
 GeminiImage2Node	comfy_api_nodes.nodes_gemini	prompt model seed aspect_ratio resolution response_modalities images? files? system_prompt?
 GeminiImageNode	comfy_api_nodes.nodes_gemini	prompt model seed images? files? aspect_ratio? response_modalities? system_prompt?
@@ -754,14 +500,10 @@ GetTrackRange	custom_nodes.ComfyUI-KJNodes	tracks start_index num_frames
 GetVideoComponents	comfy_extras.nodes_video	video
 GGUFLoaderKJ	custom_nodes.ComfyUI-KJNodes	model_name extra_model_name dequant_dtype patch_dtype patch_on_device enable_fp16_accumulation attention_override
 GITSScheduler	comfy_extras.nodes_gits	coeff steps denoise
-GITSSchedulerFuncProvider	custom_nodes.ComfyUI-Impact-Pack	coeff denoise
 GLIGENLoader	nodes	gligen_name
 GLIGENTextBoxApply	nodes	conditioning_to clip gligen_textbox_model text width height x y
 GLIGENTextBoxApplyBatchCoords	custom_nodes.ComfyUI-KJNodes	conditioning_to latents clip gligen_textbox_model coordinates text width height size_multiplier?
-GlobalSampler //Inspire	custom_nodes.ComfyUI-Inspire-Pack	sampler_name scheduler
-GlobalSeed //Inspire	custom_nodes.ComfyUI-Inspire-Pack	value mode action last_seed
 GLSLShader	comfy_extras.nodes_glsl	fragment_shader size_mode images floats ints bools curves
-GMFSS Fortuna VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier optional_interpolation_states?
 GradientToFloat	custom_nodes.ComfyUI-KJNodes	image steps
 GrokImageEditNode	comfy_api_nodes.nodes_grok	model image prompt resolution number_of_images seed aspect_ratio?
 GrokImageEditNodeV2	comfy_api_nodes.nodes_grok	prompt model seed
@@ -774,6 +516,14 @@ GrowMask	comfy_extras.nodes_mask	mask expand tapered_corners
 GrowMaskWithBlur	custom_nodes.ComfyUI-KJNodes	mask expand incremental_expandrate tapered_corners flip_input blur_radius lerp_alpha decay_factor fill_holes?
 GuidanceTimestepping+	custom_nodes.ComfyUI_essentials	model value start_at end_at
 H3AdalnModality	custom_nodes.ComfyUI-H3-PowerLoraStack	video text audio
+H3AnySwitch	custom_nodes.ComfyUI-H3-Multishot	use_on off_path? on_path?
+H3AudioTrimStart	custom_nodes.ComfyUI-H3-Multishot	audio seconds
+H3AutoRefs	custom_nodes.ComfyUI-H3-Multishot	max_per_character prompt_text? refs_root? characters? overrides? on_no_match? enabled? extra_text?
+H3CartridgeLoader	custom_nodes.ComfyUI-H3-Multishot	cartridge max_refs manual_path?
+H3ChainNormalize	custom_nodes.ComfyUI-H3-Multishot	images baseline_seconds skip_seconds fps strength deadband ema colour_match
+H3ClipLoaderAny	custom_nodes.ComfyUI-H3-Multishot	clip_name type mmproj_name?
+H3ConcatAV	custom_nodes.ComfyUI-H3-Multishot	images_a audio_a images_b? audio_b? match_b?
+H3ConditionStrength	custom_nodes.ComfyUI-H3-Multishot	conditioning visual_strength audio_strength
 H3ContinuumAssembleSeamV35	custom_nodes.ComfyUI-H3-Continuum	images audio assembly_plan exact_total_duration audio_seam video_seam buffer_backend diagnostics driving_audio?
 H3ContinuumLoadVideo	custom_nodes.ComfyUI-H3-Continuum	enable_video file force_rate
 H3ContinuumReferenceAudios	custom_nodes.ComfyUI-H3-Continuum	reference_audio_1? reference_audio_2? reference_audio_3? reference_audio_vae?
@@ -786,16 +536,44 @@ H3ContinuumVideoAdapter	custom_nodes.ComfyUI-H3-Continuum	video force_rate
 H3DecodeCacheHelper	custom_nodes.ComfyUI-H3-Continuum	cache_mode ram_budget_mb disk_budget_gb reset_token video_samples? video_vae? audio_samples? audio_vae?
 H3EasyLoadAudio	custom_nodes.ComfyUI-H3-Continuum	audio
 H3EasyLoadImage	custom_nodes.ComfyUI-H3-Continuum	image
+H3EpisodeSplit	custom_nodes.ComfyUI-H3-Multishot	script bindings
+H3ExtendTake	custom_nodes.ComfyUI-H3-Multishot	take_seconds window width height fps pin_frames model?
+H3FreeTextEncoder	custom_nodes.ComfyUI-H3-Multishot	conditioning clip
+H3InfiniteTakeSampler	custom_nodes.ComfyUI-H3-Multishot	model clip video_vae audio_vae script width height total_frames window_frames overlap_frames seed steps sampler_name scheduler activation_reserve_gb derive_length_from_script?
+H3IntScale	custom_nodes.ComfyUI-H3-Multishot	value divide_by multiple
+H3KeyframeInject	custom_nodes.ComfyUI-H3-Multishot	conditioning vae start_image width height length end_image?
+H3Keyframes	custom_nodes.ComfyUI-H3-Multishot	clip vae prompt width height length positions image_1? image_2? image_3? image_4? image_5? image_6? images_batch?
+H3LastFrame	custom_nodes.ComfyUI-H3-Multishot	images
 H3LoraInspector	custom_nodes.ComfyUI-H3-PowerLoraStack	lora_name
 H3LoraSchedule	custom_nodes.ComfyUI-H3-PowerLoraStack	rows start_strength end_strength curve curve_power explicit_strengths start_percent end_percent domain schedule?
+H3LoraStack	custom_nodes.ComfyUI-H3-Multishot	model lora_1 strength_1 lora_2 strength_2 lora_3 strength_3 lora_4 strength_4
+H3LTXTakeControls	custom_nodes.ComfyUI-H3-Multishot	width height take_seconds beat_seconds upscale vram_gb?
+H3ModelLoaderAny	custom_nodes.ComfyUI-H3-Multishot	model_name activation_reserve_gb?
+H3MultishotMemorySampler	custom_nodes.ComfyUI-H3-Multishot	model clip video_vae audio_vae script shot_count width height frames_per_shot seed steps seed_per_shot memory_frames anchor_frames start_image? keyframe_images? guide_audio? sampler_name? scheduler? bank_pinned? chain_gain_control? continuity? bank_clip_frames? color_level? join_anchor_noise? join_blend? handoff_release? bank_ref_noise? end_anchor? join_fx? audio_lock? handoff_taper? handoff_depth? reference_images? voice_ref? sampler_override? scheduler_override? self_anchor_voice? reference_image_size? preview_first_shot? output_scale? sigmas? save_every_shot? upscale_model_name? master_normalize? pin_frames? pin_noise? pin_renorm? reference_subjects? reference_video? reference_video_audio? low_ram_master? audio_pin_frames? pin_noise_audio? audio_tone_control? x0_texture_clamp? refresh_renoise? pin_noise_ramp? auto_chunk_ffn? x0_clamp_window? sampler_2? sampler_2_at? voice_ref_2? voice_ref_3?
+H3MultishotSampler	custom_nodes.ComfyUI-H3-Multishot	model clip video_vae audio_vae script shot_count width height frames_per_shot seed steps seed_per_shot start_image? reference_images? voice_ref? sampler_name? scheduler? sampler_override? scheduler_override? self_anchor_voice? output_scale? upscale_model? sigmas? save_every_shot? voice_ref_2? voice_ref_3?
+H3OptionalImage	custom_nodes.ComfyUI-H3-Multishot	enabled image?
 H3PowerLoraStack	custom_nodes.ComfyUI-H3-PowerLoraStack	model? quantized_layers? adaln_port? adaln_modality? schedule?
+H3QGraftPatch	custom_nodes.ComfyUI-H3-Multishot	model gains_file dose
+H3RefBatch	custom_nodes.ComfyUI-H3-Multishot	prompt reference_image? picked_path?
+H3ReferenceAudio	custom_nodes.ComfyUI-H3-Multishot	audio max_seconds
+H3ReferenceVideo	custom_nodes.ComfyUI-H3-Multishot	frames start_seconds seconds source_fps audio?
+H3RefFolder	custom_nodes.ComfyUI-H3-Multishot	refs_root pick seed max_refs character?
+H3RemoteTextEncoderClip	custom_nodes.ComfyUI-H3-Multishot	endpoint clip_name timeout_seconds clip_type
+H3Retake	custom_nodes.ComfyUI-H3-Multishot	model clip video_vae audio_vae images audio prompt start_seconds end_seconds mode seed sampler sigmas
+H3SamplerByName	custom_nodes.ComfyUI-H3-Multishot	sampler_name
+H3ScriptSplit	custom_nodes.ComfyUI-H3-Multishot	script shot_count
+H3SigmasByName	custom_nodes.ComfyUI-H3-Multishot	model scheduler steps denoise
+H3SpeedBoosters	custom_nodes.ComfyUI-H3-Multishot	model spectrum teacache teacache_strength blockcache easycache blockcache_threshold
+H3StudioControls	custom_nodes.ComfyUI-H3-Multishot	width height frames_per_shot steps sampler_name scheduler shot_count? use_file_prompts? take_seconds? window? model?
+H3StudioSwitches	custom_nodes.ComfyUI-H3-Multishot	sol_attn chunk_ffn remote_encoder
+H3TAEDecode	custom_nodes.ComfyUI-H3-Multishot	samples tae_name
 HaltExecution	custom_nodes.ControlFlowUtils	disable method clear_queue alert_on_trigger input run_after?
 HappyHorseImageToVideoApi	comfy_api_nodes.nodes_wan	model first_frame seed watermark
 HappyHorseReferenceVideoApi	comfy_api_nodes.nodes_wan	model seed watermark
 HappyHorseTextToVideoApi	comfy_api_nodes.nodes_wan	model seed watermark
 HappyHorseVideoEditApi	comfy_api_nodes.nodes_wan	model video seed watermark
 HDRPreviewKJ	custom_nodes.ComfyUI-KJNodes	image exposure saturation fps? input_space?
-HEDPreprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	safe
+HEDPreprocessor	custom_nodes.comfyui_controlnet_aux	image safe? resolution?
 HeyGenAvatarVideoNode	comfy_api_nodes.nodes_heygen	engine speech custom_avatar_id? resolution? aspect_ratio? background_color? seed?
 HeyGenCreateAvatarNode	comfy_api_nodes.nodes_heygen	source
 HeyGenTalkingPhotoNode	comfy_api_nodes.nodes_heygen	image speech resolution? aspect_ratio? expressiveness? seed?
@@ -803,6 +581,7 @@ HeyGenTextToSpeechNode	comfy_api_nodes.nodes_heygen	text voice custom_voice_id? 
 HeyGenVideoTranslateNode	comfy_api_nodes.nodes_heygen	video output_language mode translate_audio_only? speaker_count? seed?
 HiDreamO1PatchSeamSmoothing	comfy_extras.nodes_hidream_o1	model start_percent end_percent pattern passes blend strength
 HiDreamO1ReferenceImages	comfy_extras.nodes_hidream_o1	positive negative images?
+HintImageEnchance	custom_nodes.comfyui_controlnet_aux	hint_image image_gen_width image_gen_height resize_mode
 HitPawGeneralImageEnhance	comfy_api_nodes.nodes_hitpaw	model image upscale_factor auto_downscale
 HitPawVideoEnhance	comfy_api_nodes.nodes_hitpaw	model video
 Hunyuan3Dv2Conditioning	comfy_extras.nodes_hunyuan3d	clip_vision_output
@@ -818,7 +597,6 @@ HunyuanVideoBlockLoraSelect	custom_nodes.ComfyUI-KJNodes	double_blocks.0. double
 HunyuanVideoEncodeKeyframesToCond	custom_nodes.ComfyUI-KJNodes	model positive vae start_frame end_frame num_frames tile_size overlap temporal_size temporal_overlap negative?
 HypernetworkLoader	comfy_extras.nodes_hypernetwork	model hypernetwork_name strength
 HyperTile	comfy_extras.nodes_hypertile	model tile_size swap_size max_depth scale_depth
-HyperTile //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model tile_size swap_size max_depth scale_depth seed
 Ideogram4OptimizationsKJ	custom_nodes.ComfyUI-KJNodes	model chunk_ffn ffn_chunks ffn_seq_threshold bf16_rope
 Ideogram4PromptBuilderKJ	custom_nodes.ComfyUI-KJNodes	width height high_level_description background style aesthetics lighting medium style_palette_data elements_data bg_brightness import_mode output_format coord_mode bbox_order image? import_json? bboxes?
 Ideogram4Scheduler	comfy_extras.nodes_ideogram4	steps width height mu std
@@ -826,8 +604,6 @@ IdeogramPImage	comfy_api_nodes.nodes_ideogram	prompt quality resolution aspect_r
 IdeogramV3	comfy_api_nodes.nodes_ideogram	prompt image? mask? aspect_ratio? resolution? magic_prompt_option? seed? num_images? rendering_speed? character_image? character_mask?
 IdeogramV4	comfy_api_nodes.nodes_ideogram	prompt resolution rendering_speed seed
 IfConditionSelector	custom_nodes.ControlFlowUtils	condition require_inputs NOT custom_expression A? B? TRUE_IN? FALSE_IN?
-IFRNet VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier scale_factor optional_interpolation_states?
-IFUnet VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier scale_factor ensemble optional_interpolation_states?
 Image Comparer (rgthree)	custom_nodes.rgthree-comfy	image_a? image_b?
 Image Inset Crop (rgthree)	custom_nodes.rgthree-comfy	image measurement left right top bottom
 Image or Latent Size (rgthree)	custom_nodes.rgthree-comfy	
@@ -843,7 +619,6 @@ ImageBatchJoinWithTransition	custom_nodes.ComfyUI-KJNodes	images_1 images_2 star
 ImageBatchMulti	custom_nodes.ComfyUI-KJNodes	inputcount image_1 image_2?
 ImageBatchMultiple+	custom_nodes.ComfyUI_essentials	image_1 method image_2? image_3? image_4? image_5?
 ImageBatchRepeatInterleaving	custom_nodes.ComfyUI-KJNodes	images repeats mask?
-ImageBatchSplitter //Inspire	custom_nodes.ComfyUI-Inspire-Pack	images split_count
 ImageBatchTestPattern	custom_nodes.ComfyUI-KJNodes	batch_size start_from text_x text_y width height font font_size
 ImageBatchToList+	custom_nodes.ComfyUI_essentials	image
 ImageBlend	comfy_extras.nodes_post_processing	image1 image2 blend_factor blend_mode
@@ -876,6 +651,8 @@ ImageFlip	comfy_extras.nodes_images	image flip_method
 ImageFlip+	custom_nodes.ComfyUI_essentials	image axis
 ImageFromBatch	comfy_extras.nodes_images	image batch_index length
 ImageFromBatch+	custom_nodes.ComfyUI_essentials	image start length
+ImageGenResolutionFromImage	custom_nodes.comfyui_controlnet_aux	image
+ImageGenResolutionFromLatent	custom_nodes.comfyui_controlnet_aux	latent
 ImageGrabPIL	custom_nodes.ComfyUI-KJNodes	x y width height num_frames delay
 ImageGrid	comfy_extras.nodes_dataset	images columns cell_width cell_height padding
 ImageGridComposite2x2	custom_nodes.ComfyUI-KJNodes	image1 image2 image3 image4
@@ -883,10 +660,10 @@ ImageGridComposite3x3	custom_nodes.ComfyUI-KJNodes	image1 image2 image3 image4 i
 ImageGridtoBatch	custom_nodes.ComfyUI-KJNodes	image columns rows
 ImageHistogram	comfy_extras.nodes_curve	image
 ImageHistogramMatch+	custom_nodes.ComfyUI_essentials	image reference method factor device
+ImageIntensityDetector	custom_nodes.comfyui_controlnet_aux	image gamma_correction? resolution?
 ImageInvert	nodes	image
 ImageListToBatch+	custom_nodes.ComfyUI_essentials	image
-ImageListToImageBatch	custom_nodes.ComfyUI-Impact-Pack	images
-ImageMaskSwitch	custom_nodes.ComfyUI-Impact-Pack	select images1 mask1_opt? images2_opt? mask2_opt? images3_opt? mask3_opt? images4_opt? mask4_opt?
+ImageLuminanceDetector	custom_nodes.comfyui_controlnet_aux	image gamma_correction? resolution?
 ImageMergeTileList	comfy_extras.nodes_images	image_list final_width final_height overlap
 ImageNoiseAugmentation	custom_nodes.ComfyUI-KJNodes	image noise_aug_strength seed
 ImageNormalize_Neg1_To_1	custom_nodes.ComfyUI-KJNodes	images
@@ -902,7 +679,6 @@ ImagePrepForICLora	custom_nodes.ComfyUI-KJNodes	reference_image output_width out
 ImagePreviewFromLatent+	custom_nodes.ComfyUI_essentials	latent vae tile_size image?
 ImageQuantize	comfy_extras.nodes_post_processing	image colors dither
 ImageRandomTransform+	custom_nodes.ComfyUI_essentials	image seed repeat variation
-ImageReceiver	custom_nodes.ComfyUI-Impact-Pack	image link_id save_to_workflow image_data trigger_always
 ImageRemoveAlpha+	custom_nodes.ComfyUI_essentials	image
 ImageRemoveBackground+	custom_nodes.ComfyUI_essentials	rembg_session image
 ImageResize+	custom_nodes.ComfyUI_essentials	image width height interpolation method condition multiple_of
@@ -916,7 +692,6 @@ ImageScaleBy	nodes	image upscale_method scale_by
 ImageScaleToMaxDimension	comfy_extras.nodes_images	image upscale_method largest_size
 ImageScaleToTotalPixels	comfy_extras.nodes_post_processing	image upscale_method megapixels resolution_steps
 ImageSeamCarving+	custom_nodes.ComfyUI_essentials	image width height energy order keep_mask? drop_mask?
-ImageSender	custom_nodes.ComfyUI-Impact-Pack	images filename_prefix link_id
 ImageSharpen	comfy_extras.nodes_post_processing	image sharpen_radius sigma alpha
 ImageSharpenKJ	custom_nodes.ComfyUI-KJNodes	image method
 ImageSmartSharpen+	custom_nodes.ComfyUI_essentials	image noise_radius preserve_edges sharpen ratio
@@ -932,95 +707,10 @@ ImageUntile+	custom_nodes.ComfyUI_essentials	tiles overlap_x overlap_y rows cols
 ImageUpscaleWithModel	comfy_extras.nodes_upscale_model	upscale_model image
 ImageUpscaleWithModelBatched	custom_nodes.ComfyUI-KJNodes	upscale_model images per_batch downscale_ratio? downscale_method? precision?
 ImageYUVToRGB	comfy_extras.nodes_morphology	Y U V
-ImpactAssembleSEGS	custom_nodes.ComfyUI-Impact-Pack	seg_header seg_elt
-ImpactBoolean	custom_nodes.ComfyUI-Impact-Pack	value
-ImpactCombineConditionings	custom_nodes.ComfyUI-Impact-Pack	conditioning1
-ImpactCompare	custom_nodes.ComfyUI-Impact-Pack	cmp a b
-ImpactConcatConditionings	custom_nodes.ComfyUI-Impact-Pack	conditioning1
-ImpactConditionalBranch	custom_nodes.ComfyUI-Impact-Pack	cond tt_value ff_value
-ImpactConditionalBranchSelMode	custom_nodes.ComfyUI-Impact-Pack	cond tt_value? ff_value?
-ImpactConditionalStopIteration	custom_nodes.ComfyUI-Impact-Pack	cond
-ImpactControlBridge	custom_nodes.ComfyUI-Impact-Pack	value mode behavior
-ImpactControlNetApplyAdvancedSEGS	custom_nodes.ComfyUI-Impact-Pack	segs control_net strength start_percent end_percent segs_preprocessor? control_image? vae?
-ImpactControlNetApplySEGS	custom_nodes.ComfyUI-Impact-Pack	segs control_net strength segs_preprocessor? control_image?
-ImpactControlNetClearSEGS	custom_nodes.ComfyUI-Impact-Pack	segs
-ImpactConvertDataType	custom_nodes.ComfyUI-Impact-Pack	value
-ImpactCount_Elts_in_SEGS	custom_nodes.ComfyUI-Impact-Pack	segs
-ImpactDecomposeSEGS	custom_nodes.ComfyUI-Impact-Pack	segs
-ImpactDilate_Mask_SEG_ELT	custom_nodes.ComfyUI-Impact-Pack	seg_elt dilation
-ImpactDilateMask	custom_nodes.ComfyUI-Impact-Pack	mask dilation
-ImpactDilateMaskInSEGS	custom_nodes.ComfyUI-Impact-Pack	segs dilation
-ImpactDummyInput	custom_nodes.ComfyUI-Impact-Pack	
-ImpactEdit_SEG_ELT	custom_nodes.ComfyUI-Impact-Pack	seg_elt cropped_image_opt? cropped_mask_opt? crop_region_opt? bbox_opt? control_net_wrapper_opt? confidence_opt? label_opt?
-ImpactExecutionOrderController	custom_nodes.ComfyUI-Impact-Pack	signal value
-ImpactFlattenMask	custom_nodes.ComfyUI-Impact-Pack	masks
-ImpactFloat	custom_nodes.ComfyUI-Impact-Pack	value
-ImpactFrom_SEG_ELT	custom_nodes.ComfyUI-Impact-Pack	seg_elt
-ImpactFrom_SEG_ELT_bbox	custom_nodes.ComfyUI-Impact-Pack	bbox
-ImpactFrom_SEG_ELT_crop_region	custom_nodes.ComfyUI-Impact-Pack	crop_region
-ImpactGaussianBlurMask	custom_nodes.ComfyUI-Impact-Pack	mask kernel_size sigma
-ImpactGaussianBlurMaskInSEGS	custom_nodes.ComfyUI-Impact-Pack	segs kernel_size sigma
-ImpactHFTransformersClassifierProvider	custom_nodes.ComfyUI-Impact-Pack	preset_repo_id manual_repo_id device_mode
-ImpactIfNone	custom_nodes.ComfyUI-Impact-Pack	signal? any_input?
-ImpactImageBatchToImageList	custom_nodes.ComfyUI-Impact-Pack	image
-ImpactImageInfo	custom_nodes.ComfyUI-Impact-Pack	value
-ImpactInt	custom_nodes.ComfyUI-Impact-Pack	value
-ImpactInversedSwitch	custom_nodes.ComfyUI-Impact-Pack	select input sel_mode?
-ImpactIPAdapterApplySEGS	custom_nodes.ComfyUI-Impact-Pack	segs ipadapter_pipe weight noise weight_type start_at end_at unfold_batch faceid_v2 weight_v2 context_crop_factor reference_image combine_embeds? neg_image?
-ImpactIsNotEmptySEGS	custom_nodes.ComfyUI-Impact-Pack	segs
-ImpactKSamplerAdvancedBasicPipe	custom_nodes.ComfyUI-Impact-Pack	basic_pipe add_noise noise_seed steps cfg sampler_name scheduler latent_image start_at_step end_at_step return_with_leftover_noise scheduler_func_opt?
-ImpactKSamplerBasicPipe	custom_nodes.ComfyUI-Impact-Pack	basic_pipe seed steps cfg sampler_name scheduler latent_image denoise scheduler_func_opt?
-ImpactLatentInfo	custom_nodes.ComfyUI-Impact-Pack	value
-ImpactListBridge	custom_nodes.ComfyUI-Impact-Pack	list_input
-ImpactLogger	custom_nodes.ComfyUI-Impact-Pack	data text
-ImpactLogicalOperators	custom_nodes.ComfyUI-Impact-Pack	operator bool_a bool_b
-ImpactMakeAnyList	custom_nodes.ComfyUI-Impact-Pack	value1?
-ImpactMakeImageBatch	custom_nodes.ComfyUI-Impact-Pack	image1?
-ImpactMakeImageList	custom_nodes.ComfyUI-Impact-Pack	image1?
-ImpactMakeMaskBatch	custom_nodes.ComfyUI-Impact-Pack	mask1?
-ImpactMakeMaskList	custom_nodes.ComfyUI-Impact-Pack	mask1
-ImpactMakeTileSEGS	custom_nodes.ComfyUI-Impact-Pack	images bbox_size crop_factor min_overlap filter_segs_dilation mask_irregularity irregular_mask_mode filter_in_segs_opt? filter_out_segs_opt?
-ImpactMinMax	custom_nodes.ComfyUI-Impact-Pack	mode a b
-ImpactNeg	custom_nodes.ComfyUI-Impact-Pack	value
-ImpactNegativeConditioningPlaceholder	custom_nodes.ComfyUI-Impact-Pack	
-ImpactNodeSetMuteState	custom_nodes.ComfyUI-Impact-Pack	signal node_id set_state
-ImpactQueueTrigger	custom_nodes.ComfyUI-Impact-Pack	signal mode
-ImpactQueueTriggerCountdown	custom_nodes.ComfyUI-Impact-Pack	count total mode signal?
-ImpactRemoteBoolean	custom_nodes.ComfyUI-Impact-Pack	node_id widget_name value
-ImpactRemoteInt	custom_nodes.ComfyUI-Impact-Pack	node_id widget_name value
-ImpactSAM2VideoDetectorSEGS	custom_nodes.ComfyUI-Impact-Pack	image_frames bbox_detector sam2_model bbox_threshold sam2_threshold crop_factor drop_size
-ImpactScaleBy_BBOX_SEG_ELT	custom_nodes.ComfyUI-Impact-Pack	seg scale_by
-ImpactSchedulerAdapter	custom_nodes.ComfyUI-Impact-Pack	scheduler extra_scheduler
-ImpactSegsAndMask	custom_nodes.ComfyUI-Impact-Pack	segs mask
-ImpactSegsAndMaskForEach	custom_nodes.ComfyUI-Impact-Pack	segs masks
-ImpactSEGSClassify	custom_nodes.ComfyUI-Impact-Pack	classifier segs preset_expr manual_expr ref_image_opt?
-ImpactSEGSConcat	custom_nodes.ComfyUI-Impact-Pack	segs1
-ImpactSEGSIntersectionFilter	custom_nodes.ComfyUI-Impact-Pack	segs1 segs2 ioa_threshold
-ImpactSEGSLabelAssign	custom_nodes.ComfyUI-Impact-Pack	segs labels
-ImpactSEGSLabelFilter	custom_nodes.ComfyUI-Impact-Pack	segs preset labels
-ImpactSEGSMerge	custom_nodes.ComfyUI-Impact-Pack	segs
-ImpactSEGSNMSFilter	custom_nodes.ComfyUI-Impact-Pack	segs iou_threshold
-ImpactSEGSOrderedFilter	custom_nodes.ComfyUI-Impact-Pack	segs target order take_start take_count
-ImpactSEGSPicker	custom_nodes.ComfyUI-Impact-Pack	picks segs fallback_image_opt?
-ImpactSEGSRangeFilter	custom_nodes.ComfyUI-Impact-Pack	segs target mode min_value max_value
-ImpactSEGSToMaskBatch	custom_nodes.ComfyUI-Impact-Pack	segs
-ImpactSEGSToMaskList	custom_nodes.ComfyUI-Impact-Pack	segs
-ImpactSelectNthItemOfAnyList	custom_nodes.ComfyUI-Impact-Pack	any_list index
-ImpactSetWidgetValue	custom_nodes.ComfyUI-Impact-Pack	signal node_id widget_name boolean_value? int_value? float_value? string_value?
-ImpactSimpleDetectorSEGS	custom_nodes.ComfyUI-Impact-Pack	bbox_detector image bbox_threshold bbox_dilation crop_factor drop_size sub_threshold sub_dilation sub_bbox_expansion sam_mask_hint_threshold post_dilation? sam_model_opt? segm_detector_opt?
-ImpactSimpleDetectorSEGS_for_AD	custom_nodes.ComfyUI-Impact-Pack	bbox_detector image_frames bbox_threshold bbox_dilation crop_factor drop_size sub_threshold sub_dilation sub_bbox_expansion sam_mask_hint_threshold masking_mode? segs_pivot? sam_model_opt? segm_detector_opt?
-ImpactSimpleDetectorSEGSPipe	custom_nodes.ComfyUI-Impact-Pack	detailer_pipe image bbox_threshold bbox_dilation crop_factor drop_size sub_threshold sub_dilation sub_bbox_expansion sam_mask_hint_threshold post_dilation?
-ImpactSleep	custom_nodes.ComfyUI-Impact-Pack	signal seconds
-ImpactStringSelector	custom_nodes.ComfyUI-Impact-Pack	strings multiline select
-ImpactSwitch	custom_nodes.ComfyUI-Impact-Pack	select sel_mode input1?
-ImpactValueReceiver	custom_nodes.ComfyUI-Impact-Pack	typ value link_id
-ImpactValueSender	custom_nodes.ComfyUI-Impact-Pack	value link_id signal_opt?
-ImpactWildcardEncode	custom_nodes.ComfyUI-Impact-Pack	model clip wildcard_text populated_text mode Select to add LoRA Select to add Wildcard seed
-ImpactWildcardProcessor	custom_nodes.ComfyUI-Impact-Pack	wildcard_text populated_text mode seed Select to add Wildcard
 InjectLatentNoise+	custom_nodes.ComfyUI_essentials	latent noise_seed noise_strength normalize mask?
 InjectNoiseToLatent	custom_nodes.ComfyUI-KJNodes	latents strength noise normalize average mask? mix_randn_amount? seed?
 InpaintModelConditioning	nodes	positive negative vae pixels mask noise_mask
-InpaintPreprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	black_pixel_for_xinsir_cn?
+InpaintPreprocessor	custom_nodes.comfyui_controlnet_aux	image mask black_pixel_for_xinsir_cn?
 InsertImageBatchByIndexes	custom_nodes.ComfyUI-KJNodes	images images_to_insert insert_indexes
 InsertImagesToBatchIndexed	custom_nodes.ComfyUI-KJNodes	original_images images_to_insert indexes mode?
 InsertLatentToIndexed	custom_nodes.ComfyUI-KJNodes	source destination index
@@ -1029,14 +719,12 @@ INTConstant	custom_nodes.ComfyUI-KJNodes	value
 InterpolateCoords	custom_nodes.ComfyUI-KJNodes	coordinates interpolation_curve
 InvertCondition	custom_nodes.ControlFlowUtils	input mode
 InvertMask	comfy_extras.nodes_mask	mask
-IPAdapterModelHelper //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model preset lora_strength_model lora_strength_clip insightface_provider cache_mode clip? insightface_model_name?
-IsCached //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key
-IterativeImageUpscale	custom_nodes.ComfyUI-Impact-Pack	pixels upscale_factor steps temp_prefix upscaler vae step_mode vae_compression
-IterativeLatentUpscale	custom_nodes.ComfyUI-Impact-Pack	samples upscale_factor steps temp_prefix upscaler step_mode vae_compression
 JoinAudioChannels	comfy_extras.nodes_audio	audio_left audio_right
 JoinImageWithAlpha	comfy_extras.nodes_compositing	image alpha
 JoinStringMulti	custom_nodes.ComfyUI-KJNodes	inputcount string_1 delimiter return_list string_2?
 JoinStrings	custom_nodes.ComfyUI-KJNodes	delimiter string1? string2?
+JoyEcho_PromptSource	custom_nodes.ComfyUI-H3-Multishot	source_file load_cap? start_index? character_override? manual_path? folder? walk_folder?
+JoyEcho_ScriptPicker	custom_nodes.ComfyUI-H3-Multishot	script
 JSON comparator [Crystools]	custom_nodes.ComfyUI-Crystools	json_old json_new
 JSON extractor [Crystools]	custom_nodes.ComfyUI-Crystools	json key? default?
 JsonExtractString	comfy_extras.nodes_string	json_string key
@@ -1063,28 +751,17 @@ KlingVideoNode	comfy_api_nodes.nodes_kling	multi_shot generate_audio model seed 
 Krea2ImageNode	comfy_api_nodes.nodes_krea	prompt model seed
 Krea2StyleReferenceNode	comfy_api_nodes.nodes_krea	image strength style_reference?
 KSampler	nodes	model seed steps cfg sampler_name scheduler positive negative latent_image denoise
-KSampler //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model seed steps cfg sampler_name scheduler positive negative latent_image denoise noise_mode batch_seed_mode variation_seed variation_strength variation_method? scheduler_func_opt? internal_seed?
 KSampler Config (rgthree)	custom_nodes.rgthree-comfy	steps_total refiner_step cfg sampler_name scheduler
-KSampler Gradually Adding More Denoise (efficient)	custom_nodes.ComfyUI-Frame-Interpolation	model positive negative latent_image seed steps cfg sampler_name scheduler start_denoise denoise_increment denoise_increment_steps optional_vae?
 KSamplerAdvanced	nodes	model add_noise noise_seed steps cfg sampler_name scheduler positive negative latent_image start_at_step end_at_step return_with_leftover_noise
-KSamplerAdvanced //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model add_noise noise_seed steps cfg sampler_name scheduler positive negative latent_image start_at_step end_at_step noise_mode return_with_leftover_noise batch_seed_mode variation_seed variation_strength variation_method? noise_opt? scheduler_func_opt? internal_seed?
-KSamplerAdvancedPipe //Inspire	custom_nodes.ComfyUI-Inspire-Pack	basic_pipe add_noise noise_seed steps cfg sampler_name scheduler latent_image start_at_step end_at_step noise_mode return_with_leftover_noise batch_seed_mode variation_seed variation_strength noise_opt? scheduler_func_opt? internal_seed?
-KSamplerAdvancedProgress //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model add_noise noise_seed steps cfg sampler_name scheduler positive negative latent_image start_at_step end_at_step noise_mode return_with_leftover_noise interval omit_start_latent omit_final_latent prev_progress_latent_opt? scheduler_func_opt?
-KSamplerAdvancedProvider	custom_nodes.ComfyUI-Impact-Pack	cfg sampler_name scheduler sigma_factor basic_pipe sampler_opt? scheduler_func_opt?
-KSamplerPipe //Inspire	custom_nodes.ComfyUI-Inspire-Pack	basic_pipe seed steps cfg sampler_name scheduler latent_image denoise noise_mode batch_seed_mode variation_seed variation_strength scheduler_func_opt? internal_seed?
-KSamplerProgress //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model seed steps cfg sampler_name scheduler positive negative latent_image denoise noise_mode interval omit_start_latent omit_final_latent scheduler_func_opt?
-KSamplerProvider	custom_nodes.ComfyUI-Impact-Pack	seed steps cfg sampler_name scheduler denoise basic_pipe scheduler_func_opt?
 KSamplerSelect	comfy_extras.nodes_custom_sampler	sampler_name
 KSamplerVariationsStochastic+	custom_nodes.ComfyUI_essentials	model latent_image noise_seed steps cfg sampler scheduler positive negative variation_seed variation_strength cfg_scale
 KSamplerVariationsWithNoise+	custom_nodes.ComfyUI_essentials	model latent_image main_seed steps cfg sampler_name scheduler positive negative variation_strength variation_seed denoise
-LamaRemoverDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	mask_threshold gaussblur_radius skip_sampling
 LaplaceScheduler	comfy_extras.nodes_custom_sampler	steps sigma_max sigma_min mu beta
 LatentAdd	comfy_extras.nodes_latent	samples1 samples2
 LatentApplyOperation	comfy_extras.nodes_latent	samples operation
 LatentApplyOperationCFG	comfy_extras.nodes_latent	model operation
 LatentBatch	comfy_extras.nodes_latent	samples1 samples2
 LatentBatchSeedBehavior	comfy_extras.nodes_latent	samples seed_behavior
-LatentBatchSplitter //Inspire	custom_nodes.ComfyUI-Inspire-Pack	latent split_count
 LatentBlend	nodes	samples1 samples2 blend_factor
 LatentComposite	nodes	samples_to samples_from x y feather
 LatentCompositeMasked	comfy_extras.nodes_mask	destination source x y resize_source mask?
@@ -1102,229 +779,45 @@ LatentMotionSharpener	custom_nodes.10S-Comfy-nodes	latent base_sharpen? motion_s
 LatentMultiply	comfy_extras.nodes_latent	samples multiplier
 LatentOperationSharpen	comfy_extras.nodes_latent	sharpen_radius sigma alpha
 LatentOperationTonemapReinhard	comfy_extras.nodes_latent	multiplier
-LatentPixelScale	custom_nodes.ComfyUI-Impact-Pack	samples scale_method scale_factor vae use_tiled_vae upscale_model_opt?
-LatentReceiver	custom_nodes.ComfyUI-Impact-Pack	latent link_id trigger_always
 LatentRotate	nodes	samples rotation
-LatentSender	custom_nodes.ComfyUI-Impact-Pack	samples filename_prefix link_id preview_method
 LatentSubtract	comfy_extras.nodes_latent	samples1 samples2
-LatentSwitch	custom_nodes.ComfyUI-Impact-Pack	select sel_mode input1?
 LatentTemporalInpainter	custom_nodes.10S-Comfy-nodes	latent anchor_sigma? ghost_sigma? score_gamma? anchor_blend? seed? debug_scores?
 LatentTemporalUpsampler	custom_nodes.10S-Comfy-nodes	latent source_fps target_fps interp_mode? auto_retime? motion_scale? spatial_sharpen? ltx_safe? override_frames?
 LatentUpscale	nodes	samples upscale_method width height crop
 LatentUpscaleBy	nodes	samples upscale_method scale_by
 LatentUpscaleModelLoader	comfy_extras.nodes_hunyuan	model_name
-LayerColor: AutoAdjust	custom_nodes.ComfyUI_LayerStyle	image strength brightness contrast saturation red green blue
-LayerColor: AutoAdjustV2	custom_nodes.ComfyUI_LayerStyle	image strength brightness contrast saturation red green blue mode mask?
-LayerColor: AutoBrightness	custom_nodes.ComfyUI_LayerStyle	image strength saturation mask?
-LayerColor: Brightness & Contrast	custom_nodes.ComfyUI_LayerStyle	image brightness contrast saturation
-LayerColor: BrightnessContrastV2	custom_nodes.ComfyUI_LayerStyle	image brightness contrast saturation
-LayerColor: Color of Shadow & Highlight	custom_nodes.ComfyUI_LayerStyle	image shadow_brightness shadow_saturation shadow_hue shadow_level_offset shadow_range highlight_brightness highlight_saturation highlight_hue highlight_level_offset highlight_range mask?
-LayerColor: ColorAdapter	custom_nodes.ComfyUI_LayerStyle	image color_ref_image opacity
-LayerColor: ColorBalance	custom_nodes.ComfyUI_LayerStyle	image cyan_red magenta_green yellow_blue
-LayerColor: ColorofShadowHighlightV2	custom_nodes.ComfyUI_LayerStyle	image shadow_brightness shadow_saturation shadow_hue shadow_level_offset shadow_range highlight_brightness highlight_saturation highlight_hue highlight_level_offset highlight_range mask?
-LayerColor: ColorTemperature	custom_nodes.ComfyUI_LayerStyle	image temperature
-LayerColor: Exposure	custom_nodes.ComfyUI_LayerStyle	image exposure
-LayerColor: Gamma	custom_nodes.ComfyUI_LayerStyle	image gamma
-LayerColor: HSV	custom_nodes.ComfyUI_LayerStyle	image H S V
-LayerColor: LAB	custom_nodes.ComfyUI_LayerStyle	image L A B
-LayerColor: Levels	custom_nodes.ComfyUI_LayerStyle	image channel black_point white_point gray_point output_black_point output_white_point
-LayerColor: LUT Apply	custom_nodes.ComfyUI_LayerStyle	image LUT color_space strength
-LayerColor: Negative	custom_nodes.ComfyUI_LayerStyle	image negative_channel
-LayerColor: RGB	custom_nodes.ComfyUI_LayerStyle	image R G B
-LayerColor: YUV	custom_nodes.ComfyUI_LayerStyle	image Y U V
-LayerFilter: AddGrain	custom_nodes.ComfyUI_LayerStyle	image grain_power grain_scale grain_sat
-LayerFilter: ChannelShake	custom_nodes.ComfyUI_LayerStyle	image distance angle mode
-LayerFilter: ColorMap	custom_nodes.ComfyUI_LayerStyle	image color_map opacity
-LayerFilter: DistortDisplace	custom_nodes.ComfyUI_LayerStyle	image material_image distort_strength smoothness anti_aliasing shadow_blend_mode shadow_strength highlight_blend_mode highlight_strength mask?
-LayerFilter: Film	custom_nodes.ComfyUI_LayerStyle	image center_x center_y saturation vignette_intensity grain_power grain_scale grain_sat grain_shadows grain_highs blur_strength blur_focus_spread focal_depth depth_map?
-LayerFilter: FilmV2	custom_nodes.ComfyUI_LayerStyle	image center_x center_y saturation vignette_intensity grain_method grain_power grain_scale grain_sat filmgrainer_shadows filmgrainer_highs blur_strength blur_focus_spread focal_depth depth_map?
-LayerFilter: GaussianBlur	custom_nodes.ComfyUI_LayerStyle	image blur
-LayerFilter: GaussianBlurV2	custom_nodes.ComfyUI_LayerStyle	image blur
-LayerFilter: HalfTone	custom_nodes.ComfyUI_LayerStyle	image dot_size angle shape dot_color background_color anti_aliasing mask?
-LayerFilter: HDREffects	custom_nodes.ComfyUI_LayerStyle	image hdr_intensity shadow_intensity highlight_intensity gamma_intensity contrast enhance_color
-LayerFilter: LightLeak	custom_nodes.ComfyUI_LayerStyle	image light corner hue saturation opacity
-LayerFilter: MotionBlur	custom_nodes.ComfyUI_LayerStyle	image angle blur
-LayerFilter: Sharp & Soft	custom_nodes.ComfyUI_LayerStyle	images enhance
-LayerFilter: SkinBeauty	custom_nodes.ComfyUI_LayerStyle	image smooth threshold opacity
-LayerFilter: SoftLight	custom_nodes.ComfyUI_LayerStyle	image soft threshold opacity
-LayerFilter: WaterColor	custom_nodes.ComfyUI_LayerStyle	image line_density opacity
-LayerMask: BlendIf Mask	custom_nodes.ComfyUI_LayerStyle	image invert_mask blend_if black_point black_range white_point white_range mask?
-LayerMask: CreateGradientMask	custom_nodes.ComfyUI_LayerStyle	width height gradient_side gradient_scale gradient_offset opacity size_as?
-LayerMask: DrawRoundedRectangle	custom_nodes.ComfyUI_LayerStyle	rounded_rect_radius anti_aliasing width height size_as?
-LayerMask: ImageToMask	custom_nodes.ComfyUI_LayerStyle	image channel black_point white_point gray_point invert_output_mask mask?
-LayerMask: LoadSegformerModel	custom_nodes.ComfyUI_LayerStyle	model_name device
-LayerMask: MaskBoxDetect	custom_nodes.ComfyUI_LayerStyle	mask detect x_adjust y_adjust scale_adjust
-LayerMask: MaskBoxExtend	custom_nodes.ComfyUI_LayerStyle	mask crop_box top_extend bottem_extend left_extend right_extend
-LayerMask: MaskByColor	custom_nodes.ComfyUI_LayerStyle	image color color_in_HEX threshold fix_gap fix_threshold invert_mask mask?
-LayerMask: MaskEdgeShrink	custom_nodes.ComfyUI_LayerStyle	mask invert_mask shrink_level soft edge_shrink edge_reserve
-LayerMask: MaskEdgeUltraDetail	custom_nodes.ComfyUI_LayerStyle	image mask method mask_grow fix_gap fix_threshold detail_range black_point white_point
-LayerMask: MaskEdgeUltraDetail V2	custom_nodes.ComfyUI_LayerStyle	image mask method mask_grow fix_gap fix_threshold edge_erode edte_dilate black_point white_point device max_megapixels
-LayerMask: MaskEdgeUltraDetail V3	custom_nodes.ComfyUI_LayerStyle	image mask method mask_grow fix_gap fix_threshold mask_edge_erode mask_edge_dilate transparent_trimap_erode transparent_trimap_dilate trimap_blur black_point white_point spread_mask_grow device max_megapixels transparent_trimap?
-LayerMask: MaskGradient	custom_nodes.ComfyUI_LayerStyle	mask invert_mask gradient_side gradient_scale gradient_offset opacity
-LayerMask: MaskGrain	custom_nodes.ComfyUI_LayerStyle	mask grain invert_mask
-LayerMask: MaskGrow	custom_nodes.ComfyUI_LayerStyle	mask invert_mask grow blur
-LayerMask: MaskInvert	custom_nodes.ComfyUI_LayerStyle	mask
-LayerMask: MaskMotionBlur	custom_nodes.ComfyUI_LayerStyle	mask invert_mask blur angle
-LayerMask: MaskPreview	custom_nodes.ComfyUI_LayerStyle	mask
-LayerMask: MaskStroke	custom_nodes.ComfyUI_LayerStyle	mask invert_mask stroke_grow stroke_width blur
-LayerMask: PixelSpread	custom_nodes.ComfyUI_LayerStyle	image invert_mask mask_grow mask?
-LayerMask: RemBgUltra	custom_nodes.ComfyUI_LayerStyle	image detail_range black_point white_point process_detail
-LayerMask: RmBgUltra V2	custom_nodes.ComfyUI_LayerStyle	image detail_method detail_erode detail_dilate black_point white_point process_detail device max_megapixels
-LayerMask: SegformerB2ClothesUltra	custom_nodes.ComfyUI_LayerStyle	image face hair hat sunglass left_arm right_arm left_leg right_leg upper_clothes skirt pants dress belt shoe bag scarf detail_method detail_erode detail_dilate black_point white_point process_detail device max_megapixels
-LayerMask: SegformerClothesPipelineLoader	custom_nodes.ComfyUI_LayerStyle	model face hair hat sunglass left_arm right_arm left_leg right_leg left_shoe right_shoe upper_clothes skirt pants dress belt bag scarf
-LayerMask: SegformerClothesSetting	custom_nodes.ComfyUI_LayerStyle	face hair hat sunglass left_arm right_arm left_leg right_leg left_shoe right_shoe upper_clothes skirt pants dress belt bag scarf
-LayerMask: SegformerFashionPipelineLoader	custom_nodes.ComfyUI_LayerStyle	model shirt top sweater cardigan jacket vest pants shorts skirt coat dress jumpsuit cape glasses hat hairaccessory tie glove watch belt legwarmer tights sock shoe bagwallet scarf umbrella hood collar lapel epaulette sleeve pocket neckline buckle zipper applique bead bow flower fringe ribbon rivet ruffle sequin tassel
-LayerMask: SegformerFashionSetting	custom_nodes.ComfyUI_LayerStyle	shirt top sweater cardigan jacket vest pants shorts skirt coat dress jumpsuit cape glasses hat hairaccessory tie glove watch belt legwarmer tights sock shoe bagwallet scarf umbrella hood collar lapel epaulette sleeve pocket neckline buckle zipper applique bead bow flower fringe ribbon rivet ruffle sequin tassel
-LayerMask: SegformerUltraV2	custom_nodes.ComfyUI_LayerStyle	image segformer_pipeline detail_method detail_erode detail_dilate black_point white_point process_detail device max_megapixels
-LayerMask: SegformerUltraV3	custom_nodes.ComfyUI_LayerStyle	image segformer_model segformer_setting detail_method detail_erode detail_dilate black_point white_point process_detail max_megapixels
-LayerMask: Shadow & Highlight Mask	custom_nodes.ComfyUI_LayerStyle	image shadow_level_offset shadow_range highlight_level_offset highlight_range mask?
-LayerMask: ShadowHighlightMaskV2	custom_nodes.ComfyUI_LayerStyle	image shadow_level_offset shadow_range highlight_level_offset highlight_range mask?
 LayersFromBoundingBoxes	comfy_extras.nodes_compositor	image bboxes mask? layers? crop_to_content? canvas_width? canvas_height?
-LayerStyle: ColorOverlay	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity color layer_mask?
-LayerStyle: ColorOverlay V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity color layer_mask?
-LayerStyle: DropShadow	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity distance_x distance_y grow blur shadow_color layer_mask?
-LayerStyle: DropShadow V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity distance_x distance_y grow blur shadow_color layer_mask?
-LayerStyle: DropShadow V3	custom_nodes.ComfyUI_LayerStyle	layer_image invert_mask blend_mode opacity distance_x distance_y grow blur shadow_color background_image? layer_mask?
-LayerStyle: Gradient Map	custom_nodes.ComfyUI_LayerStyle	image start_color mid_color end_color mid_point opacity layer_mask?
-LayerStyle: GradientOverlay	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity start_color start_alpha end_color end_alpha angle layer_mask?
-LayerStyle: GradientOverlay V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity start_color start_alpha end_color end_alpha angle layer_mask?
-LayerStyle: InnerGlow	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity brightness glow_range blur light_color glow_color layer_mask?
-LayerStyle: InnerGlow V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity brightness glow_range blur light_color glow_color layer_mask?
-LayerStyle: InnerShadow	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity distance_x distance_y grow blur shadow_color layer_mask?
-LayerStyle: InnerShadow V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity distance_x distance_y grow blur shadow_color layer_mask?
-LayerStyle: OuterGlow	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity brightness glow_range blur light_color glow_color layer_mask?
-LayerStyle: OuterGlow V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity brightness glow_range blur light_color glow_color layer_mask?
-LayerStyle: Stroke	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity stroke_grow stroke_width blur stroke_color layer_mask?
-LayerStyle: Stroke V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity stroke_grow stroke_width blur stroke_color layer_mask?
-LayerUtility: AnyRerouter	custom_nodes.ComfyUI_LayerStyle	any
-LayerUtility: BatchSelector	custom_nodes.ComfyUI_LayerStyle	select images? masks?
-LayerUtility: Boolean	custom_nodes.ComfyUI_LayerStyle	bool_value
-LayerUtility: BooleanOperator	custom_nodes.ComfyUI_LayerStyle	a b operator
-LayerUtility: BooleanOperatorV2	custom_nodes.ComfyUI_LayerStyle	a_value b_value operator a? b?
-LayerUtility: CheckMask	custom_nodes.ComfyUI_LayerStyle	mask white_point area_percent
-LayerUtility: CheckMaskV2	custom_nodes.ComfyUI_LayerStyle	mask method white_point area_percent
-LayerUtility: ChoiceTextPreset	custom_nodes.ComfyUI_LayerStyle	text_preset choice_title random_choice default seed
-LayerUtility: ColorImage	custom_nodes.ComfyUI_LayerStyle	width height color
-LayerUtility: ColorImage V2	custom_nodes.ComfyUI_LayerStyle	size custom_width custom_height color size_as?
-LayerUtility: ColorName	custom_nodes.ComfyUI_LayerStyle	color palette
-LayerUtility: ColorPicker	custom_nodes.ComfyUI_LayerStyle	color mode
-LayerUtility: CropBoxResolve	custom_nodes.ComfyUI_LayerStyle	crop_box
-LayerUtility: CropByMask	custom_nodes.ComfyUI_LayerStyle	image mask_for_crop invert_mask detect top_reserve bottom_reserve left_reserve right_reserve
-LayerUtility: CropByMask V2	custom_nodes.ComfyUI_LayerStyle	image mask invert_mask detect top_reserve bottom_reserve left_reserve right_reserve round_to_multiple crop_box?
-LayerUtility: CropByMask V3	custom_nodes.ComfyUI_LayerStyle	image mask invert_mask detect top_reserve bottom_reserve left_reserve right_reserve round_to_multiple crop_box?
-LayerUtility: ExtendCanvas	custom_nodes.ComfyUI_LayerStyle	image invert_mask top bottom left right color mask?
-LayerUtility: ExtendCanvasV2	custom_nodes.ComfyUI_LayerStyle	image invert_mask top bottom left right color mask?
-LayerUtility: Float	custom_nodes.ComfyUI_LayerStyle	float_value
-LayerUtility: FluxKontextImageScale	custom_nodes.ComfyUI_LayerStyle	image method
-LayerUtility: GetImageSize	custom_nodes.ComfyUI_LayerStyle	image
-LayerUtility: GetMainColors	custom_nodes.ComfyUI_LayerStyle	image k_means_algorithm
-LayerUtility: GetMainColorsV2	custom_nodes.ComfyUI_LayerStyle	image k_means_algorithm
-LayerUtility: GradientImage	custom_nodes.ComfyUI_LayerStyle	width height angle start_color end_color
-LayerUtility: GradientImage V2	custom_nodes.ComfyUI_LayerStyle	size custom_width custom_height angle start_color end_color size_as?
-LayerUtility: GrayValue	custom_nodes.ComfyUI_LayerStyle	color_value
-LayerUtility: HLFrequencyDetailRestore	custom_nodes.ComfyUI_LayerStyle	image detail_image keep_high_freq erase_low_freq mask_blur mask?
-LayerUtility: HSV Value	custom_nodes.ComfyUI_LayerStyle	color_value
-LayerUtility: ICMask	custom_nodes.ComfyUI_LayerStyle	first_image patch_mode output_length patch_color first_mask? second_image? second_mask?
-LayerUtility: ICMaskCropBack	custom_nodes.ComfyUI_LayerStyle	image icmask_data
-LayerUtility: If 	custom_nodes.ComfyUI_LayerStyle	if_condition when_TRUE when_FALSE
-LayerUtility: ImageBatchToList	custom_nodes.ComfyUI_LayerStyle	image batch_size
-LayerUtility: ImageBlend	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity layer_mask?
-LayerUtility: ImageBlend V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity layer_mask?
-LayerUtility: ImageBlendAdvance	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity x_percent y_percent mirror scale aspect_ratio rotate transform_method anti_aliasing layer_mask?
-LayerUtility: ImageBlendAdvance V2	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask blend_mode opacity x_percent y_percent mirror scale aspect_ratio rotate transform_method anti_aliasing layer_mask?
-LayerUtility: ImageBlendAdvance V3	custom_nodes.ComfyUI_LayerStyle	layer_image invert_mask blend_mode opacity x_percent y_percent mirror scale aspect_ratio rotate transform_method anti_aliasing background_image? layer_mask?
-LayerUtility: ImageChannelMerge	custom_nodes.ComfyUI_LayerStyle	channel_1 channel_2 channel_3 mode channel_4?
-LayerUtility: ImageChannelSplit	custom_nodes.ComfyUI_LayerStyle	image mode
-LayerUtility: ImageCombineAlpha	custom_nodes.ComfyUI_LayerStyle	RGB_image mask
-LayerUtility: ImageCompositeHandleMask	custom_nodes.ComfyUI_LayerStyle	background_image layer_image invert_mask opacity x_percent y_percent scale rotate mirror anti_aliasing handle_detect top_handle bottom_handle left_handle right_handle handle_mask_outradius top_reserve bottom_reserve left_reserve right_reserve round_to_multiple layer_mask?
-LayerUtility: ImageHub	custom_nodes.ComfyUI_LayerStyle	output random_output input1_image? input1_mask? input2_image? input2_mask? input3_image? input3_mask? input4_image? input4_mask? input5_image? input5_mask? input6_image? input6_mask? input7_image? input7_mask? input8_image? input8_mask? input9_image? input9_mask?
-LayerUtility: ImageListToBatch	custom_nodes.ComfyUI_LayerStyle	image
-LayerUtility: ImageMaskScaleAs	custom_nodes.ComfyUI_LayerStyle	scale_as fit method image? mask?
-LayerUtility: ImageMaskScaleAsV2	custom_nodes.ComfyUI_LayerStyle	scale_as fit method background_color image? mask?
-LayerUtility: ImageOpacity	custom_nodes.ComfyUI_LayerStyle	image opacity invert_mask mask?
-LayerUtility: ImageReel	custom_nodes.ComfyUI_LayerStyle	image1 image1_text image2_text image3_text image4_text reel_height border image2? image3? image4?
-LayerUtility: ImageReelComposit	custom_nodes.ComfyUI_LayerStyle	reel_1 font_file font_size border color_theme reel_2? reel_3? reel_4?
-LayerUtility: ImageRemoveAlpha	custom_nodes.ComfyUI_LayerStyle	RGBA_image fill_background background_color mask?
-LayerUtility: ImageScaleByAspectRatio	custom_nodes.ComfyUI_LayerStyle	aspect_ratio proportional_width proportional_height fit method round_to_multiple scale_to_longest_side longest_side image? mask?
-LayerUtility: ImageScaleByAspectRatio V2	custom_nodes.ComfyUI_LayerStyle	aspect_ratio proportional_width proportional_height fit method round_to_multiple scale_to_side scale_to_length background_color image? mask?
-LayerUtility: ImageScaleRestore	custom_nodes.ComfyUI_LayerStyle	image scale method scale_by_longest_side longest_side mask? original_size?
-LayerUtility: ImageScaleRestore V2	custom_nodes.ComfyUI_LayerStyle	image scale method scale_by scale_by_length mask? original_size?
-LayerUtility: ImageShift	custom_nodes.ComfyUI_LayerStyle	image shift_x shift_y cyclic background_color border_mask_width border_mask_blur mask?
-LayerUtility: ImageTaggerSave	custom_nodes.ComfyUI_LayerStyle	image tag_text custom_path filename_prefix timestamp format quality preview
-LayerUtility: ImageTaggerSaveV2	custom_nodes.ComfyUI_LayerStyle	image tag_text custom_path custom_filename remove_custom_filename_ext filename_prefix timestamp format quality preview
-LayerUtility: Integer	custom_nodes.ComfyUI_LayerStyle	int_value
-LayerUtility: LayerImageTransform	custom_nodes.ComfyUI_LayerStyle	image x y mirror scale aspect_ratio rotate transform_method anti_aliasing
-LayerUtility: LayerMaskTransform	custom_nodes.ComfyUI_LayerStyle	mask x y mirror scale aspect_ratio rotate transform_method anti_aliasing
-LayerUtility: LoadImagesFromPath	custom_nodes.ComfyUI_LayerStyle	path image_load_cap? select_every_nth?
-LayerUtility: LoadVQAModel	custom_nodes.ComfyUI_LayerStyle	model precision device
-LayerUtility: NameToColor	custom_nodes.ComfyUI_LayerStyle	color_name palette in_palette_only default_color size custom_width custom_height size_as?
-LayerUtility: NanoBananaImageScale	custom_nodes.ComfyUI_LayerStyle	image method
-LayerUtility: NumberCalculator	custom_nodes.ComfyUI_LayerStyle	a b operator
-LayerUtility: NumberCalculatorV2	custom_nodes.ComfyUI_LayerStyle	a_value b_value operator a? b?
-LayerUtility: PrintInfo	custom_nodes.ComfyUI_LayerStyle	anything
-LayerUtility: PurgeVRAM	custom_nodes.ComfyUI_LayerStyle	anything purge_cache purge_models
-LayerUtility: PurgeVRAM V2	custom_nodes.ComfyUI_LayerStyle	anything purge_cache purge_models
-LayerUtility: QueueStop	custom_nodes.ComfyUI_LayerStyle	any mode stop
-LayerUtility: RandomGenerator	custom_nodes.ComfyUI_LayerStyle	min_value max_value float_decimal_places fix_seed image?
-LayerUtility: RandomGeneratorV2	custom_nodes.ComfyUI_LayerStyle	min_value max_value least float_decimal_places seed image?
-LayerUtility: RestoreCropBox	custom_nodes.ComfyUI_LayerStyle	background_image croped_image invert_mask crop_box croped_mask?
-LayerUtility: RGB Value	custom_nodes.ComfyUI_LayerStyle	color_value
-LayerUtility: RoundedRectangle	custom_nodes.ComfyUI_LayerStyle	image rounded_rect_radius anti_aliasing top bottom left right detect obj_ext_top obj_ext_bottom obj_ext_left obj_ext_right object_mask? crop_box?
-LayerUtility: Seed	custom_nodes.ComfyUI_LayerStyle	seed
-LayerUtility: SimpleTextImage	custom_nodes.ComfyUI_LayerStyle	text font_file align char_per_line leading font_size text_color stroke_width stroke_color x_offset y_offset width height size_as?
-LayerUtility: String	custom_nodes.ComfyUI_LayerStyle	string
-LayerUtility: StringCondition	custom_nodes.ComfyUI_LayerStyle	text condition sub_string
-LayerUtility: SwitchCase	custom_nodes.ComfyUI_LayerStyle	switch_condition case_1 case_2 case_3 input_default input_1? input_2? input_3?
-LayerUtility: TextBox	custom_nodes.ComfyUI_LayerStyle	text
-LayerUtility: TextImage	custom_nodes.ComfyUI_LayerStyle	text font_file spacing leading horizontal_border vertical_border scale variation_range variation_seed layout width height text_color background_color size_as?
-LayerUtility: TextImage V2	custom_nodes.ComfyUI_LayerStyle	text font_file spacing leading horizontal_border vertical_border scale variation_range variation_seed layout width height text_color background_color size_as?
-LayerUtility: TextJoin	custom_nodes.ComfyUI_LayerStyle	text_1 text_2? text_3? text_4?
-LayerUtility: TextJoinV2	custom_nodes.ComfyUI_LayerStyle	text_1 delimiter text_2? text_3? text_4?
-LayerUtility: TextPreseter	custom_nodes.ComfyUI_LayerStyle	title content text_preset?
-LayerUtility: VQAPrompt	custom_nodes.ComfyUI_LayerStyle	image vqa_model question
-LayerUtility: XY to Percent	custom_nodes.ComfyUI_LayerStyle	background_image layer_image x y
 LazyCache	comfy_extras.nodes_easycache	model reuse_threshold start_percent end_percent verbose
 LazySwitchKJ	custom_nodes.ComfyUI-KJNodes	switch on_false on_true
 LeapfusionHunyuanI2VPatcher	custom_nodes.ComfyUI-KJNodes	model latent index start_percent end_percent strength
-LeRes_DepthMap_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	rm_nearest rm_background boost?
-LineArt_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	coarse
+LeReS-DepthMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image rm_nearest? rm_background? boost? resolution?
+LineArtPreprocessor	custom_nodes.comfyui_controlnet_aux	image coarse? resolution?
+LineartStandardPreprocessor	custom_nodes.comfyui_controlnet_aux	image guassian_sigma? intensity_threshold? resolution?
 List of any [Crystools]	custom_nodes.ComfyUI-Crystools	any_1? any_2? any_3? any_4? any_5? any_6? any_7? any_8?
 List of strings [Crystools]	custom_nodes.ComfyUI-Crystools	string_1? string_2? string_3? string_4? string_5? string_6? string_7? string_8? delimiter?
-ListCounter //Inspire	custom_nodes.ComfyUI-Inspire-Pack	signal base_value
 Load image with metadata [Crystools]	custom_nodes.ComfyUI-Crystools	image
 Load3D	comfy_extras.nodes_load_3d	model_file image width height
 Load3DAdvanced	comfy_extras.nodes_load_3d	model_file viewport_state width height
 LoadAndResizeImage	custom_nodes.ComfyUI-KJNodes	image resize width height repeat keep_proportion divisible_by mask_channel background_color
 LoadAudio	comfy_extras.nodes_audio	audio
-LoadAudioUI	custom_nodes.LTX_Director	audio start_time end_time duration audioUI?
 LoadBackgroundRemovalModel	comfy_extras.nodes_bg_removal	bg_removal_name
 LoadCLIPSegModels+	custom_nodes.ComfyUI_essentials	
 LoadDA3Model	comfy_extras.nodes_depth_anything_3	model_name weight_dtype
-LoadDiffusionModelShared //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model_name weight_dtype key_opt mode
 LoadImage	nodes	image
-LoadImage //Inspire	custom_nodes.ComfyUI-Inspire-Pack	image image_data
 LoadImageDataSetFromFolder	comfy_extras.nodes_dataset	folder
-LoadImageListFromDir //Inspire	custom_nodes.ComfyUI-Inspire-Pack	directory image_load_cap? start_index? load_always? sort_method?
 LoadImageMask	nodes	image channel
 LoadImageOutput	nodes	image
-LoadImagesFromDir //Inspire	custom_nodes.ComfyUI-Inspire-Pack	directory image_load_cap? start_index? load_always? sort_method?
 LoadImagesFromFolderKJ	custom_nodes.ComfyUI-KJNodes	folder width height keep_aspect_ratio image_load_cap? start_index? include_subfolders?
 LoadImageTextDataSetFromFolder	comfy_extras.nodes_dataset	folder
 LoadLatent	nodes	latent
-LoadLBW //Inspire	custom_nodes.ComfyUI-Inspire-Pack	lbw_model
 LoadMediaPipeFaceLandmarker	comfy_extras.nodes_mediapipe	model_name
 LoadMoGeModel	comfy_extras.nodes_moge	model_name
-LoadPromptsFromDir //Inspire	custom_nodes.ComfyUI-Inspire-Pack	prompt_dir reload? load_cap? start_index?
-LoadPromptsFromFile //Inspire	custom_nodes.ComfyUI-Inspire-Pack	prompt_file text_data_opt? reload? load_cap? start_index?
-LoadSinglePromptFromFile //Inspire	custom_nodes.ComfyUI-Inspire-Pack	prompt_file index text_data_opt?
-LoadTextEncoderShared //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model_name1 model_name2 model_name3 type key_opt mode device?
 LoadText|pysssss	custom_nodes.ComfyUI-Custom-Scripts	root_dir file
 LoadTrainingDataset	comfy_extras.nodes_dataset	folder_name
 LoadVideo	comfy_extras.nodes_video	file
 LoadVideoDataSetFromFolder	comfy_extras.nodes_dataset	folder
 LoadVideosFromFolder	custom_nodes.ComfyUI-KJNodes	video force_rate custom_width custom_height frame_load_cap skip_first_frames select_every_nth output_type grid_max_columns add_label
 LoadVideoTextDataSetFromFolder	comfy_extras.nodes_dataset	folder
-LoadVideoUI	custom_nodes.LTX_Director	video start_time end_time duration start_frame end_frame duration_frames resize_method custom_width custom_height frame_rate display_mode crop_x crop_y crop_w crop_h
 LokkenVideoPostProcessing	custom_nodes.ComfyUI-Lokken-VideoTools	upscale upscale_method upscale_by interpolate original_fps interpolate_by dual_pass_rife grain grain_intensity saturation_mix compress crf batching_mode custom_batch_size encoder_preset h264_profile video? images? audio_pass?
 LoopClose	custom_nodes.ControlFlowUtils	LOOP condition data? aux? aux2? aux3? aux4? aux5?
 LoopIteration	comfy_extras.nodes_loop	iteration_index is_first is_last reuse_cache list_item? current_iteration_value?
@@ -1332,10 +825,8 @@ LoopOpen	custom_nodes.ControlFlowUtils	start step end condition index_override? 
 LoopProgress	comfy_extras.nodes_loop	start_id position total
 LoopResult	comfy_extras.nodes_loop	close_id
 Lora Loader Stack (rgthree)	custom_nodes.rgthree-comfy	model clip lora_01 strength_01 lora_02 strength_02 lora_03 strength_03 lora_04 strength_04
-LoraBlockInfo //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model clip lora_name block_info
 LoraExtractKJ	custom_nodes.ComfyUI-KJNodes	finetuned original filename_prefix rank lora_type algorithm lowrank_iters output_dtype bias_diff adaptive_param clamp_quantile
 LoraLoader	nodes	model clip lora_name strength_model strength_clip
-LoraLoaderBlockWeight //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model clip category_filter lora_name strength_model strength_clip inverse seed A B preset block_vector bypass
 LoraLoaderBypass	comfy_extras.nodes_lora_debug	model clip lora_name strength_model strength_clip
 LoraLoaderBypassModelOnly	comfy_extras.nodes_lora_debug	model lora_name strength_model
 LoraLoaderModelOnly	nodes	model lora_name strength_model
@@ -1347,6 +838,7 @@ LoraSelector	custom_nodes.ControlFlowUtils	lora_name run_after?
 LorasForFluxParams+	custom_nodes.ComfyUI_essentials	lora_1 strength_model_1
 LossGraphNode	comfy_extras.nodes_train	loss filename_prefix
 LotusConditioning	comfy_extras.nodes_lotus	
+LTX25MultishotSampler	custom_nodes.ComfyUI-H3-Multishot	model clip video_vae audio_vae prompts negative width height frames_per_shot shot_count join overlap seed seed_per_shot sampler_name sigmas_pass1 two_pass sigmas_pass2 video_cfg audio_cfg frame_rate save_every_shot upscale_model? start_image? shot_images? image_strength?
 LTX2_NAG	custom_nodes.ComfyUI-KJNodes	model nag_scale nag_alpha nag_tau nag_cond_video? nag_cond_audio? inplace?
 LTX2AttentionTunerPatch	custom_nodes.ComfyUI-KJNodes	model blocks video_scale audio_scale audio_to_video_scale video_to_audio_scale triton_kernels
 LTX2AudioLatentNormalizingSampling	custom_nodes.ComfyUI-KJNodes	model audio_normalization_factors
@@ -1360,11 +852,7 @@ LtxApi25AudioToVideo	comfy_api_nodes.nodes_ltxv	audio model prompt seed image?
 LtxApi25ImageToVideo	comfy_api_nodes.nodes_ltxv	image model prompt seed last_frame?
 LtxApi25TextToVideo	comfy_api_nodes.nodes_ltxv	model prompt seed
 LTXAVTextEncoderLoader	comfy_extras.nodes_lt_audio	text_encoder ckpt_name device
-LTXDirector	custom_nodes.LTX_Director	model clip start_second end_second duration_seconds start_frame end_frame duration_frames timeline_data local_prompts segment_lengths epsilon guide_strength audio_vae? optional_latent? global_prompt? use_custom_audio? use_custom_motion? inpaint_audio? frame_rate? display_mode? custom_width? custom_height? resize_method? divisible_by? img_compression? override_audio?
-LTXDirectorCropGuides	custom_nodes.LTX_Director	positive negative latent
-LTXDirectorGuide	custom_nodes.LTX_Director	positive negative vae latent guide_data motion_guide_data? model? ic_lora_name? ic_lora_strength? scale_by? upscale_method? image_attention_strength? crop? auto_snap_ic_grid? use_tiled_encode? tile_size? tile_overlap? retake_mode?
 LTXFaceDetector	custom_nodes.10S-Comfy-nodes	image padding? fallback_bbox? debug?
-LTXKeyframer	custom_nodes.LTX_Director	vae latent multi_input num_images insert_frame_1? strength_1? insert_frame_2? strength_2? insert_frame_3? strength_3? insert_frame_4? strength_4? insert_frame_5? strength_5? insert_frame_6? strength_6? insert_frame_7? strength_7? insert_frame_8? strength_8? insert_frame_9? strength_9? insert_frame_10? strength_10? insert_frame_11? strength_11? insert_frame_12? strength_12? insert_frame_13? strength_13? insert_frame_14? strength_14? insert_frame_15? strength_15? insert_frame_16? strength_16? insert_frame_17? strength_17? insert_frame_18? strength_18? insert_frame_19? strength_19? insert_frame_20? strength_20? insert_frame_21? strength_21? insert_frame_22? strength_22? insert_frame_23? strength_23? insert_frame_24? strength_24? insert_frame_25? strength_25? insert_frame_26? strength_26? insert_frame_27? strength_27? insert_frame_28? strength_28? insert_frame_29? strength_29? insert_frame_30? strength_30? insert_frame_31? strength_31? insert_frame_32? strength_32? insert_frame_33? strength_33? insert_frame_34? strength_34? insert_frame_35? strength_35? insert_frame_36? strength_36? insert_frame_37? strength_37? insert_frame_38? strength_38? insert_frame_39? strength_39? insert_frame_40? strength_40? insert_frame_41? strength_41? insert_frame_42? strength_42? insert_frame_43? strength_43? insert_frame_44? strength_44? insert_frame_45? strength_45? insert_frame_46? strength_46? insert_frame_47? strength_47? insert_frame_48? strength_48? insert_frame_49? strength_49? insert_frame_50? strength_50?
 LTXLatentAnchor	custom_nodes.10S-Comfy-nodes	model sigmas? strength? cache_at_step? similarity_threshold? decay_with_distance? bypass? advanced_mode? cache_mode? forwards_per_step? cache_warmup? anchor_frame? depth_curve? block_index_filter? debug?
 LTXLatentAnchorAware	custom_nodes.10S-Comfy-nodes	model reference_image? vae? energy_latent? sigmas? strength? cache_at_step? similarity_threshold? decay_with_distance? energy_threshold? bypass? debug? advanced_mode? cache_mode? forwards_per_step? cache_warmup? anchor_frame? depth_curve? block_index_filter?
 LTXLikenessAnchor	custom_nodes.10S-Comfy-nodes	model strength reference_info? reference_source? frame_0_bbox? similarity_threshold? decay_with_distance? bypass? debug? advanced_mode? depth_curve? block_index_filter? similarity_sharpness? override_face_bbox? skip_when_sigma_above? pull_mode? late_block_falloff?
@@ -1377,7 +865,6 @@ LTXReferenceBypass	custom_nodes.10S-Comfy-nodes	model
 LTXReferenceConditioning	custom_nodes.10S-Comfy-nodes	model vae image target_latent? strength? position_mode? verbose?
 LTXReferenceEnable	custom_nodes.10S-Comfy-nodes	model zero_ref_timesteps? verbose?
 LTXReferenceProbe	custom_nodes.10S-Comfy-nodes	model
-LTXSequencer	custom_nodes.LTX_Director	positive negative vae latent multi_input num_images insert_mode frame_rate insert_frame_1? insert_second_1? strength_1? insert_frame_2? insert_second_2? strength_2? insert_frame_3? insert_second_3? strength_3? insert_frame_4? insert_second_4? strength_4? insert_frame_5? insert_second_5? strength_5? insert_frame_6? insert_second_6? strength_6? insert_frame_7? insert_second_7? strength_7? insert_frame_8? insert_second_8? strength_8? insert_frame_9? insert_second_9? strength_9? insert_frame_10? insert_second_10? strength_10? insert_frame_11? insert_second_11? strength_11? insert_frame_12? insert_second_12? strength_12? insert_frame_13? insert_second_13? strength_13? insert_frame_14? insert_second_14? strength_14? insert_frame_15? insert_second_15? strength_15? insert_frame_16? insert_second_16? strength_16? insert_frame_17? insert_second_17? strength_17? insert_frame_18? insert_second_18? strength_18? insert_frame_19? insert_second_19? strength_19? insert_frame_20? insert_second_20? strength_20? insert_frame_21? insert_second_21? strength_21? insert_frame_22? insert_second_22? strength_22? insert_frame_23? insert_second_23? strength_23? insert_frame_24? insert_second_24? strength_24? insert_frame_25? insert_second_25? strength_25? insert_frame_26? insert_second_26? strength_26? insert_frame_27? insert_second_27? strength_27? insert_frame_28? insert_second_28? strength_28? insert_frame_29? insert_second_29? strength_29? insert_frame_30? insert_second_30? strength_30? insert_frame_31? insert_second_31? strength_31? insert_frame_32? insert_second_32? strength_32? insert_frame_33? insert_second_33? strength_33? insert_frame_34? insert_second_34? strength_34? insert_frame_35? insert_second_35? strength_35? insert_frame_36? insert_second_36? strength_36? insert_frame_37? insert_second_37? strength_37? insert_frame_38? insert_second_38? strength_38? insert_frame_39? insert_second_39? strength_39? insert_frame_40? insert_second_40? strength_40? insert_frame_41? insert_second_41? strength_41? insert_frame_42? insert_second_42? strength_42? insert_frame_43? insert_second_43? strength_43? insert_frame_44? insert_second_44? strength_44? insert_frame_45? insert_second_45? strength_45? insert_frame_46? insert_second_46? strength_46? insert_frame_47? insert_second_47? strength_47? insert_frame_48? insert_second_48? strength_48? insert_frame_49? insert_second_49? strength_49? insert_frame_50? insert_second_50? strength_50?
 LTXTextAttentionAmplifier	custom_nodes.10S-Comfy-nodes	model text_amplification? spatial_focus? block_index_filter? bypass? debug?
 LTXTiledSampler	custom_nodes.10S-Comfy-nodes	noise guider sampler sigmas latent_image bypass_tiling? tile_axis? n_tiles? tile_overlap? max_size_for_no_tile? audio_pass? audio_carrier_tile? debug?
 LTXVAddGeneratedKeyframes	comfy_extras.nodes_lt_keyframes	positive negative vae latent interval_frames? keyframes? frame_indices?
@@ -1427,18 +914,15 @@ LumaRay32VideoEditNode	comfy_api_nodes.nodes_luma	video prompt resolution streng
 LumaRay32VideoReframeNode	comfy_api_nodes.nodes_luma	video prompt aspect_ratio resolution seed
 LumaReferenceNode	comfy_api_nodes.nodes_luma	image weight luma_ref?
 LumaVideoNode	comfy_api_nodes.nodes_luma	prompt model aspect_ratio resolution duration loop seed luma_concepts?
-M2M VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier optional_interpolation_states?
+M-LSDPreprocessor	custom_nodes.comfyui_controlnet_aux	image score_threshold? dist_threshold? resolution?
 MagnificImageRelightNode	comfy_api_nodes.nodes_magnific	image prompt light_transfer_strength style interpolate_from_original change_background preserve_details advanced_settings reference_image?
 MagnificImageSkinEnhancerNode	comfy_api_nodes.nodes_magnific	image sharpen smart_grain mode
 MagnificImageStyleTransferNode	comfy_api_nodes.nodes_magnific	image reference_image prompt style_strength structure_strength flavor engine portrait_mode fixed_generation
 MagnificImageUpscalerCreativeNode	comfy_api_nodes.nodes_magnific	image prompt scale_factor optimized_for creativity hdr resemblance fractality engine auto_downscale
 MagnificImageUpscalerPreciseV2Node	comfy_api_nodes.nodes_magnific	image scale_factor flavor sharpen smart_grain ultra_detail auto_downscale
 Mahiro	comfy_extras.nodes_mahiro	model
-Make Interpolation State List	custom_nodes.ComfyUI-Frame-Interpolation	frame_indices is_skip_list
-MakeBasicPipe //Inspire	custom_nodes.ComfyUI-Inspire-Pack	ckpt_name ckpt_key_opt positive_wildcard_text negative_wildcard_text Add selection to Select to add LoRA Select to add Wildcard wildcard_mode positive_populated_text negative_populated_text token_normalization weight_interpretation stop_at_clip_layer seed vae_opt?
-MakeLBW //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model clip category_filter lora_name inverse seed A B preset block_vector bypass
 MakeTrainingDataset	comfy_extras.nodes_dataset	images vae clip texts?
-Manga2Anime_LineArt_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	
+Manga2Anime_LineArt_Preprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 ManualSigmas	comfy_extras.nodes_custom_sampler	sigmas
 MarigoldV2PostProcess	comfy_extras.nodes_marigold	image prediction
 MaskBatch+	custom_nodes.ComfyUI_essentials	mask1 mask2
@@ -1446,7 +930,6 @@ MaskBatchMulti	custom_nodes.ComfyUI-KJNodes	inputcount mask_1 mask_2
 MaskBlur+	custom_nodes.ComfyUI_essentials	mask amount device
 MaskBoundingBox+	custom_nodes.ComfyUI_essentials	mask padding blur image_optional?
 MaskComposite	comfy_extras.nodes_mask	destination source x y operation
-MaskDetailerPipe	custom_nodes.ComfyUI-Impact-Pack	image mask basic_pipe guide_size guide_size_for max_size mask_mode seed steps cfg sampler_name scheduler denoise feather crop_factor drop_size refiner_ratio batch_size cycle refiner_basic_pipe_opt? detailer_hook? inpaint_model? noise_mask_feather? bbox_fill? contour_fill? scheduler_func_opt?
 MaskExpandBatch+	custom_nodes.ComfyUI_essentials	mask size method
 MaskFix+	custom_nodes.ComfyUI_essentials	mask erode_dilate fill_holes remove_isolated_pixels smooth blur
 MaskFlip+	custom_nodes.ComfyUI_essentials	mask axis
@@ -1455,23 +938,16 @@ MaskFromColor+	custom_nodes.ComfyUI_essentials	image red green blue threshold
 MaskFromList+	custom_nodes.ComfyUI_essentials	width height values? str_values?
 MaskFromRGBCMYBW+	custom_nodes.ComfyUI_essentials	image threshold_r threshold_g threshold_b
 MaskFromSegmentation+	custom_nodes.ComfyUI_essentials	image segments remove_isolated_pixels remove_small_masks fill_holes
-MaskListToMaskBatch	custom_nodes.ComfyUI-Impact-Pack	mask
+MaskOptFlow	custom_nodes.comfyui_controlnet_aux	optical_flow mask
 MaskOrImageToWeight	custom_nodes.ComfyUI-KJNodes	output_type images? masks?
 MaskPreview	comfy_extras.nodes_mask	mask
 MaskPreview+	custom_nodes.ComfyUI_essentials	mask
-MaskRectArea	custom_nodes.ComfyUI-Impact-Pack	x y width height blur_radius
-MaskRectAreaAdvanced	custom_nodes.ComfyUI-Impact-Pack	x y width height image_width image_height blur_radius
 MaskSmooth+	custom_nodes.ComfyUI_essentials	mask amount
-MasksToMaskList	custom_nodes.ComfyUI-Impact-Pack	masks?
 MaskToImage	comfy_extras.nodes_mask	mask
-MaskToSEGS	custom_nodes.ComfyUI-Impact-Pack	mask combined crop_factor bbox_fill drop_size contour_fill
-MaskToSEGS_for_AnimateDiff	custom_nodes.ComfyUI-Impact-Pack	mask combined crop_factor bbox_fill drop_size contour_fill
 MathExpression|pysssss	custom_nodes.ComfyUI-Custom-Scripts	expression a? b? c?
-MediaPipe_FaceMesh_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	max_faces min_confidence resolution_upscale_by
+MediaPipe-FaceMeshPreprocessor	custom_nodes.comfyui_controlnet_aux	image max_faces? min_confidence? resolution?
 MediaPipeFaceLandmarker	comfy_extras.nodes_mediapipe	face_detection_model image detector_variant num_faces min_confidence missing_frame_fallback
 MediaPipeFaceMask	comfy_extras.nodes_mediapipe	face_landmarks regions
-MediaPipeFaceMeshDetectorProvider //Inspire	custom_nodes.ComfyUI-Inspire-Pack	max_faces face mouth left_eyebrow left_eye left_pupil right_eyebrow right_eye right_pupil
-MediaPipeFaceMeshToSEGS	custom_nodes.ComfyUI-Impact-Pack	image crop_factor bbox_fill crop_min_size drop_size dilation face mouth left_eyebrow left_eye left_pupil right_eyebrow right_eye right_pupil
 MediaPipeFaceMeshVisualize	comfy_extras.nodes_mediapipe	face_landmarks connections color thickness point_size image?
 MemoryStorage	custom_nodes.ControlFlowUtils	Name Input? Reset? AcceptNulls?
 MergeImageChannels	custom_nodes.ComfyUI-KJNodes	red green blue alpha?
@@ -1479,7 +955,8 @@ MergeImageLists	comfy_extras.nodes_dataset	images
 MergeMeshes	comfy_extras.nodes_save_3d	meshes
 MergeSplat	comfy_extras.nodes_gaussian_splat	splats
 MergeTextLists	comfy_extras.nodes_dataset	texts
-MeshGraphormerDepthMapPreprocessorProvider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	
+MeshGraphormer+ImpactDetector-DepthMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image bbox_detector bbox_threshold? bbox_dilation? bbox_crop_factor? drop_size? mask_bbox_padding? mask_type? mask_expand? rand_seed? resolution?
+MeshGraphormer-DepthMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image mask_bbox_padding? resolution? mask_type? mask_expand? rand_seed? detect_thr? presence_thr?
 MeshSmoothNormals	comfy_extras.nodes_mesh_postprocess	mesh crease_angle
 MeshTextureToImage	comfy_extras.nodes_mesh_postprocess	mesh
 MeshToFile3D	comfy_extras.nodes_save_3d	mesh
@@ -1495,7 +972,10 @@ Metadata comparator [Crystools]	custom_nodes.ComfyUI-Crystools	metadata_raw_old 
 Metadata extractor [Crystools]	custom_nodes.ComfyUI-Crystools	metadata_raw
 MetaMuseImageEditApi	comfy_api_nodes.nodes_meta	model
 MetaMuseImageTextToImageApi	comfy_api_nodes.nodes_meta	model
-MiDaS_DepthMap_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	a bg_threshold
+Metric3D-DepthMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image backbone? fx? fy? resolution?
+Metric3D-NormalMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image backbone? fx? fy? resolution?
+MiDaS-DepthMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image a? bg_threshold? resolution?
+MiDaS-NormalMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image a? bg_threshold? resolution?
 MiniMaxH3AddGuide	comfy_extras.nodes_minimax_h3	positive latent frame_idx vae? audio_vae? image? audio?
 MiniMaxH3AppendContinuation	custom_nodes.comfyui-minimax-h3-continuation	previous_av_latent sampled_window overlap_video_tokens overlap_audio_tokens transition_video_tokens transition_audio_tokens
 MiniMaxH3Cache	custom_nodes.ComfyUI-DaSiWa-Nodes	model reuse_threshold start_percent end_percent max_steps device verbose
@@ -1503,6 +983,18 @@ MiniMaxH3Director	custom_nodes.ComfyUI-DaSiWa-Nodes	mode prompt width height dur
 MiniMaxH3DirectorGuide	custom_nodes.ComfyUI-DaSiWa-Nodes	clip vae guide audio_vae?
 MiniMaxH3EffectEmbeddings	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	prompt placement effects? bypass?
 MiniMaxH3Extender	custom_nodes.ComfyUI_MiniMax_H3_Extender	model clip vae run_mode width height ref_image_size steps sampler_name scheduler denoise context_length audio_context_length clips_json resolution_mode megapixels refs_json generation_mode motion_context refine_enabled refine_scale refine_steps refine_denoise fl2va_model? audio_vae? ref_audio? ref_audio_1? ref_audio_2? ref_audio_3? ref_video_1? ref_video_fps_1? ref_video_audio_1? ref_video_2? ref_video_fps_2? ref_video_audio_2? ref_video_3? ref_video_fps_3? ref_video_audio_3? ref_pack? prompt_pack? sigmas? continue_existing_video?
+MiniMaxH3FantasticEditComposite	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	images references blend max_size
+MiniMaxH3FantasticObjectMask	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	model clip video text points start end threshold max_objects mode? base? every_frame? subject? max_frames? pictures?
+MiniMaxH3FantasticReferenceCache	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	model cache refresh_every store_8bit
+MiniMaxH3FantasticReferenceMap	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	mods? references?
+MiniMaxH3FantasticRefModApply	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	conditioning mods retention max_total_tokens
+MiniMaxH3FantasticRefModCreate	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	name subfolder mode ref_resolution grid latent_frames refinement_steps max_tokens audio_max_seconds concept_type description write_preview source subject_name? appearance? voice_description? retained_attributes? image? audio? vae? audio_vae?
+MiniMaxH3FantasticRefModEdit	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	file frames add voice latent_frames audio_max_seconds save_as vae? audio_vae? subject_name? appearance? voice_description? retained_attributes? stored_blur?
+MiniMaxH3FantasticRefModInspect	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	file view strength audio_seconds mods? index? vae? audio_vae? stored_blur?
+MiniMaxH3FantasticRefModStoreFrames	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	files vae
+MiniMaxH3FantasticRefModTextEncode	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	clip prompt width height length ref_image_size reference_fps max_total_tokens mods? references? vae? audio_vae? voice_description_at_label? stack_pictures? stack_pictures_n?
+MiniMaxH3FantasticVideoEditLatent	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	vae images mask grow keep_audio audio_vae? audio? megapixels?
+MiniMaxH3FilenamePrefix	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	folder subfolder date_folder filename
 MiniMaxH3FunControlNetApply	comfy_extras.nodes_minimax_h3	model model_patch vae strength start_percent end_percent control_video? mask? source_video?
 MiniMaxH3GuidedContinuationWindow	custom_nodes.comfyui-minimax-h3-continuation	previous_av_latent overlap_frames extension_frames
 MiniMaxH3GuidedWriter	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	prompt model task resolution duration greedy seed keep_model_loaded aspect_ratio? reference_material? options? bypass? system_prompt? repeat_last? library_pick?
@@ -1519,11 +1011,13 @@ MinimaxH3LatentUpscalerNode2D	custom_nodes.Comfyui_Minimax_h3_latent_Upscaler	la
 MiniMaxH3LoraTriggers	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	prompt triggers? bypass?
 MiniMaxH3LQPackageLoad	custom_nodes.ComfyUI-MiniMaxH3_LatentUpscaler	selection_json load_source chunk_mode scene_threshold min_scene_seconds max_scene_seconds index index_mode edit_json
 MiniMaxH3LQPackageSave	custom_nodes.ComfyUI-MiniMaxH3_LatentUpscaler	samples positive filename_prefix negative? project? note? prompt? seed? images? audio?
+MiniMaxH3MediaLoader	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	media_state
 MiniMaxH3MotionContextDiskFinalDecode	custom_nodes.ComfyUI_MiniMax_H3_Extender	cache vae audio_vae fps filename_prefix output_directory codec crf preset audio_bitrate autoplay auto_save_project save_individual_clips
 MiniMaxH3MotionContextDiskJoin	custom_nodes.ComfyUI_MiniMax_H3_Extender	samples validated run_mode fps previous_cache? trim_frames?
 MiniMaxH3MotionContextRAM	custom_nodes.ComfyUI_MiniMax_H3_Extender	conditioning latent context_latent context_length audio_context_length
 MiniMaxH3MultiReferenceCaption	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	model length seed subjects? pictures? videos? audios? previous? clip? options? enabled_mask? max_frames? context_size? bypass? reference_instructions? repeat_last?
 MiniMaxH3Pass2StaggeredScheduler	custom_nodes.ComfyUI-MiniMaxH3_LatentUpscaler	model steps denoise rho shape reference_steps? base_scheduler?
+MiniMaxH3PromptBuilder	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	prompt_text builder_state references? mods? picture_1? picture_2? picture_3? picture_4? picture_5? picture_6? picture_7? picture_8? picture_9? video_1? video_2? video_3? video_audio_1? video_audio_2? video_audio_3? audio_1? audio_2? audio_3?
 MiniMaxH3PromptCheck	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	prompt task duration options? references?
 MiniMaxH3PromptPackBridge	custom_nodes.ComfyUI_MiniMax_H3_Extender	prompt_1 prompt_2? prompt_3? prompt_4? prompt_5? prompt_6? prompt_7? prompt_8? prompt_9? prompt_10? prompt_11? prompt_12? prompt_13? prompt_14? prompt_15? prompt_16? prompt_17? prompt_18? prompt_19? prompt_20? prompt_21? prompt_22? prompt_23? prompt_24? prompt_25? prompt_26? prompt_27? prompt_28? prompt_29? prompt_30? prompt_31? prompt_32? prompt_33? prompt_34? prompt_35? prompt_36? prompt_37? prompt_38? prompt_39? prompt_40? prompt_41? prompt_42? prompt_43? prompt_44? prompt_45? prompt_46? prompt_47? prompt_48? prompt_49? prompt_50? prompt_51? prompt_52? prompt_53? prompt_54? prompt_55? prompt_56? prompt_57? prompt_58? prompt_59? prompt_60? prompt_61? prompt_62? prompt_63? prompt_64? prompt_65? prompt_66? prompt_67? prompt_68? prompt_69? prompt_70? prompt_71? prompt_72? prompt_73? prompt_74? prompt_75? prompt_76? prompt_77? prompt_78? prompt_79? prompt_80? prompt_81? prompt_82? prompt_83? prompt_84? prompt_85? prompt_86? prompt_87? prompt_88? prompt_89? prompt_90? prompt_91? prompt_92? prompt_93? prompt_94? prompt_95? prompt_96? prompt_97? prompt_98? prompt_99? prompt_100? prompt_101? prompt_102? prompt_103? prompt_104? prompt_105? prompt_106? prompt_107? prompt_108? prompt_109? prompt_110? prompt_111? prompt_112? prompt_113? prompt_114? prompt_115? prompt_116? prompt_117? prompt_118? prompt_119? prompt_120? prompt_121? prompt_122? prompt_123? prompt_124? prompt_125? prompt_126? prompt_127? prompt_128?
 MiniMaxH3PromptPresets	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	preset
@@ -1536,7 +1030,29 @@ MiniMaxH3ReferenceAdapter	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	split_
 MiniMaxH3ReferenceCaption	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	role model length seed image? audio? video? clip? previous? description? instruction? max_frames? context_size? options? bypass? repeat_last?
 MiniMaxH3ReferencePackBridge	custom_nodes.ComfyUI_MiniMax_H3_Extender	ref_1? ref_2? ref_3? ref_4? ref_5? ref_6? ref_7? ref_8? ref_9?
 MiniMaxH3ReferenceSlots	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	references soundtracks
+MiniMaxH3ReferenceSplitter	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	references
 MiniMaxH3ReferenceToVideo	comfy_extras.nodes_minimax_h3	clip prompt width height length ref_image_size vae? audio_vae? ref_images? ref_videos? ref_video_audios? ref_audios?
+MiniMaxH3RefLoRAApply	custom_nodes.ComfyUI-MiniMaxH3RefLoRA	conditioning mods retention max_total_tokens?
+MiniMaxH3RefLoRAInspect	custom_nodes.ComfyUI-MiniMaxH3RefLoRA	reflora_name verify_bytes
+MiniMaxH3RefLoRALoader	custom_nodes.ComfyUI-MiniMaxH3RefLoRA	model reflora_name lora_strength refmod_retention members attach_to_model clip? lora_strength_clip? components? max_total_tokens? show_info?
+MiniMaxH3RefLoRAPack	custom_nodes.ComfyUI-MiniMaxH3RefLoRA	lora_name output_name subfolder overwrite refmod_1 refmod_2 refmod_3 refmod_4 refmod_5 refmod_6 refmod_7 refmod_8
+MiniMaxH3RefModApply	custom_nodes.ComfyUI-MiniMaxH3Mod	conditioning mods override retention curve_direction scramble_seed curve_shape curve_value graph_preset? scramble_mode? scramble_keep? max_total_tokens? save_preset_as?
+MiniMaxH3RefModAudioExtract	custom_nodes.ComfyUI-MiniMaxH3Mod	audio audio_vae name max_seconds max_tokens budget_policy concept_type description subfolder save
+MiniMaxH3RefModBridgeDisarm	custom_nodes.ComfyUI-MiniMaxH3Mod	trigger
+MiniMaxH3RefModBundleSave	custom_nodes.ComfyUI-MiniMaxH3Mod	mods name subfolder
+MiniMaxH3RefModConfig	custom_nodes.ComfyUI-MiniMaxH3Mod	mods retention curve_direction curve_shape curve_value step_curve_direction step_curve_shape step_curve_value
+MiniMaxH3RefModContinuumBridge	custom_nodes.ComfyUI-MiniMaxH3Mod	model mods enable retention curve_direction curve_shape curve_value scramble_seed scramble_mode? scramble_keep? max_total_tokens?
+MiniMaxH3RefModExtract	custom_nodes.ComfyUI-MiniMaxH3Mod	name mode concept_type background_retention ref_resolution pool_h pool_w latent_frames identity merge motion_only multiplier max_tokens description save refs_image? refs_video? refs_bundle? mask? av_encoder? vae? extraction_preset? subfolder? mask_list? budget_policy?
+MiniMaxH3RefModFolderLoader	custom_nodes.ComfyUI-MiniMaxH3Mod	folder max_items max_frames max_edge
+MiniMaxH3RefModInspect	custom_nodes.ComfyUI-MiniMaxH3Mod	mods index preview strength vae? visual_preview?
+MiniMaxH3RefModMaskList	custom_nodes.ComfyUI-MiniMaxH3Mod	masks
+MiniMaxH3RefModMasterExtract	custom_nodes.ComfyUI-MiniMaxH3Mod	name mode concept_type background_retention ref_resolution pool_h pool_w latent_frames identity merge motion_only multiplier max_tokens description save audio_max_seconds audio_max_tokens audio_budget_policy audio_concept_type max_total_tokens refs_image? refs_video? refs_bundle? mask? av_encoder? vae? extraction_preset? subfolder? mask_list? audio? audio_vae? budget_policy? save_layout?
+MiniMaxH3RefModSave	custom_nodes.ComfyUI-MiniMaxH3Mod	mods filename_prefix subfolder
+MiniMaxH3RefModsAxis	custom_nodes.ComfyUI-MiniMaxH3Mod	show_info mod_a_1 mod_b_1 value_1 mod_a_2 mod_b_2 value_2 mod_a_3 mod_b_3 value_3 mod_a_4 mod_b_4 value_4 mod_a_5 mod_b_5 value_5 mod_a_6 mod_b_6 value_6 mod_a_7 mod_b_7 value_7 mod_a_8 mod_b_8 value_8 max_total_tokens? components_1? visual_strength_1? audio_strength_1? components_2? visual_strength_2? audio_strength_2? components_3? visual_strength_3? audio_strength_3? components_4? visual_strength_4? audio_strength_4? components_5? visual_strength_5? audio_strength_5? components_6? visual_strength_6? audio_strength_6? components_7? visual_strength_7? audio_strength_7? components_8? visual_strength_8? audio_strength_8?
+MiniMaxH3RefModsLoader	custom_nodes.ComfyUI-MiniMaxH3Mod	show_info mod_1 strength_1 copies_1 mod_2 strength_2 copies_2 mod_3 strength_3 copies_3 mod_4 strength_4 copies_4 mod_5 strength_5 copies_5 mod_6 strength_6 copies_6 mod_7 strength_7 copies_7 mod_8 strength_8 copies_8 max_total_tokens? components_1? visual_strength_1? audio_strength_1? components_2? visual_strength_2? audio_strength_2? components_3? visual_strength_3? audio_strength_3? components_4? visual_strength_4? audio_strength_4? components_5? visual_strength_5? audio_strength_5? components_6? visual_strength_6? audio_strength_6? components_7? visual_strength_7? audio_strength_7? components_8? visual_strength_8? audio_strength_8?
+MiniMaxH3RefModStack	custom_nodes.ComfyUI-Fantastic-MiniMaxH3-PromptBuilder	stack_state mods?
+MiniMaxH3RefModStepCurve	custom_nodes.ComfyUI-MiniMaxH3Mod	model override curve_direction curve_shape curve_value mods?
+MiniMaxH3RefModTextEncode	custom_nodes.ComfyUI-MiniMaxH3Mod	clip mods prompt reference_fps max_total_tokens vae?
 MiniMaxH3RewriterOptions	custom_nodes.MiniMax-H3-Prompt-Rewriter-ComfyUI	max_new_tokens temperature top_p top_k repetition_penalty attn_implementation adapter? use_lora? merge_lora? auto_download? gpu_layers? n_ctx? gguf_runtime? device? llama_backend? trust_remote_code? prompt_file? self_check? fix_once? downloader?
 MiniMaxH3SigmaShift	comfy_extras.nodes_minimax_h3	model shift_video shift_audio
 MiniMaxH3TailFromLatent	custom_nodes.ComfyUI_MiniMax_H3_Extender	samples vae audio_vae tail_seconds align_to_h3_grid
@@ -1604,15 +1120,11 @@ MoGeInference	comfy_extras.nodes_moge	moge_model image resolution_level fov_x_de
 MoGePanoramaInference	comfy_extras.nodes_moge	moge_model image resolution_level split_resolution merge_resolution batch_size refine_steps
 MoGePointMapToMesh	comfy_extras.nodes_moge	moge_geometry batch_index decimation discontinuity_threshold texture
 MoGeRender	comfy_extras.nodes_moge	moge_geometry output
-MOMO VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier num_inference_steps optional_interpolation_states?
 Morphology	comfy_extras.nodes_morphology	image operation kernel_size
 MultiGPU_WorkUnits	comfy_extras.nodes_multigpu	model max_gpus
-MultiImageLoader	custom_nodes.LTX_Director	image_paths width height interpolation resize_method multiple_of img_compression
 NABLA_AttentionKJ	custom_nodes.ComfyUI-KJNodes	model latent window_time window_width window_height sparsity torch_compile
 NAGuidance	comfy_extras.nodes_nag	model nag_scale nag_alpha nag_tau
 NoiseFromImage+	custom_nodes.ComfyUI_essentials	image noise_strenght noise_size color_noise mask_strength mask_scale_diff mask_contrast saturation contrast blur noise_mask?
-NoiseInjectionDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	schedule_for_cycle source seed start_strength end_strength
-NoiseInjectionHookProvider	custom_nodes.ComfyUI-Impact-Pack	schedule_for_iteration source seed start_strength end_strength
 NormalizedAmplitudeToFloatList	custom_nodes.ComfyUI-KJNodes	normalized_amp
 NormalizedAmplitudeToMask	custom_nodes.ComfyUI-KJNodes	normalized_amp width height frame_offset location_x location_y size shape color
 NormalizeImages	comfy_extras.nodes_dataset	images mean std
@@ -1621,14 +1133,14 @@ NullInput	custom_nodes.ControlFlowUtils	NULL NULL2? NULL3? NULL4? NULL5? NULL6?
 NullOutput	custom_nodes.ControlFlowUtils	
 OffsetMask	custom_nodes.ComfyUI-KJNodes	mask x y angle duplication_factor roll incremental padding_mode
 OffsetMaskByNormalizedAmplitude	custom_nodes.ComfyUI-KJNodes	normalized_amp mask x y rotate angle_multiplier
-ONNXDetectorProvider	custom_nodes.ComfyUI-Impact-Pack	model_name
-ONNXDetectorSEGS	custom_nodes.ComfyUI-Impact-Pack	bbox_detector image threshold dilation crop_factor drop_size labels detailer_hook?
+OneFormer-ADE20K-SemSegPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
+OneFormer-COCO-SemSegPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 OpenAIChatConfig	comfy_api_nodes.nodes_openai	truncation max_output_tokens? instructions? reasoning_effort?
 OpenAIChatNode	comfy_api_nodes.nodes_openai	prompt persist_context model images? files? advanced_options?
 OpenAIGPTImage1	comfy_api_nodes.nodes_openai	prompt seed? quality? background? size? n? image? mask? model? custom_width? custom_height?
 OpenAIGPTImageNodeV2	comfy_api_nodes.nodes_openai	prompt model n seed
 OpenAIInputFiles	comfy_api_nodes.nodes_openai	file OPENAI_INPUT_FILES?
-OpenPose_Preprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	detect_hand detect_body detect_face resolution_upscale_by
+OpenposePreprocessor	custom_nodes.comfyui_controlnet_aux	image detect_hand? detect_body? detect_face? resolution? scale_stick_for_xinsr_cn?
 OpenRouterImageNode	comfy_api_nodes.nodes_openrouter	model
 OpenRouterLLMNode	comfy_api_nodes.nodes_openrouter	prompt model seed system_prompt?
 OpticalFlowLoader	comfy_extras.nodes_void	model_name
@@ -1652,16 +1164,13 @@ PhotoMakerEncode	comfy_extras.nodes_photomaker	photomaker image clip text
 PhotoMakerLoader	comfy_extras.nodes_photomaker	photomaker_model_name
 PiDColorBiasCorrection	custom_nodes.ComfyUI-KJNodes	model strength backbone
 PiDConditioning	comfy_extras.nodes_pid	positive latent latent_format degrade_sigma
+PiDiNetPreprocessor	custom_nodes.comfyui_controlnet_aux	image safe? resolution?
 Pipe from any [Crystools]	custom_nodes.ComfyUI-Crystools	CPipeAny
 Pipe to/edit any [Crystools]	custom_nodes.ComfyUI-Crystools	CPipeAny? any_1? any_2? any_3? any_4? any_5? any_6?
 Pixal3DConditioning	comfy_extras.nodes_trellis2	clip_vision_model image camera_angle_x
 Pixal3DMultiViewConditioning	comfy_extras.nodes_trellis2	clip_vision_model fov front? left? back? right?
-PixelKSampleHookCombine	custom_nodes.ComfyUI-Impact-Pack	hook1 hook2
-PixelKSampleUpscalerProvider	custom_nodes.ComfyUI-Impact-Pack	scale_method model vae seed steps cfg sampler_name scheduler positive negative denoise use_tiled_vae tile_size upscale_model_opt? pk_hook_opt? scheduler_func_opt?
-PixelKSampleUpscalerProviderPipe	custom_nodes.ComfyUI-Impact-Pack	scale_method seed steps cfg sampler_name scheduler denoise use_tiled_vae basic_pipe tile_size upscale_model_opt? pk_hook_opt? scheduler_func_opt? tile_cnet_opt? tile_cnet_strength?
 PixelOEPixelize+	custom_nodes.ComfyUI_essentials	image downscale_mode target_size patch_size thickness color_matching upscale
-PixelTiledKSampleUpscalerProvider	custom_nodes.ComfyUI-Impact-Pack	scale_method model vae seed steps cfg sampler_name scheduler positive negative denoise tile_width tile_height tiling_strategy upscale_model_opt? pk_hook_opt? tile_cnet_opt? tile_cnet_strength? overlap?
-PixelTiledKSampleUpscalerProviderPipe	custom_nodes.ComfyUI-Impact-Pack	scale_method seed steps cfg sampler_name scheduler denoise tile_width tile_height tiling_strategy basic_pipe upscale_model_opt? pk_hook_opt? tile_cnet_opt? tile_cnet_strength?
+PixelPerfectResolution	custom_nodes.comfyui_controlnet_aux	original_image image_gen_width image_gen_height resize_mode
 PixverseImageToVideoNode	comfy_api_nodes.nodes_pixverse	image prompt quality duration_seconds motion_mode seed negative_prompt? pixverse_template?
 PixverseTemplateNode	comfy_api_nodes.nodes_pixverse	template
 PixverseTextToVideoNode	comfy_api_nodes.nodes_pixverse	prompt aspect_ratio quality duration_seconds motion_mode seed negative_prompt? pixverse_template?
@@ -1690,9 +1199,6 @@ Preview3DAdvanced	comfy_extras.nodes_load_3d	model_3d viewport_state width heigh
 PreviewAnimation	custom_nodes.ComfyUI-KJNodes	fps images? masks?
 PreviewAny	comfy_extras.nodes_preview_any	source
 PreviewAudio	comfy_extras.nodes_audio	audio
-PreviewBridge	custom_nodes.ComfyUI-Impact-Pack	images image block? restore_mask?
-PreviewBridgeLatent	custom_nodes.ComfyUI-Impact-Pack	latent image preview_method vae_opt? block? restore_mask?
-PreviewDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	quality
 PreviewGaussianSplat	comfy_extras.nodes_load_3d	model_3d viewport_state width height model_3d_info? camera_info?
 PreviewImage	nodes	images
 PreviewImageOrMask	custom_nodes.ComfyUI-KJNodes	input
@@ -1709,8 +1215,6 @@ PrimitiveFloat	comfy_extras.nodes_primitive	value
 PrimitiveInt	comfy_extras.nodes_primitive	value
 PrimitiveString	comfy_extras.nodes_primitive	value
 PrimitiveStringMultiline	comfy_extras.nodes_primitive	value
-PromptBuilder //Inspire	custom_nodes.ComfyUI-Inspire-Pack	category preset text
-PromptExtractor //Inspire	custom_nodes.ComfyUI-Inspire-Pack	image positive_id negative_id info
 Prompts Everywhere	custom_nodes.cg-use-everywhere	positive? negative?
 PrunaImageToVideoNode	comfy_api_nodes.nodes_pruna	model
 PrunaTextToVideoNode	comfy_api_nodes.nodes_pruna	model
@@ -1724,6 +1228,7 @@ PulidFluxModelLoader	custom_nodes.ComfyUI_PuLID_Flux_ll	pulid_file
 PulidFluxOptions	custom_nodes.ComfyUI_PuLID_Flux_ll	input_faces_order input_faces_index input_faces_align_mode
 PuLIDInsightFaceLoader	custom_nodes.ComfyUI-PuLID-Flux2	provider
 PuLIDModelLoader	custom_nodes.ComfyUI-PuLID-Flux2	pulid_file
+PyraCannyPreprocessor	custom_nodes.comfyui_controlnet_aux	image low_threshold? high_threshold? resolution?
 QuadrupleCLIPLoader	comfy_extras.nodes_hidream	clip_name1 clip_name2 clip_name3 clip_name4
 QuadrupleCLIPLoaderGGUF	custom_nodes.ComfyUI-GGUF	clip_name1 clip_name2 clip_name3 clip_name4
 QuiverImageToSVGNode	comfy_api_nodes.nodes_quiver	image auto_crop model seed reasoning_effort?
@@ -1733,10 +1238,8 @@ QwenImageDiffsynthControlnet	comfy_extras.nodes_model_patch	model model_patch va
 QwenImageEditApi	comfy_api_nodes.nodes_qwen	model size n seed prompt_extend watermark
 QwenImageTextToImageApi	comfy_api_nodes.nodes_qwen	model n seed prompt_extend watermark
 RandomCropImages	comfy_extras.nodes_dataset	images width height seed
-RandomGeneratorForList //Inspire	custom_nodes.ComfyUI-Inspire-Pack	signal seed
 RandomImageFromBatch	custom_nodes.ComfyUI-KJNodes	input start_index end_index num_frames randomness min_distance max_distance seed
 RandomNoise	comfy_extras.nodes_custom_sampler	noise_seed
-RandomNoise //Inspire	custom_nodes.ComfyUI-Inspire-Pack	noise_seed noise_mode batch_seed_mode variation_seed variation_strength variation_method? internal_seed?
 Read JSON file [Crystools]	custom_nodes.ComfyUI-Crystools	path_to_json?
 ReadTextFile	custom_nodes.ControlFlowUtils	file line? on_eof?
 RebatchImages	comfy_extras.nodes_rebatch	images batch_size
@@ -1761,40 +1264,20 @@ RecraftV4CreateStyleNode	comfy_api_nodes.nodes_recraft	model images
 RecraftV4TextToImageNode	comfy_api_nodes.nodes_recraft	prompt negative_prompt model n seed recraft_controls? style_id? style_match? style_references?
 RecraftV4TextToVectorNode	comfy_api_nodes.nodes_recraft	prompt negative_prompt model n seed recraft_controls? style_id? style_match? style_references?
 RecraftVectorizeImageNode	comfy_api_nodes.nodes_recraft	image
-ReencodeLatent	custom_nodes.ComfyUI-Impact-Pack	samples tile_mode input_vae output_vae tile_size overlap?
-ReencodeLatentPipe	custom_nodes.ComfyUI-Impact-Pack	samples tile_mode input_basic_pipe output_basic_pipe
 ReferenceLatent	comfy_extras.nodes_edit_model	conditioning latent?
 ReferenceTimbreAudio	comfy_extras.nodes_ace	conditioning latent?
 RegexExtract	comfy_extras.nodes_string	string regex_pattern mode case_insensitive multiline dotall group_index
 RegexMatch	comfy_extras.nodes_string	string regex_pattern case_insensitive multiline dotall
 RegexReplace	comfy_extras.nodes_string	string regex_pattern replace case_insensitive? multiline? dotall? count?
-RegionalCFG //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model mask
-RegionalConditioningColorMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	clip color_mask mask_color strength set_cond_area prompt dilation?
-RegionalConditioningSimple //Inspire	custom_nodes.ComfyUI-Inspire-Pack	clip mask strength set_cond_area prompt
-RegionalIPAdapterColorMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	color_mask mask_color image weight noise weight_type start_at end_at unfold_batch faceid_v2? weight_v2? combine_embeds? neg_image?
-RegionalIPAdapterEncodedColorMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	color_mask mask_color embeds weight weight_type start_at end_at unfold_batch neg_embeds?
-RegionalIPAdapterEncodedMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	mask embeds weight weight_type start_at end_at unfold_batch neg_embeds?
-RegionalIPAdapterMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	mask image weight noise weight_type start_at end_at unfold_batch faceid_v2? weight_v2? combine_embeds? neg_image?
-RegionalPrompt	custom_nodes.ComfyUI-Impact-Pack	mask advanced_sampler variation_seed? variation_strength? variation_method?
-RegionalPromptColorMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	basic_pipe color_mask mask_color cfg sampler_name scheduler wildcard_prompt controlnet_in_pipe sigma_factor variation_seed? variation_strength? variation_method? scheduler_func_opt?
-RegionalPromptSimple //Inspire	custom_nodes.ComfyUI-Inspire-Pack	basic_pipe mask cfg sampler_name scheduler wildcard_prompt controlnet_in_pipe sigma_factor variation_seed? variation_strength? variation_method? scheduler_func_opt?
-RegionalSampler	custom_nodes.ComfyUI-Impact-Pack	seed seed_2nd seed_2nd_mode steps base_only_steps denoise samples base_sampler regional_prompts overlap_factor restore_latent additional_mode additional_sampler additional_sigma_ratio
-RegionalSamplerAdvanced	custom_nodes.ComfyUI-Impact-Pack	add_noise noise_seed steps start_at_step end_at_step overlap_factor restore_latent return_with_leftover_noise latent_image base_sampler regional_prompts additional_mode additional_sampler additional_sigma_ratio
-RegionalSeedExplorerColorMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	color_mask mask_color noise seed_prompt enable_additional additional_seed additional_strength noise_mode variation_method?
-RegionalSeedExplorerMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	mask noise seed_prompt enable_additional additional_seed additional_strength noise_mode variation_method?
 RemapImageRange	custom_nodes.ComfyUI-KJNodes	image min max clamp
 RemapMaskRange	custom_nodes.ComfyUI-KJNodes	mask min max
 RemBGSession+	custom_nodes.ComfyUI_essentials	model providers
 RemeshMesh	comfy_extras.nodes_mesh_postprocess	mesh resolution sign_mode band project_back fix_poles smooth_iters drop_small_components precluster_max_verts
-RemoveBackendData //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key signal_opt?
-RemoveBackendDataNumberKey //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key signal_opt?
 RemoveBackground	comfy_extras.nodes_bg_removal	bg_removal_model image
-RemoveControlNet //Inspire	custom_nodes.ComfyUI-Inspire-Pack	conditioning
-RemoveControlNetFromRegionalPrompts //Inspire	custom_nodes.ComfyUI-Inspire-Pack	regional_prompts
-RemoveImageFromSEGS	custom_nodes.ComfyUI-Impact-Pack	segs
 RemoveLatentMask+	custom_nodes.ComfyUI_essentials	samples
-RemoveNoiseMask	custom_nodes.ComfyUI-Impact-Pack	samples
+RenderAnimalKps	custom_nodes.comfyui_controlnet_aux	kps
 RenderMesh	comfy_extras.nodes_mesh_postprocess	mesh mode width height background model_3d_info? camera_info?
+RenderPeopleKps	custom_nodes.comfyui_controlnet_aux	kps render_body render_hand render_face
 RenderSplat	comfy_extras.nodes_gaussian_splat	splat width height frames splat_scale sharpen headlight_shading opacity_threshold render_style background bg_image? camera_info?
 RenderUVAtlas	comfy_extras.nodes_mesh_postprocess	mesh resolution
 RenormCFG	comfy_extras.nodes_lumina2	model cfg_trunc renorm_cfg
@@ -1813,14 +1296,13 @@ ResizeImagesByShorterEdge	comfy_extras.nodes_dataset	images shorter_edge
 ResizeMask	custom_nodes.ComfyUI-KJNodes	mask width height keep_proportions upscale_method crop
 ResolutionBucket	comfy_extras.nodes_dataset	latents conditioning
 ResolutionSelector	comfy_extras.nodes_resolution	aspect_ratio megapixels multiple preview?
-RetrieveBackendData //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key
-RetrieveBackendDataNumberKey //Inspire	custom_nodes.ComfyUI-Inspire-Pack	key
 ReveImageCreateNode	comfy_api_nodes.nodes_reve	prompt model upscale remove_background seed
 ReveImageEditNode	comfy_api_nodes.nodes_reve	image edit_instruction model upscale remove_background seed
 ReveImageRemixNode	comfy_api_nodes.nodes_reve	reference_images prompt model upscale remove_background seed
 ReverseImageBatch	custom_nodes.ComfyUI-KJNodes	images
-RGB_HexToHSV //Inspire	custom_nodes.ComfyUI-Inspire-Pack	rgb_hex
-RIFE VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier fast_mode ensemble scale_factor dtype torch_compile batch_size optional_interpolation_states?
+RiftEngineScript	custom_nodes.ComfyUI-H3-Multishot	script ltx_shot_label?
+RiftPromptSource	custom_nodes.ComfyUI-H3-Multishot	source_file load_cap? start_index? character_override? manual_path? folder? walk_folder?
+RiftScriptPicker	custom_nodes.ComfyUI-H3-Multishot	script
 Rodin3D_Detail	comfy_api_nodes.nodes_rodin	Images Seed? Material_Type? Polygon_count?
 Rodin3D_Gen2	comfy_api_nodes.nodes_rodin	Images TAPose Seed? Material_Type? Polygon_count?
 Rodin3D_Gen25_Image	comfy_api_nodes.nodes_rodin	images mode material geometry_file_format texture_mode? seed? TAPose? hd_texture? texture_delight? use_original_alpha? addon_highpack? bbox_width? bbox_height? bbox_length? height_cm?
@@ -1848,9 +1330,6 @@ SAM3DBody_Loader	comfy_extras.nodes_sam3d_body	model_file
 SAM3DBody_Predict	comfy_extras.nodes_sam3d_body	sam3d_body_model image run_hand_refinement fov batch_size track_data? bboxes?
 SAM3DBody_Render	comfy_extras.nodes_sam3d_body	pose_data width height render_style background? camera_info?
 SAM3DBody_Smooth	comfy_extras.nodes_sam3d_body	mhr_pose_data strength method window rotation_threshold_degrees
-SAMDetectorCombined	custom_nodes.ComfyUI-Impact-Pack	sam_model segs image detection_hint dilation threshold bbox_expansion mask_hint_threshold mask_hint_use_negative
-SAMDetectorSegmented	custom_nodes.ComfyUI-Impact-Pack	sam_model segs image detection_hint dilation threshold bbox_expansion mask_hint_threshold mask_hint_use_negative
-SAMLoader	custom_nodes.ComfyUI-Impact-Pack	model_name device_mode
 SamplerARVideo	comfy_extras.nodes_ar_video	num_frame_per_block
 SamplerCustom	comfy_extras.nodes_custom_sampler	model add_noise noise_seed cfg positive negative sampler sigmas latent_image
 SamplerCustomAdvanced	comfy_extras.nodes_custom_sampler	noise guider sampler sigmas latent_image
@@ -1871,6 +1350,7 @@ SamplerSEEDS2	comfy_extras.nodes_custom_sampler	solver_type eta s_noise r
 SamplerSelectHelper+	custom_nodes.ComfyUI_essentials	euler euler_cfg_pp euler_ancestral euler_ancestral_cfg_pp heun heunpp2 exp_heun_2_x0 exp_heun_2_x0_sde dpm_2 dpm_2_ancestral lms dpm_fast dpm_adaptive dpmpp_2s_ancestral dpmpp_2s_ancestral_cfg_pp dpmpp_sde dpmpp_sde_gpu dpmpp_2m dpmpp_2m_cfg_pp dpmpp_2m_sde dpmpp_2m_sde_gpu dpmpp_2m_sde_heun dpmpp_2m_sde_heun_gpu dpmpp_3m_sde dpmpp_3m_sde_gpu ddpm lcm ipndm ipndm_v deis cfgpp_ud10_ab res_multistep res_multistep_cfg_pp res_multistep_ancestral res_multistep_ancestral_cfg_pp gradient_estimation gradient_estimation_cfg_pp er_sde seeds_2 seeds_3 sa_solver sa_solver_pece ddim uni_pc uni_pc_bh2
 SamplerSelfRefineVideo	custom_nodes.ComfyUI-KJNodes	input_mode certain_percentage uncertainty_threshold verbose seed latent?
 SamplingPercentToSigma	comfy_extras.nodes_custom_sampler	model sampling_percent return_actual_sigma
+SAMPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 Save image with extra metadata [Crystools]	custom_nodes.ComfyUI-Crystools	image filename_prefix with_workflow metadata_extra?
 Save3DAdvanced	comfy_extras.nodes_save_3d	model_3d filename_prefix viewport_state width height model_3d_info? camera_info?
 SaveAnimatedPNG	comfy_extras.nodes_images	images filename_prefix fps compress_level
@@ -1890,9 +1370,9 @@ SaveImageTextDataSetToFolder	comfy_extras.nodes_dataset	images folder_name filen
 SaveImageWebsocket	custom_nodes.websocket_image_save	images
 SaveImageWithAlpha	custom_nodes.ComfyUI-KJNodes	images mask filename_prefix
 SaveLatent	nodes	samples filename_prefix
-SaveLBW //Inspire	custom_nodes.ComfyUI-Inspire-Pack	lbw_model filename_prefix
 SaveLoRA	comfy_extras.nodes_train	lora prefix steps?
 SavePointCloud	comfy_extras.nodes_save_3d	model_3d filename_prefix viewport_state width height model_3d_info? camera_info?
+SavePoseKpsAsJsonFile	custom_nodes.comfyui_controlnet_aux	pose_kps filename_prefix
 SaveStringKJ	custom_nodes.ComfyUI-KJNodes	string filename_prefix output_folder file_extension?
 SaveSVGNode	comfy_extras.nodes_images	svg filename_prefix
 SaveText	comfy_extras.nodes_text	text filename_prefix format
@@ -1905,11 +1385,12 @@ SCAIL2ColoredMask	comfy_extras.nodes_scail	driving_track_data object_indices sor
 ScaleBatchPromptSchedule	custom_nodes.ComfyUI-KJNodes	input_str old_frame_count new_frame_count
 ScaleROPE	comfy_extras.nodes_rope	model scale_x shift_x scale_y shift_y scale_t shift_t
 ScheduledCFGGuidance	custom_nodes.ComfyUI-KJNodes	model positive negative cfg start_percent end_percent
-ScheduledCFGGuider //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model positive negative sigmas from_cfg to_cfg schedule
-ScheduledPerpNegCFGGuider //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model positive negative empty_conditioning neg_scale sigmas from_cfg to_cfg schedule
 SchedulerSelectHelper+	custom_nodes.ComfyUI_essentials	simple sgm_uniform karras exponential ddim_uniform beta normal linear_quadratic kl_optimal
 Screencap_mss	custom_nodes.ComfyUI-KJNodes	x y width height num_frames delay
 ScreencapStream	custom_nodes.ComfyUI-KJNodes	frame_data crop_width crop_height
+Scribble_PiDiNet_Preprocessor	custom_nodes.comfyui_controlnet_aux	image safe? resolution?
+Scribble_XDoG_Preprocessor	custom_nodes.comfyui_controlnet_aux	image threshold? resolution?
+ScribblePreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 SD3AttentionSeekerLG+	custom_nodes.ComfyUI_essentials	clip apply_to_query apply_to_key apply_to_value apply_to_out clip_l_0 clip_l_1 clip_l_2 clip_l_3 clip_l_4 clip_l_5 clip_l_6 clip_l_7 clip_l_8 clip_l_9 clip_l_10 clip_l_11 clip_g_0 clip_g_1 clip_g_2 clip_g_3 clip_g_4 clip_g_5 clip_g_6 clip_g_7 clip_g_8 clip_g_9 clip_g_10 clip_g_11 clip_g_12 clip_g_13 clip_g_14 clip_g_15 clip_g_16 clip_g_17 clip_g_18 clip_g_19 clip_g_20 clip_g_21 clip_g_22 clip_g_23 clip_g_24 clip_g_25 clip_g_26 clip_g_27 clip_g_28 clip_g_29 clip_g_30 clip_g_31
 SD3AttentionSeekerT5+	custom_nodes.ComfyUI_essentials	clip apply_to_query apply_to_key apply_to_value apply_to_out t5xxl_0 t5xxl_1 t5xxl_2 t5xxl_3 t5xxl_4 t5xxl_5 t5xxl_6 t5xxl_7 t5xxl_8 t5xxl_9 t5xxl_10 t5xxl_11 t5xxl_12 t5xxl_13 t5xxl_14 t5xxl_15 t5xxl_16 t5xxl_17 t5xxl_18 t5xxl_19 t5xxl_20 t5xxl_21 t5xxl_22 t5xxl_23
 SD3NegativeConditioning+	custom_nodes.ComfyUI_essentials	conditioning end
@@ -1924,39 +1405,23 @@ SDXL Power Prompt - Simple / Negative (rgthree)	custom_nodes.rgthree-comfy	promp
 SDXLEmptyLatentSizePicker+	custom_nodes.ComfyUI_essentials	resolution batch_size width_override height_override
 Seed (rgthree)	custom_nodes.rgthree-comfy	seed
 Seed Everywhere	custom_nodes.cg-use-everywhere	seed
-SeedExplorer //Inspire	custom_nodes.ComfyUI-Inspire-Pack	latent seed_prompt enable_additional additional_seed additional_strength noise_mode initial_batch_seed_mode variation_method? model?
-SeedLogger //Inspire	custom_nodes.ComfyUI-Inspire-Pack	seed seeds limit
 SeedNode	comfy_extras.nodes_seed	seed
 SeedVR2Conditioning	comfy_extras.nodes_seedvr	model vae_conditioning
 SeedVR2PostProcessing	comfy_extras.nodes_seedvr	images original_resized_images color_correction_method
 SeedVR2Preprocess	comfy_extras.nodes_seedvr	resized_images
 SeedVR2TemporalChunk	comfy_extras.nodes_seedvr	latent temporal_overlap chunking_mode
 SeedVR2TemporalMerge	comfy_extras.nodes_seedvr	latents temporal_overlap
-SegmDetectorCombined_v2	custom_nodes.ComfyUI-Impact-Pack	segm_detector image threshold dilation
-SegmDetectorSEGS	custom_nodes.ComfyUI-Impact-Pack	segm_detector image threshold dilation crop_factor drop_size labels detailer_hook?
-SEGSDetailer	custom_nodes.ComfyUI-Impact-Pack	image segs guide_size guide_size_for max_size seed steps cfg sampler_name scheduler denoise noise_mask force_inpaint basic_pipe refiner_ratio batch_size cycle refiner_basic_pipe_opt? inpaint_model? noise_mask_feather? scheduler_func_opt?
-SEGSDetailerForAnimateDiff	custom_nodes.ComfyUI-Impact-Pack	image_frames segs guide_size guide_size_for max_size seed steps cfg sampler_name scheduler denoise basic_pipe refiner_ratio refiner_basic_pipe_opt? noise_mask_feather? scheduler_func_opt?
-SEGSLabelFilterDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	segs preset labels
-SEGSOrderedFilterDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	target order take_start take_count
-SEGSPaste	custom_nodes.ComfyUI-Impact-Pack	image segs feather alpha ref_image_opt?
-SEGSPreview	custom_nodes.ComfyUI-Impact-Pack	segs alpha_mode min_alpha fallback_image_opt?
-SEGSPreviewCNet	custom_nodes.ComfyUI-Impact-Pack	segs
-SEGSRangeFilterDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	target mode min_value max_value
-SEGSSwitch	custom_nodes.ComfyUI-Impact-Pack	select sel_mode input1?
-SegsToCombinedMask	custom_nodes.ComfyUI-Impact-Pack	segs
-SEGSToImageList	custom_nodes.ComfyUI-Impact-Pack	segs fallback_image_opt?
-SEGSUpscaler	custom_nodes.ComfyUI-Impact-Pack	image segs model clip vae rescale_factor resampling_method supersample rounding_modulus seed steps cfg sampler_name scheduler positive negative denoise feather inpaint_model noise_mask_feather upscale_model_opt? upscaler_hook_opt? scheduler_func_opt?
-SEGSUpscalerPipe	custom_nodes.ComfyUI-Impact-Pack	image segs basic_pipe rescale_factor resampling_method supersample rounding_modulus seed steps cfg sampler_name scheduler denoise feather inpaint_model noise_mask_feather upscale_model_opt? upscaler_hook_opt? scheduler_func_opt?
 SelectCLIPDevice	comfy_extras.nodes_multigpu	clip device
 SelectModelDevice	comfy_extras.nodes_multigpu	model device
-SelectNthMask //Inspire	custom_nodes.ComfyUI-Inspire-Pack	masks idx
 SelectVAEDevice	comfy_extras.nodes_multigpu	vae device
 SelfAttentionGuidance	comfy_extras.nodes_sag	model scale blur_sigma
+SelfLiftH3Sampler	custom_nodes.comfyui-SelfLift	model positive negative vae latent_image sampler sigmas seed cfg transition_step lowres_scale rho w_min w_max upscaler_model model_hires? highres_tiling? upscaler_unload?
+SelfLiftH3TST	custom_nodes.comfyui-SelfLift	model tau log_diagnostics
+SelfLiftImageSampler	custom_nodes.comfyui-SelfLift	model positive negative vae latent_image sampler sigmas seed cfg transition_step lowres_scale rho w_min w_max latent_upsample model_hires?
+SemSegPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
 SenseNovaSamplingOptions	comfy_extras.nodes_sensenova	model shift
 SeparateMasks	custom_nodes.ComfyUI-KJNodes	mask size_threshold_width size_threshold_height mode max_poly_points
-Sepconv VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier optional_interpolation_states?
 SetClipHooks	comfy_extras.nodes_hooks	clip apply_to_conds schedule_clip hooks?
-SetDefaultImageForSEGS	custom_nodes.ComfyUI-Impact-Pack	segs image override
 SetFirstSigma	comfy_extras.nodes_custom_sampler	sigmas sigma
 SetHookKeyframes	comfy_extras.nodes_hooks	hooks hook_kf?
 SetLatentNoiseMask	nodes	samples mask
@@ -1965,11 +1430,11 @@ SetUnionControlNetType	comfy_extras.nodes_controlnet	control_net type
 SheetSage2AudioToABC	comfy_extras.nodes_audio_encoder	audio_encoder audio mode
 Show any [Crystools]	custom_nodes.ComfyUI-Crystools	any_value? console? display? prefix?
 Show any to JSON [Crystools]	custom_nodes.ComfyUI-Crystools	any_value?
-ShowCachedInfo //Inspire	custom_nodes.ComfyUI-Inspire-Pack	cache_info key
 ShowText|pysssss	custom_nodes.ComfyUI-Custom-Scripts	text
 ShuffleDataset	comfy_extras.nodes_dataset	images seed
 ShuffleImageBatch	custom_nodes.ComfyUI-KJNodes	images seed
 ShuffleImageTextDataset	comfy_extras.nodes_dataset	images texts seed
+ShufflePreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution? seed?
 ShuffleVideoDataset	comfy_extras.nodes_dataset	videos seed
 ShuffleVideoTextDataset	comfy_extras.nodes_dataset	videos texts seed
 SigmasToFloat	custom_nodes.ComfyUI-KJNodes	sigmas
@@ -1997,7 +1462,6 @@ SomethingToString	custom_nodes.ComfyUI-KJNodes	input prefix? suffix?
 SoniloTextToMusic	comfy_api_nodes.nodes_sonilo	prompt duration seed
 SoniloVideoToMusic	comfy_api_nodes.nodes_sonilo	video prompt seed
 SoundReactive	custom_nodes.ComfyUI-KJNodes	sound_level start_range_hz end_range_hz multiplier smoothing_factor normalize
-SpeechLengthCalculator	custom_nodes.LTX_Director	text fps additional_time text_input?
 SplatToFile3D	comfy_extras.nodes_gaussian_splat	splat format
 SplatToMesh	comfy_extras.nodes_gaussian_splat	splat resolution kernel smooth level min_component min_opacity color_sharpen
 SplineEditor	custom_nodes.ComfyUI-KJNodes	points_store coordinates mask_width mask_height points_to_sample sampling_method interpolation tension repeat_output float_output_type min_value? max_value? bg_image?
@@ -2008,7 +1472,6 @@ SplitImageToTileList	comfy_extras.nodes_images	image tile_width tile_height over
 SplitImageWithAlpha	comfy_extras.nodes_compositing	image
 SplitSigmas	comfy_extras.nodes_custom_sampler	sigmas step
 SplitSigmasDenoise	comfy_extras.nodes_custom_sampler	sigmas denoise
-StableCascade_CheckpointLoader //Inspire	custom_nodes.ComfyUI-Inspire-Pack	stage_b key_opt_b stage_c key_opt_c cache_mode
 StableCascade_EmptyLatentImage	comfy_extras.nodes_stable_cascade	width height compression batch_size
 StableCascade_StageB_Conditioning	comfy_extras.nodes_stable_cascade	conditioning stage_c
 StableCascade_StageC_VAEEncode	comfy_extras.nodes_stable_cascade	image vae compression
@@ -2019,8 +1482,6 @@ StableZero123_Conditioning_Batched	comfy_extras.nodes_stable3d	clip_vision init_
 StartLoop	comfy_extras.nodes_loop	mode cache_iterations parent_iteration? initial_iteration_value?
 StartRecordCUDAMemoryHistory	custom_nodes.ComfyUI-KJNodes	input enabled context stacks max_entries
 Stats system [Crystools]	custom_nodes.ComfyUI-Crystools	latent
-StepsScheduleHookProvider	custom_nodes.ComfyUI-Impact-Pack	schedule_for_iteration target_steps
-STMFNet VFI	custom_nodes.ComfyUI-Frame-Interpolation	ckpt_name frames clear_cache_after_n_frames multiplier duplicate_first_last_frames optional_interpolation_states?
 StoryboardImageGen	custom_nodes.comfyui-storyboard	model seed steps cfg sampler_name scheduler positive negative latent_image denoise
 StringCompare	comfy_extras.nodes_string	string_a string_b mode case_sensitive
 StringConcatenate	comfy_extras.nodes_string	string_a string_b delimiter
@@ -2030,7 +1491,6 @@ StringContains	comfy_extras.nodes_string	string substring case_sensitive
 StringFormat	comfy_extras.nodes_string	values f_string
 StringFunction|pysssss	custom_nodes.ComfyUI-Custom-Scripts	action tidy_tags text_a? text_b? text_c?
 StringLength	comfy_extras.nodes_string	string
-StringListToString	custom_nodes.ComfyUI-Impact-Pack	join_with string_list
 StringOperation	custom_nodes.ControlFlowUtils	input operation start_from_end case_insensitive aux1? aux2? aux3? param1? param2? param3?
 StringReplace	comfy_extras.nodes_string	string find replace
 StringSubstring	comfy_extras.nodes_string	string start end
@@ -2040,8 +1500,6 @@ StripWhitespace	comfy_extras.nodes_dataset	texts
 StyleModelApply	nodes	conditioning style_model clip_vision_output strength strength_type
 StyleModelApplyAdvanced	custom_nodes.ComfyUI-KJNodes	conditioning style_model clip_vision_output strength
 StyleModelLoader	nodes	style_model_name
-SubtractMask	custom_nodes.ComfyUI-Impact-Pack	mask1 mask2
-SubtractMaskForEach	custom_nodes.ComfyUI-Impact-Pack	base_segs mask_segs
 Superprompt	custom_nodes.ComfyUI-KJNodes	instruction_prompt prompt max_new_tokens
 SUPIRApply	comfy_extras.nodes_model_patch	model model_patch vae image strength_start strength_end restore_cfg restore_cfg_s_tmin
 SV3D_BatchSchedule	custom_nodes.ComfyUI-KJNodes	clip_vision init_image vae width height batch_size interpolation azimuth_points_string elevation_points_string
@@ -2059,6 +1517,7 @@ SyncTalkingImageNode	comfy_api_nodes.nodes_sync_so	image audio prompt seed model
 SystemNotification|pysssss	custom_nodes.ComfyUI-Custom-Scripts	message any mode
 T5TokenizerOptions	comfy_extras.nodes_cond	clip min_padding min_length
 TCFG	comfy_extras.nodes_tcfg	model
+TEEDPreprocessor	custom_nodes.comfyui_controlnet_aux	image safe_steps? resolution?
 TemporalScoreRescaling	comfy_extras.nodes_eps	model tsr_k tsr_sigma
 Tencent3DPartNode	comfy_api_nodes.nodes_hunyuan3d	model_3d seed
 Tencent3DTextureEditNode	comfy_api_nodes.nodes_hunyuan3d	model_3d prompt seed
@@ -2084,14 +1543,8 @@ TextOverlay	comfy_extras.nodes_text_overlay	images text font_size color position
 TextToLowercase	comfy_extras.nodes_dataset	texts
 TextToUppercase	comfy_extras.nodes_dataset	texts
 ThresholdMask	comfy_extras.nodes_mask	mask value
-TiledKSamplerProvider	custom_nodes.ComfyUI-Impact-Pack	seed steps cfg sampler_name scheduler denoise tile_width tile_height tiling_strategy basic_pipe
-TilePreprocessor_Provider_for_SEGS //Inspire	custom_nodes.ComfyUI-Inspire-Pack	pyrUp_iters
+TilePreprocessor	custom_nodes.comfyui_controlnet_aux	image pyrUp_iters? resolution?
 TimerNodeKJ	custom_nodes.ComfyUI-KJNodes	any_input mode name timer?
-ToBasicPipe	custom_nodes.ComfyUI-Impact-Pack	model clip vae positive negative
-ToBinaryMask	custom_nodes.ComfyUI-Impact-Pack	mask threshold
-ToDetailerPipe	custom_nodes.ComfyUI-Impact-Pack	model clip vae positive negative bbox_detector wildcard Select to add LoRA Select to add Wildcard sam_model_opt? segm_detector_opt? detailer_hook?
-ToDetailerPipeSDXL	custom_nodes.ComfyUI-Impact-Pack	model clip vae positive negative refiner_model refiner_clip refiner_positive refiner_negative bbox_detector wildcard Select to add LoRA Select to add Wildcard sam_model_opt? segm_detector_opt? detailer_hook?
-ToIPAdapterPipe //Inspire	custom_nodes.ComfyUI-Inspire-Pack	ipadapter model clip_vision? insightface?
 TomePatchModel	comfy_extras.nodes_tomesd	model ratio
 TopazImageEnhance	comfy_api_nodes.nodes_topaz	model image prompt? subject_detection? face_enhancement? face_enhancement_creativity? face_enhancement_strength? crop_to_fill? output_width? output_height? creativity? face_preservation? color_preservation?
 TopazImageEnhanceV2	comfy_api_nodes.nodes_topaz	image model output_width? output_height?
@@ -2151,14 +1604,11 @@ TripoTextToModelNodeV2	comfy_api_nodes.nodes_tripo	prompt negative_prompt? model
 TripoTextureNode	comfy_api_nodes.nodes_tripo	model_task_id texture? pbr? texture_seed? texture_quality? texture_alignment? texture_prompt? model_version? style_image? reference? part_names?
 TripoTextureNodeV2	comfy_api_nodes.nodes_tripo	model_task_id pbr? texture_seed? texture_quality? texture_alignment? texture_prompt? model_version? style_image? reference? part_names?
 TruncateText	comfy_extras.nodes_dataset	texts max_length
-TwoAdvancedSamplersForMask	custom_nodes.ComfyUI-Impact-Pack	seed steps denoise samples base_sampler mask_sampler mask overlap_factor
-TwoSamplersForMask	custom_nodes.ComfyUI-Impact-Pack	latent_image base_sampler mask_sampler mask
-TwoSamplersForMaskUpscalerProvider	custom_nodes.ComfyUI-Impact-Pack	scale_method full_sample_schedule use_tiled_vae base_sampler mask_sampler mask vae tile_size full_sampler_opt? upscale_model_opt? pk_hook_base_opt? pk_hook_mask_opt? pk_hook_full_opt?
-TwoSamplersForMaskUpscalerProviderPipe	custom_nodes.ComfyUI-Impact-Pack	scale_method full_sample_schedule use_tiled_vae base_sampler mask_sampler mask basic_pipe tile_size full_sampler_opt? upscale_model_opt? pk_hook_base_opt? pk_hook_mask_opt? pk_hook_full_opt?
+TTPlanet_TileGF_Preprocessor	custom_nodes.comfyui_controlnet_aux	image scale_factor? blur_strength? radius? eps? resolution?
+TTPlanet_TileSimple_Preprocessor	custom_nodes.comfyui_controlnet_aux	image scale_factor? blur_strength?
 UltimateSDUpscale	custom_nodes.ComfyUI_UltimateSDUpscale	image model positive negative vae upscale_by seed steps cfg sampler_name scheduler denoise upscale_model mode_type tile_width tile_height mask_blur tile_padding seam_fix_mode seam_fix_denoise seam_fix_width seam_fix_mask_blur seam_fix_padding force_uniform_tiles tiled_decode batch_size
 UltimateSDUpscaleCustomSample	custom_nodes.ComfyUI_UltimateSDUpscale	image model positive negative vae upscale_by seed steps cfg sampler_name scheduler denoise mode_type tile_width tile_height mask_blur tile_padding seam_fix_mode seam_fix_denoise seam_fix_width seam_fix_mask_blur seam_fix_padding force_uniform_tiles tiled_decode batch_size upscale_model? custom_sampler? custom_sigmas?
 UltimateSDUpscaleNoUpscale	custom_nodes.ComfyUI_UltimateSDUpscale	upscaled_image model positive negative vae seed steps cfg sampler_name scheduler denoise mode_type tile_width tile_height mask_blur tile_padding seam_fix_mode seam_fix_denoise seam_fix_width seam_fix_mask_blur seam_fix_padding force_uniform_tiles tiled_decode batch_size
-UltralyticsDetectorProvider	custom_nodes.ComfyUI-Impact-Subpack	model_name
 unCLIPCheckpointLoader	nodes	ckpt_name
 unCLIPConditioning	nodes	conditioning clip_vision_output strength noise_augmentation
 UNetCrossAttentionMultiply	comfy_extras.nodes_attention_multiply	model q k v out
@@ -2167,12 +1617,15 @@ UnetLoaderGGUF	custom_nodes.ComfyUI-GGUF	unet_name
 UnetLoaderGGUFAdvanced	custom_nodes.ComfyUI-GGUF	unet_name dequant_dtype patch_dtype patch_on_device
 UNetSelfAttentionMultiply	comfy_extras.nodes_attention_multiply	model q k v out
 UNetTemporalAttentionMultiply	comfy_extras.nodes_attention_multiply	model self_structural self_temporal cross_structural cross_temporal
+UniBlockSwap	custom_nodes.ComfyUI_UniBlockSwap	model num_blocks?
+UniBlockSwapCacheControl	custom_nodes.ComfyUI_UniBlockSwap	model
+UniBlockSwapTE	custom_nodes.ComfyUI_UniBlockSwap	clip num_blocks?
+UniFormer-SemSegPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
+Unimatch_OptFlowPreprocessor	custom_nodes.comfyui_controlnet_aux	image ckpt_name backward_flow bidirectional_flow
 UniversalSwitch	custom_nodes.ControlFlowUtils	input1 mode selection_in selection_out validate_typing input2? input3? input4? input5? input6?
 UnloadModels	custom_nodes.ControlFlowUtils	Passthrough ForceUnload
-UnsamplerDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	model steps start_end_at_step end_end_at_step cfg sampler_name scheduler normalize positive negative schedule_for_cycle
-UnsamplerHookProvider	custom_nodes.ComfyUI-Impact-Pack	model steps start_end_at_step end_end_at_step cfg sampler_name scheduler normalize positive negative schedule_for_iteration
 UnwrapMesh	comfy_extras.nodes_mesh_postprocess	mesh segmenter resolution padding weld_distance
-UnzipPrompt //Inspire	custom_nodes.ComfyUI-Inspire-Pack	zipped_prompt
+UpperBodyTrackingFromPoseKps	custom_nodes.comfyui_controlnet_aux	pose_kps id_include Head_width_height Neck_width_height Shoulder_width_height Torso_width_height RArm_width_height RForearm_width_height LArm_width_height LForearm_width_height
 UpscaleModelLoader	comfy_extras.nodes_upscale_model	model_name
 USOStyleReference	comfy_extras.nodes_model_patch	model model_patch clip_vision_output
 VAEDecode	nodes	samples vae
@@ -2194,10 +1647,8 @@ VAELoaderKJ	custom_nodes.ComfyUI-KJNodes	vae_name device weight_dtype
 VAEMergeKJ	custom_nodes.ComfyUI-KJNodes	vae_1 vae_2 ratio
 VAESave	comfy_extras.nodes_model_merging	vae filename_prefix
 VAESelector	custom_nodes.ControlFlowUtils	vae run_after?
-VariationNoiseDetailerHookProvider	custom_nodes.ComfyUI-Impact-Pack	seed strength
 Veo3FirstLastFrameNode	comfy_api_nodes.nodes_veo2	prompt negative_prompt resolution aspect_ratio duration seed first_frame last_frame model generate_audio
 Veo3VideoGenerationNode	comfy_api_nodes.nodes_veo2	prompt aspect_ratio resolution? negative_prompt? duration_seconds? enhance_prompt? person_generation? seed? image? model? generate_audio?
-VFI FloatToInt	custom_nodes.ComfyUI-Frame-Interpolation	float
 VHS_AudioToVHSAudio	custom_nodes.ComfyUI-VideoHelperSuite	audio
 VHS_BatchManager	custom_nodes.ComfyUI-VideoHelperSuite	frames_per_batch
 VHS_DuplicateImages	custom_nodes.ComfyUI-VideoHelperSuite	images multiply_by
@@ -2328,11 +1779,8 @@ WeightScheduleConvert	custom_nodes.ComfyUI-KJNodes	input_values output_type inve
 WeightScheduleExtend	custom_nodes.ComfyUI-KJNodes	input_values_1 input_values_2 output_type
 WeldVertices	comfy_extras.nodes_mesh_postprocess	mesh epsilon_rel epsilon_abs
 WidgetToString	custom_nodes.ComfyUI-KJNodes	id widget_name return_all any_input? node_title? allowed_float_decimals?
-WildcardEncode //Inspire	custom_nodes.ComfyUI-Inspire-Pack	model clip token_normalization weight_interpretation wildcard_text populated_text mode Select to add LoRA Select to add Wildcard seed
-WildcardPromptFromString	custom_nodes.ComfyUI-Impact-Pack	string delimiter prefix_all postfix_all restrict_to_tags exclude_tags
-WorklistToItemList //Inspire	custom_nodes.ComfyUI-Inspire-Pack	item
-XY Input: Lora Block Weight //Inspire	custom_nodes.ComfyUI-Inspire-Pack	category_filter lora_name strength_model strength_clip inverse seed A B preset block_vectors heatmap_palette heatmap_alpha heatmap_strength xyplot_mode
 YuE2GenerateABC	comfy_extras.nodes_yue2	clip style lyrics seed mode max_abc_tokens temperature top_p top_k repetition_penalty penalty_window
 YuE2GenerateMusic	comfy_extras.nodes_yue2	clip style lyrics abc seed mode max_duration temperature top_p top_k repetition_penalty cfg_scale?
 ZImageFunControlnet	comfy_extras.nodes_model_patch	model model_patch vae strength image? inpaint_image? mask? start_percent? end_percent?
-ZipPrompt //Inspire	custom_nodes.ComfyUI-Inspire-Pack	positive negative name_opt?
+Zoe-DepthMapPreprocessor	custom_nodes.comfyui_controlnet_aux	image resolution?
+Zoe_DepthAnythingPreprocessor	custom_nodes.comfyui_controlnet_aux	image environment? resolution?
