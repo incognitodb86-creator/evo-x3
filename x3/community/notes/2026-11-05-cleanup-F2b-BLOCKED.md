@@ -62,3 +62,21 @@ config write, no download, no install, nothing deleted, no `.bak`, no dated copy
 no file under `C:\Users\derek\sydney\` opened/listed/read, no prompt text read. Files touched by this pass: this record,
 `notes\needs_derrick.md` (addendum under the 13:00 F2a card, no new ask), `notes\actions.log`, `fix_plan.md` (checkbox),
 `notes\progress.md`, the brain status mirror and the job's one existing learning file (merged, not new).
+
+## Commits and the push retry (18:5x CT)
+
+Three commits, one concern per repo, pathspec-committed (`git commit -o -F - -- <paths>`, no `git add -A`),
+identity passed per commit (`-c user.name=Forge -c user.email=forge@alienpc.local`), the brain's secret-scan hook passed:
+
+| repo | sha | contents |
+| --- | --- | --- |
+| `C:\AI\community` | `747b123accbed36ad70a2b884a63a7205ead1c2e` | this record, `notes\_f2b\` (append script + commit-msg text), needs_derrick addendum, actions.log lines |
+| `C:\Users\derek\5slock\ralph-community` | `430cbb7b7edb1d0ef6910614f38aa6ece52a439d` | `fix_plan.md` F2b -> `- [BLOCKED]`, `notes\progress.md`, `notes\_f2b\` |
+| `C:\AI\fleet-brain` | `e8bdaeecdc26d91607164060c408c8050e4f34b0` | status mirror + the F2b lessons merged into this job's one existing learning |
+
+`git push` at 18:5x CT, all three targets, one attempt each: **HTTP 502 from `qnap.tailf242b2.ts.net`** -
+`gitea` in `ralph-community` (derrick/ralph-community.git), `gitea` in `C:\AI\community`
+(derrick/alienpc-community-pc.git), `origin` in `C:\AI\fleet-brain` (derrick/fleet-brain.git). Same failure as the
+18:4x attempt, so the QNAP Gitea service has been unhealthy across at least 20 minutes; the ahead counts in the
+section above are unchanged by this pass's records. **Nothing is lost and nothing needs a force-push**: the commits
+are on the box and push at the first 200.
