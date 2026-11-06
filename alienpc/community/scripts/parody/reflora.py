@@ -18,6 +18,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -27,6 +28,17 @@ PACK_DIR = COMFY_DIR / "custom_nodes" / "ComfyUI-MiniMaxH3RefLoRA"
 DEFAULT_REFLORA_DIR = COMFY_DIR / "models" / "loras" / "MinimaxH3" / "reflora"
 LORA_NAME_PREFIX = "MinimaxH3\\reflora\\"
 MAX_REFERENCE_SLOTS = 8
+
+# Offline class validation (B2-3): the freshest saved object_info capture and the pack tree.
+OBJINFO_DIR = Path(r"C:\AI\community\notes\objinfo")
+DEFAULT_OBJINFO_DUMP = OBJINFO_DIR / "object_info_20261105.json"
+CUSTOM_NODES_DIR = COMFY_DIR / "custom_nodes"
+# The pack that defines the H3 latent upscaler (B2-1 restored it; U5 failed on it as .disabled).
+OFFLINE_PACK_UPSCALER = "Comfyui_Minimax_h3_latent_Upscaler"
+DISABLED_SUFFIX = ".disabled"
+DUMP_NAME_RE = re.compile(r"^object_info_(\d{8})\.json$")
+PACK_SCAN_SKIP = {"__pycache__", ".git", ".venv", "venv", "node_modules", "build", "dist"}
+PACK_SCAN_MAX_BYTES = 4 << 20
 VISUAL_KINDS = ("image", "video")
 LORA_STRENGTH = 1.0
 REFMOD_RETENTION = 1.0
@@ -542,3 +554,148 @@ def reflora_ledger(graph: Dict[str, Any]) -> List[Dict[str, Any]]:
                     "members": inp.get("members"), "components": inp.get("components"),
                     "attach_to_model": inp.get("attach_to_model")})
     return out
+
+
+# ---------------------------------------------------------------------------
+# offline class validation (B2-3) - saved object_info capture + .disabled pack evidence
+# ---------------------------------------------------------------------------
+
+_OBJECT_INFO_CACHE: Dict[str, Tuple[Tuple[int, int], Dict[str, Any]]] = {}
+
+
+def _load_object_info(dump_path: Path) -> Dict[str, Any]:
+    """Read one saved object_info capture (cached by path + mtime/size; plain file read)."""
+    path = Path(dump_path)
+    key = str(path)
+    st = path.stat()
+    stamp = (st.st_mtime_ns, st.st_size)
+    hit = _OBJECT_INFO_CACHE.get(key)
+    if hit is not None and hit[0] == stamp:
+        return hit[1]
+    with open(path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    _OBJECT_INFO_CACHE[key] = (stamp, data)
+    return data
+
+
+def _dump_tag(dump_path: Path) -> str:
+    """The capture date tag in an object_info file name (``object_info_20261031.json`` -> ``20261031``)."""
+    m = DUMP_NAME_RE.match(Path(dump_path).name)
+    return m.group(1) if m else Path(dump_path).stem
+
+
+def _saved_captures() -> List[Tuple[str, Path]]:
+    """[(tag, path)] for every saved object_info capture, newest tag first."""
+    if not OBJINFO_DIR.is_dir():
+        return []
+    found = []
+    for p in OBJINFO_DIR.iterdir():
+        m = DUMP_NAME_RE.match(p.name)
+        if m:
+            found.append((m.group(1), p))
+    return sorted(found, key=lambda tp: tp[0], reverse=True)
+
+
+def _pack_defining_class(class_name: str,
+                         custom_nodes_dir: Path = CUSTOM_NODES_DIR) -> Optional[Tuple[str, Path]]:
+    """grep the pack sources for the literal class name -> (pack_dir_name, source_file).
+
+    Text scan only: no import of pack code, no subprocess, no ComfyUI call. A pack registers a
+    node by its literal name in a ``NODE_CLASS_MAPPINGS`` key in its own ``.py``, so a literal
+    substring is the evidence that this pack is the provider (the B2-2 facts were gathered the
+    same way with ``grep -rln``). First hit per pack, packs in name order = deterministic.
+    """
+    root = Path(custom_nodes_dir)
+    if not root.is_dir():
+        return None
+    for pack in sorted((p for p in root.iterdir() if p.is_dir()), key=lambda p: p.name):
+        for dirpath, dirnames, filenames in os.walk(pack):
+            dirnames[:] = sorted(d for d in dirnames if d not in PACK_SCAN_SKIP)
+            for fn in sorted(filenames):
+                if not fn.endswith(".py"):
+                    continue
+                src = Path(dirpath) / fn
+                try:
+                    if src.stat().st_size > PACK_SCAN_MAX_BYTES:
+                        continue
+                    text = src.read_text(encoding="utf-8", errors="replace")
+                except OSError:
+                    continue
+                if class_name in text:
+                    return pack.name, src
+    return None
+
+
+def _present_in_newer_capture(class_name: str, dump_path: Path) -> bool:
+    """True if a capture taken after ``dump_path`` lists the class (so it was absent from this one)."""
+    tag = _dump_tag(dump_path)
+    for other_tag, other_path in _saved_captures():
+        if tag is not None and other_tag <= tag:
+            continue
+        try:
+            known = _load_object_info(other_path)
+        except (OSError, ValueError):
+            continue
+        if class_name in known:
+            return True
+    return False
+
+
+def offline_class_check(
+    graph: Dict[str, Any],
+    dump_path: Optional[Path] = None,
+    *,
+    custom_nodes_dir: Path = CUSTOM_NODES_DIR,
+    scan_packs: bool = True,
+) -> List[str]:
+    """CPU-only stand-in for the unknown-class branch of ``run_graph_job.static_check()``.
+
+    Every ``class_type`` in the graph must be listed by the saved object_info capture (default
+    the freshest one, ``notes/objinfo/object_info_20261105.json``). A missing class is the one
+    failure a frozen template cannot show on CPU, and it is what killed the U5 two-pass arm at
+    submit time: ``static_check`` (run_graph_job.py:111-119) raised
+    ``lsu3: unknown class MinimaxH3LatentUpscaler3D`` because the pack that defines it was
+    parked as ``Comfyui_Minimax_h3_latent_Upscaler.disabled``. So a missing class also names
+    the pack that defines it and says whether that pack is disabled, from the live directory
+    name, or - when the pack is present now - from the captures: a class that shows up in a
+    newer capture was not loaded when this capture was taken.
+
+    Only file reads: no HTTP, no subprocess, no GPU, no lock, no model load. Returns the
+    problem lines (``[]`` = renderable against this capture); the caller fails closed. Lines
+    never carry prompt text.
+    """
+    path = Path(dump_path) if dump_path else DEFAULT_OBJINFO_DUMP
+    if not path.is_file():
+        raise RefLoRAError(
+            f"offline_class_check: no object_info capture at {path}; capture one with "
+            "scripts/probe_nodes.py (B2-2) - a parody graph is not built against an unknown node set."
+        )
+    known = _load_object_info(path)
+    problems: List[str] = []
+    for nid in sorted(graph):
+        node = graph[nid]
+        if not isinstance(node, dict):
+            continue
+        ct = node.get("class_type")
+        if not isinstance(ct, str) or not ct:
+            problems.append(f"{nid}: missing class_type")
+            continue
+        if ct in known:
+            continue
+        line = f"{nid}: unknown class {ct}"
+        if scan_packs:
+            prov = _pack_defining_class(ct, custom_nodes_dir)
+            if prov is not None:
+                pack_name = prov[0]
+                if pack_name.endswith(DISABLED_SUFFIX):
+                    line += f" (defined by {pack_name} - pack disabled)"
+                elif _present_in_newer_capture(ct, path):
+                    line += (f" (defined by {pack_name} - pack disabled at the {_dump_tag(path)} "
+                             f"capture; {pack_name.removesuffix(DISABLED_SUFFIX)} is present and "
+                             "enabled now)")
+                else:
+                    line += (f" (defined by {pack_name} - pack present, class not in this "
+                             "capture and not in any newer capture)")
+        problems.append(line)
+    return problems
+

@@ -75,6 +75,7 @@ def submit_parody_job(
     require_cond: bool = True,
     wait: bool = False,
     size: str = "768x1344",
+    objinfo_dump: Optional[Path] = None,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
@@ -123,6 +124,7 @@ def submit_parody_job(
         graph_mode=graph_mode,
         stage_cond=stage_cond,
         require_cond=require_cond,
+        objinfo_dump=objinfo_dump,
     )
     resolved["cond"] = cond_meta
 
@@ -243,6 +245,9 @@ def main(argv=None) -> int:
     parser.add_argument("--size", default="768x1344",
                         help="Objective size for run_queue (default 768x1344; two-pass upscales to this)")
     parser.add_argument("--template", default=None, help="Optional template path override")
+    parser.add_argument("--objinfo-dump", default=None,
+                        help="object_info capture for the offline class check "
+                             "(default notes/objinfo/object_info_20261105.json)")
     args = parser.parse_args(argv)
 
     res = submit_parody_job(
@@ -266,6 +271,7 @@ def main(argv=None) -> int:
         refmod_only=args.refmod_only,
         wait=args.wait,
         size=args.size,
+        objinfo_dump=Path(args.objinfo_dump) if args.objinfo_dump else None,
     )
     print(json.dumps(res, indent=2, default=str))
     if res.get("gpu_busy"):
