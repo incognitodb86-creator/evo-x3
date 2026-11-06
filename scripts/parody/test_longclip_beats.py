@@ -44,6 +44,11 @@ class TestLongclipBeats(unittest.TestCase):
             "method",
         ]
         content_lower = self.content.lower()
+        # 2026-11-06: "dialogue boundaries" was split into spoken_dialogue + ambient_sfx so stage
+        # cues never leak into <d>[English] ...</d>; either form documents the boundary.
+        if "dialogue boundaries" not in content_lower and "spoken_dialogue" in content_lower \
+                and "ambient_sfx" in content_lower:
+            required_fields.remove("dialogue boundaries")
         for field in required_fields:
             self.assertIn(field, content_lower, f"Missing required field: {field}")
 
