@@ -76,6 +76,9 @@ def submit_parody_job(
     wait: bool = False,
     size: str = "768x1344",
     objinfo_dump: Optional[Path] = None,
+    unet_name: Optional[str] = None,
+    pass1_lora_strength: Optional[float] = None,
+    pass2_lora_strength: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
@@ -125,6 +128,9 @@ def submit_parody_job(
         stage_cond=stage_cond,
         require_cond=require_cond,
         objinfo_dump=objinfo_dump,
+        unet_name=unet_name,
+        pass1_lora_strength=pass1_lora_strength,
+        pass2_lora_strength=pass2_lora_strength,
     )
     resolved["cond"] = cond_meta
 
@@ -152,6 +158,13 @@ def submit_parody_job(
             "seed": seed,
             "graph_mode": graph_mode,
             "refmod_only": refmod_only,
+            # B2-4 records: the effective model checkpoint and the per-pass RefLoRA dials
+            # (dials and filenames only, never prompt text).
+            "unet": graph["unet"]["inputs"]["unet_name"],
+            "pass1_lora_strength": (resolved.get("reflora") or {}).get("parody_dials", {})
+            .get("pass1_lora_strength"),
+            "pass2_lora_strength": (resolved.get("reflora") or {}).get("parody_dials", {})
+            .get("pass2_lora_strength"),
         }]
     }
     order_file = run_dir / "_render_order.json"
@@ -166,6 +179,15 @@ def submit_parody_job(
         print(f"  RefLoRA:      {[h['lora_name'] for h in (resolved.get('reflora') or {}).get('hybrids', [])]}")
         print(f"  graph_mode:   {graph_mode}")
         print(f"  refmod_only:  {refmod_only}")
+        print(f"  unet:         {graph['unet']['inputs']['unet_name']}")
+        pd = (resolved.get("reflora") or {}).get("parody_dials")
+        if pd:
+            print(f"  parody dials: pass1_lora_strength={pd['pass1_lora_strength']} "
+                  f"pass2_lora_strength={pd['pass2_lora_strength']}")
+            print(f"  pass 1 model: {pd['pass1_model']}")
+            print(f"  pass 2 model: {pd['pass2_model']}")
+            print(f"  conditioning: {pd['conditioning_injection']}")
+            print(f"  clip:         {pd['clip']}")
         print(f"  Cond:         {cond_meta}")
         print(f"  Frames:       {frames}")
         return {
@@ -236,8 +258,21 @@ def main(argv=None) -> int:
                         help="Path inside approved_characters for Cond provenance (FG-2)")
     parser.add_argument("--stage-cond", action="store_true",
                         help="Copy validated Cond into ComfyUI/input and verify SHA256")
-    parser.add_argument("--graph-mode", choices=("single-pass", "two-pass"), default="single-pass",
-                        help="single-pass=b2_refmod; two-pass=KEEP b2.api.json Lokken refine")
+    parser.add_argument("--graph-mode", choices=("single-pass", "two-pass", "two-pass-parody"),
+                        default="single-pass",
+                        help="single-pass=b2_refmod; two-pass=KEEP b2.api.json Lokken refine; "
+                             "two-pass-parody=b2_parody_2pass.api.json (B2-4, pass 1 voice-protected). "
+                             "Passing --pass1-lora-strength/--pass2-lora-strength with two-pass "
+                             "selects the parody graph.")
+    parser.add_argument("--unet", default=None, metavar="SAFETENSORS",
+                        help="A/B model swap (t179u): a bare diffusion_models filename; the accepted "
+                             "set is the two beta7 checkpoints (int8HQ default, "
+                             "beta7_activation_learned_HQ); anything else raises before any write")
+    parser.add_argument("--pass1-lora-strength", type=float, default=None,
+                        help="two-pass-parody: LoRA half on the pass-1 model line, default 0.0 = "
+                             "voice-protected base beta7 model (the pack's no-patch passthrough)")
+    parser.add_argument("--pass2-lora-strength", type=float, default=None,
+                        help="two-pass-parody: LoRA half on the pass-2 model line, default 1.0")
     parser.add_argument("--refmod-only", "--disable-reflora", dest="refmod_only", action="store_true",
                         help="Skip RefLoRA lookup (Arm A even when hybrid is on disk)")
     parser.add_argument("--wait", action="store_true",
@@ -272,6 +307,9 @@ def main(argv=None) -> int:
         wait=args.wait,
         size=args.size,
         objinfo_dump=Path(args.objinfo_dump) if args.objinfo_dump else None,
+        unet_name=args.unet,
+        pass1_lora_strength=args.pass1_lora_strength,
+        pass2_lora_strength=args.pass2_lora_strength,
     )
     print(json.dumps(res, indent=2, default=str))
     if res.get("gpu_busy"):

@@ -29,11 +29,16 @@ if str(HERE) not in sys.path:
 import reflora
 import resolve
 from build_request import (
+    BETA7_UNET_ALLOWLIST,
     DEFAULT_B2_TEMPLATE,
+    DEFAULT_PARODY_2PASS_TEMPLATE,
     DEFAULT_REFMOD_TEMPLATE,
     DEFAULT_REFLORA_TEMPLATE,
     DEFAULT_REFLORA_2PASS_TEMPLATE,
+    DEFAULT_UNET,
     build_parody_request,
+    validate_unet_name,
+    verify_keep_dials,
 )
 from run_record import build_assets_record
 
@@ -505,6 +510,198 @@ class RefLoRAFixtures(unittest.TestCase):
         self._mod("badchar")
         g, _, _ = self._build(self._resolve("Badchar"))
         self.assertEqual(reflora.offline_class_check(g), [])
+
+    # B2-4 two-pass PARODY graph: per-pass RefLoRA dials, pass 1 voice-protected ------------
+    PARODY_HYB = {"lora_name": "MinimaxH3" + chr(92) + "reflora" + chr(92)
+                  + "minimaxh3_badchar_v1_reflora.safetensors", "members": "all"}
+
+    def _parody(self, **dials):
+        g = reflora.derive_parody_2pass_graph(self.b2, self.PARODY_HYB, **dials)
+        reflora.verify_parody_2pass_graph(g, self.b2, **dials)
+        return g
+
+    def test_parody_pass1_model_link_is_raw_at_zero(self):
+        """pass1_lora_strength 0.0: pass 1 keeps the raw base model chain (voice protection)."""
+        g = self._parody()
+        self.assertNotIn(reflora.PARODY_P1_LOADER, g)
+        for nid in ("s0_guide", "s0_sched"):
+            self.assertEqual(g[nid]["inputs"]["model"], ["m_shift", 0], nid)
+        self.assertEqual(g[reflora.PARODY_P2_LOADER]["inputs"]["lora_strength"], 1.0)
+
+    def test_parody_pass1_model_link_is_a_loader_at_035(self):
+        """A pass-1 dial above 0.0 inserts a pass-1 MiniMaxH3RefLoRALoader on that line only."""
+        g = self._parody(pass1_lora_strength=0.35)
+        for nid in ("s0_guide", "s0_sched"):
+            self.assertEqual(g[nid]["inputs"]["model"], [reflora.PARODY_P1_LOADER, 0], nid)
+        self.assertEqual(g[reflora.PARODY_P1_LOADER]["class_type"], reflora.LOADER_CLASS)
+        self.assertEqual(g[reflora.PARODY_P1_LOADER]["inputs"]["lora_strength"], 0.35)
+        self.assertEqual(g[reflora.PARODY_P2_LOADER]["inputs"]["lora_strength"], 1.0)
+
+    def test_parody_pass2_loader_carries_the_pass2_dial_with_apply_route(self):
+        """The pass-2 loader takes the pass-2 strength, attach_to_model False, Visual, clip given."""
+        g = self._parody(pass2_lora_strength=0.6)
+        for nid in ("s1_guide", "p2sched"):
+            self.assertEqual(g[nid]["inputs"]["model"], [reflora.PARODY_P2_LOADER, 0], nid)
+        inp = g[reflora.PARODY_P2_LOADER]["inputs"]
+        self.assertEqual(inp["lora_strength"], 0.6)
+        self.assertIs(inp["attach_to_model"], False)
+        self.assertEqual(inp["components"], "Visual")
+        self.assertEqual(inp["clip"], ["clip", 0])
+        self.assertEqual(g[reflora.PARODY_REF_LOADER]["inputs"]["lora_strength"], 0.0)
+        self.assertNotIn("clip", g[reflora.PARODY_REF_LOADER]["inputs"])
+        self.assertEqual(g["c0"]["inputs"]["clip"], ["clip", 0])
+
+    def test_parody_one_conditioning_injection_feeds_both_guides(self):
+        """Exactly one RefMod Apply + one RefLoRA Apply (no second Apply), feeding ag0 AND ag1."""
+        g = self._parody(pass1_lora_strength=0.35)
+        by_class: dict = {}
+        for nid, node in g.items():
+            by_class.setdefault(node["class_type"], []).append(nid)
+        self.assertEqual(by_class["MiniMaxH3RefModApply"], ["refapply"])
+        self.assertEqual(by_class[reflora.APPLY_CLASS], [reflora.PARODY_REF_APPLY])
+        self.assertEqual(g["refapply"]["inputs"]["retention"], 1.0)
+        self.assertEqual(g[reflora.PARODY_REF_APPLY]["inputs"]["conditioning"], ["refapply", 0])
+        self.assertEqual(g[reflora.PARODY_REF_APPLY]["inputs"]["mods"],
+                         [reflora.PARODY_REF_LOADER, 2])
+        for nid in ("ag0", "ag1"):
+            self.assertEqual(g[nid]["inputs"]["positive"], [reflora.PARODY_REF_APPLY, 0], nid)
+
+    def test_parody_keeps_the_keep_graph_and_audio_from_pass1(self):
+        """KEEP dials byte-identical to b2.api.json, audio decoded from pass 1, 384x672/124f."""
+        for dials in ({}, {"pass1_lora_strength": 0.35}, {"pass2_lora_strength": 0.6}):
+            with self.subTest(**dials):
+                g = self._parody(**dials)
+                self.assertEqual(reflora.frozen_diff_2pass(g, self.b2), [])
+                self.assertEqual(g["dec_a"]["inputs"]["samples"], ["s0_sep", 1])
+                self.assertEqual(g["lsu3"]["inputs"], self.b2["lsu3"]["inputs"])
+                self.assertEqual((g["c0"]["inputs"]["height"], g["c0"]["inputs"]["width"],
+                                  g["c0"]["inputs"]["length"]), (672, 384, 124))
+                verify_keep_dials(g, two_pass=True)
+
+    def test_parody_shape_verifier_fails_closed(self):
+        """The guard must reject a pass-1 loader at the 0.0 dial and a second Apply."""
+        g = self._parody()
+        g["s0_guide"]["inputs"]["model"] = [reflora.PARODY_P2_LOADER, 0]
+        with self.assertRaises(ValueError) as ctx:
+            reflora.verify_parody_2pass_graph(g, self.b2)
+        self.assertIn("s0_guide", str(ctx.exception))
+        g2 = self._parody()
+        g2["reflora_apply_2"] = dict(g2[reflora.PARODY_REF_APPLY])
+        with self.assertRaises(ValueError) as ctx:
+            reflora.verify_parody_2pass_graph(g2, self.b2)
+        self.assertIn("reflora_apply_2", str(ctx.exception))
+
+    def test_committed_parody_template_matches_derivation(self):
+        """No drift: templates/b2_parody_2pass.api.json == the generated default-dial graph."""
+        committed = json.loads(Path(DEFAULT_PARODY_2PASS_TEMPLATE).read_text(encoding="utf-8"))
+        self.assertEqual(committed, reflora.derive_parody_2pass_template(self.b2))
+        self.assertEqual(reflora.frozen_diff_2pass(committed, self.b2), [])
+        self.assertEqual(reflora.offline_class_check(committed), [])
+
+    def test_builder_two_pass_parody_uses_the_template_and_records_the_dials(self):
+        """--graph-mode two-pass-parody: template graph + the run's LoRA name + dials in records."""
+        self._mod("badchar")
+        self._hyb("badchar")
+        r = self._resolve("Badchar")
+        g, prompt, cond = self._build(r, graph_mode="two-pass-parody", frames=124)
+        self.assertEqual(g["s0_guide"]["inputs"]["model"], ["m_shift", 0])
+        self.assertEqual(g["s1_guide"]["inputs"]["model"], [reflora.PARODY_P2_LOADER, 0])
+        want = r["reflora"]["hybrids"][0]["lora_name"]
+        self.assertEqual({n["inputs"]["reflora_name"] for n in g.values()
+                          if n["class_type"] == reflora.LOADER_CLASS}, {want})
+        self.assertEqual({n["inputs"]["members"] for n in g.values()
+                          if n["class_type"] == reflora.LOADER_CLASS},
+                         {r["reflora"]["hybrids"][0]["member_selection"]})
+        # KTD3: a packed hybrid dedups its standalone RefMod, so no slot is loaded (the identity
+        # rides the RefLoRA loader's members); the slots stay "(none)" exactly as in the old arm B.
+        self.assertEqual([g["refmods"]["inputs"][f"mod_{i}"] for i in range(1, 9)],
+                         ["(none)"] * 8)
+        self.assertEqual(g["c0"]["inputs"]["ref_images.ref_image_1"], ["img", 0])
+        # the template path is not a raw file copy: make_b2_build must set THIS run's per-run fields
+        # (prompt/seed/prefix/frames), the five fields b2.README documents; the file's placeholders
+        # (seed 51083002, the terrace example prompt) must not survive into a request.
+        self.assertEqual(g["noise"]["inputs"]["noise_seed"], 1)
+        self.assertEqual(g["save"]["inputs"]["filename_prefix"], "community/t/clip")
+        self.assertEqual(g["c0"]["inputs"]["prompt"], prompt)
+        self.assertEqual(g["c0"]["inputs"]["length"], 124)
+        dials = r["reflora"]["parody_dials"]
+        self.assertEqual((dials["pass1_lora_strength"], dials["pass2_lora_strength"]), (0.0, 1.0))
+        a = build_assets_record({**r, "cond": cond}, g)
+        self.assertEqual(a["reflora"]["parody_dials"], dials)
+        self.assertEqual(a["dials"]["unet"], DEFAULT_UNET)
+        self.assertEqual(sorted(tuple(n["model_line"]) for n in a["reflora_ledger"]),
+                         [(), ("p2sched", "s1_guide")])
+
+    def test_builder_two_pass_dials_imply_the_parody_graph(self):
+        """--graph-mode two-pass plus per-pass dials is the brief's command shape (B2-7)."""
+        self._mod("badchar")
+        self._hyb("badchar")
+        r = self._resolve("Badchar")
+        g, _, _ = self._build(r, graph_mode="two-pass", pass1_lora_strength=0.35,
+                              pass2_lora_strength=1.0)
+        self.assertEqual(g["s0_guide"]["inputs"]["model"], [reflora.PARODY_P1_LOADER, 0])
+        self.assertEqual(g[reflora.PARODY_P1_LOADER]["inputs"]["lora_strength"], 0.35)
+        self.assertEqual(g["reflora_apply_1"]["inputs"]["mods"], [reflora.PARODY_REF_LOADER, 2])
+        self.assertEqual(r["reflora"]["parody_dials"]["pass1_lora_strength"], 0.35)
+        # the record names which model line each loader drives (the per-pass dials in records)
+        led = {n["node"]: (n["lora_strength"], tuple(n["model_line"]))
+               for n in reflora.reflora_ledger(g)}
+        self.assertEqual(led[reflora.PARODY_P1_LOADER], (0.35, ("s0_guide", "s0_sched")))
+        self.assertEqual(led[reflora.PARODY_P2_LOADER], (1.0, ("p2sched", "s1_guide")))
+        self.assertEqual(led[reflora.PARODY_REF_LOADER], (0.0, ()))
+
+    def test_builder_two_pass_refmod_only_still_uses_the_keep_graph(self):
+        """Existing default: plain --graph-mode two-pass without dials keeps the old shape."""
+        self._mod("badchar")
+        r = self._resolve("Badchar", refmod_only=True)
+        g, _, _ = self._build(r, graph_mode="two-pass")
+        self.assertEqual(g["s0_guide"]["inputs"]["model"], ["m_shift", 0])
+        self.assertFalse([k for k, v in g.items()
+                          if v["class_type"].startswith("MiniMaxH3RefLoRA")])
+        self.assertEqual(reflora.frozen_diff_2pass(g, self.b2), [])
+
+    # B2-4 --unet: the A/B model swap, two beta7 checkpoints only --------------------------
+    LEARNED_HQ = "10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors"
+    NOT_A_UNET = "NotARealUnet.safetensors"
+
+    def test_unet_allowlist_accepts_exactly_the_two_beta7_checkpoints(self):
+        self.assertEqual(validate_unet_name(BETA7_UNET_ALLOWLIST[0]), DEFAULT_UNET)
+        self.assertEqual(validate_unet_name(self.LEARNED_HQ), self.LEARNED_HQ)
+        for bad in (self.NOT_A_UNET, "", "sub" + chr(92) + self.LEARNED_HQ):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    validate_unet_name(bad)
+
+    def test_builder_default_unet_is_the_int8hq_checkpoint(self):
+        self._mod("badchar")
+        g, _, _ = self._build(self._resolve("Badchar"))
+        self.assertEqual(g["unet"]["inputs"]["unet_name"],
+                         "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors")
+        self.assertEqual(g["unet"]["inputs"], self.tpl["unet"]["inputs"])
+        verify_keep_dials(g)
+
+    def test_builder_unet_override_passes_the_keep_guard(self):
+        self._mod("badchar")
+        r = self._resolve("Badchar")
+        g, _, _ = self._build(r, unet_name=self.LEARNED_HQ)
+        self.assertEqual(g["unet"]["inputs"]["unet_name"], self.LEARNED_HQ)
+        verify_keep_dials(g)
+        self.assertEqual(r["reflora"]["unet_name"], self.LEARNED_HQ)
+        self.assertEqual(r["reflora"]["unet_allowlist"], list(BETA7_UNET_ALLOWLIST))
+
+    def test_builder_rejects_a_third_unet_before_writing(self):
+        self._mod("badchar")
+        with self.assertRaises(ValueError) as ctx:
+            self._build(self._resolve("Badchar"), unet_name=self.NOT_A_UNET)
+        self.assertIn("UNET dial drifted", str(ctx.exception))
+        self.assertIn(self.NOT_A_UNET, str(ctx.exception))
+
+    def test_keep_guard_rejects_a_unet_outside_the_allowlist(self):
+        g = json.loads(Path(DEFAULT_B2_TEMPLATE).read_text(encoding="utf-8"))
+        g["unet"]["inputs"]["unet_name"] = self.NOT_A_UNET
+        with self.assertRaises(ValueError) as ctx:
+            verify_keep_dials(g, two_pass=True)
+        self.assertIn("UNET dial drifted", str(ctx.exception))
 
 
 class OfflineClassCheck(unittest.TestCase):
