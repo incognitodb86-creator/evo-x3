@@ -73,6 +73,8 @@ def submit_parody_job(
     stage_cond: bool = False,
     refmod_only: bool = False,
     require_cond: bool = True,
+    wait: bool = False,
+    size: str = "768x1344",
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
@@ -179,11 +181,16 @@ def submit_parody_job(
         python, "-u", str(RUN_QUEUE_PY),
         "--run-dir", str(run_dir),
         "--frames", str(frames),
-        "--detach",
+        "--size", str(size or "768x1344"),
     ]
+    if not wait:
+        cmd.append("--detach")
 
     print(f"Submitting render queue: {' '.join(cmd)}")
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+    # Detach returns after WMI spawn (~seconds). --wait runs the full batch in-foreground
+    # (can be 10-40+ min per clip on beta7); no timeout so Forge can sequence arms A->D.
+    timeout = None if wait else 180
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     print(proc.stdout)
     if proc.stderr:
         print(proc.stderr, file=sys.stderr)
@@ -204,7 +211,7 @@ def submit_parody_job(
     if proc.returncode != 0:
         raise RuntimeError(f"run_queue.py --detach failed with returncode {proc.returncode}")
 
-    return dict(base, submitted=True, detached=True, gpu_busy=False)
+    return dict(base, submitted=True, detached=(not wait), waited=bool(wait), gpu_busy=False)
 
 
 def main(argv=None) -> int:
@@ -231,6 +238,10 @@ def main(argv=None) -> int:
                         help="single-pass=b2_refmod; two-pass=KEEP b2.api.json Lokken refine")
     parser.add_argument("--refmod-only", "--disable-reflora", dest="refmod_only", action="store_true",
                         help="Skip RefLoRA lookup (Arm A even when hybrid is on disk)")
+    parser.add_argument("--wait", action="store_true",
+                        help="Run run_queue in foreground (no --detach) until BATCH closed; sequence arms cleanly")
+    parser.add_argument("--size", default="768x1344",
+                        help="Objective size for run_queue (default 768x1344; two-pass upscales to this)")
     parser.add_argument("--template", default=None, help="Optional template path override")
     args = parser.parse_args(argv)
 
@@ -253,6 +264,8 @@ def main(argv=None) -> int:
         graph_mode=args.graph_mode,
         stage_cond=args.stage_cond,
         refmod_only=args.refmod_only,
+        wait=args.wait,
+        size=args.size,
     )
     print(json.dumps(res, indent=2, default=str))
     if res.get("gpu_busy"):

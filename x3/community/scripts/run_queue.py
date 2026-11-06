@@ -252,11 +252,24 @@ def expected_prefix(g):
 def graph_expect(g):
     """(frames, (w, h)) as the submitted graph asks for, from the MiniMaxH3ReferenceToVideo node's
     length/width/height; None for a value the graph does not state as a literal. The graph is the truth
-    of what was submitted; --frames/--size are only what the caller asked for (item 10, 2026-11-04)."""
+    of what was submitted; --frames/--size are only what the caller asked for (item 10, 2026-11-04).
+
+    KEEP Lokken two-pass (b2): c0 is 384x672 then MinimaxH3LatentUpscaler3D mode.scale=2.0 -> final
+    768x1344. Multiply by any LatentUpscaler3D scale so OBJECTIVE matches the saved mp4 (FG U5)."""
     n = next((x for x in (g or {}).values() if x.get("class_type") == "MiniMaxH3ReferenceToVideo"), None)
     i = (n or {}).get("inputs", {})
     num = lambda v: int(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
     f, w, h = num(i.get("length")), num(i.get("width")), num(i.get("height"))
+    if w and h:
+        scale = 1.0
+        for node in (g or {}).values():
+            if node.get("class_type") == "MinimaxH3LatentUpscaler3D":
+                inp = node.get("inputs", {})
+                s = inp.get("mode.scale", inp.get("scale", 1.0))
+                if isinstance(s, (int, float)) and not isinstance(s, bool) and s > 0:
+                    scale *= float(s)
+        if scale != 1.0:
+            w, h = int(round(w * scale)), int(round(h * scale))
     return f, (w, h) if w and h else None
 
 
