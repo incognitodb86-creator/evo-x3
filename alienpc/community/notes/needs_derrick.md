@@ -619,3 +619,38 @@ deleted, no `.bak`, no process killed/stopped/restarted, no ComfyUI/llama-swap/S
 `git add -A`, no force-push, never GitHub, no prompt text in any record. Gitea: push answered **502**
 (at least the 16th since 2026-11-05 19:28 CT); the B2-4..B2-10 commits are local-only and push at the
 first 200.
+
+---
+
+## Gitea 502 - update from the B2-11 pass (2026-11-06 03:50 CT). No new ask in this pass; the three B2-10 asks above (Ask 1 gate names, Ask 2 the adult sentence, **Ask 3 the dial pick**) are all still open.
+
+`git push` answered **502** again in this pass, as it has on every push since 2026-11-05 19:28 CT (the
+series counted in the ops cards: 13th at 00:5x, 16th at 02:4x, 17th-19th at 03:0x, and this pass's
+pushes; each attempt is a plain `git push` with no force, never GitHub). **B2-4..B2-11 commits are
+local-only** (community, ralph-community, fleet-brain) and push at the first 200; every SHA is in the
+item records, so nothing is lost. Options, unchanged: **(A)** keep going and push at the first 200
+(what Forge does now); **(B)** you restart/repair the Gitea container when you are next on the NAS;
+**(C)** point the remotes at another git home for the duration. Nothing was changed by Forge.
+
+Two facts from this pass, for the record, not as asks:
+1. **B2-11 rendered as planned, all 18 clips, clean unload** (control arm). `sum(delivered)` is now
+   2,232 frames of the 4,340 the stitch needs; **B2-12** is the remaining 17 clips (`--resume`,
+   ~34.5 min at the measured 121.7 s/clip), and B2-12's step 5 print is the 35-cell one.
+2. **Ask 3 changes the meaning of later clips, not this item**: batch 1 carries the control arm
+   (`beta7_int8HQ`, pass1 0.0 / pass2 1.0) because the pick is unanswered, so the 3-minute film
+   B2-13 stitches is a **control-arm film**. If you want a learned-arm film, the pick is the gate and
+   the bundles for that arm have to be built (B2-10's shape, ~35 CPU builds, no GPU until B2-11/B2-12
+   run again).
+
+The one recording gap in this item is stated in the DONE note, not hidden: the pass that launched the
+batch (loop iteration 11) was ended by `ralph.ps1`'s GPU_LOCK_MIDPASS guard on purpose, wrote the
+actions.log START line and then 0 bytes of pass text, so its printed launch line and its pre-launch
+nvidia-smi reading are unrecoverable. The batch's own `LS_WAKE: comfyui_auto not loaded, waking it`
+line records the pre-launch GPU state, and the post-close state is proven by `/running` +
+`comfy_ok=False` + no lock (B2-8's standing fact: the 14 GB in nvidia-smi is the session's own LLM).
+
+Rails of this pass: no GPU call, no lock, no model load, no ComfyUI request, no render, no queue
+launch, no KEEP, no score, no winner, no stitch, no QNAP/HA/UniFi/vault/Google call, no desktop
+control, no config write, no download, nothing paid, nothing deleted, no `.bak`, no `git add -A`, no
+force-push, never GitHub, no prompt text in any record, Sydney untouched.
+
