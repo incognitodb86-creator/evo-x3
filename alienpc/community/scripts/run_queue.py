@@ -625,7 +625,7 @@ def main():
         qlog(run_dir, "ERROR batch %s" % reason)
     finally:
         comm.mark_collected()  # (c) graceful-stop may stop comfyui_auto now: every output this batch will collect is in
-        try: comm.free_comfy(slog)
+        try: comm.free_comfy(os.path.join(run_dir, "_render_queue.log"))  # B2-1 (2026-11-05): free_comfy wants a log PATH, the same path qlog() writes; slog (a function) raised TypeError and line 629 swallowed it
         except Exception as e: slog("free_comfy note %s" % str(e)[:120])
         try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
         except Exception as e: slog("unload note %s" % str(e)[:120])
