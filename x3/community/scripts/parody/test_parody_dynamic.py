@@ -225,10 +225,22 @@ class TestU2Images(unittest.TestCase):
         g, p = build_parody_request(_res(), seed=51083601, prefix="community/t/clip", images=staged, dialogue=LINE)
         self.assertEqual(g["img_1"]["class_type"], "LoadImage")
         self.assertEqual(g["img_1"]["inputs"]["image"], staged[0])
-        self.assertEqual(g["c0"]["inputs"]["ref_images.ref_image_1"], ["img_1", 0])
-        self.assertIn("<Picture 1> is the composition, wardrobe, pose, and setting reference for [Shot 1].", p)
-        self.assertIn("retention_analysis:", p)
-        self.assertIn("[reference generation] (S1)", p)
+        self.assertEqual(g["add_guide"]["class_type"], "MiniMaxH3AddGuide")
+        self.assertEqual(g["add_guide"]["inputs"], {"positive": ["c0", 0], "latent": ["c0", 1], "vae": ["vvae", 0],
+                                                    "image": ["img_1", 0], "frame_idx": 0})
+        self.assertEqual(g["refapply"]["inputs"]["conditioning"], ["add_guide", 0])
+        self.assertEqual(g["s0_guide"]["inputs"]["conditioning"], ["refapply", 0])
+        self.assertEqual(g["s0_samp"]["inputs"]["latent_image"], ["c0", 1])
+        self.assertFalse([k for k in g["c0"]["inputs"] if k.startswith("ref_images")])
+        self.assertEqual(len(g), 22)
+        self.assertNotIn("<Picture", p)
+        self.assertNotIn("[reference generation]", p)
+        self.assertNotIn("retention_analysis", p)
+        self.assertIn("overall_soundscape:", p)
+        g0, p0 = build_parody_request(_res(), seed=51083601, prefix="community/t/clip", dialogue=LINE)
+        self.assertEqual(p, p0)  # --image never changes the text Qwen sees
+        with self.assertRaises(ValueError):
+            build_parody_request(_res(), seed=51083601, prefix="community/t/clip", images=staged * 2, dialogue=LINE)
         ok, why = comm.guard_reason(g)
         self.assertTrue(ok, why)
 
@@ -238,6 +250,9 @@ class TestU2Images(unittest.TestCase):
         self.assertNotIn("<Picture", p)
         self.assertNotIn("retention_analysis", p)
         self.assertNotIn("ref_images.ref_image_1", g["c0"]["inputs"])
+        self.assertFalse([n for n in g.values() if n.get("class_type") == "MiniMaxH3AddGuide"])
+        self.assertEqual(len(g), 20)
+        self.assertEqual(g["refapply"]["inputs"]["conditioning"], ["c0", 0])
 
 
 class TestSubmitDynamic(unittest.TestCase):
