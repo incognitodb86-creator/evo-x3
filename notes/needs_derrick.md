@@ -563,3 +563,59 @@ queue, network, QNAP/HA/UniFi/vault/Google call; nothing deleted, no `.bak`, no 
 config write, no `git add -A`, no force-push, never GitHub, no prompt text in any record. Gitea:
 `git pull --rebase --autostash` at the top of this pass answered **502** (at least the 15th since 2026-11-05 19:28 CT;
 the B2-4..B2-8 commits are local-only and push at the first 200).
+
+---
+
+---
+
+## B2-10 (2026-11-06 02:4x CT) - built, verified, no GPU; three asks, item left `[PARTIAL]`
+
+35 clip bundles + order files + gate + GPU budget are in
+`C:\AI\community\runs\longclip_meganfox_3min_20261105` (gate `ALL_CLAUSES_PASS True` rc 0,
+`checks=1002 failed=0 waived=37`; record SHA256
+`08b7d40ad12556719dad6b0b0b8bccd69e91250ff85344bd76149421a0a93563`; full record
+`notes/2026-11-06-b2-10-PARTIAL.md`). The build is not the blocker - three wording/plan items are,
+and none of them is Forge's to decide:
+
+**Ask 1 - two clause names in the plan's Pass text do not exist on this tree.** The plan's Pass line
+names `reflora.verify_keep_dials` and `test_longclip_baseline.HASHES`; `git log --all` shows the files
+that carried them were **never tracked** (the untracked B2-5 helper set, gone with the mid-pass
+rollback to HEAD), so git cannot restore them, and the gate prints them as WAIVED with reasons. The
+plan's third named tool, `take_chain_stitch.py`, **does exist** - at
+`C:\AI\community\scripts\queue\take_chain_stitch.py` (a first read looked at `scripts\` root and
+called it absent; the note carries the correction) - so the gate imports it, proves its line-34
+`CELL_RE` is the pattern the plan quotes, and 35/35 cell dirs match it: **B2-13's stitcher is not
+blocked.** Forge's substitutes for the two that are gone, already running: the keeper HEAD does have,
+`build_request.verify_keep_dials(two_pass=True, cond_wired=False)`, on all 35 graphs; and identity
+proven by measuring the `<Subject 1>` block of every built prompt against B2-7's surviving
+`prompt.txt` (one SHA: `d2debaaa168caa78297ee02e8dc087cac1e6349dbb36402a44d6ef339e0e5bbe`).
+Options: **(1a)** accept the substitutes and let B2-10 reach `[x]` on the next pass; **(1b)** say the
+word and the plan's Pass text gets rewritten to name the keepers that exist in HEAD; **(1c)** say the
+word and the missing helper files get rebuilt (largest, and it re-creates code no commit owns).
+
+**Ask 2 - the plan asks each prompt to contain "scandalous and provocative adult parody."** The repo's
+own rule from B2-6, quoted in every B2-7 `run_record.json`, says adults-only compliance lives in the
+record, not the paste (no meta line, no canon-age clause, no tone label). So the 35 prompts carry the
+adult wording of the B2-9 sheet and every record carries `guard_ok=true` / `adult_stated=true`, and the
+literal sentence is the one waived clause family (35 instances). Options: **(2a)** confirm B2-6 is the
+rule and the waiver stands; **(2b)** say the sentence must appear and Forge adds it in the builder
+(~10 min, rebuild + re-gate, no GPU).
+
+**Ask 3 - the dial pick is still open** (the card of 01:1x CT, and Ask 1/Ask 2 of 00:17 CT). This
+build is the control arm (`beta7_int8HQ`, pass1 0.0 / pass2 1.0) and its records state plainly that
+**B2-8 crowned no winner** and the pick remains open; `learned_HQ` is not built. Nothing about look,
+identity, voice or the parody read is measured by Forge.
+
+**Two findings that are not asks, for the record:** (a) the community tree was rolled back to git HEAD
+mid-pass; the untracked B2-5 helper set above is gone and nothing in this pass deleted it; (b) the
+RefLoRA on disk is `minimaxh3_meganfox_v1_reflora.safetensors` 150,198,128 B SHA256
+`ca92ff7d2bede89cf4be80c1c67bed0fb8cb7c4482ed31895b7925446663ec07`, not the 260,301,799 B /
+`0a3c6a0b` file B2-2's record quotes - the name resolves and the graph verifiers pass, so the bundles
+build, but the file's identity belongs to whoever owns the LoRA.
+
+**No action taken by Forge in this pass beyond the item:** no model/LoRA download, no GPU job, no
+queue launch, no render, no KEEP, no score, no stitch, no QNAP/HA/UniFi/vault/Google call, nothing
+deleted, no `.bak`, no process killed/stopped/restarted, no ComfyUI/llama-swap/Strata touch, no
+`git add -A`, no force-push, never GitHub, no prompt text in any record. Gitea: push answered **502**
+(at least the 16th since 2026-11-05 19:28 CT); the B2-4..B2-10 commits are local-only and push at the
+first 200.

@@ -49,6 +49,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import comm
 import run_graph_job as rgj
 
+# B2-10 (2026-11-06): a 3-clip long-form run is a set of clip cells, and the plan fixes the
+# cell dir name form: c<2 digits>_s<seed>. The queue is the tool that reads a run's
+# _render_order.json, so the tag is checked there. A run turns the rule on by declaring
+# "cell_contract": true in its order file (the long-clip runs do); in such a run a tag outside
+# the form is a FAIL line and the clip is not submitted. Runs that do not declare it are unchanged.
+CELL_RE = re.compile(r"^c\d{2}_s\d{6,}$")
+_CELL_CONTRACT = False  # set by main() from the order file; prepare() enforces the tag form
+
 ROOT = r"C:\AI\community"
 PY = sys.executable
 PYTEST_FILES = [os.path.join("scripts", "tests", "test_p6_review.py"), os.path.join("scripts", "tests", "test_guard_scope.py")]
@@ -183,6 +191,11 @@ def still_done(run_dir, job, tag, f, g0, size, t0, retry, slog):
 def prepare(run_dir, job, retry, slog):
     """START line + the per-clip checks before a submit. Returns the graph, or None after logging the FAIL."""
     tag, d = job["tag"], os.path.join(run_dir, job["tag"])
+    if _CELL_CONTRACT and not CELL_RE.match(str(tag)):
+        qlog(run_dir, "FAIL pos=%d tag=%s cell_contract=true: this run's tags must be clip cell dirs "
+                      "(the cNN_sNNNNNNNN form of the long-clip plan); clip not submitted"
+             % (job["pos"], tag))
+        return None
     graph = os.path.join(d, "request.api.json")
     qlog(run_dir, "START pos=%d tag=%s arm=%s scene=%s seed=%s%s" % (job["pos"], tag, job.get("arm"), job.get("scene"),
          job.get("seed"), " (the one allowed unchanged retry)" if retry else ""))
@@ -563,6 +576,8 @@ def main():
         return detach(sys.argv[1:], run_dir)
     q = json.load(open(a.queue or os.path.join(run_dir, "_render_order.json"), encoding="utf-8"))
     jobs = q["order"] if isinstance(q, dict) else q
+    global _CELL_CONTRACT  # B2-10: the long-clip plan declares the cell contract in its order file
+    _CELL_CONTRACT = bool(q.get("cell_contract")) if isinstance(q, dict) else False
     done = done_tags(run_dir) if a.resume else set()
     todo = [j for j in jobs if j["tag"] not in done]
     size = tuple(int(x) for x in a.size.lower().split("x"))
@@ -574,6 +589,11 @@ def main():
         if a.dry_run: print("would log: " + msg)
         else: qlog(run_dir, msg)
     if a.dry_run:
+        if _CELL_CONTRACT:
+            bad_tags = [str(j["tag"]) for j in jobs if not CELL_RE.match(str(j["tag"]))]
+            print("cell_contract=true: %d/%d tags are clip cell dirs (%s)%s"
+                  % (len(jobs) - len(bad_tags), len(jobs), CELL_RE.pattern,
+                     "; these would FAIL: " + ",".join(bad_tags) if bad_tags else ""))
         for j in todo:
             print("  pos %2d %s" % (j["pos"], j["tag"]))
         print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
@@ -582,6 +602,11 @@ def main():
     if not todo:
         return 0
     slog = lambda m: comm.log(m, os.path.join(run_dir, "status.log"))
+    if _CELL_CONTRACT:
+        bad_tags = [str(j["tag"]) for j in jobs if not CELL_RE.match(str(j["tag"]))]
+        qlog(run_dir, "cell_contract=true: %d/%d tags are clip cell dirs (%s)%s"
+             % (len(jobs) - len(bad_tags), len(jobs), CELL_RE.pattern,
+                "; these FAIL: " + ",".join(bad_tags) if bad_tags else ""))
     r = subprocess.run([PY, "-m", "pytest", *PYTEST_FILES, "-q", "-p", "no:cacheprovider"], cwd=ROOT, capture_output=True, text=True)
     if r.returncode:
         qlog(run_dir, "GATE-FAIL batch pytest rc=%d" % r.returncode)
