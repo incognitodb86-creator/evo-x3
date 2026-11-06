@@ -454,6 +454,167 @@ class RefLoRAFixtures(unittest.TestCase):
         self.assertEqual(a["effective_reference_count"], b["effective_reference_count"])
 
 
+    def test_builder_fails_closed_on_a_missing_class(self):
+        """B2-3: a class the saved object_info capture does not list blocks the build on CPU."""
+        self._mod("badchar")
+        bad = json.loads(Path(DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
+        bad["save"]["class_type"] = "NotARealNodeXYZ"
+        bad_tpl = self._bad_template(bad)
+        with self.assertRaises(ValueError) as ctx:
+            self._build(self._resolve("Badchar"), template_path=bad_tpl)
+        msg = str(ctx.exception)
+        self.assertIn("save", msg)
+        self.assertIn("NotARealNodeXYZ", msg)
+        self.assertIn("offline class check", msg)
+
+    def _bad_template(self, graph) -> Path:
+        p = self.comfy_input.parent / "tpl_bad.api.json"
+        p.write_text(json.dumps(graph, indent=2), encoding="utf-8")
+        return p
+
+    def test_two_pass_build_blocked_by_a_capture_without_the_upscaler(self):
+        """B2-3 (c) at the builder: the U5 two-pass arm, where the pack was not loaded.
+
+        The graph is clean (it passes the KEEP guard); the capture is the thing that lacks the
+        class, exactly as at U5 submit time. The build must fail closed naming lsu3 and the pack.
+        """
+        if not (reflora.CUSTOM_NODES_DIR / reflora.OFFLINE_PACK_UPSCALER).is_dir():
+            self.skipTest("the upscaler pack is not present on this host")
+        newest = reflora._saved_captures()
+        if not newest or "MinimaxH3LatentUpscaler3D" not in json.loads(
+                newest[0][1].read_text(encoding="utf-8")):
+            self.skipTest("no saved capture lists the upscaler class")
+        tpl = json.loads(Path(DEFAULT_B2_TEMPLATE).read_text(encoding="utf-8"))
+        classes = sorted({n["class_type"] for n in tpl.values()})
+        classes.remove("MinimaxH3LatentUpscaler3D")
+        old = self.comfy_input.parent / "object_info_20261101.json"
+        old.write_text(json.dumps({c: {"input": {}} for c in classes}), encoding="utf-8")
+        self._mod("badchar")
+        with self.assertRaises(ValueError) as ctx:
+            self._build(self._resolve("Badchar", refmod_only=True), graph_mode="two-pass",
+                        objinfo_dump=old)
+        msg = str(ctx.exception)
+        self.assertIn("lsu3: unknown class MinimaxH3LatentUpscaler3D", msg)
+        self.assertIn(reflora.OFFLINE_PACK_UPSCALER, msg)
+        self.assertIn("pack disabled", msg)
+
+    def test_builder_passes_against_the_fresh_capture(self):
+        """Control: the real templates are all renderable against the freshest capture."""
+        if not reflora.DEFAULT_OBJINFO_DUMP.is_file():
+            self.skipTest(f"no {reflora.DEFAULT_OBJINFO_DUMP} capture on this host")
+        self._mod("badchar")
+        g, _, _ = self._build(self._resolve("Badchar"))
+        self.assertEqual(reflora.offline_class_check(g), [])
+
+
+class OfflineClassCheck(unittest.TestCase):
+    """B2-3 offline class validation: saved object_info capture + .disabled pack evidence.
+
+    CPU only: the file's live-effect audit hook blocks socket/subprocess, and these fixtures
+    read nothing outside a temp dir except the saved captures they are meant to check.
+    """
+
+    LSU3 = {"lsu3": {"class_type": "MinimaxH3LatentUpscaler3D", "inputs": {}}}
+    UPSCALER_PACK = reflora.OFFLINE_PACK_UPSCALER
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="objcheck_")
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _dump(self, name: str, classes) -> Path:
+        """Synthetic capture: membership is all the validator reads out of an object_info file."""
+        p = self.root / name
+        p.write_text(json.dumps({c: {"input": {"required": {}}} for c in classes}), encoding="utf-8")
+        return p
+
+    def _pack(self, name: str, class_name: str) -> Path:
+        """A pack directory whose source registers the class (the shape grep-based evidence sees)."""
+        pack = self.root / name
+        (pack / "nodes").mkdir(parents=True)
+        (pack / "nodes" / "n.py").write_text(
+            f"NODE_CLASS_MAPPINGS = {{\"{class_name}\": TheNode}}\n", encoding="utf-8")
+        return pack
+
+    # (a) the restored pack's class passes against the fresh capture -------------------------
+    def test_upscaler_class_passes_against_the_fresh_capture(self):
+        if not reflora.DEFAULT_OBJINFO_DUMP.is_file():
+            self.skipTest(f"no {reflora.DEFAULT_OBJINFO_DUMP} capture on this host")
+        self.assertEqual(reflora.offline_class_check(self.LSU3), [])
+        for tpl in (DEFAULT_B2_TEMPLATE, DEFAULT_REFMOD_TEMPLATE, DEFAULT_REFLORA_TEMPLATE,
+                    DEFAULT_REFLORA_2PASS_TEMPLATE):
+            with self.subTest(template=Path(tpl).name):
+                g = json.loads(Path(tpl).read_text(encoding="utf-8"))
+                self.assertEqual(reflora.offline_class_check(g), [],
+                                 f"{Path(tpl).name} is not renderable against the fresh capture")
+
+    # (b) a class no capture lists is rejected, naming the node ------------------------------
+    def test_fake_class_is_rejected_with_the_node_id(self):
+        dump = self._dump("object_info_20261105.json", ["LoadImage", "EmptySD3LatentImage"])
+        out = reflora.offline_class_check(
+            {"zz9": {"class_type": "NotARealNodeXYZ", "inputs": {}}}, dump,
+            custom_nodes_dir=self.root / "no_packs")
+        self.assertEqual(len(out), 1)
+        self.assertIn("zz9", out[0])
+        self.assertIn("NotARealNodeXYZ", out[0])
+        self.assertIn("unknown class", out[0])
+
+    # (c) the U5 failure: the .disabled pack is named, and said to be disabled --------------
+    def test_u5_failure_line_is_exact(self):
+        pack = self._pack(self.UPSCALER_PACK + reflora.DISABLED_SUFFIX,
+                          "MinimaxH3LatentUpscaler3D")
+        dump = self._dump("object_info_20261105.json", ["LTXVConcatAVLatent"])
+        out = reflora.offline_class_check(self.LSU3, dump, custom_nodes_dir=self.root)
+        self.assertEqual(
+            out, ["lsu3: unknown class MinimaxH3LatentUpscaler3D "
+                  f"(defined by {self.UPSCALER_PACK}{reflora.DISABLED_SUFFIX} - pack disabled)"])
+        self.assertIn("pack disabled", out[0])
+        self.assertEqual(pack.name, self.UPSCALER_PACK + reflora.DISABLED_SUFFIX)
+
+    def test_old_capture_names_the_pack_and_says_disabled(self):
+        """A pack parked as .disabled at capture time: the reason must name it and say disabled."""
+        if not reflora.CUSTOM_NODES_DIR.is_dir():
+            self.skipTest("no ComfyUI custom_nodes tree on this host")
+        newest = reflora._saved_captures()
+        if not newest:
+            self.skipTest("no saved object_info captures on this host")
+        freshest = json.loads(newest[0][1].read_text(encoding="utf-8"))
+        if "MinimaxH3LatentUpscaler3D" not in freshest:
+            self.skipTest("the freshest capture does not list the upscaler class")
+        old = self._dump("object_info_20261101.json", ["LTXVConcatAVLatent"])
+        out = reflora.offline_class_check(self.LSU3, old)
+        self.assertEqual(len(out), 1, out)
+        self.assertIn("lsu3: unknown class MinimaxH3LatentUpscaler3D", out[0])
+        self.assertIn(self.UPSCALER_PACK, out[0])
+        self.assertIn("pack disabled", out[0])
+
+    # (d) the validator has no live effects --------------------------------------------------
+    def test_validator_makes_no_socket_or_subprocess_call(self):
+        import socket
+        import subprocess
+        for fn, args in ((socket.create_connection, (("127.0.0.1", 1), 0.05)),
+                         (subprocess.Popen, (["cmd", "/c", "echo"],))):
+            with self.subTest(fn=fn.__name__):
+                with self.assertRaises(RuntimeError):
+                    fn(*args)
+        dump = self._dump("object_info_20261105.json", ["LoadImage"])
+        self.assertTrue(reflora.offline_class_check(
+            {"a": {"class_type": "NotARealNodeXYZ", "inputs": {}}}, dump,
+            custom_nodes_dir=self.root))
+
+    def test_missing_class_type_is_reported_and_no_capture_raises(self):
+        dump = self._dump("object_info_20261105.json", ["LoadImage"])
+        out = reflora.offline_class_check({"nx": {"inputs": {}}}, dump,
+                                         custom_nodes_dir=self.root / "no_packs")
+        self.assertEqual(out, ["nx: missing class_type"])
+        with self.assertRaises(reflora.RefLoRAError):
+            reflora.offline_class_check(self.LSU3, self.root / "object_info_19990101.json")
+
+
+    """Header/tensor-only checks on the two smoke hybrids staged by HF (U2). CPU, read-only."""
+
 class StagedHybridsLive(unittest.TestCase):
     """Header/tensor-only checks on the two smoke hybrids staged by HF (U2). CPU, read-only."""
 
