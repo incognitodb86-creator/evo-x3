@@ -417,9 +417,21 @@ def resolve_identities(
     valid_bio = validate_biometric_description(raw_bio)
 
     primary_name = candidates[0] if candidates else "subject"
-    char_part = f"character {character_input}" if character_input else ""
-    actor_part = f"actor {actor_input}" if actor_input else ""
-    parts = [p for p in [char_part, actor_part] if p]
+    # MA-6: strip trailing period on bio before appending ", styled in ... tone."
+    valid_bio = valid_bio.rstrip().rstrip(".")
+    # Same-name celebrity: (actor X) not (character X, actor X)
+    same_name = (
+        bool(character_input)
+        and bool(actor_input)
+        and _normalize_key(character_input) == _normalize_key(actor_input)
+        and _normalize_key(character_input) == _normalize_key(primary_name)
+    )
+    if same_name:
+        parts = [f"actor {actor_input}"]
+    else:
+        char_part = f"character {character_input}" if character_input else ""
+        actor_part = f"actor {actor_input}" if actor_input else ""
+        parts = [p for p in [char_part, actor_part] if p]
     id_spec = f"featuring {primary_name}" + (f" ({', '.join(parts)})" if parts else "")
     description = f"{id_spec}, {valid_bio}, styled in {request.get('tone', 'parody')} tone."
 
