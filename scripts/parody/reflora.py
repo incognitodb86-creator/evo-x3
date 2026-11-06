@@ -447,6 +447,12 @@ PASS2_LORA_STRENGTH = 1.0
 PASS1_MODEL_CONSUMERS = ("s0_guide", "s0_sched")
 PASS2_MODEL_CONSUMERS = ("s1_guide", "p2sched")
 COND_INJECT_CONSUMERS = ("ag0", "ag1")
+GUIDER_NODES = ("s0_guide", "s1_guide")
+# B2-5: a named-celeb clip with NO start photo has no picture to load and nothing to add at
+# frame_idx 0, so the Cond node and BOTH AddGuides are dropped (the pack's own no-first-frame
+# example has no LoadImage and no AddGuide: examples/workflow_api_minimaxh3_reflora_turbo.json
+# wires MiniMaxH3ImageToVideo(20) -> MiniMaxH3RefLoRAApply(31) -> BasicGuider(41).conditioning).
+NO_PHOTO_DROP_NODES = ("img",) + COND_INJECT_CONSUMERS
 REFLORA_TITLE = ("Load H3 RefLoRA references for conditioning (lora_strength 0.0 = the pack's "
                  "no-patch path: base beta7 model stays voice-protected)")
 P1_TITLE = "Pass-1 RefLoRA LoRA half (the --pass1-lora-strength dial); B2 KEEP dials untouched"
@@ -513,6 +519,43 @@ def derive_parody_2pass_graph(b2_graph: Dict[str, Any], hybrid: Dict[str, Any], 
     return g
 
 
+def drop_cond_picture(graph: Dict[str, Any]) -> Dict[str, Any]:
+    """No-photo parody graph (B2-5): drop the Cond picture and BOTH AddGuides (in place).
+
+    The pack's own no-first-frame example is the model: ``workflow_api_minimaxh3_reflora_turbo.json``
+    contains no ``LoadImage`` and no ``MiniMaxH3AddGuide`` node at all, and its guide takes the
+    identity conditioning from the RefLoRA Apply directly - node ``41`` ``BasicGuider``
+    ``"conditioning": ["31", 0]`` (lines 185-193) where ``31`` is ``MiniMaxH3RefLoRAApply``
+    ``"conditioning": ["20", 0]`` (lines 158-161) on the ``MiniMaxH3ImageToVideo`` conditioning of
+    node 20. ``nodes.py`` is the same contract: ``class MiniMaxH3RefLoRAApply`` (nodes.py:234) takes
+    ``conditioning`` (``("CONDITIONING", ...)`` at nodes.py:246) + ``mods`` and returns conditioning
+    (``RETURN_TYPES = ("CONDITIONING",)`` at nodes.py:258, ``apply(self, conditioning, mods, ...)``
+    at nodes.py:263), so with no start frame the RefMod/RefLoRA injection is the only identity feed.
+
+    ``MiniMaxH3AddGuide`` exists to add a guide IMAGE at ``frame_idx`` (``required`` = positive,
+    latent, frame_idx; ``image`` is optional), and in b2.api.json ``ag0``/``ag1`` are fed ONLY by
+    ``img`` and consume ONLY the two guiders' conditioning (measured over the frozen template:
+    ``ag0`` -> ``s0_guide.conditioning``, ``ag1`` -> ``s1_guide.conditioning``; the latents reach
+    the samplers from ``c0``/``s1_cat``, not from the AddGuides). So with no photo the clean shape
+    is: remove ``img`` + ``ag0`` + ``ag1``, drop ``c0``'s optional ``ref_images.ref_image_1``
+    (``MiniMaxH3ReferenceToVideo`` lists ``ref_images`` under ``optional``), and feed both guiders
+    from the ONE conditioning injection. Fails closed if that injection is not in the graph.
+    """
+    apply_node = graph.get(PARODY_REF_APPLY)
+    if not apply_node or apply_node.get("class_type") != APPLY_CLASS:
+        raise ValueError(
+            f"drop_cond_picture needs the single conditioning injection {PARODY_REF_APPLY!r} "
+            f"({APPLY_CLASS}); the no-photo graph has no other identity feed")
+    for nid in NO_PHOTO_DROP_NODES:
+        graph.pop(nid, None)
+    graph.setdefault("c0", {}).setdefault("inputs", {}).pop("ref_images.ref_image_1", None)
+    for nid in GUIDER_NODES:
+        if "conditioning" not in (graph.get(nid) or {}).get("inputs", {}):
+            raise ValueError(f"drop_cond_picture: {nid} has no conditioning input to rewire")
+        graph[nid]["inputs"]["conditioning"] = [PARODY_REF_APPLY, 0]
+    return graph
+
+
 def derive_parody_2pass_template(b2_graph: Dict[str, Any]) -> Dict[str, Any]:
     """The committed templates/b2_parody_2pass.api.json at the default dials (0.0 / 1.0).
 
@@ -528,16 +571,23 @@ def derive_parody_2pass_template(b2_graph: Dict[str, Any]) -> Dict[str, Any]:
 
 def verify_parody_2pass_graph(graph: Dict[str, Any], b2_template: Dict[str, Any], *,
                              pass1_lora_strength: float = PASS1_LORA_STRENGTH,
-                             pass2_lora_strength: float = PASS2_LORA_STRENGTH) -> None:
+                             pass2_lora_strength: float = PASS2_LORA_STRENGTH,
+                             cond_wired: bool = True) -> None:
     """Fail closed unless the graph is the B2-4 two-pass parody shape (raises ValueError).
 
     Keeps the KEEP guard (``frozen_diff_2pass`` against the frozen b2) and adds the shape the
     voice-protection rule depends on: raw pass-1 model line at dial 0.0, one RefMod + one
     RefLoRA conditioning injection feeding BOTH guides, the LoRA half only on the pass-2 model
     line, and audio decoded from pass 1.
+
+    ``cond_wired=False`` is the B2-5 no-photo shape: ``img``/``ag0``/``ag1`` are intentionally
+    absent (their removal is the approved delta, so the KEEP guard still checks every other node),
+    ``c0`` carries no ``ref_images.ref_image_1``, and the ONE conditioning injection feeds both
+    guiders directly - the wiring of the pack's no-first-frame example.
     """
     p1, p2 = float(pass1_lora_strength), float(pass2_lora_strength)
-    problems: List[str] = list(frozen_diff_2pass(graph, b2_template))
+    problems: List[str] = list(frozen_diff_no_photo(graph, b2_template) if not cond_wired
+                               else frozen_diff_2pass(graph, b2_template))
 
     def node(nid: str) -> Dict[str, Any]:
         return graph.get(nid) or {}
@@ -582,15 +632,32 @@ def verify_parody_2pass_graph(graph: Dict[str, Any], b2_template: Dict[str, Any]
     elif inp(PARODY_REF_APPLY, "conditioning") != ["refapply", 0] \
             or inp(PARODY_REF_APPLY, "mods") != [PARODY_REF_LOADER, 2]:
         problems.append(f"{PARODY_REF_APPLY} must apply {PARODY_REF_LOADER}.mods to refapply")
-    for nid in COND_INJECT_CONSUMERS:
-        if cls(nid) != "MiniMaxH3AddGuide":
-            problems.append(f"{nid} is not MiniMaxH3AddGuide")
-        elif inp(nid, "positive") != [PARODY_REF_APPLY, 0]:
-            problems.append(f"{nid}.positive is not the single RefLoRA Apply")
-    if cls("s0_guide") != "BasicGuider" or inp("s0_guide", "conditioning") != ["ag0", 0]:
-        problems.append("s0_guide conditioning must stay ag0")
-    if cls("s1_guide") != "BasicGuider" or inp("s1_guide", "conditioning") != ["ag1", 0]:
-        problems.append("s1_guide conditioning must stay ag1")
+    if not cond_wired:
+        # B2-5: no Cond picture -> no LoadImage, no AddGuide, no picture input on c0, and the
+        # single injection is the guide conditioning of BOTH passes.
+        for nid, gnode in graph.items():
+            if gnode.get("class_type") == "LoadImage":
+                problems.append(f"{nid}: no-photo graph must not carry a LoadImage node")
+            if gnode.get("class_type") == "MiniMaxH3AddGuide":
+                problems.append(f"{nid}: no-photo graph must not carry a MiniMaxH3AddGuide node")
+        if "ref_images.ref_image_1" in (node("c0").get("inputs") or {}):
+            problems.append("c0 must not wire ref_images.ref_image_1 with no Cond picture")
+        for nid in GUIDER_NODES:
+            if cls(nid) != "BasicGuider":
+                problems.append(f"{nid} is not BasicGuider")
+            elif inp(nid, "conditioning") != [PARODY_REF_APPLY, 0]:
+                problems.append(f"{nid}.conditioning is not the single RefLoRA Apply "
+                                f"(got {inp(nid, 'conditioning')})")
+    else:
+        for nid in COND_INJECT_CONSUMERS:
+            if cls(nid) != "MiniMaxH3AddGuide":
+                problems.append(f"{nid} is not MiniMaxH3AddGuide")
+            elif inp(nid, "positive") != [PARODY_REF_APPLY, 0]:
+                problems.append(f"{nid}.positive is not the single RefLoRA Apply")
+        if cls("s0_guide") != "BasicGuider" or inp("s0_guide", "conditioning") != ["ag0", 0]:
+            problems.append("s0_guide conditioning must stay ag0")
+        if cls("s1_guide") != "BasicGuider" or inp("s1_guide", "conditioning") != ["ag1", 0]:
+            problems.append("s1_guide conditioning must stay ag1")
 
     pass1_src = [PARODY_P1_LOADER, 0] if p1 > 0.0 else ["m_shift", 0]
     for nid in PASS1_MODEL_CONSUMERS:
@@ -627,6 +694,11 @@ ALLOWED_INPUT_DELTAS_2PASS = ALLOWED_INPUT_DELTAS | {
     # see a wrong pass-1 dial; verify_parody_2pass_graph checks that line against the dial.
 }
 
+# B2-5: a named-celeb clip with NO start photo. The pack's no-first-frame example feeds the guider
+# conditioning straight from the RefLoRA/RefMod conditioning, so with img/ag0/ag1 gone the pass-2
+# guide's conditioning is an approved delta as well (the pass-1 one already is, from the B2-4 shape).
+ALLOWED_INPUT_DELTAS_NO_PHOTO = ALLOWED_INPUT_DELTAS_2PASS | {("s1_guide", "conditioning")}
+
 ALLOWED_NEW_CLASSES = {"LoadImage", LOADER_CLASS, APPLY_CLASS,
                        "MiniMaxH3RefModsLoader", "MiniMaxH3RefModApply"}
 
@@ -636,12 +708,22 @@ def _refmod_slot_key(key: str) -> bool:
 
 
 def frozen_diff(base: Dict[str, Any], graph: Dict[str, Any],
-                allowed_deltas: Optional[set] = None) -> List[str]:
-    """R9: list every difference outside the approved identity/Cond/run-specific deltas."""
+                allowed_deltas: Optional[set] = None,
+                allow_removed: Optional[Sequence[str]] = None) -> List[str]:
+    """R9: list every difference outside the approved identity/Cond/run-specific deltas.
+
+    ``allow_removed`` names nodes the checked graph may legitimately NOT carry (B2-5: a named-celeb
+    clip with no start photo drops ``img`` + both ``MiniMaxH3AddGuide`` nodes). Everything else in
+    the base graph must still be present, so the KEEP guard keeps its teeth over every dial of the
+    nodes that remain.
+    """
     allowed = allowed_deltas if allowed_deltas is not None else ALLOWED_INPUT_DELTAS
+    dropped = set(allow_removed or ())
     bad: List[str] = []
     for nid, node in base.items():
         if nid not in graph:
+            if nid in dropped:
+                continue
             bad.append(f"node removed: {nid}")
             continue
         other = graph[nid]
@@ -662,9 +744,19 @@ def frozen_diff(base: Dict[str, Any], graph: Dict[str, Any],
     return bad
 
 
-def frozen_diff_2pass(graph: Dict[str, Any], b2_template: Dict[str, Any]) -> List[str]:
+def frozen_diff_2pass(graph: Dict[str, Any], b2_template: Dict[str, Any],
+                      allow_removed: Optional[Sequence[str]] = None) -> List[str]:
     """R9 for two-pass: zero drift on KEEP b2 sampler/upscaler/guide/model dials."""
-    return frozen_diff(b2_template, graph, allowed_deltas=ALLOWED_INPUT_DELTAS_2PASS)
+    return frozen_diff(b2_template, graph, allowed_deltas=ALLOWED_INPUT_DELTAS_2PASS,
+                       allow_removed=allow_removed)
+
+
+def frozen_diff_no_photo(graph: Dict[str, Any], b2_template: Dict[str, Any]) -> List[str]:
+    """R9 for the B2-5 no-photo two-pass shape: the KEEP guard keeps every dial of the nodes that
+    remain, and the approved delta is exactly the no-first-frame one - the ``img``/``ag0``/``ag1``
+    removals, the dropped ``c0`` picture input, and both guiders rewired to the ONE injection."""
+    return frozen_diff(b2_template, graph, allowed_deltas=ALLOWED_INPUT_DELTAS_NO_PHOTO,
+                       allow_removed=NO_PHOTO_DROP_NODES)
 
 
 def verify_reflora_graph(graph: Dict[str, Any], base: Dict[str, Any], n_hybrids: int,

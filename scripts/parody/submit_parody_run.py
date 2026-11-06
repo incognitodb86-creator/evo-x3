@@ -3,6 +3,9 @@
 Builds resolved request, saves run record, writes a one-clip run_queue manifest, and
 submits through run_queue.py --detach. run_queue owns gpu-render.lock; rc 7 means GPU busy.
 Supports --graph-mode, --cond-source, --refmod-only for U5 A/B/B-2pass/D arms.
+B2-5: for --graph-mode two-pass-parody, --image/--cond-source are optional (no photo = the
+no-LoadImage/no-AddGuide graph whose only identity feed is the RefMod/RefLoRA conditioning);
+any photo passed is still gated through approved_characters + SHA256 (FG-2/FG-11).
 """
 
 from __future__ import annotations
@@ -253,9 +256,12 @@ def main(argv=None) -> int:
     parser.add_argument("--slug", help="Optional run slug")
     parser.add_argument("--run-dir", help="Direct run directory override")
     parser.add_argument("--dry-run", action="store_true", help="Validate and prepare without submitting")
-    parser.add_argument("--image", help="ComfyUI/input-relative Cond name (e.g. hoot_start.jpg)")
+    parser.add_argument("--image", help="ComfyUI/input-relative Cond name (e.g. hoot_start.jpg); "
+                        "optional with --graph-mode two-pass-parody: no Cond flags at all = a "
+                        "named-celeb clip with NO start photo")
     parser.add_argument("--cond-source",
-                        help="Path inside approved_characters for Cond provenance (FG-2)")
+                        help="Path inside approved_characters for Cond provenance (FG-2); optional "
+                             "with --graph-mode two-pass-parody (omit both flags for no photo)")
     parser.add_argument("--stage-cond", action="store_true",
                         help="Copy validated Cond into ComfyUI/input and verify SHA256")
     parser.add_argument("--graph-mode", choices=("single-pass", "two-pass", "two-pass-parody"),
