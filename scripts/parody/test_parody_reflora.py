@@ -61,7 +61,9 @@ INDEX_BAD_MD = """| Character | Actor | Franchise | Clips | Date |
 | **Fox Standalone** | Jamie Foxx | Fixture | x.mp4 | 2026-11-05 |
 | **Jorja Role** | Jorja Fox | CSI | y.mp4 | 2026-11-05 |
 """
-BIO = "long dark hair, hazel eyes, red leather jacket"
+# B2-6: the adult age lives in the author-supplied bio (the paste has no canon-age clause), so
+# every fixture bio states an 18+ age; the builder refuses a bio that does not.
+BIO = "a woman of 28 years, long dark hair, hazel eyes, red leather jacket"
 COND = "hoot_start.jpg"
 
 

@@ -500,3 +500,16 @@ Your options (no action taken by me):
    records sit unpushed.
 
 No GPU, no render, no model load, no queue, no process touched, nothing deleted, no secret printed, Sydney untouched.
+
+## B2-6: the parody skill cannot be written by Forge (tool policy), and the skill text is ready (2026-11-06 00:20 CT)
+
+**What happened.** B2-6's code, records, tests and proofs are green (see `notes/2026-11-05-b2-6-PARTIAL.md`). Its 4th part is "Update `C:\AI\community\skills\h3-parody-identity\SKILL.md` to state the new prompt shape". Both file tools are denied on that path by this box's permission policy - verbatim: `is not permitted to run 'edit' (matched 'edit:C:/AI/community/skills/*'). Hard stop: this permission denial is policy-enforced.` (same for `write`). So no skill file was touched; `skills/h3-parody-identity/SKILL.md` is git-clean (8,165 B) with its frontmatter description at 330 chars of the 1024 limit, and the item is marked `[PARTIAL]`.
+
+**Why it matters.** B2-7 (three Megan Fox arms) and B2-9 (the 35-clip beat sheet) build prompts that follow the new clean shape. Until the skill says so, the next agent that loads `h3-parody-identity` reads the old rule ("name + biometric description in the prompt") and can re-add the age/tone/adults boilerplate the builder now rejects. The rules are in the code and tests, so the build path is safe; the skill text is the human/agent-facing doc.
+
+**The ask - pick one (Forge takes no action on skills/ or settings without a yes).**
+1. Open `write:`/`edit:` on `C:/AI/community/skills/*` for Forge (a scoped yes: one item), and I apply the text in `notes/2026-11-05-b2-6-PARTIAL.md` section 5 in the next pass. Recommended: the text is ready, additive, description stays about 500 of 1024 chars, no other skill touched.
+2. Max (the U-cleanup lane owns `h3-prompting`) applies section 5 as a one-line-plus-insert edit. Section 5 is written as ready text with the exact anchor headings.
+3. Split the skill doc into its own fix_plan item and leave B2-6 closed for code. Not recommended: it leaves a "done" item whose doc rule is stale while B2-7 builds on it.
+
+**No action taken:** no skill file, no `settings.json`/`pi-permissions.jsonc` change, nothing deleted, no config touched. Gitea push route still answers **502** (8th occurrence; every B2-4/5/6 commit is local-only, no force-push, no branch change).
