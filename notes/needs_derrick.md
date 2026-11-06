@@ -443,3 +443,31 @@ The CPU side is done and measured: the `--lora`/`--strength` dials (built by the
 Also recorded, no ask: F2a's archive placement is not how phase 2 landed - `templates\_archive\` holds only `README.md`, that README points at `C:\AI\community\_archive\2026-11-04-superseded\templates\`, which does not exist, and the retired copy is at `C:\AI\_archive\2026-11-05-cleanup\7\bfs_klein9b.api.json`. F2b's Do owns that file and README; left untouched.
 
 answered:
+
+### 2026-11-05 18:4x CT addendum to the 13:00 F2a card - F2b is BLOCKED on Ask 1, no new ask
+
+F2b (phase 2b, "retire the per-face copies") states its own dependency: F2a's two `OBJECTIVE ok` lines. They do not
+exist, so F2b is `- [BLOCKED]`. **Ask 1 above is the only thing that unblocks it**; the GPU gate is open right now
+(`gpu-render.lock` absent, `comfy_ctl.py status` 18:37:16 CT `guard=(0, ['IDLE'])`).
+
+Measured, nothing moved (record `notes\2026-11-05-cleanup-F2b-BLOCKED.md`):
+- **The move is already built by the agy lane, and it is 23 files, not 24.** `git show --name-status 25e403c` (U7,
+  12:00:59) deletes 23 `templates/faces/FC_*.api.json`; they are at `C:\AI\_archive\2026-11-05-cleanup\7\faces\`,
+  not in phase 2. `git ls-tree 25e403c^ templates/faces | grep -c 'FC_.*\.api\.json$'` = **23**. "24" is the on-disk
+  count - `templates\faces\README.md` says "24 templates on disk, 23 in git", `.gitignore` `*sydney*`.
+- **`FC_SYDNEY.api.json` is intact**: 21171 B, mtime 2026-11-03 19:01:34 (predates the cleanup).
+- **The rg clause is clean**: 7 hits = 4 records/history + 2 that name the phase-7 **archive** path deliberately
+  (the F2a node-set test fixture and its evidence generator) + `make_b2_lora_template.py`, whose `DST` is
+  `templates\b2_fc_sydney_lora.api.json`, a file that still exists. 0 hits in `.pi\agent\skills` and `C:\AI\render`.
+- **Not built**: the `templates\b2.README.md` `--lora/--strength` section (0 hits; last commit 2026-10-30).
+
+**One decision I am not making (it is the keep/drop call in your 12:0x CT card, so I am not adding a new ask):** this
+F2b text moves the 3 `b2_fc_sydney_lora*.api.json` + their README, and v2 line 22-23/28 (Max's 11:12 audit) says
+"**F2b must not move b2_fc_sydney_lora\***" and "Every FC_SYDNEY and b2_fc_sydney_lora* file stays". I executed
+neither version: with the item's dependency unmet, moving files that a plan-of-record line forbids is the one thing I
+will not do unasked. Same for `faces\README.md`: it is the per-face **builder doc** for the live
+`make_b2_lora_template.py`, so the "per-face index" move would strand a generator.
+
+Answer Ask 1 and F2b is one pass: run the 2 cells, quote the two OBJECTIVE lines, add the b2.README section, commit.
+Nothing else in this pass: no GPU, no render, no lock, no model load, no successful HTTP, no process touched, no config
+write, nothing deleted, no `.bak`, no GitHub. Sydney untouched.
