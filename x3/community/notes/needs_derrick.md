@@ -477,3 +477,26 @@ write, nothing deleted, no `.bak`, no GitHub. Sydney untouched.
 - The clause I cannot pass as written: "a non-empty list containing `pack disabled` against the 20261031 capture (the u5 case)". `object_info_20261031.json` (2450 keys) CONTAINS `MinimaxH3LatentUpscaler3D`, and so does 20261030 (2338 keys); u5's failure was against the LIVE registry while the pack was parked `.disabled`, and that capture was never saved. So no saved capture makes that line non-empty. Evidence and the two proofs that do exist: `notes/2026-11-05-forge-blocker.md`.
 - Pick one: (1) re-word clause (c)/the Pass clause to the evidence that exists (a capture that omits the class + a `.disabled` fixture pack) - then B2-3 ticks; (2) park the upscaler pack and re-capture `object_info` (needs a GPU GO, one load, later item rails); (3) leave B2-3 `[PARTIAL]`.
 - Found on the way, for B2-4 (not a blocker): two-pass `build_parody_request` rebuilds from the frozen `DEFAULT_B2_TEMPLATE` whenever a passed `--template` has no `refmods` node, so a raw-`b2`-shaped `--template` override is silently discarded in two-pass mode (measured). B2-4's new `b2_parody_2pass.api.json` carries the refmods nodes, so its `--template` proof must use that file. Say yes/no if the override path should raise instead of rebuild.
+
+## 2026-11-05 23:5x CT (Forge, Ralph pass): the Gitea push route has answered 502 for 4.5 hours, 7 occurrences
+
+The start-of-pass `git pull --rebase` of `C:\AI\fleet-brain` answered 502, and every push in this pass answered 502
+(community, ralph-community, fleet-brain). First 502 recorded 19:28 CT; 7 occurrences by 23:5x CT, across four Ralph
+passes. Effect: the brain is ahead of Gitea by these commits and not shared, so the fleet rule "commit and push your
+records" is half-met (commit works, push does not). Local work is unaffected; the loop rule "use the local copies, push
+at the first 200" is being followed, and the loop keeps ticking items with measured proofs (B2-4 and B2-5 are `[x]`,
+B2-3 is `[PARTIAL]` with the ask already filed at 22:3x).
+
+Local commits waiting on the push: `C:\AI\community` `ac3306b3f8e28b031aacdb2522bc2e1ed9d53a0c`,
+`C:\Users\derek\5slock\ralph-community` `c0ff3e4fa39b873e00f0b47731cda004ea1e4d5a`,
+`C:\AI\fleet-brain` `6ef3c07af778fee0a1474594ccadff45dac2dbf7` (and B2-1..B2-4 commits from earlier passes, all local).
+
+Your options (no action taken by me):
+1. You look at Gitea on the QNAP (the container / service health, the reverse proxy behind it). I will not restart
+   anything on the QNAP, the network or the firewall without your yes, and I never stop another job on my own judgment.
+2. Say "keep going" and I keep the loop running, retry `git pull --rebase` + push at the top of every pass, and record
+   each 502 in the pass record (current behaviour).
+3. Say "stop at the end of this item" and I stop starting new `fix_plan` items until the brain is pushed, so no more
+   records sit unpushed.
+
+No GPU, no render, no model load, no queue, no process touched, nothing deleted, no secret printed, Sydney untouched.
