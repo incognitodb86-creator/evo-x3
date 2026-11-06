@@ -112,7 +112,7 @@ class TestPromptTweaks(unittest.TestCase):
         self.assertIn("an adult performer, age 28+", p)
         self.assertTrue(comm.adult_stated(p))
         self.assertLessEqual(p.lower().count("adult"), 2)
-        self.assertIn("[English in Jennifer Check's natural speaking voice]", p)
+        self.assertIn("[English, using Megan Fox's exact Jennifer Check voice and signature vocal timbre]", p)
         self.assertIn("overall_soundscape:", p)
 
     def test_600_word_scene_preserved_untruncated(self):
@@ -153,7 +153,7 @@ class TestU4CameraPronoun(unittest.TestCase):
         p = format_parody_prompt(_res(), dialogue=LINE, pronoun="he")
         self.assertIn("He holds eye contact, gives a small nod at the end, and stops talking.", p)
         self.assertIn("His mouth movements stop completely", p)
-        self.assertIn("the one natural voice he uses", p)
+        self.assertIn("He uses Megan Fox's exact Jennifer Check voice, accent, and signature vocal timbre consistently throughout the entire clip.", p)
         t = format_parody_prompt(_res(), dialogue=None, pronoun="they")
         self.assertIn("They do not speak; their lips stay closed", t)
         e = format_parody_prompt(_res(), dialogue=LINE,
@@ -162,6 +162,15 @@ class TestU4CameraPronoun(unittest.TestCase):
         self.assertNotIn("small nod", e)
         with self.assertRaises(ValueError):
             format_parody_prompt(_res(), dialogue=LINE, pronoun="it")
+        # MA-6 end-action grammar
+        smile = format_parody_prompt(_res(), dialogue=LINE, end_action="A knowing smile and a slow wink")
+        self.assertIn("She gives a knowing smile and a slow wink.", smile)
+        self.assertNotIn("She A knowing", smile)
+        holds = format_parody_prompt(_res(), dialogue=LINE, end_action="Holds eye contact with a wry tired smile")
+        self.assertIn("She holds eye contact with a wry tired smile.", holds)
+        she_dup = format_parody_prompt(_res(), dialogue=LINE, end_action="She holds a wry smile")
+        self.assertIn("She holds a wry smile.", she_dup)
+        self.assertNotIn("She She ", she_dup)
 
     def test_two_subjects(self):
         r2 = _res(name="Needy Lesnicki", actor="Amanda Seyfried", mods=("minimaxh3_amandaseyfried_v1_refmod",),
@@ -170,7 +179,7 @@ class TestU4CameraPronoun(unittest.TestCase):
         self.assertIn("(S1) Jennifer Check - an adult performer, age 28+", both)
         self.assertIn("(S2) Needy Lesnicki - an adult performer, age 28+", both)
         self.assertIn("Non-speaking characters: none.", both)
-        self.assertIn("(S2): <d>[English in Needy Lesnicki's natural speaking voice] You said that last week too.</d>", both)
+        self.assertIn("(S2): <d>[English, using Amanda Seyfried's exact Needy Lesnicki voice and signature vocal timbre] You said that last week too.</d>", both)
         one = format_parody_prompt(_res(), dialogue=LINE, resolved2=r2)
         self.assertIn("Non-speaking characters: (S2).", one)
         self.assertIn("(S2) She does not speak", one)
