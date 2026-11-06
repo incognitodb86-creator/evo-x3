@@ -2,7 +2,9 @@
 
 Covers R8/R9/R10/KTD2/KTD3 plus FG-2 Cond provenance, FG-3 exact token match,
 FG-8/9 junction+idempotence+slot overflow+2pass frozen diff+Arm A vs B diff,
-and FG-11 Cond-required on both branches. No GPU, network, or process launch.
+FG-11 Cond-required on both branches, the B2-4 per-pass parody dials, and the B2-5
+no-start-photo named-celeb graph (no LoadImage, no AddGuide, conditioning-only identity).
+No GPU, network, or process launch.
 """
 
 from __future__ import annotations
@@ -702,6 +704,240 @@ class RefLoRAFixtures(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             verify_keep_dials(g, two_pass=True)
         self.assertIn("UNET dial drifted", str(ctx.exception))
+
+
+class NoPhotoParodyGraph(unittest.TestCase):
+    """B2-5: a named-celeb clip with NO start photo (CPU only, no HTTP, no GPU, no lock).
+
+    The graph shape is the pack's own no-first-frame example: no LoadImage, no MiniMaxH3AddGuide,
+    the ONE RefMod/RefLoRA conditioning injection feeding both guiders. A supplied photo must still
+    hit the approved_characters + SHA256 gate (FG-2/FG-11).
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="nophoto_")
+        root = Path(self.tmp.name)
+        self.index = root / "index"
+        self.index.mkdir()
+        (self.index / "INDEX.md").write_text(INDEX_MD, encoding="utf-8")
+        (self.index / "INDEX_BAD.md").write_text(INDEX_BAD_MD, encoding="utf-8")
+        self.refmods = root / "refmods"
+        self.refmods.mkdir()
+        self.rdir = root / "reflora"
+        self.rdir.mkdir()
+        self.pool = root / "approved_characters" / "HOOTERS01"
+        self.pool.mkdir(parents=True)
+        self.cond_src = self.pool / "hoot_start.jpg"
+        self.cond_src.write_bytes(b"fake-cond-bytes-hoot-start")
+        self.comfy_input = root / "ComfyUI" / "input"
+        self.comfy_input.mkdir(parents=True)
+        (self.comfy_input / "hoot_start.jpg").write_bytes(self.cond_src.read_bytes())
+        self.b2 = json.loads(Path(DEFAULT_B2_TEMPLATE).read_text(encoding="utf-8"))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _mod(self, ident: str, seed: int = 1, ver: int = 1) -> Path:
+        p = self.refmods / f"minimaxh3_{ident}_v{ver}_refmod.safetensors"
+        make_refmod(p, seed)
+        return p
+
+    def _hyb(self, ident: str, seed: int = 1, ver: int = 1, **kw) -> Path:
+        p = self.rdir / f"minimaxh3_{ident}_v{ver}_reflora.safetensors"
+        make_hybrid(p, f"minimaxh3_{ident}_v{ver}_refmod", seed, **kw)
+        return p
+
+    def _resolve(self, character: str, actor=None, refmod_only=False):
+        return resolve.resolve_identities(
+            {"names": [character], "character": character, "actor": actor, "description": BIO},
+            index_dir=self.index, refmods_dir=self.refmods,
+            reflora_dir=None if refmod_only else self.rdir)
+
+    def _no_photo(self, character="Badchar", refmod_only=False, image=None, cond_source=None, **kw):
+        """The item's command shape: --graph-mode two-pass-parody with NO Cond flags at all."""
+        self._mod(character.lower())
+        if not refmod_only:
+            self._hyb(character.lower())
+        return build_parody_request(
+            self._resolve(character, refmod_only=refmod_only),
+            seed=1, prefix="community/t/clip", image=image, cond_source=cond_source,
+            approved_pool=self.pool.parent, comfy_input=self.comfy_input,
+            graph_mode="two-pass-parody", **kw)
+
+    @staticmethod
+    def _dangling(graph):
+        """Every link that points at a node id the graph does not carry (must always be [])."""
+        bad = []
+        for nid, node in graph.items():
+            for key, val in (node.get("inputs") or {}).items():
+                if isinstance(val, list) and len(val) == 2 and isinstance(val[0], str) \
+                        and val[0] not in graph:
+                    bad.append(f"{nid}.{key} -> {val[0]}")
+        return sorted(bad)
+
+    def test_no_photo_parody_drops_the_picture_and_both_addguides(self):
+        """No Cond flags: no LoadImage, no MiniMaxH3AddGuide, no Picture input, links resolve."""
+        for dials in ({}, {"pass1_lora_strength": 0.35, "pass2_lora_strength": 1.0}):
+            with self.subTest(**dials):
+                g, prompt, cond = self._no_photo(**dials)
+                by_class: dict = {}
+                for nid, node in g.items():
+                    by_class.setdefault(node["class_type"], []).append(nid)
+                self.assertNotIn("LoadImage", by_class)
+                self.assertNotIn("MiniMaxH3AddGuide", by_class)
+                self.assertNotIn("ref_images.ref_image_1", g["c0"]["inputs"])
+                for nid in ("s0_guide", "s1_guide"):
+                    self.assertEqual(g[nid]["inputs"]["conditioning"],
+                                     [reflora.PARODY_REF_APPLY, 0], nid)
+                self.assertEqual(self._dangling(g), [])
+                # the identity feed is the one RefMod -> RefLoRA conditioning injection, both passes
+                self.assertEqual(g["refapply"]["inputs"]["conditioning"], ["c0", 0])
+                self.assertEqual(g[reflora.PARODY_REF_APPLY]["inputs"]["conditioning"],
+                                 ["refapply", 0])
+                self.assertEqual(g[reflora.PARODY_REF_APPLY]["inputs"]["mods"],
+                                 [reflora.PARODY_REF_LOADER, 2])
+                reflora.verify_parody_2pass_graph(
+                    g, self.b2, cond_wired=False,
+                    pass1_lora_strength=dials.get("pass1_lora_strength", reflora.PASS1_LORA_STRENGTH),
+                    pass2_lora_strength=dials.get("pass2_lora_strength", reflora.PASS2_LORA_STRENGTH))
+                self.assertEqual(reflora.frozen_diff_no_photo(g, self.b2), [])
+                verify_keep_dials(g, two_pass=True, cond_wired=False)
+                self.assertNotIn("<Picture 1>", prompt)
+                self.assertEqual(prompt.count("<Video 1>"), 1)
+                self.assertIsNone(cond["cond_input_name"])
+                self.assertIsNone(cond["cond_sha256"])
+
+    def test_no_photo_parody_accepts_the_beta7_model_swap(self):
+        """The A/B beta7 UNet swap is the allowlist guard's business, not the frozen template's."""
+        other = [u for u in BETA7_UNET_ALLOWLIST
+                 if u != self.b2["unet"]["inputs"].get("unet_name")][0]
+        g, _, _ = self._no_photo(unet_name=other)
+        self.assertEqual(g["unet"]["inputs"]["unet_name"], other)
+        verify_keep_dials(g, two_pass=True, cond_wired=False)
+        self.assertEqual(
+            [p for p in reflora.frozen_diff_no_photo(g, self.b2)
+             if not p.startswith("dial drift: unet.unet_name:")], [])
+
+    def test_no_photo_identity_is_the_name_and_description_in_subject_definitions(self):
+        """Identity rides the prompt's INDEX name + bio description, never a picture label."""
+        g, prompt, _ = self._no_photo()
+        self.assertIn("subject_definitions:\n<Subject 1> is the woman in <Video 1>.", prompt)
+        self.assertIn("<Subject 1> Badchar,", prompt)
+        for cue in BIO.split(", "):
+            self.assertIn(cue, prompt)
+        self.assertNotIn("<Picture", prompt)
+        self.assertEqual(self._dangling(g), [])
+
+    def test_no_photo_verifier_fails_closed(self):
+        """A LoadImage, a c0 Picture input, or the with-photo shape must not pass the no-photo guard."""
+        g, _, _ = self._no_photo()
+        g["img"] = {"_meta": {"title": "x"}, "class_type": "LoadImage",
+                    "inputs": {"image": "outside.png"}}
+        g["c0"]["inputs"]["ref_images.ref_image_1"] = ["img", 0]
+        with self.assertRaises(ValueError) as ctx:
+            reflora.verify_parody_2pass_graph(g, self.b2, cond_wired=False)
+        msg = str(ctx.exception)
+        self.assertIn("LoadImage", msg)
+        self.assertIn("ref_images.ref_image_1", msg)
+        g2, _, _ = self._no_photo()
+        with self.assertRaises(ValueError) as ctx:
+            reflora.verify_parody_2pass_graph(g2, self.b2)
+        self.assertIn("ag0", str(ctx.exception))
+        g3, _, _ = self._no_photo()
+        g3["s1_guide"]["inputs"]["conditioning"] = [reflora.PARODY_P2_LOADER, 0]
+        with self.assertRaises(ValueError) as ctx:
+            reflora.verify_parody_2pass_graph(g3, self.b2, cond_wired=False)
+        self.assertIn("s1_guide", str(ctx.exception))
+
+    def test_keep_guard_relaxes_only_for_the_no_photo_shape(self):
+        """verify_keep_dials must still demand the AddGuides when a photo is wired."""
+        g, _, _ = self._no_photo()
+        with self.assertRaises(ValueError) as ctx:
+            verify_keep_dials(g, two_pass=True)
+        self.assertIn("ag0", str(ctx.exception))
+
+    def test_no_photo_lane_still_gates_a_supplied_photo(self):
+        """--image with a Cond outside approved_characters still raises (FG-2/FG-11 unchanged)."""
+        self._mod("badchar")
+        self._hyb("badchar")
+        outside = Path(self.tmp.name) / "outside.jpg"
+        outside.write_bytes(b"nope")
+        with self.assertRaises(ValueError) as ctx:
+            self._no_photo(image=COND, cond_source=str(outside))
+        self.assertIn("approved_characters", str(ctx.exception))
+
+    def test_a_pool_photo_in_the_parody_lane_keeps_the_addguide_shape(self):
+        """A gated photo: AddGuide + Picture wiring and <Picture 1> stay exactly as they were."""
+        g, prompt, cond = self._no_photo(image=COND, cond_source=str(self.cond_src))
+        self.assertEqual(g["img"]["class_type"], "LoadImage")
+        self.assertEqual(g["c0"]["inputs"]["ref_images.ref_image_1"], ["img", 0])
+        for nid in ("ag0", "ag1"):
+            self.assertEqual(g[nid]["inputs"]["positive"], [reflora.PARODY_REF_APPLY, 0], nid)
+        for nid, guide in (("s0_guide", "ag0"), ("s1_guide", "ag1")):
+            self.assertEqual(g[nid]["inputs"]["conditioning"], [guide, 0], nid)
+        reflora.verify_parody_2pass_graph(g, self.b2)
+        self.assertIn("<Picture 1>", prompt)
+        self.assertEqual(cond["cond_sha256"], reflora.sha256_file(self.cond_src))
+        self.assertEqual(self._dangling(g), [])
+
+    def test_records_describe_the_built_graph_for_both_shapes(self):
+        """Records: no-photo says no start_photo and names the guiders; a gated photo keeps B2-4."""
+        self._mod("badchar")
+        self._hyb("badchar")
+        resolved = self._resolve("Badchar")
+        build_parody_request(resolved, seed=1, prefix="community/t/clip", image=None,
+                             cond_source=None, approved_pool=self.pool.parent,
+                             comfy_input=self.comfy_input, graph_mode="two-pass-parody")
+        pd = resolved["reflora"]["parody_dials"]
+        self.assertFalse(pd["start_photo"])
+        self.assertIn("s0_guide + s1_guide", pd["conditioning_injection"])
+        self.assertNotIn("ag0 + ag1", pd["conditioning_injection"])
+        resolved2 = self._resolve("Badchar")
+        _, _, cond2 = build_parody_request(resolved2, seed=1, prefix="community/t/clip",
+                                           image=COND, cond_source=str(self.cond_src),
+                                           approved_pool=self.pool.parent,
+                                           comfy_input=self.comfy_input,
+                                           graph_mode="two-pass-parody")
+        pd2 = resolved2["reflora"]["parody_dials"]
+        self.assertTrue(pd2["start_photo"])
+        self.assertIn("ag0 + ag1", pd2["conditioning_injection"])
+        self.assertEqual(cond2["cond_sha256"], reflora.sha256_file(self.cond_src))
+
+    def test_no_photo_never_takes_the_stage_cond_copy(self):
+        """--stage-cond with no photo takes NO shutil.copy2 path (the WinError 32 defect)."""
+        g, _, cond = self._no_photo(stage_cond=True)
+        self.assertIsNone(cond["cond_input_name"])
+        self.assertIsNone(cond["cond_sha256"])
+        self.assertFalse(cond.get("staged"))
+        self.assertNotIn("LoadImage", {n["class_type"] for n in g.values()})
+        self.assertEqual(reflora.frozen_diff_no_photo(g, self.b2), [])
+
+    def test_other_graph_modes_still_require_a_cond(self):
+        """require=False is scoped to the no-photo parody lane; every other mode still blocks."""
+        self._mod("badchar")
+        self._hyb("badchar")
+        for mode in ("single-pass", "two-pass"):
+            with self.subTest(graph_mode=mode):
+                with self.assertRaises(ValueError) as ctx:
+                    build_parody_request(
+                        self._resolve("Badchar"), seed=1, prefix="community/t/clip",
+                        image=None, cond_source=None, approved_pool=self.pool.parent,
+                        comfy_input=self.comfy_input, graph_mode=mode)
+                self.assertIn("requires Cond", str(ctx.exception))
+
+    def test_no_photo_parody_still_needs_the_identity_injection(self):
+        """No photo AND no hybrid: the run blocks, it does not build an identity-less graph."""
+        self._mod("badchar")
+        with self.assertRaises(ValueError) as ctx:
+            self._no_photo(refmod_only=True)
+        self.assertIn("RefLoRA hybrid", str(ctx.exception))
+
+    def test_drop_cond_picture_needs_the_single_injection(self):
+        """drop_cond_picture refuses a plain b2 graph (no conditioning injection to feed)."""
+        with self.assertRaises(ValueError) as ctx:
+            reflora.drop_cond_picture(json.loads(
+                Path(DEFAULT_B2_TEMPLATE).read_text(encoding="utf-8")))
+        self.assertIn(reflora.PARODY_REF_APPLY, str(ctx.exception))
 
 
 class OfflineClassCheck(unittest.TestCase):

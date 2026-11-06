@@ -9,6 +9,9 @@ Lokken refine (+ RefLoRA graft on the whole model line when a hybrid resolves);
 two-pass-parody (B2-4) = b2_parody_2pass.api.json, the per-pass dials (--pass1-lora-strength
 0.0 voice-protected / --pass2-lora-strength 1.0). --unet swaps the model between the two beta7
 checkpoints (the A/B); it is validated against BETA7_UNET_ALLOWLIST before anything is written.
+B2-5: in two-pass-parody a start photo is OPTIONAL - with neither --image nor --cond-source the
+graph carries no LoadImage and no MiniMaxH3AddGuide and the RefMod/RefLoRA conditioning is the
+only identity feed; a photo in any mode keeps the approved_characters + SHA256 gate (FG-2/FG-11).
 """
 
 from __future__ import annotations
@@ -350,8 +353,14 @@ def populate_refmod_slots(graph: Dict[str, Any], refmod_slots: Dict[str, Any]) -
         inputs[copies_key] = copies
 
 
-def verify_keep_dials(graph: Dict[str, Any], two_pass: bool = False) -> None:
-    """Verify frozen KEEP dials on REF2VA 10strip eros beta7 int8HQ graph."""
+def verify_keep_dials(graph: Dict[str, Any], two_pass: bool = False,
+                     cond_wired: bool = True) -> None:
+    """Verify frozen KEEP dials on REF2VA 10strip eros beta7 int8HQ graph.
+
+    ``cond_wired=False`` is the B2-5 no-photo two-pass shape: the two ``MiniMaxH3AddGuide`` nodes
+    are intentionally absent (no guide image to add), so they are not required here -
+    ``verify_parody_2pass_graph(cond_wired=False)`` is the guard that checks that shape.
+    """
     if "unet" not in graph:
         raise ValueError("Graph missing 'unet' node.")
     # B2-4: the A/B model swap is the only KEEP dial allowed to change, so this guard is the two
@@ -371,7 +380,9 @@ def verify_keep_dials(graph: Dict[str, Any], two_pass: bool = False) -> None:
         raise ValueError("Graph missing 'refapply' node.")
 
     if two_pass:
-        for nid in ("ag0", "ag1", "lsu3", "p2sched", "s1_guide"):
+        required = ("lsu3", "p2sched", "s1_guide") if not cond_wired else (
+            "ag0", "ag1", "lsu3", "p2sched", "s1_guide")
+        for nid in required:
             if nid not in graph:
                 raise ValueError(f"Two-pass graph missing {nid!r}.")
         if graph["p2sched"]["inputs"].get("steps") != 3:
@@ -414,6 +425,11 @@ def build_parody_request(
         conditioning of BOTH passes, CLIP stays native.
 
     Cond is required on BOTH hybrid and RefMod-only branches when ``require_cond`` (FG-11 / R10).
+    B2-5 exception, the named-parody lane only: in ``two-pass-parody`` with NEITHER ``--image`` nor
+    ``--cond-source`` the run is a no-photo clip (``require=False``), the builder drops the
+    ``LoadImage`` and BOTH ``MiniMaxH3AddGuide`` nodes (``reflora.drop_cond_picture``), and the
+    RefMod/RefLoRA conditioning injection is the only identity feed, feeding both guiders. Passing a
+    photo in any mode keeps the FG-2 pool + SHA256 gate and the AddGuide/``<Picture 1>`` shape.
 
     ``objinfo_dump``: saved object_info capture used by the offline class check (B2-3) that runs
     next to ``verify_keep_dials``; default = the freshest capture in notes/objinfo.
@@ -449,13 +465,18 @@ def build_parody_request(
             template_path = DEFAULT_REFMOD_TEMPLATE
     template_path = Path(template_path)
 
+    # B2-5: in the named-parody lane a photo is optional. "No photo" means neither flag was given,
+    # so the requirement is dropped for exactly that case; any supplied photo still goes through
+    # resolve_cond_provenance (approved_characters + SHA256, FG-2/FG-11) unchanged, and the other
+    # graph modes keep requiring Cond.
+    no_photo_parody = bool(parody and not image and not cond_source)
     cond_meta = resolve_cond_provenance(
         image=image,
         cond_source=cond_source,
         approved_pool=approved_pool,
         comfy_input=comfy_input,
         stage_cond=stage_cond,
-        require=require_cond,
+        require=require_cond and not no_photo_parody,
     )
     cond_image = cond_meta.get("cond_input_name")
 
@@ -485,6 +506,7 @@ def build_parody_request(
             LOADER_CLASS,
             add_cond_picture,
             derive_parody_2pass_graph,
+            drop_cond_picture,
             verify_parody_2pass_graph,
         )
         if not hybrids:
@@ -494,12 +516,15 @@ def build_parody_request(
         hyb = {"lora_name": str(hybrids[0]["lora_name"]),
                "members": str(hybrids[0].get("member_selection") or "all")}
         b2_tpl = json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8"))
+        verify_kwargs = {"pass1_lora_strength": p1, "pass2_lora_strength": p2,
+                         "cond_wired": bool(cond_image)}
         try:
             # --template plumbing: `graph` is the template file with this run's prompt/seed/prefix/
             # frames applied by make_b2_build above; use it as-is when it verifies at the run's dials.
-            verify_parody_2pass_graph(graph, b2_tpl, pass1_lora_strength=p1, pass2_lora_strength=p2)
+            verify_parody_2pass_graph(graph, b2_tpl, **verify_kwargs)
         except ValueError:
-            # dials the committed template does not carry: regenerate from the LIVE b2.api.json.
+            # dials/shape the committed template does not carry (a non-default dial, or the no-photo
+            # shape of B2-5): regenerate from the LIVE b2.api.json.
             base_b2 = make_b2_build(b2_tpl, prompt=prompt, seed=seed, prefix=prefix, frames=frames,
                                     refmod=None, lora=None)
             graph = derive_parody_2pass_graph(base_b2, hyb, pass1_lora_strength=p1,
@@ -511,7 +536,9 @@ def build_parody_request(
         populate_refmod_slots(graph, resolved.get("refmod_slots", {}))
         if cond_image:
             graph = add_cond_picture(graph, cond_image)
-        verify_parody_2pass_graph(graph, b2_tpl, pass1_lora_strength=p1, pass2_lora_strength=p2)
+        else:
+            graph = drop_cond_picture(graph)
+        verify_parody_2pass_graph(graph, b2_tpl, **verify_kwargs)
     elif two_pass:
         from reflora import (
             add_cond_picture,
@@ -568,15 +595,21 @@ def build_parody_request(
         if parody:
             rec["parody_dials"] = {
                 "pass1_lora_strength": p1, "pass2_lora_strength": p2,
+                "start_photo": bool(cond_image),
                 "pass1_model": ("base beta7 model, voice-protected (lora_strength 0.0 = the pack's "
                                 "no-patch passthrough, raw m_shift)" if p1 <= 0.0
                                 else "reflora_p1 at lora_strength {0:g}".format(p1)),
                 "pass2_model": "reflora_p2 at lora_strength {0:g}".format(p2),
-                "conditioning_injection": "refapply(retention 1.0) -> reflora_apply_1 (refs only) "
-                                          "-> ag0 + ag1",
+                # B2-5: with no start photo there is no AddGuide, so record where the ONE injection
+                # really feeds - the record must describe the built graph, not the template.
+                "conditioning_injection": (
+                    "refapply(retention 1.0) -> reflora_apply_1 (refs only) -> ag0 + ag1"
+                    if cond_image else
+                    "refapply(retention 1.0) -> reflora_apply_1 (refs only) -> s0_guide + s1_guide "
+                    "(no start photo: no LoadImage, no MiniMaxH3AddGuide)"),
                 "clip": "native (c0.clip = clip node, no LoRA on the text encoder)",
             }
-    verify_keep_dials(graph, two_pass=two_pass)
+    verify_keep_dials(graph, two_pass=two_pass, cond_wired=bool(cond_image))
     # B2-3: the same unknown-class check submit-time static_check() does, run offline against the
     # saved object_info capture, so a --dry-run build fails closed on CPU (the U5 b2 arm died at
     # submit on lsu3 / a .disabled pack). No HTTP: only file reads.
@@ -594,7 +627,8 @@ def main(argv=None) -> int:
     parser.add_argument("--arm-dir", required=True, help="Directory to write request.api.json and prompt.txt")
     parser.add_argument("--seed", type=int, default=51083601, help="Noise seed")
     parser.add_argument("--prefix", required=True, help="Filename prefix, e.g. community/parody_01/clip_01")
-    parser.add_argument("--frames", type=int, default=124, help="Total frames (must satisfy (f-5)%17==0)")
+    parser.add_argument("--frames", type=int, default=124,
+                        help="Total frames (must satisfy (f-5)%%17==0; %% is escaped for argparse)")
     parser.add_argument("--dialogue", help="Optional spoken line")
     parser.add_argument("--scene", help="Optional scene summary")
     parser.add_argument("--template", default=None, help="Template JSON path override")
@@ -616,8 +650,12 @@ def main(argv=None) -> int:
                         help="two-pass-parody: LoRA half on the pass-2 model line; default "
                              f"{DEFAULT_PASS2_LORA_STRENGTH} (the pack example)")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
-    parser.add_argument("--image", help="ComfyUI/input-relative Cond name, e.g. hoot_start.jpg")
-    parser.add_argument("--cond-source", help="Absolute/relative path inside approved_characters (FG-2)")
+    parser.add_argument("--image", help="ComfyUI/input-relative Cond name, e.g. hoot_start.jpg; "
+                        "optional in --graph-mode two-pass-parody: with no --cond-source either the "
+                        "clip is built with NO start photo (identity = RefMod + RefLoRA conditioning)")
+    parser.add_argument("--cond-source", help="Absolute/relative path inside approved_characters (FG-2); "
+                        "optional in --graph-mode two-pass-parody (omit both Cond flags for a "
+                        "no-photo clip)")
     parser.add_argument("--stage-cond", action="store_true",
                         help="Copy validated --cond-source into ComfyUI/input and verify SHA256")
     parser.add_argument("--refmod-only", "--disable-reflora", dest="refmod_only", action="store_true",
