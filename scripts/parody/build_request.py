@@ -358,6 +358,7 @@ def build_parody_request(
     approved_pool: Path = DEFAULT_APPROVED_POOL,
     comfy_input: Path = DEFAULT_COMFY_INPUT,
     require_cond: bool = True,
+    objinfo_dump: Optional[Path] = None,
 ) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
     """Build request API graph and prompt text for a parody run.
 
@@ -366,6 +367,9 @@ def build_parody_request(
       - ``two-pass``: KEEP ``b2.api.json`` + RefMod (+ RefLoRA graft) with AddGuide / 2x upscale / beta refine.
 
     Cond is required on BOTH hybrid and RefMod-only branches when ``require_cond`` (FG-11 / R10).
+
+    ``objinfo_dump``: saved object_info capture used by the offline class check (B2-3) that runs
+    next to ``verify_keep_dials``; default = the freshest capture in notes/objinfo.
 
     Returns:
         (graph_dict, prompt_str, cond_meta)
@@ -454,6 +458,14 @@ def build_parody_request(
             graph = add_cond_picture(graph, cond_image)
 
     verify_keep_dials(graph, two_pass=two_pass)
+    # B2-3: the same unknown-class check submit-time static_check() does, run offline against the
+    # saved object_info capture, so a --dry-run build fails closed on CPU (the U5 b2 arm died at
+    # submit on lsu3 / a .disabled pack). No HTTP: only file reads.
+    from reflora import offline_class_check
+    missing_classes = offline_class_check(graph, objinfo_dump)
+    if missing_classes:
+        raise ValueError("graph not renderable on this ComfyUI (offline class check): "
+                         + " | ".join(missing_classes))
     # Stash cond meta on resolved-facing side via return
     return graph, prompt, cond_meta
 
@@ -482,6 +494,9 @@ def main(argv=None) -> int:
     parser.add_argument("--description", "--bio", dest="description", required=True,
                         help="Biometric/wardrobe description")
     parser.add_argument("--tone", default="parody", help="Tone (parody, adult, etc.)")
+    parser.add_argument("--objinfo-dump", default=None,
+                        help="object_info capture for the offline class check "
+                             "(default notes/objinfo/object_info_20261105.json)")
 
     args = parser.parse_args(argv)
 
@@ -520,6 +535,7 @@ def main(argv=None) -> int:
         cond_source=args.cond_source,
         graph_mode=args.graph_mode,
         stage_cond=args.stage_cond,
+        objinfo_dump=Path(args.objinfo_dump) if args.objinfo_dump else None,
     )
     resolved["cond"] = cond_meta
 
