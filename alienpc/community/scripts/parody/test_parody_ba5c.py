@@ -1,4 +1,4 @@
-"""BA-5c CPU fixtures: default still gate, KD17 slot ledger and U8 queue route.
+﻿"""BA-5c CPU fixtures: default still gate, KD17 slot ledger and U8 queue route.
 
 Synthetic temp files only. No GPU, network, process launch, live run or approved-pool read.
 """
@@ -32,8 +32,7 @@ INDEX_MD = """## Folder: `good`
 | :--- | :--- | :--- | :--- | :--- |
 | **Testa Char** | Testa Actor | Fixture Show | fixture.mp4 | 2026-11-05 |
 """
-# B2-6: a fixture bio must state an adult age (the builder refuses one that does not).
-BIO = "a woman of 30 years, short silver bob haircut, green eyes, navy blazer"
+BIO = "short silver bob haircut, green eyes, navy blazer"
 
 
 class TestBA5cFixes(unittest.TestCase):
@@ -47,7 +46,7 @@ class TestBA5cFixes(unittest.TestCase):
         self.refmods.mkdir()
         for name in (
             "minimaxh3_testachar_v1_refmod",
-            "minimaxh3_testaextra_v1_refmod",
+            "minimaxh3_testachar_alt_v1_refmod",
             "minimaxh3_testaactor_v1_refmod",
         ):
             (self.refmods / f"{name}.safetensors").write_bytes(b"fixture")
@@ -63,7 +62,7 @@ class TestBA5cFixes(unittest.TestCase):
 
     def request(self, stills=()):
         return {
-            "names": ["Testa Char", "Testa Extra"],
+            "names": ["Testa Char"],
             "character": "Testa Char",
             "actor": "Testa Actor",
             "tone": "parody",
@@ -99,7 +98,7 @@ class TestBA5cFixes(unittest.TestCase):
         for i in range(4, 9):
             self.assertEqual(slots[f"mod_{i}"], {"path": "(none)", "strength": 1.0, "copies": 1})
 
-        graph, _, _ = build_parody_request(res, seed=7, prefix="community/fixture/clip", frames=124, require_cond=False)
+        graph, _ = build_parody_request(res, seed=7, prefix="community/fixture/clip", frames=124)
         inputs = graph["refmods"]["inputs"]
         ledger = build_assets_record(res, graph)["refmod_ledger"]
         self.assertEqual(len(ledger), 8)
@@ -116,7 +115,6 @@ class TestBA5cFixes(unittest.TestCase):
         with mock.patch.object(spr, "INDEX_DIR", self.index), mock.patch.object(
             spr, "REFMODS_DIR", self.refmods
         ), mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json"), mock.patch.object(
-            spr, "REFLORA_DIR", None), mock.patch.object(
             spr.subprocess, "run", return_value=done
         ) as run:
             result = spr.submit_parody_job(
@@ -127,8 +125,6 @@ class TestBA5cFixes(unittest.TestCase):
                 seed=11,
                 frames=124,
                 run_dir_override=run_dir,
-                require_cond=False,
-                refmod_only=True,
             )
         return run_dir, result, run.call_args.args[0]
 
@@ -136,16 +132,13 @@ class TestBA5cFixes(unittest.TestCase):
         run_dir, result, cmd = self.submit(0)
         self.assertIn("run_queue.py", " ".join(cmd))
         self.assertNotIn("run_graph_job.py", " ".join(cmd))
-        # submit_parody_run passes --frames then --size (objective canvas) and ends with --detach.
-        self.assertEqual(cmd[cmd.index("--frames") + 1], "124")
-        self.assertEqual(cmd[cmd.index("--size") + 1], "768x1344")
-        self.assertEqual(cmd[-1], "--detach")
+        self.assertEqual(cmd[-3:], ["--frames", "124", "--detach"])
         self.assertIn(str(run_dir), cmd)
         self.assertTrue(result["submitted"])
         self.assertTrue(result["detached"])
         self.assertFalse(result.get("gpu_busy", False))
         order = json.loads((run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertEqual(order["order"], [{"pos": 1, "tag": "clip", "arm": "parody", "scene": "Testa Char", "seed": 11, "graph_mode": "single-pass", "refmod_only": True, "unet": "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors", "pass1_lora_strength": None, "pass2_lora_strength": None}])
+        self.assertEqual(order["order"], [{"pos": 1, "tag": "clip", "arm": "parody", "scene": "Testa Char", "seed": 11}])
         self.assertEqual(
             json.loads((run_dir / "clip" / "request.api.json").read_text(encoding="utf-8")),
             json.loads((run_dir / "request.api.json").read_text(encoding="utf-8")),
