@@ -136,13 +136,16 @@ class TestBA5cFixes(unittest.TestCase):
         run_dir, result, cmd = self.submit(0)
         self.assertIn("run_queue.py", " ".join(cmd))
         self.assertNotIn("run_graph_job.py", " ".join(cmd))
-        self.assertEqual(cmd[-3:], ["--frames", "124", "--detach"])
+        # submit_parody_run passes --frames then --size (objective canvas) and ends with --detach.
+        self.assertEqual(cmd[cmd.index("--frames") + 1], "124")
+        self.assertEqual(cmd[cmd.index("--size") + 1], "768x1344")
+        self.assertEqual(cmd[-1], "--detach")
         self.assertIn(str(run_dir), cmd)
         self.assertTrue(result["submitted"])
         self.assertTrue(result["detached"])
         self.assertFalse(result.get("gpu_busy", False))
         order = json.loads((run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertEqual(order["order"], [{"pos": 1, "tag": "clip", "arm": "parody", "scene": "Testa Char", "seed": 11, "graph_mode": "single-pass", "refmod_only": True}])
+        self.assertEqual(order["order"], [{"pos": 1, "tag": "clip", "arm": "parody", "scene": "Testa Char", "seed": 11, "graph_mode": "single-pass", "refmod_only": True, "unet": "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors", "pass1_lora_strength": None, "pass2_lora_strength": None}])
         self.assertEqual(
             json.loads((run_dir / "clip" / "request.api.json").read_text(encoding="utf-8")),
             json.loads((run_dir / "request.api.json").read_text(encoding="utf-8")),

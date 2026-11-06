@@ -56,6 +56,23 @@ DEFAULT_PASS2_LORA_STRENGTH = 1.0
 DEFAULT_APPROVED_POOL = Path(r"C:\Users\derek\5slock\approved_characters")
 DEFAULT_COMFY_INPUT = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input")
 CHUNK = 1 << 20
+# Nov 6 2026 lock (Derrick t213u): `--ref-audio` = ONE standalone voice-timbre reference, loaded by
+# LoadAudio from ComfyUI\input\ref_audios\ and wired into MiniMaxH3ReferenceToVideo's
+# `ref_audios` Autogrow input. The API key form is the flat V3 Autogrow name
+# `ref_audios.ref_audio_1` - the same form comm.first_pass / reflora.add_cond_picture use for
+# `ref_images.ref_image_1` (nodes_minimax_h3.py: io.Autogrow.Input("ref_audios",
+# prefix="ref_audio_")). minimax.py then emits the bare text label "<Audio 1>: " ahead of the
+# prompt (audio never enters Qwen) and c0 encodes the clip through audio_vae into minimax_refs.
+REF_AUDIO_SUBDIR = "ref_audios"
+REF_AUDIO_NODE = "ref_audio_1"
+REF_AUDIO_INPUT_KEY = "ref_audios.ref_audio_1"
+REF_AUDIO_EXTS: Tuple[str, ...] = (".wav", ".mp3", ".flac", ".m4a", ".ogg")
+# R37: dialogue that is really a stage note (H3's TTS reads stage cues aloud inside <d>).
+_STAGE_NOTE_RE = re.compile(
+    r"^\s*[\(\[]?\s*(no speech|no dialogue|no dialog|silent|silence|sfx|foley|music|beat|pause"
+    r"|room tone|ambien)", re.IGNORECASE)
+_STAGE_TOKEN_RE = re.compile(r"t=\d|</?d>|`|no speech|room tone|\[sfx|\(sfx|<scenedirect>"
+                             r"|</scenedirect>|overall_soundscape|no_dubs", re.IGNORECASE)
 
 
 def _sha256_file(path: Path) -> str:
@@ -184,6 +201,98 @@ def resolve_cond_provenance(
     }
 
 
+def resolve_ref_audio(
+    ref_audio: Optional[str],
+    *,
+    comfy_input: Path = DEFAULT_COMFY_INPUT,
+    stage_ref_audio: bool = False,
+) -> Dict[str, Any]:
+    """`--ref-audio` gate (fail closed): never a sydney path, an existing audio file with an allowed
+    extension, staged (or already present, SHA256-identical) at ComfyUI\\input\\ref_audios\\<basename>.
+
+    Returns ``ref_audio_source_path`` / ``ref_audio_input_name`` (LoadAudio's input-relative name,
+    forward slashes) / ``ref_audio_sha256``; all None when no reference audio is requested.
+    """
+    empty = {"ref_audio_source_path": None, "ref_audio_input_name": None, "ref_audio_sha256": None}
+    if not ref_audio:
+        return empty
+    raw = str(ref_audio).strip()
+    if "sydney" in raw.lower():
+        raise ValueError("--ref-audio refuses any path containing 'sydney' (fail closed)")
+    src = Path(raw)
+    if src.suffix.lower() not in REF_AUDIO_EXTS:
+        raise ValueError(f"--ref-audio must be one of {', '.join(REF_AUDIO_EXTS)}, got {src.suffix!r}")
+    if not src.is_absolute():
+        # an input-relative name (e.g. ref_audios/voice.wav) is looked up under ComfyUI\input
+        src = Path(comfy_input) / src
+    try:
+        resolved_src = src.resolve()
+    except OSError:
+        resolved_src = src
+    if "sydney" in str(resolved_src).lower():
+        raise ValueError("--ref-audio resolves into a 'sydney' path (fail closed)")
+    if not src.is_file():
+        raise ValueError(f"--ref-audio file not found: {src}")
+    src_sha = _sha256_file(src)
+    dest = Path(comfy_input) / REF_AUDIO_SUBDIR / src.name
+    same_file = False
+    try:
+        same_file = dest.is_file() and dest.resolve() == resolved_src
+    except OSError:
+        same_file = False
+    if stage_ref_audio and not same_file:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dest)
+    if not dest.is_file():
+        raise ValueError(f"ComfyUI/input ref audio missing: {dest}. Pass --stage-ref-audio to copy "
+                         f"{src} there.")
+    dest_sha = _sha256_file(dest)
+    if dest_sha != src_sha:
+        raise ValueError(f"ref audio SHA256 mismatch: {src}={src_sha} vs {dest}={dest_sha}")
+    return {
+        "ref_audio_source_path": str(src),
+        "ref_audio_input_name": f"{REF_AUDIO_SUBDIR}/{src.name}",
+        "ref_audio_sha256": src_sha,
+    }
+
+
+def wire_ref_audio(graph: Dict[str, Any], input_name: str) -> Dict[str, Any]:
+    """Add ``ref_audio_1`` (LoadAudio) and wire it into every MiniMaxH3ReferenceToVideo node
+    (c0, and c0_s1 when a two-pass graph carries one) through ``ref_audios.ref_audio_1``,
+    with ``audio_vae`` on ``avae`` so the clip is VAE-encoded into minimax_refs."""
+    graph[REF_AUDIO_NODE] = {"class_type": "LoadAudio", "inputs": {"audio": input_name}}
+    wired = []
+    for nid, node in graph.items():
+        if node.get("class_type") == "MiniMaxH3ReferenceToVideo":
+            node.setdefault("inputs", {})["audio_vae"] = ["avae", 0]
+            node["inputs"][REF_AUDIO_INPUT_KEY] = [REF_AUDIO_NODE, 0]
+            wired.append(nid)
+    if "c0" not in wired:
+        raise ValueError("ref audio: graph has no MiniMaxH3ReferenceToVideo 'c0' to wire ref_audios into")
+    if "avae" not in graph:
+        raise ValueError("ref audio: graph has no 'avae' audio VAE loader")
+    return graph
+
+
+def clean_dialogue(words: str) -> str:
+    """R37: the spoken words only. Stage notes raise instead of reaching <d>...</d>; surrounding
+    quotes are stripped; punctuation limited to `, . ? !`; ends with `.`, `?` or `!`."""
+    raw = " ".join(str(words or "").split())
+    if _STAGE_NOTE_RE.match(raw) or _STAGE_TOKEN_RE.search(raw):
+        raise ValueError("dialogue looks like a stage direction / sound cue, not spoken words (R37): "
+                         "pass only the words she says, or omit --dialogue for a silent clip")
+    text = raw.strip().strip("\"'\u201c\u201d\u2018\u2019").strip()
+    for ch in "~\u2013\u2014\u201c\u201d\u2018\u2019*\"()[]|/\\;:<>{}":
+        text = text.replace(ch, "" if ch not in "\u2013\u2014;:" else ",")
+    text = re.sub(r"\s+,", ",", re.sub(r",+", ",", text))
+    text = re.sub(r"\s+", " ", text).strip(" ,")
+    if not re.search(r"[A-Za-z0-9]", text):
+        raise ValueError("dialogue is empty after the R37 punctuation strip")
+    if not text.endswith((".", "?", "!")):
+        text += "."
+    return text
+
+
 # R23 camera line, verbatim; 24 fps is the box's clip rate (R8: beat ranges total the clip).
 CAMERA_LINE = "The camera holds a static shot."
 FPS = 24.0
@@ -195,21 +304,16 @@ def _shot_end_clock(frames: int) -> str:
     return f"{millis // 60000:02d}:{(millis // 1000) % 60:02d}.{millis % 1000:03d}"
 
 
-def _speech_sentence(name: str, words: str) -> str:
-    """R37 speech form: the subject label keeps identity, `(S1)` is the speaker, inside `<d>` only
-    the language tag and the words, punctuation limited to `, . ? !`, statements ending in `.`."""
-    text = " ".join(str(words).split())
-    for ch in "~–—…'*\"()[]|/\\;:":
-        text = text.replace(ch, "")
-    text = re.sub(r"\s+", " ", text).strip()
-    if not text:
-        raise ValueError("dialogue is empty after the R37 punctuation strip")
-    if not text.endswith((".", "?", "!")):
-        text += "."
+def _speech_sentence(name: str, words: str, ref_audio_wired: bool = False) -> str:
+    """R37 speech form (Nov 6 lock): `(S1)` is the speaker, inside `<d>` ONLY `[English]` + the
+    spoken words (never `[English in ...]`), then the voice sentence (`<Audio 1>` only when wired)."""
+    text = clean_dialogue(words)
+    voice = ("Her speaking voice follows the close, natural vocal timbre and cadence of <Audio 1> in "
+             "the foreground." if ref_audio_wired else
+             "Her speaking voice is close, clear, and natural in the foreground.")
     return (
-        f"<Subject 1> {name} (S1) keeps her eyes on the lens, chin level, and says, "
-        f"<d>[English] {text}</d> Her lips and jaw shape each word and return to rest between the "
-        f"phrases, breath moving visibly through her nose."
+        f"<Subject 1> (S1) looks into the lens and says, <d>[English] {text}</d> {voice} Her lips and "
+        "jaw shape each word and return to rest between the phrases."
     )
 
 
@@ -220,6 +324,8 @@ def format_parody_prompt(
     audio_ref: Optional[str] = None,
     frames: int = 124,
     cond_wired: bool = False,
+    action: Optional[str] = None,
+    ref_audio_wired: bool = False,
 ) -> str:
     r"""Format the five-section H3-Max paste (R5) for the INDEX + RefMod parody lane.
 
@@ -237,6 +343,14 @@ def format_parody_prompt(
 
     Default is no speech (R37): the `(S1)` ID and the `<d>` block appear only when `dialogue` is given.
 
+    Nov 6 2026 lock (Derrick t213u): no `overall_soundscape:` / `no_dubs:` / `<scenedirect>` ever
+    (R32, TenStrip HF #77); speech is inline in `[Shot 1]` as `<d>[English] words.</d>`; when both a
+    character and an actor resolve, `<Subject 1>` is named `Character (Actor)` so H3 gets both
+    tokens; `action` (natural blocking) replaces the static stand/sway beat; `ref_audio_wired`
+    (the graph wires `ref_audios.ref_audio_1`) adds the `<Audio 1>` voice-timbre lines (R34/R35)
+    and the summary tag `[reference generation + audio reference]`. `audio_ref` (legacy) still
+    emits nothing: only a WIRED reference earns a label (R33/R42).
+
     B2-6 (the clean named-actress paste). No guard/meta boilerplate: no canon-age clause, no
     "one adult performer"-style meta line, no `(character ..., actor ...)` parenthetical, no tone
     label. `<Subject 1>` is the INDEX name + the resolved bio and nothing else - one full
@@ -251,6 +365,10 @@ def format_parody_prompt(
     actor = resolved.get("actor")
     names = resolved.get("names", [])
     primary_name = character or actor or (names[0] if names else "Subject")
+    if character and actor and str(character).strip().lower() != str(actor).strip().lower():
+        # Nov 6 lock: name both so H3 gets the character AND the actor tokens.
+        primary_name = f"{str(character).strip()} ({str(actor).strip()})"
+    action_text = " ".join(str(action or "").split()).rstrip(".") if action else ""
 
     desc = resolved.get("description")
     if not desc or not str(desc).strip():
@@ -268,11 +386,16 @@ def format_parody_prompt(
     else:
         setting = (f"<Subject 1> {primary_name} stands behind a service counter at night, in the light "
                    "and framing of the start frame.")
-    scene_summary = (
-        f"{setting} <Subject 1> {primary_name} settles into position facing the camera, stays squared to "
-        "the lens with her face in frame the whole time, and holds the last frame in the same stance "
-        "with her shoulders moving on her breath."
-    )
+    if action_text:
+        scene_summary = (
+            f"{setting} <Subject 1> {primary_name} {action_text}, with her face in frame the whole time."
+        )
+    else:
+        scene_summary = (
+            f"{setting} <Subject 1> {primary_name} settles into position facing the camera, stays squared "
+            "to the lens with her face in frame the whole time, and holds the last frame in the same "
+            "stance with her shoulders moving on her breath."
+        )
 
     # subject_definitions: RefMod citation, identity binding described in full once (R28), and the
     # Cond prose anchor only when the graph wires ref_image_1 (R36). B2-6: the identity text is the
@@ -284,6 +407,9 @@ def format_parody_prompt(
     ]
     if cond_wired:
         subject_lines.append("<Picture 1> is the start frame of [Shot 1] for setting, light and framing")
+    if ref_audio_wired:
+        subject_lines.append("<Audio 1> is the reference audio defining the exact vocal timbre, pitch, "
+                             "and speaking cadence of <Subject 1>.")
 
     # R11 lead-ins with R35 role scope; `(Sx)` never appears here; new action is not a fidelity loss.
     retention_lines = [
@@ -292,6 +418,11 @@ def format_parody_prompt(
     if cond_wired:
         retention_lines.append(
             "<Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - setting, light, framing"
+        )
+    if ref_audio_wired:
+        retention_lines.append(
+            "<Audio 1>: reference - vocal timbre, pitch, and speaking cadence of <Subject 1>, without "
+            "copying the reference audio's spoken words."
         )
 
     # R39 style opening built from the start image's text records (the resolved description, R14),
@@ -310,31 +441,43 @@ def format_parody_prompt(
             "practical lights of the room at eye level, with a shallow depth of field and fine film grain."
         )
         entry = "stands facing the camera"
-    beat = (
+    if action_text:
+        beat = (
+            f"[Shot 1] 00:00.000 - {_shot_end_clock(frames)} <Subject 1> {primary_name} {action_text}, "
+            "chin level, eyes on the lens, her face staying in the same light, and her chest rises and "
+            "falls on the last frame."
+        )
+    else:
+      beat = (
         f"[Shot 1] 00:00.000 - {_shot_end_clock(frames)} <Subject 1> {primary_name} {entry}, weight "
         "even on both feet, hands resting lightly at her sides, chin level, eyes on the lens, and she "
         "settles square to the camera inside the first two seconds. PRIMARY MOTION - small steady "
         "upper-body sway, about one gentle cycle every three seconds, a few centimetres of travel, "
         "shoulders and hips staying on the frame line, her face staying in the same light. She keeps her "
         "gaze on the lens, and her chest rises and falls on the last frame."
-    )
+      )
     sounds = (
-        "Her voice sits close and dry in the foreground, recorded in the room with the camera. The room "
-        "tone is a low hum of ventilation, with a soft glass clink on the counter and her shoes shifting "
-        "once on the tile."
+        "The room tone is a low hum of ventilation, with a soft glass clink on the counter and her shoes "
+        "shifting once on the floor."
     )
 
-    detail_lines = [style, CAMERA_LINE, beat]
+    detail_lines = [style, CAMERA_LINE]
     if dialogue:
-        # Speech rides inside [Shot 1] (R37); plain real-sound sentences close the section (R7, R26).
-        detail_lines.append(_speech_sentence(primary_name, dialogue))
+        # Speech rides inline inside [Shot 1] (R37); plain real-sound sentences close the section.
+        detail_lines.append(beat + " " + _speech_sentence(primary_name, dialogue, ref_audio_wired))
+    else:
+        detail_lines.append(beat)
 
     prompt = (
         "subject_definitions:\n" + "\n".join(subject_lines)
-        + "\n\nsummary:\n[reference generation] " + scene_summary
+        + "\n\nsummary:\n" + ("[reference generation + audio reference] " if ref_audio_wired
+                                else "[reference generation] ") + scene_summary
         + "\n\nretention_analysis:\n" + "\n".join(retention_lines)
         + "\n\ndetailed_description:\n" + "\n".join(detail_lines) + "\n" + sounds
     )
+    for banned in ("overall_soundscape", "no_dubs", "<scenedirect>", "</scenedirect>", "[English in"):
+        if banned in prompt:
+            raise ValueError(f"R32/R37: banned token {banned!r} in the built paste")
 
     # B2-6: the builder still refuses a guard failure - it never softens the paste to pass, and the
     # message carries NO prompt text (the block's record rule). Two fail-closed checks:
@@ -447,6 +590,9 @@ def build_parody_request(
     unet_name: Optional[str] = None,
     pass1_lora_strength: Optional[float] = None,
     pass2_lora_strength: Optional[float] = None,
+    action: Optional[str] = None,
+    ref_audio: Optional[str] = None,
+    stage_ref_audio: bool = False,
 ) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
     """Build request API graph and prompt text for a parody run.
 
@@ -505,8 +651,10 @@ def build_parody_request(
     # graph modes keep requiring Cond.
     has_standalone_refmod = bool(resolved.get("loaded_refmods"))
     has_hybrid = bool((resolved.get("reflora") or {}).get("hybrids"))
+    # Nov 6 lock: the default single-pass (b2_refmod, 768x1344) is also a no-photo lane when the
+    # identity is INDEX + standalone RefMod (no RefLoRA hybrid); a supplied photo keeps the gate.
     no_photo_parody = bool(
-        (parody or (mode == "two-pass" and not has_hybrid and has_standalone_refmod))
+        (parody or (mode in ("two-pass", "single-pass") and not has_hybrid and has_standalone_refmod))
         and not image and not cond_source
     )
     cond_meta = resolve_cond_provenance(
@@ -518,13 +666,19 @@ def build_parody_request(
         require=require_cond and not no_photo_parody,
     )
     cond_image = cond_meta.get("cond_input_name")
+    # --ref-audio gate runs before anything is written into the graph (fail closed).
+    ref_audio_meta = resolve_ref_audio(ref_audio, comfy_input=comfy_input,
+                                       stage_ref_audio=stage_ref_audio)
+    cond_meta.update(ref_audio_meta)
+    ref_audio_wired = bool(ref_audio_meta.get("ref_audio_input_name"))
 
     with open(template_path, "r", encoding="utf-8") as f:
         tpl = json.load(f)
 
     prompt = format_parody_prompt(
         resolved, dialogue=dialogue, scene=scene, audio_ref=audio_ref,
-        frames=frames, cond_wired=bool(cond_image),
+        frames=frames, cond_wired=bool(cond_image), action=action,
+        ref_audio_wired=ref_audio_wired,
     )
 
     graph = make_b2_build(
@@ -645,6 +799,10 @@ def build_parody_request(
             from reflora import add_cond_picture
             graph = add_cond_picture(graph, cond_image)
 
+    if ref_audio_wired:
+        wire_ref_audio(graph, ref_audio_meta["ref_audio_input_name"])
+        resolved["ref_audio"] = dict(ref_audio_meta)
+
     # B2-4 --unet (t179u): the A/B model swap, in the BUILT request only (the committed templates
     # keep the int8HQ placeholder). Validated before any file is written, and verify_keep_dials
     # below checks the same allowlist, so an unaccepted checkpoint never reaches a request.
@@ -698,9 +856,18 @@ def main(argv=None) -> int:
     parser.add_argument("--dialogue", help="Optional spoken line")
     parser.add_argument("--scene", help="Optional scene summary")
     parser.add_argument("--template", default=None, help="Template JSON path override")
+    parser.add_argument("--action", help="Natural blocking/pose for [Shot 1] (replaces the static "
+                        "stand-and-sway beat), e.g. 'leans on the polished wood counter, one hand on the bar'")
+    parser.add_argument("--ref-audio", default=None,
+                        help="Standalone voice-timbre reference (<Audio 1>): .wav/.mp3/.flac/.m4a/.ogg; "
+                             "staged to ComfyUI\\input\\ref_audios\\<basename> and wired as "
+                             "ref_audios.ref_audio_1 (never a sydney path)")
+    parser.add_argument("--stage-ref-audio", action="store_true",
+                        help="Copy --ref-audio into ComfyUI\\input\\ref_audios and verify SHA256")
     parser.add_argument("--graph-mode", choices=("single-pass", "two-pass", "two-pass-parody"),
                         default="single-pass",
-                        help="single-pass=b2_refmod (community); two-pass=KEEP b2.api.json Lokken "
+                        help="DEFAULT single-pass = Nov 6 lock: native 768x1344 b2_refmod + beta7 "
+                             "int8HQ + INDEX + RefMod, no photo needed; single-pass=b2_refmod (community); two-pass=KEEP b2.api.json Lokken "
                              "refine; two-pass-parody=b2_parody_2pass.api.json (B2-4 per-pass dials, "
                              "pass 1 voice-protected). Passing --pass1-lora-strength or "
                              "--pass2-lora-strength with two-pass selects two-pass-parody.")
@@ -777,6 +944,9 @@ def main(argv=None) -> int:
         unet_name=args.unet,
         pass1_lora_strength=args.pass1_lora_strength,
         pass2_lora_strength=args.pass2_lora_strength,
+        action=args.action,
+        ref_audio=args.ref_audio,
+        stage_ref_audio=args.stage_ref_audio,
     )
     resolved["cond"] = cond_meta
 
