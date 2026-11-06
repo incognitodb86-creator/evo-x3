@@ -82,6 +82,9 @@ def submit_parody_job(
     unet_name: Optional[str] = None,
     pass1_lora_strength: Optional[float] = None,
     pass2_lora_strength: Optional[float] = None,
+    action: Optional[str] = None,
+    ref_audio: Optional[str] = None,
+    stage_ref_audio: bool = False,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
@@ -134,6 +137,9 @@ def submit_parody_job(
         unet_name=unet_name,
         pass1_lora_strength=pass1_lora_strength,
         pass2_lora_strength=pass2_lora_strength,
+        action=action,
+        ref_audio=ref_audio,
+        stage_ref_audio=stage_ref_audio,
     )
     resolved["cond"] = cond_meta
 
@@ -192,6 +198,7 @@ def submit_parody_job(
             print(f"  conditioning: {pd['conditioning_injection']}")
             print(f"  clip:         {pd['clip']}")
         print(f"  Cond:         {cond_meta}")
+        print(f"  RefAudio:     {(resolved.get('ref_audio') or {}).get('ref_audio_input_name')}")
         print(f"  Frames:       {frames}")
         return {
             "dry_run": True,
@@ -281,6 +288,11 @@ def main(argv=None) -> int:
                         help="two-pass-parody: LoRA half on the pass-2 model line, default 1.0")
     parser.add_argument("--refmod-only", "--disable-reflora", dest="refmod_only", action="store_true",
                         help="Skip RefLoRA lookup (Arm A even when hybrid is on disk)")
+    parser.add_argument("--action", help="Natural blocking/pose for [Shot 1]")
+    parser.add_argument("--ref-audio", default=None,
+                        help="Standalone voice-timbre reference (<Audio 1>), wired as ref_audios.ref_audio_1")
+    parser.add_argument("--stage-ref-audio", action="store_true",
+                        help="Copy --ref-audio into ComfyUI\\input\\ref_audios and verify SHA256")
     parser.add_argument("--wait", action="store_true",
                         help="Run run_queue in foreground (no --detach) until BATCH closed; sequence arms cleanly")
     parser.add_argument("--size", default="768x1344",
@@ -316,6 +328,9 @@ def main(argv=None) -> int:
         unet_name=args.unet,
         pass1_lora_strength=args.pass1_lora_strength,
         pass2_lora_strength=args.pass2_lora_strength,
+        action=args.action,
+        ref_audio=args.ref_audio,
+        stage_ref_audio=args.stage_ref_audio,
     )
     print(json.dumps(res, indent=2, default=str))
     if res.get("gpu_busy"):

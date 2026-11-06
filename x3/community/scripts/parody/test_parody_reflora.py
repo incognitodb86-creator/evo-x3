@@ -217,10 +217,18 @@ class RefLoRAFixtures(unittest.TestCase):
                                  require_cond=True)
 
     def test_missing_cond_blocks_refmod_only_branch_fg11(self):
-        self._mod("badchar")
+        # Nov 6 lock (t213u): single-pass INDEX + standalone RefMod is a no-photo lane, so a
+        # RefMod-only build with no Cond flags now builds WITHOUT LoadImage; with NO standalone
+        # RefMod installed there is no identity feed and the missing Cond still blocks (FG-11).
         with self.assertRaises(ValueError):
             build_parody_request(self._resolve("Badchar", refmod_only=True), seed=1,
                                  prefix="community/t/clip", require_cond=True)
+        self._mod("badchar")
+        g, _, cond = build_parody_request(self._resolve("Badchar", refmod_only=True), seed=1,
+                                          prefix="community/t/clip", require_cond=True,
+                                          comfy_input=self.comfy_input)
+        self.assertNotIn("LoadImage", {n["class_type"] for n in g.values()})
+        self.assertIsNone(cond["cond_sha256"])
 
     # FG-2 Cond provenance ------------------------------------------------
     def test_outside_pool_cond_blocks(self):

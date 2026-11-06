@@ -174,6 +174,12 @@ def build_assets_record(
         "cond_source_path": (resolved.get("cond") or {}).get("cond_source_path"),
         "cond_input_name": (resolved.get("cond") or {}).get("cond_input_name"),
         "cond_sha256": (resolved.get("cond") or {}).get("cond_sha256"),
+        # Nov 6 lock: the standalone <Audio 1> voice-timbre reference (ref_audios.ref_audio_1).
+        "ref_audio_source_path": (resolved.get("cond") or {}).get("ref_audio_source_path"),
+        "ref_audio_input_name": (resolved.get("cond") or {}).get("ref_audio_input_name"),
+        "ref_audio_sha256": (resolved.get("cond") or {}).get("ref_audio_sha256"),
+        "ref_audio_wired": graph.get("c0", {}).get("inputs", {}).get("ref_audios.ref_audio_1")
+        == ["ref_audio_1", 0],
         "chain_plan": chain_plan,
     }
 
