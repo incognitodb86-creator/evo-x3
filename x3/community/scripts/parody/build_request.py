@@ -11,6 +11,7 @@ import argparse
 import copy
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any, Dict, List, Optional
 
@@ -25,18 +26,60 @@ from make_b2_request import build as make_b2_build
 DEFAULT_REFMOD_TEMPLATE = Path(r"C:\AI\community\templates\b2_refmod.api.json")
 
 
+_STAGE_CUE_RE = re.compile(
+    r"(\bt\s*=\s*\d|\b\d{1,2}:\d{2}|</?\s*d\s*>|`|\bno\s+speech\b|\broom\s+tone\b)",
+    re.IGNORECASE,
+)
+_FEATURING_RE = re.compile(r"\bfeaturing\s+", re.IGNORECASE)
+DEFAULT_SCENE_ACTION = "faces the camera with relaxed, natural body language"
+
+
+def validate_spoken_dialogue(dialogue: Optional[str]) -> Optional[str]:
+    """KTD2: return the spoken words only, None for a silent clip; raise on stage/SFX/timestamp cues."""
+    if dialogue is None:
+        return None
+    text = str(dialogue).strip()
+    if not text:
+        return None
+    m = _STAGE_CUE_RE.search(text)
+    if m:
+        raise ValueError(
+            f"Dialogue must be spoken words only; found stage/SFX cue {m.group(0)!r} in {text!r}. "
+            "Leave dialogue empty for a silent clip."
+        )
+    return text
+
+
+def dedupe_featuring(desc: str) -> str:
+    """KTD1: keep the first 'featuring' and drop any repeated 'featuring ' prefixes after it."""
+    seen: List[bool] = []
+
+    def _keep_first(m: "re.Match[str]") -> str:
+        if seen:
+            return ""
+        seen.append(True)
+        return m.group(0)
+
+    return _FEATURING_RE.sub(_keep_first, desc)
+
+
 def format_parody_prompt(
     resolved: Dict[str, Any],
     dialogue: Optional[str] = None,
     scene: Optional[str] = None,
     audio_ref: Optional[str] = None,
 ) -> str:
-    """Format prompt adhering to Malcolm sample block standards and adults-only guard."""
+    """Format prompt adhering to Malcolm sample block standards and adults-only guard.
+
+    KTD1: caller scene action goes into detailed_description (no fixed standing pose) and a
+    repeated 'featuring' clause is collapsed. KTD2: voice label prefers the named character,
+    <d> holds spoken words only, and an empty dialogue renders a silent clip.
+    """
     character = resolved.get("character")
     actor = resolved.get("actor")
     names = resolved.get("names", [])
     primary_name = character or actor or (names[0] if names else "Subject")
-    voice_name = actor or character or primary_name
+    voice_name = character or actor or primary_name
 
     desc = resolved.get("description")
     if not desc or not str(desc).strip():
@@ -44,30 +87,47 @@ def format_parody_prompt(
             f"Resolved identity for '{primary_name}' is missing 'description'. "
             "A concrete biometric description is required."
         )
+    desc = dedupe_featuring(str(desc).strip())
 
-    scene_summary = scene or f"{primary_name} stands calmly, looking into the camera before delivering a statement"
-    dialogue_text = dialogue or "I have a message for everyone listening, and I will only say it once."
+    spoken = validate_spoken_dialogue(dialogue)
+    scene_text = str(scene).strip() if scene and str(scene).strip() else None
+    scene_summary = scene_text or f"{primary_name} stands calmly, looking into the camera before delivering a statement"
+    scene_action = scene_text or DEFAULT_SCENE_ACTION
 
     audio_timbre_line = ""
     if audio_ref:
         audio_timbre_line = "\n<Audio 1> is the voice-timbre reference for <Subject 1>."
 
+    if spoken:
+        non_speaking = "none"
+        speech_block = (
+            "<scenedirect>\n"
+            f"(S1): <d>[English in {voice_name}'s natural speaking voice] {spoken}</d>\n"
+            "</scenedirect>\n"
+            "She holds eye contact, gives a small nod at the end, and stops talking. "
+            "Her mouth movements stop completely after the sentence. "
+            "Her speaking voice, accent and cadence are the one natural voice she uses in this scene, "
+            "used consistently in every clip of this character."
+        )
+        voice_line = "quiet room ambience, soft natural room tone; the single close-micd human voice in the foreground."
+    else:
+        non_speaking = "(S1)"
+        speech_block = "She does not speak; her lips stay closed and relaxed for the whole shot."
+        voice_line = "quiet room ambience, soft natural room tone; no spoken voice."
+
     prompt = f"""subject_definitions:
 (S1) {primary_name} - an adult performer, age 28+, {desc}{audio_timbre_line}
 
 summary:
-(S1) {scene_summary}. Adult cast, adults-only, fictional 18+ adult scene. Non-speaking characters: none. No singing, no rapping, no songs, no music, no narration, no voice-over.
+(S1) {scene_summary}. Adult cast, adults-only, fictional 18+ adult scene. Non-speaking characters: {non_speaking}. No singing, no rapping, no songs, no music, no narration, no voice-over.
 
 detailed_description:
 [static medium shot, eye level, 50mm lens, shallow depth of field]
-(S1) stands in position, late afternoon ambient lighting, soft key on face, subtle fill. Camera locked off, no zoom, no pan.
-<scenedirect>
-(S1): <d>[English in {voice_name}'s natural speaking voice] {dialogue_text}</d>
-</scenedirect>
-She holds eye contact, gives a small nod at the end, and stops talking. Her mouth movements stop completely after the sentence. Her speaking voice, accent and cadence are the one natural voice she uses in this scene, used consistently in every clip of this character.
+(S1) {scene_action}, late afternoon ambient lighting, soft key on face, subtle fill. Camera locked off, no zoom, no pan.
+{speech_block}
 
 overall_soundscape:
-quiet room ambience, soft natural room tone; the single close-micd human voice in the foreground.
+{voice_line}
 no_dubs: no extra dubbing, no studio VO, no dubbing actors, no voice actors.
 No music, no songs, no score, no soundtrack."""
 

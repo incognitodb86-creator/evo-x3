@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from build_request import (
     DEFAULT_REFMOD_TEMPLATE,
@@ -26,6 +27,8 @@ from build_request import (
 from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities
 from run_record import build_assets_record, save_run_record, verify_run_artifacts
+import comm
+import submit_parody_run as spr
 
 
 INDEX_DIR = Path(r"C:\AI\community\index\h3-known-characters")
@@ -248,6 +251,179 @@ class TestParodyPhase3(unittest.TestCase):
             )
         self.assertIn("description", str(ctx.exception).lower())
 
+
+U1_BIO = "long dark glossy layered hair, smoky winged eyeliner, full glossy lips, cropped zip hoodie, low-rise mini skirt"
+U1_LINE = "You honestly thought that outfit was a good idea tonight? Cute."
+U1_INDEX_BAD = """| Character | Actor | Franchise | Clips | Date |
+| :--- | :--- | :--- | :--- | :--- |
+| **Sydney Sweeney** | Sydney Sweeney | Real Person / Celebrity | fixture.mp4 | 2026-08-21 |
+| **Nora Fixture** | Nora Fixture | Fixture Show | fixture.mp4 | 2026-08-21 |
+"""
+
+
+def _u1_resolved(**kw):
+    base = {
+        "names": [],
+        "character": None,
+        "actor": None,
+        "description": f"featuring Megan Fox (character Jennifer Check), {U1_BIO}, styled in parody tone.",
+    }
+    base.update(kw)
+    return base
+
+
+def _u1_subject_block(prompt):
+    return prompt.split("summary:")[0]
+
+
+class TestU1OpenSlotsAndVoice(unittest.TestCase):
+    """U1 (KTD1/KTD2): character-first voice, open scene action, silent clips, featuring dedup, <d> hygiene."""
+
+    def test_voice_label_prefers_character_then_actor(self):
+        p = format_parody_prompt(_u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE)
+        self.assertIn("[English in Jennifer Check's natural speaking voice]", p)
+        self.assertNotIn("Megan Fox's natural speaking voice", p)
+        p2 = format_parody_prompt(
+            _u1_resolved(actor="Sydney Sweeney", description="featuring Sydney Sweeney, wavy blonde hair, blue eyes"),
+            dialogue=U1_LINE,
+        )
+        self.assertIn("[English in Sydney Sweeney's natural speaking voice]", p2)
+
+    def test_open_scene_action_in_detailed_description(self):
+        scene = "leaning across a neon diner counter, twirling a straw"
+        p = format_parody_prompt(
+            _u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE, scene=scene
+        )
+        detailed = p.split("detailed_description:")[1].split("overall_soundscape:")[0]
+        self.assertIn(scene, detailed)
+        self.assertNotIn("stands in position", p)
+        self.assertIn(U1_LINE, detailed)
+
+    def test_silent_clip_omits_scenedirect(self):
+        for d in (None, "", "   "):
+            p = format_parody_prompt(
+                _u1_resolved(character="Jennifer Check", actor="Megan Fox"),
+                dialogue=d,
+                scene="leaning back against metal lockers, rolling her eyes",
+            )
+            self.assertNotIn("<scenedirect>", p, msg=repr(d))
+            self.assertNotIn("</scenedirect>", p, msg=repr(d))
+            self.assertNotIn("<d>", p, msg=repr(d))
+            self.assertNotIn("Her mouth movements stop completely after the sentence", p, msg=repr(d))
+            self.assertTrue(comm.guard_ok(p))
+            self.assertTrue(comm.adult_stated(p))
+
+    def test_featuring_dedup_direct(self):
+        r = _u1_resolved(
+            character="Jennifer Check",
+            actor="Megan Fox",
+            description="featuring Jennifer Check (Megan Fox), featuring Megan Fox, long dark wavy hair, cropped leather jacket",
+        )
+        subj = _u1_subject_block(format_parody_prompt(r, dialogue=U1_LINE))
+        self.assertEqual(subj.lower().count("featuring"), 1, subj)
+        self.assertIn("long dark wavy hair, cropped leather jacket", subj)
+
+    def test_featuring_dedup_through_resolve(self):
+        res = resolve_identities(
+            {
+                "names": ["Megan Fox"],
+                "character": "Jennifer Check",
+                "actor": "Megan Fox",
+                "tone": "parody",
+                "length_s": 5,
+                "description": "featuring Megan Fox, long dark wavy hair, cropped leather jacket",
+            },
+            index_dir=INDEX_DIR,
+            refmods_dir=REFMODS_DIR,
+            aliases_path=ALIASES_PATH,
+        )
+        subj = _u1_subject_block(format_parody_prompt(res, dialogue=U1_LINE))
+        self.assertEqual(subj.lower().count("featuring"), 1, subj)
+        self.assertIn("long dark wavy hair, cropped leather jacket", subj)
+
+    def test_stage_cue_dialogue_rejected(self):
+        bad = [
+            "00:00.000 No speech, bar room tone",
+            "t=0 hello there everyone",
+            "at 00:02 she says hello",
+            "<d>nested line</d>",
+            "a stray </d> closing tag",
+            "use the `backtick` cue",
+            "NO SPEECH here",
+            "soft Room Tone only",
+        ]
+        r = _u1_resolved(character="Jennifer Check", actor="Megan Fox")
+        for d in bad:
+            with self.assertRaises(ValueError, msg=d):
+                format_parody_prompt(r, dialogue=d)
+
+
+class TestU1SubmitGateAndSydneyFixture(unittest.TestCase):
+    """U1 (KTD3): missing-RefMod fail-closed and synthetic Sydney Sweeney request build (CPU only)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="u1_")
+        self.root = Path(self.tmp.name)
+        self.index = self.root / "index"
+        self.index.mkdir()
+        (self.index / "INDEX_BAD.md").write_text(U1_INDEX_BAD, encoding="utf-8")
+        self.refmods = self.root / "refmods"
+        self.refmods.mkdir()
+        self.run_dir = self.root / "run"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _patches(self):
+        return (
+            mock.patch.object(spr, "INDEX_DIR", self.index),
+            mock.patch.object(spr, "REFMODS_DIR", self.refmods),
+            mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json"),
+            mock.patch.object(spr.subprocess, "run"),
+        )
+
+    def _assert_fail_closed(self, name):
+        p1, p2, p3, p4 = self._patches()
+        with p1, p2, p3, p4 as run:
+            with self.assertRaises(ValueError) as ctx:
+                spr.submit_parody_job(name=name, description=U1_BIO, run_dir_override=self.run_dir)
+            run.assert_not_called()
+        self.assertIn("refmod", str(ctx.exception).lower())
+        self.assertFalse(self.run_dir.exists())
+
+    def test_missing_refmod_index_bad_fails_closed(self):
+        self._assert_fail_closed("Nora Fixture")
+
+    def test_missing_refmod_index_none_fails_closed(self):
+        self._assert_fail_closed("Unlisted Fixture Person")
+
+    def test_sydney_synthetic_fixture_builds_valid_graph(self):
+        (self.refmods / "minimaxh3_sydneysweeney_v1_refmod.safetensors").write_bytes(b"fixture")
+        p1, p2, p3, p4 = self._patches()
+        with p1, p2, p3, p4 as run:
+            res = spr.submit_parody_job(
+                name="Sydney Sweeney",
+                actor="Sydney Sweeney",
+                description="wavy honey-blonde hair, bright blue eyes, soft round face, fitted white tank top",
+                dialogue="Relax, I always look this good before breakfast.",
+                scene="perched on a penthouse bar stool, swirling a drink",
+                run_dir_override=self.run_dir,
+                dry_run=True,
+            )
+            run.assert_not_called()
+        self.assertTrue(res["dry_run"])
+        self.assertEqual(res["resolved"]["index_status"], "bad")
+        graph = json.loads((self.run_dir / "request.api.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(graph), 20)
+        self.assertEqual((graph["c0"]["inputs"]["width"], graph["c0"]["inputs"]["height"]), (768, 1344))
+        self.assertEqual(graph["refmods"]["inputs"]["mod_1"], "minimaxh3_sydneysweeney_v1_refmod")
+        verify_keep_dials(graph)
+        ok, reason = comm.guard_reason(graph)
+        self.assertTrue(ok, reason)
+        prompt = (self.run_dir / "prompt.txt").read_text(encoding="utf-8")
+        self.assertIn("[English in Sydney Sweeney's natural speaking voice]", prompt)
+        self.assertIn("perched on a penthouse bar stool", prompt.split("detailed_description:")[1])
+        self.assertEqual(_u1_subject_block(prompt).lower().count("featuring"), 1)
 
 if __name__ == "__main__":
     unittest.main()
