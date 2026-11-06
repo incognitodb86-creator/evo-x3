@@ -265,24 +265,30 @@ def select_reflora(
 # graph graft (R3 / R9 / KTD1 / KTD2) — single-pass (b2_refmod) + two-pass (b2)
 # ---------------------------------------------------------------------------
 
-def _loader_node(model_src, clip_src, lora_name: str, members: str) -> Dict[str, Any]:
-    return {
-        "_meta": {"title": "Load H3 RefLoRA (pack example port order; B2 dials untouched)"},
-        "class_type": LOADER_CLASS,
-        "inputs": {
-            "model": model_src,
-            "clip": clip_src,
+def _loader_node(model_src, clip_src, lora_name: str, members: str,
+                 lora_strength: float = LORA_STRENGTH, lora_strength_clip: float = 1.0,
+                 title: str = "Load H3 RefLoRA (pack example port order; B2 dials untouched)") -> Dict[str, Any]:
+    """One MiniMaxH3RefLoRALoader in the pack example's port wiring; B2 dials untouched.
+
+    ``clip_src=None`` leaves the optional CLIP input unconnected: the pack's own contract says
+    MiniMax H3 LoRAs are ``lora_unet_*`` only, so CLIP "is usually left unconnected"
+    (nodes.py:143-144). ``lora_strength=0.0`` is the pack's no-patch path (nodes.py:179-191).
+    """
+    inputs: Dict[str, Any] = {"model": model_src}
+    if clip_src is not None:
+        inputs["clip"] = clip_src
+    inputs.update({
             "reflora_name": lora_name,
-            "lora_strength": LORA_STRENGTH,
-            "lora_strength_clip": 1.0,
+            "lora_strength": lora_strength,
+            "lora_strength_clip": lora_strength_clip,
             "refmod_retention": REFMOD_RETENTION,
             "members": members,
             "components": "Visual",
             "attach_to_model": False,
             "max_total_tokens": 0,
             "show_info": True,
-        },
-    }
+    })
+    return {"_meta": {"title": title}, "class_type": LOADER_CLASS, "inputs": inputs}
 
 
 def _apply_node(cond_src, mods_src) -> Dict[str, Any]:
@@ -428,6 +434,183 @@ def derive_reflora_2pass_template(b2_graph: Dict[str, Any]) -> Dict[str, Any]:
     return g
 
 
+# ---------------------------------------------------------------------------
+# dedicated two-pass PARODY graph (B2-4) - pass 1 voice-protected, pass 2 carries the LoRA half
+# ---------------------------------------------------------------------------
+
+PARODY_REF_LOADER = "reflora_ref"      # reference half only -> conditioning (lora_strength 0.0)
+PARODY_REF_APPLY = "reflora_apply_1"   # the ONE conditioning injection, feeds both AddGuides
+PARODY_P1_LOADER = "reflora_p1"        # only inserted when the pass-1 dial > 0.0
+PARODY_P2_LOADER = "reflora_p2"        # pass-2 model line: lora_strength = the pass-2 dial
+PASS1_LORA_STRENGTH = 0.0
+PASS2_LORA_STRENGTH = 1.0
+PASS1_MODEL_CONSUMERS = ("s0_guide", "s0_sched")
+PASS2_MODEL_CONSUMERS = ("s1_guide", "p2sched")
+COND_INJECT_CONSUMERS = ("ag0", "ag1")
+REFLORA_TITLE = ("Load H3 RefLoRA references for conditioning (lora_strength 0.0 = the pack's "
+                 "no-patch path: base beta7 model stays voice-protected)")
+P1_TITLE = "Pass-1 RefLoRA LoRA half (the --pass1-lora-strength dial); B2 KEEP dials untouched"
+P2_TITLE = ("Pass-2 RefLoRA LoRA half (the --pass2-lora-strength dial); clip passthrough, "
+            "H3 LoRAs are lora_unet_* only")
+
+
+def _parody_hybrid(hybrid: Dict[str, Any]) -> Dict[str, Any]:
+    """One placeholder/selected hybrid: an installed RefLoRA name + a member selection."""
+    if not hybrid or not str(hybrid.get("lora_name") or "").strip():
+        raise ValueError("the two-pass parody graph needs one RefLoRA hybrid with a lora_name")
+    return {"lora_name": str(hybrid["lora_name"]).strip(),
+            "members": str(hybrid.get("member_selection") or hybrid.get("members") or "all")}
+
+
+def derive_parody_2pass_graph(b2_graph: Dict[str, Any], hybrid: Dict[str, Any], *,
+                             pass1_lora_strength: float = PASS1_LORA_STRENGTH,
+                             pass2_lora_strength: float = PASS2_LORA_STRENGTH) -> Dict[str, Any]:
+    """Graft the per-pass parody dials onto the KEEP two-pass ``b2.api.json`` graph.
+
+    Shape (the B2-4 brief, voice protection first):
+      MODEL pass 1 : raw ``m_shift`` -> ``s0_guide`` + ``s0_sched`` at ``pass1_lora_strength`` 0.0,
+                     so the base beta7 model is untouched and the native voice stays intact;
+      MODEL pass 2 : ``m_shift`` -> ``reflora_p2``(lora_strength = pass-2 dial, attach_to_model
+                     False, components Visual, clip passthrough) -> ``s1_guide`` + ``p2sched``;
+      COND (both)  : ``c0`` -> ``refapply``(RefMod retention 1.0) -> ``reflora_apply_1``
+                     (the RefLoRA reference half, applied ONCE) -> ``ag0``/``ag1`` positive;
+      CLIP         : ``c0.clip`` stays the raw ``clip`` node - no LoRA on the text encoder.
+
+    ``reflora_ref`` is a second loader at ``lora_strength=0.0``: the pack patches NOTHING there
+    (nodes.py:179-191) and only emits ``H3_REF_MODS``, so the reference half reaches the conditioning
+    of both passes without putting LoRA weights on the model any pass samples. The pack never
+    mutates a model it is given - ``load_lora_for_models`` clones (comfy/sd.py:117-118) and
+    ``inject.into_model`` clones (inject.py:70-72) - so sharing the ``m_shift`` output as the
+    upstream of both model lines is safe: each patched line is a distinct clone, the raw pass-1
+    line stays the unpatched object, and the two lines cannot alias each other.
+
+    ``pass1_lora_strength > 0.0`` inserts ``reflora_p1`` on the pass-1 model line only; every
+    other dial of the frozen b2 graph is byte-identical (``frozen_diff_2pass`` is the guard).
+    """
+    p1, p2 = float(pass1_lora_strength), float(pass2_lora_strength)
+    for name, val in (("pass1_lora_strength", p1), ("pass2_lora_strength", p2)):
+        if not 0.0 <= val <= 10.0:
+            raise ValueError(f"{name} must be within 0.0..10.0 (the pack's dial range), got {val!r}")
+    hyb = _parody_hybrid(hybrid)
+    g = derive_refmod_2pass_graph(b2_graph)
+
+    g[PARODY_REF_LOADER] = _loader_node(["m_shift", 0], None, hyb["lora_name"], hyb["members"],
+                                        0.0, 0.0, REFLORA_TITLE)
+    g[PARODY_REF_APPLY] = _apply_node(["refapply", 0], [PARODY_REF_LOADER, 2])
+    for nid in COND_INJECT_CONSUMERS:
+        g[nid]["inputs"]["positive"] = [PARODY_REF_APPLY, 0]
+
+    g[PARODY_P2_LOADER] = _loader_node(["m_shift", 0], ["clip", 0], hyb["lora_name"],
+                                       hyb["members"], p2, 1.0, P2_TITLE)
+    for nid in PASS2_MODEL_CONSUMERS:
+        g[nid]["inputs"]["model"] = [PARODY_P2_LOADER, 0]
+
+    if p1 > 0.0:
+        g[PARODY_P1_LOADER] = _loader_node(["m_shift", 0], ["clip", 0], hyb["lora_name"],
+                                           hyb["members"], p1, 1.0, P1_TITLE)
+        for nid in PASS1_MODEL_CONSUMERS:
+            g[nid]["inputs"]["model"] = [PARODY_P1_LOADER, 0]
+    return g
+
+
+def derive_parody_2pass_template(b2_graph: Dict[str, Any]) -> Dict[str, Any]:
+    """The committed templates/b2_parody_2pass.api.json at the default dials (0.0 / 1.0).
+
+    Generated from the live b2.api.json, so the file is the derivation and no hand-written graph
+    can drift. Per-run fields stay the b2 example placeholders (``noise.noise_seed``,
+    ``save.filename_prefix``, ``c0.length``); only ``img.image`` becomes the ``<cond>`` placeholder
+    used by the other parody templates, and ``c0.prompt`` keeps the b2 example text.
+    """
+    g = derive_parody_2pass_graph(b2_graph, {
+        "lora_name": LORA_NAME_PREFIX + "<id>_reflora.safetensors", "member_selection": "all"})
+    return add_cond_picture(g, "community/<cond>.png")
+
+
+def verify_parody_2pass_graph(graph: Dict[str, Any], b2_template: Dict[str, Any], *,
+                             pass1_lora_strength: float = PASS1_LORA_STRENGTH,
+                             pass2_lora_strength: float = PASS2_LORA_STRENGTH) -> None:
+    """Fail closed unless the graph is the B2-4 two-pass parody shape (raises ValueError).
+
+    Keeps the KEEP guard (``frozen_diff_2pass`` against the frozen b2) and adds the shape the
+    voice-protection rule depends on: raw pass-1 model line at dial 0.0, one RefMod + one
+    RefLoRA conditioning injection feeding BOTH guides, the LoRA half only on the pass-2 model
+    line, and audio decoded from pass 1.
+    """
+    p1, p2 = float(pass1_lora_strength), float(pass2_lora_strength)
+    problems: List[str] = list(frozen_diff_2pass(graph, b2_template))
+
+    def node(nid: str) -> Dict[str, Any]:
+        return graph.get(nid) or {}
+
+    def cls(nid: str) -> str:
+        return node(nid).get("class_type", "")
+
+    def inp(nid: str, key: str) -> Any:
+        return (node(nid).get("inputs") or {}).get(key)
+
+    if cls("refapply") != "MiniMaxH3RefModApply":
+        problems.append("refapply is not MiniMaxH3RefModApply")
+    elif inp("refapply", "retention") != 1.0 or inp("refapply", "conditioning") != ["c0", 0] \
+            or inp("refapply", "mods") != ["refmods", 0]:
+        problems.append("refapply must be retention 1.0 wrapping c0 with the refmods loader")
+
+    loaders = sorted(k for k, v in graph.items() if v.get("class_type") == LOADER_CLASS)
+    applies = sorted(k for k, v in graph.items() if v.get("class_type") == APPLY_CLASS)
+    expected_loaders = [PARODY_REF_LOADER, PARODY_P2_LOADER] + ([PARODY_P1_LOADER] if p1 > 0.0 else [])
+    if sorted(loaders) != sorted(expected_loaders):
+        problems.append(f"expected RefLoRA loaders {sorted(expected_loaders)}, got {loaders}")
+    if len(applies) != 1 or applies[0] != PARODY_REF_APPLY:
+        problems.append(f"exactly one conditioning RefLoRA Apply expected, got {applies}")
+    for k in loaders:
+        if inp(k, "attach_to_model") is not False:
+            problems.append(f"{k}: attach_to_model must be False (Apply route only)")
+        if inp(k, "components") != "Visual":
+            problems.append(f"{k}: components must be Visual (native voice stays INDEX)")
+    want_strength = {PARODY_REF_LOADER: 0.0, PARODY_P2_LOADER: p2, PARODY_P1_LOADER: p1}
+    for k in loaders:
+        got = float(inp(k, "lora_strength") or 0.0)
+        want = want_strength[k]
+        if abs(got - want) > 1e-9:
+            problems.append(f"{k}: lora_strength {got} != the {k} dial {want}")
+    for k in graph:
+        if cls(k) in ("LoraLoader", "LoraLoaderModelOnly", "Power Lora Loader (rgthree)") \
+                and "reflora" in str(node(k).get("inputs", {})).lower():
+            problems.append(f"hybrid loaded in generic LoRA loader {k} (double injection)")
+
+    if cls(PARODY_REF_APPLY) != APPLY_CLASS:
+        problems.append(f"{PARODY_REF_APPLY} is not {APPLY_CLASS}")
+    elif inp(PARODY_REF_APPLY, "conditioning") != ["refapply", 0] \
+            or inp(PARODY_REF_APPLY, "mods") != [PARODY_REF_LOADER, 2]:
+        problems.append(f"{PARODY_REF_APPLY} must apply {PARODY_REF_LOADER}.mods to refapply")
+    for nid in COND_INJECT_CONSUMERS:
+        if cls(nid) != "MiniMaxH3AddGuide":
+            problems.append(f"{nid} is not MiniMaxH3AddGuide")
+        elif inp(nid, "positive") != [PARODY_REF_APPLY, 0]:
+            problems.append(f"{nid}.positive is not the single RefLoRA Apply")
+    if cls("s0_guide") != "BasicGuider" or inp("s0_guide", "conditioning") != ["ag0", 0]:
+        problems.append("s0_guide conditioning must stay ag0")
+    if cls("s1_guide") != "BasicGuider" or inp("s1_guide", "conditioning") != ["ag1", 0]:
+        problems.append("s1_guide conditioning must stay ag1")
+
+    pass1_src = [PARODY_P1_LOADER, 0] if p1 > 0.0 else ["m_shift", 0]
+    for nid in PASS1_MODEL_CONSUMERS:
+        if inp(nid, "model") != pass1_src:
+            problems.append(f"{nid} model is not the pass-1 model line {pass1_src} "
+                            f"(got {inp(nid, 'model')})")
+    for nid in PASS2_MODEL_CONSUMERS:
+        if inp(nid, "model") != [PARODY_P2_LOADER, 0]:
+            problems.append(f"{nid} model is not {PARODY_P2_LOADER}")
+
+    if inp("c0", "clip") != ["clip", 0]:
+        problems.append("c0.clip must stay the raw CLIP loader (no LoRA on the text encoder)")
+    if inp("dec_a", "samples") != ["s0_sep", 1]:
+        problems.append("dec_a.samples must stay [s0_sep, 1] (audio decoded from pass 1)")
+    if cls("c0") != "MiniMaxH3ReferenceToVideo":
+        problems.append("c0 is not REF2VA")
+    if problems:
+        raise ValueError("parody two-pass graph check failed: " + " | ".join(problems))
+
+
 # Inputs that may differ from the frozen b2_refmod template (identity/Cond + run-specific only).
 ALLOWED_INPUT_DELTAS = {
     ("c0", "prompt"), ("c0", "length"), ("c0", "clip"), ("c0", "ref_images.ref_image_1"),
@@ -439,6 +622,9 @@ ALLOWED_INPUT_DELTAS_2PASS = ALLOWED_INPUT_DELTAS | {
     ("img", "image"),
     ("ag0", "positive"), ("ag1", "positive"),
     ("s1_guide", "model"), ("p2sched", "model"),
+    # B2-4: the pass-2 model line is a per-run dial. The pass-1 model line (("s0_guide",
+    # "model"), ("s0_sched", "model")) is already an approved delta, so the KEEP guard cannot
+    # see a wrong pass-1 dial; verify_parody_2pass_graph checks that line against the dial.
 }
 
 ALLOWED_NEW_CLASSES = {"LoadImage", LOADER_CLASS, APPLY_CLASS,
@@ -544,7 +730,17 @@ def verify_reflora_graph(graph: Dict[str, Any], base: Dict[str, Any], n_hybrids:
 
 
 def reflora_ledger(graph: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """What the submitted graph actually loads (read from the graph, not the resolver)."""
+    """What the submitted graph actually loads (read from the graph, not the resolver).
+
+    ``model_line`` names the model consumers each loader feeds, so a per-pass two-pass graph
+    (B2-4: reference-only at 0.0, the pass-2 LoRA half, a pass-1 loader only above 0.0) records
+    which pass carries which dial instead of a list of identical strengths.
+    """
+    consumers: Dict[str, List[str]] = {}
+    for nid, node in graph.items():
+        src = (node.get("inputs") or {}).get("model")
+        if isinstance(src, list) and len(src) == 2 and isinstance(src[0], str):
+            consumers.setdefault(src[0], []).append(nid)
     out = []
     for k in sorted(k for k, v in graph.items() if v.get("class_type") == LOADER_CLASS):
         inp = graph[k]["inputs"]
@@ -552,7 +748,8 @@ def reflora_ledger(graph: Dict[str, Any]) -> List[Dict[str, Any]]:
                     "lora_strength": inp.get("lora_strength"),
                     "refmod_retention": inp.get("refmod_retention"),
                     "members": inp.get("members"), "components": inp.get("components"),
-                    "attach_to_model": inp.get("attach_to_model")})
+                    "attach_to_model": inp.get("attach_to_model"),
+                    "model_line": sorted(consumers.get(k, []))})
     return out
 
 
