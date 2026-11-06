@@ -3,6 +3,12 @@
 Wraps make_b2_request.py pattern, populating all 8 loader slots on b2_refmod.api.json
 (or KEEP b2.api.json in two-pass mode), constructing a Malcolm-compliant prompt,
 preserving KEEP dials, and enforcing adults-only guard + Cond provenance (FG-2/FG-11).
+
+Graph modes: single-pass = the frozen b2_refmod.api.json; two-pass = the KEEP b2.api.json
+Lokken refine (+ RefLoRA graft on the whole model line when a hybrid resolves);
+two-pass-parody (B2-4) = b2_parody_2pass.api.json, the per-pass dials (--pass1-lora-strength
+0.0 voice-protected / --pass2-lora-strength 1.0). --unet swaps the model between the two beta7
+checkpoints (the A/B); it is validated against BETA7_UNET_ALLOWLIST before anything is written.
 """
 
 from __future__ import annotations
@@ -27,6 +33,19 @@ DEFAULT_REFMOD_TEMPLATE = Path(r"C:\AI\community\templates\b2_refmod.api.json")
 DEFAULT_REFLORA_TEMPLATE = Path(r"C:\AI\community\templates\b2_reflora.api.json")
 DEFAULT_B2_TEMPLATE = Path(r"C:\AI\community\templates\b2.api.json")
 DEFAULT_REFLORA_2PASS_TEMPLATE = Path(r"C:\AI\community\templates\b2_reflora_2pass.api.json")
+# B2-4: the dedicated two-pass PARODY graph (pass-1 model line voice-protected at LoRA 0.0,
+# the LoRA half on the pass-2 model line, the reference half on the conditioning of both passes).
+DEFAULT_PARODY_2PASS_TEMPLATE = Path(r"C:\AI\community\templates\b2_parody_2pass.api.json")
+# B2-4 --unet override (`t179u`): the A/B model swap. Exactly the two beta7 checkpoints on disk,
+# bare filenames in ComfyUI\models\diffusion_models\ (no path traversal, no download).
+BETA7_UNET_ALLOWLIST: Tuple[str, ...] = (
+    "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors",
+    "10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors",
+)
+DEFAULT_UNET = BETA7_UNET_ALLOWLIST[0]
+# B2-4 per-pass RefLoRA dials (pack example: 0.0 = the no-patch passthrough, 1.0 = the applied half).
+DEFAULT_PASS1_LORA_STRENGTH = 0.0
+DEFAULT_PASS2_LORA_STRENGTH = 1.0
 DEFAULT_APPROVED_POOL = Path(r"C:\Users\derek\5slock\approved_characters")
 DEFAULT_COMFY_INPUT = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input")
 CHUNK = 1 << 20
@@ -38,6 +57,24 @@ def _sha256_file(path: Path) -> str:
         for block in iter(lambda: fh.read(CHUNK), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def validate_unet_name(value: Any) -> str:
+    """B2-4 `--unet`: accept ONLY the two beta7 checkpoints, reject everything else (fail closed).
+
+    Called before any file is written. Bare filename only (no directory part) so the value cannot
+    traverse out of ComfyUI\\models\\diffusion_models\\, and no download is ever implied.
+    """
+    name = str(value or "").strip()
+    if not name:
+        raise ValueError(f"unet dial: empty value, expected one of {', '.join(BETA7_UNET_ALLOWLIST)}")
+    if name.replace("\\", "/").rstrip("/") != Path(name).name:
+        raise ValueError(f"unet dial: {name!r} must be a bare filename in models\\diffusion_models\\, "
+                         "no path")
+    if name not in BETA7_UNET_ALLOWLIST:
+        raise ValueError(f"UNET dial drifted: expected one of the two beta7 checkpoints "
+                         f"{', '.join(BETA7_UNET_ALLOWLIST)}, got {name}")
+    return name
 
 
 def resolve_cond_provenance(
@@ -317,9 +354,12 @@ def verify_keep_dials(graph: Dict[str, Any], two_pass: bool = False) -> None:
     """Verify frozen KEEP dials on REF2VA 10strip eros beta7 int8HQ graph."""
     if "unet" not in graph:
         raise ValueError("Graph missing 'unet' node.")
+    # B2-4: the A/B model swap is the only KEEP dial allowed to change, so this guard is the two
+    # beta7 checkpoints as an allowlist (fail closed, same "UNET dial drifted" message shape).
     unet_name = graph["unet"]["inputs"].get("unet_name", "")
-    if "10Eros_Max_h3_8stepTURBO_beta7_int8HQ" not in unet_name:
-        raise ValueError(f"UNET dial drifted: expected 10Eros beta7 int8HQ, got {unet_name}")
+    if unet_name not in BETA7_UNET_ALLOWLIST:
+        raise ValueError(f"UNET dial drifted: expected one of the two beta7 checkpoints "
+                         f"{', '.join(BETA7_UNET_ALLOWLIST)}, got {unet_name}")
 
     if "s0_sched" not in graph:
         raise ValueError("Graph missing 's0_sched' node.")
@@ -359,27 +399,54 @@ def build_parody_request(
     comfy_input: Path = DEFAULT_COMFY_INPUT,
     require_cond: bool = True,
     objinfo_dump: Optional[Path] = None,
+    unet_name: Optional[str] = None,
+    pass1_lora_strength: Optional[float] = None,
+    pass2_lora_strength: Optional[float] = None,
 ) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
     """Build request API graph and prompt text for a parody run.
 
     ``graph_mode``:
       - ``single-pass`` (default): frozen ``b2_refmod.api.json`` (+ RefLoRA graft when hybrids).
       - ``two-pass``: KEEP ``b2.api.json`` + RefMod (+ RefLoRA graft) with AddGuide / 2x upscale / beta refine.
+      - ``two-pass-parody`` (B2-4): ``b2_parody_2pass.api.json`` shape - the pass-1 model line stays
+        the raw base beta7 model (voice-protected) at ``pass1_lora_strength`` 0.0, the LoRA half rides
+        the pass-2 model line at ``pass2_lora_strength``, the reference half is applied ONCE on the
+        conditioning of BOTH passes, CLIP stays native.
 
     Cond is required on BOTH hybrid and RefMod-only branches when ``require_cond`` (FG-11 / R10).
 
     ``objinfo_dump``: saved object_info capture used by the offline class check (B2-3) that runs
     next to ``verify_keep_dials``; default = the freshest capture in notes/objinfo.
 
+    ``unet_name`` (B2-4 ``t179u``): the A/B model swap, validated against ``BETA7_UNET_ALLOWLIST``
+    before anything is written; default ``DEFAULT_UNET`` (int8HQ), i.e. what the templates carry.
+    Only the BUILT request changes, never the committed template.
+
+    ``pass1_lora_strength`` / ``pass2_lora_strength``: the per-pass RefLoRA dials (defaults
+    ``DEFAULT_PASS1_LORA_STRENGTH`` 0.0 / ``DEFAULT_PASS2_LORA_STRENGTH`` 1.0). Passing either one
+    on ``two-pass`` selects the parody graph, because the per-pass dials only exist in that shape.
+
     Returns:
         (graph_dict, prompt_str, cond_meta)
     """
     mode = (graph_mode or "single-pass").strip().lower().replace("_", "-")
-    if mode not in ("single-pass", "two-pass"):
-        raise ValueError(f"graph_mode must be 'single-pass' or 'two-pass', got {graph_mode!r}")
+    p1 = DEFAULT_PASS1_LORA_STRENGTH if pass1_lora_strength is None else float(pass1_lora_strength)
+    p2 = DEFAULT_PASS2_LORA_STRENGTH if pass2_lora_strength is None else float(pass2_lora_strength)
+    explicit_dials = pass1_lora_strength is not None or pass2_lora_strength is not None
+    if mode == "two-pass" and explicit_dials:
+        mode = "two-pass-parody"
+    if mode not in ("single-pass", "two-pass", "two-pass-parody"):
+        raise ValueError("graph_mode must be 'single-pass', 'two-pass' or 'two-pass-parody', "
+                         f"got {graph_mode!r}")
+    parody = mode == "two-pass-parody"
 
     if template_path is None:
-        template_path = DEFAULT_B2_TEMPLATE if mode == "two-pass" else DEFAULT_REFMOD_TEMPLATE
+        if parody:
+            template_path = DEFAULT_PARODY_2PASS_TEMPLATE
+        elif mode == "two-pass":
+            template_path = DEFAULT_B2_TEMPLATE
+        else:
+            template_path = DEFAULT_REFMOD_TEMPLATE
     template_path = Path(template_path)
 
     cond_meta = resolve_cond_provenance(
@@ -411,9 +478,41 @@ def build_parody_request(
     )
 
     hybrids = (resolved.get("reflora") or {}).get("hybrids") or []
-    two_pass = mode == "two-pass"
+    two_pass = mode in ("two-pass", "two-pass-parody")
 
-    if two_pass:
+    if parody:
+        from reflora import (
+            LOADER_CLASS,
+            add_cond_picture,
+            derive_parody_2pass_graph,
+            verify_parody_2pass_graph,
+        )
+        if not hybrids:
+            raise ValueError(
+                "the two-pass parody graph needs one RefLoRA hybrid (the LoRA half of the identity); "
+                "no hybrid resolved for this subject - use --graph-mode two-pass for a RefMod-only run")
+        hyb = {"lora_name": str(hybrids[0]["lora_name"]),
+               "members": str(hybrids[0].get("member_selection") or "all")}
+        b2_tpl = json.loads(DEFAULT_B2_TEMPLATE.read_text(encoding="utf-8"))
+        try:
+            # --template plumbing: `graph` is the template file with this run's prompt/seed/prefix/
+            # frames applied by make_b2_build above; use it as-is when it verifies at the run's dials.
+            verify_parody_2pass_graph(graph, b2_tpl, pass1_lora_strength=p1, pass2_lora_strength=p2)
+        except ValueError:
+            # dials the committed template does not carry: regenerate from the LIVE b2.api.json.
+            base_b2 = make_b2_build(b2_tpl, prompt=prompt, seed=seed, prefix=prefix, frames=frames,
+                                    refmod=None, lora=None)
+            graph = derive_parody_2pass_graph(base_b2, hyb, pass1_lora_strength=p1,
+                                             pass2_lora_strength=p2)
+        for node in graph.values():
+            if node.get("class_type") == LOADER_CLASS:
+                node["inputs"]["reflora_name"] = hyb["lora_name"]
+                node["inputs"]["members"] = hyb["members"]
+        populate_refmod_slots(graph, resolved.get("refmod_slots", {}))
+        if cond_image:
+            graph = add_cond_picture(graph, cond_image)
+        verify_parody_2pass_graph(graph, b2_tpl, pass1_lora_strength=p1, pass2_lora_strength=p2)
+    elif two_pass:
         from reflora import (
             add_cond_picture,
             derive_refmod_2pass_graph,
@@ -457,6 +556,26 @@ def build_parody_request(
             from reflora import add_cond_picture
             graph = add_cond_picture(graph, cond_image)
 
+    # B2-4 --unet (t179u): the A/B model swap, in the BUILT request only (the committed templates
+    # keep the int8HQ placeholder). Validated before any file is written, and verify_keep_dials
+    # below checks the same allowlist, so an unaccepted checkpoint never reaches a request.
+    effective_unet = validate_unet_name(unet_name) if unet_name is not None else DEFAULT_UNET
+    graph.setdefault("unet", {}).setdefault("inputs", {})["unet_name"] = effective_unet
+    rec = resolved.setdefault("reflora", {})
+    if isinstance(rec, dict):
+        rec["unet_name"] = effective_unet
+        rec["unet_allowlist"] = list(BETA7_UNET_ALLOWLIST)
+        if parody:
+            rec["parody_dials"] = {
+                "pass1_lora_strength": p1, "pass2_lora_strength": p2,
+                "pass1_model": ("base beta7 model, voice-protected (lora_strength 0.0 = the pack's "
+                                "no-patch passthrough, raw m_shift)" if p1 <= 0.0
+                                else "reflora_p1 at lora_strength {0:g}".format(p1)),
+                "pass2_model": "reflora_p2 at lora_strength {0:g}".format(p2),
+                "conditioning_injection": "refapply(retention 1.0) -> reflora_apply_1 (refs only) "
+                                          "-> ag0 + ag1",
+                "clip": "native (c0.clip = clip node, no LoRA on the text encoder)",
+            }
     verify_keep_dials(graph, two_pass=two_pass)
     # B2-3: the same unknown-class check submit-time static_check() does, run offline against the
     # saved object_info capture, so a --dry-run build fails closed on CPU (the U5 b2 arm died at
@@ -479,8 +598,23 @@ def main(argv=None) -> int:
     parser.add_argument("--dialogue", help="Optional spoken line")
     parser.add_argument("--scene", help="Optional scene summary")
     parser.add_argument("--template", default=None, help="Template JSON path override")
-    parser.add_argument("--graph-mode", choices=("single-pass", "two-pass"), default="single-pass",
-                        help="single-pass=b2_refmod (community); two-pass=KEEP b2.api.json Lokken refine")
+    parser.add_argument("--graph-mode", choices=("single-pass", "two-pass", "two-pass-parody"),
+                        default="single-pass",
+                        help="single-pass=b2_refmod (community); two-pass=KEEP b2.api.json Lokken "
+                             "refine; two-pass-parody=b2_parody_2pass.api.json (B2-4 per-pass dials, "
+                             "pass 1 voice-protected). Passing --pass1-lora-strength or "
+                             "--pass2-lora-strength with two-pass selects two-pass-parody.")
+    parser.add_argument("--unet", default=None, metavar="SAFETENSORS",
+                        help="A/B model swap (t179u): a bare diffusion_models filename, accepted set "
+                             "= the two beta7 checkpoints "
+                             f"{', '.join(BETA7_UNET_ALLOWLIST)}; default {DEFAULT_UNET}")
+    parser.add_argument("--pass1-lora-strength", type=float, default=None,
+                        help="two-pass-parody: LoRA half on the pass-1 model line; default "
+                             f"{DEFAULT_PASS1_LORA_STRENGTH} = the pack's no-patch passthrough, so "
+                             "pass 1 samples the base beta7 model and the native voice stays intact")
+    parser.add_argument("--pass2-lora-strength", type=float, default=None,
+                        help="two-pass-parody: LoRA half on the pass-2 model line; default "
+                             f"{DEFAULT_PASS2_LORA_STRENGTH} (the pack example)")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
     parser.add_argument("--image", help="ComfyUI/input-relative Cond name, e.g. hoot_start.jpg")
     parser.add_argument("--cond-source", help="Absolute/relative path inside approved_characters (FG-2)")
@@ -536,6 +670,9 @@ def main(argv=None) -> int:
         graph_mode=args.graph_mode,
         stage_cond=args.stage_cond,
         objinfo_dump=Path(args.objinfo_dump) if args.objinfo_dump else None,
+        unet_name=args.unet,
+        pass1_lora_strength=args.pass1_lora_strength,
+        pass2_lora_strength=args.pass2_lora_strength,
     )
     resolved["cond"] = cond_meta
 
@@ -554,7 +691,8 @@ def main(argv=None) -> int:
     prompt_file.write_text(prompt, encoding="utf-8")
     cond_file.write_text(json.dumps(cond_meta, indent=2), encoding="utf-8")
     print(f"Wrote {req_file} and {prompt_file} (frames={args.frames}, seed={args.seed}, "
-          f"graph_mode={args.graph_mode}, refmod_only={args.refmod_only})")
+          f"graph_mode={args.graph_mode}, refmod_only={args.refmod_only}, "
+          f"unet={graph['unet']['inputs']['unet_name']})")
     return 0
 
 
