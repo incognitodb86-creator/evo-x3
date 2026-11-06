@@ -16,6 +16,13 @@ Renders every clip in a run's order file back to back in ONE GPU window:
                    wave after the first, then are logged FAIL and skipped (phase 2 S8, 2026-10-30)
   at the end     : unload comfyui_auto and release the lock in `finally` (also on error and Ctrl-C), then log
                    "BATCH closed rc=<n> reason=<why> done=<ok>/<queued>" (phase 2 S13)
+  post-pass      : (card t286s1226, Derrick 2026-11-06) every video clip with a DONE ok line is upscaled 2x by RTX
+                   VideoSuperRes ULTRA at its native fps (no RIFE), AFTER its OBJECTIVE check passed on the raw render
+                   and AFTER comfyui_auto is unloaded, still inside the same gpu-render.lock window (~1.4 GB VRAM).
+                   <tag>/<tag>.mp4 becomes the 2x clip (audio stream copied bit-identically); the raw render is kept as
+                   <tag>/<tag>_raw.mp4; render_ok.json gains an "upscale" block. Logged "UPSCALE ok ..." / "UPSCALE FAIL
+                   ..." (a failure keeps the raw clip and does not change rc). Stills and 1-frame outputs are skipped.
+                   --no-upscale turns the post-pass off.
 A file named STOP in the run dir halts the batch: no more submits or collecting, ComfyUI's pending queue is cleared
 (POST /queue {"clear": true}) and the running prompt interrupted (POST /interrupt). Results append to <run>/_render_queue.log
 in the same START/DONE format as the per-test queue scripts, so runs stay comparable.
@@ -27,7 +34,7 @@ expected "size": "WxH") is an image job: the same guard, lock, STOP, retry and l
 
 Usage:
   python scripts\run_queue.py --run-dir <run dir> [--queue <run dir>\_render_order.json] [--resume] [--dry-run]
-        [--frames 124] [--size 768x1344] [--detach]
+        [--frames 124] [--size 768x1344] [--detach] [--no-upscale]
 --resume skips tags with a "DONE ... ok" line in _render_queue.log. --dry-run lists what would render and makes no
 lock, GPU or HTTP call.
 --frames/--size (item 10, 2026-11-04): the clip objective check compares the probe against the frames and canvas the
@@ -67,6 +74,112 @@ JOB_TIMEOUT = 3600   # per job, counted from when ComfyUI starts it (was from su
 EVICT_MISSES = 10    # polls a prompt may be in neither /queue nor /history before it counts as evicted (~30 s)
 MAX_IN_FLIGHT = 1    # at most ONE prompt of this batch in ComfyUI at a time (FIX 3a, 2026-11-03)
 QUEUE_TIMEOUT_STOPPING = 10  # short /queue timeout (s) after repeated timeouts indicate ComfyUI stopping (FIX 3b)
+
+# RTX 2x ULTRA post-pass (card t286s1226, Derrick 2026-11-06). nvvfx/torch live in ComfyUI's venv, not in the
+# venv that runs this queue, so the frame loop runs there as a child process (frame by frame, never the whole clip in RAM).
+UPSCALE_PY = os.environ.get("RQ_UPSCALE_PY", r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe")
+UPSCALE_TIMEOUT = 1800
+_UPSCALE_SRC = r"""
+import json, subprocess, sys, time
+import torch, nvvfx
+src, dst = sys.argv[1], sys.argv[2]
+t0 = time.time()
+o = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,width,height,r_frame_rate",
+                               "-of", "json", src], capture_output=True, text=True, check=True).stdout)
+v = [x for x in o["streams"] if x.get("codec_type") == "video"][0]
+has_audio = any(x.get("codec_type") == "audio" for x in o["streams"])
+W, H, fps = int(v["width"]), int(v["height"]), v["r_frame_rate"]
+OW, OH = 2 * W, 2 * H
+dec = subprocess.Popen(["ffmpeg", "-v", "error", "-i", src, "-map", "0:v:0", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+                       stdout=subprocess.PIPE)
+cmd = ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", "%dx%d" % (OW, OH), "-r", fps, "-i", "-"]
+cmd += (["-i", src, "-map", "0:v:0", "-map", "1:a:0", "-c:a", "copy"] if has_audio else ["-map", "0:v:0"])
+cmd += ["-c:v", "libx264", "-crf", "16", "-preset", "fast", "-pix_fmt", "yuv420p", "-movflags", "+faststart", dst]
+enc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+n, fb = 0, W * H * 3
+with nvvfx.VideoSuperRes(nvvfx.effects.QualityLevel.ULTRA) as sr:
+    sr.output_width, sr.output_height = OW, OH
+    sr.load()
+    while True:
+        buf = dec.stdout.read(fb)
+        if len(buf) < fb:
+            break
+        x = torch.frombuffer(bytearray(buf), dtype=torch.uint8).view(H, W, 3).cuda().permute(2, 0, 1).float().div_(255.0).contiguous()
+        y = torch.from_dlpack(sr.run(x).image)
+        enc.stdin.write(y.clamp(0, 1).mul(255.0).round().to(torch.uint8).permute(1, 2, 0).contiguous().cpu().numpy().tobytes())
+        n += 1
+enc.stdin.close()
+rce, rcd = enc.wait(), dec.wait()
+if rce or rcd or n == 0:
+    sys.exit("upscale ffmpeg rc enc=%s dec=%s frames=%d" % (rce, rcd, n))
+print(json.dumps({"frames": n, "in": "%dx%d" % (W, H), "out": "%dx%d" % (OW, OH), "fps": fps, "audio": has_audio,
+                  "peak_torch_mib": round(torch.cuda.max_memory_allocated() / 2 ** 20), "secs": round(time.time() - t0, 2)}))
+"""
+
+
+def upscale_clip(src, dst, timeout=UPSCALE_TIMEOUT):
+    """RTX VideoSuperRes 2x ULTRA of one mp4 at its own fps into dst (audio copied as-is). Returns the child's JSON."""
+    r = subprocess.run([UPSCALE_PY, "-c", _UPSCALE_SRC, src, dst], capture_output=True, text=True, timeout=timeout)
+    if r.returncode:
+        raise RuntimeError("upscale rc=%d %s" % (r.returncode, (r.stderr or r.stdout).strip()[-300:].replace("\n", " ")))
+    lines = [x for x in (r.stdout or "").splitlines() if x.startswith("{")]
+    return json.loads(lines[-1]) if lines else {}
+
+
+def upscale_done(run_dir, jobs, slog):
+    """Post-pass: every video job with a DONE ok line and a render_ok.json without an "upscale" block (so a --resume
+    never upscales twice). The raw clip already passed OBJECTIVE; the 2x file is checked against it (exactly 2x size,
+    same frames, fps and audio presence) before <tag>.mp4 is swapped. Returns (ok, failed) counts."""
+    done, n_ok, n_fail = done_tags(run_dir), 0, 0
+    for j in jobs:
+        tag = j["tag"]
+        if j.get("job_type") == "still" or tag not in done:
+            continue
+        okp = os.path.join(run_dir, tag, "render_ok.json")
+        if not os.path.exists(okp):
+            continue
+        meta_ok = json.load(open(okp, encoding="utf-8"))
+        if meta_ok.get("upscale") or meta_ok.get("job_type") == "still":
+            continue
+        clip = os.path.join(run_dir, meta_ok.get("clip") or os.path.join(tag, tag + ".mp4"))
+        if not clip.lower().endswith(".mp4") or not os.path.exists(clip):
+            continue
+        p0 = rgj.probe(clip)
+        if p0["frames"] <= 1:
+            qlog(run_dir, "UPSCALE skip pos=%d tag=%s single frame" % (j["pos"], tag)); continue
+        tmp, raw = clip[:-4] + ".rtx.tmp.mp4", clip[:-4] + "_raw.mp4"
+        t = time.time()
+        try:
+            info = upscale_clip(clip, tmp)
+            p1 = rgj.probe(tmp)
+            why = [] if p1["bytes"] > 0 else ["0-byte file"]
+            if (p1["w"], p1["h"]) != (2 * p0["w"], 2 * p0["h"]): why.append("size %sx%s" % (p1["w"], p1["h"]))
+            if p1["frames"] != p0["frames"]: why.append("frames %d != %d" % (p1["frames"], p0["frames"]))
+            if p1["fps"] != p0["fps"]: why.append("fps %s != %s" % (p1["fps"], p0["fps"]))
+            if p1["audio"] != p0["audio"]: why.append("audio %s != %s" % (p1["audio"], p0["audio"]))
+            if why:
+                raise RuntimeError("check " + "; ".join(why))
+        except Exception as e:
+            if os.path.exists(tmp): os.remove(tmp)
+            n_fail += 1
+            qlog(run_dir, "UPSCALE FAIL pos=%d tag=%s %s (raw clip kept)" % (j["pos"], tag, str(e)[:200].replace("\n", " ")))
+            continue
+        if os.path.exists(raw): os.remove(raw)
+        os.replace(clip, raw)   # comm.fetch hard-links <tag>.mp4 to ComfyUI's output: the raw name keeps that link
+        os.replace(tmp, clip)   # the 2x clip is a new file; ComfyUI's output is never rewritten
+        el = time.time() - t
+        meta_ok["upscale"] = {"method": "RTX VideoSuperRes 2x ULTRA (nvvfx), native fps, no RIFE", "card": "t286s1226",
+                              "raw_clip": os.path.relpath(raw, run_dir), "raw_sha256": meta_ok.get("clip_sha256"),
+                              "raw_w": p0["w"], "raw_h": p0["h"], "raw_bytes": p0["bytes"], "fps": p1["fps"],
+                              "frames": p1["frames"], "elapsed_s": round(el, 1), "child": info}
+        meta_ok.update({"clip_sha256": hashlib.sha256(open(clip, "rb").read()).hexdigest(), "w": p1["w"], "h": p1["h"],
+                        "bytes": p1["bytes"]})
+        json.dump(meta_ok, open(okp, "w", encoding="utf-8"), indent=1)
+        n_ok += 1
+        qlog(run_dir, "UPSCALE ok pos=%d tag=%s %dx%d->%dx%d fps=%s frames=%d audio=%s bytes=%d elapsed=%.1fs raw=%s" % (
+            j["pos"], tag, p0["w"], p0["h"], p1["w"], p1["h"], p1["fps"], p1["frames"], "yes" if p1["audio"] else "no",
+            p1["bytes"], el, os.path.basename(raw)))
+    return n_ok, n_fail
 
 
 def qlog(run_dir, line):
@@ -570,6 +683,8 @@ def main():
     ap.add_argument("--frames", type=int, default=124)
     ap.add_argument("--size", default="768x1344")
     ap.add_argument("--detach", action="store_true", help="relaunch outside the caller's process tree (WMI) and return")
+    ap.add_argument("--no-upscale", action="store_true",
+                    help="skip the default RTX VideoSuperRes 2x ULTRA post-pass (card t286s1226); clips stay at the render size")
     a = ap.parse_args()
     run_dir = os.path.abspath(a.run_dir)
     if a.detach:
@@ -597,6 +712,7 @@ def main():
         for j in todo:
             print("  pos %2d %s" % (j["pos"], j["tag"]))
         print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
+        print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
         print("dry run: no lock, GPU or HTTP call made")
         return 0
     if not todo:
@@ -654,6 +770,11 @@ def main():
         except Exception as e: slog("free_comfy note %s" % str(e)[:120])
         try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
         except Exception as e: slog("unload note %s" % str(e)[:120])
+        if a.no_upscale:
+            qlog(run_dir, "UPSCALE skipped (--no-upscale): clips stay at the render size")
+        elif rc != 130:  # post-pass inside the lock window, after comfyui_auto freed the VRAM (never on Ctrl-C)
+            try: upscale_done(run_dir, jobs, slog)
+            except Exception as e: qlog(run_dir, "UPSCALE FAIL batch error %s: %s (raw clips kept)" % (type(e).__name__, str(e)[:160]))
         try: rgj.gpu_unlock(slog)
         except Exception as e: slog("unlock note %s" % str(e)[:120])
         try: n_ok = ok_count(run_dir, jobs)
