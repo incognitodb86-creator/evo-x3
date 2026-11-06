@@ -267,7 +267,9 @@ def format_parody_prompt(
     KTD1: caller scene action goes into detailed_description (no fixed standing pose) and a
     repeated 'featuring' clause is collapsed. KTD2: voice label prefers the named character,
     <d> holds spoken words only, and an empty dialogue renders a silent clip.
-    U2: <Picture N> + retention_analysis only when reference images are wired (zero otherwise).
+    U2 (t289u): an --image is a frame-0 MiniMaxH3AddGuide keyframe, never named in the text. image_count and
+    image_role are accepted for API compatibility only: no <Picture N>, [reference generation] or
+    retention_analysis, so Qwen sees the same text-only prompt as a run without --image (voice fidelity).
     U4: --camera, --pronoun, --end-action, optional (S2). No word caps anywhere (t263u).
     """
     primary_name, voice_name = _subject_name(resolved)
@@ -304,10 +306,6 @@ def format_parody_prompt(
 
     audio_timbre_line = "\n<Audio 1> is the voice-timbre reference for <Subject 1>." if audio_ref else ""
 
-    n_img = max(0, int(image_count or 0))
-    role = (image_role or DEFAULT_IMAGE_ROLE).strip().rstrip(".")
-    picture_lines = "".join(f"<Picture {i}> is the {role} for [Shot 1].\n" for i in range(1, n_img + 1))
-
     subj_lines = f"(S1) {primary_name} - an adult performer, age 28+, {desc}{audio_timbre_line}"
     if two:
         subj_lines += f"\n(S2) {name2} - an adult performer, age 28+, {desc2}"
@@ -342,24 +340,13 @@ def format_parody_prompt(
     else:
         voice_line = "quiet room ambience, soft natural room tone; no spoken voice."
 
-    ref_tag = "[reference generation] " if n_img else ""
     s_prefix = "" if two else "(S1) "
-    retention = ""
-    if n_img:
-        pics = ", ".join(f"<Picture {i}>" for i in range(1, n_img + 1))
-        retention = (
-            "\n\nretention_analysis:\n"
-            f"{pics} ([Shot 1] {role}): fully_preserved - composition, wardrobe, pose and setting guide the "
-            "opening frame and the action develops forward from it.\n"
-            "(S1)" + (" and (S2)" if two else "") + ": fully_preserved - face, hair and voice come from the loaded "
-            "RefMod(s) and the written description in subject_definitions, not from the picture."
-        )
 
     prompt = f"""subject_definitions:
-{picture_lines}{subj_lines}
+{subj_lines}
 
 summary:
-{ref_tag}{s_prefix}{scene_summary}. Non-speaking characters: {non_speaking}. No singing, no rapping, no songs, no music, no narration, no voice-over.{retention}
+{s_prefix}{scene_summary}. Non-speaking characters: {non_speaking}. No singing, no rapping, no songs, no music, no narration, no voice-over.
 
 detailed_description:
 [{cam}]
@@ -404,18 +391,29 @@ def merge_refmod_slots(slots1: Dict[str, Any], slots2: Optional[Dict[str, Any]])
 
 
 def inject_reference_images(graph: Dict[str, Any], staged: Sequence[str]) -> None:
-    """U2: add img_N LoadImage nodes and wire c0 ref_images.ref_image_N (in-memory graph only)."""
+    """U2 (t289u): the --image start frame is a MiniMaxH3AddGuide keyframe at frame_idx 0 (in-memory graph only).
+
+    img_1 LoadImage -> add_guide(positive=c0.0, latent=c0.1, vae=vvae, image=img_1, frame_idx=0), and the
+    conditioning chain becomes c0 -> add_guide -> refapply -> s0_guide. c0 gets NO ref_images input, so Qwen
+    encodes text only and minimax_refs belong to the RefMod(s); RefModApply copies the conditioning dict, so
+    the minimax_keyframes set here survive it. One start image per clip: more than one fails closed.
+    """
     if not staged:
         return
-    if len(staged) > 4:
-        raise ValueError("at most 4 reference images (--image) per clip")
-    for i, name in enumerate(staged, start=1):
-        rel = str(name).replace("\\", "/")
-        if not rel.startswith("community/"):
-            rel = "community/" + rel.split("/")[-1]
-        graph[f"img_{i}"] = {"_meta": {"title": f"Reference image {i} (approved_characters)"},
-                             "class_type": "LoadImage", "inputs": {"image": rel}}
-        graph["c0"]["inputs"][f"ref_images.ref_image_{i}"] = [f"img_{i}", 0]
+    if len(staged) > 1:
+        raise ValueError("--image is the frame-0 start image (MiniMaxH3AddGuide): pass exactly one per clip")
+    if graph.get("refapply", {}).get("inputs", {}).get("conditioning") != ["c0", 0]:
+        raise ValueError("template drift: refapply.conditioning is not ['c0', 0]; refusing to wire add_guide")
+    rel = str(staged[0]).replace("\\", "/")
+    if not rel.startswith("community/"):
+        rel = "community/" + rel.split("/")[-1]
+    graph["img_1"] = {"_meta": {"title": "Start image (approved_characters)"},
+                      "class_type": "LoadImage", "inputs": {"image": rel}}
+    graph["add_guide"] = {"_meta": {"title": "Frame-0 start image keyframe"},
+                          "class_type": "MiniMaxH3AddGuide",
+                          "inputs": {"positive": ["c0", 0], "latent": ["c0", 1], "vae": ["vvae", 0],
+                                     "image": ["img_1", 0], "frame_idx": 0}}
+    graph["refapply"]["inputs"]["conditioning"] = ["add_guide", 0]
 
 
 def stage_reference_images(paths: Sequence[str], input_dir: Optional[Path] = None) -> List[str]:
