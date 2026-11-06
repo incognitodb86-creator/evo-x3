@@ -187,3 +187,5 @@ d3613206d2e7e0985d2a4bd0b56f015d54469260:notes/web/civitai_model_2906001_dmadSel
 f9a15cd14e9bcb494a766a2140a959fab1300b7c:notes/web/01r_ghuntley_ralph.html:generic-api-key:155
 f9a15cd14e9bcb494a766a2140a959fab1300b7c:notes/web/01r_ghuntley_ralph.html:generic-api-key:259
 f9a15cd14e9bcb494a766a2140a959fab1300b7c:notes/web/01r_ghuntley_ralph.html:generic-api-key:91
+# 2026-11-05 22:2x CT Forge (B2-2): confirmed FAKE - node metadata in the live object_info capture notes/objinfo/object_info_20261105.json (widget defaults / generated ids, no credential values); same rule and file kind as the 20261030 dump entry above, which is the precedent for this pattern.
+notes/objinfo/object_info_20261105.json:generic-api-key:1
