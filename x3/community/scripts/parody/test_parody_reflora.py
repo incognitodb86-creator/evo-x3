@@ -927,12 +927,22 @@ class NoPhotoParodyGraph(unittest.TestCase):
                         comfy_input=self.comfy_input, graph_mode=mode)
                 self.assertIn("requires Cond", str(ctx.exception))
 
-    def test_no_photo_parody_still_needs_the_identity_injection(self):
-        """No photo AND no hybrid: the run blocks, it does not build an identity-less graph."""
+    def test_no_photo_parody_refmod_only_wires_both_guiders_and_blocks_when_empty(self):
+        """RefMod-only 2-pass no-photo wires refapply -> s0_guide + s1_guide; zero RefMods blocks."""
         self._mod("badchar")
+        g, prompt, cond = self._no_photo(refmod_only=True)
+        self.assertIsNone(cond["cond_input_name"])
+        self.assertNotIn("LoadImage", {n["class_type"] for n in g.values()})
+        self.assertNotIn(reflora.LOADER_CLASS, {n["class_type"] for n in g.values()})
+        self.assertEqual(g["refmods"]["inputs"]["mod_1"], "minimaxh3_badchar_v1_refmod")
+        self.assertEqual(g["s0_guide"]["inputs"]["conditioning"], ["refapply", 0])
+        self.assertEqual(g["s1_guide"]["inputs"]["conditioning"], ["refapply", 0])
+        self.assertEqual(reflora.frozen_diff_no_photo(g, self.b2), [])
+        empty_r = self._resolve("Goodchar", refmod_only=True)
         with self.assertRaises(ValueError) as ctx:
-            self._no_photo(refmod_only=True)
-        self.assertIn("RefLoRA hybrid", str(ctx.exception))
+            build_parody_request(empty_r, seed=1, prefix="community/t/clip",
+                                 image=None, cond_source=None, graph_mode="two-pass-parody")
+        self.assertIn("standalone RefMod", str(ctx.exception))
 
     def test_drop_cond_picture_needs_the_single_injection(self):
         """drop_cond_picture refuses a plain b2 graph (no conditioning injection to feed)."""
