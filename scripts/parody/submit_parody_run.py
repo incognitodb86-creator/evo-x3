@@ -2,10 +2,7 @@
 
 Builds resolved request, saves run record, writes a one-clip run_queue manifest, and
 submits through run_queue.py --detach. run_queue owns gpu-render.lock; rc 7 means GPU busy.
-Supports --graph-mode, --cond-source, --refmod-only for U5 A/B/B-2pass/D arms.
-B2-5: for --graph-mode two-pass-parody, --image/--cond-source are optional (no photo = the
-no-LoadImage/no-AddGuide graph whose only identity feed is the RefMod/RefLoRA conditioning);
-any photo passed is still gated through approved_characters + SHA256 (FG-2/FG-11).
+The detached batch later writes clip output and its result to _render_queue.log.
 """
 
 from __future__ import annotations
@@ -20,6 +17,7 @@ import subprocess
 import sys
 from typing import Any, Dict, Optional
 
+# Add community scripts to path
 SCRIPTS_DIR = Path(r"C:\AI\community\scripts")
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
@@ -31,13 +29,11 @@ if str(PARODY_DIR) not in sys.path:
 from build_request import DEFAULT_REFMOD_TEMPLATE, build_parody_request
 from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities
-from reflora import DEFAULT_REFLORA_DIR
 from run_record import RUNS_ROOT, save_run_record
 
 INDEX_DIR = Path(r"C:\AI\community\index\h3-known-characters")
 REFMODS_DIR = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
 ALIASES_PATH = PARODY_DIR / "aliases.json"
-REFLORA_DIR = DEFAULT_REFLORA_DIR
 RUN_QUEUE_PY = SCRIPTS_DIR / "run_queue.py"
 QUEUE_PYTHON = Path(r"C:\AI\director\.venv\Scripts\python.exe")
 QUEUE_TAG = "clip"
@@ -69,27 +65,17 @@ def submit_parody_job(
     slug: Optional[str] = None,
     run_dir_override: Optional[Path] = None,
     dry_run: bool = False,
-    template_path: Optional[Path] = None,
-    image: Optional[str] = None,
-    cond_source: Optional[str] = None,
-    graph_mode: str = "single-pass",
-    stage_cond: bool = False,
-    refmod_only: bool = False,
-    require_cond: bool = True,
-    wait: bool = False,
-    size: str = "768x1344",
-    objinfo_dump: Optional[Path] = None,
-    unet_name: Optional[str] = None,
-    pass1_lora_strength: Optional[float] = None,
-    pass2_lora_strength: Optional[float] = None,
-    action: Optional[str] = None,
-    ref_audio: Optional[str] = None,
-    stage_ref_audio: bool = False,
+    template_path: Path = DEFAULT_REFMOD_TEMPLATE,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
         raise ValueError("Biometric description (--description) is required for submit.")
 
+    index_dir = INDEX_DIR
+    refmods_dir = REFMODS_DIR
+    aliases_path = ALIASES_PATH
+
+    # 1. Resolve identity
     req_dict = {
         "names": [name] if name else [],
         "character": character,
@@ -100,14 +86,15 @@ def submit_parody_job(
     }
     resolved = resolve_identities(
         req_dict,
-        index_dir=INDEX_DIR,
-        refmods_dir=REFMODS_DIR,
-        aliases_path=ALIASES_PATH,
-        reflora_dir=None if refmod_only else REFLORA_DIR,
+        index_dir=index_dir,
+        refmods_dir=refmods_dir,
+        aliases_path=aliases_path,
     )
 
+    # 2. Plan C2V continuation if needed
     chain_plan = plan_c2v_chain(total_length_s=frames / 24, clip_frames=frames)
 
+    # 3. Determine run folder and prefix
     if run_dir_override:
         run_dir = Path(run_dir_override)
         run_name = run_dir.name
@@ -120,7 +107,8 @@ def submit_parody_job(
     run_dir.mkdir(parents=True, exist_ok=True)
     prefix = f"community/{run_name}/{QUEUE_TAG}"
 
-    graph, prompt, cond_meta = build_parody_request(
+    # 4. Build request graph and prompt
+    graph, prompt = build_parody_request(
         resolved=resolved,
         seed=seed,
         prefix=prefix,
@@ -128,21 +116,9 @@ def submit_parody_job(
         dialogue=dialogue,
         scene=scene,
         template_path=template_path,
-        image=image,
-        cond_source=cond_source,
-        graph_mode=graph_mode,
-        stage_cond=stage_cond,
-        require_cond=require_cond,
-        objinfo_dump=objinfo_dump,
-        unet_name=unet_name,
-        pass1_lora_strength=pass1_lora_strength,
-        pass2_lora_strength=pass2_lora_strength,
-        action=action,
-        ref_audio=ref_audio,
-        stage_ref_audio=stage_ref_audio,
     )
-    resolved["cond"] = cond_meta
 
+    # 5. Save initial run record (request.api.json, prompt.txt, assets.json)
     artifacts = save_run_record(
         run_dir=run_dir,
         resolved=resolved,
@@ -150,7 +126,6 @@ def submit_parody_job(
         graph=graph,
         chain_plan=chain_plan,
         clip_source=None,
-        cond_meta=cond_meta,
     )
 
     queue_job_dir = run_dir / QUEUE_TAG
@@ -165,15 +140,6 @@ def submit_parody_job(
             "arm": "parody",
             "scene": character or actor or name,
             "seed": seed,
-            "graph_mode": graph_mode,
-            "refmod_only": refmod_only,
-            # B2-4 records: the effective model checkpoint and the per-pass RefLoRA dials
-            # (dials and filenames only, never prompt text).
-            "unet": graph["unet"]["inputs"]["unet_name"],
-            "pass1_lora_strength": (resolved.get("reflora") or {}).get("parody_dials", {})
-            .get("pass1_lora_strength"),
-            "pass2_lora_strength": (resolved.get("reflora") or {}).get("parody_dials", {})
-            .get("pass2_lora_strength"),
         }]
     }
     order_file = run_dir / "_render_order.json"
@@ -184,47 +150,29 @@ def submit_parody_job(
         print(f"  Mode:         {resolved.get('mode')}")
         print(f"  INDEX status: {resolved.get('index_status')}")
         print(f"  RefMods:      {resolved.get('loaded_refmods')}")
-        print(f"  Layers:       {resolved.get('identity_layers')}")
-        print(f"  RefLoRA:      {[h['lora_name'] for h in (resolved.get('reflora') or {}).get('hybrids', [])]}")
-        print(f"  graph_mode:   {graph_mode}")
-        print(f"  refmod_only:  {refmod_only}")
-        print(f"  unet:         {graph['unet']['inputs']['unet_name']}")
-        pd = (resolved.get("reflora") or {}).get("parody_dials")
-        if pd:
-            print(f"  parody dials: pass1_lora_strength={pd['pass1_lora_strength']} "
-                  f"pass2_lora_strength={pd['pass2_lora_strength']}")
-            print(f"  pass 1 model: {pd['pass1_model']}")
-            print(f"  pass 2 model: {pd['pass2_model']}")
-            print(f"  conditioning: {pd['conditioning_injection']}")
-            print(f"  clip:         {pd['clip']}")
-        print(f"  Cond:         {cond_meta}")
-        print(f"  RefAudio:     {(resolved.get('ref_audio') or {}).get('ref_audio_input_name')}")
         print(f"  Frames:       {frames}")
         return {
             "dry_run": True,
             "run_dir": str(run_dir),
             "artifacts": {k: str(v) for k, v in artifacts.items()},
             "resolved": resolved,
-            "cond": cond_meta,
-            "graph_mode": graph_mode,
-            "refmod_only": refmod_only,
         }
 
+    # 6. Submit through the shared queue route. Detach returns after the batch PID is created.
     python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
     cmd = [
-        python, "-u", str(RUN_QUEUE_PY),
-        "--run-dir", str(run_dir),
-        "--frames", str(frames),
-        "--size", str(size or "768x1344"),
+        python,
+        "-u",
+        str(RUN_QUEUE_PY),
+        "--run-dir",
+        str(run_dir),
+        "--frames",
+        str(frames),
+        "--detach",
     ]
-    if not wait:
-        cmd.append("--detach")
 
     print(f"Submitting render queue: {' '.join(cmd)}")
-    # Detach returns after WMI spawn (~seconds). --wait runs the full batch in-foreground
-    # (can be 10-40+ min per clip on beta7); no timeout so Forge can sequence arms A->D.
-    timeout = None if wait else 180
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
     print(proc.stdout)
     if proc.stderr:
         print(proc.stderr, file=sys.stderr)
@@ -236,16 +184,13 @@ def submit_parody_job(
         "queue_log": str(run_dir / "_render_queue.log"),
         "artifacts": {k: str(v) for k, v in artifacts.items()},
         "resolved": resolved,
-        "cond": cond_meta,
-        "graph_mode": graph_mode,
-        "refmod_only": refmod_only,
     }
     if proc.returncode == GPU_BUSY_RC:
         return dict(base, submitted=False, detached=False, gpu_busy=True)
     if proc.returncode != 0:
         raise RuntimeError(f"run_queue.py --detach failed with returncode {proc.returncode}")
 
-    return dict(base, submitted=True, detached=(not wait), waited=bool(wait), gpu_busy=False)
+    return dict(base, submitted=True, detached=True, gpu_busy=False)
 
 
 def main(argv=None) -> int:
@@ -253,8 +198,7 @@ def main(argv=None) -> int:
     parser.add_argument("--name", required=True, help="Identity / celeb name")
     parser.add_argument("--character", help="Character name")
     parser.add_argument("--actor", help="Actor name")
-    parser.add_argument("--description", "--bio", dest="description", required=True,
-                        help="Biometric/wardrobe description (required)")
+    parser.add_argument("--description", "--bio", dest="description", required=True, help="Biometric/wardrobe description (required)")
     parser.add_argument("--tone", default="parody", help="Tone")
     parser.add_argument("--dialogue", help="Dialogue line")
     parser.add_argument("--scene", help="Scene summary")
@@ -263,44 +207,6 @@ def main(argv=None) -> int:
     parser.add_argument("--slug", help="Optional run slug")
     parser.add_argument("--run-dir", help="Direct run directory override")
     parser.add_argument("--dry-run", action="store_true", help="Validate and prepare without submitting")
-    parser.add_argument("--image", help="ComfyUI/input-relative Cond name (e.g. hoot_start.jpg); "
-                        "optional with --graph-mode two-pass-parody: no Cond flags at all = a "
-                        "named-celeb clip with NO start photo")
-    parser.add_argument("--cond-source",
-                        help="Path inside approved_characters for Cond provenance (FG-2); optional "
-                             "with --graph-mode two-pass-parody (omit both flags for no photo)")
-    parser.add_argument("--stage-cond", action="store_true",
-                        help="Copy validated Cond into ComfyUI/input and verify SHA256")
-    parser.add_argument("--graph-mode", choices=("single-pass", "two-pass", "two-pass-parody"),
-                        default="single-pass",
-                        help="single-pass=b2_refmod; two-pass=KEEP b2.api.json Lokken refine; "
-                             "two-pass-parody=b2_parody_2pass.api.json (B2-4, pass 1 voice-protected). "
-                             "Passing --pass1-lora-strength/--pass2-lora-strength with two-pass "
-                             "selects the parody graph.")
-    parser.add_argument("--unet", default=None, metavar="SAFETENSORS",
-                        help="A/B model swap (t179u): a bare diffusion_models filename; the accepted "
-                             "set is the two beta7 checkpoints (int8HQ default, "
-                             "beta7_activation_learned_HQ); anything else raises before any write")
-    parser.add_argument("--pass1-lora-strength", type=float, default=None,
-                        help="two-pass-parody: LoRA half on the pass-1 model line, default 0.0 = "
-                             "voice-protected base beta7 model (the pack's no-patch passthrough)")
-    parser.add_argument("--pass2-lora-strength", type=float, default=None,
-                        help="two-pass-parody: LoRA half on the pass-2 model line, default 1.0")
-    parser.add_argument("--refmod-only", "--disable-reflora", dest="refmod_only", action="store_true",
-                        help="Skip RefLoRA lookup (Arm A even when hybrid is on disk)")
-    parser.add_argument("--action", help="Natural blocking/pose for [Shot 1]")
-    parser.add_argument("--ref-audio", default=None,
-                        help="Standalone voice-timbre reference (<Audio 1>), wired as ref_audios.ref_audio_1")
-    parser.add_argument("--stage-ref-audio", action="store_true",
-                        help="Copy --ref-audio into ComfyUI\\input\\ref_audios and verify SHA256")
-    parser.add_argument("--wait", action="store_true",
-                        help="Run run_queue in foreground (no --detach) until BATCH closed; sequence arms cleanly")
-    parser.add_argument("--size", default="768x1344",
-                        help="Objective size for run_queue (default 768x1344; two-pass upscales to this)")
-    parser.add_argument("--template", default=None, help="Optional template path override")
-    parser.add_argument("--objinfo-dump", default=None,
-                        help="object_info capture for the offline class check "
-                             "(default notes/objinfo/object_info_20261105.json)")
     args = parser.parse_args(argv)
 
     res = submit_parody_job(
@@ -316,23 +222,8 @@ def main(argv=None) -> int:
         slug=args.slug,
         run_dir_override=Path(args.run_dir) if args.run_dir else None,
         dry_run=args.dry_run,
-        template_path=Path(args.template) if args.template else None,
-        image=args.image,
-        cond_source=args.cond_source,
-        graph_mode=args.graph_mode,
-        stage_cond=args.stage_cond,
-        refmod_only=args.refmod_only,
-        wait=args.wait,
-        size=args.size,
-        objinfo_dump=Path(args.objinfo_dump) if args.objinfo_dump else None,
-        unet_name=args.unet,
-        pass1_lora_strength=args.pass1_lora_strength,
-        pass2_lora_strength=args.pass2_lora_strength,
-        action=args.action,
-        ref_audio=args.ref_audio,
-        stage_ref_audio=args.stage_ref_audio,
     )
-    print(json.dumps(res, indent=2, default=str))
+    print(json.dumps(res, indent=2))
     if res.get("gpu_busy"):
         return GPU_BUSY_RC
     return 0 if res.get("dry_run") or res.get("submitted") else 1
