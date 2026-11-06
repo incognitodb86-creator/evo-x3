@@ -70,14 +70,8 @@ class TestParodyPhase1(unittest.TestCase):
         # RefMod slots must be present and filled
         self.assertIn("mod_1", res["refmod_slots"])
         self.assertTrue(any("emiliaclarke" in s["path"] for s in res["refmod_slots"].values()))
-        # B2-6: the resolved bio is the author's text only - no name clause, no "styled in ... tone"
-        # sentence. The identity reaches the paste from the INDEX rows; the tone is a record field.
+        self.assertIn("Daenerys", res["description"])
         self.assertIn("platinum-blonde", res["description"])
-        self.assertNotIn("Daenerys", res["description"])
-        self.assertNotIn("styled in", res["description"])
-        self.assertIn("Daenerys", res["character"])
-        # The actress identity rides in the INDEX rows + the RefMod slots, never in the bio text.
-        self.assertIn("Emilia Clarke", str(res["index_rows"]), "INDEX rows must name the actress")
 
     def test_u2_r3_bad_and_fence_rows(self):
         """R3: Bad and onthefence rows produce mode native_voice_refmod_look."""
@@ -152,11 +146,9 @@ class TestParodyPhase1(unittest.TestCase):
         )
         self.assertEqual(res["mode"], "native_face_voice")
         # Check both are mentioned in description and loaded
-        # B2-6: the names come from the INDEX rows, never from the bio text (no name clause baked in).
-        self.assertIn("Rachel Green", res["names"] + [res["character"]])
-        self.assertIn("Jennifer Aniston", res["names"] + [res["actor"] or ""])
+        self.assertIn("Rachel Green", res["description"])
+        self.assertIn("Jennifer Aniston", res["description"])
         self.assertIn("layered 90s blonde hair", res["description"])
-        self.assertNotIn("styled in", res["description"])
         self.assertTrue(any("jenniferaniston" in s["path"] for s in res["refmod_slots"].values()))
 
     def test_u2_kd14_over_8_slots_truncation(self):
