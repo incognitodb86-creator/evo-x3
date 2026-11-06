@@ -421,11 +421,12 @@ def resolve_identities(
     valid_bio = validate_biometric_description(raw_bio)
 
     primary_name = candidates[0] if candidates else "subject"
-    char_part = f"character {character_input}" if character_input else ""
-    actor_part = f"actor {actor_input}" if actor_input else ""
-    parts = [p for p in [char_part, actor_part] if p]
-    id_spec = f"featuring {primary_name}" + (f" ({', '.join(parts)})" if parts else "")
-    description = f"{id_spec}, {valid_bio}, styled in {request.get('tone', 'parody')} tone."
+    # B2-6: the resolved `description` is the author's validated bio and NOTHING else. The name is
+    # pasted from `character`/`names` by format_parody_prompt, so no "featuring ... (character ...,
+    # actor ...)" clause is baked in, and the tone is metadata for run_record.json (run_record.py),
+    # not a "styled in ... tone" sentence in the paste. The adult age belongs in the bio the author
+    # writes (R28 one full description, R7); the builder refuses a bio that states no adult age.
+    description = valid_bio
 
     return {
         "names": names,

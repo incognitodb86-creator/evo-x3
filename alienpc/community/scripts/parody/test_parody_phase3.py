@@ -11,6 +11,7 @@ Tests:
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -18,6 +19,8 @@ import unittest
 
 from build_request import (
     DEFAULT_REFMOD_TEMPLATE,
+    DEFAULT_UNET as _DEFAULT_UNET,
+    _shot_end_clock,
     build_parody_request as _build_parody_request,
     format_parody_prompt,
     populate_refmod_slots,
@@ -34,7 +37,7 @@ def build_parody_request(*a, **k):
     return out
 from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities
-from run_record import build_assets_record, save_run_record, verify_run_artifacts
+from run_record import _sha256_file, build_assets_record, save_run_record, verify_run_artifacts
 
 
 INDEX_DIR = Path(r"C:\AI\community\index\h3-known-characters")
@@ -50,14 +53,14 @@ class TestParodyPhase3(unittest.TestCase):
             "character": "Daenerys Targaryen",
             "tone": "dramatic parody",
             "length_s": 5,
-            "description": "platinum-blonde braided hair, pale skin, violet-leaning eyes, fantasy scale top",
+            "description": "a woman of 32 years, platinum-blonde braided hair, pale skin, violet-leaning eyes, fantasy scale top",
         }
         self.bad_req = {
             "names": ["Megan Fox"],
             "character": "Jennifer Check",
             "tone": "satirical adult parody",
             "length_s": 15,
-            "description": "long dark wavy hair, cheer jacket, heart earrings",
+            "description": "a woman of 28 years, long dark wavy hair, cheer jacket, heart earrings",
         }
         self.resolved_good = resolve_identities(
             self.good_req, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH
@@ -103,7 +106,11 @@ class TestParodyPhase3(unittest.TestCase):
         self.assertIn("refapply", graph)
 
     def test_r7c_tone_passthrough_and_guard(self):
-        """R7-c: The resolved description reaches the paste and the prompt satisfies the adults guard."""
+        """R7-c: The resolved description reaches the paste and the paste satisfies the adults guard.
+
+        B2-6: the guard passes on the CLEAN paste - no meta line, no canon-age clause; the adult age
+        comes from the resolved bio, and the compliance result is a record (test_b2_6_...).
+        """
         prompt = format_parody_prompt(
             self.resolved_bad,
             dialogue="You have no idea what is coming next.",
@@ -111,7 +118,8 @@ class TestParodyPhase3(unittest.TestCase):
         )
         self.assertIn("Jennifer Check", prompt)
         self.assertIn(self.resolved_bad["description"], prompt)
-        self.assertIn("adults-only", prompt)
+        for boilerplate in ("adults-only", "One adult performer", "canon age", "styled in parody tone"):
+            self.assertNotIn(boilerplate, prompt, f"B2-6 guard/meta boilerplate in the paste: {boilerplate!r}")
         self.assertIn("You have no idea what is coming next", prompt)
         self.assertTrue(comm.guard_ok(prompt))
         self.assertTrue(comm.adult_stated(prompt))
@@ -122,7 +130,7 @@ class TestParodyPhase3(unittest.TestCase):
         "character": "Daenerys Targaryen",
         "tone": "parody",
         "length_s": 5,
-        "description": "dark curly hair, pale skin, standing at a late-night counter in a red uniform",
+        "description": "a woman of 24 years, dark curly hair, pale skin, standing at a late-night counter in a red uniform",
     }
 
     SECTION_ORDER = [
@@ -135,6 +143,9 @@ class TestParodyPhase3(unittest.TestCase):
         "overall_soundscape", "non_diegetic_music", "<scenedirect>", "no_dubs", "Non-speaking characters",
         "[static medium shot", "natural speaking voice", "no music", "no songs", "No singing", "never",
         "then ", "after ", "afterwards", "next ", "<Picture 2>", "<Audio 1>", "<Video 2>", "age 28+",
+        # B2-6: the guard/meta boilerplate must never enter a named-actress paste (it lives in
+        # run_record.json). A real adult age (e.g. "a woman of 24 years") is not boilerplate.
+        "canon age", "styled in parody tone", "One adult performer", "adults-only", "<Audio ",
     ]
 
     def _resolved(self):
@@ -167,13 +178,16 @@ class TestParodyPhase3(unittest.TestCase):
         )
         sections = dict(self._sections(prompt))
         self.assertTrue(any(l.startswith("<Subject 1> is the woman in <Video 1>.") for l in sections["subject_definitions:"]))
-        self.assertTrue(any("<Subject 1> Daenerys Targaryen, a fictional adult, canon age 28," in l and "the only person in the clip" in l
+        # B2-6: the identity line is the INDEX name + the resolved bio and NOTHING else - no
+        # canon-age clause, no tone label, no (character, actor) parenthetical.
+        self.assertTrue(any(l.startswith("<Subject 1> Daenerys Targaryen, a woman of 24 years,")
+                            and self.REQ_SHAPE["description"] in l and "the only person in the clip" in l
                             for l in sections["subject_definitions:"]))
         self.assertIn("<Picture 1> is the start frame of [Shot 1] for setting, light and framing",
                       sections["subject_definitions:"])
         joined_summary = "\n".join(sections["summary:"])
         self.assertTrue(joined_summary.startswith("[reference generation] "), "R6/R34 task tag")
-        self.assertIn("adults-only", joined_summary)
+        self.assertNotIn("adults-only", joined_summary, "B2-6: compliance is recorded, not pasted")
         self.assertIn("<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, body, skin, wardrobe",
                       sections["retention_analysis:"])
         self.assertIn("<Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - setting, light, framing",
@@ -349,7 +363,7 @@ class TestParodyPhase3(unittest.TestCase):
 
     def test_biometric_description_passes_with_real_short_bio(self):
         """Passes with real short bio, embedding it in prompt without banned generics."""
-        bio = "platinum-blonde braided hair, pale skin, violet-leaning eyes, fantasy scale top with dark crisscross straps, golden-hour stone colonnade"
+        bio = "a woman of 31 years, platinum-blonde braided hair, pale skin, violet-leaning eyes, fantasy scale top with dark crisscross straps, golden-hour stone colonnade"
         req = {
             "names": ["Emilia Clarke"],
             "character": "Daenerys Targaryen",
@@ -387,6 +401,83 @@ class TestParodyPhase3(unittest.TestCase):
                 dry_run=True,
             )
         self.assertIn("description", str(ctx.exception).lower())
+
+    # ---- B2-6 (2026-11-06): the clean named-actress paste + the compliance RECORD ----
+    B2_6_BANNED = [
+        # The item's banned list, verbatim: guard/meta boilerplate that used to be pasted.
+        "canon age", "styled in parody tone", "One adult performer", "overall_soundscape",
+        "non_diegetic_music", "<Audio ",
+    ]
+    B2_6_RECORD_KEYS = [
+        "guard_ok", "adult_stated", "tone", "character", "actor", "description_sha256",
+        "age_result", "unet_name", "dials", "template_sha256", "prompt_sha256",
+    ]
+
+    def test_b2_6_clean_paste_bans_and_required_lines(self):
+        """B2-6: banned boilerplate absent, required structure present, no photo in the no-photo lane."""
+        prompt = format_parody_prompt(
+            self._resolved(),
+            dialogue="Welcome back, honey. I have your table ready, and I will only say it once",
+            scene="A waitress at the late-night Hooters counter faces the camera and answers a regular",
+            frames=124,
+        )
+        for banned in self.B2_6_BANNED:
+            self.assertNotIn(banned, prompt, f"B2-6 banned boilerplate in paste: {banned!r}")
+        # A no-photo paste (cond_wired=False, the default) never carries the picture label.
+        self.assertNotIn("<Picture 1>", prompt)
+        for required in ("subject_definitions:", "<Subject 1> is the woman in <Video 1>.",
+                         "<Subject 1> Daenerys Targaryen, a woman of 24 years,",
+                         f"[Shot 1] 00:00.000 - {_shot_end_clock(124)}"):
+            self.assertIn(required, prompt, f"B2-6 required line missing from paste: {required!r}")
+        self.assertTrue(comm.guard_ok(prompt) and comm.adult_stated(prompt))
+
+    def test_b2_6_builder_refuses_a_bio_that_states_no_adult_age(self):
+        """B2-6 fail-closed: a bio with no adult age raises, and the failure prints no prompt text.
+
+        run_queue.py gates every clip on `comm.guard_reason(g0)` with an adult required, so the
+        builder refuses here (raise, never a softened prompt) instead of dying at submit time.
+        """
+        no_age = dict(self._resolved(), description="dark curly hair, pale skin, a red uniform")
+        with self.assertRaises(ValueError) as ctx:
+            format_parody_prompt(no_age, frames=124)
+        msg = str(ctx.exception)
+        self.assertIn("adult", msg.lower())
+        # The block's record rule: prompt text is never printed, identity is proven by SHA256.
+        self.assertNotIn("primary_video_guidance_prompt", msg)
+        self.assertNotIn("<Subject 1>", msg)
+
+    def test_b2_6_compliance_lives_in_run_record_json(self):
+        """B2-6: run_record.json carries guard_ok/adult_stated/tone/character/actor/description_sha256
+        (+ the age result, dials and template SHA256) and NO prompt text; it is a required artifact.
+        """
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            res = self._resolved()
+            graph, prompt = build_parody_request(
+                resolved=res, seed=24, prefix="community/b2_6_test/clip", frames=124)
+            artifacts = save_run_record(run_dir=Path(tmp_dir) / "run", resolved=res,
+                                       prompt=prompt, graph=graph, chain_plan=None)
+            self.assertTrue(artifacts["run_record"].is_file(), "run_record.json must be written")
+            self.assertTrue(all(verify_run_artifacts(Path(tmp_dir) / "run",
+                                                     require_clip=False).values()))
+            rec = json.loads(artifacts["run_record"].read_text(encoding="utf-8"))
+            for key in self.B2_6_RECORD_KEYS:
+                self.assertIn(key, rec, f"run_record.json missing key {key}")
+            self.assertTrue(rec["guard_ok"] and rec["adult_stated"], "compliance gate must pass")
+            self.assertFalse(rec["age_result"]["minor_coded_word_present"])
+            # The record reports the INDEX rows exactly as the resolver resolved them.
+            self.assertEqual((rec["tone"], rec["character"], rec["actor"], rec["names"]),
+                             (res["tone"], res["character"], res["actor"], res["names"]))
+            self.assertEqual(rec["character"], "Daenerys Targaryen")
+            self.assertIn("Emilia Clarke", rec["names"])
+            self.assertEqual(rec["description_sha256"],
+                             hashlib.sha256(res["description"].encode("utf-8")).hexdigest())
+            self.assertEqual(rec["prompt_sha256"], hashlib.sha256(prompt.encode("utf-8")).hexdigest())
+            self.assertEqual(rec["unet_name"], _DEFAULT_UNET)
+            self.assertEqual(rec["template_sha256"], _sha256_file(DEFAULT_REFMOD_TEMPLATE))
+            # Identity is proven by hash: the bio and the paste never appear in the record.
+            text = artifacts["run_record"].read_text(encoding="utf-8")
+            self.assertNotIn(res["description"], text)
+            self.assertNotIn("primary_video_guidance_prompt", text)
 
 
 if __name__ == "__main__":
