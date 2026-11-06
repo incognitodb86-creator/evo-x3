@@ -4,7 +4,8 @@ description: >-
   INDEX + RefMod celebrity/character parody lane for MiniMax H3 — use when asked
   for a parody video of any named character, actor, or celebrity on the locked
   1-pass beta7_int8HQ graph (no RefLoRA, no 2-pass, no voice ref), including
-  autonomous chat execution from C:\AI\render with one submit_parody_run.py call.
+  autonomous chat execution from C:\AI\render with one submit_parody_run.py
+  call.
 ---
 # H3 parody / identity lane (INDEX + RefMod)
 
