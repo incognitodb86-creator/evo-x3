@@ -386,6 +386,15 @@ def graph_expect(g):
     i = (n or {}).get("inputs", {})
     num = lambda v: int(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
     f, w, h = num(i.get("length")), num(i.get("width")), num(i.get("height"))
+    # (c) 2026-11-06 brief t224x214 (Derrick): a continuation graph's truth is the CUMULATIVE latent, not the
+    # first beat. Each MiniMaxH3GuidedContinuationWindow adds extension_frames visible frames (its 22-frame
+    # overlap is hidden context and is trimmed by MiniMaxH3AppendContinuation), so OBJECTIVE must expect
+    # beat 1 + every extension; the mp4 carries the whole clip. (Parity with validate_graph in
+    # scripts/run_graph_job.py.)
+    for node in (g or {}).values():
+        if node.get("class_type") == "MiniMaxH3GuidedContinuationWindow":
+            ext = num((node.get("inputs") or {}).get("extension_frames"))
+            f = None if ext is None else (f + ext if f is not None else None)
     if w and h:
         scale = 1.0
         for node in (g or {}).values():

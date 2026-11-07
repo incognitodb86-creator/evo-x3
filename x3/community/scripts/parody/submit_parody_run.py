@@ -7,6 +7,11 @@ Dynamic options (all optional; omitted = the locked 124f 768x1344 single clip as
   --seconds / --frames   single shot up to SINGLE_CLIP_MAX_FRAMES (H3 grid snap); longer asks or several
                          --beat args build shared-anchor cells c01_s<seed>, c02_s<seed+1>, ... rendered in one
                          GPU window and stitched (take_chain_stitch.py) into one clip.mp4
+  --beat (2+)            (c) 2026-11-06 (brief t224x214): two or more --beat scenes are now ONE native
+                         latent-tail continuation inside ONE graph (beat 2+ starts from the previous beat's
+                         video+audio latent tail, never from the photo) and render as one clip.mp4 with no
+                         hard cut. Same flags, no new ones; one --beat, --frames, and --seconds-only long
+                         asks keep the shared-anchor + stitch path exactly as before.
   --aspect / --size      canvas (9:16 default, 16:9, 1:1, 4:3, 3:4)
   --camera / --pronoun / --end-action / --summary
   --image (1..4)         approved_characters reference images only (never sydney paths)
@@ -294,11 +299,24 @@ def submit_parody_job(
                   pronoun=pronoun, end_action=end_action, images=staged, image_role=image_role,
                   resolved2=resolved2, pronoun2=pronoun2)
     jobs: List[Dict[str, Any]] = []
+    continuation = None
     if cells is None:
         graph, prompt = build_parody_request(
             seed=seed, prefix=f"community/{run_name}/{QUEUE_TAG}", frames=frames, dialogue=dialogue,
             scene=scene, camera=camera, summary_text=summary, dialogue2=dialogue2, **common)
         jobs.append({"tag": QUEUE_TAG, "graph": graph, "prompt": prompt, "seed": seed, "frames": frames})
+    elif beats and len([b for b in beats if b and str(b).strip()]) > 1:
+        # (c) 2026-11-06 (brief t224x214): a 2+ --beat list is ONE continuation graph, not N clips. The beats
+        # list IS the plan (no new flags): beat 1 keeps the approved photo, beat 2+ continues the completed AV
+        # latent and re-applies its RefMod. build_continuation_request owns the frame math and the node wiring.
+        graph, prompt, continuation = br.build_continuation_request(
+            resolved=resolved, seed=seed, prefix=f"community/{run_name}/{QUEUE_TAG}",
+            beats=[dict(c, images=(staged if i == 0 else None)) for i, c in enumerate(cells)],
+            frames=cells[0]["frames"], width=width, height=height, template_path=template_path,
+            pronoun=pronoun, end_action=end_action, image_role=image_role, resolved2=resolved2,
+            pronoun2=pronoun2, summary_text=summary, dialogue2=dialogue2)
+        jobs.append({"tag": QUEUE_TAG, "graph": graph, "prompt": prompt, "seed": seed,
+                     "frames": continuation["total_frames"]})
     else:
         for i, c in enumerate(cells):
             tag = f"c{i + 1:02d}_s{int(seed) + i}"
@@ -313,11 +331,12 @@ def submit_parody_job(
         prompt_all = jobs[0]["prompt"]
     else:
         prompt_all = "\n\n".join(f"=== {j['tag']} ({j['frames']}f) ===\n{j['prompt']}" for j in jobs)
-    record_plan = chain_plan if len(jobs) == 1 else {
+    total_frames = sum(j["frames"] for j in jobs)
+    record_plan = continuation if continuation is not None else (chain_plan if len(jobs) == 1 else {
         "is_chained": False, "mode": "shared_anchor_cells", "clip_count": len(jobs),
         "cells": [{"tag": j["tag"], "frames": j["frames"], "seed": j["seed"]} for j in jobs],
         "total_frames": total_frames,
-    }
+    })
 
     # 5. Save run record (request.api.json, prompt.txt, assets.json)
     artifacts = save_run_record(
@@ -444,7 +463,9 @@ def main(argv=None) -> int:
     parser.add_argument("--end-action", help="What the subject does as the line ends (replaces the stock nod)")
     parser.add_argument("--image", action="append", default=[], help="approved_characters reference image (repeat 1..4)")
     parser.add_argument("--image-role", default=br.DEFAULT_IMAGE_ROLE, help="What <Picture N> anchors")
-    parser.add_argument("--beat", action="append", default=[], help="Scene beat per cell (repeat for multi-cut)")
+    parser.add_argument("--beat", action="append", default=[],
+                        help="Scene beat (repeat 2+ for a native latent-tail continuation in one graph; "
+                             "with --frames or a long --seconds ask it keeps the stitched shared-anchor cells)")
     parser.add_argument("--beat-dialogue", action="append", default=[], help="Spoken line per beat")
     parser.add_argument("--beat-camera", action="append", default=[], help="Camera per beat")
     parser.add_argument("--beat-seconds", action="append", type=float, default=[], help="Seconds per beat")

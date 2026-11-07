@@ -57,6 +57,28 @@ _CAMERA_MOTION_RE = re.compile(
     r"sweep(?:s|ing)?|arc(?:s|ing)?)\b",
     re.IGNORECASE,
 )
+
+# --- (c) 2026-11-06 (brief t224x214): native latent-tail continuation ------------------------------
+# Multi-beat used to render one INDEPENDENT clip per beat and concat them: a hard cut at every join. The path
+# the installed nodes give instead, inside ONE graph, is GuidedContinuationWindow -> LatentTailGuide ->
+# SamplerCustomAdvanced -> AppendContinuation (same shape as scripts/comm.py:build, which has no RefMod). The
+# window's 22-frame head is hidden motion context trimmed from video AND audio by the append node, transition
+# tokens 0, so the visible output is base + extension frames with no hidden overlap in it.
+CONTINUATION_OVERLAP_FRAMES = 22
+CONTINUATION_WINDOW_MAX_FRAMES = SINGLE_CLIP_MAX_FRAMES  # every sampled window stays <= 243 frames on 16 GB
+CONTINUATION_NODE_TYPES = frozenset({
+    "MiniMaxH3GuidedContinuationWindow",
+    "MiniMaxH3LatentTailGuide",
+    "MiniMaxH3AppendContinuation",
+})
+# Prompt rule for a continuation beat: inherit the previous beat's closing state, never reset to the photo.
+CONTINUATION_LEAD_IN = (
+    "The shot continues from the last seen moment: the same framing, the same standing pose, the same "
+    "wardrobe and the same room lighting, and {sub} is still in the same place at the same distance from "
+    "the camera. At first there is only natural micro-motion - a breath, a slow blink, a small shift of "
+    "weight - before this action. {Sub} keeps {poss} exact voice, accent and signature vocal timbre. "
+    "The camera does not change angle and the shot never resets to a starting photo."
+)
 PRONOUNS: Dict[str, Dict[str, str]] = {
     "she": {"subj": "She", "obj": "her", "poss": "her", "Poss": "Her", "s": "s", "does": "does", "es": "es"},
     "he": {"subj": "He", "obj": "him", "poss": "his", "Poss": "His", "s": "s", "does": "does", "es": "es"},
@@ -162,6 +184,47 @@ def validate_single_clip_frames(frames: int) -> int:
             "use --seconds / --beat to build shared-anchor cells stitched into one clip instead."
         )
     return f
+
+
+# --- (c) 2026-11-06 (brief t224x214): latent-tail continuation frame arithmetic ----------------
+# The nodes enforce the rest at queue time (continuation_nodes.py): the 17k + 5 grid, extension_frames as a
+# multiple of 17, the 40 Hz audio boundary (a window latent at the boundary or boundary + 1), the overlap trim
+# and the join. Ours is the 16 GB sampled-window ceiling measured on this card, and the base/extension split.
+def continuation_layout(base_frames: int, extension_frames: int,
+                        overlap_frames: int = CONTINUATION_OVERLAP_FRAMES) -> Dict[str, Any]:
+    """Frame arithmetic for one latent-tail window: the visible clip is base_frames + extension_frames.
+
+    The window's overlap_frames head is generated as hidden motion context and trimmed from video AND audio by
+    MiniMaxH3AppendContinuation with transition tokens 0, so no hidden overlap reaches the output and the
+    completed latent is kept as-is. Only the sampled window is capped, never the cumulative latent.
+    """
+    base, ext, overlap = int(base_frames), int(extension_frames), int(overlap_frames)
+    if base % 17 != 5 or overlap % 17 != 5:  # the same grid the nodes validate
+        raise ValueError(f"base and overlap frames must satisfy the MiniMax H3 17k + 5 grid, got {base}/{overlap}")
+    if ext < 17 or ext % 17:
+        raise ValueError(f"extension_frames must be at least 17 and a multiple of 17, got {ext}")
+    window, total = overlap + ext, base + ext
+    if window > CONTINUATION_WINDOW_MAX_FRAMES:
+        raise ValueError(
+            f"continuation window {window} frames exceeds the sampled-window ceiling of "
+            f"{CONTINUATION_WINDOW_MAX_FRAMES} frames ({CONTINUATION_WINDOW_MAX_FRAMES / H3_FPS:.3f} s on 16 GB)"
+        )
+    return {
+        "mode": "native_latent_tail_continuation",
+        "base_frames": base, "extension_frames": ext, "overlap_frames": overlap,
+        "window_frames": window, "total_frames": total, "fps": H3_FPS,
+        "base_seconds": round(base / H3_FPS, 4), "window_seconds": round(window / H3_FPS, 4),
+        "total_seconds": round(total / H3_FPS, 4),
+        "sampled_window_max_frames": CONTINUATION_WINDOW_MAX_FRAMES,
+    }
+
+
+def continuation_scene(scene: Optional[str], pronoun: Optional[str] = None) -> str:
+    """Continuation-beat scene text: the inherited closing state first, then the caller's action."""
+    pr = _pronoun(pronoun)
+    lead = CONTINUATION_LEAD_IN.format(sub=pr["subj"].lower(), Sub=pr["subj"], poss=pr["poss"])
+    action = str(scene).strip() if scene and str(scene).strip() else DEFAULT_SCENE_ACTION
+    return f"{lead} {action}"
 
 
 def resolve_canvas(aspect: Optional[str] = None, size: Optional[str] = None) -> Tuple[int, int]:
@@ -525,6 +588,176 @@ def verify_keep_dials(graph: Dict[str, Any]) -> None:
         raise ValueError("Graph missing 'refapply' node.")
 
 
+def add_continuation_beat(cumulative: Dict[str, Any], beat: Dict[str, Any], layout: Dict[str, Any],
+                          index: int) -> Dict[str, Any]:
+    """(c) 2026-11-06: wire one native latent-tail continuation beat into the cumulative graph.
+
+    Node chain as installed and as scripts/comm.py:build wires it: GuidedContinuationWindow(previous, 22 hidden,
+    +N) -> LatentTailGuide -> BasicGuider + SamplerCustomAdvanced(window) -> AppendContinuation(overlap tokens,
+    transition 0). The beat's RefModApply sits between its text node and the tail guide, as beat 1's does, so
+    identity conditions every sampled beat. Only the appended latent reaches the decoders: one mp4, no stitching.
+    `index` is the 1-based beat number.
+    """
+    if index < 2:
+        raise ValueError(f"beat {index} is not a continuation: beat 1 is a single generation, index must be >= 2")
+    for nid in (f"c{index}_gen", f"c{index}_append"):
+        if nid in cumulative:
+            raise ValueError(f"beat {index} is already wired in this graph ({nid}); beats are added in order")
+    if index > 2 and f"c{index - 1}_append" not in cumulative:
+        raise ValueError(f"beat {index} needs beat {index - 1}'s appended latent (c{index - 1}_append) first")
+    for nid in ("c0", "refmods", "refapply"):
+        if beat.get(nid, {}).get("class_type") != {"c0": "MiniMaxH3ReferenceToVideo",
+                                                   "refmods": "MiniMaxH3RefModsLoader",
+                                                   "refapply": "MiniMaxH3RefModApply"}[nid]:
+            raise ValueError(f"template drift: beat graph is missing a plain '{nid}' node")
+    if any(n.get("class_type") in ("MiniMaxH3AddGuide", "LoadImage") for n in beat.values()):
+        raise ValueError("continuation beat must not carry the start image: the latent tail guides frame 0")
+    if beat["refapply"]["inputs"].get("conditioning") != ["c0", 0]:
+        raise ValueError("template drift: beat refapply.conditioning is not ['c0', 0]")
+    # Beat 2 continues beat 1's SAMPLED AV latent: its SamplerCustomAdvanced (s0_samp) output 0, as the installed
+    # guided_continuation.json wires all three previous_av_latent inputs; c0 output 1 is the UNSAMPLED latent.
+    # Every later beat continues the latent its previous beat appended. The latent tail guides frame 0, so no
+    # start photo is wired here.
+    prev_latent = ["s0_samp", 0] if index == 2 else [f"c{index - 1}_append", 0]
+    base = cumulative.get("c0", {}).get("inputs", {})
+    if (base.get("width"), base.get("height"), base.get("fps")) != (
+            beat["c0"]["inputs"].get("width"), beat["c0"]["inputs"].get("height"),
+            beat["c0"]["inputs"].get("fps")):
+        raise ValueError("canvas/fps drift between beats: the appended latent must be one continuous clip")
+    if cumulative.get("refmods", {}).get("inputs") != beat["refmods"]["inputs"]:
+        raise ValueError("RefMod drift between beats: every beat must carry the same identity RefMod")
+
+    g = copy.deepcopy(cumulative)
+    n = str(index)
+    g[f"c{n}"] = copy.deepcopy(beat["c0"])
+    g[f"c{n}"]["_meta"] = {"title": f"Beat {n}: continuation text and RefMod chain (no start photo)"}
+    g[f"c{n}"]["inputs"]["length"] = [f"c{n}_gen", 1]  # the node docs: connect window_length to length
+    g[f"c{n}_gen"] = {
+        "_meta": {"title": f"Beat {n}: guided continuation window ({layout['overlap_frames']} hidden, "
+                           f"+{layout['extension_frames']} new frames)"},
+        "class_type": "MiniMaxH3GuidedContinuationWindow",
+        "inputs": {"previous_av_latent": prev_latent, "overlap_frames": layout["overlap_frames"],
+                   "extension_frames": layout["extension_frames"]},
+    }
+    # one RefMod load per graph, one RefModApply per beat, its mods link left on the shared loader
+    g[f"c{n}_refapply"] = copy.deepcopy(beat["refapply"])
+    g[f"c{n}_refapply"]["_meta"] = {"title": f"Beat {n}: RefMod retention 1.0 on the continuation beat"}
+    g[f"c{n}_refapply"]["inputs"]["conditioning"] = [f"c{n}", 0]
+    g[f"c{n}_tail"] = {
+        "_meta": {"title": f"Beat {n}: native latent-tail guide (frame 0, no VAE round trip)"},
+        "class_type": "MiniMaxH3LatentTailGuide",
+        "inputs": {"positive": [f"c{n}_refapply", 0], "previous_av_latent": prev_latent,
+                   "target_av_latent": [f"c{n}_gen", 0], "overlap_video_tokens": [f"c{n}_gen", 2],
+                   "overlap_audio_tokens": [f"c{n}_gen", 3]},
+    }
+    g[f"c{n}_sched"] = {"_meta": {"title": f"Beat {n}: KEEP 8 steps / simple scheduler"},
+                        "class_type": "BasicScheduler",
+                        "inputs": {"denoise": 1.0, "model": ["m_shift", 0], "scheduler": "simple", "steps": 8}}
+    g[f"c{n}_guider"] = {"_meta": {"title": f"Beat {n}: guider on the RefMod'd, tail-guided conditioning"},
+                         "class_type": "BasicGuider",
+                         "inputs": {"conditioning": [f"c{n}_tail", 0], "model": ["m_shift", 0]}}
+    g[f"c{n}_samp"] = {"_meta": {"title": f"Beat {n}: sample the window"},
+                       "class_type": "SamplerCustomAdvanced",
+                       "inputs": {"guider": [f"c{n}_guider", 0], "latent_image": [f"c{n}_gen", 0],
+                                  "noise": ["noise", 0], "sampler": ["ksel", 0],
+                                  "sigmas": [f"c{n}_sched", 0]}}
+    g[f"c{n}_append"] = {
+        "_meta": {"title": f"Beat {n}: trim the hidden overlap, append the new video and audio tokens"},
+        "class_type": "MiniMaxH3AppendContinuation",
+        "inputs": {"previous_av_latent": prev_latent, "sampled_window": [f"c{n}_samp", 0],
+                   "overlap_video_tokens": [f"c{n}_gen", 2], "overlap_audio_tokens": [f"c{n}_gen", 3],
+                   "transition_video_tokens": [f"c{n}_gen", 4], "transition_audio_tokens": [f"c{n}_gen", 5]},
+    }
+    if g.get("s0_sep", {}).get("class_type") != "LTXVSeparateAVLatent":
+        raise ValueError("template drift: no s0_sep LTXVSeparateAVLatent to rewire to the appended latent")
+    g["s0_sep"]["inputs"]["av_latent"] = [f"c{n}_append", 0]  # decoders/save stay as they are
+    return g
+
+
+def plan_continuation_chain(requested_frames: Sequence[int],
+                            overlap_frames: int = CONTINUATION_OVERLAP_FRAMES) -> List[Dict[str, Any]]:
+    """Frame plan for N beats in one graph: one native generation, then one continuation window per extra beat.
+
+    Beat 1 is a normal single generation (its length is capped at SINGLE_CLIP_MAX_FRAMES like any clip). Each
+    later beat's base is the CUMULATIVE latent built so far - only the sampled window is capped, never the
+    cumulative latent - and its extension is the length closest to what that beat asked for that both fits the
+    window ceiling and joins on the audio grid. Every returned layout is exact; the caller wires them in order.
+    Ties in that closest-length choice go to the LONGER extension: it lands nearer the total the caller asked for.
+    """
+    req = [int(x) for x in requested_frames]
+    if len(req) < 2:
+        raise ValueError("a continuation chain needs at least two beats")
+    base = validate_single_clip_frames(req[0])
+    plans: List[Dict[str, Any]] = [{"index": 1, "is_continuation": False, "frames": base}]
+    cumulative = base
+    cap_ext = CONTINUATION_WINDOW_MAX_FRAMES - overlap_frames
+    for i, want in enumerate(req[1:], start=2):
+        cum_target = cumulative + max(17, int(want))
+        best: Optional[Tuple[Tuple[int, int], int]] = None
+        for ext in range(cap_ext - cap_ext % 17, 16, -17):
+            key = (abs(cumulative + ext - cum_target), -ext)
+            if best is None or key < best[0]:
+                best = (key, ext)
+        if best is None:
+            raise ValueError(
+                f"no continuation from {cumulative} frames fits the {CONTINUATION_WINDOW_MAX_FRAMES} frame "
+                f"sampled-window ceiling (largest extension {cap_ext} frames)"
+            )
+        layout = continuation_layout(cumulative, best[1], overlap_frames)
+        plans.append({"index": i, "is_continuation": True, "frames": layout["total_frames"], "layout": layout})
+        cumulative = layout["total_frames"]
+    return plans
+
+
+def build_continuation_request(resolved: Dict[str, Any], seed: int, prefix: str, beats: Sequence[Dict[str, Any]],
+                              frames: Optional[int] = None, overlap_frames: int = CONTINUATION_OVERLAP_FRAMES,
+                              **kwargs) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
+    """(c) 2026-11-06 (brief t224x214): one graph, N beats, native latent-tail continuation, no concatenation.
+
+    Beat 1 carries the start photo and its own frames; every later beat continues the cumulative latent, has no
+    start photo, and re-applies its RefMod conditioning. A beat spec is {scene, dialogue, camera, frames,
+    pronoun, end_action, images, summary_text}; `frames` is the beat-1 default. kwargs go to every beat's prompt
+    build (shared dials: image_role, resolved2, pronoun2, lighting, ...).
+
+    Returns (graph, prompt_all, plan) with the exact frame math per beat in plan["beats"].
+    """
+    if not beats:
+        raise ValueError("no beats to build")
+    if len(beats) == 1:
+        raise ValueError("one beat is a single shot: use build_parody_request")
+    # kwargs are the shared dials the caller wants applied to every beat (pronoun, image_role, lighting, ...);
+    # a beat spec overrides them for its own beat. No key is ever passed to the single-beat builder twice.
+    shared = dict(kwargs)
+    shared.update({k: v for k, v in beats[0].items() if v is not None})
+    shared.setdefault("frames", frames)
+    chain = plan_continuation_chain([int(b.get("frames") or shared["frames"]) for b in beats], overlap_frames)
+    graph, first_prompt = build_parody_request(
+        resolved, seed=seed, prefix=prefix, frames=chain[0]["frames"],
+        **{k: v for k, v in shared.items() if k != "frames"})
+    prompts = [first_prompt]
+    plan: List[Dict[str, Any]] = [chain[0]]
+    # More windows than scenes means the last scene text keeps running (same as the shared-anchor path).
+    for i, step in enumerate(chain[1:], start=2):
+        beat_kwargs = {k: v for k, v in shared.items() if k not in ("frames", "images")}
+        beat_kwargs.update({k: v for k, v in beats[min(i - 1, len(beats) - 1)].items() if v is not None})
+        beat_kwargs.update(continuation=True, images=None, frames=step["layout"]["window_frames"])
+        beat_graph, prompt = build_parody_request(resolved, seed=seed, prefix=prefix, **beat_kwargs)
+        graph = add_continuation_beat(graph, beat_graph, step["layout"], i)
+        plan.append(step)
+        prompts.append(prompt)
+    prompt_all = "\n\n".join(f"===== beat {k} =====\n{p}" for k, p in enumerate(prompts, start=1))
+    total = plan[-1]["frames"]
+    return graph, prompt_all, {
+        "mode": "native_latent_tail_continuation",
+        "clip_count": len(plan),
+        "beats": plan,
+        "total_frames": total,
+        "total_seconds": round(total / H3_FPS, 4),
+        "fps": H3_FPS,
+        "stitched": False,
+    }
+
+
 def build_parody_request(
     resolved: Dict[str, Any],
     seed: int,
@@ -546,10 +779,13 @@ def build_parody_request(
     dialogue2: Optional[str] = None,
     pronoun2: Optional[str] = None,
     lighting: Optional[str] = None,
+    continuation: bool = False,
 ) -> Tuple[Dict[str, Any], str]:
     """Build request API graph and prompt text for a parody run (one clip / one cell).
 
     `images` are already-staged ComfyUI input names ('community/<file>'). The template on disk is never written.
+    `continuation=True` builds a beat that continues a completed latent: the scene text inherits the previous
+    beat's closing state and the start photo is refused (the latent tail guides frame 0).
 
     Returns:
         (graph_dict, prompt_str)
@@ -557,6 +793,12 @@ def build_parody_request(
     frames = validate_single_clip_frames(frames)
     with open(template_path, "r", encoding="utf-8") as f:
         tpl = json.load(f)
+
+    if continuation:
+        if images:
+            raise ValueError("a continuation beat has no start image: the latent tail guides frame 0 "
+                             "(MiniMaxH3LatentTailGuide rejects any guide inside the overlap)")
+        scene = continuation_scene(scene, pronoun)
 
     staged = list(images or [])
     prompt = format_parody_prompt(
