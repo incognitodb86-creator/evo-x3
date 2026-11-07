@@ -6,7 +6,7 @@ owner: Max Architect 3 (governed by Alfred · Chief of staff)
 ---
 # `h3-parody-identity` — Full Reference
 
-Active skill (`< 6,000 B`, a cap not a fixed byte count): the live copy on this box is `C:\AI\community\skills\h3-parody-identity\SKILL.md`. Intended mirror destinations — not claimed to be in sync until a SHA256 comparison after an edit has proved it — are `20_skills/current/h3-parody-identity/SKILL.md`, `10_packs/max/h3-parody-identity-reference.md` and `20_skills/current/h3-parody-identity/references/h3-parody-identity-reference.md`. The box path `/home/box/agent-data/workflows/h3-parody-identity/SKILL.md` is the box's own file: it is not written from this box and is not claimed updated here. `C:\Users\derek\.pi\agent\skills\` is a standalone route of plain file copies, not junctions, and is in sync only when a byte comparison says so.
+Active skill (`< 6,000 B`, a cap not a fixed byte count): AlienPc's live copy is `C:\AI\community\skills\h3-parody-identity\SKILL.md`. Intended mirror destinations — not claimed to be in sync until a SHA256 comparison after an edit has proved it — are `20_skills/current/h3-parody-identity/SKILL.md`, `10_packs/max/h3-parody-identity-reference.md` and `20_skills/current/h3-parody-identity/references/h3-parody-identity-reference.md`. The Linux box path `/home/box/agent-data/workflows/h3-parody-identity/SKILL.md` was not updated by this pass. On AlienPc, `C:\Users\derek\.pi\agent\skills\h3-parody-identity` is a junction to the community skill; `C:\Users\derek\.pi\agent\skills\comfy-render` is a standalone plain directory copy, verified separately.
 
 ## 0. Dynamic pipeline (T1 U1–U5, Derrick `t260s1142` / `t261u` / `t263u` / `t264u` / `t271u`, Nov 6, 2026)
 
