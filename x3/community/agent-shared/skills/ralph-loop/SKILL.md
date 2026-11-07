@@ -1,6 +1,6 @@
 ---
 name: ralph-loop
-description: Use when a brief has more than ~3 steps that can each be checked, or a command can measure progress (fix_plan items, staging runs, test-until-green, file-by-file migrations). Covers when to loop, how to write fix_plan.md items, and how to start ralph.ps1 with a cap. Not for one-off fixes, questions, or work that needs Derrick's decision part-way.
+description: Use when a coding brief has 4+ steps that can each be checked and needs multiple passes (fix_plan items, file-by-file migrations, fixing failing tests one at a time). Covers when to loop, how to write fix_plan.md items, and how to start ralph.ps1 with a cap. Not for one-off fixes, renders, research, questions, or work that needs Derrick's decision part-way.
 ---
 
 # Ralph loop (Forge)
@@ -14,12 +14,12 @@ and the pi-ralph-loop skill: https://github.com/lnilluv/pi-ralph-loop/blob/main/
 | Use a loop | Don't use a loop |
 |---|---|
 | A brief with 4+ steps, each checkable | Fix one specific bug |
-| Stage several run dirs / templates in order | Answer a question |
+| Same code fix across several modules | Answer a question |
 | Fix failing tests one at a time | Rename or one-line edit |
 | Same change across many files | Anything needing Derrick's choice mid-way |
-| Download/verify a list of files | A single render or single command |
+| Download/verify a list of files | Any render or research (queue run_queue.py directly) |
 
-Rule of thumb: more than ~3 passes, or you can write a command that measures progress -> loop it.
+Rule of thumb: 4+ checkable coding steps that need several passes -> loop it; 1-3 steps stay one direct turn.
 If a step needs Derrick's decision, put it as the last item ("STOP and report"), or split the loop there.
 
 ## Writing fix_plan.md items
@@ -32,9 +32,9 @@ If a step needs Derrick's decision, put it as the last item ("STOP and report"),
 - If an item can't finish, change its checkbox to `- [PARTIAL]` or `- [BLOCKED]` with the reason (or add a needs_derrick.md line) and stop; don't loop on it.
 
 
-Start (only this): Invoke-CimMethod Win32_Process -MethodName Create -Arguments @{CommandLine='powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\derek\5slock\ralph-community\ralph.ps1 -Max N'; CurrentDirectory='C:\Users\derek\5slock\ralph-community'} then reply `PID=<ProcessId>, log ralph-community\logs\ralph.log`; cap N = item count + 2 (max 12). Long items (benchmarks, renders): add -PassLimitSec 3600. ralph.ps1 refuses a second copy (logs\ralph.lock, exit 4), loads LLAMA_SWAP_KEY from User scope if missing (exit 3), and stops on PLAN_COMPLETE or NO_PROGRESS (same item still open after two passes).
+Start (only this): Invoke-CimMethod Win32_Process -MethodName Create -Arguments @{CommandLine='powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\derek\5slock\ralph-community\ralph.ps1 -Max N'; CurrentDirectory='C:\Users\derek\5slock\ralph-community'} then reply `PID=<ProcessId>, log ralph-community\logs\ralph.log`; cap N = item count + 2 (max 12). Long items (benchmarks): add -PassLimitSec 3600. ralph.ps1 refuses a second copy (logs\ralph.lock, exit 4), loads LLAMA_SWAP_KEY from User scope if missing (exit 3), and stops on PLAN_COMPLETE or NO_PROGRESS (same item still open after two passes).
 
 ## Moved from global AGENTS.md line 11 (2026-11-05, Derrick)
-- Multi-step briefs (4+ checkable steps, or a command can measure progress): do NOT do them in chat. Load skill ralph-loop, write the steps as fix_plan.md items, commit, start ralph.ps1 in the background (skill "Start"), reply with PID + logs\ralph.log, end the turn. One-off fixes and questions stay inline.
+- Multi-step coding briefs (4+ checkable steps, multi-pass): do NOT do them in chat. Load skill ralph-loop, write the steps as fix_plan.md items, commit, start ralph.ps1 in the background (skill "Start"), reply with PID + logs\ralph.log, end the turn. One-off fixes and questions stay inline. 1-3 step fixes, research and renders stay a direct turn (no Ralph).
 
-Render routing (Derrick 2026-11-05 9:21 AM CT): new render or video items go in C:\AI\render\fix_plan.md; start with -Root C:\AI\render -PromptFile C:\Users\derek\5slock\ralph-community\PROMPT.md (one PROMPT.md for both roots since the 2026-11-05 cleanup; a render start without -PromptFile points at the archived C:\AI\render\PROMPT.md and runs no prompt) (log C:\AI\render\logs\ralph.log; same cap rule). Existing `[render]`-tagged items in the main fix_plan.md finish there. Both loops can run at once; see GPU-lock rule in C:\AI\render\AGENTS.md.
+Superseded 2026-11-06 (Derrick t395u): renders are queued directly with run_queue.py on the saved graph, not as Ralph items. Historical: Render routing (Derrick 2026-11-05 9:21 AM CT): new render or video items go in C:\AI\render\fix_plan.md; start with -Root C:\AI\render -PromptFile C:\Users\derek\5slock\ralph-community\PROMPT.md (one PROMPT.md for both roots since the 2026-11-05 cleanup; a render start without -PromptFile points at the archived C:\AI\render\PROMPT.md and runs no prompt) (log C:\AI\render\logs\ralph.log; same cap rule). Existing `[render]`-tagged items in the main fix_plan.md finish there. Both loops can run at once; see GPU-lock rule in C:\AI\render\AGENTS.md.
