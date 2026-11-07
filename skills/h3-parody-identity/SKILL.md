@@ -18,20 +18,21 @@ Internals, full CLI, VRAM measurements and history: `references/h3-parody-identi
 - Images only from `approved_characters` (`LANE_IMAGE_RULES.md`). Never any `sydney` path. Never minor-coded words (`girl`, `teen`, `school`, `kid`, `child`, `minor`, `student`, `cheerleader`, `dorm`) — `guard_ok` blocks the submit.
 - Derrick's chat ask for a named parody **is** the go for one clip, continuation or stitched set. Ask first only for batches or downloads.
 
-## Writing the arguments (no word cap — 500+ words welcome)
+## Writing the arguments (Reference §0.5 & §0.7)
 
-- `--description`: concrete biometrics (face, eyes, brows, lips, skin, hair) + scenario outfit + accessories. No `featuring` prefix, no `adult` filler, no `styled in ... tone` (the builder adds identity, vocal-timbre anchor, age and tone).
-- `--scene`: rich, literal, multi-sentence: setting, fabrics, lighting (neon, 2 AM, bulbs… replaces default late-afternoon light), motion, and **both five-finger hands resting still on a prop in frame** (glass stem on table, mug on counter, purse strap, lapel) or relaxed at her sides/lap. Never splayed fingers on hips/tables, and never lift a mug/glass to sip (rim thumb warps, sip gets cut off) — also not in `--end-action`. First sentence becomes `summary:` unless `--summary` is passed.
-- **Voice fidelity**: Pair the actor with their iconic `INDEX` character (`--character` + `--actor`) AND end `--scene` before speech with an explicit vocal-timbre + composed delivery cue matching the real speaker (e.g. `Speaking in Sydney Sweeney's exact Cassie Howard voice, with her low, breathy, laid-back vocal timbre and natural vocal fry:` or `Emilia Clarke's exact Daenerys Targaryen voice, crisp British RP contralto cadence and calm authority:`). Avoid peppy cues (`amused, teasing`, `bubbly`, `playful grin`) on lower-voiced speakers — they push pitch up 30–45 Hz; use composed cues (`a wry tired smile`, `calm deadpan poise`).
-- `--camera`: e.g. `medium-wide waist-up shot including tabletop, 35mm lens, slow dolly push-in`. Motion words drop "camera locked off". Default is static 50mm medium (crops hands, so frame wider when hands matter).
+Use enough concrete detail to describe the scene clearly; avoid repetition and contradictions.
+- `--description`: concrete biometrics (face, eyes, brows, lips, skin, hair) + scenario outfit + accessories. No `featuring` prefix, no `adult` filler, no `styled in ... tone` (builder adds identity, vocal-timbre anchor, age and tone).
+- `--scene`: multi-sentence setting, fabrics, lighting (neon, 2 AM, bulbs, candlelight… replaces default late-afternoon light), and motion. Observed risks: sipping from a mug/glass warped the rim thumb and cut off the sip in tested clips (also in `--end-action`); splayed fingers on hips/tables risk warping. Options: rest five-finger hands on a prop in frame (glass stem, mug, purse strap, lapel), relax at sides/lap, follow `--image`, or frame tighter. First sentence becomes `summary:` unless `--summary` is passed.
+- **Voice fidelity**: Pair the actor with their iconic `INDEX` character (`--character` + `--actor`) AND end `--scene` before speech with an explicit vocal-timbre + delivery cue matching the speaker (Reference §0.5). Peppy cues (`amused, teasing`, `bubbly`) raised pitch in tested clips while composed cues (`a wry tired smile`, `calm deadpan poise`) stayed near register — match delivery to the speaker.
+- `--camera`: shot scale + lens + movement (`medium-wide waist-up shot including tabletop, 35mm lens, slow dolly push-in`). Motion words drop "camera locked off". Tight framing without waist-up/tabletop context (default static 50mm medium) often crops hands; frame wider when hands matter.
 - `--aspect`: `9:16` (default 768x1344 → 1536x2688), `16:9` (1344x768 → 2688x1536), `1:1`, `4:3`, `3:4`; or `--size WxH`.
 - `--seconds`: one continuous shot up to **10 s (243f; 15 s single shots fail on 16 GB)**. Longer, beatless asks → stitched cells.
-- **2+ `--beat`** (+ `--beat-*`): ONE graph, native 22f AV latent-tail continuation, no stitch; RefMod every beat, `--image` beat 1 only, windows ≤ 243f; reuse beat 1's camera. Verified 379f. Reference §0.7.
-- `--dialogue`: spoken words only (~8–15 words per 5 s). No timestamps, tags, backticks, "no speech", "room tone". Omit for silent clips. `--end-action`: verb phrase without subject (`holds a wry smile and winks slowly`, no sip); `--pronoun he|they` when needed.
-- Optional `--image <approved_characters path>`: anchors frame 0 composition, outfit, pose and setting via `MiniMaxH3AddGuide` (`frame_idx=0`, no `<Picture N>` in text); `RefMod` still carries the celebrity's face likeness onto the clip while keeping voice intact.
+- **2+ `--beat`** (+ `--beat-*`): ONE graph, native 22f AV latent-tail continuation, no stitch; RefMod every beat, `--image` beat 1 only, windows ≤ 243f; reuse beat 1's camera and continue prior beat's end state (airlock). Verified 379f. Reference §0.7.
+- `--dialogue`: spoken words only (~8–15 words per 5 s). No timestamps, tags, backticks, "no speech", "room tone". Omit for silent clips. `--end-action`: verb phrase without subject (`holds a wry smile and winks slowly`; sipping risks cutoff); `--pronoun he|they` when needed.
+- Optional `--image <approved_characters path>`: guides frame 0 composition, outfit, pose, lighting and setting via `MiniMaxH3AddGuide` (`frame_idx=0`, no `<Picture N>` in text) while `RefMod` applies face likeness (retained face/pitch in a tested pair, not universal proof). **When `--image` is passed, match its wardrobe, lighting, setting, and pose — never contradict the still.**
 - Optional second person: `--name2/--character2/--actor2/--description2/--dialogue2`; write `(S1)`/`(S2)` inside `--scene`.
 
-Name mapping: always prefer pairing `INDEX` character + actor (`--name "<Actor>" --character "<Character>" --actor "<Actor>"`, e.g. `Cassie Howard` + `Sydney Sweeney`, `Daenerys Targaryen` + `Emilia Clarke`, `Jennifer Check` + `Megan Fox`) — naming the `INDEX` character improves voice likeness even on `INDEX: bad` rows; use actor-alone only when the actor has no `INDEX` character row.
+Name mapping: prefer pairing `INDEX` character + actor (`--name "<Actor>" --character "<Character>" --actor "<Actor>"`; Reference §0.5) — improved voice likeness in tested clips even on `INDEX: bad` rows; use actor-alone only when no `INDEX` row exists.
 
 ## Autonomous recipe — ONE command, then reply
 
@@ -39,8 +40,8 @@ Name mapping: always prefer pairing `INDEX` character + actor (`--name "<Actor>"
 & 'C:\AI\director\.venv\Scripts\python.exe' 'C:\AI\community\scripts\parody\submit_parody_run.py' `
   --name '<Actor>' --character '<Character>' --actor '<Actor>' --tone 'satirical adult parody' `
   --seconds 10 --aspect 16:9 --camera '<framing + motion>' `
-  --description '<rich biometrics + outfit>' --scene '<rich scene + hands on prop + exact character/actor voice cue>' `
-  --dialogue '<spoken words only>' --end-action '<holds a wry smile, no sip>' --wait --qnap-put
+  --description '<biometrics + outfit>' --scene '<scene + hands on prop + voice cue>' `
+  --dialogue '<spoken words only>' --end-action '<holds a wry smile>' --wait --qnap-put
 ```
 
 - Submits, holds no LLM turn during render, waits for `BATCH closed`, finalizes RTX 2x `<run_dir>\clip.mp4` (stitches cells only), uploads `pi-drop/<run>.mp4`, and prints JSON (`final_mp4`, `qnap_path`, `objective`, `batch_rc`).
