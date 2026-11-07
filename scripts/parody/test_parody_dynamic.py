@@ -310,24 +310,45 @@ class TestSubmitDynamic(unittest.TestCase):
         self.assertEqual([j["tag"] for j in order["order"]], ["clip"])
 
     def test_multi_beat_shared_anchor_cells(self):
+        """2+ --beat args build ONE native latent-tail continuation clip, not shared-anchor cells.
+
+        The stitched shared-anchor cell path stays covered by test_long_seconds_auto_split.
+        """
         res = self._submit(aspect="16:9", beats=["sits at the counter, both hands on a mug",
                                                  "leans back in the booth holding the mug"],
                            beat_dialogues=["First line here for the opener.", "Second line closes it out."],
                            beat_seconds=[6, 8])
-        self.assertEqual(res["tags"], ["c01_s51083601", "c02_s51083602"])
-        self.assertEqual(res["frames"], [141, 192])
+        # the deliverable's frame count is the continuation chain's cumulative total, derived from the plan
+        plan = br.plan_continuation_chain([br.snap_h3_frames(6, max_frames=br.SINGLE_CLIP_MAX_FRAMES),
+                                           br.snap_h3_frames(8, max_frames=br.SINGLE_CLIP_MAX_FRAMES)])
+        lay = plan[-1]["layout"]
+        self.assertTrue(plan[1]["is_continuation"])
+        self.assertLessEqual(lay["window_frames"], br.CONTINUATION_WINDOW_MAX_FRAMES)
+        self.assertEqual(res["tags"], ["clip"])
+        self.assertEqual(res["frames"], [lay["total_frames"]])
+        self.assertEqual(res["total_frames"], lay["total_frames"])
+        self.assertGreater(lay["total_frames"], lay["base_frames"])  # beat 2 extends, never restarts
         order = json.loads((self.run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertTrue(order["cell_contract"])
-        self.assertEqual([j["tag"] for j in order["order"]], res["tags"])
-        graphs = [json.loads((self.run_dir / t / "request.api.json").read_text(encoding="utf-8")) for t in res["tags"]]
-        for i, g in enumerate(graphs):
-            self.assertEqual(g["refmods"]["inputs"], graphs[0]["refmods"]["inputs"])
-            self.assertEqual((g["c0"]["inputs"]["width"], g["c0"]["inputs"]["height"]), (1344, 768))
-            self.assertEqual(g["noise"]["inputs"]["noise_seed"], 51083601 + i)
-            self.assertEqual(g["save"]["inputs"]["filename_prefix"], f"community/run/{res['tags'][i]}")
-            ok, why = comm.guard_reason(g)
-            self.assertTrue(ok, why)
-        self.assertIn("Second line closes it out.", graphs[1]["c0"]["inputs"]["prompt"])
+        self.assertNotIn("cell_contract", order)
+        self.assertEqual([j["tag"] for j in order["order"]], ["clip"])
+        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
+        self.assertEqual(json.loads((self.run_dir / "request.api.json").read_text(encoding="utf-8")), g)
+        self.assertEqual(g["c0"]["inputs"]["length"], lay["base_frames"])  # beat 1 keeps its own length
+        self.assertEqual({g[k]["class_type"] for k in ("c2_gen", "c2_tail", "c2_append")},
+                         {"MiniMaxH3GuidedContinuationWindow", "MiniMaxH3LatentTailGuide", "MiniMaxH3AppendContinuation"})
+        self.assertEqual(g["c2_gen"]["inputs"], {"previous_av_latent": ["s0_samp", 0],
+                                                 "overlap_frames": lay["overlap_frames"],
+                                                 "extension_frames": lay["extension_frames"]})
+        self.assertEqual(g["s0_sep"]["inputs"]["av_latent"], ["c2_append", 0])  # one joined latent is decoded
+        for key in ("c0", "c2"):
+            self.assertEqual((g[key]["inputs"]["width"], g[key]["inputs"]["height"]), (1344, 768))
+        self.assertEqual(g["noise"]["inputs"]["noise_seed"], 51083601)
+        self.assertEqual(g["save"]["inputs"]["filename_prefix"], f"community/{self.run_dir.name}/clip")
+        ok, why = comm.guard_reason(g)
+        self.assertTrue(ok, why)
+        self.assertIn("First line here for the opener.", g["c0"]["inputs"]["prompt"])
+        self.assertIn("Second line closes it out.", g["c2"]["inputs"]["prompt"])
+        self.assertIn("The shot continues from the last seen moment", g["c2"]["inputs"]["prompt"])
 
     def test_long_seconds_auto_split(self):
         res = self._submit(seconds=15, scene="sits at the counter holding a mug", dialogue=LINE)
