@@ -38,3 +38,15 @@ Start (only this): Invoke-CimMethod Win32_Process -MethodName Create -Arguments 
 - Multi-step coding briefs (4+ checkable steps, multi-pass): do NOT do them in chat. Load skill ralph-loop, write the steps as fix_plan.md items, commit, start ralph.ps1 in the background (skill "Start"), reply with PID + logs\ralph.log, end the turn. One-off fixes and questions stay inline. 1-3 step fixes, research and renders stay a direct turn (no Ralph).
 
 Superseded 2026-11-06 (Derrick t395u): renders are queued directly with run_queue.py on the saved graph, not as Ralph items. Historical: Render routing (Derrick 2026-11-05 9:21 AM CT): new render or video items go in C:\AI\render\fix_plan.md; start with -Root C:\AI\render -PromptFile C:\Users\derek\5slock\ralph-community\PROMPT.md (one PROMPT.md for both roots since the 2026-11-05 cleanup; a render start without -PromptFile points at the archived C:\AI\render\PROMPT.md and runs no prompt) (log C:\AI\render\logs\ralph.log; same cap rule). Existing `[render]`-tagged items in the main fix_plan.md finish there. Both loops can run at once; see GPU-lock rule in C:\AI\render\AGENTS.md.
+
+
+## Sizing a pass over big text (2026-11-08, measured on the 30-chat Sydney lane review)
+
+Learning: `C:/AI/fleet-brain/20_learnings/fleet/2026-11-08-large-text-ralph-passes-need-24k-bytes-and-a-private-memory-root.md` (unreviewed).
+
+- **One pass = at most 24 KB of source text.** On this box's local coding model a pass reads about 20-25 KB of digest and writes a structured report in 20-40 minutes. Generate the items from a manifest with a script - bins of at most 24 KB, one bin = one plan item, the file paths written inside the item - never hand-write an item that names a 50-95 KB read.
+- **`-PassLimitSec 2400 -IdleTimeout 900` for that class of item.** A too-small limit is worse than a big one: 1500 s killed every pass of a 50 KB-item loop mid-work (`ITERATION_TIMEOUT` + `PI_NONZERO rc=124`), two kills on one item read as `NO_PROGRESS`, and the loop stopped with real work unfinished. Set the cap above a measured completed pass, not below a guess.
+- **Cap N = open item count + 2**, so a killed pass has a retry slot. **Launch detached** (`Start-Process`, or `Invoke-CimMethod` as above): a loop started inside a foreground tool call dies when that tool call times out.
+- **Reports are append-only.** Each pass appends its section to its report and keeps its own validator printing `ALL OK`. `write` is denied outside the loop root, so write the draft inside the root and deliver it with a shell copy.
+- **Reading private chats: `-MemoryRoot <loop root>/notes/_pi_memory`** (parameter added 2026-11-08, empty keeps the old default exactly). Without it every pass summary lands in `C:/AI/fleet-brain/25_memory/shared/daily/`, which is fleet-visible on the box; the daily file for 2026-11-07 carried 42 real-name strings from a lane-chat review (kept out of git by `25_memory/shared/.gitignore`, which is not a privacy boundary).
+- **A loop is finished only when its log says `PLAN_COMPLETE`.** Read the log and the plan before telling Derrick it completed; "done" is not a status the runner prints for a stopped loop.
