@@ -5,6 +5,10 @@ description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) o
 
 # H3 prompting - the single home (U2, 2026-10-29)
 
+## Named-parody precedence
+
+For named INDEX + RefMod parodies, `h3-parody-identity` owns the tested prompt format, identity binding and exact character/actor voice, vocal-timbre and soundscape contract. Its builder format takes precedence over this file's generic picture-reference five-section, `<Picture N>`, continuation-label and no-`overall_soundscape` prescriptions; do not rewrite the tested parody prompt to satisfy those other-lane forms. Shared motion/wording guidance applies where compatible; existing adult/minor guards remain unchanged. Ordinary picture-reference and other lanes retain their rules below.
+
 Every MiniMax-H3 / 10Eros-Max prompt rule on this box lives in this file and only here. The REF2VA lane files in references\ (ref2va-lane.md, ref2va-chain-lane.md),
 and the `alienpc-hardcore-i2v-director` prompt sections point here and must not restate a
 rule; a rule duplicated in two skills is a defect (plan `C:\AI\community\notes\2026-10-29-forge-cleanup-plan.md`,

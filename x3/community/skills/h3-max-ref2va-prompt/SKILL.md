@@ -13,7 +13,11 @@ patch record `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
 
 ## 0. Lane status
 
-- **REF2VA is the standing Max lane.** A Max clip is a REF2VA paste into `MiniMaxH3ReferenceToVideo` unless Derek
+## Named-parody precedence
+
+Named INDEX + RefMod parodies defer to `h3-parody-identity` for their locked single-pass graph and tested prompt/voice/soundscape contract. Its builder format takes precedence over this file's picture-reference sections, labels, frame-anchor restrictions and speech/no-soundscape prescriptions. One optional start image uses AddGuide at frame 0 without `<Picture N>` identity binding. Keep existing guards; do not rewrite the tested parody route to match this other-lane contract.
+
+- **REF2VA is the standing picture-reference Max lane.** Except for the named-parody route above, a Max clip is a REF2VA paste into `MiniMaxH3ReferenceToVideo` unless Derek
   directs another lane by name (first-frame I2V, stills).
 - This skill owns only REF2VA-specific rules, numbered R32-R44. Rule numbers are box-unique and stable: cite
   `R<n>` in a review, a gate or a commit message, never the sentence.
