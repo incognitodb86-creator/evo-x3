@@ -98,7 +98,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 `C:/AI/community/notes/hc_redo_research_20261023.md`, `notes/hc_face_research_20261023.md`,
 `notes/bakeoff_gpu_findings.md` + `notes/ali173_b2_object_info_full.json` (live schema dump),
-`notes/ali163_hc_bq1d_objective.json`, `notes/forge-learnings.md`, `C:/Users/derek/5slock/AGENTS.md` "## Test".
+`notes/ali163_hc_bq1d_objective.json`, `notes/forge-learnings.md`, `C:/AI/community/scripts/verify_cell.py` (runs the objective checks; it replaces a pointer to the removed 5slock root AGENTS.md "## Test" section, which no longer exists on this box).
 
 ## 6. Stock render path (moved verbatim from PROMPT.md by U5, 2026-10-29)
 Steps a-g for one render item, then script reuse and research rules:
