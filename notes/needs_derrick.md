@@ -654,3 +654,36 @@ launch, no KEEP, no score, no winner, no stitch, no QNAP/HA/UniFi/vault/Google c
 control, no config write, no download, nothing paid, nothing deleted, no `.bak`, no `git add -A`, no
 force-push, never GitHub, no prompt text in any record, Sydney untouched.
 
+
+---
+
+## 2026-11-07 21:45 CT - Forge: config asks from the Sydney chat review (all needs your GO; I changed none of these)
+Source: 30 lane sessions 2026-10-29..11-07 (`C:/Users/derek/forge/work/sydney-chat-review-20261107/FINDINGS.md`, per-group evidence in `findings/groupNN.md`). Each ask is one key in one file; I will back the file up first.
+
+1. **`.pi` file-tool grant for the lane** - `C:/Users/derek/.pi/agent/pi-permissions.jsonc`, `grants.external_directory.allow`: add `"C:/Users/derek/sydney/**"`.
+   Evidence: every `read`/`edit` of a lane file (AGENTS.md, lane skills, its own notes) returns the hard denial, so the agent works through `cat`/`python` and the review loop hit the identical wall (14 extra calls, 4 blocked attempts).
+2. **Compaction headroom for local models** - `C:/Users/derek/.pi/agent/settings.json`, `compaction.modelOverrides`: add `llama-swap:coding_swift15_iq3s*` and `llama-swap:gemma4-26b-heresy` entries that reserve ~16k and threshold at 0.9.
+   Evidence: two sessions compacted 16 times each; 65 compactions across 30 sessions; group01 ranks context pressure SEV1 with 222 tool calls, 50 user turns and no handoff written. The stock rule reserves 64000 of a 128000-token window, so a local model runs on about half its window.
+3. **Deny `ask_user_question` box-wide** - `pi-permissions.jsonc` `grants.tools.deny`: add `"ask_user_question"`.
+   Evidence: the phone client cannot show it; measured 2026-11-01 19:29:07 three questions, 29 h with no answer, the three ordered clips never built.
+4. **Lane model policy** - keep the lane on one model per session (`coding_swift15_iq3s_esp`, 16k output) and do not switch mid-session.
+   Evidence: 10 mid-session model changes; 11 of 11 agent replies over 900 characters were cut at the digest/output cap on the smaller-model sessions (one 6752-character reply truncated). Your call: which model, recorded in the lane runner.
+5. **Headless passes: do not write the shared brain** - `C:/Users/derek/5slock/ralph-community/ralph.ps1` (Max's file): keep `PI_MEMORY_DIR` pointed at the loop root instead of `C:/AI/fleet-brain/25_memory/shared` for review-style loops, so private lane transcripts are never copied into fleet-visible memory.
+   Evidence: today's `25_memory/shared/daily/2026-11-07.md` (161 KB) carries 42 real-name/persona hits, several from this review's passes. Mitigation today: `25_memory/shared/.gitignore` keeps `daily/` local, so nothing was pushed to the fleet.
+6. **One decision that unblocks three measured stalls** - which surface do you watch for finished clips (Infinite Gallery folder, QNAP share path, phone app, chat)?
+   Evidence: I wrote `infinite_image_gallery` into the lane allow-list on 2026-10-31 without you asking and never confirmed it; three "where is it" asks in 41 minutes on 2026-11-02; the answer was "your clip lives in four places".
+
+## 2026-11-08 13:2x CT - the 2026-11-07 chat-review config asks: status after Derek's GO ("Go")
+
+Asked 2026-11-07 23:3x CT (6 items) in this file. Derek said GO on 2026-11-08. Applied 1-5, the two that need his own choice stay open.
+
+APPLIED (all backed up in the same folder as `<file>.bak_20261108_go`; every file validated after the edit):
+1. APPLIED - `<...>pi-permissions.jsonc` `special.external_directory`: `C:/Users/derek/sydney` and `C:/Users/derek/sydney/*` set to allow, written before the secret guard rails (.env*, .key, .pem, rclone, auth.json, `read:*/sessions/*`) so those still win. **Needs a pi restart to take effect.** The check after restart: in a Sydney-lane chat, `read C:/Users/derek/sydney/AGENTS.md` and one `edit` of a lane notes file - both must work, and `read C:/Users/derek/sydney/INSTRUCTIONS_private.md` must be allowed by this rule only (the private lane file stays personal by the lane rules, not by this config).
+2. APPLIED - `<...>settings.json` `compaction.modelOverrides`: added `llama-swap/coding_swift15_iq3s` reserveTokens 24576 / keepRecentTokens 16384, and `llama-swap/gemma4-26b-heresy` 4096/4000 (its context is 10240, output 4096). The existing `_esp` override (20480/8000) left exactly as it was. Measured reason: the two models with the most compactions are the two with no override - 16 compactions in a 19 h session, 16 in a 3.2 day session.
+3. APPLIED - `tools.ask_user_question = deny` (last rule of the tools section). Measured reason: 2026-11-01 19:29:07 a three-question form in the phone chat, 29 h with no answer, the three ordered clips never built. **Needs a pi restart.**
+4. APPLIED as a lane rule (the runner route does not exist: no launcher script starts a Sydney chat - the three `run_sydney*.ps1` files are render submit scripts, and the phone client is pi-mobile, which I do not touch). `C:/Users/derek/sydney/AGENTS.md` now has a MODEL section: one model per session, `coding_swift15_iq3s_esp`, no mid-session switch, say it in chat first and start a new session if a change is needed. Backup `AGENTS.md.bak-20261108-modelpin`.
+5. APPLIED - `C:/Users/derek/5slock/ralph-community/ralph.ps1`: opt-in `-MemoryRoot`, empty keeps today's shared brain memory path (unchanged default). A loop root keeps pi-memory inside the loop. PS parse OK. The running loop (PID 3152) was started before this and writes to shared memory; the next loop starts with `-MemoryRoot <loop root>`.
+6. OPEN - the watched delivery surface. Derek's answer decides what the one delivery contract says. Evidence for the question, one real finished run: `C:/AI/community/runs/parody_ssweeney_20261107_182017/` - `status.log` OBJECTIVE line, `clip/render_ok.json` with `clip_sha256`, the mp4 local to the box, and no evidence in `run_queue.py` / `submit_parody_run.py` of a copy to a surface he watches. Ask: which one surface do you look at for a finished clip - QNAP share, Infinite Gallery folder, phone app, or chat? Then one copy rule lands in the render skill and every lane script.
+7. OPEN (new, one line) - loop v2 on the chat review runs on `coding_swift15_iq3s_esp`; its items are 20-50 KB of digest + append. Say if you want a stronger model for the aggregate step.
+
+Rollback for 1-3 and 5: restore `<file>.bak_20261108_go`. Exact deltas if you want them by hand: 4 additions in total - 2 rules in the permissions file (1 tools deny, 2 external_directory allows + 1 comment), 2 modelOverrides objects, 1 parameter + 1 assignment line in the runner. No other key was touched; `defaultPolicy`, `doom_loop: ask`, `gpu_render_lock`, `restart_required` and the bash guard rails are unchanged.
