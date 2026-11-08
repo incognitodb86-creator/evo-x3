@@ -1,9 +1,13 @@
 ---
 name: h3-hc-render
-description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the Forge Ralph loop - graph keys, reference-image wiring, frame/canvas math and the objective proof checks. Use when building a graph, requesting a render or checking a rendered clip.
+description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the legacy B2 lane (named INDEX + RefMod parodies defer to h3-parody-identity and direct queueing, never Ralph) - graph keys, reference-image wiring, frame/canvas math and the objective proof checks. Use when building a graph, requesting a render or checking a rendered clip.
 ---
 
 # H3 hardcore render
+
+## Named-parody precedence
+
+For named INDEX + RefMod parodies, `h3-parody-identity` owns the locked single-pass graph, approved duration/aspect/start-image/second-speaker options and tested prompt/voice/soundscape contract. Its route overrides the legacy two-pass B2 defaults and Ralph/request-proof loop below: submit through `submit_parody_run.py ... --wait --qnap-put` / `run_queue.py` directly, never Ralph or a coding-model launch for renders. Existing guards and GPU-lock rules stay unchanged. The B2 guidance below remains for its other lanes; do not use it to rewrite the tested parody graph or prompt.
 
 R2. Render rules (adults only, no real likeness, guard_ok) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
 
