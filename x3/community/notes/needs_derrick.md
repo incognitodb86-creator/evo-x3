@@ -687,3 +687,38 @@ APPLIED (all backed up in the same folder as `<file>.bak_20261108_go`; every fil
 7. OPEN (new, one line) - loop v2 on the chat review runs on `coding_swift15_iq3s_esp`; its items are 20-50 KB of digest + append. Say if you want a stronger model for the aggregate step.
 
 Rollback for 1-3 and 5: restore `<file>.bak_20261108_go`. Exact deltas if you want them by hand: 4 additions in total - 2 rules in the permissions file (1 tools deny, 2 external_directory allows + 1 comment), 2 modelOverrides objects, 1 parameter + 1 assignment line in the runner. No other key was touched; `defaultPolicy`, `doom_loop: ask`, `gpu_render_lock`, `restart_required` and the bash guard rails are unchanged.
+
+## 2026-11-08 14:5x CT - ask 6 answered, ask 7 answered
+
+- **Ask 6 RESOLVED - the watched surface is the QNAP share** (Derek: "Qnap I found the files"). Implemented as a DELIVERY section in `C:/Users/derek/sydney/AGENTS.md` (backup `AGENTS.md.bak-20261108-delivery`): parody runs use the existing `--qnap-put` on `submit_parody_run.py` and report its `qnap_path`; B2/I2V runs must do `pi_qnap.py put` + `verify_cell.py` (its check is "QNAP copy size matches local") because `run_queue.py` has no NAS step at all. Report: one `qnap:` path per clip, never a list of local folders.
+- One thing left for Max, not you: if the NAS push should live **inside** `run_queue.py` (so no lane can forget it), that is a shared community script and his call. Today the rule is at the caller.
+- **Ask 7 RESOLVED - keep the loop on `coding_swift15_iq3s_esp`** for the aggregate step (Derek: "I think that's the strongest model we can run"). Loop v3 needs no change.
+- **Commits, on the branch you chose:** `C:/AI/fleet-brain` branch `docs/parody-identity-docs-20261106` = f61d6ca (the config-apply record + the measured Ralph pass-sizing learning), now 27 ahead of `origin/master`. `C:/AI/community` same branch = a54505e (needs_derrick status, actions.log lines, ralph-loop skill sizing section). The lane repo (`C:/Users/derek/sydney`, master) gets its AGENTS.md commit with the DELIVERY + MODEL sections. **Nothing pushed** - say the word and I push that branch, or merge it to master, your choice.
+
+### 8. GO NEEDED (2026-11-08 15:0x CT) - two loaded H3 skills are stale copies (found while double-checking the H3 skills)
+
+Checked after Derek asked "make sure the h3 parody skills and h3-prompt skills still work correctly". The H3 lane code is fine: `python C:/AI/community/scripts/parody/submit_parody_run.py --help` exits 0 with `--qnap-put` present, and `pytest C:/AI/community/scripts/parody` = **91 passed, 11 subtests passed in 1.40 s**. Nothing of mine started a render; no GPU lock.
+What is broken is the **loaded copy** of two skills - pi reads `C:/Users/derek/.pi/agent/skills/`, and for these two it reads an old plain copy, not the community master:
+
+| skill | `C:/AI/community/skills/` (master) | `C:/Users/derek/.pi/agent/skills/` (what pi loads) | state |
+| --- | --- | --- | --- |
+| `h3-parody-identity` | 5944 B | 5944 B | **Junction** - one home, fine |
+| `h3-max-ref2va-prompt` | 19984 B | 19984 B | **Junction** - fine |
+| `ralph-loop` | - | Junction | fine (today's sizing edit is live) |
+| `h3-prompting` | 17160 B | **16535 B** | DIFFERS - the loaded copy has no `## Named-parody precedence` block |
+| `h3-hc-render` | 12124 B | **11421 B** | DIFFERS - no precedence block **and** its description still says the lane is "for the Forge Ralph loop" |
+
+Why it matters: the loaded `h3-hc-render` tells the agent the B2 parody route is the Ralph/request-proof loop, while `h3-parody-identity` says "submit through `submit_parody_run.py ... --wait --qnap-put` / `run_queue.py` directly, **never Ralph**". A named-parody request read through the old copy is steered into the coding-model loop the parody lane forbids - a stickiness cause in the render lane, same class as R6/R10 in this review.
+**The community way already on this box:** `h3-parody-identity`, `h3-max-ref2va-prompt` and `ralph-loop` are junctions, so they cannot drift. Proposed fix, one line per skill, after moving the old copy to `_archive`:
+
+```
+powershell: Move-Item C:\Users\derek\.pi\agent\skills\h3-prompting  C:\Users\derek\.pi\agent\_archive\2026-11-08-skill-mirror\h3-prompting
+powershell: New-Item -ItemType Junction -Path C:\Users\derek\.pi\agent\skills\h3-prompting -Target C:\AI\community\skills\h3-prompting
+powershell: Move-Item C:\Users\derek\.pi\agent\skills\h3-hc-render  C:\Users\derek\.pi\agent\_archive\2026-11-08-skill-mirror\h3-hc-render
+powershell: New-Item -ItemType Junction -Path C:\Users\derek\.pi\agent\skills\h3-hc-render -Target C:\AI\community\skills\h3-hc-render
+```
+
+Takes effect at the next pi start (skills load at session start), so it goes with the restart that loads asks 1 and 3.
+Smaller alternative if you prefer not to touch `.pi`: copy the two master files over the loaded ones; drift can come back.
+Also found, low severity, pre-existing (not from today): `h3-hc-render/SKILL.md` line 101 (and its mirror line 97) cites `C:/Users/derek/5slock/AGENTS.md` "## Test" in its Sources list; that file does not exist and 5slock is not a git repo, so the pointer is dead. Suggested one-line fix: point it at `C:/AI/community/scripts/verify_cell.py`, the instrument that runs the objective checks.
+No H3 skill was changed by me today: `git status` shows the only H3 edits in the working copy date to 2026-11-06 (the named-parody precedence work) and my commits today touched only the ralph-loop skill and notes. Those 2026-11-06 skill edits are still uncommitted - say yes and I commit them on the same branch.
