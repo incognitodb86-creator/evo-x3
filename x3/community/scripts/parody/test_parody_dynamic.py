@@ -350,10 +350,11 @@ class TestSubmitDynamic(unittest.TestCase):
         self.assertIn("Second line closes it out.", g["c2"]["inputs"]["prompt"])
         self.assertIn("The shot continues from the last seen moment", g["c2"]["inputs"]["prompt"])
 
-    def test_long_seconds_auto_split(self):
-        res = self._submit(seconds=15, scene="sits at the counter holding a mug", dialogue=LINE)
-        self.assertEqual(len(res["tags"]), 2)
-        self.assertEqual(res["frames"], [175, 175])
+    def test_long_seconds_without_beats_is_refused(self):
+        # Step 2/3 (2026-11-09): a long ask must not clone one scene into N beats.
+        with self.assertRaises(ValueError):
+            self._submit(seconds=15, scene="sits at the counter holding a mug", dialogue=LINE)
+        self.assertFalse(self.run_dir.exists())
         res = self._submit(seconds=10, scene="sits at the counter holding a mug", dialogue=LINE)
         self.assertEqual(res["frames"], [243])
         self.assertTrue(all((f - 5) % 17 == 0 and f <= 243 for f in res["frames"]))

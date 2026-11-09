@@ -370,6 +370,7 @@ def format_parody_prompt(
     resolved2: Optional[Dict[str, Any]] = None,
     dialogue2: Optional[str] = None,
     pronoun2: Optional[str] = None,
+    ambience: Optional[str] = None,
 ) -> str:
     """Format prompt adhering to Malcolm sample block standards and adults-only guard.
 
@@ -443,13 +444,14 @@ def format_parody_prompt(
     speech_block = "\n".join(blocks)
 
     n_voices = int(bool(spoken)) + int(bool(spoken2))
+    amb = (ambience or "").strip().rstrip(".;,") or "quiet room ambience, soft natural room tone"
     if n_voices == 2:
-        voice_line = ("quiet room ambience, soft natural room tone; two close-micd human voices in the foreground, "
+        voice_line = (f"{amb}; two close-micd human voices in the foreground, "
                       "one speaker at a time.")
     elif n_voices == 1:
-        voice_line = "quiet room ambience, soft natural room tone; the single close-micd human voice in the foreground."
+        voice_line = f"{amb}; the single close-micd human voice in the foreground."
     else:
-        voice_line = "quiet room ambience, soft natural room tone; no spoken voice."
+        voice_line = f"{amb}; no spoken voice."
 
     s_prefix = "" if two else "(S1) "
 
@@ -674,15 +676,14 @@ def add_continuation_beat(cumulative: Dict[str, Any], beat: Dict[str, Any], layo
     return g
 
 
-def plan_continuation_chain(requested_frames: Sequence[int],
-                            overlap_frames: int = CONTINUATION_OVERLAP_FRAMES) -> List[Dict[str, Any]]:
-    """Frame plan for N beats in one graph: one native generation, then one continuation window per extra beat.
+def _layout_chain(requested_frames: Sequence[int], overlap_frames: int = CONTINUATION_OVERLAP_FRAMES) -> List[Dict[str, Any]]:
+    """Lay out exactly these windows: one base generation, then one continuation window per entry.
 
-    Beat 1 is a normal single generation (its length is capped at SINGLE_CLIP_MAX_FRAMES like any clip). Each
-    later beat's base is the CUMULATIVE latent built so far - only the sampled window is capped, never the
-    cumulative latent - and its extension is the length closest to what that beat asked for that both fits the
-    window ceiling and joins on the audio grid. Every returned layout is exact; the caller wires them in order.
-    Ties in that closest-length choice go to the LONGER extension: it lands nearer the total the caller asked for.
+    Entry 1 is the base single generation (capped at SINGLE_CLIP_MAX_FRAMES like any clip). Each later entry's
+    base is the CUMULATIVE latent built so far - only the sampled window is capped, never the cumulative latent -
+    and its extension is the length closest to what that entry asked for that both fits the window ceiling and
+    joins on the audio grid. Every returned layout is exact; the caller wires them in order. Ties in that
+    closest-length choice go to the LONGER extension: it lands nearer the total the caller asked for.
     """
     req = [int(x) for x in requested_frames]
     if len(req) < 2:
@@ -707,6 +708,106 @@ def plan_continuation_chain(requested_frames: Sequence[int],
         plans.append({"index": i, "is_continuation": True, "frames": layout["total_frames"], "layout": layout})
         cumulative = layout["total_frames"]
     return plans
+
+
+def _split_frames(total: int, parts: int) -> List[int]:
+    """Split `total` frames over `parts` windows as evenly as whole frames allow (largest remainder first)."""
+    if parts <= 0:
+        return []
+    base, rem = divmod(int(total), parts)
+    return [base + (1 if i < rem else 0) for i in range(parts) if base + (1 if i < rem else 0) > 0]
+
+
+def plan_beat_windows(beats_frames: Sequence[float], base_max_frames: Optional[int] = None,
+                      overlap_frames: int = CONTINUATION_OVERLAP_FRAMES) -> Dict[str, Any]:
+    """(F1 2026-11-08) Duration-honouring window plan for a native continuation chain.
+
+    Why: one window per beat silently clamped long beats. No continuation window can add more than
+    CONTINUATION_WINDOW_MAX_FRAMES - overlap_frames new frames, so a 60 s ask over 2 beats asked for 2 x 30 s
+    and produced 243 + 221 = 464 f (19.33 s). The installed nodes already repeat the native continuation
+    window to grow one clip (the 1348 f / 56.17 s and 566 f / 23.58 s runs are that mechanism), so a beat
+    that needs more time is served by REPEATING that window - never by clamping the beat, never by a second
+    stitched clip, and with no new node, input, flag, gate, script, graph, model, sampler, seed, size, fps,
+    voice reference, RefLoRA, 2-pass, post-pass, prompt rule, or test harness.
+
+    `beats_frames` is what each beat was ASKED for, in frames (unclamped: a 30 s beat is 720/24 = 360 f, not
+    243 f). Beat order and meaning are kept: window 1 is beat 1's base generation, every later window belongs
+    to one named beat, in beat order.
+
+    The rule, from the installed caps only: a beat gets one window per the time it asks for - beat 1 opens
+    with its base generation (capped at the single-clip ceiling like any clip) plus ceil(left / cap_ext)
+    continuation windows, every later beat ceil(ask / cap_ext), where cap_ext =
+    CONTINUATION_WINDOW_MAX_FRAMES - overlap_frames (221 f at stock overlap), and a left under one grid step
+    (17 f) needs no window at all because the base window's own grid rounding covers it. The frames a beat
+    asks for are split evenly over its windows (_split_frames); no window's ask exceeds cap_ext, and the base
+    window is grid-snapped through the existing single-clip path. _layout_chain then rounds each window with
+    snap_h3_frames/continuation_layout's existing nearest-grid search, so the reported total is the actual
+    CUMULATIVE legal H3 grid (e.g. 708 f for 60 s over 2 beats), never a chosen frame count like 1433f.
+    Every ask needs at least one window per beat, so a 2 x 8 s (379 f) or 3 x 8 s (566 f) ask keeps its
+    validated one-window-per-beat shape exactly.
+
+    Returns {"windows": [{"beat_index", "beat_number", "is_base", "want_frames"}], "chain": the layout of
+    those windows, "requested_total_frames", "windows_per_beat", "base_max_frames", "window_max_frames",
+    "overlap_frames", "fps"}.
+    """
+    cap_base = min(int(base_max_frames if base_max_frames is not None else SINGLE_CLIP_MAX_FRAMES),
+                   H3_HARD_MAX_FRAMES)
+    cap_base = snap_h3_frames(cap_base / float(H3_FPS), max_frames=cap_base)  # base ceiling, on-grid (243)
+    cap_ext = CONTINUATION_WINDOW_MAX_FRAMES - int(overlap_frames)            # new frames per later window (221)
+    if cap_ext < 17:
+        raise ValueError("overlap leaves no room for a continuation window")
+    asks = [max(H3_MIN_FRAMES, int(round(float(x)))) for x in beats_frames]
+    if not asks:
+        raise ValueError("no beats to plan")
+
+    windows: List[Dict[str, Any]] = []
+    windows_per_beat: List[int] = []
+    for i, ask in enumerate(asks):
+        left = ask
+        if not windows:   # beat 1 opens with the base single generation, capped and grid-snapped like any clip
+            base = snap_h3_frames(min(ask, cap_base) / float(H3_FPS), max_frames=cap_base)
+            windows.append({"beat_index": i, "beat_number": i + 1, "is_base": True, "want_frames": base})
+            left = ask - base
+        # a leftover below one grid step (17 f) is already covered by the base window's own grid rounding,
+        # so it needs no extra window: the pre-F1 one-window-per-beat shape is kept exactly.
+        repeats = (left + cap_ext - 1) // cap_ext if left >= 17 else 0
+        for frames in _split_frames(left, repeats):
+            windows.append({"beat_index": i, "beat_number": i + 1, "is_base": False, "want_frames": frames})
+        windows_per_beat.append(1 + repeats)
+    return {"windows": windows, "requested_total_frames": sum(asks), "windows_per_beat": windows_per_beat,
+            "chain": _layout_chain([w["want_frames"] for w in windows], overlap_frames),
+            "base_max_frames": cap_base, "window_max_frames": CONTINUATION_WINDOW_MAX_FRAMES,
+            "overlap_frames": int(overlap_frames), "fps": H3_FPS}
+
+
+def plan_continuation_chain(requested_frames: Sequence[int],
+                            overlap_frames: int = CONTINUATION_OVERLAP_FRAMES) -> List[Dict[str, Any]]:
+    """Frame plan for N beats in one graph: one native generation, then one continuation window per extra beat.
+
+    Beat 1 is a normal single generation (its length is capped at SINGLE_CLIP_MAX_FRAMES like any clip). Each
+    later beat's base is the CUMULATIVE latent built so far - only the sampled window is capped, never the
+    cumulative latent - and its extension is the length closest to what that beat asked for that both fits the
+    window ceiling and joins on the audio grid. Every returned layout is exact; the caller wires them in order.
+    Ties in that closest-length choice go to the LONGER extension: it lands nearer the total the caller asked for.
+
+    F1 (2026-11-08): a 2-entry request is read as what its two beats ASKED for, and plan_beat_windows gives
+    each of them the windows its length needs by repeating the installed native continuation window (the 60 s
+    / 2-beat ask that used to come out as 243 + 221 = 464 f now gets the windows that carry it). Only that
+    2-entry form is expanded: 3+ entries already mean "one window per beat" (a 6 x 243 f request reaches
+    1348 f = 56.17 s, the shape the 2026-11-07 run proved), and plan_cells asks for its windows explicitly,
+    so a caller that planned its own windows is never re-planned. The cumulative latent is never capped; only
+    the sampled window is.
+    """
+    req = [int(x) for x in requested_frames]
+    if len(req) < 2:
+        raise ValueError("a continuation chain needs at least two beats")
+    if len(req) == 2 and int(overlap_frames) == CONTINUATION_OVERLAP_FRAMES:
+        # F1: honour the requested length by repeating the native window (see plan_beat_windows) instead of
+        # clamping the request to what one base + one continuation window can sample.
+        _plan = plan_beat_windows(req, overlap_frames=overlap_frames)
+        if len(_plan["windows"]) > len(req):
+            req = [w["want_frames"] for w in _plan["windows"]]
+    return _layout_chain(req, overlap_frames)
 
 
 def build_continuation_request(resolved: Dict[str, Any], seed: int, prefix: str, beats: Sequence[Dict[str, Any]],
@@ -780,6 +881,7 @@ def build_parody_request(
     pronoun2: Optional[str] = None,
     lighting: Optional[str] = None,
     continuation: bool = False,
+    ambience: Optional[str] = None,
 ) -> Tuple[Dict[str, Any], str]:
     """Build request API graph and prompt text for a parody run (one clip / one cell).
 
@@ -805,7 +907,7 @@ def build_parody_request(
         resolved, dialogue=dialogue, scene=scene, audio_ref=audio_ref, lighting=lighting,
         camera=camera, pronoun=pronoun, end_action=end_action, summary_text=summary_text,
         image_count=len(staged), image_role=image_role,
-        resolved2=resolved2, dialogue2=dialogue2, pronoun2=pronoun2,
+        resolved2=resolved2, dialogue2=dialogue2, pronoun2=pronoun2, ambience=ambience,
     )
 
     # Use make_b2_request.build as foundation
@@ -851,8 +953,9 @@ def main(argv=None) -> int:
     parser.add_argument("--aspect", help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square")
     parser.add_argument("--size", help="Explicit canvas WxH (multiples of 32, 256..2048)")
     parser.add_argument("--pronoun", default="she", choices=["she", "he", "they"])
+    parser.add_argument("--ambience", help="Soundscape ambience phrase (default: quiet room ambience, soft natural room tone)")
     parser.add_argument("--end-action", help="What the subject does as the line ends")
-    parser.add_argument("--image", action="append", default=[], help="approved_characters reference image (1..4)")
+    parser.add_argument("--image", action="append", default=[], help="Optional single approved_characters start image (AddGuide frame 0; more than one is rejected)")
     parser.add_argument("--image-role", default=DEFAULT_IMAGE_ROLE)
     parser.add_argument("--template", default=str(DEFAULT_REFMOD_TEMPLATE), help="Template JSON path")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
@@ -913,6 +1016,7 @@ def main(argv=None) -> int:
         summary_text=args.summary,
         images=staged,
         image_role=args.image_role,
+        ambience=args.ambience,
     )
 
     arm_dir = Path(args.arm_dir)
