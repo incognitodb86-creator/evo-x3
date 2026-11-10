@@ -4,17 +4,13 @@ Builds resolved request, saves run record, writes a run_queue manifest, and subm
 run_queue.py --detach. run_queue owns gpu-render.lock; rc 7 means GPU busy.
 
 Dynamic options (all optional; omitted = the locked 124f 768x1344 single clip as before):
-  --frames              exact single-shot frame count on the H3 grid, capped at 243.
-  --seconds             single shot up to SINGLE_CLIP_MAX_FRAMES (H3 grid snap); longer asks use the native
-                         continuation (see --beat) instead of stitched cells.
-  --beat (2+)           two or more non-empty explicit scenes select ONE native A/V latent-tail continuation
-                         graph, including when --frames or --seconds is supplied; beat 2+ starts from the
-                         previous sampled/cumulative latent, not the photo. A lone beat within the cap
-                         remains a single shot; a longer --seconds ask with fewer than 2 beats is refused (step 2, 2026-11-09): give 2+ distinct --beat scenes.
+  --seconds / --frames   single shot up to SINGLE_CLIP_MAX_FRAMES (H3 grid snap); longer asks require 2+
+                         --beat scenes
+  --beat (2+)            two or more --beat scenes build ONE native latent-tail continuation graph
+                         (tag "clip"), not stitched cells
   --aspect / --size      canvas (9:16 default, 16:9, 1:1, 4:3, 3:4)
   --camera / --pronoun / --end-action / --summary
-  --image               optional single approved_characters start image via AddGuide frame 0 (never sydney
-                         paths); continuation uses this image on beat 1 only, not timed later image guides.
+  --image (1..4)         approved_characters reference images only (never sydney paths)
   --name2 ... --dialogue2  optional second subject (S2)
   --wait [--qnap-put]    block until BATCH closed, copy/stitch clip.mp4, upload pi-drop/<run>.mp4, and print
                          final_mp4 + qnap_path in the JSON - one call, no PowerShell polling loop
@@ -175,26 +171,6 @@ def _resolve(name, character, actor, tone, frames, description):
     return resolved
 
 
-def _beat_frame_requests(seconds: Optional[float], beats: Sequence[str],
-                         beat_seconds: Optional[Sequence[float]], max_frames: int) -> List[int]:
-    """(F1 2026-11-08) The frames each beat ASKS for, in beat order, unclamped (0 = no length ask).
-
-    Kept as one helper so the window plan a run is built from and the plan recorded beside it can never
-    disagree. Unclamped on purpose: the single-clip cap is what clamped long beats before, so a 30 s beat
-    reports 720/24 = 360 f here and is capped by the window planner, not here. No --seconds and no
-    --beat-seconds means no length ask: 0 in, and the caller keeps the stock 124 f.
-    """
-    bs = list(beat_seconds or [])
-    if not beats:
-        return []                                   # no beats: no per-beat length ask to plan
-    per = (float(seconds) / len(beats)) if seconds else None
-    out: List[int] = []
-    for i in range(len(beats)):
-        s = bs[i] if i < len(bs) else per
-        out.append(int(round(float(s) * br.H3_FPS)) if s else 0)
-    return out
-
-
 def plan_cells(
     seconds: Optional[float],
     scene: Optional[str],
@@ -206,42 +182,28 @@ def plan_cells(
     beat_seconds: Optional[Sequence[float]],
     max_frames: int,
 ) -> Optional[List[Dict[str, Any]]]:
-    """U1: None for a single clip, else the ordered cell list [{scene, dialogue, camera, frames}].
-
-    For 2+ explicit beats the list is the continuation WINDOW plan, not one entry per beat (F1 2026-11-08):
-    a beat that needs more time than one continuation window can add is served by repeating that window, so
-    the clip honours the requested per-beat and total length instead of clamping each beat to 243 f. Every
-    window carries its own beat's scene/dialogue/camera and the beats stay in order, so the meaning of the
-    beats is unchanged; a beat that fits in one window still gets exactly one entry, as before.
-    """
+    """U1: None for a single clip, else the ordered shared-anchor cell list [{scene, dialogue, camera, frames}]."""
     beats = [b for b in (beats or []) if b and str(b).strip()]
     max_s = max_frames / float(br.H3_FPS)
-    explicit_beats = len(beats)
-    if explicit_beats <= 1 and not (seconds and seconds > max_s):
+    if len(beats) <= 1 and not (seconds and seconds > max_s):
         return None
-    if explicit_beats <= 1:
+    if len(beats) <= 1:
         n = int(math.ceil(float(seconds) / max_s))
         base = beats[0] if beats else scene
         beats = [base] * n
-    bd, bc = list(beat_dialogues or []), list(beat_cameras or [])
-    asked = _beat_frame_requests(seconds, beats, beat_seconds, max_frames)
-    per_beat = [
-        {"scene": b,
-         "dialogue": (bd[i] if i < len(bd) else (dialogue if i == 0 else None)),
-         "camera": (bc[i] if i < len(bc) else camera),
-         # a window's own length stays the stock single-clip snap; 0 = no length ask = the stock 124 f
-         "frames": (br.snap_h3_frames(asked[i] / float(br.H3_FPS), max_frames=max_frames) if asked[i] else 124)}
-        for i, b in enumerate(beats)]
-    if explicit_beats <= 1:
-        return per_beat           # one scene over a long ask: the shared-anchor stitched cells, as before
-    # F1: repeat native continuation windows to honour each beat's requested length (plan_beat_windows owns
-    # the cumulative-grid arithmetic); the beat's scene/dialogue/camera are carried by each of its windows.
-    # A beat with no length ask keeps the stock 124 f window, i.e. the pre-F1 one-window-per-beat shape.
-    asks = [a if a else 124 for a in asked]
-    plan = br.plan_beat_windows(asks, base_max_frames=max_frames)
-    # cell keys stay the builder's keys (scene/dialogue/camera/frames): the beat's meaning is carried by the
-    # scene/dialogue/camera it repeats, so no extra key is passed into the locked graph builder.
-    return [dict(per_beat[w["beat_index"]], frames=w["want_frames"]) for w in plan["windows"]]
+    n = len(beats)
+    per = (float(seconds) / n) if seconds else None
+    cells = []
+    for i, b in enumerate(beats):
+        bd = list(beat_dialogues or [])
+        bc = list(beat_cameras or [])
+        bs = list(beat_seconds or [])
+        d = bd[i] if i < len(bd) else (dialogue if i == 0 else None)
+        c = bc[i] if i < len(bc) else camera
+        s = bs[i] if i < len(bs) else per
+        frames = br.snap_h3_frames(s, max_frames=max_frames) if s else 124
+        cells.append({"scene": b, "dialogue": d, "camera": c, "frames": frames})
+    return cells
 
 
 def submit_parody_job(
@@ -290,29 +252,54 @@ def submit_parody_job(
 
     # 0. Length + canvas (validated before anything touches disk)
     max_frames = br.SINGLE_CLIP_MAX_FRAMES
-    # Derek 2026-11-09 (Max Architect 3): a long ask with fewer than 2 beats uses the native continuation
-    # path (repeat the one scene as N beats) instead of stitched shared-anchor cells. plan_cells puts the
-    # dialogue on beat 1 only. A single clip within the cap, or an explicit --frames, is unchanged.
     _nb = [b for b in (beats or []) if b and str(b).strip()]
+    is_multi_beat = len(_nb) > 1
     _cap_s = max_frames / float(br.H3_FPS)
-    if frames is None and seconds and float(seconds) > _cap_s and len(_nb) < 2 and (_nb or scene):
-        # Step 2 (Derek yes 2026-11-09 2:41 PM CT): never clone one scene into N beats (it loops the same action).
+    if frames is None and seconds and float(seconds) > _cap_s and not is_multi_beat:
         raise ValueError(
             f"--seconds {float(seconds):g} is longer than one shot ({_cap_s:.1f}s): pass 2 or more --beat scenes, "
             "one distinct action per beat, or lower --seconds to fit one shot.")
     if frames is not None:
         frames = br.validate_single_clip_frames(frames)
     width, height = br.resolve_canvas(aspect, size)
-    cells = None if frames is not None and not (beats and len([b for b in beats if b]) > 1) else plan_cells(
-        seconds, scene, dialogue, camera, beats, beat_dialogues, beat_cameras, beat_seconds, max_frames)
-    if cells is None:
-        if frames is None:
-            frames = br.snap_h3_frames(seconds, max_frames=max_frames) if seconds else 124
-        if beats:
-            scene = [b for b in beats if b][0] if any(beats) else scene
-    total_frames = sum(c["frames"] for c in cells) if cells else frames
-    if cells and int(seed) < 100000:
-        raise ValueError("multi-cell runs need a seed of at least 6 digits (cell dir form c01_s<seed>)")
+
+    cells: Optional[List[Dict[str, Any]]] = None
+    beat_specs: Optional[List[Dict[str, Any]]] = None
+
+    if is_multi_beat:
+        beat_specs = []
+        for i, b in enumerate(_nb):
+            bd = list(beat_dialogues or [])
+            bc = list(beat_cameras or [])
+            bs = list(beat_seconds or [])
+            d = bd[i] if i < len(bd) else (dialogue if i == 0 else None)
+            c = bc[i] if i < len(bc) else camera
+            if i < len(bs) and bs[i]:
+                f = br.snap_h3_frames(bs[i], max_frames=max_frames)
+            elif seconds:
+                f = br.snap_h3_frames(float(seconds) / len(_nb), max_frames=max_frames)
+            elif frames is not None:
+                f = frames
+            else:
+                f = None
+            beat_specs.append({"scene": b, "dialogue": d, "camera": c, "frames": f})
+        chain_req = [
+            int(s["frames"] or br.DEFAULT_CONTINUATION_BASE_FRAMES)
+            for s in beat_specs
+        ]
+        chain_preview = br._layout_chain(chain_req)
+        total_frames = chain_preview[-1]["frames"]
+    else:
+        cells = plan_cells(
+            seconds, scene, dialogue, camera, beats, beat_dialogues, beat_cameras, beat_seconds, max_frames)
+        if cells is None:
+            if frames is None:
+                frames = br.snap_h3_frames(seconds, max_frames=max_frames) if seconds else 124
+            if beats:
+                scene = [b for b in beats if b][0] if any(beats) else scene
+        total_frames = sum(c["frames"] for c in cells) if cells else frames
+        if cells and int(seed) < 100000:
+            raise ValueError("multi-cell runs need a seed of at least 6 digits (cell dir form c01_s<seed>)")
 
     # 1. Resolve identities (S1 + optional S2), images gate
     resolved = _resolve(name, character, actor, tone, total_frames, description)
@@ -324,18 +311,11 @@ def submit_parody_job(
     valid_images = validate_reference_images(list(images or []), pools=tuple(image_pools) if image_pools else None) \
         if images else []
 
-    # 2. Plan C2V continuation (single clip never chains; cells are stitched instead)
-    chain_plan = plan_c2v_chain(total_length_s=(cells[0]["frames"] if cells else frames) / 24,
-                                clip_frames=(cells[0]["frames"] if cells else frames))
-    # F1: the duration plan this run honours (requested per-beat frames -> windows), for the run record and
-    # the final line. Only for the native 2+ beat path with a length ask; computed from the same helper
-    # plan_cells used, so the record and the graph can never disagree. A beat with no length ask keeps the
-    # stock 124 f window, as in plan_cells.
-    _named_beats = [b for b in (beats or []) if b and str(b).strip()]
-    duration_plan = (br.plan_beat_windows(
-        [a if a else 124 for a in _beat_frame_requests(seconds, _named_beats, beat_seconds, max_frames)],
-        base_max_frames=max_frames)
-        if len(_named_beats) > 1 and cells and (seconds or beat_seconds) else None)
+    # 2. Plan C2V continuation (single clip never chains; cells are stitched; 2+ beats use native continuation)
+    chain_plan = None
+    if not is_multi_beat:
+        chain_plan = plan_c2v_chain(total_length_s=(cells[0]["frames"] if cells else frames) / 24,
+                                    clip_frames=(cells[0]["frames"] if cells else frames))
 
     # 3. Determine run folder
     if run_dir_override:
@@ -354,19 +334,21 @@ def submit_parody_job(
                   resolved2=resolved2, pronoun2=pronoun2, ambience=ambience)
     jobs: List[Dict[str, Any]] = []
     continuation = None
-    if cells is None:
+    if cells is None and not is_multi_beat:
         graph, prompt = build_parody_request(
             seed=seed, prefix=f"community/{run_name}/{QUEUE_TAG}", frames=frames, dialogue=dialogue,
             scene=scene, camera=camera, summary_text=summary, dialogue2=dialogue2, **common)
         jobs.append({"tag": QUEUE_TAG, "graph": graph, "prompt": prompt, "seed": seed, "frames": frames})
-    elif beats and len([b for b in beats if b and str(b).strip()]) > 1:
+    elif is_multi_beat:
+        assert beat_specs is not None
         # (c) 2026-11-06 (brief t224x214): a 2+ --beat list is ONE continuation graph, not N clips. The beats
         # list IS the plan (no new flags): beat 1 keeps the approved photo, beat 2+ continues the completed AV
         # latent and re-applies its RefMod. build_continuation_request owns the frame math and the node wiring.
+        req_frames = frames if (seconds is None and not beat_seconds and frames is not None) else None
         graph, prompt, continuation = br.build_continuation_request(
             resolved=resolved, seed=seed, prefix=f"community/{run_name}/{QUEUE_TAG}",
-            beats=[dict(c, images=(staged if i == 0 else None)) for i, c in enumerate(cells)],
-            frames=cells[0]["frames"], width=width, height=height, template_path=template_path,
+            beats=[dict(c, images=(staged if i == 0 else None)) for i, c in enumerate(beat_specs)],
+            frames=req_frames, width=width, height=height, template_path=template_path,
             pronoun=pronoun, end_action=end_action, image_role=image_role, resolved2=resolved2,
             pronoun2=pronoun2, summary_text=summary, dialogue2=dialogue2, ambience=ambience)
         jobs.append({"tag": QUEUE_TAG, "graph": graph, "prompt": prompt, "seed": seed,
@@ -391,10 +373,6 @@ def submit_parody_job(
         "cells": [{"tag": j["tag"], "frames": j["frames"], "seed": j["seed"]} for j in jobs],
         "total_frames": total_frames,
     })
-    if duration_plan is not None:
-        # F1: keep the requested beats and the delivered windows in the record: requested_total_frames is
-        # what the beats asked for, chain[-1]["frames"] is the cumulative length the graph will render.
-        record_plan["duration_plan"] = duration_plan
 
     # 5. Save run record (request.api.json, prompt.txt, assets.json)
     artifacts = save_run_record(
@@ -513,17 +491,15 @@ def main(argv=None) -> int:
     parser.add_argument("--summary", help="Optional short summary line (default: first sentence of a long --scene)")
     parser.add_argument("--seed", type=int, default=51083601, help="Seed")
     parser.add_argument("--frames", type=int, default=None, help="Exact single-clip frames (H3 grid, max 243 on 16 GB)")
-    parser.add_argument("--seconds", type=float, help="Length in seconds (single shot up to the measured ceiling, else stitched cells)")
+    parser.add_argument("--seconds", type=float, help="Length in seconds (single shot up to the measured ceiling of 243 frames / ~10.1s; longer asks require 2+ --beat)")
     parser.add_argument("--aspect", help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square")
     parser.add_argument("--size", help="Explicit canvas WxH (multiples of 32, 256..2048)")
     parser.add_argument("--camera", help="Camera framing/motion; motion words drop 'Camera locked off'")
     parser.add_argument("--pronoun", default="she", choices=["she", "he", "they"])
     parser.add_argument("--end-action", help="What the subject does as the line ends (replaces the stock nod)")
-    parser.add_argument("--image", action="append", default=[], help="Optional single approved_characters start image (AddGuide frame 0; beat 1 only for continuation)")
-    parser.add_argument("--image-role", default=br.DEFAULT_IMAGE_ROLE, help="Legacy image-role argument; AddGuide does not add <Picture N> prompt labels")
-    parser.add_argument("--beat", action="append", default=[],
-                        help="Scene beat (2+ non-empty explicit beats select native A/V-tail continuation in one graph, "
-                             "including with --frames or --seconds; longer asks without 2+ beats use stitched cells)")
+    parser.add_argument("--image", action="append", default=[], help="approved_characters reference image (repeat 1..4)")
+    parser.add_argument("--image-role", default=br.DEFAULT_IMAGE_ROLE, help="What <Picture N> anchors")
+    parser.add_argument("--beat", action="append", default=[], help="Scene beat (repeat 2+ for one native continuation graph, not stitched cells)")
     parser.add_argument("--beat-dialogue", action="append", default=[], help="Spoken line per beat")
     parser.add_argument("--beat-camera", action="append", default=[], help="Camera per beat")
     parser.add_argument("--beat-seconds", action="append", type=float, default=[], help="Seconds per beat")
