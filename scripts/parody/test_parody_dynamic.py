@@ -319,8 +319,8 @@ class TestSubmitDynamic(unittest.TestCase):
                            beat_dialogues=["First line here for the opener.", "Second line closes it out."],
                            beat_seconds=[6, 8])
         # the deliverable's frame count is the continuation chain's cumulative total, derived from the plan
-        plan = br.plan_continuation_chain([br.snap_h3_frames(6, max_frames=br.SINGLE_CLIP_MAX_FRAMES),
-                                           br.snap_h3_frames(8, max_frames=br.SINGLE_CLIP_MAX_FRAMES)])
+        plan = br._layout_chain([br.snap_h3_frames(6, max_frames=br.SINGLE_CLIP_MAX_FRAMES),
+                                 br.snap_h3_frames(8, max_frames=br.SINGLE_CLIP_MAX_FRAMES)])
         lay = plan[-1]["layout"]
         self.assertTrue(plan[1]["is_continuation"])
         self.assertLessEqual(lay["window_frames"], br.CONTINUATION_WINDOW_MAX_FRAMES)
@@ -451,6 +451,245 @@ class TestWaitFinalize(unittest.TestCase):
         with mock.patch.object(spr, "COMFY_OUT_COMMUNITY", Path(self.tmp.name) / "none"):
             with self.assertRaises(FileNotFoundError):
                 spr.finalize_clip(self.run, ["c01_s51083601", "c02_s51083602"], "python")
+
+
+class TestContinuationFiveItems(unittest.TestCase):
+    """Focused tests for the 5 native continuation items in 2026-11-09 brief."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="cont_five_")
+        self.run_dir = Path(self.tmp.name) / "run_test"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_item1_ambience_option(self):
+        # 1. Default ambience when omitted or None
+        p_def = format_parody_prompt(_res(), dialogue=LINE)
+        self.assertIn("quiet room ambience, soft natural room tone; the single close-micd human voice in the foreground.", p_def)
+
+        # 2. Custom ambience in single voice
+        custom_amb = "quiet night room tone, distant gentle rain"
+        p_custom = format_parody_prompt(_res(), dialogue=LINE, ambience=custom_amb)
+        self.assertIn("quiet night room tone, distant gentle rain; the single close-micd human voice in the foreground.", p_custom)
+
+        # 3. Custom ambience with 2 voices
+        p_two = format_parody_prompt(_res(), dialogue=LINE, resolved2=_res("Ivy Fixture", "Ivy Fixture"),
+                                     dialogue2="Coffee is ready.", ambience="soft cafe ambience, subtle espresso steam")
+        self.assertIn("soft cafe ambience, subtle espresso steam; two close-micd human voices in the foreground, one speaker at a time.", p_two)
+
+        # 4. Custom ambience with silent clip
+        p_silent = format_parody_prompt(_res(), dialogue=None, ambience="deep space hum, airlock circulation")
+        self.assertIn("deep space hum, airlock circulation; no spoken voice.", p_silent)
+
+        # 5. build_parody_request carries ambience through
+        _, prompt = build_parody_request(_res(), seed=51083601, prefix="community/amb_test/clip", frames=124,
+                                        dialogue=LINE, ambience="crackling fireplace, quiet parlor")
+        self.assertIn("crackling fireplace, quiet parlor", prompt)
+
+    def test_item2_refuse_long_seconds_without_two_plus_beats(self):
+        # Refuses > 243 frames (~10.125s) with 0 beats
+        with self.assertRaises(ValueError) as ctx:
+            spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=15.0, scene="sitting calmly",
+                                  run_dir_override=self.run_dir, dry_run=True)
+        self.assertIn("pass 2 or more --beat scenes", str(ctx.exception))
+        self.assertFalse(self.run_dir.exists())
+
+        # Refuses > 243 frames with only 1 beat
+        with self.assertRaises(ValueError) as ctx2:
+            spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=12.0, beats=["lone beat"],
+                                  run_dir_override=self.run_dir, dry_run=True)
+        self.assertIn("pass 2 or more --beat scenes", str(ctx2.exception))
+        self.assertFalse(self.run_dir.exists())
+
+        # Allows <= 243 frames (~10.125s) without beats as a single shot
+        res_ok = spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=10.0, scene="sitting calmly",
+                                       run_dir_override=self.run_dir, dry_run=True)
+        self.assertEqual(res_ok["frames"], [243])
+        self.assertEqual(res_ok["tags"], ["clip"])
+
+        # Allows > 243 frames with 2+ beats as native continuation
+        run_2b = Path(self.tmp.name) / "run_2b"
+        res_2b = spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=15.0,
+                                       beats=["sitting calmly holding cup", "stands up smoothly"],
+                                       run_dir_override=run_2b, dry_run=True)
+        self.assertEqual(res_2b["tags"], ["clip"])
+        self.assertGreater(res_2b["total_frames"], 243)
+
+    def test_item3_native_continuation_node_wiring_and_chain(self):
+        beats = [
+            {"scene": "sits at the mahogany counter, both hands on a cup", "frames": 192},
+            {"scene": "stands up slowly, resting right hand on the edge", "frames": 192},
+            {"scene": "walks toward the tall window, turning slightly", "frames": 192},
+        ]
+        g, p_all, plan = br.build_continuation_request(_res(), seed=51083601, prefix="community/cont3/clip",
+                                                       beats=beats)
+        self.assertEqual(plan["clip_count"], 3)
+        self.assertEqual(len(plan["beats"]), 3)
+        self.assertEqual(br.CONTINUATION_OVERLAP_FRAMES, 22)
+        self.assertEqual(br.CONTINUATION_WINDOW_MAX_FRAMES, 243)
+
+        # Check Beat 2 wiring
+        # previous_av_latent = ["s0_samp", 0]
+        self.assertEqual(g["c2_gen"]["class_type"], "MiniMaxH3GuidedContinuationWindow")
+        self.assertEqual(g["c2_gen"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
+        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 22)
+        ext2 = g["c2_gen"]["inputs"]["extension_frames"]
+        self.assertEqual(ext2 % 17, 0)
+        self.assertLessEqual(22 + ext2, 243)
+
+        self.assertEqual(g["c2_tail"]["class_type"], "MiniMaxH3LatentTailGuide")
+        self.assertEqual(g["c2_tail"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
+        self.assertEqual(g["c2_tail"]["inputs"]["target_av_latent"], ["c2_gen", 0])
+        self.assertEqual(g["c2_tail"]["inputs"]["positive"], ["c2_refapply", 0])
+
+        self.assertEqual(g["c2_refapply"]["class_type"], "MiniMaxH3RefModApply")
+        self.assertEqual(g["c2_refapply"]["inputs"]["conditioning"], ["c2", 0])
+        self.assertEqual(g["c2_refapply"]["inputs"]["mods"], ["refmods", 0])
+
+        self.assertEqual(g["c2_samp"]["class_type"], "SamplerCustomAdvanced")
+        self.assertEqual(g["c2_samp"]["inputs"]["latent_image"], ["c2_gen", 0])
+        self.assertEqual(g["c2_samp"]["inputs"]["sigmas"], ["c2_sched", 0])
+
+        self.assertEqual(g["c2_append"]["class_type"], "MiniMaxH3AppendContinuation")
+        self.assertEqual(g["c2_append"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
+        self.assertEqual(g["c2_append"]["inputs"]["sampled_window"], ["c2_samp", 0])
+
+        # Check Beat 3 wiring
+        # previous_av_latent = ["c2_append", 0]
+        self.assertEqual(g["c3_gen"]["class_type"], "MiniMaxH3GuidedContinuationWindow")
+        self.assertEqual(g["c3_gen"]["inputs"]["previous_av_latent"], ["c2_append", 0])
+        self.assertEqual(g["c3_gen"]["inputs"]["overlap_frames"], 22)
+
+        self.assertEqual(g["c3_tail"]["class_type"], "MiniMaxH3LatentTailGuide")
+        self.assertEqual(g["c3_tail"]["inputs"]["previous_av_latent"], ["c2_append", 0])
+        self.assertEqual(g["c3_tail"]["inputs"]["positive"], ["c3_refapply", 0])
+
+        self.assertEqual(g["c3_refapply"]["class_type"], "MiniMaxH3RefModApply")
+        self.assertEqual(g["c3_refapply"]["inputs"]["conditioning"], ["c3", 0])
+        self.assertEqual(g["c3_refapply"]["inputs"]["mods"], ["refmods", 0])
+
+        self.assertEqual(g["c3_append"]["class_type"], "MiniMaxH3AppendContinuation")
+        self.assertEqual(g["c3_append"]["inputs"]["previous_av_latent"], ["c2_append", 0])
+        self.assertEqual(g["c3_append"]["inputs"]["sampled_window"], ["c3_samp", 0])
+
+        # Rewired s0_sep points to the last append node
+        self.assertEqual(g["s0_sep"]["inputs"]["av_latent"], ["c3_append", 0])
+
+        # One window per requested beat: exactly c0, c2, c3
+        c_nodes = {k for k in g if k.startswith("c") and k[1:].isdigit()}
+        self.assertEqual(c_nodes, {"c0", "c2", "c3"})
+
+        # RefMod on every beat
+        refapplies = {k for k in g if "refapply" in k}
+        self.assertEqual(refapplies, {"refapply", "c2_refapply", "c3_refapply"})
+
+        # No AddGuide or LoadImage on continuation beats
+        self.assertFalse(any(n.get("class_type") in ("MiniMaxH3AddGuide", "LoadImage") for n in g.values()))
+
+    def test_item3_addguide_start_photo_beat1_only(self):
+        beats = [
+            {"scene": "sits at the counter", "frames": 192, "images": ["community/megan_ref.jpg"]},
+            {"scene": "stands up slowly", "frames": 192},
+        ]
+        g, _, _ = br.build_continuation_request(_res(), seed=51083601, prefix="community/addguide/clip",
+                                                beats=beats)
+        # beat 1 has AddGuide
+        self.assertIn("add_guide", g)
+        self.assertEqual(g["add_guide"]["class_type"], "MiniMaxH3AddGuide")
+        self.assertIn("img_1", g)
+
+        # Continuation beat must reject start images
+        with self.assertRaises(ValueError):
+            br.build_parody_request(_res(), seed=51083601, prefix="community/test", continuation=True,
+                                    images=["community/invalid.jpg"])
+
+    def test_item4_airlock_wording(self):
+        beats = [
+            {"scene": "sits at the counter, both hands on a mug", "frames": 192},
+            {"scene": "leans back in the booth holding the mug", "frames": 192},
+        ]
+        g, p_all, _ = br.build_continuation_request(_res(), seed=51083601, prefix="community/airlock/clip",
+                                                    beats=beats, pronoun="she")
+        p_b1 = g["c0"]["inputs"]["prompt"]
+        p_b2 = g["c2"]["inputs"]["prompt"]
+
+        self.assertNotIn("The shot continues from the last seen moment", p_b1)
+        self.assertIn("The shot continues from the last seen moment", p_b2)
+        self.assertIn("the same framing, the same standing pose", p_b2)
+        self.assertIn("natural micro-motion", p_b2)
+        self.assertIn("The camera does not change angle and the shot never resets to a starting photo.", p_b2)
+        self.assertIn("and she is still in the same place", p_b2)
+        self.assertIn("She keeps her exact voice", p_b2)
+
+    def test_item5_submit_parody_run_native_continuation_graph(self):
+        res = spr.submit_parody_job(
+            name="Megan Fox", description=BIO,
+            beats=["sits at the counter, both hands on a mug", "stands up slowly beside the stool"],
+            beat_dialogues=["First line.", "Second line."],
+            beat_seconds=[6, 8],
+            run_dir_override=self.run_dir,
+            dry_run=True,
+        )
+        self.assertEqual(res["tags"], ["clip"])
+        self.assertNotIn("c01_s51083601", res["tags"])
+        order = json.loads((self.run_dir / "_render_order.json").read_text(encoding="utf-8"))
+        self.assertNotIn("cell_contract", order)
+        self.assertEqual([j["tag"] for j in order["order"]], ["clip"])
+
+        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
+        self.assertEqual(g["c2_gen"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
+        self.assertEqual(g["s0_sep"]["inputs"]["av_latent"], ["c2_append", 0])
+
+    def test_plan_continuation_chain_removed(self):
+        self.assertFalse(hasattr(br, "plan_continuation_chain"))
+
+    def test_continuation_layout_defaults_match_verified_379_layout(self):
+        lay = br.continuation_layout()
+        self.assertEqual(lay["base_frames"], 192)
+        self.assertEqual(lay["extension_frames"], 187)
+        self.assertEqual(lay["overlap_frames"], 22)
+        self.assertEqual(lay["window_frames"], 209)
+        self.assertEqual(lay["total_frames"], 379)
+        self.assertLessEqual(lay["window_frames"], br.CONTINUATION_WINDOW_MAX_FRAMES)
+
+    def test_two_beats_omitted_seconds_uses_continuation_defaults(self):
+        with mock.patch("submit_parody_run.plan_c2v_chain") as mock_c2v:
+            res = spr.submit_parody_job(
+                name="Megan Fox", description=BIO,
+                beats=["sits at the counter, both hands on a mug", "stands up slowly beside the stool"],
+                run_dir_override=self.run_dir,
+                dry_run=True,
+            )
+            mock_c2v.assert_not_called()
+        self.assertEqual(res["tags"], ["clip"])
+        self.assertEqual(res["frames"], [379])
+        self.assertEqual(res["total_frames"], 379)
+        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
+        self.assertEqual(g["c0"]["inputs"]["length"], 192)
+        self.assertEqual(g["c2_gen"]["inputs"]["extension_frames"], 187)
+        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 22)
+        self.assertLessEqual(22 + 187, br.CONTINUATION_WINDOW_MAX_FRAMES)
+
+    def test_single_shot_byte_identical_and_locked_dials(self):
+        g, p = build_parody_request(_res(), seed=51083601, prefix="community/test/clip", frames=124)
+        verify_keep_dials(g)
+
+        import hashlib
+        s = json.dumps(g, indent=2, sort_keys=True)
+        g_hash = hashlib.sha256(s.encode("utf-8")).hexdigest()
+        p_hash = hashlib.sha256(p.encode("utf-8")).hexdigest()
+        self.assertEqual(g_hash, "949666d54685f2e94979841e0c5a925a40486bf44f44e3c563941a462270dee8")
+        self.assertEqual(p_hash, "521ba2341a7c135bfb4831b95d6688441fc029d234e1c223e065a49d2b9a3b50")
+
+        # Verify locked dials
+        c0 = g["c0"]["inputs"]
+        self.assertEqual((c0["width"], c0["height"]), (768, 1344))
+        self.assertIn("10Eros_Max_h3_8stepTURBO_beta7_int8HQ", json.dumps(g["unet"]["inputs"]))
+        self.assertEqual(g["s0_sched"]["inputs"]["steps"], 8)
+        self.assertEqual(g["s0_sched"]["inputs"]["scheduler"], "simple")
+        self.assertEqual(g["c0"]["class_type"], "MiniMaxH3ReferenceToVideo")
+        self.assertEqual(g["refapply"]["class_type"], "MiniMaxH3RefModApply")
 
 
 if __name__ == "__main__":
