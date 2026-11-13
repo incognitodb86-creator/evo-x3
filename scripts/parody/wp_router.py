@@ -4,7 +4,7 @@ route_mode(ask, position, still_read, cfg, continued) -> {act_id, position, mode
 - act: --position by id/alias (acts.yaml via the builder), else an act alias named in the ask, else the closest act name,
   else a still-pose guess; every fallback is logged as a warning and never blocks.
 - mode: one base block per clip (talk, strip, transition, oral, partner, solo, sex) keyed off the act + ask keywords.
-- overlays: cinematic, gonzo, pov, edge, forced_orgasm, defeat, cnc, taboo_role, spoof, restraints, toy, threesome,
+- overlays: cinematic, gonzo, pov, edge, forced_orgasm, defeat, cnc, taboo_role, spoof, bts, restraints, toy, threesome,
   continued, nonhuman, scale. Overlays add notes to the base card and turn on their lint rules; they are never new acts.
 """
 from __future__ import annotations
@@ -25,6 +25,7 @@ OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every 
     ("cnc", r"\bcnc\b|reluctan\w*|\bresist\w*|non-?con\w*"),
     ("taboo_role", r"\bdaddy\b|\bstep-?(?:brother|sister|dad|mom|father|mother|son|daughter)\b|\b(?:brother|sister|uncle|cousin)\b|roleplay"),
     ("spoof", r"\bspoof\b|\bparody\b|infomercial|\bnoir\b|space-captain|sitcom"),
+    ("bts", r"\bbts\b|\binterview\b|off[- ]?screen interviewer"),
     ("restraints", r"\brestrain\w*|\btied\b|\bcuff\w*|\bbound\b|\bropes?\b|strapped"),
     ("toy", r"\btoys?\b|vibrator|dildo|\bplug\b|\bwand\b"),
     # lost-features audit (Derrick, Prompt maker t243s811): creature partners and size play, no literal 'non-human' needed

@@ -420,3 +420,21 @@ def test_pm_acc4_make_cast_handjob_template():
     msg = (rep2.get("not_ready") or "").lower()
     assert "w5" not in msg, rep2.get("not_ready")
 
+
+def test_pm_acc4d_templates_and_male_solo_still():
+    mmf = br.make_cast(BED_READ, "mmf", "MMF, she's on all fours, one behind, one in her mouth")
+    assert "penis is inside her mouth" in (mmf.get("contact") or "").lower()
+    assert "lips sealed around his shaft" in (mmf.get("contact") or "").lower()
+    assert "sheathed" not in (mmf.get("contact") or "").lower()
+    sc = br.make_cast(BED_READ, "ff_scissoring", "FF scissoring on the bed")
+    assert "vulva pressed to vulva" in (sc.get("contact") or "").lower()
+    ffm = br.make_cast(BED_READ, "ffm", "FFM on the bed")
+    c = (ffm.get("contact") or "").lower()
+    assert "penis" in c and "vagina" in c and ("vulva" in c or "mouth" in c)
+    cg = br.make_cast(BED_READ, "cowgirl", "she rides him")
+    assert "penis" in (cg.get("contact") or "").lower() and "vagina" in (cg.get("contact") or "").lower()
+    male = br.make_cast(BED_READ, "male_solo", "male solo edging")
+    # still is setting only: do not describe her hair/skin/clothes as his
+    blob = " ".join(str(male.get(k) or "") for k in ("woman", "still", "still_line", "still_wardrobe", "man")).lower()
+    assert "blonde" not in blob and "sheer nude bra" not in blob
+

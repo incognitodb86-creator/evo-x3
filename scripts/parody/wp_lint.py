@@ -254,6 +254,7 @@ SAFETY_HARD = frozenset({
     "act_mismatch", "tag_words", "youth_hint", "scale_adult", "consent_setup",
     "voice_missing", "builder",
     "contact_anatomy", "talk_lines", "talk_s2_defined",
+    "double_says", "hands_line",
 })
 HARD_WEIGHT = 20
 SOFT_WEIGHT = 5
@@ -266,6 +267,24 @@ def norm(s: str) -> str:
 
 def spoken_lines(text: str) -> List[str]:
     return [norm(m.group(1)) for m in D_RE.finditer(text or "") if norm(m.group(1))]
+
+
+_INTERVIEWER_LEAD_RE = re.compile(r"(?i)(?:off[- ]?screen(?: interviewer)?|(?:the )?interviewer|\(S2\)[^.<]{0,40}\basks)\s*[,:]?\s*$")
+
+
+def talk_counted_lines(dd: str, ctx: Optional[Dict[str, Any]] = None) -> List[str]:
+    """BTS: off-screen interviewer questions are scripted but do not count toward talk_lines."""
+    out = []
+    text = dd or ""
+    for m in D_RE.finditer(text):
+        pre = text[max(0, m.start() - 100):m.start()]
+        if _INTERVIEWER_LEAD_RE.search(pre):
+            continue
+        n = norm(m.group(1))
+        if n:
+            out.append(n)
+    return out
+
 
 
 def spoken_words(text: str) -> int:
@@ -563,10 +582,17 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     if kind != "oral" and ORAL_SHEATHED_RE.search(plain):  # acc4: mmf/spitroast oral words too
         issues.append(_fix("oral_contact", "oral contact names the mouth (inside her mouth), never sheathed or hips flush"))
     if rules["contact"] or kind in ("sex", "oral"):
-        if not re.search(r"(?i)\b(?:penis|cock|shaft|glans|vagina|pussy|anus|asshole|mouth|lips|vulva|clitoris|clit)\b", plain):
-            issues.append(_fix("contact_anatomy", "the entry or contact sentence must name penis, vagina, anus, mouth or vulva; 'thrusts into her' alone is not enough"))
+        if not re.search(r"(?i)\b(?:penis|cock|shaft|glans|vagina|pussy|anus|asshole|mouth|lips|vulvas?|clitoris|clit)\b", plain):
+            issues.append(_fix("contact_anatomy", "the entry or contact sentence must name penis, vagina, anus, mouth, vulva, vulvas or clitoris; 'thrusts into her' alone is not enough"))
     if re.search(r"(?i)\bseats himself\b", plain):
         issues.append(_fix("seats_himself", "do not write 'seats himself'; land the pose in (S1)'s own words", False, 5))
+    if re.search(r"(?i)\bsays\s*,\s*\(S\d\)\s+says\b", plain):
+        issues.append(_fix("double_says", "do not write a doubled speech verb ('says, (S1) says'); one 'says' per line"))
+    for sl in lines:
+        if re.search(r"(?i)\b(?:your|my|his) hands\b|\bhands (?:are|feel|won't|on me|on you)\b|\b(?:too tight|so strong|so heavy|won't let go)\b|\b(?:your|his) grip\b", sl):
+            issues.append(_fix("hands_line", "spoken lines never mention his or her hands, grip or strength; write a new line about the act or the body"))
+            break
+
     if _clear_needed(slots, kind) and not _join_inherited_clear(slots, ctx.get("scene")):
         gnoun = join_noun(slots)
         # builder parity: the builder's own W5 credit (active pull/slide/tug ... aside|up, or a removal verb)
@@ -673,8 +699,9 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     wc = len(WORD_RE.findall(norm(D_RE.sub(" ", dd))))
     if wc < lo or wc > hi:
         issues.append(_fix("length", f"detailed_description has {wc} words outside speech; aim for {lo}-{hi}", False, 10))
-    if rules["min_lines"] and len(lines) < rules["min_lines"]:
-        issues.append(_fix("talk_lines", f"talk-only needs three to five short lines; it has {len(lines)}"))
+    counted = talk_counted_lines(dd, ctx)
+    if rules["min_lines"] and len(counted) < rules["min_lines"]:
+        issues.append(_fix("talk_lines", f"talk-only needs three to five short lines (off-screen interviewer questions do not count); it has {len(counted)}"))
     if kind == "talk" and re.search(r"\(S2\)|<Subject 2>", dd) and not re.search(
             r"(?i)(?:subject_definitions:)?[^\n]*<(?:Subject 2)>|\(S2\) is ", full):
         issues.append(_fix("talk_s2_defined", "(S2) is named in the talk; define them in subject_definitions (look or clothes, BTS interviewer included)"))
