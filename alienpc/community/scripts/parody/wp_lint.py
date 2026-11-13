@@ -169,6 +169,14 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
             if other != act and other not in ACT_COMPAT.get(act, ()) and any(re.search(rx, x) for x in body_s):
                 out.append(_fix("act_mismatch", f"this clip is {act}; remove the {other} landing words and land in {act}'s own pose"))
                 break
+    if act == "standing_mf" and any(re.search(r"(?i)hands and knees|on all fours|(?<!standing )\bdoggy\b", outside_d(x))
+                                    for x in sents if not OPENER_RE.search(x)):  # PM acc3 #4
+        out.append(_fix("act_mismatch", "standing_mf lands 'bent forward over the surface, both feet planted'; never hands and knees, all fours or doggy"))
+    _pt = ctx.get("s3_picture") or 2  # PM acc3 #8: a <Picture N> tag (N>=2) only next to (S3)/<Subject 3>
+    for x in sents:
+        if re.search(rf"<Picture {_pt}>", x) and not re.search(r"\(S3\)|<Subject 3>", x):
+            out.append(_fix("picture_tag", f"<Picture {_pt}> belongs only in a sentence about (S3)"))
+            break
     if kind == "oral" and oral_mouth_talk(dd):
         out.append(_fix("oral_mouth_full", "(S1) speaks only while her mouth is free; move her line before he enters her mouth or after she pulls off"))
     pm_s = outside_d(sents[prim_idx]) if prim_idx is not None else ""
@@ -194,7 +202,7 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
         out.append(_fix("camera_big", f"use a stable camera move (held, slow push-in, slow pull-out); drop '{big.group(0)}'"))
     fillers = [norm(f) for f in (cfg.get("filler_lines") or [])]
     for l in spoken_lines(dd):
-        if l in fillers and l not in norm(ask):
+        if any(f and re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", l) for f in fillers) and l not in norm(ask):  # PM acc3 #8: substrings
             out.append(_fix("filler", f"line '{l}' is a stock filler; write a line about the still"))
     if "pov" in ov:
         if re.search(r"(?i)\bhand-?held\b", " ".join(cam)) or re.search(r"(?i)\bextreme close", plain):
@@ -306,6 +314,7 @@ SLAP_RE = re.compile(r"(?i)\b(?:slap\w*|smack\w*)\b")  # acceptance-3 (m19): sof
 ORAL_SHEATHED_RE = re.compile(r"(?i)\b(?:sheathed|hips flush)\b[^.;]{0,40}\b(?:mouth|throat|lips)\b|\b(?:mouth|throat|lips)\b[^.;]{0,20}\bsheathed\b")
 TAG_WORDS_RE = re.compile(r"(?i)\b(?:cinematic|beautiful)\b")
 # lost-features audit (Derrick t243s811): youth hint = hard stop; tiny/fairy = adult proportions stated (hard)
+UNDER18_AGE_RE = re.compile(r"(?i)\b(?:(?:[1-9]|1[0-7])\s*(?:-\s*)?(?:years?|yrs?)(?:\s*-?\s*old|\s+of\s+age)|aged\s+(?:[1-9]|1[0-7])\b|age\s+(?:[1-9]|1[0-7])\b)")
 YOUTH_RE = re.compile(r"(?i)\b(?:child\w*|kids?|teen\w*|tween|underage|under-age|minor|loli\w*|shota\w*|schoolgirl|little girl|"
                       r"pre-?pubescent|pre-?teen|young-looking|baby-?faced|juvenile|jailbait|barely legal|flat-chested girl)\b")
 CONSENT_RE = re.compile(r"(?i)\b(?:nods?|nodding|winks?|winking)\b|<d>[^<]*\b(?:yes|yeah|okay|ok|deal|tonight|wake me|do it|"
@@ -496,7 +505,8 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
             issues.append(_fix("slot_" + name, f"name the still's {name.replace('_', ' ')} ({' / '.join(words[:3])}) in the prose"))
 
     # -- scale (lost-features audit): tiny/fairy women are adults at miniature scale; any youth hint is a hard stop --
-    yh = YOUTH_RE.search(dd) or YOUTH_RE.search(ctx.get("ask") or "")
+    yh = (YOUTH_RE.search(dd) or YOUTH_RE.search(ctx.get("ask") or "") or UNDER18_AGE_RE.search(full)
+          or UNDER18_AGE_RE.search(ctx.get("ask") or ""))
     if yh:
         issues.append(_fix("youth_hint", f"hard stop: '{yh.group(0)}' reads as a minor; every person is an adult woman or man, 18+"))
     if "scale" in (ctx.get("overlays") or []) and TINY_RE.search((ctx.get("ask") or "") + " " + dd):
