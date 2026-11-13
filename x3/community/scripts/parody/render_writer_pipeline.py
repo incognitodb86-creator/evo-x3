@@ -117,6 +117,27 @@ def first_phrase(s: str) -> str:
     return re.split(r"[,;]", s or "")[0].strip()
 
 
+
+_SHEATHED_MOUTH_RE = re.compile(r"(?i)\b(?:fully\s+)?sheathed in her mouth\b")
+_NO_CONTACT_RE = re.compile(r"(?i)^(?:no contact|none|null|-)\.?$")
+
+
+def normalize_ending_state(es: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Clean inherited end state before a continued opener (PM acc4d #4): never 'sheathed' in the mouth."""
+    out = dict(es or {})
+    for k in ("pose", "contact"):
+        v = out.get(k)
+        if not v:
+            continue
+        s = str(v)
+        s = _SHEATHED_MOUTH_RE.sub("inside her mouth", s)
+        s = re.sub(r"(?i)\bsheathed\b(?=[^.;]{0,40}\b(?:mouth|throat|lips)\b)", "inside", s)
+        if _NO_CONTACT_RE.match(s.strip()):
+            s = ""
+        out[k] = s
+    return out
+
+
 def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, run_id: str, last_tone: Optional[str],
                scene_prev: Optional[Dict[str, Any]] = None, overlays: Optional[List[str]] = None) -> Dict[str, Any]:
     f = br.still_facts(still_read)
@@ -140,7 +161,7 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
     if not inv:
         focus_opts = [x for x in focus_opts if x != "garment state"]
     focus = rng.choice(focus_opts)
-    focus_text = {"his body": "his body (hands, grip, strength, what he does to her)", "her body": "her body and how it feels",
+    focus_text = {"his body": "his body and what he does to her (never his hands, grip or strength)", "her body": "her body and how it feels",
                   "the act": "the act itself and what comes next", "the tone": "the tone slot, said straight to the partner",
                   "garment state": f"the {g0.get('name', 'garment')} and where it is now",
                   "still prop": (f["props"][0] if f["props"] else "his body")}[focus]
@@ -156,8 +177,14 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
         "tone": pick_tone(ask, rng, last_tone, overlays), "line_focus": focus, "line_focus_text": focus_text,
         "position": position, "kind": kind, "opening_lead": rng.choice(OPENING_LEADS),
     }
+    if (position == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or ""):
+        # setting-only still: never leak her hair, skin, clothes or pose onto the man
+        for k in ("hair", "skin", "build", "garment", "garment_noun", "pose"):
+            slots[k] = ""
+        slots["garments_all"] = []
+        slots["join_garments"] = []
     if scene_prev:
-        es = scene_prev.get("ending_state") or {}
+        es = normalize_ending_state(scene_prev.get("ending_state") or {})
         slots["inherited"] = {"pose": es.get("pose"), "garments": es.get("garments"), "contact": es.get("contact"),
                               "camera": es.get("camera"), "pov": es.get("pov"), "done_actions": scene_prev.get("done_actions") or []}
     return slots
@@ -282,8 +309,8 @@ _PRIMARY_REQ = ("- One sentence that begins exactly 'As it builds, PRIMARY MOTIO
 _CLEAR_REQ = ("- If a garment covers the join: one active clearance sentence BEFORE the entry, in this form: '(S2) pulls her "
               "<garment> aside to one side at her hip, where it stays.' (the still's garment noun; never 'bunched'). Only the garment "
               "over the join gets 'aside to one side at her hip'; a top is pushed up off her breasts.\n")
-_JOIN_REQ = _CLEAR_REQ + ("- One literal contact sentence with one join keyword (inside her, buried in her, deep in her, hips flush, flush "
-             "against, fully sheathed) that holds through the motion.\n")
+_JOIN_REQ = _CLEAR_REQ + ("- One literal contact sentence with one join keyword (inside her, inside her vagina, inside her mouth, buried in her, deep in her, hips flush, flush "
+             "against) that holds through the motion. Never write sheathed.\n")
 # One block per mode (keyed by config position_kinds). Lint rules for the same mode live in wp_lint.MODE_RULES.
 MODES: Dict[str, Dict[str, Any]] = {
     "sex": {"schema": BEAT_SCHEMA_SEX, "beat_task": _SEX_BEAT, "prose_req": _JOIN_REQ + _PRIMARY_REQ,
@@ -354,6 +381,7 @@ def mode(kind: str) -> Dict[str, Any]:
 
 # Overlays ride on the base card (never new acts): one plan note + one prose note each.
 OVERLAY_NOTES: Dict[str, str] = {
+    "bts": ("BTS interview: (S2) is the off-screen interviewer. Script two of his questions as '(S2), off-screen, asks <d>[English] …</d>'. Those questions do not count toward her line count. (S1) answers with three short spoken lines of her own. Do not skip the beat card."),
     "cinematic": "Film look (never write the words cinematic or beautiful): one motivated camera job (held, a slow push-in, a locked medium or a low angle), light that separates the bodies, at most one line per speaker.",
     "gonzo": "Gonzo: closer framing (medium-close), light handheld energy, a faster tempo, lens looks written in the action prose.",
     "pov": "POV: the camera is the dominant's eye line, medium or medium-close, (S1) looks toward the lens, only his hands or forearms enter frame (named once). Write no camera sentence of your own; the builder's POV camera line is the only one.",
@@ -440,7 +468,7 @@ def parse_json(text: str) -> Any:
 # builder-required words per act (consistency gate), written into the brief so the card and the prose carry them
 ACT_NOTES = {
     "cowgirl": ("write this clause word for word inside the PRIMARY MOTION sentence: 'she rises and sinks on him, his hips "
-                "lifting a few inches off the {surface} to meet her as she sinks'."),
+                "lifting a few inches off the {surface} to meet her as she sinks'. Contact: 'his penis inside her vagina'."),
     "finish": ("(S1) kneels on the {surface} in front of him, weight on both knees, sitting back on her heels, face tilted up; "
                "(S2) stands with his hips level with her face; she is silent from the moment he is at her lips. Foley is breath "
                "and wet sounds, never a slap. Contact: his penis at her lips; the glans as he releases; the semen lands on her cheeks "
@@ -449,14 +477,18 @@ ACT_NOTES = {
                "around his shaft with both palms; (S2) stands, hips level with her chest; she is silent from the moment he is at "
                "her lips. Contact: his shaft pressed between her breasts (never 'sheathed')."),
     "mmf": ("(S3) kneels behind her between her knees; (S2) kneels in front of her head, his hips level with her face; she is "
-            "silent while (S2) is in her mouth (her side is wet suction and breath through her nose). (S3) has no spoken line; "
-            "give (S3) a full look in the card (age 25 or older, build, hair, attire)."),
+            "silent while (S2) is in her mouth (her side is wet suction and breath through her nose). Contact: '(S2)'s penis is "
+            "inside her mouth, her lips sealed around his shaft' (never sheathed, never hips flush for the mouth). (S3) has no "
+            "spoken line; give (S3) a full look in the card (age 25 or older, build, hair, attire)."),
     "doggy": ("If the surface is a log or the place is sand: (S1) is on her knees in the sand, forearms on the log, not kneeling on top of the log. "
+               "The end pose of the clip is knees in the sand, forearms on the log, so the next clip inherits that (never 'all fours on the log'). "
                "Never write 'seats himself'."),
     "handjob": "Contact: her fist wrapped around his shaft; this is not a titjob.",
     "ff_cunnilingus": ("(S1) sits on the {surface} edge, thighs apart; (S2) kneels between them, her mouth sealed over (S1)'s vulva, tongue on her clitoris. "
                         "Never use blowjob or 'in her mouth' wording."),
-    "ff_scissoring": "Both lie on their sides facing opposite ways, legs interlocked in an X, vulva pressed to vulva.",
+    "ff_scissoring": ("Both lie on their sides facing opposite ways, legs interlocked in an X. Contact sentence, word for word: "
+                        "'vulva pressed to vulva'."),
+    "ffm": ("Contact: '(S2)'s penis inside (S1)'s vagina' and '(S3)'s mouth on (S1)'s breast or vulva'. Name those anatomy nouns in the entry sentence."),
 }
 LINE_ANGLES = ["a command about what he does next", "a reaction to the pace", "a plea or a dare in the tone slot",
                "praise or teasing about his body", "a question to him that the action answers", "a short gasped fragment"]
@@ -564,7 +596,7 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
         inh = slots["inherited"]
         def _nz(x):
             s = str(x or "").strip()
-            return s if s and s.lower() not in ("none", "null", "-") else ""
+            return s if s and s.lower() not in ("none", "null", "-", "no contact", "no contact.") else ""
         state = "; ".join(filter(None, (_nz(inh.get("pose")), _nz(inh.get("contact")))))
         lines.append(CONTINUE_NOTE.format(state=state or "the previous clip's end pose"))
         done = [d for d in (inh.get("done_actions") or []) if _nz(d)]
@@ -689,7 +721,9 @@ def glue_fix(dd: str) -> str:
     dd = re.sub(r"(</d>\s*)(?:\(S\d\) )?adds in an? [^<]{0,40}?(?:tone|voice), and ", r"\1", dd)
     dd = re.sub(r"(?i)\b(the) the\b", r"\1", dd)
     dd = re.sub(r"(?i)\s*;\s*none\.?", "", dd)
-    dd = re.sub(r"(?i)(?:(?<=[.!?>])|^)\s*none\.(?=\s|$)", "", dd)
+    dd = re.sub(r"(?i)\s*;\s*no contact\.?", "", dd)
+    dd = re.sub(r"(?i)\b(?:fully\s+)?sheathed in her mouth\b", "inside her mouth", dd)
+    dd = re.sub(r"(?i)(?:(?<=[.!?>])|^)\s*(?:none|no contact)\.(?=\s|$)", "", dd)
     dd = re.sub(r"(?i)\bher skin (?:glistening|glistens|glistened|glistening with \w+)\b", "her damp skin", dd)
     dd = re.sub(r"(?i)\b(damp)\b((?:[ ,]+\w+){0,4}?)[ ,]+damp\b", r"\1\2", dd)
     return re.sub(r"\s{2,}", " ", dd).strip()
@@ -1128,7 +1162,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         blacklist = [r["line"] for r in wp_state.load_blacklist(bl_path, log)]
         brief = brief_block(ask, position, kind, slots, bodies)
         if (position == "male_solo") or ((br.get_act(position) or {}).get("id") == "male_solo"):
-            brief += "\nMALE SOLO: (S1) is the man. The person in the start still is not (S1) and is not in this clip."
+            brief += ("\nMALE SOLO: (S1) is the man. The start still is setting only: use its place, light and surface, never the person\'s hair, skin, clothes or pose. The person in the still is not (S1) and is not in this clip.")
         if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" and int(job.get("shot_count") or 1) > 1:
             brief += "\n" + shots_line(int(job["shot_count"]), int(job.get("frames") or 243))
         # MMF S3 (Derrick t1440): reuse the scene's S3 look, use a given S3 still, else the card invents one (faceless fallback)
@@ -1192,9 +1226,28 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + (["--s3-in-frame"] if s3_in_frame else []) + \
             (["--shots", "multi"] if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" else []) + \
             (["--continued"] if scene_prev else [])
+        if card is None and kind == "talk":
+            # BTS/talk: never skip the beat card; use a minimal valid card and keep writing
+            card = {
+                "summary": "talk-only beat",
+                "camera": "held medium shot, her face in frame",
+                "partners": [],
+                "anchor": {"pose": slots.get("pose") or "as shown"},
+                "onset": {"action": "she turns toward the interviewer", "sound": "room tone"},
+                "development": {"line_topics": ["her answer about the scene", "a follow-up from her", "a last short reply"],
+                                "sound": "her voice"},
+                "result": {"action": "she holds the look", "sound": "room tone",
+                           "line_topics": ["a closing line from her"]},
+                "end_state": {"pose": slots.get("pose") or "standing as shown", "motion": "still speaking"},
+            }
+            result["warnings"].append("beat_card_fallback")
         if card is None:
             result["warnings"].append("beat_card_skipped")
         else:
+            if route["act_id"] == "doggy" and isinstance(card.get("end_state"), dict):
+                place = " ".join(filter(None, [slots.get("place"), slots.get("surface"), slots.get("floor"), ask]))
+                if re.search(r"(?i)\b(?:log|sand)\b", place):
+                    card["end_state"]["pose"] = "on her knees in the sand, forearms on the log"
             if route["act_id"] == "standing_mf" and isinstance(card.get("end_state"), dict) and \
                     not re.search(r"(?i)\bstand", str(card["end_state"].get("pose") or "")):
                 # c8b: a rerouted doggy card still ended 'doggy, hands and knees'; the next clip inherits that pose
