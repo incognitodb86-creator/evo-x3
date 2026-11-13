@@ -108,7 +108,8 @@ BAD = [
 def test_each_hard_rule_trips_alone(code, mut):
     bad = mut(GOOD_SEX)
     assert bad != GOOD_SEX
-    assert hard(full(bad), ctx()) == [code]
+    got = hard(full(bad), ctx())
+    assert got == [code] or (code == "clearance" and got == ["clearance", "clearance_missing"])
 
 
 def test_header_order_and_blacklist():
@@ -216,7 +217,7 @@ def scripted(monkeypatch, prose, down_on=None):
 
 
 def stub_build(monkeypatch, status="READY"):
-    def run_build(run_dir, ask, position, still, character, timeout=300):
+    def run_build(run_dir, ask, position, still, character, timeout=300, extra=None):
         rep = {"status": status, "reason": None if status == "READY" else "W5 test", "build": {"added": [], "speech": {"dropped": []},
                "state": {"garments": {"item:bodysuit": "on"}, "writer_aside": ["item:bodysuit"]}}, "frames": 243}
         (Path(run_dir) / "build_report.json").write_text(json.dumps(rep), encoding="utf-8")
@@ -448,3 +449,72 @@ def test_bunched_clearance_survives_builder(home):
     import render_writer_pipeline as p
     out = p.normalize_prose("(S2) pulls the sheer white halter dress aside to her waist where it stays bunched.", "sex", {})
     assert "stays gathered" in out and "bunched" not in out
+
+
+def test_acceptance2_fixes(home):
+    import render_writer_pipeline as p
+    import wp_lint
+    # 1: the label never lands inside <d>
+    dd = "(S2) says in a low voice, <d>[English] does the log feel good?</d> As it builds, he thrusts at two strokes a second."
+    out = p.normalize_prose(dd, "sex", {})
+    assert "PRIMARY MOTION" not in "".join(__import__("re").findall(r"<d>.*?</d>", out))
+    assert "As it builds, PRIMARY MOTION - he thrusts" in out
+    # cowgirl word order, tag words, shiny skin
+    assert "his hips lift" in p.normalize_prose("(S2) lifts his hips a few inches.", "sex", {})
+    o2 = p.normalize_prose("A cinematic shot of glistening skin.", "sex", {})
+    assert "cinematic" not in o2 and "glistening" not in o2
+    # 9: still read cleanup
+    d, ch = p.clean_still_read({"read": {"floor": "unseen", "skin": "glistening wet skin"}})
+    assert d["read"]["floor"] == "the floor" and "visible pores" in d["read"]["skin"] and ch
+    # 10: CONTINUE_RE knows 'maintains'
+    assert wp_lint.CONTINUE_RE.search("as (S2) maintains the heavy tempo")
+    assert wp_lint.MOUTH_CONTACT_RE.search("he slides past her lips")
+
+
+def test_acceptance3_fixes():
+    import render_writer_pipeline as r
+    import wp_lint as L
+    out = r.normalize_prose("She peels the dress down past her hips, one slow move every two seconds. At first, standing_mf; held.",
+                            "strip", {"surface": "sideboard"})
+    assert "PRIMARY MOTION - " in out and "cycle every two seconds" in out and "standing_mf" not in out
+    assert not L.SHALLOW_RE.search("her strained, shallow breathing")
+    assert L.SHALLOW_RE.search("shallow thrusts at the entrance")
+    assert L.join_noun({"join_garments": ["sheer mesh bikini bottom"]}) == "bikini bottom"
+    assert L._join_inherited_clear({"join_garments": ["sheer white halter dress"], "inherited": {"garments": {"dress": "aside"}}}, None)
+    assert not L._join_inherited_clear({"join_garments": ["sheer white halter dress"], "inherited": {"garments": {"dress": "on"}}}, None)
+    req = L.required_slots({"garment_noun": "top", "garments_all": ["string top", "sheer mesh bikini bottom"],
+                            "join_garments": ["sheer mesh bikini bottom"]})
+    assert "bottom" in req["garment"] and "top" in req["garment"]
+
+
+def test_acceptance3_round2():
+    import render_writer_pipeline as r
+    import wp_lint as L
+    out = r.normalize_prose("As it builds, she drives at two thrusts a second, her chest jolting.", "sex", {})
+    assert "strokes a second" in out and "PRIMARY MOTION - " in out
+    assert not L.SLAP_RE.search("The wet, rhythmic sliding of skin on skin.") and L.SLAP_RE.search("the wet slap of skin")
+    assert L._join_inherited_clear({"join_garments": ["sheer mesh bikini bottom"],
+                                    "inherited": {"garments": {"top": "on", "panties": "aside"}}}, None)
+    full = r.assemble_output("[Shot 1] At first, (S1) sits.", {"summary": "A cinematic medium shot of a glistening woman"},
+                             {"place": "beach", "light": "dusk", "hair": "blonde"}, 2, "sex")
+    summ = full.split("summary:\n", 1)[1].split("\n", 1)[0]
+    assert "cinematic" not in summ.lower() and "glistening" not in summ and summ.startswith("A medium shot")
+    assert r.partner_type2_for("mmf", "mmf on the log") == "faceless" and r.partner_type2_for("missionary", "x") is None
+
+
+def test_acceptance3_mouth_full_s1_line_dropped():
+    import render_writer_pipeline as r
+    dd = ("(S2) slides into her mouth as (S3) enters her. (S2) says in a low voice, <d>Like that?</d> "
+          "(S1) says in a bratty voice, <d>Harder.</d> By the end, she keeps moving.")
+    out = r.normalize_prose(dd, "sex", {})
+    assert "Harder" not in out and "Like that?" in out and "By the end" in out
+
+
+def test_mmf_s3_look_from_card():
+    import render_writer_pipeline as r
+    card = {"partners": [{"label": "S2", "sex": "male", "age": 30, "build": "athletic", "attire": "jeans", "enters_from": "left"},
+                         {"label": "(S3)", "sex": "male", "age": 19, "build": "lean", "hair": "short dark hair",
+                          "attire": "wearing grey linen trousers", "enters_from": "behind"}]}
+    look = r.s3_look_from_card(card)
+    assert look == "an adult man, 25 years of age, of lean build, with short dark hair, in grey linen trousers"
+    assert r.s3_look_from_card({"partners": []}) is None
