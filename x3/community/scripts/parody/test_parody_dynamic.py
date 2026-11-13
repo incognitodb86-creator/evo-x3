@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -46,7 +49,7 @@ def _res(name="Jennifer Check", actor="Megan Fox", mods=("minimaxh3_meganfox_v1_
 
 
 def _detail(p):
-    return p.split("detailed_description:")[1].split("overall_soundscape:")[0]
+    return p.split("detailed_description:", 1)[1]
 
 
 def _summary(p):
@@ -109,11 +112,11 @@ class TestPromptTweaks(unittest.TestCase):
         p = format_parody_prompt(_res(), dialogue=LINE, scene="sits in a neon diner booth, holding a coffee mug")
         self.assertNotIn("Adult cast", p)
         self.assertNotIn("adults-only", p)
-        self.assertIn("an adult performer, age 28+", p)
-        self.assertTrue(comm.adult_stated(p))
+        self.assertNotIn("an adult performer, age 28+", p)
         self.assertLessEqual(p.lower().count("adult"), 2)
-        self.assertIn("[English, using Megan Fox's exact Jennifer Check voice and signature vocal timbre]", p)
-        self.assertIn("overall_soundscape:", p)
+        self.assertIn("(S1) says in Megan Fox's exact Jennifer Check voice with signature vocal timbre: <d>[English] ", p)
+        self.assertIn("<d>[English] Relax, the coffee here is the only thing scarier than me after midnight.</d>", p)
+        self.assertNotIn("overall_soundscape:", p)
 
     def test_600_word_scene_preserved_untruncated(self):
         sent = ("She leans across the chrome-trimmed counter under pink and cyan neon, rain streaking the dark glass "
@@ -138,7 +141,7 @@ class TestU4CameraPronoun(unittest.TestCase):
     def test_default_static_camera(self):
         p = format_parody_prompt(_res(), dialogue=LINE)
         self.assertIn("[static medium shot, eye level, 50mm lens, shallow depth of field]", p)
-        self.assertIn("Camera locked off, no zoom, no pan.", p)
+        self.assertNotIn("Camera locked off", p)
 
     def test_moving_camera_drops_locked_off(self):
         cam = "cinematic widescreen medium-wide shot from waist up including tabletop, 35mm lens, slow smooth dolly push-in"
@@ -147,13 +150,13 @@ class TestU4CameraPronoun(unittest.TestCase):
         self.assertNotIn("Camera locked off", p)
         p2 = format_parody_prompt(_res(), dialogue=LINE, camera="close-up, 85mm lens")
         self.assertIn("[close-up, 85mm lens]", p2)
-        self.assertIn("Camera locked off, no zoom, no pan.", p2)
+        self.assertNotIn("Camera locked off", p2)
 
     def test_pronouns_and_end_action(self):
         p = format_parody_prompt(_res(), dialogue=LINE, pronoun="he")
         self.assertIn("He holds eye contact, gives a small nod at the end, and stops talking.", p)
         self.assertIn("His mouth movements stop completely", p)
-        self.assertIn("He uses Megan Fox's exact Jennifer Check voice, accent, and signature vocal timbre consistently throughout the entire clip.", p)
+        self.assertNotIn("consistently throughout the entire clip", p)
         t = format_parody_prompt(_res(), dialogue=None, pronoun="they")
         self.assertIn("They do not speak; their lips stay closed", t)
         e = format_parody_prompt(_res(), dialogue=LINE,
@@ -176,10 +179,11 @@ class TestU4CameraPronoun(unittest.TestCase):
         r2 = _res(name="Needy Lesnicki", actor="Amanda Seyfried", mods=("minimaxh3_amandaseyfried_v1_refmod",),
                   bio="wavy honey-blonde hair, wide blue eyes, oversized cardigan")
         both = format_parody_prompt(_res(), dialogue=LINE, resolved2=r2, dialogue2="You said that last week too.")
-        self.assertIn("(S1) Jennifer Check - an adult performer, age 28+", both)
-        self.assertIn("(S2) Needy Lesnicki - an adult performer, age 28+", both)
+        self.assertIn("(S1) Jennifer Check - ", both)
+        self.assertIn("(S2) Needy Lesnicki - ", both)
+        self.assertNotIn("an adult performer, age 28+", both)
         self.assertIn("Non-speaking characters: none.", both)
-        self.assertIn("(S2): <d>[English, using Amanda Seyfried's exact Needy Lesnicki voice and signature vocal timbre] You said that last week too.</d>", both)
+        self.assertIn("(S2) says in Amanda Seyfried's exact Needy Lesnicki voice with signature vocal timbre: <d>[English] You said that last week too.</d>", both)
         one = format_parody_prompt(_res(), dialogue=LINE, resolved2=r2)
         self.assertIn("Non-speaking characters: (S2).", one)
         self.assertIn("(S2) She does not speak", one)
@@ -245,7 +249,7 @@ class TestU2Images(unittest.TestCase):
         self.assertNotIn("<Picture", p)
         self.assertNotIn("[reference generation]", p)
         self.assertNotIn("retention_analysis", p)
-        self.assertIn("overall_soundscape:", p)
+        self.assertNotIn("overall_soundscape:", p)
         g0, p0 = build_parody_request(_res(), seed=51083601, prefix="community/t/clip", dialogue=LINE)
         self.assertEqual(p, p0)  # --image never changes the text Qwen sees
         with self.assertRaises(ValueError):
@@ -466,26 +470,26 @@ class TestContinuationFiveItems(unittest.TestCase):
     def test_item1_ambience_option(self):
         # 1. Default ambience when omitted or None
         p_def = format_parody_prompt(_res(), dialogue=LINE)
-        self.assertIn("quiet room ambience, soft natural room tone; the single close-micd human voice in the foreground.", p_def)
+        self.assertIn("Quiet room ambience, soft natural room tone, with the single close-micd human voice in the foreground.", p_def)
 
         # 2. Custom ambience in single voice
         custom_amb = "quiet night room tone, distant gentle rain"
         p_custom = format_parody_prompt(_res(), dialogue=LINE, ambience=custom_amb)
-        self.assertIn("quiet night room tone, distant gentle rain; the single close-micd human voice in the foreground.", p_custom)
+        self.assertIn("Quiet night room tone, distant gentle rain, with the single close-micd human voice in the foreground.", p_custom)
 
         # 3. Custom ambience with 2 voices
         p_two = format_parody_prompt(_res(), dialogue=LINE, resolved2=_res("Ivy Fixture", "Ivy Fixture"),
                                      dialogue2="Coffee is ready.", ambience="soft cafe ambience, subtle espresso steam")
-        self.assertIn("soft cafe ambience, subtle espresso steam; two close-micd human voices in the foreground, one speaker at a time.", p_two)
+        self.assertIn("Soft cafe ambience, subtle espresso steam, with two close-micd human voices in the foreground, one speaker at a time.", p_two)
 
         # 4. Custom ambience with silent clip
         p_silent = format_parody_prompt(_res(), dialogue=None, ambience="deep space hum, airlock circulation")
-        self.assertIn("deep space hum, airlock circulation; no spoken voice.", p_silent)
+        self.assertIn("Deep space hum, airlock circulation, with no spoken voice.", p_silent)
 
         # 5. build_parody_request carries ambience through
         _, prompt = build_parody_request(_res(), seed=51083601, prefix="community/amb_test/clip", frames=124,
                                         dialogue=LINE, ambience="crackling fireplace, quiet parlor")
-        self.assertIn("crackling fireplace, quiet parlor", prompt)
+        self.assertIn("Crackling fireplace, quiet parlor", prompt)
 
     def test_item2_refuse_long_seconds_without_two_plus_beats(self):
         # Refuses > 243 frames (~10.125s) with 0 beats
@@ -616,7 +620,9 @@ class TestContinuationFiveItems(unittest.TestCase):
 
         self.assertNotIn("The shot continues from the last seen moment", p_b1)
         self.assertIn("The shot continues from the last seen moment", p_b2)
-        self.assertIn("the same framing, the same standing pose", p_b2)
+        # dynsafe brief item 1: beat 2 inherits beat 1's actual closing pose, never a hardcoded standing pose
+        self.assertIn("the same framing, the same pose the previous beat ended on (she sits at the counter, both hands on a mug)", p_b2)
+        self.assertNotIn("standing pose", p_b2)
         self.assertIn("natural micro-motion", p_b2)
         self.assertIn("The camera does not change angle and the shot never resets to a starting photo.", p_b2)
         self.assertIn("and she is still in the same place", p_b2)
@@ -679,8 +685,8 @@ class TestContinuationFiveItems(unittest.TestCase):
         s = json.dumps(g, indent=2, sort_keys=True)
         g_hash = hashlib.sha256(s.encode("utf-8")).hexdigest()
         p_hash = hashlib.sha256(p.encode("utf-8")).hexdigest()
-        self.assertEqual(g_hash, "949666d54685f2e94979841e0c5a925a40486bf44f44e3c563941a462270dee8")
-        self.assertEqual(p_hash, "521ba2341a7c135bfb4831b95d6688441fc029d234e1c223e065a49d2b9a3b50")
+        self.assertEqual(g_hash, "1778d290d18c38c9767080d7de4181bb8775d3917cbadffe4f2f8b346ccc4ce3")
+        self.assertEqual(p_hash, "9d36f0c68585c717bf1ec95797402a17b144c5ef6975d93746f5726f81703971")
 
         # Verify locked dials
         c0 = g["c0"]["inputs"]
@@ -692,5 +698,396 @@ class TestContinuationFiveItems(unittest.TestCase):
         self.assertEqual(g["refapply"]["class_type"], "MiniMaxH3RefModApply")
 
 
+class TestPlainDiegeticSoundTail(unittest.TestCase):
+    def test_no_overall_soundscape_header_and_trailing_plain_sound(self):
+        p = format_parody_prompt(_res(), dialogue=LINE, scene="sits in a neon diner booth, holding a coffee mug")
+        self.assertNotIn("overall_soundscape", p.lower())
+        self.assertNotIn("no_dubs:", p)
+        # spoken clip: voice mentioned in the plain tail, after speech / detailed_description
+        tail = p.strip().splitlines()[-1].strip()
+        self.assertFalse(tail.endswith("No music, no songs, no score, no soundtrack."))
+        self.assertNotIn("No music, no songs, no score, no soundtrack.", tail)
+        self.assertIn("Quiet room ambience, soft natural room tone, with the single close-micd human voice in the foreground.", tail)
+        self.assertNotIn("No singing, no rapping, no songs, no music, no narration, no voice-over.", p)
+        self.assertGreaterEqual(tail.count("."), 2)
+        self.assertLessEqual(tail.count("."), 4)
+        silent = format_parody_prompt(_res(), dialogue=None, scene="sits in a neon diner booth, holding a coffee mug")
+        self.assertNotIn("overall_soundscape", silent.lower())
+        stail = silent.strip().splitlines()[-1].strip()
+        self.assertIn("Quiet room ambience, soft natural room tone, with no spoken voice.", stail)
+        self.assertNotIn("No music, no songs, no score, no soundtrack.", stail)
+        custom = format_parody_prompt(_res(), dialogue=LINE, ambience="soft leather and low neon hum")
+        self.assertIn("Soft leather and low neon hum, with the single close-micd human voice in the foreground.", custom)
+
+
+
+class TestDialogueTimbreOutsideD(unittest.TestCase):
+    def test_voice_and_timbre_outside_d_tags(self):
+        p = format_parody_prompt(_res(), dialogue=LINE, scene="sits in a neon diner booth, holding a coffee mug")
+        import re
+        insides = re.findall(r"<d>(.*?)</d>", p, flags=re.DOTALL)
+        self.assertTrue(insides)
+        for inner in insides:
+            self.assertTrue(inner.startswith("[English] "), inner)
+            low = inner.lower()
+            for banned in ("timbre", "voice", "using ", "says in"):
+                self.assertNotIn(banned, low, inner)
+        pre = p.split("<d>", 1)[0]
+        self.assertIn("says in Megan Fox's exact Jennifer Check voice with signature vocal timbre:", pre)
+        self.assertIn("<d>[English] Relax, the coffee here is the only thing scarier than me after midnight.</d>", p)
+        r2 = _res(name="Needy Lesnicki", actor="Amanda Seyfried", mods=("minimaxh3_amandaseyfried_v1_refmod",),
+                  bio="wavy honey-blonde hair, wide blue eyes, oversized cardigan")
+        both = format_parody_prompt(_res(), dialogue=LINE, resolved2=r2, dialogue2="You said that last week too.")
+        insides2 = re.findall(r"<d>(.*?)</d>", both, flags=re.DOTALL)
+        self.assertEqual(len(insides2), 2)
+        for inner in insides2:
+            self.assertTrue(inner.startswith("[English] "), inner)
+            self.assertNotIn("timbre", inner.lower())
+            self.assertNotIn("voice", inner.lower())
+
+
+
+class TestVoiceQualityCue(unittest.TestCase):
+    def test_cassie_voice_description_outside_d_and_no_repeated_uses_line(self):
+        cassie = _res(name="Cassie Howard", actor="Sydney Sweeney",
+                      mods=("minimaxh3_sydneysweeney_v1_refmod",),
+                      bio="long centre-parted blonde hair, blue eyes, tanned skin")
+        p = format_parody_prompt(cassie, dialogue=LINE, scene="sits in a neon diner booth, holding a coffee mug")
+        pre = p.split("<d>", 1)[0]
+        self.assertIn(
+            "(S1) says in Sydney Sweeney's exact Cassie Howard voice with signature vocal timbre, "
+            "a low, soft, breathy voice with light vocal fry, unhurried:",
+            pre,
+        )
+        import re
+        insides = re.findall(r"<d>(.*?)</d>", p, flags=re.DOTALL)
+        self.assertTrue(insides)
+        for inner in insides:
+            self.assertTrue(inner.startswith("[English] "), inner)
+            self.assertEqual(inner, f"[English] {LINE}")
+            low = inner.lower()
+            for banned in ("timbre", "voice", "fry", "breathy"):
+                self.assertNotIn(banned, low, inner)
+        self.assertNotIn("consistently throughout the entire clip", p)
+        unknown = format_parody_prompt(_res(), dialogue=LINE)
+        self.assertIn(
+            "(S1) says in Megan Fox's exact Jennifer Check voice with signature vocal timbre: <d>[English] ",
+            unknown,
+        )
+        self.assertNotIn("a low, soft, breathy voice", unknown)
+        self.assertNotIn("contralto", unknown)
+        self.assertNotIn("consistently throughout the entire clip", unknown)
+
+
+
+
+
+class TestApprovedCamVoiceMusic(unittest.TestCase):
+    """Camera header derive, OC voice cue, and music-negative placement (2026-11-10)."""
+
+    def test_holds_sentence_derives_header_instead_of_eye_level_default(self):
+        scene = (
+            "The camera holds a static medium-wide shot from a tripod at hip height on a 50mm lens, "
+            "holding her face and the seated man's face in the same frame. She stands at the right edge of the seat."
+        )
+        p = format_parody_prompt(_res(), dialogue=LINE, scene=scene)
+        self.assertIn("[static medium-wide shot, hip height, 50mm lens, shallow depth of field]", p)
+        self.assertNotIn("[static medium shot, eye level, 50mm lens, shallow depth of field]", p)
+        self.assertNotIn("Camera locked off", p)
+
+    def test_explicit_camera_arg_not_overwritten_by_holds_sentence(self):
+        scene = (
+            "The camera holds a static medium-wide shot from a tripod at hip height on a 50mm lens, "
+            "holding her face and the seated man's face in the same frame."
+        )
+        cam = "close-up, 85mm lens"
+        p = format_parody_prompt(_res(), dialogue=LINE, scene=scene, camera=cam)
+        self.assertIn("[close-up, 85mm lens]", p)
+        self.assertNotIn("[static medium-wide shot, hip height, 50mm lens, shallow depth of field]", p)
+
+    def test_oc_description_voice_cue_on_says_line(self):
+        oc = {
+            "names": ["Pool Blonde"],
+            "character": "Pool Blonde",
+            "actor": "",
+            "description": (
+                "featuring oc poolblonde (character Pool Blonde), an adult woman aged 28, "
+                "an original character with an invented face, voice and body, her own signature vocal timbre, "
+                "a low, dry, unhurried alto with a slight rasp, wearing a jewelled choker, styled in club tone."
+            ),
+            "refmod_slots": _slots("minimaxh3_oc_poolblonde_v1_refmod"),
+        }
+        p = format_parody_prompt(oc, dialogue=LINE, scene="stands at the seat edge")
+        pre = p.split("<d>", 1)[0]
+        self.assertIn(
+            "says in Pool Blonde's exact voice with signature vocal timbre, "
+            "a low, dry, unhurried alto with a slight rasp:",
+            pre,
+        )
+
+    def test_voice_quality_field_wins_over_description(self):
+        r = _res()
+        r["voice_quality"] = "a dry mid alto"
+        p = format_parody_prompt(r, dialogue=LINE)
+        pre = p.split("<d>", 1)[0]
+        self.assertIn("signature vocal timbre, a dry mid alto:", pre)
+        self.assertNotIn("a low, soft, breathy voice", pre)
+
+
+class TestArgonLowMultiStillAndLeadIn(unittest.TestCase):
+    """argon-low Section C (2026-11-11): D dynamic lead-in, A Beat-1 AddGuide chain, B continuation AddGuide, C new-shot."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="argon_c_")
+        self.root = Path(self.tmp.name)
+        self.pool = self.root / "approved_characters"
+        (self.pool / "B01").mkdir(parents=True)
+        self.img1 = self.pool / "B01" / "start.png"
+        self.img2 = self.pool / "B01" / "mid.png"
+        self.img3 = self.pool / "B01" / "cut.png"
+        for i, p in enumerate((self.img1, self.img2, self.img3), start=1):
+            p.write_bytes(f"\x89PNG fixture {i}".encode())
+        self.input_dir = self.root / "comfy_input"
+        self.index = self.root / "index"
+        self.index.mkdir()
+        (self.index / "INDEX_BAD.md").write_text(INDEX_BAD, encoding="utf-8")
+        self.refmods = self.root / "refmods"
+        self.refmods.mkdir()
+        (self.refmods / "minimaxh3_norafixture_v1_refmod.safetensors").write_bytes(b"f")
+        self.run_dir = self.root / "run"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_c1_dynamic_lead_in_when_beat_moves_cuts_or_walks(self):
+        closer = br.beat_closer(
+            {"scene": "She pulls the silk robe down over her hips and drops it on the bedroom rug. She kneels on the rug."},
+            "she",
+        )
+        self.assertEqual(closer["place"], "bedroom")
+        # Static continuation keeps same-framing / same-room lead-in
+        s_static = br.continuation_scene("She leans forward and rests her palms on the rug.", "she", closer=closer)
+        self.assertIn("the same framing", s_static)
+        self.assertIn("the same room lighting", s_static)
+        self.assertIn("The camera does not change angle", s_static)
+        self.assertIn("never resets to a starting photo", s_static)
+        # Camera move / timed cut / walk drops "same framing / camera does not change angle / same room"
+        for kw in (
+            {"scene": "The camera pushes in with small amplitude at slow speed as she rises."},
+            {"scene": "She walks across the floor to the window."},
+            {"scene": "[Shot 2] Cut to a closer angle at the edge of the bed.", "new_shot": True},
+        ):
+            s_dyn = br.continuation_scene(kw["scene"], "she", closer=closer, new_shot=kw.get("new_shot", False))
+            self.assertNotIn("the same framing", s_dyn)
+            self.assertNotIn("the same room lighting", s_dyn)
+            self.assertNotIn("camera does not change angle", s_dyn.lower())
+            self.assertIn("never resets to a starting photo", s_dyn)
+            self.assertIn("she kneels on the rug", s_dyn)
+
+    def test_c2_beat1_chained_add_guides_and_fail_closed(self):
+        staged = br.stage_reference_images(
+            validate_reference_images([str(self.img1), str(self.img2)], pools=(self.pool,)),
+            self.input_dir,
+        )
+        g, p = build_parody_request(
+            _res(), seed=51083601, prefix="community/t/clip", frames=124,
+            images=staged, image_times=[3.0], dialogue=LINE,
+        )
+        self.assertEqual(g["img_1"]["inputs"]["image"], staged[0])
+        self.assertEqual(g["img_2"]["inputs"]["image"], staged[1])
+        self.assertEqual(g["add_guide"]["inputs"], {
+            "positive": ["c0", 0], "latent": ["c0", 1], "vae": ["vvae", 0], "image": ["img_1", 0], "frame_idx": 0,
+        })
+        self.assertEqual(g["add_guide_2"]["inputs"], {
+            "positive": ["add_guide", 0], "latent": ["c0", 1], "vae": ["vvae", 0], "image": ["img_2", 0], "frame_idx": 72,
+        })
+        self.assertEqual(g["refapply"]["inputs"]["conditioning"], ["add_guide_2", 0])
+        self.assertFalse([k for k in g["c0"]["inputs"] if k.startswith("ref_images")])
+        self.assertEqual(br.snap_still_token_frame(3.0), 68)
+        # Fail closed: later image with no time, time outside beat 1, or pins < 0.5s apart
+        with self.assertRaises(ValueError):
+            build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=124, images=staged)
+        with self.assertRaises(ValueError):
+            build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=124,
+                                 images=staged, image_times=[6.0])
+        with self.assertRaises(ValueError):
+            build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=124,
+                                 images=staged, image_times=[0.3])
+
+    def test_c3_and_c4_continuation_beat_guides_and_new_shot_mode(self):
+        staged = br.stage_reference_images(
+            validate_reference_images([str(self.img1), str(self.img2), str(self.img3)], pools=(self.pool,)),
+            self.input_dir,
+        )
+        # B mode: continuing beat pin at >= 0.5s into Beat 2 (clip time 6.5s on a 124f / 5.1667s base beat -> ~1.333s into beat 2)
+        p1 = mock.patch.object(spr, "INDEX_DIR", self.index)
+        p2 = mock.patch.object(spr, "REFMODS_DIR", self.refmods)
+        p3 = mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json")
+        p4 = mock.patch.object(spr.subprocess, "run")
+        with p1, p2, p3, p4:
+            res = spr.submit_parody_job(
+                name="Nora Fixture", actor="Nora Fixture", description=BIO,
+                run_dir_override=self.run_dir, dry_run=True,
+                beats=["stands in the bedroom holding a mug", "steps toward the counter and sets the mug down"],
+                beat_seconds=[5.0, 6.0],
+                images=[str(self.img1), str(self.img2)],
+                image_times=[6.5],
+                image_pools=(self.pool,),
+                image_input_dir=self.input_dir,
+            )
+        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
+        self.assertEqual(g["img_1"]["inputs"]["image"], staged[0])
+        self.assertEqual(g["c2_img"]["inputs"]["image"], staged[1])
+        self.assertEqual(g["c2_guide"]["inputs"]["positive"], ["c2_refapply", 0])
+        self.assertEqual(g["c2_guide"]["inputs"]["latent"], ["c2_gen", 0])
+        self.assertGreaterEqual(g["c2_guide"]["inputs"]["frame_idx"], 22 + 12)
+        self.assertEqual(g["c2_tail"]["inputs"]["positive"], ["c2_guide", 0])
+
+        # Reject pin inside hidden overlap (< 22) and continuing-beat pin < 0.5s into new part
+        g_base, _ = build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=124)
+        g_beat, _ = build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=158, continuation=True)
+        lay = br.continuation_layout(124, 136, 22)
+        with self.assertRaises(ValueError):
+            br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[1], "frame_idx": 10}])
+        with self.assertRaises(ValueError):
+            br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[1], "sec": 0.2}], new_shot=False)
+
+        # C mode ("new shot"): allows pin in first 0.5s of beat 2, uses dynamic cut lead-in, and rejects walk between two rooms
+        g_cut = br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[2], "sec": 0.25}], new_shot=True)
+        self.assertEqual(g_cut["c2_guide"]["inputs"]["frame_idx"], 22 + 6)
+        with self.assertRaises(ValueError):
+            br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[2], "sec": 1.2}], new_shot=True)
+        with self.assertRaises(ValueError):
+            build_parody_request(
+                _res(), seed=51083601, prefix="community/t/clip", frames=158, continuation=True,
+                prior_closer={"pose": "she stands", "wardrobe": "", "place": "bedroom"},
+                scene="She walks into the kitchen and leans on the counter.", new_shot=False,
+            )
+
+    def test_prequel_last_frame_pin_resolves_to_frames_minus_one_single_clip(self):
+        staged = br.stage_reference_images(
+            validate_reference_images([str(self.img1), str(self.img2)], pools=(self.pool,)),
+            self.input_dir,
+        )
+        # 1. Single prequel clip with 1 image and image_times=["end"] -> resolves to frames - 1 (123)
+        g1, _ = build_parody_request(
+            _res(), seed=51083601, prefix="community/t/clip", frames=124,
+            images=[staged[0]], image_times=["end"], dialogue=LINE,
+        )
+        self.assertEqual(g1["add_guide"]["inputs"]["frame_idx"], 123)
+        self.assertNotIn("add_guide_2", g1)
+
+        # 2. Single prequel clip with 1 image and image_times=[-1] -> resolves to frames - 1 (123)
+        g2, _ = build_parody_request(
+            _res(), seed=51083601, prefix="community/t/clip", frames=124,
+            images=[staged[0]], image_times=[-1], dialogue=LINE,
+        )
+        self.assertEqual(g2["add_guide"]["inputs"]["frame_idx"], 123)
+
+        # 3. Single prequel clip with frame_indices=[-1]
+        g3, _ = build_parody_request(
+            _res(), seed=51083601, prefix="community/t/clip", frames=124,
+            images=[staged[0]], frame_indices=[-1], dialogue=LINE,
+        )
+        self.assertEqual(g3["add_guide"]["inputs"]["frame_idx"], 123)
+
+        # 4. Start still (frame 0) + last-frame pin (123) with image_times=["end"]
+        g4, _ = build_parody_request(
+            _res(), seed=51083601, prefix="community/t/clip", frames=124,
+            images=staged, image_times=["end"], dialogue=LINE,
+        )
+        self.assertEqual(g4["add_guide"]["inputs"]["frame_idx"], 0)
+        self.assertEqual(g4["add_guide_2"]["inputs"]["frame_idx"], 123)
+
+        # 5. Start still (frame 0) + last-frame pin (123) with frame_indices=[0, -1]
+        g5, _ = build_parody_request(
+            _res(), seed=51083601, prefix="community/t/clip", frames=124,
+            images=staged, frame_indices=[0, -1], dialogue=LINE,
+        )
+        self.assertEqual(g5["add_guide"]["inputs"]["frame_idx"], 0)
+        self.assertEqual(g5["add_guide_2"]["inputs"]["frame_idx"], 123)
+
+        # Ensure no negative frame_idx is written anywhere in the graph
+        for nid, node in g4.items():
+            if node.get("class_type") == "MiniMaxH3AddGuide":
+                self.assertGreaterEqual(node["inputs"]["frame_idx"], 0)
+
+    def test_prequel_rejects_mid_act_frame_as_last_frame_pin(self):
+        # 1. validate_target_opening_pose checks
+        br.validate_target_opening_pose("character_opening_pose.png")
+        br.validate_target_opening_pose("character_frame_0.png", frame_idx=0)
+        with self.assertRaises(ValueError) as cm:
+            br.validate_target_opening_pose("character_mid_act.png")
+        self.assertIn("mid-act frame is not accepted as the last-frame pin image", str(cm.exception))
+
+        with self.assertRaises(ValueError) as cm2:
+            br.validate_target_opening_pose("character_scene_mid_frame.png")
+        self.assertIn("mid-act frame is not accepted as the last-frame pin image", str(cm2.exception))
+
+        with self.assertRaises(ValueError) as cm3:
+            br.validate_target_opening_pose("character_scene.png", frame_idx=48)
+        self.assertIn("mid-act frame", str(cm3.exception))
+
+        with self.assertRaises(ValueError) as cm4:
+            br.validate_target_opening_pose("character_scene.png", is_opening_pose=False)
+        self.assertIn("mid-act frame", str(cm4.exception))
+
+        # 2. build_parody_request rejects mid-act image path on last-frame pin
+        mid_img = self.pool / "fixture_mid_act.png"
+        mid_img.write_bytes(self.img1.read_bytes())
+        staged_mid = br.stage_reference_images(
+            validate_reference_images([str(mid_img)], pools=(self.pool,)),
+            self.input_dir,
+        )
+        with self.assertRaises(ValueError) as cm5:
+            build_parody_request(
+                _res(), seed=51083601, prefix="community/t/clip", frames=124,
+                images=staged_mid, image_times=["end"], dialogue=LINE,
+            )
+        self.assertIn("mid-act frame is not accepted", str(cm5.exception))
+
+    def test_prequel_stitch_join_path_not_latent_tail(self):
+        # Create a fixture target mp4
+        target_mp4 = self.root / "existing_scene.mp4"
+        r = subprocess.run([
+            "ffmpeg", "-y", "-loglevel", "error",
+            "-f", "lavfi", "-i", "testsrc=duration=2.0:size=320x240:rate=24",
+            "-f", "lavfi", "-i", "anullsrc=duration=2.0:channel_layout=stereo:sample_rate=44100",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(target_mp4)
+        ], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0)
+
+        # 1. submit_parody_job with prequel_to and dry_run=True
+        p1 = mock.patch.object(spr, "INDEX_DIR", self.index)
+        p2 = mock.patch.object(spr, "REFMODS_DIR", self.refmods)
+        p3 = mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json")
+        p4 = mock.patch.object(spr.subprocess, "run")
+        with p1, p2, p3, p4:
+            res = spr.submit_parody_job(
+                name="Nora Fixture", actor="Nora Fixture", description=BIO,
+                run_dir_override=self.run_dir, dry_run=True,
+                scene="She enters the room before the meeting.",
+                prequel_to=target_mp4,
+            )
+        self.assertTrue(res["dry_run"])
+        self.assertEqual(res["prequel_to"], str(target_mp4.resolve()))
+        self.assertTrue(res["prequel_stitch"])
+        # Check that the request graph is a single clip and has NO LatentTailGuide
+        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
+        for nid, node in g.items():
+            self.assertNotEqual(node.get("class_type"), "MiniMaxH3LatentTailGuide")
+
+        # 2. finalize_clip stitches [prequel, existing]
+        prequel_clip = self.run_dir / "prequel_01.mp4"
+        shutil.copyfile(target_mp4, prequel_clip)
+        fres = spr.finalize_clip(self.run_dir, ["prequel_01"], sys.executable, prequel_to=target_mp4)
+        self.assertTrue(fres["stitched"])
+        self.assertEqual(fres["prequel_to"], str(target_mp4.resolve()))
+        self.assertTrue(Path(fres["final_mp4"]).is_file())
+        self.assertGreater(Path(fres["final_mp4"]).stat().st_size, 0)
+        self.assertEqual(fres["clips"], [str(prequel_clip.resolve()), str(target_mp4.resolve())])
+
+
 if __name__ == "__main__":
     unittest.main()
+

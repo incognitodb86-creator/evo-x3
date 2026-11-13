@@ -28,13 +28,13 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
 - Content: `--scene` (rich; first sentence → `summary:` when > 180 chars or multi-sentence), `--summary`, `--dialogue` (spoken words only), `--end-action`, `--pronoun she|he|they`.
 - Length: `--frames N` (H3 grid, ≤ 243) or `--seconds S` (`snap_h3_frames`: `(f-5) % 17 == 0`, 56..243). `--beat` (repeat 2+) + `--beat-dialogue` / `--beat-camera` / `--beat-seconds` → one native latent-tail continuation graph (§0.7).
 - Canvas: `--aspect 9:16|16:9|1:1|4:3|3:4|portrait|landscape|widescreen|square` (768x1344, 1344x768, 1024x1024, 1152x864, 864x1152) or `--size WxH` (multiples of 32, 256..2048).
-- Camera: `--camera "<framing, lens, motion>"`; motion words (push, pull, pan, tilt, track, dolly, handheld, orbit, crane, zoom, follow, move, sweep, arc) drop `Camera locked off, no zoom, no pan.`; default `[static medium shot, eye level, 50mm lens, shallow depth of field]` + locked-off tail.
+- Camera: `--camera "<framing, lens, motion>"`. There is no locked-off tail. When the scene has a `The camera holds ...` sentence, the `[cam]` header is derived from it; otherwise the default header is `[static medium shot, eye level, 50mm lens, shallow depth of field]`. A still camera is one positive framing sentence (official H3 §4.3); add amplitude and speed only when the camera moves.
 - Images (U2, live `d53e082` / Nov 6): `--image` takes **exactly one** `approved_characters` path (full path or sub-path inside `C:\Users\derek\5slock\approved_characters` or `\\NAS4CBE37.local\home\AlienPc-approved\approved_characters`); `>1` raises `ValueError`; any `sydney` path or anything outside the pools → `ValueError`. Staged to `ComfyUI\input\community\parody_ref_<sha10>_<stem>.<ext>`, wired as `img_1: LoadImage` → `add_guide: MiniMaxH3AddGuide` (`frame_idx=0`) → `refapply: MiniMaxH3RefModApply` (conditioning chain `c0 → add_guide → refapply → s0_guide`). **No** `c0.ref_images`, **no** `<Picture N>` / `[reference generation]` / `retention_analysis:` in the prompt — Qwen sees text-only, so voice stays intact. Derrick (`t314u`, watched clips): `RefMod` still drives the celebrity's face likeness onto the AddGuide shot (e.g. Emilia Clarke face on a generic apartment still) while keeping voice. Omit `--image` for RefMod-only composition; pass `--image` to pin frame-0 composition/wardrobe/pose/setting.
 - Second subject (U4): `--name2 --character2 --actor2 --description2 --dialogue2 --pronoun2`; RefMods merge 4 + 4 into `mod_1..mod_8` (spare slots go to whoever has more); `(S2)` line in `subject_definitions`, accurate `Non-speaking characters:`, `(S2): <d>…</d>` when it speaks; the scene/summary drop the `(S1)` prefix, so write `(S1)`/`(S2)` inside `--scene`.
 - Run control: `--seed`, `--slug`, `--run-dir`, `--dry-run`, `--wait`, `--qnap-put`, `--wait-timeout` (default 3 h).
 
 ### 0.3 Prompt tweaks (`t261u` / `t263u`)
-- Removed `Adult cast, adults-only, fictional 18+ adult scene.` from `summary:`; `(S1) <name> - an adult performer, age 28+, …` satisfies `comm.adult_stated` (`format_parody_prompt` now checks `guard_ok` **and** `adult_stated`). `comm.py` and the guard tests are untouched.
+- Removed `Adult cast, adults-only, fictional 18+ adult scene.` from `summary:`. `format_parody_prompt` checks `comm.guard_ok` only; prompts no longer must contain 'adult' or a stated age (Derrick 2026-11-11 t835u).
 - Zero word caps anywhere (resolve/build/submit). A 600-word scene is a CPU test.
 
 ### 0.4 `--wait --qnap-put` and the shared-anchor stitch flow
@@ -52,17 +52,18 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
   - *wardrobe*: the scenario outfit and accessories; when `--image` is passed, describe its wardrobe and never contradict the still.
   - *setting*: `--scene` multi-sentence setting and fabrics; its first sentence becomes `summary:` unless `--summary` is passed.
   - *lighting*: name the light (neon, 2 AM, bulbs, candlelight) to replace the default late-afternoon light — the lighting-cue gate of `9cfab36` is why an explicit cue is needed.
-  - *framing/movement*: `--camera` with shot scale + lens + movement; motion words drop the locked-off tail; frame wider when hands matter (above).
+  - *framing/movement*: `--camera` with shot scale + lens + movement. There is no locked-off tail; a still camera is one positive framing sentence, with amplitude and speed only when it moves. Frame wider when hands matter (above).
   - *actions*: what happens in the shot, with hands placed as above; in multi-beat work each beat continues the prior beat's end state (§0.7).
-  - *dialogue/delivery*: `--dialogue` spoken words only (~8–15 words per 5 s, no timestamps, tags, backticks, "no speech", "room tone"), and `--scene` ends before speech with an explicit vocal-timbre + delivery cue (below).
+  - *dialogue/delivery*: `--dialogue` spoken words only (~8–15 words per 5 s, no timestamps, tags, backticks, "no speech", "room tone"), and `--scene` ends before speech with an explicit vocal-timbre + delivery cue (below). Spoken lines are natural in-character talk (reacting, teasing, answering, asides to someone present), never narrating or describing what she is doing on screen, never stage directions or counts.
 - **Nov 6 afternoon voice findings** (`acoustic.py` + Derrick `t314u` watched the clips; `videoReview` was wrong on both face and voice):
   - `MiniMaxH3AddGuide frame_idx=0` does **not** shift pitch register on a byte-identical Daenerys pair (`172 Hz` nophoto vs `176 Hz` photo) and **does not** wipe RefMod face — Clip 2 with a generic apartment still still looked like Emilia Clarke; RefMod carries face likeness onto the AddGuide shot while keeping voice. Scope: this is **one measured pair on one generic apartment still**, not universal `AddGuide` proof; the skill wording says "retained face/pitch in a tested pair".
   - Upbeat expression cues (`"amused, teasing"`, `bubbly`) raised median F0 **+30–45 Hz** while calm/composed cues (`"a wry tired smile"`, `"calm deadpan poise"`) + explicit vocal-timbre phrasing stayed near register (~`200 Hz`) **in the tested Cassie/Sweeney clips** — measured on that set, **not universal**; match delivery to the speaker.
-  - Keep the explicit vocal-timbre + delivery cue examples verbatim (written at the end of `--scene`, before speech):
-    - `Speaking in Sydney Sweeney's exact Cassie Howard voice, with her low, breathy, laid-back vocal timbre and natural vocal fry:`
-    - `Emilia Clarke's exact Daenerys Targaryen voice, crisp British RP contralto cadence and calm authority:`
+  - Keep the speaking-line form (voice wording and a short concrete pitch/texture/pace cue stay outside `<d>`; only the `[English]` tag and the verbatim spoken words go inside, official H3 guide section 4.4):
+    - `(S1) says in Sydney Sweeney's exact Cassie Howard voice with signature vocal timbre, a low, soft, breathy voice with light vocal fry, unhurried: <d>[English] words</d>`
+    - `(S1) says in Emilia Clarke's exact Daenerys Targaryen voice with signature vocal timbre, a crisp British RP contralto cadence and calm authority: <d>[English] words</d>`
+  - The Nov 6 tests showed the exact-voice name alone stayed at about 232 Hz, while adding the breathy vocal-fry cue brought it to about 200 Hz. Keep mood words that raise pitch (like `amused, teasing half-smile`) away from the speaking line.
   - Pairing the actor with their iconic INDEX character (`--character` + `--actor`; e.g. Cassie Howard + Sydney Sweeney, Daenerys Targaryen + Emilia Clarke, Jennifer Check + Megan Fox) produces **stronger voice likeness** than the actor name alone — Derrick confirmed Cassie Howard beat Sydney-alone — even on `INDEX: bad` rows. RefMod (`kind: video`) carries no audio tokens; character+actor naming in the prompt is the voice lever. Use actor-alone only when the actor has no `INDEX` character row.
-  - Builder now emits `<d>[English, using {actor}'s exact {character} voice and signature vocal timbre] …` when character ≠ actor, else `{name}'s exact voice`.
+  - The writer form above is the contract. The builder (`build_request.py`) still emits the voice line without a description and with a trailing `She uses ... voice ... consistently` sentence; that would be a code change, and this documentation pass does not change the builder.
 
 ### 0.7 Native multi-beat continuation (2026-11-06, Derrick t358u–t374u; commit `1ac31d7`)
 - Trigger: 2+ non-empty `--beat` (`submit_parody_run.py` `elif beats and len(...) > 1`). Builder: `build_request.build_continuation_request`. One graph, one `clip.mp4`, no stitch. A long `--seconds` with no beats still uses the §0.4 shared-anchor cells (`test_long_seconds_auto_split`).
@@ -84,7 +85,7 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
 
 ## 1. Active Locked Baseline (`4bc9bba` / `ab72d88`, Derrick Nov 6, 2026 `t218u` & `t375s1715`)
 - **Graph (`templates/b2_refmod.api.json`)**: Single-pass `768x1344`, `8` steps (`euler` / `simple`, `shift` `12.0` video / `3.0` audio, `cfg=1.0`, `denoise=1.0`) on `10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors`.
-- **Identity (`INDEX + RefMod` only)**: `MiniMaxH3RefModsLoader` (`mod_1..mod_8`, `strength=1.0`) → `MiniMaxH3RefModApply` (`retention=1.0`). Zero `RefLoRA` (`ComfyUI-MiniMaxH3RefLoRA.disabled`, weights archived to `C:\AI\_archive\2026-11-06-refmod-only\`), zero `2-pass` upscaler, zero `LoadAudio` / `ref_audio` voice ref, zero `LoadImage` start photo by default.
+- **Identity (`INDEX + RefMod` only)**: `MiniMaxH3RefModsLoader` (`mod_1..mod_8`, `strength=1.0`) → `MiniMaxH3RefModApply` (`retention=1.0`). Zero `RefLoRA` (`ComfyUI-MiniMaxH3RefLoRA.disabled`, weights archived to `C:\AI\_archive\2026-11-06-refmod-only\`), zero `2-pass` upscaler, voice binding via RefMod audio and <Audio 1> / <Subject 1> labels is allowed, zero `LoadImage` start photo by default.
 - **Direct execution**: Queue `run_queue.py` directly on saved `request.api.json` or `submit_parody_run.py` output — no `pi.ps1`, no `ralph.ps1`, no local LLM load. Any new CLI flag, ComfyUI node/input, multi-file edit, or test arm requires a 1:1 question card yes from Derrick first.
 - **Dialogue / beat-sheet hygiene**: Never pass beat-sheet timestamps (`t=00.00.000-...`), `"No speech"`, foley/SFX cues (`room tone`, `glass clink`, `heels on wood`), or backticks inside `--dialogue` / `<d>...</d>` (H3 TTS speaks stage cues out loud). Pass spoken words only inside `<d>...</d>`, and omit `<d>` (`dialogue=None`) on silent clips. Always inspect generated `prompt.txt` before `run_queue.py`.
 
@@ -160,6 +161,7 @@ On this box for parody:
 Community (Malcolm H3 Prompting Guide + TenStrip HF 10Eros-Max notes) puts **camera angles, in-clip cuts, transitions, and motion** in the shared prompting rules - not in a separate identity doc. On this box that means:
 
 - Shot headers, cut verbs, camera vocab (R8 / R23), speech, adults floor: `h3-prompting`
+- Weight, gravity, load, pressure, follow-through and angles (R23a/R23b): `h3-prompting` `references/motion-contact-anatomy.md`
 - REF2VA section order, style opening (R39), TenStrip retention/audio shape: `h3-max-ref2va-prompt`
 - Cond still -> intent / director card / package triage: `alienpc-hardcore-i2v-director`
 - Still pose unlock before I2V: `alienpc-stills-pose-edit-prompting`
@@ -182,7 +184,7 @@ This skill only changes **identity binding** (INDEX + RefMod + name/description)
 ---
 
 ## 3. Superseded Archive — Nov 6, 2026 6:43 AM `2-pass` Skill Text (`7,614 B`, RETIRED by `ab72d88` / `t375s1715`)
-Kept verbatim per non-deletion rule for audit history only; **do not run 2-pass or strip `<scenedirect>`/`overall_soundscape:` from `4bc9bba` without a new Derrick card yes**.
+Kept verbatim per non-deletion rule for audit history only; **do not run 2-pass or strip `<scenedirect>` or the old labeled soundscape header from `4bc9bba` without a new Derrick card yes**.
 
 ```markdown
 ---
@@ -219,7 +221,7 @@ Keep `prompt.txt` strictly visual and acoustic — compliance metadata belongs i
 
 1. **`subject_definitions:`**:
    - `<Subject 1> is the woman in <Video 1>.` (binds the `RefMod` conditioning route).
-   - `<Subject 1> <Name>, <resolved character/actor biometric + wardrobe description>, the only person in the clip` — **one** full description (never paste another still's facial caption onto a named subject, and never append `"a fictional adult, canon age 28"`, `"styled in parody tone"`, or `(character ..., actor ...)` parentheticals). Stated adult age (21+) lives naturally inside the biometric description (`"25-year-old woman"`).
+   - `<Subject 1> <Name>, <resolved character/actor biometric + wardrobe description>, the only person in the clip` — **one** full description (never paste another still's facial caption onto a named subject, and never append `"a fictional adult"`, `"styled in parody tone"`, or `(character ..., actor ...)` parentheticals).
    - Include `<Picture 1> is the start frame of [Shot 1] for setting, light and framing` **only** when `ref_image_1` is wired in the graph.
 2. **`summary:`**:
    - `[reference generation] <natural prose summary of who, where, wardrobe, and the single physical transition/action of this clip>.`
@@ -229,7 +231,7 @@ Keep `prompt.txt` strictly visual and acoustic — compliance metadata belongs i
    - `<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, body, skin, wardrobe` (plus `<Picture 1>` line only when `Cond` is wired).
 4. **`detailed_description:` — Real Per-Clip Camera, Action & Clean Speech**:
    - **Style line** (`The target video is a realistic photographic portrait of <Name>...`), followed by the clip's **actual camera line** (`R23` vocabulary: `The camera holds a static shot.`, `Tracking, slow, small amplitude...`, `Push In, slow, small amplitude...`) — never leave a hardcoded static camera line on a tracking/push-in clip.
-   - **`[Shot 1] 00:00.000 - <end_clock>` must carry the clip's real pose and motion**: compile the beat sheet's opening posture, primary physical action, garment state, prop handling, and ending posture directly into `[Shot 1]`. Never leave smoke-test boilerplate (`"stands facing the camera, weight even on both feet, hands resting lightly at her sides... PRIMARY MOTION - small steady upper-body sway"`) on multi-clip scenes where the subject walks, sits, leans, undresses, or drinks, because H3 obeys `[Shot 1]` over `summary:`.
+   - **`[Shot 1]` (no timestamp, R8) must carry the clip's real pose and motion**: compile the beat sheet's opening posture, primary physical action, garment state, prop handling, and ending posture directly into `[Shot 1]`. Never leave smoke-test boilerplate (`"stands facing the camera, weight even on both feet, hands resting lightly at her sides... PRIMARY MOTION - small steady upper-body sway"`) on multi-clip scenes where the subject walks, sits, leans, undresses, or drinks, because H3 obeys `[Shot 1]` over `summary:`.
    - **Speech `<d>[English] ... </d>` holds ONLY spoken words**:
      - When the character speaks, emit `<Subject 1> <Name> (S1) ... says, <d>[English] <spoken words only></d>` with punctuation limited to `, . ? !`.
      - **Never** pass beat-sheet timestamps (`t=00.00.000-...`), `"No speech"`, foley/SFX cues (`room tone`, `glass clink`, `paper, card stock`, `heels on wood`), backticks, or nested `<d>` tags into `--dialogue` / `<d>...</d>`. H3's TTS skips `t=` numbers and speaks stage cues out loud.
@@ -242,8 +244,8 @@ Keep `prompt.txt` strictly visual and acoustic — compliance metadata belongs i
    - Reject any `dialogue` input containing `t=\d`, `<d>`, `</d>`, backticks, `"no speech"` (case-insensitive), or `"room tone"`.
    - Reject raw beat-sheet schema headers (`Opening:`, `Ending:`, `Anchors:`, `Method:`) inside `summary:` or `detailed_description:`.
    - Verify ComfyUI `/object_info` exposes every node class in `request.api.json` (`submit_parody_run.py --dry-run`) before starting a batch.
-   - Enforce `comm.guard_ok` and `comm.adult_stated` fail-closed at build time and write compliance fields (`guard_ok`, `adult_stated`, `character`, `actor`, `tone`, `description_sha256`) to `run_record.json`.
+   - Enforce `comm.guard_ok` fail-closed at build time and write compliance fields (`guard_ok`, `character`, `actor`, `tone`, `description_sha256`) to `run_record.json`.
 2. **Tone fidelity & prompt readback**:
-   - Preserve the exact wardrobe, framing, and consensual adult/provocative parody tone specified in the user's brief (never sanitize a requested provocative parody into tame generic filler, while keeping `comm.guard_ok` vocabulary clean and zero non-consensual themes).
+   - Preserve the exact wardrobe, framing, and consensual adult/provocative parody tone specified in the user's brief (never sanitize a requested provocative parody into tame generic filler).
    - On multi-clip runs, inspect a sample of generated `prompt.txt` files (including silent and spoken cells) before `run_queue.py` launches so `<d>...</d>`, `[Shot 1]`, and `loaded_refmods` are verified before GPU spend.
 ```

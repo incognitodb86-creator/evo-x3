@@ -27,7 +27,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 ## 2. Graph wiring (the part that has actually broken)
 
-- Request graph (default; Derrick 2026-10-30 "Only make the B2 template file the default"): build it with
+- Request graph (default for the B2 lane only, optional elsewhere; named parodies use the single-pass h3-parody-identity graph; Derrick 2026-10-30 "Only make the B2 template file the default"): build it with
   `C:/AI/director/.venv/Scripts/python.exe C:/AI/community/scripts/make_b2_request.py` from
   `C:/AI/community/templates/b2.api.json` (see `templates/b2.README.md`). It patches only the per-run fields
   `c0.prompt`, `noise.noise_seed`, `img.image`, `save.filename_prefix` and `c0.length` (frames, set by the plan; the
