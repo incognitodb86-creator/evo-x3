@@ -2402,6 +2402,43 @@ _STYLE_WARN_PREFIXES = ("transition word left", "quoted speech left outside <d>"
                         "surface conflict", "doggy pose conflict")
 
 
+_SHOT_HDR_RE = re.compile(r"\[Shot\s*(\d+)\]\s*")
+_SHOT_CLOCK_RE = re.compile(r"(?i)^At\s+(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\s*,\s*")
+
+
+def split_shots(desc: str, clip_seconds: float) -> Tuple[str, List[Tuple[int, str, str]], Optional[str]]:
+    """B1 (Max Architect 3, Derrick (long-scene spec, Prompt maker t243s804, 2026-11-13)): split a multi-shot body into the master ([Shot 1] text) and later shots
+    (n, 'MM:SS.mmm', body). Rules (R8): N counts up from 2, clocks increase, first cut >= 1.5 s, last cut <= clip - 2.0 s,
+    every shot >= 2.0 s. Returns (master, shots, error)."""
+    hs = list(_SHOT_HDR_RE.finditer(desc))
+    later = [m for m in hs if int(m.group(1)) >= 2]
+    if not later:
+        return desc, [], None
+    master = desc[:later[0].start()].rstrip()
+    shots: List[Tuple[int, str, str]] = []
+    prev_t, err = 0.0, None
+    for i, m in enumerate(later):
+        body = desc[m.end():(later[i + 1].start() if i + 1 < len(later) else len(desc))].strip()
+        c = _SHOT_CLOCK_RE.match(body)
+        n = int(m.group(1))
+        if n != i + 2:
+            err = err or f"shot numbers must count up from 2 (got [Shot {n}])"
+        if not c:
+            err = err or f"[Shot {n}] needs a clock 'At MM:SS.mmm, the camera cuts to ...'"
+            shots.append((n, "", body))
+            continue
+        t = int(c.group(1)) * 60 + int(c.group(2)) + int((c.group(3) or "0").ljust(3, "0")) / 1000.0
+        if i == 0 and t < 1.5:
+            err = err or f"first cut at {t:.3f}s is before 1.5 s"
+        if t - prev_t < 2.0:
+            err = err or f"[Shot {n}] at {t:.3f}s leaves the shot before it under 2.0 s"
+        if t > clip_seconds - 2.0:
+            err = err or f"[Shot {n}] at {t:.3f}s is later than clip length {clip_seconds:.3f}s - 2.0 s"
+        prev_t = t
+        shots.append((n, f"{int(t // 60):02d}:{t % 60:06.3f}", body[c.end():]))
+    return master, shots, err
+
+
 def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) -> Tuple[str, Dict[str, Any]]:
     """Turn one free-text writer prompt into the R5 paste for an OC RefMod clip that opens on <Picture 1>.
 
@@ -2453,6 +2490,13 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
             else:
                 desc_raw = (secs.get("_lead") or [""])[0]
     desc_raw = "\n".join(ln for ln in desc_raw.splitlines() if not _RETENTION_LINE_RE.search(ln))
+    later_shots: List[Tuple[int, str, str]] = []
+    if str(cast.get("shots") or "single").lower() == "multi":  # B1: later shots pass through; single = today's collapse
+        desc_raw, later_shots, shot_err = split_shots(desc_raw, float(cast.get("clip_seconds", 10.125)))
+        if shot_err:
+            raise WriterNotReady("NOT_READY: shot syntax: " + shot_err)
+        if later_shots:
+            report["shots"] = [{"shot": n, "at": t} for n, t, _ in later_shots]
     sound_raw = " ".join(b for k, v in secs.items() if k in _SOUND_HEADERS for b in v[:1])
     if sound_raw:
         report["stripped"].append("labeled sound header -> plain end-of-beat sound sentences (R7)")
@@ -2554,7 +2598,8 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     ledger: List[Dict[str, Any]] = []
     counts: Dict[str, int] = {"S1": 0, "S2": 0, "S3": 0}
     budget = speech_budget(cast)
-    body = convert_speech(clean(desc_q, body=True), voices, counts=counts, ledger=ledger, budget=budget)
+    max_lines = max(1, int(round(float(cast.get("clip_seconds", 10.0)) / 5.0)))  # B2: lines per speaker scale with length
+    body = convert_speech(clean(desc_q, body=True), voices, max_lines=max_lines, counts=counts, ledger=ledger, budget=budget)
     report["counts"] = counts
     opener = opener_holder["text"]
     if opener is not None:
@@ -2651,7 +2696,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         report["added"].append("move-into-position beat (R16/R23a)")
     act_at = next((i for i, x in enumerate(rest) if is_act(x) and x not in (beat,)), len(rest))
     seq = [cam] + rest[:act_at] + [x for x in (motion, contact) if x] + rest[act_at:]
-    sound_all = convert_speech(clean(sound_q), voices, counts=counts, ledger=ledger, budget=budget) if sound_raw else []
+    sound_all = convert_speech(clean(sound_q), voices, max_lines=max_lines, counts=counts, ledger=ledger, budget=budget) if sound_raw else []
     spoken = [c for c in sound_all if "<d>" in c]
     sound = [c for c in sound_all if "<d>" not in c][:3]
     seq = seq[:-1] + spoken + seq[-1:] if spoken and len(seq) > 1 else seq + spoken
@@ -2667,6 +2712,14 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     if len(speech_in) != len(out_lines) + len(dropped) or missing:
         raise WriterPromptError(f"silent drop: {len(speech_in)} spoken lines in, {len(out_lines)} kept, {len(dropped)} dropped "
                                 f"with a reason; missing {missing[:3]}")
+    shot_text: Dict[int, str] = {}
+    for n, t, body_n in later_shots:  # B1: each later shot keeps its header, clock, camera sentence, lines and sounds
+        units = convert_speech(clean(to_quote(body_n)), voices, max_lines=max_lines, counts=counts, ledger=ledger, budget=budget)
+        txt = " ".join(units).strip()
+        if not txt:
+            raise WriterNotReady(f"NOT_READY: shot syntax: [Shot {n}] has no text left after cleaning")
+        shot_text[n] = txt
+        detailed += f" [Shot {n}] At {t}, " + txt[:1].lower() + txt[1:]
     summary_src = (secs.get("summary") or [""])[0]
     summary_kept = [s for s in clean(re.sub(r"^\s*\[[^\]]+\]\s*", "", summary_src)) if "<d>" not in s][:2]
     summary_kept = [_PRON_COMMA_RE.sub(r"\1 ", _SUMMARY_STRIP_RE.sub("<Subject 1> takes off her clothes", x)) for x in summary_kept]
@@ -2694,6 +2747,10 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     elif pt in ("woman", "futa") and (cast.get("partner") or cast.get("man")):
         extra = " She is not in <Picture 1>; she enters during the clip." if off_s2 else ""
         subject_definitions_lines.append(f"<Subject 2> is {cast.get('partner') or cast['man']}; she is (S2).{extra}")
+    elif pt == "non-human" and cast.get("man") and (cast.get("act_id") or cast.get("position")) != "male_solo":
+        pr2 = "it" if "no face" in cast["man"] else "he"  # G1-G4: look text only, no RefMod
+        extra = f" {pr2.capitalize()} is not in <Picture 1>; {pr2} enters during the clip." if off_s2 else ""
+        subject_definitions_lines.append(f"<Subject 2> is {cast['man']}; {pr2} is (S2), the same creature for the whole clip.{extra}")
     is_3p_scene = cast.get("is_three_person") or cast.get("bodies", 2) >= 3
     if is_3p_scene:
         pt3 = str(cast.get("partner_type2") or "man").lower()
@@ -2733,6 +2790,12 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
                 if pt == "man" else
                 "<Subject 2> (appears in [Shot 1]): fully_preserved - her face, build and skin stay the same woman throughout"
             )
+    elif pt == "non-human" and cast.get("man") and (cast.get("act_id") or cast.get("position")) != "male_solo":
+        # G2: never 'the same man' for a creature; the look text is the only anchor (G4: no RefMod)
+        retention_lines.append(
+            "<Subject 2> (" + ("enters during the clip" if off_s2 else "appears in [Shot 1]") + "): fully_preserved - " +
+            ("its form, size and texture stay the same throughout" if "no face" in cast["man"]
+             else "his face, form, size and skin stay the same creature throughout, exactly as named in subject_definitions"))
     if is_3p_scene:
         pt3 = str(cast.get("partner_type2") or "man").lower()
         if cast.get("s3_still"):
@@ -2871,6 +2934,13 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     report["issues"] = issues
     if strict and issues:
         raise WriterPromptError("writer prompt failed the consistency gate: " + "; ".join(issues))
+    if shot_text:  # B1: retention names every shot a subject appears in
+        def _appears(m: "re.Match[str]") -> str:
+            k = int(m.group(1))
+            ns = [1] + [n for n, x in sorted(shot_text.items())
+                        if re.search(rf"\(S{k}\)|<Subject {k}>" + (r"|\b(?:she|her)\b" if k == 1 else ""), x)]
+            return f"<Subject {k}> (appears in " + ", ".join(f"[Shot {n}]" for n in ns) + ")"
+        final = re.sub(r"<Subject (\d)> \(appears in \[Shot 1\]\)", _appears, final)
     return final, report
 
 
@@ -3446,6 +3516,34 @@ OC_MAN = ("an adult man, twenty-six years of age, of solid adult build with work
 OC_VOICE_S1 = "a low, warm adult woman's voice with a slightly husky edge, tight and breathy with the effort"
 OC_VOICE_S2 = "a contrasting deep, steady adult man's voice, low and hoarse"
 OC_VOICE_S2_WOMAN = "a contrasting low, steady adult woman's voice, smoky and firm"  # #6 futa/woman partner
+# long-scene spec G1-G4 (Derrick, Prompt maker t243s804/t243s811): creature partners are non-human (her RefMod only, look text only - G4: no creature RefMod yet)
+_CREATURE_RE = re.compile(r"(?i)\b(orcs?|ogres?|trolls?|goblins?|monsters?|demons?|aliens?|minotaurs?|werewol(?:f|ves)|"
+                          r"centaurs?|tentacles?|tentacled|creatures?|elf|elves|elven)\b")
+_CREATURE_LOOKS = {
+    "orc": "an adult male orc, towering and heavily muscled, with green skin, small lower tusks and coarse black hair",
+    "troll": "an adult male troll, huge and broad, with grey-green hide and heavy brows",
+    "ogre": "an adult male ogre, huge and broad, with thick grey skin",
+    "goblin": "an adult male goblin, wiry, with green skin and pointed ears",
+    "elf": "an adult male elf, tall and lean, with pointed ears and long pale hair",
+    "alien": "an adult male alien, tall and lean, with smooth blue-grey skin and large dark eyes",
+    "demon": "an adult male demon, tall and muscular, with red skin and curved horns",
+    "minotaur": "an adult male minotaur, a huge bull-headed humanoid with dark hide",
+    "werewolf": "an adult male werewolf, huge, with dark fur and a wolf's head",
+    "centaur": "an adult male centaur, a muscular man's torso on a horse's body",
+    "tentacle": "a mass of thick, slick tentacles with no face",
+}
+OC_VOICE_NONHUMAN = "a deep, rough, guttural non-human voice"  # G3
+
+
+def creature_look(ask: str) -> str:
+    m = _CREATURE_RE.search(ask or "")
+    if not m:
+        return "an adult non-human male partner"
+    w = m.group(1).lower().rstrip("s")
+    w = {"elve": "elf", "elven": "elf", "werewolve": "werewolf", "tentacled": "tentacle", "creature": "monster"}.get(w, w)
+    return _CREATURE_LOOKS.get(w, f"an adult male {w}, huge and inhuman")
+
+
 _UNDRESS_ASK_RE = re.compile(
     r"(?i)\b(?:undress(?:es|ed|ing)?|strip(?:s|ped|ping|tease)?|naked|nude|topless|bottomless|"
     r"clothes off|takes?\s+(?:off\s+)?(?:her|his|their)?\s*(?:clothes|lingerie|underwear|garments)(?:\s+off)?|"
@@ -3619,7 +3717,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
 
     pt = str(partner_type or "man").lower()
     if pt == "man":
-        if re.search(r"\bnon[- ]human\b", ask or "", re.I):
+        if re.search(r"\bnon[- ]human\b", ask or "", re.I) or _CREATURE_RE.search(ask or ""):  # G1
             pt = "non-human"
         elif re.search(r"\bfaceless\b", ask or "", re.I):
             pt = "faceless"
@@ -3926,7 +4024,13 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
             base["voice_s2"] = OC_VOICE_S2_WOMAN  # #6: a woman partner never gets the man's voice line
         if pt != "futa" and "penis" in base.get("contact", "").lower():
             base["contact"] = ""
-        if pt in ("none", "non-human", "faceless"):
+        if pt == "non-human" and _CREATURE_RE.search(ask or "") and act_id != "male_solo":
+            # G1-G4: a creature partner is described (look text only, no RefMod) and can speak unless it has no face
+            look = creature_look(ask)
+            base["man"] = look
+            base["voice_s2"] = "" if "no face" in look else OC_VOICE_NONHUMAN
+            base["camera_tail"] = "keeping her face in frame" if "no face" in look else "keeping both faces in frame"
+        elif pt in ("none", "non-human", "faceless"):
             if act_id != "male_solo":
                 base["man"] = ""
             base["voice_s2"] = ""

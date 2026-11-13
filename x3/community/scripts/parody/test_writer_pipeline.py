@@ -518,3 +518,46 @@ def test_mmf_s3_look_from_card():
     look = r.s3_look_from_card(card)
     assert look == "an adult man, 25 years of age, of lean build, with short dark hair, in grey linen trousers"
     assert r.s3_look_from_card({"partners": []}) is None
+
+
+def test_router_nonhuman_and_scale_overlays():
+    import wp_router as R
+    r = R.route_mode("orc partner, standing doggy at the pool edge", "doggy", {}, {}, continued=False)
+    assert "nonhuman" in r["overlays"]
+    for ask in ("tiny adult fairy rides him", "giant lifts the tiny woman, standing carry", "massive oversized cock, slow missionary"):
+        assert "scale" in R.route_mode(ask, "missionary", {}, {}, continued=False)["overlays"], ask
+    assert "nonhuman" in R.route_mode("tentacles wrap her", "female_solo", {}, {}, continued=False)["overlays"]
+    plain = R.route_mode("he takes her on her back", "missionary", {}, {}, continued=False)["overlays"]
+    assert "nonhuman" not in plain and "scale" not in plain
+
+
+def test_scale_lint_adult_proportions_and_youth_stop():
+    import wp_lint as L
+    hdr = "detailed_description:\n[Shot 1] "
+    ctx = {"kind": "sex", "slots": {}, "overlays": ["scale"], "ask": "tiny adult fairy rides him", "cfg": {}}
+    bad = L.lint(hdr + "At first, (S1), a tiny fairy no taller than his forearm, sits on his chest. She rides him.", ctx)
+    assert "scale_adult" in bad["hard"]
+    good = L.lint(hdr + "At first, (S1), a tiny fairy no taller than his forearm, sits on his chest: her adult face, full adult "
+                        "breasts, wide adult hips and an adult woman's proportions at miniature scale. She rides him.", ctx)
+    assert "scale_adult" not in good["hard"] and "scale_anchor" not in [i["code"] for i in good["issues"]]
+    young = L.lint(hdr + "At first, (S1) sits.", dict(ctx, ask="tiny schoolgirl fairy"))
+    assert "youth_hint" in young["hard"]
+
+
+def test_youth_hint_hard_stop_before_any_writer_call(home, tmp_path, monkeypatch):
+    calls = scripted(monkeypatch, lambda purpose: GOOD_SEX)
+    cfg = p.load_config(home / "config.yaml")
+    r = p.run_clip(job(tmp_path, "y1", ask="tiny schoolgirl fairy rides him"), cfg, lambda *a: None)
+    assert r["status"] == "NOT_READY" and "youth hint" in r["not_ready_reason"] and not calls
+
+
+def test_consent_setup_overlay_needs_consent_beat_before_sex():
+    import wp_router as R, wp_lint as L
+    assert "consent_setup" in R.route_mode("sleep roleplay, spooning", "spooning", {}, {}, continued=False)["overlays"]
+    hdr = "detailed_description:\n[Shot 1] "
+    ctx = {"kind": "sex", "slots": {}, "overlays": ["consent_setup"], "ask": "sleep roleplay, spooning", "cfg": {}}
+    bad = L.lint(hdr + "At first, (S1) lies on her side, eyes closed. (S2) slides into her from behind.", ctx)
+    good = L.lint(hdr + "At first, (S1) lies on her side and says in a sleepy voice, <d>Wake me up like that tonight.</d> "
+                        "Later (S2) slides into her from behind.", ctx)
+    assert "consent_setup" in bad["hard"] and "consent_setup" not in good["hard"]
+    assert "consent_setup" not in L.lint(hdr + "(S2) slides into her.", dict(ctx, overlays=["consent_setup", "continued"]))["hard"]

@@ -133,3 +133,56 @@ def test_c1b_mid_act_opener_kept_on_continued_clip():
     out, rep = _fin(dd, "doggy", "doggy on the log, keep going")
     assert "The clip opens on <Picture 1>" not in out, out
     assert any("opens mid-act" in a for a in rep["added"])
+
+
+# ---- long-scene spec B1/B2/G1-G4 (Prompt maker t243s804) -------------------------------------------------------------
+LONG_DD = ("The camera holds a medium-wide shot at hip height, keeping her face, his face and the join in frame. At first, (S1) sits "
+           "on the log, leaning forward. She shifts onto her hands and knees on the log. (S2) pulls her sheer mesh bikini bottom aside "
+           "to one side at her hip, where it stays. (S2) enters her from behind and stays buried in her, hips flush. As it builds, "
+           "PRIMARY MOTION - (S2) thrusts about one stroke every second. (S1) says in a strained voice, <d>[English] Don't stop.</d> "
+           "[Shot 2] At 00:05.000, the camera cuts to a medium close-up of her face at eye level, the same rhythm continuing. "
+           "(S1) says in a strained voice, <d>[English] Right there.</d> A wet rhythmic slap.")
+
+
+def test_b1_single_is_todays_collapse():
+    cast = br.make_cast(READ, "doggy", "doggy on the log")
+    out_default, _ = br.finalize_writer_prompt(HDR + LONG_DD, cast, strict=False)
+    out_single, _ = br.finalize_writer_prompt(HDR + LONG_DD, dict(cast, shots="single"), strict=False)
+    assert out_default == out_single and "[Shot 2]" not in out_single
+
+
+def test_b1_multi_keeps_headers_clocks_and_retention():
+    cast = dict(br.make_cast(READ, "doggy", "doggy on the log"), shots="multi")
+    out, rep = br.finalize_writer_prompt(HDR + LONG_DD, cast, strict=False)
+    assert "[Shot 1] " in out and "[Shot 2] At 00:05.000, the camera cuts to a medium close-up of her face" in out, out
+    assert "Right there" in out.split("[Shot 2] At")[1] and "Right there" not in out.split("[Shot 2] At")[0]
+    assert "<Subject 1> (appears in [Shot 1], [Shot 2])" in out
+    assert rep["shots"] == [{"shot": 2, "at": "00:05.000"}]
+
+
+def test_b1_bad_clock_not_ready():
+    import pytest
+    cast = dict(br.make_cast(READ, "doggy", "doggy on the log"), shots="multi")
+    for bad in ("At 00:01.000,", "At 00:09.500,"):
+        with pytest.raises(br.WriterNotReady):
+            br.finalize_writer_prompt(HDR + LONG_DD.replace("At 00:05.000,", bad), cast, strict=False)
+
+
+def test_b2_line_cap_scales_with_length():
+    lines = " ".join(f"(S1) says in a soft voice, <d>[English] line number {w}.</d>" for w in ("one", "two", "three", "four"))
+    dd = ("The camera holds a medium shot, keeping her face in frame. At first, (S1) sits on the log. She shifts onto her hands and "
+          "knees on the log. (S2) pulls her sheer mesh bikini bottom aside to one side at her hip, where it stays. (S2) enters her "
+          "and stays buried in her. As it builds, PRIMARY MOTION - (S2) thrusts about one stroke every second. " + lines)
+    base = br.make_cast(READ, "doggy", "doggy on the log")
+    short, _ = br.finalize_writer_prompt(HDR + dd, dict(base, clip_seconds=4.0, speech_wps=10), strict=False)
+    long_, _ = br.finalize_writer_prompt(HDR + dd, dict(base, clip_seconds=20.0, speech_wps=10), strict=False)
+    assert short.count("<d>") == 1 and long_.count("<d>") == 4
+
+
+def test_g1_g4_orc_is_non_human_with_look_voice_and_retention():
+    cast = br.make_cast(READ, "doggy", "orc partner takes her from behind on the log")
+    assert cast["partner_type"] == "non-human" and "orc" in cast["man"] and cast["voice_s2"] == br.OC_VOICE_NONHUMAN
+    out, _ = br.finalize_writer_prompt(HDR + LONG_DD.split(" [Shot 2]")[0], cast, strict=False)
+    assert "<Subject 2> is an adult male orc" in out and "same creature" in out and "the same man" not in out
+    t = br.make_cast(READ, "doggy", "tentacles wrap her on the log")
+    assert t["partner_type"] == "non-human" and t["voice_s2"] == ""
