@@ -236,8 +236,10 @@ def validate_reference_images(
 ) -> List[str]:
     """U2: --image gate (LANE_IMAGE_RULES.md). Every image must live inside an approved_characters pool.
 
-    Accepts a full path, or a sub-path / filename relative to a pool. Rejects any path that mentions
-    'sydney' (case-insensitive), anything outside the pools, missing files, non-image extensions, and > 4 images.
+    Accepts a full path, or a sub-path / filename relative to a pool. Rejects > 4 images
+    (MAX_REFERENCE_IMAGES), any path that mentions 'sydney' (case-insensitive), anything outside
+    the pools, missing files, and non-image extensions.
+    build_request.py wires --image as a single frame-0 AddGuide start image (0 or 1 per clip).
     """
     if not images:
         return []

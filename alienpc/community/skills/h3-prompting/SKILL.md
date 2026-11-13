@@ -7,7 +7,7 @@ description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) o
 
 ## Named-parody precedence
 
-For named INDEX + RefMod parodies, `h3-parody-identity` owns the tested prompt format, identity binding and exact character/actor voice, vocal-timbre and soundscape contract. Its builder format takes precedence over this file's generic picture-reference five-section, `<Picture N>`, continuation-label and no-`overall_soundscape` prescriptions; do not rewrite the tested parody prompt to satisfy those other-lane forms. Shared motion/wording guidance applies where compatible; existing adult/minor guards remain unchanged. Ordinary picture-reference and other lanes retain their rules below.
+For named INDEX + RefMod parodies, `h3-parody-identity` owns the tested prompt format, identity binding and exact character/actor voice, vocal-timbre and soundscape contract. Its builder format takes precedence over this file's generic picture-reference five-section, `<Picture N>`, continuation-label and no-labeled-soundscape-header prescriptions; do not rewrite the tested parody prompt to satisfy those other-lane forms. Shared motion/wording guidance applies where compatible; existing adult/minor guards remain unchanged. Ordinary picture-reference and other lanes retain their rules below.
 
 Every MiniMax-H3 / 10Eros-Max prompt rule on this box lives in this file and only here. The REF2VA lane files in references\ (ref2va-lane.md, ref2va-chain-lane.md),
 and the `alienpc-hardcore-i2v-director` prompt sections point here and must not restate a
@@ -29,10 +29,9 @@ and stable; a REF2VA paste is gated by section 5 here **and** section 5 of the R
 
 ## 0. Output contract
 
-**R1 - Output only the prompt.** When asked for a prompt, deliver the prompt text and nothing else: no preamble, no
-options, no explanation, no self-review, no word count in the paste. Write it to a plain `notes/*.txt` (or the run
-dir's prompt file) first, then embed it in the builder, so prompts stay diffable and the prompt/graph variables stay
-separable. Counting words is a private check, never output (PROMPT.md item 1c: "Count words; nothing else").
+**R1 - Output only the prompt.** When asked for a prompt, your very first emitted token must be `subject_definitions:`.
+Deliver the complete five-section prompt text and nothing else: no planner notes, no "I will read/write" preamble, no
+options, no explanation, no self-review, and no word count. Counting words and checking rules happen silently before token 1.
 
 R2. Render rules (adults only, no real likeness, guard_ok) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
 
@@ -58,28 +57,37 @@ command string. `run_graph_job.py` runs `comm.guard_ok` before any POST - never 
 5. `continuation:` - only for continued clips, and it is exactly the R10 line.
 
 **R6 - Task type.** Default `[reference generation]`. `keyframe completion` is a labelled one-axis try, never a
-silent freeze. `MiniMaxH3ReferenceToVideo` does not pin frame 0 (the still is conditioning); first-frame lock is
+silent freeze. For a first-and-last-frame (keyframe completion) clip, describe the physical path that connects the two stills, not two static portraits. `MiniMaxH3ReferenceToVideo` does not pin frame 0 (the still is conditioning); first-frame lock is
 `MiniMaxH3ImageToVideo`, and a reference image cannot be mixed with it on one node.
 
-**R7 - Audio is plain cues in the main prompt, never a section. No `overall_soundscape:` block, no
-`non_diegetic_music:` block, no music/foley score.** TenStrip (model owner, HF 10Eros-Max discussion #77, quoted in
+**R7 - Audio is plain cues in the main prompt, never a section. No labeled soundscape or
+non-diegetic-music header, no music/foley score.** TenStrip (model owner, HF 10Eros-Max discussion #77, quoted in
 `C:\AI\community\notes\web\tenstrip_hf77_audio_20261029.md`): *"Don't use developer H3 style prompting, it causes
 the most interference. 'overall_soundcape' especially is actually the easiest way to introduce extremely bad audio
 and will cause the model to go out of it's way and start putting cartoon sounds on the output and ignore prompt and
 should be deleted. Prompt very normal audio queues in prompt or at the end of the main prompt."* So: at the END of
-`detailed_description`, one or two sentences naming the real sounds in the order they happen - room tone, breath
-through the nose, skin-on-skin impact, wet friction, fabric rustle, footfall - each tied to the action that makes
-it. No "soundscape", no soundtrack, no music unless Derek asks for it by name. (Old runs and old prompts keep their
-`overall_soundscape:` sections: those blocks are **deleted** for anything written fresh on this box, and nothing is
-re-rendered from them.)
+each beat / `detailed_description`, one to three plain sentences of natural diegetic sound (room tone, footsteps,
+fabric, breath, skin-on-skin impact, wet friction) in the order they happen, each tied to the action that makes
+it; no labeled header and no cartoon sound effects. No soundtrack, no music unless Derek asks for it by name. (Old
+runs may still contain a labeled soundscape section: those blocks are **deleted** for anything written fresh on
+this box, and nothing is re-rendered from them.)
 
-**R8 - Shot headers and time, no transition words.** Camera/lens/light sentences come before `[Shot 1]`; beats carry
-clock ranges that total the clip duration (`[Shot 1] 00:00.000 - 00:04.000 ...`, `[Shot 2] At 00:05.000, the camera
-cuts to ...`). Never use "then / after / afterwards / next" to move the story: those trigger premature cuts. One
-continuous shot is one `[Shot 1]`.
+**Dialogue - natural in-character talk; voice wording stays outside `<d>`.** Spoken lines are natural in-character talk (reacting, teasing, answering, asides to someone present), never narrating or describing what she is doing on screen, never stage directions or counts. Write each `<d>` line with that speaker's visible mouth or body action on the same beat, outside the `<d>`.
+Bad: `Hands on the seat. This one is slow.` Good: `Don't rush me.`
+Speech form (official H3 guide section 4.4; R37): `(S1) says in <Actor>'s exact <Character> voice with signature vocal timbre, <short concrete voice description>: <d>[English] words</d>`. Only the `[English]` tag and the verbatim spoken words go inside `<d>`. When two people speak at the same time, use a compound speaker ID such as `(S1,S2)`. Keep IDs stable.
+Next to the voice name, add a short concrete description of pitch, texture and pace. Example for Sydney Sweeney as Cassie Howard: `a low, soft, breathy voice with light vocal fry, unhurried`. The Nov 6 tests showed the exact-voice name alone stayed at about 232 Hz, while adding the breathy vocal-fry cue brought it to about 200 Hz. Keep mood words that raise pitch (like `amused, teasing half-smile`) away from the speaking line.
+
+For fictional adult OC / Cond stills only: The form is `(S1) ... says in a ... voice, <d>[English] ...</d>`, with a contrasting voice written for each speaker. Never paste the celebrity / INDEX voice line (`says in <Actor>'s exact <Character> voice with signature vocal timbre...`) on OC runs.
+
+**Hardcore OC dirty talk** (fictional adult OC / Cond stills only, when Derrick asks for rough, degrading, or hardcore talk; never on a real-person likeness, name, or voice run, and never a change to the parody speech form in `h3-parody-identity`). Write one or two fresh, crude lines for that exact stroke: short and filthy, spoken to the other adult, naming the cock, cunt, throat, depth, or being used - never a narration of the act and never a stock set. These two show the filth level, not a bank to copy; write a new line for the beat every time: she, mouth free, on a deep stroke (`Fuck that cunt, I want your cock in my guts.`); he, during a blowjob (`Choke on it. I want to hear you gag.`). Too mild, never ship: `Fuck me harder.` `Take it. Don't you stop.` (the builder sends these back NOT_READY). Bad: `Take your time. I want all of it.` `Get up behind me. Take me on my hands and knees.` `I'm taking it all off.` `Daddy` and `good girl` are adult dominance talk only; the 18+ floor stays. Do not reuse the same lines across a chain. In a 10-15 s clip, one or two lines per speaker is enough, placed on separate beats so the mouth can finish each line. Delivery stays outside `<d>` and matches the intensity (hoarse, tight, breathless, forced), not a calm, flat or default unhurried soft voice. Inside `<d>`: only `[English]` and the verbatim words, ending with `.` `?` or `!`; no ellipses, no emoji, no moan spelled as speech. Moans are not speech: non-verbal moans, breath and impact stay in the plain diegetic sound cues (R7). Do not add a labeled soundscape.
+
+**Oral, riding and sex sound** (2026-11-11). Oral beat: she does not speak while her mouth is on him - no `(S1)` `<d>` line from the moment he is in her mouth until she pulls off (the builder sends it back NOT_READY); never write `no speech`, and never put foley inside `<d>`. Her side is diegetic foley tied to the motion: wet suction on each stroke, a gag on the deep stroke, breath through her nose. (S2) may speak on those beats; on OC / Cond stills he talks filthy (her throat, the depth, the gag, being used) while she stays silent. Cowgirl / riding: PRIMARY MOTION names her rise and her sink and a measurable lift of his pelvis off the mattress (for example a few inches) meeting her descent; if only she moves, the builder sends it back NOT_READY. Sex sound: end the shot with one to three plain diegetic sentences tied to the action (wet impact, moan, mattress creak, gag, punched breath); no labeled `overall_soundscape` or `non_diegetic_music` header and no score that would bury the body sounds (the builder flags both). A silent explicit clip with no talk and no body sound is a miss when the brief wants talk or sex sound.
+
+
+**R8 - Shot headers and time, no transition words.** Camera/lens/light sentences belong inside `[Shot 1]` (agreeing with R23). `[Shot 1]` gets no timestamp. Later shots open with `[Shot N] At MM:SS.mmm, the camera cuts to ...` only at a real cut. Beats inside a shot are written as time-ordered prose using the four still-open phases (R14). Never use "then / after / afterwards / next" to move the story: those trigger premature cuts. Order comes from sentence sequence and phase wording such as "at first", "as ... builds", "by the end", never from transition words. One continuous shot is one `[Shot 1]`.
 
 **R9 - Length.** `detailed_description` has no word cap - long, literal, in time order beats short (TenStrip's own
-advice; a 6.5k-char prompt is about 1.7k tokens). No minimum or maximum word count anywhere (Derrick 2026-10-29). The only hard limit is the encoder: overflow raises
+advice; a 6.5k-char prompt is about 1.7k tokens). Prompts run as long as the useful timed physical, visual and camera detail runs, with no word floor or quota and no padding, staying under the encoder limit. The only hard limit is the encoder: overflow raises
 `ValueError "MiniMax H3 text segment exceeds the supported prompt length"`; it never truncates
 (`comfy/text_encoders/minimax.py MiniMaxH3Tokenizer`, `embedding_size 5120`).
 
@@ -106,6 +114,8 @@ their panel. Every continued clip carries references again: a chunk with no `<Pi
 lies <where> for the rest of the clip, so the bodies that become bare are the same bodies the photograph shows.`
 Plus the matching `... is an action in the story ...` clause in `retention_analysis`, so H3 does not read the start
 photo's clothes as a body change.
+When a scene leads into sex, write a dedicated undress beat or start from a nude still; write removals as "pull down" or "slides down" rather than "takes off" (which can tear bikini strings), and name each garment as it comes off and the named surface it lands on where it stays in view; size the undress beat by the job: 124f (~5.2s) is the floor for one standing garment, while two or more garments or a lying-down removal get a longer undress beat (up to 243f) or start from a nude / near-nude still (a nude or near-nude start still needs no undress beat and can stay one 243f clip); with one primary action per short window, Beat 2 of a split undress-plus-act opens already bare, never restates the start still's clothes, and marks the wardrobe as changed rather than fully preserved.
+If a start-still garment still covers the join (penetration), she must pull it aside or take it off before he enters, and the entry sentence must still carry that state — a prior pull-aside line is not enough if the entry sentence reads as if the garment still covers the join (builder W5; do not loosen).
 
 **R13 - Split the jobs of the references** and give every reference its own distinguishing description: the approved
 full-body start still = bodies, skin, figures, wardrobe, setting, light and camera (`<Picture 1>`); face crops = face
@@ -113,10 +123,10 @@ and hair only (`<Picture 2>`, `<Picture 3>`); a pose reference (`<Picture 2>` in
 Say which is which in `subject_definitions` and `retention_analysis`.
 
 **R14 - Describe the start image from its own text records** (panel prompt, notes, the run's facts file) - looking
-at the image itself needs Derek's specific permission (`alienpc-pi-rules`). The model follows words over pixels for
+at the image itself needs Derek's specific permission (`alienpc-pi-rules`). Describe only what the still shows; a cropped still never invents out-of-frame hands, feet, or garment edges. Open on the still's own angle and gaze. Frame 0 is pinned whenever a Cond still or AddGuide is used. A clip that opens on a still runs in four phases, in order, inside `[Shot 1]`: first-frame anchor, action onset, continuous development, result or reaction. Never write "don't look at the camera" or "behind the camera"; a start frame facing the lens snaps the gaze back, so start on the still's gaze instead. The model follows words over pixels for
 materials and wardrobe, so cover in order: fabric and opacity (sheer / mesh / opaque, wet / dry, skin through it),
 fit and construction (straps, ties, how it comes off), light (direction, colour, rim, wet specular), composition
-(crop, camera height, aspect, placement), props and surfaces that move or make sound, hair and visible skin detail.
+(crop, camera height, aspect, placement), props and surfaces that move or make sound, hair and visible skin detail (a small catchlight in each eye, natural moisture on the lids, and a few flyaway hairs that move a beat late and then settle). Sheer fabric reads more opaque in gathered folds and more translucent on flat areas, with a thin air gap, a soft fabric shadow on the skin, mesh as a visible thread grid, and the cloth color mixing with the skin tone. Environment response: R23.
 Name each garment's **end state** and say it stays visible ("the top falls to the stone floor beside her boots and
 stays there"); a garment that moves or comes off gets its own `<Subject N>` and a `retention_analysis` line. Copy
 wardrobe and jewellery words from the panel prompt word for word: one colour, one item, one place.
@@ -126,28 +136,29 @@ reference to the canvas pixels) is a labelled pre-B2 option only, used when a br
 
 ## 3. Motion, contact, anatomy
 
-Moved verbatim to [references/motion-contact-anatomy.md](references/motion-contact-anatomy.md) (rules R10, R16, R17, R18, R19, R20, R21, R22, R23). Read it before writing motion, contact or body lines.
+Canonical rules R16–R23b live in [references/motion-contact-anatomy.md](references/motion-contact-anatomy.md) (already loaded in writer context). Apply them directly to all motion, contact, and body lines.
 
 ## 4. Wording
 
-Moved verbatim to [references/wording.md](references/wording.md) (rules R7, R10, R21, R24, R25, R26, R27, R28, R29, R30, R31). Read it before final wording.
+Canonical rules R24–R31 (including R29a) live in [references/wording.md](references/wording.md) (already loaded in writer context). Apply them directly to final wording.
 
 ## 5. Detail checklist (from `p15_writer_skill.md`'s self-refine rubric, audio line updated for R7)
 
 1. All five sections present, in order (R5), task type named (R6); continued clips carry the R10 line.
-2. Every subject declared a fictional adult with a stated 21+ age; zero terms that could trip the youth guard.
-3. No `overall_soundscape:` / `non_diegetic_music:` block; audio is plain cues at the end of the description (R7).
-4. Retention lines present and specific (R11); the clothing clause present when wardrobe comes off (R12).
-5. Skin words: dry matte, natural pores - zero `oiled / glossy / sheen / wet sheen / glistening`.
-6. Literal anatomy named at the contact points; five-finger hands named; screen side and contact plane restated.
-7. Zero `then / after / afterwards / next` in `detailed_description` (R8); zero negatives in the body (R24).
-8. Timed beats total the clip length; PRIMARY MOTION named with tempo (R17); motion alive on the last frame.
-9. Camera line exactly R23; no "reveal" on a static hold.
-10. Response dial is the one Derek named (R21); a bare slap is to the face (R22); garments have named end states.
-11. Nothing outside the prompt was output (R1); the diff gate shows only this cell's axis (R30); no trigger word
+2. No labeled soundscape or non-diegetic-music header; audio is one to three plain diegetic-sound sentences at the end of the description (R7).
+3. Retention lines present and specific (R11); the clothing clause present when wardrobe comes off (R12).
+4. Skin words: natural pores and fine surface detail, matte by default; `wet / sheen` only where the scene wets the skin (pool, shower, sweat); `realistic oiled skin with visible pores` is allowed - a thin oil sheen that still shows pore texture and fine detail; never `plastic / glossy / waxy` (R25).
+5. Literal anatomy named at the contact points; five-finger hands named; screen side and contact plane restated.
+6. Zero `then / after / afterwards / next` in `detailed_description` (R8); zero negatives in the body (R24).
+7. `[Shot 1]` untimestamped, later shots cut with time only at real cuts, beats in time-ordered prose using the four phases (R8, R14); PRIMARY MOTION named with tempo (R17); motion alive on the last frame; long-run OC sex pacing (R29a).
+8. Camera line exactly R23; no "reveal" on a static hold.
+9. Response dial is the one Derek named (R21); a bare slap is to the face (R22); garments have named end states.
+10. Nothing outside the prompt was output (R1); the diff gate shows only this cell's axis (R30); no trigger word
 for a LoRA that is not loaded (R31).
-12. **REF2VA pastes only:** run the additional gate in section 5 of `h3-max-ref2va-prompt` (labels vs wired inputs,
+11. **REF2VA pastes only:** run the additional gate in section 5 of `h3-max-ref2va-prompt` (labels vs wired inputs,
 task-type tags, role-scoped retention lines, frame anchors, style opening, language, no `<scenetrans>`, speech form).
+12. Load-bearing limb, surface pressure, follow-through, camera height vs body angle (R23a/R23b).
+13. Every beat writes cause and effect: the motion, then how fabric, flesh and light react to it (cling or swing, bounce or compression, light on damp skin or through sheer cloth), then the settle (R14, R17, R20, R23a, R23b). Name the light in the camera line: source, direction, soft/hard, colour temperature, how it falls on skin and fabric (R23).
 
 ## 6. Worked examples
 
@@ -161,16 +172,15 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
   are archived at `C:\AI\community\archive\2026-11-03-ref2va-split\`; thin pointers remain at
   [references/ref2va-lane.md](references/ref2va-lane.md) and [references/ref2va-chain-lane.md](references/ref2va-chain-lane.md)
   so old citations resolve.
-- `alienpc-hardcore-i2v-director` "Max POS
-  craft / H3 prompt shape / Static Shot / static hold vs reveal / frame-one identity" - all point here; they keep
-  only their lane (node wiring, chain scheduling, still→intent match, watch/triage, queue).
+- `alienpc-hardcore-i2v-director` lives at `C:\Users\derek\.pi\agent\skills\alienpc-hardcore-i2v-director\SKILL.md` (not copied here). It owns still-to-intent matching, director cards and package D triage. Prompt rules stay in this
+  file (R16–R23b, R29a); do not restate them there.
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
 - `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts.
 - **Long-clip beat sheet & multi-shot continuity**: [references/longclip-beat-sheet.md](references/longclip-beat-sheet.md) (beat sheet fields, in-clip [Shot N] preference, one primary beat per clip; C2V runtime marked UNPROVEN).
 - The writer model's system prompt `C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (the only copy
   on this box - `C:\AI\community\notes\` has none) keeps its
   own rubric and few-shots: it is a model prompt, not a rule file, so it is not merged and not edited here. Its
-  `overall_soundscape:` instruction is superseded by R7 for anything written fresh on this box.
+  labeled soundscape-header instruction is superseded by R7 for anything written fresh on this box.
 
 ## 8. Sources
 
@@ -194,7 +204,7 @@ reason our paste shape differs from the hosted format is **R32** there. Reviews:
 
 | Numbers | Where the rule text lives |
 | --- | --- |
-| R1-R4, R7-R9, R16-R31 | this file, sections 0-4 (R16-R23 in `references/motion-contact-anatomy.md`, R24-R31 in `references/wording.md`) |
+| R1-R4, R7-R9, R16-R23b, R24-R31 (incl. R29a) | this file, sections 0-4 (R16–R23b in `references/motion-contact-anatomy.md`, R24–R29a and R30-R31 in `references/wording.md`) |
 | R5, R6, R10-R15 | this file, sections 1-2; the REF2VA reading of them is section 2 of `h3-max-ref2va-prompt\SKILL.md` |
 | R32-R44 | `C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md` - REF2VA on H3-Max only: R32 hosted audio fields,
 R33 label set and wired inputs, R34 task-type tags, R35 role-scoped retention, R36 frame anchors and the alignment line,
@@ -207,4 +217,7 @@ A new rule is added in the file that owns its lane and gets the next box-unique 
 
 ## Sibling: parody / INDEX identity
 Named INDEX+RefMod parody runs: load `h3-parody-identity` (name + description + RefMod). Do not fold those rules into this file.
+
+## Sibling: fictional OC / custom RefMod
+For a custom OC RefMod (no real person), bind likeness to that RefMod plus the approved still. Voice follows the OC template in Dialogue (do not paste a celebrity actor-voice line). Wardrobe and pose follow Picture 1 unless the beat writes a change. Explicit craft on these runs follows R16–R23b and R29a. After writing, submit through `submit_writer_run` as described in C:\AI\render\AGENTS.md; do not queue the draft yourself. The hook fails closed on >3-body asks and FFM/MMF. For a non-human or faceless partner, load only her RefMod. Still nouns win on costume, place, roles, wardrobe, races, and scale.
 

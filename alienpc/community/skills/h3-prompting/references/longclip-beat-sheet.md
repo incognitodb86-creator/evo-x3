@@ -45,7 +45,7 @@ Every long-clip beat sheet entry requires these fields (keep `spoken_dialogue` s
    H3's speech synthesizer skips `t=` numbers and speaks non-timestamp text inside `<d>` out loud (`"No speech, bar room tone and glasses"`, `"Paper, card stock"`). Only `spoken_dialogue` enters `<d>[English] ... </d>`; when `spoken_dialogue` is empty/`NONE`, omit `(S1)` and `<d>...</d>` altogether.
 2. **Compile `opening/ending state` + `primary beat` + `camera` into `detailed_description:`, NOT as raw headers in `summary:`**:
    - `summary:` must be natural `[reference generation]` prose with zero raw schema labels (`Set:`, `Wardrobe:`, `Opening:`, `Ending:`, `Anchors:`, `Method:`).
-   - `[Shot 1] 00:00.000 - <end_clock>` must describe that specific clip's real posture, physical action, garment state, and camera framing - never leave a smoke-test default (`"stands facing the camera, weight even on both feet, hands resting lightly at her sides"`) on walking, seated, leaning, or undressing clips.
+   - `[Shot 1]` (no timestamp, R8) must describe that specific clip's real posture, physical action, garment state, and camera framing - never leave a smoke-test default (`"stands facing the camera, weight even on both feet, hands resting lightly at her sides"`) on walking, seated, leaning, or undressing clips.
 3. **Preserve the brief's exact wardrobe and tone**:
    When a brief specifies a provocative or scandalous consensual adult parody, carry that exact wardrobe, framing, and dialogue attitude into the beat sheet and compiled `prompt.txt` (passing `comm.guard_ok` vocabulary cleanly; never sanitize into generic filler).
 
