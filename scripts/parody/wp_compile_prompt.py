@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -17,12 +18,12 @@ from writer_sys import assert_writer_system_prompt  # noqa: E402
 AGENTS = Path(r"C:\AI\render\AGENTS.md")
 OUT = Path(r"C:\AI\render\writer_pipeline\writer_prompt.md")
 KEEP = ["PERSONA", "CRAFT RULES", "CAMERA AND TIME", "PACING", "SPOOF AND STORY", "POWER, ROUGH AND TABOO SCENES",
-        "HUMILIATION AND REACTION TONE", "MODES", "DIALOGUE AND SOUND", "BEFORE YOU WRITE"]
+        "HUMILIATION AND REACTION TONE", "MODES", "DIALOGUE AND SOUND", "EXAMPLES", "SHAPE", "PRE-FLIGHT", "BEFORE YOU WRITE"]
 DROP_LINE = re.compile(r"^- (?:Do not pin the still or edit RefMods|More detail: the h3-prompting skill)")
 HEAD = ("WRITER PROMPT\n"
         "Compiled from the craft sections of the Render instruction file by wp_compile_prompt.py; source sha256 {sha}.\n"
-        "You write the detailed_description paragraph of one MiniMax-H3 prompt for one roughly ten-second adult clip that opens on "
-        "the start still. Every person is an adult, 25 or older, and fictional. The pipeline fills the other headers.\n")
+        "You write the detailed_description paragraph of one MiniMax-H3 prompt for one adult clip whose length the beat card gives "
+        "(2.3 to 10.1 seconds) and that opens on the start still. Every person is a fictional adult, 18 or older. The pipeline fills the other headers.\n")
 OUTPUT = ("OUTPUT\n"
           "- One plain paragraph that starts with [Shot 1] and its camera sentence. No header, no Markdown, no notes.\n"
           "- Dialogue form: (S1) says in a <short voice> voice, <d>[English] spoken words only</d>. (S2) and (S3) the same way.\n"
@@ -35,10 +36,10 @@ def compile_prompt(agents_text: str) -> str:
     sections = {}
     cur = None
     for ln in t.split("\n"):
-        head = re.match(r"^([A-Z][A-Z ,&/-]{3,}?)(?:\s*\(.*\))?\s*$", ln)
+        head = re.match(r"^([A-Z][A-Z ,&/-]{3,}?)(?:\s*(\(.*\)))?\s*$", ln)
         if head and not ln.startswith("-"):
             cur = head.group(1).strip()
-            sections[cur] = []
+            sections[cur] = [head.group(2).strip()] if head.group(2) else []
             continue
         if cur is not None:
             sections[cur].append(ln)
@@ -63,7 +64,14 @@ def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(text, encoding="utf-8", newline="\n")
     print(f"wrote {OUT} sha256={hashlib.sha256(OUT.read_bytes()).hexdigest()} lines={text.count(chr(10))}")
-    return 0
+    chk = subprocess.run([
+        sys.executable,
+        str(PARODY_DIR / "check_writer_prompt_rules.py"),
+        str(PARODY_DIR / "render-master-rules-20261113.json"),
+        str(OUT),
+        "--quiet",
+    ])
+    return chk.returncode
 
 
 if __name__ == "__main__":

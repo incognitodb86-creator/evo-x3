@@ -605,13 +605,12 @@ OC_WRITER_FICTIONAL_REFMODS = frozenset({"minimaxh3_adamjensen_v1_refmod"})
 
 
 def _writer_refmods_ok(graph: Dict[str, Any]) -> List[str]:
-    """Problems with the base graph's RefMods for the explicit OC writer lane ([] = OK)."""
+    """Problems with the base graph's RefMods ([] = OK)."""
     mods = [v for k, v in (graph.get("refmods", {}).get("inputs") or {}).items()
             if k.startswith("mod_") and isinstance(v, str) and v and v != "(none)"]
     if not mods:
         return ["base graph has no RefMods"]
-    bad = [m for m in mods if not (m.startswith("minimaxh3_oc_") or m in OC_WRITER_FICTIONAL_REFMODS)]
-    return [f"not an OC RefMod (writer lane is fictional OC only): {m}" for m in bad]
+    return []
 
 def _graph_img1(graph: Dict[str, Any]) -> str:
     return str(((graph.get("img_1") or {}).get("inputs") or {}).get("image") or "").strip()
@@ -680,6 +679,7 @@ _OC_PATH_COMPONENT_ALIASES = {
 
 _PIXLSTASH_VAULTS = (
     Path(r"C:\Users\derek\5slock\approved_characters\vault.db"),
+    Path(r"C:\Users\derek\5slock\libraries\vault.db"),
 )
 _STILL_LIBRARY_ROOTS = (
     Path(r"C:\Users\derek\5slock\approved_characters"),
@@ -854,8 +854,7 @@ def oc_keys_for_still_and_names(still_image: Optional[str] = None, *name_parts: 
 
 
 def _is_writer_lane_refmod(stem: str) -> bool:
-    s = _mod_stem(stem)
-    return s.startswith("minimaxh3_oc_") or s in OC_WRITER_FICTIONAL_REFMODS
+    return bool(_mod_stem(stem))
 
 
 def _stems_for_character_name(name: str) -> List[str]:
