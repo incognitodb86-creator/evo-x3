@@ -1,4 +1,5 @@
 """Builder fixes approved by Derrick, card t1437s5374 (2026-11-13): one test per item (Max Architect 3)."""
+import re
 import build_request as br
 
 READ = {"read": {"room": "beach", "place": "on a driftwood log", "surface": "log", "bed": False, "floor": "sand",
@@ -196,3 +197,41 @@ def test_acc4_continued_mmf_s3_in_frame_never_enters():
     assert "enters during the clip" in out_new
     s3_cont = [l for l in out_cont.splitlines() if "<Subject 3>" in l]
     assert s3_cont and not any("enters during the clip" in l for l in s3_cont), s3_cont
+
+
+# ---- Derrick t247s837: the six held builder items ---------------------------------------------------------------------
+def test_h1_strip_wardrobe_line_after_primary():
+    cast = br.make_cast(READ, "tease", "she strips the crop top on the log")
+    dd = ("The camera holds a medium shot, keeping her face in frame. At first, (S1) sits on the log, leaning forward. "
+          "As it builds, PRIMARY MOTION - (S1) peels her sheer mesh crop top up and off, one slow pull every second. "
+          "By the end, she sways, the top in her hand.")
+    out, rep = br.finalize_writer_prompt(HDR + dd, cast, strict=False)
+    body = out.split("detailed_description:", 1)[1]
+    if any("wardrobe line" in a for a in rep.get("added", [])):
+        w = [x for x in re.split(r"(?<=[.!?])\s+", body) if re.search(r"(?i)\bstays?\b", x) and "PRIMARY" not in x]
+        assert w and body.index(w[0]) > body.index("PRIMARY MOTION"), body
+
+
+def test_h2_same_move_lowers_onto_back_and_no_waist_kneel():
+    assert br._same_move("<Subject 1> lies back on the bed", "(S1) lowers herself onto her back")
+    assert br._WAIST_SURFACE_RE.search("the wooden sideboard")
+
+
+def test_h3_refmod_people_not_slots():
+    mods = [{"path": "minimaxh3_oc_poolclub_v1_refmod_audio.safetensors"}, {"path": "minimaxh3_oc_poolclub_v1_refmod_visual.safetensors"}]
+    assert br.refmod_people(mods) == 1
+
+
+def test_h4_s3_picture_computed_from_wired_refs():
+    assert br.s3_picture({"s3_picture": 7}) == 2 and br.s3_picture({"refs_wired_before_s3": 2}) == 3
+
+
+def test_h5_s3_still_partner_type_keeps_voice():
+    cast = br.make_cast(READ, "mmf", "mmf on the log", partner_type2="still")
+    assert cast["partner_type2"] == "still" and cast.get("voice_s3")
+
+
+def test_h6_absent_ref_strips_tag_only():
+    br._set_ctx(br.make_cast(READ, "doggy", "doggy on the log"))
+    out = br._strip_sentence("(S1) arches her back on the log, her hair as shown in <Picture 3>, and looks back at him.")
+    assert out and "<Picture 3>" not in out and "arches her back" in out, out
