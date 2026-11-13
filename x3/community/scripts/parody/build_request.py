@@ -2740,7 +2740,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         ),
     ]
     off_s2 = bool(cast.get("off_still_s2"))
-    off_s3 = bool(cast.get("off_still_s3"))
+    off_s3 = bool(cast.get("off_still_s3")) and not cast.get("s3_in_frame")  # acc4: continued MMF, S3 is in the inherited frame
     if pt == "man" and cast.get("man") and (cast.get("s1_gender") != "man" and (cast.get("act_id") or cast.get("position")) != "male_solo"):
         extra = " He is not in <Picture 1>; he enters during the clip." if off_s2 else ""
         subject_definitions_lines.append(f"<Subject 2> is {cast['man']}; he is (S2).{extra}")
@@ -2904,7 +2904,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     if report.get("not_ready"):
         issues.append("NOT_READY: " + report["not_ready"])
     off_s2 = bool(cast.get("off_still_s2"))
-    off_s3 = bool(cast.get("off_still_s3"))
+    off_s3 = bool(cast.get("off_still_s3")) and not cast.get("s3_in_frame")  # acc4: continued MMF, S3 is in the inherited frame
     if off_s2 and not writer_defined_missing_person(raw, subject=2):
         issues.append(
             "NOT_READY: the start still does not show the partner; the writer must define how they look, "
