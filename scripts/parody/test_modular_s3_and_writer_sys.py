@@ -206,9 +206,10 @@ def test_r7_three_person_job_refmods_allocation_and_limits():
 
 def test_r8_oc_hook_writes_s3_and_checks_refmod_slots():
     """R8: The OC hook, not only the parody CLI, writes S3 and loads or checks those slots."""
-    # Graph with 3 live RefMods for a 3-person cast
+    # Graph with 3 live RefMods for a 3-person cast with explicit named faces
     g = _dummy_refmod_graph(n_mods=3)
     cast = br.make_cast(BED_READ, "threesome", "threesome with two partners")
+    cast = dict(cast, named_faces=["S1", "S2", "S3"], partner_type="man", partner_type2="man")
     raw = "detailed_description:\n[Shot 1] The camera holds. <Subject 2> enters her and thrusts with steady rhythmic strokes while <Subject 3> holds her close on the bed.\n\ndiegetic sound:\nsoft room tone."
     g_out, _, _ = br.build_writer_request(g, raw, cast, prefix="test_oc_s3", strict=False)
     assert g_out["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_mod_1"
@@ -218,10 +219,19 @@ def test_r8_oc_hook_writes_s3_and_checks_refmod_slots():
         mod_val = g_out["refmods"]["inputs"][f"mod_{i}"]
         assert (mod_val.get("path") == "(none)") if isinstance(mod_val, dict) else (mod_val == "(none)")
 
-    # Graph with only 1 RefMod for a 3-person cast with named faces fails NOT_READY
+    # Default MMF/threesome partners are faceless: one OC RefMod is enough (Derrick t1467).
+    g_one = _dummy_refmod_graph(n_mods=1)
+    c_face = br.make_cast(BED_READ, "threesome", "threesome with two partners")
+    g_ok, _, _ = br.build_writer_request(g_one, raw, c_face, prefix="test_oc_s3_faceless", strict=False)
+    assert g_ok["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_mod_1"
+    for i in range(2, 9):
+        assert g_ok["refmods"]["inputs"][f"mod_{i}"] == "(none)"
+
+    # Explicit named faces still fail-closed without enough RefMods.
     g_bad = _dummy_refmod_graph(n_mods=1)
+    named = dict(cast, named_faces=["S1", "S2", "S3"], partner_type="man", partner_type2="man")
     with pytest.raises(br.WriterNotReady, match="named-face person has no RefMod"):
-        br.build_writer_request(g_bad, raw, cast, prefix="test_oc_s3_bad", strict=False)
+        br.build_writer_request(g_bad, raw, named, prefix="test_oc_s3_bad", strict=False)
 
 
 def test_r9_w4_does_not_drop_s3_garments():
@@ -291,3 +301,98 @@ def test_r14_dials_sampler_lock_unchanged_age_floor_18_plus():
     assert not comm.guard_ok("minor")
     assert not comm.guard_ok("child")
     assert not comm.guard_ok("children")
+
+def test_s3_dual_mode_faceless_still_and_generated_look():
+    """Derrick t1467: MMF dual mode passes with a generated look, a partner2 still, or the faceless fallback."""
+    raw = ("detailed_description:\n[Shot 1] The camera holds. <Subject 2> is behind her with steady rhythmic strokes "
+           "while <Subject 3> is at her mouth.\n\ndiegetic sound:\nsoft room tone.")
+    g1 = _dummy_refmod_graph(n_mods=1)
+    c_face = br.make_cast(BED_READ, "mmf", "MMF threesome on the bed")
+    assert c_face["partner_type2"] == "faceless"
+    br.build_writer_request(g1, raw, c_face, prefix="mmf_faceless", strict=False)
+
+    c_still = dict(c_face, s3_still="community/flux_p1_20261030/M01_body.jpg")
+    g_st, _, rep = br.build_writer_request(_dummy_refmod_graph(n_mods=1), raw, c_still, prefix="mmf_still", strict=False)
+    assert rep.get("s3_still") or g_st.get("img_s3")
+
+    c_look = dict(c_face, s3_look="an adult man, thirty years of age, of solid build, with short dark hair")
+    br.build_writer_request(_dummy_refmod_graph(n_mods=1), raw, c_look, prefix="mmf_look", strict=False)
+
+
+def test_w5_skipped_for_mmf_double_blowjob():
+    assert "mmf_double_blowjob" in br._ORAL_POSITIONS
+    cast = br.make_cast(BED_READ, "mmf_double_blowjob", "MMF double blowjob")
+    raw = ("detailed_description:\n[Shot 1] The camera holds. At first, (S1) is on her knees in her sheer panties. "
+           "(S2) and (S3) stand in front of her. She takes them in her mouth.\n\ndiegetic sound:\nwet suction.")
+    # Must not raise W5 / clearance just because the panties were not pulled aside before oral entry.
+    prompt, rep = br.finalize_writer_prompt(raw, cast, strict=False)
+    assert "NOT_READY" not in str(rep.get("error") or "")
+    # also the request builder should not raise WriterNotReady for W5
+    br.build_writer_request(_dummy_refmod_graph(n_mods=1), raw, cast, prefix="w5_oral", strict=False)
+
+
+def test_male_solo_s1_is_the_man_not_the_still_person():
+    cast = br.make_cast(BED_READ, "male_solo", "male solo edging")
+    assert cast["s1_gender"] == "man" and cast["act_id"] == "male_solo"
+    assert "not (S1)" in cast["still"] or "not in this clip" in cast["still"]
+    raw = ("detailed_description:\n[Shot 1] The camera holds. At first, (S1) stands by the bed. "
+           "He strokes himself at a slow tempo.\n\ndiegetic sound:\nquiet breath.")
+    prompt, rep = br.finalize_writer_prompt(raw, cast, strict=False)
+    text = prompt if isinstance(prompt, str) else str(prompt)
+    assert "does not define <Subject 1>" in text or "not the person shown in <Picture 1>" in text
+    assert "exact same man shown in <Picture 1>" not in text
+
+
+def test_ffm_act_written_when_ask_names_an_act():
+    cast = br.make_cast(BED_READ, "ffm", "FFM on the bed")
+    raw = ("detailed_description:\n[Shot 1] The camera holds. At first, (S1) lies back on the bed. "
+           "(S2) rides her face while (S3) sinks onto her with slow strokes.\n\ndiegetic sound:\nbreath and wet contact.")
+    prompt, rep = br.finalize_writer_prompt(raw, cast, strict=False)
+    assert rep.get("act_written") is True
+    # is_act_ask is true for FFM, so build_writer_request must not raise act:false
+    br.build_writer_request(_dummy_refmod_graph(n_mods=1), raw, cast, prefix="ffm_act", strict=False)
+
+def test_pm_acc4_builder_continued_skips_opening_from_still():
+    raw = ("detailed_description:\n[Shot 1] The camera holds a static medium shot. At first, (S1) is already on her back, "
+           "and (S2) is buried in her vagina with steady rhythmic strokes.\n\ndiegetic sound:\nsoft room tone.")
+    cast = dict(br.make_cast(BED_READ, "missionary", "keep going, faster"), continued=True)
+    prompt, rep = br.finalize_writer_prompt(raw, cast, strict=False)
+    text = prompt if isinstance(prompt, str) else str(prompt)
+    assert "The clip opens on <Picture 1>" not in text
+    assert any("opening-from-still skipped" in a or "continued" in a for a in (rep.get("added") or []))
+
+
+def test_pm_acc4_builder_bunches_is_not_a_removal():
+    raw = ("detailed_description:\n[Shot 1] The camera holds. At first, (S1) stands on the wood floor, knees on the floor, "
+           "her sheer panties bunching at her waist and stay there. She touches herself.\n\ndiegetic sound:\nquiet breath.")
+    cast = br.make_cast(BED_READ, "female_solo", "solo with a wand on the bed")
+    prompt, rep = br.finalize_writer_prompt(raw, cast, strict=False)
+    st = (rep.get("state") or {})
+    assert "item:panties" not in (st.get("writer_removed") or [])
+    text = prompt if isinstance(prompt, str) else str(prompt)
+    assert "the the floor" not in text
+    # wardrobe line must not claim the panties were taken off to the floor
+    assert "she took off" not in text.lower() or "panties" not in text.lower()
+
+
+def test_pm_acc4_builder_no_r23_when_writer_wrote_camera():
+    raw = ("detailed_description:\n[Shot 1] Held, medium shot. At first, (S1) lies back on the bed. "
+           "(S2) enters her vagina and stays buried in her vagina with steady rhythmic strokes.\n\ndiegetic sound:\nsoft room tone.")
+    cast = br.make_cast(BED_READ, "missionary", "missionary on the bed")
+    prompt, rep = br.finalize_writer_prompt(raw, cast, strict=False)
+    assert not any("camera sentence (R23)" == a or a.startswith("camera sentence (R23)") for a in (rep.get("added") or []))
+    text = prompt if isinstance(prompt, str) else str(prompt)
+    assert text.lower().count("the camera holds a static medium shot") <= 1
+
+
+def test_pm_acc4_speech_speaker_is_sentence_subject():
+    assert br._speaker_of('(S1) winks playfully at (S2) and says, <d>[English] Stay close.</d>') == "S1"
+    assert br._span_speaker("(S1) winks playfully at (S2) and says, ") == "S1"
+    assert br._speaker_of('(S2) says in a low voice, <d>[English] Hold still.</d>') == "S2"
+
+
+def test_pm_acc4_garments_floor_has_no_double_the():
+    read = dict(BED_READ, floor="the floor")
+    cast = br.make_cast(read, "tease", "slow striptease")
+    assert "the the" not in (cast.get("garments_floor") or "")
+    assert (cast.get("garments_floor") or "").lower().startswith("the ")

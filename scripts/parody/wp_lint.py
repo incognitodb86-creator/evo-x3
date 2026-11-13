@@ -247,7 +247,16 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
 
 def mode_rules(kind: str) -> Dict[str, Any]:
     return MODE_RULES.get(kind) or MODE_RULES["sex"]
+# Codes that stay hard (block_ready plus voice_missing and a builder reject). Craft codes are soft.
+SAFETY_HARD = frozenset({
+    "oral_silence", "oral_mouth_full", "oral_contact", "oral_sound",
+    "nested_d", "blacklist", "builder_primary", "clearance_missing", "clearance",
+    "act_mismatch", "tag_words", "youth_hint", "scale_adult", "consent_setup",
+    "voice_missing", "builder",
+    "contact_anatomy", "talk_lines", "talk_s2_defined",
+})
 HARD_WEIGHT = 20
+SOFT_WEIGHT = 5
 
 
 def norm(s: str) -> str:
@@ -462,8 +471,10 @@ def _join_inherited_clear(slots: Dict[str, Any], scene: Optional[Dict[str, Any]]
     return True
 
 
-def _fix(code: str, note: str, hard: bool = True, pen: int = 0) -> Dict[str, Any]:
-    return {"code": code, "note": note, "hard": hard, "penalty": HARD_WEIGHT if hard else pen}
+def _fix(code: str, note: str, hard: Optional[bool] = None, pen: int = 0) -> Dict[str, Any]:
+    if hard is None:
+        hard = code in SAFETY_HARD
+    return {"code": code, "note": note, "hard": hard, "penalty": HARD_WEIGHT if hard else (pen or SOFT_WEIGHT)}
 
 
 def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
@@ -551,6 +562,11 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
         issues.append(_fix(kind + "_contact", rules.get("banned_hint") or "wrong join words for this mode"))
     if kind != "oral" and ORAL_SHEATHED_RE.search(plain):  # acc4: mmf/spitroast oral words too
         issues.append(_fix("oral_contact", "oral contact names the mouth (inside her mouth), never sheathed or hips flush"))
+    if rules["contact"] or kind in ("sex", "oral"):
+        if not re.search(r"(?i)\b(?:penis|cock|shaft|glans|vagina|pussy|anus|asshole|mouth|lips|vulva|clitoris|clit)\b", plain):
+            issues.append(_fix("contact_anatomy", "the entry or contact sentence must name penis, vagina, anus, mouth or vulva; 'thrusts into her' alone is not enough"))
+    if re.search(r"(?i)\bseats himself\b", plain):
+        issues.append(_fix("seats_himself", "do not write 'seats himself'; land the pose in (S1)'s own words", False, 5))
     if _clear_needed(slots, kind) and not _join_inherited_clear(slots, ctx.get("scene")):
         gnoun = join_noun(slots)
         # builder parity: the builder's own W5 credit (active pull/slide/tug ... aside|up, or a removal verb)
@@ -658,7 +674,10 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     if wc < lo or wc > hi:
         issues.append(_fix("length", f"detailed_description has {wc} words outside speech; aim for {lo}-{hi}", False, 10))
     if rules["min_lines"] and len(lines) < rules["min_lines"]:
-        issues.append(_fix("talk_lines", f"talk-only needs three to five short lines; it has {len(lines)}", False, 15))
+        issues.append(_fix("talk_lines", f"talk-only needs three to five short lines; it has {len(lines)}"))
+    if kind == "talk" and re.search(r"\(S2\)|<Subject 2>", dd) and not re.search(
+            r"(?i)(?:subject_definitions:)?[^\n]*<(?:Subject 2)>|\(S2\) is ", full):
+        issues.append(_fix("talk_s2_defined", "(S2) is named in the talk; define them in subject_definitions (look or clothes, BTS interviewer included)"))
 
     issues += mode_checks(dd, full, sents, plain, ctx, kind, prim_idx)
 

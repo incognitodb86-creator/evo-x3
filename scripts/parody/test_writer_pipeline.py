@@ -28,7 +28,7 @@ GOOD_SEX = ("[Shot 1] The camera holds a low three-quarter angle at hip height b
             "surf hisses behind her. (S2) steps in from the left and turns her by the waist; she bends forward and drops to her "
             "hands and knees on the sand, her forearms braced on the bleached log as the wood creaks under her weight. He kneels "
             "behind her so his hips line up with hers, hooks the bodysuit at the back and pulls it aside to one hip, where it "
-            "stays, and enters her from behind with a low grunt. He sinks in to the hilt and stays buried in her through every "
+            "stays, and enters her vagina from behind with a low grunt. He sinks his penis in to the hilt and stays buried in her vagina through every "
             "drive. As it builds, PRIMARY MOTION - hard rear thrusts, two strokes a second, from behind with her forearms on the "
             "log; her wet hair swings and her body jolts forward on each slap of skin. (S2) says in a low voice, <d>[English] "
             "Sand on your knees, and you still push back.</d> (S1) says in a breathless voice, <d>[English] Deeper, the log is "
@@ -85,7 +85,7 @@ def test_good_samples_pass():
 BAD = [
     ("no_primary", lambda t: t.replace("PRIMARY MOTION - hard rear thrusts,", "hard rear thrusts land")),
     ("no_tempo", lambda t: t.replace("two strokes a second", "harder and harder")),
-    ("no_contact", lambda t: t.replace("stays buried in her through every drive", "stays there through every drive")),
+    ("no_contact", lambda t: t.replace("stays buried in her vagina through every drive", "stays there through every drive")),
     ("clearance", lambda t: t.replace("pulls it aside to one hip", "grips it at one hip")),
     ("shot2", lambda t: t.replace("By the end,", "[Shot 2] By the end,")),
     ("timestamp", lambda t: t.replace("As it builds,", "At 0:03 as it builds,")),
@@ -94,7 +94,7 @@ BAD = [
     ("slot_surface", lambda t: t.replace("log", "rock")),
     ("speech_budget", lambda t: t.replace("Deeper, the log is shaking.",
                                           "Deeper, the log is shaking under us and I can feel every single grain of sand now.")),
-    ("cloned", lambda t: t.replace("He sinks in to the hilt and stays buried in her through every drive.",
+    ("cloned", lambda t: t.replace("He sinks his penis in to the hilt and stays buried in her vagina through every drive.",
                                    "He sinks in to the base from behind and stays buried in her as the pace climbs.")),
     ("phase_anchor", lambda t: t.replace("At first, (S1) leans against the log", "(S1) waits by the log")),
     ("phase_order", lambda t: t.replace("As it builds, PRIMARY", "By the end, PRIMARY").replace(
@@ -108,14 +108,21 @@ BAD = [
 def test_each_hard_rule_trips_alone(code, mut):
     bad = mut(GOOD_SEX)
     assert bad != GOOD_SEX
-    got = hard(full(bad), ctx())
-    assert got == [code] or (code == "clearance" and got == ["clearance", "clearance_missing"])
+    r = wp_lint.lint(full(bad), ctx())
+    codes = [i["code"] for i in r["issues"]]
+    assert code in codes
+    if code in wp_lint.SAFETY_HARD:
+        got = r["hard"]
+        assert got == [code] or (code == "clearance" and set(got) <= {"clearance", "clearance_missing"} and code in got)
+    else:
+        assert code not in r["hard"]
 
 
 def test_header_order_and_blacklist():
     f = full(GOOD_SEX)
     swapped = f.replace("summary:", "SUMMARYTMP:").replace("retention_analysis:", "summary:").replace("SUMMARYTMP:", "retention_analysis:")
-    assert "header_order" in hard(swapped, ctx())
+    assert "header_order" in [i["code"] for i in wp_lint.lint(swapped, ctx())["issues"]]
+    assert "header_order" not in hard(swapped, ctx())
     assert hard(f, ctx(blacklist=["Deeper, the log is shaking!"])) == ["blacklist"]
     assert hard(f, ctx(blacklist=["Stay still for me."])) == []
 
@@ -128,17 +135,20 @@ def test_oral_rules():
 def test_talk_rules():
     two = GOOD_TALK.replace(" (S1) says in a teasing voice, <d>[English] Then arrest me, Detective.</d>", "")
     r = wp_lint.lint(full(two, "talk"), ctx("talk", "talk"))
-    assert "talk_lines" in [i["code"] for i in r["issues"] if not i["hard"]]
-    assert hard(full(GOOD_TALK.replace("Then arrest me, Detective.", "Then arrest me, Detective, right now, cuff me to that log and walk me home slowly."), "talk"),
-                ctx("talk", "talk")) == ["speech_budget"]
+    assert "talk_lines" in r["hard"]
+    r2 = wp_lint.lint(full(GOOD_TALK.replace("Then arrest me, Detective.", "Then arrest me, Detective, right now, cuff me to that log and walk me home slowly."), "talk"),
+                      ctx("talk", "talk"))
+    assert "speech_budget" in [i["code"] for i in r2["issues"]] and "speech_budget" not in r2["hard"]
 
 
 def test_chain_rules():
     scene = {"done_actions": ["hooks the bodysuit at the back and pulls it aside to one hip"],
              "ending_state": {"garments": {"item:bodysuit": "aside"}, "pov": False}}
-    assert "chain_restate" in hard(full(GOOD_SEX), ctx(scene=scene))
+    assert "chain_restate" in [i["code"] for i in wp_lint.lint(full(GOOD_SEX), ctx(scene=scene))["issues"]]
+    assert "chain_restate" not in hard(full(GOOD_SEX), ctx(scene=scene))
     reset = GOOD_SEX.replace("her sheer beige bodysuit clinging wet to her hips", "her sheer beige bodysuit covering her hips again")
-    assert "chain_garment_reset" in hard(full(reset), ctx(scene={"done_actions": [], "ending_state": {"garments": {"item:bodysuit": "aside"}}}))
+    r_reset = wp_lint.lint(full(reset), ctx(scene={"done_actions": [], "ending_state": {"garments": {"item:bodysuit": "aside"}}}))
+    assert "chain_garment_reset" in [i["code"] for i in r_reset["issues"]] and "chain_garment_reset" not in r_reset["hard"]
 
 
 def test_builder_preview_keeps_writer_lines():
@@ -251,12 +261,13 @@ def test_happy_path_and_blacklist_update(home, tmp_path, monkeypatch):
 def test_fault_all_fail_lint_fallback(home, tmp_path, monkeypatch):
     # the normalizer may add a missing label, so the all-fail case drops the label AND the tempo
     bad = GOOD_SEX.replace("PRIMARY MOTION - hard rear thrusts, two strokes a second,", "hard rear thrusts land")
+    bad = bad.replace("At first, (S1)", "At first, (S1), 16 years old,")  # youth_hint is a hard ready-blocker (survives normalize)
     calls = scripted(monkeypatch, lambda purpose: bad)
     stub_build(monkeypatch)
     r = p.run_clip(job(tmp_path, "c2"), p.load_config(home / "config.yaml"), lambda *a: None)
     assert "lint_fail_fallback" in r["warnings"] and "rewrite" in calls and r["builds"]  # the build still ran
-    # PM acc3 #8: a fallback scoring under 50 is NOT_READY (low_score); otherwise it still ships READY
-    assert r["status"] == ("NOT_READY" if r["pick_score"] < 50 else "READY"), r["pick_score"]
+    # PM acc4 #8: a lint-fail fallback never ships READY; score must be >= 60 with no hard flag
+    assert r["status"] == "NOT_READY", r.get("pick_score")
 
 
 def test_fault_writer_down_next_clip_proceeds(home, tmp_path, monkeypatch):
@@ -312,7 +323,7 @@ def test_two_clip_chain_scene_state(home, tmp_path, monkeypatch):
     for k in ("clip_id", "primary_beat", "opening_state", "ending_state", "anchors", "camera", "spoken_dialogue", "ambient_sfx",
               "frame_budget", "method", "done_actions"):
         assert k in st["clips"][0], k
-    r2 = p.run_clip(job(tmp_path, "s1c2", scene="scn1"), cfg, lambda *a: None)
+    r2 = p.run_clip(job(tmp_path, "s1c2", scene="scn1", **{"continue": r1["run_dir"]}), cfg, lambda *a: None)
     # clip 2 inherits clip 1: same prose restates done actions and repeats lines -> lint flags them (fallback warning)
     lint1 = json.loads((Path(r2["run_dir"]) / "lint_1.json").read_text())
     assert "blacklist" in lint1["hard"]
@@ -405,12 +416,13 @@ def test_mode_rules_builder_parity():
                             "(S1) says in a muffled voice, <d>[English] Mmm, yes.</d>")
     assert "oral_mouth_full" in hard(full(bad, "oral"), c)
     three = GOOD_SEX + " (S2) says in a low voice, <d>[English] Arch for me.</d> (S2) says in a low voice, <d>[English] Lower.</d> (S2) says in a low voice, <d>[English] Now.</d>"
-    assert "speaker_cap" in hard(full(three), ctx())
-    assert "shallow" in hard(full(GOOD_SEX.replace("He sinks in to the hilt", "He stays shallow at the entrance")), ctx())
-    assert "panel" in hard(full(GOOD_SEX.replace("hooks the bodysuit", "hooks the bodysuit panel")), ctx())
-    assert "dial" in hard(full(GOOD_SEX.replace("At first,", "At 24 fps, at first,")), ctx())
+    assert "speaker_cap" in [i["code"] for i in wp_lint.lint(full(three), ctx())["issues"]]
+    assert "shallow" in [i["code"] for i in wp_lint.lint(full(GOOD_SEX.replace("He sinks his penis in to the hilt", "He stays shallow at the entrance")), ctx())["issues"]]
+    assert "panel" in [i["code"] for i in wp_lint.lint(full(GOOD_SEX.replace("hooks the bodysuit", "hooks the bodysuit panel")), ctx())["issues"]]
+    assert "dial" in [i["code"] for i in wp_lint.lint(full(GOOD_SEX.replace("At first,", "At 24 fps, at first,")), ctx())["issues"]]
     cpos = ctx(cast={"position_check": r"\bon her back\b"})
-    assert "pose_landing" in hard(full(GOOD_SEX), cpos)
+    assert "pose_landing" in [i["code"] for i in wp_lint.lint(full(GOOD_SEX), cpos)["issues"]]
+    assert "pose_landing" not in hard(full(GOOD_SEX), cpos)
     cpart = ctx(cast={"off_still_s2": True})
     assert "partner_gate" not in hard(full(GOOD_SEX), cpart)  # the pipeline-owned S2 line satisfies the builder gate
     assert wp_lint.tempo_rate("two hard strokes a second") == 2 and wp_lint.tempo_rate("one stroke every half second") == 2
@@ -598,3 +610,40 @@ def test_little_sister_role_word_is_not_a_youth_hint():
     r = L.lint(hdr + "At first, (S1), an adult woman playing his little sister, lies on the bed.", ctx)
     assert "youth_hint" not in r["hard"]
     assert "youth_hint" in L.lint(hdr + "At first, (S1), 17 years old, lies on the bed.", ctx)["hard"]
+
+def test_lint_craft_is_soft_and_score_stays_above_ready():
+    """Craft codes (phase_anchor, static_end, ...) are soft ~5 pts; three of them stay >= min_ready_score 50.
+    Safety codes in SAFETY_HARD stay hard at 20 and still block lint pass."""
+    assert wp_lint.SOFT_WEIGHT == 5 and wp_lint.HARD_WEIGHT == 20
+    soft = wp_lint._fix("phase_anchor", "x")
+    assert soft["hard"] is False and soft["penalty"] == 5
+    assert wp_lint._fix("youth_hint", "x")["hard"] and wp_lint._fix("voice_missing", "x")["hard"]
+    assert wp_lint._fix("clearance_missing", "x")["hard"] and wp_lint._fix("blacklist", "x")["hard"]
+    bad = GOOD_SEX.replace("At first, (S1) leans against the log", "(S1) waits by the log")
+    bad = bad.replace("By the end, she is still rocking back onto him and he keeps the same pace, gripping her hips.",
+                      "By the end, her hair is gold in the low sun.")
+    r = wp_lint.lint(full(bad), ctx())
+    assert "phase_anchor" in [i["code"] for i in r["issues"]]
+    assert "static_end" in [i["code"] for i in r["issues"]]
+    assert r["score"] >= 50 and r["pass"] and not r["hard"]
+
+def test_pm_acc4_router_handjob_sensual_and_pool_edge():
+    import wp_router as R
+    cfg = {"position_kinds": {"talk": ["talk"], "oral": ["blowjob"], "partner": ["titjob", "finish", "handjob"],
+                                "solo": ["tease", "female_solo"], "sex": ["doggy", "missionary"]}}
+    h = R.route_mode("handjob", "handjob", {}, cfg)
+    assert h["act_id"] == "handjob" and h["mode"] == "partner"
+    s = R.route_mode("something sensual on the balcony", "sensual", {}, cfg)
+    assert s["act_id"] == "tease"
+    e = R.route_mode("she leans on the pool edge", "missionary", {}, cfg)
+    assert "edge" not in e["overlays"]
+    e2 = R.route_mode("edging, she stops just before", "missionary", {}, cfg)
+    assert "edge" in e2["overlays"]
+
+
+def test_pm_acc4_tone_not_ashamed_on_neutral_ask():
+    rng = __import__("random").Random(1)
+    for i in range(20):
+        t = p.pick_tone("missionary on the bed, she is eager", rng, None, overlays=[])
+        assert t not in ("ashamed", "reluctant"), t
+    assert p.pick_tone("forced orgasm, she resists", __import__("random").Random(0), None, overlays=["forced_orgasm", "cnc"]) in p.TONES

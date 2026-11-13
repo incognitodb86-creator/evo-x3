@@ -19,7 +19,7 @@ OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every 
     ("cinematic", r"\bcinematic|\bmovie\b|\bfilm\b|high-end"),
     ("gonzo", r"\bgonzo\b|\bamateur\b|\braw\b"),
     ("pov", r"\bpov\b|point of view|into the lens"),
-    ("edge", r"\bedg(?:e|es|ing)\b|\bdenial\b|\bteas(?:e|es|ing)\b"),
+    ("edge", r"(?:(?<!pool )(?<!water.s )\bedges?\b(?!\s+of\b)|\bedging\b|\bdenial\b|\bteas(?:e|es|ing)\b)"),
     ("forced_orgasm", r"forced orgasm|overstim\w*"),
     ("defeat", r"superheroine|\bheroine\b|\bperil\b|\bdefeated\b"),
     ("cnc", r"\bcnc\b|reluctan\w*|\bresist\w*|non-?con\w*"),
@@ -58,6 +58,10 @@ def resolve_act(position: str, ask: str, still_read: Optional[Dict[str, Any]]) -
     e = br.get_act(position or "")
     if e:
         return {"act_id": e.get("id") or position, "warnings": warnings}
+    # PM acc4 #11: an unknown sensual ask routes to tease, not talk
+    if re.search(r"(?i)\bsensual\b", (position or "") + " " + (ask or "")) and not SEX_WORDS_RE.search(ask or ""):
+        warnings.append({"warn": "mode_fallback", "why": "unknown sensual ask; routed to tease", "chosen": "tease"})
+        return {"act_id": "tease", "warnings": warnings}
     idx = _alias_index()
     a = (ask or "").lower()
     hits = sorted(((len(k), v) for k, v in idx.items() if re.search(r"(?<![\w-])" + re.escape(k) + r"(?![\w-])", a)), reverse=True)

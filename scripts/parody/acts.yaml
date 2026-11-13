@@ -131,6 +131,27 @@ acts:
     known_bad: []
     status: untested
 
+
+  handjob:
+    id: handjob
+    aliases:
+      - "hand job"
+      - "stroking him"
+      - "hj"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "her fist wrapped around his shaft"
+      - "stroke his shaft"
+    motion_verbs:
+      - "stroking"
+      - "sliding her fist"
+    default_camera: close-up
+    still_read_must_keeps: []
+    known_bad: []
+    status: untested
+
   titjob:
     id: titjob
     aliases:
