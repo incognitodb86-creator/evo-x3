@@ -754,7 +754,7 @@ _CAMERA_STATIC_RE = re.compile(r"\b(locked|locked-off|static|holds? (?:a |the )?
 _STANDING_RE = re.compile(r"\b(stand|stands|standing)\b", re.IGNORECASE)
 _TEMPO_RE = re.compile(r"\b(per second|every (?:half )?second|cycle|bpm|tempo|strokes? a second|beats? a second)\b", re.IGNORECASE)
 _CONTACT_RE = re.compile(r"\b(inside her|fully sheathed|hips flush|flush against|buried in her|deep in her|sheathed)\b", re.IGNORECASE)
-_CAMERA_SENTENCE_RE = re.compile(r"^\s*(?:\[Shot \d+\]\s*)?(?:the |a |one )?(?:camera|lens|\d{2,3}\s?mm|shot on|framing|(?:medium|full|wide|tight)(?:[- ](?:full|wide|close))?[- ]shot|(?:medium )?close-up|low[- ]angle|high[- ]angle|eye[- ]level)\b", re.I)
+_CAMERA_SENTENCE_RE = re.compile(r"^\s*(?:\[Shot \d+\]\s*)?(?:the |a |one )?(?:camera|lens|\d{2,3}\s?mm|shot on|framing|(?:held,?\s+)?(?:medium|full|wide|tight)(?:[- ](?:full|wide|close))?[- ]shot|(?:medium )?close-up|low[- ]angle|high[- ]angle|eye[- ]level|static medium shot|the held medium shot)\b", re.I)
 _LABELS = [
     (re.compile(r"(?<![(<\w])S1(?![)\w])"), "(S1)"),
     (re.compile(r"(?<![(<\w])S2(?![)\w])"), "(S2)"),
@@ -1085,7 +1085,8 @@ def _speech_form(spk: str, voices: Dict[str, str], span: str) -> str:
     return f"({spk}) says in {voice}, {_clean_d_span(span)}"
 
 
-_LEAD_RE = re.compile(r"(?:,?\s*(?:and\s+)?)?(?:\(S[123]\)\s*|<Subject [123]>\s*|\b(?:she|he|they)\s+)?(?:[\w-]+\s+){0,2}?\b" + _SPEECH_VERB +
+_PREP_BEHIND = r"(?<!\bat )(?<!\bto )(?<!\bwith )(?<!\bfor )(?<!\bfrom )(?<!\btoward )(?<!\btowards )"
+_LEAD_RE = re.compile(r"(?:,?\s*(?:and\s+)?)?" + _PREP_BEHIND + r"(?:\(S[123]\)\s*|<Subject [123]>\s*|\b(?:she|he|they)\s+)?(?:[\w-]+\s+){0,2}?\b" + _SPEECH_VERB +
                       r"\b(?:[^<\x00]|<(?:Audio|Subject|Picture) \d+>(?:'s)?)*$", re.I)  # pmfix5: crosses <Audio 1> (A_03/F_03 double lead)
 _AUDIO_LEAD_RE = re.compile(r"(?i)\bin <Audio 1>(?:'s voice)?(?: with signature vocal timbre)?(?: as <Subject [123]>)?,?\s*")
 _DOUBLE_LEAD_RE = re.compile(r"\(S[123]\) says in[^<]*\(S[123]\) says in")
@@ -3762,6 +3763,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     sheets = f["sheets"] or surface
     sheets = sheets if re.match(r"(?i)(?:the|a|an|her)\b", sheets) else "the " + sheets
     pad = "mattress" if bed else re.sub(r"(?i)^(?:the|a|an)\s+", "", surface)
+    _clean_surf = lambda s: re.sub(r'^(?:the|a|an)\s+', '', (s or '').strip(), flags=re.I)
     def _the(s: str) -> str:
         s = re.sub(r"\s+", " ", (s or "").strip())
         s = re.sub(r"(?i)\bthe the\b", "the", s)
@@ -3769,7 +3771,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
             s = "the " + s
         return s
     floor = f["floor"]
-    at_floor = (_the(f"{floor} beside the bed") if bed else _the(floor)) if floor else _the(surface) or surface
+    at_floor = "the " + (_clean_surf(floor) + " beside the bed" if bed and floor else _clean_surf(floor) or _clean_surf(surface) or "floor")
     pose = f["pose"].rstrip(".")
     pose = re.sub(r"(?i)^she\s+", "", pose)
     facing = ", facing the camera" if read.get("facing_camera") and "facing" not in pose else ""

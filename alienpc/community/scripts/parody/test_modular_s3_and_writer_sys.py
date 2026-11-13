@@ -438,3 +438,30 @@ def test_pm_acc4d_templates_and_male_solo_still():
     blob = " ".join(str(male.get(k) or "") for k in ("woman", "still", "still_line", "still_wardrobe", "man")).lower()
     assert "blonde" not in blob and "sheer nude bra" not in blob
 
+
+def test_flash_issues_1_3_4():
+    # Issue 1: Double-prefixed text glue ('the the wooden sideboard')
+    read_sideboard = dict(BED_READ, bed=False, surface="the wooden sideboard", floor="the floor")
+    cast_sb = br.make_cast(read_sideboard, "tease", "slow striptease")
+    assert "the the" not in (cast_sb.get("garments_floor") or "")
+    assert (cast_sb.get("garments_floor") or "").lower().startswith("the ")
+    import render_writer_pipeline as rwp
+    slots_sb = rwp.make_slots(read_sideboard, "standing_mf on the sideboard", "standing_mf", "sex", "test_run", None)
+    brief_sb = rwp.brief_block("standing_mf on the sideboard", "standing_mf", "sex", slots_sb, 2)
+    assert "the the" not in brief_sb.lower()
+
+    # Issue 3: Stacking camera sentences with 'Held medium shot.'
+    raw_cam = ("[Shot 1] Held medium shot. The camera slowly pushes in to her face. "
+               "At first, (S1) lies back on the bed. (S2) enters her vagina and stays buried in her vagina with steady rhythmic strokes.\n\n"
+               "diegetic sound:\nsoft room tone.")
+    prompt_cam, rep_cam = br.finalize_writer_prompt(raw_cam, cast_sb, strict=False)
+    text_cam = prompt_cam if isinstance(prompt_cam, str) else str(prompt_cam)
+    # exactly one camera sentence remains
+    assert text_cam.lower().count("pushes in to her face") == 1
+    assert "held medium shot" not in text_cam.lower()
+
+    # Issue 4: Preposition before speaker label in convert_speech
+    res = br.convert_speech(["(S1) winks playfully at (S2) and says, <d>[English] Stay close.</d>"], {"S1": "a warm voice"})
+    assert "(S1) says in a warm voice" in res[0]
+    assert "(S2) says" not in res[0]
+
