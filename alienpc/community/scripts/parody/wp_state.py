@@ -196,6 +196,21 @@ def load_scene(p: Path) -> List[Dict[str, Any]]:
         return []
 
 
+def reset_scene(p: Path, scene_id: str) -> None:
+    """Clip 1 of a scene starts a fresh scene_state (PM acc4 #3). Old file is moved to _archive, never deleted."""
+    p = Path(p)
+    if p.exists():
+        arch = p.parent / "_archive"
+        arch.mkdir(parents=True, exist_ok=True)
+        dest = arch / f"{p.stem}-{now_ct().replace(':', '')}{p.suffix}"
+        n = 1
+        while dest.exists():
+            dest = arch / f"{p.stem}-{now_ct().replace(':', '')}-{n}{p.suffix}"
+            n += 1
+        p.rename(dest)
+    atomic_write(p, json.dumps({"scene_id": scene_id, "updated": now_ct(), "clips": []}, indent=2, ensure_ascii=False))
+
+
 def append_scene(p: Path, scene_id: str, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
     clips = [c for c in load_scene(p) if c.get("clip_id") != entry.get("clip_id")]
     clips.append(entry)

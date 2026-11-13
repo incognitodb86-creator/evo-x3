@@ -839,8 +839,13 @@ def _join_cleared_still_on(plain: str) -> bool:
 
 
 def _not_an_undress_beat(plain: str) -> bool:
-    """Join-clearing motion, including 'hangs open', is not taking the garment off."""
-    return _join_cleared_still_on(plain) or bool(re.search(r"(?i)\bhangs open\b", plain or ""))
+    """Join-clearing motion, including 'hangs open', is not taking the garment off.
+    'bunches at her waist' / 'bunches around her waist' is gathered-on, not a removal (PM acc4 #5)."""
+    if _join_cleared_still_on(plain) or re.search(r"(?i)\bhangs open\b", plain or ""):
+        return True
+    return bool(re.search(
+        r"(?i)\bbunch(?:es|ing|ed)?\s+(?:up\s+)?(?:around|at|to)\s+(?:her\s+)?(?:waist|midriff|hips|ribs)\b",
+        plain or ""))
 
 
 def _w5_covered_garments(cast: Dict[str, Any], state: Dict[str, Any]) -> List[str]:
@@ -1025,15 +1030,21 @@ def _clean_d_span(span: str) -> str:
     return f"<d>[English] {inner}</d>"
 
 
+def _subject_speaker_label(text: str) -> Optional[str]:
+    """The sentence subject, never an (Sx) after at/to/toward (PM acc4 #7 / Derrick t251s854)."""
+    for m in re.finditer(r"\(S([123])\)|<Subject ([123])>", text or ""):
+        if re.search(r"(?i)\b(?:at|to|toward|towards|with|for|from)\s+$", text[:m.start()]):
+            continue
+        return "S" + (m.group(1) or m.group(2))
+    return None
+
+
 def _speaker_of(sentence: str) -> str:
     if scene_addenda.is_offscreen_voice_sentence(sentence):
         return "OFFSCREEN"
-    if re.search(r"\(S3\)|<Subject 3>", sentence):
-        return "S3"
-    if re.search(r"\(S2\)|<Subject 2>", sentence):
-        return "S2"
-    if re.search(r"\(S1\)|<Subject 1>", sentence):
-        return "S1"
+    subj = _subject_speaker_label(sentence)
+    if subj:
+        return subj
     lead = re.split(r'\x00|["\u201c]', sentence)[0]
     he = len(re.findall(r"\b(he|his|him)\b", lead, re.I))
     she = len(re.findall(r"\b(she|her)\b", lead, re.I))
@@ -1048,10 +1059,9 @@ def _span_speaker(before: str) -> str:
     """Speaker of a spoken line: the nearest (S1)/(S2)/(S3) or <Subject N> before it, else pronouns of the lead."""
     if scene_addenda.is_offscreen_voice_sentence(before):
         return "OFFSCREEN"
-    labels = list(re.finditer(r"\(S([123])\)|<Subject ([123])>", before))
-    if labels:
-        m = labels[-1]
-        return "S" + (m.group(1) or m.group(2))
+    subj = _subject_speaker_label(before)
+    if subj:
+        return subj
     lead = before[-160:]
     he = len(re.findall(r"\b(he|his|him)\b", lead, re.I))
     she = len(re.findall(r"\b(she|her)\b", lead, re.I))
@@ -1267,7 +1277,7 @@ _JOIN_PEN_RE = re.compile(r"(?i)\b(?:sheathed|fully seated|seats fully|inside he
                          r"|(?:thrusts?|pushes|slides|sinks|drives) (?:deep |all the way |hard )?into her\b(?! mouth| throat| cleavage)"
                          r"|(?:buried|deep) (?:deep )?in her\b(?! mouth| throat| cleavage| hair))")  # c1a: 'thrusts deep into her', 'buried in her'
 # Max Architect 3, Derrick t1437s5374 (2026-11-13): #7: no-entry acts are exempt from the W5 join gate (titjob always; finish when nothing enters her)
-_ORAL_POSITIONS = ("blowjob", "titjob")
+_ORAL_POSITIONS = ("blowjob", "titjob", "mmf_double_blowjob")
 _NOPEN_POSITIONS = ("finish",)
 _STAY_ON_RE = re.compile(r"(?i)\b(?:stays?|remains?|kept|left|staying) on\b")
 _TAIL_FALL_RE = re.compile(r"(?i)^(?:and\s+)?(?:where\s+)?(?:they|it)\s+(?:drops?|falls?|lands?|pools?|stays?|lies?)\b")
@@ -1878,7 +1888,7 @@ def apply_still_facts(text: str, read: Optional[Dict[str, Any]]) -> Tuple[str, D
     return out, {"swaps": swaps, "hits": hits, "misses": misses}
 
 
-_PLACE_RE = re.compile(r"(?i)\b(?:on|onto|to|across|over|into)\s+((?:the|her|a)\s+(?!(?:side|way|end|knees|back|thighs|hips|ankles|feet|body|head|shoulders?|arms?|legs?|waist|chest|breasts?|lap|neck|hands?)\b)[\w -]{2,40}?)(?=\s*(?:[,.;]|$|\band\b|\bbeside\b|\bwhere\b))")
+_PLACE_RE = re.compile(r"(?i)\b(?:falls? to|lands? on|drops? (?:it |them )?(?:to|onto|on)|took off[^,.;]{0,40}(?:on|onto|to)|stays? on)\s+((?:the|her|a)\s+(?!(?:side|way|end|knees|back|thighs|hips|ankles|feet|body|head|shoulders?|arms?|legs?|waist|chest|breasts?|lap|neck|hands?)\b)[\w -]{2,40}?)(?=\s*(?:[,.;]|$|\band\b|\bbeside\b|\bwhere\b))")
 
 
 def _cast_items(cast: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -2630,7 +2640,12 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     if opener is not None:
         opener = next((x for x in body if _OPENER_RE.search(_D_RE.sub("", x))), None)
     body = _resolve_camera(body, cast["camera_tail"])
-    cams = [s for s in body if "<d>" not in s and _CAMERA_SENTENCE_RE.search(s)]
+    def _has_writer_camera(s: str) -> bool:
+        plain = _D_RE.sub("", s)
+        return bool(_CAMERA_SENTENCE_RE.search(plain) or re.search(
+            r"(?i)\b(?:the camera\b|held,?\s+medium(?:[- ]close)?\s+shot|held medium shot|the held medium shot|a fixed [^.]*\bangle|static medium shot)\b",
+            plain))
+    cams = [s for s in body if "<d>" not in s and _has_writer_camera(s)]
     if not cams:
         body.insert(0, f"The camera holds a static medium shot at hip height, {cast['camera_tail']}.")  # dynsafe: no surface noun
         report["added"].append("camera sentence (R23)")
@@ -2676,7 +2691,13 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     if b_kind in ("dance", "tease", "transformation", "talk"):
         report["act_written"] = False
     else:
-        report["act_written"] = bool(state.get("act") or _ORAL_ACT_RE.search(text_body))
+        _aid = str(cast.get("act_id") or cast.get("position") or "")
+        _ffm_ok = _aid in ("ffm", "mmf", "mmf_double_blowjob", "threesome") and (
+            _ACT_RE.search(text_body) or _ORAL_ACT_RE.search(text_body) or _PENETRATION_RE.search(text_body)
+            or re.search(r"(?i)(?:<Subject [123]>|\(S[123]\)).{0,80}(?:mouth|tongue|fingers?|scissor|straddl|rides?|thrust|pumps?|sucks?)", text_body)
+        )
+        report["act_written"] = bool(state.get("act") or _ORAL_ACT_RE.search(text_body) or _ffm_ok)
+
     beat = transition_beat(cast, text_body) if cast.get("dynamic_pose") else cast["position_beat"]
     contact = ""
     act_ent = cast.get("act_entry") or (get_act(cast.get("position", "")) if cast.get("position") else None)
@@ -2703,15 +2724,25 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     writer_opener = rest.index(opener) if opener in rest else None
     # c1b/mmf2 (Derrick t1437s5374): a continued clip opens mid-act, so its 'At first' opener may itself be the act sentence
     mid_act = writer_opener is not None and writer_opener == act_at and bool(re.match(r"(?i)\s*At first\b", _D_RE.sub("", rest[writer_opener])))
-    if writer_opener is not None and (writer_opener < act_at or mid_act):
+    continued = bool(cast.get("continued"))
+    if writer_opener is not None and (writer_opener < act_at or mid_act or continued):
         stands = [i for i, x in enumerate(rest[:act_at]) if _STAND_SENT_RE.search(_D_RE.sub("", x))]
         anchor = max([writer_opener] + stands)
-        report["added"].append("writer opener kept (builder opener skipped)" + (" (opens mid-act)" if mid_act else ""))
+        report["added"].append("writer opener kept (builder opener skipped)" + (" (opens mid-act)" if mid_act else "")
+                               + (" (continued)" if continued else ""))
         strip_like = b_kind in ("tease", "strip") or cast.get("position") in ("tease", "strip")  # (1) Derrick t247s837
         extra = [wardrobe] if wardrobe and not strip_like else []
         rest = rest[:writer_opener + 1] + extra + rest[writer_opener + 1:]
         if not has_move and not mid_act:
             rest.insert(anchor + 1 + len(extra), beat)
+    elif continued:
+        # PM acc4 #1 / Derrick t251s854: never add the opening-from-still sentence on a continued run
+        report["added"].append("continued: opening-from-still skipped")
+        strip_like = b_kind in ("tease", "strip") or cast.get("position") in ("tease", "strip")
+        extra = [wardrobe] if wardrobe and not strip_like else []
+        rest = extra + rest
+        if not has_move and not mid_act:
+            rest = [beat] + rest
     else:
         if writer_opener is not None:
             rest.pop(writer_opener)  # exactly one opening: the writer's came after the act, the builder's goes first
@@ -2762,16 +2793,17 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         summary = f"{TASK_TAG} " + " ".join(summary_kept)
     else:
         summary = f"{TASK_TAG} " + (cast.get("summary_act") or "")
-    subject_definitions_lines = [
-        f"{R11_PICTURE}, and {_scene(cast)['setting']}, its light and the opening framing: {cast['still']}.",
-        (
-            f"<Subject 1> is the exact same man shown in <Picture 1> of the reference pictures and in the first 5 seconds of "
-            f"this clip, preserving his face, hairstyle, body, skin and figure with complete fidelity; "
-            f"{cast.get('man') or cast['woman']}; he is (S1), and <Audio 1> defines his voice timbre."
-            if (cast.get("s1_gender") == "man" or (cast.get("act_id") or cast.get("position")) == "male_solo")
-            else f"{R11_SUBJECT}; {cast['woman']}; she is (S1), and <Audio 1> defines her voice timbre."
-        ),
-    ]
+    _male_solo = (cast.get("s1_gender") == "man" or (cast.get("act_id") or cast.get("position")) == "male_solo")
+    if _male_solo:
+        subject_definitions_lines = [
+            f"<Picture 1> is the start still of the setting only, and {_scene(cast)['setting']}, its light and the opening framing: {cast['still']}. It does not define <Subject 1>.",
+            f"<Subject 1> is {cast.get('man') or 'an adult man, twenty-four years of age, of solid adult build'}; he is (S1). He is not the person shown in <Picture 1>, and that person is not in this clip.",
+        ]
+    else:
+        subject_definitions_lines = [
+            f"{R11_PICTURE}, and {_scene(cast)['setting']}, its light and the opening framing: {cast['still']}.",
+            f"{R11_SUBJECT}; {cast['woman']}; she is (S1), and <Audio 1> defines her voice timbre.",
+        ]
     off_s2 = bool(cast.get("off_still_s2"))
     off_s3 = bool(cast.get("off_still_s3")) and not cast.get("s3_in_frame")  # acc4: continued MMF, S3 is in the inherited frame
     if pt == "man" and cast.get("man") and (cast.get("s1_gender") != "man" and (cast.get("act_id") or cast.get("position")) != "male_solo"):
@@ -3280,11 +3312,20 @@ def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, A
         inputs = g["refmods"]["inputs"]
         if is_3p:
             pt2 = str(cast.get("partner_type") or "man").lower()
-            pt3 = str(cast.get("partner_type2") or "man").lower()
+            pt3 = str(cast.get("partner_type2") or "faceless").lower()
+            if cast.get("s3_still") and pt3 in ("man", "woman", "faceless", ""):
+                pt3 = "still"  # (5) a still-S3 face rides on its <Picture N>, not a RefMod
+            # Derrick t1440 / t1467: generated look or no still -> faceless fallback. Generic man/woman
+            # partners are not named-face RefMod subjects unless the caller listed named_faces.
+            if not cast.get("named_faces"):
+                if pt2 in ("man", "woman"):
+                    pt2 = "faceless"
+                if pt3 in ("man", "woman"):
+                    pt3 = "faceless"
             named_faces = ["S1"]
             if pt2 not in ("none", "non-human", "faceless"):
                 named_faces.append("S2")
-            if pt3 not in ("none", "non-human", "faceless", "still"):  # (5) a still-S3 face rides on its <Picture N>
+            if pt3 not in ("none", "non-human", "faceless", "still"):
                 named_faces.append("S3")
             if cast.get("named_faces"):
                 named_faces = list(cast["named_faces"])
@@ -3697,7 +3738,8 @@ def get_act(name_or_alias: str) -> Optional[Dict[str, Any]]:
 def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str = OC_MAN, voice_s1: str = OC_VOICE_S1,
               voice_s2: str = OC_VOICE_S2, voice_s3: str = "a low, firm adult voice", partner_type: str = "man",
               partner_type2: Optional[str] = None, role: Optional[str] = None,
-              beat_kind: Optional[str] = None, camera_kind: Optional[str] = None) -> Dict[str, Any]:
+              beat_kind: Optional[str] = None, camera_kind: Optional[str] = None,
+              continued: bool = False) -> Dict[str, Any]:
     """The OC writer cast from one still read (moved from the EWT driver). dynsafe: every garment (type 'other' too) is
     kept under the still's own phrase; nothing is renamed to a fixed lingerie word; no garment = wardrobe_unverified (no
     raise); undress only when the ask names it; the setting, surface and pose come from the read (no bedroom / room /
@@ -3719,8 +3761,14 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     sheets = f["sheets"] or surface
     sheets = sheets if re.match(r"(?i)(?:the|a|an|her)\b", sheets) else "the " + sheets
     pad = "mattress" if bed else re.sub(r"(?i)^(?:the|a|an)\s+", "", surface)
+    def _the(s: str) -> str:
+        s = re.sub(r"\s+", " ", (s or "").strip())
+        s = re.sub(r"(?i)\bthe the\b", "the", s)
+        if s and not re.match(r"(?i)(?:the|a|an|her|his)\b", s):
+            s = "the " + s
+        return s
     floor = f["floor"]
-    at_floor = (f"the {floor} beside the bed" if bed else f"the {floor}") if floor else surface
+    at_floor = (_the(f"{floor} beside the bed") if bed else _the(floor)) if floor else _the(surface) or surface
     pose = f["pose"].rstrip(".")
     pose = re.sub(r"(?i)^she\s+", "", pose)
     facing = ", facing the camera" if read.get("facing_camera") and "facing" not in pose else ""
@@ -3729,7 +3777,10 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         still_bits.append(f"lit by {f['light']}")
     if read.get("framing"):
         still_bits.append(f"framed {read['framing']}")
-    still_line = ", ".join(still_bits) + (f", with <Subject 1> {pose}{facing}" if pose else ", with <Subject 1> exactly as shown")
+    if (position == "male_solo") or (_infer_package2_act(position, ask, partner_type) == "male_solo"):
+        still_line = ", ".join(still_bits) + ". This clip is male solo: (S1) is the man. The person shown in the start still is not (S1) and is not in this clip"
+    else:
+        still_line = ", ".join(still_bits) + (f", with <Subject 1> {pose}{facing}" if pose else ", with <Subject 1> exactly as shown")
     wear = f" in {still_garments}" if still_garments else ""
     src = _unwrap_still_read(read)
     woman_bits = ["an adult woman in her twenties"] + [x for x in (src.get("build"), src.get("skin"), src.get("hair")) if x]
@@ -3763,7 +3814,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     is_3p = is_3p_act or is_3p_ask
     req_bodies = 3 if is_3p else (act_entry.get("bodies", 2) if act_entry else 2)
 
-    pt2 = str(partner_type2 or "man").lower() if (partner_type2 is not None or is_3p) else "none"
+    pt2 = str(partner_type2 if partner_type2 is not None else ("faceless" if is_3p else "none")).lower()
     if pt2 == "man":
         if re.search(r"\bnon[- ]human\b", ask or "", re.I):
             pt2 = "non-human"
@@ -3888,6 +3939,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         camera_tail=cam_tail, position=position, ask=ask,
         dynamic_pose=True, undress=undress, surface=surface, still_bed=bed,
         partner_type=pt, partner_type2=pt2, role=role, beat_kind=b_kind, camera_kind=c_kind,
+        continued=bool(continued),
         act_id=act_id, act_entry=act_entry, act_status=act_entry.get("status", "untested") if act_entry else "tested",
         is_three_person=is_3p, bodies=req_bodies,
         s1_gender=s1_gender, states=list(brief.get("states") or []),

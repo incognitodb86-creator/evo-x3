@@ -1581,7 +1581,7 @@ def test_step2_acts_registry_seeding_and_statuses():
     acts = br.load_acts_registry()
     # Package 2 (R15-R23, 2026-11-12) adds four untested acts; the original 19 stay.
     # Derrick t204u adds talk (tested).
-    assert len(acts) == 24
+    assert len(acts) == 25
     for tid in ("missionary", "doggy", "cowgirl", "blowjob", "talk"):
         assert acts[tid]["status"] == "tested", f"{tid} must be tested"
     for uid in ("spooning", "prone_bone", "titjob", "finish", "female_solo",
@@ -1878,7 +1878,7 @@ def test_t105u_settings_roles_races_pass_through_no_new_modules():
 
     # Settings/roles/races/fetishes must not become acts. Package 2 added four catalog acts (R15-R23); t204u adds talk.
     acts = br.load_acts_registry()
-    assert len(acts) == 24
+    assert len(acts) == 25
     for blocked_id in ("office", "shower", "teacher", "maid", "elf", "alien", "tiny_elf",
                        "little_person", "gangbang", "orgy", "foursome", "bukkake"):
         assert blocked_id not in acts
@@ -1895,7 +1895,7 @@ def test_t105u_fetish_fisting_piss_spit_gape_free_text():
 
     # Fetish words stay free text, not new act rows. Registry size includes the four Package 2 acts and talk (t204u).
     acts = br.load_acts_registry()
-    assert len(acts) == 24
+    assert len(acts) == 25
     for f in ("fisting", "piss", "spit", "gape"):
         assert f not in acts
 
