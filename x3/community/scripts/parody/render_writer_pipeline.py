@@ -561,17 +561,18 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
     if re.search(r"(?i)\boversized|massive oversized", ask_l):
         lines.append("SCALE: name the oversized anatomy once with a measurable size, slow entry, and a firm grip.")
     lines.append("Never write 'seats himself'; land the pose in (S1)'s own words.")
+    surf_noun = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
     if slots.get("surface_height") == "waist" and kind in ("sex", "transition") and act.get("id") in ("missionary", "mf_anal"):
-        lines.append(f"HEIGHT: the {slots.get('surface')} is waist-high, so (S1) lies back on it and (S2) stands at its edge "
+        lines.append(f"HEIGHT: the {surf_noun} is waist-high, so (S1) lies back on it and (S2) stands at its edge "
                      "between her legs; he does not kneel on it. Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
     if slots.get("surface_height") == "waist" and act.get("id") == "standing_mf":
-        lines.append(f"HEIGHT: the {slots.get('surface')} is waist-high, so (S1) stands at its edge, bends forward at the hips and "
+        lines.append(f"HEIGHT: the {surf_noun} is waist-high, so (S1) stands at its edge, bends forward at the hips and "
                      "lays her forearms and chest on it, weight on both feet; (S2) stands behind her. Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
     if act.get("id") == "standing_mf":  # #4
-        lines.append(f"LANDING: land it as 'bent forward over the {slots.get('surface') or 'surface'}, both feet planted'; never write "
+        lines.append(f"LANDING: land it as 'bent forward over the {surf_noun}, both feet planted'; never write "
                      "hands and knees, all fours or doggy.")
     if slots.get("surface_height") == "waist" and act.get("id") == "mmf":  # #6
-        sf = slots.get("surface") or "surface"
+        sf = surf_noun
         lines.append(f"HEIGHT: (S1) bends forward over the {sf}, feet planted; (S3) stands behind her; (S2) stands at the far side, "
                      "hips level with her face; she is silent while (S2) is in her mouth; (S2) holds her head and her head bobs "
                      "along his shaft." + " Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
@@ -582,7 +583,7 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
                  "spoken to the partner about the act, his body or hers, in the tone slot.")
     if slots.get("opening_lead") and not slots.get("inherited"):
         lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's pose and surface noun "
-                     f"('(S1) leans against the {slots.get('surface') or 'surface'}'), and never starts with 'breathes heavily'; "
+                     f"('(S1) leans against the {surf_noun}'), and never starts with 'breathes heavily'; "
                      f"it may add a detail about {slots['opening_lead']}.")
     lines.append("SUMMARY: summary is one plain sentence: who, where, the act; never the camera line, 'At first' or 'As it builds'.")
     if act.get("contact_verbs") or act.get("motion_verbs"):  # the act's own vocabulary from acts.yaml (routing data, no new rule)
@@ -753,10 +754,17 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     place = slots.get("place") or "setting"
     light = slots.get("light") or "light"
     hair = slots.get("hair") or "her hair as shown"
-    sd = [f"<Picture 1> is the reference image defining the exact appearance, face and hairstyle of <Subject 1>, and the {place}, "
-          f"its {light} and the opening framing.",
-          f"<Subject 1> is the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, {hair}; she is (S1), and "
-          f"<Audio 1> defines her voice timbre."]
+    position = slots.get("position") or ""
+    is_male_solo = (position == "male_solo") or re.search(r"(?i)\bmale solo\b", slots.get("ask") or "")
+    if is_male_solo:
+        sd = [f"<Picture 1> is the reference image defining the {place}, its {light} and the opening framing.",
+              f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1), and "
+              f"<Audio 1> defines his voice timbre."]
+    else:
+        sd = [f"<Picture 1> is the reference image defining the exact appearance, face and hairstyle of <Subject 1>, and the {place}, "
+              f"its {light} and the opening framing.",
+              f"<Subject 1> is the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, {hair}; she is (S1), and "
+              f"<Audio 1> defines her voice timbre."]
     partners = (card or {}).get("partners") or []
     want = 1 if bodies == 2 or kind == "talk" else (2 if bodies >= 3 else 0)
     if kind == "talk" and not re.search(r"\(S2\)", dd):
@@ -781,7 +789,8 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         role = {"man": "the man, an adult", "woman": "the woman, an adult", "futa": "the woman, an adult futa"}[sex]
         sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}, in {attire}, who enters from {side} "
                   f"and {pron} is ({label}).")
-    summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {slots.get('position')} clip on the {slots.get('surface')}")
+    _sum_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
+    summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {slots.get('position')} clip on the {_sum_surf}")
     # #2: one plain sentence of who, where and the act; never the camera line or the phase scaffold
     _ss = [x for x in re.split(r"(?<=[.!?])\s+", summary) if x.strip() and not re.match(r"(?i)\s*the camera\b", x)]
     summary = re.sub(r"(?i)\b(?:at first|as it builds|by the end),?\s*", "", (_ss[0] if _ss else summary)).strip().rstrip(".")
@@ -790,9 +799,12 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     summary = re.sub(r"\s{2,}", " ", re.sub(r"(?i)\b(?:cinematic|beautiful(?:ly)?)\b,?\s*", "", summary)).strip()
     summary = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", summary)
     summary = re.sub(r"\b(?:A|An) (?=[aeiou])", "An ", re.sub(r"\bAn (?=[^aeiouAEIOU])", "A ", summary))
+    ret_line = ("<Subject 1>: not_in_clip - clip is male solo, (S1) is the man. <Picture 1>: fully_preserved - the "
+                f"{place}, the light and the opening framing." if is_male_solo else
+                "<Subject 1>: fully_preserved - face, hair and body from <Picture 1>. <Picture 1>: fully_preserved - the "
+                f"{place}, the light and the opening framing.")
     out = ["subject_definitions:", *sd, "", "summary:", summary + ".", "", "retention_analysis:",
-           "<Subject 1>: fully_preserved - face, hair and body from <Picture 1>. <Picture 1>: fully_preserved - the "
-           f"{place}, the light and the opening framing.", "", "detailed_description:", dd]
+           ret_line, "", "detailed_description:", dd]
     if continuation:
         out += ["", "continuation:", continuation]
     return "\n".join(out) + "\n"
@@ -1251,7 +1263,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             if route["act_id"] == "standing_mf" and isinstance(card.get("end_state"), dict) and \
                     not re.search(r"(?i)\bstand", str(card["end_state"].get("pose") or "")):
                 # c8b: a rerouted doggy card still ended 'doggy, hands and knees'; the next clip inherits that pose
-                card["end_state"]["pose"] = (f"standing at the edge of the {slots.get('surface') or 'surface'}, bent forward at the hips, "
+                _end_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
+                card["end_state"]["pose"] = (f"standing at the edge of the {_end_surf}, bent forward at the hips, "
                                              "forearms and chest on it, weight on both feet, (S2) standing behind her")
             wp_state.atomic_write(run_dir / "beat_card.json", json.dumps(card, indent=2, ensure_ascii=False))
         # 4 prose x N
