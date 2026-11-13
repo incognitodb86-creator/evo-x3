@@ -507,3 +507,22 @@ acts:
       - "her hips raised over her shoulders"
     known_bad: []
     status: untested
+
+  talk:
+    id: talk
+    aliases:
+      - "talk only"
+      - "banter"
+      - "spoof talk"
+    bodies: 3
+    partner_types:
+      - "none"
+      - "man"
+      - "woman"
+      - "futa"
+    contact_verbs: []
+    motion_verbs: []
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad: []
+    status: tested
