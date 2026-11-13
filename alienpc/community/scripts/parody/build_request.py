@@ -3785,6 +3785,12 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     wear = f" in {still_garments}" if still_garments else ""
     src = _unwrap_still_read(read)
     woman_bits = ["an adult woman in her twenties"] + [x for x in (src.get("build"), src.get("skin"), src.get("hair")) if x]
+    if (position == "male_solo") or (_infer_package2_act(position, ask, partner_type) == "male_solo"):
+        woman_bits = []
+        still_garments = ""
+        wear = ""
+        # still_line already setting-only; do not attach her hair, skin or clothes
+        src = {**src, "hair": "", "skin": "", "build": "", "pose": "", "garments": []}
     undress = bool(_UNDRESS_ASK_RE.search(ask or ""))
 
     act_entry = get_act(position)
@@ -4022,7 +4028,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         base.update(position_check=r"\b(?:scissoring|tribbing|legs? entangled|vulvas pressed)\b",
             move_check=r"\b(?:intertwines? her legs|presses? her hips)\b",
             primary_motion="synchronized circular hip grind, about one full cycle per second, pelvises staying flush",
-            contact="Their vulvas are pressed flush together as their pelvises grind in synchronized circular motion.",
+            contact="Their vulva pressed to vulva as their pelvises grind in synchronized circular motion.",
             summary_act=f"<Subject 1> and <Subject 2> scissor together on {surface}.")
     elif act_id == "mf_anal":
         base.update(position_check=r"\b(?:anal|from behind|hands and knees)\b",
@@ -4058,13 +4064,13 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         base.update(position_check=r"\b(?:mmf|double penetration|two men|both men)\b",
             move_check=r"\b(?:mmf|thrusting|penetration|moving)\b",
             primary_motion="synchronized rhythmic movement between <Subject 1>, <Subject 2>, and <Subject 3>",
-            contact=f"<Subject 2> and <Subject 3> are positioned with <Subject 1> on {surface} maintaining continuous contact.",
+            contact=f"<Subject 2>'s penis is inside her mouth, her lips sealed around his shaft; <Subject 3> is behind her on {surface}.",
             summary_act=f"<Subject 1>, <Subject 2>, and <Subject 3> engage in an MMF scene on {surface}.")
     elif act_id == "ffm":
         base.update(position_check=r"\b(?:ffm|two women|both women)\b",
             move_check=r"\b(?:ffm|rhythmic|moving|embracing)\b",
             primary_motion="continuous fluid motion and intimate contact between all three adults",
-            contact=f"<Subject 1>, <Subject 2>, and <Subject 3> share continuous intimate contact on {surface}.",
+            contact=f"<Subject 2>'s penis is inside <Subject 1>'s vagina; <Subject 3>'s mouth is on <Subject 1>'s vulva, on {surface}.",
             summary_act=f"<Subject 1>, <Subject 2>, and <Subject 3> engage in an FFM scene on {surface}.")
     elif act_id == "mmf_double_blowjob":
         base.update(oral_giver="S1",

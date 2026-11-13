@@ -647,3 +647,33 @@ def test_pm_acc4_tone_not_ashamed_on_neutral_ask():
         t = p.pick_tone("missionary on the bed, she is eager", rng, None, overlays=[])
         assert t not in ("ashamed", "reluctant"), t
     assert p.pick_tone("forced orgasm, she resists", __import__("random").Random(0), None, overlays=["forced_orgasm", "cnc"]) in p.TONES
+
+
+def test_pm_acc4d_glue_lint_and_ending_state():
+    import render_writer_pipeline as wp
+    import wp_lint as L
+    assert "; no contact." not in wp.glue_fix("dress bunched at the waist; no contact. She turns.")
+    g = wp.glue_fix("He is fully sheathed in her mouth.")
+    assert "inside her mouth" in g and "sheathed" not in g.lower()
+    es = wp.normalize_ending_state({"pose": "all fours", "contact": "fully sheathed in her mouth"})
+    assert es["contact"] == "inside her mouth"
+
+    def _full(dd):
+        return ("subject_definitions:\n(S1) is an adult woman.\n(S2) is an adult man.\n\n"
+                "summary:\nThey are together on the bed.\n\nretention_analysis:\nkept.\n\n"
+                "detailed_description:\n" + dd)
+
+    r = L.lint(_full("[Shot 1] She winks at (S2) and says, (S1) says in a playful voice, <d>[English] Stay close.</d> He enters her vagina. PRIMARY MOTION - he thrusts at one cycle per second. His penis is inside her vagina."),
+               {"kind": "sex", "slots": {}, "blacklist": [], "cloned": [], "cfg": {}, "ask": "", "act_id": "missionary"})
+    assert "double_says" in [i["code"] for i in r["issues"]]
+    r2 = L.lint(_full("[Shot 1] She looks at him and says, <d>[English] Your hands are too tight.</d> PRIMARY MOTION - she sinks at one cycle per second. His penis is inside her vagina."),
+                {"kind": "sex", "slots": {}, "blacklist": [], "cloned": [], "cfg": {}, "ask": "", "act_id": "cowgirl"})
+    assert "hands_line" in [i["code"] for i in r2["issues"]]
+    r3 = L.lint(_full("[Shot 1] PRIMARY MOTION - they grind at one cycle per second. Their vulvas are pressed together."),
+                {"kind": "sex", "slots": {}, "blacklist": [], "cloned": [], "cfg": {}, "ask": "FF scissoring", "act_id": "ff_scissoring"})
+    assert "contact_anatomy" not in [i["code"] for i in r3["issues"]]
+    bts = _full("[Shot 1] She sits. (S2), off-screen, asks, <d>[English] How did that feel?</d> "
+                "She says, <d>[English] It felt real.</d> (S2), off-screen, asks, <d>[English] What next?</d> "
+                "She says, <d>[English] We keep going.</d> She adds, <d>[English] That's the shot.</d>")
+    counted = L.talk_counted_lines(bts, {"ask": "BTS interview"})
+    assert len(counted) == 3
