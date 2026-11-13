@@ -1278,7 +1278,7 @@ _JOIN_PEN_RE = re.compile(r"(?i)\b(?:sheathed|fully seated|seats fully|inside he
                          r"|(?:buried|deep) (?:deep )?in her\b(?! mouth| throat| cleavage| hair))")  # c1a: 'thrusts deep into her', 'buried in her'
 # Max Architect 3, Derrick t1437s5374 (2026-11-13): #7: no-entry acts are exempt from the W5 join gate (titjob always; finish when nothing enters her)
 _ORAL_POSITIONS = ("blowjob", "titjob", "mmf_double_blowjob")
-_NOPEN_POSITIONS = ("finish",)
+_NOPEN_POSITIONS = ("finish", "handjob")
 _STAY_ON_RE = re.compile(r"(?i)\b(?:stays?|remains?|kept|left|staying) on\b")
 _TAIL_FALL_RE = re.compile(r"(?i)^(?:and\s+)?(?:where\s+)?(?:they|it)\s+(?:drops?|falls?|lands?|pools?|stays?|lies?)\b")
 
@@ -3993,6 +3993,12 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
             primary_motion="continuous sliding motion between her breasts, about one full cycle per second",
             contact="His penis is pressed between her breasts as her hands squeeze her cleavage firmly around the shaft.",
             summary_act=f"<Subject 1> gives <Subject 2> a titjob on {surface}.")
+    elif act_id == "handjob":
+        base.update(position_check=r"\b(?:fist wrapped around|strok\w* (?:his )?(?:shaft|penis|cock)|hand ?job)\b",
+            move_check=r"\b(?:kneels? in front of him|sits? (?:beside|next to|in front of) him)\b",
+            primary_motion="continuous stroking of his shaft with her fist, about one full cycle per second",
+            contact="Her fist is wrapped around his penis as she strokes the shaft.",
+            summary_act=f"<Subject 1> gives <Subject 2> a handjob on {surface}.")
     elif act_id == "finish":
         base.update(position_check=r"\b(?:cumshot|facial|creampie|finish|spills?)\b",
             move_check=r"\b(?:pulls? out|bucks?|spasms?)\b",

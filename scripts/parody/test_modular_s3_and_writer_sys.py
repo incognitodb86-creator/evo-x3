@@ -396,3 +396,20 @@ def test_pm_acc4_garments_floor_has_no_double_the():
     cast = br.make_cast(read, "tease", "slow striptease")
     assert "the the" not in (cast.get("garments_floor") or "")
     assert (cast.get("garments_floor") or "").lower().startswith("the ")
+
+
+def test_pm_acc4_make_cast_handjob_template():
+    # PM #11: make_cast has a handjob branch; it must not raise unknown act.
+    c = br.make_cast(BED_READ, "handjob", "handjob")
+    assert c.get("position") == "handjob" or c.get("act_id") == "handjob" or "handjob" in (c.get("summary_act") or "").lower()
+    assert "unknown act" not in (c.get("not_ready") or "")
+    assert "fist" in (c.get("contact") or "").lower()
+    assert "penis" in (c.get("contact") or "").lower()
+    assert "handjob" in (c.get("summary_act") or "").lower()
+    raw = ("detailed_description:\n[Shot 1] Held, medium shot. At first, (S1) sits beside him on the bed. "
+           "Her fist is wrapped around his penis as she strokes the shaft.\n\ndiegetic sound:\nsoft breath.")
+    prompt, rep = br.finalize_writer_prompt(raw, c, strict=False)
+    assert not (rep.get("not_ready") or "").lower().startswith("not_ready: unknown act")
+    text = prompt if isinstance(prompt, str) else str(prompt)
+    assert "handjob" in text.lower() or "fist" in text.lower()
+
