@@ -1122,6 +1122,7 @@ def submit_writer_run(
     prequel_to: Optional[Union[str, Path]] = None,
     character: Optional[str] = None,
     names: Optional[Sequence[str]] = None,
+    partner_type2: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Render's production hook for a free-text OC writer prompt: after the writer call, before graph submit.
 
@@ -1212,6 +1213,8 @@ def submit_writer_run(
             mk = {}
             if brief.get("partner_type"):
                 mk["partner_type"] = brief["partner_type"]
+            if partner_type2:  # Max Architect 3, Derrick t1437s5374: MMF third person faceless (writer-run --partner-type2)
+                mk["partner_type2"] = partner_type2
             ck = brief.get("camera_kind")
             if ck and ck not in ("third_person", "third-person"):
                 mk["camera_kind"] = br._CAM_KIND_MAP.get(ck, ck)
@@ -1315,6 +1318,21 @@ def submit_writer_run(
         return not_ready(f"hook error before the queue call, nothing queued ({type(e).__name__}: {e})")
 
 
+def _s3_overrides(look: Optional[str], still: Optional[str]) -> Optional[Dict[str, Any]]:
+    """MMF S3 (Max Architect 3, Derrick t1440): man3 = the generated look; s3_still = the reference still, which must exist."""
+    o: Dict[str, Any] = {}
+    if look:
+        o["man3"] = look.strip().rstrip(".")
+    if still:
+        p = Path(still)
+        if not p.is_absolute():
+            p = br.COMFY_INPUT_COMMUNITY.parent / still
+        if not p.is_file():
+            raise FileNotFoundError(f"S3 reference still not found: {still}")
+        o["s3_still"] = still.strip()
+    return o or None
+
+
 def _writer_run_cli(argv) -> int:
     """Short Render entry (Max Architect 3, 2026-11-13 t1343u/t1345u): python submit_parody_run.py writer-run <run_dir>
     --ask "..." --position doggy --still <path> --character FCSydny [--queue]. Reads writer_output.txt and
@@ -1327,6 +1345,11 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--position", default="")
     ap.add_argument("--still", default=None)
     ap.add_argument("--character", default=None)
+    ap.add_argument("--partner-type2", default=None, choices=["man", "woman", "none", "non-human", "faceless"])
+    # Max Architect 3, Derrick t1440 (MMF S3): a generated S3 look, an S3 reference still, an optional frame cap for VRAM
+    ap.add_argument("--s3-look", default=None, help="S3 description, e.g. 'an adult man, thirty years of age, ...'")
+    ap.add_argument("--partner2-still", default=None, help="S3 reference still under ComfyUI input (community/x.jpg) or a full path")
+    ap.add_argument("--frames", type=int, default=None, help="frame-count cap (VRAM: two reference stills peak near 15.4/16.3 GB)")
     ap.add_argument("--queue", action="store_true", help="Actually queue (only when Derrick said to queue)")
     try:
         a = ap.parse_args(argv)
@@ -1345,7 +1368,9 @@ def _writer_run_cli(argv) -> int:
         r = submit_writer_run((d / "writer_output.txt").read_text(encoding="utf-8"), base_graph, d,
                               a.ask, a.position, still_image=(a.still or None),
                               still_read=json.loads((d / "still_read.json").read_text(encoding="utf-8")),
-                              dry_run=not a.queue, character=(a.character or None))
+                              dry_run=not a.queue, character=(a.character or None), partner_type2=(a.partner_type2 or None),
+                              cast_overrides=_s3_overrides(a.s3_look, a.partner2_still),
+                              **({"frames": br.validate_single_clip_frames(a.frames)} if a.frames else {}))
     except Exception as e:
         print(f"NOT_READY submitted=False hook error: {type(e).__name__}: {e}")
         return 3

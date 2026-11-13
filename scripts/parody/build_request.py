@@ -785,14 +785,15 @@ _HAND_COPY_RE = re.compile(r",?\s*HAND ANATOMY HARD-LOCKED[^;.]*[;.]?", re.I)
 _PHASE_LABEL_RE = re.compile(r"(?:^|(?<=[.!?]\s))\s*(?:First[- ]frame anchor|Action onset|Continuous development|Result(?: and reaction)?)\s*:\s*", re.I)
 _PRIMARY_RE = re.compile(r"primary motion\s*[-—–:]", re.I)
 # dynsafe (limit 3): the opener is pose-generic (stand / kneel / sit / lie / lean), not stand-only
-_POSE_WORDS = r"(?:stand|stands|standing|kneel|kneels|kneeling|sit|sits|sitting|lie|lies|lying|lean|leans|leaning|crouch\w*|perch\w*)"
+# Max Architect 3, Derrick t1437s5374 (2026-11-13): c1b: a continued clip's inherited pose ('on her hands and knees', 'bent forward') is an opener pose too
+_POSE_WORDS = r"(?:stand|stands|standing|kneel|kneels|kneeling|sit|sits|sitting|lie|lies|lying|lean|leans|leaning|crouch\w*|perch\w*|on (?:her )?hands and knees|on all fours|on her back|bent forward|bends? forward|straddl\w*)"
 _OPENER_RE = re.compile(r"\b(?:first-frame anchor|at first|the opening frame|opens? (?:on|locked on))\b[^.]*\b" + _POSE_WORDS + r"|"
                         r"\b" + _POSE_WORDS + r"\b[^.]{0,80}\b(?:<Picture 1>|the still|the photograph|exactly as)|"
                         r"^(?:\[Shot \d+\]\s*)?<Subject 1> " + _POSE_WORDS + r" facing the (?:lens|camera)\b|"
-                        r"^(?:\[Shot \d+\]\s*)?At first,?\s+(?:<Subject 1>|she\b)", re.I)
+                        r"^(?:\[Shot \d+\]\s*)?At first,?\s+(?:<Subject 1>|\(S1\)|she\b)", re.I)
 _STAND_SENT_RE = re.compile(r"\b(stand|stands|standing)\b", re.I)
 _GARMENT_RE = re.compile(r"\b(bra|panties|thong|briefs|knickers|lingerie|garter\w*|stocking\w*|thigh-highs?|choker|set)\b", re.I)
-_HIS_CLOTHES_RE = re.compile(r"\b((?:his )?(?:dark )?trousers visible|stays? bunched[^,;.]*|pulls? (?:his|the) (?:black )?(?:t-)?shirt[^,;.]*|"
+_HIS_CLOTHES_RE = re.compile(r"\b((?:his )?(?:dark )?trousers visible|stays? bunched (?:at|around|about) his (?:knees|ankles|thighs|shins)[^,;.]*|pulls? (?:his|the) (?:black )?(?:t-)?shirt[^,;.]*|"
                              r"hauls? the (?:black )?(?:t-)?shirt[^,;.]*|drops? his trousers|his hand reaching to his waistband[^,;.]*|"
                              r"pulling them down|leaving them in a heap|unbuckl\w*[^,;.]*|unzip\w*[^,;.]*|his trousers;?)\b", re.I)
 _PENETRATION_RE = re.compile(r"\b(sheathed|fully seated|inside her|enters her|enters|seats fully|astride)\b", re.I)
@@ -1068,7 +1069,9 @@ def speech_budget(cast: Dict[str, Any]) -> int:
 
 def _speech_form(spk: str, voices: Dict[str, str], span: str) -> str:
     """The one H3-guide OC form for every spoken line (h3-prompting SKILL.md: '(S1) ... says in a ... voice, <d>[English] ...</d>')."""
-    voice = voices.get(spk) or f"a distinct adult voice for ({spk})"
+    voice = voices.get(spk)
+    if not voice:  # Max Architect 3, Derrick t1437s5374 (2026-11-13): #5: no placeholder voice line for a partner with no voice (talk, absent (S2))
+        return f"({spk}) says, {_clean_d_span(span)}"
     return f"({spk}) says in {voice}, {_clean_d_span(span)}"
 
 
@@ -1169,7 +1172,13 @@ def _set_ctx(cast: Dict[str, Any]) -> None:
     _CTX.clear()
     _CTX.update(position=cast.get("position"), throat_contact=bool(cast.get("throat_contact")), **_skin_asks(cast))
     _CTX.update(still_bed=sc["bed"], surface=sc["surface"], pad_phrase=sc["pad_phrase"], still_words=words,
-                skin_flags=[], camera_flags=[])
+                skin_flags=[], camera_flags=[], ref_pictures=[s3_picture(cast)] if cast.get("s3_still") else [])
+
+
+def s3_picture(cast: Dict[str, Any]) -> int:
+    """Max Architect 3, Derrick t1440 (MMF S3, 2026-11-13): the S3 reference still is the next ref_images slot after <Picture 1> (the node numbers pictures by
+    wired slot order), so it is <Picture 2> unless cast['s3_picture'] says otherwise."""
+    return int(cast.get("s3_picture") or 2)
 
 
 def _skin_asks(cast: Dict[str, Any]) -> Dict[str, bool]:
@@ -1242,8 +1251,12 @@ class _HersAbsent:
 
 
 # frs16 S2: penetration of the join for the finalized W5 gate ('<Subject 2> enters at frame right' is not penetration)
-_JOIN_PEN_RE = re.compile(r"(?i)\b(?:sheathed|fully seated|seats fully|inside her|(?:enters|sinks into|slides into|pushes into|thrusts into) her\b(?! mouth| throat))")
-_ORAL_POSITIONS = ("blowjob",)
+_JOIN_PEN_RE = re.compile(r"(?i)\b(?:sheathed|fully seated|seats fully|inside her|(?:enters|sinks into|slides into|pushes into|thrusts into) her\b(?! mouth| throat)"
+                         r"|(?:thrusts?|pushes|slides|sinks|drives) (?:deep |all the way |hard )?into her\b(?! mouth| throat| cleavage)"
+                         r"|(?:buried|deep) (?:deep )?in her\b(?! mouth| throat| cleavage| hair))")  # c1a: 'thrusts deep into her', 'buried in her'
+# Max Architect 3, Derrick t1437s5374 (2026-11-13): #7: no-entry acts are exempt from the W5 join gate (titjob always; finish when nothing enters her)
+_ORAL_POSITIONS = ("blowjob", "titjob")
+_NOPEN_POSITIONS = ("finish",)
 _STAY_ON_RE = re.compile(r"(?i)\b(?:stays?|remains?|kept|left|staying) on\b")
 _TAIL_FALL_RE = re.compile(r"(?i)^(?:and\s+)?(?:where\s+)?(?:they|it)\s+(?:drops?|falls?|lands?|pools?|stays?|lies?)\b")
 
@@ -1404,7 +1417,10 @@ def _strip_sentence(s: str) -> Optional[str]:
         plain = _D_RE.sub("", s)
         if not s.strip() or _ABSENT_GARMENT_RE.search(_hers_text(plain)) or len(plain.split()) < 3:
             return None
-    if _DIAL_RE.search(plain) or _is_policy(s) or _ABSENT_REF_RE.search(plain) or _MUSIC_RE.search(plain):
+    _ref_plain = plain
+    for _n in _CTX.get("ref_pictures") or []:  # MMF S3 still: its <Picture N> is a real wired reference, not an absent one
+        _ref_plain = re.sub(rf"(?i)<Picture {int(_n)}>", "", _ref_plain)
+    if _DIAL_RE.search(plain) or _is_policy(s) or _ABSENT_REF_RE.search(_ref_plain) or _MUSIC_RE.search(plain):
         return None
     if _NEGATION_START_RE.match(plain) or _NEGATION_LIST_RE.search(plain):
         return None
@@ -1485,7 +1501,9 @@ def _resolve_camera(sentences: List[str], camera_tail: str) -> List[str]:
     body = " ".join(out)
     items = ["her face"]
     late_partner = bool(re.search(r"(?i)\bonce (?:he|she|her partner|his partner|everyone) enters\b", camera_tail))
-    if ("his face" in camera_tail or "both faces" in camera_tail) and not late_partner:
+    if "both faces" in camera_tail and not late_partner:
+        items = ["both faces"]  # #6 futa/woman partner: never append 'his face'
+    elif "his face" in camera_tail and not late_partner:
         items.append("his face")
     if "join" in camera_tail:
         items.append("the join")
@@ -1511,7 +1529,8 @@ def _resolve_camera(sentences: List[str], camera_tail: str) -> List[str]:
         flags.append({"code": "K7", "why": "framing crops a named face or leaves no headroom", "text": cam[:120]})
     if classes and not has_end:
         flags.append({"code": "K4", "why": "camera move has no end framing (missing framing items appended only)", "text": cam[:120]})
-    item_rx = {"her face": r"\bher face\b|\bboth faces\b", "his face": r"\bhis face\b|\bboth faces\b", "the join": r"\bjoin\b"}
+    item_rx = {"her face": r"\bher face\b|\bboth faces\b", "his face": r"\bhis face\b|\bboth faces\b", "the join": r"\bjoin\b",
+               "both faces": r"\bboth faces\b|\ball (?:three )?faces\b"}
     miss = [it for it in items if not re.search(item_rx[it], cam, re.I)]
     if not classes and re.search(r"(?i)\bfaces\b", cam) and "the join" in miss and len(miss) > 1:
         miss = ["the join"] if re.search(r"(?i)\bjoin\b", camera_tail) else []  # 'keeping both faces' style holds
@@ -1958,6 +1977,13 @@ def track_state(sentences: List[str], cast: Dict[str, Any], repair: bool = True,
                 named_in = [c for c in cl if re.search(dict(item_rx)[k], c, re.I) or re.search(dict(_GARMENT_KEYS).get(k, r"$^"), c, re.I)]
                 return bool(named_in) and all(_STAY_ON_RE.search(c) and not _REMOVE_VERB_RE.search(c) for c in named_in)
             hit = [k for k in hit if not stay_only(k)]
+        if not hit and _join_cleared_still_on(plain) and re.search(
+                r"(?i)\b(?:pull\w*|slid\w*|tug\w*|hook\w*|push\w*)\s+(?:it|them)\s+(?:aside|to one side|up)\b", plain):
+            # #4 (r09): 'pulls it aside' credits the one join garment still on
+            jk = [g["key"] for g in items if (g["key"] in _JOIN_KEYS or g.get("slot") == "full-body")
+                  and state["garments"].get(g["key"]) == "on" and g["key"] not in (state.get("writer_aside") or [])]
+            if len(jk) == 1:
+                hit = jk
         for k, rx in item_rx:
             if k in hit and state["garments"].get(k) == "on" and _join_cleared_still_on(plain):
                 if k not in state.setdefault("writer_aside", []):
@@ -2170,6 +2196,20 @@ def _pose_kind(text: str) -> Optional[str]:
 def _man_pose(text: str) -> Optional[str]:
     m = re.search(r"(?i)(?:<Subject 2>|\(S2\)|\bhe\b)\s+(?:[\w-]+\s+){0,3}?(stands?|standing|kneels?|kneeling|lies|lying|sits?|sitting)\b", text or "")
     return _pose_kind(m.group(1)) if m else None
+
+
+# Max Architect 3, Derrick t1437s5374 #2: the builder's move-in beat and the writer's own move name the same pose
+_MOVE_PAIRS = [
+    (r"\bknee(?:s|ls?|ling)\b", r"\b(?:kneel\w*|(?:drops?|sinks?|goes|gets?|lowers? herself|comes? down) (?:down )?(?:to|on|onto) her knees|on her knees)\b"),
+    (r"\bhands and knees\b|\ball fours\b", r"\bhands and knees\b|\ball fours\b"),
+    (r"\bon her back\b|\blies back\b", r"\bon her back\b|\blies back\b|\blying back\b"),
+    (r"\bstraddl\w*|\bastride\b", r"\bstraddl\w*|\bastride\b"),
+    (r"\bbends? (?:forward|over)\b|\bbent (?:forward|over)\b", r"\bbend\w* (?:forward|over)\b|\bbent (?:forward|over)\b"),
+]
+
+
+def _same_move(beat: str, text: str) -> bool:
+    return any(re.search(a, beat or "", re.I) and re.search(b, text or "", re.I) for a, b in _MOVE_PAIRS)
 
 
 def transition_beat(cast: Dict[str, Any], writer_text: str = "") -> str:
@@ -2537,9 +2577,17 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         if len(pms) > 1:
             report["stripped"].append(f"extra PRIMARY MOTION x{len(pms) - 1}")
     else:
-        rest = [x for i, x in enumerate(rest) if i not in pms]
-        motion = f"PRIMARY MOTION - {cast['primary_motion']}."
-        report["added"].append("PRIMARY MOTION with tempo (R17)" + (" (writer's had no tempo)" if pms else ""))
+        # Max Architect 3, Derrick t1437s5374 #3: the writer's own tempo sentence gets the label, never a second stock tempo
+        tz = next((i for i, x in enumerate(rest) if "<d>" not in x and _TEMPO_RE.search(x) and not _CAMERA_SENTENCE_RE.search(x)
+                   and (_ACT_RE.search(x) or _PENETRATION_RE.search(x) or _ORAL_ACT_RE.search(x) or not cast.get("contact"))), None)
+        if tz is not None and not pms:
+            lead = re.match(r"(?i)\s*(?:as it builds,\s*)?", rest[tz])
+            rest[tz] = rest[tz][:lead.end()] + "PRIMARY MOTION - " + rest[tz][lead.end():]
+            report["added"].append("PRIMARY MOTION label on the writer's tempo sentence (R17)")
+        else:
+            rest = [x for i, x in enumerate(rest) if i not in pms]
+            motion = f"PRIMARY MOTION - {cast['primary_motion']}."
+            report["added"].append("PRIMARY MOTION with tempo (R17)" + (" (writer's had no tempo)" if pms else ""))
     rest, state, violations = track_state(rest, cast, keep=[opener] if opener else [])
     if opener and opener not in rest:
         opener = next((x for x in rest if _OPENER_RE.search(_D_RE.sub("", x))), None)
@@ -2570,6 +2618,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     if wardrobe:
         report["added"].append("wardrobe line from the tracked end state (R12)")
     has_move = bool(re.search(cast.get("move_check") or cast.get("position_check", r"$^"), text_body, re.I))
+    has_move = has_move or _same_move(cast.get("position_beat") or "", text_body)  # #2: no second move-in sentence
 
     def is_act(x: str) -> bool:
         if "<d>" in x and not _D_RE.sub("", x).strip(" ,.():S12says"):
@@ -2579,13 +2628,15 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         return bool(_ACT_RE.search(x) or _PENETRATION_RE.search(x))
     act_at = next((i for i, x in enumerate(rest) if is_act(x)), len(rest))
     writer_opener = rest.index(opener) if opener in rest else None
-    if writer_opener is not None and writer_opener < act_at:
+    # c1b/mmf2 (Derrick t1437s5374): a continued clip opens mid-act, so its 'At first' opener may itself be the act sentence
+    mid_act = writer_opener is not None and writer_opener == act_at and bool(re.match(r"(?i)\s*At first\b", _D_RE.sub("", rest[writer_opener])))
+    if writer_opener is not None and (writer_opener < act_at or mid_act):
         stands = [i for i, x in enumerate(rest[:act_at]) if _STAND_SENT_RE.search(_D_RE.sub("", x))]
         anchor = max([writer_opener] + stands)
-        report["added"].append("writer opener kept (builder opener skipped)")
+        report["added"].append("writer opener kept (builder opener skipped)" + (" (opens mid-act)" if mid_act else ""))
         extra = [wardrobe] if wardrobe else []
         rest = rest[:writer_opener + 1] + extra + rest[writer_opener + 1:]
-        if not has_move:
+        if not has_move and not mid_act:
             rest.insert(anchor + 1 + len(extra), beat)
     else:
         if writer_opener is not None:
@@ -2646,10 +2697,19 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     is_3p_scene = cast.get("is_three_person") or cast.get("bodies", 2) >= 3
     if is_3p_scene:
         pt3 = str(cast.get("partner_type2") or "man").lower()
-        desc3 = cast.get("man3") or cast.get("partner3", ("an adult man, twenty-four years of age, of solid adult build" if pt3 == "man" else "an adult woman, twenty-two years of age, of slender build"))
+        desc3 = cast.get("man3") or cast.get("partner3", ("an adult woman, twenty-two years of age, of slender build" if pt3 == "woman" else "an adult man, twenty-four years of age, of solid adult build"))
         pron3 = "she" if pt3 == "woman" else "he"
         extra3 = f" {pron3.capitalize()} is not in <Picture 1>; {pron3} enters during the clip." if off_s3 else ""
-        subject_definitions_lines.append(f"<Subject 3> is {desc3}; {pron3} is (S3).{extra3}")
+        if cast.get("s3_still"):  # MMF S3 reference still (wired as ref_images slot s3_picture)
+            n3 = s3_picture(cast)
+            look3 = re.sub(r"^an? adult (?:man|woman),?\s*", "", desc3)
+            subject_definitions_lines.append(f"<Picture {n3}> is the reference image defining the exact visual appearance, identity, "
+                                             f"face and hairstyle of <Subject 3>.")
+            subject_definitions_lines.append(f"<Subject 3> is the exact same {'adult woman' if pt3 == 'woman' else 'adult man'} shown in "
+                                             f"<Picture {n3}>, {look3}; {pron3} is (S3).{extra3}"
+                                             + (f" {pron3.capitalize()} follows <Picture {n3}>." if off_s3 else ""))
+        else:
+            subject_definitions_lines.append(f"<Subject 3> is {desc3}; {pron3} is (S3).{extra3}")
     subject_definitions_lines.append(R11_HAND)
     subject_definitions = "\n".join(subject_definitions_lines)
 
@@ -2675,7 +2735,10 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
             )
     if is_3p_scene:
         pt3 = str(cast.get("partner_type2") or "man").lower()
-        if off_s3:
+        if cast.get("s3_still"):
+            retention_lines.append(f"<Subject 3> ({'enters during the clip' if off_s3 else 'appears in [Shot 1]'}): fully_preserved - "
+                                   f"{'her' if pt3 == 'woman' else 'his'} face, body and figure follow <Picture {s3_picture(cast)}>")
+        elif off_s3:
             retention_lines.append(
                 "<Subject 3> (enters during the clip): " +
                 ("she is not in <Picture 1>; keep the look the writer named once she is in frame" if pt3 == "woman"
@@ -2910,6 +2973,9 @@ def lint_writer_prompt(raw: str, cast: Dict[str, Any]) -> Tuple[List[Dict[str, A
     if cast.get("undress") is False:
         covered = _w5_covered_garments(cast, lint_state)
         pen = next((i for i, u in enumerate(units) if _PENETRATION_RE.search(_D_RE.sub("", u))), None)
+        if cast.get("position") in _ORAL_POSITIONS or (cast.get("position") in _NOPEN_POSITIONS and not any(
+                _JOIN_PEN_RE.search(_D_RE.sub("", u)) for u in units)):
+            covered = []  # #7
         if covered and pen is not None:
             issues.append({"code": "W5", "idx": pen, "text": units[pen],
                            "why": _LINT_CODES["W5"].format(items=" and ".join(covered))})
@@ -3094,6 +3160,13 @@ def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, A
                               "width": width, "height": height})
     g["noise"]["inputs"]["noise_seed"] = seed
     g["save"]["inputs"]["filename_prefix"] = prefix
+    if cast.get("s3_still"):  # Max Architect 3, Derrick t1440 (MMF S3, 2026-11-13): S3 reference still on c0 (multiref_test_20261113 wiring)
+        if "img_1" not in g:
+            raise WriterNotReady("NOT_READY: an S3 reference still needs img_1 (<Picture 1>) wired first")
+        g["img_s3"] = {"class_type": "LoadImage", "inputs": {"image": str(cast["s3_still"])}, "_meta": {"title": "S3 reference still"}}
+        g["c0"]["inputs"]["ref_images.ref_image_1"] = ["img_1", 0]
+        g["c0"]["inputs"][f"ref_images.ref_image_{s3_picture(cast)}"] = ["img_s3", 0]
+        report["s3_still"] = {"image": str(cast["s3_still"]), "picture": s3_picture(cast)}
     # RefMod handling: 3-person and partner_type checks
     req_bodies = cast.get("bodies", 3 if _THREE_BODY_ASK_RE.search(f"{cast.get('position', '')} {cast.get('ask', '')}") else 2)
     is_3p = req_bodies >= 3 or bool(_THREE_BODY_ASK_RE.search(f"{cast.get('position', '')} {cast.get('ask', '')}"))
@@ -3372,6 +3445,7 @@ OC_MAN = ("an adult man, twenty-six years of age, of solid adult build with work
           "for the whole clip")
 OC_VOICE_S1 = "a low, warm adult woman's voice with a slightly husky edge, tight and breathy with the effort"
 OC_VOICE_S2 = "a contrasting deep, steady adult man's voice, low and hoarse"
+OC_VOICE_S2_WOMAN = "a contrasting low, steady adult woman's voice, smoky and firm"  # #6 futa/woman partner
 _UNDRESS_ASK_RE = re.compile(
     r"(?i)\b(?:undress(?:es|ed|ing)?|strip(?:s|ped|ping|tease)?|naked|nude|topless|bottomless|"
     r"clothes off|takes?\s+(?:off\s+)?(?:her|his|their)?\s*(?:clothes|lingerie|underwear|garments)(?:\s+off)?|"
@@ -3848,6 +3922,8 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
 
     if pt != "man":
         base["his_clothes"] = ""
+        if pt == "woman" and base.get("voice_s2") == OC_VOICE_S2:
+            base["voice_s2"] = OC_VOICE_S2_WOMAN  # #6: a woman partner never gets the man's voice line
         if pt != "futa" and "penis" in base.get("contact", "").lower():
             base["contact"] = ""
         if pt in ("none", "non-human", "faceless"):
@@ -3861,8 +3937,8 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
             # R15: S2 keeps she/her and one RefMod; never rewritten to a man.
             if not base.get("man"):
                 base["man"] = "an adult woman, twenty-two years of age, of slender build"
-            if not base.get("voice_s2"):
-                base["voice_s2"] = voice_s2
+            if not base.get("voice_s2") or base.get("voice_s2") == OC_VOICE_S2:
+                base["voice_s2"] = voice_s2 if voice_s2 != OC_VOICE_S2 else OC_VOICE_S2_WOMAN  # #6
             base["camera_tail"] = "keeping both faces in frame"
 
     base["position_beat"] = transition_beat(base, "")
