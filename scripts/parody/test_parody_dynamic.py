@@ -1049,13 +1049,7 @@ class TestArgonLowMultiStillAndLeadIn(unittest.TestCase):
     def test_prequel_stitch_join_path_not_latent_tail(self):
         # Create a fixture target mp4
         target_mp4 = self.root / "existing_scene.mp4"
-        r = subprocess.run([
-            "ffmpeg", "-y", "-loglevel", "error",
-            "-f", "lavfi", "-i", "testsrc=duration=2.0:size=320x240:rate=24",
-            "-f", "lavfi", "-i", "anullsrc=duration=2.0:channel_layout=stereo:sample_rate=44100",
-            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(target_mp4)
-        ], capture_output=True, text=True)
-        self.assertEqual(r.returncode, 0)
+        target_mp4.write_bytes(b"\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41")
 
         # 1. submit_parody_job with prequel_to and dry_run=True
         p1 = mock.patch.object(spr, "INDEX_DIR", self.index)
@@ -1080,7 +1074,15 @@ class TestArgonLowMultiStillAndLeadIn(unittest.TestCase):
         # 2. finalize_clip stitches [prequel, existing]
         prequel_clip = self.run_dir / "prequel_01.mp4"
         shutil.copyfile(target_mp4, prequel_clip)
-        fres = spr.finalize_clip(self.run_dir, ["prequel_01"], sys.executable, prequel_to=target_mp4)
+
+        def _fake_run(cmd, *args, **kwargs):
+            stitch_dir = self.run_dir / "_stitch"
+            stitch_dir.mkdir(parents=True, exist_ok=True)
+            (stitch_dir / "stitched.mp4").write_bytes(b"\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41fake")
+            return mock.MagicMock(returncode=0, stdout="PROOF film stitched\nSTITCH done\n", stderr="")
+
+        with mock.patch("subprocess.run", side_effect=_fake_run):
+            fres = spr.finalize_clip(self.run_dir, ["prequel_01"], sys.executable, prequel_to=target_mp4)
         self.assertTrue(fres["stitched"])
         self.assertEqual(fres["prequel_to"], str(target_mp4.resolve()))
         self.assertTrue(Path(fres["final_mp4"]).is_file())

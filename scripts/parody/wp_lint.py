@@ -155,7 +155,7 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
     first_contact = next((i for i, x in enumerate(sents) if MOUTH_CONTACT_RE.search(outside_d(x))), None)
     if first_contact is not None and any(re.search(r"\(S1\)[^<]{0,120}<d>", x) for x in sents[first_contact:]):
         out.append(_fix("oral_silence", "after her mouth is on him only (S2) speaks; give (S1) wet suction and breath instead"))
-    if (kind in ("oral", "solo") or act in ("finish", "titjob", "blowjob") or "toy" in ov) and SLAP_RE.search(plain):
+    if (kind == "oral" or act in ("finish", "titjob", "blowjob") or "toy" in ov) and SLAP_RE.search(plain):
         out.append(_fix("oral_sound", "no slap foley here: wet suction, breath, fabric or the toy's hum"))
     if re.search(r"<d>[^<]*<d>|</d>\s*</d>", dd) or any("[" in re.sub(r"^\s*\[English\]\s*", "", m) or "PRIMARY MOTION" in m
                                                        for m in re.findall(r"<d>(.*?)</d>", dd, flags=re.S)):
