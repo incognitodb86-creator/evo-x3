@@ -2352,11 +2352,11 @@ def _writer_subject_bios(raw: str) -> Dict[str, str]:
     return out
 
 
-# Render cleanup step 4 (Max Architect 3, 2026-11-13, Derrick t1355): style-only lints are warnings, not stops.
-# They go to report["warnings"] and never block. Still blocking: minor descriptor, NOT_READY reasons (packed beats, W5,
-# D1, A1 on a talk ask, hard scene addenda, off-still partner undefined), missing sections, unknown act, people count,
+# Style-only lints are warnings, not stops (t1355). R1 and D4 are hard stops again (Derrick t179s554, 2026-11-13).
+# Warnings go to report["warnings"] and never block. Still blocking: R1, D4, minor descriptor, packed beats, W5, D1,
+# A1 on a talk ask, hard scene addenda, off-still partner undefined, missing sections, unknown act, people count,
 # speaker attribution, silent drops, and P2-DOSE / P2-DRINK safety.
-_STYLE_WARN_CODES = frozenset({"D2", "D3", "D4", "R1"})
+_STYLE_WARN_CODES = frozenset({"D2", "D3"})
 _STYLE_WARN_PREFIXES = ("transition word left", "quoted speech left outside <d>", "double speech lead",
                         "INDEX voice wording on an OC cast", "leg position changes", "facing conflict",
                         "surface conflict", "doggy pose conflict")
