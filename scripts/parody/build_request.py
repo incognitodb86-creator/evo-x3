@@ -2906,7 +2906,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     # repair writer after finalize, so a garment that still covers the join at penetration is NOT_READY.
     if cast.get("undress") is False:
         covered = _w5_covered_garments(cast, state)
-        if covered and cast.get("position") not in _ORAL_POSITIONS and _JOIN_PEN_RE.search(text_body):
+        if covered and cast.get("position") not in _ORAL_POSITIONS and cast.get("position") != "handjob" and _JOIN_PEN_RE.search(text_body):
             report["w5_final"] = {"covered": covered}
             report["not_ready"] = (report.get("not_ready", "") + "; " if report.get("not_ready") else "") + \
                 "W5 " + _LINT_CODES["W5"].format(items=" and ".join(covered)) + " (finalized state, unrepaired)"
@@ -3108,8 +3108,9 @@ def lint_writer_prompt(raw: str, cast: Dict[str, Any]) -> Tuple[List[Dict[str, A
     if cast.get("undress") is False:
         covered = _w5_covered_garments(cast, lint_state)
         pen = next((i for i, u in enumerate(units) if _PENETRATION_RE.search(_D_RE.sub("", u))), None)
-        if cast.get("position") in _ORAL_POSITIONS or (cast.get("position") in _NOPEN_POSITIONS and not any(
-                _JOIN_PEN_RE.search(_D_RE.sub("", u)) for u in units)):
+        if (cast.get("position") in _ORAL_POSITIONS or cast.get("position") == "handjob" or
+                (cast.get("position") in _NOPEN_POSITIONS and not any(
+                _JOIN_PEN_RE.search(_D_RE.sub("", u)) for u in units))):
             covered = []  # #7
         if covered and pen is not None:
             issues.append({"code": "W5", "idx": pen, "text": units[pen],
