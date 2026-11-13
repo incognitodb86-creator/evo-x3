@@ -561,3 +561,13 @@ def test_consent_setup_overlay_needs_consent_beat_before_sex():
                         "Later (S2) slides into her from behind.", ctx)
     assert "consent_setup" in bad["hard"] and "consent_setup" not in good["hard"]
     assert "consent_setup" not in L.lint(hdr + "(S2) slides into her.", dict(ctx, overlays=["consent_setup", "continued"]))["hard"]
+
+
+def test_acc4_oral_sheathed_lint_in_mmf_mode():
+    import wp_lint as L
+    hdr = "detailed_description:\n[Shot 1] "
+    ctx = {"kind": "sex", "slots": {}, "overlays": ["threesome"], "ask": "MMF spitroast", "cfg": {}}
+    r = L.lint(hdr + "At first, (S1) kneels. (S2) is fully sheathed in her mouth while (S3) is buried in her.", ctx)
+    assert "oral_contact" in r["hard"]
+    ok = L.lint(hdr + "At first, (S1) kneels. (S2) is deep inside her mouth while (S3) is buried in her.", ctx)
+    assert "oral_contact" not in ok["hard"]

@@ -1350,6 +1350,7 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--character", default=None)
     ap.add_argument("--partner-type2", default=None, choices=["man", "woman", "none", "non-human", "faceless"])
     # Max Architect 3, Derrick t1440 (MMF S3): a generated S3 look, an S3 reference still, an optional frame cap for VRAM
+    ap.add_argument("--s3-in-frame", action="store_true", help="continued clip: S3 is already in the inherited frame (no 'enters')")
     ap.add_argument("--s3-look", default=None, help="S3 description, e.g. 'an adult man, thirty years of age, ...'")
     ap.add_argument("--partner2-still", default=None, help="S3 reference still under ComfyUI input (community/x.jpg) or a full path")
     ap.add_argument("--frames", type=int, default=None, help="frame-count cap (VRAM: two reference stills peak near 15.4/16.3 GB)")
@@ -1374,7 +1375,8 @@ def _writer_run_cli(argv) -> int:
                               a.ask, a.position, still_image=(a.still or None),
                               still_read=json.loads((d / "still_read.json").read_text(encoding="utf-8")),
                               dry_run=not a.queue, character=(a.character or None), partner_type2=(a.partner_type2 or None),
-                              cast_overrides=dict(_s3_overrides(a.s3_look, a.partner2_still) or {}, **({"shots": a.shots} if a.shots else {}))
+                              cast_overrides=dict(_s3_overrides(a.s3_look, a.partner2_still) or {}, **({"shots": a.shots} if a.shots else {}),
+                                                  **({"s3_in_frame": True} if a.s3_in_frame else {}))
                               or None, partner_type=(a.partner_type or None),
                               **({"frames": br.validate_single_clip_frames(a.frames)} if a.frames else {}))
     except Exception as e:
