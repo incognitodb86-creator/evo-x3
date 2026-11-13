@@ -303,6 +303,7 @@ def opening_sentence(dd: str) -> str:
 MOUTH_CONTACT_RE = re.compile(r"(?i)\b(?:inside her mouth|into her mouth|in her mouth|past her lips|between her lips|at her lips|"
                               r"against her lips)\b|\blips (?:close|wrap|seal|part)\w* (?:around|over)")
 SLAP_RE = re.compile(r"(?i)\b(?:slap\w*|smack\w*)\b")  # acceptance-3 (m19): soft 'skin on skin' sliding is not slap foley
+ORAL_SHEATHED_RE = re.compile(r"(?i)\b(?:sheathed|hips flush)\b[^.;]{0,40}\b(?:mouth|throat|lips)\b|\b(?:mouth|throat|lips)\b[^.;]{0,20}\bsheathed\b")
 TAG_WORDS_RE = re.compile(r"(?i)\b(?:cinematic|beautiful)\b")
 # lost-features audit (Derrick t243s811): youth hint = hard stop; tiny/fairy = adult proportions stated (hard)
 YOUTH_RE = re.compile(r"(?i)\b(?:child\w*|kids?|teen\w*|tween|underage|under-age|minor|loli\w*|shota\w*|schoolgirl|little girl|"
@@ -538,6 +539,8 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
         issues.append(_fix("no_contact", f"the contact sentence needs one join word ({rules['contact_hint']}) and must hold through the motion"))
     if rules.get("banned_contact") and re.search(r"(?i)" + rules["banned_contact"], plain):
         issues.append(_fix(kind + "_contact", rules.get("banned_hint") or "wrong join words for this mode"))
+    if kind != "oral" and ORAL_SHEATHED_RE.search(plain):  # acc4: mmf/spitroast oral words too
+        issues.append(_fix("oral_contact", "oral contact names the mouth (inside her mouth), never sheathed or hips flush"))
     if _clear_needed(slots, kind) and not _join_inherited_clear(slots, ctx.get("scene")):
         gnoun = join_noun(slots)
         # builder parity: the builder's own W5 credit (active pull/slide/tug ... aside|up, or a removal verb)

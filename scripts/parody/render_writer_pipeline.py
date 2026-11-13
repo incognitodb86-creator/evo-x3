@@ -461,6 +461,15 @@ def surface_height(surface: str) -> str:
     return "low"
 
 
+def shots_line(n: int, frames: int) -> str:
+    """B1 (long-scene spec): cut clocks for an n-shot clip, evenly spaced on the R8 grid."""
+    secs = frames / 24.0
+    cuts = [round(secs * i / n, 3) for i in range(1, n)]
+    clk = ", ".join(f"[Shot {i + 2}] At 00:{c:06.3f}" for i, c in enumerate(cuts))
+    return (f"SHOTS: this clip has {n} shots. Write [Shot 1] as usual, then each cut in order as its own sentence group: {clk}, "
+            "the camera cuts to <a new size or angle on the same action>. The action, tempo and screen sides never change at a cut.")
+
+
 def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodies: int) -> str:
     lines = [f"ASK: {ask}", f"POSITION: {position} ({kind})", "STILL FACTS (Picture 1):"]
     for k in ("place", "surface", "floor", "light", "pose", "framing", "garment", "hair", "skin", "build"):
@@ -1003,11 +1012,15 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         cloned = wp_state.refresh_cloned(cloned_path, sysprompt, pmeta["writer_prompt_sha256"], wp_state.load_recent(recent_path))
         blacklist = [r["line"] for r in wp_state.load_blacklist(bl_path, log)]
         brief = brief_block(ask, position, kind, slots, bodies)
+        if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" and int(job.get("shot_count") or 1) > 1:
+            brief += "\n" + shots_line(int(job["shot_count"]), int(job.get("frames") or 243))
         # MMF S3 (Derrick t1440): reuse the scene's S3 look, use a given S3 still, else the card invents one (faceless fallback)
         s3_still = s3_look = None
+        s3_in_frame = False
         if bodies >= 3 and partner_type2_for(position, ask):
             s3_still = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
             s3_look = (scene_prev or {}).get("s3_look")
+            s3_in_frame = bool(s3_look)
             if s3_look:
                 brief += f"\nTHIRD PERSON (S3), the same person as the last clip, every detail kept: {s3_look}."
             if s3_still:
@@ -1055,7 +1068,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             log("s3_mode", dict(result["s3"], run=run_id))
         _bx: List[str] = (["--s3-look", s3_look] if s3_look else []) + (["--partner2-still", s3_still] if s3_still else []) + \
             (["--frames", str(int(job["frames"]))] if job.get("frames") else []) + \
-            (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + \
+            (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + (["--s3-in-frame"] if s3_in_frame else []) + \
             (["--shots", "multi"] if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" else [])
         if card is None:
             result["warnings"].append("beat_card_skipped")
@@ -1259,6 +1272,7 @@ def main(argv=None) -> int:
     ap.add_argument("--partner2-still", help="MMF: (S3) reference still (ComfyUI input path, e.g. community/x.jpg)")
     ap.add_argument("--frames", type=int, help="optional frame cap for VRAM (two reference stills)")
     ap.add_argument("--shots", choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
+    ap.add_argument("--shot-count", type=int, default=1, help="B1: shots in a multi clip")
     ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
     ap.add_argument("--config", default=str(CONFIG_PATH))
     ap.add_argument("--sampler-arm", help="setup A/B only")
@@ -1281,7 +1295,7 @@ def main(argv=None) -> int:
             return 3
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
                      "character": a.character, "scene": a.scene, "continue": a.cont,
-                     "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots})
+                     "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count})
     results = []
     for job in jobs:  # one failing clip never blocks the next
         r = run_clip(job, cfg, log, ov)

@@ -186,3 +186,13 @@ def test_g1_g4_orc_is_non_human_with_look_voice_and_retention():
     assert "<Subject 2> is an adult male orc" in out and "same creature" in out and "the same man" not in out
     t = br.make_cast(READ, "doggy", "tentacles wrap her on the log")
     assert t["partner_type"] == "non-human" and t["voice_s2"] == ""
+
+
+def test_acc4_continued_mmf_s3_in_frame_never_enters():
+    cast = dict(br.make_cast(READ, "mmf", "mmf on the log", partner_type2="faceless"),
+                man3="an adult man, 31 years of age, of lean build, with short dark hair, in grey linen trousers")
+    out_new, _ = br.finalize_writer_prompt(HDR + MMF_DD, dict(cast, off_still_s3=True), strict=False)
+    out_cont, _ = br.finalize_writer_prompt(HDR + MMF_DD, dict(cast, off_still_s3=True, s3_in_frame=True), strict=False)
+    assert "enters during the clip" in out_new
+    s3_cont = [l for l in out_cont.splitlines() if "<Subject 3>" in l]
+    assert s3_cont and not any("enters during the clip" in l for l in s3_cont), s3_cont
