@@ -1175,10 +1175,22 @@ def _set_ctx(cast: Dict[str, Any]) -> None:
                 skin_flags=[], camera_flags=[], ref_pictures=[s3_picture(cast)] if cast.get("s3_still") else [])
 
 
+def refmod_people(mods: List[Any]) -> int:
+    """(3) Derrick t247s837: one character = its audio + visual RefMods; count distinct characters."""
+    names = set()
+    for m in mods:
+        n = str(m.get("path") if isinstance(m, dict) else m)
+        n = re.sub(r"(?i)[\\/]", "/", n).split("/")[-1]
+        n = re.sub(r"(?i)\.(?:safetensors|pt|bin)$", "", n)
+        names.add(re.sub(r"(?i)(?:_refmod)?_(?:audio|visual|video|face)(?:_[\w-]*)?$", "", n))
+    return len(names)
+
+
 def s3_picture(cast: Dict[str, Any]) -> int:
     """Max Architect 3, Derrick t1440 (MMF S3, 2026-11-13): the S3 reference still is the next ref_images slot after <Picture 1> (the node numbers pictures by
     wired slot order), so it is <Picture 2> unless cast['s3_picture'] says otherwise."""
-    return int(cast.get("s3_picture") or 2)
+    # (4) Derrick t247s837: computed from the refs wired before it (slot after the last one), never a free override
+    return 1 + max(1, int(cast.get("refs_wired_before_s3") or 1))
 
 
 def _skin_asks(cast: Dict[str, Any]) -> Dict[str, bool]:
@@ -1420,6 +1432,16 @@ def _strip_sentence(s: str) -> Optional[str]:
     _ref_plain = plain
     for _n in _CTX.get("ref_pictures") or []:  # MMF S3 still: its <Picture N> is a real wired reference, not an absent one
         _ref_plain = re.sub(rf"(?i)<Picture {int(_n)}>", "", _ref_plain)
+    _tags = [m.group(0) for m in _ABSENT_REF_RE.finditer(_ref_plain)]
+    if _tags and all(re.fullmatch(r"<(?:Picture|Audio|Subject) \d+>", t) for t in _tags):
+        # (6) Derrick t247s837: strip only the unwired tag (with its 'from/in/following' lead), keep the sentence
+        for t in set(_tags):
+            s = re.sub(r"(?i)\s*,?\s*(?:(?:as )?(?:shown |seen )?(?:in|from|following|like|matching|per|of) (?:the )?)?" + re.escape(t), "", s)
+        s = re.sub(r"\s+([,.;:])", r"\1", s).strip()
+        plain = _D_RE.sub("", s)
+        _ref_plain = plain
+        if len(plain.split()) < 3:
+            return None
     if _DIAL_RE.search(plain) or _is_policy(s) or _ABSENT_REF_RE.search(_ref_plain) or _MUSIC_RE.search(plain):
         return None
     if _NEGATION_START_RE.match(plain) or _NEGATION_LIST_RE.search(plain):
@@ -2202,10 +2224,13 @@ def _man_pose(text: str) -> Optional[str]:
 _MOVE_PAIRS = [
     (r"\bknee(?:s|ls?|ling)\b", r"\b(?:kneel\w*|(?:drops?|sinks?|goes|gets?|lowers? herself|comes? down) (?:down )?(?:to|on|onto) her knees|on her knees)\b"),
     (r"\bhands and knees\b|\ball fours\b", r"\bhands and knees\b|\ball fours\b"),
-    (r"\bon her back\b|\blies back\b", r"\bon her back\b|\blies back\b|\blying back\b"),
+    (r"\bon her back\b|\blies back\b", r"\bon her back\b|\blies back\b|\blying back\b|\blower\w* (?:\w+ ){0,2}onto (?:her|the) back\b"),  # (2) Derrick t247s837
     (r"\bstraddl\w*|\bastride\b", r"\bstraddl\w*|\bastride\b"),
     (r"\bbends? (?:forward|over)\b|\bbent (?:forward|over)\b", r"\bbend\w* (?:forward|over)\b|\bbent (?:forward|over)\b"),
 ]
+
+
+_WAIST_SURFACE_RE = re.compile(r"(?i)\b(?:sideboard|table|counter|desk|dresser|vanity|bar|kitchen island|washing machine|piano)\b")
 
 
 def _same_move(beat: str, text: str) -> bool:
@@ -2664,6 +2689,9 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         report["added"].append("wardrobe line from the tracked end state (R12)")
     has_move = bool(re.search(cast.get("move_check") or cast.get("position_check", r"$^"), text_body, re.I))
     has_move = has_move or _same_move(cast.get("position_beat") or "", text_body)  # #2: no second move-in sentence
+    if re.search(r"(?i)\bkneel", beat or "") and _WAIST_SURFACE_RE.search(str(cast.get("surface") or _scene(cast)["surface"] or "")):
+        has_move = True  # (2) Derrick t247s837: never a kneel move-in on a waist-high surface
+        report["stripped"].append("kneel move-in skipped (waist-high surface)")
 
     def is_act(x: str) -> bool:
         if "<d>" in x and not _D_RE.sub("", x).strip(" ,.():S12says"):
@@ -2679,7 +2707,8 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         stands = [i for i, x in enumerate(rest[:act_at]) if _STAND_SENT_RE.search(_D_RE.sub("", x))]
         anchor = max([writer_opener] + stands)
         report["added"].append("writer opener kept (builder opener skipped)" + (" (opens mid-act)" if mid_act else ""))
-        extra = [wardrobe] if wardrobe else []
+        strip_like = b_kind in ("tease", "strip") or cast.get("position") in ("tease", "strip")  # (1) Derrick t247s837
+        extra = [wardrobe] if wardrobe and not strip_like else []
         rest = rest[:writer_opener + 1] + extra + rest[writer_opener + 1:]
         if not has_move and not mid_act:
             rest.insert(anchor + 1 + len(extra), beat)
@@ -2691,11 +2720,15 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
             report["not_ready"] = "no writer opener and no pose fact in the still read"
         opening = f"The clip opens on <Picture 1>: <Subject 1> {cast['still_wardrobe']}."
         report["added"].append("opening-from-still sentence (R14/R16)")
-        rest = [opening] + ([wardrobe] if wardrobe else []) + ([] if has_move else [beat]) + rest
+        strip_like = b_kind in ("tease", "strip") or cast.get("position") in ("tease", "strip")
+        rest = [opening] + ([wardrobe] if wardrobe and not strip_like else []) + ([] if has_move else [beat]) + rest
     if not has_move:
         report["added"].append("move-into-position beat (R16/R23a)")
     act_at = next((i for i, x in enumerate(rest) if is_act(x) and x not in (beat,)), len(rest))
     seq = [cam] + rest[:act_at] + [x for x in (motion, contact) if x] + rest[act_at:]
+    if wardrobe and strip_like and wardrobe not in seq:  # (1): a strip's end-state wardrobe line follows the PRIMARY sentence
+        pi = next((i for i, x in enumerate(seq) if "PRIMARY MOTION" in x), None)
+        seq.insert(pi + 1 if pi is not None else len(seq), wardrobe)
     sound_all = convert_speech(clean(sound_q), voices, max_lines=max_lines, counts=counts, ledger=ledger, budget=budget) if sound_raw else []
     spoken = [c for c in sound_all if "<d>" in c]
     sound = [c for c in sound_all if "<d>" not in c][:3]
@@ -3235,6 +3268,9 @@ def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, A
             raise WriterNotReady("NOT_READY: an S3 reference still needs img_1 (<Picture 1>) wired first")
         g["img_s3"] = {"class_type": "LoadImage", "inputs": {"image": str(cast["s3_still"])}, "_meta": {"title": "S3 reference still"}}
         g["c0"]["inputs"]["ref_images.ref_image_1"] = ["img_1", 0]
+        _wired = [int(k.rsplit("_", 1)[1]) for k in g["c0"]["inputs"] if re.fullmatch(r"ref_images\.ref_image_\d+", k)]
+        if max(_wired) + 1 != s3_picture(cast):  # (4): the prompt's <Picture N> must be the next wired slot
+            raise WriterNotReady(f"NOT_READY: S3 still would be ref slot {max(_wired) + 1}, prompt says <Picture {s3_picture(cast)}>")
         g["c0"]["inputs"][f"ref_images.ref_image_{s3_picture(cast)}"] = ["img_s3", 0]
         report["s3_still"] = {"image": str(cast["s3_still"]), "picture": s3_picture(cast)}
     # RefMod handling: 3-person and partner_type checks
@@ -3248,14 +3284,14 @@ def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, A
             named_faces = ["S1"]
             if pt2 not in ("none", "non-human", "faceless"):
                 named_faces.append("S2")
-            if pt3 not in ("none", "non-human", "faceless"):
+            if pt3 not in ("none", "non-human", "faceless", "still"):  # (5) a still-S3 face rides on its <Picture N>
                 named_faces.append("S3")
             if cast.get("named_faces"):
                 named_faces = list(cast["named_faces"])
             if len(named_faces) > 8:
                 raise WriterNotReady(f"NOT_READY: more named faces ({len(named_faces)}) than 8 RefMod slots")
             live_mods = [inputs[f"mod_{i}"] for i in range(1, 9) if inputs.get(f"mod_{i}") and inputs[f"mod_{i}"] != "(none)"]
-            if len(live_mods) < len(named_faces):
+            if refmod_people(live_mods) < len(named_faces):  # (3) Derrick t247s837: people, not audio+visual slots
                 raise WriterNotReady("NOT_READY: named-face person has no RefMod and was not marked non-human or faceless")
             for i in range(1, 9):
                 k = f"mod_{i}"
@@ -4076,7 +4112,7 @@ def merge_refmod_slots(slots1: Dict[str, Any], slots2: Optional[Dict[str, Any]] 
         named_subjects = [
             ("S1", slots1, True),
             ("S2", slots2, pt2 not in ("none", "non-human", "faceless")),
-            ("S3", slots3, pt3 not in ("none", "non-human", "faceless")),
+            ("S3", slots3, pt3 not in ("none", "non-human", "faceless", "still")),
         ]
 
         named_faces = [s for s, sl, is_named in named_subjects if is_named]

@@ -589,3 +589,12 @@ def test_pm_acc3_glue_summary_and_lints():
     assert "act_mismatch" in r["hard"]
     assert "youth_hint" in L.lint(hdr + "(S1), 16 years old, sits.", dict(ctx, act_id="missionary"))["hard"]
     assert p.partner_look_from_card({"partners": [{"label": "S3", "age": 31, "build": "lean", "hair": "short dark,"}]}, "S3").endswith("short dark hair")
+
+
+def test_little_sister_role_word_is_not_a_youth_hint():
+    import wp_lint as L
+    hdr = "detailed_description:\n[Shot 1] "
+    ctx = {"kind": "sex", "act_id": "missionary", "slots": {}, "overlays": ["taboo_role"], "ask": "little sister roleplay, missionary", "cfg": {}}
+    r = L.lint(hdr + "At first, (S1), an adult woman playing his little sister, lies on the bed.", ctx)
+    assert "youth_hint" not in r["hard"]
+    assert "youth_hint" in L.lint(hdr + "At first, (S1), 17 years old, lies on the bed.", ctx)["hard"]
