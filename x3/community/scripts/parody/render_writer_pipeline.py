@@ -273,7 +273,8 @@ _SEX_BEAT = ("Plan this clip as a beat card in JSON. Four phases: anchor (the st
 _PRIMARY_REQ = ("- One sentence that begins exactly 'As it builds, PRIMARY MOTION - ' followed by the motion, its intensity and one "
                 "tempo word (per second, every second, cycle, strokes a second), then one follow-through cue.\n")
 _CLEAR_REQ = ("- If a garment covers the join: one active clearance sentence BEFORE the entry, in this form: '(S2) pulls her "
-              "<garment> aside to one side at her hip, where it stays.' (the still's garment noun; never 'bunched').\n")
+              "<garment> aside to one side at her hip, where it stays.' (the still's garment noun; never 'bunched'). Only the garment "
+              "over the join gets 'aside to one side at her hip'; a top is pushed up off her breasts.\n")
 _JOIN_REQ = _CLEAR_REQ + ("- One literal contact sentence with one join keyword (inside her, buried in her, deep in her, hips flush, flush "
              "against, fully sheathed) that holds through the motion.\n")
 # One block per mode (keyed by config position_kinds). Lint rules for the same mode live in wp_lint.MODE_RULES.
@@ -348,14 +349,14 @@ def mode(kind: str) -> Dict[str, Any]:
 OVERLAY_NOTES: Dict[str, str] = {
     "cinematic": "Film look (never write the words cinematic or beautiful): one motivated camera job (held, a slow push-in, a locked medium or a low angle), light that separates the bodies, at most one line per speaker.",
     "gonzo": "Gonzo: closer framing (medium-close), light handheld energy, a faster tempo, lens looks written in the action prose.",
-    "pov": "POV: the camera is the dominant's eye line, medium or medium-close, (S1) looks toward the lens, only his hands or forearms enter frame (named once), one simple move at most.",
+    "pov": "POV: the camera is the dominant's eye line, medium or medium-close, (S1) looks toward the lens, only his hands or forearms enter frame (named once). Write no camera sentence of your own; the builder's POV camera line is the only one.",
     "edge": "Edge: the denial is tempo or one full pull-out pause with entry kept full; one denial moment.",
     "forced_orgasm": "Forced orgasm: one or two overstimulation cues in the body, PRIMARY MOTION keeps going through the result, her lines are fragments of three words or fewer.",
     "defeat": "Superheroine defeat: an original adult heroine, one strength beat, one break moment, one costume move that stays, her voice drops; no named hero and no quoted line. Her lines and her face carry the tone slot from the first line to the last frame.",
     "cnc": "Consensual non-consent fantasy between adults: one protest beat inside the action and his override by grip or command; no safeword unless asked.",
     "taboo_role": "Role-play between adults: one role for the clip, at most one title per line, tied to something visible.",
     "spoof": "Spoof: original characters only, one genre flavour and cadence, one visual nod; film look as light, lens and grain words, no real names and no famous quotes.",
-    "restraints": "Restraints: name the restraint, who set it and its limit once; it stays on to the last frame. The restraint holds her at the surface she is lying on; name what it ties to only if it is in the still (no headboard unless the still has one).",
+    "restraints": "Restraints: name the restraint, who set it and its limit once; it stays on to the last frame. Tie her wrists to the {surface} she lies on, or he holds them; name no other anchor.",
     "toy": "Toy: define it once (type, size, who controls it); solo, the toy is the PRIMARY MOTION with tempo; with a partner, penetration is the PRIMARY MOTION and the toy rides in the follow-through; insertion or removal is one move each with where it rests.",
     "threesome": "Three adults at most: define (S3) (look, clothes, entrance), give each hand an owner such as (S3)'s left hand, at most two lines per speaker.",
     "continued": "Continued clip: open from the previous end state; never restate a finished action or reset a garment.",
@@ -371,8 +372,8 @@ OVERLAY_NOTES: Dict[str, str] = {
 }
 
 
-def overlay_text(overlays: List[str]) -> str:
-    notes = [OVERLAY_NOTES[o] for o in overlays if o in OVERLAY_NOTES]
+def overlay_text(overlays: List[str], surface: Optional[str] = None) -> str:
+    notes = [OVERLAY_NOTES[o].replace("{surface}", surface or "surface") for o in overlays if o in OVERLAY_NOTES]
     return ("\nOVERLAYS (apply to this clip):\n" + "\n".join("- " + n for n in notes) + "\n") if notes else ""
 
 
@@ -434,18 +435,20 @@ ACT_NOTES = {
                 "lifting a few inches off the {surface} to meet her as she sinks'."),
     "finish": ("(S1) kneels on the {surface} in front of him, weight on both knees, sitting back on her heels, face tilted up; "
                "(S2) stands with his hips level with her face; she is silent from the moment he is at her lips. Foley is breath "
-               "and wet sounds, never a slap."),
+               "and wet sounds, never a slap. Contact: his penis at her lips; the glans as he releases; the semen lands on her cheeks "
+               "and lips and stays."),
     "titjob": ("(S1) kneels on the {surface}, sitting back on her heels, weight on both knees, and presses her breasts together "
                "around his shaft with both palms; (S2) stands, hips level with her chest; she is silent from the moment he is at "
-               "her lips."),
+               "her lips. Contact: his shaft pressed between her breasts (never 'sheathed')."),
     "mmf": ("(S3) kneels behind her between her knees; (S2) kneels in front of her head, his hips level with her face; she is "
             "silent while (S2) is in her mouth (her side is wet suction and breath through her nose). (S3) has no spoken line; "
             "give (S3) a full look in the card (age 25 or older, build, hair, attire)."),
 }
-LINE_ANGLES = ["a command about what he does next", "a reaction to his grip or his strength", "a plea or a dare in the tone slot",
+LINE_ANGLES = ["a command about what he does next", "a reaction to the pace", "a plea or a dare in the tone slot",
                "praise or teasing about his body", "a question to him that the action answers", "a short gasped fragment"]
 CONTINUE_NOTE = ("CONTINUED: the 'At first' sentence is the inherited end state (pose, join, garments) word for word: "
-                 "'At first, {state}.' There is no move out of the still and no re-entry; the motion is already running.")
+                 "'At first, {state}.' There is no move out of the still and no re-entry; the motion is already running. If the previous "
+                 "clip had no join, write the entry before the PRIMARY; the 'At first' sentence is a full clause with (S1) as its subject.")
 # acceptance-2 e: openings rotate (not every clip 'At first, (S1) leans/sits/stands')
 OPENING_LEADS = ["her hands", "her gaze toward the lens", "her hair", "the light on her skin", "her hips", "her garment",
                  "her breath", "her bare shoulders"]
@@ -488,22 +491,34 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
             lines.append(f"CLEARANCE (before any entry or contact sentence): '(S2) pulls her {wp_lint.join_noun(slots)} aside to one side at her hip, where it stays.'")
     act = br.get_act(position) or {}
     if partner_sex(ask, "") == "futa":
-        lines.append("PARTNER: (S2) is a futa woman; refer to her as she/her, never he, his, him or the man (builder P2).")
+        lines.append("PARTNER: (S2) is a futa woman; refer to her as she/her, never he, his, him or the man (builder P2). "
+                     "Contact: '(S2)'s penis is fully sheathed inside her vagina, hips flush.'")
     if ACT_NOTES.get(act.get("id")):
         lines.append(f"ACT RULE ({act.get('id')}): " + ACT_NOTES[act["id"]].format(surface=slots.get("surface") or "surface"))
     if slots.get("surface_height") == "waist" and kind in ("sex", "transition") and act.get("id") in ("missionary", "mf_anal"):
         lines.append(f"HEIGHT: the {slots.get('surface')} is waist-high, so (S1) lies back on it and (S2) stands at its edge "
-                     "between her legs; he does not kneel on it.")
+                     "between her legs; he does not kneel on it. Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
     if slots.get("surface_height") == "waist" and act.get("id") == "standing_mf":
         lines.append(f"HEIGHT: the {slots.get('surface')} is waist-high, so (S1) stands at its edge, bends forward at the hips and "
-                     "lays her forearms and chest on it, weight on both feet; (S2) stands behind her.")
+                     "lays her forearms and chest on it, weight on both feet; (S2) stands behind her. Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
+    if act.get("id") == "standing_mf":  # #4
+        lines.append(f"LANDING: land it as 'bent forward over the {slots.get('surface') or 'surface'}, both feet planted'; never write "
+                     "hands and knees, all fours or doggy.")
+    if slots.get("surface_height") == "waist" and act.get("id") == "mmf":  # #6
+        sf = slots.get("surface") or "surface"
+        lines.append(f"HEIGHT: (S1) bends forward over the {sf}, feet planted; (S3) stands behind her; (S2) stands at the far side, "
+                     "hips level with her face; she is silent while (S2) is in her mouth; (S2) holds her head and her head bobs "
+                     "along his shaft." + " Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
     if slots.get("place"):
         lines.append(f"PLACE: name only the still's place ({slots['place']}); never add a room, balcony, headboard or location.")
-    lines.append("LINES: line_topics never name the surface, the floor or the furniture, and never the word deep; each line is "
+    lines.append("LINES: line_topics never name the surface, the floor or the furniture, never his grip, his hands or his strength, "
+                 "and never the word deep; each line is "
                  "spoken to the partner about the act, his body or hers, in the tone slot.")
     if slots.get("opening_lead") and not slots.get("inherited"):
-        lines.append(f"OPENING: the 'At first' sentence starts from {slots['opening_lead']} (then the still's pose), not with "
-                     "'(S1) leans', '(S1) sits' or '(S1) stands'.")
+        lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's pose and surface noun "
+                     f"('(S1) leans against the {slots.get('surface') or 'surface'}'), and never starts with 'breathes heavily'; "
+                     f"it may add a detail about {slots['opening_lead']}.")
+    lines.append("SUMMARY: summary is one plain sentence: who, where, the act; never the camera line, 'At first' or 'As it builds'.")
     if act.get("contact_verbs") or act.get("motion_verbs"):  # the act's own vocabulary from acts.yaml (routing data, no new rule)
         lines.append(f"ACT {act.get('id')}: contact words {', '.join(act.get('contact_verbs') or [])}; motion words "
                      f"{', '.join(act.get('motion_verbs') or [])}")
@@ -625,7 +640,17 @@ def normalize_prose(dd: str, kind: str, slots: Optional[Dict[str, Any]] = None) 
             at = m.start() + off + lead.end()
             dd = dd[:at] + "PRIMARY MOTION - " + dd[at:]
             break
-    return dd
+    return glue_fix(dd)
+
+
+def glue_fix(dd: str) -> str:
+    """acceptance-3 review (PM) #1: text glue the lint does not see."""
+    dd = re.sub(r"(</d>\s*)(?:\(S\d\) )?adds in an? [^<]{0,40}?(?:tone|voice), and ", r"\1", dd)
+    dd = re.sub(r"(?i)\b(the) the\b", r"\1", dd)
+    dd = re.sub(r"(?i)(?:(?<=[.!?>])|^)\s*none\.(?=\s|$)", "", dd)
+    dd = re.sub(r"(?i)\bher skin (?:glistening|glistens|glistened|glistening with \w+)\b", "her damp skin", dd)
+    dd = re.sub(r"(?i)\b(damp)\b((?:[ ,]+\w+){0,4}?)[ ,]+damp\b", r"\1\2", dd)
+    return re.sub(r"\s{2,}", " ", dd).strip()
 
 
 _S1_ONLY = re.compile(r"(?i)\b(?:bikini|bra|panties|thong|lingerie|stockings|crop top|bodysuit|dress|skirt|slip|teddy|mesh)\b")
@@ -681,6 +706,10 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}, in {attire}, who enters from {side} "
                   f"and {pron} is ({label}).")
     summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {slots.get('position')} clip on the {slots.get('surface')}")
+    # #2: one plain sentence of who, where and the act; never the camera line or the phase scaffold
+    _ss = [x for x in re.split(r"(?<=[.!?])\s+", summary) if x.strip() and not re.match(r"(?i)\s*the camera\b", x)]
+    summary = re.sub(r"(?i)\b(?:at first|as it builds|by the end),?\s*", "", (_ss[0] if _ss else summary)).strip().rstrip(".")
+    summary = (summary[:1].upper() + summary[1:]) if summary else f"(S1) in a {slots.get('position')} clip"
     # acceptance-3 (m08): tag words and shine words never ship in the summary either
     summary = re.sub(r"\s{2,}", " ", re.sub(r"(?i)\b(?:cinematic|beautiful(?:ly)?)\b,?\s*", "", summary)).strip()
     summary = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", summary)
@@ -791,9 +820,16 @@ def partner_type2_for(position: str, ask: str) -> Optional[str]:
     return None
 
 
+_COLOUR_END_RE = re.compile(r"(?i)\b(?:dark|black|brown|blond|blonde|red|grey|gray|white|silver|auburn|copper|light|short|long)\s*,?$")
+
+
 def s3_look_from_card(card: Optional[Dict[str, Any]]) -> Optional[str]:
-    """MMF S3 (Derrick t1440): the card's (S3) partner as one fixed look line; None when the card has no usable (S3)."""
-    p3 = next((p for p in ((card or {}).get("partners") or []) if re.sub(r"\W", "", str(p.get("label", ""))).upper() == "S3"), None)
+    return partner_look_from_card(card, "S3")
+
+
+def partner_look_from_card(card: Optional[Dict[str, Any]], label: str = "S3") -> Optional[str]:
+    """MMF S3 (Derrick t1440), S2 too (#14): the card's partner as one fixed look line; None when the card has none."""
+    p3 = next((p for p in ((card or {}).get("partners") or []) if re.sub(r"\W", "", str(p.get("label", ""))).upper() == label), None)
     if not p3 or not (p3.get("build") or p3.get("attire")):
         return None
     try:
@@ -803,7 +839,9 @@ def s3_look_from_card(card: Optional[Dict[str, Any]]) -> Optional[str]:
     sex = "woman" if re.search(r"(?i)\b(?:female|woman|f)\b", str(p3.get("sex", ""))) else "man"
     bits = [f"an adult {sex}, {age} years of age", f"of {_clean_attr(p3.get('build'), 'solid')} build".replace("build build", "build")]
     if p3.get("hair"):
-        h3 = _clean_attr(p3.get('hair'), '')
+        h3 = _clean_attr(p3.get('hair'), '').rstrip(" ,")
+        if _COLOUR_END_RE.search(h3):  # #14: 'short dark' keeps its noun
+            h3 += " hair"
         bits.append(f"with {h3}" + ("" if re.search(r"(?i)\b(?:hair|bald|shaved|buzz|cut|crop|beard)\b", h3) else " hair"))
     if p3.get("attire"):
         bits.append(f"in {re.sub(r'(?i)^(?:in|wearing)\s+', '', _clean_attr(p3.get('attire'), ''))}")
@@ -864,8 +902,10 @@ def clean_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
             if key == "floor" and re.fullmatch(r"(?i)\s*(?:unseen|not visible|unknown|none|n/?a|out of frame)\s*", v):
                 nv = "the floor"
             if _SHINE_RE.search(nv):
+                nv = re.sub(r"(?i)\bher skin (?=glisten)", "", nv)
                 nv = _SHINE_RE.sub(MATTE_SKIN, nv, count=1)
-                nv = _SHINE_RE.sub("damp", nv)
+                nv = _SHINE_RE.sub("", nv)  # #1: never 'damp ... damp'
+                nv = re.sub(r"\s*,\s*(?:,\s*)+", ", ", re.sub(r"\b(?:wet|damp),\s*(?=,|$)", "", nv)).strip(" ,")
             if nv != v:
                 changed.append(f"{key}: {v[:60]} -> {nv[:60]}")
             return nv
@@ -992,7 +1032,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             route = dict(route, position="standing_mf", act_id="standing_mf",
                          warnings=list(route["warnings"]) + [{"warn": "waist_high_reroute", "from": "doggy", "to": "standing_mf", "surface": _sf}])
         elif surface_height(_sf) == "waist" and route["act_id"] in ("cowgirl", "reverse_cowgirl"):
-            route = dict(route, warnings=list(route["warnings"]) + [{"warn": "surface_mismatch", "act": route["act_id"], "surface": _sf}])
+            # #5: riding on a waist-high top is NOT_READY (surface_mismatch), not a warning
+            result.update(status="NOT_READY", not_ready_reason=f"surface_mismatch: {route['act_id']} on a waist-high {_sf}; "
+                                                               "use a still with a bed, couch or floor, or a standing act")
+            raise _Stop()
         if route["position"] != position:
             log("mode_fallback", {"run": run_id, "position": position, "chosen": route["position"]})
         position, kind, overlays = route["position"], route["mode"], route["overlays"]
@@ -1016,10 +1059,14 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             brief += "\n" + shots_line(int(job["shot_count"]), int(job.get("frames") or 243))
         # MMF S3 (Derrick t1440): reuse the scene's S3 look, use a given S3 still, else the card invents one (faceless fallback)
         s3_still = s3_look = None
+        s2_look_saved = None
         s3_in_frame = False
         if bodies >= 3 and partner_type2_for(position, ask):
             s3_still = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
             s3_look = (scene_prev or {}).get("s3_look")
+            s2_look_saved = (scene_prev or {}).get("s2_look")
+            if s2_look_saved:  # #14
+                brief += f"\nPARTNER (S2), the same person as the last clip, every detail kept: {s2_look_saved}."
             s3_in_frame = bool(s3_look)
             if s3_look:
                 brief += f"\nTHIRD PERSON (S3), the same person as the last clip, every detail kept: {s3_look}."
@@ -1177,7 +1224,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             builds.append(build)
         status = build["status"]
         # acceptance-1 fix c: these hard rules block READY even when the builder passes (others fall back with a warning)
-        blocking = sorted(set(chosen["lint"]["hard"]) & set((cfg.get("lint") or {}).get("block_ready") or []))
+        # PM acc3 #8: youth_hint and scale_adult always block (in code, not only config)
+        blocking = sorted(set(chosen["lint"]["hard"]) & (set((cfg.get("lint") or {}).get("block_ready") or []) | {"youth_hint", "scale_adult"}))
+        if status == "READY" and float(chosen["lint"].get("score") or 0) < float(cfg.get("min_ready_score", 50)):
+            blocking = sorted(set(blocking) | {"low_score"})  # PM acc3 #8: a fallback under 50 never ships READY
         if status == "READY" and blocking:
             status = "NOT_READY"
             build = dict(build, reason="lint hard rule: " + ", ".join(blocking))
@@ -1229,7 +1279,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                          "ambient_sfx": [((card or {}).get(p) or {}).get("sound") for p in ("anchor", "onset", "development", "result") if ((card or {}).get(p) or {}).get("sound")],
                          "frame_budget": (build["report"].get("frames") or 243),
                          "method": "planned cut", "done_actions": done, "ts": wp_state.now_ct(),
-                         "s3_look": s3_look, "s3_still": s3_still}
+                         "s3_look": s3_look, "s3_still": s3_still,
+                         "s2_look": s2_look_saved or partner_look_from_card(card, "S2")}
                 wp_state.append_scene(sp, scene_id, entry)
                 result["scene_state"] = str(sp)
     except _Stop:

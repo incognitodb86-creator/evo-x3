@@ -255,7 +255,8 @@ def test_fault_all_fail_lint_fallback(home, tmp_path, monkeypatch):
     stub_build(monkeypatch)
     r = p.run_clip(job(tmp_path, "c2"), p.load_config(home / "config.yaml"), lambda *a: None)
     assert "lint_fail_fallback" in r["warnings"] and "rewrite" in calls and r["builds"]  # the build still ran
-    assert r["status"] == "READY"
+    # PM acc3 #8: a fallback scoring under 50 is NOT_READY (low_score); otherwise it still ships READY
+    assert r["status"] == ("NOT_READY" if r["pick_score"] < 50 else "READY"), r["pick_score"]
 
 
 def test_fault_writer_down_next_clip_proceeds(home, tmp_path, monkeypatch):
@@ -571,3 +572,20 @@ def test_acc4_oral_sheathed_lint_in_mmf_mode():
     assert "oral_contact" in r["hard"]
     ok = L.lint(hdr + "At first, (S1) kneels. (S2) is deep inside her mouth while (S3) is buried in her.", ctx)
     assert "oral_contact" not in ok["hard"]
+
+
+def test_pm_acc3_glue_summary_and_lints():
+    import wp_lint as L
+    g = p.glue_fix("<d>[English] Is that all?</d> adds in a teasing, sharp tone, and (S1) says in a low voice, <d>[English] More.</d> "
+                   "It stays on the the floor. none. Her damp skin, slick and damp, shines.")
+    assert "adds in" not in g and "the the" not in g and "none." not in g and g.count("damp") == 1, g
+    out = p.assemble_output("[Shot 1] x.", {"summary": "The camera holds wide. At first, (S1) kneels on the sand."},
+                            {"place": "beach", "surface": "sand", "position": "blowjob"}, 2, "oral")
+    summ = out.split("summary:\n", 1)[1].split("\n", 1)[0]
+    assert "At first" not in summ and "camera" not in summ, summ
+    hdr = "detailed_description:\n[Shot 1] "
+    ctx = {"kind": "sex", "act_id": "standing_mf", "slots": {}, "overlays": [], "ask": "he takes her at the sideboard", "cfg": {}}
+    r = L.lint(hdr + "At first, (S1) leans on the sideboard. She settles onto her hands and knees. (S2) is buried in her.", ctx)
+    assert "act_mismatch" in r["hard"]
+    assert "youth_hint" in L.lint(hdr + "(S1), 16 years old, sits.", dict(ctx, act_id="missionary"))["hard"]
+    assert p.partner_look_from_card({"partners": [{"label": "S3", "age": 31, "build": "lean", "hair": "short dark,"}]}, "S3").endswith("short dark hair")
