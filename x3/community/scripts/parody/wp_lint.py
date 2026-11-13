@@ -41,7 +41,8 @@ RESULT_RE = re.compile(r"(?i)\b(?:by the end|as the clip ends|on the last frame|
 SOUND_NOUN_RE = re.compile(r"(?i)\b(?:sound\w*|creak\w*|rustl\w*|thud\w*|click\w*|hum\w*|waves?|slap\w*|rasp\w*|crackl\w*|"
                            r"hiss\w*|patter\w*|echo\w*|knock\w*|thump\w*|scrape\w*|squeak\w*|whisper\w*|rattl\w*|jingl\w*|"
                            r"splash\w*|surf|wind|rain|traffic|siren\w*|footsteps?|door\w*|fabric|rumbl\w*|buzz\w*|tick\w*|drip\w*)\b")
-CONTINUE_RE = re.compile(r"(?i)\b(?:\w+ing|keeps?|still|continues?|on and on|without stopping)\b")
+CONTINUE_RE = re.compile(r"(?i)\b(?:\w+ing|keeps?|still|continues?|on and on|without stopping|maintains?|keeps up|"
+                         r"holds the (?:pace|tempo|rhythm))\b")
 SUBJECT_START_RE = re.compile(r"^\s*(\(S[123]\)|<Subject [123]>|she|he|her|his|they|the camera)\b", re.I)
 WORD_RE = re.compile(r"[a-z0-9']+")
 
@@ -75,7 +76,7 @@ ORAL_ACT_RE = br._ORAL_ACT_RE
 MOUTH_FREE_RE = br._MOUTH_FREE_RE
 RISE_RE, SINK_RE, HIS_LIFT_RE, MEET_RE = br._RISE_RE, br._SINK_RE, br._HIS_LIFT_RE, br._MEET_RE
 SPEAKER_D_RE = re.compile(r"\((S[123])\)[^<]{0,120}?<d>|<d>")
-SHALLOW_RE = re.compile(r"(?i)\b(?:shallow\w*|at the entrance|just the tip|half[- ]depth|only the tip)\b")
+SHALLOW_RE = re.compile(r"(?i)\b(?:shallow(?!,?\s+(?:breath|breathing|gasp|pant|exhale|inhale))\w*|at the entrance|just the tip|half[- ]depth|only the tip)\b")
 NARR_RE = re.compile(r"(?i)\b(?:dominates? her|submits?|feels? (?:humiliated|ashamed|degraded)|she (?:orgasms|cums|climaxes))\b")
 PANEL_RE = re.compile(r"(?i)\bpanels?\b")
 CAM_BIG_RE = re.compile(r"(?i)\b(?:orbit\w*|360|whip[- ]?pan\w*|crane\w*|\barcs?\b|arcing)\b")
@@ -150,26 +151,36 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
     for spk, n in speaker_counts(dd).items():
         if n > 2:
             out.append(_fix("speaker_cap", f"({spk}) has {n} lines; the builder keeps two per speaker, so give at most two"))
-    if kind == "oral":
-        first_contact = next((i for i, x in enumerate(sents) if re.search(r"(?i)\b(?:inside her mouth|into her mouth|in her mouth)\b|"
-                                                                    r"\blips (?:close|wrap|seal|part)\w* (?:around|over)", outside_d(x))), None)
-        if first_contact is not None and any(re.search(r"\(S1\)[^<]{0,120}<d>", x) for x in sents[first_contact:]):
-            out.append(_fix("oral_silence", "after her mouth is on him only (S2) speaks; give (S1) wet suction and breath instead"))
-        if re.search(r"(?i)\b(?:slap\w* of skin|skin (?:on|against) skin|hips? slap\w*|slapping|flesh slap\w*|thighs? slap\w*)\b", plain):
-            out.append(_fix("oral_sound", "oral foley is wet suction, a gag on the deep stroke and breath through her nose, not skin slaps"))
-    if re.search(r"<d>[^<]*<d>|</d>\s*</d>", dd):
-        out.append(_fix("nested_d", "one <d>...</d> pair per spoken line, never nested"))
+    # acceptance-2 item 10: silent mouth in every act (oral, mmf/spitroast, finish, titjob) once her mouth is on him
+    first_contact = next((i for i, x in enumerate(sents) if MOUTH_CONTACT_RE.search(outside_d(x))), None)
+    if first_contact is not None and any(re.search(r"\(S1\)[^<]{0,120}<d>", x) for x in sents[first_contact:]):
+        out.append(_fix("oral_silence", "after her mouth is on him only (S2) speaks; give (S1) wet suction and breath instead"))
+    if (kind in ("oral", "solo") or act in ("finish", "titjob", "blowjob") or "toy" in ov) and SLAP_RE.search(plain):
+        out.append(_fix("oral_sound", "no slap foley here: wet suction, breath, fabric or the toy's hum"))
+    if re.search(r"<d>[^<]*<d>|</d>\s*</d>", dd) or any("[" in re.sub(r"^\s*\[English\]\s*", "", m) or "PRIMARY MOTION" in m
+                                                       for m in re.findall(r"<d>(.*?)</d>", dd, flags=re.S)):
+        out.append(_fix("nested_d", "one <d>[English] words</d> pair per spoken line: no nesting, no other [brackets], no labels inside"))
+    if TAG_WORDS_RE.search(full):
+        out.append(_fix("tag_words", "remove the words cinematic / beautiful (summary and prose)"))
+    # act_mismatch: another act's landing words in a non-transition clip (c3b standing_mf landing missionary)
+    if kind not in ("transition", "talk") and act in ACT_LANDING:
+        body_s = [outside_d(x) for x in sents if not OPENER_RE.search(x)]
+        for other, rx in ACT_LANDING.items():
+            if other != act and other not in ACT_COMPAT.get(act, ()) and any(re.search(rx, x) for x in body_s):
+                out.append(_fix("act_mismatch", f"this clip is {act}; remove the {other} landing words and land in {act}'s own pose"))
+                break
     if kind == "oral" and oral_mouth_talk(dd):
         out.append(_fix("oral_mouth_full", "(S1) speaks only while her mouth is free; move her line before he enters her mouth or after she pulls off"))
     pm_s = outside_d(sents[prim_idx]) if prim_idx is not None else ""
     if act == "cowgirl" and not (RISE_RE.search(pm_s) and SINK_RE.search(pm_s) and HIS_LIFT_RE.search(pm_s)
                                  and br._LIFT_MEASURE_RE.search(pm_s) and MEET_RE.search(pm_s)):
-        out.append(_fix("ride_both", "in the PRIMARY MOTION sentence itself: her rise and her sink, and his hips lifting a few inches off the surface to meet her as she sinks"))
+        out.append(_fix("ride_both", "write this clause word for word in the PRIMARY MOTION sentence: 'she rises and sinks on him, his hips "
+                                     f"lifting a few inches off the {(ctx.get('slots') or {}).get('surface') or 'surface'} to meet her as she sinks'"))
     if DIAL_RE.search(plain):
         out.append(_fix("dial", f"remove the technical term '{DIAL_RE.search(plain).group(0)}'; film look is light, lens and grain words"))
     if THROAT_RE.search(plain):
         out.append(_fix("throat", "write throat contact exactly as 'his hand on her throat' (the builder drops other throat wording)"))
-    if kind in ("sex", "partner") and SHALLOW_RE.search(plain):
+    if kind == "sex" and SHALLOW_RE.search(plain):  # partner (titjob/finish) has no entry depth
         out.append(_fix("shallow", "the builder keeps full entry; show denial with tempo or a full pull-out pause"))
     if NARR_RE.search(plain):
         out.append(_fix("narrate", "show the dynamic in grip, gaze and breath instead of naming it"))
@@ -208,6 +219,8 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
         if CONTACT_RE.search(plain):
             out.append(_fix("strip_contact", "a strip clip has no penetration contact"))
     op = opening_sentence(dd)
+    if not (ctx.get("slots") or {}).get("inherited") and re.search(r"(?i)\bat first,\s*\(S1\)\s+(?:leans|sits|stands|is (?:leaning|sitting|standing))\b", dd):
+        out.append(_fix("opening_stock", "open 'At first,' on the lead detail from the brief, not '(S1) leans/sits/stands'", False, 5))
     for prev in ctx.get("recent_openings") or []:
         if op and prev and difflib.SequenceMatcher(None, op, prev).ratio() >= float(cfg.get("opening_ratio", 0.85)):
             out.append(_fix("opening_repeat", "the 'At first' sentence repeats a recent clip; open on a different detail of the still"))
@@ -287,6 +300,17 @@ def opening_sentence(dd: str) -> str:
     return norm(m.group(0)) if m else ""
 
 
+MOUTH_CONTACT_RE = re.compile(r"(?i)\b(?:inside her mouth|into her mouth|in her mouth|past her lips|between her lips|at her lips|"
+                              r"against her lips)\b|\blips (?:close|wrap|seal|part)\w* (?:around|over)")
+SLAP_RE = re.compile(r"(?i)\b(?:slap\w*|smack\w*)\b")  # acceptance-3 (m19): soft 'skin on skin' sliding is not slap foley
+TAG_WORDS_RE = re.compile(r"(?i)\b(?:cinematic|beautiful)\b")
+ACT_LANDING = {"missionary": r"(?i)\bmissionary\b|\bon her back\b", "doggy": r"(?i)\bhands and knees\b|\bon all fours\b",
+               "cowgirl": r"(?i)\bastride\b|\bstraddl\w*|\bcowgirl\b",
+               "standing_mf": r"(?i)\bbends? forward at the hips\b|\bstanding (?:sex|doggy|missionary)\b"}
+ACT_COMPAT = {"mf_anal": ("doggy", "missionary"), "mmf": ("doggy",), "standing_mf": ()}
+CLEAR_WORD_RE = re.compile(r"(?i)\b(?:aside|to one side|off|up to her waist|slides? (?:it|them|her [\w -]+) up)\b")
+
+
 def is_sound_sentence(s: str) -> bool:
     """A closing / ambient sound sentence (no speaker, no actor doing an action)."""
     if D_RE.search(s) or OPENER_RE.search(s) or PRIMARY_RE.search(s):
@@ -327,7 +351,9 @@ def required_slots(slots: Dict[str, Any]) -> Dict[str, List[str]]:
     if slots.get("surface"):
         req["surface"] = [_head_noun(slots["surface"])]
     if slots.get("garment_noun"):
-        req["garment"] = [slots["garment_noun"]]
+        # any garment the still shows counts (acceptance-3: doggy prose names the bikini bottom, not the top)
+        g = [slots["garment_noun"]] + [_head_noun(x) for x in (slots.get("garments_all") or []) + (slots.get("join_garments") or [])]
+        req["garment"] = [w for i, w in enumerate(g) if w and w not in g[:i]]
     lp = []
     for k in ("light", "place"):
         for w in WORD_RE.findall((slots.get(k) or "").lower()):
@@ -380,6 +406,34 @@ def ngrams(words: List[str], n: int) -> List[str]:
 
 def _clear_needed(slots: Dict[str, Any], kind: str) -> bool:
     return bool(mode_rules(kind)["clearance"]) and bool(slots.get("join_garments"))
+
+
+def join_noun(slots: Dict[str, Any]) -> str:
+    """The garment that covers the join, by its short noun ('bikini bottom', 'dress', 'panties')."""
+    j = (slots.get("join_garments") or [""])[0]
+    w = WORD_RE.findall(j.lower())
+    if not w:
+        return slots.get("garment_noun") or "garment"
+    if w[-1] in ("bottom", "bottoms", "top", "piece") and len(w) > 1:
+        return " ".join(w[-2:])
+    return w[-1]
+
+
+def _join_inherited_clear(slots: Dict[str, Any], scene: Optional[Dict[str, Any]]) -> bool:
+    """A continued clip whose previous clip already left every join garment aside/off/up needs no new clearance."""
+    gar = ((scene or {}).get("ending_state") or {}).get("garments") or (slots.get("inherited") or {}).get("garments") or {}
+    if not gar or not slots.get("join_garments"):
+        return False
+    # builder state keys (c1b: {'panties': 'aside'} for a 'bikini bottom'): every join key it tracks is aside/off
+    jk = [k for k in gar if str(k).replace("item:", "") in br._JOIN_KEYS]
+    if jk and all(re.search(r"(?i)aside|bunch|gather|off|up|removed|floor", str(gar[k])) for k in jk):
+        return True
+    for j in slots["join_garments"]:
+        hn = _head_noun(j)
+        pos = next((str(v) for k, v in gar.items() if _head_noun(str(k).replace("item:", "")) == hn or norm(str(k)) == norm(j)), "")
+        if not re.search(r"(?i)aside|bunch|gather|off|up|removed|floor", pos):
+            return False
+    return True
 
 
 def _fix(code: str, note: str, hard: bool = True, pen: int = 0) -> Dict[str, Any]:
@@ -448,12 +502,18 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
         issues.append(_fix("no_contact", f"the contact sentence needs one join word ({rules['contact_hint']}) and must hold through the motion"))
     if rules.get("banned_contact") and re.search(r"(?i)" + rules["banned_contact"], plain):
         issues.append(_fix(kind + "_contact", rules.get("banned_hint") or "wrong join words for this mode"))
-    if _clear_needed(slots, kind):
-        gnoun = slots.get("garment_noun") or "garment"
+    if _clear_needed(slots, kind) and not _join_inherited_clear(slots, ctx.get("scene")):
+        gnoun = join_noun(slots)
         # builder parity: the builder's own W5 credit (active pull/slide/tug ... aside|up, or a removal verb)
         cleared = br._join_cleared_still_on(plain) or REMOVE_VERB_RE.search(plain)
         if not cleared:
             issues.append(_fix("clearance", f"the {gnoun} covers the join; write '(S2) pulls her {gnoun} aside' (or slides it up) before entry and say where it stays"))
+        # clearance_missing (acceptance-2 c1a): the first entry/contact sentence comes before any clearance sentence
+        entry = next((i for i, x in enumerate(sents) if br._JOIN_PEN_RE.search(outside_d(x)) or CONTACT_RE.search(outside_d(x))), None)
+        clear = next((i for i, x in enumerate(sents) if CLEAR_WORD_RE.search(outside_d(x)) and
+                      (br._join_cleared_still_on(outside_d(x)) or REMOVE_VERB_RE.search(outside_d(x)))), None)
+        if entry is not None and (clear is None or clear > entry):
+            issues.append(_fix("clearance_missing", f"clear the {gnoun} BEFORE he enters: '(S2) pulls her {gnoun} aside to one side at her hip, where it stays.'"))
 
     # -- four phases (t222) --
     content = [i for i, s in enumerate(sents) if not CAMERA_SENTENCE_RE.search(s) and not is_sound_sentence(s)]

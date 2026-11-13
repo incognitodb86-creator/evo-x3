@@ -127,17 +127,16 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
         items = inv
     join = [g["name"] for g in items if g.get("key") in br._JOIN_KEYS or g.get("slot") in ("bottom", "full-body")
             or re.search(r"(?i)\b(?:bodysuit|teddy|leotard|catsuit|one-piece|swimsuit|bikini)\b", g["name"])]
-    focus_opts = ["garment state", "surface", "depth", "still prop"]
-    if kind == "talk":
-        focus_opts = ["garment state", "surface", "place", "still prop"]
+    focus_opts = ["his body", "her body", "the act", "the tone"]  # acceptance-2 item 9: never surface/floor/furniture/depth
     if not f["props"]:
         focus_opts = [x for x in focus_opts if x != "still prop"]
     if not inv:
         focus_opts = [x for x in focus_opts if x != "garment state"]
     focus = rng.choice(focus_opts)
-    focus_text = {"garment state": f"the {g0.get('name', 'garment')} and where it is now", "surface": f.get("surface") or "the surface",
-                  "depth": "how deep he is", "still prop": (f["props"][0] if f["props"] else "the room"),
-                  "place": f.get("place") or f.get("setting") or "the place"}[focus]
+    focus_text = {"his body": "his body (hands, grip, strength, what he does to her)", "her body": "her body and how it feels",
+                  "the act": "the act itself and what comes next", "the tone": "the tone slot, said straight to the partner",
+                  "garment state": f"the {g0.get('name', 'garment')} and where it is now",
+                  "still prop": (f["props"][0] if f["props"] else "his body")}[focus]
     slots = {
         "surface": re.sub(r"(?i)^(?:the|a|an)\s+", "", f.get("surface") or ""),
         "garment": garment, "garment_noun": gnoun, "garments_all": [g["name"] for g in inv], "join_garments": join,
@@ -148,7 +147,7 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
         "framing": read.get("framing") or "", "hair": read.get("hair") or "", "skin": read.get("skin") or "",
         "build": read.get("build") or "", "props": f["props"], "restraints": f["restraints"],
         "tone": pick_tone(ask, rng, last_tone), "line_focus": focus, "line_focus_text": focus_text,
-        "position": position, "kind": kind,
+        "position": position, "kind": kind, "opening_lead": rng.choice(OPENING_LEADS),
     }
     if scene_prev:
         es = scene_prev.get("ending_state") or {}
@@ -216,7 +215,8 @@ BEAT_SCHEMA_SEX = {
         "partners": {"type": "array", "items": {"type": "object", "required": ["label", "sex", "age", "build", "attire", "enters_from"],
                                                  "properties": {"label": {"type": "string"}, "sex": {"type": "string"},
                                                                 "age": {"type": "integer"}, "build": {"type": "string"},
-                                                                "attire": {"type": "string"}, "enters_from": {"type": "string"}}}},
+                                                                "attire": {"type": "string"}, "enters_from": {"type": "string"},
+                                                                "hair": {"type": "string"}}}},
         "anchor": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
         "onset": {"type": "object", "required": ["exit", "load", "height", "clearance", "entry", "sound"],
                   "properties": {k: {"type": "string"} for k in ("exit", "load", "height", "clearance", "entry", "sound")}},
@@ -272,8 +272,8 @@ _SEX_BEAT = ("Plan this clip as a beat card in JSON. Four phases: anchor (the st
              "Spoken words in total: twenty-five at most.")
 _PRIMARY_REQ = ("- One sentence that begins exactly 'As it builds, PRIMARY MOTION - ' followed by the motion, its intensity and one "
                 "tempo word (per second, every second, cycle, strokes a second), then one follow-through cue.\n")
-_CLEAR_REQ = ("- If a garment covers the join: one active clearance sentence, (S2) pulls (or slides) the still's garment, by its own "
-              "noun, aside or up to her waist, and where it stays.\n")
+_CLEAR_REQ = ("- If a garment covers the join: one active clearance sentence BEFORE the entry, in this form: '(S2) pulls her "
+              "<garment> aside to one side at her hip, where it stays.' (the still's garment noun; never 'bunched').\n")
 _JOIN_REQ = _CLEAR_REQ + ("- One literal contact sentence with one join keyword (inside her, buried in her, deep in her, hips flush, flush "
              "against, fully sheathed) that holds through the motion.\n")
 # One block per mode (keyed by config position_kinds). Lint rules for the same mode live in wp_lint.MODE_RULES.
@@ -282,9 +282,13 @@ MODES: Dict[str, Dict[str, Any]] = {
             "onset_hint": "The onset: the exit from that pose (and the clearance with the word aside, and the entry).\n"},
     "oral": {"schema": BEAT_SCHEMA_SEX,
              "beat_task": _SEX_BEAT.replace("the contact keyword", "the contact keyword inside her mouth"),
-             "prose_req": ("- One literal contact sentence that names the mouth and its motion and contains the words inside her "
-                           "mouth (never hips flush or sheathed), holding through the motion. Only (S2) speaks in this clip; "
-                           "(S1)'s side is wet suction and breath through her nose.\n") + _PRIMARY_REQ,
+             "prose_req": ("- The contact sentence, in these words: 'his shaft slides past her lips deep inside her mouth, and she keeps "
+                           "her lips sealed around it' (never hips flush, never sheathed). Only (S2) speaks in this clip; "
+                           "(S1)'s side is wet suction and breath through her nose.\n"
+                           "- The PRIMARY MOTION sentence, in these words: 'PRIMARY MOTION - her head bobs along his shaft about one "
+                           "stroke every second.' (you may add one follow-through clause after a semicolon).\n"
+                           "- Write the act's landing words once, inside a real clause (e.g. 'and kneels in front of him on the "
+                           "<surface>'); never a list of aliases.\n"),
              "onset_hint": "The onset: the exit from that pose down to the mouth's height (and the entry into her mouth).\n"},
     "partner": {"schema": BEAT_SCHEMA_NOJOIN,
                 "beat_task": ("Plan this clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
@@ -299,7 +303,8 @@ MODES: Dict[str, Dict[str, Any]] = {
                            "(the first move out of the still pose), development (the PRIMARY MOTION with one tempo word, one or two "
                            "follow-through cues, at most two short lines), result (the end state with the motion still running). "
                            "One person, no partner contact. Each phase has one diegetic sound. Spoken words in total: twenty-five at most."),
-             "prose_req": _PRIMARY_REQ,
+             "prose_req": _PRIMARY_REQ + "- The camera keeps her face and body in frame (she is alone). Foley is breath, fabric, wet "
+                                         "skin or the toy's hum, never a slap.\n",
              "onset_hint": "The onset: the first move out of that pose (any garment move uses aside or a removal verb).\n"},
     "strip": {"schema": BEAT_SCHEMA_NOJOIN,
               "beat_task": ("Plan this strip clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
@@ -308,7 +313,11 @@ MODES: Dict[str, Dict[str, Any]] = {
                             "stays there, with a short hold between steps), result (the end state still moving). One person, no "
                             "contact. Each phase has one diegetic sound. Spoken words in total: twenty-five at most."),
               "prose_req": ("- One to three removal steps with a removal verb (slides down, pulls off, peels), each naming the garment "
-                            "noun, where it lands and that it stays there; no contact.\n") + _PRIMARY_REQ,
+                            "noun, where it lands (the floor at her feet, or a named surface) and that it stays there; no contact; "
+                            "a garment that is off stays off.\n"
+                            "- The PRIMARY MOTION in this form: 'PRIMARY MOTION - she peels the <garment> down past her hips about one "
+                            "slow pull cycle every two seconds; it drops to the floor at her feet and stays there.'\n"
+                            "- The camera keeps her face and body in frame (no join, she is alone).\n"),
               "onset_hint": "The onset: the first move out of that pose toward the first garment.\n"},
     "transition": {"schema": _schema_variant(BEAT_SCHEMA_SEX, ["exit", "load", "height", "sound"],
                                              ["follow_through", "sound", "lines"]),
@@ -337,16 +346,16 @@ def mode(kind: str) -> Dict[str, Any]:
 
 # Overlays ride on the base card (never new acts): one plan note + one prose note each.
 OVERLAY_NOTES: Dict[str, str] = {
-    "cinematic": "Cinematic: one motivated camera job (held, a slow push-in, a locked medium or a low angle), light that separates the bodies, at most one line per speaker.",
+    "cinematic": "Film look (never write the words cinematic or beautiful): one motivated camera job (held, a slow push-in, a locked medium or a low angle), light that separates the bodies, at most one line per speaker.",
     "gonzo": "Gonzo: closer framing (medium-close), light handheld energy, a faster tempo, lens looks written in the action prose.",
     "pov": "POV: the camera is the dominant's eye line, medium or medium-close, (S1) looks toward the lens, only his hands or forearms enter frame (named once), one simple move at most.",
     "edge": "Edge: the denial is tempo or one full pull-out pause with entry kept full; one denial moment.",
     "forced_orgasm": "Forced orgasm: one or two overstimulation cues in the body, PRIMARY MOTION keeps going through the result, her lines are fragments of three words or fewer.",
-    "defeat": "Superheroine defeat: an original adult heroine, one strength beat, one break moment, one costume move that stays, her voice drops; no named hero and no quoted line.",
+    "defeat": "Superheroine defeat: an original adult heroine, one strength beat, one break moment, one costume move that stays, her voice drops; no named hero and no quoted line. Her lines and her face carry the tone slot from the first line to the last frame.",
     "cnc": "Consensual non-consent fantasy between adults: one protest beat inside the action and his override by grip or command; no safeword unless asked.",
     "taboo_role": "Role-play between adults: one role for the clip, at most one title per line, tied to something visible.",
     "spoof": "Spoof: original characters only, one genre flavour and cadence, one visual nod; film look as light, lens and grain words, no real names and no famous quotes.",
-    "restraints": "Restraints: name the restraint, who set it and its limit once; it stays on to the last frame.",
+    "restraints": "Restraints: name the restraint, who set it and its limit once; it stays on to the last frame. The restraint holds her at the surface she is lying on; name what it ties to only if it is in the still (no headboard unless the still has one).",
     "toy": "Toy: define it once (type, size, who controls it); solo, the toy is the PRIMARY MOTION with tempo; with a partner, penetration is the PRIMARY MOTION and the toy rides in the follow-through; insertion or removal is one move each with where it rests.",
     "threesome": "Three adults at most: define (S3) (look, clothes, entrance), give each hand an owner such as (S3)'s left hand, at most two lines per speaker.",
     "continued": "Continued clip: open from the previous end state; never restate a finished action or reset a garment.",
@@ -412,9 +421,25 @@ def parse_json(text: str) -> Any:
 
 # builder-required words per act (consistency gate), written into the brief so the card and the prose carry them
 ACT_NOTES = {
-    "cowgirl": ("the PRIMARY MOTION sentence itself names her rise and her sink, and his hips lifting a few inches off the "
-                "{surface} to meet her as she sinks (all in that one sentence)."),
+    "cowgirl": ("write this clause word for word inside the PRIMARY MOTION sentence: 'she rises and sinks on him, his hips "
+                "lifting a few inches off the {surface} to meet her as she sinks'."),
+    "finish": ("(S1) kneels on the {surface} in front of him, weight on both knees, sitting back on her heels, face tilted up; "
+               "(S2) stands with his hips level with her face; she is silent from the moment he is at her lips. Foley is breath "
+               "and wet sounds, never a slap."),
+    "titjob": ("(S1) kneels on the {surface}, sitting back on her heels, weight on both knees, and presses her breasts together "
+               "around his shaft with both palms; (S2) stands, hips level with her chest; she is silent from the moment he is at "
+               "her lips."),
+    "mmf": ("(S3) kneels behind her between her knees; (S2) kneels in front of her head, his hips level with her face; she is "
+            "silent while (S2) is in her mouth (her side is wet suction and breath through her nose). (S3) has no spoken line; "
+            "give (S3) a full look in the card (age 25 or older, build, hair, attire)."),
 }
+LINE_ANGLES = ["a command about what he does next", "a reaction to his grip or his strength", "a plea or a dare in the tone slot",
+               "praise or teasing about his body", "a question to him that the action answers", "a short gasped fragment"]
+CONTINUE_NOTE = ("CONTINUED: the 'At first' sentence is the inherited end state (pose, join, garments) word for word: "
+                 "'At first, {state}.' There is no move out of the still and no re-entry; the motion is already running.")
+# acceptance-2 e: openings rotate (not every clip 'At first, (S1) leans/sits/stands')
+OPENING_LEADS = ["her hands", "her gaze toward the lens", "her hair", "the light on her skin", "her hips", "her garment",
+                 "her breath", "her bare shoulders"]
 SURFACE_HEIGHT = [("waist", r"sideboard|table|counter|desk|dresser|vanity|bar|kitchen island|washing machine|piano"),
                   ("low", r"bed|sofa|couch|log|sand|mattress|bench|chaise|futon|lounger|rug|blanket|towel"),
                   ("floor", r"floor|ground|carpet|grass|deck")]
@@ -439,14 +464,28 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
     lines.append(f"- facing the camera: {'yes' if slots.get('facing_camera') else 'no'}")
     if slots.get("join_garments") and wp_lint.mode_rules(kind)["clearance"]:
         lines.append("- covers the join: " + ", ".join(slots["join_garments"]))
+        if wp_lint._join_inherited_clear(slots, None):
+            lines.append("CLEARANCE: the " + wp_lint.join_noun(slots) + " is already aside from the last clip; keep it there, no new clearance sentence.")
+        else:
+            lines.append(f"CLEARANCE (before any entry or contact sentence): '(S2) pulls her {wp_lint.join_noun(slots)} aside to one side at her hip, where it stays.'")
     act = br.get_act(position) or {}
     if partner_sex(ask, "") == "futa":
         lines.append("PARTNER: (S2) is a futa woman; refer to her as she/her, never he, his, him or the man (builder P2).")
     if ACT_NOTES.get(act.get("id")):
         lines.append(f"ACT RULE ({act.get('id')}): " + ACT_NOTES[act["id"]].format(surface=slots.get("surface") or "surface"))
-    if slots.get("surface_height") == "waist" and kind in ("sex", "transition") and act.get("id") in ("missionary", "standing_mf", "mf_anal"):
+    if slots.get("surface_height") == "waist" and kind in ("sex", "transition") and act.get("id") in ("missionary", "mf_anal"):
         lines.append(f"HEIGHT: the {slots.get('surface')} is waist-high, so (S1) lies back on it and (S2) stands at its edge "
                      "between her legs; he does not kneel on it.")
+    if slots.get("surface_height") == "waist" and act.get("id") == "standing_mf":
+        lines.append(f"HEIGHT: the {slots.get('surface')} is waist-high, so (S1) stands at its edge, bends forward at the hips and "
+                     "lays her forearms and chest on it, weight on both feet; (S2) stands behind her.")
+    if slots.get("place"):
+        lines.append(f"PLACE: name only the still's place ({slots['place']}); never add a room, balcony, headboard or location.")
+    lines.append("LINES: line_topics never name the surface, the floor or the furniture, and never the word deep; each line is "
+                 "spoken to the partner about the act, his body or hers, in the tone slot.")
+    if slots.get("opening_lead") and not slots.get("inherited"):
+        lines.append(f"OPENING: the 'At first' sentence starts from {slots['opening_lead']} (then the still's pose), not with "
+                     "'(S1) leans', '(S1) sits' or '(S1) stands'.")
     if act.get("contact_verbs") or act.get("motion_verbs"):  # the act's own vocabulary from acts.yaml (routing data, no new rule)
         lines.append(f"ACT {act.get('id')}: contact words {', '.join(act.get('contact_verbs') or [])}; motion words "
                      f"{', '.join(act.get('motion_verbs') or [])}")
@@ -456,6 +495,8 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
               f"{'; (S3) is a third adult, defined by you' if bodies >= 3 and kind != 'talk' else ''}. Everyone is an adult, 25 or older."]
     if slots.get("inherited"):
         inh = slots["inherited"]
+        state = "; ".join(str(x) for x in (inh.get("pose"), inh.get("contact")) if x)
+        lines.append(CONTINUE_NOTE.format(state=state or "the previous clip's end pose"))
         lines += ["CONTINUED CLIP: open from the previous clip's end state, already in progress:",
                   f"- pose: {inh.get('pose')}", f"- garments: {json.dumps(inh.get('garments'))}", f"- contact: {inh.get('contact')}",
                   f"- camera: {inh.get('camera')} (POV: {inh.get('pov')})",
@@ -517,6 +558,25 @@ def normalize_prose(dd: str, kind: str, slots: Optional[Dict[str, Any]] = None) 
     # builder _HIS_CLOTHES_RE (build_request.py:795) matches 'stays bunched' and drops the whole clause, which deletes the
     # clearance and trips W5 (final4_c missionary/doggy). Same meaning, a word the builder keeps:
     dd = re.sub(r"(?i)\b(stay(?:s|ing)?|left|remain(?:s|ing)?) bunched\b", r"\1 gathered", dd)
+    # builder _HIS_LIFT_RE (build_request.py:2233) wants 'his hips ... lift' (m09): same meaning, builder word order
+    dd = re.sub(r"\((S2)\) lifts his (hips|pelvis)\b", r"his \2 lift", dd)
+    dd = re.sub(r"(?i)\bhe lifts his (hips|pelvis)\b", r"his \1 lift", dd)
+    # dry-matte skin (Derrick floor): shiny skin words from the read or the writer -> damp
+    dd = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", dd)
+    dd = re.sub(r"(?i)\bdamp,? damp\b", "damp", dd)
+    # act ids never ship as prose (c8b 'At first, standing_mf;'): builder ids -> plain words
+    surf = (slots or {}).get("surface") or "surface"
+    for aid, words in (("standing_mf", f"standing, bent forward over the {surf}"), ("reverse_cowgirl", "reverse cowgirl"),
+                       ("mf_anal", "anal"), ("female_solo", "alone"), ("standing_ff", "standing")):
+        dd = re.sub(r"\b" + aid + r"\b", words, dd)
+    # strip/solo tempo 'every two seconds' is not a builder tempo word (_TEMPO_RE): same tempo, with 'cycle'
+    if wp_lint.mode_rules(kind)["primary"] and not br._TEMPO_RE.search(re.sub(r"<d>.*?</d>", "", dd, flags=re.S)):
+        dd = re.sub(r"(?i)\b(?:about\s+)?(?:one\s+)?(?:slow\s+|smooth\s+|steady\s+)?(?:move|pull|tug|motion|stroke|peel|step)?\s*"
+                    r"every (two|three|four|five|2|3|4|5) seconds\b", r"one slow cycle every \1 seconds", dd, count=1)
+    # acceptance-3 (m18): 'two thrusts a second' / 'pumps a second' -> the builder tempo word 'strokes a second'
+    dd = re.sub(r"(?i)\b(thrusts?|pumps?|bobs?|pushes|drives|slams?|bounces?)( a second)\b", "strokes a second", dd)
+    # tag words never ship (Derrick floor): 'cinematic'/'beautiful' -> drop the adjective
+    dd = re.sub(r"(?i)\s*\b(?:cinematic|beautiful(?:ly)?)\b,?", "", dd)
     for k in ("place", "light", "surface", "hair"):  # pmfix6: SHAPE blanks left literal -> fill from still_read slots
         if (slots or {}).get(k):
             dd = re.sub(r"<\s*" + k + r"\s*>", str(slots[k]), dd, flags=re.I)
@@ -525,14 +585,26 @@ def normalize_prose(dd: str, kind: str, slots: Optional[Dict[str, Any]] = None) 
     dd = re.sub(r"<d>(.*?)</d>", _d, dd, flags=re.S)
     dd = re.sub(r"<d>(\s*(?:\[English\]\s*)?)[\"\u201c\u201d']+(.*?)[\"\u201c\u201d']+</d>", r"<d>\1\2</d>", dd, flags=re.S)
     dd = re.sub(r"(?<![(\w<])S([123])(?![\w)>])", r"(S\1)", dd)  # bare S1 -> (S1)
+    # acceptance-3 (m16): once her mouth is on him she is silent (builder D1): drop (S1)'s spoken units after that point
+    _mk = re.sub(r"<d>.*?</d>", lambda mm: "\x00" * len(mm.group(0)), dd, flags=re.S)
+    _mc = wp_lint.MOUTH_CONTACT_RE.search(_mk)
+    if _mc:
+        head, tail = dd[:_mc.end()], dd[_mc.end():]
+        tail = re.sub(r"(?:(?<=[.!?>])|^)\s*\(S1\)[^<.!?]{0,120}<d>.*?</d>[.!?]?", "", tail, flags=re.S)
+        dd = head + tail
     if wp_lint.mode_rules(kind)["primary"] and not br._PRIMARY_RE.search(dd):
         # the first sentence (outside <d>) that carries a tempo word gets the label, after a leading 'As it builds,'
-        for m in re.finditer(r"[^.!?]*[.!?]", dd):
+        # acceptance-2 bug 1: mask every <d>...</d> span first, so a line ending in '?' or '!' never puts the label
+        # inside the dialogue; a chunk that holds a masked span is only searched after its last span
+        masked = re.sub(r"<d>.*?</d>", lambda mm: "\x00" * len(mm.group(0)), dd, flags=re.S)
+        for m in re.finditer(r"[^.!?]*[.!?]", masked):
             sent = m.group(0)
-            if "<d>" in sent or not br._TEMPO_RE.search(sent):
+            off = sent.rfind("\x00") + 1
+            sent = sent[off:]
+            if "<d>" in sent or "</d>" in sent or not br._TEMPO_RE.search(sent):
                 continue
             lead = re.match(r"(?i)\s*(?:as it builds,\s*)?", sent)
-            at = m.start() + lead.end()
+            at = m.start() + off + lead.end()
             dd = dd[:at] + "PRIMARY MOTION - " + dd[at:]
             break
     return dd
@@ -591,6 +663,10 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}, in {attire}, who enters from {side} "
                   f"and {pron} is ({label}).")
     summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {slots.get('position')} clip on the {slots.get('surface')}")
+    # acceptance-3 (m08): tag words and shine words never ship in the summary either
+    summary = re.sub(r"\s{2,}", " ", re.sub(r"(?i)\b(?:cinematic|beautiful(?:ly)?)\b,?\s*", "", summary)).strip()
+    summary = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", summary)
+    summary = re.sub(r"\b(?:A|An) (?=[aeiou])", "An ", re.sub(r"\bAn (?=[^aeiouAEIOU])", "A ", summary))
     out = ["subject_definitions:", *sd, "", "summary:", summary + ".", "", "retention_analysis:",
            "<Subject 1>: fully_preserved - face, hair and body from <Picture 1>. <Picture 1>: fully_preserved - the "
            f"{place}, the light and the opening framing.", "", "detailed_description:", dd]
@@ -661,6 +737,8 @@ def make_cast(still_read: Dict[str, Any], position: str, ask: str) -> Tuple[Dict
     mk = {}
     if brief.get("partner_type"):
         mk["partner_type"] = brief["partner_type"]
+    if partner_type2_for(position, ask):
+        mk["partner_type2"] = partner_type2_for(position, ask)
     ck = brief.get("camera_kind")
     if ck and ck not in ("third_person", "third-person"):
         mk["camera_kind"] = br._CAM_KIND_MAP.get(ck, ck)
@@ -682,11 +760,45 @@ def builder_preview_fn(still_read: Dict[str, Any], position: str, ask: str):
     return preview
 
 
-def run_build(run_dir: Path, ask: str, position: str, still: str, character: Optional[str], timeout: int = 300) -> Dict[str, Any]:
+MMF_FACELESS_ACTS = ("mmf", "mmf_double_blowjob", "threesome")
+
+
+def partner_type2_for(position: str, ask: str) -> Optional[str]:
+    """Derrick t1437s5374: the MMF third person is faceless by default (no RefMod needed for (S3))."""
+    act = ((br.get_act(position) or {}).get("id") if position else None) or position
+    if act in MMF_FACELESS_ACTS and not re.search(r"(?i)\b(?:ffm|two (?:women|girls)|another (?:woman|girl))\b", ask or ""):
+        return "faceless"
+    return None
+
+
+def s3_look_from_card(card: Optional[Dict[str, Any]]) -> Optional[str]:
+    """MMF S3 (Derrick t1440): the card's (S3) partner as one fixed look line; None when the card has no usable (S3)."""
+    p3 = next((p for p in ((card or {}).get("partners") or []) if re.sub(r"\W", "", str(p.get("label", ""))).upper() == "S3"), None)
+    if not p3 or not (p3.get("build") or p3.get("attire")):
+        return None
+    try:
+        age = max(25, int(p3.get("age") or 30))
+    except (TypeError, ValueError):
+        age = 30
+    sex = "woman" if re.search(r"(?i)\b(?:female|woman|f)\b", str(p3.get("sex", ""))) else "man"
+    bits = [f"an adult {sex}, {age} years of age", f"of {_clean_attr(p3.get('build'), 'solid')} build".replace("build build", "build")]
+    if p3.get("hair"):
+        h3 = _clean_attr(p3.get('hair'), '')
+        bits.append(f"with {h3}" + ("" if re.search(r"(?i)\b(?:hair|bald|shaved|buzz|cut|crop|beard)\b", h3) else " hair"))
+    if p3.get("attire"):
+        bits.append(f"in {re.sub(r'(?i)^(?:in|wearing)\s+', '', _clean_attr(p3.get('attire'), ''))}")
+    return re.sub(r"(?i)\b(?:cinematic|beautiful)\b\s*", "", ", ".join(b for b in bits if b.strip()))
+
+
+def run_build(run_dir: Path, ask: str, position: str, still: str, character: Optional[str], timeout: int = 300,
+              extra: Optional[List[str]] = None) -> Dict[str, Any]:
     """Existing dry-run hook. Never passes --queue."""
     cmd = [sys.executable, str(SUBMIT_PY), "writer-run", str(run_dir), "--ask", ask, "--position", position, "--still", still]
+    cmd += list(extra or [])
     if character:
         cmd += ["--character", character]
+    if partner_type2_for(position, ask):
+        cmd += ["--partner-type2", partner_type2_for(position, ask)]
     assert "--queue" not in cmd
     t0 = time.time()
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=str(PARODY_DIR))
@@ -717,7 +829,54 @@ def auto_still(cfg: Dict[str, Any], run_id: str, ask: str) -> str:
     return random.Random(seed_for(run_id, ask, 7)).choice(sorted(pool))
 
 
+_SHINE_RE = re.compile(r"(?i)\b(?:glistening|glisten\w*|oily|oiled|glossy|shiny|shimmering|slick)\b(?:\s+(?:with\s+)?(?:wet\s+)?skin)?")
+MATTE_SKIN = "damp skin with a soft natural sheen and visible pores"
+
+
+def clean_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+    """acceptance-2 item 9: 'unseen' floor -> 'the floor'; shiny skin words -> the dry-matte wording. Pipeline data only."""
+    changed: List[str] = []
+    rd = d.get("read") if isinstance(d.get("read"), dict) else d
+
+    def fix(v: Any, key: str) -> Any:
+        if isinstance(v, str):
+            nv = v
+            if key == "floor" and re.fullmatch(r"(?i)\s*(?:unseen|not visible|unknown|none|n/?a|out of frame)\s*", v):
+                nv = "the floor"
+            if _SHINE_RE.search(nv):
+                nv = _SHINE_RE.sub(MATTE_SKIN, nv, count=1)
+                nv = _SHINE_RE.sub("damp", nv)
+            if nv != v:
+                changed.append(f"{key}: {v[:60]} -> {nv[:60]}")
+            return nv
+        if isinstance(v, dict):
+            return {k: fix(x, k) for k, x in v.items()}
+        if isinstance(v, list):
+            return [fix(x, key) for x in v]
+        return v
+    new = fix(rd, "read")
+    if rd is d:
+        return new, changed
+    out = dict(d)
+    out["read"] = new
+    return out, changed
+
+
 def ensure_still_read(run_dir: Path, still: str, still_read_src: Optional[str], client: Client, cfg: Dict[str, Any], log) -> Dict[str, Any]:
+    d = _ensure_still_read_raw(run_dir, still, still_read_src, client, cfg, log)
+    nd, changed = clean_still_read(d)
+    if changed:
+        p = run_dir / "still_read.json"
+        raw = run_dir / "still_read.raw.json"
+        if not raw.exists():
+            wp_state.atomic_write(raw, json.dumps(d, indent=2, ensure_ascii=False))
+        nd["cleaned"] = changed
+        wp_state.atomic_write(p, json.dumps(nd, indent=2, ensure_ascii=False))
+        log("still_read_cleaned", {"run": run_dir.name, "changed": changed})
+    return nd
+
+
+def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[str], client: Client, cfg: Dict[str, Any], log) -> Dict[str, Any]:
     p = run_dir / "still_read.json"
     if p.exists():
         return json.loads(p.read_text(encoding="utf-8"))
@@ -798,6 +957,13 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         still_read = ensure_still_read(run_dir, still, job.get("still_read"), client, cfg, log)
         # 2b mode router (coverage B0): act + base mode + overlays; fallbacks are logged, never block
         route = wp_router.route_mode(ask, position, still_read, cfg, continued=bool(scene_prev))
+        # acceptance-2 item 3: doggy on a waist-high-only surface is standing_mf (bent over its edge); cowgirl there warns
+        _sf = br.still_facts(still_read).get("surface") or ""
+        if surface_height(_sf) == "waist" and route["act_id"] == "doggy" and br.get_act("standing_mf"):
+            route = dict(route, position="standing_mf", act_id="standing_mf",
+                         warnings=list(route["warnings"]) + [{"warn": "waist_high_reroute", "from": "doggy", "to": "standing_mf", "surface": _sf}])
+        elif surface_height(_sf) == "waist" and route["act_id"] in ("cowgirl", "reverse_cowgirl"):
+            route = dict(route, warnings=list(route["warnings"]) + [{"warn": "surface_mismatch", "act": route["act_id"], "surface": _sf}])
         if route["position"] != position:
             log("mode_fallback", {"run": run_id, "position": position, "chosen": route["position"]})
         position, kind, overlays = route["position"], route["mode"], route["overlays"]
@@ -817,6 +983,15 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         cloned = wp_state.refresh_cloned(cloned_path, sysprompt, pmeta["writer_prompt_sha256"], wp_state.load_recent(recent_path))
         blacklist = [r["line"] for r in wp_state.load_blacklist(bl_path, log)]
         brief = brief_block(ask, position, kind, slots, bodies)
+        # MMF S3 (Derrick t1440): reuse the scene's S3 look, use a given S3 still, else the card invents one (faceless fallback)
+        s3_still = s3_look = None
+        if bodies >= 3 and partner_type2_for(position, ask):
+            s3_still = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
+            s3_look = (scene_prev or {}).get("s3_look")
+            if s3_look:
+                brief += f"\nTHIRD PERSON (S3), the same person as the last clip, every detail kept: {s3_look}."
+            if s3_still:
+                brief += "\nTHIRD PERSON (S3): his face and body come from his own reference picture; name only his clothes."
         try:
             cast_l, _ = make_cast(still_read, position, ask)
         except Exception as e:
@@ -852,15 +1027,30 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             except Exception as e:
                 log("beat_card_invalid", {"run": run_id, "attempt": attempt, "error": str(e)[:300]})
                 wp_state.atomic_write(run_dir / f"beat_card_invalid_{attempt}.txt", raw or "")
+        if bodies >= 3 and partner_type2_for(position, ask) and not s3_look:
+            s3_look = s3_look_from_card(card)
+        if bodies >= 3 and partner_type2_for(position, ask):
+            result["s3"] = {"look": s3_look, "still": s3_still,
+                            "mode": "still" if s3_still else ("generated" if s3_look else "faceless_default")}
+            log("s3_mode", dict(result["s3"], run=run_id))
+        _bx: List[str] = (["--s3-look", s3_look] if s3_look else []) + (["--partner2-still", s3_still] if s3_still else []) + \
+            (["--frames", str(int(job["frames"]))] if job.get("frames") else [])
         if card is None:
             result["warnings"].append("beat_card_skipped")
         else:
+            if route["act_id"] == "standing_mf" and isinstance(card.get("end_state"), dict) and \
+                    not re.search(r"(?i)\bstand", str(card["end_state"].get("pose") or "")):
+                # c8b: a rerouted doggy card still ended 'doggy, hands and knees'; the next clip inherits that pose
+                card["end_state"]["pose"] = (f"standing at the edge of the {slots.get('surface') or 'surface'}, bent forward at the hips, "
+                                             "forearms and chest on it, weight on both feet, (S2) standing behind her")
             wp_state.atomic_write(run_dir / "beat_card.json", json.dumps(card, indent=2, ensure_ascii=False))
         # 4 prose x N
         n = int(cfg.get("n_candidates", 3))
         cands: Dict[str, Dict[str, Any]] = {}
         for k in range(1, n + 1):
-            raw = client.chat(prose_messages(sysprompt, brief, card, kind, overlays), sampler, seed_for(run_id, ask, k),
+            angle = LINE_ANGLES[(seed_for(run_id, ask, 50) + k) % len(LINE_ANGLES)]  # acceptance-2 b: lines differ per draft
+            raw = client.chat(prose_messages(sysprompt, brief + f"\nLINE ANGLE for this draft: {angle}", card, kind, overlays),
+                              sampler, seed_for(run_id, ask, k),
                               cfg.get("prose_max_tokens", 1100), purpose=f"prose_{k}")
             dd = normalize_prose(clean_prose(raw), kind, slots)
             full = assemble_output(dd, card, slots, bodies, kind)
@@ -881,9 +1071,27 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             wp_state.atomic_write(run_dir / "lint_rewrite.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands["rewrite"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 1), "notes": notes,
                                 "from": best_name}
+        # 6b acceptance-3: every draft still carries a READY-blocking code -> one more targeted rewrite on those codes only
+        _blk = set((cfg.get("lint") or {}).get("block_ready") or [])
+        if cands and all(set(c["lint"]["hard"]) & _blk for c in cands.values()):
+            src_name = "rewrite" if "rewrite" in cands else best_name
+            src_l = cands[src_name]["lint"]
+            notes = ["FIX THESE FIRST (they block READY): " + "; ".join(i["note"] for i in src_l["issues"] if i["code"] in _blk)]
+            notes += [x for x in wp_lint.notes_for_rewrite(src_l, 3) if x not in notes]
+            raw = client.chat(rewrite_messages(sysprompt, brief, card, cands[src_name]["dd"], notes, kind, overlays), sampler,
+                              seed_for(run_id, ask, n + 3), cfg.get("prose_max_tokens", 1100), purpose="rewrite_block")
+            dd = normalize_prose(clean_prose(raw), kind, slots)
+            full = assemble_output(dd, card, slots, bodies, kind)
+            wp_state.atomic_write(run_dir / "rewrite_block.txt", full)
+            lr = wp_lint.lint(full, lint_ctx)
+            wp_state.atomic_write(run_dir / "lint_rewrite_block.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
+            cands["rewrite_block"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 3), "notes": notes,
+                                      "from": src_name}
+            result["warnings"].append("block_rewrite")
         # 7 rank and pick
         passing = [c for c in cands if cands[c]["lint"]["pass"]]
-        pool = passing or list(cands)
+        unblocked = [c for c in cands if not set(cands[c]["lint"]["hard"]) & _blk]
+        pool = passing or unblocked or list(cands)  # a fallback never prefers a READY-blocking draft
         if not passing:
             worst = cands[max(cands, key=lambda c: cands[c]["lint"]["score"])]["lint"]["hard"]
             result["warnings"].append("lint_fail_fallback")
@@ -913,7 +1121,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         chosen = cands[pick]
         wp_state.atomic_write(run_dir / "writer_output.txt", chosen["full"])
         # 8 build (dry); on NOT_READY one more rewrite from its message, then rebuild once
-        build = run_build(run_dir, ask, position, still, character)
+        build = run_build(run_dir, ask, position, still, character, extra=_bx)
         builds = [build]
         if build["status"] != "READY":
             nr = run_dir / "clip_NOT_READY.txt"
@@ -930,7 +1138,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             cands["rewrite_builder"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 2), "notes": notes}
             pick, chosen = "rewrite_builder", cands["rewrite_builder"]
             wp_state.atomic_write(run_dir / "writer_output.txt", full)
-            build = run_build(run_dir, ask, position, still, character)
+            build = run_build(run_dir, ask, position, still, character, extra=_bx)
             builds.append(build)
         status = build["status"]
         # acceptance-1 fix c: these hard rules block READY even when the builder passes (others fall back with a warning)
@@ -985,7 +1193,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                          "camera": "continuity", "spoken_dialogue": kl,
                          "ambient_sfx": [((card or {}).get(p) or {}).get("sound") for p in ("anchor", "onset", "development", "result") if ((card or {}).get(p) or {}).get("sound")],
                          "frame_budget": (build["report"].get("frames") or 243),
-                         "method": "planned cut", "done_actions": done, "ts": wp_state.now_ct()}
+                         "method": "planned cut", "done_actions": done, "ts": wp_state.now_ct(),
+                         "s3_look": s3_look, "s3_still": s3_still}
                 wp_state.append_scene(sp, scene_id, entry)
                 result["scene_state"] = str(sp)
     except WriterDown as e:
@@ -1007,7 +1216,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
 def summary_line(r: Dict[str, Any]) -> str:
     st = r.get("status")
     extra = f"reason={str(r.get('not_ready_reason') or r.get('error') or '')[:300]}" if st != "READY" else \
-        f"pick={r.get('pick')} score={r.get('pick_score')} spoken_words={r.get('spoken_words')}"
+        (f"pick={r.get('pick')} score={r.get('pick_score')} spoken_words={r.get('spoken_words')}"
+         + (f" lint_fail={r.get('pick_hard')}" if r.get("pick_hard") else ""))
     return (f"{st} run={r.get('run_dir')} {extra} warnings={r.get('warnings')} seconds={r.get('seconds')} "
             f"pick_json={Path(r.get('run_dir', '.')) / 'pick.json'} queued=False")
 
@@ -1022,6 +1232,8 @@ def main(argv=None) -> int:
     ap.add_argument("--character", default=None)
     ap.add_argument("--scene", help="scene id for a multi-clip scene (scene_state.json)")
     ap.add_argument("--continue", dest="cont", help="previous run dir this clip continues")
+    ap.add_argument("--partner2-still", help="MMF: (S3) reference still (ComfyUI input path, e.g. community/x.jpg)")
+    ap.add_argument("--frames", type=int, help="optional frame cap for VRAM (two reference stills)")
     ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
     ap.add_argument("--config", default=str(CONFIG_PATH))
     ap.add_argument("--sampler-arm", help="setup A/B only")
@@ -1043,7 +1255,8 @@ def main(argv=None) -> int:
             print("NOT_READY usage: render_writer_pipeline.py <run_dir> --ask \"...\" --position <act> --still <path|auto> --character FCSydny")
             return 3
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
-                     "character": a.character, "scene": a.scene, "continue": a.cont})
+                     "character": a.character, "scene": a.scene, "continue": a.cont,
+                     "partner2_still": a.partner2_still, "frames": a.frames})
     results = []
     for job in jobs:  # one failing clip never blocks the next
         r = run_clip(job, cfg, log, ov)
