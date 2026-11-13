@@ -104,10 +104,9 @@ class TestParodyPhase3(unittest.TestCase):
             scene="standing in a dimly lit hallway at night",
         )
         self.assertIn("Jennifer Check", prompt)
-        # t261u: the redundant summary filler is gone; subject_definitions still states the adult (age 28+).
+        # t261u/t835u: summary filler and the age 28+ subject stamp are both gone.
         self.assertNotIn("Adult cast, adults-only, fictional 18+ adult scene", prompt)
-        self.assertIn("an adult performer, age 28+", prompt)
-        self.assertTrue(comm.adult_stated(prompt))
+        self.assertNotIn("an adult performer, age 28+", prompt)
         self.assertIn("You have no idea what is coming next", prompt)
 
     def test_r7d_short_request_single_clip(self):
@@ -285,20 +284,20 @@ class TestU1OpenSlotsAndVoice(unittest.TestCase):
 
     def test_voice_label_prefers_character_then_actor(self):
         p = format_parody_prompt(_u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE)
-        self.assertIn("[English, using Megan Fox's exact Jennifer Check voice and signature vocal timbre]", p)
+        self.assertIn("(S1) says in Megan Fox's exact Jennifer Check voice with signature vocal timbre: <d>[English] ", p)
         self.assertNotIn("Jennifer Check's natural speaking voice", p)
         p2 = format_parody_prompt(
             _u1_resolved(actor="Sydney Sweeney", description="featuring Sydney Sweeney, wavy blonde hair, blue eyes"),
             dialogue=U1_LINE,
         )
-        self.assertIn("[English, using Sydney Sweeney's exact voice and signature vocal timbre]", p2)
+        self.assertIn("(S1) says in Sydney Sweeney's exact voice with signature vocal timbre: <d>[English] ", p2)
 
     def test_open_scene_action_in_detailed_description(self):
         scene = "leaning across a neon diner counter, twirling a straw"
         p = format_parody_prompt(
             _u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE, scene=scene
         )
-        detailed = p.split("detailed_description:")[1].split("overall_soundscape:")[0]
+        detailed = p.split("detailed_description:", 1)[1]
         self.assertIn(scene, detailed)
         self.assertNotIn("stands in position", p)
         self.assertIn(U1_LINE, detailed)
@@ -315,7 +314,6 @@ class TestU1OpenSlotsAndVoice(unittest.TestCase):
             self.assertNotIn("<d>", p, msg=repr(d))
             self.assertNotIn("Her mouth movements stop completely after the sentence", p, msg=repr(d))
             self.assertTrue(comm.guard_ok(p))
-            self.assertTrue(comm.adult_stated(p))
 
     def test_featuring_dedup_direct(self):
         r = _u1_resolved(
@@ -425,7 +423,7 @@ class TestU1SubmitGateAndSydneyFixture(unittest.TestCase):
         ok, reason = comm.guard_reason(graph)
         self.assertTrue(ok, reason)
         prompt = (self.run_dir / "prompt.txt").read_text(encoding="utf-8")
-        self.assertIn("[English, using Sydney Sweeney's exact voice and signature vocal timbre]", prompt)
+        self.assertIn("(S1) says in Sydney Sweeney's exact voice with signature vocal timbre: <d>[English] ", prompt)
         self.assertIn("perched on a penthouse bar stool", prompt.split("detailed_description:")[1])
         self.assertEqual(_u1_subject_block(prompt).lower().count("featuring"), 1)
 
@@ -433,11 +431,12 @@ class TestU3LightingAndTone(unittest.TestCase):
     """U3 (R6/R7): lighting-cue gate and satire tone dedupe in format_parody_prompt."""
 
     def _detailed(self, prompt):
-        return prompt.split("detailed_description:")[1].split("overall_soundscape:")[0]
+        return prompt.split("detailed_description:", 1)[1]
 
     def test_default_scene_keeps_late_afternoon_lighting(self):
         p = format_parody_prompt(_u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE)
-        self.assertIn("late afternoon ambient lighting, soft key on face, subtle fill. Camera locked off", self._detailed(p))
+        self.assertIn("late afternoon ambient lighting, soft key on face, subtle fill.", self._detailed(p))
+        self.assertNotIn("Camera locked off", p)
         p2 = format_parody_prompt(
             _u1_resolved(character="Jennifer Check", actor="Megan Fox"),
             dialogue=U1_LINE,
@@ -455,7 +454,8 @@ class TestU3LightingAndTone(unittest.TestCase):
         p = format_parody_prompt(_u1_resolved(character="Jennifer Check", actor="Megan Fox"), dialogue=U1_LINE, scene=scene)
         d = self._detailed(p)
         self.assertNotIn("late afternoon ambient lighting", p)
-        self.assertIn(f"(S1) {scene}. Camera locked off, no zoom, no pan.", d)
+        self.assertIn(f"(S1) {scene}.", d)
+        self.assertNotIn("Camera locked off", d)
         self.assertTrue(comm.guard_ok(p))
 
     def test_explicit_lighting_kwarg_wins(self):
@@ -465,7 +465,8 @@ class TestU3LightingAndTone(unittest.TestCase):
             scene="leans on a vanity counter, holding a makeup brush",
             lighting="warm vanity bulb light",
         )
-        self.assertIn("holding a makeup brush, warm vanity bulb light. Camera locked off", self._detailed(p))
+        self.assertIn("holding a makeup brush, warm vanity bulb light.", self._detailed(p))
+        self.assertNotIn("Camera locked off", p)
         self.assertNotIn("late afternoon ambient lighting", p)
 
     def test_duplicate_satire_tone_collapsed_through_resolve(self):

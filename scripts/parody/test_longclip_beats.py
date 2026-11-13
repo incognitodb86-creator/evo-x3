@@ -53,10 +53,12 @@ class TestLongclipBeats(unittest.TestCase):
             self.assertIn(field, content_lower, f"Missing required field: {field}")
 
     def test_beat_sheet_methods_specified(self) -> None:
-        """All 3 execution methods are specified: in-clip [Shot N], planned cut, C2V."""
+        """All 3 execution methods are specified: in-clip [Shot N], planned cut, native A/V continuation.
+
+        Max Architect 3, 2026-11-13 (Derrick t1355): the 2026-11-06 rewrite renamed C2V to native A/V continuation."""
         self.assertIn("in-clip [Shot N]", self.content)
         self.assertIn("planned cut", self.content)
-        self.assertIn("C2V", self.content)
+        self.assertIn("native A/V continuation", self.content)
 
     def test_beat_sheet_core_planning_rules(self) -> None:
         """Core planning rules: prefer in-clip [Shot N], don't restate finished actions, 1 primary beat."""
@@ -65,13 +67,15 @@ class TestLongclipBeats(unittest.TestCase):
         self.assertIn("don't restate finished actions", content_lower)
         self.assertIn("one primary beat per clip", content_lower)
 
-    def test_beat_sheet_c2v_unproven_marking(self) -> None:
-        """C2V runtime is explicitly marked UNPROVEN (native A/V carry unproven)."""
-        self.assertIn("UNPROVEN", self.content)
-        self.assertTrue(
-            "unproven" in self.content.lower() or "native a/v carry is unproven" in self.content.lower(),
-            "C2V runtime must be explicitly marked UNPROVEN",
-        )
+    def test_beat_sheet_native_continuation_verification_is_bounded(self) -> None:
+        """Native A/V continuation names what is verified and what is untested (was: C2V marked UNPROVEN).
+
+        Max Architect 3, 2026-11-13 (Derrick t1355): the two-beat path was verified on 2026-11-06, so the sheet now
+        bounds the claim instead of marking it UNPROVEN."""
+        content_lower = self.content.lower()
+        self.assertIn("bounded verification", content_lower)
+        self.assertIn("verified", content_lower)
+        self.assertIn("untested", content_lower)
 
     def test_beat_sheet_routing_and_no_copied_dials(self) -> None:
         """Links to h3-hc-render and LANE_IMAGE_RULES without copying dials or image rules."""

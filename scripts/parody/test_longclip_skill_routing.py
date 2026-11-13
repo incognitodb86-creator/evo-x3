@@ -48,12 +48,14 @@ class TestLongclipSkillRouting(unittest.TestCase):
         self.assertTrue(len(pointer_lines) >= 1)
         self.assertIn("UNPROVEN", pointer_lines[0])
 
-    def test_video_render_skill_reported_missing_and_not_created(self) -> None:
-        """skills/video-render/SKILL.md does not exist on this box and is reported MISSING without being created."""
-        self.assertFalse(
-            VIDEO_RENDER_SKILL.exists(),
-            "skills/video-render/SKILL.md was unexpectedly created; brief requires reporting MISSING instead of creating.",
-        )
+    def test_video_render_skill_present(self) -> None:
+        """skills/video-render/SKILL.md now exists on purpose (Render loads it); it must be a valid skill.
+
+        Max Architect 3, 2026-11-13 (Derrick t1355): was 'reported missing and not created' (U5, before the skill was added)."""
+        self.assertTrue(VIDEO_RENDER_SKILL.exists(), f"Missing {VIDEO_RENDER_SKILL}")
+        head = VIDEO_RENDER_SKILL.read_text(encoding="utf-8")[:400]
+        self.assertTrue(head.startswith("---"))
+        self.assertIn("name: video-render", head)
 
     def test_beat_sheet_reference_target_exists(self) -> None:
         """The referenced longclip-beat-sheet.md file exists and is valid markdown."""

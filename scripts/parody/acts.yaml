@@ -1,0 +1,509 @@
+# Acts Registry (2026-11-11 modular builder upgrade)
+# Fields: id, aliases, bodies, partner_types, contact_verbs, motion_verbs, default_camera, still_read_must_keeps, known_bad, status
+
+acts:
+  missionary:
+    id: missionary
+    aliases:
+      - "missionary position"
+      - "on her back"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "inside her vagina"
+      - "hips flush"
+    motion_verbs:
+      - "frontal thrust"
+      - "thrusts"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "bed"
+      - "sheets"
+    known_bad: []
+    status: tested
+
+  doggy:
+    id: doggy
+    aliases:
+      - "doggy style"
+      - "from behind"
+      - "hands and knees"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "inside her vagina from behind"
+      - "hips flush against her buttocks"
+    motion_verbs:
+      - "rear thrust"
+      - "thrusts deep"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "surface"
+    known_bad: []
+    status: tested
+
+  cowgirl:
+    id: cowgirl
+    aliases:
+      - "reverse cowgirl"
+      - "riding"
+      - "straddles him"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "inside her vagina"
+      - "sits astride his hips"
+    motion_verbs:
+      - "rises and sinks"
+      - "grinds"
+      - "rides"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "surface"
+      - "sheets"
+    known_bad: []
+    status: tested
+
+  blowjob:
+    id: blowjob
+    aliases:
+      - "oral"
+      - "fellatio"
+      - "deepthroat"
+      - "sucking"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "in her mouth"
+      - "lips sealed around the shaft"
+    motion_verbs:
+      - "head bobbing"
+      - "slides down his shaft"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad:
+      - "she speaks during blowjob"
+    status: tested
+
+  spooning:
+    id: spooning
+    aliases:
+      - "side-lying"
+      - "side sex"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "inside her from behind"
+      - "curled together"
+    motion_verbs:
+      - "slow rhythmic thrust"
+      - "gentle rocking"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "bed"
+      - "surface"
+    known_bad: []
+    status: untested
+
+  prone_bone:
+    id: prone_bone
+    aliases:
+      - "prone bone"
+      - "face down"
+      - "lying flat"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "inside her from behind"
+      - "hips pressing her buttocks flat"
+    motion_verbs:
+      - "downward rear thrust"
+      - "full depth"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "surface"
+    known_bad: []
+    status: untested
+
+  titjob:
+    id: titjob
+    aliases:
+      - "paizuri"
+      - "assjob"
+      - "footjob"
+      - "hotdogging"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "between her breasts"
+      - "shaft pressed between cleavage"
+    motion_verbs:
+      - "sliding between breasts"
+      - "compressing breasts around shaft"
+    default_camera: close-up
+    still_read_must_keeps: []
+    known_bad: []
+    status: untested
+
+  finish:
+    id: finish
+    aliases:
+      - "cumshot"
+      - "facial"
+      - "creampie"
+      - "oral creampie"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "spills across her skin"
+      - "pulses onto her face"
+      - "fills her"
+    motion_verbs:
+      - "hips bucking"
+      - "spasming"
+      - "slowing to a stop"
+    default_camera: close-up
+    still_read_must_keeps: []
+    known_bad: []
+    status: untested
+
+  female_solo:
+    id: female_solo
+    aliases:
+      - "solo"
+      - "fingering"
+      - "masturbation"
+      - "wand"
+      - "vibrator"
+    bodies: 1
+    partner_types:
+      - "none"
+    contact_verbs:
+      - "fingers inside her"
+      - "wand vibrating against her clitoris"
+    motion_verbs:
+      - "circular friction"
+      - "hips arching"
+      - "legs trembling"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "toys"
+    known_bad: []
+    status: untested
+
+  ff_cunnilingus:
+    id: ff_cunnilingus
+    aliases:
+      - "cunnilingus"
+      - "lesbian oral"
+      - "eating her out"
+    bodies: 2
+    partner_types:
+      - "woman"
+    contact_verbs:
+      - "tongue against her clitoris"
+      - "face between her thighs"
+    motion_verbs:
+      - "rhythmic lapping"
+      - "circular tongue strokes"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad:
+      - "lump between legs"
+    status: untested
+
+  ff_scissoring:
+    id: ff_scissoring
+    aliases:
+      - "scissoring"
+      - "tribbing"
+      - "trib"
+    bodies: 2
+    partner_types:
+      - "woman"
+    contact_verbs:
+      - "vulvas pressed together"
+      - "pelvises grinding flush"
+    motion_verbs:
+      - "circular grinding"
+      - "synchronized hip rock"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad:
+      - "standing scissoring"
+      - "extra arms"
+    status: untested
+
+  mf_anal:
+    id: mf_anal
+    aliases:
+      - "anal"
+      - "anal doggy"
+      - "anal penetration"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "inside her anus"
+      - "hips flush against her buttocks"
+    motion_verbs:
+      - "slow careful thrust"
+      - "steady deep strokes"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad:
+      - "anal missionary"
+    status: untested
+
+  bondage:
+    id: bondage
+    aliases:
+      - "restraint"
+      - "tied"
+      - "strapped"
+      - "cuffs"
+      - "ropes"
+    bodies: 2
+    partner_types:
+      - "man"
+      - "woman"
+    contact_verbs:
+      - "wrists bound"
+      - "restraints secured to frame"
+    motion_verbs:
+      - "pulling against restraints"
+      - "arching against straps"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "restraints"
+      - "props"
+    known_bad:
+      - "pet-position native"
+    status: untested
+
+  dance:
+    id: dance
+    aliases:
+      - "twerk"
+      - "hip sway"
+      - "jiggle"
+      - "choreography"
+    bodies: 1
+    partner_types:
+      - "none"
+    contact_verbs: []
+    motion_verbs:
+      - "rhythmic hip drops"
+      - "pelvic rotations"
+      - "buttocks bouncing"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad:
+      - "twerk without lora"
+    status: untested
+
+  tease:
+    id: tease
+    aliases:
+      - "strip"
+      - "striptease"
+      - "slow peel"
+    bodies: 1
+    partner_types:
+      - "none"
+      - "man"
+    contact_verbs: []
+    motion_verbs:
+      - "sliding fabric down shoulders"
+      - "stepping out of garment"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "garments"
+    known_bad: []
+    status: untested
+
+  threesome:
+    id: threesome
+    aliases:
+      - "three-way"
+      - "menage a trois"
+      - "threesome sex"
+    bodies: 3
+    partner_types:
+      - "man"
+      - "woman"
+    contact_verbs:
+      - "bodies pressed together"
+      - "surrounded by partners"
+    motion_verbs:
+      - "synchronized movement"
+      - "alternating strokes"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad: []
+    status: untested
+
+  mmf:
+    id: mmf
+    aliases:
+      - "m/m/f"
+      - "m+m+f"
+      - "two men one woman"
+    bodies: 3
+    partner_types:
+      - "man"
+      - "man"
+    contact_verbs:
+      - "between both men"
+      - "flanked by both partners"
+    motion_verbs:
+      - "coordinated thrusting"
+      - "double attention"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad: []
+    status: untested
+
+  ffm:
+    id: ffm
+    aliases:
+      - "f/f/m"
+      - "f+f+m"
+      - "two women one man"
+    bodies: 3
+    partner_types:
+      - "woman"
+      - "man"
+    contact_verbs:
+      - "both women together with him"
+      - "caressing each other beside him"
+    motion_verbs:
+      - "shared intimacy"
+      - "synchronized motion"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad: []
+    status: untested
+
+  mmf_double_blowjob:
+    id: mmf_double_blowjob
+    aliases:
+      - "double blowjob"
+      - "two cock blowjob"
+      - "sucking both"
+    bodies: 3
+    partner_types:
+      - "man"
+      - "man"
+    contact_verbs:
+      - "both shafts in and around her mouth"
+      - "alternating between both lengths"
+    motion_verbs:
+      - "sliding her head between both shafts"
+      - "licking and sucking each in turn"
+    default_camera: third-person
+    still_read_must_keeps: []
+    known_bad: []
+    status: untested
+
+
+  # Package 2 (R15-R23, t126u-t127u). Untested on the current lock. Merged in live schema
+  # (mapping keyed by id; still_read_must_keeps; default_camera hyphenated to match existing rows).
+  male_solo:
+    id: male_solo
+    aliases:
+      - "jerk off"
+      - "jerking off"
+      - "jack off"
+      - "edging"
+      - "male solo"
+      - "solo guy"
+    bodies: 1
+    partner_types:
+      - "none"
+    performer: man
+    finish_variants:
+      - "ruined_orgasm"
+    contact_verbs:
+      - "strokes himself"
+      - "grips his shaft"
+    motion_verbs:
+      - "slow strokes"
+      - "speeds up"
+      - "edges and stops"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "his hand"
+      - "his body"
+    known_bad: []
+    status: untested
+
+  standing_mf:
+    id: standing_mf
+    aliases:
+      - "standing sex"
+      - "standing fuck"
+      - "standing missionary"
+      - "standing doggy"
+    bodies: 2
+    partner_types:
+      - "man"
+    not_carried: 1
+    contact_verbs:
+      - "thrusts into her"
+      - "presses against her"
+    motion_verbs:
+      - "hip thrusts"
+      - "both feet planted"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "both standing"
+      - "feet on the floor"
+    known_bad:
+      - "carried sex is not this act"
+    status: untested
+
+  airplane:
+    id: airplane
+    aliases:
+      - "airplane position"
+      - "airplane"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "thrusts into her"
+    motion_verbs:
+      - "hip thrusts"
+      - "holds her thighs"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "her legs held up and out"
+    known_bad: []
+    status: untested
+
+  piledriver:
+    id: piledriver
+    aliases:
+      - "piledriver"
+      - "pile driver"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "drives down into her"
+    motion_verbs:
+      - "downward thrusts"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "her hips raised over her shoulders"
+    known_bad: []
+    status: untested

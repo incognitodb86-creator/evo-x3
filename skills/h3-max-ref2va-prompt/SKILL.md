@@ -33,9 +33,9 @@ restate it here.
   motion/contact/anatomy, the response dial, camera line, positives-only, plain wording, sound nouns, contradiction
   phrases, label discipline, one pose per cell, the pre-queue diff gate, LoRA trigger hygiene).
 - **R5, R6, R8-R15** are the paste shape, and this file states their REF2VA reading: §2 below, items 1-8.
-- **The REF2VA checklist is section 5 of `h3-prompting` plus section 5 of this file.** The shared 11 items are not
+- **The REF2VA checklist is section 5 of `h3-prompting` plus section 5 of this file.** The shared 14 items are not
   copied here; R32-R44 is a superset.
-- The rule index is **§7 of `h3-prompting`**.
+- The rule index is **§9 of `h3-prompting`**.
 
 ## 2. REF2VA reading of the paste shape (R5, R6, R8-R15 as they apply here)
 
@@ -45,10 +45,11 @@ restate it here.
 2. **R6 (REF2VA reading of the task type).** `[reference generation]` is the default tag. `[video continuation]` only on
    continued cells (R10). `[keyframe completion]` is a labelled one-axis try. Nothing in our graph emits
    `[video editing]` / `audio reuse` / `audio reference` today (see R33, R34).
-3. **R7 (REF2VA reading of audio).** Plain real-sound cues at the end of `detailed_description`; no
-   `overall_soundscape:` / `non_diegetic_music:` block (R32 names why upstream has them).
-4. **R8/R9 (REF2VA reading).** `[Shot 1]` untimestamped, later `[Shot N] At MM:SS.mmm`; beats total the clip; no word
-   cap (R41 for the provenance of upstream's word range).
+3. **R7 (REF2VA reading of audio).** End each beat with one to three plain sentences of natural
+   diegetic sound (room tone, footsteps, fabric, breath) at the end of `detailed_description`; no
+   labeled soundscape or non-diegetic-music header and no cartoon sound effects (R32 names why
+   upstream has those headers; TenStrip HF 10Eros-Max discussion #77).
+4. **R8/R9 (REF2VA reading).** Timing: follow h3-prompting R8 (shot headers and timing); length follows h3-prompting R9 (R41 for the provenance of upstream's word range).
 5. **R10 (REF2VA reading).** A continued cell opens exactly `[video continuation] Continuing seamlessly from <Video 1>.`
    On this box that chain mechanism is latent-tail continuation (`comm.py build()`:
    `MiniMaxH3GuidedContinuationWindow` + `MiniMaxH3LatentTailGuide` + `MiniMaxH3AppendContinuation`); the phrase is a
@@ -62,12 +63,14 @@ restate it here.
 
 ## 3. REF2VA-specific rules
 
-**R32 - Do not paste the hosted pipeline's audio fields.** Upstream's Ref2VA format has six sections because two of
-them (`overall_soundscape:`, `non_diegetic_music:`) are the output of **H3-Context-IR**, a hosted preprocessing
+**R32 - Do not paste the hosted pipeline's audio fields.** Upstream's Ref2VA format has six sections because two
+labeled audio headers (a soundscape field and a non-diegetic-music field) are the output of **H3-Context-IR**, a hosted preprocessing
 system explicitly *not* in the open-source release (MiniMax-H3 README, "H3-Context-IR ... is not included in this
 open-source release"). We run H3-Base directly, so the paste keeps the five local sections and R7's plain audio cues:
-shot-synchronised real sounds belong in `detailed_description` (upstream's own example puts "a canned audience laugh
-begins immediately after the line" in the shot, not in an audio block). Measured reason for the ban: TenStrip (model
+end each beat with one to three plain sentences of natural diegetic sound (room tone, footsteps, fabric, breath) in
+`detailed_description` (upstream's own example puts "a canned audience laugh
+begins immediately after the line" in the shot, not in an audio block); no labeled header and no cartoon sound effects.
+Measured reason for the ban: TenStrip (model
 owner, HF 10Eros-Max discussion #77) - "overall_soundcape ... is actually the easiest way to introduce extremely bad
 audio ... should be deleted."
 
@@ -128,12 +131,12 @@ dialogue words out of the sound vocabulary. No rule of ours bans speech, so the 
 this lane" (removed from R26 on 2026-11-03) is a brief lock stated as a model fact, and is not a reason. When speech
 is asked for, write it as:
 
-- `<Subject N> (S1) ... says, <d>[English] exact words</d>` - the subject label keeps identity, `(S1)` is the speaker;
-  IDs are assigned once in the order of the first real vocal events and reused everywhere; joint speech is `(S1,S2)`;
-  people who never vocalise get no ID (base-en §4.4, ref-en §5.4).
+- `<Subject N> (S1) says in <Actor>'s exact <Character> voice with signature vocal timbre, <short concrete voice description>: <d>[English] words</d>` - the subject label keeps identity, `(S1)` is the speaker;
+  IDs are assigned once in the order of the first real vocal events and reused everywhere; joint speech is `(S1,S2)` (see h3-prompting Dialogue);
+  people who never vocalise get no ID (official H3 guide section 4.4; base-en §4.4, ref-en §5.4). Next to the voice name, add a short concrete description of pitch, texture and pace; keep mood words that raise pitch (like `amused, teasing half-smile`) away from the speaking line. Pair each `<d>` line with visible mouth or body action outside `<d>` per h3-prompting Dialogue.
 - Voice-over: the exact phrase `says in an off-screen voiceover`, and immediately after the `<d>` block state that the
   on-screen character's lips remain completely closed (base-en §4.4).
-- Inside `<d>`: only the language tag and the words, verbatim, in their original language; `[unclear]` for
+- Inside `<d>`: only the `[English]` tag and the verbatim spoken words, in their original language (official H3 guide section 4.4); `[unclear]` for
   unintelligible spans, never a guess; punctuation limited to `, . ? !`; no tildes, emoji, bullets, repeated or
   decorative punctuation; end statements, questions and exclamations with `. ? !` before `</d>` (ref-en §5.4).
 - When only a timbre is referenced (`<Audio N>` in the audio arm), do not carry the reference audio's words into the
@@ -205,7 +208,7 @@ here). Both gates pass before a cell is staged; a gate failure is fixed in the p
 subject_definitions:
 <Picture 1> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 1>
 <Picture 1> is the start frame of [Shot 1] for setting, light and framing
-<Subject 1> is the woman in <Picture 1>: <face/hair per the records>, a fictional adult, canon age 28
+<Subject 1> is the woman in <Picture 1>: <face/hair per the records>, a fictional adult
 <Subject 2> is <partner/garment/prop per the records> ...
 summary:
 [reference generation] <who, where, the entry transition, one consent clause when Derek states it (R21)>
@@ -214,9 +217,11 @@ retention_analysis:
 <Picture 1> ([Shot 1] scene/identity anchor): fully_preserved - setting, light, framing
 <the clothing clause line, R12, when wardrobe comes off>
 detailed_description:
-<one or two style sentences, R39> <camera/lens/light sentences, R23>
-[Shot 1] 00:00.000 - 00:0X.000 <the get-into-position clause (R16), PRIMARY MOTION with tempo (R17), contact
-geometry (R19), the response dial Derek named (R21), garment end states (R14), the shot alive on the last frame>
+<one or two style sentences, R39>
+[Shot 1] <camera/lens/light sentences, R23; follow h3-prompting R8 (shot headers and timing)> the
+get-into-position clause (R16), PRIMARY MOTION with tempo (R17), contact geometry (R19), weight/load/angles (R23a/R23b), the response dial
+Derek named (R21), garment end states (R14), the shot alive on the last frame
+[Shot 2] At 00:0X.000, the camera cuts to ... <only when the clip has more than one shot: later shots open with [Shot N] At MM:SS.mmm, the camera cuts to ... only at a real cut (follow h3-prompting R8)>
 <one or two plain real-sound sentences in the order the sounds happen, R7>
 continuation:
 [video continuation] Continuing seamlessly from <Video 1>.   (R10 - continued cells only)
@@ -243,3 +248,65 @@ and R11's clauses are copied verbatim from there.
 ## Sibling: parody / INDEX identity
 Named INDEX+RefMod parody runs: load `h3-parody-identity` (name + description + RefMod). Do not fold those rules into this file.
 
+## 8. Pre-write planner card (JSON; not pasted)
+
+Fill this card silently before writing a REF2VA cell. Convert it into the normal five local sections (R5) and the paste skeleton in section 6. Do not paste the JSON. Do not invent a new R-number; this section only organizes existing craft (R7, R9, R14, R16, R17, R32, R37) ahead of the section 5 gate.
+
+Allowed length pairs at 24 fps: duration_s 5|8|10 with frames 124|192|243. Cap one shot at 243f unless Derek named multi-beat / continuation. EXAMPLE_ values below are placeholders only.
+
+```json
+{
+  "duration_s": 5,
+  "frames": 124,
+  "primary_motion": "EXAMPLE_rear_thrust",
+  "tempo": "EXAMPLE_one_cycle_per_half_second",
+  "dialogue": {
+    "enabled": false,
+    "lines": [
+      "EXAMPLE_spoken_words_only_if_enabled"
+    ]
+  },
+  "opening_pose_matches_reference": true,
+  "get_into_position_beat": "EXAMPLE_stand_turn_settle_or_null_if_Cond_matches",
+  "face_anchor_per_phase": [
+    "EXAMPLE_phase1_same_face_toward_lens",
+    "EXAMPLE_phase2_same_face_toward_lens"
+  ],
+  "garments": [
+    {
+      "item": "EXAMPLE_silver_mesh_top",
+      "action": "EXAMPLE_peels_off",
+      "end_state": "EXAMPLE_on_floor_beside_boots",
+      "stays": true
+    }
+  ],
+  "continuation": {
+    "enabled": false,
+    "picks_up_from": "EXAMPLE_prior_beat_end_state_or_null"
+  },
+  "ambient_cues": [
+    "EXAMPLE_room_tone",
+    "EXAMPLE_fabric_rustle",
+    "EXAMPLE_soft_breath"
+  ],
+  "self_check": {
+    "no_labeled_soundscape_header": true,
+    "no_non_diegetic_music_header": true,
+    "five_local_sections_only": true,
+    "no_reflora": true,
+    "no_two_pass": true,
+    "no_sampler_steps_cfg_resolution_in_paste": true,
+    "no_350_500_word_cap": true,
+    "dialogue_spoken_words_only": true,
+    "continuation_does_not_restart": true,
+    "adults_18_plus_only": true
+  }
+}
+```
+
+Hard bans (fail closed; cite live rules):
+- Never emit a labeled soundscape or non-diegetic-music header (R7, R32; TenStrip #77).
+- No hosted six-section dump; five local sections only (R5).
+- No RefLoRA, no 2-pass, no sampler/CFG/steps/resolution in the paste; voice binding via the RefMod audio and <Audio 1> / <Subject 1> labels is allowed (R33).
+- No 350-500 word cap; length follows h3-prompting R9 (no word floor or quota, staying under the encoder limit; Derek).
+- Dialogue = spoken words only inside lane markup (R37). Continuations never restart the scene (R10). Adults 18+ only.
