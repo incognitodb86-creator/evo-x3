@@ -45,6 +45,9 @@ def build(tpl, refmod=None, lora=None, strength=0.7, **vals):
         if node not in g or field not in g[node].get("inputs", {}):
             raise ValueError("template has no %s.%s" % (node, field))
         g[node]["inputs"][field] = vals[key]
+    if "rewriter" in g and "prompt" in g["rewriter"].get("inputs", {}) and vals.get("prompt") is not None:
+        g["rewriter"]["inputs"]["prompt"] = vals["prompt"]
+        g["c0"]["inputs"]["prompt"] = ["rewriter", 0]
     if refmod is not None:
         node, field = REFMOD_FIELD
         if node not in g or field not in g[node].get("inputs", {}):
