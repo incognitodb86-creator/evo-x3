@@ -2555,7 +2555,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     text_body = _D_RE.sub("", " ".join(rest))
     pt = str(cast.get("partner_type") or "man").lower()
     b_kind = cast.get("beat_kind", "act")
-    if b_kind in ("dance", "tease", "transformation"):
+    if b_kind in ("dance", "tease", "transformation", "talk"):
         report["act_written"] = False
     else:
         report["act_written"] = bool(state.get("act") or _ORAL_ACT_RE.search(text_body))
@@ -3564,7 +3564,9 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
 
     b_kind = beat_kind or ("undress" if position == "undress" else (
         "dance" if act_id in ("dance", "twerk") else (
-            "tease" if act_id in ("tease", "strip") else "act"
+            "tease" if act_id in ("tease", "strip") else (
+                "talk" if act_id == "talk" else "act"
+            )
         )
     ))
 
@@ -3597,6 +3599,23 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         pt = str(brief["partner_type"]).lower()
     if brief.get("body_count") is not None and not is_3p:
         req_bodies = int(brief["body_count"])
+    # Derrick t204u: talk-only spoof/parody. Bodies follow the still and ask (1-3).
+    # A 1-body talk clip is partner_type none so finalize does not invent S2.
+    if act_id == "talk":
+        still_n = still_people if still_people is not None else 1
+        ask_txt = ask or ""
+        if (_THREE_BODY_ASK_RE.search(ask_txt)
+                or re.search(r"\(S3\)|<Subject 3>", ask_txt, re.I)):
+            req_bodies = 3
+        elif (re.search(r"\(S2\)|<Subject 2>", ask_txt, re.I)
+              or re.search(r"(?i)\bfuta(?:nari)?s?\b", ask_txt)
+              or still_n >= 2):
+            req_bodies = min(3, max(2, still_n))
+        else:
+            req_bodies = min(3, max(1, still_n))
+        is_3p = req_bodies >= 3
+        if req_bodies == 1:
+            pt = "none"
     ck_brief = brief.get("camera_kind")
     if ck_brief and ck_brief not in ("third_person", "third-person"):
         c_kind = _CAM_KIND_MAP.get(ck_brief, ck_brief)
@@ -3817,6 +3836,13 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
             primary_motion="",
             contact="",
             summary_act="<Subject 1> takes off her clothes.")
+    elif act_id == "talk":
+        # Derrick t204u: talk-only. No contact or PRIMARY MOTION, and none is injected.
+        base.update(position_check=r"$^",
+            move_check=r"$^",
+            primary_motion="",
+            contact="",
+            summary_act=f"<Subject 1> talks on {surface}.")
     else:
         raise WriterNotReady(f"NOT_READY: unknown act {position!r}")
 
