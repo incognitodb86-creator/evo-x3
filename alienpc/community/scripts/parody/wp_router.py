@@ -5,7 +5,7 @@ route_mode(ask, position, still_read, cfg, continued) -> {act_id, position, mode
   else a still-pose guess; every fallback is logged as a warning and never blocks.
 - mode: one base block per clip (talk, strip, transition, oral, partner, solo, sex) keyed off the act + ask keywords.
 - overlays: cinematic, gonzo, pov, edge, forced_orgasm, defeat, cnc, taboo_role, spoof, restraints, toy, threesome,
-  continued. Overlays add notes to the base card and turn on their lint rules; they are never new acts.
+  continued, nonhuman, scale. Overlays add notes to the base card and turn on their lint rules; they are never new acts.
 """
 from __future__ import annotations
 
@@ -27,6 +27,13 @@ OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every 
     ("spoof", r"\bspoof\b|\bparody\b|infomercial|\bnoir\b|space-captain|sitcom"),
     ("restraints", r"\brestrain\w*|\btied\b|\bcuff\w*|\bbound\b|\bropes?\b|strapped"),
     ("toy", r"\btoys?\b|vibrator|dildo|\bplug\b|\bwand\b"),
+    # lost-features audit (Derrick, Prompt maker t243s811): creature partners and size play, no literal 'non-human' needed
+    ("nonhuman", br._CREATURE_RE.pattern.replace("(?i)", "")),
+    # Derrick t1454u/t1455u: sleep, hypnosis/mind-control and sedative themes are agreed adult roleplay: one consent line or wink in clip 1 (t1457u)
+    ("consent_setup", r"\basleep\b|\bsleep(?:ing|s)?\b|\bhypno\w*|mind[- ]?control\w*|\btrance\b|\bsedat\w*|\bdrugged\b|\bmdma\b"),
+    ("scale", r"\btiny\b|\bfair(?:y|ies)\b|\bpixie|\bminiature\b|\bgiant(?:ess)?\b|\boversized\b|"
+              r"\b(?:massive|huge|enormous) (?:cock|dick|shaft|size)\b|size difference|\bcarr(?:y|ies|ied|ying)\b|"
+              r"held in (?:the )?air|\blifts? (?:her (?:up|off|into)|the tiny)\b"),
 ]
 TRANSITION_RE = re.compile(r"(?i)position change|\bswitch(?:es)? to\b|turns her over|\bfrom (?:missionary|doggy|cowgirl|spooning)\b[^.]{0,30}\bto\b|rolls her (?:over|onto)")
 STRIP_RE = re.compile(r"(?i)\bstrip\w*|\bundress\w*|slow reveal|\bpeels?\b")
