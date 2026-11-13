@@ -412,4 +412,11 @@ def test_pm_acc4_make_cast_handjob_template():
     assert not (rep.get("not_ready") or "").lower().startswith("not_ready: unknown act")
     text = prompt if isinstance(prompt, str) else str(prompt)
     assert "handjob" in text.lower() or "fist" in text.lower()
+    # W5 must not block a handjob even if a leftover garment is on and the writer said "sheathed".
+    raw_w5 = ("detailed_description:\n[Shot 1] Held, medium shot. At first, (S1) stands on the sand. "
+              "Her white bikini bottom stays on her body. Her fist wraps around his penis and he stays fully sheathed "
+              "as she strokes the shaft.\n\ndiegetic sound:\nsoft breath.")
+    prompt2, rep2 = br.finalize_writer_prompt(raw_w5, c, strict=False)
+    msg = (rep2.get("not_ready") or "").lower()
+    assert "w5" not in msg, rep2.get("not_ready")
 
