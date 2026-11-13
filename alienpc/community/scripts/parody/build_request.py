@@ -753,7 +753,11 @@ _CAMERA_STATIC_RE = re.compile(r"\b(locked|locked-off|static|holds? (?:a |the )?
                                re.IGNORECASE)
 _STANDING_RE = re.compile(r"\b(stand|stands|standing)\b", re.IGNORECASE)
 _TEMPO_RE = re.compile(r"\b(per second|every (?:half )?second|cycle|bpm|tempo|strokes? a second|beats? a second)\b", re.IGNORECASE)
-_CONTACT_RE = re.compile(r"\b(inside her|fully sheathed|hips flush|flush against|buried in her|deep in her|sheathed)\b", re.IGNORECASE)
+_CONTACT_RE = re.compile(
+    r"(?=.*\b(?:penis|vagina|anus|mouth|vulva|vulvas|clitoris|clit|shaft|lips|fist)\b)"
+    r"(?=.*\b(?:inside her|inside her mouth|fully sheathed|hips flush|flush against|buried in her|deep in her|sheathed|vulva pressed to vulva|wrapped around his (?:penis|shaft))\b)",
+    re.IGNORECASE | re.DOTALL,
+)
 _CAMERA_SENTENCE_RE = re.compile(r"^\s*(?:\[Shot \d+\]\s*)?(?:the |a |one )?(?:camera|lens|\d{2,3}\s?mm|shot on|framing|(?:held,?\s+)?(?:medium|full|wide|tight)(?:[- ](?:full|wide|close))?[- ]shot|(?:medium )?close-up|low[- ]angle|high[- ]angle|eye[- ]level|static medium shot|the held medium shot)\b", re.I)
 _LABELS = [
     (re.compile(r"(?<![(<\w])S1(?![)\w])"), "(S1)"),

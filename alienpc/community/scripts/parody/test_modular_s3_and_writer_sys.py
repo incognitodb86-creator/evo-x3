@@ -465,3 +465,19 @@ def test_flash_issues_1_3_4():
     assert "(S1) says in a warm voice" in res[0]
     assert "(S2) says" not in res[0]
 
+
+def test_part4_pixlstash_stills_vault_and_voice_ref_attach():
+    import submit_parody_run as spr
+    vaults = [str(p).lower() for p in spr._PIXLSTASH_VAULTS]
+    assert any("approved_characters\\vault.db" in v for v in vaults)
+    assert any("5slock\\libraries\\vault.db" in v for v in vaults)
+    assert vaults.index(next(v for v in vaults if "approved_characters\\vault.db" in v)) < vaults.index(
+        next(v for v in vaults if "5slock\\libraries\\vault.db" in v)
+    )
+
+    res = spr.resolve_writer_refmods(character="FCSydny")
+    stems = res.get("stems") or []
+    assert "minimaxh3_oc_poolclub_v1_refmod_audio" in stems
+    assert "minimaxh3_oc_poolclub_v1_refmod_visual" in stems
+    assert spr._writer_refmods_ok({"refmods": {"inputs": {"mod_1": "some_non_oc_refmod"}}}) == []
+
