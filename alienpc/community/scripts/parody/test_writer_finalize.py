@@ -1135,8 +1135,8 @@ def test_moans_in_d_and_no_speech_words_are_not_ready():
 def test_oc_stock_dirty_talk_pair_is_not_ready_but_not_on_a_real_person_path():
     stock = HDR + ("He thrusts deep. (S1) says in a voice: <d>[English] Fuck me harder.</d> "
                    "(S2) says in a voice: <d>[English] Take it. Don't you stop.</d> Her thighs shake.")
-    _, rs = br.finalize_writer_prompt(stock, _cast())  # Render cleanup step 4 (Max Architect 3, 2026-11-13, Derrick t1355): style lint is a warning, not a stop
-    assert any(w.startswith("D4 stock dirty-talk") for w in rs["warnings"])
+    with pytest.raises(br.WriterPromptError, match="D4 stock dirty-talk"):
+        br.finalize_writer_prompt(stock, _cast())
     _, rep = br.finalize_writer_prompt(stock, _cast(), strict=False)
     assert "Fuck me harder." in _ and "Take it. Don't you stop." in _  # never rewritten
     _, rp = br.finalize_writer_prompt(stock, _cast(index_voice=True), strict=False)
@@ -1171,8 +1171,8 @@ def test_cowgirl_only_her_motion_is_not_ready_and_builder_writes_no_thrust():
     assert c["primary_motion"] == "" and "blowjob" not in c["summary_act"]
     raw = COW_HDR + ("PRIMARY MOTION - she rises and sinks on his cock about once per second, full depth. "
                      "Her moans break on each drop and the bed creaks.")
-    _, rr = br.finalize_writer_prompt(raw, c)  # Render cleanup step 4 (Max Architect 3, 2026-11-13, Derrick t1355): style lint is a warning, not a stop
-    assert any(w.startswith("R1 cowgirl") for w in rr["warnings"])
+    with pytest.raises(br.WriterPromptError, match="R1 cowgirl"):
+        br.finalize_writer_prompt(raw, c)
     p, rep = br.finalize_writer_prompt(raw, c, strict=False)
     d = desc_of(p)
     assert "his pelvis" not in d and "his hips lift" not in d  # the builder never inserts his thrust
