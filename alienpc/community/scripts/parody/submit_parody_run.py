@@ -1218,6 +1218,8 @@ def submit_writer_run(
                 mk["partner_type"] = partner_type
             if partner_type2:  # Max Architect 3, Derrick t1437s5374: MMF third person faceless (writer-run --partner-type2)
                 mk["partner_type2"] = partner_type2
+            if (cast_overrides or {}).get("s3_still"):  # (5) Derrick t247s837: S3 with a still keeps face (via its Picture) and voice
+                mk["partner_type2"] = "still"
             ck = brief.get("camera_kind")
             if ck and ck not in ("third_person", "third-person"):
                 mk["camera_kind"] = br._CAM_KIND_MAP.get(ck, ck)
@@ -1348,7 +1350,7 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--position", default="")
     ap.add_argument("--still", default=None)
     ap.add_argument("--character", default=None)
-    ap.add_argument("--partner-type2", default=None, choices=["man", "woman", "none", "non-human", "faceless"])
+    ap.add_argument("--partner-type2", default=None, choices=["man", "woman", "none", "non-human", "faceless", "still"])
     # Max Architect 3, Derrick t1440 (MMF S3): a generated S3 look, an S3 reference still, an optional frame cap for VRAM
     ap.add_argument("--s3-in-frame", action="store_true", help="continued clip: S3 is already in the inherited frame (no 'enters')")
     ap.add_argument("--s3-look", default=None, help="S3 description, e.g. 'an adult man, thirty years of age, ...'")
@@ -1431,7 +1433,7 @@ def main(argv=None) -> int:
     parser.add_argument("--description3", help="Third subject biometric/wardrobe description")
     parser.add_argument("--dialogue3", help="Third subject spoken words only")
     parser.add_argument("--pronoun3", default="she", choices=["she", "he", "they"])
-    parser.add_argument("--partner-type2", choices=["man", "woman", "none", "non-human", "faceless"],
+    parser.add_argument("--partner-type2", choices=["man", "woman", "none", "non-human", "faceless", "still"],
                         help="Partner type for S3")
     parser.add_argument("--ambience", help="Soundscape ambience phrase (default: quiet room ambience, soft natural room tone)")
     parser.add_argument("--slug", help="Optional run slug")
