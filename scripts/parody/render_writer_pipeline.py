@@ -359,6 +359,15 @@ OVERLAY_NOTES: Dict[str, str] = {
     "toy": "Toy: define it once (type, size, who controls it); solo, the toy is the PRIMARY MOTION with tempo; with a partner, penetration is the PRIMARY MOTION and the toy rides in the follow-through; insertion or removal is one move each with where it rests.",
     "threesome": "Three adults at most: define (S3) (look, clothes, entrance), give each hand an owner such as (S3)'s left hand, at most two lines per speaker.",
     "continued": "Continued clip: open from the previous end state; never restate a finished action or reset a garment.",
+    "nonhuman": ("Non-human partner: (S2) is a creature (no RefMod); describe his look once in the card, keep it the same all clip, "
+                 "never call him a man. Still nouns win on costume, place, roles, wardrobe, races and scale."),
+    "consent_setup": ("Agreed roleplay (porn-style, Derrick t1457u): in the opening clip, before any sex, give one quick consent beat: "
+                      "a short playful line from her (e.g. <d>Wake me up like that tonight.</d>) or a nod or wink before the hypnosis gag. "
+                      "Then the rest plays freely as the game they agreed to; a 'drugged' theme is a choice both made together."),
+    "scale": ("Size play: fix one measurable scale anchor in the card (e.g. 'she is no taller than his forearm') and keep it all clip. "
+              "A tiny or fairy woman is an adult woman at miniature scale: write her adult face, full adult breasts, wide adult hips "
+              "and an adult woman's proportions. Oversized anatomy is named once, with a slow entry and a firm grip. A carry or "
+              "held-in-air pose has a measurable hold (his hands locked under her thighs) and her weight on his arms."),
 }
 
 
@@ -737,6 +746,8 @@ def make_cast(still_read: Dict[str, Any], position: str, ask: str) -> Tuple[Dict
     mk = {}
     if brief.get("partner_type"):
         mk["partner_type"] = brief["partner_type"]
+    if br._CREATURE_RE.search(ask or ""):
+        mk["partner_type"] = "non-human"  # nonhuman overlay (G1)
     if partner_type2_for(position, ask):
         mk["partner_type2"] = partner_type2_for(position, ask)
     ck = brief.get("camera_kind")
@@ -914,6 +925,10 @@ def chain_start_still(prev_run: Path, still: str, run_dir: Path, log) -> str:
 
 
 # ---- one clip -------------------------------------------------------------------------------------------------------
+class _Stop(Exception):
+    """A hard stop that ends the clip as NOT_READY with result['not_ready_reason'] already set."""
+
+
 def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     ov = overrides or {}
     t_start = time.time()
@@ -937,6 +952,11 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
     recent_path = state_dir / "recent_outputs.jsonl"
     cloned_path = state_dir / "cloned_phrases.txt"
     try:
+        # lost-features audit (Derrick t243s811): a youth hint in the ask is a hard stop before any writer call
+        _yh = wp_lint.YOUTH_RE.search(ask or "")
+        if _yh:
+            result.update(status="NOT_READY", not_ready_reason=f"youth hint in the ask: '{_yh.group(0)}' (every person is an adult, 18+)")
+            raise _Stop()
         # scene / chain
         scene_id = job.get("scene")
         prev_run = Path(job["continue"]) if job.get("continue") else None
@@ -1034,7 +1054,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                             "mode": "still" if s3_still else ("generated" if s3_look else "faceless_default")}
             log("s3_mode", dict(result["s3"], run=run_id))
         _bx: List[str] = (["--s3-look", s3_look] if s3_look else []) + (["--partner2-still", s3_still] if s3_still else []) + \
-            (["--frames", str(int(job["frames"]))] if job.get("frames") else [])
+            (["--frames", str(int(job["frames"]))] if job.get("frames") else []) + \
+            (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + \
+            (["--shots", "multi"] if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" else [])
         if card is None:
             result["warnings"].append("beat_card_skipped")
         else:
@@ -1197,6 +1219,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                          "s3_look": s3_look, "s3_still": s3_still}
                 wp_state.append_scene(sp, scene_id, entry)
                 result["scene_state"] = str(sp)
+    except _Stop:
+        log("hard_stop", {"run": run_id, "reason": result.get("not_ready_reason")})
     except WriterDown as e:
         result.update(status="writer_down", error=str(e), llm_calls=client.calls)
         log("writer_down", {"run": run_id, "error": str(e)})
@@ -1234,6 +1258,7 @@ def main(argv=None) -> int:
     ap.add_argument("--continue", dest="cont", help="previous run dir this clip continues")
     ap.add_argument("--partner2-still", help="MMF: (S3) reference still (ComfyUI input path, e.g. community/x.jpg)")
     ap.add_argument("--frames", type=int, help="optional frame cap for VRAM (two reference stills)")
+    ap.add_argument("--shots", choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
     ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
     ap.add_argument("--config", default=str(CONFIG_PATH))
     ap.add_argument("--sampler-arm", help="setup A/B only")
@@ -1256,7 +1281,7 @@ def main(argv=None) -> int:
             return 3
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
                      "character": a.character, "scene": a.scene, "continue": a.cont,
-                     "partner2_still": a.partner2_still, "frames": a.frames})
+                     "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots})
     results = []
     for job in jobs:  # one failing clip never blocks the next
         r = run_clip(job, cfg, log, ov)

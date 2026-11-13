@@ -304,6 +304,22 @@ MOUTH_CONTACT_RE = re.compile(r"(?i)\b(?:inside her mouth|into her mouth|in her 
                               r"against her lips)\b|\blips (?:close|wrap|seal|part)\w* (?:around|over)")
 SLAP_RE = re.compile(r"(?i)\b(?:slap\w*|smack\w*)\b")  # acceptance-3 (m19): soft 'skin on skin' sliding is not slap foley
 TAG_WORDS_RE = re.compile(r"(?i)\b(?:cinematic|beautiful)\b")
+# lost-features audit (Derrick t243s811): youth hint = hard stop; tiny/fairy = adult proportions stated (hard)
+YOUTH_RE = re.compile(r"(?i)\b(?:child\w*|kids?|teen\w*|tween|underage|under-age|minor|loli\w*|shota\w*|schoolgirl|little girl|"
+                      r"pre-?pubescent|pre-?teen|young-looking|baby-?faced|juvenile|jailbait|barely legal|flat-chested girl)\b")
+CONSENT_RE = re.compile(r"(?i)\b(?:nods?|nodding|winks?|winking)\b|<d>[^<]*\b(?:yes|yeah|okay|ok|deal|tonight|wake me|do it|"
+                        r"i want|let's play|our game|you promised|go ahead|put me under|i'm ready)\b[^<]*</d>")
+SEX_START_RE = re.compile(r"(?i)\b(?:enters her|slides into her|pushes into her|sinks (?:onto|down on) him|inside her|takes him into her mouth|"
+                          r"lips (?:close|wrap) (?:around|over) (?:him|the)|thrusts?|grinds? (?:on|against) him|penetrat\w*)\b")
+TINY_RE = re.compile(r"(?i)\b(?:tiny|fair(?:y|ies)|pixie\w*|miniature)\b")
+ADULT_SCALE_PARTS = [
+    ("face", re.compile(r"(?i)\badult(?:'s)? (?:woman's )?face\b|\b(?:her|a) (?:\w+ )?adult face\b")),
+    ("breasts", re.compile(r"(?i)\badult breasts\b|\b(?:full|heavy|round) adult breasts\b")),
+    ("hips", re.compile(r"(?i)\badult hips\b|\b(?:wide|curved|full) adult hips\b")),
+    ("proportions", re.compile(r"(?i)\badult(?: woman's)? (?:proportions|body|figure)\b")),
+]
+SCALE_ANCHOR_RE = re.compile(r"(?i)\bno (?:taller|bigger|larger) than\b|\b(?:the size of|fits in|in the palm of|as tall as|"
+                             r"reaches (?:his|the))\b|\b\d+ (?:inches|centimet(?:er|re)s|cm) tall\b")
 ACT_LANDING = {"missionary": r"(?i)\bmissionary\b|\bon her back\b", "doggy": r"(?i)\bhands and knees\b|\bon all fours\b",
                "cowgirl": r"(?i)\bastride\b|\bstraddl\w*|\bcowgirl\b",
                "standing_mf": r"(?i)\bbends? forward at the hips\b|\bstanding (?:sex|doggy|missionary)\b"}
@@ -477,6 +493,26 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     for name, words in req.items():
         if not any(_has_word(dn, w) for w in words):
             issues.append(_fix("slot_" + name, f"name the still's {name.replace('_', ' ')} ({' / '.join(words[:3])}) in the prose"))
+
+    # -- scale (lost-features audit): tiny/fairy women are adults at miniature scale; any youth hint is a hard stop --
+    yh = YOUTH_RE.search(dd) or YOUTH_RE.search(ctx.get("ask") or "")
+    if yh:
+        issues.append(_fix("youth_hint", f"hard stop: '{yh.group(0)}' reads as a minor; every person is an adult woman or man, 18+"))
+    if "scale" in (ctx.get("overlays") or []) and TINY_RE.search((ctx.get("ask") or "") + " " + dd):
+        miss = [w for w, rx in ADULT_SCALE_PARTS if not rx.search(plain)]
+        if miss:
+            issues.append(_fix("scale_adult", "a tiny or fairy woman is an adult woman at miniature scale: state her adult "
+                                              + ", ".join(miss) + " in the prose (e.g. 'her adult face, full adult breasts, wide adult hips, "
+                                              "an adult woman's proportions at miniature scale')"))
+        if not SCALE_ANCHOR_RE.search(plain):
+            issues.append(_fix("scale_anchor", "fix one measurable scale anchor (e.g. 'no taller than his forearm') and keep it", False, 5))
+
+    # -- consent beat (Derrick t1457u): sleep/hypnosis/sedative roleplay needs one consent line or wink in clip 1 before the sex --
+    if "consent_setup" in (ctx.get("overlays") or []) and "continued" not in (ctx.get("overlays") or []):
+        sx = SEX_START_RE.search(dd)
+        if not CONSENT_RE.search(dd[:sx.start()] if sx else dd):
+            issues.append(_fix("consent_setup", "agreed roleplay: before any sex, add one quick consent beat - a playful line from her "
+                                                "(e.g. 'Wake me up like that tonight.') or a nod or wink before the game starts"))
 
     # -- speech budget + freshness (all) --
     lines = spoken_lines(dd)
