@@ -731,3 +731,18 @@ No H3 skill was changed by me today: `git status` shows the only H3 edits in the
 - Restart for asks 1, 3, 8: run `pi` again (your client), which closes the phone session that is open now; the Ralph loop is a detached PowerShell (PID 19144) that calls the `pi` CLI per pass, so it is not affected. After the restart, the check line is in ask 1.
 
 **Follow-up (15:3x CT, your yes): the dead citation is fixed.** `h3-hc-render/SKILL.md:101` cites `C:/AI/community/scripts/verify_cell.py` now; provenance kept as words, no dead path. One edit reached the loaded copy as well, because `.pi/agent/skills/h3-hc-render` is a junction - that is the point of ask 8. Backup `SKILL.md.bak-20261108-citation`, commit `c339ca7`. Path audit is clean, 91 tests pass. Nothing else in the H3 skills references a missing file. **Open: ask 9 (Gitea 502 - may the container be restarted), and the pi restart for asks 1/3/8.**
+
+**Loop status + plan v4 (13:5x CT, no decision needed from you):** 13 items done, 23 open (13 bins = 262.3 KB of digest left, 81% of the source already read; 10 aggregate items). I split the two aggregate items after measuring their inputs at 48 KB and ~400 KB (over the 24 KB pass rule I proved today) - plan backup `fix_plan.md.bak-20261108-aggregate-split`, running item untouched. The loop has used 10 of its 26 passes, so it will stop at the cap with ~7 aggregate items open; phase 2 is the same launch with `-Max 12`, which finishes `FINDINGS.md` and prints `PLAN_COMPLETE`. No GPU, no renders, no config touched. Still open from me: the pi restart (asks 1/3/8) and ask 9 (Gitea 502).## F6c needs one render GO (2026-11-13 23:5x CT, Forge ralph pass)
+
+F6c's last clause is "one test render through the skill passes with an OBJECTIVE ok line (GPU gate, lock, small frames, non-Sydney)". Everything else about that clause is prepared and measured; the only thing missing is your GO for a GPU window (standing rule: any render needs Derrick's go).
+
+- Gate measured OPEN this pass: `C:\AI\locks\gpu-render.lock` absent; `comfy_ctl.py status` 23:52:27 CT `guard=(0, ['IDLE'])`, no queued job.
+- The one command the skill points at is ready and dry-run clean (no lock/GPU/HTTP):
+  `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_queue.py --run-dir C:\AI\community\runs\f6c_comfy_render_skill_2026-11-13 --frames 124 --size 768x1344 --no-upscale`
+  -> `queue 1 clips, 0 already DONE ok, 1 to render / pos 1 c1_f6c_preflight / dry run: no lock, GPU or HTTP call made`
+- The clip: the existing non-Sydney B2 graph copied from `runs/speed_ab_20261113/arm_C_6step_base/request.api.json` (22 nodes, seed 51083601, 124 f, 768x1344), output prefix redirected into the F6c run dir. Adults guard `guard_reason=(True, '')`. Cost: that same graph rendered 124 f in 122 s on this box today (`runs/speed_ab_20261113/status.log` 22:21:11 CT `OBJECTIVE ok arm_C_6step_base frames=124 size=768x1344 audio=True`); add ~35-40 s for the comfyui_auto wake.
+- Why "small frames" is not smaller here: H3 is on a frame grid ((frames - 5) % 17 == 0), so the smallest legal clip is 22 f, and no 22-frame render exists on this box as precedent. 124 f at 768x1344 is the shape with measured OBJECTIVE-ok history today. Say "go" for that, or name a smaller/other shape and I will use it.
+- The other two F6c clauses were proved this pass: description length 287 chars (<=1024), and `pi --print` on the already-loaded model lists `comfy-render` and does not list `alienpc-local-video-ops` (46 names, saved `notes/_f6c_pi_skill_list.txt`).
+
+Nothing was queued by this pass. No GPU, no lock, no render, no model load.
+
