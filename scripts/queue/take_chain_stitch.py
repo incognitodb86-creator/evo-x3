@@ -78,6 +78,21 @@ def cells(run_dir: Path) -> list[dict]:
     return found
 
 
+def explicit_clips(clip_paths: list[Path]) -> list[dict]:
+    """Ordered explicit mp4 clips for stitching (e.g. prequel clip + existing clip)."""
+    found = []
+    for p in clip_paths:
+        p = Path(p).resolve()
+        if not p.is_file():
+            raise SystemExit(f"MISSING CLIP: {p}")
+        ok = p.parent / "render_ok.json"
+        meta = json.loads(ok.read_text(encoding="utf-8")) if ok.is_file() else {}
+        found.append({"cell": p.stem, "clip": p, "meta": meta})
+    if len(found) < 2:
+        raise SystemExit(f"need at least 2 clips, found {len(found)}")
+    return found
+
+
 def uniform(cs: list[dict]) -> list[dict]:
     provs = [probe(c["clip"]) for c in cs]
     keys = ("codec_name", "width", "height", "r_frame_rate", "pix_fmt", "sample_rate", "channels")
@@ -168,22 +183,64 @@ def grid(cs: list[dict], out_dir: Path, cell_w: int = 300, at: float = 5.0) -> P
     return out_path
 
 
+def stitch_clips(
+    clip_paths: list[Path],
+    out_dir: Path,
+    name: str = "stitched",
+    xfade: float = 0.06,
+    no_key: bool = True,
+    run_dir: Path | None = None,
+) -> Path:
+    """Stitch 2+ explicit mp4 clips with ffprobe uniform proof, video concat demux, and audio crossfade."""
+    cs = explicit_clips(clip_paths)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    provs = uniform(cs)
+    if not no_key and run_dir:
+        write_key(run_dir, cs, out_dir)
+    film = build_film(cs, provs, out_dir, name, xfade)
+    want = sum(p["duration"] for p in provs)
+    got = probe(film)
+    drift = (len(provs) - 1) * xfade
+    ok = abs(got["duration"] - want) < 0.35
+    print(f"PROOF film path={film} dur={got['duration']:.3f} want={want:.3f} delta={got['duration'] - want:+.3f} "
+          f"video={got['width']}x{got['height']}@{got['r_frame_rate']} audio={got['codec_name']} "
+          f"{got['sample_rate']}Hz ch={got['channels']} bytes={film.stat().st_size}")
+    if not ok:
+        raise RuntimeError(f"stitch duration mismatch: got {got['duration']:.3f}, want {want:.3f}")
+    return film
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("run_dir")
+    ap.add_argument("run_dir", nargs="?", default=None, help="run directory containing cell dirs cNN_sSEED")
+    ap.add_argument("--clips", nargs="+", default=None, help="explicit mp4 file paths to stitch in order")
+    ap.add_argument("--out-dir", default=None, help="output directory for stitched film (default: RUN_DIR/_stitch)")
     ap.add_argument("--xfade", type=float, default=0.06, help="audio crossfade seconds per seam (plan default 0.060)")
     ap.add_argument("--name", default="fc_take_chain", help="film filename stem")
     ap.add_argument("--grid", action="store_true", help="also build review_grid.png")
     ap.add_argument("--no-key", action="store_true")
     a = ap.parse_args()
 
-    run_dir = Path(a.run_dir).resolve()
-    if not run_dir.is_dir():
-        raise SystemExit(f"not a directory: {run_dir}")
-    out_dir = run_dir / "_stitch"
-    out_dir.mkdir(exist_ok=True)
+    if a.clips:
+        clips = [Path(p).resolve() for p in a.clips]
+        cs = explicit_clips(clips)
+        if a.out_dir:
+            out_dir = Path(a.out_dir).resolve()
+        elif a.run_dir:
+            out_dir = Path(a.run_dir).resolve() / "_stitch"
+        else:
+            out_dir = clips[0].parent / "_stitch"
+        run_dir = Path(a.run_dir).resolve() if a.run_dir else clips[0].parent
+    else:
+        if not a.run_dir:
+            raise SystemExit("run_dir is required when --clips is not specified")
+        run_dir = Path(a.run_dir).resolve()
+        if not run_dir.is_dir():
+            raise SystemExit(f"not a directory: {run_dir}")
+        out_dir = run_dir / "_stitch"
+        cs = cells(run_dir)
 
-    cs = cells(run_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
     provs = uniform(cs)
     if not a.no_key:
         write_key(run_dir, cs, out_dir)

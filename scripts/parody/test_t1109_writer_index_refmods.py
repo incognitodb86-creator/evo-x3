@@ -209,3 +209,46 @@ def test_t1125_pixlstash_tag_attaches_poolclub(monkeypatch):
     out = s.resolve_writer_refmods(still_image=still)
     assert not out.get("reason"), out
     assert any("poolclub" in x for x in (out.get("stems") or []))
+
+
+def test_argon_fix_writer_defined_missing_person_matches_s2_and_subject_tags():
+    assert br.writer_defined_missing_person("(S2) walks in from the doorway, wearing a dark shirt.", subject=2)
+    assert br.writer_defined_missing_person("<Subject 2> steps in from the left, wearing dark trousers.", subject=2)
+    assert br.writer_defined_missing_person("(S3) walks in from the right, wearing a black jacket.", subject=3)
+    assert br.writer_defined_missing_person("<Subject 3> steps in from behind, tall with dark hair.", subject=3)
+
+
+def test_argon_fix_fcmegan_and_poolblonde_v2_dedup():
+    out_megan = s.resolve_writer_refmods(
+        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        character="FCMegan",
+    )
+    assert not out_megan.get("reason"), out_megan
+    assert any("meganfox" in x for x in (out_megan.get("stems") or []))
+
+    out_megan_names = s.resolve_writer_refmods(
+        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        names=["FCMegan"],
+    )
+    assert not out_megan_names.get("reason"), out_megan_names
+    assert any("meganfox" in x for x in (out_megan_names.get("stems") or []))
+
+    out_megan_path = s.resolve_writer_refmods(
+        still_image=r"C:\Users\derek\5slock\approved_characters\FCMegan\still_01.jpg",
+    )
+    assert not out_megan_path.get("reason"), out_megan_path
+    assert any("meganfox" in x for x in (out_megan_path.get("stems") or []))
+
+    keys = s.installed_oc_refmod_keys()
+    assert "poolblonde" in keys
+    assert all("_v2_" in x for x in keys["poolblonde"])
+    assert not any("_v1_" in x for x in keys["poolblonde"])
+
+    out_blonde = s.resolve_writer_refmods(
+        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        character="poolblonde",
+    )
+    assert not out_blonde.get("reason"), out_blonde
+    assert all("_v2_" in x for x in out_blonde["stems"] if "poolblonde" in x)
+    assert not any("_v1_" in x for x in out_blonde["stems"])
+

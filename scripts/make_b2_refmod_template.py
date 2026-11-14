@@ -32,7 +32,7 @@ import json
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = r"C:\AI\community"  # templates/ and runs/ stay in the community work tree (F6b)
 DEFAULT_SRC = r"C:\AI\community\runs\vf_20261104\vf_b\request.api.json"
 DEFAULT_DST = os.path.join(ROOT, "templates", "b2_refmod.api.json")
 SRC_SHA = "39cba43784e89606"  # the vf_b graph after the item-3c slot fix; the file that rendered ok
