@@ -987,11 +987,16 @@ def test_hook_not_ready_without_still_read(tmp_path):
     assert not (tmp_path / "r1" / "_render_order.json").exists()
 
 
-def test_hook_refuses_real_person_refmods(tmp_path):
+def test_hook_allows_non_oc_refmods(tmp_path):
+    import json as _json
     import submit_parody_run as spr
-    res = spr.submit_writer_run(GOOD, _oc_graph(("minimaxh3_zendaya_v1_refmod",)), tmp_path / "r2", ASK, "missionary",
-                                still_read=POLE_READ, dry_run=True)
-    assert res["status"] == "NOT_READY" and "not an OC RefMod" in res["reason"]
+    g0 = _oc_graph(("minimaxh3_zendaya_v1_refmod",))
+    g0["img_1"]["inputs"]["image"] = "community/generic_stage.png"
+    res = spr.submit_writer_run(GOOD_ASIDE, g0, tmp_path / "r2", ASK, "missionary",
+                                still_read=POLE_READ, still_image="community/generic_stage.png", dry_run=True)
+    assert res["status"] == "READY" and res["dry_run"] and not res["submitted"]
+    g = _json.loads((tmp_path / "r2" / "clip" / "request.api.json").read_text(encoding="utf-8"))
+    assert g["refmods"]["inputs"]["mod_1"] == "minimaxh3_zendaya_v1_refmod"
 
 
 def test_hook_refusal_retry_then_not_ready(tmp_path):
