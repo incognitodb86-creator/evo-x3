@@ -14,7 +14,7 @@ STEPS (one run folder per clip, under C:\AI\community\runs)
 1. Pick the start still yourself from _inputs, stills\approved_characters or stills\comfy_input, and look at it with the read tool.
 2. Write still_read.json in the run folder: {"read": {...}, "source": "<still path>"}.
    Required keys in "read": room, place, surface, bed (true/false), sheets, floor, pose (verb-first, place and posture only), facing_camera (true/false), framing, light, people (number visible), garments (list of {type, name, look}; [] if nude), build, skin, hair. Optional: props, restraints, toys.
-3. Write the clip by running the PIPELINE command below (dry by default): it writes writer_output.txt and dry-builds it. Report its READY or NOT_READY line and the pick.json path. Never add --queue.
+3. Write the clip by running the PIPELINE command below (dry by default): it writes writer_output.txt and dry-builds it. Report its READY or NOT_READY line and the pick.json path, then paste the full prompt.txt and ask Derrick "Render this?". Never add --queue before he says yes to that prompt.
 4. Only when the pipeline prints writer_down or error: write writer_output.txt yourself with these plain-text headers in order: subject_definitions:, summary:, retention_analysis:, detailed_description: (continuation: at the end only for a continued clip; no Markdown), then run THE ONE COMMAND below. Do not build base.api.json.
 
 CRAFT RULES
@@ -162,7 +162,7 @@ PIPELINE (Python 3.12; Gemma 4 26B A4B Heretic on PolyStrata, arm A; writes each
 
 THE ONE COMMAND (Python 3.12)
 & 'C:\Program Files\Python312\python.exe' C:\AI\community\scripts\parody\submit_parody_run.py writer-run '<run_dir>' --ask '<ask>' --position '<position>' --still '<still>' --character FCSydny [--frames <N>] [--shots single|multi] [--continued] [--partner2-still '<still>'] [--s3-look '<look>'] [--s3-in-frame] [--partner-type <type>] [--partner-type2 <type>] [--names <name>...]
-- Dry run by default: READY means prompt.txt and clip\request.api.json were built and nothing was queued. Add --queue only when Derrick says so.
+- Dry run by default: READY means prompt.txt and clip\request.api.json were built and nothing was queued. To render: after Derrick approves the pasted prompt, rerun THE ONE COMMAND on the same run_dir with the same arguments plus --queue (it reuses writer_output.txt, so the approved prompt is what renders; do not rewrite it). Report the submitted= line. If he asks for changes, edit writer_output.txt, rerun dry, and paste the new prompt for approval again.
 - On NOT_READY: fix writer_output.txt once from the message and rerun once. Still NOT_READY: report the exact reason to Derrick and stop.
 
 NEVER

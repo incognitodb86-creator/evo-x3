@@ -19,7 +19,7 @@ Quickstart for running the H3 writer pipeline from `C:\AI\render` on AlienPc.
 ## 2. Normal Run Workflow (Dry Only by Default)
 1. Pick a start still (under `_inputs`, `stills\approved_characters`, or `stills\comfy_input`), inspect it with `read`, and create one run folder under `C:\AI\community\runs\<run_name>`.
 2. Write `<run_dir>\still_read.json`: `{"read": {room, place, surface, bed, sheets, floor, pose, facing_camera, framing, light, people, garments, build, skin, hair}, "source": "<still path>"}`.
-3. Run the autonomous writer pipeline (dry by default; never `--queue`):
+3. Run the autonomous writer pipeline (dry by default; paste prompt.txt to Derrick and add `--queue` only after he approves it):
    ```powershell
    & 'C:\Program Files\Python312\python.exe' C:\AI\community\scripts\parody\render_writer_pipeline.py `
      'C:\AI\community\runs\<run_name>' --ask '<ask>' --position '<position>' `
