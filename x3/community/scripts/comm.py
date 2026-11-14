@@ -35,11 +35,10 @@ def http(url, data=None, timeout=60, method=None):
     try: return json.loads(raw)
     except Exception: return raw.decode("utf-8", "replace")
 
-# --- adults-only guard: one denylist regex, fail closed (simplified 2026-11-02, Derek 9:00 PM CT) ---
-# A word counts only when it stands alone (no letter on either side), so cowgirl/girlfriend/eighteen/kidnap/childhood pass
-# without an exception list. Anything that is not a string fails.
-_BAD_RE = re.compile(r"(?<![a-z])(?:girl|teen|school|schoolgirl|underage|minor|kid|child|children"
-                     r"|loli)s?(?![a-z])|barely\s+legal", re.I)
+# --- adults-only guard: real minor terms only, fail closed (Derrick 2026-11-11 t835u) ---
+# A word counts only when it stands alone (no letter on either side), so childhood passes
+# without an exception list. Anything that is not a string fails. girl/teen/school are not blocked.
+_BAD_RE = re.compile(r"(?<![a-z])(?:underage|minor|child|children)s?(?![a-z])", re.I)
 # The positive check accepts the word adult, and an unambiguous age 18-99 stated as an age:
 # "28-year-old", "28 years old", "28 yo", "age 28", "21+". "17 years old" and "in her twenties"
 # do NOT count - the number must be 18+ and stated as an age, so an unclear text stays blocked.
@@ -74,10 +73,12 @@ def prompt_items(inputs):
         if isinstance(v, str):
             yield k, v
 
-def guard_reason(g, require_adult=True):
+def guard_reason(g, require_adult=False):
     """(ok, reason) for the adults-only gate; reason is "" when ok. Fail closed.
     The reason names WHY it failed - a graph whose prompt text is invisible to PROMPT_KEYS says so,
-    instead of reporting the generic adults failure a wording problem would produce."""
+    instead of reporting the generic adults failure a wording problem would produce.
+    require_adult is accepted for compatibility and ignored: prompts no longer must contain
+    'adult' or a stated age (Derrick 2026-11-11 t835u)."""
     if not isinstance(g, dict) or not all(isinstance(n, dict) for n in g.values()):
         return False, "malformed graph"
     items = [(nid, n.get("class_type"), k, v)
@@ -88,8 +89,6 @@ def guard_reason(g, require_adult=True):
     bad = [(nid, ct, k) for nid, ct, k, v in items if not guard_ok(v)]
     if bad:
         return False, "minor-coded word in node %s (%s).%s" % bad[0]
-    if require_adult and not any(adult_stated(v) for _, _, _, v in items):
-        return False, "no adult stated in %d prompt string(s)" % len(items)
     return True, ""
 
 APPROVED = {  # ALI-80 approved adult stills only

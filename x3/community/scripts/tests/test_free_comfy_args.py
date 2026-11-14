@@ -22,8 +22,11 @@ RUN_QUEUE = os.path.join(REPO_ROOT, "scripts", "run_queue.py")
 BATCH_LOG = "_render_queue.log"  # the batch log qlog() (run_queue.py:64) writes
 
 
+_ACTIVE = False
+
+
 def _deny_live_effects(event: str, args: tuple) -> None:
-    if event in {"socket.connect", "subprocess.Popen", "os.system", "os.startfile"}:
+    if _ACTIVE and event in {"socket.connect", "subprocess.Popen", "os.system", "os.startfile"}:
         raise RuntimeError(f"B2-1 CPU fixture blocked {event}")
 
 
@@ -46,6 +49,16 @@ def _free_comfy_calls(path: str) -> list[ast.Call]:
 
 class TestFreeComfyArgs(unittest.TestCase):
     """The end-of-batch free step must log to a real file: a bare Name (a closure) is the regression."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        global _ACTIVE
+        _ACTIVE = True
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        global _ACTIVE
+        _ACTIVE = False
 
     def test_source_is_parseable_and_calls_free_comfy(self) -> None:
         """The test is not vacuous: run_queue.py parses and does call comm.free_comfy (renaming it away fails here)."""
