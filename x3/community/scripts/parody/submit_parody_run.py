@@ -1113,6 +1113,31 @@ def prepare_writer_base_graph(
     return graph, report
 
 
+def _normalize_comfy_still(still: Optional[str]) -> Optional[str]:
+    """Normalize a writer start-still path to a ComfyUI input-relative path for LoadImage."""
+    if not (isinstance(still, str) and still.strip()):
+        return still
+    s = still.strip()
+    norm = s.replace("\\", "/")
+    comfy_in = br.COMFY_INPUT_COMMUNITY.parent
+    for marker in ("stills/comfy_input/",):
+        idx = norm.lower().find(marker)
+        if idx >= 0:
+            rel = norm[idx + len(marker):].lstrip("/")
+            if rel and (comfy_in / rel).is_file():
+                return rel
+    p = Path(s)
+    if p.is_file():
+        try:
+            rel = p.resolve().relative_to(comfy_in.resolve())
+            return rel.as_posix()
+        except ValueError:
+            staged = br.stage_reference_images([str(p)])
+            if staged:
+                return staged[0]
+    return s
+
+
 def submit_writer_run(
     raw: Any,
     base_graph: Any,
@@ -1295,7 +1320,7 @@ def submit_writer_run(
             return not_ready("no start-still path for img_1 (<Picture 1>); pass the still under ComfyUI input, e.g. community/x.png")
         if "img_1" not in g:
             return not_ready("base graph has no img_1 start-image node for <Picture 1>")
-        g["img_1"]["inputs"]["image"] = still_image.strip()
+        g["img_1"]["inputs"]["image"] = (_normalize_comfy_still(still_image) or still_image).strip()
         report.update(status="READY", chars=len(prompt), prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest().upper(),
                       build=rep)
         jd = run_dir / tag
