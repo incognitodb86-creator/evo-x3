@@ -393,7 +393,9 @@ def mode(kind: str) -> Dict[str, Any]:
 
 # Overlays ride on the base card (never new acts): one plan note + one prose note each.
 OVERLAY_NOTES: Dict[str, str] = {
-    "bts": ("BTS interview: (S2) is the off-screen interviewer. Script two of his questions as '(S2), off-screen, asks <d>[English] …</d>'. Those questions do not count toward her line count. (S1) answers with three short spoken lines of her own. Do not skip the beat card."),
+    "bts": ("BTS interview: the off-screen interviewer has no body, no <Subject 2> entry and no (Sn) label; "
+            "script two short interviewer questions as 'An off-screen interviewer asks, <d>[English] ...</d>' "
+            "(without (S2)), and (S1) answers on screen with two short spoken lines of her own (4 spoken lines total). Do not skip the beat card."),
     "cinematic": "Film look (never write the words cinematic or beautiful): one motivated camera job (held, a slow push-in, a locked medium or a low angle), light that separates the bodies, at most one line per speaker.",
     "gonzo": "Gonzo: closer framing (medium-close), light handheld energy, a faster tempo, lens looks written in the action prose.",
     "pov": "POV: the camera is the dominant's eye line, medium or medium-close, (S1) looks toward the lens, only his hands or forearms enter frame (named once). Write no camera sentence of your own; the builder's POV camera line is the only one.",
@@ -410,8 +412,8 @@ OVERLAY_NOTES: Dict[str, str] = {
     "nonhuman": ("Non-human partner: (S2) is a creature (no RefMod); describe his look once in the card, keep it the same all clip, "
                  "never call him a man. Still nouns win on costume, place, roles, wardrobe, races and scale."),
     "consent_setup": ("Agreed roleplay (porn-style, Derrick t1457u): in the opening clip, before any sex, give one quick consent beat: "
-                      "a short playful line from her (e.g. <d>Wake me up like that tonight.</d>) or a nod or wink before the hypnosis gag. "
-                      "Then the rest plays freely as the game they agreed to; a 'drugged' theme is a choice both made together."),
+                      "a short playful line from her (e.g. <d>Wake me up like that tonight.</d>) or a nod or wink before a sleep/hypnosis/sedative setup; "
+                      "for an awake MDMA/party setup chosen together, show mutual awake eagerness (smiles, pulls him close, touch-seeking hands, or an eager line)."),
     "scale": ("Size play: fix one measurable scale anchor in the card (e.g. 'she is no taller than his forearm') and keep it all clip. "
               "A tiny or fairy woman is an adult woman at miniature scale: write her adult face, full adult breasts, wide adult hips "
               "and an adult woman's proportions. Oversized anatomy is named once, with a slow entry and a firm grip. A carry or "
@@ -909,7 +911,8 @@ def judge_messages(cands: List[Tuple[str, str]], brief: str) -> List[Dict[str, A
 
 
 # ---- builder preview + build ----------------------------------------------------------------------------------------
-def make_cast(still_read: Dict[str, Any], position: str, ask: str, continued: bool = False) -> Tuple[Dict[str, Any], str]:
+def make_cast(still_read: Dict[str, Any], position: str, ask: str, continued: bool = False,
+              inherited_garments: Optional[Dict[str, str]] = None) -> Tuple[Dict[str, Any], str]:
     still_people = None
     rd = br._unwrap_still_read(still_read)
     if rd.get("people"):
@@ -919,7 +922,7 @@ def make_cast(still_read: Dict[str, Any], position: str, ask: str, continued: bo
                                         still_people=still_people if isinstance(still_people, int) else None)
     if not hook_act and brief.get("act_id") and br.get_act(brief["act_id"]):
         position = brief["act_id"]
-    mk = {}
+    mk: Dict[str, Any] = {}
     if brief.get("partner_type"):
         mk["partner_type"] = brief["partner_type"]
     if br._CREATURE_RE.search(ask or ""):
@@ -930,6 +933,8 @@ def make_cast(still_read: Dict[str, Any], position: str, ask: str, continued: bo
         mk["partner_type2"] = partner_type2_for(position, ask)
     if continued:
         mk["continued"] = True
+    if inherited_garments:
+        mk["inherited_garments"] = dict(inherited_garments)
     if re.search(r"(?i)\bgiant", ask or ""):
         mk["man"] = "a giant adult man, about twice her height, twenty-six years of age, of solid adult build"
     ck = brief.get("camera_kind")
@@ -941,10 +946,11 @@ def make_cast(still_read: Dict[str, Any], position: str, ask: str, continued: bo
     return br.make_cast(still_read, position, ask, **mk), position
 
 
-def builder_preview_fn(still_read: Dict[str, Any], position: str, ask: str):
+def builder_preview_fn(still_read: Dict[str, Any], position: str, ask: str, continued: bool = False,
+                       inherited_garments: Optional[Dict[str, str]] = None):
     def preview(full: str) -> Dict[str, Any]:
         try:
-            cast, _ = make_cast(still_read, position, ask, continued=False)
+            cast, _ = make_cast(still_read, position, ask, continued=continued, inherited_garments=inherited_garments)
             _, rep = br.finalize_writer_prompt(full, cast, strict=True)
             return {"added": rep.get("added", []), "violations": rep.get("violations", []),
                     "dropped": (rep.get("speech") or {}).get("dropped", []), "state": rep.get("state"),
@@ -1290,8 +1296,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 brief += f"\nTHIRD PERSON (S3), the same person as the last clip, every detail kept: {s3_look}."
             if s3_still:
                 brief += "\nTHIRD PERSON (S3): his face and body come from his own reference picture; name only his clothes."
+        _inh_g = (slots.get("inherited") or {}).get("garments") if scene_prev else None
         try:
-            cast_l, _ = make_cast(still_read, position, ask, continued=bool(scene_prev))
+            cast_l, _ = make_cast(still_read, position, ask, continued=bool(scene_prev), inherited_garments=_inh_g)
         except Exception as e:
             cast_l = {}
             result["warnings"].append("cast_preview_failed")
@@ -1306,7 +1313,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         lint_cfg["speech_words_max"] = speech_words_max
         lint_cfg["max_lines_per_speaker"] = max_lines_spk
         lint_ctx = {"kind": kind, "slots": slots, "blacklist": blacklist, "cloned": cloned, "cfg": lint_cfg,
-                    "scene": scene_prev, "builder_preview": builder_preview_fn(still_read, position, ask),
+                    "scene": scene_prev, "builder_preview": builder_preview_fn(still_read, position, ask, continued=bool(scene_prev), inherited_garments=_inh_g),
                     "cast": cast_l, "overlays": overlays, "ask": ask, "act_id": route["act_id"], "wet_ok": wet_ok,
                     "recent_openings": [wp_lint.opening_sentence(d) for d in wp_state.load_recent(recent_path)[-10:]]}
         # 3 beat card
@@ -1338,7 +1345,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             (["--frames", str(int(job["frames"]))] if job.get("frames") else []) + \
             (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + (["--s3-in-frame"] if s3_in_frame else []) + \
             (["--shots", "multi"] if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" else []) + \
-            (["--continued"] if scene_prev else [])
+            (["--continued"] if scene_prev else []) + \
+            (["--inherited-garments", json.dumps(_inh_g, separators=(",", ":"))] if scene_prev and _inh_g else [])
         if card is None and kind == "talk":
             # BTS/talk: never skip the beat card; use a minimal valid card and keep writing
             card = {

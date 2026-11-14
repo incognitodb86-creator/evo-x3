@@ -75,7 +75,7 @@ CAMERA_MOTION_RE = br._CAMERA_MOTION_RE
 ORAL_ACT_RE = br._ORAL_ACT_RE
 MOUTH_FREE_RE = br._MOUTH_FREE_RE
 RISE_RE, SINK_RE, HIS_LIFT_RE, MEET_RE = br._RISE_RE, br._SINK_RE, br._HIS_LIFT_RE, br._MEET_RE
-SPEAKER_D_RE = re.compile(r"\((S[123])\)[^<]{0,120}?<d>|<d>")
+SPEAKER_D_RE = re.compile(r"\((S[123])\)[^<.\n!?;]{0,120}?<d>|<d>")
 SHALLOW_RE = re.compile(r"(?i)\b(?:shallow(?!,?\s+(?:breath|breathing|gasp|pant|exhale|inhale))\w*|at the entrance|just the tip|half[- ]depth|only the tip)\b")
 NARR_RE = re.compile(r"(?i)\b(?:dominates? her|submits?|feels? (?:humiliated|ashamed|degraded)|she (?:orgasms|cums|climaxes))\b")
 PANEL_RE = re.compile(r"(?i)\bpanels?\b")
@@ -99,8 +99,10 @@ def tempo_rate(text: str) -> Optional[float]:
 
 def speaker_counts(dd: str) -> Dict[str, int]:
     out: Dict[str, int] = {}
-    for m in SPEAKER_D_RE.finditer(dd or ""):
-        spk = m.group(1) or "?"
+    text = dd or ""
+    for m in SPEAKER_D_RE.finditer(text):
+        pre = text[max(0, m.start() - 100):max(0, m.end() - 3)]
+        spk = "?" if _INTERVIEWER_LEAD_RE.search(pre) else (m.group(1) or "?")
         out[spk] = out.get(spk, 0) + 1
     return out
 
@@ -142,8 +144,11 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
     if cast:
         for n in sorted(set(re.findall(r"\(S([23])\)[^<.!?]{0,120}<d>", dd))):
             if not cast.get(f"voice_s{n}"):
-                out.append(_fix("voice_missing", f"(S{n}) has no voice in this clip's cast (talk/solo act); give the line to (S1) "
-                                                 f"or make it an off-screen voice"))
+                if re.search(rf"(?i)\(S{n}\)[^<.!?]{{0,60}}\boff[- ]?screen", dd):
+                    out.append(_fix("voice_missing", f"off-screen interviewer has no (S{n}) label; rewrite without (S{n}) as 'An off-screen interviewer asks, <d>...</d>'"))
+                else:
+                    out.append(_fix("voice_missing", f"(S{n}) has no voice in this clip's cast (talk/solo act); give the line to (S1) "
+                                                     f"or make it an off-screen voice"))
     # L-FUTA: builder P2-FUTA-AS-MAN
     if re.search(r"(?i)\bfuta\b", ask) and re.search(r"(?i)\b(?:he|his|him|himself|the man)\b", plain):
         out.append(_fix("futa_pronoun", "the futa partner is she/her; no he, his, him or the man"))
@@ -270,7 +275,11 @@ def spoken_lines(text: str) -> List[str]:
     return [norm(m.group(1)) for m in D_RE.finditer(text or "") if norm(m.group(1))]
 
 
-_INTERVIEWER_LEAD_RE = re.compile(r"(?i)(?:off[- ]?screen(?: interviewer)?|(?:the )?interviewer|\(S2\)[^.<]{0,40}\basks)\s*[,:]?\s*$")
+_INTERVIEWER_LEAD_RE = re.compile(
+    r"(?i)(?:(?:an?\s+)?off[- ]?screen(?:\s+interviewer|\s+voice)?[^.<\n]{0,60}\b(?:asks?|says?|prompts?)|"
+    r"(?:the\s+)?interviewer[^.<\n]{0,60}\b(?:asks?|says?|prompts?)|"
+    r"off[- ]?screen(?:\s+interviewer)?|\(S2\)[^.<]{0,40}\basks)\s*[,:]?\s*$"
+)
 
 
 def talk_counted_lines(dd: str, ctx: Optional[Dict[str, Any]] = None) -> List[str]:
@@ -491,10 +500,10 @@ def _join_inherited_clear(slots: Dict[str, Any], scene: Optional[Dict[str, Any]]
     return True
 
 
-def _fix(code: str, note: str, hard: Optional[bool] = None, pen: int = 0) -> Dict[str, Any]:
+def _fix(code: str, note: str, hard: Optional[bool] = None, pen: Optional[int] = None) -> Dict[str, Any]:
     if hard is None:
         hard = code in SAFETY_HARD
-    return {"code": code, "note": note, "hard": hard, "penalty": HARD_WEIGHT if hard else (pen or SOFT_WEIGHT)}
+    return {"code": code, "note": note, "hard": hard, "penalty": HARD_WEIGHT if hard else (SOFT_WEIGHT if pen is None else pen)}
 
 
 def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
@@ -552,7 +561,25 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     # -- consent beat (Derrick t1457u): sleep/hypnosis/sedative roleplay needs one consent line or wink in clip 1 before the sex --
     if "consent_setup" in (ctx.get("overlays") or []) and "continued" not in (ctx.get("overlays") or []):
         sx = SEX_START_RE.search(dd)
-        if not CONSENT_RE.search(dd[:sx.start()] if sx else dd):
+        before = dd[:sx.start()] if sx else dd
+        _ask = ctx.get("ask") or ""
+        _sleep_or_hypno = bool(re.search(r"(?i)\b(?:asleep|sleep\w*|hypno\w*|mind[- ]?control\w*|trance|sedat\w*|drugged|unconscious|passed out)\b", _ask))
+        _passive_prose = bool(re.search(r"(?i)\b(?:eyes closed|asleep|sleeping|unconscious|slack limbs?|limbs slack|entranced|in a trance)\b", before))
+        _awake_mutual = bool(
+            not _sleep_or_hypno
+            and not _passive_prose
+            and (
+                re.search(r"(?i)\b(?:chose|chosen|agree[ds]?|together|mutual\w*|consens\w*|willing\w*)\b", _ask)
+                or re.search(
+                    r"(?i)\b(?:smiles?\b|kisses? (?:him|back)|pulls? him (?:close|closer|down|onto her)|"
+                    r"reaches? (?:up |out )?for him|locks? eyes|touch-?seeking|touches? (?:his|him)|"
+                    r"heavy-lidded eyes[^.]{0,60}\b(?:smiles?|kisses?|reaches?|pulls?|touches?|looks? at him))\b",
+                    before,
+                )
+                or CONSENT_RE.search(dd)
+            )
+        )
+        if not _awake_mutual and not CONSENT_RE.search(before):
             issues.append(_fix("consent_setup", "agreed roleplay: before any sex, add one quick consent beat - a playful line from her "
                                                 "(e.g. 'Wake me up like that tonight.') or a nod or wink before the game starts"))
 
@@ -565,8 +592,9 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     for h in blacklist_hits(lines, ctx.get("blacklist") or [], float(cfg.get("blacklist_ratio", 0.8))):
         focus = slots.get("line_focus_text") or slots.get("line_focus") or "the still"
         issues.append(_fix("blacklist", f"line '{h['line']}' is in the last-20 list; write a new line about {focus}"))
-    for p in cloned_hits(dd, ctx.get("cloned") or []):
-        issues.append(_fix("cloned", f"the phrase '{p}' is copied from the instructions; say it in your own words"))
+    for idx_c, p in enumerate(cloned_hits(dd, ctx.get("cloned") or [])):
+        issues.append(_fix("cloned", f"the phrase '{p}' is copied from the instructions; say it in your own words",
+                           False, 5 if idx_c < 2 else 0))
 
     # -- act rules --
     prim_idx = next((i for i, s in enumerate(sents) if PRIMARY_RE.search(s)), None)
@@ -701,8 +729,17 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     if wc < lo or wc > hi:
         issues.append(_fix("length", f"detailed_description has {wc} words outside speech; aim for {lo}-{hi}", False, 10))
     counted = talk_counted_lines(dd, ctx)
-    if rules["min_lines"] and len(counted) < rules["min_lines"]:
-        issues.append(_fix("talk_lines", f"talk-only needs three to five short lines (off-screen interviewer questions do not count); it has {len(counted)}"))
+    all_spoken = spoken_lines(dd)
+    _is_bts_qna = (
+        "bts" in (ctx.get("overlays") or [])
+        or bool(re.search(r"(?i)\b(?:bts|behind[- ]the[- ]scenes|interview\w*|off[- ]?screen)\b", ctx.get("ask") or ""))
+    )
+    if rules["min_lines"]:
+        if _is_bts_qna and len(all_spoken) > len(counted):
+            if len(counted) < 2 or len(all_spoken) < rules["min_lines"]:
+                issues.append(_fix("talk_lines", "BTS interview needs at least 2 answers from (S1) and 3 to 5 total spoken lines including interviewer questions"))
+        elif len(counted) < rules["min_lines"]:
+            issues.append(_fix("talk_lines", f"talk-only needs three to five short lines (off-screen interviewer questions do not count); it has {len(counted)}"))
     if kind == "talk" and re.search(r"\(S2\)|<Subject 2>", dd) and not re.search(
             r"(?i)(?:subject_definitions:)?[^\n]*<(?:Subject 2)>|\(S2\) is ", full):
         issues.append(_fix("talk_s2_defined", "(S2) is named in the talk; define them in subject_definitions (look or clothes, BTS interviewer included)"))

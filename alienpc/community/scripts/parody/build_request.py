@@ -1538,13 +1538,21 @@ def _resolve_camera(sentences: List[str], camera_tail: str) -> List[str]:
             cam = " ".join(kept_parts).rstrip(" ,;") + "."
         cam = re.sub(r"\b(locked[- ]off|locked|static)\s+", "", cam, flags=re.I)
     body = " ".join(out)
-    items = ["her face"]
+    low_tail = (camera_tail or "").lower()
+    _solo_man = _CTX.get("s1_gender") == "man" or _CTX.get("act_id") == "male_solo"
+    items = ["his face"] if _solo_man else ["her face"]
     late_partner = bool(re.search(r"(?i)\bonce (?:he|she|her partner|his partner|everyone) enters\b", camera_tail))
-    if "both faces" in camera_tail and not late_partner:
+    if "both faces" in low_tail and not late_partner:
         items = ["both faces"]  # #6 futa/woman partner: never append 'his face'
-    elif "his face" in camera_tail and not late_partner:
-        items.append("his face")
-    if "join" in camera_tail:
+    elif ("all three faces" in low_tail or "all faces" in low_tail) and not late_partner:
+        items = ["all three faces"] if "all three faces" in low_tail else ["all faces"]
+    elif "his face" in low_tail and not late_partner:
+        if any(p in low_tail for p in ("her face", "both faces", "all three faces", "all faces")):
+            if "his face" not in items:
+                items.append("his face")
+        else:
+            items = ["his face"]
+    if "join" in low_tail:
         items.append("the join")
     if re.search(r"(?i)his face (?:stays|is|remains) out of (?:the )?frame", body) and "his face" in items:
         items.remove("his face")
@@ -1568,8 +1576,14 @@ def _resolve_camera(sentences: List[str], camera_tail: str) -> List[str]:
         flags.append({"code": "K7", "why": "framing crops a named face or leaves no headroom", "text": cam[:120]})
     if classes and not has_end:
         flags.append({"code": "K4", "why": "camera move has no end framing (missing framing items appended only)", "text": cam[:120]})
-    item_rx = {"her face": r"\bher face\b|\bboth faces\b", "his face": r"\bhis face\b|\bboth faces\b", "the join": r"\bjoin\b",
-               "both faces": r"\bboth faces\b|\ball (?:three )?faces\b"}
+    item_rx = {
+        "her face": r"\bher face\b|\bboth faces\b|\ball (?:three )?faces\b",
+        "his face": r"\bhis face\b|\bboth faces\b|\ball (?:three )?faces\b",
+        "the join": r"\bjoin\b",
+        "both faces": r"\bboth faces\b|\ball (?:three )?faces\b",
+        "all three faces": r"\ball three faces\b|\ball faces\b",
+        "all faces": r"\ball (?:three )?faces\b",
+    }
     miss = [it for it in items if not re.search(item_rx[it], cam, re.I)]
     if not classes and re.search(r"(?i)\bfaces\b", cam) and "the join" in miss and len(miss) > 1:
         miss = ["the join"] if re.search(r"(?i)\bjoin\b", camera_tail) else []  # 'keeping both faces' style holds
@@ -1814,7 +1828,8 @@ def _scene(cast: Dict[str, Any]) -> Dict[str, Any]:
         return {"bed": bed, "surface": "the surface shown in <Picture 1>", "pad": "hip", "pad_phrase": "the surface beneath her",
                 "setting": setting, "anchor": f"{setting}, its surfaces, the light and the opening framing", "neutral": True}
     floor = (f or {}).get("floor") or ""
-    bits = [setting] + (["the bed and its sheets"] if bed else [surface]) + ([f"the {floor}"] if floor and floor not in surface else [])
+    floor_noun = re.sub(r"(?i)^(?:the|a|an)\s+", "", floor).strip()
+    bits = [setting] + (["the bed and its sheets"] if bed else [surface]) + ([f"the {floor_noun}"] if floor_noun and floor_noun.lower() not in surface.lower() else [])
     return {"bed": bed, "surface": surface, "pad": "mattress" if bed else re.sub(r"(?i)^(?:the|a|an)\s+", "", surface),
             "pad_phrase": "the mattress" if bed else surface, "setting": setting,
             "anchor": ", ".join(bits) + ", the light and the opening framing"}
@@ -1869,7 +1884,9 @@ def apply_still_facts(text: str, read: Optional[Dict[str, Any]]) -> Tuple[str, D
         if not re.search(r"(?i)\bbedroom\b", f["setting"]):
             sub(r"\b(?:the |a |her )?bedroom\b", "the " + (f["place"] or "room"))
     if f["floor"] and not re.search(r"(?i)\b(?:wood|oak|hardwood|parquet)", f["floor"]):
-        sub(r"\b(?:the )?(?:dark |polished |bare )?(?:wood(?:en)?|oak|hardwood|parquet) floor\b", "the " + f["floor"])
+        fl_noun = re.sub(r"(?i)^(?:the|a|an)\s+", "", f["floor"]).strip()
+        if fl_noun:
+            sub(r"\b(?:the )?(?:dark |polished |bare )?(?:wood(?:en)?|oak|hardwood|parquet) floor\b", "the " + fl_noun)
     by_key: Dict[str, str] = {}
     for g in f["garments"]:
         if g["key"]:
@@ -1930,6 +1947,25 @@ def _cast_items(cast: Dict[str, Any]) -> List[Dict[str, Any]]:
     return out
 
 
+def _match_inherited_garment(item: Dict[str, Any], inherited: Dict[str, str]) -> Optional[str]:
+    """Match a still inventory item against inherited garment states (aside/up/off/on) from the prior clip."""
+    if not inherited:
+        return None
+    k = str(item.get("key") or "")
+    name = str(item.get("name") or "").lower()
+    k_short = k[5:] if k.startswith("item:") else k
+    name_key = _garment_key(name) or ""
+    for ik, st in inherited.items():
+        iks = str(ik or "").strip()
+        ikl = iks.lower()
+        ik_short = ikl[5:] if ikl.startswith("item:") else ikl
+        if iks == k or ik_short == k_short.lower() or (name_key and ik_short == name_key):
+            return str(st).lower()
+        if len(ik_short) >= 3 and re.search(rf"(?i)\b{re.escape(ik_short)}\b", name):
+            return str(st).lower()
+    return None
+
+
 def track_state(sentences: List[str], cast: Dict[str, Any], repair: bool = True, keep: Sequence[str] = ()
                 ) -> Tuple[List[str], Dict[str, Any], List[Dict[str, Any]]]:
     """Walk the writer's body sentences in order with a wardrobe + position state (start: the still - every still garment
@@ -1945,7 +1981,26 @@ def track_state(sentences: List[str], cast: Dict[str, Any], repair: bool = True,
     off_items = [g["key"] for g in items if g["off"]]
     stay_items = [g["key"] for g in items if g["stay"]]
     item_rx = [(g["key"], g["rx"]) for g in items]
-    state = {"garments": {g["key"]: "on" for g in items}, "level": 0, "act": False, "writer_removed": [], "builder_removed": []}
+    state: Dict[str, Any] = {
+        "garments": {g["key"]: "on" for g in items},
+        "level": 0,
+        "act": False,
+        "writer_removed": [],
+        "builder_removed": [],
+        "writer_aside": [],
+        "prior_aside": [],
+        "prior_off": [],
+    }
+    if cast.get("continued") and isinstance(cast.get("inherited_garments"), dict):
+        inh = cast["inherited_garments"]
+        for g in items:
+            st = _match_inherited_garment(g, inh)
+            if st in ("aside", "up"):
+                state["writer_aside"].append(g["key"])
+                state["prior_aside"].append(g["key"])
+            elif st == "off":
+                state["garments"][g["key"]] = "off"
+                state["prior_off"].append(g["key"])
     absent = re.compile(cast["absent_garments"], re.I) if cast.get("absent_garments") else None
     move_rx = re.compile(cast.get("move_check") or cast.get("position_check") or r"$^", re.I)
     out: List[str] = []
@@ -2058,7 +2113,7 @@ def _plural(xs: Sequence[str]) -> bool:
     return len(xs) != 1 or bool(re.search(r"(?i)[^s]s$", _head(xs[0])))
 
 
-def writer_named_his_clothes(raw: str, floor: str) -> str:
+def writer_named_his_clothes(raw: str, floor: str, subject: str = "<Subject 2>") -> str:
     """Build the canonical partner-undress line from garments the writer actually named (t1104u/t1109u).
 
     Returns "" when the writer named none — the builder must not invent a shirt and trousers.
@@ -2104,10 +2159,24 @@ def writer_named_his_clothes(raw: str, floor: str) -> str:
         return ""
     if landing_sent:
         s = re.sub(r"(?i)^(?:\[Shot \d+\]\s*)?(?:Then,?\s+)*", "", landing_sent)
-        s = re.sub(r"(?i)^(?:<Subject 2>|he|the man)\b", "<Subject 2>", s, count=1)
-        if not re.match(r"<Subject 2>\b", s):
-            s = "<Subject 2> " + (s[:1].lower() + s[1:] if s else s)
+        s = re.sub(r"(?i)^(?:<Subject [12]>|he|the man)\b", subject, s, count=1)
+        if not re.match(re.escape(subject) + r"\b", s):
+            s = f"{subject} " + (s[:1].lower() + s[1:] if s else s)
         return s
+    # Pull-aside / clearance of his garment ("pulls his trousers aside") is not a floor removal.
+    removed_only = []
+    for item in found:
+        aside_hit = re.search(rf"(?i)\bhis\s+(?:[\w-]+\s+){{0,2}}{re.escape(item)}\b[^.;\n]*?\b(?:aside|to one side)\b", raw)
+        drop_hit = re.search(
+            rf"(?i)\b(?:pulls?|takes?|strips?|peels?|drops?|kicks?|steps?|pools?|slides?|tugs?|pushes?)\s+(?:off\s+)?his\s+(?:[\w-]+\s+){{0,2}}{re.escape(item)}\b[^.;\n]*?\b(?:off|down|floor|ankles?|knees?|bed|chair|couch|sand|ground)\b|\bhis\s+(?:[\w-]+\s+){{0,2}}{re.escape(item)}\b[^.;\n]*?\b(?:off|drops?|pools?)\b",
+            raw,
+        )
+        if aside_hit and not drop_hit:
+            continue
+        removed_only.append(item)
+    found = removed_only
+    if not found:
+        return ""
     prefer = [
         "t-shirt", "shirt", "polo", "hoodie", "sweater", "jumper", "jacket", "blazer", "coat", "vest",
         "trousers", "jeans", "slacks", "chinos", "pants", "shorts", "boxers", "briefs", "underwear", "belt", "tie",
@@ -2115,9 +2184,9 @@ def writer_named_his_clothes(raw: str, floor: str) -> str:
     found = [n for n in prefer if n in found] + [n for n in found if n not in prefer]
     floor = (floor or "the floor").strip() or "the floor"
     if len(found) == 1:
-        return f"<Subject 2> pulls off his {found[0]}, and it drops to {floor} and stays there"
+        return f"{subject} pulls off his {found[0]}, and it drops to {floor} and stays there"
     join = f"{found[0]} and {found[1]}" if len(found) == 2 else ", ".join(found[:-1]) + " and " + found[-1]
-    return f"<Subject 2> pulls off his {join}, and they drop to {floor} and stay there"
+    return f"{subject} pulls off his {join}, and they drop to {floor} and stay there"
 
 
 def writer_defined_missing_person(raw: str, subject: int = 2) -> bool:
@@ -2151,9 +2220,12 @@ def wardrobe_line(cast: Dict[str, Any], state: Dict[str, Any]) -> str:
     builder's 'She takes off ...' clause only names what it removes as a gap fill; items the writer removed are named
     with their end state; items kept on are a retention clause. No removal at all = a retention line only."""
     names = {g["key"]: g["name"] for g in _cast_items(cast)}
-    builder_off = [names[k] for k in state.get("builder_removed", [k for k, v in state["garments"].items() if v == "off"]) if k in names]
+    prior_aside = set(state.get("prior_aside") or [])
+    prior_off = set(state.get("prior_off") or [])
+    builder_off = [names[k] for k in state.get("builder_removed", [k for k, v in state["garments"].items() if v == "off"]) if k in names and k not in prior_off]
     writer_off = [names[k] for k in state.get("writer_removed", []) if k in names]
-    on = [names[k] for k, v in state["garments"].items() if v == "on" and k in names]
+    kept_aside = [names[k] for k in state.get("prior_aside", []) if k in names and state["garments"].get(k) == "on"]
+    on = [names[k] for k, v in state["garments"].items() if v == "on" and k in names and k not in prior_aside]
 
     def join(xs):
         return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " and " + xs[-1]
@@ -2169,6 +2241,13 @@ def wardrobe_line(cast: Dict[str, Any], state: Dict[str, Any]) -> str:
         by_place.setdefault(places.get(k) or cast["garments_floor"], []).append(names[k])
     for where, xs in by_place.items():
         parts.append(("the " if parts else "The ") + f"{join(xs)} she took off {'stay' if _plural(xs) else 'stays'} on {where}")
+    prev_off = [names[k] for k in state.get("prior_off", []) if k in names]
+    if prev_off:
+        pl = _plural(prev_off)
+        parts.append(("the " if parts else "The ") + f"{join(prev_off)} she took off before {'stay' if pl else 'stays'} on {cast['garments_floor']}")
+    if kept_aside:
+        pl = _plural(kept_aside)
+        parts.append(("and the " if parts else "Her ") + f"{join(kept_aside)} {'stay' if pl else 'stays'} pulled aside")
     if on:
         pl = _plural(on)
         lead = ("while the " if parts else "Her ") if builder_off and not writer_off else ("and the " if parts else "Her ")
@@ -2411,26 +2490,40 @@ def _writer_subject_bios(raw: str) -> Dict[str, str]:
     out: Dict[str, str] = {}
     if not (raw or "").strip():
         return out
-    m1 = re.search(
-        r"(?is)complete fidelity;\s*(an adult (?:wo)?man,[^;]+)\s*;\s*(?:she|he) is \(S1\)",
+    m_sec = re.search(
+        r"(?is)\bsubject_definitions:\s*\n(.*?)(?=\n(?:summary|retention_analysis|detailed_description|diegetic sound)\s*:|\Z)",
         raw,
     )
+    sec = m_sec.group(1) if m_sec else raw
+    m1 = (
+        re.search(
+            r"(?is)(?:complete fidelity|<Picture 1>)\s*;\s*((?:an|the) adult (?:wo)?man,[^;\n]+?)\s*;\s*(?:she|he) is \(S1\)",
+            sec,
+        )
+        or re.search(
+            r"(?im)^<Subject 1> is (an adult man,[^;\n]+?)\s*(?:;\s*|\s*,?\s*\band\b\s+)he is \(S1\)",
+            sec,
+        )
+    )
     if m1 and _adult_age_ok(m1.group(1)):
-        bio = " ".join(m1.group(1).split())
+        bio = " ".join(m1.group(1).split()).rstrip(" ,;")
         if re.search(r"(?i)\ban adult man\b", bio):
             out["s1_man"] = bio
         else:
             out["woman"] = bio
-    m2 = re.search(
-        r"(?is)<Subject 2> is (an adult (?:wo)?man,[^;]+)\s*;\s*(?:he|she) is \(S2\)",
-        raw,
-    )
-    if m2 and _adult_age_ok(m2.group(1)):
-        bio = " ".join(m2.group(1).split())
-        if re.search(r"(?i)\ban adult (?:woman|futa)\b", bio):
-            out["partner"] = bio
-        else:
-            out["man"] = bio
+    for idx, man_key, partner_key in ((2, "man", "partner"), (3, "man3", "partner3")):
+        m = re.search(
+            rf"(?im)^<Subject {idx}> is ([^\n]+?)\s*(?:;\s*|\s*,?\s*\band\b\s+)(?:he|she|it) is \(S{idx}\)",
+            sec,
+        )
+        if m and _adult_age_ok(m.group(1)):
+            bio = " ".join(m.group(1).split()).rstrip(" ,;")
+            if re.search(r"(?i)\bexact same\b[^;\n]*\bshown in <Picture", bio):
+                continue
+            if re.search(r"(?i)\b(?:an adult |the )?(?:woman|futa)\b", bio):
+                out[partner_key] = bio
+            else:
+                out[man_key] = bio
     return out
 
 
@@ -2493,16 +2586,34 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     _set_ctx(cast)
     report: Dict[str, Any] = {"stripped": [], "added": [], "flags": []}
     # Max Architect 3, Derrick t1104u/t1109u: partner undress only in clothes the writer named.
-    if not (cast.get("his_clothes") or "").strip():
+    _solo_man = (
+        cast.get("s1_gender") == "man"
+        or (cast.get("act_id") or cast.get("position")) == "male_solo"
+        or str(cast.get("partner_type") or "").lower() == "none"
+        or int(cast.get("bodies") or 2) < 2
+    )
+    if not _solo_man and not (cast.get("his_clothes") or "").strip():
         filled = writer_named_his_clothes(raw, cast.get("garments_floor") or "the floor")
         if filled:
             cast = dict(cast, his_clothes=filled)
             report["added"].append("his_clothes from writer-named partner garments")
     bios = _writer_subject_bios(raw)
     if bios:
-        keep = {k: bios[k] for k in ("woman", "man", "partner") if k in bios}
+        keep = {k: bios[k] for k in ("woman", "man", "partner", "s1_man", "man3", "partner3") if k in bios}
+        if str(cast.get("partner_type") or "").lower() == "non-human" and "man" in keep:
+            if re.search(r"(?i)^(?:the |an adult )?man\b", keep["man"]) and not re.search(
+                r"(?i)\b(?:orc|elf|troll|alien|goblin|monster|demon|creature|tentacle\w*|beast|giant)\b",
+                keep["man"],
+            ):
+                keep.pop("man")
+        if _solo_man and "s1_man" in keep:
+            keep["man"] = keep["s1_man"]
         if keep:
             cast = dict(cast, **keep)
+            if "partner3" in keep:
+                cast.pop("man3", None)
+            elif "man3" in keep:
+                cast.pop("partner3", None)
             report["added"].append("subject bios from writer subject_definitions")
             _set_ctx(cast)
     if cast.get("still_read"):
@@ -2826,7 +2937,11 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     is_3p_scene = cast.get("is_three_person") or cast.get("bodies", 2) >= 3
     if is_3p_scene:
         pt3 = str(cast.get("partner_type2") or "man").lower()
-        desc3 = cast.get("man3") or cast.get("partner3", ("an adult woman, twenty-two years of age, of slender build" if pt3 == "woman" else "an adult man, twenty-four years of age, of solid adult build"))
+        desc3 = (
+            (cast.get("partner3") or cast.get("man3") or "an adult woman, twenty-two years of age, of slender build")
+            if pt3 in ("woman", "futa")
+            else (cast.get("man3") or cast.get("partner3") or "an adult man, twenty-four years of age, of solid adult build")
+        )
         pron3 = "she" if pt3 == "woman" else "he"
         extra3 = f" {pron3.capitalize()} is not in <Picture 1>; {pron3} enters during the clip." if off_s3 else ""
         if cast.get("s3_still"):  # MMF S3 reference still (wired as ref_images slot s3_picture)
@@ -2844,7 +2959,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
 
     retention_lines = [
         (
-            "<Subject 1> (appears in [Shot 1]): fully_preserved - his face, hairstyle, body, skin and figure are kept from <Picture 1> in every phase"
+            "<Subject 1> (appears in [Shot 1]): fully_preserved - his face, hairstyle, body and skin stay as defined in <Subject 1> in every phase"
             if (cast.get("s1_gender") == "man" or (cast.get("act_id") or cast.get("position")) == "male_solo")
             else "<Subject 1> (appears in [Shot 1]): fully_preserved - her face, hairstyle, body, skin and figure are kept from <Picture 1> in every phase"
         ),
@@ -3747,7 +3862,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
               voice_s2: str = OC_VOICE_S2, voice_s3: str = "a low, firm adult voice", partner_type: str = "man",
               partner_type2: Optional[str] = None, role: Optional[str] = None,
               beat_kind: Optional[str] = None, camera_kind: Optional[str] = None,
-              continued: bool = False) -> Dict[str, Any]:
+              continued: bool = False, inherited_garments: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """The OC writer cast from one still read (moved from the EWT driver). dynsafe: every garment (type 'other' too) is
     kept under the still's own phrase; nothing is renamed to a fixed lingerie word; no garment = wardrobe_unverified (no
     raise); undress only when the ask names it; the setting, surface and pose come from the read (no bedroom / room /
@@ -3755,6 +3870,10 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     if not read:
         raise WriterNotReady("NOT_READY: no still read (vision facts) for <Picture 1>")
     validate_hook_ask(position, ask)
+    if (position == "male_solo") or (_infer_package2_act(position, ask, partner_type) == "male_solo"):
+        _src0 = dict(_unwrap_still_read(read))
+        _src0.update({"hair": "", "skin": "", "build": "", "pose": "", "garments": [], "facing_camera": False, "people": 0})
+        read = dict(read, read=_src0) if isinstance(read, dict) and isinstance(read.get("read"), dict) else _src0
     f = still_facts(read)
     inv = garment_inventory(read)
 
@@ -3938,7 +4057,8 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
             (man if pt == "man" else ("an adult woman, twenty-two years of age, of slender build" if pt in ("woman", "futa") else ""))
             if s1_gender != "man" else (man or "an adult man, twenty-four years of age, of solid adult build")
         ),
-        voice_s1=voice_s1, voice_s2=voice_s2 if pt in ("man", "woman", "futa") and act_id != "male_solo" else "",
+        voice_s1=("a deep, steady adult man's voice, low and hoarse" if (s1_gender == "man" or act_id == "male_solo") and voice_s1 == OC_VOICE_S1 else voice_s1),
+        voice_s2=voice_s2 if pt in ("man", "woman", "futa") and act_id != "male_solo" else "",
         voice_s3=voice_s3 if (is_3p and pt2 not in ("none", "non-human", "faceless")) else "",
         still=still_line,
         still_wardrobe=(f"{pose}{wear}{facing}" if pose else f"is shown exactly as in <Picture 1>{wear}"),
@@ -3955,6 +4075,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         dynamic_pose=True, undress=undress, surface=surface, still_bed=bed,
         partner_type=pt, partner_type2=pt2, role=role, beat_kind=b_kind, camera_kind=c_kind,
         continued=bool(continued),
+        inherited_garments=dict(inherited_garments or {}),
         act_id=act_id, act_entry=act_entry, act_status=act_entry.get("status", "untested") if act_entry else "tested",
         is_three_person=is_3p, bodies=req_bodies,
         s1_gender=s1_gender, states=list(brief.get("states") or []),
