@@ -568,7 +568,8 @@ def test_consent_setup_overlay_needs_consent_beat_before_sex():
     import wp_router as R, wp_lint as L
     assert "consent_setup" in R.route_mode("sleep roleplay, spooning", "spooning", {}, {}, continued=False)["overlays"]
     hdr = "detailed_description:\n[Shot 1] "
-    ctx = {"kind": "sex", "slots": {}, "overlays": ["consent_setup"], "ask": "sleep roleplay, spooning", "cfg": {}}
+    # Section 4.2: consent/roleplay agreement goes in its own separate agreement/talk clip, not inside the sex clip.
+    ctx = {"kind": "talk", "slots": {}, "overlays": ["consent_setup"], "ask": "sleep roleplay agreement clip", "cfg": {}}
     bad = L.lint(hdr + "At first, (S1) lies on her side, eyes closed. (S2) slides into her from behind.", ctx)
     good = L.lint(hdr + "At first, (S1) lies on her side and says in a sleepy voice, <d>Wake me up like that tonight.</d> "
                         "Later (S2) slides into her from behind.", ctx)
@@ -810,6 +811,106 @@ def test_xhigh_cloned_whitelist_bts_and_mdma_consent():
     mdma_ctx = {"kind": "sex", "slots": {}, "overlays": ["consent_setup"], "ask": "two adults chose MDMA together, slow missionary", "cfg": {}}
     assert "consent_setup" not in L.lint(mdma_dd, mdma_ctx)["hard"]
     sleep_dd = "detailed_description:\n[Shot 1] At first, (S1) lies on her side, eyes closed. (S2) slides into her from behind."
-    sleep_ctx = {"kind": "sex", "slots": {}, "overlays": ["consent_setup"], "ask": "sleep roleplay, spooning", "cfg": {}}
+    sleep_ctx = {"kind": "talk", "slots": {}, "overlays": ["consent_setup"], "ask": "sleep roleplay agreement clip", "cfg": {}}
     assert "consent_setup" in L.lint(sleep_dd, sleep_ctx)["hard"]
 
+
+def test_beat_card_schema_number_bool_match_partner_labels_and_talk_frames(home, tmp_path, monkeypatch):
+    """Section 0: schema accepts clip_seconds float + bool matches_still + line_topics; assemble_output skips S1 index-0 and preserves S3 woman / vampire attire; talk gets beat-sized frames."""
+    sex_card = dict(CARD, clip_seconds=10.1, partners=[
+        {"label": "(S1)", "sex": "female", "age": 25, "build": "curvy", "attire": "sheer beige bodysuit", "enters_from": "center", "matches_still": True},
+        {"label": "(S2)", "sex": "man", "age": 34, "build": "tall build", "attire": "velvet cape and dark waistcoat", "enters_from": "left", "matches_still": False},
+    ])
+    assert p.schema_errors(sex_card, p.mode("sex")["schema"]) == []
+    bad_bool_sec = dict(sex_card, clip_seconds=True)
+    assert any("clip_seconds" in e for e in p.schema_errors(bad_bool_sec, p.mode("sex")["schema"]))
+
+    talk_card = {
+        "clip_seconds": 6.5,
+        "summary": "On-set interview by the driftwood log.",
+        "camera": "medium shot at chest height",
+        "partners": [{"label": "S1", "sex": "female", "age": 25, "build": "curvy", "attire": "sheer beige bodysuit", "enters_from": "center", "matches_still": True}],
+        "anchor": {"action": "leans against the log", "sound": "soft surf"},
+        "onset": {"action": "she looks off-camera", "sound": "surf"},
+        "development": {"line_topics": ["questions about the shoot", "her playful reply"], "sound": "her voice"},
+        "result": {"action": "she smiles warmly", "sound": "waves"},
+        "end_state": {"pose": "leaning on the log", "garments": {"bodysuit": "on"}, "contact": "", "camera": "medium", "pov": False},
+    }
+    assert p.schema_errors(talk_card, p.mode("talk")["schema"]) == []
+
+    # S1 at partners[0] must not shadow S2 vampire attire or S3 woman in black lace bodysuit (lf10, lf22).
+    out_vamp = p.assemble_output(
+        "[Shot 1] At first, (S1) leans on the log.", sex_card,
+        {"ask": "vampire spoof, doggy", "place": "beach", "light": "golden hour", "surface": "driftwood log", "garments_all": ["sheer beige bodysuit"]},
+        2, "sex",
+    )
+    assert "velvet cape and dark waistcoat" in out_vamp and "matches True" not in out_vamp and "matches False" not in out_vamp
+
+    ffm_card = dict(CARD, partners=[
+        {"label": "S1", "sex": "female", "age": 25, "build": "curvy", "attire": "sheer beige bodysuit", "enters_from": "center", "matches_still": "yes"},
+        {"label": "S2", "sex": "man", "age": 32, "build": "broad build", "attire": "dark trousers", "enters_from": "left", "matches_still": "no"},
+        {"label": "S3", "sex": "female", "age": 27, "build": "slim build", "attire": "a black lace bodysuit", "enters_from": "right", "matches_still": False},
+    ])
+    out_ffm = p.assemble_output(
+        "[Shot 1] At first, (S1) rides him while (S3) kneels beside them.", ffm_card,
+        {"ask": "FFM threesome: she rides him while another woman kneels beside them", "place": "beach",
+         "light": "golden hour", "surface": "driftwood log", "garments_all": ["sheer beige bodysuit"]},
+        3, "sex",
+    )
+    s3_line = [ln for ln in out_ffm.splitlines() if ln.startswith("<Subject 3>")][0]
+    assert "the woman, an adult" in s3_line and "black lace bodysuit" in s3_line
+
+    # Beat-sized frames propagate from talk beat card when job frames is unset (no default 243 frames).
+    seen_extra = []
+
+    def chat_talk(self, messages, sampler, seed, max_tokens, response_format=None, purpose=""):
+        self.calls.append({"purpose": purpose, "seconds": 0.0})
+        if purpose.startswith("beat_card"):
+            return json.dumps(talk_card)
+        if purpose == "judge":
+            return '{"best": "A"}'
+        return ("[Shot 1] The camera holds a medium shot beside the driftwood log in golden hour light. "
+                "At first, (S1) leans against the driftwood log as surf rolls in. "
+                "An off-screen interviewer asks, <d>[English] Ready for the take?</d> "
+                "As it builds, she laughs softly. (S1) says in a playful voice, <d>[English] Always ready out here.</d> "
+                "An off-screen interviewer asks, <d>[English] One more line?</d> "
+                "By the end, she winks, still leaning on the log as waves hiss.")
+
+    monkeypatch.setattr(p.Client, "chat", chat_talk)
+
+    def run_build_cap(run_dir, ask, position, still, character, timeout=300, extra=None):
+        seen_extra.append(list(extra or []))
+        rep = {"status": "READY", "reason": None, "build": {"added": [], "speech": {"dropped": []}, "state": {"garments": {}}}, "frames": 158}
+        (Path(run_dir) / "build_report.json").write_text(json.dumps(rep), encoding="utf-8")
+        return {"status": "READY", "rc": 0, "stdout": "READY", "stderr": "", "report": rep, "seconds": 0.0, "reason": None}
+
+    monkeypatch.setattr(p, "run_build", run_build_cap)
+    cfg = p.load_config(home / "config.yaml")
+    r = p.run_clip(job(tmp_path, "lf08_talk", ask="BTS interview with off-screen interviewer", position="talk"), cfg, lambda *a: None)
+    assert r["frames"] == 158 and r["frames"] != 243
+    assert "--frames" in seen_extra[0] and "158" in seen_extra[0]
+    assert "beat_card_skipped" not in r["warnings"]
+
+
+
+
+def test_followup_item28_router_and_item29_fail_closed(home, tmp_path, monkeypatch):
+    import wp_router
+    cfg = p.load_config(home / "config.yaml")
+    r_rc = wp_router.route_mode("reverse cowgirl on the bed", "reverse cowgirl", {"surface": "bed"}, cfg)
+    assert r_rc["act_id"] == "reverse_cowgirl"
+    r_vhs = wp_router.route_mode("VHS camcorder doggy, MDMA party", "doggy", {"surface": "bed"}, cfg)
+    assert "vhs" in r_vhs["overlays"] and "states" in r_vhs["overlays"]
+    assert p.partner_type_for("mmf", "MMF threesome") is None
+
+    # Item 29: continued clip with missing/placeholder ending_state.pose fails closed
+    monkeypatch.setattr(p, "RUNS_ROOT", tmp_path / "runs")
+    prev_dir = tmp_path / "runs" / "prev_clip"
+    prev_dir.mkdir(parents=True)
+    (prev_dir / "pick.json").write_text(json.dumps({"status": "READY", "scene_id": "s29"}), encoding="utf-8")
+    sp = p.wp_state.scene_path(tmp_path / "runs", "s29")
+    p.wp_state.append_scene(sp, "s29", {"clip_id": "prev_clip", "run_dir": str(prev_dir), "still": str(home / "s.jpg"),
+                                        "ending_state": {"pose": "", "garments": {"dress": "on"}, "contact": None}})
+    r = p.run_clip(job(tmp_path, "c2_bad_pose", ask="keep going", position="doggy", **{"continue": str(prev_dir)}),
+                   p.load_config(home / "config.yaml"), lambda *a: None)
+    assert r["status"] == "NOT_READY" and "ending_state.pose" in (r.get("not_ready_reason") or ""), r

@@ -47,7 +47,6 @@ acts:
   cowgirl:
     id: cowgirl
     aliases:
-      - "reverse cowgirl"
       - "riding"
       - "straddles him"
     bodies: 2
@@ -56,6 +55,28 @@ acts:
     contact_verbs:
       - "inside her vagina"
       - "sits astride his hips"
+    motion_verbs:
+      - "rises and sinks"
+      - "grinds"
+      - "rides"
+    default_camera: third-person
+    still_read_must_keeps:
+      - "surface"
+      - "sheets"
+    known_bad: []
+    status: tested
+
+  reverse_cowgirl:
+    id: reverse_cowgirl
+    aliases:
+      - "reverse cowgirl"
+      - "facing away"
+    bodies: 2
+    partner_types:
+      - "man"
+    contact_verbs:
+      - "inside her vagina"
+      - "astride him facing away"
     motion_verbs:
       - "rises and sinks"
       - "grinds"

@@ -756,7 +756,7 @@ _TEMPO_RE = re.compile(r"\b(per second|every (?:half )?second|cycle|bpm|tempo|st
 _CONTACT_RE = re.compile(
     r"(?=.*\b(?:penis|vagina|anus|mouth|vulva|vulvas|clitoris|clit|shaft|lips|fist|tongue|fingers)\b)"
     r"(?=.*\b(?:inside her|inside her mouth|fully sheathed|hips flush|flush against|buried in her|deep in her|sheathed|"
-    r"vulva (?:pressed to|against) vulva|vulvas? pressed together|(?:wrapped )?around his (?:penis|shaft)|"
+    r"vulva (?:is )?(?:pressed to|against) (?:\(S[123]\)'s |<Subject [123]>'s |her )?vulva|vulvas? pressed together|(?:wrapped )?around his (?:penis|shaft)|"
     r"(?:mouth|lips|tongue) (?:is |moves |presses |sealed )?(?:on|against|over) (?:the other woman's |her |\(S[123]\)'s |<Subject [123]>'s )?(?:vulva|clitoris|clit))\b)",
     re.IGNORECASE | re.DOTALL,
 )
@@ -1098,6 +1098,15 @@ _AUDIO_LEAD_RE = re.compile(r"(?i)\bin <Audio 1>(?:'s voice)?(?: with signature 
 _DOUBLE_LEAD_RE = re.compile(r"\(S[123]\) says in[^<]*\(S[123]\) says in")
 
 
+def _speech_form_with_tone(spk: str, voices: Dict[str, str], span: str, tone: str = "") -> str:
+    voice = voices.get(spk) or (OC_VOICE_S1 if spk == "S1" else OC_VOICE_S2)
+    if tone:
+        tone_words = [w for w in re.findall(r"[a-z-]+", tone.lower()) if w not in ("a", "an", "the", "voice", "and", "with", "in")]
+        if tone_words and any(w not in voice.lower() for w in tone_words):
+            voice = f"{voice}, {tone} tone"
+    return f"({spk}) says in {voice}, {_clean_d_span(span)}"
+
+
 def convert_speech(sentences: List[str], voices: Dict[str, str], max_lines: int = 2,
                    counts: Optional[Dict[str, int]] = None, ledger: Optional[List[Dict[str, Any]]] = None,
                    budget: Optional[int] = None) -> List[str]:
@@ -1125,6 +1134,8 @@ def convert_speech(sentences: List[str], voices: Dict[str, str], max_lines: int 
             lm = _LEAD_RE.search(seg)
             pre = seg[:lm.start()] if lm else seg
             pre = re.sub(r"(?:\(S[123]\)|<Audio 1>(?:'s voice)?|<Subject [123]>)\s*[:,]?\s*$", "", pre).rstrip(" :,;")
+            tone_m = re.search(r"(?i)\bin\s+(?:a|an)\s+([^,;:.]+?)\s+voice\b", seg[lm.start():] if lm else seg)
+            tone_str = tone_m.group(1).strip() if tone_m else ""
             bare = re.sub(r"\((?!S[123]\))[^)]*\)|<(?:Audio|Subject) \d+>(?:'s voice)?|\(S[123]\)|[\s:,'-]", "", pre)
             if spk == "OFFSCREEN":
                 # Package 2 R18: narrated off-screen voice is not a subject, not credited, not counted.
@@ -1153,9 +1164,9 @@ def convert_speech(sentences: List[str], voices: Dict[str, str], max_lines: int 
             ledger.append({"line": words, "speaker": spk, "kept": True, "reason": ""})
             if len(bare) > 12:
                 joiner = " " if pre.rstrip().endswith((".", "!", "?")) else ", and "
-                pieces.append(pre.rstrip() + joiner + _speech_form(spk, voices, m.group(0)))
+                pieces.append(pre.rstrip() + joiner + _speech_form_with_tone(spk, voices, m.group(0), tone_str))
             else:
-                pieces.append((" " if pieces else "") + _speech_form(spk, voices, m.group(0)))
+                pieces.append((" " if pieces else "") + _speech_form_with_tone(spk, voices, m.group(0), tone_str))
             pos = m.end()
         s = " ".join(p.strip() for p in pieces if p.strip()) + s[pos:]
         s = re.sub(r"(</d>)\s*[\"”]?\s*[.,]+(?=\s|$)", r"\1", s)
@@ -1240,8 +1251,16 @@ def _partner_garment(text: str, start: int) -> bool:
     before it in its clause refers to the partner (walking back over comma-separated items); no possessive = hers."""
     cut = max(text.rfind(c, 0, start) for c in ";.:!?")
     clause = text[cut + 1:start]
-    if re.search(r"(?:<Subject [23]>|\(S[23]\))\b", clause):
-        return True
+    subjs = list(re.finditer(r"(?:<Subject ([123])>|\(S([123])\))", clause))
+    if subjs:
+        last_s = subjs[-1].group(1) or subjs[-1].group(2)
+        after_s = clause[subjs[-1].end():]
+        poss_after = list(_POSS_RE.finditer(after_s))
+        if poss_after:
+            m = poss_after[-1]
+            return (m.group(1) or "").lower() in ("his", "their") or m.group(2) in ("2", "3") or m.group(3) in ("2", "3") or bool(re.search(r"(?i)partner|man|captor|master", m.group(0)))
+        if last_s in ("2", "3"):
+            return True
     for part in reversed(clause.split(",")):
         poss = list(_POSS_RE.finditer(part))
         if poss:
@@ -1300,10 +1319,22 @@ def _drop_clauses(s: str, rx: "re.Pattern[str]", guard: bool = True) -> str:
     kept: List[str] = []
     tail = False
     dropped_first = False
+    prefix = ""
     for i, p in enumerate(parts):
-        if rx.search(_D_RE.sub("", _restore_d(p, spans))):
+        p_plain = _D_RE.sub("", _restore_d(p, spans))
+        ctx_plain = prefix + p_plain
+        # NB1: when checking _HersAbsent, evaluate on the clause prefix since the last ';' so partner appositives
+        # like '(S3), a petite woman in a silk camisole, kneels' keep their partner owner across commas.
+        if isinstance(rx, _HersAbsent):
+            hers_ctx = _hers_text(ctx_plain, rx.rx)
+            hit = bool(rx.rx.search(hers_ctx[len(prefix):]))
+        else:
+            hit = bool(rx.search(p_plain))
+        if hit:
             tail = True
             dropped_first = dropped_first or i == 0
+            if p.rstrip().endswith((";", ".")):
+                prefix = ""
             continue
         if tail and _TAIL_ITEM_RE.match(p.strip(" ,;.")):
             continue
@@ -1314,6 +1345,7 @@ def _drop_clauses(s: str, rx: "re.Pattern[str]", guard: bool = True) -> str:
             continue  # frs16 S1: '..., and they drop to the floor' goes with its absent-garment clause
         tail = False
         kept.append(p)
+        prefix = "" if p.rstrip().endswith((";", ".")) else (ctx_plain + " ")
     if not kept:
         return ""
     out = " ".join(kept).rstrip(" ,;")
@@ -1430,9 +1462,16 @@ def _strip_sentence(s: str) -> Optional[str]:
     s = re.sub(r",?\s*HAND ANATOMY HARD-LOCKED[^;.]*;\s*", "; ", s)   # keep the separator (G_01 run-on)
     s = _HAND_COPY_RE.sub("", s).strip()
     s = _DANGLING_RE.sub(".", s)
-    s = re.sub(r"\s+in (?:his )?(?:dark |black )?(?:trousers|jeans|pants)\b", "", s, flags=re.I)
-    if _HIS_CLOTHES_RE.search(_D_RE.sub("", s)):
-        s = _drop_clauses(s, _HIS_CLOTHES_RE)
+    _single_body = (
+        int(_CTX.get("bodies") or 2) < 2
+        or _CTX.get("act_id") == "male_solo"
+        or _CTX.get("s1_gender") == "man"
+        or str(_CTX.get("partner_type") or "").lower() == "none"
+    )
+    if not _single_body:
+        s = re.sub(r"\s+in (?:his )?(?:dark |black )?(?:trousers|jeans|pants)\b", "", s, flags=re.I)
+        if _HIS_CLOTHES_RE.search(_D_RE.sub("", s)):
+            s = _drop_clauses(s, _HIS_CLOTHES_RE)
     if not s.strip():
         return None
     s = _scaffold(s)
@@ -1550,8 +1589,6 @@ def _resolve_camera(sentences: List[str], camera_tail: str) -> List[str]:
         if any(p in low_tail for p in ("her face", "both faces", "all three faces", "all faces")):
             if "his face" not in items:
                 items.append("his face")
-        else:
-            items = ["his face"]
     if "join" in low_tail:
         items.append("the join")
     if re.search(r"(?i)his face (?:stays|is|remains) out of (?:the )?frame", body) and "his face" in items:
@@ -1576,19 +1613,7 @@ def _resolve_camera(sentences: List[str], camera_tail: str) -> List[str]:
         flags.append({"code": "K7", "why": "framing crops a named face or leaves no headroom", "text": cam[:120]})
     if classes and not has_end:
         flags.append({"code": "K4", "why": "camera move has no end framing (missing framing items appended only)", "text": cam[:120]})
-    item_rx = {
-        "her face": r"\bher face\b|\bboth faces\b|\ball (?:three )?faces\b",
-        "his face": r"\bhis face\b|\bboth faces\b|\ball (?:three )?faces\b",
-        "the join": r"\bjoin\b",
-        "both faces": r"\bboth faces\b|\ball (?:three )?faces\b",
-        "all three faces": r"\ball three faces\b|\ball faces\b",
-        "all faces": r"\ball (?:three )?faces\b",
-    }
-    miss = [it for it in items if not re.search(item_rx[it], cam, re.I)]
-    if not classes and re.search(r"(?i)\bfaces\b", cam) and "the join" in miss and len(miss) > 1:
-        miss = ["the join"] if re.search(r"(?i)\bjoin\b", camera_tail) else []  # 'keeping both faces' style holds
-    if miss:
-        cam = cam.rstrip(".") + ", keeping " + (", ".join(miss[:-1]) + " and " + miss[-1] if len(miss) > 1 else miss[0]) + " in frame."
+    # NB6: do not append a camera tail onto the writer's camera sentence (no stacked 'keeping' or 'the join' on no-contact).
     cam = re.sub(r"(?i),\s*keeping ([^,]+?) in frame,\s*keeping\b", r", keeping \1 and", cam)  # A_01 doubled 'keeping'
     cam = re.sub(r"(?i),?\s*and that framing is the final framing", "", cam)
     out[k] = cam if cam.endswith(".") else cam + "."
@@ -1614,7 +1639,11 @@ def _garment_retention(cast: Dict[str, Any], state: Dict[str, Any]) -> List[str]
                    f"{cast['garments_floor']} and {'stay' if pl else 'stays'} there")
     if aside:
         pl = _plural(aside)
-        out.append(f"The {join(aside)} of <Picture 1>: partially_preserved - {'they stay' if pl else 'it stays'} on her body, pulled aside or slid up so the join is clear")
+        _aid = (_CTX.get("act_id") or _CTX.get("position") or "").lower()
+        if _aid in ("handjob", "blowjob", "oral", "titjob", "mmf_double_blowjob"):
+            out.append(f"The {join(aside)} of <Picture 1>: partially_preserved - {'they stay' if pl else 'it stays'} on her body, adjusted as she works")
+        else:
+            out.append(f"The {join(aside)} of <Picture 1>: partially_preserved - {'they stay' if pl else 'it stays'} on her body, pulled aside or slid up so the join is clear")
     if on:
         pl = _plural(on)
         out.append(f"The {join(on)} of <Picture 1>: fully_preserved - {'they stay' if pl else 'it stays'} on her body as the photograph shows")
@@ -1642,7 +1671,7 @@ def check_writer_consistency(text: str) -> List[str]:
 
 _GARMENT_KEYS = [
     # lingerie (unchanged); a bikini top tracks like the bra, bikini bottoms like the panties (Derrick t856s3457)
-    ("bra", r"\bbra\b|\bbralette\b|\bbikini top\b"), ("panties", r"\b(?:panties|thong|knickers|briefs|bottoms)\b|\bbikini (?:bottoms?|briefs)\b"),
+    ("bra", r"\bbra\b|\bbralette\b|\bbikini top\b"), ("panties", r"\b(?:panties|panty|thong|knickers|briefs|bottoms)\b|\bbikini (?:bottoms?|briefs)\b"),
     ("garter belt", r"\bgarter\w*(?: belt| clips?)?\b|\bbelt\b"),
     ("stockings", r"\bstocking\w*\b|\bthigh-highs?\b"), ("choker", r"\bchoker\b"),
     # pmfix5 garments: everyday clothes (his clothes are the builder's his_clothes line and never match: 'his ...' is excluded)
@@ -1676,7 +1705,7 @@ _TYPE_ALIAS = {"thong": "panties", "bikini top": "bra", "bikini bottom": "pantie
                "boots": "shoes", "garter": "garter belt", "garters": "garter belt", "jeans": "pants", "robe": "jacket"}
 _GENERIC_TYPES = ("", "other", "lingerie", "top", "clothing", "outfit")
 _KEY_NOUNS = {
-    "bra": r"bra top|bra|bralette|bikini top", "panties": r"bikini bottoms?|bottoms|panties|thong|knickers|briefs",
+    "bra": r"bra top|bra|bralette|bikini top", "panties": r"bikini bottoms?|bottoms|panties|panty|thong|knickers|briefs",
     "garter belt": r"garter belt|garters?|suspenders", "stockings": r"stockings|thigh-highs?|fishnets", "choker": r"choker",
     "swimsuit": r"swimsuit|one-piece|bathing suit", "dress": r"sundress|dress|gown", "top": r"t-shirt|tank top|crop top|top|tee|shirt|blouse|camisole|cami",
     "skirt": r"skirt", "shorts": r"shorts", "pants": r"jeans|leggings|pants|trousers",
@@ -1728,8 +1757,8 @@ def garment_inventory(read: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
         key = g["key"]
         slot = _SLOT_OF_KEY.get(key or "", "")
         if not slot:
-            slot = "bottom" if re.search(r"(?i)\b(?:bottoms?|thong|briefs)\b", g["name"]) else "accessory"
-        out.append({"name": g["name"], "type": g["type"], "key": key, "slot": slot})
+            slot = "bottom" if re.search(r"(?i)\b(?:bottoms?|thong|briefs|panty|panties)\b", g["name"]) else "accessory"
+        out.append({"name": g["name"], "type": g["type"], "look": g.get("look", ""), "key": key, "slot": slot})
     return out
 
 
@@ -1740,14 +1769,14 @@ def absent_garment_pattern(read: Optional[Dict[str, Any]]) -> Optional[str]:
         return None
     words = set()
     for g in inv:
-        words |= set(re.findall(r"[a-z-]+", g["name"].lower()))
+        words |= set(re.findall(r"[a-z-]+", (g["name"] + " " + g.get("look", "")).lower()))
         words.add(_head(g["name"]))
     keys = {g["key"] for g in inv if g["key"]}
     stems = {w.rstrip("s") for w in words}
     absent = []
     for lex in _GARMENT_LEXICON:
         if lex == "the sheer fabric":
-            if "sheer" not in words:
+            if not (words & {"sheer", "lace", "mesh", "silk", "satin", "chiffon", "translucent", "fabric"}):
                 absent.append("the sheer fabric")
             continue
         lk = _garment_key(lex)
@@ -1790,11 +1819,25 @@ def still_facts(read: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         if isinstance(p, dict):
             raw_garments.extend(p.get("garments") or [])
     for g in raw_garments:
-        g = {"name": g, "type": ""} if isinstance(g, str) else dict(g)
+        g = {"name": g, "type": "", "look": ""} if isinstance(g, str) else dict(g)
         name = (g.get("name") or "").strip()
-        if name:
-            garments.append({"name": name, "type": (g.get("type") or "").strip().lower(),
-                             "key": garment_type_key(g.get("type"), name)})
+        look = (g.get("look") or "").strip()
+        if not name:
+            continue
+        # NB11: split compound lingerie sets (e.g. 'sheer beige bra and high-waist panty with garters') into top & bottom.
+        parts = [name]
+        if re.search(r"\band\b", name, re.I):
+            cand = [x.strip() for x in re.split(r"\s+and\s+", name, maxsplit=1, flags=re.I) if x.strip()]
+            if len(cand) == 2:
+                k0, k1 = _garment_key(cand[0]), _garment_key(cand[1])
+                if k0 and k1 and k0 != k1:
+                    parts = cand
+        for part in parts:
+            full_name = part
+            if look and "," not in look and len(look.split()) <= 3 and look.lower() not in part.lower() and len(part.split()) <= 2:
+                full_name = f"{look} {part}"
+            garments.append({"name": full_name, "type": (g.get("type") or "").strip().lower(),
+                             "look": look, "key": garment_type_key(None if len(parts) > 1 else g.get("type"), full_name)})
     props = r.get("props") or []
     if isinstance(props, str):
         props = [x.strip() for x in re.split(r"[,;]", props) if x.strip()]
@@ -1828,11 +1871,12 @@ def _scene(cast: Dict[str, Any]) -> Dict[str, Any]:
         return {"bed": bed, "surface": "the surface shown in <Picture 1>", "pad": "hip", "pad_phrase": "the surface beneath her",
                 "setting": setting, "anchor": f"{setting}, its surfaces, the light and the opening framing", "neutral": True}
     floor = (f or {}).get("floor") or ""
-    floor_noun = re.sub(r"(?i)^(?:the|a|an)\s+", "", floor).strip()
+    floor_noun = re.sub(r"(?i)^(?:(?:the|a|an)\s+)+", "", floor).strip()
     bits = [setting] + (["the bed and its sheets"] if bed else [surface]) + ([f"the {floor_noun}"] if floor_noun and floor_noun.lower() not in surface.lower() else [])
+    anchor = re.sub(r"(?i)\bthe\s+the\b", "the", ", ".join(bits) + ", the light and the opening framing")
     return {"bed": bed, "surface": surface, "pad": "mattress" if bed else re.sub(r"(?i)^(?:the|a|an)\s+", "", surface),
             "pad_phrase": "the mattress" if bed else surface, "setting": setting,
-            "anchor": ", ".join(bits) + ", the light and the opening framing"}
+            "anchor": anchor}
 
 
 def still_facts_block(read: Optional[Dict[str, Any]]) -> str:
@@ -1959,7 +2003,7 @@ def _match_inherited_garment(item: Dict[str, Any], inherited: Dict[str, str]) ->
         iks = str(ik or "").strip()
         ikl = iks.lower()
         ik_short = ikl[5:] if ikl.startswith("item:") else ikl
-        if iks == k or ik_short == k_short.lower() or (name_key and ik_short == name_key):
+        if iks == k or ik_short == k_short.lower() or (name_key and ik_short == name_key) or (name_key and _garment_key(ik_short) == name_key):
             return str(st).lower()
         if len(ik_short) >= 3 and re.search(rf"(?i)\b{re.escape(ik_short)}\b", name):
             return str(st).lower()
@@ -1995,10 +2039,10 @@ def track_state(sentences: List[str], cast: Dict[str, Any], repair: bool = True,
         inh = cast["inherited_garments"]
         for g in items:
             st = _match_inherited_garment(g, inh)
-            if st in ("aside", "up"):
+            if st and re.search(r"\b(?:aside|slid|pulled|pushed|hiked|bunched|up)\b", st):
                 state["writer_aside"].append(g["key"])
                 state["prior_aside"].append(g["key"])
-            elif st == "off":
+            elif st and re.search(r"\b(?:off|removed|floor|dropped|taken off)\b", st):
                 state["garments"][g["key"]] = "off"
                 state["prior_off"].append(g["key"])
     absent = re.compile(cast["absent_garments"], re.I) if cast.get("absent_garments") else None
@@ -2182,9 +2226,10 @@ def writer_named_his_clothes(raw: str, floor: str, subject: str = "<Subject 2>")
         "trousers", "jeans", "slacks", "chinos", "pants", "shorts", "boxers", "briefs", "underwear", "belt", "tie",
     ]
     found = [n for n in prefer if n in found] + [n for n in found if n not in prefer]
-    floor = (floor or "the floor").strip() or "the floor"
+    floor = re.sub(r"(?i)\bthe\s+the\b", "the", (floor or "the floor").strip()) or "the floor"
     if len(found) == 1:
-        return f"{subject} pulls off his {found[0]}, and it drops to {floor} and stays there"
+        pl = _plural([found[0]])
+        return f"{subject} pulls off his {found[0]}, and {'they drop' if pl else 'it drops'} to {floor} and {'stay' if pl else 'stays'} there"
     join = f"{found[0]} and {found[1]}" if len(found) == 2 else ", ".join(found[:-1]) + " and " + found[-1]
     return f"{subject} pulls off his {join}, and they drop to {floor} and stay there"
 
@@ -2221,11 +2266,13 @@ def wardrobe_line(cast: Dict[str, Any], state: Dict[str, Any]) -> str:
     with their end state; items kept on are a retention clause. No removal at all = a retention line only."""
     names = {g["key"]: g["name"] for g in _cast_items(cast)}
     prior_aside = set(state.get("prior_aside") or [])
+    writer_aside = set(state.get("writer_aside") or [])
+    all_aside = prior_aside | writer_aside
     prior_off = set(state.get("prior_off") or [])
     builder_off = [names[k] for k in state.get("builder_removed", [k for k, v in state["garments"].items() if v == "off"]) if k in names and k not in prior_off]
     writer_off = [names[k] for k in state.get("writer_removed", []) if k in names]
     kept_aside = [names[k] for k in state.get("prior_aside", []) if k in names and state["garments"].get(k) == "on"]
-    on = [names[k] for k, v in state["garments"].items() if v == "on" and k in names and k not in prior_aside]
+    on = [names[k] for k, v in state["garments"].items() if v == "on" and k in names and k not in all_aside]
 
     def join(xs):
         return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " and " + xs[-1]
@@ -2336,6 +2383,8 @@ def _same_move(beat: str, text: str) -> bool:
 def transition_beat(cast: Dict[str, Any], writer_text: str = "") -> str:
     """dynsafe (limit 3): one short bridge from the still pose to the act pose, used only when the writer wrote no move.
     Built from the still's pose and the writer's own man pose (standing / kneeling / lying), never a fixed lie-back."""
+    if str(cast.get("partner_type") or "").lower() == "none" or int(cast.get("bodies") or 2) < 2:
+        return ""
     pos = cast.get("position")
     still = _pose_kind(cast.get("still_pose") or "")
     man = _man_pose(writer_text)
@@ -2354,8 +2403,8 @@ def transition_beat(cast: Dict[str, Any], writer_text: str = "") -> str:
     if pos == "missionary":
         her = f"She stays on her back on {surf}" if still == "lie" else f"She lowers onto her back on {surf}"
         return her + ", and <Subject 2> kneels between her spread thighs, his forearms bracing beside her ribs."
-    if pos in ("cowgirl", "reverse cowgirl", "riding"):
-        facing = " facing his feet" if pos == "reverse cowgirl" else ""
+    if pos in ("cowgirl", "reverse cowgirl", "reverse_cowgirl", "riding"):
+        facing = " facing his feet" if pos in ("reverse cowgirl", "reverse_cowgirl") else ""
         return f"<Subject 2> lies back on {surf}, and she swings a knee over and straddles his hips{facing}."
     if pos == "doggy":
         her = (f"From her kneel she leans forward onto her hands and knees on {surf}" if still == "kneel"
@@ -2449,7 +2498,7 @@ def audio_act_checks(units: Sequence[str], cast: Dict[str, Any], act_written: bo
     if act_written and not any(_D_RE.search(u) for u in units) and not _BODY_SOUND_RE.search(plain_all):
         out.append({"code": "A1", "idx": None, "hard": bool(_TALK_ASK_RE.search(cast.get("ask") or "")),
                     "why": "explicit clip with no talk and no body sound; the builder does not invent audio"})
-    if cast.get("position") in ("cowgirl", "reverse cowgirl", "riding") or _COWGIRL_RE.search(cast.get("ask") or ""):
+    if cast.get("position") in ("cowgirl", "reverse cowgirl", "reverse_cowgirl", "riding") or _COWGIRL_RE.search(cast.get("ask") or ""):
         pm = [(i, u) for i, u in enumerate(units) if "<d>" not in u and _PRIMARY_RE.search(u)]
         ok = any(_RISE_RE.search(u) and _SINK_RE.search(u) and _HIS_LIFT_RE.search(u) and _LIFT_MEASURE_RE.search(u) and _MEET_RE.search(u)
                  for _, u in pm)
@@ -2476,7 +2525,7 @@ _AGE_WORDS = {
 
 def _adult_age_ok(text: str) -> bool:
     """Keep a writer biometric line only when every named age is 18+ (or no numeric age is present)."""
-    ages = [int(m.group(1)) for m in re.finditer(r"\b(\d{1,3})\s+years\b", text or "", re.I)]
+    ages = [int(m.group(1)) for m in re.finditer(r"\b(\d{1,3})\s*(?:-?\s*years?\b|yo\b|y\.?o\.?)", text or "", re.I)]
     # Longest phrases first so 'twenty-four' is not also counted as 'four' or 'twenty'.
     for word, n in sorted(_AGE_WORDS.items(), key=lambda kv: -len(kv[0])):
         if re.search(r"\b" + re.escape(word) + r"\b", text or "", re.I):
@@ -2574,6 +2623,34 @@ def split_shots(desc: str, clip_seconds: float) -> Tuple[str, List[Tuple[int, st
     return master, shots, err
 
 
+_FINAL_RAW_ACT_RE = re.compile(
+    r"(?i)\b(?:standing_mf|ff_scissoring|ff_cunnilingus|prone_bone|mf_anal|male_solo|female_solo|mmf_double_blowjob)\b|\b(?:ffm|mmf)\s+clip\b"
+)
+_FINAL_COMMA_GLUE_RE = re.compile(
+    r"\(S[123]\)\s*,\s+(?:kneels|stands|lies|sits|leans|straddles|thrusts|strokes|pulls|grabs|grips|bends|enters|climbs|drops|rides|laps|sucks)\b"
+)
+
+
+def lint_final_prompt(full: str) -> List[str]:
+    """Item 16: hard final-text check on the built prompt."""
+    errs: List[str] = []
+    if re.search(r"(?i)\bthe\s+the\b", full):
+        errs.append("double article 'the the'")
+    dd_m = re.search(r"(?is)\bdetailed_description:\s*\n(.*)\Z", full)
+    dd_part = dd_m.group(1) if dd_m else full
+    if re.search(r"<Subject\s+\d+>", dd_part):
+        errs.append("<Subject N> tag in detailed_description")
+    if re.search(r"(?i)previous clip's end pose", full):
+        errs.append("placeholder \"previous clip's end pose\" in prompt")
+    if re.search(r"(?i)\bsays\s*,\s*\(S\b|\bsays\s*,\s*\(S\d\)", full):
+        errs.append("malformed 'says, (S' speech glue")
+    if _FINAL_RAW_ACT_RE.search(full):
+        errs.append("raw act_id in built prompt")
+    if _FINAL_COMMA_GLUE_RE.search(dd_part):
+        errs.append("'(Sn), <verb>' comma glue in detailed_description")
+    return errs
+
+
 def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) -> Tuple[str, Dict[str, Any]]:
     """Turn one free-text writer prompt into the R5 paste for an OC RefMod clip that opens on <Picture 1>.
 
@@ -2597,25 +2674,15 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         if filled:
             cast = dict(cast, his_clothes=filled)
             report["added"].append("his_clothes from writer-named partner garments")
-    bios = _writer_subject_bios(raw)
-    if bios:
-        keep = {k: bios[k] for k in ("woman", "man", "partner", "s1_man", "man3", "partner3") if k in bios}
-        if str(cast.get("partner_type") or "").lower() == "non-human" and "man" in keep:
-            if re.search(r"(?i)^(?:the |an adult )?man\b", keep["man"]) and not re.search(
-                r"(?i)\b(?:orc|elf|troll|alien|goblin|monster|demon|creature|tentacle\w*|beast|giant)\b",
-                keep["man"],
-            ):
-                keep.pop("man")
-        if _solo_man and "s1_man" in keep:
-            keep["man"] = keep["s1_man"]
-        if keep:
-            cast = dict(cast, **keep)
-            if "partner3" in keep:
-                cast.pop("man3", None)
-            elif "man3" in keep:
-                cast.pop("partner3", None)
-            report["added"].append("subject bios from writer subject_definitions")
-            _set_ctx(cast)
+    # P1 rework: do not copy writer's subject_definitions into cast; source from cast/beat_card and validate S2/S3 clauses.
+    _youth_check_re = re.compile(
+        r"(?i)\b(?:child\w*|kids?|teen\w*|tween|underage|under-age|minor|loli\w*|shota\w*|schoolgirl|little girl|"
+        r"little boy|young girl|young boy|preteen|pre-teen|pubescent|adolescent|juvenile)\b"
+    )
+    for _pk in ("man", "partner", "man3", "partner3"):
+        _pval = str(cast.get(_pk) or "").strip()
+        if _pval and (not _adult_age_ok(_pval) or _MINOR_RE.search(_pval) or _youth_check_re.search(_pval)):
+            raise WriterNotReady(f"NOT_READY: partner definition {_pk!r} failed adult age / youth lint")
     if cast.get("still_read"):
         raw, report["still_facts"] = apply_still_facts(raw, cast["still_read"])
     secs = split_writer_sections(raw)
@@ -2681,15 +2748,19 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
             why = None
             if body and _OPENER_RE.search(_normalize_labels(plain)):
                 if opener_holder["text"] is None:
-                    s = _ABSENT_SPAN_RE.sub("in " + still_garments, s) if still_garments else s
+                    # NB1: never overwrite (S2)/(S3)'s attire in the opener with <Picture 1>'s garments.
+                    _pm_op = re.search(r"(,\s*(?:and\s+)?|;\s*)(?=\(S[23]\)|<Subject\s+[23]>)", s)
+                    _s_her, _s_tail = (s[:_pm_op.start()], s[_pm_op.start():]) if _pm_op else (s, "")
+                    _s_her = _ABSENT_SPAN_RE.sub("in " + still_garments, _s_her) if still_garments else _s_her
                     if still_garments:  # dynsafe: keep a complete writer list, else swap only that noun phrase
                         inv = cast.get("inventory") or [{"name": x, "key": _garment_key(x)} for x in _items(still_garments)]
                         heads = ["|".join([_head(g["name"])] + (_KEY_NOUNS[g["key"]].split("|") if g.get("key") in _KEY_NOUNS else []))
                                  for g in inv]
-                        s2 = _swap_opener_list(s, still_garments, heads, _ABSENT_GARMENT_RE)
-                        if s2 != s:
+                        s2 = _swap_opener_list(_s_her, still_garments, heads, _ABSENT_GARMENT_RE)
+                        if s2 != _s_her:
                             report["stripped"].append("opener garment list swapped for the still's list: " + s[:80])
-                        s = re.sub(r"(?i)\bin (in " + re.escape(still_garments) + ")", r"\1", s2)
+                        _s_her = re.sub(r"(?i)\bin (in " + re.escape(still_garments) + ")", r"\1", s2)
+                    s = _s_her + _s_tail
                     c = _strip_sentence(s)
                     if c and not _is_fragment(c):
                         opener_holder["text"] = c
@@ -2819,8 +2890,10 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     beat = transition_beat(cast, text_body) if cast.get("dynamic_pose") else cast["position_beat"]
     contact = ""
     act_ent = cast.get("act_entry") or (get_act(cast.get("position", "")) if cast.get("position") else None)
+    all_shots_plain = " ".join([text_body] + [_D_RE.sub("", b) for _, _, b in later_shots])
+    has_contact = bool(_CONTACT_RE.search(all_shots_plain) or (cast.get("continued") and _PENETRATION_RE.search(all_shots_plain)))
     if pt == "man" and b_kind == "act" and (act_ent or cast.get("position") is None):
-        contact = "" if _CONTACT_RE.search(text_body) else cast.get("contact", "")
+        contact = "" if has_contact else cast.get("contact", "")
     if contact:
         report["added"].append("contact geometry line (R19)")
     wardrobe = wardrobe_line(cast, state)
@@ -2851,16 +2924,14 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         strip_like = b_kind in ("tease", "strip") or cast.get("position") in ("tease", "strip")  # (1) Derrick t247s837
         extra = [wardrobe] if wardrobe and not strip_like else []
         rest = rest[:writer_opener + 1] + extra + rest[writer_opener + 1:]
-        if not has_move and not mid_act:
+        if not continued and not has_move and not mid_act:
             rest.insert(anchor + 1 + len(extra), beat)
     elif continued:
-        # PM acc4 #1 / Derrick t251s854: never add the opening-from-still sentence on a continued run
+        # PM acc4 #1 / Derrick t251s854: never add the opening-from-still sentence or move-in beat on a continued run
         report["added"].append("continued: opening-from-still skipped")
         strip_like = b_kind in ("tease", "strip") or cast.get("position") in ("tease", "strip")
         extra = [wardrobe] if wardrobe and not strip_like else []
         rest = extra + rest
-        if not has_move and not mid_act:
-            rest = [beat] + rest
     else:
         if writer_opener is not None:
             rest.pop(writer_opener)  # exactly one opening: the writer's came after the act, the builder's goes first
@@ -2871,7 +2942,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         report["added"].append("opening-from-still sentence (R14/R16)")
         strip_like = b_kind in ("tease", "strip") or cast.get("position") in ("tease", "strip")
         rest = [opening] + ([wardrobe] if wardrobe and not strip_like else []) + ([] if has_move else [beat]) + rest
-    if not has_move:
+    if not continued and not has_move:
         report["added"].append("move-into-position beat (R16/R23a)")
     act_at = next((i for i, x in enumerate(rest) if is_act(x) and x not in (beat,)), len(rest))
     seq = [cam] + rest[:act_at] + [x for x in (motion, contact) if x] + rest[act_at:]
@@ -2902,15 +2973,27 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
             raise WriterNotReady(f"NOT_READY: shot syntax: [Shot {n}] has no text left after cleaning")
         shot_text[n] = txt
         detailed += f" [Shot {n}] At {t}, " + txt[:1].lower() + txt[1:]
+    # NB7: never leave <Subject N> tags in detailed_description prose.
+    detailed = re.sub(r"<Subject ([123])>", r"(S\1)", detailed)
+    detailed = re.sub(r"(?i)\bthe\s+the\b", "the", detailed)
     summary_src = (secs.get("summary") or [""])[0]
     summary_kept = [s for s in clean(re.sub(r"^\s*\[[^\]]+\]\s*", "", summary_src)) if "<d>" not in s][:2]
     summary_kept = [_PRON_COMMA_RE.sub(r"\1 ", _SUMMARY_STRIP_RE.sub("<Subject 1> takes off her clothes", x)) for x in summary_kept]
-    # Keep the writer's summary when present. Do not prepend a canned get-into-position
-    # beat (e.g. "lies back on the floor") that can contradict the writer's blocking.
-    if summary_kept:
+    # NB4: never ship raw act_ids in summary; use summary_act plus scenario and consent clause.
+    _RAW_ACT_SUM_RE = re.compile(r"(?i)\b(?:standing_mf|ff_scissoring|ff_cunnilingus|prone_bone|mf_anal|male_solo|female_solo|mmf_double_blowjob)\b|\b(?:ffm|mmf)\s+clip\b")
+    if summary_kept and not any(_RAW_ACT_SUM_RE.search(x) for x in summary_kept):
         summary = f"{TASK_TAG} " + " ".join(summary_kept)
     else:
         summary = f"{TASK_TAG} " + (cast.get("summary_act") or "")
+    _scen_bits = [str(x).replace("_", " ") for x in ((cast.get("themes") or []) + (cast.get("look") or [])) if x]
+    if cast.get("role") and str(cast["role"]).lower() not in summary.lower():
+        _scen_bits.append(str(cast["role"]))
+    for _sb in _scen_bits[:2]:
+        if _sb.lower() not in summary.lower():
+            summary = summary.rstrip(".") + f" ({_sb})."
+    if (cast.get("states") or cast.get("themes") or cast.get("role")) and not re.search(r"(?i)\bconsent", summary):
+        summary = summary.rstrip(".") + "; all characters are consenting adults."
+    summary = re.sub(r"(?i)\bthe\s+the\b", "the", summary)
     _male_solo = (cast.get("s1_gender") == "man" or (cast.get("act_id") or cast.get("position")) == "male_solo")
     if _male_solo:
         subject_definitions_lines = [
@@ -2924,7 +3007,8 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         ]
     off_s2 = bool(cast.get("off_still_s2"))
     off_s3 = bool(cast.get("off_still_s3")) and not cast.get("s3_in_frame")  # acc4: continued MMF, S3 is in the inherited frame
-    if pt == "man" and cast.get("man") and (cast.get("s1_gender") != "man" and (cast.get("act_id") or cast.get("position")) != "male_solo"):
+    is_3p_scene = cast.get("is_three_person") or cast.get("bodies", 2) >= 3
+    if (pt == "man" or (is_3p_scene and pt == "faceless")) and cast.get("man") and (cast.get("s1_gender") != "man" and (cast.get("act_id") or cast.get("position")) != "male_solo"):
         extra = " He is not in <Picture 1>; he enters during the clip." if off_s2 else ""
         subject_definitions_lines.append(f"<Subject 2> is {cast['man']}; he is (S2).{extra}")
     elif pt in ("woman", "futa") and (cast.get("partner") or cast.get("man")):
@@ -2934,7 +3018,6 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         pr2 = "it" if "no face" in cast["man"] else "he"  # G1-G4: look text only, no RefMod
         extra = f" {pr2.capitalize()} is not in <Picture 1>; {pr2} enters during the clip." if off_s2 else ""
         subject_definitions_lines.append(f"<Subject 2> is {cast['man']}; {pr2} is (S2), the same creature for the whole clip.{extra}")
-    is_3p_scene = cast.get("is_three_person") or cast.get("bodies", 2) >= 3
     if is_3p_scene:
         pt3 = str(cast.get("partner_type2") or "man").lower()
         desc3 = (
@@ -2964,17 +3047,17 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
             else "<Subject 1> (appears in [Shot 1]): fully_preserved - her face, hairstyle, body, skin and figure are kept from <Picture 1> in every phase"
         ),
     ]
-    if pt in ("man", "woman", "futa") and cast.get("man") and (cast.get("s1_gender") != "man" and (cast.get("act_id") or cast.get("position")) != "male_solo"):
+    if (pt in ("man", "woman", "futa") or (is_3p_scene and pt == "faceless")) and cast.get("man") and (cast.get("s1_gender") != "man" and (cast.get("act_id") or cast.get("position")) != "male_solo"):
         if off_s2:
             retention_lines.append(
                 "<Subject 2> (enters during the clip): he is not in <Picture 1>; keep the look the writer named once he is in frame"
-                if pt == "man" else
+                if pt in ("man", "faceless") else
                 "<Subject 2> (enters during the clip): she is not in <Picture 1>; keep the look the writer named once she is in frame"
             )
         else:
             retention_lines.append(
                 "<Subject 2> (appears in [Shot 1]): fully_preserved - his face, build and skin stay the same man throughout"
-                if pt == "man" else
+                if pt in ("man", "faceless") else
                 "<Subject 2> (appears in [Shot 1]): fully_preserved - her face, build and skin stay the same woman throughout"
             )
     elif pt == "non-human" and cast.get("man") and (cast.get("act_id") or cast.get("position")) != "male_solo":
@@ -3008,8 +3091,15 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
         ),
     ] + _garment_retention(cast, state))
     retention = "\n".join(retention_lines)
+    retention = re.sub(r"(?i)\bthe\s+the\b", "the", retention)
     final = (f"subject_definitions:\n{subject_definitions}\n\nsummary:\n{summary}\n\n"
              f"retention_analysis:\n{retention}\n\ndetailed_description:\n{detailed}\n")
+    _final_errs = lint_final_prompt(final)
+    if _final_errs:
+        report["final_lint"] = _final_errs
+        if strict:
+            report["not_ready"] = (report.get("not_ready", "") + "; " if report.get("not_ready") else "") + \
+                "final lint: " + "; ".join(_final_errs)
     # dynsafe (brief item 2): one primary beat per short window. A real undress (not a pull-aside) plus the act in one
     # single-shot clip is packed: split it into two briefs or send it back; never compressed, never template-filled.
     # A nude or near-nude start still (no cover garments in the inventory) needs no undress beat and stays one clip.
@@ -3888,15 +3978,16 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     sheets = f["sheets"] or surface
     sheets = sheets if re.match(r"(?i)(?:the|a|an|her)\b", sheets) else "the " + sheets
     pad = "mattress" if bed else re.sub(r"(?i)^(?:the|a|an)\s+", "", surface)
-    _clean_surf = lambda s: re.sub(r'^(?:the|a|an)\s+', '', (s or '').strip(), flags=re.I)
+    _clean_surf = lambda s: re.sub(r'^(?:(?:the|a|an)\s+)+', '', (s or '').strip(), flags=re.I)
     def _the(s: str) -> str:
         s = re.sub(r"\s+", " ", (s or "").strip())
-        s = re.sub(r"(?i)\bthe the\b", "the", s)
+        s = re.sub(r"(?i)\bthe\s+the\b", "the", s)
         if s and not re.match(r"(?i)(?:the|a|an|her|his)\b", s):
             s = "the " + s
         return s
-    floor = f["floor"]
-    at_floor = "the " + (_clean_surf(floor) + " beside the bed" if bed and floor else _clean_surf(floor) or _clean_surf(surface) or "floor")
+    floor = _clean_surf(f["floor"])
+    at_floor = "the " + (floor + " beside the bed" if bed and floor else floor or _clean_surf(surface) or "floor")
+    at_floor = re.sub(r"(?i)\bthe\s+the\b", "the", at_floor)
     pose = f["pose"].rstrip(".")
     pose = re.sub(r"(?i)^she\s+", "", pose)
     facing = ", facing the camera" if read.get("facing_camera") and "facing" not in pose else ""
@@ -3947,8 +4038,9 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     is_3p_ask = bool(_THREE_BODY_ASK_RE.search(f"{position} {ask or ''}"))
     is_3p = is_3p_act or is_3p_ask
     req_bodies = 3 if is_3p else (act_entry.get("bodies", 2) if act_entry else 2)
+    is_ffm = (act_id == "ffm") or bool(re.search(r"(?i)\b(?:ffm|two (?:women|girls)|another (?:woman|girl))\b", ask or ""))
 
-    pt2 = str(partner_type2 if partner_type2 is not None else ("faceless" if is_3p else "none")).lower()
+    pt2 = str(partner_type2 if partner_type2 is not None else ("woman" if is_ffm else ("faceless" if is_3p else "none"))).lower()
     if pt2 == "man":
         if re.search(r"\bnon[- ]human\b", ask or "", re.I):
             pt2 = "non-human"
@@ -4012,6 +4104,8 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     ck_brief = brief.get("camera_kind")
     if ck_brief and ck_brief not in ("third_person", "third-person"):
         c_kind = _CAM_KIND_MAP.get(ck_brief, ck_brief)
+    _no_join_cam = (b_kind in ("dance", "tease", "strip", "talk", "undress", "transformation")
+                    or act_id in ("female_solo", "male_solo", "talk", "dance", "tease", "strip", "undress"))
     if c_kind == "POV":
         cam_tail = "keeping her face in frame, partner POV"
     elif c_kind == "close-up":
@@ -4026,8 +4120,8 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         cam_tail = "keeping all three faces in frame"
     elif pt in ("none", "non-human", "faceless") and act_id == "male_solo":
         cam_tail = "keeping his face in frame"
-    elif pt in ("none", "non-human", "faceless"):
-        cam_tail = "keeping her face in frame"
+    elif pt in ("none", "non-human", "faceless") or _no_join_cam:
+        cam_tail = "keeping both faces in frame" if pt in ("woman", "futa") else "keeping her face in frame"
     elif is_3p and still_people is not None and still_people < 3:
         cam_tail = "keeping her face in frame, and all faces in frame once everyone is in the shot"
     elif still_people is not None and still_people < 2 and pt == "man":
@@ -4054,12 +4148,12 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
     base = dict(
         woman=", ".join(woman_line_src[:-1]) + (", and " + woman_line_src[-1] if len(woman_line_src) > 1 else woman_line_src[0]) if len(woman_line_src) > 1 else woman_line_src[0],
         man=(
-            (man if pt == "man" else ("an adult woman, twenty-two years of age, of slender build" if pt in ("woman", "futa") else ""))
+            (man if (pt == "man" or (is_3p and not is_ffm and pt == "faceless")) else ("an adult woman, twenty-two years of age, of slender build" if pt in ("woman", "futa") else ""))
             if s1_gender != "man" else (man or "an adult man, twenty-four years of age, of solid adult build")
         ),
         voice_s1=("a deep, steady adult man's voice, low and hoarse" if (s1_gender == "man" or act_id == "male_solo") and voice_s1 == OC_VOICE_S1 else voice_s1),
-        voice_s2=voice_s2 if pt in ("man", "woman", "futa") and act_id != "male_solo" else "",
-        voice_s3=voice_s3 if (is_3p and pt2 not in ("none", "non-human", "faceless")) else "",
+        voice_s2=voice_s2 if (pt in ("man", "woman", "futa") or (is_3p and not is_ffm and pt == "faceless")) and act_id != "male_solo" else "",
+        voice_s3=voice_s3 if (is_3p and pt2 not in ("none", "non-human")) else "",
         still=still_line,
         still_wardrobe=(f"{pose}{wear}{facing}" if pose else f"is shown exactly as in <Picture 1>{wear}"),
         still_garments=still_garments, still_pose=pose, still_read=read, inventory=inv,
@@ -4085,21 +4179,33 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         look_line=scene_addenda.look_line(brief), first_beat_talk_ok=bool(brief.get("first_beat_talk_ok")),
     )
 
+    if is_ffm and pt2 in ("woman", "futa"):
+        base["partner3"] = "an adult woman, twenty-two years of age, of slender build"
+
+    _waist = bool(_WAIST_SURFACE_RE.search(surface))
     if act_id == "missionary":
+        _m_contact = (
+            f"His penis is fully inside her vagina with their hips flush on every stroke; he stands at the edge of {surface} with his feet planted on {at_floor}, and her back rests on {surface}."
+            if _waist else
+            f"His penis is fully inside her vagina with their hips flush on every stroke; his knees and forearms carry his weight into the {pad}, and her heels press into {sheets}."
+        )
         base.update(position_check=r"\b(lies|lying|lowers) (?:back )?onto her back|on her back\b",
             move_check=r"\b(lies|lie|lying|lowers?|lays?)\b[^.]{0,40}\b(back|onto (?:her|the) (?:back|sheets|mattress|pillows|forearms|elbows))|\bon her back\b",
             primary_motion="continuous deep frontal thrust, about one full cycle per second, full depth travel, hips staying in contact",
-            contact=(f"His penis is fully inside her vagina with their hips flush on every stroke; his knees and forearms carry his weight "
-                     f"into the {pad}, and her heels press into {sheets}."),
+            contact=_m_contact,
             summary_act=f"<Subject 1> lies back on {surface} and takes <Subject 2> in the missionary position.")
     elif act_id == "doggy":
+        _d_contact = (
+            f"His penis is fully inside her vagina from behind with his hips flush against her buttocks on every stroke; her forearms brace on {surface} and both stand with feet planted on {at_floor}."
+            if _waist else
+            f"His penis is fully inside her vagina from behind with his hips flush against her buttocks on every stroke; her palms and knees carry her weight into the {pad}."
+        )
         base.update(position_check=r"\bhands and knees\b|\ball fours\b",
             move_check=r"\bhands and knees\b|\ball fours\b|\bkneels? on (?:the|her) [\w -]{2,30}?\b(?:mattress|bed|sofa|rug|floor|sand|carpet|stage)\b|\bbends? (?:over|forward)\b",
             primary_motion="continuous deep rear thrust, about one full cycle per second, full depth travel, his hips meeting her buttocks on each stroke",
-            contact=(f"His penis is fully inside her vagina from behind with his hips flush against her buttocks on every stroke; her palms "
-                     f"and knees carry her weight into the {pad}."),
+            contact=_d_contact,
             summary_act=f"<Subject 1> gets on her hands and knees on {surface} and takes <Subject 2> from behind in the doggy position.")
-    elif act_id in ("cowgirl", "reverse cowgirl", "riding"):  # oralfoley rule 5: the writer names both bodies' motion
+    elif act_id in ("cowgirl", "reverse cowgirl", "reverse_cowgirl", "riding"):  # oralfoley rule 5: the writer names both bodies' motion
         base.update(position_check=r"\b(?:straddl\w*|astride|rides?|riding|on top of him)\b",
             move_check=r"\b(?:straddl\w*|astride|climbs? (?:on top of|onto) him|swings? (?:a|her) (?:leg|knee) over|lowers? herself onto him)\b",
             primary_motion="",
@@ -4157,7 +4263,7 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         base.update(position_check=r"\b(?:scissoring|tribbing|legs? entangled|vulvas pressed)\b",
             move_check=r"\b(?:intertwines? her legs|presses? her hips)\b",
             primary_motion="synchronized circular hip grind, about one full cycle per second, pelvises staying flush",
-            contact="Their vulva pressed to vulva as their pelvises grind in synchronized circular motion.",
+            contact="(S1)'s vulva is pressed to (S2)'s vulva as their pelvises grind in synchronized circular motion.",
             summary_act=f"<Subject 1> and <Subject 2> scissor together on {surface}.")
     elif act_id == "mf_anal":
         base.update(position_check=r"\b(?:anal|from behind|hands and knees)\b",

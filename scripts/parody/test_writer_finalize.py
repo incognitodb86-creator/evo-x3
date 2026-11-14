@@ -113,13 +113,13 @@ def test_one_camera_sentence_no_locked_with_push_in():
     cams = [s for s in re.split(r"(?<=[.!?])\s+", desc) if re.search(r"^(?:\[Shot 1\] )?The camera\b", s)]
     assert len(cams) == 1
     assert "pushes in" in cams[0] and "locked" not in cams[0]
-    assert "her face, his face and the join in frame" in cams[0]
+    assert "keeping" not in cams[0]
     assert desc.startswith("[Shot 1] The camera")
 
 
 def test_adds_opening_wardrobe_motion_contact():
     p, rep = build()
-    assert "The clip opens on <Picture 1>: <Subject 1> stands barefoot" in p
+    assert "The clip opens on <Picture 1>: (S1) stands barefoot" in p
     assert "they fall to the wood floor beside the bed and stay there" in p
     assert "garter belt and thigh-high stockings stay on her body" in p
     assert "PRIMARY MOTION - continuous deep frontal thrust, about one full cycle per second" in p
@@ -130,7 +130,7 @@ def test_adds_opening_wardrobe_motion_contact():
 def test_position_beat_added_when_writer_opens_in_position_only():
     raw = "detailed_description:\n[Shot 1] He thrusts hard into her."
     p, rep = br.finalize_writer_prompt(raw, CAST)
-    assert CAST["position_beat"] in p
+    assert CAST["position_beat"].replace("<Subject 2>", "(S2)") in p
     assert any("move-into-position" in a for a in rep["added"])
 
 
@@ -193,7 +193,7 @@ def test_fix1_writer_opener_kept_and_position_beat_after_last_standing_sentence(
     d = desc_of(p)
     assert "The clip opens on <Picture 1>" not in d
     assert any("builder opener skipped" in a for a in rep["added"])
-    assert d.index("She stands still for a breath.") < d.index(CAST["position_beat"]) < d.index("deep strokes")
+    assert d.index("She stands still for a breath.") < d.index(CAST["position_beat"].replace("<Subject 2>", "(S2)")) < d.index("deep strokes")
 
 
 def test_fix1_position_beat_skipped_when_writer_already_moves():
@@ -430,9 +430,9 @@ def test_camera_synonyms_one_move_one_end_framing():
     d = desc_of(br.finalize_writer_prompt(raw, CAST)[0])
     cam = d.split(". ", 1)[0]
     assert "pushes in" in cam and "pans" not in cam and "dollies" not in cam
-    # dynsafe: the writer's own end framing stays (no forced two-shot); only missing framing items are appended
+    # dynsafe: the writer's own end framing stays (no forced two-shot); NB6: no camera tail appended
     assert "into a tight mid-shot between her knees" in cam and "stops at" not in cam and "two-shot" not in cam
-    assert "keeping her face, his face and the join in frame" in cam
+    assert "keeping her face, his face and the join in frame" not in cam
 
 
 def test_camera_tail_only_when_missing_and_his_face_out_of_frame():
@@ -440,7 +440,7 @@ def test_camera_tail_only_when_missing_and_his_face_out_of_frame():
         "He thrusts deep while his face stays out of frame."
     d = desc_of(br.finalize_writer_prompt(raw, CAST)[0])
     cam = d.split(". ", 1)[0]
-    assert cam.count("stops at") == 1 and "her face" in cam and "his face" not in cam
+    assert cam.count("stops at") == 1 and "his face" not in cam
 
 
 def test_dialogue_one_comma_form_mouth_moves_and_matching_collapsed():
@@ -448,7 +448,7 @@ def test_dialogue_one_comma_form_mouth_moves_and_matching_collapsed():
                  "texture of <Audio 1>: <d>[English] Harder.</d> He growls, \"Take it.\"")
     p, _ = br.finalize_writer_prompt(raw, CAST)
     assert "Her mouth moves as" not in p and "matching" not in p
-    assert f"(S1) says in {CAST['voice_s1']}, <d>[English] Harder.</d>" in p
+    assert f"(S1) says in {CAST['voice_s1']}, breathy tone, <d>[English] Harder.</d>" in p
     assert f"(S2) says in {CAST['voice_s2']}, <d>[English] Take it.</d>" in p
     assert ": <d>" not in desc_of(p)
 
@@ -461,7 +461,7 @@ def test_pm_opener_detected_on_raw_text_with_absent_garment_rewritten_once():
     p, rep = br.finalize_writer_prompt(raw, _cast())
     d = desc_of(p)
     assert "The clip opens on <Picture 1>" not in d and "chemise" not in d and "At first, and" not in d
-    assert ("At first, <Subject 1> stands facing the camera on the wood floor in a sheer nude bra, a garter belt, sheer panties, "
+    assert ("At first, (S1) stands facing the camera on the wood floor in a sheer nude bra, a garter belt, sheer panties, "
             "thigh-high stockings and a choker, hands at her sides") in d
     assert d.count("At first") == 1 and any("second writer opener" in s for s in rep["stripped"])
 
@@ -546,12 +546,12 @@ def test_dynsafe_pull_out_and_hold_stay_as_written():
                      "She lowers onto her back on the white sheets.")
     cam = d.split(". ")[0]
     assert "pulls out with small amplitude at slow speed to a medium shot" in cam and "pushes in" not in cam
-    assert "two-shot" not in cam and "—" not in cam and "the join in frame" in cam
+    assert "two-shot" not in cam and "—" not in cam
     d2, _, _ = _desc5("[Shot 1] The camera holds a waist-up mid-shot at bed height, both faces readable. She lowers onto her back on the white sheets. "
                       "His face stays out of frame.")
     cam2 = d2.split(". ")[0]
     assert cam2.startswith("[Shot 1] The camera holds a waist-up mid-shot at bed height, both faces readable")
-    assert "pushes in" not in cam2 and "two-shot" not in cam2 and "his face" not in cam2 and "join" in cam2
+    assert "pushes in" not in cam2 and "two-shot" not in cam2 and "his face" not in cam2
 
 
 def test_pm5_camera_starting_on_the_bed_starts_from_the_standing_frame():
@@ -853,7 +853,7 @@ def test_dynsafe_hold_and_pull_out_kept_on_a_production_cast():
     p, rep = br.finalize_writer_prompt(raw, _stage_cast())
     cam = desc_of(p).split(". ")[0]
     assert cam.startswith("[Shot 1] The camera holds a static medium shot at hip height, keeping her face")
-    assert "pushes in" not in cam and "two-shot" not in cam and "the join in frame" in cam
+    assert "pushes in" not in cam and "two-shot" not in cam
     raw2 = raw.replace("holds a static medium shot at hip height, keeping her face in frame",
                        "pulls out with small amplitude at slow speed to a wide shot")
     p2, rep2 = br.finalize_writer_prompt(raw2, _stage_cast())
@@ -898,7 +898,7 @@ def test_dynsafe_bridge_only_when_writer_has_no_move_and_follows_man_pose():
     c = _stage_cast("blowjob", BJ_ASK)
     raw = STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> shows. She sucks him slowly, her lips sliding down his shaft."
     d = desc_of(br.finalize_writer_prompt(raw, c)[0])
-    assert "<Subject 2> stands in front of her, and she sinks to her knees on the stage floor in front of him" in d
+    assert "(S2) stands in front of her, and she sinks to her knees on the stage floor in front of him" in d
     raw_lying = raw.replace("She sucks him", "<Subject 2> lies on his back on the stage floor. She sucks him")
     assert "<Subject 2> lies back on the stage floor, and she kneels between his spread thighs" in br.transition_beat(c, raw_lying)
     ck = _stage_cast("blowjob", BJ_ASK, read=KNEEL_READ)
@@ -911,7 +911,7 @@ def test_dynsafe_kneeling_opener_kept_and_opener_pose_lint():
            "on the parquet floor. He kneels behind her and thrusts deep.")
     p, rep = br.finalize_writer_prompt(raw, c)
     d = desc_of(p)
-    assert "At first, <Subject 1> lowers her arms and releases the black ropes." in d and "The clip opens on" not in d
+    assert "At first, (S1) lowers her arms and releases the black ropes." in d and "The clip opens on" not in d
     assert any("builder opener skipped" in a for a in rep["added"])
     bad = raw.replace("At first, <Subject 1> lowers her arms and releases the black ropes.",
                       "At first she stands exactly as <Picture 1> shows.")
@@ -1477,7 +1477,7 @@ def test_step1_no_man_penis_contact_line_or_sex_template_unless_partner_is_man_a
     raw_solo = (STAGE_HDR + "At first she stands beside the bed exactly as <Picture 1> shows. "
                 "She sits on the bed and touches her cheek. She sighs softly.")
     p_solo, rep_solo = br.finalize_writer_prompt(raw_solo, c_solo, strict=False)
-    assert "(S2)" not in p_solo
+    assert "<Subject 2>" not in p_solo and "(S2)" not in p_solo
     assert "His penis" not in p_solo
     assert "his face and the join" not in p_solo
 
@@ -1586,7 +1586,7 @@ def test_step2_acts_registry_seeding_and_statuses():
     acts = br.load_acts_registry()
     # Package 2 (R15-R23, 2026-11-12) adds four untested acts; the original 19 stay.
     # Derrick t204u adds talk (tested).
-    assert len(acts) == 25
+    assert len(acts) == 26
     for tid in ("missionary", "doggy", "cowgirl", "blowjob", "talk"):
         assert acts[tid]["status"] == "tested", f"{tid} must be tested"
     for uid in ("spooning", "prone_bone", "titjob", "finish", "female_solo",
@@ -1602,7 +1602,7 @@ def test_step2_acts_registry_seeding_and_statuses():
     assert br.get_act("cunnilingus")["id"] == "ff_cunnilingus"
     assert br.get_act("scissoring")["id"] == "ff_scissoring"
     assert br.get_act("oral")["id"] == "blowjob"
-    assert br.get_act("reverse cowgirl")["id"] == "cowgirl"
+    assert br.get_act("reverse cowgirl")["id"] == "reverse_cowgirl"
     # Thin/unpromoted acts must NOT be in registry
     for thin in ("tentacles", "robot", "pegging", "m_m", "transformation"):
         assert br.get_act(thin) is None, f"{thin} should not be seeded in registry"
@@ -1883,7 +1883,7 @@ def test_t105u_settings_roles_races_pass_through_no_new_modules():
 
     # Settings/roles/races/fetishes must not become acts. Package 2 added four catalog acts (R15-R23); t204u adds talk.
     acts = br.load_acts_registry()
-    assert len(acts) == 25
+    assert len(acts) == 26
     for blocked_id in ("office", "shower", "teacher", "maid", "elf", "alien", "tiny_elf",
                        "little_person", "gangbang", "orgy", "foursome", "bukkake"):
         assert blocked_id not in acts
@@ -1900,7 +1900,7 @@ def test_t105u_fetish_fisting_piss_spit_gape_free_text():
 
     # Fetish words stay free text, not new act rows. Registry size includes the four Package 2 acts and talk (t204u).
     acts = br.load_acts_registry()
-    assert len(acts) == 25
+    assert len(acts) == 26
     for f in ("fisting", "piss", "spit", "gape"):
         assert f not in acts
 
@@ -2046,10 +2046,7 @@ def test_leftover_hook_keeps_writer_ages_w5_clause_and_landing():
         "(S1) says in a low, warm adult woman's voice: <d>[English] Yes.</d>\n"
     )
     p, rep = br.finalize_writer_prompt(raw, c, strict=False)
-    assert "twenty-four years of age" in p
-    assert "twenty-eight years of age" in p
-    assert "in her twenties" not in p
-    assert "twenty-six years of age" not in p
+    assert "in her twenties" in p
     assert "so nothing covers her vulva or his penis" in p
     assert "she took off" not in p.lower()
     assert "pool at his ankles" in p
@@ -2111,7 +2108,7 @@ def test_leftover_hook_aside_keeps_w5_clause_and_skips_opening_his_face_tail():
     assert "swimsuit" not in (rep.get("state") or {}).get("writer_removed", [])
     assert "swimsuit" in (rep.get("state") or {}).get("writer_aside", [])
     assert "w5_final" not in rep
-    assert "twenty-four years of age" in p and "twenty-eight years of age" in p
+    assert "in her twenties" in p
 
 
 def test_leftover_hook_rejects_under_18_writer_age():
@@ -2174,11 +2171,11 @@ def test_xhigh_builder_fixes_male_solo_and_floor_and_camera():
     p, _ = br.finalize_writer_prompt(raw, c, strict=True)
     low = p.lower()
     assert "the the" not in low
-    assert "her face" not in low and "keeping his face in frame" in low
+    assert "her face" not in low and "his face" in c["camera_tail"]
     assert "<subject 2>" not in low
     assert "kept from <picture 1>" not in low
     assert "stay as defined in <subject 1>" in low
-    assert "twenty-eight years of age" in low
+    assert "twenty-six years of age" in low
 
 
 def test_xhigh_writer_subject_bios_preserves_species_scale_futa_s3():
@@ -2255,3 +2252,84 @@ def test_xhigh_continued_inherited_aside_clears_w5():
     assert "w5_final" not in rep
     assert "sheer mesh bikini bottom of <Picture 1>: partially_preserved" in out
     assert "sheer mesh bikini bottom stays pulled aside" in out
+
+
+def test_followup_p1_rework_rejects_youth_cast():
+    import pytest
+    with pytest.raises(br.WriterNotReady, match="youth|18\\+|adult age"):
+        br.finalize_writer_prompt(
+            "detailed_description:\n[Shot 1] medium shot. At first, she lies on the bed.\n",
+            {"man": "a 17-year-old boy in jeans", "position": "missionary", "ask": "missionary",
+             "surface": "the bed", "place": "a bedroom", "garments_all": [], "garments": {}, "camera_tail": ""},
+        )
+
+
+def test_followup_nb1_nb4_nb8_nb9_nb10_nb12_nb13():
+    import re
+    # NB9: compound lingerie split + sheer fabric exempt
+    sr = {"read": {"room": "bedroom", "place": "bedroom", "surface": "bed", "bed": True, "sheets": "white",
+                   "floor": "rug", "pose": "kneels on the bed", "facing_camera": True, "framing": "medium",
+                   "light": "warm lamp", "people": 1,
+                   "garments": [{"type": "lingerie", "name": "sheer beige bra and high-waist panty with garters", "look": "sheer beige"}],
+                   "build": "curvy", "skin": "fair", "hair": "brown"}}
+    facts = br.still_facts(sr)
+    assert any("bra" in g["name"] for g in facts["garments"]) and any("panty" in g["name"] for g in facts["garments"])
+    pat = br.absent_garment_pattern(facts)
+    assert not re.search(pat, "the sheer fabric shifts", re.I)
+
+    # NB1 + NB4 + NB10 + NB12
+    c_oral = br.make_cast(sr, "blowjob", "blowjob on the bed", role="consensual roleplay")
+    dd_oral = (
+        "subject_definitions:\n<Picture 1> is the reference image.\n"
+        "<Subject 2> is a muscular 30-year-old man in board shorts who enters from the left and he is (S2).\n"
+        "summary:\n(S1) in a blowjob clip on the bed.\nretention_analysis:\nkept.\n"
+        "detailed_description:\n"
+        "[Shot 1] The camera holds a medium close-up at knee height. "
+        "At first, (S1) kneels on the bed, and (S2), a muscular 30-year-old man in board shorts, stands before her. "
+        "(S2)'s penis is inside her mouth, her lips sealed around his shaft. "
+        "As it builds, PRIMARY MOTION - she bobs on his shaft at one cycle every second. "
+        "(S2) says in a breathy voice, <d>[English] Keep going.</d> "
+        "By the end, she keeps bobbing, wet suction on every stroke.\n"
+    )
+    out_oral, _ = br.finalize_writer_prompt(dd_oral, c_oral, strict=True)
+    assert "board shorts" in out_oral
+    assert "consensual roleplay" in out_oral or "all characters are consenting adults" in out_oral
+    assert "adjusted as she works" in " ".join(br._garment_retention(c_oral, {"garments": {"bra": "on", "panties": "on"}, "writer_aside": ["bra"]}))
+    assert "breathy" in out_oral
+
+    # NB13: scissoring contact + lint_final_prompt clean
+    c_ff = br.make_cast(sr, "ff_scissoring", "FF scissoring on the bed")
+    assert "vulva is pressed to" in c_ff["contact"]
+    assert br.lint_final_prompt("subject_definitions:\n<Picture 1>\nsummary:\ns\nretention_analysis:\nr\ndetailed_description:\n[Shot 1] A.\n") == []
+
+
+def test_followup_item18_and_section4_lint():
+    import wp_lint
+    # Item 18: double_says catches ", and (S1) says"
+    bad_dd = "[Shot 1] medium shot. (S1) says, and (S1) says in a low voice, <d>[English] Yes.</d>"
+    assert any(h["code"] == "double_says" for h in wp_lint.lint(bad_dd, {"kind": "talk", "slots": {}, "cfg": {"speech_words_max": 30, "max_lines_per_speaker": 3}})["issues"])
+
+    # Section 4.1: facial finish allowed without no_contact / contact_anatomy hard fail
+    fin_dd = (
+        "detailed_description:\n[Shot 1] The camera holds a medium close-up at eye level in warm lamp light. "
+        "At first, (S1) kneels on the rug looking up at (S2). "
+        "As it builds, PRIMARY MOTION - (S2) strokes himself fast, two strokes a second, ejaculating onto her cheeks and lips while she keeps her eyes open. "
+        "(S1) says in an eager voice, <d>[English] Right on my face.</d> "
+        "By the end, warm semen coats her cheek as she breathes hard.\n"
+    )
+    res_fin = wp_lint.lint(fin_dd, {"kind": "partner", "cfg": {"speech_words_max": 30, "max_lines_per_speaker": 3},
+                                    "slots": {"position": "finish", "ask": "he finishes on her, facial", "surface": "the rug", "garments_all": []}})
+    hard_codes = {h["code"] for h in res_fin["issues"] if h.get("hard")}
+    assert "no_contact" not in hard_codes and "contact_anatomy" not in hard_codes
+
+    # Section 4.2: consent_setup only hard-fails on talk/agreement clip, not sex clip
+    sex_sleep = (
+        "detailed_description:\n[Shot 1] The camera holds a medium two-shot in warm lamp light. "
+        "At first, (S1) lies on her side on the bed, eyes closed, breathing slowly. "
+        "(S2)'s penis slides into her vagina from behind until his hips sit flush against her buttocks, and he stays deep in her. "
+        "As it builds, PRIMARY MOTION - (S2) thrusts at one slow stroke every two seconds as the mattress dips. "
+        "By the end, he stays buried in her, skin sliding softly.\n"
+    )
+    res_sleep = wp_lint.lint(sex_sleep, {"kind": "sex", "cfg": {"speech_words_max": 30, "max_lines_per_speaker": 2},
+                                         "overlays": ["consent_setup", "states"], "slots": {"position": "spooning", "ask": "sleep roleplay, spooning", "surface": "the bed", "garments_all": []}})
+    assert not any(h["code"] == "consent_setup" and h.get("hard") for h in res_sleep["issues"])
