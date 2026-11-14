@@ -25,7 +25,10 @@ WHITELIST = ("inside her", "inside her mouth", "fully sheathed", "hips flush", "
              "keeping the join", "says in a", "says in a low", "in a low voice", "in a soft voice",
              "his penis", "her vagina", "her anus", "her mouth", "her vulva", "from behind", "until his hips",
              "his hips are", "her buttocks", "against her buttocks", "where it stays", "hands and knees",
-             "on her back", "on all fours", "wet skin slaps", "on every stroke")
+             "on her back", "on all fours", "wet skin slaps", "on every stroke",
+             "shot 1 the camera is", "the camera is", "camera is a", "says in a", "stays buried in",
+             "stays deep in", "flush against her", "pushes into her", "drives into her", "slides into her",
+             "sinks into her", "thrusts into her", "to one side at her hip")
 
 
 _STRIP_TAG_RE = re.compile(r"(?i)</?d>|\[(?:English|Shot\s+\d+)\]")

@@ -454,12 +454,29 @@ def blacklist_hits(lines: Sequence[str], blacklist: Iterable[str], ratio: float 
     return hits
 
 
+_MANDATED_CLONE_RE = re.compile(
+    r"(?i)\b(?:"
+    r"shot \d+ the camera is|"
+    r"the camera (?:is|holds) a|"
+    r"\(?\bs[123]\b\)? says in a|"
+    r"says in a (?:low|soft|warm|steady|sharp|playful|husky|deep)|"
+    r"(?:his|her) (?:penis|shaft) (?:pushes|drives|slides|sinks|thrusts|enters) into her|"
+    r"until his hips (?:are|meet)|"
+    r"stays (?:buried|deep|fully sheathed|inside)|"
+    r"flush against her buttocks|"
+    r"to one side at her hip where it stays"
+    r")\b"
+)
+
+
 def cloned_hits(dd: str, phrases: Iterable[str]) -> List[str]:
     t = " " + norm(dd) + " "
     out = []
     for p in phrases:
         pn = norm(p)
-        if pn and (" " + pn + " ") in t:
+        if not pn or (len(pn.split()) <= 8 and _MANDATED_CLONE_RE.search(pn)):
+            continue
+        if (" " + pn + " ") in t:
             out.append(p)
     return out
 
@@ -558,30 +575,14 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
         if not SCALE_ANCHOR_RE.search(plain):
             issues.append(_fix("scale_anchor", "fix one measurable scale anchor (e.g. 'no taller than his forearm') and keep it", False, 5))
 
-    # -- consent beat (Derrick t1457u): sleep/hypnosis/sedative roleplay needs one consent line or wink in clip 1 before the sex --
-    if "consent_setup" in (ctx.get("overlays") or []) and "continued" not in (ctx.get("overlays") or []):
+    # -- consent beat (Derrick rule call 2, t1526s5657): agreement goes in its own separate agreement clip,
+    # not inside the sex clip. Only the agreement clip itself (talk / explicit agreement clip) requires CONSENT_RE.
+    _is_agreement_clip = (kind == "talk" or bool(re.search(r"(?i)\bagreement clip\b", ctx.get("ask") or "")))
+    if "consent_setup" in (ctx.get("overlays") or []) and "continued" not in (ctx.get("overlays") or []) and _is_agreement_clip:
         sx = SEX_START_RE.search(dd)
         before = dd[:sx.start()] if sx else dd
-        _ask = ctx.get("ask") or ""
-        _sleep_or_hypno = bool(re.search(r"(?i)\b(?:asleep|sleep\w*|hypno\w*|mind[- ]?control\w*|trance|sedat\w*|drugged|unconscious|passed out)\b", _ask))
-        _passive_prose = bool(re.search(r"(?i)\b(?:eyes closed|asleep|sleeping|unconscious|slack limbs?|limbs slack|entranced|in a trance)\b", before))
-        _awake_mutual = bool(
-            not _sleep_or_hypno
-            and not _passive_prose
-            and (
-                re.search(r"(?i)\b(?:chose|chosen|agree[ds]?|together|mutual\w*|consens\w*|willing\w*)\b", _ask)
-                or re.search(
-                    r"(?i)\b(?:smiles?\b|kisses? (?:him|back)|pulls? him (?:close|closer|down|onto her)|"
-                    r"reaches? (?:up |out )?for him|locks? eyes|touch-?seeking|touches? (?:his|him)|"
-                    r"heavy-lidded eyes[^.]{0,60}\b(?:smiles?|kisses?|reaches?|pulls?|touches?|looks? at him))\b",
-                    before,
-                )
-                or CONSENT_RE.search(dd)
-            )
-        )
-        if not _awake_mutual and not CONSENT_RE.search(before):
-            issues.append(_fix("consent_setup", "agreed roleplay: before any sex, add one quick consent beat - a playful line from her "
-                                                "(e.g. 'Wake me up like that tonight.') or a nod or wink before the game starts"))
+        if not CONSENT_RE.search(before):
+            issues.append(_fix("consent_setup", "agreement clip: include the explicit consensual agreement line or nod"))
 
     # -- speech budget + freshness (all) --
     lines = spoken_lines(dd)
@@ -604,19 +605,23 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
         else:
             if not TEMPO_RE.search(sents[prim_idx]):
                 issues.append(_fix("no_tempo", "PRIMARY MOTION has no tempo word; use 'strokes a second', 'per second' or 'cycle'"))
-    if rules["contact"] and not CONTACT_RE.search(plain):
+    _facial_finish = (
+        str(slots.get("position") or "").lower() == "finish"
+        or bool(re.search(r"(?i)\b(?:facial|cum(?:shot)? on her face|finishes? on her)\b", ctx.get("ask") or ""))
+    )
+    if rules["contact"] and not _facial_finish and not CONTACT_RE.search(plain):
         issues.append(_fix("no_contact", f"the contact sentence needs one join word ({rules['contact_hint']}) and must hold through the motion"))
     if rules.get("banned_contact") and re.search(r"(?i)" + rules["banned_contact"], plain):
         issues.append(_fix(kind + "_contact", rules.get("banned_hint") or "wrong join words for this mode"))
     if kind != "oral" and ORAL_SHEATHED_RE.search(plain):  # acc4: mmf/spitroast oral words too
         issues.append(_fix("oral_contact", "oral contact names the mouth (inside her mouth), never sheathed or hips flush"))
-    if rules["contact"] or kind in ("sex", "oral"):
+    if (rules["contact"] or kind in ("sex", "oral")) and not _facial_finish:
         if not re.search(r"(?i)\b(?:penis|cock|shaft|glans|vagina|pussy|anus|asshole|mouth|lips|vulvas?|clitoris|clit)\b", plain):
             issues.append(_fix("contact_anatomy", "the entry or contact sentence must name penis, vagina, anus, mouth, vulva, vulvas or clitoris; 'thrusts into her' alone is not enough"))
     if re.search(r"(?i)\bseats himself\b", plain):
         issues.append(_fix("seats_himself", "do not write 'seats himself'; land the pose in (S1)'s own words", False, 5))
-    if re.search(r"(?i)\bsays\s*,\s*\(S\d\)\s+says\b", plain):
-        issues.append(_fix("double_says", "do not write a doubled speech verb ('says, (S1) says'); one 'says' per line"))
+    if re.search(r"(?i)\b(?:says|asks)\s*,\s*(?:and\s+)?\(S\d\)\s+(?:says|asks)\b", plain):
+        issues.append(_fix("double_says", "do not write a doubled speech verb ('says, (S1) says' or 'asks, and (S2) says'); one verb per line"))
     for sl in lines:
         if re.search(r"(?i)\b(?:your|my|his) hands\b|\bhands (?:are|feel|won't|on me|on you)\b|\b(?:too tight|so strong|so heavy|won't let go)\b|\b(?:your|his) grip\b", sl):
             issues.append(_fix("hands_line", "spoken lines never mention his or her hands, grip or strength; write a new line about the act or the body"))

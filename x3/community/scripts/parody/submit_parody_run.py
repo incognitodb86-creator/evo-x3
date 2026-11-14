@@ -1346,11 +1346,20 @@ def submit_writer_run(
         return not_ready(f"hook error before the queue call, nothing queued ({type(e).__name__}: {e})")
 
 
-def _s3_overrides(look: Optional[str], still: Optional[str]) -> Optional[Dict[str, Any]]:
-    """MMF S3 (Max Architect 3, Derrick t1440): man3 = the generated look; s3_still = the reference still, which must exist."""
+def _s3_overrides(look: Optional[str], still: Optional[str], s2_look: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """MMF/FFM S2/S3: man/partner & man3/partner3 from beat card look; s3_still = the reference still, which must exist."""
     o: Dict[str, Any] = {}
+    if s2_look:
+        s2l = s2_look.strip().rstrip(".")
+        if re.search(r"(?i)\b(?:woman|futa)\b", s2l):
+            o["partner"] = s2l
+        else:
+            o["man"] = s2l
     if look:
-        o["man3"] = look.strip().rstrip(".")
+        s3l = look.strip().rstrip(".")
+        o["man3"] = s3l
+        if re.search(r"(?i)\b(?:woman|futa)\b", s3l):
+            o["partner3"] = s3l
     if still:
         p = Path(still)
         if not p.is_absolute():
@@ -1378,6 +1387,7 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--s3-in-frame", action="store_true", help="continued clip: S3 is already in the inherited frame (no 'enters')")
     ap.add_argument("--continued", action="store_true", help="this clip continues a previous clip (skip opening-from-still)")
     ap.add_argument("--inherited-garments", default=None, help="JSON map of garment key -> prior state (aside/up/off/on) for continued clips")
+    ap.add_argument("--s2-look", default=None, help="S2 description from beat card, e.g. 'an adult man, thirty years of age, ...'")
     ap.add_argument("--s3-look", default=None, help="S3 description, e.g. 'an adult man, thirty years of age, ...'")
     ap.add_argument("--partner2-still", default=None, help="S3 reference still under ComfyUI input (community/x.jpg) or a full path")
     ap.add_argument("--frames", type=int, default=None, help="frame-count cap (VRAM: two reference stills peak near 15.4/16.3 GB)")
@@ -1413,7 +1423,7 @@ def _writer_run_cli(argv) -> int:
                               a.ask, a.position, still_image=(a.still or None),
                               still_read=json.loads((d / "still_read.json").read_text(encoding="utf-8")),
                               dry_run=not a.queue, character=(a.character or None), partner_type2=(a.partner_type2 or None),
-                              cast_overrides=dict(_s3_overrides(a.s3_look, a.partner2_still) or {}, **({"shots": a.shots} if a.shots else {}),
+                              cast_overrides=dict(_s3_overrides(a.s3_look, a.partner2_still, getattr(a, "s2_look", None)) or {}, **({"shots": a.shots} if a.shots else {}),
                                                   **({"s3_in_frame": True} if a.s3_in_frame else {}),
                                                   **({"inherited_garments": inh_garments} if isinstance(inh_garments, dict) and inh_garments else {}))
                               or None, partner_type=(a.partner_type or None), continued=bool(getattr(a, "continued", False)),
