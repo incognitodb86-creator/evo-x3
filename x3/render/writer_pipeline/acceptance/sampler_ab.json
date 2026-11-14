@@ -1,0 +1,847 @@
+{
+    "rule":  "higher lint pass rate first, then more distinct dialogue (spec 1 Sampler)",
+    "B":  {
+              "suite":  "ten",
+              "home":  "C:\\AI\\render\\writer_pipeline\\acceptance\\home_ab_B",
+              "arm":  "B",
+              "persona":  null,
+              "rows":  [
+                           {
+                               "case":  "missionary",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\missionary pick=cand_3 score=90 spoken_words=8 warnings=[] seconds=11.3 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\missionary\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  11.5,
+                               "status":  "READY",
+                               "pick":  "cand_3",
+                               "score":  90,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  8,
+                               "seconds":  11.3,
+                               "llm_seconds":  10.9,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "So deep... please, more",
+                                             "You like that depth?"
+                                         ],
+                               "opening":  "At first, S1 leans against the wooden sideboard, her damp blonde hair clinging to her glistening skin in the soft evening light.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  3,
+                               "tone":  "eager",
+                               "line_focus":  "depth",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "doggy",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\doggy pick=rewrite score=85 spoken_words=7 warnings=[] seconds=11.9 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\doggy\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  12.1,
+                               "status":  "READY",
+                               "pick":  "rewrite",
+                               "score":  85,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  7,
+                               "seconds":  11.9,
+                               "llm_seconds":  11.6,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Stay on the log.",
+                                             "It\u0027s so rough..."
+                                         ],
+                               "opening":  "At first, (S1) sits on the driftwood log, leaning forward with her damp blonde hair obscuring her face.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "ashamed",
+                               "line_focus":  "surface",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "blowjob",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\blowjob pick=cand_2 score=75 spoken_words=10 warnings=[\u0027lint_fail_fallback\u0027] seconds=11.8 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\blowjob\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  12.0,
+                               "status":  "READY",
+                               "pick":  "cand_2",
+                               "score":  75,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "oral_contact"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  10,
+                               "seconds":  11.8,
+                               "llm_seconds":  11.4,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "The sand is so warm against my knees",
+                                             "Keep going"
+                                         ],
+                               "opening":  "At first, (S1) stands on the sand in her sheer white maxi dress, looking directly at the lens with sun-kissed skin glistening in the golden hour light.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "eager",
+                               "line_focus":  "surface",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "talk",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\talk pick=cand_2 score=73 spoken_words=23 warnings=[\u0027lint_fail_fallback\u0027] seconds=12.6 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\talk\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  12.7,
+                               "status":  "READY",
+                               "pick":  "cand_2",
+                               "score":  73,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "static_end"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  23,
+                               "seconds":  12.6,
+                               "llm_seconds":  12.2,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Come to make an arrest, detective?",
+                                             "I think I found the culprit.",
+                                             "Is it the dress that\u0027s guilty?",
+                                             "It\u0027s a bit too transparent."
+                                         ],
+                               "opening":  "At first, (S1) leans against the wooden sideboard by the window, her damp blonde hair clinging to her glistening, wet skin.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)",
+                                                   "move-into-position beat (R16/R23a)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "spoof",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "cowgirl",
+                               "rc":  3,
+                               "stdout":  "NOT_READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\cowgirl reason=writer prompt failed the consistency gate: NOT_READY: R1 cowgirl PRIMARY MOTION must name her rise and her sink and a measurable lift of his pelvis off the surface meeting her descent; the builder does not write his thrust warnings=[\u0027lint_fail_fallback\u0027] seconds=17.7 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\cowgirl\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  17.8,
+                               "status":  "NOT_READY",
+                               "pick":  "rewrite_builder",
+                               "score":  55,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "static_end",
+                                                 "builder"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  9,
+                               "seconds":  17.7,
+                               "llm_seconds":  14.8,
+                               "first_build":  "NOT_READY",
+                               "n_builds":  2,
+                               "lines":  [
+                                             "This sideboard is the only thing keeping you upright"
+                                         ],
+                               "opening":  "At first, (S1) leans her damp, blonde hair against the wooden sideboard, her wet skin glistening in the soft evening light.",
+                               "build_added":  [
+
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "silent",
+                               "line_focus":  "surface",
+                               "not_ready_msg":  "NOT_READY: writer prompt failed the consistency gate: NOT_READY: R1 cowgirl PRIMARY MOTION must name her rise and her sink and a measurable lift of his pelvis off the surface meeting her descent; the builder does not write his thrust\n\n--- non-strict diagnostic build (NOT for render) ---\nsubject_defi"
+                           },
+                           {
+                               "case":  "doggy_rough",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\doggy_rough pick=rewrite score=85 spoken_words=12 warnings=[] seconds=11.9 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\doggy_rough\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  12.0,
+                               "status":  "READY",
+                               "pick":  "rewrite",
+                               "score":  85,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  12,
+                               "seconds":  11.9,
+                               "llm_seconds":  11.5,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "This top is too see-through, you jerk!",
+                                             "Look at it now."
+                                         ],
+                               "opening":  "At first, (S1) sits leaning against the driftwood log, her damp blonde hair messy and her skin glistening under the golden hour light.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "bratty",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "bj_tease",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\bj_tease pick=rewrite score=70 spoken_words=7 warnings=[\u0027lint_fail_fallback\u0027] seconds=12.7 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\bj_tease\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  12.8,
+                               "status":  "READY",
+                               "pick":  "rewrite",
+                               "score":  70,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "oral_contact"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  7,
+                               "seconds":  12.7,
+                               "llm_seconds":  12.3,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Take it all.",
+                                             "It is so deep..."
+                                         ],
+                               "opening":  "At first, (S1) stands on the sand in her sheer white maxi dress, looking at the camera.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "ashamed",
+                               "line_focus":  "depth",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "missionary_slow",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\missionary_slow pick=rewrite score=95 spoken_words=12 warnings=[] seconds=11.6 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\missionary_slow\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  11.7,
+                               "status":  "READY",
+                               "pick":  "rewrite",
+                               "score":  95,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  12,
+                               "seconds":  11.6,
+                               "llm_seconds":  11.2,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Don\u0027t stop, you\u0027re finally deep enough",
+                                             "You\u0027re the one pulling me in"
+                                         ],
+                               "opening":  "At first, (S1) leans against the wooden sideboard, her damp blonde hair clinging to her glistening, wet skin.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "bratty",
+                               "line_focus":  "depth",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "talk_spoof",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\talk_spoof pick=cand_3 score=93 spoken_words=19 warnings=[\u0027beat_card_skipped\u0027] seconds=11.2 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\talk_spoof\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  11.3,
+                               "status":  "READY",
+                               "pick":  "cand_3",
+                               "score":  93,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+                                                "beat_card_skipped"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  19,
+                               "seconds":  11.2,
+                               "llm_seconds":  10.9,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Tired of staying dry? Try our new Sand-Proof Mesh!",
+                                             "It is totally translucent!",
+                                             "And it clings like glue!"
+                                         ],
+                               "opening":  "At first, (S1) sits leaning on the driftwood log, her damp blonde hair messy against her glistening, wet skin.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)",
+                                                   "move-into-position beat (R16/R23a)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  2,
+                               "tone":  "spoof",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "standing",
+                               "rc":  3,
+                               "stdout":  "NOT_READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\standing reason=NOT_READY: unknown act \u0027standing\u0027 warnings=[\u0027lint_fail_fallback\u0027] seconds=14.2 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_B\\standing\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  14.3,
+                               "status":  "NOT_READY",
+                               "pick":  "rewrite_builder",
+                               "score":  80,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "builder"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  9,
+                               "seconds":  14.2,
+                               "llm_seconds":  13.7,
+                               "first_build":  "NOT_READY",
+                               "n_builds":  2,
+                               "lines":  [
+                                             "This dress is too thin, I can see everything."
+                                         ],
+                               "opening":  "At first, (S1) stands on the sand, looking at the lens with sun-kissed skin glistening in the light as the soft rustle of waves carries through the air.",
+                               "build_added":  [
+
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "silent",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  "NOT_READY: NOT_READY: unknown act \u0027standing\u0027\n\n--- non-strict diagnostic build (NOT for render) ---\n(non-strict build also failed: NOT_READY: unknown act \u0027standing\u0027)\n"
+                           }
+                       ],
+              "ready":  8,
+              "n":  10,
+              "first_build_ready":  8,
+              "lint_pass":  5,
+              "cloned_hits":  0,
+              "builder_primary_added":  0,
+              "builder_contact_added":  0,
+              "mean_seconds":  12.7,
+              "spoken_lines":  21,
+              "distinct_spoken_lines":  21,
+              "identical_spoken_lines":  0,
+              "distinct_openings":  10
+          },
+    "note":  "standing case used an unknown act name (harness typo, same in both arms); fixed to standing_mf afterwards",
+    "A":  {
+              "suite":  "ten",
+              "home":  "C:\\AI\\render\\writer_pipeline\\acceptance\\home_ab_A",
+              "arm":  "A",
+              "persona":  null,
+              "rows":  [
+                           {
+                               "case":  "missionary",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\missionary pick=cand_3 score=80 spoken_words=6 warnings=[] seconds=13.0 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\missionary\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  13.1,
+                               "status":  "READY",
+                               "pick":  "cand_3",
+                               "score":  80,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  6,
+                               "seconds":  13.0,
+                               "llm_seconds":  12.6,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "God, so deep...",
+                                             "You like that?"
+                                         ],
+                               "opening":  "At first, (S1) leans against the wooden sideboard, her damp blonde hair clinging to her glistening skin in the soft evening light.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  3,
+                               "tone":  "eager",
+                               "line_focus":  "depth",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "doggy",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\doggy pick=cand_1 score=65 spoken_words=7 warnings=[\u0027lint_fail_fallback\u0027] seconds=12.0 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\doggy\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  12.1,
+                               "status":  "READY",
+                               "pick":  "cand_1",
+                               "score":  65,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "slot_garment"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  7,
+                               "seconds":  12.0,
+                               "llm_seconds":  11.7,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "It\u0027s too rough...",
+                                             "Stay on the log."
+                                         ],
+                               "opening":  "At first, (S1) sits on the driftwood log, leaning forward with her damp blonde hair obscuring her face as the soft lap of waves hits the sand.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "ashamed",
+                               "line_focus":  "surface",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "blowjob",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\blowjob pick=rewrite score=93 spoken_words=3 warnings=[] seconds=11.2 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\blowjob\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  11.3,
+                               "status":  "READY",
+                               "pick":  "rewrite",
+                               "score":  93,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  3,
+                               "seconds":  11.2,
+                               "llm_seconds":  10.8,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Just swallow it."
+                                         ],
+                               "opening":  "At first, (S1) stands on the sand, her blonde wavy hair catching the golden hour light as she looks directly at the lens.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)",
+                                                   "move-into-position beat (R16/R23a)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "eager",
+                               "line_focus":  "surface",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "talk",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\talk pick=cand_1 score=86 spoken_words=25 warnings=[] seconds=22.3 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\talk\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  22.5,
+                               "status":  "READY",
+                               "pick":  "cand_1",
+                               "score":  86,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  25,
+                               "seconds":  22.3,
+                               "llm_seconds":  7.7,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Come to investigate the wet dress, detective?",
+                                             "Looks like a crime scene, sweetheart.",
+                                             "It is a little too translucent, isn\u0027t it?",
+                                             "Case is closed already."
+                                         ],
+                               "opening":  "At first, (S1) leans against the wooden sideboard, her damp blonde hair clinging to her glistening skin in the soft evening light.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)",
+                                                   "move-into-position beat (R16/R23a)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "spoof",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "cowgirl",
+                               "rc":  3,
+                               "stdout":  "NOT_READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\cowgirl reason=writer prompt failed the consistency gate: NOT_READY: R1 cowgirl PRIMARY MOTION must name her rise and her sink and a measurable lift of his pelvis off the surface meeting her descent; the builder does not write his thrust warnings=[\u0027lint_fail_fallback\u0027] seconds=13.4 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\cowgirl\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  13.6,
+                               "status":  "NOT_READY",
+                               "pick":  "rewrite_builder",
+                               "score":  80,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "builder"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  7,
+                               "seconds":  13.4,
+                               "llm_seconds":  12.8,
+                               "first_build":  "NOT_READY",
+                               "n_builds":  2,
+                               "lines":  [
+                                             "This wood is nothing compared to you"
+                                         ],
+                               "opening":  "At first, (S1) leans against the wooden sideboard in the soft evening light, her damp blonde hair clinging to her glistening skin as the sideboard creaks under her weight.",
+                               "build_added":  [
+
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "silent",
+                               "line_focus":  "surface",
+                               "not_ready_msg":  "NOT_READY: writer prompt failed the consistency gate: NOT_READY: R1 cowgirl PRIMARY MOTION must name her rise and her sink and a measurable lift of his pelvis off the surface meeting her descent; the builder does not write his thrust\n\n--- non-strict diagnostic build (NOT for render) ---\nsubject_defi"
+                           },
+                           {
+                               "case":  "doggy_rough",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\doggy_rough pick=cand_1 score=75 spoken_words=12 warnings=[] seconds=10.4 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\doggy_rough\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  10.5,
+                               "status":  "READY",
+                               "pick":  "cand_1",
+                               "score":  75,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  12,
+                               "seconds":  10.4,
+                               "llm_seconds":  10.0,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "This top is too wet, you jerk",
+                                             "Shut up and take it"
+                                         ],
+                               "opening":  "At first, (S1) sits leaning on the driftwood log, her blonde hair damp and messy against her glistening skin.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  2,
+                               "tone":  "bratty",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "bj_tease",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\bj_tease pick=rewrite score=90 spoken_words=3 warnings=[] seconds=11.6 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\bj_tease\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  11.7,
+                               "status":  "READY",
+                               "pick":  "rewrite",
+                               "score":  90,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  3,
+                               "seconds":  11.6,
+                               "llm_seconds":  11.2,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Take it all."
+                                         ],
+                               "opening":  "At first, (S1) stands on the sand in her sheer white maxi dress, looking at the camera with a sun-kissed glow.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "ashamed",
+                               "line_focus":  "depth",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "missionary_slow",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\missionary_slow pick=rewrite score=100 spoken_words=9 warnings=[] seconds=11.7 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\missionary_slow\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  11.9,
+                               "status":  "READY",
+                               "pick":  "rewrite",
+                               "score":  100,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  9,
+                               "seconds":  11.7,
+                               "llm_seconds":  11.4,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Don\u0027t stop, just go deeper",
+                                             "I\u0027m hitting your limit"
+                                         ],
+                               "opening":  "At first, (S1) leans against the wooden sideboard, her wet, blonde hair clinging to her glistening skin in the soft evening light.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "bratty",
+                               "line_focus":  "depth",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "talk_spoof",
+                               "rc":  0,
+                               "stdout":  "READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\talk_spoof pick=cand_2 score=90 spoken_words=13 warnings=[\u0027beat_card_skipped\u0027] seconds=10.7 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\talk_spoof\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  10.8,
+                               "status":  "READY",
+                               "pick":  "cand_2",
+                               "score":  90,
+                               "pick_pass":  true,
+                               "pick_hard":  [
+
+                                             ],
+                               "warnings":  [
+                                                "beat_card_skipped"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  13,
+                               "seconds":  10.7,
+                               "llm_seconds":  10.4,
+                               "first_build":  "READY",
+                               "n_builds":  1,
+                               "lines":  [
+                                             "Tired of hiding your curves?",
+                                             "Try the Mesh-O-Matic!",
+                                             "It\u0027s practically invisible!"
+                                         ],
+                               "opening":  "At first, (S1) sits leaning on the driftwood log, her damp blonde hair messy against her glistening skin.",
+                               "build_added":  [
+                                                   "wardrobe line from the tracked end state (R12)",
+                                                   "writer opener kept (builder opener skipped)",
+                                                   "move-into-position beat (R16/R23a)"
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  1,
+                               "tone":  "spoof",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  ""
+                           },
+                           {
+                               "case":  "standing",
+                               "rc":  3,
+                               "stdout":  "NOT_READY run=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\standing reason=NOT_READY: unknown act \u0027standing\u0027 warnings=[\u0027lint_fail_fallback\u0027] seconds=13.4 pick_json=C:\\AI\\community\\runs\\wp_accept_20261113\\ab_A\\standing\\pick.json queued=False",
+                               "stderr":  "",
+                               "wall_s":  13.5,
+                               "status":  "NOT_READY",
+                               "pick":  "rewrite_builder",
+                               "score":  80,
+                               "pick_pass":  false,
+                               "pick_hard":  [
+                                                 "builder"
+                                             ],
+                               "warnings":  [
+                                                "lint_fail_fallback"
+                                            ],
+                               "cloned_hits":  [
+
+                                               ],
+                               "spoken_words":  9,
+                               "seconds":  13.4,
+                               "llm_seconds":  13.0,
+                               "first_build":  "NOT_READY",
+                               "n_builds":  2,
+                               "lines":  [
+                                             "this white dress looks better bunched up like this."
+                                         ],
+                               "opening":  "At first, S1 stands on the sand, her blonde hair catching the golden hour light as she looks toward the lens amidst the soft rustle of waves.",
+                               "build_added":  [
+
+                                               ],
+                               "builder_primary_added":  false,
+                               "builder_contact_added":  false,
+                               "cand_pass":  0,
+                               "tone":  "silent",
+                               "line_focus":  "garment state",
+                               "not_ready_msg":  "NOT_READY: NOT_READY: unknown act \u0027standing\u0027\n\n--- non-strict diagnostic build (NOT for render) ---\n(non-strict build also failed: NOT_READY: unknown act \u0027standing\u0027)\n"
+                           }
+                       ],
+              "ready":  8,
+              "n":  10,
+              "first_build_ready":  8,
+              "lint_pass":  7,
+              "cloned_hits":  0,
+              "builder_primary_added":  0,
+              "builder_contact_added":  0,
+              "mean_seconds":  13.0,
+              "spoken_lines":  19,
+              "distinct_spoken_lines":  19,
+              "identical_spoken_lines":  0,
+              "distinct_openings":  9
+          },
+    "winner":  "A"
+}
