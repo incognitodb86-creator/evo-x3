@@ -677,3 +677,82 @@ def test_pm_acc4d_glue_lint_and_ending_state():
                 "She says, <d>[English] We keep going.</d> She adds, <d>[English] That's the shot.</d>")
     counted = L.talk_counted_lines(bts, {"ask": "BTS interview"})
     assert len(counted) == 3
+
+
+def test_part2_item5_partner_fields_and_clip_length_and_modes_header():
+    import wp_lint as L
+
+    # section_split must keep bracketed MODES header so assemble_system injects mode blocks
+    sys_txt, meta = p.assemble_system({"writer_prompt": str(Path(r"C:\AI\render\writer_pipeline\writer_prompt.md"))},
+                                      "tease edge clip on the bed", "current")
+    assert "Teasing and edging" in meta["modes"]
+    assert "Teasing and edging" in sys_txt
+
+    # partner card species, scale_anchor, anatomy, and matches_still flow into <Subject N>
+    card = {
+        "summary": "An orc and a futa take her on the stone slab.",
+        "partners": [
+            {
+                "label": "S2", "sex": "man", "age": 35, "build": "towering muscular build",
+                "attire": "a leather harness", "enters_from": "left",
+                "species": "orc", "scale_anchor": "about twice her height",
+            },
+            {
+                "label": "S3", "sex": "futa", "age": 28, "build": "tall slim build",
+                "attire": "a black corset", "enters_from": "behind",
+                "anatomy": "with full breasts and a thick penis", "matches_still": "<Picture 2>",
+            },
+        ],
+    }
+    slots = {"place": "stone room", "light": "torchlight", "surface": "the slab",
+             "tone": "eager", "line_focus_text": "his body",
+             "frames": 124, "clip_seconds": 5.2, "speech_words_max": 13, "max_lines_per_speaker": 1}
+    out = p.assemble_output("[Shot 1] At first, (S1) lies on the slab.", card, slots, 3, "sex")
+    s2_line = [ln for ln in out.splitlines() if ln.startswith("<Subject 2>")][0]
+    s3_line = [ln for ln in out.splitlines() if ln.startswith("<Subject 3>")][0]
+    assert "the orc, an adult" in s2_line and "the man" not in s2_line.lower()
+    assert "about twice her height" in s2_line
+    assert "with full breasts and a thick penis" in s3_line
+    assert "matches <Picture 2>" in s3_line
+
+    # brief_block passes T and scaled word/line budget; wp_lint honors max_lines_per_speaker
+    brief = p.brief_block("missionary on the slab", "missionary", "sex", slots, 2)
+    assert "T = 5.2 s (124 frames)" in brief and "at most 13" in brief and "at most 1 short line(s) per speaker" in brief
+    dd_2lines = ("[Shot 1] (S1) says in a soft voice, <d>[English] One.</d> "
+                 "(S1) says in a soft voice, <d>[English] Two.</d>")
+    lr = L.lint(full(dd_2lines), ctx(cfg={"speech_words_max": 13, "max_lines_per_speaker": 1}))
+    assert "speaker_cap" in [i["code"] for i in lr["issues"]]
+
+
+def test_male_solo_strips_female_read_slots_and_voice():
+    female_read = {
+        "read": {
+            "room": "high-rise apartment",
+            "place": "by a window",
+            "surface": "wooden sideboard",
+            "bed": False,
+            "sheets": None,
+            "floor": "the floor",
+            "pose": "leaning, standing",
+            "facing_camera": True,
+            "framing": "medium shot",
+            "light": "soft evening light from window",
+            "people": 1,
+            "garments": [{"type": "dress", "name": "sheer white halter dress", "look": "white sheer"}],
+            "build": "curvy",
+            "skin": "fair skin",
+            "hair": "blonde, damp, straight",
+        }
+    }
+    stripped, changed = p.strip_male_solo_still_read(female_read)
+    assert set(changed) >= {"hair", "skin", "build", "pose", "garments", "facing_camera", "people"}
+    assert stripped["read"]["garments"] == [] and stripped["read"]["hair"] == "" and stripped["read"]["pose"] == ""
+    slots = p.make_slots(female_read, "male solo edging", "male_solo", "solo", "lf21_test", None)
+    assert not slots["opening_lead"].startswith("her ") and "her skin" not in slots["opening_lead"]
+    assert "her body" not in slots["line_focus_text"] and slots["garments_all"] == []
+    brief = p.brief_block("male solo edging", "male_solo", "solo", slots, 1)
+    assert "still's pose" not in brief
+    cast, _ = p.make_cast(female_read, "male_solo", "male solo edging")
+    assert "man's voice" in (cast.get("voice_s1") or "").lower()
+    assert cast.get("inventory") == [] and cast.get("garments_off") == ""
+

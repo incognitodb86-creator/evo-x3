@@ -155,16 +155,21 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
         items = inv
     join = [g["name"] for g in items if g.get("key") in br._JOIN_KEYS or g.get("slot") in ("bottom", "full-body")
             or re.search(r"(?i)\b(?:bodysuit|teddy|leotard|catsuit|one-piece|swimsuit|bikini(?!\s+top))\b", g["name"])]
-    focus_opts = ["his body", "her body", "the act", "the tone"]  # acceptance-2 item 9: never surface/floor/furniture/depth
+    is_male_solo = (position == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or "")
+    focus_opts = ["his body", "the act", "the tone"] if is_male_solo else ["his body", "her body", "the act", "the tone"]  # acceptance-2 item 9
     if not f["props"]:
         focus_opts = [x for x in focus_opts if x != "still prop"]
     if not inv:
         focus_opts = [x for x in focus_opts if x != "garment state"]
     focus = rng.choice(focus_opts)
-    focus_text = {"his body": "his body and what he does to her (never his hands, grip or strength)", "her body": "her body and how it feels",
-                  "the act": "the act itself and what comes next", "the tone": "the tone slot, said straight to the partner",
-                  "garment state": f"the {g0.get('name', 'garment')} and where it is now",
-                  "still prop": (f["props"][0] if f["props"] else "his body")}[focus]
+    focus_text = {
+        "his body": "his body and how he feels" if is_male_solo else "his body and what he does to her (never his hands, grip or strength)",
+        "her body": "her body and how it feels",
+        "the act": "the act itself and what comes next",
+        "the tone": "the tone slot, spoken aloud" if is_male_solo else "the tone slot, said straight to the partner",
+        "garment state": f"the {g0.get('name', 'garment')} and where it is now",
+        "still prop": (f["props"][0] if f["props"] else "his body"),
+    }[focus]
     slots = {
         "surface": re.sub(r"(?i)^(?:the|a|an)\s+", "", f.get("surface") or ""),
         "garment": garment, "garment_noun": gnoun, "garments_all": [g["name"] for g in inv], "join_garments": join,
@@ -175,12 +180,14 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
         "framing": read.get("framing") or "", "hair": read.get("hair") or "", "skin": read.get("skin") or "",
         "build": read.get("build") or "", "props": f["props"], "restraints": f["restraints"],
         "tone": pick_tone(ask, rng, last_tone, overlays), "line_focus": focus, "line_focus_text": focus_text,
-        "position": position, "kind": kind, "opening_lead": rng.choice(OPENING_LEADS),
+        "position": position, "kind": kind,
+        "opening_lead": rng.choice(MALE_OPENING_LEADS if is_male_solo else OPENING_LEADS),
     }
-    if (position == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or ""):
+    if is_male_solo:
         # setting-only still: never leak her hair, skin, clothes or pose onto the man
         for k in ("hair", "skin", "build", "garment", "garment_noun", "pose"):
             slots[k] = ""
+        slots["facing_camera"] = False
         slots["garments_all"] = []
         slots["join_garments"] = []
     if scene_prev:
@@ -194,7 +201,7 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
 def section_split(text: str) -> List[Tuple[str, List[str]]]:
     out: List[Tuple[str, List[str]]] = []
     for ln in text.splitlines():
-        if re.match(r"^[A-Z][A-Z ,&/()-]{3,}$", ln.strip()) and not ln.startswith("-"):
+        if re.match(r"^[A-Z][A-Z ,&/-]{3,}(?:\s*\(.*\))?$", ln.strip()) and not ln.startswith("-"):
             out.append((ln.strip(), []))
         elif out:
             out[-1][1].append(ln)
@@ -244,13 +251,17 @@ BEAT_SCHEMA_SEX = {
     "type": "object",
     "required": ["summary", "camera", "partners", "anchor", "onset", "development", "result", "end_state"],
     "properties": {
+        "clip_seconds": {"type": "number"},
         "summary": {"type": "string"},
         "camera": {"type": "string"},
         "partners": {"type": "array", "items": {"type": "object", "required": ["label", "sex", "age", "build", "attire", "enters_from"],
                                                  "properties": {"label": {"type": "string"}, "sex": {"type": "string"},
                                                                 "age": {"type": "integer"}, "build": {"type": "string"},
                                                                 "attire": {"type": "string"}, "enters_from": {"type": "string"},
-                                                                "hair": {"type": "string"}}}},
+                                                                "hair": {"type": "string"},
+                                                                "species": {"type": "string"}, "scale_anchor": {"type": "string"},
+                                                                "anatomy": {"type": "string"}, "matches_still": {"type": "string"},
+                                                                "still": {"type": "string"}}}},
         "anchor": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
         "onset": {"type": "object", "required": ["exit", "load", "height", "clearance", "entry", "sound"],
                   "properties": {k: {"type": "string"} for k in ("exit", "load", "height", "clearance", "entry", "sound")}},
@@ -271,6 +282,7 @@ BEAT_SCHEMA_TALK = {
     "type": "object",
     "required": ["summary", "camera", "partners", "anchor", "onset", "development", "result", "end_state"],
     "properties": {
+        "clip_seconds": {"type": "number"},
         "summary": {"type": "string"}, "camera": {"type": "string"},
         "partners": BEAT_SCHEMA_SEX["properties"]["partners"],
         "anchor": BEAT_SCHEMA_SEX["properties"]["anchor"],
@@ -303,7 +315,7 @@ _SEX_BEAT = ("Plan this clip as a beat card in JSON. Four phases: anchor (the st
              "clearance move using the still's garment noun and the word aside, and the entry), development (the PRIMARY MOTION "
              "with one tempo word the builder reads, the contact keyword, one or two follow-through cues, one or two short lines), "
              "result (the end state with the motion still running). Each phase has one diegetic sound tied to its action. "
-             "Spoken words in total: twenty-five at most.")
+             "Stay within the brief's clip-length spoken-word budget.")
 _PRIMARY_REQ = ("- One sentence that begins exactly 'As it builds, PRIMARY MOTION - ' followed by the motion, its intensity and one "
                 "tempo word (per second, every second, cycle, strokes a second), then one follow-through cue.\n")
 _CLEAR_REQ = ("- If a garment covers the join: one active clearance sentence BEFORE the entry, in this form: '(S2) pulls her "
@@ -329,15 +341,15 @@ MODES: Dict[str, Dict[str, Any]] = {
                 "beat_task": ("Plan this clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
                               "(exit from the still pose into the position and what carries each body's weight), development (the "
                               "PRIMARY MOTION with one tempo word, the body parts that touch, one or two follow-through cues, one or "
-                              "two short lines), result (the end state with the motion still running). No penetration. Each phase "
-                              "has one diegetic sound tied to its action. Spoken words in total: twenty-five at most."),
-                "prose_req": ("- One literal sentence naming the body parts that touch and how they move (no penetration).\n") + _PRIMARY_REQ,
-                "onset_hint": "The onset: the exit from that pose into the position.\n"},
+                                  "two short lines), result (the end state with the motion still running). No penetration. Each phase "
+                                  "has one diegetic sound tied to its action. Stay within the brief's clip-length spoken-word budget."),
+                    "prose_req": ("- One literal sentence naming the body parts that touch and how they move (no penetration).\n") + _PRIMARY_REQ,
+                    "onset_hint": "The onset: the exit from that pose into the position.\n"},
     "solo": {"schema": BEAT_SCHEMA_NOJOIN,
              "beat_task": ("Plan this solo clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
                            "(the first move out of the still pose), development (the PRIMARY MOTION with one tempo word, one or two "
                            "follow-through cues, at most two short lines), result (the end state with the motion still running). "
-                           "One person, no partner contact. Each phase has one diegetic sound. Spoken words in total: twenty-five at most."),
+                           "One person, no partner contact. Each phase has one diegetic sound. Stay within the brief's clip-length spoken-word budget."),
              "prose_req": _PRIMARY_REQ + "- The camera keeps her face and body in frame (she is alone). Foley is breath, fabric, wet "
                                          "skin or the toy's hum, never a slap.\n",
              "onset_hint": "The onset: the first move out of that pose (any garment move uses aside or a removal verb).\n"},
@@ -346,7 +358,7 @@ MODES: Dict[str, Dict[str, Any]] = {
                             "(the first move toward the first garment), development (the PRIMARY MOTION is the removal itself with one "
                             "tempo word, one to three removal steps, each naming the still's garment noun, where it lands and that it "
                             "stays there, with a short hold between steps), result (the end state still moving). One person, no "
-                            "contact. Each phase has one diegetic sound. Spoken words in total: twenty-five at most."),
+                            "contact. Each phase has one diegetic sound. Stay within the brief's clip-length spoken-word budget."),
               "prose_req": ("- One to three removal steps with a removal verb (slides down, pulls off, peels), each naming the garment "
                             "noun, where it lands (the floor at her feet, or a named surface) and that it stays there; no contact; "
                             "a garment that is off stays off.\n"
@@ -360,7 +372,7 @@ MODES: Dict[str, Dict[str, Any]] = {
                                  "exactly as shown or as the last clip ended), onset (the exit from that pose and who moves whom), "
                                  "development (the bodies landing in the new pose in the act's own words, contact held if it was "
                                  "held), result (the new pose landed with a slow first motion). Each phase has one diegetic sound. "
-                                 "Spoken words in total: twenty-five at most."),
+                                 "Stay within the brief's clip-length spoken-word budget."),
                    "prose_req": _CLEAR_REQ + ("- One sentence that lands the new pose in the act's own words (on her back, hands and knees, "
                                  "astride, on her side, face down); any motion stays slow.\n"),
                    "onset_hint": "The onset: the exit from that pose and who moves whom.\n"},
@@ -368,9 +380,9 @@ MODES: Dict[str, Dict[str, Any]] = {
              "beat_task": ("Plan this talk-only clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
                            "(the one physical action that moves the story), development (two or three short spoken lines), result (the last "
                            "line and an end state that is still moving). Three to five lines in total, about five to eight words each, "
-                           "twenty-five spoken words at most. Each phase has one diegetic sound tied to its action. No sex, no contact."),
-             "prose_req": ("- Three or four short spoken lines across the phases, at most two per speaker, twenty-five spoken words "
-                           "in total at most; no contact and no PRIMARY MOTION.\n"),
+                           "within the brief's clip-length spoken-word budget. Each phase has one diegetic sound tied to its action. No sex, no contact."),
+             "prose_req": ("- Three or four short spoken lines across the phases, within the brief's clip-length spoken-word budget; "
+                           "no contact and no PRIMARY MOTION.\n"),
              "onset_hint": "The onset: the one physical action that moves the story.\n"},
 }
 
@@ -498,6 +510,7 @@ CONTINUE_NOTE = ("CONTINUED: the 'At first' sentence is the inherited end state 
 # acceptance-2 e: openings rotate (not every clip 'At first, (S1) leans/sits/stands')
 OPENING_LEADS = ["her hands", "her gaze toward the lens", "her hair", "the light on her skin", "her hips", "her garment",
                  "her breath", "her bare shoulders"]
+MALE_OPENING_LEADS = ["his hands", "his gaze toward the side", "the light in the room", "his stance", "his shoulders", "his breath"]
 SURFACE_HEIGHT = [("waist", r"sideboard|table|counter|desk|dresser|vanity|bar|kitchen island|washing machine|piano"),
                   ("low", r"bed|sofa|couch|log|sand|mattress|bench|chaise|futon|lounger|rug|blanket|towel"),
                   ("floor", r"floor|ground|carpet|grass|deck")]
@@ -582,17 +595,27 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
                  "and never the word deep; each line is "
                  "spoken to the partner about the act, his body or hers, in the tone slot.")
     if slots.get("opening_lead") and not slots.get("inherited"):
-        lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's pose and surface noun "
-                     f"('(S1) leans against the {surf_noun}'), and never starts with 'breathes heavily'; "
-                     f"it may add a detail about {slots['opening_lead']}.")
+        if (position == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or ""):
+            lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's setting and {surf_noun} "
+                         f"surface noun, and never starts with 'breathes heavily'; it may add a detail about {slots['opening_lead']}.")
+        else:
+            lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's pose and surface noun "
+                         f"('(S1) leans against the {surf_noun}'), and never starts with 'breathes heavily'; "
+                         f"it may add a detail about {slots['opening_lead']}.")
     lines.append("SUMMARY: summary is one plain sentence: who, where, the act; never the camera line, 'At first' or 'As it builds'.")
     if act.get("contact_verbs") or act.get("motion_verbs"):  # the act's own vocabulary from acts.yaml (routing data, no new rule)
         lines.append(f"ACT {act.get('id')}: contact words {', '.join(act.get('contact_verbs') or [])}; motion words "
                      f"{', '.join(act.get('motion_verbs') or [])}")
+    clip_frames = int(slots.get("frames") or br.SINGLE_CLIP_MAX_FRAMES)
+    clip_secs = float(slots.get("clip_seconds") or round(clip_frames / float(br.H3_FPS), 1))
+    word_max = int(slots.get("speech_words_max") or max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5))))
+    lines_max = int(slots.get("max_lines_per_speaker") or max(1, int(round((clip_frames / float(br.H3_FPS)) / 5.0))))
     lines += [f"TONE (the submissive's reaction tone for this clip): {slots['tone']}",
               f"LINE FOCUS (what the talk is about): {slots['line_focus_text']}",
               f"PEOPLE: (S1) is the woman in the still{'; (S2) is her partner, defined by you' if bodies >= 2 else ''}"
-              f"{'; (S3) is a third adult, defined by you' if bodies >= 3 and kind != 'talk' else ''}. Everyone is an adult, 25 or older."]
+              f"{'; (S3) is a third adult, defined by you' if bodies >= 3 and kind != 'talk' else ''}. Everyone is an adult, 25 or older.",
+              f"CLIP LENGTH: T = {clip_secs:.1f} s ({clip_frames} frames); spoken words total at most {word_max} "
+              f"(at most {lines_max} short line(s) per speaker)."]
     if slots.get("inherited"):
         inh = slots["inherited"]
         def _nz(x):
@@ -749,6 +772,22 @@ def _clean_attr(s: str, default: str) -> str:
     return s or default
 
 
+def _partner_match_clause(p: Dict[str, Any], idx: int, slots: Dict[str, Any]) -> str:
+    raw = str(p.get("matches_still") or p.get("matches") or p.get("still") or "").strip()
+    if not raw and idx == 1 and slots.get("s3_still"):
+        raw = "matches <Picture 2>"
+    if not raw:
+        return ""
+    m = re.search(r"<?\bPicture\s+(\d+)\b>?", raw, flags=re.I)
+    if m:
+        pic = f"<Picture {m.group(1)}>"
+        return raw if raw.lower().startswith("matches") and pic in raw else f"matches {pic}"
+    cleaned = _clean_attr(raw, "")
+    if not cleaned:
+        return ""
+    return cleaned if cleaned.lower().startswith("matches") else f"matches {cleaned}"
+
+
 def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, Any], bodies: int, kind: str,
                     continuation: Optional[str] = None) -> str:
     place = slots.get("place") or "setting"
@@ -786,8 +825,19 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         sm = _SIDE_RE.search(str(p.get("enters_from") or ""))
         side = ("the " + sm.group(0).lower()) if sm and not sm.group(0).lower().startswith(("the", "behind", "off")) else (
             sm.group(0).lower() if sm else "the right")
-        role = {"man": "the man, an adult", "woman": "the woman, an adult", "futa": "the woman, an adult futa"}[sex]
-        sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}, in {attire}, who enters from {side} "
+        species = _clean_attr(p.get("species"), "")
+        if species and species.lower() not in ("human", "person"):
+            role = f"the {species}, an adult" if sex == "man" else (
+                f"the {species} futa woman, an adult" if sex == "futa" else f"the {species} woman, an adult"
+            )
+        else:
+            role = {"man": "the man, an adult", "woman": "the woman, an adult", "futa": "the woman, an adult futa"}[sex]
+        anat = _clean_attr(p.get("anatomy") or p.get("futa_anatomy"), "")
+        scale = _clean_attr(p.get("scale_anchor") or p.get("scale"), "")
+        match_str = _partner_match_clause(p, i, slots)
+        extras = ", ".join(x for x in (anat, scale, match_str) if x)
+        extra_part = f", {extras}" if extras else ""
+        sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}{extra_part}, in {attire}, who enters from {side} "
                   f"and {pron} is ({label}).")
     _sum_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
     summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {slots.get('position')} clip on the {_sum_surf}")
@@ -885,6 +935,9 @@ def make_cast(still_read: Dict[str, Any], position: str, ask: str, continued: bo
     ck = brief.get("camera_kind")
     if ck and ck not in ("third_person", "third-person"):
         mk["camera_kind"] = br._CAM_KIND_MAP.get(ck, ck)
+    if (brief.get("s1_gender") == "man") or ((hook_act or brief.get("act_id") or position) == "male_solo"):
+        still_read, _ = strip_male_solo_still_read(still_read)
+        mk["voice_s1"] = "a deep, steady adult man's voice, low and hoarse"
     return br.make_cast(still_read, position, ask, **mk), position
 
 
@@ -938,7 +991,16 @@ def partner_look_from_card(card: Optional[Dict[str, Any]], label: str = "S3") ->
     except (TypeError, ValueError):
         age = 30
     sex = "woman" if re.search(r"(?i)\b(?:female|woman|f)\b", str(p3.get("sex", ""))) else "man"
-    bits = [f"an adult {sex}, {age} years of age", f"of {_clean_attr(p3.get('build'), 'solid')} build".replace("build build", "build")]
+    species = _clean_attr(p3.get("species"), "")
+    if species and species.lower() not in ("human", "person"):
+        head = f"an adult {species}" if sex == "man" else f"an adult {species} woman"
+    else:
+        head = f"an adult {sex}"
+    bits = [f"{head}, {age} years of age", f"of {_clean_attr(p3.get('build'), 'solid')} build".replace("build build", "build")]
+    if p3.get("anatomy") or p3.get("futa_anatomy"):
+        bits.append(_clean_attr(p3.get("anatomy") or p3.get("futa_anatomy"), ""))
+    if p3.get("scale_anchor") or p3.get("scale"):
+        bits.append(_clean_attr(p3.get("scale_anchor") or p3.get("scale"), ""))
     if p3.get("hair"):
         h3 = _clean_attr(p3.get('hair'), '').rstrip(" ,")
         if _COLOUR_END_RE.search(h3):  # #14: 'short dark' keeps its noun
@@ -1022,6 +1084,22 @@ def clean_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
         return new, changed
     out = dict(d)
     out["read"] = new
+    return out, changed
+
+
+def strip_male_solo_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+    """Strip the still woman's personal attributes/garments so a male_solo still_read stays setting-only."""
+    rd = d.get("read") if isinstance(d.get("read"), dict) else d
+    nr = dict(rd)
+    changed: List[str] = []
+    for k, empty in (("hair", ""), ("skin", ""), ("build", ""), ("pose", ""), ("garments", []), ("facing_camera", False), ("people", 0)):
+        if nr.get(k) not in (empty, None):
+            changed.append(k)
+            nr[k] = empty
+    if rd is d:
+        return nr, changed
+    out = dict(d)
+    out["read"] = nr
     return out, changed
 
 
@@ -1157,6 +1235,15 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         if route["position"] != position:
             log("mode_fallback", {"run": run_id, "position": position, "chosen": route["position"]})
         position, kind, overlays = route["position"], route["mode"], route["overlays"]
+        if (position == "male_solo") or (route.get("act_id") == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or ""):
+            raw_sr = run_dir / "still_read.raw.json"
+            if not raw_sr.exists() and (run_dir / "still_read.json").exists():
+                wp_state.atomic_write(raw_sr, (run_dir / "still_read.json").read_text(encoding="utf-8"))
+            still_read, ms_changed = strip_male_solo_still_read(still_read)
+            if ms_changed:
+                still_read = dict(still_read, male_solo_stripped=ms_changed)
+                wp_state.atomic_write(run_dir / "still_read.json", json.dumps(still_read, indent=2, ensure_ascii=False))
+                log("male_solo_still_stripped", {"run": run_id, "fields": ms_changed})
         bodies = acts_bodies(position)
         for w in route["warnings"]:
             result["warnings"].append(w["warn"])
@@ -1166,6 +1253,17 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         # 2 slots
         last_tone = (state_dir / "last_tone.txt").read_text(encoding="utf-8").strip() if (state_dir / "last_tone.txt").exists() else None
         slots = make_slots(still_read, ask, position, kind, run_id, last_tone, scene_prev, overlays=overlays)
+        clip_frames = int(job.get("frames") or br.SINGLE_CLIP_MAX_FRAMES)
+        clip_seconds = round(clip_frames / float(br.H3_FPS), 1)
+        speech_words_max = max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5)))
+        max_lines_spk = max(1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
+        slots["frames"] = clip_frames
+        slots["clip_seconds"] = clip_seconds
+        slots["speech_words_max"] = speech_words_max
+        slots["max_lines_per_speaker"] = max_lines_spk
+        s3_still_pre = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
+        if s3_still_pre:
+            slots["s3_still"] = s3_still_pre
         wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
         sysprompt, pmeta = assemble_system(cfg, ask, persona, route["mode_blocks"])
         result.update(pmeta)
@@ -1204,7 +1302,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                       "or off the clip." if kind == "talk" else "\nVOICE: only (S1) speaks in this clip.")
         rd_ = br._unwrap_still_read(still_read)
         wet_ok = bool(wp_lint.WET_RE.search(json.dumps(rd_)) or wp_lint.WET_RE.search(ask))
-        lint_ctx = {"kind": kind, "slots": slots, "blacklist": blacklist, "cloned": cloned, "cfg": cfg.get("lint") or {},
+        lint_cfg = dict(cfg.get("lint") or {})
+        lint_cfg["speech_words_max"] = speech_words_max
+        lint_cfg["max_lines_per_speaker"] = max_lines_spk
+        lint_ctx = {"kind": kind, "slots": slots, "blacklist": blacklist, "cloned": cloned, "cfg": lint_cfg,
                     "scene": scene_prev, "builder_preview": builder_preview_fn(still_read, position, ask),
                     "cast": cast_l, "overlays": overlays, "ask": ask, "act_id": route["act_id"], "wet_ok": wet_ok,
                     "recent_openings": [wp_lint.opening_sentence(d) for d in wp_state.load_recent(recent_path)[-10:]]}
@@ -1256,6 +1357,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         if card is None:
             result["warnings"].append("beat_card_skipped")
         else:
+            card.setdefault("clip_seconds", clip_seconds)
             if route["act_id"] == "doggy" and isinstance(card.get("end_state"), dict):
                 place = " ".join(filter(None, [slots.get("place"), slots.get("surface"), slots.get("floor"), ask]))
                 if re.search(r"(?i)\b(?:log|sand)\b", place):

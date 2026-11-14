@@ -598,9 +598,9 @@ def submit_parody_job(
     return res
 
 
-# --- dynsafe writer hook --------------------------------------------------------------------------------------------
-# Explicit sexual craft is for fictional adult OC runs only (C:\AI\render\AGENTS.md Prompt Writer rule 7): every RefMod in
-# the base graph must be an OC RefMod (minimaxh3_oc_*) or a listed fictional character; anything else fails closed.
+# --- writer hook ----------------------------------------------------------------------------------------------------
+# Writer runs accept all adult RefMods and voice refs (OC, PixlStash-tagged, or INDEX character/celebrity RefMods);
+# every person in the clip is an adult 18+.
 OC_WRITER_FICTIONAL_REFMODS = frozenset({"minimaxh3_adamjensen_v1_refmod"})
 
 
@@ -861,7 +861,8 @@ def _stems_for_character_name(name: str) -> List[str]:
     from resolve import find_refmods_for_name
     if not (name or "").strip():
         return []
-    files = find_refmods_for_name(name.strip(), REFMODS_DIR) or []
+    norm_q = re.sub(r"[^a-z0-9]", "", name.lower())
+    files = (find_refmods_for_name(norm_q, REFMODS_DIR) or []) if norm_q else []
     stems = [_mod_stem(getattr(f, "stem", f)) for f in files]
     key = trained_oc_subject_keys().get(_norm_ident(name))
     if key:
@@ -912,36 +913,34 @@ def resolve_writer_refmods(
     character: Optional[str] = None,
     names: Optional[Sequence[str]] = None,
 ) -> Dict[str, Any]:
-    """Pick fictional OC / listed-fictional RefMods for the writer hook (t1109u).
+    """Pick installed visual/audio RefMods for the writer hook across OC, INDEX, and PixlStash tags.
 
-    Uses the same INDEX + aliases + local RefMod resolver as named parodies, but this explicit
-    hook only loads OC / listed-fictional RefMods. A celebrity INDEX hit is a named-parody
-    identity: fail closed here and use submit_parody_run.py. Also matches a still from the
-    approved POOL folder, a PixlStash character tag, or a trained RefMod trigger (FCSydny).
-    Never guesses a likeness from a still filename, and never reuses the previous run's RefMods.
+    Uses aliases + INDEX + local RefMod files (all adult RefMods and voice refs allowed), trained
+    RefMod triggers (e.g. FCSydny), PixlStash character tags, or approved POOL path components.
+    Never guesses a likeness from a bare still filename, and never reuses the previous run's RefMods.
     Stills are not passed to validate_stills (writer stills may live outside approved_characters).
     """
     out: Dict[str, Any] = {"stems": [], "source": None, "reason": None, "index": None}
     char = (character or "").strip() or None
     name_list = [n for n in (list(names) if names else []) if str(n).strip()]
-    if char or name_list:
-        stems: List[str] = []
-        for n in ([char] if char else []) + name_list:
-            stems.extend(_stems_for_character_name(str(n)))
-        oc: List[str] = []
+
+    def _resolve_names(targets: Sequence[str]) -> List[str]:
+        found: List[str] = []
         seen: set = set()
-        for s in stems:
-            if _is_writer_lane_refmod(s) and s not in seen:
-                seen.add(s)
-                oc.append(s)
+        for n in targets:
+            for s in _stems_for_character_name(str(n)):
+                if _is_writer_lane_refmod(s) and s not in seen:
+                    seen.add(s)
+                    found.append(s)
         try:
+            tlist = [str(n).strip() for n in targets if str(n).strip()]
             req = {
-                "names": name_list + ([char] if char and char not in name_list else []),
-                "character": char or "",
+                "names": tlist,
+                "character": tlist[0] if tlist else "",
                 "actor": "",
                 "tone": "",
                 "length_s": 10,
-                "description": "",
+                "description": "adult figure with eyes, hair, and outfit",
             }
             resolved = resolve_identities(req, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
             loaded = [_mod_stem(x) for x in (resolved.get("loaded_refmods") or [])]
@@ -950,38 +949,30 @@ def resolve_writer_refmods(
                 "index_flag": resolved.get("index_flag"),
                 "loaded": loaded,
             }
-            loaded_oc = [s for s in loaded if _is_writer_lane_refmod(s)]
-            loaded_other = [s for s in loaded if not _is_writer_lane_refmod(s)]
-            if loaded_other and not loaded_oc and not oc:
-                who = char or (name_list[0] if name_list else "named identity")
-                out["reason"] = (
-                    f"'{who}' resolves through the character INDEX as a named parody identity; "
-                    "use submit_parody_run.py with --character / --actor, not the explicit OC writer hook. "
-                    "This hook will not attach a real-person RefMod or reuse the previous run's RefMods."
-                )
-                return out
-            for s in loaded_oc:
-                if s not in oc:
-                    oc.append(s)
-        except Exception as e:  # INDEX miss is fine; OC stem match can still succeed
+            for s in loaded:
+                if _is_writer_lane_refmod(s) and s not in seen:
+                    seen.add(s)
+                    found.append(s)
+        except Exception as e:
             out["index_error"] = f"{type(e).__name__}: {e}"
-        if oc:
-            out["stems"] = oc
+        return found
+
+    if char or name_list:
+        targets = ([char] if char else []) + [n for n in name_list if n != char]
+        matched = _resolve_names(targets)
+        if matched:
+            out["stems"] = matched
             out["source"] = "character"
             return out
-        if any(index_named_identity(x) for x in ([char] if char else []) + [str(n) for n in name_list]):
-            who = char or (name_list[0] if name_list else "named identity")
-            out["reason"] = (
-                f"'{who}' resolves through the character INDEX as a named parody identity; "
-                "use submit_parody_run.py with --character / --actor, not the explicit OC writer hook. "
-                "This hook will not attach a real-person RefMod or reuse the previous run's RefMods."
-            )
-            return out
+        who = char or (name_list[0] if name_list else "named identity")
+        out["reason"] = f"no local RefMod installed for '{who}' in {REFMODS_DIR}"
+        return out
+
     keys = oc_keys_for_still_and_names(still_image, char, " ".join(str(n) for n in name_list))
     if keys:
         inst = installed_oc_refmod_keys()
-        stems = []
-        seen = set()
+        stems: List[str] = []
+        seen: set = set()
         for k in keys:
             for s in inst.get(k, []):
                 if s not in seen:
@@ -991,11 +982,20 @@ def resolve_writer_refmods(
             out["stems"] = stems
             out["source"] = "still_path"
             return out
+
+    tagged = pixlstash_character_names_for_still(still_image)
+    if tagged:
+        matched = _resolve_names(tagged)
+        if matched:
+            out["stems"] = matched
+            out["source"] = "pixlstash"
+            return out
+
     out["reason"] = (
-        "no OC RefMod matched this still via installed minimaxh3_oc_* files, the trained trigger, "
+        "no RefMod matched this still via installed files, the trained trigger, "
         "the POOL folder, a PixlStash character tag, or the character name; "
-        "will not reuse the previous run's RefMods. Pass a still tagged or filed as the OC character "
-        "(for example FCSydny / poolclub or poolblonde), or pass the character name."
+        "will not reuse the previous run's RefMods. Pass a still tagged or filed as the character "
+        "(for example FCSydny / poolclub or poolblonde), or pass --character <name>."
     )
     return out
 
@@ -1014,7 +1014,7 @@ def prepare_writer_base_graph(
     img = _graph_img1(graph)
     mods = _graph_mod_values(graph)
     mods_ok = bool(mods) and all(_is_writer_lane_refmod(m) for m in mods)
-    keys = oc_keys_in_text(still) if still else []
+    keys = oc_keys_for_still_and_names(still) if still else []
     blob = " ".join(mods).lower()
     mods_match_keys = bool(keys) and all(k in blob for k in keys)
 
@@ -1069,8 +1069,18 @@ def prepare_writer_base_graph(
     img_mismatch = bool(still and img and Path(img).name.lower() != Path(still).name.lower())
     if img_mismatch and not keys:
         picked = resolve_writer_refmods(still_image=still)
+        if picked.get("stems"):
+            graph = json.loads(Path(DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
+            report["template"] = True
+            report["template_path"] = str(DEFAULT_REFMOD_TEMPLATE)
+            graph = _pin_still(graph)
+            _set_refmod_slots(graph, picked["stems"])
+            report["stems"] = list(picked["stems"])
+            report["source"] = picked.get("source")
+            report["index"] = picked.get("index")
+            return graph, report
         report["reason"] = picked.get("reason") or (
-            "the start still changed and no OC RefMod matched the new still; will not reuse the previous run's RefMods"
+            "the start still changed and no RefMod matched the new still; will not reuse the previous run's RefMods"
         )
         report["index"] = picked.get("index")
         return graph, report
@@ -1225,7 +1235,16 @@ def submit_writer_run(
                 mk["camera_kind"] = br._CAM_KIND_MAP.get(ck, ck)
             if continued or mk.get("continued"):
                 mk["continued"] = True
+            _is_male_solo = (brief.get("s1_gender") == "man") or ((hook_act or brief.get("act_id") or position) == "male_solo")
+            if _is_male_solo and isinstance(still_read, dict):
+                # Strip female wardrobe/hair/skin/build/pose/people so apply_still_facts & _garment_retention emit setting only.
+                _sr_in = still_read.get("read") if isinstance(still_read.get("read"), dict) else still_read
+                _sr_clean = dict(_sr_in)
+                _sr_clean.update({"hair": "", "skin": "", "build": "", "pose": "", "garments": [], "facing_camera": False, "people": 0})
+                still_read = dict(still_read, read=_sr_clean) if isinstance(still_read.get("read"), dict) else _sr_clean
             cast = br.make_cast(still_read, position, ask, **mk)
+            if _is_male_solo and not (cast_overrides or {}).get("voice_s1"):
+                cast["voice_s1"] = "a deep, steady adult man's voice, low and hoarse"
             cast.update(cast_overrides or {})
             report["still_read"] = still_read
             if callable(raw):

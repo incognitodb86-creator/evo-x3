@@ -34,12 +34,14 @@ def compile_prompt(agents_text: str) -> str:
     t = agents_text.replace("\r\n", "\n")
     sha = hashlib.sha256(agents_text.encode("utf-8")).hexdigest()
     sections = {}
+    headers = {}
     cur = None
     for ln in t.split("\n"):
         head = re.match(r"^([A-Z][A-Z ,&/-]{3,}?)(?:\s*(\(.*\)))?\s*$", ln)
         if head and not ln.startswith("-"):
             cur = head.group(1).strip()
-            sections[cur] = [head.group(2).strip()] if head.group(2) else []
+            headers[cur] = ln.strip()
+            sections[cur] = []
             continue
         if cur is not None:
             sections[cur].append(ln)
@@ -48,9 +50,14 @@ def compile_prompt(agents_text: str) -> str:
         if k not in sections:
             raise SystemExit(f"section {k} missing from AGENTS.md")
         body = [l for l in sections[k] if not DROP_LINE.match(l)]
+        if k == "SHAPE":
+            for idx, l in enumerate(body):
+                if l.strip() == "detailed_description:":
+                    body = body[idx:]
+                    break
         if k == "BEFORE YOU WRITE":
             out.append(OUTPUT)
-        out.append(k + "\n" + "\n".join(body).strip("\n") + "\n")
+        out.append(headers[k] + "\n" + "\n".join(body).strip("\n") + "\n")
     text = "\n".join(out)
     assert_writer_system_prompt(text)
     if "AGENTS.md" in text or "--queue" in text:

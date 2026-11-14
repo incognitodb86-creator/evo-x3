@@ -1,6 +1,6 @@
 ---
 name: h3-max-ref2va-prompt
-description: The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 on this box - the standing Max lane unless Derek directs otherwise. Use for any paste into MiniMaxH3ReferenceToVideo: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / video-render) or FLUX stills (alienpc-stills-pose-edit-prompting).
+description: "The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 on this box - the standing Max lane unless Derek directs otherwise. Use for any paste into MiniMaxH3ReferenceToVideo: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / video-render) or FLUX stills (alienpc-stills-pose-edit-prompting)."
 ---
 
 # H3-Max REF2VA prompt lane (AlienPc setup)
@@ -24,7 +24,7 @@ Named INDEX + RefMod parodies defer to `h3-parody-identity` for their locked sin
 
 ## 1. The shared rules (h3-prompting, unchanged, all apply)
 
-R2. Render rules (adults only, no real likeness, guard_ok) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
+R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
 
 `C:\AI\community\skills\h3-prompting\SKILL.md` is the single home for the cross-lane rules; read it first, do not
 restate it here.
@@ -307,6 +307,6 @@ Allowed length pairs at 24 fps: duration_s 5|8|10 with frames 124|192|243. Cap o
 Hard bans (fail closed; cite live rules):
 - Never emit a labeled soundscape or non-diegetic-music header (R7, R32; TenStrip #77).
 - No hosted six-section dump; five local sections only (R5).
-- No RefLoRA, no 2-pass, no sampler/CFG/steps/resolution in the paste; voice binding via the RefMod audio and <Audio 1> / <Subject 1> labels is allowed (R33).
+- All adult RefMods and voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed on 1-pass `templates/b2_refmod.api.json`; no 2-pass upscaler and no sampler/CFG/steps/resolution in the paste (R33).
 - No 350-500 word cap; length follows h3-prompting R9 (no word floor or quota, staying under the encoder limit; Derek).
 - Dialogue = spoken words only inside lane markup (R37). Continuations never restart the scene (R10). Adults 18+ only.

@@ -85,7 +85,7 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
 
 ## 1. Active Locked Baseline (`4bc9bba` / `ab72d88`, Derrick Nov 6, 2026 `t218u` & `t375s1715`)
 - **Graph (`templates/b2_refmod.api.json`)**: Single-pass `768x1344`, `8` steps (`euler` / `simple`, `shift` `12.0` video / `3.0` audio, `cfg=1.0`, `denoise=1.0`) on `10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors`.
-- **Identity (`INDEX + RefMod` only)**: `MiniMaxH3RefModsLoader` (`mod_1..mod_8`, `strength=1.0`) → `MiniMaxH3RefModApply` (`retention=1.0`). Zero `RefLoRA` (`ComfyUI-MiniMaxH3RefLoRA.disabled`, weights archived to `C:\AI\_archive\2026-11-06-refmod-only\`), zero `2-pass` upscaler, voice binding via RefMod audio and <Audio 1> / <Subject 1> labels is allowed, zero `LoadImage` start photo by default.
+- **Identity (`INDEX + RefMod + PixlStash tags`)**: `MiniMaxH3RefModsLoader` (`mod_1..mod_8`, `strength=1.0`) → `MiniMaxH3RefModApply` (`retention=1.0`). All adult RefMods (OC, INDEX, PixlStash-tagged across `approved_characters\vault.db` and Stills `C:\Users\derek\5slock\libraries\vault.db`) and all voice refs (`*_refmod_audio` + `<Audio 1>` / `<Subject 1>` labels; e.g. `FCSydny` -> `poolclub` visual + audio) are allowed; 2-pass upscaler is retired; `18+` (`guard_ok` / youth lint) is the only content rule. `LoadImage` start photo (`img_1`) is used when `--image` or `writer-run --still` is passed.
 - **Direct execution**: Queue `run_queue.py` directly on saved `request.api.json` or `submit_parody_run.py` output — no `pi.ps1`, no `ralph.ps1`, no local LLM load. Any new CLI flag, ComfyUI node/input, multi-file edit, or test arm requires a 1:1 question card yes from Derrick first.
 - **Dialogue / beat-sheet hygiene**: Never pass beat-sheet timestamps (`t=00.00.000-...`), `"No speech"`, foley/SFX cues (`room tone`, `glass clink`, `heels on wood`), or backticks inside `--dialogue` / `<d>...</d>` (H3 TTS speaks stage cues out loud). Pass spoken words only inside `<d>...</d>`, and omit `<d>` (`dialogue=None`) on silent clips. Always inspect generated `prompt.txt` before `run_queue.py`.
 
@@ -184,7 +184,7 @@ This skill only changes **identity binding** (INDEX + RefMod + name/description)
 ---
 
 ## 3. Superseded Archive — Nov 6, 2026 6:43 AM `2-pass` Skill Text (`7,614 B`, RETIRED by `ab72d88` / `t375s1715`)
-Kept verbatim per non-deletion rule for audit history only; **do not run 2-pass or strip `<scenedirect>` or the old labeled soundscape header from `4bc9bba` without a new Derrick card yes**.
+Kept verbatim per non-deletion rule for historical audit reference only; superseded by Section 1 above (2-pass is retired; **today's code allows all adult RefMods and voice refs via `*_refmod_audio` + `<Audio 1>`, with `18+` as the only content rule**). Do not run 2-pass or treat historical notes below as current locks.
 
 ```markdown
 ---

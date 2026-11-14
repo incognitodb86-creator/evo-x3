@@ -126,7 +126,7 @@ def test_t1109_prepare_graph_attaches_oc_refmod_from_still_path():
     assert s._graph_img1(g).endswith("oc_poolclub_diner.jpg")
 
 
-def test_t1109_prepare_graph_character_name_attaches_oc_and_index_celebrity_fails_closed():
+def test_t1109_prepare_graph_character_name_attaches_oc_and_index_celebrity_refmods():
     keys = s.installed_oc_refmod_keys()
     assert "poolblonde" in keys
     tpl = json.loads(Path(s.DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
@@ -143,11 +143,17 @@ def test_t1109_prepare_graph_character_name_attaches_oc_and_index_celebrity_fail
         still_image=r"C:\AI\render\_inputs\generic_start.jpg",
         character="daenerys",
     )
-    assert rep2.get("reason")
-    reason = (rep2.get("reason") or "")
-    assert "named parody" in reason.lower() or "INDEX" in reason or "index" in reason.lower()
-    if rep2.get("stems"):
-        assert all(s._is_writer_lane_refmod(x) for x in rep2["stems"])
+    assert not rep2.get("reason"), rep2
+    assert any("emiliaclarke" in x for x in (rep2.get("stems") or []))
+
+    _g3, rep3 = s.prepare_writer_base_graph(
+        tpl,
+        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        character="nonexistent_character_xyz",
+    )
+    assert rep3.get("reason")
+    assert "no local RefMod installed" in rep3["reason"]
+    assert "will not attach a real-person RefMod" not in rep3["reason"]
 
 
 def test_t1125_trained_subject_fcsydny_maps_to_poolclub():
@@ -182,7 +188,7 @@ def test_t1125_orc_pool_edge_and_hoot_are_not_folder_aliases():
     assert "poolclub" not in " ".join(out2.get("stems") or [])
 
 
-def test_t1125_character_fcsydny_attaches_poolclub_and_deadpool_fails_closed():
+def test_t1125_character_fcsydny_and_deadpool_attach_refmods():
     out = s.resolve_writer_refmods(
         still_image=r"C:\AI\render\_inputs\generic_start.jpg",
         character="FCSydny",
@@ -193,11 +199,8 @@ def test_t1125_character_fcsydny_attaches_poolclub_and_deadpool_fails_closed():
         still_image=r"C:\AI\render\_inputs\generic_start.jpg",
         character="Deadpool",
     )
-    assert out2.get("reason")
-    reason = (out2.get("reason") or "").lower()
-    assert "named parody" in reason or "index" in reason
-    if out2.get("stems"):
-        assert all(s._is_writer_lane_refmod(x) for x in out2["stems"])
+    assert not out2.get("reason"), out2
+    assert any("ryanreynolds" in x for x in (out2.get("stems") or []))
 
 
 def test_t1125_pixlstash_tag_attaches_poolclub(monkeypatch):
