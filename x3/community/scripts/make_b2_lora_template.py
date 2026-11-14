@@ -25,7 +25,7 @@ import json
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = r"C:\AI\community"  # templates/ and runs/ stay in the community work tree (F6b)
 SRC = os.path.join(ROOT, "templates", "b2.api.json")
 DST = os.path.join(ROOT, "templates", "b2_fc_sydney_lora.api.json")
 SRC_SHA = "124fb1331874f27803e95c81db67fe270b30dd5533732d7032105839dfd81ca2"  # b2.README.md, the default recipe

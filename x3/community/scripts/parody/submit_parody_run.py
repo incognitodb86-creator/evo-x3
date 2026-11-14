@@ -641,18 +641,45 @@ def _set_refmod_slots(graph: Dict[str, Any], stems: Sequence[str]) -> None:
 
 
 _OC_KEY_RE = re.compile(r"(?i)minimaxh3_oc_([^_]+)_")
+_OC_VER_RE = re.compile(r"(?i)_v(\d+)_")
+
+
+def _keep_highest_oc_version(stems: Sequence[str]) -> List[str]:
+    """When multiple versions (v1, v2) of the same OC key appear in stems, keep only the highest version."""
+    max_ver: Dict[str, int] = {}
+    for s in stems:
+        m = _OC_KEY_RE.search(s)
+        if m:
+            vm = _OC_VER_RE.search(s)
+            ver = int(vm.group(1)) if vm else 0
+            k = m.group(1).lower()
+            if ver > max_ver.get(k, -1):
+                max_ver[k] = ver
+    out: List[str] = []
+    for s in stems:
+        m = _OC_KEY_RE.search(s)
+        if m:
+            vm = _OC_VER_RE.search(s)
+            ver = int(vm.group(1)) if vm else 0
+            k = m.group(1).lower()
+            if ver < max_ver.get(k, 0):
+                continue
+        out.append(s)
+    return out
 
 
 def installed_oc_refmod_keys(refmods_dir: Optional[Path] = None) -> Dict[str, List[str]]:
-    """Map oc_* keys (poolclub, poolblonde) to installed RefMod stems."""
+    """Map oc_* keys (poolclub, poolblonde) to installed RefMod stems (highest v<N> pair per key)."""
     d = Path(refmods_dir or REFMODS_DIR)
     keys: Dict[str, List[str]] = {}
     if not d.is_dir():
         return keys
-    for f in d.glob("*.safetensors"):
+    for f in sorted(d.glob("*.safetensors")):
         m = _OC_KEY_RE.search(f.stem)
         if m:
             keys.setdefault(m.group(1).lower(), []).append(f.stem)
+    for k, stems in list(keys.items()):
+        keys[k] = _keep_highest_oc_version(stems)
     return keys
 
 
@@ -675,6 +702,7 @@ def oc_keys_in_text(*parts: Optional[str]) -> List[str]:
 # Not substring matches. Do not alias SYDNEY or ORC_POOL_EDGE.
 _OC_PATH_COMPONENT_ALIASES = {
     "pool": "poolclub",  # approved_characters\POOL -> trained trigger FCSydny
+    "fcmegan": "meganfox",  # approved_characters\FCMegan -> minimaxh3_meganfox_v1_refmod
 }
 
 _PIXLSTASH_VAULTS = (
@@ -858,18 +886,23 @@ def _is_writer_lane_refmod(stem: str) -> bool:
 
 
 def _stems_for_character_name(name: str) -> List[str]:
-    from resolve import find_refmods_for_name
+    from resolve import find_refmods_for_name, load_aliases
     if not (name or "").strip():
         return []
     norm_q = re.sub(r"[^a-z0-9]", "", name.lower())
     files = (find_refmods_for_name(norm_q, REFMODS_DIR) or []) if norm_q else []
+    if not files and norm_q:
+        alias_target = _OC_PATH_COMPONENT_ALIASES.get(norm_q) or (load_aliases(ALIASES_PATH) or {}).get(norm_q)
+        if alias_target:
+            alias_norm = re.sub(r"[^a-z0-9]", "", alias_target.lower())
+            files = (find_refmods_for_name(alias_norm, REFMODS_DIR) or []) if alias_norm else []
     stems = [_mod_stem(getattr(f, "stem", f)) for f in files]
     key = trained_oc_subject_keys().get(_norm_ident(name))
     if key:
         for s in installed_oc_refmod_keys().get(key, []):
             if s not in stems:
                 stems.append(s)
-    return stems
+    return _keep_highest_oc_version(stems)
 
 
 
@@ -955,7 +988,7 @@ def resolve_writer_refmods(
                     found.append(s)
         except Exception as e:
             out["index_error"] = f"{type(e).__name__}: {e}"
-        return found
+        return _keep_highest_oc_version(found)
 
     if char or name_list:
         targets = ([char] if char else []) + [n for n in name_list if n != char]
@@ -978,8 +1011,13 @@ def resolve_writer_refmods(
                 if s not in seen:
                     seen.add(s)
                     stems.append(s)
+            if not inst.get(k):
+                for s in _stems_for_character_name(k):
+                    if _is_writer_lane_refmod(s) and s not in seen:
+                        seen.add(s)
+                        stems.append(s)
         if stems:
-            out["stems"] = stems
+            out["stems"] = _keep_highest_oc_version(stems)
             out["source"] = "still_path"
             return out
 
@@ -1323,6 +1361,7 @@ def submit_writer_run(
         g["img_1"]["inputs"]["image"] = (_normalize_comfy_still(still_image) or still_image).strip()
         report.update(status="READY", chars=len(prompt), prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest().upper(),
                       build=rep)
+        (run_dir / f"{tag}_NOT_READY.txt").unlink(missing_ok=True)
         jd = run_dir / tag
         jd.mkdir(parents=True, exist_ok=True)
         (run_dir / "prompt.txt").write_text(prompt, encoding="utf-8")
@@ -1407,6 +1446,7 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--position", default="")
     ap.add_argument("--still", default=None)
     ap.add_argument("--character", default=None)
+    ap.add_argument("--names", nargs="+", default=None, help="character/celebrity names for RefMod resolution")
     ap.add_argument("--partner-type2", default=None, choices=["man", "woman", "none", "non-human", "faceless", "still"])
     # Max Architect 3, Derrick t1440 (MMF S3): a generated S3 look, an S3 reference still, an optional frame cap for VRAM
     ap.add_argument("--s3-in-frame", action="store_true", help="continued clip: S3 is already in the inherited frame (no 'enters')")
@@ -1447,7 +1487,8 @@ def _writer_run_cli(argv) -> int:
         r = submit_writer_run((d / "writer_output.txt").read_text(encoding="utf-8"), base_graph, d,
                               a.ask, a.position, still_image=(a.still or None),
                               still_read=json.loads((d / "still_read.json").read_text(encoding="utf-8")),
-                              dry_run=not a.queue, character=(a.character or None), partner_type2=(a.partner_type2 or None),
+                              dry_run=not a.queue, character=(a.character or None), names=(a.names or None),
+                              partner_type2=(a.partner_type2 or None),
                               cast_overrides=dict(_s3_overrides(a.s3_look, a.partner2_still, getattr(a, "s2_look", None)) or {}, **({"shots": a.shots} if a.shots else {}),
                                                   **({"s3_in_frame": True} if a.s3_in_frame else {}),
                                                   **({"inherited_garments": inh_garments} if isinstance(inh_garments, dict) and inh_garments else {}))

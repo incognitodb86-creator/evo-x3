@@ -2239,9 +2239,9 @@ def writer_defined_missing_person(raw: str, subject: int = 2) -> bool:
     if not (raw or "").strip():
         return False
     if subject == 3:
-        who = re.compile(r"(?i)\b(?:<subject 3>|\(s3\)|the (?:other )?man|the (?:other )?woman|a third)\b")
+        who = re.compile(r"(?i)(?:<subject 3>|\(s3\)|\b(?:the (?:other )?man|the (?:other )?woman|a third)\b)")
     else:
-        who = re.compile(r"(?i)\b(?:he|his|<subject 2>|\(s2\)|the man|the woman|her partner)\b")
+        who = re.compile(r"(?i)(?:<subject 2>|\(s2\)|\b(?:he|his|the man|the woman|her partner)\b)")
     # "He enters her" is the act, not an entrance into the scene.
     enter = re.compile(
         r"(?i)\b(?:walks? in|comes? in|steps? in|arrives|comes? into|walks? into|steps? into|"

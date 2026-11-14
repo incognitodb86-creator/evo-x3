@@ -5,6 +5,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 QUEUE = os.path.join(os.path.dirname(HERE), "queue")
 if QUEUE not in sys.path:
     sys.path.insert(0, QUEUE)
+# F6b: this test moved to C:\AI\lib\tests with the rest of the suite; its tool stayed in the community
+# queue folder (its card forbids moving the test, and a move would take the tool out of the test's reach),
+# so that folder is on the path too. Same file, same behaviour.
+QCOMMUNITY = r"C:\AI\community\scripts\queue"
+if os.path.isdir(QCOMMUNITY) and QCOMMUNITY not in sys.path:
+    sys.path.insert(0, QCOMMUNITY)
 
 import flux_phase_gate as g
 

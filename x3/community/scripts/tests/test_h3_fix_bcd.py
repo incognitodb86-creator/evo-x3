@@ -116,7 +116,13 @@ class TestPromptIdsAndHarvest(unittest.TestCase):  # (c)
 
 class TestClipShaBackfill(unittest.TestCase):  # (d)
     def test_backfill_fills_only_empty(self):
-        sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(HERE)), "notes"))
+        # F6b: the tests moved to C:\AI\lib\tests, so ".." is now C:\AI\lib and has no notes folder. The
+        # helper this test imports (h3_lora_ab_judge_check.py) lives in the community work tree, which is
+        # where it always lived; that path is added, then the import is exactly as before.
+        for cand in (os.path.join(os.path.dirname(os.path.dirname(HERE)), "notes"),
+                     r"C:\AI\community\notes"):
+            if os.path.isdir(cand) and cand not in sys.path:
+                sys.path.insert(0, cand)
         import h3_lora_ab_judge_check as jc
         with tempfile.TemporaryDirectory() as b:
             runs = os.path.join(b, "runs"); os.makedirs(os.path.join(runs, "c1")); os.makedirs(os.path.join(runs, "c2"))
