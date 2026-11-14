@@ -24,7 +24,8 @@ OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every 
     ("defeat", r"superheroine|\bheroine\b|\bperil\b|\bdefeated\b"),
     ("cnc", r"\bcnc\b|reluctan\w*|\bresist\w*|non-?con\w*"),
     ("taboo_role", r"\bdaddy\b|\bstep-?(?:brother|sister|dad|mom|father|mother|son|daughter)\b|\b(?:brother|sister|uncle|cousin)\b|roleplay"),
-    ("spoof", r"\bspoof\b|\bparody\b|infomercial|\bnoir\b|space-captain|sitcom"),
+    ("spoof", r"\bspoof\b|\bparody\b|infomercial|\bnoir\b|space-captain|sitcom|\bvampire\b|\bcostume\b|\bcosplay\b"),
+    ("vhs", r"\bvhs\b|\bcamcorder\b|\bhandycam\b"),
     ("bts", r"\bbts\b|\binterview\b|off[- ]?screen interviewer"),
     ("restraints", r"\brestrain\w*|\btied\b|\bcuff\w*|\bbound\b|\bropes?\b|strapped"),
     ("toy", r"\btoys?\b|vibrator|dildo|\bplug\b|\bwand\b"),
@@ -32,6 +33,7 @@ OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every 
     ("nonhuman", br._CREATURE_RE.pattern.replace("(?i)", "")),
     # Derrick t1454u/t1455u: sleep, hypnosis/mind-control and sedative themes are agreed adult roleplay: one consent line or wink in clip 1 (t1457u)
     ("consent_setup", r"\basleep\b|\bsleep(?:ing|s)?\b|\bhypno\w*|mind[- ]?control\w*|\btrance\b|\bsedat\w*|\bdrugged\b|\bmdma\b"),
+    ("states", r"\basleep\b|\bsleep(?:ing|s)?\b|\bhypno\w*|mind[- ]?control\w*|\btrance\b|\bsedat\w*|\bdrugged\b|\bmdma\b|\bhigh\b|\btelekinesis\b"),
     ("scale", r"\btiny\b|\bfair(?:y|ies)\b|\bpixie|\bminiature\b|\bgiant(?:ess)?\b|\boversized\b|"
               r"\b(?:massive|huge|enormous) (?:cock|dick|shaft|size)\b|size difference|\bcarr(?:y|ies|ied|ying)\b|"
               r"held in (?:the )?air|\blifts? (?:her (?:up|off|into)|the tiny)\b"),
@@ -41,7 +43,8 @@ STRIP_RE = re.compile(r"(?i)\bstrip\w*|\bundress\w*|slow reveal|\bpeels?\b")
 SEX_WORDS_RE = re.compile(r"(?i)\b(?:sex|fucks?|takes her|thrusts?|rides?|riding|penetrat\w*|inside her)\b")
 # mode-block labels in writer_prompt.md MODES (only the blocks for this clip are kept)
 BLOCK_FOR = {"cinematic": "Cinematic", "gonzo": "Gonzo", "pov": "Gonzo", "edge": "Teasing and edging",
-             "forced_orgasm": "Forced orgasm", "strip": "Strip and undress", "defeat": "Superheroine defeat", "toy": "Toys"}
+             "forced_orgasm": "Forced orgasm", "strip": "Strip and undress", "defeat": "Superheroine defeat",
+             "toy": "Toys", "vhs": "Camera and look", "states": "States"}
 
 
 def _alias_index() -> Dict[str, str]:

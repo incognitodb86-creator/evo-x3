@@ -427,7 +427,7 @@ def test_pm_acc4d_templates_and_male_solo_still():
     assert "lips sealed around his shaft" in (mmf.get("contact") or "").lower()
     assert "sheathed" not in (mmf.get("contact") or "").lower()
     sc = br.make_cast(BED_READ, "ff_scissoring", "FF scissoring on the bed")
-    assert "vulva pressed to vulva" in (sc.get("contact") or "").lower()
+    assert "(s1)'s vulva is pressed to (s2)'s vulva" in (sc.get("contact") or "").lower()
     ffm = br.make_cast(BED_READ, "ffm", "FFM on the bed")
     c = (ffm.get("contact") or "").lower()
     assert "penis" in c and "vagina" in c and ("vulva" in c or "mouth" in c)

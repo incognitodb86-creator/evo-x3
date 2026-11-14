@@ -252,6 +252,8 @@ BEAT_SCHEMA_SEX = {
     "required": ["summary", "camera", "partners", "anchor", "onset", "development", "result", "end_state"],
     "properties": {
         "clip_seconds": {"type": "number"},
+        "look": {"type": "string"},
+        "arousal_stage": {"type": "integer"},
         "summary": {"type": "string"},
         "camera": {"type": "string"},
         "partners": {"type": "array", "items": {"type": "object", "required": ["label", "sex", "age", "build", "attire", "enters_from"],
@@ -260,18 +262,17 @@ BEAT_SCHEMA_SEX = {
                                                                 "attire": {"type": "string"}, "enters_from": {"type": "string"},
                                                                 "hair": {"type": "string"},
                                                                 "species": {"type": "string"}, "scale_anchor": {"type": "string"},
-                                                                "anatomy": {"type": "string"}, "matches_still": {"type": "string"},
+                                                                "anatomy": {"type": "string"}, "matches_still": {"type": ["string", "boolean"]},
                                                                 "still": {"type": "string"}}}},
         "anchor": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
         "onset": {"type": "object", "required": ["exit", "load", "height", "clearance", "entry", "sound"],
                   "properties": {k: {"type": "string"} for k in ("exit", "load", "height", "clearance", "entry", "sound")}},
-        "development": {"type": "object", "required": ["primary_motion", "tempo_word", "contact_keyword", "follow_through", "sound", "lines"],
+        "development": {"type": "object", "required": ["primary_motion", "tempo_word", "contact_keyword", "follow_through", "sound", "line_topics"],
                         "properties": {"primary_motion": {"type": "string"}, "tempo_word": {"type": "string"},
                                        "contact_keyword": {"type": "string"},
                                        "follow_through": {"type": "array", "items": {"type": "string"}},
                                        "sound": {"type": "string"},
-                                       "lines": {"type": "array", "items": {"type": "object", "required": ["speaker", "text"],
-                                                                            "properties": {"speaker": {"type": "string"}, "text": {"type": "string"}}}}}},
+                                       "line_topics": {"type": "array", "items": {"type": "string"}}}},
         "result": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
         "end_state": {"type": "object", "required": ["pose", "garments", "contact", "camera", "pov"],
                       "properties": {"pose": {"type": "string"}, "garments": {"type": "object"}, "contact": {"type": "string"},
@@ -283,17 +284,18 @@ BEAT_SCHEMA_TALK = {
     "required": ["summary", "camera", "partners", "anchor", "onset", "development", "result", "end_state"],
     "properties": {
         "clip_seconds": {"type": "number"},
+        "look": {"type": "string"},
         "summary": {"type": "string"}, "camera": {"type": "string"},
         "partners": BEAT_SCHEMA_SEX["properties"]["partners"],
         "anchor": BEAT_SCHEMA_SEX["properties"]["anchor"],
         "onset": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
-        "development": {"type": "object", "required": ["lines", "sound"],
-                        "properties": {"lines": {"type": "array", "minItems": 2, "maxItems": 3,
-                                                 "items": BEAT_SCHEMA_SEX["properties"]["development"]["properties"]["lines"]["items"]},
+        "development": {"type": "object", "required": ["line_topics", "sound"],
+                        "properties": {"line_topics": {"type": "array", "minItems": 2, "maxItems": 3,
+                                                       "items": {"type": "string"}},
                                        "sound": {"type": "string"}}},
-        "result": {"type": "object", "required": ["action", "sound", "lines"],
+        "result": {"type": "object", "required": ["action", "sound"],
                    "properties": {"action": {"type": "string"}, "sound": {"type": "string"},
-                                  "lines": BEAT_SCHEMA_SEX["properties"]["development"]["properties"]["lines"]}},
+                                  "line_topics": {"type": "array", "items": {"type": "string"}}}},
         "end_state": BEAT_SCHEMA_SEX["properties"]["end_state"],
     },
 }
@@ -308,7 +310,7 @@ def _schema_variant(base: Dict[str, Any], onset_req: List[str], dev_req: List[st
 
 # no penetration join: the onset has no clearance/entry requirement and the development has no contact keyword
 BEAT_SCHEMA_NOJOIN = _schema_variant(BEAT_SCHEMA_SEX, ["exit", "load", "height", "sound"],
-                                     ["primary_motion", "tempo_word", "follow_through", "sound", "lines"])
+                                     ["primary_motion", "tempo_word", "follow_through", "sound", "line_topics"])
 
 _SEX_BEAT = ("Plan this clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset (exit from the "
              "still pose into the position, what carries each body's weight, how the surface height lines up the hips, the one "
@@ -405,6 +407,8 @@ OVERLAY_NOTES: Dict[str, str] = {
     "cnc": "Consensual non-consent fantasy between adults: one protest beat inside the action and his override by grip or command; no safeword unless asked.",
     "taboo_role": "Role-play between adults: one role for the clip, at most one title per line, tied to something visible.",
     "spoof": "Spoof: original characters only, one genre flavour and cadence, one visual nod; film look as light, lens and grain words, no real names and no famous quotes.",
+    "vhs": "VHS camcorder look: soft analog camcorder video with slight colour bleed and tracking lines, handheld camcorder energy, never a phone or smartphone.",
+    "states": "States / fantasy setup: keep every character an adult; any consent/roleplay agreement belongs in its own separate setup clip, never inside the sex clip.",
     "restraints": "Restraints: name the restraint, who set it and its limit once; it stays on to the last frame. Tie her wrists to the {surface} she lies on, or he holds them; name no other anchor.",
     "toy": "Toy: define it once (type, size, who controls it); solo, the toy is the PRIMARY MOTION with tempo; with a partner, penetration is the PRIMARY MOTION and the toy rides in the follow-through; insertion or removal is one move each with where it rests.",
     "threesome": "Three adults at most: define (S3) (look, clothes, entrance), give each hand an owner such as (S3)'s left hand, at most two lines per speaker.",
@@ -447,23 +451,29 @@ def _lines_to_topics(schema: Any) -> Any:
 def schema_errors(obj: Any, schema: Dict[str, Any], path: str = "$") -> List[str]:
     errs: List[str] = []
     t = schema.get("type")
-    types = {"object": dict, "array": list, "string": str, "integer": int, "boolean": bool}
-    if t and not isinstance(obj, types[t]) or (t == "integer" and isinstance(obj, bool)):
-        return [f"{path}: expected {t}"]
-    if t == "object":
+    types = {"object": dict, "array": list, "string": str, "integer": int, "number": (int, float), "boolean": bool}
+    allowed = [t] if isinstance(t, str) else (list(t) if isinstance(t, list) else [])
+    if allowed:
+        ok = any(a in types and isinstance(obj, types[a]) and not (a in ("integer", "number") and isinstance(obj, bool))
+                 for a in allowed)
+        if not ok:
+            return [f"{path}: expected {t}"]
+    if isinstance(obj, dict) and (t == "object" or "object" in allowed):
         for k in schema.get("required", []):
             if k not in obj:
                 errs.append(f"{path}.{k}: missing")
         for k, sub in (schema.get("properties") or {}).items():
             if k in obj:
                 errs += schema_errors(obj[k], sub, f"{path}.{k}")
-    if t == "array":
+    if isinstance(obj, list) and (t == "array" or "array" in allowed):
         if len(obj) < schema.get("minItems", 0) or len(obj) > schema.get("maxItems", 10 ** 6):
             errs.append(f"{path}: {len(obj)} items")
         for i, it in enumerate(obj):
             errs += schema_errors(it, schema.get("items") or {}, f"{path}[{i}]")
-    if t == "string" and not obj.strip():
-        errs.append(f"{path}: empty")
+    if isinstance(obj, str) and not obj.strip():
+        leaf = path.rsplit(".", 1)[-1]
+        if leaf not in ("contact", "hair", "species", "scale_anchor", "anatomy", "matches_still", "still", "prop_hand"):
+            errs.append(f"{path}: empty")
     return errs
 
 
@@ -759,14 +769,42 @@ _S1_ONLY = re.compile(r"(?i)\b(?:bikini|bra|panties|thong|lingerie|stockings|cro
 _SIDE_RE = re.compile(r"(?i)\b(?:frame )?(?:left|right|behind(?: her)?|the door(?:way)?|off[- ]?screen)\b")
 
 
-def partner_sex(ask: str, card_sex: str) -> str:
-    """The ask decides the partner's sex; the beat card may not turn 'him' into a woman."""
-    a = ask.lower()
-    if re.search(r"\bfuta\b", a):
+def partner_sex(ask: str, card_sex: str, label: Optional[str] = None) -> str:
+    """The ask decides the partner's sex; respects S3 female in FFM and card futa when appropriate."""
+    a = (ask or "").lower()
+    cs = (card_sex or "").lower().strip()
+    if re.search(r"\bffm\b", a):
+        if label == "S3":
+            return "woman"
+        if label == "S2":
+            return "futa" if re.search(r"\bfuta\b", cs) else "man"
+    if re.search(r"\bmmf\b", a):
+        return "man"
+    if re.search(r"\bfuta\b", a) and (label != "S3" or re.search(r"\bfuta\b", cs)):
         return "futa"
-    if re.search(r"\b(?:woman|girl|lesbian|girlfriend|her friend|another woman)\b", a) and not re.search(r"\b(?:him|man|guy|he)\b", a):
+    if not a and cs == "futa":
+        return "futa"
+    if re.search(r"\b(?:woman|girl|lesbian|girlfriend|her friend|another woman|second woman|two women|two girls)\b", a):
+        if re.search(r"\b(?:him|man|guy|he)\b", a):
+            if re.search(r"\b(?:female|woman|girl|f)\b", cs) or label == "S3":
+                return "woman"
+            return "man"
         return "woman"
     return "man"
+
+
+def _pick_partner(partners: List[Any], label: str, idx: int) -> Dict[str, Any]:
+    """Match partner entry by S2/S3 label first, skipping any S1 entry Gemma placed at index 0."""
+    dicts = [p for p in partners if isinstance(p, dict)]
+
+    def _lbl(item: Dict[str, Any]) -> str:
+        return re.sub(r"\W", "", str(item.get("label", ""))).upper()
+
+    exact = next((p for p in dicts if _lbl(p) == label), None)
+    if exact is not None:
+        return exact
+    non_s1 = [p for p in dicts if _lbl(p) != "S1"]
+    return non_s1[idx] if idx < len(non_s1) else {}
 
 
 def _clean_attr(s: str, default: str) -> str:
@@ -775,19 +813,28 @@ def _clean_attr(s: str, default: str) -> str:
 
 
 def _partner_match_clause(p: Dict[str, Any], idx: int, slots: Dict[str, Any]) -> str:
-    raw = str(p.get("matches_still") or p.get("matches") or p.get("still") or "").strip()
+    val = p.get("matches_still") if "matches_still" in p else (p.get("matches") or p.get("still"))
+    if isinstance(val, bool):
+        if val and idx == 1 and slots.get("s3_still"):
+            return "matches <Picture 2>"
+        return ""
+    raw = str(val or "").strip()
     if not raw and idx == 1 and slots.get("s3_still"):
         raw = "matches <Picture 2>"
     if not raw:
+        return ""
+    if re.fullmatch(r"(?i)(?:true|false|yes|no|none|null|n/?a|same)", raw):
+        if idx == 1 and slots.get("s3_still") and raw.lower() in ("true", "yes", "same"):
+            return "matches <Picture 2>"
         return ""
     m = re.search(r"<?\bPicture\s+(\d+)\b>?", raw, flags=re.I)
     if m:
         pic = f"<Picture {m.group(1)}>"
         return raw if raw.lower().startswith("matches") and pic in raw else f"matches {pic}"
     cleaned = _clean_attr(raw, "")
-    if not cleaned:
+    if not cleaned or not re.match(r"(?i)^matches\b", cleaned):
         return ""
-    return cleaned if cleaned.lower().startswith("matches") else f"matches {cleaned}"
+    return cleaned
 
 
 def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, Any], bodies: int, kind: str,
@@ -811,10 +858,10 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     if kind == "talk" and not re.search(r"\(S2\)", dd):
         want = 0
     for i in range(want):
-        p = partners[i] if i < len(partners) else {}
         label = f"S{i + 2}"
-        sex = partner_sex(slots.get("ask") or "", str(p.get("sex") or ""))
-        age = p.get("age") if isinstance(p.get("age"), int) else 30
+        p = _pick_partner(partners, label, i)
+        sex = partner_sex(slots.get("ask") or "", str(p.get("sex") or ""), label=label)
+        age = p.get("age") if isinstance(p.get("age"), int) and not isinstance(p.get("age"), bool) else 30
         age = max(25, min(int(age), 60))
         pron = "he" if sex == "man" else "she"
         # Derrick t1411u SHAPE form (one sentence, "and he is"): the builder's partner gate splits on ';' (shapes2)
@@ -822,7 +869,9 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         if build.lower() == (slots.get("build") or "").lower() or re.search(r"(?i)\b(?:curvy|petite|busty)\b", build):
             build = "athletic build" if sex == "man" else "slim build"
         attire = _clean_attr(p.get("attire"), "")
-        if not attire or _S1_ONLY.search(attire) or any(g.lower() in attire.lower() for g in slots.get("garments_all") or []):
+        same_as_s1 = any(g.lower() in attire.lower() for g in (slots.get("garments_all") or []) if g)
+        bad_man_attire = (sex == "man") and bool(_S1_ONLY.search(attire))
+        if not attire or bad_man_attire or same_as_s1:
             attire = "a dark t-shirt and jeans" if sex == "man" else "a black dress"
         sm = _SIDE_RE.search(str(p.get("enters_from") or ""))
         side = ("the " + sm.group(0).lower()) if sm and not sm.group(0).lower().startswith(("the", "behind", "off")) else (
@@ -842,7 +891,15 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}{extra_part}, in {attire}, who enters from {side} "
                   f"and {pron} is ({label}).")
     _sum_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
-    summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {slots.get('position')} clip on the {_sum_surf}")
+    _pos_id = str(slots.get('position') or 'scene').strip()
+    _POS_SUMMARY = {
+        "standing_mf": "standing", "ff_scissoring": "scissoring", "ff_cunnilingus": "cunnilingus",
+        "mmf_double_blowjob": "double blowjob", "mmf_dp": "double penetration",
+        "reverse_cowgirl": "reverse cowgirl", "prone_bone": "prone bone",
+        "female_solo": "solo", "male_solo": "male solo",
+    }
+    _pos_human = _POS_SUMMARY.get(_pos_id, _pos_id.replace("_", " "))
+    summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {_pos_human} scene on the {_sum_surf}")
     # #2: one plain sentence of who, where and the act; never the camera line or the phase scaffold
     _ss = [x for x in re.split(r"(?<=[.!?])\s+", summary) if x.strip() and not re.match(r"(?i)\s*the camera\b", x)]
     summary = re.sub(r"(?i)\b(?:at first|as it builds|by the end),?\s*", "", (_ss[0] if _ss else summary)).strip().rstrip(".")
@@ -974,9 +1031,7 @@ def partner_type2_for(position: str, ask: str) -> Optional[str]:
 
 
 def partner_type_for(position: str, ask: str) -> Optional[str]:
-    """S2 on an MMF job uses the same faceless default as S3 unless the ask names a futa or non-human partner."""
-    if partner_type2_for(position, ask):
-        return "faceless"
+    """S2 on an MMF job stays a regular man (not faceless) unless the ask names a futa or non-human partner."""
     return None
 
 
@@ -1259,10 +1314,21 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         # 2 slots
         last_tone = (state_dir / "last_tone.txt").read_text(encoding="utf-8").strip() if (state_dir / "last_tone.txt").exists() else None
         slots = make_slots(still_read, ask, position, kind, run_id, last_tone, scene_prev, overlays=overlays)
-        clip_frames = int(job.get("frames") or br.SINGLE_CLIP_MAX_FRAMES)
+        if is_continue and scene_prev:
+            _inh_pose = str(((slots.get("inherited") or {}).get("pose")) or "").strip()
+            if not _inh_pose or _inh_pose.lower() in ("none", "null", "-", "the previous clip's end pose"):
+                result.update(status="NOT_READY", not_ready_reason="continued clip missing inherited ending_state.pose")
+                raise _Stop()
+        _explicit_frames = bool(job.get("frames"))
+        if _explicit_frames:
+            clip_frames = int(job["frames"])
+        elif kind == "talk":
+            clip_frames = br.snap_h3_frames(8.0)
+        else:
+            clip_frames = br.SINGLE_CLIP_MAX_FRAMES
         clip_seconds = round(clip_frames / float(br.H3_FPS), 1)
         speech_words_max = max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5)))
-        max_lines_spk = max(1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
+        max_lines_spk = max(2 if kind == "talk" else 1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
         slots["frames"] = clip_frames
         slots["clip_seconds"] = clip_seconds
         slots["speech_words_max"] = speech_words_max
@@ -1276,26 +1342,16 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         # self-maintenance: cloned phrases follow the prompt sha + recent outputs
         cloned = wp_state.refresh_cloned(cloned_path, sysprompt, pmeta["writer_prompt_sha256"], wp_state.load_recent(recent_path))
         blacklist = [r["line"] for r in wp_state.load_blacklist(bl_path, log)]
-        brief = brief_block(ask, position, kind, slots, bodies)
-        if (position == "male_solo") or ((br.get_act(position) or {}).get("id") == "male_solo"):
-            brief += ("\nMALE SOLO: (S1) is the man. The start still is setting only: use its place, light and surface, never the person\'s hair, skin, clothes or pose. The person in the still is not (S1) and is not in this clip.")
-        if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" and int(job.get("shot_count") or 1) > 1:
-            brief += "\n" + shots_line(int(job["shot_count"]), int(job.get("frames") or 243))
         # MMF S3 (Derrick t1440): reuse the scene's S3 look, use a given S3 still, else the card invents one (faceless fallback)
         s3_still = s3_look = None
         s2_look_saved = None
         s3_in_frame = False
-        if bodies >= 3 and partner_type2_for(position, ask):
+        if bodies >= 2:
+            s2_look_saved = (scene_prev or {}).get("s2_look")
+        if bodies >= 3:
             s3_still = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
             s3_look = (scene_prev or {}).get("s3_look")
-            s2_look_saved = (scene_prev or {}).get("s2_look")
-            if s2_look_saved:  # #14
-                brief += f"\nPARTNER (S2), the same person as the last clip, every detail kept: {s2_look_saved}."
-            s3_in_frame = bool(s3_look)
-            if s3_look:
-                brief += f"\nTHIRD PERSON (S3), the same person as the last clip, every detail kept: {s3_look}."
-            if s3_still:
-                brief += "\nTHIRD PERSON (S3): his face and body come from his own reference picture; name only his clothes."
+            s3_in_frame = bool(s3_look) if partner_type2_for(position, ask) else False
         _inh_g = (slots.get("inherited") or {}).get("garments") if scene_prev else None
         try:
             cast_l, _ = make_cast(still_read, position, ask, continued=bool(scene_prev), inherited_garments=_inh_g)
@@ -1303,10 +1359,27 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             cast_l = {}
             result["warnings"].append("cast_preview_failed")
             log("cast_preview_failed", {"run": run_id, "error": str(e)[:300]})
-        if cast_l and not cast_l.get("voice_s2"):
-            # acceptance-1 f: no partner voice for this ask (builder would print 'a distinct adult voice for (S2)')
-            brief += ("\nVOICE: no partner voice is set for this ask, so only (S1) speaks (at most two lines); (S2) stays silent "
+
+        def _build_full_brief() -> str:
+            b = brief_block(ask, position, kind, slots, bodies)
+            if (position == "male_solo") or ((br.get_act(position) or {}).get("id") == "male_solo"):
+                b += ("\nMALE SOLO: (S1) is the man. The start still is setting only: use its place, light and surface, never the person\'s hair, skin, clothes or pose. The person in the still is not (S1) and is not in this clip.")
+            if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" and int(job.get("shot_count") or 1) > 1:
+                b += "\n" + shots_line(int(job["shot_count"]), clip_frames)
+            if bodies >= 2 and s2_look_saved:  # #14
+                b += f"\nPARTNER (S2), the same person as the last clip, every detail kept: {s2_look_saved}."
+            if bodies >= 3:
+                if s3_look:
+                    b += f"\nTHIRD PERSON (S3), the same person as the last clip, every detail kept: {s3_look}."
+                if s3_still:
+                    b += "\nTHIRD PERSON (S3): his face and body come from his own reference picture; name only his clothes."
+            if cast_l and not cast_l.get("voice_s2"):
+                # acceptance-1 f: no partner voice for this ask (builder would print 'a distinct adult voice for (S2)')
+                b += ("\nVOICE: no partner voice is set for this ask, so only (S1) speaks (at most two lines); (S2) stays silent "
                       "or off the clip." if kind == "talk" else "\nVOICE: only (S1) speaks in this clip.")
+            return b
+
+        brief = _build_full_brief()
         rd_ = br._unwrap_still_read(still_read)
         wet_ok = bool(wp_lint.WET_RE.search(json.dumps(rd_)) or wp_lint.WET_RE.search(ask))
         lint_cfg = dict(cfg.get("lint") or {})
@@ -1335,14 +1408,41 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             except Exception as e:
                 log("beat_card_invalid", {"run": run_id, "attempt": attempt, "error": str(e)[:300]})
                 wp_state.atomic_write(run_dir / f"beat_card_invalid_{attempt}.txt", raw or "")
-        if bodies >= 3 and partner_type2_for(position, ask) and not s3_look:
+        if card is not None and not _explicit_frames:
+            cs = card.get("clip_seconds")
+            if isinstance(cs, (int, float)) and not isinstance(cs, bool) and float(cs) > 0:
+                req_s = float(cs)
+                if kind == "talk":
+                    req_s = max(5.2, min(req_s, 8.7))
+                else:
+                    req_s = max(2.3, min(req_s, float(br.SINGLE_CLIP_MAX_FRAMES) / float(br.H3_FPS)))
+                new_frames = br.snap_h3_frames(req_s)
+                if new_frames != clip_frames:
+                    clip_frames = new_frames
+                    clip_seconds = round(clip_frames / float(br.H3_FPS), 1)
+                    speech_words_max = max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5)))
+                    max_lines_spk = max(2 if kind == "talk" else 1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
+                    slots["frames"] = clip_frames
+                    slots["clip_seconds"] = clip_seconds
+                    slots["speech_words_max"] = speech_words_max
+                    slots["max_lines_per_speaker"] = max_lines_spk
+                    lint_cfg["speech_words_max"] = speech_words_max
+                    lint_cfg["max_lines_per_speaker"] = max_lines_spk
+                    wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
+                    brief = _build_full_brief()
+            card["clip_seconds"] = clip_seconds
+        elif card is not None:
+            card["clip_seconds"] = clip_seconds
+        s2_look = s2_look_saved or (partner_look_from_card(card, "S2") if (bodies >= 2 and "nonhuman" not in overlays) else None)
+        if bodies >= 3 and not s3_look:
             s3_look = s3_look_from_card(card)
         if bodies >= 3 and partner_type2_for(position, ask):
             result["s3"] = {"look": s3_look, "still": s3_still,
                             "mode": "still" if s3_still else ("generated" if s3_look else "faceless_default")}
             log("s3_mode", dict(result["s3"], run=run_id))
-        _bx: List[str] = (["--s3-look", s3_look] if s3_look else []) + (["--partner2-still", s3_still] if s3_still else []) + \
-            (["--frames", str(int(job["frames"]))] if job.get("frames") else []) + \
+        _bx: List[str] = (["--s2-look", s2_look] if s2_look else []) + \
+            (["--s3-look", s3_look] if s3_look else []) + (["--partner2-still", s3_still] if s3_still else []) + \
+            (["--frames", str(int(clip_frames))] if (_explicit_frames or card is not None or kind == "talk") else []) + \
             (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + (["--s3-in-frame"] if s3_in_frame else []) + \
             (["--shots", "multi"] if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" else []) + \
             (["--continued"] if scene_prev else []) + \
@@ -1350,6 +1450,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         if card is None and kind == "talk":
             # BTS/talk: never skip the beat card; use a minimal valid card and keep writing
             card = {
+                "clip_seconds": clip_seconds,
                 "summary": "talk-only beat",
                 "camera": "held medium shot, her face in frame",
                 "partners": [],
@@ -1490,6 +1591,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             result["warnings"].append("lint_blocked_ready")
         result.update(status=status, pick=pick, pick_score=chosen["lint"]["score"], pick_pass=chosen["lint"]["pass"],
                       pick_hard=chosen["lint"]["hard"], judge=judge, still=still, scene_id=scene_id,
+                      frames=clip_frames, clip_seconds=clip_seconds,
                       candidates={c: {"score": v["lint"]["score"], "pass": v["lint"]["pass"], "hard": v["lint"]["hard"],
                                       "seed": v["seed"]} for c, v in cands.items()},
                       seeds={"beat_card": seed_for(run_id, ask, 0), **{c: v["seed"] for c, v in cands.items()}},
@@ -1523,13 +1625,14 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 entry = {"clip_id": run_id, "run_dir": str(run_dir), "still": still, "primary_beat": ((card or {}).get("development") or {}).get("primary_motion") or (card or {}).get("summary"),
                          "opening_state": (scene_prev or {}).get("ending_state") or {"pose": slots["pose"], "garments": {g: "on" for g in slots["garments_all"]},
                                                                                      "contact": None, "camera": slots.get("framing"), "pov": False},
-                         "ending_state": {"pose": es.get("pose"), "garments": garments, "contact": es.get("contact"),
+                         "ending_state": {"pose": str(es.get("pose") or "").strip() or slots.get("pose") or ((card or {}).get("anchor") or {}).get("pose") or "as shown",
+                                          "garments": garments, "contact": es.get("contact"),
                                           "camera": es.get("camera"), "pov": bool(es.get("pov"))},
                          "anchors": {"identity": character, "wardrobe": slots["garments_all"], "location": slots["place"],
                                      "prop": slots["props"], "prop_hand": es.get("prop_hand")},
                          "camera": "continuity", "spoken_dialogue": kl,
                          "ambient_sfx": [((card or {}).get(p) or {}).get("sound") for p in ("anchor", "onset", "development", "result") if ((card or {}).get(p) or {}).get("sound")],
-                         "frame_budget": (build["report"].get("frames") or 243),
+                         "frame_budget": (build["report"].get("frames") or clip_frames),
                          "method": "planned cut", "done_actions": done, "ts": wp_state.now_ct(),
                          "s3_look": s3_look, "s3_still": s3_still,
                          "s2_look": s2_look_saved or partner_look_from_card(card, "S2")}
