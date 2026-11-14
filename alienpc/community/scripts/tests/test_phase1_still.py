@@ -22,7 +22,7 @@ class TestTemplate(unittest.TestCase):
         self.assertEqual(TPL["19"]["class_type"], "Flux2Scheduler")
         self.assertEqual(TPL["19"]["inputs"]["steps"], 4)
         self.assertEqual(TPL["17"]["inputs"]["cfg"], 1.0)
-        self.assertEqual(TPL["2"]["inputs"]["strength_model"], 1.0)
+        self.assertEqual(TPL["2"]["inputs"]["strength_model"], 0.5)
         self.assertIn("rank64", TPL["2"]["inputs"]["lora_name"])
         self.assertEqual(TPL["25"]["inputs"]["resize_type.megapixels"], 1.0)
         self.assertTrue(TPL["5"]["inputs"]["text"].startswith("head_swap: start with Picture 1"))
@@ -75,7 +75,7 @@ class TestPatcher(unittest.TestCase):
                     if k in TPL and g[k]["inputs"][f] != TPL[k]["inputs"][f]}
             self.assertLessEqual(diff - job_keys, allowed, str(dial))  # a KV-plan arm changes nothing beyond the plan's dials
             self.assertEqual(g["1"]["inputs"]["unet_name"], dial["unet"])
-            self.assertEqual(g["2"]["inputs"]["strength_model"], dial.get("strength", 1.0))
+            self.assertEqual(g["2"]["inputs"]["strength_model"], dial.get("strength", 0.5))
             self.assertEqual(g["19"]["inputs"]["steps"], 4)  # fixed: 4 steps, cfg 1.0, lcm on every KV-plan row
             self.assertEqual(g["17"]["inputs"]["cfg"], 1.0)
             self.assertEqual(g["18"]["inputs"]["sampler_name"], "lcm")
@@ -87,10 +87,10 @@ class TestPatcher(unittest.TestCase):
             else:
                 self.assertNotIn("26", g)
                 self.assertEqual(g["17"]["inputs"]["model"], ["2", 0])
-        plain = mbr.build(TPL, **base)  # no dial = the baseline: base UNET, strength 1.0, no KV node
+        plain = mbr.build(TPL, **base)  # no dial = the baseline: base UNET, strength 0.5, no KV node
         self.assertNotIn("26", plain)
         self.assertEqual((plain["1"]["inputs"]["unet_name"], plain["2"]["inputs"]["strength_model"], plain["17"]["inputs"]["model"]),
-                         (TPL["1"]["inputs"]["unet_name"], 1.0, ["2", 0]))
+                         (TPL["1"]["inputs"]["unet_name"], 0.5, ["2", 0]))
         self.assertTrue(rq.guard_graph(mbr.build(TPL, **dict(base, unet=kvfile, kv=True, strength=0.0))))
 
     def test_expected_size(self):

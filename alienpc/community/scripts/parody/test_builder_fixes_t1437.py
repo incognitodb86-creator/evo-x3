@@ -53,9 +53,10 @@ def test_5_no_placeholder_voice_for_absent_partner():
 def test_6_futa_camera_and_voice():
     cast = br.make_cast(READ, "missionary", "futa missionary on the log", partner_type="futa")
     assert "adult man's" not in (cast.get("voice_s2") or "") and "woman's voice" in cast["voice_s2"]
+    assert "both faces" in (cast.get("camera_tail") or "") and "his face" not in (cast.get("camera_tail") or "")
     br._CTX["position"] = "missionary"
     cam = br._resolve_camera(["The camera is a medium two-shot at hip height."], "keeping both faces in frame")[0]
-    assert "his face" not in cam and "both faces" in cam, cam
+    assert "his face" not in cam, cam
 
 
 def test_7_titjob_and_finish_exempt_from_w5():
