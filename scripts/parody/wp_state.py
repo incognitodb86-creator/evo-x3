@@ -18,8 +18,22 @@ WHITELIST = ("inside her", "inside her mouth", "fully sheathed", "hips flush", "
              "sheathed", "aside", "to one side", "primary motion", "per second", "every second", "every half second", "cycle",
              "strokes a second", "stroke a second", "beats a second", "beat a second", "tempo", "bpm", "at first",
              "as it builds", "by the end", "as the clip ends", "on the last frame",
-             # required wordings the rules themselves prescribe (never a clone)
-             "his hand on her throat", "s3 's left hand", "s3 s left hand", "he does x she does y")
+             # required wordings & structural syntax the rules themselves prescribe (never a clone)
+             "his hand on her throat", "s3 's left hand", "s3 s left hand", "he does x she does y",
+             "the camera is a", "the camera holds a", "medium two shot", "two shot at", "at hip height",
+             "at chest height", "at eye level", "keeping her face", "keeping his face", "keeping both faces",
+             "keeping the join", "says in a", "says in a low", "in a low voice", "in a soft voice",
+             "his penis", "her vagina", "her anus", "her mouth", "her vulva", "from behind", "until his hips",
+             "his hips are", "her buttocks", "against her buttocks", "where it stays", "hands and knees",
+             "on her back", "on all fours", "wet skin slaps", "on every stroke")
+
+
+_STRIP_TAG_RE = re.compile(r"(?i)</?d>|\[(?:English|Shot\s+\d+)\]")
+_CLONE_STOP = frozenset({
+    "a", "an", "the", "and", "or", "as", "at", "by", "for", "from", "in", "into", "is", "are",
+    "it", "its", "of", "on", "to", "until", "with", "he", "she", "his", "her", "hers", "they",
+    "their", "them", "s1", "s2", "s3", "d", "english", "shot", "stays", "where", "every",
+})
 
 
 def now_ct() -> str:
@@ -127,16 +141,18 @@ def build_cloned(prompt_text: str, recent: List[str]) -> List[str]:
         q = norm(m.group(1))
         if len(q.split()) >= 4 and len(_strip_whitelist(q).split()) >= 3:
             out.append(q)
-    pw = WORD_RE.findall(norm(prompt_text))
-    pgrams = {" ".join(pw[i:i + 6]) for i in range(len(pw) - 5)}
+    pw = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", prompt_text)))
+    pgrams = {" ".join(pw[i:i + 6]) for i in range(max(0, len(pw) - 5))}
     counts: Dict[str, int] = {}
     for dd in recent[-20:]:
-        w = WORD_RE.findall(norm(dd))
-        for g in {" ".join(w[i:i + 6]) for i in range(len(w) - 5)} & pgrams:
+        w = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", dd)))
+        for g in {" ".join(w[i:i + 6]) for i in range(max(0, len(w) - 5))} & pgrams:
             counts[g] = counts.get(g, 0) + 1
     for g, c in counts.items():
-        if c >= 2 and len(_strip_whitelist(g).split()) >= 3:
-            out.append(g)
+        if c >= 2:
+            rem = [tok for tok in _strip_whitelist(g).split() if tok not in _CLONE_STOP]
+            if len(rem) >= 3:
+                out.append(g)
     seen, uniq = set(), []
     for p in out:
         if p not in seen:

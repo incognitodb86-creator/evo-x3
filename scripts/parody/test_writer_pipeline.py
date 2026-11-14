@@ -756,3 +756,60 @@ def test_male_solo_strips_female_read_slots_and_voice():
     assert "man's voice" in (cast.get("voice_s1") or "").lower()
     assert cast.get("inventory") == [] and cast.get("garments_off") == ""
 
+
+def test_xhigh_cloned_whitelist_bts_and_mdma_consent():
+    """Structural n-grams don't trip cloned_hits; BTS off-screen Q&A passes talk_lines+voice; MDMA mutual choice passes consent_setup."""
+    import wp_lint as L
+
+    # 1. Structural syntax and required anatomy phrases repeated in recent outputs must not become cloned phrases.
+    prompt_doc = (
+        '[Shot 1] The camera is a medium two-shot at hip height.\n'
+        '"he sinks in to the base from behind"\n'
+        'His penis pushes into her vagina from behind until his hips are flush against her buttocks, and he stays buried in her.\n'
+        '(S2) says in a low voice, <d>[English] Keep still.</d> By the end, she arches. Wet skin slaps on every stroke.'
+    )
+    recent_dd = (
+        '[Shot 1] The camera is a medium two-shot at hip height. His penis pushes into her vagina from behind until his hips are '
+        'flush against her buttocks, and he stays buried in her. <d>[English] More.</d> (S2) says in a low voice, <d>[English] Stay put.</d> '
+        'By the end, she arches. Wet skin slaps on every stroke.'
+    )
+    cl = wp_state.build_cloned(prompt_doc, [recent_dd, recent_dd])
+    assert "he sinks in to the base from behind" in cl
+    assert not any("shot 1" in x or "d s2 says" in x or "hips are flush" in x or "buried in her" in x for x in cl), cl
+
+    # 2. Overlapping cloned hits cap penalty at 10 points (never -50/-70).
+    c_many = ctx(cloned=["alpha beta gamma delta epsilon zeta", "beta gamma delta epsilon zeta eta",
+                         "gamma delta epsilon zeta eta theta", "delta epsilon zeta eta theta iota"])
+    r_many = L.lint(full(GOOD_SEX + " Alpha beta gamma delta epsilon zeta eta theta iota."), c_many)
+    cloned_pen = sum(i["penalty"] for i in r_many["issues"] if i["code"] == "cloned")
+    assert cloned_pen == 10 and "cloned" not in r_many["hard"]
+
+    # 3. BTS off-screen interviewer (no S2) + 2 (S1) lines passes talk_lines and speaker_cap without voice_missing.
+    bts_no_sn = (
+        "subject_definitions:\n<Subject 1> is the exact same woman; (S1).\n\n"
+        "summary:\nBTS interview.\n\nretention_analysis:\nkept.\n\n"
+        "detailed_description:\n[Shot 1] The camera holds beside the driftwood log in golden hour light. "
+        "At first, (S1) sits on the log. An off-screen interviewer asks, <d>[English] Was he loud?</d> "
+        "As it builds, she smirks. (S1) says in a sharp voice, <d>[English] He barely stopped breathing.</d> "
+        "An off-screen interviewer asks, <d>[English] Ready again?</d> "
+        "By the end, she tilts her head. (S1) says in a sharp voice, <d>[English] Maybe if he keeps up.</d> Soft surf rolls in."
+    )
+    bts_ctx = ctx("talk", "talk", overlays=["bts"], ask="BTS interview, off-screen interviewer asks her questions",
+                  cast={"voice_s1": "sharp voice", "voice_s2": ""},
+                  cfg={"speech_words_max": 25, "max_lines_per_speaker": 2, "blacklist_ratio": 0.8, "words_min": 40, "words_max": 190})
+    lr_bts = L.lint(bts_no_sn, bts_ctx)
+    assert "talk_lines" not in lr_bts["hard"] and "voice_missing" not in lr_bts["hard"] and not any(
+        i["code"] == "speaker_cap" for i in lr_bts["issues"]
+    ), lr_bts["issues"]
+
+    # 4. Awake mutual MDMA passes consent_setup while sleep/eyes-closed without consent beat still blocks.
+    mdma_dd = (
+        "detailed_description:\n[Shot 1] At first, (S1) leans on the sideboard with heavy-lidded eyes, smiling warmly as she pulls him close. "
+        "His penis pushes into her vagina on the sideboard. (S1) says in an eager voice, <d>[English] You feel so good right now.</d>"
+    )
+    mdma_ctx = {"kind": "sex", "slots": {}, "overlays": ["consent_setup"], "ask": "two adults chose MDMA together, slow missionary", "cfg": {}}
+    assert "consent_setup" not in L.lint(mdma_dd, mdma_ctx)["hard"]
+    sleep_dd = "detailed_description:\n[Shot 1] At first, (S1) lies on her side, eyes closed. (S2) slides into her from behind."
+    sleep_ctx = {"kind": "sex", "slots": {}, "overlays": ["consent_setup"], "ask": "sleep roleplay, spooning", "cfg": {}}
+    assert "consent_setup" in L.lint(sleep_dd, sleep_ctx)["hard"]
+

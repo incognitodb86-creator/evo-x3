@@ -1235,6 +1235,8 @@ def submit_writer_run(
                 mk["camera_kind"] = br._CAM_KIND_MAP.get(ck, ck)
             if continued or mk.get("continued"):
                 mk["continued"] = True
+            if isinstance((cast_overrides or {}).get("inherited_garments"), dict):
+                mk["inherited_garments"] = dict(cast_overrides["inherited_garments"])
             _is_male_solo = (brief.get("s1_gender") == "man") or ((hook_act or brief.get("act_id") or position) == "male_solo")
             if _is_male_solo and isinstance(still_read, dict):
                 # Strip female wardrobe/hair/skin/build/pose/people so apply_still_facts & _garment_retention emit setting only.
@@ -1375,6 +1377,7 @@ def _writer_run_cli(argv) -> int:
     # Max Architect 3, Derrick t1440 (MMF S3): a generated S3 look, an S3 reference still, an optional frame cap for VRAM
     ap.add_argument("--s3-in-frame", action="store_true", help="continued clip: S3 is already in the inherited frame (no 'enters')")
     ap.add_argument("--continued", action="store_true", help="this clip continues a previous clip (skip opening-from-still)")
+    ap.add_argument("--inherited-garments", default=None, help="JSON map of garment key -> prior state (aside/up/off/on) for continued clips")
     ap.add_argument("--s3-look", default=None, help="S3 description, e.g. 'an adult man, thirty years of age, ...'")
     ap.add_argument("--partner2-still", default=None, help="S3 reference still under ComfyUI input (community/x.jpg) or a full path")
     ap.add_argument("--frames", type=int, default=None, help="frame-count cap (VRAM: two reference stills peak near 15.4/16.3 GB)")
@@ -1395,12 +1398,24 @@ def _writer_run_cli(argv) -> int:
         # base.api.json optional: fall back to an in-memory copy of the locked template (read-only).
         base = d / "base.api.json"
         base_graph = str(base) if base.is_file() else json.loads(Path(DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
+        inh_garments = None
+        if getattr(a, "inherited_garments", None):
+            inh_garments = json.loads(a.inherited_garments)
+        elif a.continued and (d / "slots.json").is_file():
+            try:
+                _sl = json.loads((d / "slots.json").read_text(encoding="utf-8"))
+                _ig = ((_sl.get("inherited") or {}).get("garments")) if isinstance(_sl, dict) else None
+                if isinstance(_ig, dict) and _ig:
+                    inh_garments = _ig
+            except Exception:
+                inh_garments = None
         r = submit_writer_run((d / "writer_output.txt").read_text(encoding="utf-8"), base_graph, d,
                               a.ask, a.position, still_image=(a.still or None),
                               still_read=json.loads((d / "still_read.json").read_text(encoding="utf-8")),
                               dry_run=not a.queue, character=(a.character or None), partner_type2=(a.partner_type2 or None),
                               cast_overrides=dict(_s3_overrides(a.s3_look, a.partner2_still) or {}, **({"shots": a.shots} if a.shots else {}),
-                                                  **({"s3_in_frame": True} if a.s3_in_frame else {}))
+                                                  **({"s3_in_frame": True} if a.s3_in_frame else {}),
+                                                  **({"inherited_garments": inh_garments} if isinstance(inh_garments, dict) and inh_garments else {}))
                               or None, partner_type=(a.partner_type or None), continued=bool(getattr(a, "continued", False)),
                               **({"frames": br.validate_single_clip_frames(a.frames)} if a.frames else {}))
     except Exception as e:

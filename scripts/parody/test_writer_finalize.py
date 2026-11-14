@@ -2129,3 +2129,129 @@ def test_leftover_hook_rejects_under_18_writer_age():
     )
     p, _ = br.finalize_writer_prompt(raw, dict(CAST), strict=False)
     assert "seventeen years of age" not in p
+
+
+def test_xhigh_builder_fixes_male_solo_and_floor_and_camera():
+    """Male solo pre-strip, male voice_s1, retention, _resolve_camera his face, no 'the the floor', no <Subject 2>."""
+    sr = {
+        "read": {
+            "room": "high-rise apartment",
+            "place": "by a window",
+            "surface": "wooden sideboard",
+            "bed": False,
+            "sheets": "",
+            "floor": "the floor",
+            "light": "soft evening light from window",
+            "framing": "medium shot",
+            "pose": "leaning, standing",
+            "facing_camera": True,
+            "people": 1,
+            "garments": [{"type": "dress", "name": "sheer white halter dress"}],
+            "build": "curvy",
+            "skin": "fair skin",
+            "hair": "blonde, damp",
+        }
+    }
+    c = br.make_cast(sr, "male_solo", "male solo edging")
+    assert c["inventory"] == [] and c["still_garments"] == ""
+    assert "man's voice" in c["voice_s1"].lower() and c["voice_s1"] != br.OC_VOICE_S1
+    assert c["camera_tail"] == "keeping his face in frame"
+    assert br.writer_named_his_clothes("He pulls his trousers aside to clear his groin.", "the floor", subject="<Subject 1>") == ""
+    raw = (
+        "subject_definitions:\n"
+        "<Picture 1> is the start still of the setting only.\n"
+        "<Subject 1> is an adult man, twenty-eight years of age, of solid adult build; he is (S1).\n"
+        "summary:\n(S1) edges beside the wooden sideboard.\n"
+        "retention_analysis:\n<Picture 1>: fully_preserved.\n"
+        "detailed_description:\n"
+        "[Shot 1] The camera holds a medium profile shot at chest height in soft evening light. "
+        "At first, (S1) leans beside the wooden sideboard on his feet, by the window. "
+        "He pulls his trousers aside to clear his groin. "
+        "As it builds, PRIMARY MOTION - he grips his shaft and edges with steady slow strokes at one cycle per second. "
+        "(S1) says in a low voice, <d>[English] Too close.</d> "
+        "By the end, he holds his grip beside the sideboard, still stroking steadily with a soft gasp.\n"
+    )
+    p, _ = br.finalize_writer_prompt(raw, c, strict=True)
+    low = p.lower()
+    assert "the the" not in low
+    assert "her face" not in low and "keeping his face in frame" in low
+    assert "<subject 2>" not in low
+    assert "kept from <picture 1>" not in low
+    assert "stay as defined in <subject 1>" in low
+    assert "twenty-eight years of age" in low
+
+
+def test_xhigh_writer_subject_bios_preserves_species_scale_futa_s3():
+    """_writer_subject_bios keeps assemble_output comma+and format, species, scale_anchor, futa S3, without losing orc."""
+    raw = (
+        "subject_definitions:\n"
+        "<Picture 1> is the reference image defining <Subject 1>.\n"
+        "<Subject 1> is the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, blonde, damp, messy; she is (S1).\n"
+        "<Subject 2> is the orc, an adult, 35 years of age, towering muscular build, in a leather harness, about twice her height, who enters from left and he is (S2).\n"
+        "<Subject 3> is the futa, an adult, 28 years of age, tall slim build, in a black corset, with full breasts and a thick penis, matches <Picture 2>, who enters from behind and she is (S3).\n"
+    )
+    bios = br._writer_subject_bios(raw)
+    assert "an adult woman, 25 years of age" in bios.get("woman", "")
+    assert "the orc, an adult, 35 years of age" in bios.get("man", "") and "about twice her height" in bios["man"]
+    assert "with full breasts and a thick penis" in bios.get("partner3", "") and "matches <Picture 2>" in bios["partner3"]
+
+    # Generic "the man" in writer bio does not overwrite a non-human orc cast["man"].
+    sr = {
+        "read": {
+            "room": "beach", "place": "on a driftwood log", "surface": "log", "bed": False, "floor": "sand",
+            "pose": "leaning on the log", "facing_camera": True, "framing": "medium shot", "light": "golden hour",
+            "people": 1, "garments": [{"type": "bottom", "name": "sheer mesh bikini bottom"}],
+        }
+    }
+    orc_cast = br.make_cast(sr, "doggy", "orc partner takes her from behind on the log", partner_type="non-human")
+    orc_raw = (
+        "subject_definitions:\n"
+        "<Picture 1> is the reference image.\n"
+        "<Subject 2> is the man, an adult, 30 years of age, athletic build, who enters from the right and he is (S2).\n"
+        "summary:\nAn orc takes her on the log.\n"
+        "retention_analysis:\nkept.\n"
+        "detailed_description:\n"
+        "[Shot 1] The camera holds a medium shot at hip height, keeping her face, his face and the join in frame. "
+        "At first, (S1) leans on the log, her sheer mesh bikini bottom covering her hips. "
+        "She drops onto her hands and knees on the log and pulls the sheer mesh bikini bottom aside to one side at her hip, where it stays. "
+        "His penis pushes into her vagina from behind until his hips are flush against her buttocks, and he stays buried in her. "
+        "As it builds, PRIMARY MOTION - heavy thrusts at one stroke every second. "
+        "(S2) says in a gravelly voice, <d>[English] Hold still.</d> "
+        "By the end, he keeps thrusting. Wet skin slaps on the log.\n"
+    )
+    orc_out, _ = br.finalize_writer_prompt(orc_raw, orc_cast, strict=True)
+    assert "orc" in [ln for ln in orc_out.splitlines() if ln.startswith("<Subject 2>")][0].lower()
+
+
+def test_xhigh_continued_inherited_aside_clears_w5():
+    """Continued clip inheriting prior panties='aside' clears W5 without needing a duplicate pull-aside."""
+    sr = {
+        "read": {
+            "room": "beach", "place": "on the wet sand", "surface": "sand", "bed": False, "floor": "wet sand",
+            "pose": "kneeling on the sand", "facing_camera": False, "framing": "medium shot", "light": "low sun",
+            "people": 1, "garments": [{"type": "top", "name": "sheer mesh crop top"}, {"type": "bottom", "name": "sheer mesh bikini bottom"}],
+        }
+    }
+    c = dict(
+        br.make_cast(
+            sr, "mmf", "mmf continued", continued=True,
+            inherited_garments={"top": "on", "panties": "aside"}, partner_type2="faceless",
+        ),
+        s3_in_frame=True,
+    )
+    dd = (
+        "subject_definitions:\n<Picture 1> is the reference image.\n"
+        "<Subject 2> is the man, an adult, 30 years of age, athletic build, in dark board shorts, who enters from the right and he is (S2).\n"
+        "<Subject 3> is the man, an adult, 32 years of age, broad-shouldered build, in dark board shorts, who enters from the left and he is (S3).\n"
+        "summary:\nMMF continued.\nretention_analysis:\nkept.\n"
+        "detailed_description:\n"
+        "[Shot 1] The camera holds a medium two-shot at hip height, keeping all three faces and the join in frame. "
+        "At first, (S1) is on her knees on the sand, leaning back against (S3) while (S2) stands in front of her; "
+        "(S2)'s penis is inside her mouth and (S3)'s penis is buried in her vagina from behind, hips flush. "
+        "As it builds, PRIMARY MOTION - (S3) drives heavy thrusts about one stroke every second while her sheer mesh crop top shifts. "
+        "By the end, both keep the pace going. Wet skin slaps and heavy breath.\n"
+    )
+    out, rep = br.finalize_writer_prompt(dd, c, strict=True)
+    assert "w5_final" not in rep
+    assert "sheer mesh bikini bottom of <Picture 1>: partially_preserved" in out
+    assert "sheer mesh bikini bottom stays pulled aside" in out
