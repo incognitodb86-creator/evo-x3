@@ -9,7 +9,7 @@ description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int
 
 For named INDEX + RefMod parodies, `h3-parody-identity` owns the locked single-pass graph, approved duration/aspect/start-image/second-speaker options and tested prompt/voice/soundscape contract. Its route overrides the legacy two-pass B2 defaults and Ralph/request-proof loop below: submit through `submit_parody_run.py ... --wait --qnap-put` / `run_queue.py` directly, never Ralph or a coding-model launch for renders. Existing guards and GPU-lock rules stay unchanged. The B2 guidance below remains for its other lanes; do not use it to rewrite the tested parody graph or prompt.
 
-R2. Render rules (adults only, no real likeness, guard_ok) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
+R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
 
 Work the loop in this order. One job per pass. Never mix a request pass with a proof pass.
 

@@ -481,3 +481,97 @@ def test_part4_pixlstash_stills_vault_and_voice_ref_attach():
     assert "minimaxh3_oc_poolclub_v1_refmod_visual" in stems
     assert spr._writer_refmods_ok({"refmods": {"inputs": {"mod_1": "some_non_oc_refmod"}}}) == []
 
+
+def test_part4_all_refmods_and_pixlstash_celebrity_tag(monkeypatch):
+    import submit_parody_run as spr
+    z = spr.resolve_writer_refmods(character="Zendaya")
+    assert not z.get("reason"), z
+    assert any("zendaya" in x for x in (z.get("stems") or []))
+
+    monkeypatch.setattr(spr, "pixlstash_character_names_for_still", lambda still: ["Zendaya"])
+    z_tag = spr.resolve_writer_refmods(still_image=r"C:\AI\render\_inputs\generic_tag_test.jpg")
+    assert not z_tag.get("reason"), z_tag
+    assert z_tag.get("source") == "pixlstash"
+    assert any("zendaya" in x for x in (z_tag.get("stems") or []))
+
+
+def test_contact_regex_and_prompt_compiler_77_rules():
+    import wp_compile_prompt as wpc
+    import check_writer_prompt_rules as chk
+
+    for phrase in (
+        "her mouth on her vulva",
+        "her tongue moves against her clitoris",
+        "her fist around his shaft",
+        "their vulvas pressed together",
+    ):
+        assert br._CONTACT_RE.search(phrase), phrase
+
+    agents_src = Path(r"C:\AI\render\AGENTS.md").read_text(encoding="utf-8")
+    compiled = wpc.compile_prompt(agents_src)
+    assert "MODES (use only when the ask calls for one)" in compiled
+    assert "EXAMPLES (level of detail only;" in compiled
+    shape_sec = compiled.split("\nSHAPE ", 1)[1].split("\nPRE-FLIGHT", 1)[0]
+    assert "\nsubject_definitions:\n" not in shape_sec
+    assert "\ndetailed_description:\n" in shape_sec
+
+    rules_data = chk.json.loads((Path(__file__).resolve().parent / "render-master-rules-20261113.json").read_text(encoding="utf-8"))
+    lines = compiled.split("\n")
+    ratio = float(rules_data.get("condensed_ratio", 0.6))
+    fails = [(r["id"], chk.check(r, compiled, lines, ratio)) for r in rules_data["rules"]
+             if r.get("severity") != "retired" and chk.check(r, compiled, lines, ratio)[0] != "PASS"]
+    assert fails == [], fails
+
+
+def test_submit_writer_run_male_solo_strips_dress_and_woman_voice(tmp_path):
+    import submit_parody_run as spr
+    sr = {
+        "read": {
+            "room": "high-rise apartment",
+            "place": "by a window",
+            "surface": "wooden sideboard",
+            "bed": False,
+            "floor": "the floor",
+            "pose": "leaning, standing",
+            "facing_camera": True,
+            "framing": "medium shot",
+            "light": "soft evening light from window",
+            "people": 1,
+            "garments": [{"type": "dress", "name": "sheer white halter dress", "look": "white"}],
+            "build": "curvy",
+            "skin": "fair",
+            "hair": "blonde",
+        }
+    }
+    raw = (
+        "subject_definitions:\n"
+        "<Picture 1> defines the high-rise apartment, its soft evening light and framing.\n"
+        "<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1).\n\n"
+        "summary:\n(S1) edges beside the sideboard.\n\n"
+        "retention_analysis:\n<Picture 1>: fully_preserved - high-rise apartment, wooden sideboard, floor, light and framing.\n\n"
+        "detailed_description:\n"
+        "[Shot 1] The camera is a fixed medium shot at chest height in soft evening light. "
+        "At first, (S1) leans beside the wooden sideboard on his feet, by the window. "
+        "As it builds, his lounge pants sit down at mid-thigh, and PRIMARY MOTION - he grips his shaft and edges with steady slow strokes at one cycle per second, his breath hitching. "
+        "(S1) says, <d>[English] Too close.</d> "
+        "By the end, he holds his grip beside the sideboard, still stroking steadily with a soft gasp.\n"
+    )
+    g0 = {
+        "c0": {"inputs": {"prompt": "", "length": 243, "width": 768, "height": 1344}},
+        "noise": {"inputs": {"noise_seed": 0}},
+        "save": {"inputs": {"filename_prefix": ""}},
+        "refmods": {"inputs": {f"mod_{i}": ("minimaxh3_oc_poolclub_v1_refmod_visual" if i == 1 else "(none)") for i in range(1, 9)}},
+        "img_1": {"inputs": {"image": "community/POOL_F034.jpg"}},
+    }
+    res = spr.submit_writer_run(
+        raw, g0, tmp_path / "ms1", "male solo edging", "male_solo",
+        still_read=sr, still_image="community/POOL_F034.jpg", dry_run=True,
+    )
+    assert res["status"] == "READY", res
+    ptxt = (tmp_path / "ms1" / "prompt.txt").read_text(encoding="utf-8")
+    low = ptxt.lower()
+    assert "sheer white halter dress" not in low
+    assert "woman's voice" not in low
+    assert "man's voice" in low
+
+

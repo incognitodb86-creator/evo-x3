@@ -147,10 +147,11 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
     # L-FUTA: builder P2-FUTA-AS-MAN
     if re.search(r"(?i)\bfuta\b", ask) and re.search(r"(?i)\b(?:he|his|him|himself|the man)\b", plain):
         out.append(_fix("futa_pronoun", "the futa partner is she/her; no he, his, him or the man"))
-    # L-SPK2: the builder keeps at most 2 lines per speaker
+    # L-SPK2: the builder keeps at most max_lines_per_speaker lines per speaker
+    max_spk = int(cfg.get("max_lines_per_speaker", 2))
     for spk, n in speaker_counts(dd).items():
-        if n > 2:
-            out.append(_fix("speaker_cap", f"({spk}) has {n} lines; the builder keeps two per speaker, so give at most two"))
+        if n > max_spk:
+            out.append(_fix("speaker_cap", f"({spk}) has {n} lines; the builder keeps {max_spk} per speaker, so give at most {max_spk}"))
     # acceptance-2 item 10: silent mouth in every act (oral, mmf/spitroast, finish, titjob) once her mouth is on him
     first_contact = next((i for i, x in enumerate(sents) if MOUTH_CONTACT_RE.search(outside_d(x))), None)
     if first_contact is not None and any(re.search(r"\(S1\)[^<]{0,120}<d>", x) for x in sents[first_contact:]):

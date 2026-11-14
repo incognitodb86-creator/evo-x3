@@ -754,8 +754,10 @@ _CAMERA_STATIC_RE = re.compile(r"\b(locked|locked-off|static|holds? (?:a |the )?
 _STANDING_RE = re.compile(r"\b(stand|stands|standing)\b", re.IGNORECASE)
 _TEMPO_RE = re.compile(r"\b(per second|every (?:half )?second|cycle|bpm|tempo|strokes? a second|beats? a second)\b", re.IGNORECASE)
 _CONTACT_RE = re.compile(
-    r"(?=.*\b(?:penis|vagina|anus|mouth|vulva|vulvas|clitoris|clit|shaft|lips|fist)\b)"
-    r"(?=.*\b(?:inside her|inside her mouth|fully sheathed|hips flush|flush against|buried in her|deep in her|sheathed|vulva pressed to vulva|wrapped around his (?:penis|shaft))\b)",
+    r"(?=.*\b(?:penis|vagina|anus|mouth|vulva|vulvas|clitoris|clit|shaft|lips|fist|tongue|fingers)\b)"
+    r"(?=.*\b(?:inside her|inside her mouth|fully sheathed|hips flush|flush against|buried in her|deep in her|sheathed|"
+    r"vulva (?:pressed to|against) vulva|vulvas? pressed together|(?:wrapped )?around his (?:penis|shaft)|"
+    r"(?:mouth|lips|tongue) (?:is |moves |presses |sealed )?(?:on|against|over) (?:the other woman's |her |\(S[123]\)'s |<Subject [123]>'s )?(?:vulva|clitoris|clit))\b)",
     re.IGNORECASE | re.DOTALL,
 )
 _CAMERA_SENTENCE_RE = re.compile(r"^\s*(?:\[Shot \d+\]\s*)?(?:the |a |one )?(?:camera|lens|\d{2,3}\s?mm|shot on|framing|(?:held,?\s+)?(?:medium|full|wide|tight)(?:[- ](?:full|wide|close))?[- ]shot|(?:medium )?close-up|low[- ]angle|high[- ]angle|eye[- ]level|static medium shot|the held medium shot)\b", re.I)
