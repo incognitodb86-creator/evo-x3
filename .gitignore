@@ -2,3 +2,14 @@ logs/
 sessions/
 *.bak-*
 _inputs/
+
+# writer_pipeline runtime, caches, acceptance run homes, and backups
+__pycache__/
+writer_pipeline/last_tone.txt
+writer_pipeline/recent_outputs.jsonl
+writer_pipeline/cloned_phrases.txt
+writer_pipeline/_archive/
+writer_pipeline/acceptance/.pytest_cache/
+writer_pipeline/acceptance/home_*/
+writer_pipeline/acceptance/shared_state_*/
+writer_pipeline/acceptance/_archive/
