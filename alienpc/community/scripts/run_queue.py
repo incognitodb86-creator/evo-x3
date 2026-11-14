@@ -2,6 +2,8 @@ r"""run_queue.py - THE reusable render-queue template (simplify plan S4 + S8, 20
 
 Renders every clip in a run's order file back to back in ONE GPU window:
   once per batch : pytest gate, take gpu-render.lock (held = rc 7 GPU_BUSY), unload the LLM, wake comfyui_auto
+  post-pass      : RTX 2x of every finished clip by default (--no-upscale to skip); a failed post-pass is
+                   rc 9 with the count in the reason and the raw clip kept (the 2x is the deliverable)
   submit (one at a time) : at most MAX_IN_FLIGHT = 1 clip in ComfyUI at a time (FIX 3, 2026-11-03: was submit all
                    up front; up-front submit risked losing queued jobs when llama-swap swapped/killed ComfyUI).
                    Submits the next clip right after the current one settles (minimal gap between jobs).
@@ -51,7 +53,7 @@ missing a DONE ok line, 7 GPU busy (lock held), 8 uncaught error (reason names i
 never closed (killed/unknown; reported at the next start), 130 Ctrl-C. A kill cannot log itself: the next start
 reports it.
 """
-import argparse, copy, hashlib, json, os, re, shutil, subprocess, sys, time
+import argparse, copy, datetime, hashlib, json, os, re, shutil, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import comm
 import run_graph_job as rgj
@@ -84,17 +86,36 @@ import json, subprocess, sys, time
 import torch, nvvfx
 src, dst = sys.argv[1], sys.argv[2]
 t0 = time.time()
-o = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,width,height,r_frame_rate",
+o = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                               "stream=codec_type,width,height,r_frame_rate,color_range,color_space,"
+                               "color_transfer,color_primaries",
                                "-of", "json", src], capture_output=True, text=True, check=True).stdout)
 v = [x for x in o["streams"] if x.get("codec_type") == "video"][0]
 has_audio = any(x.get("codec_type") == "audio" for x in o["streams"])
 W, H, fps = int(v["width"]), int(v["height"]), v["r_frame_rate"]
+# F5 (2026-11-08): keep the source's own colour labels through the post-pass. The frame loop decodes to rgb24
+# (the format nvvfx wants) and re-encodes yuv420p, and libx264 writes no colour tags of its own, so the 2x
+# file used to arrive with every label unknown (measured 2026-11-08 on a real run: raw tv/bt709/iec61966-2-1/
+# bt709 -> clip.mp4 all unknown; reproduced in that same rgb24 shape with CPU ffmpeg in
+# runs/skills-forge-repair-2026-11-08-181650/probe_f5_labels.sh). The source's tags are stated three times,
+# which is what ffmpeg's measured behaviour needs: on the source decoder (that is how its pixels are labelled,
+# and so how they convert into RGB), on the RGB input of the encoder process (the labels the decoded frames
+# carry, so RGB->YUV converts back the same way), and on the encoder output (the tags in the file it writes).
+# Measured: all four labels in the 2x file match the source; a source with no labels stays unlabelled, because
+# no flag is built from an unknown value. Only ffmpeg's existing colour options are used.
+_color = [x for field, flag in (("color_range", "-color_range"), ("color_space", "-colorspace"),
+                                ("color_transfer", "-color_trc"), ("color_primaries", "-color_primaries"))
+          for x in (lambda s: [flag, s] if s and s.lower() not in
+                    ("", "unknown", "unspecified", "unrecognized", "unregistered", "none", "n/a") else [])
+          (str(v.get(field) or "").strip())]
 OW, OH = 2 * W, 2 * H
-dec = subprocess.Popen(["ffmpeg", "-v", "error", "-i", src, "-map", "0:v:0", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
-                       stdout=subprocess.PIPE)
-cmd = ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", "%dx%d" % (OW, OH), "-r", fps, "-i", "-"]
+dec = subprocess.Popen(["ffmpeg", "-v", "error", *_color, "-i", src, "-map", "0:v:0", "-f", "rawvideo",
+                        "-pix_fmt", "rgb24", "-"], stdout=subprocess.PIPE)
+cmd = ["ffmpeg", "-y", "-v", "error", *_color, "-f", "rawvideo", "-pix_fmt", "rgb24",
+       "-s", "%dx%d" % (OW, OH), "-r", fps, "-i", "-"]
 cmd += (["-i", src, "-map", "0:v:0", "-map", "1:a:0", "-c:a", "copy"] if has_audio else ["-map", "0:v:0"])
-cmd += ["-c:v", "libx264", "-crf", "16", "-preset", "fast", "-pix_fmt", "yuv420p", "-movflags", "+faststart", dst]
+cmd += ["-c:v", "libx264", "-crf", "16", "-preset", "fast", "-pix_fmt", "yuv420p"]
+cmd += _color + ["-movflags", "+faststart", dst]
 enc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
 n, fb = 0, W * H * 3
 with nvvfx.VideoSuperRes(nvvfx.effects.QualityLevel.ULTRA) as sr:
@@ -113,6 +134,7 @@ rce, rcd = enc.wait(), dec.wait()
 if rce or rcd or n == 0:
     sys.exit("upscale ffmpeg rc enc=%s dec=%s frames=%d" % (rce, rcd, n))
 print(json.dumps({"frames": n, "in": "%dx%d" % (W, H), "out": "%dx%d" % (OW, OH), "fps": fps, "audio": has_audio,
+                  "color_labels": " ".join(_color),
                   "peak_torch_mib": round(torch.cuda.max_memory_allocated() / 2 ** 20), "secs": round(time.time() - t0, 2)}))
 """
 
@@ -183,7 +205,12 @@ def upscale_done(run_dir, jobs, slog):
 
 
 def qlog(run_dir, line):
-    ts = time.strftime("%Y-%m-%dT%H:%M:%S-05:00")
+    """One log line: ISO-8601 local wall-clock with the real UTC offset (F12 2026-11-08), then the text.
+
+    The offset comes from the machine clock (this box runs America/Chicago: -06:00 standard, -05:00 daylight),
+    not a written '-05', so a line states the time it was written at. Line format, files and targets unchanged.
+    """
+    ts = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
     print(ts, line, flush=True)
     with open(os.path.join(run_dir, "_render_queue.log"), "a", encoding="utf-8") as f:
         f.write("%s %s\n" % (ts, line))
@@ -782,8 +809,21 @@ def main():
         if a.no_upscale:
             qlog(run_dir, "UPSCALE skipped (--no-upscale): clips stay at the render size")
         elif rc != 130:  # post-pass inside the lock window, after comfyui_auto freed the VRAM (never on Ctrl-C)
-            try: upscale_done(run_dir, jobs, slog)
-            except Exception as e: qlog(run_dir, "UPSCALE FAIL batch error %s: %s (raw clips kept)" % (type(e).__name__, str(e)[:160]))
+            try:
+                # F2 (2026-11-08): the 2x post-pass is the requested default deliverable, so its counts reach
+                # rc/reason instead of only the log: a failed post-pass stops --wait / --qnap-final reporting a
+                # run as delivered (rc 9 = post-pass failure, a code of its own, not GPU_BUSY rc 7). upscale_done
+                # keeps the raw clip, --no-upscale asks for no post-pass and stays rc 0, a batch whose
+                # post-passes all succeed is unchanged, and the failure is named in the closing BATCH line.
+                n_up_ok, n_up_fail = upscale_done(run_dir, jobs, slog)
+                if n_up_fail and rc == 0:
+                    rc, reason = 9, ("%d of %d clips failed the requested 2x post-pass (raw clips kept)"
+                                     % (n_up_fail, n_up_ok + n_up_fail))
+                    qlog(run_dir, "UPSCALE batch %s" % reason)
+            except Exception as e:
+                qlog(run_dir, "UPSCALE FAIL batch error %s: %s (raw clips kept)" % (type(e).__name__, str(e)[:160]))
+                if rc == 0:
+                    rc, reason = 9, "post-pass error %s (raw clips kept)" % type(e).__name__
         try: rgj.gpu_unlock(slog)
         except Exception as e: slog("unlock note %s" % str(e)[:120])
         try: n_ok = ok_count(run_dir, jobs)

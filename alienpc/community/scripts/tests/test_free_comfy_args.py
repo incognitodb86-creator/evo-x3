@@ -17,8 +17,11 @@ import os
 import sys
 import unittest
 
-REPO_ROOT = r"C:\AI\community"
-RUN_QUEUE = os.path.join(REPO_ROOT, "scripts", "run_queue.py")
+# F6b: run_queue.py moved to the shared library, so this fixture reads it there. The community path is kept
+# as a fallback so the fixture still runs against an un-moved tree (the baseline check does exactly that).
+CANDIDATES = [r"C:\AI\community\scripts", r"C:\AI\lib", r"C:\AI\community"]
+REPO_ROOT = next(d for d in CANDIDATES if os.path.isfile(os.path.join(d, "run_queue.py")))
+RUN_QUEUE = os.path.join(REPO_ROOT, "run_queue.py")
 BATCH_LOG = "_render_queue.log"  # the batch log qlog() (run_queue.py:64) writes
 
 
