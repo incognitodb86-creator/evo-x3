@@ -1,19 +1,19 @@
 # Render Pi Session Guide (`C:\AI\render\RUN_ME.md`)
-Last Updated: 2026-11-13
+Last Updated: 2026-11-14
 
 Quickstart for running the H3 writer pipeline from `C:\AI\render` on AlienPc.
 
 ## 1. Launch `pi` Correctly (Model, CWD, Permissions, Guard)
 - **Working directory**: `C:\AI\render` (reads `C:\AI\render\AGENTS.md` and `.pi\agent\pi-permissions.jsonc`).
-- **Model override (mandatory)**: `C:\Users\derek\.pi\agent\settings.json` defaults to `coding_swift15_iq3s_esp`. **Never** run Render chats on that coding default. Always pass Gemma 4 26B A4B Heretic on PolyStrata (arm A):
+- **Model override (mandatory)**: `C:\Users\derek\.pi\agent\settings.json` defaults to `coding_swift15_iq3s_esp`. **Never** run Render chats on that coding default. Always pass Gemma 4 26B A4B Heretic on PolyStrata (`gemma4_heretic_poly_think`, `--thinking medium`):
   ```powershell
   Set-Location C:\AI\render
-  pi --approve --provider llama-swap --model gemma4_heretic_poly
+  pi --approve --model llama-swap/gemma4_heretic_poly_think --thinking medium
   ```
   - For an automated single-turn check add `-p --no-session "<prompt>"`.
   - Pipeline internal LLM alias (`C:\AI\render\writer_pipeline\config.yaml`): `gemma4_heretic_poly_think` with `thinking: false`, frozen sampler **arm A** (`temperature: 1.0`, `top_p: 0.95`, `top_k: 64`, `min_p: 0.10`, `n_candidates: 3`, `min_ready_score: 60`).
 - **Write sandbox (`C:\AI\render\.pi\agent\pi-permissions.jsonc`)**: `edit` and `write` are denied everywhere under `C:\AI\render` and elsewhere, and allowed **only** under `C:/AI/community/runs/*`.
-- **Loop guard (`C:\Users\derek\.pi\agent\extensions\loop-guard.ts`)**: aborts 3 identical tool calls in a row and caps `submit_parody_run.py` calls per run folder at `4` (`RUN_LIMIT = 4`). Stop and report `NOT_READY` instead of retrying in a loop.
+- **Loop guard (`C:\Users\derek\.pi\agent\extensions\loop-guard.ts`)**: aborts 3 identical tool calls in a row and caps `submit_parody_run.py` / `render_writer_pipeline.py` calls per run folder at `4` (`RUN_LIMIT = 4`). Stop and report `NOT_READY` instead of retrying in a loop.
 - **GPU lock**: Before sending model requests or calling the pipeline, confirm `C:\AI\locks\gpu-render.lock` is not held (`False`). Never start a job while ComfyUI renders hold the lock.
 
 ## 2. Normal Run Workflow (Dry Only by Default)

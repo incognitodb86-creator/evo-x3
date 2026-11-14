@@ -66,7 +66,7 @@ CAMERA AND TIME
 
 PACING (clip length follows the beat, action, tempo and extension, about 2.3 to 10.1 seconds; the timings below are for a 10 s clip and scale with length)
 - One beat per clip. If it can't play in one clip, it belongs in its own clip.
-- The beat card gives the clip length T in seconds. Onset fills about the first 30% of T, development to about 80%, result to the end. A clip that opens already joined spends all of T on motion. Each phase gets one diegetic sound tied to its action. The last sentence keeps motion going.
+- The beat card gives the clip length T in seconds (for a clip whose length the beat card gives, onset fills about the first 30% of T, development to about 80%, result to the end). A clip that opens already joined spends all of T on motion. Each phase gets one diegetic sound tied to its action. The last sentence keeps motion going.
 - For a 10 s sex clip, exit, clearance and entry take the first 2-3 seconds; PRIMARY MOTION owns the rest.
 - Spoken words: at most 2.5 per second of T. Lines per speaker: one per five seconds, at least one.
 - Talk fits the time: one to two short lines per speaker in a sex clip, fewer in cinematic mode; a spoken line takes about two seconds, and the builder drops lines past about 2.5 words a second.
@@ -155,10 +155,10 @@ Unfilled <...> blanks ship as literal text; fill every one. Keep the dash in "PR
 
 PIPELINE (Python 3.12; Gemma 4 26B A4B Heretic on PolyStrata, arm A; writes each clip, dry by default, never queues)
 & 'C:\Program Files\Python312\python.exe' C:\AI\community\scripts\parody\render_writer_pipeline.py '<run_dir>' --ask '<ask>' --position '<position>' --still '<still>' --character FCSydny [--frames <N>] [--shots single|multi] [--shot-count <k>] [--scene <id>] [--continue '<prev_run_dir>'] [--partner2-still '<still>']
-- Launch this session from C:\AI\render with --provider llama-swap --model gemma4_heretic_poly (not the default coding model); pipeline config uses model_alias gemma4_heretic_poly_think (thinking: false, arm A). Pi write permissions allow C:/AI/community/runs/* only; loop-guard caps submit_parody_run calls per run folder at 4.
+- Launch this session from C:\AI\render with --model llama-swap/gemma4_heretic_poly_think --thinking medium (not the default coding model); pipeline config uses model_alias gemma4_heretic_poly_think (thinking: false, arm A). Pi write permissions allow C:/AI/community/runs/* only; loop-guard caps submit_parody_run and render_writer_pipeline calls per run folder at 4.
 - FCSydny attaches minimaxh3_oc_poolclub_v1_refmod_visual and minimaxh3_oc_poolclub_v1_refmod_audio (<Audio 1>). All adult RefMods (OC, INDEX, and PixlStash-tagged across C:\AI\render\stills\approved_characters\vault.db and C:\Users\derek\5slock\libraries\vault.db) and voice refs are allowed; 18+ youth lint is the only content rule.
 - Run it after still_read.json is in the run folder. It prints one READY or NOT_READY line with the pick.json path; report that line. For a continued clip add --continue '<previous run_dir>'. It already fixes and rebuilds once, so do not edit its writer_output.txt.
-- Show an image inline with the read tool. In phone chat, ask with numbered options, never a questionnaire tool. QNAP only through C:\AI\community\lib\pi_qnap.py (ls/get/put; mv or rm need Derrick's yes).
+- Show an image inline with the read tool. In phone chat, ask with numbered options, never a questionnaire tool. QNAP only through C:\AI\community\scripts\pi_qnap.py (ls/get/put; mv or rm need Derrick's yes).
 
 THE ONE COMMAND (Python 3.12)
 & 'C:\Program Files\Python312\python.exe' C:\AI\community\scripts\parody\submit_parody_run.py writer-run '<run_dir>' --ask '<ask>' --position '<position>' --still '<still>' --character FCSydny [--frames <N>] [--shots single|multi] [--continued] [--partner2-still '<still>'] [--s3-look '<look>'] [--s3-in-frame] [--partner-type <type>] [--partner-type2 <type>] [--names <name>...]
