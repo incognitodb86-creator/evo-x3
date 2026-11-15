@@ -2,7 +2,7 @@
 
 Last Updated: 2026-11-11
 
-C:\\AI\\render\\AGENTS.md is the Render *agent* instruction file (tool calls, hook commands, GPU lock, QNAP). When it is
+/home/derekboone/AI/render/AGENTS.md is the Render *agent* instruction file (tool calls, hook commands, GPU lock, QNAP). When it is
 pasted into a raw writer call (no tools), writers answer with an agent preamble, a refusal or a fake tool call and stop
 short (fn_swift_bakeoff_rerun_20261111). The Render agent keeps AGENTS.md as its own instructions and then calls the
 hook; a raw writer call gets only the prompt skills below.
@@ -22,7 +22,7 @@ WRITER_SKILL_SOURCES: Tuple[Path, ...] = (
 )
 # Markers that only appear in agent instruction files (AGENTS.md / GEMINI.md), never in a prompt skill.
 _AGENT_FILE_NAMES = {"agents.md", "gemini.md", "claude.md"}
-_AGENT_MARKERS = ("# Render Rules", "## Prompt Writer Rules", "C:\\AI\\locks\\gpu-render.lock", "pi_qnap.py")
+_AGENT_MARKERS = ("# Render Rules", "## Prompt Writer Rules", "/home/derekboone/AI/locks/gpu-render.lock", "pi_qnap.py")
 
 
 class AgentInstructionsInWriterPrompt(ValueError):

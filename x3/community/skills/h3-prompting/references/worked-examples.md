@@ -3,7 +3,7 @@
 ## 6. Worked examples
 
 Four examples: the two **archived** winning prompts - both few-shots from
-`C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md`, reproduced character-for-character
+`/home/derekboone/AI/5slock/ralph-community/notes/p15_writer_skill.md`, reproduced character-for-character
 (LF-normalized) - live in the supporting file `references/examples_archived.md` in this skill directory (9,749 B for
 both, measured 2026-10-29: read it when a full paste is needed, it is not loaded with the skill; that file carries
 the audio-supersession note). **In those two archived examples the labeled soundscape and non-diegetic-music

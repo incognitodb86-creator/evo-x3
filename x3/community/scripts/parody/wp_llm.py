@@ -15,7 +15,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-PI_MODELS = Path(os.path.expanduser(r"~\.pi\agent\models.json"))
+PI_MODELS = Path(os.path.expanduser(r"~/.pi/agent/models.json"))
 
 
 class WriterDown(RuntimeError):
@@ -36,7 +36,14 @@ def _api_key() -> Optional[str]:
         pass
     try:
         d = json.loads(PI_MODELS.read_text(encoding="utf-8"))
-        v = d["providers"]["llama-swap"].get("apiKey")
+        provs = d["providers"]  # EVO-X3 2026-11-15: pi provider is x3-local; AlienPc: llama-swap
+        v = (provs.get("llama-swap") or provs.get("x3-local") or {}).get("apiKey")
+        if isinstance(v, str) and v.startswith("!"):  # EVO-X3 2026-11-15: pi resolves "!cmd" keys; do the same
+            cmd = v[1:].strip()
+            if cmd.startswith("cat ") and " " not in cmd[4:].strip():
+                return Path(os.path.expanduser(cmd[4:].strip())).read_text(encoding="utf-8").strip() or None
+            import subprocess
+            return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=20).stdout.strip() or None
         if isinstance(v, str) and v:
             return os.environ.get(v, v) if re.fullmatch(r"[A-Z_][A-Z0-9_]*", v) else v
     except Exception:

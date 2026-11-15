@@ -64,7 +64,7 @@ def _dummy_refmod_graph(n_mods: int = 8) -> dict:
 # ==============================================================================
 
 def test_writer_sys_assert_rejects_agent_instructions():
-    bad_prompt = "# Render Rules (C:\\AI\\render)\nSome prompt directions\nmanage_task and tool guidelines"
+    bad_prompt = "# Render Rules (/home/derekboone/AI/render)\nSome prompt directions\nmanage_task and tool guidelines"
     with pytest.raises(AgentInstructionsInWriterPrompt):
         assert_writer_system_prompt(bad_prompt)
 
@@ -489,7 +489,7 @@ def test_part4_all_refmods_and_pixlstash_celebrity_tag(monkeypatch):
     assert any("zendaya" in x for x in (z.get("stems") or []))
 
     monkeypatch.setattr(spr, "pixlstash_character_names_for_still", lambda still: ["Zendaya"])
-    z_tag = spr.resolve_writer_refmods(still_image=r"C:\AI\render\_inputs\generic_tag_test.jpg")
+    z_tag = spr.resolve_writer_refmods(still_image=r"/home/derekboone/AI/render/_inputs/generic_tag_test.jpg")
     assert not z_tag.get("reason"), z_tag
     assert z_tag.get("source") == "pixlstash"
     assert any("zendaya" in x for x in (z_tag.get("stems") or []))
@@ -507,7 +507,7 @@ def test_contact_regex_and_prompt_compiler_77_rules():
     ):
         assert br._CONTACT_RE.search(phrase), phrase
 
-    agents_src = Path(r"C:\AI\render\AGENTS.md").read_text(encoding="utf-8")
+    agents_src = Path(r"/home/derekboone/AI/render/AGENTS.md").read_text(encoding="utf-8")
     compiled = wpc.compile_prompt(agents_src)
     assert "MODES (use only when the ask calls for one)" in compiled
     assert "EXAMPLES (level of detail only;" in compiled

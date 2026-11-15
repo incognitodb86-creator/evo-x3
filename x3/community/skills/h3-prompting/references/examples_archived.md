@@ -2,8 +2,8 @@
 
 Supporting file of the skill `h3-prompting` (`SKILL.md` in this directory). Read this when a full paste is
 needed: it holds the two winning prompts archived in
-`C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (its only two few-shots), copied
-**verbatim text** - the fenced blocks are reproduced character-for-character (line endings normalized to LF), verified by `C:\AI\community\notes\u2_check.py`. Nothing in the p15 file was
+`/home/derekboone/AI/5slock/ralph-community/notes/p15_writer_skill.md` (its only two few-shots), copied
+**verbatim text** - the fenced blocks are reproduced character-for-character (line endings normalized to LF), verified by `/home/derekboone/AI/community/notes/u2_check.py`. Nothing in the p15 file was
 changed: it is the writer model's system prompt, not a rule file.
 
 **Audio supersession (R7 in `SKILL.md`):** the `overall_soundscape:` and `non_diegetic_music:` blocks in these

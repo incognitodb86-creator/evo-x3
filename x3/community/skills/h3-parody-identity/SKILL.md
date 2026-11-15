@@ -3,7 +3,7 @@ name: h3-parody-identity
 description: >-
   INDEX + RefMod celebrity/character parody and writer lane for MiniMax H3 — use for any named character, actor, celebrity, or writer-run video on the locked
   1-pass beta7_int8HQ graph (all adult RefMods and voice refs allowed; 18+ only), including
-  autonomous chat execution from C:\AI\render or writer-run builds.
+  autonomous chat execution from /home/derekboone/AI/render or writer-run builds.
 ---
 # H3 parody / identity lane (INDEX + RefMod)
 
@@ -11,10 +11,10 @@ Internals, CLI, VRAM: `references/h3-parody-identity-reference.md` (brain: `10_p
 
 ## Locked baseline (Derrick, Nov 5–6, 2026; synced 2026-11-13)
 
-- `templates/b2_refmod.api.json`, 1-pass, `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, 8 steps `euler`/`simple`, shift 12.0/3.0, RefModsLoader → RefModApply `retention 1.0`, plus `run_queue.py` default NVIDIA `RTX VSR ULTRA 2x @ 24fps` (`1536x2688` / `2688x1536`, keeps `<tag>_raw.mp4`; `--no-upscale` opt-out). **All adult RefMods (OC, INDEX, PixlStash-tagged across `approved_characters\vault.db` and `C:\Users\derek\5slock\libraries\vault.db`) and all voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed; 2-pass is retired and 18+ (`guard_ok` / youth lint) is the only content rule.** New nodes/dials need Derrick's yes.
+- `templates/b2_refmod.api.json`, 1-pass, `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, 8 steps `euler`/`simple`, shift 12.0/3.0, RefModsLoader → RefModApply `retention 1.0`, plus `run_queue.py` default NVIDIA `RTX VSR ULTRA 2x @ 24fps` (`1536x2688` / `2688x1536`, keeps `<tag>_raw.mp4`; `--no-upscale` opt-out). **All adult RefMods (OC, INDEX, PixlStash-tagged across `approved_characters\vault.db` and `/home/derekboone/AI/5slock/libraries/vault.db`) and all voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed; 2-pass is retired and 18+ (`guard_ok` / youth lint) is the only content rule.** New nodes/dials need Derrick's yes.
 - INDEX + RefMod + voice refs resolve automatically in `submit_parody_run.py` (`FCSydny` attaches `minimaxh3_oc_poolclub_v1_refmod_audio` and `minimaxh3_oc_poolclub_v1_refmod_visual`); report errors if a requested name has no local weights instead of downloading anything.
 - Never open any `sydney` path. Never use minor-coded words (`underage`, `minor`, `child`, `children`) — `guard_ok` blocks the submit (`18+` only content rule).
-- Writer-run lane (`C:\AI\render`, Gemma 4 26B A4B Heretic on PolyStrata arm A: `--provider llama-swap --model gemma4_heretic_poly`): use `render_writer_pipeline.py` (flags `--ask --position --still --still-read --character FCSydny --frames --shots --shot-count --scene --continue --partner2-still`) or `submit_parody_run.py writer-run` (`--ask --position --still --character --frames --shots --continued --partner2-still --s3-look --s3-in-frame --partner-type --partner-type2`), dry by default (`--queue` only when Derrick says yes).
+- Writer-run lane (`/home/derekboone/AI/render`, Gemma 4 26B A4B Heretic on PolyStrata arm A: `--provider llama-swap --model gemma4_heretic_poly`): use `render_writer_pipeline.py` (flags `--ask --position --still --still-read --character FCSydny --frames --shots --shot-count --scene --continue --partner2-still`) or `submit_parody_run.py writer-run` (`--ask --position --still --character --frames --shots --continued --partner2-still --s3-look --s3-in-frame --partner-type --partner-type2`), dry by default (`--queue` only when Derrick says yes).
 - For named parody clips, Derrick's chat ask **is** the go for one clip, continuation or stitched set; for Render writer runs, stop dry at `READY` and ask before `--queue`. Ask first for batches or downloads.
 
 ## Writing the arguments (Reference §0.5, §0.7)
@@ -36,7 +36,7 @@ Name mapping: prefer pairing `INDEX` character + actor (`--name "<Actor>" --char
 ## Autonomous recipe — ONE command, then reply
 
 ```powershell
-& 'C:\AI\director\.venv\Scripts\python.exe' 'C:\AI\community\scripts\parody\submit_parody_run.py' `
+& '/home/derekboone/AI/director/.venv/Scripts/python.exe' '/home/derekboone/AI/community/scripts/parody/submit_parody_run.py' `
   --name '<Actor>' --character '<Character>' --actor '<Actor>' --tone 'satirical adult parody' `
   --seconds 10 --aspect 16:9 --camera '<framing + motion>' `
   --description '<biometrics + outfit>' --scene '<scene + hands on prop + voice cue>' `

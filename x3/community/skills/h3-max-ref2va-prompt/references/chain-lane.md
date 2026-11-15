@@ -1,7 +1,7 @@
 # REF2VA chain lane (cells from one still) - h3-max-ref2va-prompt
 
 Chain-lane facts only. **Every prompt rule for a cell is in `../SKILL.md` (R32-R44, this skill) and in
-`C:\AI\community\skills\h3-prompting\SKILL.md` (R1-R31); cite `R<n>`, never restate a rule in a brief.** The per-cell
+`/home/derekboone/AI/community/skills/h3-prompting/SKILL.md` (R1-R31); cite `R<n>`, never restate a rule in a brief.** The per-cell
 audit is `h3-prompting` section 5 plus section 5 of `../SKILL.md`.
 
 ## Chain lane (this file only)

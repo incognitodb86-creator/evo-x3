@@ -13,7 +13,7 @@ from pathlib import Path
 import sys
 
 # Add community scripts to path for comm and make_b2_request
-SCRIPTS_DIR = Path(r"C:\AI\community\scripts")
+SCRIPTS_DIR = Path(r"/home/derekboone/AI/community/scripts")
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
@@ -21,7 +21,7 @@ import comm
 from make_b2_request import build as build_b2_graph
 
 
-DEFAULT_TEMPLATE = Path(r"C:\AI\community\templates\b2.api.json")
+DEFAULT_TEMPLATE = Path(r"/home/derekboone/AI/community/templates/b2.api.json")
 
 
 def prepare_request(

@@ -1,6 +1,6 @@
 ---
 name: h3-prompting
-description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box. Covers output prompt formatting, five prompt sections with plain audio cues (TenStrip HF #77), verbatim identity clauses, position/motion/contact geometry, response dials, garment states, <Video 1> continuation, wording, LoRA hygiene, checklist, and worked examples. Use when writing, reviewing, or auditing H3 prompt text, run prompt files, MiniMaxH3ReferenceToVideo pastes, multi-cell chains, I2V POS, or Continuum sequence_prompts. (REF2VA lane is in h3-max-ref2va-prompt; render rules are in C:\AI\render\AGENTS.md).
+description: The single home for MiniMax-H3 / 10Eros-Max prompt rules (R1-R31) on this box. Covers output prompt formatting, five prompt sections with plain audio cues (TenStrip HF #77), verbatim identity clauses, position/motion/contact geometry, response dials, garment states, <Video 1> continuation, wording, LoRA hygiene, checklist, and worked examples. Use when writing, reviewing, or auditing H3 prompt text, run prompt files, MiniMaxH3ReferenceToVideo pastes, multi-cell chains, I2V POS, or Continuum sequence_prompts. (REF2VA lane is in h3-max-ref2va-prompt; render rules are in /home/derekboone/AI/render/AGENTS.md).
 ---
 
 # H3 prompting - the single home (U2, 2026-10-29)
@@ -11,7 +11,7 @@ For named INDEX + RefMod parodies, `h3-parody-identity` owns the tested prompt f
 
 Every MiniMax-H3 / 10Eros-Max prompt rule on this box lives in this file and only here. The REF2VA lane files in references\ (ref2va-lane.md, ref2va-chain-lane.md),
 and the `alienpc-hardcore-i2v-director` prompt sections point here and must not restate a
-rule; a rule duplicated in two skills is a defect (plan `C:\AI\community\notes\2026-10-29-forge-cleanup-plan.md`,
+rule; a rule duplicated in two skills is a defect (plan `/home/derekboone/AI/community/notes/2026-10-29-forge-cleanup-plan.md`,
 unit U2, check "each rule string appears in exactly one skill"). Rule numbers are stable: cite them as `R11` in a
 review, a diff gate or a commit message, never the sentence.
 
@@ -22,7 +22,7 @@ Model/lane facts (beta7 dials, node names, ports, queue, watch/triage, KEEP poli
 `video-render` and the director - this file is prompt text only.
 
 **Lane split (2026-11-03).** The REF2VA paste lane for H3-Max is the skill `h3-max-ref2va-prompt`
-(`C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md`, rules R32-R44, chain lane in its `references\chain-lane.md`);
+(`/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`, rules R32-R44, chain lane in its `references\chain-lane.md`);
 REF2VA is the standing Max lane unless Derek names another lane. This file keeps R1-R31, which apply to every lane
 including REF2VA, plus the rule index (section 9). A rule sentence lives in exactly one file; numbers are box-unique
 and stable; a REF2VA paste is gated by section 5 here **and** section 5 of the REF2VA skill.
@@ -33,7 +33,7 @@ and stable; a REF2VA paste is gated by section 5 here **and** section 5 of the R
 Deliver the complete five-section prompt text and nothing else: no planner notes, no "I will read/write" preamble, no
 options, no explanation, no self-review, and no word count. Counting words and checking rules happen silently before token 1.
 
-R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
+R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in /home/derekboone/AI/render/AGENTS.md; run render work from /home/derekboone/AI/render.
 
 **R3 - Fiction and policy text never enter the paste.** No governance/safety/consent-policy sentences, no "this is
 fiction", no age-rating boilerplate, no model-name instructions. Consent, when Derek states it, is one plain clause
@@ -62,7 +62,7 @@ silent freeze. For a first-and-last-frame (keyframe completion) clip, describe t
 
 **R7 - Audio is plain cues in the main prompt, never a section. No labeled soundscape or
 non-diegetic-music header, no music/foley score.** TenStrip (model owner, HF 10Eros-Max discussion #77, quoted in
-`C:\AI\community\notes\web\tenstrip_hf77_audio_20261029.md`): *"Don't use developer H3 style prompting, it causes
+`/home/derekboone/AI/community/notes/web/tenstrip_hf77_audio_20261029.md`): *"Don't use developer H3 style prompting, it causes
 the most interference. 'overall_soundcape' especially is actually the easiest way to introduce extremely bad audio
 and will cause the model to go out of it's way and start putting cartoon sounds on the output and ignore prompt and
 should be deleted. Prompt very normal audio queues in prompt or at the end of the main prompt."* So: at the END of
@@ -95,7 +95,7 @@ advice; a 6.5k-char prompt is about 1.7k tokens). Prompts run as long as the use
 (`<Video 1>` = the previous clip). A continuation without `<Video 1>` is invalid - rewrite it. Only a hard cut to a
 new scene has no `<Video 1>`, and it must be labelled `hard cut`. Storyboard runs reference `<Shot Reference N>` for
 their panel. Every continued clip carries references again: a chunk with no `<Picture N>` drifts
-(`C:\AI\community\notes\hc_redo_research_20261023.md`).
+(`/home/derekboone/AI/community/notes/hc_redo_research_20261023.md`).
 
 ## 2. Keeping identity, bodies and wardrobe
 
@@ -166,10 +166,10 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
 
 ## 7. Pointers (who defers to this file)
 
-- **REF2VA (the standing Max lane): skill `h3-max-ref2va-prompt`** - `C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md`
+- **REF2VA (the standing Max lane): skill `h3-max-ref2va-prompt`** - `/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`
   (rules R32-R44, its own gate, paste skeleton) and `...\references\chain-lane.md` (multi-cell chains). Its section 2
   is the REF2VA reading of R5, R6, R8-R15; it never restates a rule of this file. The two files this pointer replaces
-  are archived at `C:\AI\community\archive\2026-11-03-ref2va-split\`; thin pointers remain at
+  are archived at `/home/derekboone/AI/community/archive/2026-11-03-ref2va-split/`; thin pointers remain at
   [references/ref2va-lane.md](references/ref2va-lane.md) and [references/ref2va-chain-lane.md](references/ref2va-chain-lane.md)
   so old citations resolve.
 - `alienpc-hardcore-i2v-director` lives at `C:\Users\derek\.pi\agent\skills\alienpc-hardcore-i2v-director\SKILL.md` (not copied here). It owns still-to-intent matching, director cards and package D triage. Prompt rules stay in this
@@ -177,23 +177,23 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
 - `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts.
 - **Long-clip beat sheet & multi-shot continuity**: [references/longclip-beat-sheet.md](references/longclip-beat-sheet.md) (beat sheet fields, in-clip [Shot N] preference, one primary beat per clip; C2V runtime marked UNPROVEN).
-- The writer model's system prompt `C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (the only copy
-  on this box - `C:\AI\community\notes\` has none) keeps its
+- The writer model's system prompt `/home/derekboone/AI/5slock/ralph-community/notes/p15_writer_skill.md` (the only copy
+  on this box - `/home/derekboone/AI/community/notes/` has none) keeps its
   own rubric and few-shots: it is a model prompt, not a rule file, so it is not merged and not edited here. Its
   labeled soundscape-header instruction is superseded by R7 for anything written fresh on this box.
 
 ## 8. Sources
 
 Model card and community: `huggingface.co/TenStrip/10Eros-Max` discussions #77 (audio, saved at
-`C:\AI\community\notes\web\tenstrip_hf77_audio_20261029.md`), #63 (retention lead-in lines), #50 (prompt format per
+`/home/derekboone/AI/community/notes/web/tenstrip_hf77_audio_20261029.md`), #63 (retention lead-in lines), #50 (prompt format per
 version), #49 (prompt-writer system prompts); MiniMax `VIDEO_PROMPT_WRITING_GUIDE_ref_en.md`
 (`huggingface.co/MiniMaxAI/MiniMax-H3`); civitai guides. Reddit `.json` endpoints return a "Blocked" HTML page from
 this box - cite HF/GitHub/civitai.
-Box evidence: `C:\Users\derek\5slock\ralph-community\notes\p15_writer_skill.md` (persona, standards, rubric, its two
-few-shots), `C:\AI\community\notes\hc_face_research_20261023.md`, `notes/hc_redo_research_20261023.md`,
+Box evidence: `/home/derekboone/AI/5slock/ralph-community/notes/p15_writer_skill.md` (persona, standards, rubric, its two
+few-shots), `/home/derekboone/AI/community/notes/hc_face_research_20261023.md`, `notes/hc_redo_research_20261023.md`,
 `notes/bq1_prompt_diff.txt`, `notes/forge-learnings.md`, `notes/prompt_guide_20261023.md`, `notes/im1_prompts.md`,
-`C:\AI\community\specs\prompt_v2\*.txt`, `C:\AI\community\runs\terrace_dom_q5guide_20261028_s51083007\prompt_seg0.txt`
-(the current B2 KEEP paste, with the old audio blocks), `C:\AI\community\skills\h3-hc-render\SKILL.md`,
+`/home/derekboone/AI/community/specs/prompt_v2/*.txt`, `/home/derekboone/AI/community/runs/terrace_dom_q5guide_20261028_s51083007/prompt_seg0.txt`
+(the current B2 KEEP paste, with the old audio blocks), `/home/derekboone/AI/community/skills/h3-hc-render/SKILL.md`,
 the 2026-10-28 prompt corrections in MEMORY (slap-to-face, the response dial, beta 7 dials).
 Upstream (read 2026-11-03): MiniMax-AI/MiniMax-H3 `skills/h3-prompt-writing/references/ref-en.txt` and `base-en.txt`
 (local clone, HEAD `199b7d0`, 2026-10-28) - the source of the REF2VA rules R32-R41 in `h3-max-ref2va-prompt`; the
@@ -206,7 +206,7 @@ reason our paste shape differs from the hosted format is **R32** there. Reviews:
 | --- | --- |
 | R1-R4, R7-R9, R16-R23b, R24-R31 (incl. R29a) | this file, sections 0-4 (R16–R23b in `references/motion-contact-anatomy.md`, R24–R29a and R30-R31 in `references/wording.md`) |
 | R5, R6, R10-R15 | this file, sections 1-2; the REF2VA reading of them is section 2 of `h3-max-ref2va-prompt\SKILL.md` |
-| R32-R44 | `C:\AI\community\skills\h3-max-ref2va-prompt\SKILL.md` - REF2VA on H3-Max only: R32 hosted audio fields,
+| R32-R44 | `/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md` - REF2VA on H3-Max only: R32 hosted audio fields,
 R33 label set and wired inputs, R34 task-type tags, R35 role-scoped retention, R36 frame anchors and the alignment line,
 R37 speech form, R38 language and visible text, R39 style opening, R40 continuity tokens, R41 length provenance,
 R42 the graph contract, R43 the chain lane, R44 the REF2VA gate |
@@ -219,5 +219,5 @@ A new rule is added in the file that owns its lane and gets the next box-unique 
 Named INDEX+RefMod parody runs: load `h3-parody-identity` (name + description + RefMod). Do not fold those rules into this file.
 
 ## Sibling: writer-run & custom/INDEX RefMods
-All adult RefMods (OC such as `FCSydny` -> `poolclub` visual + audio, INDEX/celebrity, PixlStash-tagged across `approved_characters\vault.db` and Stills `C:\Users\derek\5slock\libraries\vault.db`) and all voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed. Bind likeness to the resolved RefMod(s) plus the start still; wardrobe and pose follow Picture 1 unless the beat writes a change. Explicit craft follows R16–R23b and R29a. Use the Gemma 4 26B A4B Heretic PolyStrata arm A writer pipeline (`render_writer_pipeline.py` flags: `--ask --position --still --still-read --character --frames --shots --shot-count --scene --continue --partner2-still`) or `submit_parody_run.py writer-run` (`--ask --position --still --character --frames --shots --continued --partner2-still --s3-look --s3-in-frame --partner-type --partner-type2 --names`), dry by default (`--queue` only on Derrick's yes). 3-body MMF/FFM asks are supported; >3-body asks fail closed. Only content rule kept is 18+ (youth lint). For a non-human or faceless partner, load only her RefMod; still nouns win on costume, place, roles, wardrobe, races, and scale.
+All adult RefMods (OC such as `FCSydny` -> `poolclub` visual + audio, INDEX/celebrity, PixlStash-tagged across `approved_characters\vault.db` and Stills `/home/derekboone/AI/5slock/libraries/vault.db`) and all voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed. Bind likeness to the resolved RefMod(s) plus the start still; wardrobe and pose follow Picture 1 unless the beat writes a change. Explicit craft follows R16–R23b and R29a. Use the Gemma 4 26B A4B Heretic PolyStrata arm A writer pipeline (`render_writer_pipeline.py` flags: `--ask --position --still --still-read --character --frames --shots --shot-count --scene --continue --partner2-still`) or `submit_parody_run.py writer-run` (`--ask --position --still --character --frames --shots --continued --partner2-still --s3-look --s3-in-frame --partner-type --partner-type2 --names`), dry by default (`--queue` only on Derrick's yes). 3-body MMF/FFM asks are supported; >3-body asks fail closed. Only content rule kept is 18+ (youth lint). For a non-human or faceless partner, load only her RefMod; still nouns win on costume, place, roles, wardrobe, races, and scale.
 

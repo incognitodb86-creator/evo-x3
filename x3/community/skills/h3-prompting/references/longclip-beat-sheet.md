@@ -17,7 +17,7 @@ This reference defines the structured beat sheet fields, prompt-compilation rule
 5. **Dials & Render settings**:
    Do not copy render dials (steps, shifts, CFG, VSA, denoise, sampler) into prompts or beat sheets. All render settings defer to [skills/h3-hc-render/SKILL.md](../../h3-hc-render/SKILL.md).
 6. **Image rules**:
-   Do not restate or define image rules in prompt skills. All image guidelines defer to `ComfyUI/LANE_IMAGE_RULES.md` in the render runtime (`C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\LANE_IMAGE_RULES.md`).
+   Do not restate or define image rules in prompt skills. All image guidelines defer to `ComfyUI/LANE_IMAGE_RULES.md` in the render runtime (`/home/derekboone/AI/comfy-alienpc/LANE_IMAGE_RULES.md`).
 
 ---
 

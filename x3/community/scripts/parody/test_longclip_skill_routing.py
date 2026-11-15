@@ -18,7 +18,7 @@ def _deny_live_effects(event: str, args: tuple) -> None:
 
 sys.addaudithook(_deny_live_effects)
 
-REPO_ROOT = Path(r"C:\AI\community")
+REPO_ROOT = Path(r"/home/derekboone/AI/community")
 H3_PROMPTING_SKILL = REPO_ROOT / "skills" / "h3-prompting" / "SKILL.md"
 BEAT_SHEET_REF = REPO_ROOT / "skills" / "h3-prompting" / "references" / "longclip-beat-sheet.md"
 VIDEO_RENDER_SKILL = REPO_ROOT / "skills" / "video-render" / "SKILL.md"

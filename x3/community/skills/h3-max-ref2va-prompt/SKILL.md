@@ -8,8 +8,8 @@ description: "The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 on th
 Created 2026-11-03 at Derek's request: the REF2VA lane is its own skill, scoped to **H3-Max (10Eros-Max beta7)
 and this box's graph**, not a section of the cross-lane file. Upstream source for the new rules: MiniMax-AI/MiniMax-H3
 `skills/h3-prompt-writing/references/ref-en.txt`, read at clone HEAD `199b7d0e1fd95e7b3eafa8c15eca692534142427`
-(2026-10-28); review and full diff `C:\AI\community\notes\2026-11-03-h3-upstream-prompt-skill-review.md`,
-patch record `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
+(2026-10-28); review and full diff `/home/derekboone/AI/community/notes/2026-11-03-h3-upstream-prompt-skill-review.md`,
+patch record `/home/derekboone/AI/community/notes/2026-11-03-h3-ref2va-skill-split.md`.
 
 ## 0. Lane status
 
@@ -24,9 +24,9 @@ Named INDEX + RefMod parodies defer to `h3-parody-identity` for their locked sin
 
 ## 1. The shared rules (h3-prompting, unchanged, all apply)
 
-R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
+R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in /home/derekboone/AI/render/AGENTS.md; run render work from /home/derekboone/AI/render.
 
-`C:\AI\community\skills\h3-prompting\SKILL.md` is the single home for the cross-lane rules; read it first, do not
+`/home/derekboone/AI/community/skills/h3-prompting/SKILL.md` is the single home for the cross-lane rules; read it first, do not
 restate it here.
 
 - **All of R1-R4 and R16-R31 apply to a REF2VA paste**, unchanged (output contract, adults-only and the youth guard,
@@ -181,7 +181,7 @@ here). Both gates pass before a cell is staged; a gate failure is fixed in the p
 
 - Node: `MiniMaxH3ReferenceToVideo` on 10Eros-Max beta7 via llama-swap `:8080/comfyui`; model dials, wiring, queue
   and triage are `h3-hc-render`.
-- Builder: `C:\AI\community\scripts\make_b2_request.py` -> `scripts/comm.py` `build()/first_pass()`; mode `r2v` wires
+- Builder: `/home/derekboone/AI/community/scripts/make_b2_request.py` -> `scripts/comm.py` `build()/first_pass()`; mode `r2v` wires
   `ref_images.ref_image_1` + `ref_image_size: "max"`; a reference image cannot share a node with
   `MiniMaxH3ImageToVideo` (R6); the builder has no `ref_videos` / `ref_audios` wiring today (R33).
 - Chain lane: multi-cell chains are `references/chain-lane.md` in this skill; a chain is N cells from one Condition
@@ -199,7 +199,7 @@ here). Both gates pass before a cell is staged; a gate failure is fixed in the p
 6. No `<scenetrans>`; continuity in prose; if the token appears anywhere in the paste, stop (R40).
 7. No speech unless Derek asked for it; if present, the R37 form is exact, and the render needs his GO.
 8. Sections English, original language only inside `<d>` and for quoted visible text (R38).
-9. The node contract checks for the lane: `C:\AI\community\scripts\verify_cell.py` and the adults-only tests named in
+9. The node contract checks for the lane: `/home/derekboone/AI/community/scripts/verify_cell.py` and the adults-only tests named in
    `references/chain-lane.md` / `h3-prompting` gate; then the R30 diff gate.
 
 ## 6. Paste skeleton (structure only; content comes from the run's records, R14)
@@ -236,12 +236,12 @@ and R11's clauses are copied verbatim from there.
   `references/base-en.txt`), read from a local clone at HEAD `199b7d0` (2026-10-28); `npx skills add
   https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing` is the vendor install - **not installed on this
   box on purpose**: two skills stating the same rules breaks the "each rule in exactly one skill" check of
-  `C:\AI\community\notes\2026-10-29-forge-cleanup-plan.md` (U2).
+  `/home/derekboone/AI/community/notes/2026-10-29-forge-cleanup-plan.md` (U2).
 - Box contract: `ComfyUI/comfy_extras/nodes_minimax_h3.py:243-284,335`; `ComfyUI/comfy/text_encoders/minimax.py:3-13,32,160,175-178`;
-  `C:\AI\community\scripts\comm.py:120-149` (what our builder feeds the node).
+  `/home/derekboone/AI/community/scripts/comm.py:120-149` (what our builder feeds the node).
 - Model owner measurements: TenStrip HF 10Eros-Max #77 (audio), #63 (retention lead-in), #50/#49 (format per version).
-- Review and patch records: `C:\AI\community\notes\2026-11-03-h3-upstream-prompt-skill-review.md`,
-  `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
+- Review and patch records: `/home/derekboone/AI/community/notes/2026-11-03-h3-upstream-prompt-skill-review.md`,
+  `/home/derekboone/AI/community/notes/2026-11-03-h3-ref2va-skill-split.md`.
 - Everything else (R1-R31 evidence) stays in `h3-prompting` section 8.
 
 

@@ -8,7 +8,7 @@ One clip, end to end, no human step:
 Failures degrade (fallback pick + warning, NOT_READY recorded, writer_down) and never block the next ask.
 
 Usage (Render's pi chat or Derrick):
-  & 'C:\\Program Files\\Python312\\python.exe' C:\\AI\\community\\scripts\\parody\\render_writer_pipeline.py <run_dir>
+  python3 /home/derekboone/AI/community/scripts/parody/render_writer_pipeline.py <run_dir>
       --ask "<ask>" --position <act> --still <still path> --character FCSydny [--scene <id> | --continue <prev_run_dir>]
   Batch: render_writer_pipeline.py --batch <asks.jsonl>
 This script has no queue option: queueing stays Derrick's yes through submit_parody_run.py writer-run --queue.
@@ -45,9 +45,9 @@ import wp_lint  # noqa: E402
 import wp_state  # noqa: E402
 from wp_llm import Client, WriterDown  # noqa: E402
 
-PIPE_DIR = Path(os.environ.get("WP_HOME", r"C:\AI\render\writer_pipeline"))
+PIPE_DIR = Path(os.environ.get("WP_HOME", r"/home/derekboone/AI/render/writer_pipeline"))
 CONFIG_PATH = PIPE_DIR / "config.yaml"
-RUNS_ROOT = Path(r"C:\AI\community\runs")
+RUNS_ROOT = Path(r"/home/derekboone/AI/community/runs")
 SUBMIT_PY = PARODY_DIR / "submit_parody_run.py"
 VERSION = "wp-2026-11-13.1"
 

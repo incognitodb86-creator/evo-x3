@@ -100,8 +100,8 @@ def test_t1109_prepare_graph_does_not_keep_previous_run_refmods():
         "minimaxh3_oc_poolclub_v1_refmod_visual",
         "minimaxh3_oc_poolclub_v1_refmod_audio",
     ])
-    tpl["img_1"] = {"inputs": {"image": r"C:\AI\render\run\old\poolclub_start.png"}}
-    _g, rep = s.prepare_writer_base_graph(tpl, still_image=r"C:\AI\render\_inputs\hoot_start.jpg")
+    tpl["img_1"] = {"inputs": {"image": r"/home/derekboone/AI/render/run/old/poolclub_start.png"}}
+    _g, rep = s.prepare_writer_base_graph(tpl, still_image=r"/home/derekboone/AI/render/_inputs/hoot_start.jpg")
     assert rep.get("reason")
     assert "will not reuse the previous run" in rep["reason"]
 
@@ -114,9 +114,9 @@ def test_t1109_prepare_graph_attaches_oc_refmod_from_still_path():
         "minimaxh3_oc_poolblonde_v2_refmod_visual",
         "minimaxh3_oc_poolblonde_v2_refmod_audio",
     ])
-    tpl["img_1"] = {"inputs": {"image": r"C:\AI\render\run\old\blonde_start.png"}}
+    tpl["img_1"] = {"inputs": {"image": r"/home/derekboone/AI/render/run/old/blonde_start.png"}}
     g, rep = s.prepare_writer_base_graph(
-        tpl, still_image=r"C:\AI\render\_inputs\oc_poolclub_diner.jpg",
+        tpl, still_image=r"/home/derekboone/AI/render/_inputs/oc_poolclub_diner.jpg",
     )
     assert not rep.get("reason"), rep
     assert rep.get("template") is True
@@ -132,7 +132,7 @@ def test_t1109_prepare_graph_character_name_attaches_oc_and_index_celebrity_refm
     tpl = json.loads(Path(s.DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
     _g, rep = s.prepare_writer_base_graph(
         tpl,
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="poolblonde",
     )
     assert not rep.get("reason"), rep
@@ -140,7 +140,7 @@ def test_t1109_prepare_graph_character_name_attaches_oc_and_index_celebrity_refm
 
     _g2, rep2 = s.prepare_writer_base_graph(
         tpl,
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="daenerys",
     )
     assert not rep2.get("reason"), rep2
@@ -148,7 +148,7 @@ def test_t1109_prepare_graph_character_name_attaches_oc_and_index_celebrity_refm
 
     _g3, rep3 = s.prepare_writer_base_graph(
         tpl,
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="nonexistent_character_xyz",
     )
     assert rep3.get("reason")
@@ -164,13 +164,13 @@ def test_t1125_trained_subject_fcsydny_maps_to_poolclub():
 def test_t1125_pool_folder_still_attaches_fcsydny_poolclub_refmod():
     keys = s.installed_oc_refmod_keys()
     assert "poolclub" in keys, "poolclub OC RefMods must be installed for this test"
-    still = r"C:\Users\derek\5slock\approved_characters\POOL\flow_more_2026-10-19\POOL_F009.jpg"
+    still = r"/home/derekboone/AI/5slock/approved_characters/POOL/flow_more_2026-10-19/POOL_F009.jpg"
     out = s.resolve_writer_refmods(still_image=still)
     assert not out.get("reason"), out
     stems = " ".join(out.get("stems") or [])
     assert "poolclub" in stems
     assert "poolblonde" not in stems
-    junction = r"C:\AI\render\stills\approved_characters\POOL\flow_more_2026-10-19\POOL_F009.jpg"
+    junction = r"/home/derekboone/AI/render/stills/approved_characters/POOL/flow_more_2026-10-19/POOL_F009.jpg"
     out2 = s.resolve_writer_refmods(still_image=junction)
     assert not out2.get("reason"), out2
     assert any("poolclub" in x for x in (out2.get("stems") or []))
@@ -178,25 +178,25 @@ def test_t1125_pool_folder_still_attaches_fcsydny_poolclub_refmod():
 
 def test_t1125_orc_pool_edge_and_hoot_are_not_folder_aliases():
     out = s.resolve_writer_refmods(
-        still_image=r"C:\Users\derek\5slock\approved_characters\ORC_POOL_EDGE\not_a_real_still.jpg",
+        still_image=r"/home/derekboone/AI/5slock/approved_characters/ORC_POOL_EDGE/not_a_real_still.jpg",
     )
     stems = " ".join(out.get("stems") or [])
     assert "poolclub" not in stems
     assert out.get("reason")
-    out2 = s.resolve_writer_refmods(still_image=r"C:\AI\render\_inputs\hoot_start.jpg")
+    out2 = s.resolve_writer_refmods(still_image=r"/home/derekboone/AI/render/_inputs/hoot_start.jpg")
     assert out2.get("reason")
     assert "poolclub" not in " ".join(out2.get("stems") or [])
 
 
 def test_t1125_character_fcsydny_and_deadpool_attach_refmods():
     out = s.resolve_writer_refmods(
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="FCSydny",
     )
     assert not out.get("reason"), out
     assert any("poolclub" in x for x in (out.get("stems") or []))
     out2 = s.resolve_writer_refmods(
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="Deadpool",
     )
     assert not out2.get("reason"), out2
@@ -207,12 +207,12 @@ def test_t1125_oc_trigger_word_from_the_attached_refmod():
     """Derrick 2026-11-14: an OC RefMod's trained trigger (its own subject_name) is reported for the prompt;
     an INDEX/celebrity RefMod has no trained trigger and reports none."""
     out = s.resolve_writer_refmods(
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="FCSydny",
     )
     assert out.get("trigger") == "FCSydny", out
     out2 = s.resolve_writer_refmods(
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="Deadpool",
     )
     assert not out2.get("trigger"), out2
@@ -228,7 +228,7 @@ def test_trigger_clause_names_the_oc_trigger_once():
 
 def test_t1125_pixlstash_tag_attaches_poolclub(monkeypatch):
     monkeypatch.setattr(s, "pixlstash_character_names_for_still", lambda still: ["FCSydny"])
-    still = r"C:\Users\derek\5slock\approved_characters\FLOW_BLONDE_DARK_PAIRS_2026-10-19\fake.jpg"
+    still = r"/home/derekboone/AI/5slock/approved_characters/FLOW_BLONDE_DARK_PAIRS_2026-10-19/fake.jpg"
     out = s.resolve_writer_refmods(still_image=still)
     assert not out.get("reason"), out
     assert any("poolclub" in x for x in (out.get("stems") or []))
@@ -243,21 +243,21 @@ def test_argon_fix_writer_defined_missing_person_matches_s2_and_subject_tags():
 
 def test_argon_fix_fcmegan_and_poolblonde_v2_dedup():
     out_megan = s.resolve_writer_refmods(
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="FCMegan",
     )
     assert not out_megan.get("reason"), out_megan
     assert any("meganfox" in x for x in (out_megan.get("stems") or []))
 
     out_megan_names = s.resolve_writer_refmods(
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         names=["FCMegan"],
     )
     assert not out_megan_names.get("reason"), out_megan_names
     assert any("meganfox" in x for x in (out_megan_names.get("stems") or []))
 
     out_megan_path = s.resolve_writer_refmods(
-        still_image=r"C:\Users\derek\5slock\approved_characters\FCMegan\still_01.jpg",
+        still_image=r"/home/derekboone/AI/5slock/approved_characters/FCMegan/still_01.jpg",
     )
     assert not out_megan_path.get("reason"), out_megan_path
     assert any("meganfox" in x for x in (out_megan_path.get("stems") or []))
@@ -268,7 +268,7 @@ def test_argon_fix_fcmegan_and_poolblonde_v2_dedup():
     assert not any("_v1_" in x for x in keys["poolblonde"])
 
     out_blonde = s.resolve_writer_refmods(
-        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        still_image=r"/home/derekboone/AI/render/_inputs/generic_start.jpg",
         character="poolblonde",
     )
     assert not out_blonde.get("reason"), out_blonde
