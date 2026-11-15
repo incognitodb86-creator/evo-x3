@@ -1,0 +1,8 @@
+3e24342164b3d94991ba9692fdc0dd08e3fd7362e0aacc396a9a5c54a544c3b7  ./embed-small/nomic-embed-text-v1.5.Q8_0.gguf
+acc44040f74d0e55fb89c3967056cce5dbda1bcc52e909c3ba6fc72b5e9c0858  ./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+45792ae869072d8229384c51c7c73dd959e191505252b41dd71852d9746f5ce4  ./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf
+8c76e79d444b16a663d9c8db54e585ed3b1da13eebd2619c37b0c355da803c82  ./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf
+5de8b5dbf89409acc39468decafd4a4a95b13c29d88a14b0356107897829ec36  ./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf
+5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6  ./flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+1f2e89b8382fd2182ef3a7e15a5cf272722f767a8a08a58dd69ae36c52edbf1c  ./gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf
+2a5f3565f39cf885103da591182c1266da64745737b42b452fd3e675369f1211  ./qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf
