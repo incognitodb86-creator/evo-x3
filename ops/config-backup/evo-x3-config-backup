@@ -1,0 +1,10 @@
+#!/bin/bash
+# EVO-X3 local config backup (root-only, 0600, keeps 14). Added 2026-11-15 gap audit.
+set -euo pipefail
+umask 077
+D=/var/backups/evo-x3; mkdir -p "$D"; chmod 700 "$D"
+F="$D/evo-x3-config-$(date +%Y%m%d-%H%M).tgz"
+tar czf "$F" --ignore-failed-read /etc/evo-x3 /etc/systemd/system/llama-swap.service /etc/modprobe.d/ttm.conf /etc/default/grub /usr/local/bin/evo-llama-swap /home/derekboone/.pi/agent/settings.json /home/derekboone/.pi/agent/models.json 2>/dev/null
+chmod 600 "$F"
+ls -1t "$D"/evo-x3-config-*.tgz | tail -n +15 | xargs -r rm -f
+echo "backup ok $F"

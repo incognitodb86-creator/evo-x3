@@ -1,0 +1,14 @@
+{
+  "providers": {
+    "x3-local": {
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "api": "openai-completions",
+      "apiKey": "!cat /home/derekboone/.config/evo-x3/llm-key",
+      "models": [
+        {"id": "gemma4-heretic", "name": "X3 local Gemma 4 26B A4B Heretic Q8_0 (llama.cpp Vulkan)", "reasoning": false, "input": ["text"], "contextWindow": 32768, "maxTokens": 8192, "samplingParams": {"temperature": 1.0, "top_p": 0.95, "top_k": 64}},
+        {"id": "qwen27b", "name": "X3 local Qwen3.8-27B UD-Q4_K_XL (llama.cpp Vulkan)", "reasoning": true, "input": ["text"], "contextWindow": 131072, "maxTokens": 16384, "samplingParams": {"temperature": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0}, "compat": {"thinkingFormat": "qwen-chat-template"}},
+        {"id": "flash-next", "name": "X3 local Qwen3.8-Flash-Next UD-Q4_K_XL + MTP (Gufo)", "reasoning": true, "input": ["text"], "contextWindow": 32768, "maxTokens": 8192, "samplingParams": {"temperature": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0}, "compat": {"thinkingFormat": "qwen-chat-template"}}
+      ]
+    }
+  }
+}

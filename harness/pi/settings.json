@@ -1,0 +1,28 @@
+{
+  "packages": [
+    "npm:pi-subagents@0.83.1",
+    "npm:cc-safety-net@2.7.0",
+    "npm:@juicesharp/rpiv-todo@2.15.0",
+    "npm:pi-web-access@0.46.0"
+  ],
+  "defaultProvider": "x3-local",
+  "defaultModel": "gemma4-heretic",
+  "defaultThinkingLevel": "off",
+  "enableInstallTelemetry": false,
+  "enableAnalytics": false,
+  "extensions": [
+    "-builtin:llama.cpp"
+  ],
+  "httpIdleTimeoutMs": 1950000,
+  "retry": {
+    "enabled": true,
+    "maxRetries": 2,
+    "provider": {
+      "timeoutMs": 1200000,
+      "maxRetries": 0
+    }
+  },
+  "subagents": {
+    "defaultModel": "x3-local/gemma4-heretic"
+  }
+}
