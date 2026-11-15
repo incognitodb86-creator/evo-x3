@@ -22,4 +22,9 @@ Patterns checked: `sk-`, `tskey-`, `Bearer\s+[A-Za-z0-9_\-\.]+`, `LLM_KEY_.*=`.
 ## 3. Repository Scan (`gitleaks dir C:\evo-x3 --redact -v` & Post-Commit `gitleaks git`)
 - Raw directory scan (`gitleaks dir C:\evo-x3 --redact -v`) scanned ~21.60 MB and flagged 2 `generic-api-key` log lines in `runs/h2_usb_backup_20261114/agy.log:72` and `runs/orch_full_20261114/agy.log:75` (`keyringAuth: loaded token, REDACTED ...`).
 - Both `runs/*/agy.log` files are excluded from Git by `.gitignore` (`runs/*/agy.log`, `runs/*/agy.out`, `runs/*/agy.err`, `iso/`, `drivers/`, `*.img`, `*.gguf`).
-- Post-commit `gitleaks git C:\evo-x3 --redact -v` result is recorded below after the final commit.
+- Post-commit `gitleaks git C:\evo-x3 --redact -v` result: **`PASS` (0 leaks found; exit code `0`)**
+  ```text
+  INF 1 commits scanned.
+  INF scanned ~254890 bytes (254.89 KB) in 386ms
+  INF no leaks found
+  ```
