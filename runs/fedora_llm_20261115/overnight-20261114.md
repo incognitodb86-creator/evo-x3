@@ -552,3 +552,50 @@ llama-swap remained enabled and active on 127.0.0.1:8080 after the tests. embed-
 ### 9.4 sudoers
 
 `/etc/sudoers.d/90-max-setup` is removed as the last step after the repo commit and push, then `sudo -n true` is verified to fail.
+
+Repo commit (pushed to gitea derrick/evo-x3 main): `1758d4731d61c568fef5652f14f2eeb99dd29c3e`.
+
+### 9.4 sudoers (done)
+
+Removed `/etc/sudoers.d/90-max-setup` at 2026-11-15 after the repo push. `sudo -n true` now fails (exit 1). Passwordless sudo is gone.
+
+Derrick restored `/etc/sudoers.d/90-max-setup` on 2026-11-15 at 08:19 CT so remaining admin gaps could be finished. It is removed again after the section 10 commit and push.
+
+## 10. Morning closeout gaps (2026-11-15 08:22–08:24 CT)
+
+Derrick restored passwordless sudo via `/etc/sudoers.d/90-max-setup` and explicitly asked to generate API keys, fix the hardware clock, and finish remaining admin gaps before removing sudo again.
+
+### 10.1 Time
+- Ran `timedatectl set-local-rtc 0` so the hardware clock stores UTC. Windows already has `RealTimeIsUniversal=1`.
+- Timezone remains `America/Chicago` (CST, -0600). NTP is active and the system clock is synchronized.
+- After the change, `timedatectl` showed local 08:22:13 CST, universal 14:22:13 UTC, RTC 14:22:13, `RTC in local TZ: no`, and the previous local-RTC warning was gone. Recheck at 08:24:23 CST was the same.
+
+### 10.2 Cockpit
+- Ran `systemctl disable --now cockpit.socket`. Socket is disabled and inactive. Port 9090 is closed (no listener in `ss`).
+
+### 10.3 GRUB
+- Backed up `/etc/default/grub` and `/boot/grub2/grub.cfg` to `/root/evo-x3-backups-20261115-082213/` on the host.
+- Set `GRUB_TIMEOUT=3` and `GRUB_DEFAULT=0`, then ran `grub2-mkconfig -o /boot/grub2/grub.cfg`.
+- UEFI BootOrder left at `0003,0000,0001` (Fedora first). os-prober still lists Windows Boot Manager; Windows partitions were not modified.
+
+### 10.4 API keys
+- Derrick's one-time override: generate the keys on the host rather than waiting for him to type them.
+- Generated five unique 64-hex keys with `openssl rand -hex 32` and wrote them only to `/etc/evo-x3/llm.env` (mode 0600, owner root:root, SELinux `system_u:object_r:etc_t:s0`). Values were not printed, logged, committed, or copied off the host.
+- Key names: `LLM_KEY_ALIENPC`, `LLM_KEY_PI`, `LLM_KEY_BOX`, `LLM_KEY_HERMES`, `LLM_KEY_DERRICK_LAPTOP`.
+- Restarted `llama-swap.service`. The restart blocked briefly because leftover container `llama-swap-embed-small` ignored SIGTERM; it was SIGKILL'd so the unit could return. llama-swap is using the canonical config `/etc/evo-x3/llama-swap.yaml` (auth on) and is listening on `127.0.0.1:8080`.
+- `/v1/models` verification on loopback, status codes only: `401` without a key, `200` with a key read from the file on the host.
+- Derrick can copy the values from `/etc/evo-x3/llm.env` into Vaultwarden.
+
+### 10.5 MES firmware debugfs check
+- Kernel `7.3.3-200.fc44.x86_64`, `linux-firmware-20261019-1.fc44`, `amd-gpu-firmware-20261019-1.fc44`.
+- `/sys/kernel/debug/dri/{0000:66:00.0,1,128}/amdgpu_firmware_info`: `MES feature version: 1, firmware version: 0x00000096` (MES_KIQ `0x00000075`). MES ≠ `0x83`. PASS. Versionlock was not applied in this session.
+
+### 10.6 U2 backup image
+- Derrick confirmed (2026-11-15, America/Chicago) that the U2 backup image already exists on the X3BACKUP USB. Recorded as done on that confirmation. This session did not re-verify image checksums or run a restore test.
+
+### 10.7 Still waiting on Derrick
+- BIOS: UMA 512 MB and Balanced 85 W (Flash-Next still cannot load). No BIOS change was made.
+- Tailscale Serve / ACL: not changed; needs an explicit yes before publishing off loopback.
+
+### 10.8 sudoers
+- `/etc/sudoers.d/90-max-setup` is removed as the last step after the repo commit and push, then `sudo -n true` is verified to fail.

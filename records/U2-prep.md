@@ -1,7 +1,11 @@
 # B1 / U2: Safe Prep, ISOs, Driver Export & USB/Imaging Instructions
 
 - **Recorded:** 2026-11-15 (America/Chicago; system clock pre-sync reading, ~15 h ahead offset before `w32time` sync)
-- **Overall U2 Status:** `PARTIAL / BLOCKED-ON-DERRICK & WAITING-ON-HOUSEHOLD` (Safe prep done where non-elevated/un-gated; USB writes, Clonezilla imaging, and QNAP share wait on Derrick & Household).
+- **Overall U2 Status:** `DONE (backup image on X3BACKUP USB, Derrick confirmed 2026-11-15)`. The original prep notes below are historical and were written before that confirmation. This session did not re-verify image checksums or run a restore test. QNAP off-pool second copy, if still desired, remains a Household item.
+
+## Confirmation (2026-11-15, America/Chicago)
+
+Derrick confirmed the U2 backup image already exists on the X3BACKUP USB. Treat the full-disk image step as done on that confirmation.
 
 ## 1. Driver Export (`pnputil /export-driver * C:\evo-x3\drivers`)
 - **Status:** `PARTIAL / BLOCKED-ON-DERRICK` (requires Administrator PowerShell)
