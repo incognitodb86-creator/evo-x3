@@ -40,5 +40,5 @@ Start (only this): Invoke-CimMethod Win32_Process -MethodName Create -Arguments 
 - **`-PassLimitSec 2400` for that class of item.** Set the per-pass wall-clock cap above a completed pass so passes are not killed mid-work.
 - **Cap N = open item count + 2**, so a killed pass has a retry slot. **Launch detached** (`Start-Process`, or `Invoke-CimMethod` as above): a loop started inside a foreground tool call dies when that tool call times out.
 - **Reports are append-only.** Each pass appends its section to its report and keeps its own validator printing `ALL OK`. `write` is denied outside the loop root, so write the draft inside the root and deliver it with a shell copy.
-- **Reading private chats: `-MemoryRoot <loop root>/notes/_pi_memory`**. Pass `-MemoryRoot` when reviewing private lane transcripts so pass summaries stay inside the private loop root rather than landing in `C:/AI/fleet-brain/25_memory/shared/`.
+- **Reading private chats: `-MemoryRoot <loop root>/notes/_pi_memory`**. Pass `-MemoryRoot` when reviewing private lane transcripts so pass summaries stay inside the private loop root rather than landing in `/home/derekboone/AI/fleet-brain/25_memory/shared/`.
 - **A loop is finished only when its log says `PLAN_COMPLETE`.** Read the log and the plan before telling Derrick it completed; "done" is not a status the runner prints for a stopped loop.

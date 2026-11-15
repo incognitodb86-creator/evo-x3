@@ -5,7 +5,7 @@ All characters in this directory are fictional adults (18+) with no real-person 
 
 ## Rules for Character Sheets
 - Address characters by folder name only (e.g. `SYDNEY`).
-- `C:\AI\community\approved_characters\<NAME>` is strictly add-only: never remove, move, or delete an image there.
+- `/home/derekboone/AI/community/approved_characters/<NAME>` is strictly add-only: never remove, move, or delete an image there.
 - Vision models never decide identity, age, or resemblance.
 - Never open, read, or parse Derrick's Grok Imagine prompts or prompt sidecar files.
 - Never open, read, or list `C:\Users\derek\sydney\` or any `talk-persona.md`.

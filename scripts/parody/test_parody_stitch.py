@@ -22,7 +22,7 @@ def _deny_live_effects(event: str, args: tuple) -> None:
 
 sys.addaudithook(_deny_live_effects)
 
-REPO_ROOT = Path(r"C:\AI\community")
+REPO_ROOT = Path(r"/home/derekboone/AI/community")
 QUEUE_DIR = REPO_ROOT / "scripts" / "queue"
 if str(QUEUE_DIR) not in sys.path:
     sys.path.insert(0, str(QUEUE_DIR))

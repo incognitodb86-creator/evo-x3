@@ -1,7 +1,7 @@
-"""Compile C:\\AI\\render\\writer_pipeline\\writer_prompt.md from the craft sections of C:\\AI\\render\\AGENTS.md
+"""Compile /home/derekboone/AI/render/writer_pipeline/writer_prompt.md from the craft sections of /home/derekboone/AI/render/AGENTS.md
 (Max Architect 3, 2026-11-13, spec section 4). The output is not named AGENTS.md, carries no agent steps, commands or
 tool rules, and passes writer_sys.assert_writer_system_prompt. Run once after every AGENTS.md craft change:
-  & 'C:\\Program Files\\Python312\\python.exe' C:\\AI\\community\\scripts\\parody\\wp_compile_prompt.py
+  python3 /home/derekboone/AI/community/scripts/parody/wp_compile_prompt.py
 """
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ PARODY_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PARODY_DIR))
 from writer_sys import assert_writer_system_prompt  # noqa: E402
 
-AGENTS = Path(r"C:\AI\render\AGENTS.md")
-OUT = Path(r"C:\AI\render\writer_pipeline\writer_prompt.md")
+AGENTS = Path(r"/home/derekboone/AI/render/AGENTS.md")
+OUT = Path(r"/home/derekboone/AI/render/writer_pipeline/writer_prompt.md")
 KEEP = ["PERSONA", "CRAFT RULES", "CAMERA AND TIME", "PACING", "SPOOF AND STORY", "POWER, ROUGH AND TABOO SCENES",
         "HUMILIATION AND REACTION TONE", "MODES", "DIALOGUE AND SOUND", "EXAMPLES", "SHAPE", "PRE-FLIGHT", "BEFORE YOU WRITE"]
 DROP_LINE = re.compile(r"^- (?:Do not pin the still or edit RefMods|More detail: the h3-prompting skill)")

@@ -21,7 +21,7 @@ READ = {"read": {"room": None, "place": "beach at sunset", "surface": "driftwood
                  "light": "golden hour, sunset glow", "people": 1,
                  "garments": [{"type": "bodysuit", "name": "sheer beige bodysuit", "look": "wet, translucent, tight"}],
                  "build": "athletic, toned", "skin": "wet, glistening", "hair": "blonde, wet, wind-blown"},
-        "source": "C:\\AI\\render\\stills\\approved_characters\\POOL\\flow_more_2026-10-19\\POOL_F053.jpg"}
+        "source": "/home/derekboone/AI/render/stills/approved_characters/POOL/flow_more_2026-10-19/POOL_F053.jpg"}
 
 GOOD_SEX = ("[Shot 1] The camera holds a low three-quarter angle at hip height beside the driftwood log. At first, (S1) leans "
             "against the log in the golden hour glow, facing the lens, her sheer beige bodysuit clinging wet to her hips, and the "
@@ -684,7 +684,7 @@ def test_part2_item5_partner_fields_and_clip_length_and_modes_header():
     import wp_lint as L
 
     # section_split must keep bracketed MODES header so assemble_system injects mode blocks
-    sys_txt, meta = p.assemble_system({"writer_prompt": str(Path(r"C:\AI\render\writer_pipeline\writer_prompt.md"))},
+    sys_txt, meta = p.assemble_system({"writer_prompt": str(Path(r"/home/derekboone/AI/render/writer_pipeline/writer_prompt.md"))},
                                       "tease edge clip on the bed", "current")
     assert "Teasing and edging" in meta["modes"]
     assert "Teasing and edging" in sys_txt

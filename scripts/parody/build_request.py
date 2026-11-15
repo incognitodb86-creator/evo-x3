@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import yaml
 
 # Add community scripts to path for make_b2_request and comm
-SCRIPTS_DIR = Path(r"C:\AI\community\scripts")
+SCRIPTS_DIR = Path(r"/home/derekboone/AI/community/scripts")
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
@@ -34,8 +34,8 @@ if str(PARODY_DIR) not in sys.path:
 from writer_sys import assert_writer_system_prompt, AgentInstructionsInWriterPrompt
 import scene_addenda
 
-DEFAULT_REFMOD_TEMPLATE = Path(r"C:\AI\community\templates\b2_refmod.api.json")
-COMFY_INPUT_COMMUNITY = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input\community")
+DEFAULT_REFMOD_TEMPLATE = Path(r"/home/derekboone/AI/community/templates/b2_refmod.api.json")
+COMFY_INPUT_COMMUNITY = Path(r"/home/derekboone/AI/comfy-alienpc/input/community")
 
 # --- U1: H3 frame grid + single-clip ceiling -------------------------------------------------
 H3_FPS = 24
@@ -5380,8 +5380,8 @@ def main(argv=None) -> int:
 
     # Import resolve from same package
     from resolve import resolve_identities, validate_reference_images
-    index_dir = Path(r"C:\AI\community\index\h3-known-characters")
-    refmods_dir = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
+    index_dir = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
+    refmods_dir = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
     aliases_path = Path(__file__).parent / "aliases.json"
 
     if args.frames is not None:

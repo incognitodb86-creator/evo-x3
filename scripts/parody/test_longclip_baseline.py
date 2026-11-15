@@ -24,7 +24,7 @@ sys.addaudithook(_deny_live_effects)
 
 from c2v_chain import plan_c2v_chain, DEFAULT_CLIP_FRAMES
 
-REPO_ROOT = Path(r"C:\AI\community")
+REPO_ROOT = Path(r"/home/derekboone/AI/community")
 TEMPLATES_DIR = REPO_ROOT / "templates"
 B2_TEMPLATE = TEMPLATES_DIR / "b2.api.json"
 B2_REFMOD_TEMPLATE = TEMPLATES_DIR / "b2_refmod.api.json"

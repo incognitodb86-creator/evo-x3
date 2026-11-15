@@ -40,7 +40,7 @@ import time
 from typing import Any, Dict, List, Optional, Sequence, Union, Tuple
 
 # Add community scripts to path
-SCRIPTS_DIR = Path(r"C:\AI\community\scripts")
+SCRIPTS_DIR = Path(r"/home/derekboone/AI/community/scripts")
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
@@ -55,14 +55,14 @@ from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities, validate_reference_images
 from run_record import RUNS_ROOT, save_run_record
 
-INDEX_DIR = Path(r"C:\AI\community\index\h3-known-characters")
-REFMODS_DIR = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
+INDEX_DIR = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
+REFMODS_DIR = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
 ALIASES_PATH = PARODY_DIR / "aliases.json"
 RUN_QUEUE_PY = SCRIPTS_DIR / "run_queue.py"
 STITCH_PY = SCRIPTS_DIR / "queue" / "take_chain_stitch.py"
 PI_QNAP_PY = SCRIPTS_DIR / "pi_qnap.py"
-COMFY_OUT_COMMUNITY = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\output\community")
-QUEUE_PYTHON = Path(r"C:\AI\director\.venv\Scripts\python.exe")
+COMFY_OUT_COMMUNITY = Path(r"/home/derekboone/AI/comfy-alienpc/output/community")
+QUEUE_PYTHON = Path(r"/home/derekboone/AI/director/.venv/Scripts/python.exe")
 QUEUE_TAG = "clip"
 GPU_BUSY_RC = 7
 WAIT_POLL_SEC = 5
@@ -547,6 +547,9 @@ def submit_parody_job(
         }
 
     # 6. Submit through the shared queue route. Detach returns after the batch PID is created.
+    if os.name != "nt":  # EVO-X3 2026-11-15: no local ComfyUI/run_queue route; renders stay on AlienPc
+        raise RuntimeError("X3: --queue is not wired through run_queue.py; after Derrick's yes use "
+                           "~/AI/render/x3/queue-remote.sh <run_dir> (AlienPc ComfyUI over the tailnet)")
     python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
     since = _batch_count(run_dir)
     cmd = [
@@ -706,12 +709,12 @@ _OC_PATH_COMPONENT_ALIASES = {
 }
 
 _PIXLSTASH_VAULTS = (
-    Path(r"C:\Users\derek\5slock\approved_characters\vault.db"),
-    Path(r"C:\Users\derek\5slock\libraries\vault.db"),
+    Path(r"/home/derekboone/AI/5slock/approved_characters/vault.db"),
+    Path(r"/home/derekboone/AI/5slock/libraries/vault.db"),
 )
 _STILL_LIBRARY_ROOTS = (
-    Path(r"C:\Users\derek\5slock\approved_characters"),
-    Path(r"C:\AI\render\stills\approved_characters"),
+    Path(r"/home/derekboone/AI/5slock/approved_characters"),
+    Path(r"/home/derekboone/AI/render/stills/approved_characters"),
 )
 
 
@@ -1406,6 +1409,9 @@ def submit_writer_run(
             marker.unlink()
         order = {"order": [{"pos": 1, "tag": tag, "arm": "oc_writer", "scene": position, "seed": seed}]}
         order_file.write_text(json.dumps(order, indent=2), encoding="utf-8")
+        if os.name != "nt":  # EVO-X3 2026-11-15: no local ComfyUI/run_queue route; renders stay on AlienPc
+            raise RuntimeError("X3: --queue is not wired through run_queue.py; after Derrick's yes use "
+                               "~/AI/render/x3/queue-remote.sh <run_dir> (AlienPc ComfyUI over the tailnet)")
         python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
         q_frames = rep.get("total_frames") if isinstance(rep, dict) and rep.get("total_frames") else g["c0"]["inputs"]["length"]
         cmd = [python, "-u", str(RUN_QUEUE_PY), "--run-dir", str(run_dir), "--size",
