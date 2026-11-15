@@ -1,14 +1,14 @@
 # Render writer pipeline config (Max Architect 3, 2026-11-13, Derrick t1409u). Read by
-# C:\AI\community\scripts\parody\render_writer_pipeline.py. Sampler frozen once at setup by the A/B (results in
+# /home/derekboone/AI/community/scripts/parody/render_writer_pipeline.py. Sampler frozen once at setup by the A/B (results in
 # acceptance\sampler_ab.json); never re-tuned automatically.
 version: wp-2026-11-13.1
-endpoint: http://127.0.0.1:8085/v1      # GPU lock gate -> llama-swap; requests wait while a render holds the GPU lock
-model_alias: gemma4_heretic_poly_think  # same served model as Render's pi chat (no llama-swap swap between Render and the pipeline)
+endpoint: http://127.0.0.1:8080/v1      # EVO-X3 llama-swap (loopback; key read in-process from pi models.json x3-local). AlienPc used the :8085 GPU-lock gate
+model_alias: gemma4-heretic  # EVO-X3: Gemma 4 26B A4B Heretic Q8_0 llama.cpp Vulkan (AlienPc: gemma4_heretic_poly_think). same served model as Render's pi chat (no llama-swap swap between Render and the pipeline)
 thinking: false                         # chat_template_kwargs.enable_thinking (Gemma thinking is on/off only)
 timeout_s: 900
 retry_backoff_s: [10, 30, 90]
 default_character: FCSydny
-writer_prompt: writer_prompt.md          # relative to C:\AI\render\writer_pipeline
+writer_prompt: writer_prompt.md          # relative to /home/derekboone/AI/render/writer_pipeline
 writer_prompt_sha256: 7a9479b545df5475968202967808f305e3a86670702e514d49207659f360508c
 persona: current                        # frozen by the persona arm (current | option1 | option2)
 n_candidates: 3
@@ -55,6 +55,6 @@ position_kinds:   # a new builder act needs one line here (spec "Max, only on ch
   solo: [female_solo, male_solo, tease, dance]
   sex: [missionary, doggy, cowgirl, reverse_cowgirl, spooning, prone_bone, ff_scissoring, mf_anal, bondage, threesome, mmf, ffm, standing_mf, airplane, piledriver]
 still_pool:
-  - C:\AI\render\stills\approved_characters\POOL\**\*.jpg
-  - C:\AI\render\stills\approved_characters\POOL\**\*.png
+  - /home/derekboone/AI/render/stills/approved_characters/POOL/**/*.jpg
+  - /home/derekboone/AI/render/stills/approved_characters/POOL/**/*.png
 shots_default: single  # B1 long-scene spec
