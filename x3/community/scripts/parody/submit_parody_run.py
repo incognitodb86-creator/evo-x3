@@ -953,9 +953,25 @@ def resolve_writer_refmods(
     Never guesses a likeness from a bare still filename, and never reuses the previous run's RefMods.
     Stills are not passed to validate_stills (writer stills may live outside approved_characters).
     """
-    out: Dict[str, Any] = {"stems": [], "source": None, "reason": None, "index": None}
+    out: Dict[str, Any] = {"stems": [], "source": None, "reason": None, "index": None, "trigger": None}
     char = (character or "").strip() or None
     name_list = [n for n in (list(names) if names else []) if str(n).strip()]
+
+    def _oc_trigger(stems: Sequence[str]) -> Optional[str]:
+        """The trained RefMod trigger word (e.g. FCSydny) of the visual RefMod just attached, from its own
+        safetensors subject_name. Only for minimaxh3_oc_* files; None for INDEX/celebrity RefMods."""
+        d = Path(REFMODS_DIR)
+        for s in stems:
+            stem = _mod_stem(str(s))
+            if not re.search(r"(?i)^minimaxh3_oc_", stem):
+                continue
+            f = d / (stem + ".safetensors")
+            if not f.is_file():
+                continue
+            subj = _safetensors_metadata(f).get("subject_name")
+            if isinstance(subj, str) and subj.strip():
+                return subj.strip()
+        return None
 
     def _resolve_names(targets: Sequence[str]) -> List[str]:
         found: List[str] = []
@@ -996,6 +1012,7 @@ def resolve_writer_refmods(
         if matched:
             out["stems"] = matched
             out["source"] = "character"
+            out["trigger"] = _oc_trigger(matched)
             return out
         who = char or (name_list[0] if name_list else "named identity")
         out["reason"] = f"no local RefMod installed for '{who}' in {REFMODS_DIR}"
@@ -1019,6 +1036,7 @@ def resolve_writer_refmods(
         if stems:
             out["stems"] = _keep_highest_oc_version(stems)
             out["source"] = "still_path"
+            out["trigger"] = _oc_trigger(out["stems"])
             return out
 
     tagged = pixlstash_character_names_for_still(still_image)
@@ -1027,6 +1045,7 @@ def resolve_writer_refmods(
         if matched:
             out["stems"] = matched
             out["source"] = "pixlstash"
+            out["trigger"] = _oc_trigger(matched)
             return out
 
     out["reason"] = (
@@ -1244,7 +1263,7 @@ def submit_writer_run(
         graph0, attach = prepare_writer_base_graph(
             graph0, still_image=still_for_ref, character=character, names=names,
         )
-        report["refmods"] = {k: attach.get(k) for k in ("template", "template_path", "injected_still", "stems", "source", "index") if k in attach}
+        report["refmods"] = {k: attach.get(k) for k in ("template", "template_path", "injected_still", "stems", "source", "index", "trigger") if k in attach}
         if attach.get("reason"):
             return not_ready(attach["reason"])
         bad = _writer_refmods_ok(graph0)
@@ -1313,6 +1332,10 @@ def submit_writer_run(
             if _is_male_solo and not (cast_overrides or {}).get("voice_s1"):
                 cast["voice_s1"] = "a deep, steady adult man's voice, low and hoarse"
             cast.update({k: v for k, v in (cast_overrides or {}).items() if k != "scene_read"})
+            # The trained RefMod trigger word of the attached OC visual RefMod (Derrick 2026-11-14): the builder
+            # names it once in the <Subject 1> line. INDEX/celebrity RefMods have no trained trigger -> nothing added.
+            if attach.get("trigger"):
+                cast["refmod_trigger"] = str(attach["trigger"]).strip()
             report["still_read"] = still_read
             if callable(raw):
                 raw, gate_log = br.gated_write(raw, cast=dict(cast), ask=ask)

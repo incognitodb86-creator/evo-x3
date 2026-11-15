@@ -705,6 +705,14 @@ R11_PICTURE = "<Picture 1> is the reference image defining the exact visual appe
 R11_SUBJECT = ("<Subject 1> is the exact same woman shown in <Picture 1> of the reference pictures and in the first 5 seconds of "
                "this clip, preserving her face, hairstyle, body, skin and figure with complete fidelity")
 R11_HAND = "HAND ANATOMY HARD-LOCKED - exactly five separate fingers, readable knuckles, no melt, merge or extra digit"
+
+
+def _trigger_clause(cast: Dict[str, Any]) -> str:
+    """The trained RefMod trigger word of the attached OC visual RefMod (Derrick 2026-11-14), named once in the
+    <Subject 1> line. cast['refmod_trigger'] is set by submit_parody_run from the RefMod's own subject_name, so it
+    can only be a trigger that is loaded in this graph (R31). Empty for INDEX/celebrity RefMods: no trained trigger."""
+    t = re.sub(r"[^A-Za-z0-9_-]", "", str(cast.get("refmod_trigger") or "").strip())
+    return f", {t}" if t else ""
 TASK_TAG = "[reference generation]"
 
 _SECTION_RE = re.compile(
@@ -3055,7 +3063,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     else:
         subject_definitions_lines = [
             f"{R11_PICTURE}, and {_scene(cast)['setting']}, its light and the opening framing: {cast['still']}.",
-            f"{R11_SUBJECT}; {cast['woman']}; she is (S1), and <Audio 1> defines her voice timbre.",
+            f"{R11_SUBJECT}; {cast['woman']}; she is (S1)" + _trigger_clause(cast) + ", and <Audio 1> defines her voice timbre.",
         ]
     off_s2 = bool(cast.get("off_still_s2"))
     off_s3 = bool(cast.get("off_still_s3")) and not cast.get("s3_in_frame")  # acc4: continued MMF, S3 is in the inherited frame
@@ -3767,7 +3775,7 @@ def build_writer_continuation_request(
         camera=b2_kept[0] if b2_kept and _CAMERA_SENTENCE_RE.search(_D_RE.sub("", b2_kept[0])) else None,
     )
     subj2 = "\n".join([
-        f"<Subject 1> is the exact same woman from beat 1, preserving her face, hairstyle, body, skin and figure with complete fidelity; {cast['woman']}; she is (S1), and <Audio 1> defines her voice timbre.",
+        f"<Subject 1> is the exact same woman from beat 1, preserving her face, hairstyle, body, skin and figure with complete fidelity; {cast['woman']}; she is (S1)" + _trigger_clause(cast) + ", and <Audio 1> defines her voice timbre.",
         f"<Subject 2> is {cast['man']}; he is (S2).",
         R11_HAND,
     ])

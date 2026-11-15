@@ -21,7 +21,16 @@ USAGE = r"C:/AI/lora/person_alias_2026-10-29/h3/USAGE_FC_SYDNEY_h3.md"
 TRIGGER_MAP = r"C:/AI/lora/person_alias_2026-10-29/TRIGGER_MAP_private.txt"
 OUT = r"C:/AI/community/review/bj-pov-2026-10-30/lora_audit.txt"
 
-TRIGGER = "Sydney Sweeney"  # read from TRIGGER_MAP_private.txt, recorded there from the file's own header
+def _trigger():
+    for line in open(TRIGGER_MAP, encoding="utf-8", errors="replace"):
+        if "trigger" in line.lower():
+            i = line.find('"')
+            if i >= 0:
+                j = line.find('"', i + 1)
+                if j > i:
+                    return line[i + 1:j]
+    raise SystemExit("no trigger line in the private map")
+TRIGGER = _trigger()  # the token lives only in TRIGGER_MAP_private.txt, never in a shared file
 
 rows = []
 
