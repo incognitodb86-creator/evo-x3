@@ -203,6 +203,29 @@ def test_t1125_character_fcsydny_and_deadpool_attach_refmods():
     assert any("ryanreynolds" in x for x in (out2.get("stems") or []))
 
 
+def test_t1125_oc_trigger_word_from_the_attached_refmod():
+    """Derrick 2026-11-14: an OC RefMod's trained trigger (its own subject_name) is reported for the prompt;
+    an INDEX/celebrity RefMod has no trained trigger and reports none."""
+    out = s.resolve_writer_refmods(
+        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        character="FCSydny",
+    )
+    assert out.get("trigger") == "FCSydny", out
+    out2 = s.resolve_writer_refmods(
+        still_image=r"C:\AI\render\_inputs\generic_start.jpg",
+        character="Deadpool",
+    )
+    assert not out2.get("trigger"), out2
+
+
+def test_trigger_clause_names_the_oc_trigger_once():
+    """The builder names the loaded RefMod's trigger in the <Subject 1> line, once; no cast trigger = no clause (R31)."""
+    assert br._trigger_clause({"refmod_trigger": "FCSydny"}) == ", FCSydny"
+    assert br._trigger_clause({}) == ""
+    assert br._trigger_clause({"refmod_trigger": "  "}) == ""
+    assert br._trigger_clause({"refmod_trigger": "FC\nSyd ny"}) == ", FCSydny"
+
+
 def test_t1125_pixlstash_tag_attaches_poolclub(monkeypatch):
     monkeypatch.setattr(s, "pixlstash_character_names_for_still", lambda still: ["FCSydny"])
     still = r"C:\Users\derek\5slock\approved_characters\FLOW_BLONDE_DARK_PAIRS_2026-10-19\fake.jpg"
