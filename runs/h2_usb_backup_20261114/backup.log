@@ -1,0 +1,37 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261115122023
+Username: EVO-X3\Derek
+RunAs User: EVO-X3\Derek
+Configuration Name: 
+Machine: EVO-X3 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\evo-x3\runs\h2_usb_backup_20261114\wipe_and_backup.ps1
+Process ID: 13548
+PSVersion: 5.1.26100.7705
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.7705
+BuildVersion: 10.0.26100.7705
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\evo-x3\runs\h2_usb_backup_20261114\backup.log
+=== Step 1: Identify target disk ===
+Target Disk: Number=1, FriendlyName=ASMT 2115, BusType=USB, SizeGB=447.14, PartitionStyle=MBR
+=== Step 2: Wipe and format disk ===
+Formatted Volume: DriveLetter=F, Label=X3BACKUP, FileSystem=NTFS
+
+Number FriendlyName BusType SizeGB PartitionStyle
+------ ------------ ------- ------ --------------
+     1 ASMT 2115    USB     447.14 GPT
+
+
+
+DriveLetter FileSystemLabel FileSystem SizeGB SizeRemainingGB
+----------- --------------- ---------- ------ ---------------
+          F X3BACKUP        NTFS       447.12          447.02
+
+
+=== Step 3: Check BitLocker status (read-only) ===
+

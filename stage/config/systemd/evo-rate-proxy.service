@@ -1,0 +1,20 @@
+[Unit]
+Description=EVO-X3 U14 Per-Key Rate Limiter & CT Logger Proxy (127.0.0.1:8080 -> 127.0.0.1:8082)
+After=llama-swap.service
+Requires=llama-swap.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/evo-x3/llm.env
+Environment=EVO_PROXY_LISTEN=127.0.0.1:8080
+Environment=EVO_LLAMASWAP_UPSTREAM=http://127.0.0.1:8082
+Environment=EVO_MAX_CONCURRENT_PER_KEY=2
+Environment=EVO_RPM_PER_KEY=60
+ExecStart=/usr/bin/python3 /opt/evo-x3/stage/config/proxy/evo-rate-proxy.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

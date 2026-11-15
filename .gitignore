@@ -1,0 +1,7 @@
+iso/
+drivers/
+*.img
+*.gguf
+runs/*/agy.log
+runs/*/agy.out
+runs/*/agy.err
