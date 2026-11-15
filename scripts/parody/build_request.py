@@ -1795,6 +1795,12 @@ def _unwrap_still_read(read: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     inner = r.get("read")
     if not isinstance(inner, dict):
         return r
+    # Max Architect, Derrick t271s933 (2026-11-15): a W5 override (stale_garment_correction) counts only with the frame
+    # evidence it judged (a saved crop at 'evidence'); without one the garments it removed stay in the read.
+    corr = r.get("stale_garment_correction")
+    if isinstance(corr, dict) and corr.get("removed") and not (corr.get("evidence") and Path(str(corr["evidence"])).is_file()):
+        have = list(inner.get("garments") or [])
+        inner = dict(inner, garments=have + [g for g in corr["removed"] if g not in have])
     fact_keys = (
         "garments", "surface", "pose", "room", "setting", "place", "floor",
         "bed", "people", "light", "hair", "skin", "build", "props", "sheets",
@@ -2010,6 +2016,47 @@ def _match_inherited_garment(item: Dict[str, Any], inherited: Dict[str, str]) ->
     return None
 
 
+_SCENE_LOCK_KEYS = ("room", "setting", "place", "surface", "bed", "sheets", "floor", "light", "hair", "skin", "build")
+_OFF_STATE_RE = re.compile(r"\b(?:off|removed|floor|dropped|taken off)\b")
+
+
+def _chain_locked_read(read: Optional[Dict[str, Any]], scene_read: Optional[Dict[str, Any]],
+                       tracked: Optional[Dict[str, str]]) -> Optional[Dict[str, Any]]:
+    """Max Architect, Derrick t271s933 (2026-11-15): a chained clip's cast is never rewritten from the last-frame read.
+    Fix B: her build, skin and hair and the set nouns (room, place, surface, bed, sheets, floor, light) come from the
+    scene's clip-1 read (scene_read); the last frame keeps only its pose, framing, facing and head count.
+    Fix A: garments come from the tracked scene state (the previous clip's final state or the pack state table). A
+    garment tracked off never comes back and the last-frame read adds none; the reads only lend garment names."""
+    tracked = {str(k): str(v).lower() for k, v in (tracked or {}).items() if str(k).strip()}
+    if not scene_read and not tracked:
+        return read
+    last = _unwrap_still_read(read)
+    first = _unwrap_still_read(scene_read) if scene_read else {}
+    out = dict(last)
+    for k in (_SCENE_LOCK_KEYS if first else ()):
+        if k in first:
+            out[k] = first[k]
+        else:
+            out.pop(k, None)
+    garments: List[Dict[str, Any]] = []
+    keys = set()
+    for g in garment_inventory(first) + garment_inventory(last):
+        st = _match_inherited_garment(g, tracked)
+        if st and not _OFF_STATE_RE.search(st) and g["key"] not in keys:
+            keys.add(g["key"])
+            garments.append({"type": g["type"], "name": g["name"], "look": g.get("look", "")})
+    kept = garment_inventory({"garments": garments})
+    for ik, st in tracked.items():
+        if _OFF_STATE_RE.search(st) or any(_match_inherited_garment(g, {ik: st}) for g in kept):
+            continue
+        short = ik[5:] if ik.lower().startswith("item:") else ik
+        garments.append({"type": short, "name": short, "look": ""})
+    out["garments"] = garments
+    if isinstance(out.get("people"), list):
+        out["people"] = [dict(p, garments=[]) if isinstance(p, dict) else p for p in out["people"]]
+    return out
+
+
 def track_state(sentences: List[str], cast: Dict[str, Any], repair: bool = True, keep: Sequence[str] = ()
                 ) -> Tuple[List[str], Dict[str, Any], List[Dict[str, Any]]]:
     """Walk the writer's body sentences in order with a wardrobe + position state (start: the still - every still garment
@@ -2045,6 +2092,11 @@ def track_state(sentences: List[str], cast: Dict[str, Any], repair: bool = True,
             elif st and re.search(r"\b(?:off|removed|floor|dropped|taken off)\b", st):
                 state["garments"][g["key"]] = "off"
                 state["prior_off"].append(g["key"])
+        # Max Architect, Derrick t271s933 (2026-11-15) Fix A: a garment the scene already tracks off stays off in this
+        # clip's end state, so the next chained clip inherits it and no later read can put it back on.
+        for ik, st in inh.items():
+            if _OFF_STATE_RE.search(str(st).lower()) and not any(_match_inherited_garment(g, {ik: st}) for g in items):
+                state["garments"][str(ik)] = "off"
     absent = re.compile(cast["absent_garments"], re.I) if cast.get("absent_garments") else None
     move_rx = re.compile(cast.get("move_check") or cast.get("position_check") or r"$^", re.I)
     out: List[str] = []
@@ -3952,7 +4004,8 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
               voice_s2: str = OC_VOICE_S2, voice_s3: str = "a low, firm adult voice", partner_type: str = "man",
               partner_type2: Optional[str] = None, role: Optional[str] = None,
               beat_kind: Optional[str] = None, camera_kind: Optional[str] = None,
-              continued: bool = False, inherited_garments: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+              continued: bool = False, inherited_garments: Optional[Dict[str, str]] = None,
+              scene_read: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """The OC writer cast from one still read (moved from the EWT driver). dynsafe: every garment (type 'other' too) is
     kept under the still's own phrase; nothing is renamed to a fixed lingerie word; no garment = wardrobe_unverified (no
     raise); undress only when the ask names it; the setting, surface and pose come from the read (no bedroom / room /
@@ -3964,6 +4017,8 @@ def make_cast(read: Optional[Dict[str, Any]], position: str, ask: str, man: str 
         _src0 = dict(_unwrap_still_read(read))
         _src0.update({"hair": "", "skin": "", "build": "", "pose": "", "garments": [], "facing_camera": False, "people": 0})
         read = dict(read, read=_src0) if isinstance(read, dict) and isinstance(read.get("read"), dict) else _src0
+    if continued:  # Max Architect, Derrick t271s933 (2026-11-15) Fix A + B: see _chain_locked_read
+        read = _chain_locked_read(read, scene_read, inherited_garments)
     f = still_facts(read)
     inv = garment_inventory(read)
 
