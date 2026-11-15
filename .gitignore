@@ -13,3 +13,11 @@ writer_pipeline/acceptance/.pytest_cache/
 writer_pipeline/acceptance/home_*/
 writer_pipeline/acceptance/shared_state_*/
 writer_pipeline/acceptance/_archive/
+
+# EVO-X3 (2026-11-15)
+x3/.venv/
+x3/bakeoff/
+.pi/npm/
+.pi/git/
+*.bak-x3linux
+x3/.gitignore.pre-x3

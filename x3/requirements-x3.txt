@@ -1,0 +1,6 @@
+numpy==2.5.4
+opencv-python-headless==5.0.0.93
+pillow==13.0.0
+pysbd==0.3.4
+pytest==9.2.0
+PyYAML==6.0.3

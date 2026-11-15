@@ -6,7 +6,7 @@ from pathlib import Path
 
 H3_FPS = 24
 LEGAL = (56, 73, 90, 107, 124, 141, 158, 175, 192, 209, 226, 243)
-STILL = r"C:\AI\render\stills\approved_characters\BEDROOM01\01_BEDROOM_LINGERIE.jpg"
+STILL = r"/home/derekboone/AI/render/stills/approved_characters/BEDROOM01/01_BEDROOM_LINGERIE.jpg"
 SURFACE = "the bed"
 GENRE = "hardcore pro"
 TARGET_MIN, TARGET_MAX = 285.0, 315.0
