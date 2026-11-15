@@ -1,0 +1,62 @@
+﻿{
+    "timestamp_ct_before":  "2026-11-14 21:32:55",
+    "is_admin":  true,
+    "clock":  {
+                  "timezone_before":  "Central Standard Time",
+                  "timezone_after":  "Central Standard Time",
+                  "w32time_status":  "Running / Automatic",
+                  "resync_output":  "Sending resync command to local computer\nThe command completed successfully.",
+                  "resync_exit":  0,
+                  "time_after_ct":  "2026-11-14 21:32:57 -06:00",
+                  "time_after_utc":  "2026-11-15T03:32:57.4026768Z"
+              },
+    "packages":  {
+                     "git_exit":  0,
+                     "tailscale_exit":  0,
+                     "tailscale_up_launched":  true
+                 },
+    "u1_admin":  {
+                     "confirm_secure_boot":  "False",
+                     "bitlocker_volume":  {
+                                              "MountPoint":  "C:",
+                                              "EncryptionMethod":  "None",
+                                              "VolumeStatus":  "FullyDecrypted",
+                                              "ProtectionStatus":  "Off",
+                                              "LockStatus":  "Unlocked",
+                                              "EncryptionPercentage":  0,
+                                              "VolumeType":  "OperatingSystem"
+                                          },
+                     "manage_bde_status":  "BitLocker Drive Encryption: Configuration Tool version 10.0.26100\nCopyright (C) 2013 Microsoft Corporation. All rights reserved.\n\nVolume C: []\n[OS Volume]\n\n    Size:                 1831.46 GB\n    BitLocker Version:    None\n    Conversion Status:    Fully Decrypted\n    Percentage Encrypted: 0.0%\n    Encryption Method:    None\n    Protection Status:    Protection Off\n    Lock Status:          Unlocked\n    Identification Field: None\n",
+                     "esp_used_bytes":  87266304,
+                     "esp_free_bytes":  13396992,
+                     "esp_used_mb":  83.22,
+                     "esp_free_mb":  12.78,
+                     "esp_efi_dirs":  "Boot, Microsoft, OEM"
+                 },
+    "u2_drivers":  {
+                       "exit_code":  0,
+                       "exported_folder_count":  70,
+                       "total_size_mb":  2111.96,
+                       "summary_tail":  "Exporting driver package:   oem68.inf (voiceclarityep_audio_component.inf)\nDriver package exported successfully.\n\nExporting driver package:   oem69.inf (wintun.inf)\nDriver package exported successfully.\n\nTotal driver packages:      70\nExported driver packages:   70"
+                   },
+    "u2b_before":  {
+                       "HiberbootEnabled":  0,
+                       "powercfg_a":  "The following sleep states are available on this system:\n    Standby (S0 Low Power Idle) Network Connected\n    Hibernate\n\nThe following sleep states are not available on this system:\n    Standby (S1)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Standby (S2)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Standby (S3)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Hybrid Sleep\n\tStandby (S3) is not available.\n\tThe hypervisor does not support this standby state.\n\n    Fast Startup\n\tThis action is disabled in the current system policy.\n",
+                       "RealTimeIsUniversal":  "\u003cabsent\u003e",
+                       "WU_AU":  "\u003cabsent\u003e"
+                   },
+    "u2b_after":  {
+                      "powercfg_h_off_exit":  0,
+                      "powercfg_h_off_out":  "",
+                      "reg_utc_exit":  0,
+                      "reg_utc_out":  "The operation completed successfully.\n",
+                      "HiberbootEnabled":  0,
+                      "powercfg_a":  "The following sleep states are available on this system:\n    Standby (S0 Low Power Idle) Network Connected\n\nThe following sleep states are not available on this system:\n    Standby (S1)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Standby (S2)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Standby (S3)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Hibernate\n\tHibernation has not been enabled.\n\n    Hybrid Sleep\n\tStandby (S3) is not available.\n\tHibernation is not available.\n\tThe hypervisor does not support this standby state.\n\n    Fast Startup\n\tHibernation is not available.\n",
+                      "RealTimeIsUniversal":  1,
+                      "WU_AU":  "{\"NoAutoUpdate\":0,\"AUOptions\":2,\"NoAutoRebootWithLoggedOnUsers\":1}"
+                  },
+    "errors":  [
+
+               ],
+    "timestamp_ct_after":  "2026-11-14 21:33:59"
+}

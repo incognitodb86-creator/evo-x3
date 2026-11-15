@@ -35,3 +35,81 @@ DriveLetter FileSystemLabel FileSystem SizeGB SizeRemainingGB
 
 === Step 3: Check BitLocker status (read-only) ===
 
+wbadmin 1.0 - Backup command-line tool
+(C) Copyright Microsoft Corporation. All rights reserved.
+
+Retrieving volume information...
+This will back up SYSTEM(EFI System Partition) (100.00 MB),(C:),Recovery (1.17 GB) to F:.
+The backup operation to F: is starting.
+Creating a shadow copy of the volumes specified for backup...
+Creating a shadow copy of the volumes specified for backup...
+Creating a shadow copy of the volumes specified for backup...
+Creating a shadow copy of the volumes specified for backup...
+Creating a backup of volume SYSTEM(EFI System Partition) (100.00 MB), copied (0%).
+Creating a backup of volume SYSTEM(EFI System Partition) (100.00 MB), copied (0%).
+Creating a backup of volume SYSTEM(EFI System Partition) (100.00 MB), copied (100%).
+The backup of volume SYSTEM(EFI System Partition) (100.00 MB) completed successfully.
+Creating a backup of volume (C:), copied (2%).
+Creating a backup of volume (C:), copied (5%).
+Creating a backup of volume (C:), copied (7%).
+Creating a backup of volume (C:), copied (10%).
+Creating a backup of volume (C:), copied (12%).
+Creating a backup of volume (C:), copied (15%).
+Creating a backup of volume (C:), copied (17%).
+Creating a backup of volume (C:), copied (20%).
+Creating a backup of volume (C:), copied (22%).
+Creating a backup of volume (C:), copied (25%).
+Creating a backup of volume (C:), copied (28%).
+Creating a backup of volume (C:), copied (30%).
+Creating a backup of volume (C:), copied (32%).
+Creating a backup of volume (C:), copied (35%).
+Creating a backup of volume (C:), copied (37%).
+Creating a backup of volume (C:), copied (40%).
+Creating a backup of volume (C:), copied (42%).
+Creating a backup of volume (C:), copied (45%).
+Creating a backup of volume (C:), copied (48%).
+Creating a backup of volume (C:), copied (51%).
+Creating a backup of volume (C:), copied (53%).
+Creating a backup of volume (C:), copied (56%).
+Creating a backup of volume (C:), copied (59%).
+Creating a backup of volume (C:), copied (62%).
+Creating a backup of volume (C:), copied (64%).
+Creating a backup of volume (C:), copied (67%).
+Creating a backup of volume (C:), copied (69%).
+Creating a backup of volume (C:), copied (72%).
+Creating a backup of volume (C:), copied (75%).
+Creating a backup of volume (C:), copied (77%).
+Creating a backup of volume (C:), copied (80%).
+Creating a backup of volume (C:), copied (82%).
+Creating a backup of volume (C:), copied (84%).
+Creating a backup of volume (C:), copied (86%).
+Creating a backup of volume (C:), copied (89%).
+Creating a backup of volume (C:), copied (91%).
+Creating a backup of volume (C:), copied (93%).
+Creating a backup of volume (C:), copied (96%).
+Creating a backup of volume (C:), copied (98%).
+Creating a backup of volume (C:), copied (100%).
+The backup of volume (C:) completed successfully.
+Creating a backup of volume Recovery (1.17 GB), copied (39%).
+The backup of volume Recovery (1.17 GB) completed successfully.
+Summary of the backup operation:
+------------------
+
+The backup operation successfully completed.
+The backup of volume SYSTEM(EFI System Partition) (100.00 MB) completed successfully.
+The backup of volume (C:) completed successfully.
+The backup of volume Recovery (1.17 GB) completed successfully.
+Log of files successfully backed up:
+C:\WINDOWS\Logs\WindowsBackup\Backup-15-11-2026_18-21-58.log
+wbadmin 1.0 - Backup command-line tool
+(C) Copyright Microsoft Corporation. All rights reserved.
+
+Backup time: 11/15/2026 12:21 PM
+Backup target: 1394/USB Disk labeled X3BACKUP(F:)
+Version identifier: 11/15/2026-18:21
+Can recover: Volume(s), File(s), Application(s), Bare Metal Recovery, System State
+Snapshot ID: {80d2ed94-d5cd-41d0-a8f1-011904544367}
+**********************
+Windows PowerShell transcript end
+End time: 20261114213100
+**********************
