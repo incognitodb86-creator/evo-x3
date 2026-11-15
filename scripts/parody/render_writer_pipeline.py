@@ -1215,6 +1215,75 @@ def chain_start_still(prev_run: Path, still: str, run_dir: Path, log) -> str:
     return still
 
 
+# ---- run dir + start-still guard (Max Architect 2026-11-15, Derrick "Yes, make the fixes and rerun the Q8 vs Q4 test") ----
+def resolve_run_dir(raw: Any) -> Path:
+    """An absolute run dir is used as given. A relative one resolves under RUNS_ROOT (it used to land under the chat's
+    cwd, outside runs/ and past the pi write sandbox). A leading '.../runs/' prefix is dropped; '..' is refused."""
+    s = str(raw or "").strip()
+    if not s:
+        raise ValueError("run_dir is empty")
+    rp = Path(s)
+    if rp.is_absolute():
+        return rp
+    parts = [x for x in re.split(r"[\\/]+", s) if x not in ("", ".")]
+    if "runs" in parts:
+        parts = parts[len(parts) - parts[::-1].index("runs"):]
+    if not parts or ".." in parts or re.match(r"^[A-Za-z]:", parts[0]):
+        raise ValueError(f"run_dir '{s}' does not resolve under {RUNS_ROOT}; pass an absolute path under runs/")
+    return RUNS_ROOT.joinpath(*parts)
+
+
+def _file_sha256(path: Path) -> Optional[str]:
+    try:
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    except OSError:
+        return None
+
+
+def _norm_still(x: Any) -> str:
+    return os.path.normcase(os.path.normpath(os.path.expanduser(str(x).strip())))
+
+
+def still_read_mismatch(still: str, run_dir: Path, still_read_src: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+    """(not_ready_reason, warning) for the still read the pipeline is about to use (run_dir/still_read.json if present,
+    else --still-read). It must belong to the start still: same path, or the same file bytes (sha256). A read with no
+    "source" (and no "source_sha256") cannot be checked and only warns."""
+    existing = run_dir / "still_read.json"
+    srp = existing if existing.exists() else (Path(still_read_src) if still_read_src else None)
+    if srp is None:
+        return None, None
+    try:
+        d = json.loads(srp.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        return f"still read {srp} is not valid JSON ({e})", None
+    d = d if isinstance(d, dict) else {}
+    sha = str(d.get("source_sha256") or "").strip().lower()
+    src = d.get("source")
+    if sha:
+        have = _file_sha256(Path(still))
+        if have and have == sha:
+            return None, None
+        return (f"still read does not belong to the start still: {srp} source_sha256 does not match --still '{still}'"), None
+    if not src:
+        return None, "still_read_unverified (no source in the still read)"
+    if _norm_still(src) == _norm_still(still):
+        return None, None
+    try:
+        if os.path.realpath(os.path.expanduser(str(src))) == os.path.realpath(os.path.expanduser(str(still))):
+            return None, None
+    except Exception:  # noqa: BLE001
+        pass
+    a, b = _file_sha256(Path(os.path.expanduser(str(src)))), _file_sha256(Path(still))
+    if a and b and a == b:
+        return None, None
+    return (f"still read does not belong to the start still: {srp.name} describes '{src}' but --still is '{still}'; "
+            "pass the still that read describes, or remove the read so the pipeline reads the new still"), None
+
+
 # ---- one clip -------------------------------------------------------------------------------------------------------
 class _Stop(Exception):
     """A hard stop that ends the clip as NOT_READY with result['not_ready_reason'] already set."""
@@ -1223,7 +1292,12 @@ class _Stop(Exception):
 def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     ov = overrides or {}
     t_start = time.time()
-    run_dir = Path(job["run_dir"])
+    try:
+        run_dir = resolve_run_dir(job.get("run_dir"))
+    except ValueError as e:
+        return {"run": str(job.get("run_dir")), "run_dir": str(job.get("run_dir")), "ask": job.get("ask"),
+                "position": job.get("position"), "status": "NOT_READY", "not_ready_reason": str(e), "warnings": [],
+                "version": VERSION, "seconds": 0.0}
     run_dir.mkdir(parents=True, exist_ok=True)
     run_id = run_dir.name
     ask, position = job["ask"], job["position"]
@@ -1274,11 +1348,27 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             result["chain"] = "dry_chain"
             if not list(prev_run.glob("*.mp4")):
                 result["warnings"] = list(result.get("warnings") or []) + ["chain_unverified"]
-        still = job.get("still") or "auto"
+        still = str(job.get("still") or "").strip()
+        if not still and not is_continue:  # guard 2026-11-15: a missing --still used to fall back to a random pool still
+            result.update(status="NOT_READY", not_ready_reason="start still missing: pass --still '<the start still path>' "
+                          "(or --still auto for a pool pick plus a fresh vision read)")
+            raise _Stop()
+        still = still or "auto"
         if still == "auto":
+            if job.get("still_read") and not is_continue:
+                result.update(status="NOT_READY", not_ready_reason="start still missing: --still-read was given with "
+                              "--still auto; pass --still '<the still that read describes>'")
+                raise _Stop()
             still = auto_still(cfg, run_id, ask)
         if scene_prev and scene_prev.get("run_dir"):
             still = chain_start_still(Path(scene_prev["run_dir"]), scene_prev.get("still") or still, run_dir, log)
+        else:
+            _why, _warn = still_read_mismatch(still, run_dir, job.get("still_read"))
+            if _why:
+                result.update(status="NOT_READY", not_ready_reason=_why)
+                raise _Stop()
+            if _warn:
+                result["warnings"] = list(result.get("warnings") or []) + [_warn]
         # 1 still read
         still_read = ensure_still_read(run_dir, still, job.get("still_read"), client, cfg, log)
         # 2b mode router (coverage B0): act + base mode + overlays; fallbacks are logged, never block
@@ -1670,7 +1760,7 @@ def main(argv=None) -> int:
     ap.add_argument("run_dir", nargs="?")
     ap.add_argument("--ask")
     ap.add_argument("--position")
-    ap.add_argument("--still", default="auto", help="still path, or auto (pool pick + vision read)")
+    ap.add_argument("--still", default=None, help="start still path (required), or auto (pool pick + vision read)")
     ap.add_argument("--still-read", help="existing still_read.json to copy into the run dir")
     ap.add_argument("--character", default=None)
     ap.add_argument("--scene", help="scene id for a multi-clip scene (scene_state.json)")
