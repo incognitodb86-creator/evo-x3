@@ -54,8 +54,9 @@ SEX_KINDS = ("sex", "oral")
 MODE_RULES: Dict[str, Dict[str, Any]] = {
     "sex": {"primary": True, "contact": True, "contact_hint": "inside her, buried in her, deep in her or hips flush",
             "banned_contact": None, "clearance": True, "dev": "primary", "min_lines": 0},
-    "oral": {"primary": True, "contact": True, "contact_hint": "inside her mouth", "banned_contact": r"\b(?:hips flush|sheathed)\b",
-             "banned_hint": "oral contact names the mouth (inside her mouth), never hips flush or sheathed",
+    "oral": {"primary": True, "contact": True, "contact_hint": "inside her mouth",
+             "banned_contact": r"\b(?:hips flush|sheathed)\b|\b(?:deep in|buried in|inside) her\b(?!\s+(?:mouth|throat)\b)",
+             "banned_hint": "oral contact names the mouth (inside her mouth), never vaginal terms (deep in her / buried in her), hips flush or sheathed",
              "clearance": False, "dev": "primary", "min_lines": 0},
     # partner present but no penetration join (titjob, finish): motion and tempo yes, join keyword no
     "partner": {"primary": True, "contact": False, "banned_contact": None, "clearance": False, "dev": "primary", "min_lines": 0},
@@ -190,10 +191,11 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
                                  and br._LIFT_MEASURE_RE.search(pm_s) and MEET_RE.search(pm_s)):
         out.append(_fix("ride_both", "write this clause word for word in the PRIMARY MOTION sentence: 'she rises and sinks on him, his hips "
                                      f"lifting a few inches off the {(ctx.get('slots') or {}).get('surface') or 'surface'} to meet her as she sinks'"))
-    if DIAL_RE.search(plain):
-        out.append(_fix("dial", f"remove the technical term '{DIAL_RE.search(plain).group(0)}'; film look is light, lens and grain words"))
+    if DIAL_RE.search(plain) or re.search(r"(?i)\b\d{1,3}fps\b", plain):
+        _dm = DIAL_RE.search(plain) or re.search(r"(?i)\b\d{1,3}fps\b", plain)
+        out.append(_fix("dial", f"remove the technical term '{_dm.group(0)}'; film look is light, lens and grain words"))
     if THROAT_RE.search(plain):
-        out.append(_fix("throat", "write throat contact exactly as 'his hand on her throat' (the builder drops other throat wording)"))
+        out.append(_fix("throat", "write throat contact exactly as 'his hand on her throat' (never slide/grip/close/choke throat wording)"))
     if kind == "sex" and SHALLOW_RE.search(plain):  # partner (titjob/finish) has no entry depth
         out.append(_fix("shallow", "the builder keeps full entry; show denial with tempo or a full pull-out pause"))
     if NARR_RE.search(plain):
@@ -261,6 +263,7 @@ SAFETY_HARD = frozenset({
     "voice_missing", "builder",
     "contact_anatomy", "talk_lines", "talk_s2_defined",
     "double_says", "hands_line",
+    "dial", "throat", "negatives",
 })
 HARD_WEIGHT = 20
 SOFT_WEIGHT = 5
@@ -346,7 +349,7 @@ def opening_sentence(dd: str) -> str:
     return norm(m.group(0)) if m else ""
 
 
-MOUTH_CONTACT_RE = re.compile(r"(?i)\b(?:inside her mouth|into her mouth|in her mouth|past her lips|between her lips|at her lips|"
+MOUTH_CONTACT_RE = re.compile(r"(?i)\b(?:inside her mouth|into her mouth|in her mouth|enters? her mouth|past her lips|between her lips|at her lips|"
                               r"against her lips)\b|\blips (?:close|wrap|seal|part)\w* (?:around|over)")
 SLAP_RE = re.compile(r"(?i)\b(?:slap\w*|smack\w*)\b")  # acceptance-3 (m19): soft 'skin on skin' sliding is not slap foley
 ORAL_SHEATHED_RE = re.compile(r"(?i)\b(?:sheathed|hips flush)\b[^.;]{0,40}\b(?:mouth|throat|lips)\b|\b(?:mouth|throat|lips)\b[^.;]{0,20}\bsheathed\b")
@@ -710,11 +713,14 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
                 and not ctx.get("ask_pov_change"):
             issues.append(_fix("chain_pov", "the last clip was POV; keep the POV angle"))
 
-    # -- soft penalties --
-    neg = NEG_WORD_RE.findall(plain)
+    # -- hard negatives check (previously soft + quietly stripped/rewritten) --
+    _neg_rx = re.compile(
+        r"(?i)\b(?:not|never|nothing|no|without|avoid|neither|nor|nowhere|cannot|"
+        r"don't|doesn't|didn't|won't|can't|isn't|aren't|wasn't|weren't|couldn't|wouldn't|shouldn't)\b"
+    )
+    neg = _neg_rx.findall(plain)
     if neg:
-        issues.append(_fix("negatives", f"{len(neg)} negative word(s) outside <d> ('{neg[0]}'); the builder strips them, state it positively",
-                           False, min(15, 3 * len(neg))))
+        issues.append(_fix("negatives", f"{len(neg)} negative word(s) outside <d> ('{neg[0]}'); state every action and camera hold positively"))
     run, prev_subj, worst = 1, None, 1
     for s in sents:
         m = SUBJECT_START_RE.match(s)

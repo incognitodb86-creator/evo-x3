@@ -142,7 +142,7 @@ class TestWriterBeatsContinuation(unittest.TestCase):
     # overlap_audio_t = audio_t(base) - audio_t(base - overlap), 65 rows x2 at base 192 / overlap 39 and 37 x2 at
     # base 379 / overlap 22 - and the RefMod's value tensor never grows into those slots:
     #   value [2000, 32] vs indexing result [2130, 32] (c2_samp, prompt_id 332f0637) and [2074, 32] (beat 3).
-    # All 44 continuation graphs in /home/derekboone/AI/community/runs that produced an mp4 load no audio RefMod on the tail beat;
+    # All 44 continuation graphs in /home/evo/AI/community/runs that produced an mp4 load no audio RefMod on the tail beat;
     # the only one that carried it has no output. So the voice reference stays on beat 1 and the voice carries on
     # the tail, which is beat 1's sampled audio. The visible length is untouched: 192 + 187 + 187 = 566 frames.
     VOICE_REFMOD = "minimaxh3_oc_poolclub_v1_refmod_audio"
@@ -351,6 +351,74 @@ class TestWriterBeatsContinuation(unittest.TestCase):
         for i in (1, 2, 3):
             self.assertIn(f"===== beat {i} =====", prompt_all)
         self.assertIn("Marker A3", prompt_all)
+
+
+    def test_beat2_two_cuts_39f_overlap_consistency_and_shot1_not_1625s(self):
+        b2_two_cuts = BEAT2.replace(
+            'Marker B2: the low bed creaks under her palms. (S1) says in a hoarse, breathless voice, <d>[English] Keep going.</d>',
+            'Marker B2: the low bed creaks under her palms.\n'
+            '[Shot 3] At 00:06.250, the camera cuts to a medium shot at hip height. (S1) says in a hoarse, breathless voice, <d>[English] Keep going.</d>',
+        )
+        b3_single_cut = BEAT3.replace("At 00:03.250,", "At 00:06.500,")
+        g, _, plan = _build(beat_prompts=[BEAT1, b2_two_cuts, b3_single_cut])
+        self.assertEqual(plan["beats"][1]["shot_frames"], [248, 320])
+        self.assertEqual(plan["beats"][2]["shot_frames"], [513])
+        b2_prompt = g["c2"]["inputs"]["prompt"]
+        self.assertIn("At 00:03.958,", b2_prompt)
+        self.assertIn("At 00:06.958,", b2_prompt)
+        self.assertNotIn("At 00:10.333,", b2_prompt)
+        self.assertNotIn("At 00:13.333,", b2_prompt)
+        cuts2 = plan["beats"][1]["shot_clocks"]["cuts"]
+        self.assertEqual(cuts2["00:03.250"]["frames_after_the_join"], 56)  # 2.333 s, NOT 39f (1.625 s)
+        self.assertEqual(cuts2["00:06.250"]["window_local_clock"], "00:06.958")
+        # Consistency: carry == trim == assembly == shot_clocks for every continuation beat
+        self.assertTrue(all(x["consistent"] for x in plan["overlap_consistency"]))
+        self.assertEqual([x["applied_overlap_frames"] for x in plan["overlap_consistency"]], [39, 22])
+
+        # Also verify the 00:03.500 / 00:05.750 beat-3 no-op rebase at overlap 22 -> global 441 / 495
+        b3_two_cuts = BEAT3.replace("At 00:03.250,", "At 00:03.500,").replace(
+            'Marker B3: the low bed creaks under her palms.',
+            'Marker B3: the low bed creaks under her palms.\n[Shot 3] At 00:05.750, the camera cuts to his face.',
+        )
+        _, _, plan2 = _build(beat_prompts=[BEAT1, b2_two_cuts, b3_two_cuts])
+        self.assertEqual(plan2["beats"][2]["shot_frames"], [441, 495])
+
+    def test_optional_audio_seam_crossfade_and_loudness_trace(self):
+        import math as _math
+        _, _, plan_default = _build()
+        self.assertFalse(plan_default["audio_seam_crossfade"]["enabled"])
+        self.assertFalse(plan_default["audio_seam_crossfade"]["default_enabled"])
+        _, _, plan_on = _build(audio_seam_crossfade=True, audio_seam_crossfade_mode="soft_av")
+        self.assertTrue(plan_on["audio_seam_crossfade"]["enabled"])
+        w65 = plan_on["audio_seam_crossfade"]["beats"][0]["soft_av_weights"]
+        self.assertEqual(len(w65), 65)
+        self.assertTrue(all(x == 1.0 for x in w65[:-8]))
+        self.assertTrue(all(w65[i] > w65[i + 1] for i in range(57, 64)))
+
+        # Synthetic 32 kHz audio across seam with an abrupt phase/DC step click
+        sr = 32000
+        prev = [0.35 * _math.sin(2.0 * _math.pi * 220.0 * i / sr) + 0.4 for i in range(9600)]
+        nxt = [-0.35 * _math.sin(2.0 * _math.pi * 220.0 * i / sr) - 0.4 for i in range(9600)]
+        out_declick, trace_declick = br.apply_seam_audio_crossfade(prev, nxt, sample_rate=sr, crossfade_ms=15.0, mode="declick")
+        self.assertEqual(trace_declick["crossfade_samples"], 480)
+        self.assertGreater(trace_declick["before"]["seam_step_delta"], 0.7)
+        self.assertLess(trace_declick["after"]["seam_step_delta"], 0.05)
+        self.assertIn("overlap_tail", trace_declick["after"]["segments"])
+        out_soft, trace_soft = br.apply_seam_audio_crossfade(prev, nxt, sample_rate=sr, mode="soft_av", release_ticks=8)
+        self.assertEqual(trace_soft["crossfade_samples"], 6400)
+        self.assertLess(trace_soft["after"]["seam_step_delta"], 0.05)
+
+
+    def test_parse_plan_end_actions_extracts_plan_lines(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            plan_p = Path(d) / "PLAN.md"
+            plan_p.write_text(
+                "### Beat 1\n- end_action (for the builder's beat_closer / `--end-action`): closer one\n"
+                "### Beat 2\n- end_action (for the builder's beat_closer / `--end-action`): closer two\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(br.parse_plan_end_actions(plan_p), ["closer one", "closer two"])
 
 
 if __name__ == "__main__":
