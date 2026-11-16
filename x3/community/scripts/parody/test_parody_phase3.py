@@ -31,8 +31,9 @@ import comm
 import submit_parody_run as spr
 
 
-INDEX_DIR = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
-REFMODS_DIR = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+INDEX_DIR = _REPO_ROOT / "index" / "h3-known-characters"
+REFMODS_DIR = _REPO_ROOT.parent / "comfy-alienpc" / "models" / "refmods"
 ALIASES_PATH = Path(__file__).parent / "aliases.json"
 
 

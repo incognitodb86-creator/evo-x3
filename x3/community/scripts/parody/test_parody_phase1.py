@@ -16,10 +16,12 @@ from sync_refmods import check_sync_status, sync_refmods
 class TestParodyPhase1(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp(prefix="parody_test_"))
-        self.index_dir = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
-        self.refmods_dir = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
-        self.approved_dir = Path(r"/home/derekboone/AI/5slock/approved_characters")
-        self.aliases_path = Path(r"/home/derekboone/AI/community/scripts/parody/aliases.json")
+        repo_root = Path(__file__).resolve().parents[2]
+        ai_root = repo_root.parent
+        self.index_dir = repo_root / "index" / "h3-known-characters"
+        self.refmods_dir = ai_root / "comfy-alienpc" / "models" / "refmods"
+        self.approved_dir = ai_root / "5slock" / "approved_characters"
+        self.aliases_path = Path(__file__).resolve().parent / "aliases.json"
 
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
