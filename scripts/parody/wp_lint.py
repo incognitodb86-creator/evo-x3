@@ -518,7 +518,7 @@ def _fix(code: str, note: str, hard: Optional[bool] = None, pen: Optional[int] =
     return {"code": code, "note": note, "hard": hard, "penalty": HARD_WEIGHT if hard else (SOFT_WEIGHT if pen is None else pen)}
 
 
-def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
+def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any]:
     """ctx: kind (sex|oral|talk|solo), slots, blacklist (list[str]), cloned (list[str]), cfg (lint block),
     scene (optional previous scene entry), builder_preview (optional callable full_text -> dict)."""
     cfg = ctx.get("cfg") or {}
@@ -593,6 +593,19 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
                                               "an adult woman's proportions at miniature scale')"))
         if not SCALE_ANCHOR_RE.search(plain):
             issues.append(_fix("scale_anchor", "fix one measurable scale anchor (e.g. 'no taller than his forearm') and keep it", False, 5))
+    if minimal:
+        _lines = spoken_lines(dd)
+        _words = sum(len(l.split()) for l in _lines)
+        for h in blacklist_hits(_lines, ctx.get("blacklist") or [], float(cfg.get("blacklist_ratio", 0.8))):
+            focus = slots.get("line_focus_text") or slots.get("line_focus") or "the still"
+            issues.append(_fix("blacklist", f"line '{h['line']}' is in the last-20 list; write a new line about {focus}"))
+        hard = [i for i in issues if i["hard"]]
+        score = max(0, 100 - sum(i["penalty"] for i in issues))
+        wc = len(WORD_RE.findall(norm(D_RE.sub(" ", dd))))
+        return {"score": score, "pass": not hard, "hard": [i["code"] for i in hard], "issues": issues,
+                "spoken_words": _words, "lines": _lines, "words": wc, "sentences": len(sents),
+                "phases": {"anchor": -1, "onset": -1, "development": -1, "result": -1},
+                "builder_preview": None}
 
     # -- consent beat (Derrick rule call 2, t1526s5657): agreement goes in its own separate agreement clip,
     # not inside the sex clip. Only the agreement clip itself (talk / explicit agreement clip) requires CONSENT_RE.

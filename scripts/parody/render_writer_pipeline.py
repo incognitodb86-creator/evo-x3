@@ -1621,7 +1621,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         lint_cfg["speech_words_max"] = speech_words_max
         lint_cfg["max_lines_per_speaker"] = max_lines_spk
         lint_ctx = {"kind": kind, "slots": slots, "blacklist": blacklist, "cloned": cloned, "cfg": lint_cfg,
-                    "scene": scene_prev, "builder_preview": builder_preview_fn(still_read, position, ask, continued=bool(scene_prev), inherited_garments=_inh_g),
+                    "scene": scene_prev, 
                     "cast": cast_l, "overlays": overlays, "ask": ask, "act_id": route["act_id"], "wet_ok": wet_ok,
                     "recent_openings": [wp_lint.opening_sentence(d) for d in wp_state.load_recent(recent_path)[-10:]]}
         # 3 beat card (Cut 2: talk clips and runs with --frames use the in-code minimal beat card, no LLM planning call)
@@ -1746,7 +1746,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                               cfg.get("prose_max_tokens", 1100), purpose=f"prose_{k}")
             full, dd = _materialise_writer_text(raw)
             wp_state.atomic_write(run_dir / f"cand_{k}.txt", full)
-            lr = wp_lint.lint(full, lint_ctx)
+            lr = wp_lint.lint(full, lint_ctx, minimal=True)
             wp_state.atomic_write(run_dir / f"lint_{k}.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands[f"cand_{k}"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, k)}
         # 6 opt-in single rewrite (--fix-once only; default off per U52)
@@ -1759,7 +1759,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                               seed_for(run_id, ask, n + 1), cfg.get("prose_max_tokens", 1100), purpose="rewrite")
             full, dd = _materialise_writer_text(raw)
             wp_state.atomic_write(run_dir / "rewrite.txt", full)
-            lr = wp_lint.lint(full, lint_ctx)
+            lr = wp_lint.lint(full, lint_ctx, minimal=True)
             wp_state.atomic_write(run_dir / "lint_rewrite.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands["rewrite"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 1), "notes": notes,
                                 "from": best_name}
@@ -1791,7 +1791,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             raw = client.chat(rewrite_messages(sysprompt, brief, card, chosen["dd"], notes, kind, overlays), sampler,
                               seed_for(run_id, ask, n + 2), cfg.get("prose_max_tokens", 1100), purpose="rewrite_builder")
             full, dd = _materialise_writer_text(raw)
-            lr = wp_lint.lint(full, lint_ctx)
+            lr = wp_lint.lint(full, lint_ctx, minimal=True)
             wp_state.atomic_write(run_dir / "rewrite_builder.txt", full)
             wp_state.atomic_write(run_dir / "lint_rewrite_builder.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands["rewrite_builder"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 2), "notes": notes}
