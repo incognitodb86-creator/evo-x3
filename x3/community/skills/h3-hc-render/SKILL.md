@@ -3,13 +3,13 @@ name: h3-hc-render
 description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the legacy B2 lane (named INDEX + RefMod parodies defer to h3-parody-identity and direct queueing, never Ralph) - graph keys, reference-image wiring, frame/canvas math and the objective proof checks. Use when building a graph, requesting a render or checking a rendered clip.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). From the X3, dry-build first and queue only via `bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick` after Derrick's yes.
+> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). After Derrick's yes, run the writer pipeline (or `submit_parody_run.py`) with `--queue --yes-derrick` so it writes and queues in one pass (queue-remote.sh; adults guard and pytest gate stay).
 
 # H3 hardcore render
 
 ## Named-parody precedence
 
-For named INDEX + RefMod parodies, `h3-parody-identity` owns the locked single-pass graph, approved duration/aspect/start-image/second-speaker options and tested prompt/voice/soundscape contract. Its route overrides the legacy two-pass B2 defaults and Ralph/request-proof loop below: dry-build through `submit_parody_run.py --dry-run` and queue via `bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick` only after Derrick's yes (never Ralph or a coding-model launch for renders). Existing guards and GPU-lock rules stay unchanged. The B2 guidance below remains for its other lanes; do not use it to rewrite the tested parody graph or prompt.
+For named INDEX + RefMod parodies, `h3-parody-identity` owns the locked single-pass graph, approved duration/aspect/start-image/second-speaker options and tested prompt/voice/soundscape contract. Its route overrides the legacy two-pass B2 defaults and Ralph/request-proof loop below: after Derrick's yes, run `submit_parody_run.py` / `render_writer_pipeline.py` with `--queue --yes-derrick` (write and queue in one pass; never Ralph or a coding-model launch for renders). Existing guards and GPU-lock rules stay unchanged. The B2 guidance below remains for its other lanes; do not use it to rewrite the tested parody graph or prompt.
 
 R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in ~/AI/render/AGENTS.md; run render work from ~/AI/render.
 
