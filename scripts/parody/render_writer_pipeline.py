@@ -1350,11 +1350,21 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             if not list(prev_run.glob("*.mp4")):
                 result["warnings"] = list(result.get("warnings") or []) + ["chain_unverified"]
         still = str(job.get("still") or "").strip()
-        if not still and not is_continue:  # guard 2026-11-15: a missing --still used to fall back to a random pool still
+        if not still and is_continue:
+            if scene_prev and scene_prev.get("still"):
+                still = str(scene_prev["still"]).strip()
+            elif prev_run and (prev_run / "pick.json").is_file():
+                try:
+                    still = str(json.loads((prev_run / "pick.json").read_text(encoding="utf-8")).get("still") or "").strip()
+                except Exception:
+                    still = ""
+        if not still:  # hard fail when --still is missing (never silently fall back to auto)
             result.update(status="NOT_READY", not_ready_reason="start still missing: pass --still '<the start still path>' "
                           "(or --still auto for a pool pick plus a fresh vision read)")
             raise _Stop()
-        still = still or "auto"
+        if still != "auto" and Path(still).is_absolute() and not Path(still).is_file():
+            result.update(status="NOT_READY", not_ready_reason=f"start still file not found: {still}")
+            raise _Stop()
         if still == "auto":
             if job.get("still_read") and not is_continue:
                 result.update(status="NOT_READY", not_ready_reason="start still missing: --still-read was given with "
@@ -1789,6 +1799,12 @@ def main(argv=None) -> int:
     else:
         if not (a.run_dir and a.ask and a.position):
             print("NOT_READY usage: render_writer_pipeline.py <run_dir> --ask \"...\" --position <act> --still <path|auto> --character FCSydny")
+            return 3
+        if not Path(a.run_dir).is_absolute():
+            print(f"NOT_READY run_dir must be an absolute path: {a.run_dir}")
+            return 3
+        if a.cont and not Path(a.cont).is_absolute():
+            print(f"NOT_READY --continue must be an absolute path: {a.cont}")
             return 3
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
                      "character": a.character, "scene": a.scene, "continue": a.cont,
