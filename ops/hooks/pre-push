@@ -1,0 +1,11 @@
+#!/bin/sh
+# G7: run gitleaks before every push. Abort on any hit.
+# Installed as .git/hooks/pre-push (shared by worktrees). Official gitleaks 8.30.1.
+set -e
+root=$(git rev-parse --show-toplevel)
+script="$root/ops/gitleaks-pre-push.sh"
+if [ -x "$script" ]; then
+  exec "$script"
+fi
+echo "ops/gitleaks-pre-push.sh missing or not executable" >&2
+exit 1
