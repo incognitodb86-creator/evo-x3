@@ -3,6 +3,8 @@ name: h3-hc-render
 description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the legacy B2 lane (named INDEX + RefMod parodies defer to h3-parody-identity and direct queueing, never Ralph) - graph keys, reference-image wiring, frame/canvas math and the objective proof checks. Use when building a graph, requesting a render or checking a rendered clip.
 ---
 
+> EVO-X3: renders run on AlienPc ComfyUI. From the X3, queue only via `~/AI/render/x3/queue-remote.sh <run> --yes-derrick` after Derrick's yes. The PowerShell steps below are AlienPc-side.
+
 # H3 hardcore render
 
 ## Named-parody precedence
@@ -104,7 +106,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 Steps a-g for one render item, then script reuse and research rules:
    - For a render item (stock path):
      a. Pick one approved, never-animated still with /home/derekboone/AI/community/notes/hc_pick_scan_20261023.py (unless named in MAX). GI063 render hold is RELEASED (Derrick 2026-10-27 9:09 AM CT — wrongly flagged by wrong model; do NOT treat GI063 as hold; keep youth guard on GI063).
-     b. Caption once with your own model (coding_swift15_iq3s_esp, the ralph.ps1 default): one ask, one image. Vision models exist and stay: the Forge vision model Swift via mmproj, the W7 and W8 writer mmproj files, and JoyCaption.
+     b. Caption once with your own model (AlienPc: coding_swift15_iq3s_esp, the ralph.ps1 default; EVO-X3: x3-local/gemma4-heretic with vision on, Swift is not on the X3): one ask, one image. Vision models exist and stay: the Forge vision model Swift via mmproj, the W7 and W8 writer mmproj files, and JoyCaption.
      c. Write one natural-language H3 prompt from that caption, following h3-prompting (no word cap; long, literal, in time order).
      d. Check: /home/derekboone/AI/director/.venv/Scripts/python.exe -m pytest -q /home/derekboone/AI/community/scripts/tests/test_p6_review.py /home/derekboone/AI/community/scripts/tests/test_guard_scope.py. comm.guard_ok also runs inside run_graph_job.py before /prompt POST; never loosen either.
      e. Build graph: /home/derekboone/AI/director/.venv/Scripts/python.exe /home/derekboone/AI/community/scripts/make_b2_request.py --arm-dir <run_dir> --prompt-file <txt> --seed <n> --image <ComfyUI input path> --prefix <sub/name> [--frames <n>] writes <run_dir>\request.api.json from /home/derekboone/AI/community/templates/b2.api.json (the B2 recipe, Derrick decision 2026-10-30; details in templates\b2.README.md). Only prompt, seed, start image, filename prefix and frames change; everything else is locked.

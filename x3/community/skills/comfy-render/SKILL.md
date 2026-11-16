@@ -3,6 +3,8 @@ name: comfy-render
 description: Run ComfyUI render workflows on AlienPc (B2 video, stills) via llama-swap (standing policy route http://127.0.0.1:8080/comfyui/; comm.py:6 currently sets /upstream/comfyui_auto — discrepancy unresolved). Named INDEX + RefMod parodies defer to h3-parody-identity and submit_parody_run.py.
 ---
 
+> EVO-X3: renders run on AlienPc ComfyUI. From the X3, queue only via `~/AI/render/x3/queue-remote.sh <run> --yes-derrick` after Derrick's yes. The PowerShell steps below are AlienPc-side.
+
 # ComfyUI Render (`comfy-render`)
 
 - **Named-parody precedence:** For named character, actor, or celebrity INDEX + RefMod parodies, defer to `h3-parody-identity` (`submit_parody_run.py` / `run_queue.py`).

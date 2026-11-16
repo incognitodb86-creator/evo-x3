@@ -2,6 +2,8 @@
 name: video-render
 description: Stage, build, queue, and evaluate I2V / H3 (MiniMax-H3 / 10Eros-Max B2) video clips and batches on AlienPc via make_b2_request.py and run_queue.py. Use when asked to build or run video renders, stage video A/B tests, check status.log OBJECTIVE lines, upload finished clips to QNAP pi-drop, or work with fictional adult character video workflows.
 ---
+
+> EVO-X3: renders run on AlienPc ComfyUI. From the X3, queue only via `~/AI/render/x3/queue-remote.sh <run> --yes-derrick` after Derrick's yes. The PowerShell steps below are AlienPc-side.
 # Video Render (`video-render`)
 
 > Render rules live in /home/derekboone/AI/render/AGENTS.md; run render work from /home/derekboone/AI/render.
