@@ -3,7 +3,7 @@ name: comfy-render
 description: Run ComfyUI render workflows on AlienPc (B2 video, stills) via llama-swap (standing policy route http://127.0.0.1:8080/comfyui/; comm.py:6 currently sets /upstream/comfyui_auto — discrepancy unresolved). Named INDEX + RefMod parodies defer to h3-parody-identity and submit_parody_run.py.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). From the X3, dry-build first and queue only via `bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick` after Derrick's yes.
+> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). After Derrick's yes, run the writer pipeline (or `submit_parody_run.py`) with `--queue --yes-derrick` so it writes and queues in one pass (queue-remote.sh; adults guard and pytest gate stay).
 
 # ComfyUI Render (`comfy-render`)
 

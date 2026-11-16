@@ -64,11 +64,24 @@ STITCH_PY = SCRIPTS_DIR / "queue" / "take_chain_stitch.py"
 PI_QNAP_PY = SCRIPTS_DIR / "pi_qnap.py"
 COMFY_OUT_COMMUNITY = _AI_ROOT / "comfy-alienpc" / "output" / "community"
 QUEUE_PYTHON = _AI_ROOT / "director" / ".venv" / "Scripts" / "python.exe"
+QUEUE_REMOTE_SH = Path(os.environ.get("QUEUE_REMOTE_SH", str(Path.home() / "AI" / "render" / "x3" / "queue-remote.sh")))
 QUEUE_TAG = "clip"
 GPU_BUSY_RC = 7
 WAIT_POLL_SEC = 5
 WAIT_TIMEOUT_SEC = 3 * 3600
 _BATCH_RE = re.compile(r" BATCH closed rc=(\d+)\b")
+
+
+def _run_queue_remote(run_dir: Path, keep_comfy_process: bool = False) -> subprocess.CompletedProcess:
+    """Queue a READY run dir on AlienPc ComfyUI via queue-remote.sh.
+
+    Max Architect 2026-11-16 (Derrick t2036u, t2039u). Adults guard and pytest gate stay inside run_queue.py. Caller must already
+    have required --yes-derrick; this helper always passes that flag to the script.
+    """
+    cmd = ["bash", str(QUEUE_REMOTE_SH), str(run_dir), "--yes-derrick"] + (
+        ["--keep-comfy-process"] if keep_comfy_process else []
+    )
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=180)
 
 
 def queue_outcome(run_dir: Path) -> Optional[Dict[str, Any]]:
@@ -328,6 +341,7 @@ def submit_parody_job(
     prequel_to: Optional[Union[str, Path]] = None,
     keep_comfy_process: bool = False,
     still_mode: str = br.DEFAULT_STILL_MODE,
+    yes_derrick: bool = False,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if run_dir_override is not None and not Path(run_dir_override).is_absolute():
@@ -567,28 +581,32 @@ def submit_parody_job(
         }
 
     # 6. Submit through the shared queue route. Detach returns after the batch PID is created.
-    if os.name != "nt":  # EVO-X3 2026-11-15: no local ComfyUI/run_queue route; renders stay on AlienPc
-        raise RuntimeError("X3: --queue is not wired through run_queue.py; after Derrick's yes use "
-                           "~/AI/render/x3/queue-remote.sh <run_dir> (AlienPc ComfyUI over the tailnet)")
-    python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
+    # Max Architect 2026-11-16 (Derrick t2036u, t2039u): on the X3, --queue --yes-derrick calls queue-remote.sh (AlienPc ComfyUI) in the same pass.
     since = _batch_count(run_dir)
-    cmd = [
-        python,
-        "-u",
-        str(RUN_QUEUE_PY),
-        "--run-dir",
-        str(run_dir),
-        "--size",
-        f"{width}x{height}",
-        "--frames",
-        str(jobs[0]["frames"]),
-        "--detach",
-    ]
-    if keep_comfy_process:  # chained mode (keep-comfy-part1, 2026-11-15): only when the caller asked
-        cmd.append("--keep-comfy-process")
-
-    print(f"Submitting render queue: {' '.join(cmd)}")
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+    if os.name != "nt":
+        if not yes_derrick:
+            raise RuntimeError("X3: --queue requires --yes-derrick after Derrick approved this prompt; nothing queued")
+        print(f"Submitting render queue: bash {QUEUE_REMOTE_SH} {run_dir} --yes-derrick")
+        proc = _run_queue_remote(run_dir, keep_comfy_process)
+        python = str(Path.home() / "AI" / "render" / "x3" / ".venv" / "bin" / "python")
+    else:
+        python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
+        cmd = [
+            python,
+            "-u",
+            str(RUN_QUEUE_PY),
+            "--run-dir",
+            str(run_dir),
+            "--size",
+            f"{width}x{height}",
+            "--frames",
+            str(jobs[0]["frames"]),
+            "--detach",
+        ]
+        if keep_comfy_process:  # chained mode (keep-comfy-part1, 2026-11-15): only when the caller asked
+            cmd.append("--keep-comfy-process")
+        print(f"Submitting render queue: {' '.join(cmd)}")
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
     print(proc.stdout)
     if proc.stderr:
         print(proc.stderr, file=sys.stderr)
@@ -1262,6 +1280,7 @@ def submit_writer_run(
     aspect: Optional[str] = None,
     size: Optional[str] = None,
     still_mode: str = br.DEFAULT_STILL_MODE,
+    yes_derrick: bool = False,
 ) -> Dict[str, Any]:
     """Render's production hook for a free-text OC writer prompt: after the writer call, before graph submit.
 
@@ -1275,7 +1294,8 @@ def submit_writer_run(
     Fails closed: on any hard stop writes <run_dir>/clip_NOT_READY.txt and build_report.json and submits nothing.
     frs16 (Fleet Reviewer S3/S4/S6, 2026-11-11): any exception before the queue call (bad base graph, no c0, pysbd / PIL
     import, a failed or timed-out run_queue.py) is NOT_READY too, never a bare traceback; a dry run writes a DRY_RUN marker
-    and no _render_order.json; a missing or empty still path (img_1) is NOT_READY."""
+    and no _render_order.json; a missing or empty still path (img_1) is NOT_READY.
+    Max Architect 2026-11-16 (Derrick t2036u, t2039u): --queue --yes-derrick writes _render_order.json and queues on AlienPc via queue-remote.sh (no dry-run rebuild)."""
     run_dir = Path(run_dir)
     tag = QUEUE_TAG
     report: Dict[str, Any] = {"hook": "submit_parody_run.submit_writer_run", "builder": None, "builder_sha256": None,
@@ -1467,20 +1487,23 @@ def submit_writer_run(
             marker.unlink()
         order = {"order": [{"pos": 1, "tag": tag, "arm": "oc_writer", "scene": position, "seed": seed}]}
         order_file.write_text(json.dumps(order, indent=2), encoding="utf-8")
-        if os.name != "nt":  # EVO-X3 2026-11-15: no local ComfyUI/run_queue route; renders stay on AlienPc
-            raise RuntimeError("X3: --queue is not wired through run_queue.py; after Derrick's yes use "
-                               "~/AI/render/x3/queue-remote.sh <run_dir> (AlienPc ComfyUI over the tailnet)")
-        python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
+        if not yes_derrick:
+            return not_ready("pass --yes-derrick only after Derrick approved this prompt; nothing queued")
         q_frames = rep.get("total_frames") if isinstance(rep, dict) and rep.get("total_frames") else g["c0"]["inputs"]["length"]
-        cmd = [python, "-u", str(RUN_QUEUE_PY), "--run-dir", str(run_dir), "--size",
-               f"{g['c0']['inputs']['width']}x{g['c0']['inputs']['height']}", "--frames", str(q_frames), "--detach"]
-        if keep_comfy_process:  # chained mode (keep-comfy-part1, 2026-11-15): only when the caller asked
-            cmd.append("--keep-comfy-process")
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            if os.name != "nt":
+                # Max Architect 2026-11-16 (Derrick t2036u, t2039u): write and queue in one pass on AlienPc ComfyUI; no dry-run rebuild.
+                proc = _run_queue_remote(run_dir, keep_comfy_process)
+            else:
+                python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable
+                cmd = [python, "-u", str(RUN_QUEUE_PY), "--run-dir", str(run_dir), "--size",
+                       f"{g['c0']['inputs']['width']}x{g['c0']['inputs']['height']}", "--frames", str(q_frames), "--detach"]
+                if keep_comfy_process:  # chained mode (keep-comfy-part1, 2026-11-15): only when the caller asked
+                    cmd.append("--keep-comfy-process")
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
         except subprocess.TimeoutExpired:
             report["queue_rc"] = "timeout"
-            return not_ready("run_queue.py --detach did not return within 180 s; not confirmed queued - check "
+            return not_ready("queue did not return within 180 s; not confirmed queued - check "
                              f"{run_dir / '_render_queue.log'} and the GPU lock before any retry")
         report.update(queue_rc=proc.returncode, submitted=proc.returncode == 0, gpu_busy=proc.returncode == GPU_BUSY_RC,
                       queue_log=str(run_dir / "_render_queue.log"))
@@ -1554,7 +1577,9 @@ def _writer_run_cli(argv) -> int:
                     help="How start still is wired: guide (default frame-0 AddGuide) or ref (un-resized c0 reference, not frame-0 pinned)")
     ap.add_argument("--shots", default=None, choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
     ap.add_argument("--partner-type", default=None, choices=["man", "woman", "futa", "none", "non-human", "faceless"])
-    ap.add_argument("--queue", action="store_true", help="Actually queue (only when Derrick said to queue)")
+    ap.add_argument("--queue", action="store_true", help="Write and queue in one pass (requires --yes-derrick)")
+    ap.add_argument("--yes-derrick", action="store_true",
+                    help="Max Architect 2026-11-16 (Derrick t2036u, t2039u): required with --queue; queues on AlienPc via queue-remote.sh")
     # keep-comfy-part1 (2026-11-15): chained runs pass this through to run_queue.py, which keeps the
     # comfyui_auto PROCESS alive at batch close (POST /free still runs). Default off: normal runs unchanged.
     ap.add_argument("--keep-comfy-process", action="store_true",
@@ -1564,6 +1589,9 @@ def _writer_run_cli(argv) -> int:
         a = ap.parse_args(argv)
     except SystemExit:
         print("NOT_READY submitted=False bad writer-run arguments (see usage above)")
+        return 3
+    if a.queue and not a.yes_derrick:
+        print("NOT_READY submitted=False --queue requires --yes-derrick after Derrick approved this prompt")
         return 3
     d = Path(a.run_dir)
     if not d.is_absolute():
@@ -1600,10 +1628,13 @@ def _writer_run_cli(argv) -> int:
         _scene_p = Path(a.scene_read) if getattr(a, "scene_read", None) else d / "still_read.start.json"
         if a.continued and _scene_p.is_file():
             scene_read = json.loads(_scene_p.read_text(encoding="utf-8"))
+        if a.queue and not a.yes_derrick:
+            print("NOT_READY submitted=False --queue requires --yes-derrick after Derrick approved this prompt")
+            return 3
         r = submit_writer_run((d / "writer_output.txt").read_text(encoding="utf-8"), base_graph, d,
                               a.ask, a.position, still_image=(a.still or None),
                               still_read=json.loads((d / "still_read.json").read_text(encoding="utf-8")),
-                              dry_run=not a.queue, character=(a.character or None), names=(a.names or None),
+                              dry_run=not a.queue, yes_derrick=bool(a.yes_derrick), character=(a.character or None), names=(a.names or None),
                               partner_type2=(a.partner_type2 or None),
                               cast_overrides=dict(_s3_overrides(a.s3_look, a.partner2_still, getattr(a, "s2_look", None)) or {}, **({"shots": a.shots} if a.shots else {}),
                                                   **({"s3_in_frame": True} if a.s3_in_frame else {}),
@@ -1673,6 +1704,8 @@ def main(argv=None) -> int:
     parser.add_argument("--slug", help="Optional run slug")
     parser.add_argument("--run-dir", help="Direct run directory override")
     parser.add_argument("--dry-run", action="store_true", help="Validate and prepare without submitting")
+    parser.add_argument("--yes-derrick", action="store_true",
+                        help="Max Architect 2026-11-16 (Derrick t2036u, t2039u): required to queue on the X3 (passed to queue-remote.sh)")
     parser.add_argument("--wait", action="store_true", help="Block until the batch closes and write <run_dir>/clip.mp4")
     parser.add_argument("--qnap-put", action="store_true", help="With --wait: upload clip.mp4 to pi-drop/<run>.mp4")
     parser.add_argument("--wait-timeout", type=float, default=WAIT_TIMEOUT_SEC)
@@ -1730,6 +1763,7 @@ def main(argv=None) -> int:
         prequel_to=args.prequel_to,
         keep_comfy_process=args.keep_comfy_process,
         still_mode=args.still_mode,
+        yes_derrick=bool(args.yes_derrick),
     )
     if args.wait and not args.dry_run:
         r = res.get("resolved") or {}

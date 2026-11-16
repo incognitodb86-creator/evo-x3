@@ -11,7 +11,8 @@ Usage (Render's pi chat or Derrick):
   python3 /home/derekboone/AI/community/scripts/parody/render_writer_pipeline.py <run_dir>
       --ask "<ask>" --position <act> --still <still path> --character FCSydny [--scene <id> | --continue <prev_run_dir>]
   Batch: render_writer_pipeline.py --batch <asks.jsonl>
-This script has no queue option: queueing stays Derrick's yes through submit_parody_run.py writer-run --queue.
+After Derrick's yes, pass --queue --yes-derrick to write and queue on AlienPc ComfyUI in one pass
+(Max Architect 2026-11-16 (Derrick t2036u, t2039u)). --queue without --yes-derrick is refused. Without those flags the hook still dry-builds only.
 """
 from __future__ import annotations
 
@@ -1638,8 +1639,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                                       "from": src_name}
             result["warnings"].append("block_rewrite")
         # 7 rank and pick
+        # Max Architect 2026-11-16 (Derrick t2036u): min_ready_score is reported only; it never keeps a lint-pass draft out of the pool.
         min_score = float(cfg.get("min_ready_score", 60))
-        passing = [c for c in cands if cands[c]["lint"]["pass"] and float(cands[c]["lint"].get("score") or 0) >= min_score and not cands[c]["lint"]["hard"]]
+        passing = [c for c in cands if cands[c]["lint"]["pass"] and not cands[c]["lint"]["hard"]]
         pool = passing or list(cands)
         if not passing:
             worst = cands[max(cands, key=lambda c: cands[c]["lint"]["score"])]["lint"]["hard"]
@@ -1692,11 +1694,12 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         status = build["status"]
         # acceptance-1 fix c: these hard rules block READY even when the builder passes (others fall back with a warning)
         # PM acc3 #8: youth_hint and scale_adult always block (in code, not only config)
-        # PM acc4 #8: READY needs score >= 60 and no hard flag; never ship ready_with_lint_fail
+        # PM acc4 #8 hard lint flags can still block READY. Max Architect 2026-11-16 (Derrick t2036u): low_score / min_ready_score
+        # is computed and reported (pick_score, optional warning) and never flips READY on its own.
         min_score = float(cfg.get("min_ready_score", 60))
         blocking = sorted(set(chosen["lint"]["hard"] or []))
-        if status == "READY" and float(chosen["lint"].get("score") or 0) < min_score:
-            blocking = sorted(set(blocking) | {"low_score"})
+        if float(chosen["lint"].get("score") or 0) < min_score:
+            result["warnings"].append("low_score")
         if status == "READY" and (blocking or not chosen["lint"].get("pass")):
             status = "NOT_READY"
             why = ", ".join(blocking) if blocking else "lint failed"
@@ -1716,6 +1719,29 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                       build_added=((build["report"].get("build") or {}).get("added") or []),
                       cloned_hits=wp_lint.cloned_hits(chosen["dd"], cloned), spoken_words=chosen["lint"]["spoken_words"],
                       llm_calls=client.calls)
+        if status == "READY" and job.get("queue"):
+            # Max Architect 2026-11-16 (Derrick t2036u, t2039u): same process, no second writer pass; queue-remote.sh keeps --yes-derrick, adults guard, pytest gate.
+            if not job.get("yes_derrick"):
+                status = "NOT_READY"
+                build = dict(build, reason="--queue requires --yes-derrick after Derrick approved this prompt; nothing queued")
+                result["warnings"].append("queue_refused_no_yes")
+            else:
+                qsh = Path.home() / "AI" / "render" / "x3" / "queue-remote.sh"
+                try:
+                    qp = subprocess.run(["bash", str(qsh), str(run_dir), "--yes-derrick"],
+                                        capture_output=True, text=True, timeout=180)
+                    result["submitted"] = qp.returncode == 0
+                    result["queue_rc"] = qp.returncode
+                    result["queue_stdout"] = (qp.stdout or "")[-400:]
+                    if qp.returncode not in (0, 7):
+                        status = "NOT_READY"
+                        build = dict(build, reason=f"queue-remote.sh rc={qp.returncode}; nothing confirmed queued")
+                    elif qp.returncode == 7:
+                        result["gpu_busy"] = True
+                        result["warnings"].append("gpu_busy")
+                except subprocess.TimeoutExpired:
+                    status = "NOT_READY"
+                    build = dict(build, reason="queue-remote.sh did not return within 180 s; not confirmed queued")
         if status != "READY":
             result["not_ready_reason"] = build["reason"]
             log("clip_not_ready", {"run": run_id, "reason": str(build["reason"])[:500]})
@@ -1775,13 +1801,17 @@ def summary_line(r: Dict[str, Any]) -> str:
     st = r.get("status")
     extra = f"reason={str(r.get('not_ready_reason') or r.get('error') or '')[:300]}" if st != "READY" else \
         (f"pick={r.get('pick')} score={r.get('pick_score')} spoken_words={r.get('spoken_words')}"
+         + (f" submitted={r.get('submitted')}" if "submitted" in r else "")
          + (f" lint_fail={r.get('pick_hard')}" if r.get("pick_hard") else ""))
     return (f"{st} run={r.get('run_dir')} {extra} warnings={r.get('warnings')} seconds={r.get('seconds')} "
             f"pick_json={Path(r.get('run_dir', '.')) / 'pick.json'} queued=False")
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(prog="render_writer_pipeline.py", description="Render writer pipeline (dry builds only, never queues)")
+    ap = argparse.ArgumentParser(prog="render_writer_pipeline.py",
+                                 description="Render writer pipeline. After Derrick's yes, --queue --yes-derrick writes and queues in one pass.")
+    ap.add_argument("--queue", action="store_true", help="After a READY write, queue on AlienPc (requires --yes-derrick)")
+    ap.add_argument("--yes-derrick", action="store_true", help="Max Architect 2026-11-16 (Derrick t2036u, t2039u): required with --queue")
     ap.add_argument("run_dir", nargs="?")
     ap.add_argument("--ask")
     ap.add_argument("--position")
@@ -1803,6 +1833,9 @@ def main(argv=None) -> int:
     ap.add_argument("--sampler-arm", help="setup A/B only")
     ap.add_argument("--persona", help="setup persona arm only (current, option1, option2)")
     a = ap.parse_args(argv)
+    if a.queue and not a.yes_derrick:
+        print("NOT_READY --queue requires --yes-derrick after Derrick approved this prompt")
+        return 3
     cfg = load_config(Path(a.config))
     log = wp_state.Log(PIPE_DIR / "logs", int(cfg.get("log_retention_days", 14)), int(cfg.get("log_cap_mb", 50)))
     moved = wp_state.archive_old_scenes(RUNS_ROOT, int(cfg.get("scene_archive_days", 30)))
@@ -1827,7 +1860,8 @@ def main(argv=None) -> int:
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
                      "character": a.character, "scene": a.scene, "continue": a.cont,
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
-                     "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode})
+                     "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode,
+                     "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []
     for job in jobs:  # one failing clip never blocks the next
         r = run_clip(job, cfg, log, ov)

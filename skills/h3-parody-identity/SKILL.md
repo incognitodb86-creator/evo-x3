@@ -6,7 +6,7 @@ description: >-
   autonomous chat execution from /home/derekboone/AI/render or writer-run builds.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). From the X3, dry-build first and queue only via `bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick` after Derrick's yes.
+> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). After Derrick's yes, run the writer pipeline (or `submit_parody_run.py`) with `--queue --yes-derrick` so it writes and queues in one pass (queue-remote.sh; adults guard and pytest gate stay).
 # H3 parody / identity lane (INDEX + RefMod)
 
 Internals, CLI, VRAM: `references/h3-parody-identity-reference.md` (brain: `10_packs/max/h3-parody-identity-reference.md`). Read only when changing pipeline.
@@ -16,7 +16,7 @@ Internals, CLI, VRAM: `references/h3-parody-identity-reference.md` (brain: `10_p
 - `templates/b2_refmod.api.json`, 1-pass, `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, 8 steps `euler`/`simple`, shift 12.0/3.0, RefModsLoader → RefModApply `retention 1.0`, plus `run_queue.py` default NVIDIA `RTX VSR ULTRA 2x @ 24fps` (`1536x2688` / `2688x1536`, keeps `<tag>_raw.mp4`; `--no-upscale` opt-out; on X3 remote mode, 2x upscale post-pass is deferred to AlienPc). **All adult RefMods (OC, INDEX, PixlStash-tagged in `~/AI/5slock/libraries/vault.db`; on the X3, PixlStash tags resolve on AlienPc only so pass `--character`/`--names`) and all voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed; 2-pass is retired and 18+ (`guard_ok` / youth lint) is the only content rule.** New nodes/dials need Derrick's yes.
 - INDEX + RefMod + voice refs resolve automatically in `submit_parody_run.py` (`FCSydny` attaches `minimaxh3_oc_poolclub_v1_refmod_audio` and `minimaxh3_oc_poolclub_v1_refmod_visual`); report errors if a requested name has no local weights instead of downloading anything.
 - Never open any `sydney` path (`~/AI/sydney/`). Never use minor-coded words (`underage`, `minor`, `child`, `children`) — `guard_ok` blocks the submit (`18+` only content rule).
-- Writer-run lane (`~/AI/render`, Gemma 4 26B A4B Heretic arm A: `--provider x3-local --model gemma4-heretic` Q8_0 llama.cpp Vulkan + BF16 mmproj on the EVO-X3; `--provider llama-swap --model gemma4_heretic_poly` on AlienPc): use `render_writer_pipeline.py` (flags `--ask --position --still --still-read --character FCSydny --frames --shots --shot-count --scene --continue --partner2-still`) or `submit_parody_run.py writer-run` (`--ask --position --still --character --frames --shots --continued --partner2-still --s3-look --s3-in-frame --partner-type --partner-type2`), dry by default.
+- Writer-run lane (`~/AI/render`, Gemma 4 26B A4B Heretic arm A: `--provider x3-local --model gemma4-heretic` Q8_0 llama.cpp Vulkan + BF16 mmproj on the EVO-X3; `--provider llama-swap --model gemma4_heretic_poly` on AlienPc): use `render_writer_pipeline.py` (flags `--ask --position --still --still-read --character FCSydny --frames --shots --shot-count --scene --continue --partner2-still`) or `submit_parody_run.py writer-run` (`--ask --position --still --character --frames --shots --continued --partner2-still --s3-look --s3-in-frame --partner-type --partner-type2`), after Derrick's yes, run with `--queue --yes-derrick` (write and queue in one pass; no dry run first).
 - On the EVO-X3, always stop dry at `READY`, paste `prompt.txt` to Derrick, and queue only after his explicit yes via `bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick`. Ask first for batches or downloads.
 
 ## Writing the arguments (Reference §0.5, §0.7)
@@ -35,21 +35,18 @@ Use concrete detail to describe the scene clearly; avoid repetition and contradi
 
 Name mapping: prefer pairing `INDEX` character + actor (`--name "<Actor>" --character "<Character>" --actor "<Actor>"`; Reference §0.5) — improved voice likeness in tested clips even on `INDEX: bad` rows; use actor-alone only when no `INDEX` row exists.
 
-## Dry build, then queue after Derrick's yes (X3 recipe)
+## Write and queue in one pass after Derrick's yes (X3 recipe)
 
-1. Dry build (writes `prompt.txt`, `<tag>/request.api.json`, `_render_order.json`; queues nothing):
+1. After Derrick's yes (and after confirming AlienPc's GPU/lease is free), write and queue in one pass with `--queue --yes-derrick` (no dry run first):
 ```bash
 ~/AI/render/x3/.venv/bin/python ~/AI/community/scripts/parody/submit_parody_run.py \
   --name '<Actor>' --character '<Character>' --actor '<Actor>' --tone 'satirical adult parody' \
   --seconds 10 --aspect 16:9 --camera '<framing + motion>' \
   --description '<biometrics + outfit>' --scene '<scene + hands on prop + voice cue>' \
-  --dialogue '<spoken words only>' --end-action '<holds a wry smile>' --dry-run
+  --dialogue '<spoken words only>' --end-action '<holds a wry smile>' \
+  --yes-derrick
 ```
-2. Paste `prompt.txt` to Derrick and ask `"Render this?"`. Wait for his explicit yes.
-3. Only after his yes (and after confirming AlienPc's GPU/lease is free), queue remotely:
-```bash
-bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick [--wait]
-```
+(`submit_parody_run.py` without `--dry-run` queues; on the X3 that requires `--yes-derrick` and goes through `queue-remote.sh`.)
 - **Do NOT** poll manually; `--wait` waits for `BATCH closed` in `_render_queue.log` (`rc=0` ok; `rc=7` GPU busy). On `ValueError`, quote it, fix wording once if yours, else stop. After `rc=0`, optionally upload `<run_dir>/clip/clip.mp4` to QNAP `pi-drop/` per `AGENTS.md`.
 
 ## Sibling skills
