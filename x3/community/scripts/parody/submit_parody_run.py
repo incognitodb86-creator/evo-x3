@@ -40,11 +40,12 @@ import time
 from typing import Any, Dict, List, Optional, Sequence, Union, Tuple
 
 # Add community scripts to path
-SCRIPTS_DIR = Path(r"/home/derekboone/AI/community/scripts")
+PARODY_DIR = Path(__file__).resolve().parent
+SCRIPTS_DIR = PARODY_DIR.parent
+_AI_ROOT = SCRIPTS_DIR.parents[1]
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-PARODY_DIR = SCRIPTS_DIR / "parody"
 if str(PARODY_DIR) not in sys.path:
     sys.path.insert(0, str(PARODY_DIR))
 
@@ -55,14 +56,14 @@ from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities, validate_reference_images
 from run_record import RUNS_ROOT, save_run_record
 
-INDEX_DIR = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
-REFMODS_DIR = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
+INDEX_DIR = SCRIPTS_DIR.parent / "index" / "h3-known-characters"
+REFMODS_DIR = _AI_ROOT / "comfy-alienpc" / "models" / "refmods"
 ALIASES_PATH = PARODY_DIR / "aliases.json"
 RUN_QUEUE_PY = SCRIPTS_DIR / "run_queue.py"
 STITCH_PY = SCRIPTS_DIR / "queue" / "take_chain_stitch.py"
 PI_QNAP_PY = SCRIPTS_DIR / "pi_qnap.py"
-COMFY_OUT_COMMUNITY = Path(r"/home/derekboone/AI/comfy-alienpc/output/community")
-QUEUE_PYTHON = Path(r"/home/derekboone/AI/director/.venv/Scripts/python.exe")
+COMFY_OUT_COMMUNITY = _AI_ROOT / "comfy-alienpc" / "output" / "community"
+QUEUE_PYTHON = _AI_ROOT / "director" / ".venv" / "Scripts" / "python.exe"
 QUEUE_TAG = "clip"
 GPU_BUSY_RC = 7
 WAIT_POLL_SEC = 5
@@ -727,12 +728,12 @@ _OC_PATH_COMPONENT_ALIASES = {
 }
 
 _PIXLSTASH_VAULTS = (
-    Path(r"/home/derekboone/AI/5slock/approved_characters/vault.db"),
-    Path(r"/home/derekboone/AI/5slock/libraries/vault.db"),
+    _AI_ROOT / "5slock" / "approved_characters" / "vault.db",
+    _AI_ROOT / "5slock" / "libraries" / "vault.db",
 )
 _STILL_LIBRARY_ROOTS = (
-    Path(r"/home/derekboone/AI/5slock/approved_characters"),
-    Path(r"/home/derekboone/AI/render/stills/approved_characters"),
+    _AI_ROOT / "5slock" / "approved_characters",
+    _AI_ROOT / "render" / "stills" / "approved_characters",
 )
 
 
