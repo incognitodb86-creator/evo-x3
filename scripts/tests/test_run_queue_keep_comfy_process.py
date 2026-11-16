@@ -223,15 +223,17 @@ class TestSubmitPassesFlagOnlyWhenAsked(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             with mock.patch.object(spr.subprocess, "run", fake_run):
                 r1 = spr.submit_writer_run(raw, dict(graph), os.path.join(td, "a"), "she has sex with him, position: missionary",
-                                           "missionary", still_read=read, still_image="community/oc_poolblonde_stage.png")
+                                           "missionary", still_read=read, still_image="community/oc_poolblonde_stage.png",
+                                           yes_derrick=True)
                 self.assertEqual(r1["status"], "READY", r1.get("reason"))
                 self.assertNotIn(FLAG, calls[-1], "a normal queued writer-run must not touch the chain flag")
-                self.assertEqual(calls[-1][-1], "--detach", "the flag is appended after --detach only when asked")
+                tail_flag = "--yes-derrick" if os.name != "nt" else "--detach"
+                self.assertEqual(calls[-1][-1], tail_flag, f"the flag is appended after {tail_flag} only when asked")
                 r2 = spr.submit_writer_run(raw, dict(graph), os.path.join(td, "b"), "she has sex with him, position: missionary",
                                            "missionary", still_read=read, still_image="community/oc_poolblonde_stage.png",
-                                           keep_comfy_process=True)
+                                           keep_comfy_process=True, yes_derrick=True)
                 self.assertEqual(r2["status"], "READY", r2.get("reason"))
-                self.assertEqual(calls[-1][-2:], ["--detach", FLAG], "the chain call appends the flag last")
+                self.assertEqual(calls[-1][-2:], [tail_flag, FLAG], "the chain call appends the flag last")
 
     def test_writer_run_cli_flag_parses_off_by_default(self):
         """The writer-run entry's parser: absent = False, present = True (no queue, no I/O - SystemExit 3 after parsing)."""

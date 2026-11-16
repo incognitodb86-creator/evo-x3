@@ -1,6 +1,6 @@
 # Community-path helper (ALI-52 P2-P6). Stock ComfyUI API only; Switchyard untouched.
 import json, os, re, sys, time, shutil, urllib.request, urllib.error, datetime, hashlib
-W = r"C:\AI\community"
+W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C = r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI"
 LS = "http://127.0.0.1:8080"
 BASE = LS + "/upstream/comfyui_auto"

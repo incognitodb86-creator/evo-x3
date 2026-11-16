@@ -23,7 +23,7 @@ Usage:
 """
 import argparse, copy, json, math, os, sys
 
-COMMUNITY = r"C:\AI\community"  # templates/ and runs/ stay in the community work tree (F6b)
+COMMUNITY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # templates/ and runs/ stay in the community work tree (F6b)
 TEMPLATE = os.path.join(COMMUNITY, "templates", "flux_stills_s2_bfs.api.json")
 # per-job field -> [(node id, input key)]. Nothing else may change.
 FIELDS = {

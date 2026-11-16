@@ -41,9 +41,11 @@ class CellContract(unittest.TestCase):
         self._old = run_queue._CELL_CONTRACT
         self.addCleanup(setattr, run_queue, "_CELL_CONTRACT", self._old)
         # qlog() appends to the shared notes/actions.log; a test must not write there
-        self._old_actions = run_queue.ACTIONS
+        for _m in (run_queue, run_queue.comm, run_queue.rgj):
+            _saved = dict(vars(_m))
+            self.addCleanup(lambda _m=_m, _s=_saved: (vars(_m).clear(), vars(_m).update(_s)))
+        # qlog() appends to the shared notes/actions.log; a test must not write there
         run_queue.ACTIONS = os.path.join(self.run, "actions.log")
-        self.addCleanup(setattr, run_queue, "ACTIONS", self._old_actions)
 
     def _log(self):
         p = os.path.join(self.run, "_render_queue.log")
