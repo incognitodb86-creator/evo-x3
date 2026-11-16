@@ -17,6 +17,7 @@
 set -euo pipefail
 R="$HOME/AI/render"; S="$HOME/AI/community/skills"
 cd "$R"
+export PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/panes/render}"
 export PATH="$R/x3/.venv/bin:$HOME/.local/bin:$PATH"
 exec pi --approve \
   --no-extensions \
