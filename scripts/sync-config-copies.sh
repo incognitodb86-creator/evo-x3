@@ -26,5 +26,11 @@ cp /etc/systemd/system/evo-x3-*.service /etc/systemd/system/evo-x3-*.timer "$D/s
 cp /etc/containers/systemd/open-webui.container "$D/quadlet/"
 cp /usr/local/bin/evo-llama-swap "$D/bin/" 2>/dev/null || true
 [ -f ~/AI/forge/.pi/settings.json ] && cp ~/AI/forge/.pi/settings.json "$D/forge-pi/settings.json"
+# Host config copies (no secrets). etckeeper /etc stays LOCAL: it tracks shadow, ssh host keys and wifi PSKs.
+mkdir -p "$D/host"
+for f in /etc/default/grub /etc/ssh/sshd_config.d/*.conf /etc/firewalld/zones/*.xml /etc/modprobe.d/*.conf /etc/sysctl.d/*.conf /etc/tuned/active_profile; do
+  [ -r "$f" ] && cp "$f" "$D/host/$(echo "${f#/etc/}" | tr / _)" 2>/dev/null || true
+done
+cat /proc/cmdline | sed -E 's/(root=|rd\.luks\.uuid=|luks-)[^ ]*/\1<redacted>/g' > "$D/host/proc_cmdline.txt"
 grep -rIl -E '(sk-|hf_)[A-Za-z0-9]{16,}' "$D" && { echo "SECRET-LIKE STRING FOUND"; exit 1; } || true
 echo synced
