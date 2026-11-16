@@ -1,7 +1,15 @@
 {
   "provider": "searxng",
-  "searxngBaseUrl": "http://192.168.0.147:8888",
-  "webSearch": { "allowedProviders": ["searxng"] },
-  "ssrf": { "allowRanges": ["192.168.0.147/32"] },
+  "searxngBaseUrl": "http://127.0.0.1:8888",
+  "webSearch": {
+    "allowedProviders": [
+      "searxng"
+    ]
+  },
+  "ssrf": {
+    "allowRanges": [
+      "127.0.0.1/32"
+    ]
+  },
   "workflow": "none"
 }

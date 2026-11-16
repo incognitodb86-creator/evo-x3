@@ -24,6 +24,7 @@ cp /etc/systemd/system/llama-swap.service "$D/systemd/"
 cp /etc/systemd/system/llama-swap.service.d/*.conf "$D/systemd/"
 cp /etc/systemd/system/evo-x3-*.service /etc/systemd/system/evo-x3-*.timer "$D/systemd/" 2>/dev/null || true
 cp /etc/containers/systemd/open-webui.container "$D/quadlet/"
+cp ~/.config/containers/systemd/searxng.container "$D/quadlet/" 2>/dev/null || true
 cp /usr/local/bin/evo-llama-swap "$D/bin/" 2>/dev/null || true
 [ -f ~/AI/forge/.pi/settings.json ] && cp ~/AI/forge/.pi/settings.json "$D/forge-pi/settings.json"
 # Host config copies (no secrets). etckeeper /etc stays LOCAL: it tracks shadow, ssh host keys and wifi PSKs.

@@ -1,3 +1,5 @@
 20261116-062524 services disabled: qemu-guest-agent vmtoolsd vgauthd iscsid.socket iscsiuio.socket multipathd ModemManager (rollback: systemctl enable --now <unit>)
 20261116-062524 grubby --remove-args=amdgpu.gttsize=122880 (rollback: grubby --update-kernel=ALL --args=amdgpu.gttsize=122880)
 20261116-062838 pi models.json (+flash-next-uncensored, card sampling incl presence 0), forge settings defaultThinkingLevel medium, forge-pi.sh --thinking medium; rollback: restore *.bak-20261116-062838-u34
+20261116-064238 llama-swap.yaml U34 (Gufo slot archived, setParamsByID subs); rollback: sudo cp /etc/evo-x3/llama-swap.yaml.bak-20261116-064238-u34-pre /etc/evo-x3/llama-swap.yaml && sudo systemctl restart llama-swap
+20261116-065140 SearXNG quadlet ~/.config/containers/systemd/searxng.container (127.0.0.1:8888); web-search.json -> 127.0.0.1; u32-searxng stopped (kept). Rollback: restore web-search.json.bak-20261116-065140-u34
