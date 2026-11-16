@@ -3,3 +3,4 @@
 20261116-062838 pi models.json (+flash-next-uncensored, card sampling incl presence 0), forge settings defaultThinkingLevel medium, forge-pi.sh --thinking medium; rollback: restore *.bak-20261116-062838-u34
 20261116-064238 llama-swap.yaml U34 (Gufo slot archived, setParamsByID subs); rollback: sudo cp /etc/evo-x3/llama-swap.yaml.bak-20261116-064238-u34-pre /etc/evo-x3/llama-swap.yaml && sudo systemctl restart llama-swap
 20261116-065140 SearXNG quadlet ~/.config/containers/systemd/searxng.container (127.0.0.1:8888); web-search.json -> 127.0.0.1; u32-searxng stopped (kept). Rollback: restore web-search.json.bak-20261116-065140-u34
+2026-11-16_07:25:37 fedora-first-boot.service/.timer added; BootOrder 0003,0000,0001. Rollback: systemctl disable --now fedora-first-boot.{service,timer}
