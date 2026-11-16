@@ -16,12 +16,19 @@ RENDER_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "render" / "s
 _HOME_RENDER_APPROVED_STILLS_DIR = Path("~/AI/render/stills/approved_characters").expanduser()
 KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
 NAS_APPROVED_STILLS_DIR = Path(r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters")
+# PixlStash vault.db lives in 5slock/libraries and every picture file_path is relative to it.
+PIXLSTASH_IMAGES_DIR = Path(__file__).resolve().parents[3] / "5slock" / "libraries"
+GROK_FLOW_LIBRARIES_DIR = Path(__file__).resolve().parents[3] / "5slock" / "libraries"
 APPROVED_IMAGE_POOLS: Tuple[Path, ...] = tuple(
     dict.fromkeys((
         DEFAULT_APPROVED_STILLS_DIR,
         RENDER_APPROVED_STILLS_DIR,
         _HOME_RENDER_APPROVED_STILLS_DIR,
         NAS_APPROVED_STILLS_DIR,
+        # Derrick Nov 12 + "yes change it wtf" (Alfred t520u, Nov 16 2026): PixlStash catalog and
+        # Grok/Flow exports are acceptable stills. Containment, Sydney and 18+ checks still apply.
+        PIXLSTASH_IMAGES_DIR,
+        GROK_FLOW_LIBRARIES_DIR,
     ))
 )
 REFERENCE_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
@@ -223,9 +230,11 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
         if "sydney" in str(p).lower() or p.name.upper() == "SYDNEY":
             raise ValueError(f"Sydney paths are strictly prohibited: {s}")
 
+        pools_ok = [app_dir_res] if approved_dir is not None else [x.resolve() for x in (DEFAULT_APPROVED_STILLS_DIR, *APPROVED_IMAGE_POOLS)]
         try:
-            # Check containment; omitted approved_dir still fails closed to the default pool.
-            p.relative_to(app_dir_res)
+            # Check containment; omitted approved_dir accepts any APPROVED_IMAGE_POOLS root (fails closed otherwise).
+            if not any(p.is_relative_to(x) for x in pools_ok):
+                raise ValueError
         except ValueError:
             raise ValueError(
                 f"Still path '{s}' is not within the approved_characters pool: '{pool_dir}'"
