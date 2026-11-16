@@ -2,7 +2,7 @@
 
 Source: /workspace/maxops/research/render-modular-builder-upgrade-2026-11-11.md (closed 8:56 AM CT Nov 12).
 Written on the box 2026-11-12 as a self-contained helper so it can be merged onto the live
-/home/derekboone/AI/community/scripts/parody tree without overwriting build_request.py (the live tree is several
+/home/evo/AI/community/scripts/parody tree without overwriting build_request.py (the live tree is several
 rounds ahead of every box copy). It adds no rule pack, no age rule beyond the existing 18+ floor, no
 graph/lock/sampler change, and never writes drug dose or administration.
 

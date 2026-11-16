@@ -6,7 +6,7 @@ For `still`: if Derrick asked for a pose, angle or scene, first load the `alienp
 Then queue the render batch in the background with this one command:
 
 ```
-/home/derekboone/AI/director/.venv/Scripts/python.exe /home/derekboone/AI/community/scripts/make_render.py $@
+/home/evo/AI/director/.venv/Scripts/python.exe /home/evo/AI/community/scripts/make_render.py $@
 ```
 
 Then reply with the job id and queue log path (`<run_dir>\_render_queue.log`) so the next message still gets answered. Keep every /media/... link on its own line, unchanged, so it shows inline in the phone chat. Do nothing else: no other commands, checks or comments.
