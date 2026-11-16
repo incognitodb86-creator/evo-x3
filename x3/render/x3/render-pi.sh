@@ -10,6 +10,10 @@
 #   - no --remote / herdr-agent-state.ts / pi-mobile: herdr and the phone bridge are not on the X3 (phone cutover is gated)
 # Writing is dry-run only. Renders run on AlienPc ComfyUI; queue only after Derrick's yes (x3/queue-remote.sh).
 # NOT the production Render chat until Derrick OKs the picks; AlienPc stays production until cutover.
+#   - --no-extensions is kept on purpose: a bare `pi` in this folder would also load
+#     plannotator, pi-canvas, pi-say and the compound-engineering plugin from
+#     ~/AI/render/.pi/settings.json. Intended extensions are passed with -e:
+#     pi-permission-system, cc-safety-net, loop-guard, pi-subagents, pi-memory.
 set -euo pipefail
 R="$HOME/AI/render"; S="$HOME/AI/community/skills"
 cd "$R"
@@ -19,6 +23,8 @@ exec pi --approve \
   -e "$R/.pi/npm/node_modules/pi-permission-system/index.ts" \
   -e "$HOME/.pi/agent/npm/node_modules/cc-safety-net/dist/pi/index.js" \
   -e "$R/.pi/extensions/loop-guard.ts" \
+  -e "$HOME/.pi/agent/npm/node_modules/pi-subagents/bundle/index.js" \
+  -e "$R/.pi/npm/node_modules/pi-memory/index.ts" \
   --no-mcp \
   --no-skills \
   --skill "$S/video-render" --skill "$S/image-render" --skill "$S/comfy-render" \
