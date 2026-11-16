@@ -55,7 +55,6 @@ VERSION = "wp-2026-11-13.1"
 
 TONES = ("ashamed", "bratty", "reluctant", "eager", "silent")
 TONE_WORDS = [
-    ("spoof", r"spoof|parody|noir|banter|genre|detective|cowboy|vampire|space captain"),
     ("ashamed", r"asham\w*|shame\w*|embarrass\w*|humiliat\w*"),
     ("bratty", r"bratt?y|brat\b|mouthy|sassy|defiant|cheeky"),
     ("reluctant", r"reluctan\w*|cnc|resist\w*|protest\w*|unwilling|struggl\w*"),

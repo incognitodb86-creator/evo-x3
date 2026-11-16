@@ -122,7 +122,7 @@ def route_mode(ask: str, position: str, still_read: Optional[Dict[str, Any]], cf
         overlays.remove("edge")
     if base == "strip" and SEX_WORDS_RE.search(a) and act_id == "tease":
         warnings.append({"warn": "strip_then_sex", "why": "strip and sex in one ask: this clip is the strip; run the sex as the next clip on the same --scene"})
-    if base == "talk" and "spoof" not in overlays and re.search(r"(?i)spoof|parody", a):
-        overlays.append("spoof")
+    tone_flags = [o for o in overlays if o in ("spoof", "cinematic", "gonzo")]
     blocks = sorted({BLOCK_FOR[o] for o in overlays + [base] if o in BLOCK_FOR})
-    return {"act_id": act_id, "position": act_id, "mode": base, "overlays": overlays, "mode_blocks": blocks, "warnings": warnings}
+    return {"act_id": act_id, "position": act_id, "mode": base, "overlays": overlays, "tone_flags": tone_flags,
+            "mode_blocks": blocks, "warnings": warnings}
