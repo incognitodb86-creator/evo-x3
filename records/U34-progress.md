@@ -14,3 +14,12 @@ Resume rule: read this file, then continue at the first step not marked DONE.
 
 ## Half-applied changes
 None.
+
+## 07:30–07:35 CT — Phase 6, cleanup, backup started
+- Phase 6 (AlienPc): models.json evo-x3 provider → X3 ids (bak models.json.bak-20261116-072818-u34). One-shot pings PONG: Render gemma4-heretic 16 s, Sydney model 2 s, Forge flash-next/medium 34 s.
+- C:\AI\director\scripts\pi_herdr_at_logon.ps1: Sydney/Render → evo-x3/gemma4-heretic, Forge → evo-x3/flash-next --thinking medium. Parse check 0 errors. Bak .bak-20261116-073004-u34. Committed b5d964a, pushed (alienpc-director, branch selfheal-2026-10-14).
+- Live herdr panes NOT restarted (would cut live chats; herdr server started 11/11 lacks EVO_X3_LLM_KEY env). Takes effect on next logon / herdr restart.
+- Cleanup → ~/evo-x3/_archive/u33 (24 MB) + /etc/evo-x3/_archive (20 old yaml baks) + ~/.pi/agent/_archive (11 baks). stage-src kept (bench uses U12 fixture). Commit bcc6f42. Forge launcher synced, x3-forge 330dd23.
+- Final backup: first run aborted at 07:33 (unanchored tar excludes would have skipped dirs like drivers/media); relaunched 07:33 with anchored excludes.
+- 07:37 Final backup PASS: QNAP u34-final-20261116-0733, 7.6 GiB, sha256 verified.
+- 07:40 U34-rollout-done record written; lease released.
