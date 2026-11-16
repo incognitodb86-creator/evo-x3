@@ -16,6 +16,7 @@ MOB="$HOME/.pi/agent/npm/node_modules/pi-mobile/src/index.ts"
 HST=$(ls "$HOME"/.pi/agent/extensions/herdr*.ts 2>/dev/null | head -1)
 for i in $(seq 1 30); do herdr status 2>/dev/null | grep -q "status: *running" && break; sleep 1; done
 herdr status 2>/dev/null | grep -q "status: *running" || { log "ERROR herdr server not running"; exit 1; }
+panes_json=$(herdr pane list 2>/dev/null); [ -n "$panes_json" ] || panes_json='{}'
 for name in $PANES; do
   dir=${CWD[$name]:-}; launcher="$HOME/evo-x3/pi-chats/$name-pi.sh"
   [ -d "$dir" ] && [ -r "$launcher" ] || { log "ERROR $name: missing $dir or $launcher"; continue; }
@@ -23,10 +24,30 @@ for name in $PANES; do
   if grep -q -- "--no-extensions" "$launcher"; then
     [ -f "$MOB" ] && extra="$extra -e $MOB"; [ -n "$HST" ] && extra="$extra -e $HST"
   fi
-  # herdr restores workspaces after a server restart/boot but not the agent in them: reuse the restored pane
-  # (first pane whose cwd is the chat dir); skip only when pi is already running there.
-  row=$(herdr agent list 2>/dev/null | jq -r --arg d "$dir" '[.result.agents[] | select(.cwd==$d)][0] | if . == null then "" else "\(.pane_id) \(.agent // "none")" end')
-  pane=${row%% *}; agent=${row#* }
+  # herdr restores workspaces after a server restart/boot but not the agent in them: herdr agent list
+  # only returns panes with a live agent, so query herdr pane list + herdr workspace get to match an
+  # existing restored pane by workspace label or cwd; skip only when pi is already running there.
+  row=""
+  best_pane=""
+  best_agent="none"
+  while IFS=$'\t' read -r pid wid pcwd pagent; do
+    [ -n "$pid" ] || continue
+    wlabel=$(herdr workspace get "$wid" 2>/dev/null | jq -r '.result.workspace.label // ""')
+    if [ "$wlabel" = "$name" ] || [ "$pcwd" = "$dir" ]; then
+      if [ "$pagent" = "pi" ]; then
+        best_pane="$pid"
+        best_agent="pi"
+        break
+      elif [ -z "$best_pane" ]; then
+        best_pane="$pid"
+        best_agent="${pagent:-none}"
+      fi
+    fi
+  done < <(printf %s "$panes_json" | jq -r '.result.panes[]? | [.pane_id, .workspace_id, .cwd, (.agent // "none")] | @tsv')
+  if [ -n "$best_pane" ]; then
+    row="$best_pane $best_agent"
+  fi
+  pane="$best_pane"; agent="$best_agent"
   if [ -n "$row" ] && [ "$agent" = "pi" ]; then log "$name pi already running in $pane; skip"; continue; fi
   if [ -z "$row" ]; then
     out=$(herdr workspace create --cwd "$dir" --label "$name" --no-focus 2>&1); rc=$?
