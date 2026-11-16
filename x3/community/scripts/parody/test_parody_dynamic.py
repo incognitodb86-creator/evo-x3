@@ -227,7 +227,9 @@ class TestU2Images(unittest.TestCase):
         # Sydney path block dropped (Derrick t2084u): an in-pool sydney path is accepted like any other.
         self.assertEqual(validate_reference_images(["sydney_misc/a.png"], pools=pools),
                          [str((self.pool / "sydney_misc" / "a.png").resolve())])
-        for bad in (str(self.outside), r"C:\Users\derek\sydney\x.png", "B01/missing.png"):
+        # Pool containment dropped (Derrick t2086u/t2087u): an existing outside path is accepted.
+        self.assertEqual(validate_reference_images([str(self.outside)], pools=pools), [str(self.outside.resolve())])
+        for bad in ("/nonexistent/x.png", "B01/missing.png"):
             with self.assertRaises(ValueError, msg=bad):
                 validate_reference_images([bad], pools=pools)
         with self.assertRaises(ValueError):
