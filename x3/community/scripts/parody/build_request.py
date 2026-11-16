@@ -73,9 +73,11 @@ _CAMERA_MOTION_RE = re.compile(
 # window's 22-frame head is hidden motion context trimmed from video AND audio by the append node, transition
 # tokens 0, so the visible output is base + extension frames with no hidden overlap in it.
 CONTINUATION_OVERLAP_FRAMES = 22
+CONTINUATION_OVERLAP_MIN_FRAMES = 5  # the node floor: 17k + 5 with k = 0 (continuation_nodes._validate_guided_...)
 CONTINUATION_WINDOW_MAX_FRAMES = SINGLE_CLIP_MAX_FRAMES  # every sampled window stays <= 243 frames on 16 GB
 DEFAULT_CONTINUATION_BASE_FRAMES = 192
 DEFAULT_CONTINUATION_EXTENSION_FRAMES = 187
+AUDIO_LATENT_FPS = 40  # nodes_minimax_h3.AUDIO_LATENT_FPS at H3_FPS 24: audio tokens = round(frames * 40 / 24)
 CONTINUATION_NODE_TYPES = frozenset({
     "MiniMaxH3GuidedContinuationWindow",
     "MiniMaxH3LatentTailGuide",
@@ -220,6 +222,64 @@ def validate_single_clip_frames(frames: int) -> int:
 # The nodes enforce the rest at queue time (continuation_nodes.py): the 17k + 5 grid, extension_frames as a
 # multiple of 17, the 40 Hz audio boundary (a window latent at the boundary or boundary + 1), the overlap trim
 # and the join. Ours is the 16 GB sampled-window ceiling measured on this card, and the base/extension split.
+
+
+def continuation_audio_t(frames: int) -> int:
+    """40 Hz audio-latent tokens for an H3 frame count, exactly as the installed nodes round it.
+
+    nodes_minimax_h3.temporal_shape -> round(frame_count / FPS * AUDIO_LATENT_FPS), and
+    continuation_nodes.audio_t_at_frame_boundary -> round(frame_index * 40 / 24) are the same function. Rounding is
+    not linear over frames, so the two ways of sizing one window's audio are not always the same number.
+    """
+    return round(int(frames) / float(H3_FPS) * AUDIO_LATENT_FPS)
+
+
+def continuation_window_audio_t(previous_frames: int, overlap_frames: int, extension_frames: int) -> int:
+    """Audio tokens MiniMaxH3GuidedContinuationWindow allocates for this window (a slice of the GLOBAL timeline).
+
+    _calculate_guided_continuation_layout: overlap_audio_t = audio_t(prev) - audio_t(prev - overlap),
+    new_audio_t = audio_t(prev + ext) - audio_t(prev); the fresh target is their sum.
+    """
+    prev, ov, ext = int(previous_frames), int(overlap_frames), int(extension_frames)
+    return continuation_audio_t(prev + ext) - continuation_audio_t(prev - ov)
+
+
+def continuation_window_audio_is_aligned(previous_frames: int, overlap_frames: int, extension_frames: int) -> bool:
+    """True when that global-slice window audio equals temporal_shape(overlap + ext)[2], the length c{n} is built at.
+
+    The window latent reaches MiniMaxH3ReferenceToVideo's `length` as the node's window_length output, so that node
+    sizes the latent it conditions from temporal_shape(window). validate_h3_av_window accepts either length for the
+    window, so nothing rejects the pair at build time; the mismatch only surfaces at the sampler of that beat
+    (c2_samp: 'shape mismatch: value tensor of shape [2000, 32] cannot be broadcast to indexing result of shape
+    [2074, 32]' on a 192-frame tail at 22/187, where the window allocates 349 tokens and c2 conditions 348 -
+    extend-test-3beat-20261115 live run, prompt_id 26a05372). Every sampled window must satisfy this.
+    """
+    return (continuation_window_audio_t(previous_frames, overlap_frames, extension_frames)
+            == continuation_audio_t(int(overlap_frames) + int(extension_frames)))
+
+
+def pick_continuation_overlap(previous_frames: int, extension_frames: int,
+                             requested_overlap: int = CONTINUATION_OVERLAP_FRAMES) -> int:
+    """The legal 17k + 5 overlap nearest requested_overlap whose window audio matches temporal_shape(window).
+
+    Only overlaps that fit the sampled-window ceiling and the previous latent are offered; ties go to the LARGER
+    overlap, which carries more hidden motion context at the same visible length. The requested value is returned
+    untouched whenever it is already aligned, so a length that works today keeps working (124 + 22/187 -> 22, the
+    known-good 311f two-beat pack). Raises when no legal overlap aligns for this previous latent and extension.
+    """
+    prev, ext, want = int(previous_frames), int(extension_frames), int(requested_overlap)
+    hi = min(CONTINUATION_WINDOW_MAX_FRAMES - ext, prev)
+    for cand in sorted(range(CONTINUATION_OVERLAP_MIN_FRAMES, hi + 1, 17), key=lambda o: (abs(o - want), -o)):
+        if continuation_window_audio_is_aligned(prev, cand, ext):
+            return cand
+    raise ValueError(
+        f"no legal 17k + 5 overlap up to {hi} makes a {prev}-frame latent's +{ext} continuation window audio match "
+        f"temporal_shape(window): the window latent and the latent MiniMaxH3ReferenceToVideo builds from that "
+        "window_length would be different sizes and that beat's sampler would fail. Shorten the extension, or "
+        "continue from a latent whose length puts the window on the audio grid."
+    )
+
+
 def continuation_layout(base_frames: int = DEFAULT_CONTINUATION_BASE_FRAMES,
                         extension_frames: int = DEFAULT_CONTINUATION_EXTENSION_FRAMES,
                         overlap_frames: int = CONTINUATION_OVERLAP_FRAMES) -> Dict[str, Any]:
@@ -228,12 +288,23 @@ def continuation_layout(base_frames: int = DEFAULT_CONTINUATION_BASE_FRAMES,
     The window's overlap_frames head is generated as hidden motion context and trimmed from video AND audio by
     MiniMaxH3AppendContinuation with transition tokens 0, so no hidden overlap reaches the output and the
     completed latent is kept as-is. Only the sampled window is capped, never the cumulative latent.
+
+    overlap_frames is the ASKED overlap: `pick_continuation_overlap` keeps it when it is audio-aligned for this
+    base length and steps it to the nearest legal 17k + 5 value when it is not, which never changes the visible
+    base + extension length. The applied value is in ["overlap_frames"], the asked one in
+    ["requested_overlap_frames"], and both audio lengths are reported so a plan shows the match.
     """
-    base, ext, overlap = int(base_frames), int(extension_frames), int(overlap_frames)
-    if base % 17 != 5 or overlap % 17 != 5:  # the same grid the nodes validate
-        raise ValueError(f"base and overlap frames must satisfy the MiniMax H3 17k + 5 grid, got {base}/{overlap}")
+    base, ext, requested = int(base_frames), int(extension_frames), int(overlap_frames)
+    if base % 17 != 5 or requested % 17 != 5:  # the same grid the nodes validate
+        raise ValueError(f"base and overlap frames must satisfy the MiniMax H3 17k + 5 grid, got {base}/{requested}")
     if ext < 17 or ext % 17:
         raise ValueError(f"extension_frames must be at least 17 and a multiple of 17, got {ext}")
+    if requested + ext > CONTINUATION_WINDOW_MAX_FRAMES:
+        raise ValueError(
+            f"continuation window {requested + ext} frames exceeds the sampled-window ceiling of "
+            f"{CONTINUATION_WINDOW_MAX_FRAMES} frames ({CONTINUATION_WINDOW_MAX_FRAMES / H3_FPS:.3f} s on 16 GB)"
+        )
+    overlap = pick_continuation_overlap(base, ext, requested)
     window, total = overlap + ext, base + ext
     if window > CONTINUATION_WINDOW_MAX_FRAMES:
         raise ValueError(
@@ -243,10 +314,15 @@ def continuation_layout(base_frames: int = DEFAULT_CONTINUATION_BASE_FRAMES,
     return {
         "mode": "native_latent_tail_continuation",
         "base_frames": base, "extension_frames": ext, "overlap_frames": overlap,
+        "requested_overlap_frames": requested,
         "window_frames": window, "total_frames": total, "fps": H3_FPS,
         "base_seconds": round(base / H3_FPS, 4), "window_seconds": round(window / H3_FPS, 4),
         "total_seconds": round(total / H3_FPS, 4),
         "sampled_window_max_frames": CONTINUATION_WINDOW_MAX_FRAMES,
+        "window_audio_t": continuation_window_audio_t(base, overlap, ext),
+        "window_audio_official_t": continuation_audio_t(window),
+        "overlap_audio_t": continuation_audio_t(base) - continuation_audio_t(base - overlap),
+        "new_audio_t": continuation_audio_t(total) - continuation_audio_t(base),
     }
 
 
@@ -3962,6 +4038,8 @@ def build_writer_beats_continuation_request(
         "total_frames": chain[-1]["frames"],
         "total_seconds": round(chain[-1]["frames"] / H3_FPS, 4),
         "overlap_frames": overlap_frames,
+        # per-beat applied overlaps (each is the audio-aligned 17k + 5 value nearest the one asked for)
+        "overlap_frames_applied": [int(b["layout"]["overlap_frames"]) for b in chain[1:]],
         "fps": H3_FPS,
         "stitched": False,
         "start_image": start_image or "",
@@ -5152,7 +5230,10 @@ def _layout_chain(requested_frames: Sequence[int], overlap_frames: int = CONTINU
     base is the CUMULATIVE latent built so far - only the sampled window is capped, never the cumulative latent -
     and its extension is the length closest to what that entry asked for that both fits the window ceiling and
     joins on the audio grid. Every returned layout is exact; the caller wires them in order. Ties in that
-    closest-length choice go to the LONGER extension: it lands nearer the total the caller asked for.
+    closest-length choice go to the LONGER extension: it lands nearer the total the caller asked for. Per beat the
+    overlap is the audio-aligned one for that beat's latent length (`continuation_layout`); an extension that leaves
+    no aligned overlap under the window ceiling is skipped for the next closest one, so no chain is ever laid on a
+    window whose audio size disagrees with the latent its text node conditions.
     """
     req = [int(x) for x in requested_frames]
     if len(req) < 2:
@@ -5163,17 +5244,19 @@ def _layout_chain(requested_frames: Sequence[int], overlap_frames: int = CONTINU
     cap_ext = CONTINUATION_WINDOW_MAX_FRAMES - overlap_frames
     for i, want in enumerate(req[1:], start=2):
         cum_target = cumulative + max(17, int(want))
-        best: Optional[Tuple[Tuple[int, int], int]] = None
-        for ext in range(cap_ext - cap_ext % 17, 16, -17):
-            key = (abs(cumulative + ext - cum_target), -ext)
-            if best is None or key < best[0]:
-                best = (key, ext)
-        if best is None:
+        layout: Optional[Dict[str, Any]] = None
+        for ext in sorted(range(cap_ext - cap_ext % 17, 16, -17),
+                          key=lambda e: (abs(cumulative + e - cum_target), -e)):
+            try:
+                layout = continuation_layout(cumulative, ext, overlap_frames)
+                break
+            except ValueError:
+                continue
+        if layout is None:
             raise ValueError(
                 f"no continuation from {cumulative} frames fits the {CONTINUATION_WINDOW_MAX_FRAMES} frame "
                 f"sampled-window ceiling (largest extension {cap_ext} frames)"
             )
-        layout = continuation_layout(cumulative, best[1], overlap_frames)
         plans.append({"index": i, "is_continuation": True, "frames": layout["total_frames"], "layout": layout})
         cumulative = layout["total_frames"]
     return plans
