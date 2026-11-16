@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# Plain capped Ralph loop for Forge on the EVO-X3 (bash port of the AlienPc Windows Ralph runner; same behavior).
+# Plain capped Ralph loop for Forge on the EVO-X3 (bash port of the AlienPc Windows Ralph runner + U53 safety checks).
 # Runs pi --print on PROMPT.md, one fix_plan item per pass, stops at PLAN_COMPLETE, NO_PROGRESS or the -Max cap.
-# Max Architect 2026-11-15, X3 Phase 2 (Derrick t1784s6566 "port ralph-loop to Linux"). Forge owns this file.
+# Max Architect 2026-11-15, X3 Phase 2 (Derrick t1784s6566 "port ralph-loop to Linux"); U53 B3+I2 2026-11-16. Forge owns this file.
 # Usage: ralph.sh [-Max 10] [-Model x3-local/flash-next] [-PassLimitSec 3600] [-IterationTimeoutSec 7200]
 #                 [-GpuWaits 30] [-GpuWaitSec 120] [-GpuLockPath <lock>] [-LockPollSec 2]
-#                 [-MemoryRoot <dir>] [-WorkDir <pi cwd>] [-CommandOverride <cmd>] [-LogPath <path>]
+#                 [-MemoryRoot <dir>] [-WorkDir <pi cwd>] [-TargetRepo <repo|none>] [-WorktreeRoot <dir>]
+#                 [-NoWorktree] [-MaxDiffFiles 10] [-StaleHours 12] [-ClearStale] [-BackpressureCmd <cmd>]
+#                 [-CommandOverride <cmd>] [-LogPath <path>]
 # Start detached: nohup setsid bash ralph.sh -Max N >/dev/null 2>&1 &
 # Exit codes: 0 done/capped, 4 another copy running, 5 bad args.
 set -uo pipefail
 Max=10; Model='x3-local/flash-next'; GpuWaits=30; GpuWaitSec=120
 GpuLockPath="$HOME/AI/locks/gpu-render.lock"; IterationTimeoutSec=7200; CommandOverride=''; LogPath=''
 PassLimitSec=3600; LockPollSec=2; MemoryRoot="$HOME/AI/fleet-brain/25_memory/shared"; WorkDir="$HOME/AI/forge"
+TargetRepo='auto'; WorktreeRoot="$HOME/AI/_worktrees"; NoWorktree=0
+MaxDiffFiles=10; StaleHours=12; ClearStale=0; BackpressureCmd=''
 while [ $# -gt 0 ]; do
   case "$1" in
     -Max|--max) Max="$2"; shift 2;;
@@ -23,6 +27,13 @@ while [ $# -gt 0 ]; do
     -LockPollSec) LockPollSec="$2"; shift 2;;
     -MemoryRoot|--memory-root) MemoryRoot="$2"; shift 2;;
     -WorkDir) WorkDir="$2"; shift 2;;
+    -TargetRepo) TargetRepo="$2"; shift 2;;
+    -WorktreeRoot) WorktreeRoot="$2"; shift 2;;
+    -NoWorktree) NoWorktree=1; shift 1;;
+    -MaxDiffFiles) MaxDiffFiles="$2"; shift 2;;
+    -StaleHours) StaleHours="$2"; shift 2;;
+    -ClearStale) ClearStale=1; shift 1;;
+    -BackpressureCmd) BackpressureCmd="$2"; shift 2;;
     -CommandOverride) CommandOverride="$2"; shift 2;;
     -LogPath) LogPath="$2"; shift 2;;
     *) echo "unknown arg $1" >&2; exit 5;;
@@ -33,7 +44,7 @@ day=$(date +%Y%m%d)
 if [ -n "$LogPath" ]; then logDir="$(dirname "$(realpath -m "$LogPath")")"; idx="$(realpath -m "$LogPath")"
 elif [ -n "$CommandOverride" ]; then logDir="${TMPDIR:-/tmp}/ralph_override_$$"; idx="$logDir/ralph.log"
 else logDir="$K/logs"; idx="$logDir/ralph.log"; fi
-mkdir -p "$K/logs" "$K/sessions" "$K/notes" "$logDir"
+mkdir -p "$K/logs" "$K/sessions" "$K/notes" "$K/_archive" "$logDir"
 run="$logDir/ralph-$day-$$.log"
 log() { local l; l="$(date +%Y-%m-%dT%H:%M:%S) $*"; printf '%s\n' "$l" >>"$idx"; printf '%s\n' "$l" >>"$run"; printf '%s\n' "$l"; }
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
@@ -46,7 +57,15 @@ if [ -f "$lock" ]; then
   log "stale ralph.lock (pid ${lp:-?} not alive) - taking it"
 fi
 echo $$ >"$lock"
-trap 'rm -f "$lock"' EXIT
+
+loopPolicyDir=""
+wtWorkDir=""; wtWorkRepo=""; wtWorkStart=""
+wtTargetDir=""; wtTargetRepo=""; wtTargetStart=""
+cleanup() {
+  rm -f "$lock"
+  [ -n "$loopPolicyDir" ] && rm -rf "$loopPolicyDir"
+}
+trap cleanup EXIT
 stall=0; stopReason=''
 
 # GPU lock rule: test with flock -n (same as queue-remote.sh / remote_comfy.py).
@@ -82,6 +101,345 @@ top_item() {
 }
 mtime() { stat -c %Y "$1" 2>/dev/null || echo 0; }
 
+# I2-1: Clear stale fix_plan.md items before starting the loop so leftover items from earlier runs never execute.
+clear_stale_fix_plan() {
+  local fp="$K/fix_plan.md"
+  [ -f "$fp" ] || return 0
+  local hasOpen=0
+  grep -qE '^\s*- \[ \]' "$fp" 2>/dev/null && hasOpen=1
+  local now fpMtime doneMtime ageSec staleReason=""
+  now=$(date +%s); fpMtime=$(mtime "$fp"); ageSec=$((now - fpMtime))
+  if [ "$ClearStale" = 1 ]; then
+    staleReason="explicit -ClearStale"
+  elif [ "$hasOpen" = 1 ] && [ "$StaleHours" -gt 0 ] && [ "$ageSec" -gt $((StaleHours * 3600)) ]; then
+    staleReason="fix_plan.md older than ${StaleHours}h (${ageSec}s)"
+  elif [ "$hasOpen" = 1 ] && [ -f "$logDir/DONE.txt" ] && grep -q 'done=true' "$logDir/DONE.txt" 2>/dev/null; then
+    if python3 -c 'import os,sys; sys.exit(0 if os.stat(sys.argv[1]).st_mtime_ns > os.stat(sys.argv[2]).st_mtime_ns else 1)' "$logDir/DONE.txt" "$fp"; then
+      staleReason="previous DONE.txt (done=true) is newer than fix_plan.md"
+    fi
+  fi
+  if [ -n "$staleReason" ]; then
+    local arch="$K/_archive/fix_plan.stale-$(date +%Y%m%d-%H%M%S).md"
+    cp -p "$fp" "$arch"
+    python3 - "$fp" << "PY"
+import pathlib, re, sys
+p = pathlib.Path(sys.argv[1])
+lines = p.read_text(encoding="utf-8", errors="replace").splitlines(True)
+kept = [ln for ln in lines if not re.match(r"^\s*- \[ \]", ln)]
+p.write_text("".join(kept), encoding="utf-8")
+PY
+    log "STALE_FIX_PLAN_CLEARED ($staleReason) - archived to $arch; cleared unchecked items"
+  fi
+}
+
+# I2-4 (tool layer): Build a loop-scoped pi-permissions.jsonc denying edits to skills/ and AGENTS.md inside loops.
+build_loop_policy() {
+  local basePolicy="$HOME/.pi/agent/pi-permissions.jsonc"
+  loopPolicyDir="$logDir/loop-policy-$$"
+  mkdir -p "$loopPolicyDir"
+  python3 - "$basePolicy" "$loopPolicyDir/pi-permissions.jsonc" << "PY"
+import pathlib, re, sys
+
+src = pathlib.Path(sys.argv[1])
+dst = pathlib.Path(sys.argv[2])
+text = src.read_text(encoding="utf-8") if src.is_file() else "{\n  \"tools\": {},\n  \"bash\": {}\n}\n"
+
+tool_rules = """
+    // I2 loop guard: deny edits to skills/ and AGENTS.md from inside Ralph loops
+    "skill_manage": "deny",
+    "edit:*/skills/*": "deny",
+    "write:*/skills/*": "deny",
+    "edit:*skills/*": "deny",
+    "write:*skills/*": "deny",
+    "edit:*/AGENTS.md": "deny",
+    "write:*/AGENTS.md": "deny",
+    "edit:AGENTS.md": "deny",
+    "write:AGENTS.md": "deny",
+"""
+bash_rules = """
+    // I2 loop guard: deny shell writes to skills/ and AGENTS.md from inside Ralph loops
+    "*sed *skills/*": "deny",
+    "*sed *AGENTS.md*": "deny",
+    "*tee *skills/*": "deny",
+    "*tee *AGENTS.md*": "deny",
+    "*>*skills/*": "deny",
+    "*>*AGENTS.md*": "deny",
+    "*rm *skills/*": "deny",
+    "*rm *AGENTS.md*": "deny",
+    "*mv *skills/*": "deny",
+    "*mv *AGENTS.md*": "deny",
+    "*cp *skills/*": "deny",
+    "*cp *AGENTS.md*": "deny",
+    "*python*skills/*": "deny",
+    "*python*AGENTS.md*": "deny",
+"""
+
+def inject(doc: str, section: str, snippet: str) -> str:
+    m = re.search(rf'"{re.escape(section)}"\s*:\s*\{{', doc)
+    if not m:
+        return doc
+    depth = 1
+    i = m.end()
+    in_str = False
+    esc = False
+    in_line_comment = False
+    while i < len(doc):
+        ch = doc[i]
+        if in_line_comment:
+            if ch == "\n":
+                in_line_comment = False
+        elif in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+        else:
+            if ch == "/" and i + 1 < len(doc) and doc[i + 1] == "/":
+                in_line_comment = True
+            elif ch == '"':
+                in_str = True
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    return doc[:i] + snippet + "  " + doc[i:]
+        i += 1
+    return doc
+
+text = inject(text, "tools", tool_rules)
+text = inject(text, "bash", bash_rules)
+dst.write_text(text, encoding="utf-8")
+PY
+  export PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR="$loopPolicyDir"
+}
+
+# I2-5: One git worktree per loop.
+setup_worktrees() {
+  RunWorkDir="$K"
+  [ -d "$WorkDir" ] && RunWorkDir="$WorkDir"
+  if [ "$NoWorktree" = 1 ]; then
+    log "WORKTREE disabled (-NoWorktree); cwd=$RunWorkDir"
+    return 0
+  fi
+  local tag="ralph-$day-$$"
+  local loopDir="$WorktreeRoot/$tag"
+  mkdir -p "$loopDir"
+  local workRoot=""
+  workRoot="$(git -C "$WorkDir" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [ -n "$workRoot" ]; then
+    wtWorkRepo="$workRoot"
+    wtWorkStart="$(git -C "$workRoot" rev-parse HEAD)"
+    wtWorkDir="$loopDir/$(basename "$workRoot")"
+    local br="${tag}-$(basename "$workRoot")"
+    if git -C "$workRoot" worktree add -b "$br" "$wtWorkDir" HEAD >/dev/null 2>&1; then
+      # Symlink untracked pi runtime dirs (.pi/npm, .pi/git) if WorkDir is forge
+      for sub in npm git; do
+        if [ -e "$workRoot/.pi/$sub" ] && [ ! -e "$wtWorkDir/.pi/$sub" ]; then
+          mkdir -p "$wtWorkDir/.pi"
+          ln -s "$workRoot/.pi/$sub" "$wtWorkDir/.pi/$sub"
+        fi
+      done
+      RunWorkDir="$wtWorkDir"
+      export RALPH_FORGE_WORKTREE="$wtWorkDir"
+      log "WORKTREE work repo=$workRoot branch=$br path=$wtWorkDir"
+    else
+      log "WORKTREE_WARN failed to create worktree for $workRoot; using $WorkDir"
+      wtWorkDir=""; wtWorkRepo=""
+    fi
+  fi
+
+  local resolvedTarget=""
+  if [ "$TargetRepo" = "none" ]; then
+    resolvedTarget=""
+  elif [ "$TargetRepo" = "auto" ]; then
+    [ -d "$HOME/AI/community/.git" ] && resolvedTarget="$HOME/AI/community"
+  else
+    resolvedTarget="$TargetRepo"
+  fi
+  if [ -n "$resolvedTarget" ]; then
+    local tRoot=""
+    tRoot="$(git -C "$resolvedTarget" rev-parse --show-toplevel 2>/dev/null || true)"
+    if [ -n "$tRoot" ] && [ "$tRoot" != "$wtWorkRepo" ]; then
+      wtTargetRepo="$tRoot"
+      wtTargetStart="$(git -C "$tRoot" rev-parse HEAD)"
+      wtTargetDir="$loopDir/$(basename "$tRoot")"
+      local tbr="${tag}-$(basename "$tRoot")"
+      if git -C "$tRoot" worktree add -b "$tbr" "$wtTargetDir" HEAD >/dev/null 2>&1; then
+        export RALPH_WORKTREE="$wtTargetDir"
+        log "WORKTREE target repo=$tRoot branch=$tbr path=$wtTargetDir"
+      else
+        log "WORKTREE_WARN failed to create worktree for $tRoot"
+        wtTargetDir=""; wtTargetRepo=""
+      fi
+    fi
+  fi
+  # Ensure relative symlink forge/AGENTS.md -> ../community/agent-shared/AGENTS.md resolves if community wasn't cloned into loopDir
+  if [ -n "$wtWorkDir" ] && [ ! -e "$loopDir/community" ] && [ -d "$HOME/AI/community" ]; then
+    ln -s "$HOME/AI/community" "$loopDir/community"
+  fi
+}
+
+# Record git HEADs before a pass.
+declare -A PRE_HEAD
+declare -A PRE_DIRTY
+repo_dirty_lines() {
+  local repo="$1" ph="$2"
+  { git -C "$repo" diff --name-only "$ph" 2>/dev/null; git -C "$repo" status --porcelain 2>/dev/null | sed -E 's/^.. //; s/^.* -> //'; }     | grep -v '^$'     | grep -vE '^(ralph-community/(fix_plan\.md|notes/|logs/|sessions/|_archive/)|\.pi/(npm|git)$|dummy_run/|scripts/dummy_run/)'     | sort -u || true
+}
+record_pre_pass() {
+  PRE_HEAD=()
+  PRE_DIRTY=()
+  for r in "$wtWorkDir" "$wtTargetDir" "$WorkDir" "$HOME/AI/community" "$HOME/AI/forge"; do
+    [ -n "$r" ] && [ -d "$r" ] || continue
+    local realR; realR="$(realpath "$r" 2>/dev/null || echo "$r")"
+    git -C "$realR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
+    local ph; ph="$(git -C "$realR" rev-parse HEAD 2>/dev/null || true)"
+    PRE_HEAD["$realR"]="$ph"
+    PRE_DIRTY["$realR"]="$(repo_dirty_lines "$realR" "$ph")"
+  done
+}
+
+revert_worktrees_to_pre() {
+  for r in "$wtWorkDir" "$wtTargetDir"; do
+    [ -n "$r" ] && [ -d "$r" ] || continue
+    local ph="${PRE_HEAD[$r]:-}"
+    [ -n "$ph" ] && git -C "$r" reset --hard "$ph" >/dev/null 2>&1 || true
+    git -C "$r" clean -fd >/dev/null 2>&1 || true
+  done
+}
+
+# I2-2, I2-3, I2-4: Per-pass backpressure check (protected paths, git diff --stat cap, skill-load smoke test).
+run_backpressure() {
+  local iterNum="$1"
+  local failReason=""
+
+  # Check every tracked worktree/repo for protected path edits and diff file cap
+  local totalChanged=0
+  local seenRepos=""
+  for r in "$wtWorkDir" "$wtTargetDir" "$HOME/AI/community" "$HOME/AI/forge"; do
+    [ -n "$r" ] && [ -d "$r" ] || continue
+    local realR; realR="$(realpath "$r" 2>/dev/null || echo "$r")"
+    case " $seenRepos " in *" $realR "*) continue;; esac
+    seenRepos="$seenRepos $realR"
+    git -C "$realR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
+
+    local ph="${PRE_HEAD[$realR]:-HEAD}"
+    local curDirty="" diffNames=""
+    curDirty="$(repo_dirty_lines "$realR" "$ph")"
+    if [ -n "$curDirty" ]; then
+      diffNames="$(comm -23 <(printf '%s\n' "$curDirty" | sort -u) <(printf '%s\n' "${PRE_DIRTY[$realR]:-}" | grep -v '^$' | sort -u) || true)"
+    fi
+
+    if [ -n "$diffNames" ]; then
+      local statLine
+      statLine="$(git -C "$realR" diff --stat "$ph" 2>/dev/null | tail -n 1 || true)"
+      log "iter $iterNum : git diff --stat ($realR): ${statLine:-untracked-only}"
+
+      # I2-4: Deny edits to skills/ and AGENTS.md inside loops
+      local badProt
+      badProt="$(printf '%s\n' "$diffNames" | grep -E '(^|/)skills/|(^|/)AGENTS\.md$' || true)"
+      if [ -n "$badProt" ]; then
+        failReason="protected path edited inside loop ($realR): $(echo "$badProt" | tr '\n' ',')"
+        break
+      fi
+
+      local cnt
+      cnt="$(printf '%s\n' "$diffNames" | wc -l | tr -d ' ')"
+      totalChanged=$((totalChanged + cnt))
+    fi
+  done
+
+  if [ -z "$failReason" ] && [ "$totalChanged" -gt "$MaxDiffFiles" ]; then
+    failReason="git diff --stat file cap exceeded ($totalChanged > $MaxDiffFiles files)"
+  fi
+
+  # I2-2: Skill-load smoke test
+  if [ -z "$failReason" ]; then
+    local settingsTarget="$RunWorkDir/.pi/settings.json"
+    [ -f "$settingsTarget" ] || settingsTarget="$HOME/AI/forge/.pi/settings.json"
+    local commRoot="${wtTargetDir:-$HOME/AI/community}"
+    local forgeRoot="${wtWorkDir:-$HOME/AI/forge}"
+    local smokeOut=""
+    if ! smokeOut="$(python3 - "$settingsTarget" "$forgeRoot" "$commRoot" 2>&1 << "PY"
+import json, pathlib, re, sys
+
+settings_path = pathlib.Path(sys.argv[1])
+forge_root = pathlib.Path(sys.argv[2])
+comm_root = pathlib.Path(sys.argv[3])
+
+cfg = json.loads(settings_path.read_text(encoding="utf-8"))
+agents_md = forge_root / "AGENTS.md"
+if not agents_md.exists() or not agents_md.read_text(encoding="utf-8").strip():
+    raise SystemExit(f"AGENTS.md missing or empty at {agents_md}")
+
+def remap(p_str: str) -> pathlib.Path:
+    for prefix in ("/home/evo/AI/community", "/home/derekboone/AI/community"):
+        if p_str.startswith(prefix):
+            return pathlib.Path(str(comm_root) + p_str[len(prefix):])
+    return pathlib.Path(p_str)
+
+for ext in cfg.get("extensions", []):
+    if ext.startswith("-"):
+        continue
+    ep = remap(ext)
+    if not ep.exists():
+        raise SystemExit(f"missing extension path: {ep}")
+
+excludes = {str(remap(s[1:])) for s in cfg.get("skills", []) if s.startswith("-")}
+includes = [s for s in cfg.get("skills", []) if not s.startswith("-")]
+loaded = 0
+for inc in includes:
+    root = remap(inc)
+    if not root.is_dir():
+        raise SystemExit(f"missing skill root: {root}")
+    for child in sorted(root.iterdir()):
+        if not child.is_dir() or child.name.startswith(".") or child.name == "_archive":
+            continue
+        if str(child) in excludes:
+            continue
+        bak = [b.name for b in child.glob("*.bak-*")]
+        if bak:
+            raise SystemExit(f"leftover backup in skill {child}: {bak}")
+        sfile = child / "SKILL.md"
+        if not sfile.is_file():
+            raise SystemExit(f"missing SKILL.md in {child}")
+        txt = sfile.read_text(encoding="utf-8", errors="replace")
+        m = re.match(r"^---\s*\n(.*?)\n---", txt, re.S)
+        if not m or not re.search(r"(?m)^name:\s*\S+", m.group(1)) or not re.search(r"(?m)^description:\s*\S+", m.group(1)):
+            raise SystemExit(f"invalid skill frontmatter: {sfile}")
+        loaded += 1
+if loaded == 0:
+    raise SystemExit("no skills loaded")
+print(f"SKILL_SMOKE_OK skills={loaded} changed_files={0}")
+PY
+)"; then
+      failReason="skill-load smoke failed: $smokeOut"
+    else
+      log "iter $iterNum : $smokeOut (changed_files=$totalChanged cap=$MaxDiffFiles)"
+    fi
+  fi
+
+  if [ -z "$failReason" ] && [ -n "$BackpressureCmd" ]; then
+    if ! bash -c "cd \"$RunWorkDir\" && $BackpressureCmd" >>"$idx" 2>&1; then
+      failReason="BackpressureCmd failed: $BackpressureCmd"
+    fi
+  fi
+
+  if [ -n "$failReason" ]; then
+    log "iter $iterNum : BACKPRESSURE_FAIL: $failReason"
+    return 1
+  fi
+  log "iter $iterNum : BACKPRESSURE_OK (changed_files=$totalChanged cap=$MaxDiffFiles)"
+  return 0
+}
+
+clear_stale_fix_plan
+build_loop_policy
+setup_worktrees
+
 for ((i=1; i<=Max; i++)); do
   log "iter $i of $Max start"
   gpuWait=0; BUSY=''
@@ -97,15 +455,18 @@ for ((i=1; i<=Max; i++)); do
   topItem="$(top_item)"
   if [ "$topItem" = '(none)' ]; then log "iter $i : PLAN_COMPLETE - no open item, loop stopped"; echo "iter=$i max=$Max done=true reason=plan_complete" >"$logDir/DONE.txt"; stopReason=plan_complete; break; fi
   progBefore="$(mtime "$prog")"
+  fpSnapshot="$logDir/fix_plan.pre-$i.bak"
+  cp -p "$K/fix_plan.md" "$fpSnapshot"
+  record_pre_pass
   passCap=$(( PassLimitSec < IterationTimeoutSec ? PassLimitSec : IterationTimeoutSec ))
   echo "$(date +%Y-%m-%dT%H:%M:%S) iter=$i state=start cap=${passCap}s item=$topItem" >"$hb"
   # Shared fleet memory for this pass only (process scope; Sydney's sessions never see it).
   export PI_MEMORY_DIR="$MemoryRoot"; mkdir -p "$MemoryRoot"
-  log "iter $i : PI_MEMORY_DIR=$PI_MEMORY_DIR (process scope, this pass only)"
+  log "iter $i : PI_MEMORY_DIR=$PI_MEMORY_DIR cwd=$RunWorkDir (process scope, this pass only)"
   if [ -n "$CommandOverride" ]; then
-    setsid bash -c "cd \"$K\" && $CommandOverride" >"$iterTmp" 2>&1 &
+    setsid bash -c "cd \"$RunWorkDir\" && $CommandOverride" >"$iterTmp" 2>&1 &
   else
-    setsid bash -c 'cd "$1" && exec pi --approve --print --model "$2" --no-session "@$3/PROMPT.md"' _ "$WorkDir" "$Model" "$K" >"$iterTmp" 2>&1 &
+    setsid bash -c 'cd "$1" && exec pi --approve --print --model "$2" --no-session "@$3/PROMPT.md"' _ "$RunWorkDir" "$Model" "$K" >"$iterTmp" 2>&1 &
   fi
   pp=$!; start=$(date +%s); lockEnd=''; timedOut=0
   while kill -0 "$pp" 2>/dev/null; do
@@ -124,7 +485,16 @@ for ((i=1; i<=Max; i++)); do
   fi
   [ -f "$iterTmp" ] && mv -f "$iterTmp" "$iterLog"
   if [ "$piRc" -ne 0 ]; then log "iter $i : PI_NONZERO rc=$piRc - pass text in $iterLog"; else log "iter $i : pass complete rc=0"; fi
-  sha="$(git -C "$K" rev-parse --short HEAD 2>/dev/null)"
+
+  if ! run_backpressure "$i"; then
+    revert_worktrees_to_pre
+    cp -p "$fpSnapshot" "$K/fix_plan.md"
+    piRc=126
+    log "iter $i : reverted worktree and fix_plan.md after BACKPRESSURE_FAIL"
+  fi
+  rm -f "$fpSnapshot"
+
+  sha="$(git -C "${wtWorkDir:-$K}" rev-parse --short HEAD 2>/dev/null)"
   if [ "$(mtime "$prog")" -le "$progBefore" ]; then echo "- $(date +%Y-%m-%dT%H:%M:%S) [ralph.sh auto] iter $i rc=$piRc head=$sha item: $topItem (model wrote no progress line)" >>"$prog"; log "iter $i : progress line written by harness"; fi
   echo "$(date +%Y-%m-%dT%H:%M:%S) iter=$i state=end rc=$piRc head=$sha item=$topItem" >"$hb"
   echo "iter=$i max=$Max pi_rc=$piRc gpu_wait=$gpuWait" >"$logDir/DONE.txt"
