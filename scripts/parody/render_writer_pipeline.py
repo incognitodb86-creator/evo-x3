@@ -1416,9 +1416,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
     kind = position_kind(position, cfg)  # provisional; the router below decides after the still read
     bodies = acts_bodies(position)
     overlays: List[str] = []
-    arm = ov.get("sampler_arm") or cfg.get("sampler_arm", "B")
-    sampler = dict(cfg["samplers"][arm])
-    persona = ov.get("persona") or cfg.get("persona", "current")
+    arm = cfg.get("sampler_arm", "A")
+    sampler = dict((cfg.get("samplers") or {}).get(arm) or {"temperature": 1.0, "top_p": 0.95, "top_k": 64, "min_p": 0.10})
+    persona = cfg.get("persona", "current")
     client = Client(cfg, log)
     result: Dict[str, Any] = {"run": run_id, "run_dir": str(run_dir), "ask": ask, "position": position, "kind": kind,
                               "status": None, "warnings": [], "version": VERSION, "sampler_arm": arm, "persona": persona}
@@ -1960,8 +1960,6 @@ def main(argv=None) -> int:
     ap.add_argument("--n-candidates", type=int, default=None, help="A/B test flag: number of prose candidates (default 1)")
     ap.add_argument("--debug", action="store_true", help="Write debug per-run files (cand_*, lint_*, slots.json, route.json, beat_card*)")
     ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
-    ap.add_argument("--sampler-arm", help="setup A/B only")
-    ap.add_argument("--persona", help="setup persona arm only (current, option1, option2)")
     a = ap.parse_args(argv)
     if a.queue and not a.yes_derrick:
         print("NOT_READY --queue requires --yes-derrick after Derrick approved this prompt")
@@ -1971,7 +1969,7 @@ def main(argv=None) -> int:
     moved = wp_state.archive_old_scenes(RUNS_ROOT, int(cfg.get("scene_archive_days", 30)))
     if moved:
         log("scenes_archived", {"scenes": moved})
-    ov = {"sampler_arm": a.sampler_arm, "persona": a.persona}
+    ov = {}
     jobs: List[Dict[str, Any]] = []
     if a.batch:
         for ln in Path(a.batch).read_text(encoding="utf-8").splitlines():
