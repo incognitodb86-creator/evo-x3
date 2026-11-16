@@ -537,10 +537,10 @@ class TestContinuationFiveItems(unittest.TestCase):
         # previous_av_latent = ["s0_samp", 0]
         self.assertEqual(g["c2_gen"]["class_type"], "MiniMaxH3GuidedContinuationWindow")
         self.assertEqual(g["c2_gen"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
-        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 22)
+        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 39)  # 22 off a 192f tail is audio-misaligned (c2_samp)
         ext2 = g["c2_gen"]["inputs"]["extension_frames"]
         self.assertEqual(ext2 % 17, 0)
-        self.assertLessEqual(22 + ext2, 243)
+        self.assertLessEqual(39 + ext2, 243)
 
         self.assertEqual(g["c2_tail"]["class_type"], "MiniMaxH3LatentTailGuide")
         self.assertEqual(g["c2_tail"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
@@ -654,10 +654,19 @@ class TestContinuationFiveItems(unittest.TestCase):
         lay = br.continuation_layout()
         self.assertEqual(lay["base_frames"], 192)
         self.assertEqual(lay["extension_frames"], 187)
-        self.assertEqual(lay["overlap_frames"], 22)
-        self.assertEqual(lay["window_frames"], 209)
+        # c2-samp fix: the asked 22-frame overlap stays, but only when its window audio equals temporal_shape(window).
+        # Off a 192-frame tail 22/187 allocates 349 tokens for a 209f window whose official length is 348, so the
+        # layout steps to the nearest legal 17k + 5 overlap that matches (39, window 226). The 379 visible frames, the
+        # window ceiling and the extension are untouched.
+        self.assertEqual(lay["requested_overlap_frames"], 22)
+        self.assertEqual(lay["overlap_frames"], 39)
+        self.assertEqual(lay["window_frames"], 226)
         self.assertEqual(lay["total_frames"], 379)
         self.assertLessEqual(lay["window_frames"], br.CONTINUATION_WINDOW_MAX_FRAMES)
+        self.assertEqual(lay["window_audio_t"], lay["window_audio_official_t"])
+        self.assertFalse(br.continuation_window_audio_is_aligned(192, 22, 187))
+        self.assertTrue(br.continuation_window_audio_is_aligned(192, 39, 187))
+        self.assertTrue(br.continuation_window_audio_is_aligned(124, 22, 187))  # the 311f pack keeps its 22
 
     def test_two_beats_omitted_seconds_uses_continuation_defaults(self):
         with mock.patch("submit_parody_run.plan_c2v_chain") as mock_c2v:
@@ -674,8 +683,8 @@ class TestContinuationFiveItems(unittest.TestCase):
         g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
         self.assertEqual(g["c0"]["inputs"]["length"], 192)
         self.assertEqual(g["c2_gen"]["inputs"]["extension_frames"], 187)
-        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 22)
-        self.assertLessEqual(22 + 187, br.CONTINUATION_WINDOW_MAX_FRAMES)
+        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 39)  # audio-aligned for a 192f tail, visible 379 kept
+        self.assertLessEqual(39 + 187, br.CONTINUATION_WINDOW_MAX_FRAMES)
 
     def test_single_shot_byte_identical_and_locked_dials(self):
         g, p = build_parody_request(_res(), seed=51083601, prefix="community/test/clip", frames=124)

@@ -4228,3 +4228,192 @@ eeds_derrick.md (backup needs_derrick.md.bak-20261107-chatreview); no .pi config
 2026-11-15T20:07:01-0600 START U31 Antigravity (Argon/executor) implementing open agy-redteam-review-20261115.md audit fixes per U31-agy-brief.md
 2026-11-15T20:12:33-0600 DONE U31 Antigravity implemented open agy-redteam-review-20261115.md fixes; Render subagent rerun PASS (gemma4-heretic-sub, np2); open-webui ENABLE_SIGNUP=false live; commits etc=9a3b135 render=513fd09; record=/home/derekboone/evo-x3/records/U31-agy-audit-fixes-20261115.md
 2026-11-15T20:35:13-0600 START U21/U32 Antigravity (Argon) running B1-B5 benchmarks and U32 deep-research bake-off on EVO-X3 per U21-agy-brief.md
+2026-11-15T14:15:36-06:00 run_queue clip_01: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T14:15:36-06:00 run_queue clip_01: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T14:20:53-06:00 run_queue clip_01: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2945620 retry=False
+2026-11-15T14:21:03-06:00 run_queue clip_01: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=29421341 elapsed=7.7s raw=clip_raw.mp4
+2026-11-15T14:21:03-06:00 run_queue clip_01: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T14:21:55-06:00 run_queue clip_02: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T14:21:55-06:00 run_queue clip_02: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T14:27:08-06:00 run_queue clip_02: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2712010 retry=False
+2026-11-15T14:27:17-06:00 run_queue clip_02: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=26148479 elapsed=7.5s raw=clip_raw.mp4
+2026-11-15T14:27:17-06:00 run_queue clip_02: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T14:28:13-06:00 run_queue clip_03: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T14:28:13-06:00 run_queue clip_03: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T14:33:28-06:00 run_queue clip_03: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2498288 retry=False
+2026-11-15T14:33:37-06:00 run_queue clip_03: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=24804391 elapsed=7.5s raw=clip_raw.mp4
+2026-11-15T14:33:37-06:00 run_queue clip_03: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T14:34:33-06:00 run_queue clip_04: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T14:34:33-06:00 run_queue clip_04: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T14:39:48-06:00 run_queue clip_04: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3035487 retry=False
+2026-11-15T14:39:58-06:00 run_queue clip_04: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=26060648 elapsed=8.7s raw=clip_raw.mp4
+2026-11-15T14:39:58-06:00 run_queue clip_04: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T14:41:04-06:00 run_queue clip_05: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T14:41:04-06:00 run_queue clip_05: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T14:46:19-06:00 run_queue clip_05: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3131576 retry=False
+2026-11-15T14:46:40-06:00 run_queue clip_05: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=26398341 elapsed=19.3s raw=clip_raw.mp4
+2026-11-15T14:46:40-06:00 run_queue clip_05: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T15:43:24-06:00 run_queue clip_06: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T15:43:24-06:00 run_queue clip_06: START pos=1 tag=clip arm=oc_writer scene=blowjob seed=51083601
+2026-11-15T15:47:02-06:00 run_queue clip_06: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=2159372 retry=False
+2026-11-15T15:47:11-06:00 run_queue clip_06: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=17032699 elapsed=6.6s raw=clip_raw.mp4
+2026-11-15T15:47:11-06:00 run_queue clip_06: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T15:48:06-06:00 run_queue clip_07: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T15:48:06-06:00 run_queue clip_07: START pos=1 tag=clip arm=oc_writer scene=blowjob seed=51083601
+2026-11-15T15:53:19-06:00 run_queue clip_07: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2875717 retry=False
+2026-11-15T15:53:28-06:00 run_queue clip_07: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=24917826 elapsed=7.5s raw=clip_raw.mp4
+2026-11-15T15:53:28-06:00 run_queue clip_07: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T17:20:04-06:00 run_queue clip_08: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T17:20:04-06:00 run_queue clip_08: START pos=1 tag=clip arm=oc_writer scene=blowjob seed=51083601
+2026-11-15T17:25:19-06:00 run_queue clip_08: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3316179 retry=False
+2026-11-15T17:25:29-06:00 run_queue clip_08: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=26153449 elapsed=7.7s raw=clip_raw.mp4
+2026-11-15T17:25:29-06:00 run_queue clip_08: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T17:26:22-06:00 run_queue clip_09: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T17:26:22-06:00 run_queue clip_09: START pos=1 tag=clip arm=oc_writer scene=doggy seed=51083601
+2026-11-15T17:29:57-06:00 run_queue clip_09: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=1867242 retry=False
+2026-11-15T17:30:06-06:00 run_queue clip_09: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=15710362 elapsed=7.0s raw=clip_raw.mp4
+2026-11-15T17:30:06-06:00 run_queue clip_09: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T17:31:11-06:00 run_queue clip_10: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T17:31:11-06:00 run_queue clip_10: START pos=1 tag=clip arm=oc_writer scene=doggy seed=51083601
+2026-11-15T17:36:28-06:00 run_queue clip_10: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3054728 retry=False
+2026-11-15T17:36:49-06:00 run_queue clip_10: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=25331031 elapsed=19.5s raw=clip_raw.mp4
+2026-11-15T17:36:50-06:00 run_queue clip_10: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T17:37:44-06:00 run_queue clip_11: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T17:37:44-06:00 run_queue clip_11: START pos=1 tag=clip arm=oc_writer scene=doggy seed=51083601
+2026-11-15T17:43:01-06:00 run_queue clip_11: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3122595 retry=False
+2026-11-15T17:43:10-06:00 run_queue clip_11: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=25750821 elapsed=7.8s raw=clip_raw.mp4
+2026-11-15T17:43:10-06:00 run_queue clip_11: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T17:44:02-06:00 run_queue clip_12: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T17:44:02-06:00 run_queue clip_12: START pos=1 tag=clip arm=oc_writer scene=missionary seed=51083601
+2026-11-15T17:47:38-06:00 run_queue clip_12: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=1621113 retry=False
+2026-11-15T17:47:46-06:00 run_queue clip_12: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=15170583 elapsed=6.4s raw=clip_raw.mp4
+2026-11-15T17:47:47-06:00 run_queue clip_12: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T17:48:37-06:00 run_queue clip_13: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T17:48:37-06:00 run_queue clip_13: START pos=1 tag=clip arm=oc_writer scene=missionary seed=51083601
+2026-11-15T17:53:54-06:00 run_queue clip_13: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3154362 retry=False
+2026-11-15T17:54:04-06:00 run_queue clip_13: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=25862632 elapsed=7.6s raw=clip_raw.mp4
+2026-11-15T17:54:04-06:00 run_queue clip_13: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T17:54:55-06:00 run_queue clip_14: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T17:54:55-06:00 run_queue clip_14: START pos=1 tag=clip arm=oc_writer scene=missionary seed=51083601
+2026-11-15T18:00:06-06:00 run_queue clip_14: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3258292 retry=False
+2026-11-15T18:00:16-06:00 run_queue clip_14: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=25919279 elapsed=8.5s raw=clip_raw.mp4
+2026-11-15T18:00:17-06:00 run_queue clip_14: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:01:19-06:00 run_queue clip_15: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:01:19-06:00 run_queue clip_15: START pos=1 tag=clip arm=oc_writer scene=standing_mf seed=51083601
+2026-11-15T18:04:54-06:00 run_queue clip_15: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=1886984 retry=False
+2026-11-15T18:05:14-06:00 run_queue clip_15: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=15217108 elapsed=18.3s raw=clip_raw.mp4
+2026-11-15T18:05:15-06:00 run_queue clip_15: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:06:09-06:00 run_queue clip_16: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:06:09-06:00 run_queue clip_16: START pos=1 tag=clip arm=oc_writer scene=standing_mf seed=51083601
+2026-11-15T18:11:27-06:00 run_queue clip_16: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3404038 retry=False
+2026-11-15T18:11:36-06:00 run_queue clip_16: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=26253557 elapsed=7.9s raw=clip_raw.mp4
+2026-11-15T18:11:37-06:00 run_queue clip_16: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:12:30-06:00 run_queue clip_17: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:12:30-06:00 run_queue clip_17: START pos=1 tag=clip arm=oc_writer scene=standing_mf seed=51083601
+2026-11-15T18:17:43-06:00 run_queue clip_17: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3376242 retry=False
+2026-11-15T18:17:52-06:00 run_queue clip_17: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=26916529 elapsed=7.7s raw=clip_raw.mp4
+2026-11-15T18:17:53-06:00 run_queue clip_17: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:18:47-06:00 run_queue clip_18: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:18:47-06:00 run_queue clip_18: START pos=1 tag=clip arm=oc_writer scene=blowjob seed=51083601
+2026-11-15T18:22:25-06:00 run_queue clip_18: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=2068568 retry=False
+2026-11-15T18:22:33-06:00 run_queue clip_18: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=16739915 elapsed=6.5s raw=clip_raw.mp4
+2026-11-15T18:22:34-06:00 run_queue clip_18: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:23:33-06:00 run_queue clip_19: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:23:33-06:00 run_queue clip_19: START pos=1 tag=clip arm=oc_writer scene=blowjob seed=51083601
+2026-11-15T18:28:48-06:00 run_queue clip_19: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2937297 retry=False
+2026-11-15T18:28:58-06:00 run_queue clip_19: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=25651675 elapsed=8.4s raw=clip_raw.mp4
+2026-11-15T18:28:58-06:00 run_queue clip_19: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:30:10-06:00 run_queue clip_20: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:30:10-06:00 run_queue clip_20: START pos=1 tag=clip arm=oc_writer scene=blowjob seed=51083601
+2026-11-15T18:35:27-06:00 run_queue clip_20: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3135094 retry=False
+2026-11-15T18:35:53-06:00 run_queue clip_20: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=26816209 elapsed=24.0s raw=clip_raw.mp4
+2026-11-15T18:35:53-06:00 run_queue clip_20: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:37:14-06:00 run_queue clip_21: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:37:14-06:00 run_queue clip_21: START pos=1 tag=clip arm=oc_writer scene=standing_mf seed=51083601
+2026-11-15T18:41:01-06:00 run_queue clip_21: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=1932233 retry=False
+2026-11-15T18:41:10-06:00 run_queue clip_21: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=15765293 elapsed=6.6s raw=clip_raw.mp4
+2026-11-15T18:41:10-06:00 run_queue clip_21: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:42:07-06:00 run_queue clip_22: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:42:07-06:00 run_queue clip_22: START pos=1 tag=clip arm=oc_writer scene=standing_mf seed=51083601
+2026-11-15T18:47:20-06:00 run_queue clip_22: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2915168 retry=False
+2026-11-15T18:47:29-06:00 run_queue clip_22: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=24684123 elapsed=7.5s raw=clip_raw.mp4
+2026-11-15T18:47:29-06:00 run_queue clip_22: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:48:24-06:00 run_queue clip_23: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:48:24-06:00 run_queue clip_23: START pos=1 tag=clip arm=oc_writer scene=standing_mf seed=51083601
+2026-11-15T18:53:39-06:00 run_queue clip_23: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3119443 retry=False
+2026-11-15T18:53:48-06:00 run_queue clip_23: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=25239105 elapsed=7.6s raw=clip_raw.mp4
+2026-11-15T18:53:48-06:00 run_queue clip_23: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:54:42-06:00 run_queue clip_24: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:54:42-06:00 run_queue clip_24: START pos=1 tag=clip arm=oc_writer scene=missionary seed=51083601
+2026-11-15T18:58:17-06:00 run_queue clip_24: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=1734242 retry=False
+2026-11-15T18:58:26-06:00 run_queue clip_24: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=15171671 elapsed=7.3s raw=clip_raw.mp4
+2026-11-15T18:58:26-06:00 run_queue clip_24: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T18:59:31-06:00 run_queue clip_25: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T18:59:31-06:00 run_queue clip_25: START pos=1 tag=clip arm=oc_writer scene=missionary seed=51083601
+2026-11-15T19:04:49-06:00 run_queue clip_25: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3185074 retry=False
+2026-11-15T19:05:10-06:00 run_queue clip_25: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=24634728 elapsed=19.4s raw=clip_raw.mp4
+2026-11-15T19:05:10-06:00 run_queue clip_25: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T19:06:05-06:00 run_queue clip_26: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T19:06:05-06:00 run_queue clip_26: START pos=1 tag=clip arm=oc_writer scene=missionary seed=51083601
+2026-11-15T19:11:22-06:00 run_queue clip_26: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3354347 retry=False
+2026-11-15T19:11:37-06:00 run_queue clip_26: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=27144496 elapsed=12.5s raw=clip_raw.mp4
+2026-11-15T19:11:37-06:00 run_queue clip_26: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T19:12:55-06:00 run_queue clip_27: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T19:12:55-06:00 run_queue clip_27: START pos=1 tag=clip arm=oc_writer scene=prone_bone seed=51083601
+2026-11-15T19:16:40-06:00 run_queue clip_27: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=1851915 retry=False
+2026-11-15T19:16:48-06:00 run_queue clip_27: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=15696800 elapsed=6.3s raw=clip_raw.mp4
+2026-11-15T19:16:48-06:00 run_queue clip_27: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T19:17:37-06:00 run_queue clip_28: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T19:17:37-06:00 run_queue clip_28: START pos=1 tag=clip arm=oc_writer scene=prone_bone seed=51083601
+2026-11-15T19:22:55-06:00 run_queue clip_28: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3170871 retry=False
+2026-11-15T19:23:04-06:00 run_queue clip_28: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=25869264 elapsed=7.6s raw=clip_raw.mp4
+2026-11-15T19:23:04-06:00 run_queue clip_28: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T19:23:56-06:00 run_queue clip_29: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T19:23:56-06:00 run_queue clip_29: START pos=1 tag=clip arm=oc_writer scene=prone_bone seed=51083601
+2026-11-15T19:29:11-06:00 run_queue clip_29: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2691442 retry=False
+2026-11-15T19:29:21-06:00 run_queue clip_29: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=22704964 elapsed=8.5s raw=clip_raw.mp4
+2026-11-15T19:29:21-06:00 run_queue clip_29: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T19:30:27-06:00 run_queue clip_30: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T19:30:27-06:00 run_queue clip_30: START pos=1 tag=clip arm=oc_writer scene=finish seed=51083601
+2026-11-15T19:34:05-06:00 run_queue clip_30: DONE pos=1 tag=clip ok 768x1344 158f audio yes wall=?s bytes=2092222 retry=False
+2026-11-15T19:34:26-06:00 run_queue clip_30: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=158 audio=yes bytes=17688754 elapsed=18.7s raw=clip_raw.mp4
+2026-11-15T19:34:26-06:00 run_queue clip_30: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T19:35:21-06:00 run_queue clip_31: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T19:35:21-06:00 run_queue clip_31: START pos=1 tag=clip arm=oc_writer scene=finish seed=51083601
+2026-11-15T19:40:39-06:00 run_queue clip_31: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=2844201 retry=False
+2026-11-15T19:40:48-06:00 run_queue clip_31: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=24637940 elapsed=7.9s raw=clip_raw.mp4
+2026-11-15T19:40:49-06:00 run_queue clip_31: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T19:41:39-06:00 run_queue clip_32: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T19:41:39-06:00 run_queue clip_32: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T19:46:15-06:00 run_queue clip_32: DONE pos=1 tag=clip ok 768x1344 209f audio yes wall=?s bytes=2314895 retry=False
+2026-11-15T19:46:24-06:00 run_queue clip_32: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=209 audio=yes bytes=21845924 elapsed=7.4s raw=clip_raw.mp4
+2026-11-15T19:46:25-06:00 run_queue clip_32: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-15T20:18:02-06:00 Forge: START keep-comfy-part1 follow-up (submit_parody_run flag, canonical scripts/queue/chain_queue.py, test_run_queue_keep_comfy_process, VRAM note, scoped commit)
+2026-11-15 (keep-comfy-part1, Forge) DONE: --keep-comfy-process chain opt-in committed 7b7c000 (run_queue flag + guarded unload, submit_parody_run passthrough both entries, canonical scripts/queue/chain_queue.py with /comfyui/system_stats keepalive ping, 14 new tests in test_run_queue_keep_comfy_process.py + fixture). Verified: 38 passed tests/run_queue suites, 7 test_parody_ba5c, 16 test_t1109_writer_index_refmods, 183 test_writer_finalize; --help and dry-run argv show flag off by default. VRAM fit note notes/2026-11-15-keep-comfy-vram-fit.md: H3 render ~15.4/16.3 GB + Gemma Q4_K_M 15.71 GB (expert cache 7.44 GiB, 749 MiB free) cannot coexist - flag buys process-wake (~40 s) removal only, part 2 writer residency fits only in non-render gaps. No llama-swap/ComfyUI changes, no GPU render queued.
+2026-11-15T20:42:55-06:00 Forge: START extend-3beat part3 wiring (writer-format 3-beat route on the live latent-tail builder, dry run only, no render)
+2026-11-15T21:11:58-06:00 Forge: FIX extend-3beat part3 (build_request.build_writer_beats_continuation_request + writer_beat_scene/prompt/lead_in helpers; new scripts/parody/test_writer_beats_continuation.py; runs/extend-test-3beat-20261115/dry_run/build_dry_run.py; builder backed up to _archive/extend3beat-wire-20261115-204255)
+2026-11-15T21:11:58-06:00 extend-3beat part3 DONE (Forge): writer-format 3-beat route wired and committed ab4d1ea (build_request.py +132 this job only via git apply --cached, test +199, other jobs trigger-clause hunks left unstaged, no push). Dry run of the pack clean: 38 nodes c0/c2/c3, 192+187+187=566f visible 23.5833s, 209f windows, 22f hidden overlap, 768x1344, seed 51083601, RefMod on every beat, no RefLoRA, no 2-pass, no voice ref, verify_keep_dials PASS, GI183 only at beat 1 frame 0, Picture 1 kept on beats 2-3 with no staged image, no H3 video-continuation opener, authored prompt text byte-preserved (only the builder CONTINUATION_LEAD_IN_DYNAMIC block inserted), pack hashes 808424141FE88045/7115D0AE1CFBFA53/ED7BC54BD52A366E unchanged. Tests: 7 new route tests, 124 pytest + 81 unittest + 135 full-discovery existing pass. Artifacts runs/extend-test-3beat-20261115/dry_run, report C:/AI/render/_handoff/2026-11-15-extend-test-3beat-RESULT.md + run notes/RESULT.md. Open item for Derrick: the writer-run/writer-continue entries have no 3-beat writer-format entry point, so rendering needs that entry wiring plus his go. No GPU, no GPU lock, nothing queued.
+2026-11-15T21:20:13-06:00 run_queue live: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T21:20:13-06:00 run_queue live: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T21:24:30-06:00 run_queue live: FAIL pos=1 tag=clip job error (node_error)
+2026-11-15T21:24:30-06:00 run_queue live: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601 (the one allowed unchanged retry)
+2026-11-15T21:24:35-06:00 run_queue live: FAIL pos=1 tag=clip job error (node_error)
+2026-11-15T21:24:35-06:00 run_queue live: FAIL pos=1 tag=clip failed twice (one unchanged retry used) - skipped
+2026-11-15T21:24:36-06:00 run_queue live: BATCH closed rc=5 reason=1 clip(s) failed twice: clip done=0/1: comfyui_auto unloaded, lock released
+2026-11-15T21:48:24-06:00 Forge: START c2-samp audio-length fix (build_request continuation_layout/_layout_chain, no render, no GPU lock)
+2026-11-15T21:48:24-06:00 Forge: DONE c2-samp fix commit 12d0733 (build_request.py +2 audio-aligned per-beat overlap; test_parody_dynamic; test_writer_beats_continuation; backups _archive/c2-samp-fix-20261115-2128; 520 tests pass; pack beat2 22->39 window 226 377==377, beat3 keeps 22 209 348==348, 566f unchanged; prompts byte-identical; result C:/AI/render/_handoff/2026-11-15-c2-samp-fix-RESULT.md)
+2026-11-15T21:51:08-06:00 run_queue live-12d0733: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T21:51:08-06:00 run_queue live-12d0733: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T21:55:25-06:00 run_queue live-12d0733: FAIL pos=1 tag=clip job error (node_error)
+2026-11-15T21:55:25-06:00 run_queue live-12d0733: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601 (the one allowed unchanged retry)
+2026-11-15T21:55:30-06:00 run_queue live-12d0733: FAIL pos=1 tag=clip job error (node_error)
+2026-11-15T21:55:30-06:00 run_queue live-12d0733: FAIL pos=1 tag=clip failed twice (one unchanged retry used) - skipped
+2026-11-15T21:55:32-06:00 run_queue live-12d0733: BATCH closed rc=5 reason=1 clip(s) failed twice: clip done=0/1: comfyui_auto unloaded, lock released
+2026-11-15T23:23:16-06:00 c2-samp-2000-cap: START forge one-turn builder fix, no render, no gpu lock (brief _handoff\c2-samp-2000-cap\PROMPT.md)
+2026-11-15T23:23:16-06:00 c2-samp-2000-cap: FIX build_request.py add_continuation_beat gives beats 2..N an audio-free MiniMaxH3RefModsLoader (c{n}_refmods) + cond_audio row report in plan; 2000 = poolclub voice RefMod [1,32,2,1000] packed, layout reserves 2000+2*overlap_audio (130/74) -> 2130/2074 vs 2000 at c2_samp
+2026-11-15T23:23:16-06:00 c2-samp-2000-cap: DONE commit 8ee347e (2 files, +214/-1, not pushed), 520 tests pass, dry-c2-samp READY 566f 192+187+187, prompts byte-identical (808424141FE88045/7115D0AE1CFBFA53/ED7BC54BD52A366E), _trigger_clause left unstaged, RESULT _handoff\2026-11-15-c2-samp-2000-cap-RESULT.md
+2026-11-15T23:44:00-06:00 run_queue live-8ee347e: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-15T23:44:00-06:00 run_queue live-8ee347e: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
+2026-11-15T23:59:34-06:00 run_queue live-8ee347e: DONE pos=1 tag=clip ok 768x1344 566f audio yes wall=?s bytes=8107181 retry=False
+2026-11-16T00:00:00-06:00 run_queue live-8ee347e: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=566 audio=yes bytes=67449223 elapsed=23.7s raw=clip_raw.mp4
+2026-11-16T00:00:00-06:00 run_queue live-8ee347e: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released

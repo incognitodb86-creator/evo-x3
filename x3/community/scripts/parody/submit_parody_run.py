@@ -325,6 +325,7 @@ def submit_parody_job(
     image_times: Optional[Sequence[Any]] = None,
     beat_new_shots: Optional[Sequence[Any]] = None,
     prequel_to: Optional[Union[str, Path]] = None,
+    keep_comfy_process: bool = False,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if not description or not str(description).strip():
@@ -564,6 +565,8 @@ def submit_parody_job(
         str(jobs[0]["frames"]),
         "--detach",
     ]
+    if keep_comfy_process:  # chained mode (keep-comfy-part1, 2026-11-15): only when the caller asked
+        cmd.append("--keep-comfy-process")
 
     print(f"Submitting render queue: {' '.join(cmd)}")
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
@@ -648,7 +651,16 @@ _OC_VER_RE = re.compile(r"(?i)_v(\d+)_")
 
 
 def _keep_highest_oc_version(stems: Sequence[str]) -> List[str]:
-    """When multiple versions (v1, v2) of the same OC key appear in stems, keep only the highest version."""
+    """When multiple versions (v1, v2) of the same OC key appear in stems, keep only the highest version.
+
+    A voice RefMod trimmed to fit a continuation beat's cond_audio cap (`<name>_23s`,
+    build_request.CONTINUATION_VOICE_REFMOD_SUFFIX) is a DERIVED copy of a reference that exists in full form:
+    build_request._continuation_voice_refmods wires it on one continuation beat from that beat's own layout.
+    It is never a character's voice reference for a base beat - two audio RefMods there pack
+    2*(1000+920)=3840 rows against the 2000 a voice reference carries, the over-cap family of the live c2_samp
+    failure (2026-11-15, [2000,32] vs [2130,32]). So a trim is dropped exactly when the file it was cut from is
+    in the same list; a list with only a trim keeps it (a character whose full reference is not installed).
+    """
     max_ver: Dict[str, int] = {}
     for s in stems:
         m = _OC_KEY_RE.search(s)
@@ -668,7 +680,9 @@ def _keep_highest_oc_version(stems: Sequence[str]) -> List[str]:
             if ver < max_ver.get(k, 0):
                 continue
         out.append(s)
-    return out
+    trim = br.CONTINUATION_VOICE_REFMOD_SUFFIX
+    drop = {s for s in out if str(s).endswith(trim) and str(s)[: -len(trim)] in out}
+    return [s for s in out if s not in drop]
 
 
 def installed_oc_refmod_keys(refmods_dir: Optional[Path] = None) -> Dict[str, List[str]]:
@@ -1219,6 +1233,7 @@ def submit_writer_run(
     partner_type2: Optional[str] = None,
     partner_type: Optional[str] = None,
     continued: bool = False,
+    keep_comfy_process: bool = False,
 ) -> Dict[str, Any]:
     """Render's production hook for a free-text OC writer prompt: after the writer call, before graph submit.
 
@@ -1416,6 +1431,8 @@ def submit_writer_run(
         q_frames = rep.get("total_frames") if isinstance(rep, dict) and rep.get("total_frames") else g["c0"]["inputs"]["length"]
         cmd = [python, "-u", str(RUN_QUEUE_PY), "--run-dir", str(run_dir), "--size",
                f"{g['c0']['inputs']['width']}x{g['c0']['inputs']['height']}", "--frames", str(q_frames), "--detach"]
+        if keep_comfy_process:  # chained mode (keep-comfy-part1, 2026-11-15): only when the caller asked
+            cmd.append("--keep-comfy-process")
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
         except subprocess.TimeoutExpired:
@@ -1491,6 +1508,11 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--shots", default=None, choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
     ap.add_argument("--partner-type", default=None, choices=["man", "woman", "futa", "none", "non-human", "faceless"])
     ap.add_argument("--queue", action="store_true", help="Actually queue (only when Derrick said to queue)")
+    # keep-comfy-part1 (2026-11-15): chained runs pass this through to run_queue.py, which keeps the
+    # comfyui_auto PROCESS alive at batch close (POST /free still runs). Default off: normal runs unchanged.
+    ap.add_argument("--keep-comfy-process", action="store_true",
+                    help="With --queue: run_queue.py skips only the llama-swap unload of comfyui_auto at batch "
+                         "close, so the next clip in a chain does not pay the ~40 s process wake")
     try:
         a = ap.parse_args(argv)
     except SystemExit:
@@ -1532,7 +1554,8 @@ def _writer_run_cli(argv) -> int:
                                                   **({"inherited_garments": inh_garments} if isinstance(inh_garments, dict) and inh_garments else {}),
                                                   **({"scene_read": scene_read} if isinstance(scene_read, dict) else {}))
                               or None, partner_type=(a.partner_type or None), continued=bool(getattr(a, "continued", False)),
-                              **({"frames": br.validate_single_clip_frames(a.frames)} if a.frames else {}))
+                              **({"frames": br.validate_single_clip_frames(a.frames)} if a.frames else {}),
+                              **({"keep_comfy_process": True} if a.keep_comfy_process else {}))
     except Exception as e:
         print(f"NOT_READY submitted=False hook error: {type(e).__name__}: {e}")
         return 3
@@ -1594,6 +1617,10 @@ def main(argv=None) -> int:
     parser.add_argument("--wait", action="store_true", help="Block until the batch closes and write <run_dir>/clip.mp4")
     parser.add_argument("--qnap-put", action="store_true", help="With --wait: upload clip.mp4 to pi-drop/<run>.mp4")
     parser.add_argument("--wait-timeout", type=float, default=WAIT_TIMEOUT_SEC)
+    # keep-comfy-part1 (2026-11-15): same flag as run_queue.py; only passed through when set.
+    parser.add_argument("--keep-comfy-process", action="store_true",
+                        help="run_queue.py keeps the comfyui_auto process loaded at batch close "
+                             "(POST /free still runs); for chained runs. Default off: normal run unloads.")
     args = parser.parse_args(argv)
 
     res = submit_parody_job(
@@ -1642,6 +1669,7 @@ def main(argv=None) -> int:
         image_times=args.image_at,
         beat_new_shots=args.beat_new_shot,
         prequel_to=args.prequel_to,
+        keep_comfy_process=args.keep_comfy_process,
     )
     if args.wait and not args.dry_run:
         r = res.get("resolved") or {}
