@@ -4,13 +4,12 @@
 # workspace (label = chat name) if missing, then runs that chat's launcher in the pane:
 #   ~/evo-x3/pi-chats/<name>-pi.sh --remote [+ pi-mobile and herdr extensions for the --no-extensions launchers]
 # The launchers hold the full AlienPc-equivalent argv (extensions, skills, AGENTS.md, model, thinking).
-# Default PANES="render forge". Sydney is launcher-only until Derrick or Sydney's lane copies her files (D7):
-# start her later with PANES=sydney bash herdr-panes.sh.
+# Default PANES="render forge sydney". Sydney workspace copied 2026-11-16 (Derrick t1881u).
 set -uo pipefail
 export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin"
 LOG=${HERDR_PANES_LOG:-$HOME/evo-x3/logs/herdr-panes.log}; mkdir -p "$(dirname "$LOG")"
 log() { echo "$(date +%FT%T%z) $*" >> "$LOG"; }
-PANES=${PANES:-"render forge"}
+PANES=${PANES:-"render forge sydney"}
 declare -A CWD=([render]="$HOME/AI/render" [forge]="$HOME/AI/forge" [sydney]="$HOME/AI/sydney")
 MOB="$HOME/.pi/agent/npm/node_modules/pi-mobile/src/index.ts"
 HST=$(ls "$HOME"/.pi/agent/extensions/herdr*.ts 2>/dev/null | head -1)
