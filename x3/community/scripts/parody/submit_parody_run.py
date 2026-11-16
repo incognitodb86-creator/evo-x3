@@ -648,7 +648,16 @@ _OC_VER_RE = re.compile(r"(?i)_v(\d+)_")
 
 
 def _keep_highest_oc_version(stems: Sequence[str]) -> List[str]:
-    """When multiple versions (v1, v2) of the same OC key appear in stems, keep only the highest version."""
+    """When multiple versions (v1, v2) of the same OC key appear in stems, keep only the highest version.
+
+    A voice RefMod trimmed to fit a continuation beat's cond_audio cap (`<name>_23s`,
+    build_request.CONTINUATION_VOICE_REFMOD_SUFFIX) is a DERIVED copy of a reference that exists in full form:
+    build_request._continuation_voice_refmods wires it on one continuation beat from that beat's own layout.
+    It is never a character's voice reference for a base beat - two audio RefMods there pack
+    2*(1000+920)=3840 rows against the 2000 a voice reference carries, the over-cap family of the live c2_samp
+    failure (2026-11-15, [2000,32] vs [2130,32]). So a trim is dropped exactly when the file it was cut from is
+    in the same list; a list with only a trim keeps it (a character whose full reference is not installed).
+    """
     max_ver: Dict[str, int] = {}
     for s in stems:
         m = _OC_KEY_RE.search(s)
@@ -668,7 +677,9 @@ def _keep_highest_oc_version(stems: Sequence[str]) -> List[str]:
             if ver < max_ver.get(k, 0):
                 continue
         out.append(s)
-    return out
+    trim = br.CONTINUATION_VOICE_REFMOD_SUFFIX
+    drop = {s for s in out if str(s).endswith(trim) and str(s)[: -len(trim)] in out}
+    return [s for s in out if s not in drop]
 
 
 def installed_oc_refmod_keys(refmods_dir: Optional[Path] = None) -> Dict[str, List[str]]:
