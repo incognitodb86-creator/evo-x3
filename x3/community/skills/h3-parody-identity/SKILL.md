@@ -50,7 +50,7 @@ Name mapping: prefer pairing `INDEX` character + actor (`--name "<Actor>" --char
 ```bash
 bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick [--wait]
 ```
-- **Do NOT** poll manually; `--wait` waits for `BATCH closed` in `_render_queue.log` (`rc=0` ok; `rc=7` GPU busy). On `ValueError`, quote it, fix wording once if yours, else stop. After `rc=0`, optionally upload via `~/AI/render/x3/.venv/bin/python ~/AI/community/scripts/pi_qnap.py put <run_dir>/clip/clip.mp4 pi-drop/<run>.mp4`.
+- **Do NOT** poll manually; `--wait` waits for `BATCH closed` in `_render_queue.log` (`rc=0` ok; `rc=7` GPU busy). On `ValueError`, quote it, fix wording once if yours, else stop. After `rc=0`, optionally upload `<run_dir>/clip/clip.mp4` to QNAP `pi-drop/` per `AGENTS.md`.
 
 ## Sibling skills
 
