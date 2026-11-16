@@ -1244,12 +1244,7 @@ def kept_lines(full: str, rep: Dict[str, Any]) -> List[str]:
 
 # ---- still handling -------------------------------------------------------------------------------------------------
 def auto_still(cfg: Dict[str, Any], run_id: str, ask: str) -> str:
-    pool = []
-    for g in cfg.get("still_pool") or []:
-        pool += [p for p in glob.glob(os.path.expanduser(g), recursive=True) if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
-    if not pool:
-        raise RuntimeError("still auto: the still pool is empty")
-    return random.Random(seed_for(run_id, ask, 7)).choice(sorted(pool))
+    raise RuntimeError("no still pool on X3; pass an explicit --still path")
 
 
 _SHINE_RE = re.compile(r"(?i)\b(?:glistening|glisten\w*|oily|oiled|glossy|shiny|shimmering|slick)\b(?:\s+(?:with\s+)?(?:wet\s+)?skin)?")
