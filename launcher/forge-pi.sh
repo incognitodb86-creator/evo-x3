@@ -6,5 +6,6 @@
 # X3 Forge pane launcher: runs as evo from herdr-panes.sh (which passes --remote for herdr/pi-mobile).
 set -euo pipefail
 cd "$HOME/AI/forge"
+export PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/panes/forge}"
 export PATH="$HOME/AI/render/x3/.venv/bin:$HOME/.local/bin:$PATH"
 exec pi --approve --model "${FORGE_MODEL:-x3-local/flash-next}" --thinking "${FORGE_THINKING:-medium}" "$@"
