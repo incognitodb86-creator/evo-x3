@@ -194,6 +194,17 @@ class TestWriterBeatsContinuation(unittest.TestCase):
         self.assertFalse(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [37])["ok"])
         self.assertTrue(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [])["ok"])
         self.assertTrue(br.continuation_cond_audio_rows([], [65])["ok"])  # the wired state: the tail keyframe alone
+        # A 920-token (23 s) trim is still a mismatch: packed 1840 vs reserved 1970 / 1914.
+        # Do not treat layout_rows <= 2000 as ok.
+        t23 = br.CONTINUATION_VOICE_REFMOD_LATENT_T
+        self.assertEqual((t23, 2 * t23 + 2 * 65, 2 * t23 + 2 * 37), (920, 1970, 1914))
+        self.assertEqual(br.continuation_cond_audio_rows([t23], [65]),
+                         {"refmod_cond_audio_rows": 1840, "keyframe_cond_audio_rows": 130,
+                          "packed_cond_audio_rows": 1840, "layout_cond_audio_rows": 1970, "row_delta": 130,
+                          "cond_audio_block": True, "ok": False,
+                          "error_signature": "value tensor of shape [1840, 32] cannot be broadcast "
+                                             "to indexing result of shape [1970, 32]"})
+        self.assertFalse(br.continuation_cond_audio_rows([t23], [37])["ok"])
         # prompt text is unchanged by the graph change (the allowed hashes of the live pack, live-12d0733)
         for i, node in enumerate(("c0", "c2", "c3"), start=1):
             self.assertIn(f"Marker A{i}", g[node]["inputs"]["prompt"])
@@ -216,7 +227,12 @@ class TestWriterBeatsContinuation(unittest.TestCase):
             if lead:
                 self.assertEqual(sent.count(lead), 1, f"beat {i}: the lead-in is not a single inserted block")
             stripped = sent.replace(probe, "", 1) if lead else sent
-            self.assertEqual(stripped, authored.strip(), f"beat {i}: the route changed the authored prompt text")
+            # Continuation-window prompts carry window-local clocks; authored beat-file clocks may differ.
+            # Shot wording is otherwise unchanged (pack beat files stay hash-identical).
+            def _clock_neutral(s: str) -> str:
+                return re.sub(r"At \d{1,2}:[0-5]\d(?:\.\d{1,3})?,", "At <CLOCK>,", s)
+            self.assertEqual(_clock_neutral(stripped), _clock_neutral(authored.strip()),
+                             f"beat {i}: the route changed the authored prompt text beyond shot clocks")
             for section in ("subject_definitions", "summary", "retention_analysis", "detailed_description"):
                 self.assertIn(section + ":", sent)
             self.assertIn(f"Marker A{i}", sent)
@@ -273,6 +289,24 @@ class TestWriterBeatsContinuation(unittest.TestCase):
         no_shot1 = BEAT2.replace("detailed_description:\n[Shot 1] ", "detailed_description:\n", 1)
         with self.assertRaises(br.WriterPromptError):
             _build(beat_prompts=[BEAT1, no_shot1], frames=[192, 187])
+
+    def test_continuation_shot_clocks_are_window_local_and_globals_are_reported(self):
+        g, _, plan = _build()
+        # Fixture authored cut is 00:03.250 = 78f. Beat 2 applies overlap 39 (requested 22), so
+        # window-local = 78 + 17 = 95 = 00:03.958; global = 192 + 95 - 39 = 248.
+        # Beat 3 keeps overlap 22, so the clock is unchanged at 00:03.250; global = 379 + 78 - 22 = 435.
+        self.assertEqual(plan["beats"][1]["shot_frames"], [248])
+        self.assertEqual(plan["beats"][2]["shot_frames"], [435])
+        b2 = g["c2"]["inputs"]["prompt"]
+        self.assertIn("At 00:03.958,", b2)
+        self.assertNotIn("At 00:10.333,", b2)
+        b3 = g["c3"]["inputs"]["prompt"]
+        self.assertIn("At 00:03.250,", b3)
+        cuts2 = plan["beats"][1]["shot_clocks"]["cuts"]
+        first = next(iter(cuts2.values()))
+        self.assertEqual(first["window_local_frames"], 95)
+        self.assertEqual(first["global_frames"], 248)
+        self.assertEqual(first["window_local_clock"], "00:03.958")
 
     def test_prompt_all_lists_every_beat(self):
         _, prompt_all, plan = _build()
