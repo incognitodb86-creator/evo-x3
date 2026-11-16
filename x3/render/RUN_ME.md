@@ -57,7 +57,7 @@ Quickstart for running the H3 writer pipeline from `~/AI/render` (EVO-X3 Linux a
 ## 3. Characters, RefMods, Voice Refs, and Stills Vaults
 - **All adult RefMods and all voice refs are allowed**: OC RefMods, INDEX celebrity/character RefMods, PixlStash-tagged identities, and voice refs (`*_refmod_audio` + `<Audio 1>`) are all supported by `writer-run`.
 - **`FCSydny`**: resolves automatically to `minimaxh3_oc_poolclub_v1_refmod_visual` and `minimaxh3_oc_poolclub_v1_refmod_audio` (`<Audio 1>` voice timbre).
-- **Stills & PixlStash vaults (`submit_parody_run.py` `_PIXLSTASH_VAULTS`)**: tag-resolution looks up character tags across `/home/derekboone/AI/render/stills/approved_characters/vault.db` and Stills libraries `/home/derekboone/AI/5slock/libraries/vault.db` (path/tag lookup only — never open/browse library pictures, captions, sidecars, or face groups).
+- **Stills & PixlStash vaults (`submit_parody_run.py` `_PIXLSTASH_VAULTS`)**: tag-resolution looks up character tags in the merged Stills library `~/AI/5slock/libraries/vault.db` (POOL folder fallback at `~/AI/render/stills/approved_characters/POOL`) (path/tag lookup only — never open/browse library pictures, captions, sidecars, or face groups).
 - **Content rule**: Only `18+` adults-only applies (`guard_ok` and youth lint stay locked). Never use minor-coded terms.
 
 ## 4. Prompt Compilation & Acceptance
