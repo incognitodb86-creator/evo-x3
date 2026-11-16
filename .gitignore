@@ -1,0 +1,7 @@
+# x3-forge: Forge project config only
+_archive/
+.pi/npm/
+.pi/git/
+*.bak-*
+sessions/
+*.env
