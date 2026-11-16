@@ -1624,25 +1624,38 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                     "scene": scene_prev, "builder_preview": builder_preview_fn(still_read, position, ask, continued=bool(scene_prev), inherited_garments=_inh_g),
                     "cast": cast_l, "overlays": overlays, "ask": ask, "act_id": route["act_id"], "wet_ok": wet_ok,
                     "recent_openings": [wp_lint.opening_sentence(d) for d in wp_state.load_recent(recent_path)[-10:]]}
-        # 3 beat card
+        # 3 beat card (Cut 2: talk clips and runs with --frames use the in-code minimal beat card, no LLM planning call)
         card = None
-        schema = mode(kind)["schema"]
         bc = dict(sampler, **(cfg.get("beat_card_sampler") or {}))
-        for attempt in (1, 2):
-            raw = client.chat(beat_messages(sysprompt, brief, kind, overlays), bc, seed_for(run_id, ask, 0) + attempt - 1,
-                              cfg.get("beat_card_max_tokens", 1400),
-                              response_format={"type": "json_schema", "json_schema": {"name": "beat_card", "schema": schema}},
-                              purpose=f"beat_card_{attempt}")
-            try:
-                c = parse_json(raw)
-                errs = schema_errors(c, schema)
-                if errs:
-                    raise ValueError("; ".join(errs[:6]))
-                card = c
-                break
-            except Exception as e:
-                log("beat_card_invalid", {"run": run_id, "attempt": attempt, "error": str(e)[:300]})
-                wp_state.atomic_write(run_dir / f"beat_card_invalid_{attempt}.txt", raw or "")
+        if kind == "talk" or _explicit_frames:
+            card = {
+                "clip_seconds": clip_seconds,
+                "summary": f"{position} beat" if kind != "talk" else "talk-only beat",
+                "camera": "held medium shot, her face in frame",
+                "partners": [],
+                "anchor": {"pose": slots.get("pose") or "as shown"},
+                "onset": {"action": "she begins the beat", "sound": "room tone"},
+                "development": {"line_topics": ["her line for the scene"], "sound": "her voice"},
+                "result": {"action": "she holds the look", "sound": "room tone", "line_topics": ["a closing line"]},
+                "end_state": {"pose": slots.get("pose") or "as shown", "motion": "still going"},
+            }
+        else:
+            schema = mode(kind)["schema"]
+            for attempt in (1, 2):
+                raw = client.chat(beat_messages(sysprompt, brief, kind, overlays), bc, seed_for(run_id, ask, 0) + attempt - 1,
+                                  cfg.get("beat_card_max_tokens", 1400),
+                                  response_format={"type": "json_schema", "json_schema": {"name": "beat_card", "schema": schema}},
+                                  purpose=f"beat_card_{attempt}")
+                try:
+                    c = parse_json(raw)
+                    errs = schema_errors(c, schema)
+                    if errs:
+                        raise ValueError("; ".join(errs[:6]))
+                    card = c
+                    break
+                except Exception as e:
+                    log("beat_card_invalid", {"run": run_id, "attempt": attempt, "error": str(e)[:300]})
+                    wp_state.atomic_write(run_dir / f"beat_card_invalid_{attempt}.txt", raw or "")
         if card is not None and not _explicit_frames:
             cs = card.get("clip_seconds")
             if isinstance(cs, (int, float)) and not isinstance(cs, bool) and float(cs) > 0:

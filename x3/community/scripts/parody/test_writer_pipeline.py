@@ -894,9 +894,10 @@ def test_beat_card_schema_number_bool_match_partner_labels_and_talk_frames(home,
     monkeypatch.setattr(p, "run_build", run_build_cap)
     cfg = p.load_config(home / "config.yaml")
     r = p.run_clip(job(tmp_path, "lf08_talk", ask="BTS interview with off-screen interviewer", position="talk"), cfg, lambda *a: None)
-    assert r["frames"] == 158 and r["frames"] != 243
-    assert "--frames" in seen_extra[0] and "158" in seen_extra[0]
+    assert r["frames"] == 192 and r["frames"] != 243
+    assert "--frames" in seen_extra[0] and "192" in seen_extra[0]
     assert "beat_card_skipped" not in r["warnings"]
+    assert not any(c["purpose"].startswith("beat_card") for c in r.get("llm_calls") or [])
 
 
 
