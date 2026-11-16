@@ -3964,6 +3964,131 @@ def writer_beat_prompt(text: str, pronoun: Optional[str] = None, closer: Optiona
     return out if out.endswith("\n") else out + "\n"
 
 
+# --- continuation shot clocks: a beat's authored cut times -> frames of the window it is sampled on ----------------
+# A writer times a cut inside its own beat ("[Shot 2] At 00:03.250, the camera cuts"), measured from the start of
+# the sampled window the pack planned, i.e. from the previous beats' delivered total plus the overlap the plan
+# documents. That planned overlap is NOT the overlap the layout applies: `continuation_layout` snaps the requested
+# overlap to the audio-aligned 5n + 5 grid of the previous clip's latent, and the shipped 192 + 187 + 187 pack
+# (1920x1080, 24 fps, overlaps 22 / 22) applies 39 and 22 - live-verified on 2026-11-15 (run
+# extend-test-3beat-20261115\live-12d0733: applied [39, 22], windows 226 = 39 + 187 and 209 = 22 + 187, window
+# audio 377 and 348 = round(frames * 40 / 24), the official `nodes_minimax_h3.temporal_shape` grid).
+# So beat 2's window is 17 frames LONGER AT THE FRONT than the plan's 209, all of it hidden tail. Of any window,
+# only the frames after its overlap reach the delivered clip (the LatentTailGuide rebuilds the overlap, Append-
+# Continuation appends the rest), so a beat's first delivered frame is the cumulative total of the beats before it:
+#     window_local = authored_frames + (applied_overlap - requested_overlap)   # the window grew at the front
+#     global_frame = window_start + window_local - applied_overlap             # the hidden part is not in the clip
+# Beat 2 of that pack: 00:03.250 -> authored 78 -> window-local 95 (00:03.958 of the 9.416 s window the sampler
+# receives) -> 192 + 95 - 39 = 248 on the delivered clip, not 267, which is what an authored 00:03.250 reads if
+# the 0.917 s of hidden overlap is never subtracted. 00:06.250 -> authored 150 -> window-local 167 (00:06.958) ->
+# 192 + 167 - 39 = 320. A beat whose applied overlap equals the requested one (beat 3: 22 = 22) has no window
+# growth and no shift: its authored clocks stay authored, and 379 + authored - 22 lands them on the delivered clip.
+# The shipped continuation prompt carries the WINDOW clock - a sampler only ever has its own window, and a GLOBAL
+# clock (00:10.333 for that first beat-2 cut) sits 6.375 s past the end of a 9.416 s window, a time the model
+# cannot cut at. The plan, the report and the asserts carry window-local AND global frames.
+
+# `_BEAT_SHOT_CLOCK_RE` is deliberately a SEPARATE pattern from the `_SHOT_CLOCK_RE` used by `split_shots` (above,
+# the "At " line splitter). The rewriter needs the `[Shot N]` tag it re-times and a strict two-digit-second clock;
+# one shared name would let a later module-level assignment silently replace the earlier pattern, and the second
+# definition in this module does exactly that - so `split_shots` ran on the rewriter's anchored pattern.
+_BEAT_SHOT_CLOCK_RE = re.compile(r"^(\[Shot\s+\d+\]\s*)At\s+(\d{1,2}):([0-5]\d)(?:\.(\d{1,3}))?\s*,", re.MULTILINE)
+
+
+def parse_shot_clocks(text: str, fps: int = H3_FPS) -> List[Dict[str, Any]]:
+    """Every authored "[Shot N] At MM:SS.mmm," cut in one beat prompt, in order, as frames of that beat.
+
+    `mmss` is the authored clock, `frames` that clock in frames of the beat's own window, measured from the window
+    start the plan gives it. [] for a beat with no cut line: beat 1's [Shot 1] opens at frame 0 and is never timed.
+    """
+    out: List[Dict[str, Any]] = []
+    for m in _BEAT_SHOT_CLOCK_RE.finditer(text or ""):
+        mm, ss, frac = int(m.group(2)), int(m.group(3)), (m.group(4) or "0")
+        seconds = mm * 60 + ss + float("0." + frac)
+        out.append({"mmss": f"{mm:02d}:{ss:02d}.{frac}", "seconds": round(seconds, 4),
+                    "frames": int(round(seconds * fps))})
+    return out
+
+
+def shot_clock_window_local(authored_frames: int, requested_overlap_frames: int,
+                            applied_overlap_frames: int) -> int:
+    """An authored cut's frame on the window the layout really applies (the hidden front grows by the overlap delta)."""
+    return int(authored_frames) + (int(applied_overlap_frames) - int(requested_overlap_frames))
+
+
+def shot_clock_global_frames(window_local_frames: int, window_start_frames: int,
+                             applied_overlap_frames: int) -> int:
+    """A window-local cut frame on the DELIVERED clip: the window starts `window_start_frames` into the clip and its
+    first `applied_overlap` frames are the joined, hidden tail."""
+    return max(int(window_start_frames) + int(window_local_frames) - int(applied_overlap_frames), 0)
+
+
+def format_shot_clock(frames: int, fps: int = H3_FPS) -> str:
+    """Frames of one clip as the guide's own MM:SS.mmm clock (H3 prompts read the clock, not the frame number)."""
+    f = int(frames)
+    return f"{f // (60 * fps):02d}:{(f // fps) % 60:02d}.{(f % fps) * 1000 // fps:03d}"
+
+
+def rebase_continuation_shot_clocks(text: str, requested_overlap_frames: int, applied_overlap_frames: int,
+                                    window_start_frames: int, fps: int = H3_FPS,
+                                    clock_target: str = "window",
+                                    ) -> Tuple[str, Dict[str, Any]]:
+    """Re-time one continuation beat's cut clocks for the window the layout really applies.
+
+    `requested_overlap_frames` is the overlap the beat's clocks were authored from (the 22-frame grid default the
+    pack documents), `applied_overlap_frames` the audio-aligned one the layout applies (22 -> 39 on a 230-frame
+    latent). `window_start_frames` is the beat's first DELIVERED frame - the cumulative total of the beats before
+    it, since the hidden overlap is joined and never appended. Returns (text, report).
+
+    `clock_target` decides the clock the shipped text carries:
+      "window" (default, and what a sampler reads): the cut's frame ON THE WINDOW it runs. A 226-frame window with
+        a 39-frame hidden front samples frames 0..225, so a cut authored 78 frames into the planned window is at
+        window frame 95 = 00:03.958. A GLOBAL clock (00:10.333 for that same cut) is 6.375 s past the end of the
+        9.416 s window the sampler receives - the model is told to cut at a time that does not exist in its clip.
+      "global": the cut's frame on the DELIVERED stitched clip, for a prompt written against the finished video.
+    The report carries both, per cut: authored clock, window-local frame and time, global frame and time, frames
+    after the join, shift. Nothing is invented: a beat with no cut line comes back unchanged with an empty report.
+    """
+    if clock_target not in ("window", "global"):
+        raise BuilderError(f"shot clock target {clock_target!r} is not 'window' or 'global'")
+    cuts = parse_shot_clocks(text, fps=fps)
+    req, app = int(requested_overlap_frames), int(applied_overlap_frames)
+    start = int(window_start_frames)
+    report: Dict[str, Any] = {
+        "requested_overlap_frames": req,
+        "applied_overlap_frames": app,
+        "window_growth_frames": app - req,
+        "window_start_frames": start,
+        "window_start_seconds": round(start / float(fps), 4),
+        "planned_window_start_frames": start + req,
+        "clock_target": clock_target,
+        "clock_fps": int(fps),
+        "cut_count": len(cuts),
+        "cuts": {},
+    }
+
+    def _rewrite(m: "re.Match[str]") -> str:
+        g = m.group
+        mm, ss, frac = int(g(2)), int(g(3)), (g(4) or "0")
+        authored = int(round((mm * 60 + ss + float("0." + frac)) * fps))
+        local = shot_clock_window_local(authored, req, app)   # the applied window is longer at the front by that much
+        gf = shot_clock_global_frames(local, start, app)       # the window's first `app` frames are the hidden tail
+        ship = local if clock_target == "window" else gf
+        report["cuts"][f"{mm:02d}:{ss:02d}.{frac.ljust(3, '0')}"] = {
+            "authored_frames": authored, "authored_seconds": round(authored / float(fps), 4),
+            "window_local_frames": local,
+            "window_local_seconds": round(local / float(fps), 4),
+            "window_local_clock": format_shot_clock(local, fps=fps),
+            "frames_after_the_join": local - app,
+            "global_frames": gf, "global_seconds": round(gf / float(fps), 4),
+            "global_clock": format_shot_clock(gf, fps=fps),
+            "shipped_frames": ship, "shipped_clock": format_shot_clock(ship, fps=fps),
+            "shift_frames": ship - authored,
+        }
+        return f"{g(1)}At {format_shot_clock(ship, fps=fps)},"
+
+    out = _BEAT_SHOT_CLOCK_RE.sub(_rewrite, text) if cuts else text
+    return out, report
+
+
 def build_writer_beats_continuation_request(
     base_graph: Dict[str, Any],
     beat_prompts: Sequence[str],
@@ -4021,6 +4146,19 @@ def build_writer_beats_continuation_request(
         cur_scene = writer_beat_scene(texts[i - 1])
         _validate_continuation_place_transition(cur_scene, closer, new_shot=(i in cut_beats))
         text_i = writer_beat_prompt(texts[i - 1], pronoun, closer=closer, new_shot=(i in cut_beats))
+        # A beat's cut clocks are authored inside its beat, from the window start the REQUESTED overlap gives.
+        # The layout applies the audio-aligned overlap instead - 39 frames where this pack requests 22 (live-verified
+        # 2026-11-15, live-12d0733) - so the applied window is 17 frames longer at the front, all of it the hidden
+        # joined tail. The window-local frame is authored + that delta; the delivered (global) frame is
+        # window_start + window_local - applied. The shipped text carries the WINDOW clock (the sampler only has its
+        # window); the plan carries the global frames. Beat 1 has no window: its [Shot 1] opens at 0, untimed.
+        text_i, shot_clocks = rebase_continuation_shot_clocks(
+            text_i, overlap_frames, int(step["layout"]["overlap_frames"]), int(chain[i - 2]["frames"]),
+            clock_target="window")
+        chain[i - 1]["shot_clocks"] = shot_clocks
+        chain[i - 1]["shot_frames"] = [int(c["global_frames"]) for c in shot_clocks["cuts"].values()]
+        chain[i - 1]["window_start_frames"] = int(chain[i - 2]["frames"])
+        chain[i - 1]["window_start_seconds"] = round(int(chain[i - 2]["frames"]) / H3_FPS, 4)
         prompts.append(text_i.strip())
         leads.append({"index": i, "is_continuation": True, "closer_used": closer.get("pose", ""),
                       "lead_in": writer_beat_lead_in(writer_beat_scene(texts[i - 1]), pronoun, closer=closer,
@@ -4046,13 +4184,19 @@ def build_writer_beats_continuation_request(
         "total_frames": chain[-1]["frames"],
         "total_seconds": round(chain[-1]["frames"] / H3_FPS, 4),
         "overlap_frames": overlap_frames,
-        # per-beat applied overlaps (each is the audio-aligned 17k + 5 value nearest the one asked for)
+        # per-beat applied overlaps (each is the audio-aligned 5n + 5 value the layout takes nearest the ask:
+        # 22 -> 39 for beat 2 of this pack, 22 -> 22 for beat 3)
         "overlap_frames_applied": [int(b["layout"]["overlap_frames"]) for b in chain[1:]],
         # the c2_samp cond_audio row check, per beat, from the built graph (no render): packed value rows must
         # equal the slots PackedLayout reserves. Beat 1 keeps the voice reference (rows equal); continuation
         # beats carry only the tail keyframe rows (also equal). See continuation_cond_audio_rows().
         "cond_audio_rows": continuation_audio_refmod_report(
             g, {f"c{i}": step["layout"] for i, step in enumerate(chain[1:], start=2)}),
+        # every authored "[Shot N] At MM:SS.mmm" cut, per beat: the report carries the authored clock, its
+        # window-local frame (the clock the shipped text carries) and its delivered-clip frame; "shot_frames" is
+        # the delivered-clip (global) frames of those cuts, which is what the run's asserts check.
+        "shot_clocks": [dict(b.get("shot_clocks") or {}) for b in chain],
+        "shot_frames": [list(b.get("shot_frames") or []) for b in chain],
         "fps": H3_FPS,
         "stitched": False,
         "start_image": start_image or "",
@@ -5034,6 +5178,24 @@ AUDIO_REFMOD_MARKER = "_refmod_audio"
 # measured audio latent frames of the FCSydny voice RefMod (minimaxh3_oc_poolclub_v1_refmod_audio.safetensors:
 # tensor [1, 32, 2, 1000], refmod_meta latent_t=1000, 25.0 s at 32 kHz); 2*1000 = the 2000 rows in the error.
 MEASURED_AUDIO_REFMOD_LATENT_T = 1000
+# The cond-audio rows the voice reference a clip opens with can carry. The runtime packs that reference as
+# [2*latent_t, 32] and indexes it with the rows PackedLayout reserves, and on a continuation beat the latent-tail
+# guide's keyframe audio (2*overlap_audio rows) is in the reserved count - so the reference's own row count is the
+# ceiling every later beat shares. Measured on the live c2_samp failure: [2000, 32] vs [2130, 32] at
+# overlap_audio_t 65, [2074, 32] at 37 - the 25.0 s voice RefMod fills its 2000 rows, and the tail does not fit.
+# Do not treat layout_rows <= 2000 as a pass: the live crash is a shape mismatch
+# (value [2*latent_t, 32] vs index [2*latent_t + 2*overlap_audio, 32]), not an overflow of a 2000-row bucket.
+# A 920-token trim (23.0 s) would still be [1840, 32] vs [1970, 32] on beat 2. The 23 s file stays on disk
+# and is not wired onto continuation beats; see _continuation_voice_refmods.
+AUDIO_REFMOD_ROW_CAP = 2 * MEASURED_AUDIO_REFMOD_LATENT_T
+# A voice RefMod cut down is a NEW file beside the original, never an edit of it:
+# scripts/parody/voice_refmod_trim.py slices the latent on a speech gap and writes the trimmed copy.
+COMFY_REFMOD_DIR = r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods"
+# The trimmed copy's mod name is the ORIGINAL name plus this suffix: voice_refmod_trim.py writes
+# `<stem>_23s.safetensors` beside the original, so `minimaxh3_oc_poolclub_v1_refmod_audio` gains
+# `minimaxh3_oc_poolclub_v1_refmod_audio_23s` and `is_audio_refmod` still recognises it.
+CONTINUATION_VOICE_REFMOD_SUFFIX = "_23s"
+CONTINUATION_VOICE_REFMOD_LATENT_T = 920
 
 
 def is_audio_refmod(mod_name: Any) -> bool:
@@ -5041,8 +5203,59 @@ def is_audio_refmod(mod_name: Any) -> bool:
     return isinstance(mod_name, str) and AUDIO_REFMOD_MARKER in mod_name
 
 
+def audio_refmod_latent_t(mod_name: Any, refmod_dir: str = COMFY_REFMOD_DIR,
+                          default: int = MEASURED_AUDIO_REFMOD_LATENT_T) -> int:
+    """latent_t of a voice RefMod as it sits on disk: the last dim of its `latent` tensor [1, 32, 2, latent_t].
+
+    Reads only the safetensors header (8-byte length + JSON), so it is cheap, offline and loads no model. The
+    runtime takes the same number from the tensor (core.py: H3RefMod.__post_init__ sets latent_t from
+    latent.shape[-1]), which is why a trimmed copy reports its own length everywhere downstream. `default` is the
+    measured 25.0 s poolclub value, used for a name whose file is not on this box (a fixture, another machine).
+    """
+    import json as _json
+    import os
+    import struct
+
+    stem = str(mod_name or "")
+    if stem.endswith(".safetensors"):
+        path = Path(stem)
+    elif is_audio_refmod(stem):
+        path = Path(refmod_dir) / f"{stem}.safetensors"
+    else:
+        return int(default)
+    try:
+        with path.open("rb") as fh:
+            head = fh.read(8)
+            (n,) = struct.unpack("<Q", head)
+            spec = _json.loads(fh.read(n).decode("utf-8"))
+        shape = spec["latent"]["shape"]
+        if len(shape) != 4 or list(shape[:3]) != [1, 32, 2]:
+            return int(default)
+        return int(shape[3])
+    except (OSError, ValueError, KeyError, TypeError):
+        return int(default)
+
+
+def continuation_voice_refmod(mod_name: Any, refmod_dir: str = COMFY_REFMOD_DIR) -> Optional[str]:
+    """The mod name of a trimmed copy of a voice RefMod, if that copy exists on disk (else None).
+
+    A voice RefMod is a pre-encoded audio VAE latent, so a shorter copy of the same voice is made the community
+    way: scripts/parody/voice_refmod_trim.py cuts one contiguous window of the latent on a speech gap and writes a
+    NEW file next to the original - the same slice audio.py: make_audio_mod(..., budget_policy="truncate")
+    performs on encode (latent[..., :max_tokens // 2]). The original is never edited, moved or deleted, and it
+    stays the voice reference of beat 1, which has no latent tail and fits its rows exactly.
+    """
+    stem = str(mod_name or "")
+    if not is_audio_refmod(stem):
+        return None
+    trimmed = f"{stem}{CONTINUATION_VOICE_REFMOD_SUFFIX}"
+    if (Path(refmod_dir) / f"{trimmed}.safetensors").is_file():
+        return trimmed
+    return None
+
+
 def continuation_cond_audio_rows(audio_refmod_latent_t: Sequence[int] = (), keyframe_audio_t: Sequence[int] = (),
-                                 ) -> Dict[str, Any]:
+                                 row_cap: int = AUDIO_REFMOD_ROW_CAP) -> Dict[str, Any]:
     """Dry row math for one beat's cond_audio: the packed VALUE rows vs the slots PackedLayout reserves.
 
     PackedLayout reserves 2*latent_t cond_audio slots per reference-audio RefMod and 2*audio_t per keyframe, and
@@ -5051,21 +5264,27 @@ def continuation_cond_audio_rows(audio_refmod_latent_t: Sequence[int] = (), keyf
     while the packed reference rows stay 2*latent_t -> the sampler dies on the broadcast:
         [2*latent_t, 32] vs [2*latent_t + 2*overlap_audio_t, 32]  (live: [2000, 32] vs [2130, 32]).
     A beat is `ok` in exactly two states:
-      equal  - the beat reserves nothing beyond its reference audio (beat 1: 2000 rows, 2000 slots, sampled by
-               s0_samp for 66 s in the same run that failed at c2_samp);
-      empty  - the beat has no reference audio at all (packed rows 0): the cond-audio block is not packed and no
-               indexed assignment is attempted, which is how all 44 continuation graphs that produced an mp4 pass
-               while carrying a latent tail. The voice then comes from that tail, i.e. beat 1's sampled audio.
-    Any other pair is the c2_samp failure and `error_signature` is the runtime's own wording of it.
+      equal  - packed value rows equal the slots PackedLayout reserves (beat 1: 2000 == 2000). Official
+               model.py:_cond_audio_rows concatenates pack_audio of every payload cond_audio_latent
+               (keyframes then refs), which would equal reserved IF both tensors are in the payload.
+               The live c2_samp failure measured value [2000, 32] vs index [2130, 32]: the value tensor
+               was the RefMod only, and the tail's 2*overlap_audio reserved slots were not in it.
+      empty  - packed rows 0 and cond_audio_block is False: no indexed assignment is attempted
+               (8ee347e continuation path; reserved may be 130 / 74). The voice then comes from the
+               latent tail, i.e. beat 1's sampled audio.
+    A 920-token trim is still a mismatch ([1840, 32] vs [1970, 32] on beat 2, [1840, 32] vs [1914, 32]
+    on beat 3). Do not treat layout_rows <= 2000 as ok. `error_signature` is the runtime's own wording.
     """
     refmod_rows = 2 * sum(int(t) for t in audio_refmod_latent_t)
     keyframe_rows = 2 * sum(int(t) for t in keyframe_audio_t)
     layout_rows = refmod_rows + keyframe_rows
+    equal = refmod_rows == layout_rows
+    empty = refmod_rows == 0
     return {"refmod_cond_audio_rows": refmod_rows, "keyframe_cond_audio_rows": keyframe_rows,
             "packed_cond_audio_rows": refmod_rows, "layout_cond_audio_rows": layout_rows,
             "row_delta": layout_rows - refmod_rows, "cond_audio_block": refmod_rows > 0,
-            "ok": refmod_rows == 0 or layout_rows == refmod_rows,
-            "error_signature": (None if (refmod_rows == 0 or layout_rows == refmod_rows) else
+            "ok": equal or empty,
+            "error_signature": (None if (equal or empty) else
                                 f"value tensor of shape [{refmod_rows}, 32] cannot be broadcast to "
                                 f"indexing result of shape [{layout_rows}, 32]")}
 
@@ -5078,9 +5297,11 @@ def continuation_audio_refmod_report(graph: Dict[str, Any],
 
     `beat_layouts` maps a beat's node prefix ("c2", "c3") to its continuation layout, which carries the exact
     overlap_audio_t the tail keyframe has; without it the tail audio is sized at the overlap boundary
-    (audio_t(overlap_frames)), the same number on any audio-aligned base. Beat 1 has no window and no keyframe
-    audio, so it always reports equal; a continuation beat that loads an audio RefMod and has a tail is the
-    c2_samp failure, and its row_delta is the 2*overlap_audio the value tensor is short by.
+    (audio_t(overlap_frames)), the same number on any audio-aligned base. Each beat's audio RefMod is measured at
+    its own latent_t from its file header (audio_refmod_latent_t), so a beat wired to a trimmed copy reports that
+    copy's rows. Beat 1 has no window and no keyframe audio, so it always reports equal; a continuation beat whose
+    reserved rows pass the cap is the c2_samp failure, and its row_delta is the 2*overlap_audio the value tensor
+    is short by.
     """
     loader_mods = {nid: [nd["inputs"].get(f"mod_{i}") for i in range(1, 9)]
                    for nid, nd in graph.items()
@@ -5093,7 +5314,7 @@ def continuation_audio_refmod_report(graph: Dict[str, Any],
             continue
         key = nid[: -len("_refapply")] if nid.endswith("_refapply") else ""
         mods = loader_mods.get((nd["inputs"].get("mods") or [""])[0], [])
-        audio_t = [MEASURED_AUDIO_REFMOD_LATENT_T for m in mods if is_audio_refmod(m)]
+        audio_t = [audio_refmod_latent_t(m) for m in mods if is_audio_refmod(m)]
         tail_audio_t: List[int] = []
         if key in windows:
             lay = (beat_layouts or {}).get(key) or {}
@@ -5114,6 +5335,10 @@ def _continuation_audio_free_refmods(graph: Dict[str, Any], beat: Dict[str, Any]
     The identity RefMods stay: the visual RefMod re-applies on the continuation beat, the latent tail carries
     the voice (the tail IS the previous beat's sampled audio, voiced by the beat-1 reference). Returns the
     dropped audio RefMod names. Nothing is dropped when the pack uses no voice reference.
+
+    8ee347e shipped this as the whole story of a continuation beat's voice. It is now the fallback: the beat
+    first tries the trimmed copy of the same voice (_continuation_voice_refmods) and is made voice-off only when
+    no trimmed copy exists, or when its rows still pass the cap.
     """
     beat_inputs = beat["refmods"].get("inputs") or {}
     audio_slots = [i for i in range(1, 9) if is_audio_refmod(beat_inputs.get(f"mod_{i}"))]
@@ -5128,6 +5353,51 @@ def _continuation_audio_free_refmods(graph: Dict[str, Any], beat: Dict[str, Any]
                                         f"voice reference not attached (c2_samp: 2*latent_t value rows vs "
                                         f"2*latent_t + 2*overlap_audio cond_audio slots)"}
     return dropped
+
+
+def _continuation_voice_refmods(graph: Dict[str, Any], beat: Dict[str, Any], node_id: str,
+                                layout: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep a voice RefMod on a continuation beat only when packed rows equal reserved slots.
+
+    Official packing would make them equal if the tail keyframe and the RefMod both landed in
+    payload cond_audio_latents (model.py:_cond_audio_rows concatenates pack_audio of each). The live
+    c2_samp failure did not: value [2000, 32] vs index [2130, 32]. A 920-token (23 s) trim is still a
+    mismatch ([1840, 32] vs [1970, 32] / [1914, 32]), so it is not wired onto c2/c3. The 23 s file stays
+    on disk. Decision, from continuation_cond_audio_rows:
+      packed == reserved (no tail, or a future packing that includes the tail in the value) -> keep/swap;
+      otherwise -> leave the beat voice-off (8ee347e) and say so in the loader's title;
+      a beat with no audio RefMod at all -> nothing to do.
+    The visual RefMod is untouched on every beat. Numbers come from RefMod file headers and the layout.
+    """
+    beat_inputs = beat["refmods"].get("inputs") or {}
+    audio_slots = [i for i in range(1, 9) if is_audio_refmod(beat_inputs.get(f"mod_{i}"))]
+    report: Dict[str, Any] = {"node": node_id, "swapped": [], "dropped": [], "rows": None}
+    if not audio_slots:
+        return report
+    names = [str(beat_inputs[f"mod_{i}"]) for i in audio_slots]
+    tail_audio_t = [int(layout["overlap_audio_t"]) if "overlap_audio_t" in layout
+                    else continuation_audio_t(int(layout["overlap_frames"]))]
+    full_rows = continuation_cond_audio_rows([audio_refmod_latent_t(n) for n in names], tail_audio_t)
+    trimmed_names = [continuation_voice_refmod(n) for n in names]
+    trimmed_rows = continuation_cond_audio_rows(
+        [audio_refmod_latent_t(n) for n in trimmed_names if n], tail_audio_t)
+    report["rows"] = {"full": full_rows, "trimmed": trimmed_rows}
+    if full_rows["ok"]:
+        return report                      # a beat with no tail to reserve: the full reference stays
+    if not any(trimmed_names) or not trimmed_rows["ok"]:
+        report["dropped"] = _continuation_audio_free_refmods(graph, beat, node_id)
+        return report
+    loader = copy.deepcopy(beat["refmods"])
+    for i, name in zip(audio_slots, trimmed_names):
+        loader["inputs"][f"mod_{i}"] = name or "(none)"
+    graph[node_id] = loader
+    kept_t = min(audio_refmod_latent_t(n) for n in trimmed_names if n)
+    graph[node_id]["_meta"] = {
+        "title": f"{node_id}: identity RefMod load for the continuation beat, voice reference trimmed to "
+                 f"{kept_t} latent tokens ({kept_t / 40:.1f} s) to fit the {AUDIO_REFMOD_ROW_CAP}-row "
+                 f"cond_audio cap (c2_samp: {full_rows['error_signature']})"}
+    report["swapped"] = [n for n in trimmed_names if n]
+    return report
 
 
 def verify_keep_dials(graph: Dict[str, Any]) -> None:
@@ -5252,7 +5522,8 @@ def add_continuation_beat(cumulative: Dict[str, Any], beat: Dict[str, Any], layo
     # 2*overlap_audio slots that the audio RefMod's value tensor never grows into: value [2000, 32] vs indexing
     # result [2000 + 2*overlap_audio, 32] (2074 at overlap 37, 2130 at 65). continuation_cond_audio_rows() is the
     # dry row check; 44 of 44 continuation graphs that produced an mp4 have no audio RefMod on the tail beat.
-    if _continuation_audio_free_refmods(g, beat, f"c{n}_refmods"):
+    voice = _continuation_voice_refmods(g, beat, f"c{n}_refmods", layout)
+    if voice["swapped"] or voice["dropped"]:
         g[f"c{n}_refapply"]["inputs"]["mods"] = [f"c{n}_refmods", 0]
 
     # argon-low C.3 (B) + C.4 (C): optional AddGuide keyframe(s) on the continuation beat at frame_idx >= overlap_frames
