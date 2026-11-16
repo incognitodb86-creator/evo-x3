@@ -22,6 +22,16 @@ F=$(jq -r '.build.total_frames // empty' "$RUN/build_report.json" 2>/dev/null ||
 [ -n "$F" ] || F=$(jq -r '(if has("prompt") then .prompt else . end).c0.inputs.length // empty' "$REQ")
 [ -n "$W" ] && [ -n "$H" ] && [ -n "$F" ] || { echo "refused: cannot read size/frames from $REQ" >&2; exit 3; }
 PY=${RQ_PY:-$HOME/AI/render/x3/.venv/bin/python}
+# Max Architect 2026-11-16 (Derrick t2049u): works from nohup/ssh shells, and a busy GPU waits instead of failing rc 7.
+export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+LOCK="$HOME/AI/locks/gpu-render.lock"
+if [ "$DRY" = 0 ] && [ "${QR_WAITING:-0}" != 1 ] && ! flock -n "$LOCK" true 2>/dev/null; then
+  SELF=$(realpath "$0")
+  systemd-run --user --unit "render-wait-$(basename "$RUN")-$$" --setenv=QR_WAITING=1 --setenv=XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+    bash -c 'until flock -n "$1" true; do sleep 15; done; exec "$2" "$3" --yes-derrick "${@:4}"' _ "$LOCK" "$SELF" "$RUN" "${EXTRA[@]}"
+  echo "X3 submitter busy: waiting in background; queues automatically when the X3 submit queue frees (log $RUN/_render_queue.log)"
+  exit 0
+fi
 cd "$HOME/AI/community"
 ARGS=(scripts/run_queue.py --remote --run-dir "$RUN" --size "${W}x${H}" --frames "$F" "${EXTRA[@]}")
 ORD='{"order":[{"pos":1,"tag":"clip","arm":"oc_writer","scene":"x3","seed":0}]}'
