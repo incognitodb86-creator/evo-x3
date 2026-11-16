@@ -1,0 +1,5 @@
+
+
+Strix Halo integrates its CPU, GPU, and NPU onto a single die that accesses a shared LPDDR5X memory pool, meaning the system has no separate discrete VRAM or secondary memory channel to offload bandwidth-hungry tasks. Consequently, heavy workloads that exceed the total available capacity or bandwidth will cause all components to contend for the same resources, leading to significant performance bottlenecks across both computing and graphics tasks. [end of text]
+
+

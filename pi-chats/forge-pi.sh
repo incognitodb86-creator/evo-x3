@@ -7,4 +7,4 @@
 set -euo pipefail
 cd "$HOME/AI/forge"
 export PATH="$HOME/AI/render/x3/.venv/bin:$HOME/.local/bin:$PATH"
-exec pi --approve --model "${FORGE_MODEL:-x3-local/flash-next}" "$@"
+exec pi --approve --model "${FORGE_MODEL:-x3-local/flash-next}" --thinking "${FORGE_THINKING:-medium}" "$@"

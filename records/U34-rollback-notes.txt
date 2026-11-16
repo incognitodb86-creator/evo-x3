@@ -1,0 +1,3 @@
+20261116-062524 services disabled: qemu-guest-agent vmtoolsd vgauthd iscsid.socket iscsiuio.socket multipathd ModemManager (rollback: systemctl enable --now <unit>)
+20261116-062524 grubby --remove-args=amdgpu.gttsize=122880 (rollback: grubby --update-kernel=ALL --args=amdgpu.gttsize=122880)
+20261116-062838 pi models.json (+flash-next-uncensored, card sampling incl presence 0), forge settings defaultThinkingLevel medium, forge-pi.sh --thinking medium; rollback: restore *.bak-20261116-062838-u34
