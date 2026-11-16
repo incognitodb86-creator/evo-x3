@@ -5,10 +5,11 @@ import argparse, json, os, re, shutil, subprocess, sys, time, urllib.request
 from pathlib import Path
 
 PY = sys.executable
-PARODY = Path(r"/home/derekboone/AI/community/scripts/parody")
-LIVE_HOME = Path(r"/home/derekboone/AI/render/writer_pipeline")
-PM6 = Path(r"/home/derekboone/AI/community/runs/u6_gemma_heretic_20261113/gemma_pmfix6")
-POOL = Path(r"/home/derekboone/AI/render/stills/approved_characters/POOL/flow_more_2026-10-19")
+_AI_ROOT = Path(__file__).resolve().parents[3]
+PARODY = _AI_ROOT / "community" / "scripts" / "parody"
+LIVE_HOME = _AI_ROOT / "render" / "writer_pipeline"
+PM6 = _AI_ROOT / "community" / "runs" / "u6_gemma_heretic_20261113" / "gemma_pmfix6"
+POOL = _AI_ROOT / "render" / "stills" / "approved_characters" / "POOL" / "flow_more_2026-10-19"
 FOUR = [
     ("missionary", "she has sex with him", "missionary", POOL / "POOL_F034.jpg", PM6 / "u6_01_missionary" / "still_read.json"),
     ("doggy", "she has sex with him", "doggy", POOL / "POOL_F053.jpg", PM6 / "u6_02_doggy" / "still_read.json"),
@@ -19,7 +20,7 @@ FOUR = [
 S034, S053, S058 = (FOUR[0][3], FOUR[0][4]), (FOUR[1][3], FOUR[1][4]), (FOUR[2][3], FOUR[2][4])
 # Cowgirl / reverse-cowgirl on the waist-high S034 sideboard is a real surface_mismatch hard stop.
 # Those asks run on a bed still; still_read is None so the pipeline vision-reads it. Never browse PixlStash.
-SBED = (Path(r"/home/derekboone/AI/render/stills/approved_characters/BEDROOM01/01_BEDROOM_LINGERIE.jpg"), None)
+SBED = (_AI_ROOT / "render" / "stills" / "approved_characters" / "BEDROOM01" / "01_BEDROOM_LINGERIE.jpg", None)
 EXTRA = [  # six more asks for the 10-ask sampler A/B, same three stills
     ("cowgirl", "she rides him", "cowgirl", *SBED),
     ("doggy_rough", "he takes her rough from behind", "doggy", FOUR[1][3], FOUR[1][4]),

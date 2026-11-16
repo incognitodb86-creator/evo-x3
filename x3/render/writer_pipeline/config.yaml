@@ -55,6 +55,6 @@ position_kinds:   # a new builder act needs one line here (spec "Max, only on ch
   solo: [female_solo, male_solo, tease, dance]
   sex: [missionary, doggy, cowgirl, reverse_cowgirl, spooning, prone_bone, ff_scissoring, mf_anal, bondage, threesome, mmf, ffm, standing_mf, airplane, piledriver]
 still_pool:
-  - /home/derekboone/AI/render/stills/approved_characters/POOL/**/*.jpg
-  - /home/derekboone/AI/render/stills/approved_characters/POOL/**/*.png
+  - ~/AI/render/stills/approved_characters/POOL/**/*.jpg
+  - ~/AI/render/stills/approved_characters/POOL/**/*.png
 shots_default: single  # B1 long-scene spec
