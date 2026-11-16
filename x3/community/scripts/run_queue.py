@@ -76,7 +76,7 @@ import run_graph_job as rgj
 CELL_RE = re.compile(r"^c\d{2}_s\d{6,}$")
 _CELL_CONTRACT = False  # set by main() from the order file; prepare() enforces the tag form
 
-ROOT = r"/home/derekboone/AI/community"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY = sys.executable
 PYTEST_FILES = [os.path.join("scripts", "tests", "test_p6_review.py"), os.path.join("scripts", "tests", "test_guard_scope.py")]
 ACTIONS = os.path.join(ROOT, "notes", "actions.log")
@@ -89,7 +89,7 @@ QUEUE_TIMEOUT_STOPPING = 10  # short /queue timeout (s) after repeated timeouts 
 
 # RTX 2x ULTRA post-pass (card t286s1226, Derrick 2026-11-06). nvvfx/torch live in ComfyUI's venv, not in the
 # venv that runs this queue, so the frame loop runs there as a child process (frame by frame, never the whole clip in RAM).
-UPSCALE_PY = os.environ.get("RQ_UPSCALE_PY", r"/home/derekboone/AI/comfy-alienpc/.venv/Scripts/python.exe")
+UPSCALE_PY = os.environ.get("RQ_UPSCALE_PY", os.path.join(os.path.dirname(ROOT), "comfy-alienpc", ".venv", "Scripts", "python.exe"))
 UPSCALE_TIMEOUT = 1800
 _UPSCALE_SRC = r"""
 import json, subprocess, sys, time

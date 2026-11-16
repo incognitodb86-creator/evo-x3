@@ -17,7 +17,7 @@ import shutil
 from typing import Any, Dict, List, Optional
 
 
-RUNS_ROOT = Path(r"/home/derekboone/AI/community/runs")
+RUNS_ROOT = Path(__file__).resolve().parents[2] / "runs"
 
 
 def build_refmod_ledger(resolved: Dict[str, Any], graph: Dict[str, Any]) -> List[Dict[str, Any]]:

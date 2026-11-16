@@ -55,7 +55,7 @@ TOKENS_PER_SECOND = 40.0          # the 40 Hz audio-latent rate (build_request.A
 TOKEN_MS = 25.0                   # one latent token = 25 ms
 SAMPLES_PER_TOKEN = 800           # 32 kHz / 40 Hz
 SAMPLE_RATE = 32000               # the sample rate the H3 audio VAE encodes at (audio.py: encode_audio)
-REFMOD_DIR = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
+REFMOD_DIR = Path(__file__).resolve().parents[3] / "comfy-alienpc" / "models" / "refmods"
 AUDIO_VAE = REFMOD_DIR.parent / "audio_vae" / "minimax_h3_audio_vae_fp32.safetensors"
 DEFAULT_SOURCE = REFMOD_DIR / "minimaxh3_oc_poolclub_v1_refmod_audio.safetensors"
 COND_AUDIO_ROW_CAP = 2000         # build_request.AUDIO_REFMOD_ROW_CAP = 2 * latent_t of the base reference
