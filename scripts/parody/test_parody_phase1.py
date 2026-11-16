@@ -204,12 +204,10 @@ class TestParodyPhase1(unittest.TestCase):
             validated = validate_stills([str(pool_img)], self.approved_dir)
             self.assertEqual(len(validated), 1)
 
-        # 2. Non-pool still -> rejected
+        # 2. Non-pool still -> accepted (pool containment dropped, Derrick t2086u/t2087u)
         fake_still = self.test_dir / "random.png"
         fake_still.write_bytes(b"data")
-        with self.assertRaises(ValueError) as ctx:
-            validate_stills([str(fake_still)], self.approved_dir)
-        self.assertIn("not within the approved_characters pool", str(ctx.exception))
+        self.assertEqual(len(validate_stills([str(fake_still)], self.approved_dir)), 1)
 
         # 3. Sydney path block dropped (Derrick t2084u, Nov 16 2026).
 

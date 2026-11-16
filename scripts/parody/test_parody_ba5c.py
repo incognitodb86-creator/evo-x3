@@ -76,10 +76,11 @@ class TestBA5cFixes(unittest.TestCase):
             self.request(stills), index_dir=self.index, refmods_dir=self.refmods, **kwargs
         )
 
-    def test_omitted_pool_rejects_outside_still(self):
+    def test_omitted_pool_accepts_outside_still(self):
+        # Pool containment dropped (Derrick t2086u/t2087u): any existing still is accepted.
         with mock.patch.object(resolve, "DEFAULT_APPROVED_STILLS_DIR", self.pool):
-            with self.assertRaisesRegex(ValueError, "approved_characters pool"):
-                self.resolve(stills=[self.outside])
+            res = self.resolve(stills=[self.outside])
+        self.assertEqual(res["stills"], [str(Path(self.outside).resolve())])
 
     def test_omitted_pool_accepts_default_pool_still(self):
         with mock.patch.object(resolve, "DEFAULT_APPROVED_STILLS_DIR", self.pool):

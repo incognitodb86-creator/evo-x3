@@ -26,7 +26,7 @@ APPROVED_IMAGE_POOLS: Tuple[Path, ...] = tuple(
         _HOME_RENDER_APPROVED_STILLS_DIR,
         NAS_APPROVED_STILLS_DIR,
         # Derrick Nov 12 + "yes change it wtf" (Alfred t520u, Nov 16 2026): PixlStash catalog and
-        # Grok/Flow exports are acceptable stills. Containment and 18+ checks still apply.
+        # Grok/Flow exports are acceptable stills. Only the 18+ check applies (t2086u).
         PIXLSTASH_IMAGES_DIR,
         GROK_FLOW_LIBRARIES_DIR,
     ))
@@ -215,7 +215,7 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
         List of validated resolved path strings.
 
     Raises:
-        ValueError: If a still path violates security or pool containment.
+        ValueError: If a still file does not exist.
     """
     valid_paths: List[str] = []
     if not stills:
@@ -227,16 +227,7 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
         p = Path(s).resolve()
         # Sydney path block dropped (Derrick t2084u, Nov 16 2026).
 
-        pools_ok = [app_dir_res] if approved_dir is not None else [x.resolve() for x in (DEFAULT_APPROVED_STILLS_DIR, *APPROVED_IMAGE_POOLS)]
-        try:
-            # Check containment; omitted approved_dir accepts any APPROVED_IMAGE_POOLS root (fails closed otherwise).
-            if not any(p.is_relative_to(x) for x in pools_ok):
-                raise ValueError
-        except ValueError:
-            raise ValueError(
-                f"Still path '{s}' is not within the approved_characters pool: '{pool_dir}'"
-            )
-
+        # Pool containment dropped (Derrick t2086u, Nov 16 2026): the only policy check is 18+.
         if not p.is_file():
             raise ValueError(f"Still file does not exist: {s}")
 
@@ -249,11 +240,10 @@ def validate_reference_images(
     images: Optional[List[str]],
     pools: Optional[Tuple[Path, ...]] = None,
 ) -> List[str]:
-    """U2: --image gate (LANE_IMAGE_RULES.md). Every image must live inside an approved_characters pool.
+    """U2: --image gate (LANE_IMAGE_RULES.md). Image paths must exist; bare names are looked up in the pools.
 
     Accepts a full path, or a sub-path / filename relative to a pool. Rejects > 4 images
-    (MAX_REFERENCE_IMAGES), anything outside
-    the pools, missing files, and non-image extensions.
+    (MAX_REFERENCE_IMAGES), missing files, and non-image extensions.
     build_request.py wires --image as a single frame-0 AddGuide start image (0 or 1 per clip).
     """
     if not images:
@@ -272,26 +262,13 @@ def validate_reference_images(
                 rp = t.resolve()
             except OSError:
                 continue
-            inside = False
-            for pl in pool_list:
-                try:
-                    rp.relative_to(pl.resolve())
-                    inside = True
-                    break
-                except (ValueError, OSError):
-                    continue
-            if not inside:
-                if cand.is_absolute():
-                    raise ValueError(
-                        f"--image '{raw}' is not inside an approved_characters pool "
-                        f"({', '.join(str(x) for x in pool_list)})"
-                    )
-                continue
+            # Pool containment dropped (Derrick t2086u): any existing image path is accepted;
+            # bare names are still looked up inside the pools for convenience.
             if rp.is_file():
                 found = rp
                 break
         if found is None:
-            raise ValueError(f"--image '{raw}' not found inside an approved_characters pool")
+            raise ValueError(f"--image '{raw}' not found (absolute path, or name inside a pool)")
         if found.suffix.lower() not in REFERENCE_IMAGE_EXTS:
             raise ValueError(f"--image '{raw}' must be one of {', '.join(REFERENCE_IMAGE_EXTS)}")
         out.append(str(found))
