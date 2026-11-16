@@ -645,6 +645,12 @@ def resolve_named_identity(
     }
 
 
+
+def _ask_quoted_lines(ask: str) -> List[str]:
+    return [m.group(1).replace("[English]", "").strip() for m in br._D_RE.finditer(ask or "")
+            if m.group(1).replace("[English]", "").strip()]
+
+
 def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodies: int) -> str:
     lines = [f"ASK: {ask}", f"POSITION: {position} ({kind})", "STILL FACTS (Picture 1):"]
     for k in ("place", "surface", "floor", "light", "pose", "framing", "garment", "hair", "skin", "build"):
@@ -704,7 +710,7 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
                      "hips level with her face; she is silent while (S2) is in her mouth; (S2) holds her head and her head bobs "
                      "along his shaft." + " Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
     if slots.get("place"):
-        lines.append(f"PLACE: name only the still's place ({slots['place']}); never add a room, balcony, headboard or location.")
+        lines.append(f"PLACE & WARDROBE: keep the still for face, body, light and framing; if the ask specifies a different setting, wardrobe or lines, the ask beats the still (otherwise use {slots['place']}).")
     lines.append("LINES: line_topics never name the surface, the floor or the furniture, never his grip, his hands or his strength, "
                  "and never the word deep; each line is "
                  "spoken to the partner about the act, his body or hers, in the tone slot.")
@@ -730,6 +736,10 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
               f"{'; (S3) is a third adult, defined by you' if bodies >= 3 and kind != 'talk' else ''}. Everyone is an adult, 25 or older.",
               f"CLIP LENGTH: T = {clip_secs:.1f} s ({clip_frames} frames); spoken words total at most {word_max} "
               f"(at most {lines_max} short line(s) per speaker)."]
+    _q_lines = _ask_quoted_lines(ask)
+    if _q_lines:
+        lines.append("QUOTED DIALOGUE (MANDATORY — keep EVERY line verbatim in <d>[English] ...</d>, do not drop or merge any): " +
+                     " | ".join(f"<d>[English] {ql}</d>" for ql in _q_lines))
     if slots.get("identity"):
         ident = slots["identity"]
         ichar = ident.get("character") or ""
@@ -774,8 +784,10 @@ def prose_messages(sysprompt: str, brief: str, card: Optional[Dict[str, Any]], k
             "- A sentence that begins 'At first, ' with the still's exact pose, on the still's surface.\n"
             "- " + mode(kind)["onset_hint"] + req +
             "- A sentence that begins 'By the end, ' with the end state, the motion still going.\n"
-            "- One to three plain diegetic sound sentences at the end tied to the action (never write overall_soundscape: or non_diegetic_music: headers).\n"
-            "Write every spoken line fresh in this paragraph from the card's line_topics (one <d> pair per line, no quotes inside it). "
+            "- One to three plain diegetic sound sentences at the end tied to the action (never write overall_soundscape: or non_diegetic_music: headers).\n" +
+            ("Keep EVERY quoted <d>[English] ...</d> line from the ask verbatim in order (do not drop any); write any unquoted lines fresh from line_topics (one <d> pair per line, no quotes inside it). "
+             if _ask_quoted_lines(brief) else
+             "Write every spoken line fresh in this paragraph from the card's line_topics (one <d> pair per line, no quotes inside it). ") +
             "Dialogue format: (S2) says in a <short voice> voice, <d>[English] words</d>. Write every sentence in your own words; "
             "copy no example phrase from the instructions. Plain text, one paragraph, no header, no Markdown.")
     return [{"role": "system", "content": sysprompt},
@@ -1548,8 +1560,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         else:
             clip_frames = br.SINGLE_CLIP_MAX_FRAMES
         clip_seconds = round(clip_frames / float(br.H3_FPS), 1)
-        speech_words_max = max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5)))
-        max_lines_spk = max(2 if kind == "talk" else 1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
+        _q_ask = _ask_quoted_lines(ask)
+        _q_words = sum(len(ql.split()) for ql in _q_ask)
+        speech_words_max = max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5)), (_q_words + 8) if _q_ask else 0)
+        max_lines_spk = max(len(_q_ask), 2 if kind == "talk" else 1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
         slots["frames"] = clip_frames
         slots["clip_seconds"] = clip_seconds
         slots["speech_words_max"] = speech_words_max
