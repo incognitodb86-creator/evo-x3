@@ -44,7 +44,6 @@ lint:
   words_min: 90
   words_max: 190
   pen_phase_no_sound: 5
-  block_ready: [oral_silence, oral_mouth_full, oral_contact, oral_sound, nested_d, blacklist, builder_primary, clearance_missing, act_mismatch, tag_words, youth_hint, scale_adult, consent_setup, dial, throat, negatives]
   opening_ratio: 0.85
   filler_lines: ["hold still", "stay still", "please", "good girl", "take it", "yes right there", "oh yes", "fuck me harder", "take it all"]
   tempo_range: {oral: [0.5, 1.5], sex: [0.5, 2.5], partner: [0.5, 2.5], edge: [0.2, 1.0], solo: [0.3, 2.5], strip: [0.2, 1.0]}
