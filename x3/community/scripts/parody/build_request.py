@@ -3838,6 +3838,138 @@ def build_writer_continuation_request(
     return g, prompt_all, cont_plan
 
 
+# --- N-beat writer-format continuation route (extend-test-3beat-20261115, Prompt maker t285u, Derrick 8:00 PM CT) -------
+# The writer lane's only multi-beat route was the automatic 2-beat undress+act split above (packed_split_is_safe), which
+# re-derives both beat prompts from a cast. A writer pack that already ships finished writer-format beat prompts (three
+# here) has to be fed in as written: this route keeps every authored section byte-identical and only adds what the
+# continuation builder always adds - its own lead-in (continuation_scene) and the latent-tail wiring (add_continuation_beat).
+_WRITER_BEAT_SECTIONS = ("subject_definitions", "summary", "retention_analysis", "detailed_description")
+
+
+def writer_beat_scene(text: str) -> str:
+    """The detailed_description text of one writer-format beat prompt ('' when it has none)."""
+    return (split_writer_sections(text).get("detailed_description") or [""])[0].strip()
+
+
+def writer_beat_lead_in(scene: str, pronoun: Optional[str] = None, closer: Optional[Dict[str, str]] = None,
+                       new_shot: bool = False) -> str:
+    """The continuation builder's own lead-in for one writer-format beat, as continuation_scene builds it (never copied here).
+
+    continuation_scene returns '<lead-in> <scene>'; the authored scene is what it ends with, so the lead-in is that
+    prefix. A beat with [Shot 2+] cuts, a camera move or a cut gets CONTINUATION_LEAD_IN_DYNAMIC, as the parody lane does.
+    """
+    first = re.split(r"(?<=[.!?])\s+", _D_RE.sub(" ", scene).strip())[0]
+    full = continuation_scene(scene, pronoun, closer=closer, new_shot=new_shot,
+                             camera=first if _CAMERA_SENTENCE_RE.search(_D_RE.sub(" ", first)) else None)
+    return full[: len(full) - len(str(scene).strip())].strip() if full.endswith(str(scene).strip()) else full
+
+
+def writer_beat_prompt(text: str, pronoun: Optional[str] = None, closer: Optional[Dict[str, str]] = None,
+                      new_shot: bool = False) -> str:
+    """One writer-format beat prompt as a continuation beat sends it: the builder lead-in goes after the `[Shot 1]` tag
+    (the same place the writer continuation route puts it), every other byte of the authored prompt is untouched."""
+    scene = writer_beat_scene(text)
+    if not scene:
+        raise WriterPromptError("a writer-format beat prompt has no detailed_description to continue")
+    lead = writer_beat_lead_in(scene, pronoun, closer=closer, new_shot=new_shot)
+    m = re.search(r"(?ms)(?:^|\n)\s*detailed_description:\s*\[Shot\s*1\]\s*", text)
+    if not m:
+        raise WriterPromptError("a writer-format beat prompt's detailed_description does not open with [Shot 1]")
+    at = m.end()
+    out = text[:at] + lead + " " + text[at:]
+    return out if out.endswith("\n") else out + "\n"
+
+
+def build_writer_beats_continuation_request(
+    base_graph: Dict[str, Any],
+    beat_prompts: Sequence[str],
+    prefix: str,
+    seed: int = 51083601,
+    frames: Optional[Sequence[int]] = None,
+    overlap_frames: int = CONTINUATION_OVERLAP_FRAMES,
+    width: int = DEFAULT_CANVAS[0],
+    height: int = DEFAULT_CANVAS[1],
+    end_actions: Optional[Sequence[str]] = None,
+    start_image: Optional[str] = None,
+    pronoun: Optional[str] = None,
+    new_shots: Optional[Sequence[int]] = None,
+    beat_guides: Optional[Dict[int, Sequence[Dict[str, Any]]]] = None,
+) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
+    """ONE native latent-tail continuation graph from 2+ finished writer-format beat prompts, in order.
+
+    Beat 1 carries the frame-0 start still (`start_image`, an already-staged ComfyUI input name) via AddGuide. Every
+    later beat is a continuation: no staged image (the latent tail guides frame 0), its RefMods re-apply, and the
+    prompt is the authored beat text plus the builder's own continuation lead-in, whose inherited state is that beat's
+    `end_actions[i-2]` (the previous beat's closer, as the parody lane's `beat_closer` reads it). Only the
+    lead-in is added to a beat's text; the four authored sections are sent byte-identical (verified by the caller's
+    prompt hash). Frame math is `_layout_chain`, so every sampled window stays <= CONTINUATION_WINDOW_MAX_FRAMES.
+
+    Returns `(graph, prompt_all, plan)` exactly as `build_continuation_request` does, with the per-beat layout in
+    `plan["beats"]` and each beat's closer/lead-in in `plan["beat_leads"]`.
+    """
+    texts = [str(t) for t in (beat_prompts or [])]
+    if len(texts) < 2:
+        raise ValueError("two or more writer-format beat prompts are needed: one beat is a single clip (build_writer_request)")
+    for i, t in enumerate(texts, start=1):
+        secs = split_writer_sections(t)
+        missing = [s for s in _WRITER_BEAT_SECTIONS if not (secs.get(s) or [""])[0].strip()]
+        if missing:
+            raise WriterPromptError(f"beat {i} is not a complete writer-format prompt: missing {', '.join(missing)}")
+    req = [int(x) for x in (frames or ([DEFAULT_CONTINUATION_BASE_FRAMES] + [DEFAULT_WRITER_ACT_EXT_FRAMES] * (len(texts) - 1)))]
+    if len(req) != len(texts):
+        raise ValueError(f"{len(texts)} beat prompts need {len(texts)} frame counts, got {len(req)}")
+    closers = [str(x or "") for x in (list(end_actions) + [""] * len(texts))[:len(texts)]]
+    cut_beats = {int(i) for i in (new_shots or [])}
+    chain = _layout_chain(req, overlap_frames)
+
+    g = copy.deepcopy(base_graph)
+    g["c0"]["inputs"].update({"prompt": texts[0].strip(), "length": chain[0]["frames"], "width": width, "height": height})
+    g["noise"]["inputs"]["noise_seed"] = seed
+    g["save"]["inputs"]["filename_prefix"] = prefix
+    if start_image:
+        inject_reference_images(g, [start_image], frames=chain[0]["frames"], frame_indices=[0])
+
+    prompts = [texts[0].strip()]
+    leads: List[Dict[str, Any]] = [{"index": 1, "is_continuation": False, "closer_used": "", "lead_in": ""}]
+    for step in chain[1:]:
+        i = int(step["index"])
+        closer = beat_closer({"scene": writer_beat_scene(texts[i - 2]), "end_action": closers[i - 2], "pronoun": pronoun}, pronoun)
+        cur_scene = writer_beat_scene(texts[i - 1])
+        _validate_continuation_place_transition(cur_scene, closer, new_shot=(i in cut_beats))
+        text_i = writer_beat_prompt(texts[i - 1], pronoun, closer=closer, new_shot=(i in cut_beats))
+        prompts.append(text_i.strip())
+        leads.append({"index": i, "is_continuation": True, "closer_used": closer.get("pose", ""),
+                      "lead_in": writer_beat_lead_in(writer_beat_scene(texts[i - 1]), pronoun, closer=closer,
+                                                     new_shot=(i in cut_beats))})
+        bg = copy.deepcopy(g)
+        for nid in [x for x, node in bg.items()
+                    if node.get("class_type") in ("MiniMaxH3AddGuide", "LoadImage") or x == "img_1"]:
+            del bg[nid]
+        bg["refapply"]["inputs"]["conditioning"] = ["c0", 0]
+        bg["c0"]["inputs"].update({"prompt": text_i.strip(), "length": step["layout"]["window_frames"],
+                                   "width": width, "height": height})
+        g = add_continuation_beat(g, bg, step["layout"], i, beat_guides=(beat_guides or {}).get(i),
+                                  new_shot=(i in cut_beats))
+
+    prompt_all = "\n\n".join(f"===== beat {k} =====\n{p}" for k, p in enumerate(prompts, start=1))
+    return g, prompt_all, {
+        "mode": "native_latent_tail_continuation",
+        "format": "writer_beats",
+        "clip_count": len(chain),
+        "beats": [dict(step) for step in chain],
+        "beat_leads": leads,
+        "base_frames": chain[0]["frames"],
+        "total_frames": chain[-1]["frames"],
+        "total_seconds": round(chain[-1]["frames"] / H3_FPS, 4),
+        "overlap_frames": overlap_frames,
+        "fps": H3_FPS,
+        "stitched": False,
+        "start_image": start_image or "",
+        "canvas": [width, height],
+        "seed": seed,
+    }
+
+
 # --- dynsafe: still read + cast for production (moved from runs/expanded_writer_test_20261111/_ewt_run.py) --------------
 VISION_READ_PROMPT = (
     "Describe this start still for a video prompt writer. Judge only what you see. Reply with JSON only, with these keys: "
