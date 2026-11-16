@@ -224,7 +224,10 @@ class TestU2Images(unittest.TestCase):
         pools = (self.pool,)
         self.assertEqual(validate_reference_images([str(self.img)], pools=pools), [str(self.img.resolve())])
         self.assertEqual(validate_reference_images(["B01/diner_ref.png"], pools=pools), [str(self.img.resolve())])
-        for bad in (str(self.outside), "sydney_misc/a.png", r"C:\Users\derek\sydney\x.png", "B01/missing.png"):
+        # Sydney path block dropped (Derrick t2084u): an in-pool sydney path is accepted like any other.
+        self.assertEqual(validate_reference_images(["sydney_misc/a.png"], pools=pools),
+                         [str((self.pool / "sydney_misc" / "a.png").resolve())])
+        for bad in (str(self.outside), r"C:\Users\derek\sydney\x.png", "B01/missing.png"):
             with self.assertRaises(ValueError, msg=bad):
                 validate_reference_images([bad], pools=pools)
         with self.assertRaises(ValueError):

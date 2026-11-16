@@ -190,7 +190,7 @@ class TestParodyPhase1(unittest.TestCase):
         self.assertTrue(any("char1" in str(p) for p in res["loaded_refmods"]))
 
     def test_u3_r5_stills_gate(self):
-        """R5 / U3: Stills gate permits only approved pool, rejects non-pool and Sydney."""
+        """R5 / U3: Stills gate permits only approved pool, rejects non-pool."""
         # 1. Pool still (valid)
         pool_img = self.approved_dir / "BEDROOM01" / "preview.png"
         if not pool_img.exists():
@@ -211,11 +211,7 @@ class TestParodyPhase1(unittest.TestCase):
             validate_stills([str(fake_still)], self.approved_dir)
         self.assertIn("not within the approved_characters pool", str(ctx.exception))
 
-        # 3. Sydney path -> rejected
-        sydney_fake = self.approved_dir / "SYDNEY" / "face.png"
-        with self.assertRaises(ValueError) as ctx:
-            validate_stills([str(sydney_fake)], self.approved_dir)
-        self.assertIn("Sydney paths are strictly prohibited", str(ctx.exception))
+        # 3. Sydney path block dropped (Derrick t2084u, Nov 16 2026).
 
     def test_u4_r6_sync_dry_run_and_fixtures(self):
         """R6 / U4: Sync dry-run reports missing/short without downloading."""
