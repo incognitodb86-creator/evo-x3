@@ -16,8 +16,18 @@ Renders every clip in a run's order file back to back in ONE GPU window:
                    and, like a stall, is looked for on disk first (never re-rendered if its output landed)
   retry          : clips that failed or stalled get exactly one unchanged retry, submitted together as a second
                    wave after the first, then are logged FAIL and skipped (phase 2 S8, 2026-10-30)
-  at the end     : unload comfyui_auto and release the lock in `finally` (also on error and Ctrl-C), then log
-                   "BATCH closed rc=<n> reason=<why> done=<ok>/<queued>" (phase 2 S13)
+  at the end     : free ComfyUI's models (POST /free) and, unless --keep-comfy-process is set, unload
+                   comfyui_auto; then release the lock in `finally` (also on error and Ctrl-C), and log
+                   "BATCH closed rc=<n> reason=<why> done=<ok>/<queued>: <comfyui_auto unloaded | comfyui_auto kept loaded>"
+                   (phase 2 S13)
+  --keep-comfy-process (chain mode, keep-comfy-part1, 2026-11-15): the end-of-batch llama-swap unload of
+                   comfyui_auto is what forces a ~40 s process wake before the next one-clip batch, and a chained
+                   run pays that per clip. With this flag the finally block still calls comm.free_comfy
+                   (POST /free unload_models+free_memory, so the VRAM is handed back) and skips ONLY the
+                   POST /api/models/unload/comfyui_auto, i.e. llama-swap keeps the process alive. Default OFF:
+                   normal runs are unchanged. The caller must keep comfyui_auto's ttl (300 s idle in
+                   llama-swap.yaml) from expiring between batches; scripts/queue/chain_queue.py pings it during
+                   the still_read/writer gap.
   post-pass      : (card t286s1226, Derrick 2026-11-06) every video clip with a DONE ok line is upscaled 2x by RTX
                    VideoSuperRes ULTRA at its native fps (no RIFE), AFTER its OBJECTIVE check passed on the raw render
                    and AFTER comfyui_auto is unloaded, still inside the same gpu-render.lock window (~1.4 GB VRAM).
@@ -36,7 +46,7 @@ expected "size": "WxH") is an image job: the same guard, lock, STOP, retry and l
 
 Usage:
   python scripts\run_queue.py --run-dir <run dir> [--queue <run dir>\_render_order.json] [--resume] [--dry-run]
-        [--frames 124] [--size 768x1344] [--detach] [--no-upscale]
+        [--frames 124] [--size 768x1344] [--detach] [--no-upscale] [--keep-comfy-process]
 --resume skips tags with a "DONE ... ok" line in _render_queue.log. --dry-run lists what would render and makes no
 lock, GPU or HTTP call.
 --frames/--size (item 10, 2026-11-04): the clip objective check compares the probe against the frames and canvas the
@@ -721,6 +731,10 @@ def main():
     ap.add_argument("--detach", action="store_true", help="relaunch outside the caller's process tree (WMI) and return")
     ap.add_argument("--no-upscale", action="store_true",
                     help="skip the default RTX VideoSuperRes 2x ULTRA post-pass (card t286s1226); clips stay at the render size")
+    ap.add_argument("--keep-comfy-process", action="store_true",
+                    help="chained mode: at batch close still free ComfyUI's models (POST /free) but skip only the "
+                         "llama-swap unload of comfyui_auto, so the next one-clip batch does not pay the process wake. "
+                         "Default off: a normal run unloads comfyui_auto in finally as before.")
     a = ap.parse_args()
     run_dir = os.path.abspath(a.run_dir)
     if a.detach:
@@ -749,6 +763,8 @@ def main():
             print("  pos %2d %s" % (j["pos"], j["tag"]))
         print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
         print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
+        print("comfy process: %s" % ("kept loaded at batch close (--keep-comfy-process: /free still runs, llama-swap unload skipped)"
+                                     if a.keep_comfy_process else "unloaded at batch close (default)"))
         print("dry run: no lock, GPU or HTTP call made")
         return 0
     if not todo:
@@ -804,8 +820,13 @@ def main():
         comm.mark_collected()  # (c) graceful-stop may stop comfyui_auto now: every output this batch will collect is in
         try: comm.free_comfy(os.path.join(run_dir, "_render_queue.log"))  # B2-1 (2026-11-05): free_comfy wants a log PATH, the same path qlog() writes; slog (a function) raised TypeError and line 629 swallowed it
         except Exception as e: slog("free_comfy note %s" % str(e)[:120])
-        try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
-        except Exception as e: slog("unload note %s" % str(e)[:120])
+        # --keep-comfy-process (chain mode, 2026-11-15): comm.free_comfy above always runs; only the llama-swap
+        # unload of comfyui_auto is skipped, so the process stays warm for the next batch in the chain.
+        if a.keep_comfy_process:
+            slog("KEEP comfyui_auto (--keep-comfy-process: /free ran, llama-swap unload skipped)")
+        else:
+            try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
+            except Exception as e: slog("unload note %s" % str(e)[:120])
         if a.no_upscale:
             qlog(run_dir, "UPSCALE skipped (--no-upscale): clips stay at the render size")
         elif rc != 130:  # post-pass inside the lock window, after comfyui_auto freed the VRAM (never on Ctrl-C)
@@ -831,7 +852,9 @@ def main():
             n_ok = 0; slog("ok_count note %s" % str(e)[:120])
         if rc == 0 and n_ok < len(jobs):  # never rc=0 while a queued clip lacks a DONE ok line
             rc, reason = 6, "ended with %d queued clip(s) missing a DONE ok line" % (len(jobs) - n_ok)
-        qlog(run_dir, "BATCH closed rc=%d reason=%s done=%d/%d: comfyui_auto unloaded, lock released" % (rc, reason, n_ok, len(jobs)))
+        # the closing line never claims an unload that --keep-comfy-process skipped
+        tail = "comfyui_auto kept loaded" if a.keep_comfy_process else "comfyui_auto unloaded"
+        qlog(run_dir, "BATCH closed rc=%d reason=%s done=%d/%d: %s, lock released" % (rc, reason, n_ok, len(jobs), tail))
     return rc
 
 
