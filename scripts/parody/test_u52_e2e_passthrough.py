@@ -175,7 +175,7 @@ def test_u52_e2e_pipeline_to_request_frames_and_passthrough(tmp_path, monkeypatc
         "--character", "FCSydny",
         "--config", str(home / "config.yaml"),
         "--frames", "120",
-        "--still-mode", still_mode,
+        "--still-mode", still_mode, "--debug",
     ])
     assert rc == 0, (rd / "clip_NOT_READY.txt").read_text(encoding="utf-8") if (rd / "clip_NOT_READY.txt").exists() else ""
 
