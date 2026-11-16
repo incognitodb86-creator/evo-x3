@@ -4,3 +4,5 @@ cwd=/home/derekboone/evo-x3
 brief=/home/derekboone/evo-x3/records/U21-agy-brief.md
 pid_wrapper=125523
 host=evo-X3
+exit_code=3
+end=2026-11-15 23:57:52 America/Chicago

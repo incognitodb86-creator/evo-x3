@@ -22,3 +22,8 @@ _archive/
 bench/**/raw*
 __pycache__/
 *.pyc
+
+# SearXNG runtime settings hold secret_key (U34: rotated after an accidental commit; example kept)
+deep-research-bakeoff/searxng/settings.yml
+deep-research-bakeoff/searxng/*.bak-*
+*.bak-*
