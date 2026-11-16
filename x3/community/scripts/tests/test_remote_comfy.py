@@ -1,0 +1,69 @@
+"""EVO-X3 remote queue mode (consolidation P1b, 2026-11-16): checks through the real entry points, no network."""
+import importlib, json, os, sys, tempfile, unittest
+from unittest import mock
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import remote_comfy as rc
+
+G = {"img_1": {"class_type": "LoadImage", "inputs": {"image": "community/a.jpg"}},
+     "aud": {"class_type": "LoadAudio", "inputs": {"audio": "v.wav"}},
+     "unet": {"class_type": "UNETLoader", "inputs": {"unet_name": "x.safetensors"}}}
+
+class T(unittest.TestCase):
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        os.makedirs(os.path.join(self.d, "community"))
+        open(os.path.join(self.d, "community", "a.jpg"), "wb").write(b"jpg")
+        open(os.path.join(self.d, "v.wav"), "wb").write(b"RIFFwav")
+
+    def test_upload_plan_lists_image_and_audio_not_models(self):
+        plan = rc.upload_plan(G, self.d)
+        self.assertEqual(sorted((p["kind"], p["name"], p["subfolder"]) for p in plan),
+                         [("audio", "v.wav", ""), ("image", "community/a.jpg", "community")])
+
+    def test_missing_input_fails_closed(self):
+        os.remove(os.path.join(self.d, "v.wav"))
+        with self.assertRaises(FileNotFoundError):
+            rc.upload_plan(G, self.d)
+
+    def test_multipart_carries_overwrite_and_file(self):
+        body, ct = rc._multipart({"subfolder": "community", "type": "input", "overwrite": "true"}, "a.wav", b"DATA")
+        self.assertIn(b'name="overwrite"\r\n\r\ntrue', body)
+        self.assertIn(b'name="image"; filename="a.wav"', body)
+        self.assertIn(b"DATA", body)
+        self.assertTrue(ct.startswith("multipart/form-data; boundary="))
+
+    def test_lock_is_exclusive_and_released(self):
+        with mock.patch.object(rc, "LOCK", os.path.join(self.d, "locks", "gpu.lock")):
+            self.assertEqual(rc.lock_acquire("t")[0], 0)
+            import fcntl
+            fh = open(rc.LOCK, "a+")
+            with self.assertRaises(BlockingIOError):
+                fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            rc.lock_release()
+            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB); fh.close()
+
+    def test_enable_routes_submit_through_uploads_and_fetch_through_view(self):
+        rq = importlib.import_module("run_queue")
+        for m in (rq, rq.comm, rq.rgj):
+            saved = dict(vars(m)); self.addCleanup(lambda m=m, s=saved: (vars(m).clear(), vars(m).update(s)))
+        rc.enable(rq)
+        self.assertEqual(rq.comm.BASE, rc.API)
+        self.assertIsNone(rq.comm.comfy_loaded())
+        posted = []
+        outdir = os.path.join(self.d, "clip")
+        with mock.patch.object(rc, "upload", side_effect=lambda it: posted.append(it["name"]) or {"name": it["name"]}), \
+             mock.patch.object(rq.comm, "http", return_value={"prompt_id": "p1"}) as http:
+            pid = rq.comm.submit(json.loads(json.dumps(G)), "clip", {}, outdir)
+        self.assertEqual(pid, "p1")
+        self.assertEqual(sorted(posted), ["community/a.jpg", "v.wav"])
+        self.assertTrue(http.call_args[0][0].endswith("/prompt"))
+        hist = {"p1": {"status": {"status_str": "success"}, "outputs": {"9": {"videos": [{"subfolder": "community/clip", "filename": "c_00001.mp4"}]}}}}
+        def fake_dl(sub, name, dst, timeout=900):
+            open(dst, "wb").write(b"mp4"); return 3
+        with mock.patch.object(rq.comm, "http", return_value=hist), mock.patch.object(rc, "download", side_effect=fake_dl):
+            side = rq.comm.fetch("p1", "clip", {}, outdir, 0)
+        self.assertEqual(side["file"], os.path.join(outdir, "clip.mp4"))
+        self.assertTrue(os.path.isfile(side["file"] + ".json"))
+
+if __name__ == "__main__":
+    unittest.main()

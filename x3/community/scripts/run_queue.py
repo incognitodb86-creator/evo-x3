@@ -735,8 +735,15 @@ def main():
                     help="chained mode: at batch close still free ComfyUI's models (POST /free) but skip only the "
                          "llama-swap unload of comfyui_auto, so the next one-clip batch does not pay the process wake. "
                          "Default off: a normal run unloads comfyui_auto in finally as before.")
+    ap.add_argument("--remote", action="store_true",
+                    help="EVO-X3: queue on AlienPc ComfyUI over the tailnet (Serve :8446; scripts/remote_comfy.py). Implied on Linux.")
+    ap.add_argument("--probe", action="store_true", help="with --dry-run --remote: one GET /system_stats (ignored path, never wakes ComfyUI)")
     a = ap.parse_args()
     run_dir = os.path.abspath(a.run_dir)
+    remote = a.remote or os.name != "nt"  # consolidation P1b 2026-11-16: the X3 has no local ComfyUI
+    if remote:
+        import remote_comfy
+        remote_comfy.enable(sys.modules[__name__])
     if a.detach:
         return detach(sys.argv[1:], run_dir)
     q = json.load(open(a.queue or os.path.join(run_dir, "_render_order.json"), encoding="utf-8"))
@@ -762,9 +769,18 @@ def main():
         for j in todo:
             print("  pos %2d %s" % (j["pos"], j["tag"]))
         print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
-        print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
+        print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "deferred to AlienPc (X3 remote, D5)" if remote else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
         print("comfy process: %s" % ("kept loaded at batch close (--keep-comfy-process: /free still runs, llama-swap unload skipped)"
                                      if a.keep_comfy_process else "unloaded at batch close (default)"))
+        if remote:
+            nbad = remote_comfy.dry_report(sys.modules[__name__], run_dir, todo)
+            if a.probe:
+                try:
+                    comm.http(remote_comfy.API + "/system_stats", timeout=15); print("probe: :8446 reachable, ComfyUI loaded")
+                except Exception as e:
+                    print("probe: :8446 answered %s" % str(e)[:160])
+            print("dry run: no lock, upload or POST made%s" % ("; %d clip(s) would FAIL" % nbad if nbad else ""))
+            return 0  # same rc contract as the local dry run; FAIL lines above name any clip that would fail
         print("dry run: no lock, GPU or HTTP call made")
         return 0
     if not todo:
