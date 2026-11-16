@@ -26,7 +26,7 @@ APPROVED_IMAGE_POOLS: Tuple[Path, ...] = tuple(
         _HOME_RENDER_APPROVED_STILLS_DIR,
         NAS_APPROVED_STILLS_DIR,
         # Derrick Nov 12 + "yes change it wtf" (Alfred t520u, Nov 16 2026): PixlStash catalog and
-        # Grok/Flow exports are acceptable stills. Containment, Sydney and 18+ checks still apply.
+        # Grok/Flow exports are acceptable stills. Containment and 18+ checks still apply.
         PIXLSTASH_IMAGES_DIR,
         GROK_FLOW_LIBRARIES_DIR,
     ))
@@ -205,7 +205,6 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
     """Validate still image paths against approved pool and security constraints.
 
     Enforces:
-    - Rejection of any path referencing Sydney (FP-10).
     - Containment within approved_characters pool (U3 / KD10).
 
     Args:
@@ -226,9 +225,7 @@ def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str
     app_dir_res = pool_dir.resolve()
     for s in stills:
         p = Path(s).resolve()
-        # Sydney isolation rule: never touch Sydney assets
-        if "sydney" in str(p).lower() or p.name.upper() == "SYDNEY":
-            raise ValueError(f"Sydney paths are strictly prohibited: {s}")
+        # Sydney path block dropped (Derrick t2084u, Nov 16 2026).
 
         pools_ok = [app_dir_res] if approved_dir is not None else [x.resolve() for x in (DEFAULT_APPROVED_STILLS_DIR, *APPROVED_IMAGE_POOLS)]
         try:
@@ -255,7 +252,7 @@ def validate_reference_images(
     """U2: --image gate (LANE_IMAGE_RULES.md). Every image must live inside an approved_characters pool.
 
     Accepts a full path, or a sub-path / filename relative to a pool. Rejects > 4 images
-    (MAX_REFERENCE_IMAGES), any path that mentions 'sydney' (case-insensitive), anything outside
+    (MAX_REFERENCE_IMAGES), anything outside
     the pools, missing files, and non-image extensions.
     build_request.py wires --image as a single frame-0 AddGuide start image (0 or 1 per clip).
     """
@@ -267,8 +264,6 @@ def validate_reference_images(
     pool_list = tuple(Path(x) for x in (pools if pools is not None else APPROVED_IMAGE_POOLS))
     out: List[str] = []
     for raw in imgs:
-        if "sydney" in raw.lower():
-            raise ValueError(f"Sydney paths are strictly prohibited as reference images: {raw}")
         cand = Path(raw).expanduser() if raw.startswith("~") else Path(raw)
         tries = [cand] if cand.is_absolute() or str(cand).startswith("\\\\") else [pl / cand for pl in pool_list]
         found = None
@@ -277,8 +272,6 @@ def validate_reference_images(
                 rp = t.resolve()
             except OSError:
                 continue
-            if "sydney" in str(rp).lower():
-                raise ValueError(f"Sydney paths are strictly prohibited as reference images: {raw}")
             inside = False
             for pl in pool_list:
                 try:
