@@ -37,16 +37,14 @@ Name mapping: prefer pairing `INDEX` character + actor (`--name "<Actor>" --char
 
 ## Write and queue in one pass after Derrick's yes (X3 recipe)
 
-1. After Derrick's yes (and after confirming AlienPc's GPU/lease is free), write and queue in one pass with `--queue --yes-derrick` (no dry run first):
+1. After Derrick's yes (and after confirming AlienPc's GPU/lease is free), write and queue in one pass with the ONE writer command (`render_writer_pipeline.py`, which calls `submit_parody_run.py writer-run` with `--character`/`--actor`/`--names`) and `--queue --yes-derrick`:
 ```bash
-~/AI/render/x3/.venv/bin/python ~/AI/community/scripts/parody/submit_parody_run.py \
-  --name '<Actor>' --character '<Character>' --actor '<Actor>' --tone 'satirical adult parody' \
-  --seconds 10 --aspect 16:9 --camera '<framing + motion>' \
-  --description '<biometrics + outfit>' --scene '<scene + hands on prop + voice cue>' \
-  --dialogue '<spoken words only>' --end-action '<holds a wry smile>' \
-  --yes-derrick
+~/AI/render/x3/.venv/bin/python ~/AI/community/scripts/parody/render_writer_pipeline.py <run_dir> \
+  --ask "<ask>" --position <act> --still <still_path> \
+  --character "<Character>" --actor "<Actor>" --names "<Character>" "<Actor>" \
+  --queue --yes-derrick
 ```
-(`submit_parody_run.py` without `--dry-run` queues; on the X3 that requires `--yes-derrick` and goes through `queue-remote.sh`.)
+(Without `--queue --yes-derrick`, `render_writer_pipeline.py` runs dry and stops at `READY`.)
 - **Do NOT** poll manually; `--wait` waits for `BATCH closed` in `_render_queue.log` (`rc=0` ok; `rc=7` GPU busy). On `ValueError`, quote it, fix wording once if yours, else stop. After `rc=0`, optionally upload `<run_dir>/clip/clip.mp4` to QNAP `pi-drop/` per `AGENTS.md`.
 
 ## Sibling skills

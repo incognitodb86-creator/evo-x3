@@ -1670,6 +1670,14 @@ def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else list(argv)
     if argv and argv[0] == "writer-run":
         return _writer_run_cli(argv[1:])
+    if argv and argv[0] == "classic":
+        return classic_main(argv[1:])
+    return _writer_run_cli(argv)
+
+
+def classic_main(argv=None) -> int:
+    """Retired classic parody CLI; kept only for legacy tests."""
+    argv = sys.argv[1:] if argv is None else list(argv)
     parser = argparse.ArgumentParser(description="Submit H3 parody render job")
     parser.add_argument("--name", required=True, help="Identity / celeb name")
     parser.add_argument("--character", help="Character name")
