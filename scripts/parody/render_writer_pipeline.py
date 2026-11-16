@@ -408,7 +408,7 @@ OVERLAY_NOTES: Dict[str, str] = {
     "defeat": "Superheroine defeat: an original adult heroine, one strength beat, one break moment, one costume move that stays, her voice drops; no named hero and no quoted line. Her lines and her face carry the tone slot from the first line to the last frame.",
     "cnc": "Consensual non-consent fantasy between adults: one protest beat inside the action and his override by grip or command; no safeword unless asked.",
     "taboo_role": "Role-play between adults: one role for the clip, at most one title per line, tied to something visible.",
-    "spoof": "Spoof: original characters only, one genre flavour and cadence, one visual nod; film look as light, lens and grain words, no real names and no famous quotes.",
+    "spoof": "Spoof (tone overlay): satirical or parody genre flavour, cadence, and one visual nod; film look as light, lens and grain words. Tone only — never drops or blocks named characters or actors.",
     "vhs": "VHS camcorder look: soft analog camcorder video with slight colour bleed and tracking lines, handheld camcorder energy, never a phone or smartphone.",
     "states": "States / fantasy setup: keep every character an adult; any consent/roleplay agreement belongs in its own separate setup clip, never inside the sex clip.",
     "restraints": "Restraints: name the restraint, who set it and its limit once; it stays on to the last frame. Tie her wrists to the {surface} she lies on, or he holds them; name no other anchor.",
@@ -546,6 +546,105 @@ def shots_line(n: int, frames: int) -> str:
             "the camera cuts to <a new size or angle on the same action>. The action, tempo and screen sides never change at a cut.")
 
 
+
+def _known_identity_tokens() -> Tuple[Dict[str, str], List[Dict[str, Any]]]:
+    import resolve as _res
+    idx_dir = _AI_ROOT / "community" / "index" / "h3-known-characters"
+    ali_path = PARODY_DIR / "aliases.json"
+    rows = _res.load_index_files(idx_dir) if idx_dir.is_dir() else []
+    aliases = _res.load_aliases(ali_path) if ali_path.is_file() else {}
+    return aliases, rows
+
+
+def resolve_named_identity(
+    ask: str,
+    character: Optional[str] = None,
+    actor: Optional[str] = None,
+    names: Optional[List[str]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Fix 1: One path for named people. Detect/resolve any named character or celeb in the ask or flags."""
+    import resolve as _res
+    import submit_parody_run as _spr
+
+    char = (character or "").strip() or None
+    act = (actor or "").strip() or None
+    name_list = [str(n).strip() for n in (names or []) if str(n).strip()]
+
+    aliases, rows = _known_identity_tokens()
+    ask_s = ask or ""
+    if not (char or act or name_list) and ask_s:
+        candidates_to_scan: List[str] = []
+        for k in aliases:
+            if len(k) >= 4:
+                candidates_to_scan.append(k)
+        for r in rows:
+            for fld in (r.get("character"), r.get("actor")):
+                v = (fld or "").strip()
+                if len(v) >= 4:
+                    candidates_to_scan.append(v)
+        candidates_to_scan = sorted(set(candidates_to_scan), key=len, reverse=True)
+        matched_from_ask: List[str] = []
+        for cand in candidates_to_scan:
+            if re.search(r"(?i)\b" + re.escape(cand) + r"\b", ask_s):
+                if not any(cand.lower() in m.lower() for m in matched_from_ask):
+                    matched_from_ask.append(cand)
+        for oc_m in re.finditer(r"\bFC[A-Za-z0-9_]{3,}\b", ask_s):
+            if oc_m.group(0) not in matched_from_ask:
+                matched_from_ask.append(oc_m.group(0))
+        name_list = matched_from_ask
+
+    if not (char or act or name_list):
+        return None
+
+    targets: List[str] = []
+    for item in ([char, act] + name_list):
+        if item and item not in targets:
+            targets.append(item)
+
+    idx_dir = _AI_ROOT / "community" / "index" / "h3-known-characters"
+    ali_path = PARODY_DIR / "aliases.json"
+    ref_dir = _AI_ROOT / "comfy-alienpc" / "models" / "refmods"
+    req = {
+        "names": targets,
+        "character": char or (name_list[0] if name_list else ""),
+        "actor": act or "",
+        "tone": "",
+        "length_s": 10,
+        "description": "adult figure with eyes, hair, and outfit",
+    }
+    resolved = _res.resolve_identities(req, index_dir=idx_dir, refmods_dir=ref_dir, aliases_path=ali_path)
+    matched_rows = resolved.get("matched_index_rows") or []
+    res_char = char
+    res_actor = act
+    if matched_rows:
+        r0 = matched_rows[0]
+        res_char = res_char or r0.get("character")
+        res_actor = res_actor or r0.get("actor")
+    if not res_actor:
+        for t in targets:
+            norm_t = _res._normalize_key(t)
+            if norm_t in aliases:
+                res_actor = aliases[norm_t].title()
+                if not res_char:
+                    res_char = t
+                break
+    if not res_char and targets:
+        res_char = targets[0]
+
+    picked = _spr.resolve_writer_refmods(still_image=None, character=res_char, names=targets)
+    all_names = list(dict.fromkeys([x for x in (res_char, res_actor, *targets) if x]))
+    return {
+        "character": res_char,
+        "actor": res_actor,
+        "names": all_names,
+        "index_status": resolved.get("index_status") or "none",
+        "index_flag": resolved.get("index_flag") or "index:none",
+        "refmods": list(picked.get("stems") or []),
+        "trigger": picked.get("trigger"),
+        "reason": picked.get("reason"),
+    }
+
+
 def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodies: int) -> str:
     lines = [f"ASK: {ask}", f"POSITION: {position} ({kind})", "STILL FACTS (Picture 1):"]
     for k in ("place", "surface", "floor", "light", "pose", "framing", "garment", "hair", "skin", "build"):
@@ -631,6 +730,16 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
               f"{'; (S3) is a third adult, defined by you' if bodies >= 3 and kind != 'talk' else ''}. Everyone is an adult, 25 or older.",
               f"CLIP LENGTH: T = {clip_secs:.1f} s ({clip_frames} frames); spoken words total at most {word_max} "
               f"(at most {lines_max} short line(s) per speaker)."]
+    if slots.get("identity"):
+        ident = slots["identity"]
+        ichar = ident.get("character") or ""
+        iact = ident.get("actor") or ""
+        iflag = ident.get("index_flag") or "index:none"
+        if ichar and iact and ichar.lower() != iact.lower():
+            lines.append(f"IDENTITY (parody): (S1) is {ichar} (played by {iact}, {iflag}). Name both {ichar} and {iact} in subject_definitions:, and match <Audio 1> to {iact}\x27s {ichar} voice.")
+        elif ichar or iact:
+            who = ichar or iact
+            lines.append(f"IDENTITY (parody): (S1) is {who} ({iflag}). Name {who} in subject_definitions:, and match <Audio 1> to {who}\x27s voice.")
     if slots.get("inherited"):
         inh = slots["inherited"]
         def _nz(x):
@@ -852,10 +961,23 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
               f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1), and "
               f"<Audio 1> defines his voice timbre."]
     else:
+        ident = slots.get("identity") or {}
+        ichar = (ident.get("character") or "").strip()
+        iact = (ident.get("actor") or "").strip()
+        if ichar and iact and ichar.lower() != iact.lower():
+            id_prefix = f"{ichar} ({iact}), "
+            voice_tail = f"<Audio 1> defines {iact}\x27s exact {ichar} voice timbre."
+        elif ichar or iact:
+            who = ichar or iact
+            id_prefix = f"{who}, "
+            voice_tail = f"<Audio 1> defines {who}\x27s voice timbre."
+        else:
+            id_prefix = ""
+            voice_tail = "<Audio 1> defines her voice timbre."
         sd = [f"<Picture 1> is the reference image defining the exact appearance, face and hairstyle of <Subject 1>, and the {place}, "
               f"its {light} and the opening framing.",
-              f"<Subject 1> is the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, {hair}; she is (S1), and "
-              f"<Audio 1> defines her voice timbre."]
+              f"<Subject 1> is {id_prefix}the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, {hair}; she is (S1), and "
+              f"{voice_tail}"]
     partners = (card or {}).get("partners") or []
     want = 1 if bodies == 2 or kind == "talk" else (2 if bodies >= 3 else 0)
     if kind == "talk" and not re.search(r"\(S2\)", dd):
@@ -1076,12 +1198,14 @@ def partner_look_from_card(card: Optional[Dict[str, Any]], label: str = "S3") ->
 
 
 def run_build(run_dir: Path, ask: str, position: str, still: str, character: Optional[str], timeout: int = 300,
-              extra: Optional[List[str]] = None) -> Dict[str, Any]:
+              extra: Optional[List[str]] = None, names: Optional[List[str]] = None) -> Dict[str, Any]:
     """Existing dry-run hook. Never passes --queue."""
     cmd = [sys.executable, str(SUBMIT_PY), "writer-run", str(run_dir), "--ask", ask, "--position", position, "--still", still]
     cmd += list(extra or [])
     if character:
         cmd += ["--character", character]
+    if names:
+        cmd += ["--names", *[str(n) for n in names if str(n).strip()]]
     if partner_type_for(position, ask) and "--partner-type" not in cmd:
         cmd += ["--partner-type", partner_type_for(position, ask)]
     if partner_type2_for(position, ask) and "--partner-type2" not in cmd:
@@ -1278,7 +1402,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
     run_dir.mkdir(parents=True, exist_ok=True)
     run_id = run_dir.name
     ask, position = job["ask"], job["position"]
-    character = job.get("character") or cfg.get("default_character")
+    character = job.get("character")
+    identity = resolve_named_identity(ask, character=character, actor=job.get("actor"), names=job.get("names"))
+    if not character and identity and identity.get("character"):
+        character = identity["character"]
     kind = position_kind(position, cfg)  # provisional; the router below decides after the still read
     bodies = acts_bodies(position)
     overlays: List[str] = []
@@ -1401,6 +1528,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         # 2 slots
         last_tone = (state_dir / "last_tone.txt").read_text(encoding="utf-8").strip() if (state_dir / "last_tone.txt").exists() else None
         slots = make_slots(still_read, ask, position, kind, run_id, last_tone, scene_prev, overlays=overlays)
+        if identity:
+            slots["identity"] = identity
+            result["identity"] = identity
         if is_continue and scene_prev:
             _inh_pose = str(((slots.get("inherited") or {}).get("pose")) or "").strip()
             if not _inh_pose or _inh_pose.lower() in ("none", "null", "-", "the previous clip's end pose"):
@@ -1641,7 +1771,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         chosen = cands[pick]
         wp_state.atomic_write(run_dir / "writer_output.txt", chosen["full"])
         # 8 build (dry); opt-in --fix-once retry on NOT_READY if not already retried
-        build = run_build(run_dir, ask, position, still, character, extra=_bx)
+        _id_names = [str(n) for n in ((identity or {}).get("names") or []) if str(n).strip()]
+        _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else [])
+        build = run_build(run_dir, ask, position, still, character, extra=_bx_build)
         builds = [build]
         if fix_once and not fixed_once and build["status"] != "READY":
             nr = run_dir / "clip_NOT_READY.txt"
@@ -1657,7 +1789,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             cands["rewrite_builder"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 2), "notes": notes}
             pick, chosen = "rewrite_builder", cands["rewrite_builder"]
             wp_state.atomic_write(run_dir / "writer_output.txt", full)
-            build = run_build(run_dir, ask, position, still, character, extra=_bx)
+            _id_names = [str(n) for n in ((identity or {}).get("names") or []) if str(n).strip()]
+            _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else [])
+            build = run_build(run_dir, ask, position, still, character, extra=_bx_build)
             builds.append(build)
         status = build["status"]
         # acceptance-1 fix c: these hard rules block READY even when the builder passes (others fall back with a warning)
@@ -1795,6 +1929,8 @@ def main(argv=None) -> int:
     ap.add_argument("--still", default=None, help="start still path (required), or auto (pool pick + vision read)")
     ap.add_argument("--still-read", help="existing still_read.json to copy into the run dir")
     ap.add_argument("--character", default=None)
+    ap.add_argument("--actor", default=None)
+    ap.add_argument("--names", nargs="+", default=None, help="character/celebrity names for parody identity + RefMod")
     ap.add_argument("--scene", help="scene id for a multi-clip scene (scene_state.json)")
     ap.add_argument("--continue", dest="cont", help="previous run dir this clip continues")
     ap.add_argument("--partner2-still", help="MMF: (S3) reference still (ComfyUI input path, e.g. community/x.jpg)")
@@ -1836,7 +1972,7 @@ def main(argv=None) -> int:
             print(f"NOT_READY --continue must be an absolute path: {a.cont}")
             return 3
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
-                     "character": a.character, "scene": a.scene, "continue": a.cont,
+                     "character": a.character, "actor": a.actor, "names": a.names, "scene": a.scene, "continue": a.cont,
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
                      "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode,
                      "fix_once": bool(a.fix_once),
