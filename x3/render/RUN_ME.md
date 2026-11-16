@@ -9,7 +9,7 @@ Quickstart for running the H3 writer pipeline from `~/AI/render` (EVO-X3 Linux a
   sudo -n -u evo env XDG_RUNTIME_DIR=/run/user/1001 HOME=/home/evo PATH=/home/evo/.local/bin:/usr/bin bash /home/evo/AI/render/x3/render-pi.sh
   ```
 - **Python venv**: Use `/home/evo/AI/render/x3/.venv/bin/python3` (`~/AI/render/x3/.venv/bin/python3`); do not call bare `/usr/bin/python3` or Windows `.venv/Scripts/python.exe`.
-- **Dry build & remote queueing**: `render_writer_pipeline.py` and `submit_parody_run.py` are dry by default (`--queue` is refused on Linux). Paste `prompt.txt` to Derrick; only after his explicit yes (and confirming AlienPc's GPU/lease is free), queue remotely over Tailscale Serve `https://alienpc.tailf242b2.ts.net:8446`:
+- **Write and queue in one pass**: after Derrick's yes (and confirming AlienPc's GPU/lease is free), run `render_writer_pipeline.py` or `submit_parody_run.py writer-run` with `--queue --yes-derrick`. That writes the prompt and queues on AlienPc ComfyUI over Tailscale Serve `https://alienpc.tailf242b2.ts.net:8446` in one pass (no dry-run rebuild). `Max Architect 2026-11-16 (Derrick t2036u, t2039u)`:
   ```bash
   bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick [--dry-run]
   ```
@@ -31,7 +31,7 @@ Quickstart for running the H3 writer pipeline from `~/AI/render` (EVO-X3 Linux a
 ## 2. Normal Run Workflow (Dry Only by Default)
 1. Pick a start still (under `_inputs`, `stills\approved_characters`, or `stills\comfy_input`), inspect it with `read`, and create one run folder under `/home/derekboone/AI/community/runs/<run_name>`.
 2. Write `<run_dir>\still_read.json`: `{"read": {room, place, surface, bed, sheets, floor, pose, facing_camera, framing, light, people, garments, build, skin, hair}, "source": "<still path>"}`.
-3. Run the autonomous writer pipeline (dry by default; paste prompt.txt to Derrick and add `--queue` only after he approves it):
+3. After Derrick's yes, run the autonomous writer pipeline with `--queue --yes-derrick` (write and queue in one pass; no dry run first):
    ```powershell
    python3 /home/derekboone/AI/community/scripts/parody/render_writer_pipeline.py `
      '/home/derekboone/AI/community/runs/<run_name>' --ask '<ask>' --position '<position>' `
@@ -51,8 +51,8 @@ Quickstart for running the H3 writer pipeline from `~/AI/render` (EVO-X3 Linux a
    ```
    Additional `writer-run` flags: `--frames <N>`, `--shots single|multi`, `--continued`, `--partner2-still '<still>'`, `--s3-look '<look>'`, `--s3-in-frame`, `--partner-type <type>`, `--partner-type2 <type>`, `--names <name>...`. (`base.api.json` is optional — `submit_parody_run.py` loads `templates\b2_refmod.api.json` read-only if absent.)
 5. Check output and stop:
-   - `READY` writes `<run_dir>\prompt.txt`, `<run_dir>\clip\request.api.json`, `<run_dir>\build_report.json`, and `<run_dir>\DRY_RUN`.
-   - Report the `READY` / `NOT_READY` status line and `<run_dir>\pick.json` path. **Never pass `--queue` unless Derrick explicitly approves queueing.**
+   - `READY` writes `<run_dir>/prompt.txt`, `<run_dir>/clip/request.api.json`, and `<run_dir>/build_report.json`. With `--queue --yes-derrick` it also queues and writes `_render_order.json` (no `DRY_RUN` leftover).
+   - Report the `READY` / `NOT_READY` status line, `<run_dir>/pick.json` path, and `submitted=`. **Never pass `--queue` or `--yes-derrick` unless Derrick explicitly approved queueing.**
 
 ## 3. Characters, RefMods, Voice Refs, and Stills Vaults
 - **All adult RefMods and all voice refs are allowed**: OC RefMods, INDEX celebrity/character RefMods, PixlStash-tagged identities, and voice refs (`*_refmod_audio` + `<Audio 1>`) are all supported by `writer-run`.
