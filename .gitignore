@@ -1,3 +1,4 @@
+# Existing (orchestrator)
 iso/
 drivers/
 *.img
@@ -5,3 +6,59 @@ drivers/
 runs/*/agy.log
 runs/*/agy.out
 runs/*/agy.err
+
+# Model weights (G6). Keep the model list + SHA-256 in git; weights stay on /srv/models and the QNAP.
+*.hgn
+*.safetensors
+*.bin
+*.gguf.*
+*.pt
+*.onnx
+*.ggml
+*.npz
+*.ckpt
+
+# Secrets and credentials. /etc/evo-x3/*.env and *.cred are never committed.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!*.pubkey
+*.cred
+auth.json
+**/auth.json
+**/llm.env
+**/hf.env
+**/gitea.env
+**/openwebui.env
+**/vaultwarden.env
+**/ntfy.env
+**/pihole.env
+**/plex.env
+**/unifi.env
+**/kuma.env
+qnap.cred
+
+# Sessions, caches, virtualenvs, package installs
+sessions/
+**/sessions/
+.cache/
+__pycache__/
+**/__pycache__/
+node_modules/
+.venv/
+**/.venv/
+*.pyc
+.pi/npm/
+.pi/git/
+
+# Archives and installer blobs
+*.tar.gz
+*.tar
+*.tgz
+*.zip
+
+# Local backups and editor copies
+*.bak
+*.bak-*
