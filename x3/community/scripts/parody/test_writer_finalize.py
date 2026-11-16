@@ -1343,6 +1343,7 @@ def test_frs16_s3_any_hook_error_is_not_ready_never_a_traceback(tmp_path, monkey
     assert '"NOT_READY"' in (tmp_path / "e3" / "build_report.json").read_text()
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="AlienPc --queue / Windows vault paths; X3 uses queue-remote.sh and has no vault.db")
 def test_frs16_s3_queue_failures_are_not_ready_with_a_mocked_queue(tmp_path, monkeypatch):
     import subprocess as _sp
     import submit_parody_run as spr
@@ -1403,6 +1404,7 @@ def test_frs16_s6_missing_or_empty_still_path_is_not_ready(tmp_path):
 
 
 # --- argon-low Section B (2026-11-11): packed undress-plus-act with complete safe split -> ONE 2-beat continuation -------
+@pytest.mark.skipif(sys.platform != "win32", reason="AlienPc --queue / Windows vault paths; X3 uses queue-remote.sh and has no vault.db")
 def test_argonlow_packed_undress_plus_act_becomes_one_2beat_continuation(tmp_path, monkeypatch):
     import json as _json
     import submit_parody_run as spr

@@ -3,6 +3,7 @@
 Authorized by Derrick t1007u and t1008s3914, Nov 11, 2026.
 """
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -466,6 +467,7 @@ def test_flash_issues_1_3_4():
     assert "(S2) says" not in res[0]
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="AlienPc --queue / Windows vault paths; X3 uses queue-remote.sh and has no vault.db")
 def test_part4_pixlstash_stills_vault_and_voice_ref_attach():
     import submit_parody_run as spr
     vaults = [str(p).lower() for p in spr._PIXLSTASH_VAULTS]

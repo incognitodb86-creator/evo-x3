@@ -128,6 +128,7 @@ class TestBA5cFixes(unittest.TestCase):
             )
         return run_dir, result, run.call_args.args[0]
 
+    @unittest.skipIf(sys.platform != "win32", "AlienPc --queue path; X3 uses queue-remote.sh")
     def test_u8_uses_detached_run_queue_and_queue_manifest(self):
         run_dir, result, cmd = self.submit(0)
         self.assertIn("run_queue.py", " ".join(cmd))
@@ -144,6 +145,7 @@ class TestBA5cFixes(unittest.TestCase):
             json.loads((run_dir / "request.api.json").read_text(encoding="utf-8")),
         )
 
+    @unittest.skipIf(sys.platform != "win32", "AlienPc --queue path; X3 uses queue-remote.sh")
     def test_u8_rc7_is_gpu_busy_not_generic_failure(self):
         _, result, _ = self.submit(7)
         self.assertTrue(result["gpu_busy"])
