@@ -3,9 +3,9 @@ import { tokenizeCmd, runDirFromCmd, normalizeRunDir, parodyRunKey } from './loo
 import process from 'node:process';
 
 const cases = [
-  ['submit_parody_run.py writer-run /home/derekboone/AI/community/runs/clip1 --ask hi', '/home/derekboone/AI/community/runs/clip1'],
-  ['submit_parody_run.py --ask hi --run-dir /home/derekboone/AI/community/runs/clip2 writer-run', '/home/derekboone/AI/community/runs/clip2'],
-  ['/venv/bin/python3 render_writer_pipeline.py --position doggy "/home/derekboone/AI/community/runs/Clip3"', '/home/derekboone/AI/community/runs/Clip3'],
+  ['submit_parody_run.py writer-run /home/evo/AI/community/runs/clip1 --ask hi', '/home/evo/AI/community/runs/clip1'],
+  ['submit_parody_run.py --ask hi --run-dir /home/evo/AI/community/runs/clip2 writer-run', '/home/evo/AI/community/runs/clip2'],
+  ['/venv/bin/python3 render_writer_pipeline.py --position doggy "/home/evo/AI/community/runs/Clip3"', '/home/evo/AI/community/runs/Clip3'],
   ['render_writer_pipeline.py --run-dir=/tmp/R4 --ask x', '/tmp/R4'],
   ['submit_parody_run.py writer-run --still /tmp/a.jpg /tmp/R5', '/tmp/R5'],
   ['submit_parody_run.py writer-run --continued /tmp/R6 --ask x', '/tmp/R6'],
