@@ -26,7 +26,7 @@ bash ~/AI/render/x3/render-pi.sh -p --no-session "<ask>"  # one-shot
 `render-pi.sh` mirrors AlienPc's production Render pane argv (`C:\AI\director\scripts\pi_herdr_at_logon.ps1` `$renderPiArgs`): `--no-extensions` is kept so project settings do not auto-load plannotator, pi-canvas, pi-say or the compound-engineering plugin; intended extensions are passed with `-e` (pi-permission-system, cc-safety-net, loop-guard, pi-subagents, pi-memory); `--no-mcp`; `--no-skills` + the same 9 skills (video-render, image-render, comfy-render, h3-parody-identity, h3-prompting, h3-max-ref2va-prompt, h3-hc-render, alienpc-hardcore-i2v-director, alienpc-stills-pose-edit-prompting, from `~/AI/community/skills`; on AlienPc the `~/.pi/agent/skills` copies are junctions to the same folders); `--no-context-files`; `--append-system-prompt ~/AI/render/AGENTS.md`.
 - Model mapping (Derrick's cutover mapping): Render → `x3-local/gemma4-heretic` (Gemma 4 26B A4B Heretic Q8_0 + official unsloth BF16 mmproj vision, llama.cpp Vulkan, temp 1.0 / top_p 0.95 / top_k 64, 262144 ctx per slot, image budget 560–1120), `--thinking medium` as on AlienPc (thinking is per request). Attach stills as `@path` arguments; a path written only in prose is not sent and the model will invent the outfit.
 - Left out on purpose: `--remote`, `herdr-agent-state.ts`, pi-mobile (herdr 0.9.5 is installed but not wired; the phone bridge is not on the X3; the phone cutover is gated).
-- `~/AI/render/.pi/settings.json` (used only by a bare `pi` in this folder, not by the launcher): AlienPc's global package set installed project-local (pi-permission-system 0.8.0, pi-memory 0.4.2, plannotator 0.28.40, pi-canvas 0.1.1, pi-say 1.1.1, compound-engineering @34492307 with AlienPc's skill filters) + skills/prompts paths; default model x3-local/gemma4-heretic.
+- `~/AI/render/.pi/settings.json` (used only by a bare `pi` in this folder for packages/skills, while `pi-subagents` reads its `subagents` block from it: `defaultModel` `x3-local/gemma4-heretic-sub`, `disableThinking: true`, `defaultThinking: "off"`): AlienPc's global package set installed project-local (pi-permission-system 0.8.0, pi-memory 0.4.2, plannotator 0.28.40, pi-canvas 0.1.1, pi-say 1.1.1, compound-engineering @34492307 with AlienPc's skill filters) + skills/prompts paths; default model x3-local/gemma4-heretic.
 - Write sandbox: `~/AI/render/.pi/agent/pi-permissions.jsonc` (write/edit only under `~/AI/community/runs/*`), global floor `~/.pi/agent/pi-permissions.jsonc` (AlienPc policy, paths translated; only loaded by this project's pi-permission-system).
 - Python: `~/AI/render/x3/.venv` (Python 3.14; `requirements-x3.txt`: pysbd 0.3.4, PyYAML 6.0.3, pillow, numpy, opencv-python-headless, pytest).
 
@@ -54,8 +54,8 @@ Full table, sources and live checks: `~/evo-x3/records/U24-model-tuning-20261115
 
 | Slot | Context | KV | Key flags |
 |---|---|---|---|
-| gemma4-heretic | 2 × 262144 | f16 | official unsloth mmproj BF16 (U25), image 560–1120, -b/-ub 2048, reasoning per request |
-| flash-next (Forge) | 262144, 4 Halogen slots (llama-swap concurrencyLimit 1 until Phase 1 lands) | Halogen 0.20.5 native HGN v2 (U26) | effort medium; `flash-next-gufo` = Gufo rollback slot; `flash-next-uncensored` = non-production (U26) |
+| gemma4-heretic | 2 × 262144 | f16 | official unsloth mmproj BF16 (U25), image 560–1120, -b/-ub 2048, reasoning per request; `gemma4-heretic-sub` alias (maxTokens 4096, thinking off) for Render subagents |
+| flash-next (Forge) | 262144, 4 Halogen slots (llama-swap `concurrencyLimit: 4`, `flash-next-sub` alias, U27/U29) | Halogen 0.20.5 native HGN v2 (U26) | effort medium; `flash-next-gufo` = Gufo rollback slot; `flash-next-uncensored` = non-production (U26) |
 | qwen27b (Gufo) | 262144 × 2 sessions | Gufo | UD-Q8_K_XL + DFlash2 Q4_K_M draft (U25), Gufo card preset, cache-ram 2 GiB, text-only |
 | embed-small | 8192 | – | yarn 0.75, -b/-ub 8192, nomic prefixes |
 

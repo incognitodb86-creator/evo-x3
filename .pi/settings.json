@@ -54,6 +54,8 @@
     "autoResize": true
   },
   "subagents": {
-    "defaultModel": "x3-local/gemma4-heretic"
+    "defaultModel": "x3-local/gemma4-heretic-sub",
+    "disableThinking": true,
+    "defaultThinking": "off"
   }
 }
