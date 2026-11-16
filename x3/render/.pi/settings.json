@@ -52,5 +52,8 @@
   "images": {
     "blockImages": false,
     "autoResize": true
+  },
+  "subagents": {
+    "defaultModel": "x3-local/gemma4-heretic"
   }
 }
