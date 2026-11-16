@@ -25,7 +25,7 @@ bash ~/AI/render/x3/render-pi.sh -p --no-session "<ask>"  # one-shot
 ```
 `render-pi.sh` mirrors AlienPc's production Render pane argv (`C:\AI\director\scripts\pi_herdr_at_logon.ps1` `$renderPiArgs`): `--no-extensions` + pi-permission-system, cc-safety-net, loop-guard; `--no-mcp`; `--no-skills` + the same 9 skills (video-render, image-render, comfy-render, h3-parody-identity, h3-prompting, h3-max-ref2va-prompt, h3-hc-render, alienpc-hardcore-i2v-director, alienpc-stills-pose-edit-prompting, from `~/AI/community/skills`; on AlienPc the `~/.pi/agent/skills` copies are junctions to the same folders); `--no-context-files`; `--append-system-prompt ~/AI/render/AGENTS.md`.
 - Model mapping (Derrick's cutover mapping): Render → `x3-local/gemma4-heretic` (Gemma 4 26B A4B Heretic Q8_0 + official unsloth BF16 mmproj vision, llama.cpp Vulkan, temp 1.0 / top_p 0.95 / top_k 64, 262144 ctx per slot, image budget 560–1120), `--thinking medium` as on AlienPc (thinking is per request). Attach stills as `@path` arguments; a path written only in prose is not sent and the model will invent the outfit.
-- Left out on purpose: `--remote`, `herdr-agent-state.ts`, pi-mobile (herdr and the phone bridge are not on the X3; the phone cutover is gated).
+- Left out on purpose: `--remote`, `herdr-agent-state.ts`, pi-mobile (herdr 0.9.5 is installed but not wired; the phone bridge is not on the X3; the phone cutover is gated).
 - `~/AI/render/.pi/settings.json` (used only by a bare `pi` in this folder, not by the launcher): AlienPc's global package set installed project-local (pi-permission-system 0.8.0, pi-memory 0.4.2, plannotator 0.28.40, pi-canvas 0.1.1, pi-say 1.1.1, compound-engineering @34492307 with AlienPc's skill filters) + skills/prompts paths; default model x3-local/gemma4-heretic.
 - Write sandbox: `~/AI/render/.pi/agent/pi-permissions.jsonc` (write/edit only under `~/AI/community/runs/*`), global floor `~/.pi/agent/pi-permissions.jsonc` (AlienPc policy, paths translated; only loaded by this project's pi-permission-system).
 - Python: `~/AI/render/x3/.venv` (Python 3.14; `requirements-x3.txt`: pysbd 0.3.4, PyYAML 6.0.3, pillow, numpy, opencv-python-headless, pytest).
@@ -43,7 +43,7 @@ Bundle + uncommitted patch + overlay (see `~/AI/_xfer/render-20261115/`), then `
 ## Known gaps
 - Vision: closed 2026-11-15 (mmproj on the Heretic slot, verified on a POOL still; U25 swapped to the official unsloth BF16 mmproj and re-verified).
 - GPU lock `~/AI/locks/gpu-render.lock` is local and never held; AlienPc's lock is not visible from the X3.
-- Not installed: pi-mobile and herdr (phone cutover is a separate gated step), pi-computer-use (headless box).
+- Not installed: pi-mobile (phone cutover is a separate gated step), pi-computer-use (headless box). herdr 0.9.5 is installed in ~/.local/bin but not configured.
 - Refmod stubs go stale when AlienPc adds refmods; re-run the manifest step.
 
 ## Blind Q8 vs Q4_K_M test (2026-11-15)
@@ -55,6 +55,12 @@ Full table, sources and live checks: `~/evo-x3/records/U24-model-tuning-20261115
 | Slot | Context | KV | Key flags |
 |---|---|---|---|
 | gemma4-heretic | 2 × 262144 | f16 | official unsloth mmproj BF16 (U25), image 560–1120, -b/-ub 2048, reasoning per request |
-| flash-next (Gufo) | 262144 × 1 session | Gufo | MTP, effort medium, preserve-thinking on, cache-ram 2 GiB |
+| flash-next (Forge) | 262144, 4 Halogen slots (llama-swap concurrencyLimit 1 until Phase 1 lands) | Halogen 0.20.5 native HGN v2 (U26) | effort medium; `flash-next-gufo` = Gufo rollback slot; `flash-next-uncensored` = non-production (U26) |
 | qwen27b (Gufo) | 262144 × 2 sessions | Gufo | UD-Q8_K_XL + DFlash2 Q4_K_M draft (U25), Gufo card preset, cache-ram 2 GiB, text-only |
 | embed-small | 8192 | – | yarn 0.75, -b/-ub 8192, nomic prefixes |
+
+## X3 Phases 1-5 (2026-11-15, Derrick t1784s6566) - record ~/evo-x3/records/U27-on-track-20261115.md
+- Forge: Linux AGENTS.md, ralph loop ~/AI/forge/ralph-community/ralph.sh (bash port), subagents use the parent's model (Forge flash-next, Render heretic; global stays heretic for Sydney).
+- Forge project packages load only with --approve (pi project trust); forge-pi.sh and ralph.sh pass it.
+- pi-workspace-history 0.5.2 in the Forge project (/undo, /redo, /checkpoint). pi-memory 0.4.2 recall tested across sessions (qmd not installed, so no memory_search).
+- Host: sshd keys only and no root login (Tailscale SSH unaffected), tuned accelerator-performance, Open WebUI pinned by digest, llama-swap refuses to start with empty keys.
