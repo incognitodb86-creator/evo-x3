@@ -35,7 +35,7 @@ from datetime import datetime
 from pathlib import Path
 
 PY = sys.executable
-SCRIPTS = Path(r"/home/derekboone/AI/community/scripts")
+SCRIPTS = Path(__file__).resolve().parent.parent
 SUBMIT = SCRIPTS / "parody" / "submit_parody_run.py"
 PARODY = SUBMIT.parent
 for _p in (str(SCRIPTS), str(PARODY)):
@@ -43,7 +43,7 @@ for _p in (str(SCRIPTS), str(PARODY)):
         sys.path.insert(0, _p)
 
 # The finished v2 scene, kept as the default so an old command line still works.
-STILL0 = r"/home/derekboone/AI/render/stills/approved_characters/GROK_IMAGINE_2026-10-19b/GI183.jpg"
+STILL0 = str(SCRIPTS.parents[1] / "render" / "stills" / "approved_characters" / "GROK_IMAGINE_2026-10-19b" / "GI183.jpg")
 S2 = ("a fictional adult man aged 31, athletic, naturally muscular build with real weight in his "
       "chest and thighs, light tan skin, short dark hair and dark stubble")
 SEED = 51083601  # writer-run default seed, fixed for every clip (build_report.json records it)

@@ -1,15 +1,15 @@
 ---
 name: h3-max-ref2va-prompt
-description: "The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 on this box - the standing Max lane unless Derek directs otherwise. Use for any paste into MiniMaxH3ReferenceToVideo: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / video-render) or FLUX stills (alienpc-stills-pose-edit-prompting)."
+description: "The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 (non-parody picture-reference rules R32-R44; named INDEX/RefMod parodies use h3-parody-identity, and writer runs use ~/AI/render/AGENTS.md). Use for explicit MiniMaxH3ReferenceToVideo pastes: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / video-render) or FLUX stills (alienpc-stills-pose-edit-prompting)."
 ---
 
-# H3-Max REF2VA prompt lane (AlienPc setup)
+# H3-Max REF2VA prompt lane
 
 Created 2026-11-03 at Derek's request: the REF2VA lane is its own skill, scoped to **H3-Max (10Eros-Max beta7)
-and this box's graph**, not a section of the cross-lane file. Upstream source for the new rules: MiniMax-AI/MiniMax-H3
+and our graph**, not a section of the cross-lane file. Upstream source for the new rules: MiniMax-AI/MiniMax-H3
 `skills/h3-prompt-writing/references/ref-en.txt`, read at clone HEAD `199b7d0e1fd95e7b3eafa8c15eca692534142427`
-(2026-10-28); review and full diff `/home/derekboone/AI/community/notes/2026-11-03-h3-upstream-prompt-skill-review.md`,
-patch record `/home/derekboone/AI/community/notes/2026-11-03-h3-ref2va-skill-split.md`.
+(2026-10-28); review and full diff `~/AI/community/notes/2026-11-03-h3-upstream-prompt-skill-review.md`,
+patch record `~/AI/community/notes/2026-11-03-h3-ref2va-skill-split.md`.
 
 ## 0. Lane status
 
@@ -17,16 +17,15 @@ patch record `/home/derekboone/AI/community/notes/2026-11-03-h3-ref2va-skill-spl
 
 Named INDEX + RefMod parodies defer to `h3-parody-identity` for their locked single-pass graph and tested prompt/voice/soundscape contract. Its builder format takes precedence over this file's picture-reference sections, labels, frame-anchor restrictions and speech/no-soundscape prescriptions. One optional start image uses AddGuide at frame 0 without `<Picture N>` identity binding. Keep existing guards; do not rewrite the tested parody route to match this other-lane contract.
 
-- **REF2VA is the standing picture-reference Max lane.** Except for the named-parody route above, a Max clip is a REF2VA paste into `MiniMaxH3ReferenceToVideo` unless Derek
-  directs another lane by name (first-frame I2V, stills).
+- **REF2VA is the non-parody picture-reference lane (R32-R44).** Use it when Derek asks for a `MiniMaxH3ReferenceToVideo` paste outside `h3-parody-identity` (1-pass INDEX + RefMod) and `~/AI/render` writer-runs.
 - This skill owns only REF2VA-specific rules, numbered R32-R44. Rule numbers are box-unique and stable: cite
   `R<n>` in a review, a gate or a commit message, never the sentence.
 
 ## 1. The shared rules (h3-prompting, unchanged, all apply)
 
-R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in /home/derekboone/AI/render/AGENTS.md; run render work from /home/derekboone/AI/render.
+R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in ~/AI/render/AGENTS.md; run render work from ~/AI/render.
 
-`/home/derekboone/AI/community/skills/h3-prompting/SKILL.md` is the single home for the cross-lane rules; read it first, do not
+`~/AI/community/skills/h3-prompting/SKILL.md` is the single home for the cross-lane rules; read it first, do not
 restate it here.
 
 - **All of R1-R4 and R16-R31 apply to a REF2VA paste**, unchanged (output contract, adults-only and the youth guard,
@@ -179,9 +178,9 @@ here). Both gates pass before a cell is staged; a gate failure is fixed in the p
 
 ## 4. Our graph, so the paste matches what can be fed
 
-- Node: `MiniMaxH3ReferenceToVideo` on 10Eros-Max beta7 via llama-swap `:8080/comfyui`; model dials, wiring, queue
+- Node: `MiniMaxH3ReferenceToVideo` on 10Eros-Max beta7 on AlienPc ComfyUI (from the X3, queued via `~/AI/render/x3/queue-remote.sh` to `https://alienpc.tailf242b2.ts.net:8446`); model dials, wiring, queue
   and triage are `h3-hc-render`.
-- Builder: `/home/derekboone/AI/community/scripts/make_b2_request.py` -> `scripts/comm.py` `build()/first_pass()`; mode `r2v` wires
+- Builder: `~/AI/community/scripts/make_b2_request.py` -> `scripts/comm.py` `build()/first_pass()`; mode `r2v` wires
   `ref_images.ref_image_1` + `ref_image_size: "max"`; a reference image cannot share a node with
   `MiniMaxH3ImageToVideo` (R6); the builder has no `ref_videos` / `ref_audios` wiring today (R33).
 - Chain lane: multi-cell chains are `references/chain-lane.md` in this skill; a chain is N cells from one Condition
