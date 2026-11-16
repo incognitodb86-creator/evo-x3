@@ -337,7 +337,7 @@ def test_s3_plus_ref_mode_no_picture_slot_collision():
     g, prompt, rep = br.build_writer_request(tpl, MMF_HDR + MMF_DD, cast, "community/u41/mmf", strict=False, still_mode="ref")
 
     assert prompt.startswith(br.REF_MODE_PICTURE1_LEAD)
-    assert "<Picture 2> is the reference image defining the exact visual appearance" in prompt
+    assert MMF_DD in prompt  # U52 passthrough keeps writer prose untouched
     assert not any(n.get("class_type") == "MiniMaxH3AddGuide" for n in g.values())
     assert g["img_1"]["inputs"]["image"] == "community/synth_s1.png"
     assert g["img_s3"]["inputs"]["image"] == "community/synth_s3.png"

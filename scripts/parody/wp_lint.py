@@ -255,16 +255,8 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
 
 def mode_rules(kind: str) -> Dict[str, Any]:
     return MODE_RULES.get(kind) or MODE_RULES["sex"]
-# Codes that stay hard (block_ready plus voice_missing and a builder reject). Craft codes are soft.
-SAFETY_HARD = frozenset({
-    "oral_silence", "oral_mouth_full", "oral_contact", "oral_sound",
-    "nested_d", "blacklist", "builder_primary", "clearance_missing", "clearance",
-    "act_mismatch", "tag_words", "youth_hint", "scale_adult", "consent_setup",
-    "voice_missing", "builder",
-    "contact_anatomy", "talk_lines", "talk_s2_defined",
-    "double_says", "hands_line",
-    "dial", "throat", "negatives",
-})
+# U52: Only 18+ safety codes stay hard; all other craft/format rules are advisory warnings/notes.
+SAFETY_HARD = frozenset({"youth_hint", "scale_adult"})
 HARD_WEIGHT = 20
 SOFT_WEIGHT = 5
 
@@ -545,9 +537,33 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
     if core != want or (secs and secs[-1] not in ("detailed_description", "continuation")):
         issues.append(_fix("header_order", "the four headers must appear once each, in order: subject_definitions, summary, "
                            "retention_analysis, detailed_description"))
-    if SHOT2_RE.search(dd):
-        issues.append(_fix("shot2", "write one [Shot 1] only; a second angle is one camera move in prose"))
-    if TIMESTAMP_RE.search(plain):
+    _audio_hdrs = re.findall(r"(?im)^\s*(overall_soundscape|non_diegetic_music)\s*:", full or "")
+    if _audio_hdrs:
+        _u_hdrs = ", ".join(dict.fromkeys(h.lower() for h in _audio_hdrs))
+        issues.append(_fix(
+            "audio_header_beta7",
+            f"! WARNING: labeled audio header ({_u_hdrs}) wrecks 10Eros-Max beta7 audio (TenStrip HF #77); "
+            "move sound to plain diegetic sentences at the end of detailed_description (R7)",
+            hard=False,
+            pen=HARD_WEIGHT,
+        ))
+    _shot_cuts = list(re.finditer(
+        r"\[Shot\s*(\d+)\]\s*(?:At\s+(?:(\d{1,2}):)?(\d{1,2}(?:\.\d+)?)(?=\s|,|$))?",
+        dd or "", re.I,
+    ))
+    _clip_s = (ctx.get("slots") or {}).get("clip_seconds") or ctx.get("clip_seconds")
+    _prev_t = -1.0
+    for _sm in _shot_cuts:
+        _sn = int(_sm.group(1))
+        if _sn >= 2 and _sm.group(3) is not None:
+            _t = (int(_sm.group(2) or 0) * 60.0) + float(_sm.group(3))
+            if _t <= _prev_t:
+                issues.append(_fix("shot_timestamp", f"[Shot {_sn}] timestamp {_t:.3f}s is non-monotonic (<= previous cut {_prev_t:.3f}s)", False))
+            elif _clip_s is not None and _t > float(_clip_s):
+                issues.append(_fix("shot_timestamp", f"[Shot {_sn}] timestamp {_t:.3f}s exceeds clip length ({float(_clip_s):.2f}s)", False))
+            _prev_t = _t
+    _plain_no_cut_ts = re.sub(r"\[Shot\s*\d+\]\s*At\s+\d{1,2}:\d{2}(?:\.\d+)?", "", plain, flags=re.I)
+    if TIMESTAMP_RE.search(_plain_no_cut_ts):
         issues.append(_fix("timestamp", "remove the timestamp or seconds; order comes from phase words (At first, as it builds, by the end)"))
     m = SEQ_WORD_RE.search(plain)
     if m:
@@ -750,7 +766,7 @@ def lint(full: str, ctx: Dict[str, Any]) -> Dict[str, Any]:
             if len(counted) < 2 or len(all_spoken) < rules["min_lines"]:
                 issues.append(_fix("talk_lines", "BTS interview needs at least 2 answers from (S1) and 3 to 5 total spoken lines including interviewer questions"))
         elif len(counted) < rules["min_lines"]:
-            issues.append(_fix("talk_lines", f"talk-only needs three to five short lines (off-screen interviewer questions do not count); it has {len(counted)}"))
+            issues.append(_fix("talk_lines", f"note: talk-only suggests 3-5 short lines (1-2 per speaker is fine in 10-15s); it has {len(counted)}", False))
     if kind == "talk" and re.search(r"\(S2\)|<Subject 2>", dd) and not re.search(
             r"(?i)(?:subject_definitions:)?[^\n]*<(?:Subject 2)>|\(S2\) is ", full):
         issues.append(_fix("talk_s2_defined", "(S2) is named in the talk; define them in subject_definitions (look or clothes, BTS interviewer included)"))

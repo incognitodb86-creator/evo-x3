@@ -121,8 +121,12 @@ def test_mmf_s3_still_picture_survives_and_is_wired():
     cast = dict(br.make_cast(READ, "mmf", "mmf on the log", partner_type2="faceless"),
                 man3="an adult man, 31 years of age, of lean build", s3_still="community/flux_p1_20261030/M01_body.jpg")
     g, prompt, rep = br.build_writer_request(_mmf_graph(), HDR + MMF_DD, cast, "community/t/x", strict=False)
-    assert "<Picture 2> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 3>." in prompt
-    assert "<Picture 2> sets his look" in prompt  # the writer's own <Picture 2> sentence is no longer stripped
+    assert "<Picture 2> sets his look." in prompt
+    assert g["img_s3"]["inputs"]["image"] == "community/flux_p1_20261030/M01_body.jpg"
+    assert g["c0"]["inputs"]["ref_images.ref_image_2"] == ["img_s3", 0]
+    assert rep["s3_still"]["picture"] == 2
+    p_strict, _ = br.finalize_writer_prompt(HDR + MMF_DD, cast, strict=False)
+    assert "<Picture 2> is the reference image defining the exact visual appearance, identity, face and hairstyle of <Subject 3>." in p_strict
     assert g["img_s3"]["inputs"]["image"] == "community/flux_p1_20261030/M01_body.jpg"
     assert g["c0"]["inputs"]["ref_images.ref_image_1"] == ["img_1", 0]
     assert g["c0"]["inputs"]["ref_images.ref_image_2"] == ["img_s3", 0]
@@ -178,7 +182,7 @@ def test_b2_line_cap_scales_with_length():
     base = br.make_cast(READ, "doggy", "doggy on the log")
     short, _ = br.finalize_writer_prompt(HDR + dd, dict(base, clip_seconds=4.0, speech_wps=10), strict=False)
     long_, _ = br.finalize_writer_prompt(HDR + dd, dict(base, clip_seconds=20.0, speech_wps=10), strict=False)
-    assert short.count("<d>") == 1 and long_.count("<d>") == 4
+    assert short.count("<d>") == 4 and long_.count("<d>") == 4  # U52: convert_speech never drops spoken lines
 
 
 def test_g1_g4_orc_is_non_human_with_look_voice_and_retention():

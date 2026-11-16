@@ -228,10 +228,10 @@ def snap_h3_frames(seconds: float, fps: int = H3_FPS, min_frames: int = H3_MIN_F
     return 5 + 17 * k
 
 
-def validate_single_clip_frames(frames: int) -> int:
-    """U1: single-clip ceiling (SINGLE_CLIP_MAX_FRAMES = 243 on 16 GB) and positivity."""
+def align_h3_frames(frames: int, max_frames: Optional[int] = None) -> int:
+    """ComfyUI align_frame_count: snap up onto the 17n+5 grid (`while f % 17 != 5: f += 1`), enforcing cap."""
     f = int(frames)
-    cap = min(int(SINGLE_CLIP_MAX_FRAMES), H3_HARD_MAX_FRAMES)
+    cap = min(int(max_frames if max_frames is not None else SINGLE_CLIP_MAX_FRAMES), H3_HARD_MAX_FRAMES)
     if f < 1:
         raise ValueError(f"frames must be positive, got {f}")
     if f > cap:
@@ -239,7 +239,19 @@ def validate_single_clip_frames(frames: int) -> int:
             f"{f} frames exceeds the single-clip ceiling of {cap} frames ({cap / H3_FPS:.3f} s on 16 GB VRAM); "
             "use --seconds / --beat to build shared-anchor cells stitched into one clip instead."
         )
+    while f % 17 != 5:
+        f += 1
+    if f > cap:
+        raise ValueError(
+            f"{f} aligned frames exceeds the single-clip ceiling of {cap} frames ({cap / H3_FPS:.3f} s on 16 GB VRAM); "
+            "use --seconds / --beat to build shared-anchor cells stitched into one clip instead."
+        )
     return f
+
+
+def validate_single_clip_frames(frames: int) -> int:
+    """U1/U52: align onto ComfyUI 17n+5 grid and enforce single-clip ceiling (SINGLE_CLIP_MAX_FRAMES = 243 on 16 GB)."""
+    return align_h3_frames(frames)
 
 
 # --- (c) 2026-11-06 (brief t224x214): latent-tail continuation frame arithmetic ----------------
@@ -1363,20 +1375,14 @@ def convert_speech(sentences: List[str], voices: Dict[str, str], max_lines: int 
                     pieces.append((" " if pieces else "") + form)
                 pos = m.end()
                 continue
-            reason = None
+            note = ""
             if counts.get(spk, 0) + 1 > max_lines:
-                reason = f"speech cap: {spk} already has {max_lines} lines"
+                note = f"speech cap note: {spk} exceeds {max_lines} lines"
             elif budget is not None and counts["_words"] + n > budget:
-                reason = f"speech budget: {counts['_words']}+{n} words > {budget}"
-            if reason:
-                ledger.append({"line": words, "speaker": spk, "kept": False, "reason": reason})
-                if len(bare) > 12:
-                    pieces.append(pre + ("" if pre.endswith((".", "!", "?")) else "."))
-                pos = m.end()
-                continue
+                note = f"speech budget note: {counts['_words']}+{n} words > {budget}"
             counts[spk] = counts.get(spk, 0) + 1
             counts["_words"] += n
-            ledger.append({"line": words, "speaker": spk, "kept": True, "reason": ""})
+            ledger.append({"line": words, "speaker": spk, "kept": True, "reason": note})
             if len(bare) > 12:
                 joiner = " " if pre.rstrip().endswith((".", "!", "?")) else ", and "
                 pieces.append(pre.rstrip() + joiner + _speech_form_with_tone(spk, voices, m.group(0), tone_str))
@@ -2984,10 +2990,13 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
             raise WriterNotReady("NOT_READY: shot syntax: " + shot_err)
         if later_shots:
             report["shots"] = [{"shot": n, "at": t} for n, t, _ in later_shots]
-    sound_raw = " ".join(b for k, v in secs.items() if k in _SOUND_HEADERS for b in v[:1])
+    _plain_sound_keys = _SOUND_HEADERS - {"overall_soundscape"}
+    sound_raw = " ".join(b for k, v in secs.items() if k in _plain_sound_keys for b in v[:1])
     if sound_raw:
         report["stripped"].append("labeled sound header -> plain end-of-beat sound sentences (R7)")
-    if any(k in _MUSIC_HEADERS for k in secs):
+    _beta7_audio_hdrs = [k for k in secs if k in ("overall_soundscape", "non_diegetic_music")]
+    _other_music_hdrs = [k for k in secs if k in _MUSIC_HEADERS and k != "non_diegetic_music"]
+    if _other_music_hdrs:
         report["stripped"].append("music header dropped")
     for k in ("subject_definitions", "retention_analysis"):
         if k in secs:
@@ -3258,8 +3267,6 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     for _sb in _scen_bits[:2]:
         if _sb.lower() not in summary.lower():
             summary = summary.rstrip(".") + f" ({_sb})."
-    if (cast.get("states") or cast.get("themes") or cast.get("role")) and not re.search(r"(?i)\bconsent", summary):
-        summary = summary.rstrip(".") + "; all characters are consenting adults."
     summary = re.sub(r"(?i)\bthe\s+the\b", "the", summary)
     _male_solo = (cast.get("s1_gender") == "man" or (cast.get("act_id") or cast.get("position")) == "male_solo")
     if _male_solo:
@@ -3359,8 +3366,13 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     ] + _garment_retention(cast, state))
     retention = "\n".join(retention_lines)
     retention = re.sub(r"(?i)\bthe\s+the\b", "the", retention)
+    _extra_hdrs = "".join(
+        f"\n{hk}:\n{secs[hk][0].strip()}\n"
+        for hk in ("overall_soundscape", "non_diegetic_music")
+        if hk in secs and (secs[hk][0] or "").strip()
+    )
     final = (f"subject_definitions:\n{subject_definitions}\n\nsummary:\n{summary}\n\n"
-             f"retention_analysis:\n{retention}\n\ndetailed_description:\n{detailed}\n")
+             f"retention_analysis:\n{retention}\n\ndetailed_description:\n{detailed}\n{_extra_hdrs}")
     _final_errs = lint_final_prompt(final)
     if _final_errs:
         report["final_lint"] = _final_errs
@@ -3431,11 +3443,15 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     if re.search(r"(?i)\bno speech\b", desc_raw + " " + sound_raw) and not any(c["code"] == "D3" for c in checks):
         report["flags"].append({"code": "D3", "why": "the draft wrote 'no speech'; the existing negation cleanup kept it out of the "
                                                      "prompt - leave silence unwritten"})
-    if sound_raw:
-        report["flags"].append({"code": "S6", "why": "labeled overall_soundscape / sound header in the draft; body sound belongs as one to "
-                                                     "three plain diegetic sentences at the end of the shot (the header label is not used)"})
+    if sound_raw or "overall_soundscape" in secs:
+        report["flags"].append({"code": "S6", "why": "! WARNING: labeled overall_soundscape / sound header in the draft; TenStrip HF #77 warns "
+                                                     "overall_soundscape wrecks 10Eros-Max beta7 audio — use plain diegetic sentences at the end of detailed_description (R7)"})
+    if "overall_soundscape" in secs:
+        report["warnings"].append("! WARNING: overall_soundscape: header kept verbatim, but TenStrip HF #77 warns it wrecks 10Eros-Max beta7 audio (R7)")
     if any(k in _MUSIC_HEADERS for k in secs):
-        report["flags"].append({"code": "M6", "why": "non_diegetic_music header in the draft; score would bury the body sounds"})
+        report["flags"].append({"code": "M6", "why": "! WARNING: non_diegetic_music header in the draft; score would bury body sounds and hurt 10Eros-Max beta7 audio (R7)"})
+    if "non_diegetic_music" in secs:
+        report["warnings"].append("! WARNING: non_diegetic_music: header kept verbatim, but R7 / TenStrip HF #77 advises plain diegetic sound in detailed_description")
     if _MUSIC_RE.search(desc_raw) and not _MUSIC_RE.search(cast.get("ask") or ""):
         report["flags"].append({"code": "M7", "why": "unrequested music / score in the description would bury the body sounds"})
     report["skin_unrequested"] = list(_CTX.get("skin_flags", []))
@@ -3757,28 +3773,74 @@ def _wire_ref_mode_start_still(graph: Dict[str, Any]) -> None:
     c0_in["ref_image_size"] = "max"
 
 
+_UNDER18_AGE_RE = re.compile(
+    r"(?i)\b(?:(?:[1-9]|1[0-7])\s*(?:-\s*)?(?:years?|yrs?)(?:\s*-?\s*old|\s+of\s+age)|"
+    r"aged\s+(?:[1-9]|1[0-7])\b|age\s+(?:[1-9]|1[0-7])\b)"
+)
+_YOUTH_GATE_RE = re.compile(
+    r"(?i)\b(?:child\w*|kids?|teen\w*|tween|underage|under-age|minor|loli\w*|shota\w*|schoolgirl|"
+    r"little girl|little boy|young girl|young boy|pre-?teen|pre-?pubescent|adolescent|juvenile|"
+    r"young-looking|baby-?faced|jailbait|barely legal|flat-chested girl)\b"
+)
+
+
+def _check_writer_18plus(raw: str, cast: Dict[str, Any]) -> None:
+    """Enforce the 18+ safety floor on writer text and partner definitions."""
+    for _pk in ("man", "partner", "man3", "partner3"):
+        _pval = str(cast.get(_pk) or "").strip()
+        if _pval and (not _adult_age_ok(_pval) or _MINOR_RE.search(_pval) or _YOUTH_GATE_RE.search(_pval)):
+            raise WriterNotReady(f"NOT_READY: partner definition {_pk!r} failed adult age / youth lint")
+    for _label, _txt in (("prompt", raw or ""), ("ask", str(cast.get("ask") or ""))):
+        if _MINOR_RE.search(_txt) or _YOUTH_GATE_RE.search(_txt) or _UNDER18_AGE_RE.search(_txt):
+            raise WriterNotReady(f"NOT_READY: minor / under-18 descriptor in {_label}")
+
+
 def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, Any], prefix: str,
                          seed: int = 51083601, frames: int = SINGLE_CLIP_MAX_FRAMES,
                          width: int = DEFAULT_CANVAS[0], height: int = DEFAULT_CANVAS[1],
-                         strict: bool = True, writer: Optional[Callable[[str], str]] = None,
+                         strict: bool = False, writer: Optional[Callable[[str], str]] = None,
                          writer_system: Optional[str] = None, repair_rounds: int = 2,
                          still_mode: str = DEFAULT_STILL_MODE,
+                         advisory: Optional[bool] = None,
                          ) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
-    """Embed a finalized writer prompt into a copy of an existing OC RefMod graph (c0 prompt, seed, size, prefix).
-    With writer (a callable) or writer_system (uses comm.llm), lint issues go back to the writer first (max 2 rounds)."""
-    hard = writer_gate(raw)  # stillfacts fix 1: a refusal / no description is NOT_READY, never a prompt
-    if hard:
-        raise WriterRefusal("NOT_READY: " + "; ".join(hard))
+    """Embed a writer prompt into a copy of an existing OC RefMod graph (c0 prompt, seed, size, prefix).
+
+    U52: advisory/passthrough mode is the default (`strict=False` / `advisory=True`): writer text passes through
+    verbatim with no rewriting, stripping, reordering, or section injection, and rule checks are recorded as
+    advisory warnings. Hard stops are only 18+ (`_MINOR_RE` / youth / under-18), empty or refused writer output,
+    and missing still / RefMod / graph errors. Pass `strict=True` (or `advisory=False`) for legacy strict finalizer."""
+    is_strict = bool(strict) if advisory is None else (not bool(advisory))
+    if not (raw or "").strip():
+        raise WriterRefusal("NOT_READY: empty writer output")
+    if is_strict:
+        hard = writer_gate(raw)  # stillfacts fix 1: a refusal / no description is NOT_READY, never a prompt
+        if hard:
+            raise WriterRefusal("NOT_READY: " + "; ".join(hard))
+    else:
+        _plain_no_d = _D_RE.sub("", raw or "")
+        _ref_m = _REFUSAL_RE.search(_plain_no_d)
+        if _ref_m:
+            raise WriterRefusal(f"NOT_READY: refusal phrase: {_ref_m.group(0)!r}")
     if not cast.get("still_read"):  # dynsafe (limits 3 + 5): no still facts = NOT_READY, never a bedroom fallback
         raise WriterNotReady("NOT_READY: no still read (vision facts) for <Picture 1>; the builder has no bedroom fallback")
-    validate_hook_ask(cast.get("position", ""), cast.get("ask", ""))
+    _check_writer_18plus(raw, cast)
+    _pre_warnings: List[str] = []
+    if is_strict:
+        validate_hook_ask(cast.get("position", ""), cast.get("ask", ""))
+    else:
+        try:
+            validate_hook_ask(cast.get("position", ""), cast.get("ask", ""))
+        except WriterNotReady as _e:
+            _pre_warnings.append(str(_e))
     if "states" not in cast or "offscreen_voice" not in cast:
         _br = scene_addenda.resolve_brief(
             cast.get("ask") or "", act_id=cast.get("act_id") or cast.get("position"),
             registry=load_acts_registry(), partner_type=cast.get("partner_type"),
         )
         if _br.get("not_ready"):
-            raise WriterNotReady("NOT_READY: " + _br["not_ready"])
+            if is_strict:
+                raise WriterNotReady("NOT_READY: " + _br["not_ready"])
+            _pre_warnings.append(str(_br["not_ready"]))
         if _br.get("partner_type") and not cast.get("partner_type"):
             cast["partner_type"] = _br["partner_type"]
         cast.setdefault("states", list(_br.get("states") or []))
@@ -3789,29 +3851,67 @@ def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, A
         cast.setdefault("sleeper_gender", _br.get("sleeper_gender"))
         cast.setdefault("addenda_flags", list(_br.get("flags") or []))
         cast.setdefault("look_line", scene_addenda.look_line(_br))
+    frames = align_h3_frames(frames)
     repair_log = None
-    if writer is None and writer_system:
-        assert_writer_system_prompt(writer_system)
-        writer = comm_writer(writer_system)
-    if writer is not None:
-        raw, repair_log = repair_writer_output(raw, cast, writer, max_rounds=repair_rounds)
-        unfixed = [it for it in repair_log["remaining"] if it["code"] in ("C1", "C2", "C3")]
-        if unfixed:
-            raise WriterNotReady(f"NOT_READY: conflicts still unfixed after {repair_rounds} writer-repair rounds: " +
-                                 "; ".join(f"{it['code']} {it.get('why', '')}" for it in unfixed))
-    cast = dict(cast, clip_seconds=cast.get("clip_seconds", validate_single_clip_frames(frames) / 24.0))
+    if is_strict:
+        if writer is None and writer_system:
+            assert_writer_system_prompt(writer_system)
+            writer = comm_writer(writer_system)
+        if writer is not None:
+            raw, repair_log = repair_writer_output(raw, cast, writer, max_rounds=repair_rounds)
+            unfixed = [it for it in repair_log["remaining"] if it["code"] in ("C1", "C2", "C3")]
+            if unfixed:
+                raise WriterNotReady(f"NOT_READY: conflicts still unfixed after {repair_rounds} writer-repair rounds: " +
+                                     "; ".join(f"{it['code']} {it.get('why', '')}" for it in unfixed))
+    cast = dict(cast, clip_seconds=cast.get("clip_seconds", frames / 24.0))
     mode = normalize_still_mode(still_mode)
-    prompt, report = finalize_writer_prompt(raw, cast, strict=strict)
-    if cast.get("ask") and is_act_ask(cast["ask"]) and not report.get("act_written"):
-        raise WriterNotReady("NOT_READY: act:false although the ask names an act")
-    if repair_log is not None:
-        report["repair"] = repair_log
-    report["lint"] = [{k: v for k, v in it.items() if k != "text"} for it in lint_writer_prompt(raw, cast)[0]]
+    if is_strict:
+        prompt, report = finalize_writer_prompt(raw, cast, strict=True)
+        if cast.get("ask") and is_act_ask(cast["ask"]) and not report.get("act_written"):
+            raise WriterNotReady("NOT_READY: act:false although the ask names an act")
+        if repair_log is not None:
+            report["repair"] = repair_log
+        report["lint"] = [{k: v for k, v in it.items() if k != "text"} for it in lint_writer_prompt(raw, cast)[0]]
+    else:
+        prompt = raw.strip()
+        _speech_cnt = len(_D_RE.findall(raw))
+        report = {
+            "stripped": [],
+            "added": [],
+            "flags": [],
+            "warnings": list(_pre_warnings),
+            "issues": [],
+            "passthrough": True,
+            "frames": frames,
+            "still_facts": still_facts(cast["still_read"]) if cast.get("still_read") else {},
+            "speech": {"in": _speech_cnt, "kept": _speech_cnt, "dropped": []},
+        }
+        if not _DESC_HEAD_RE.search(raw or ""):
+            report["warnings"].append("missing detailed_description / integrated_multimodal_description header")
+        _hdr_hits = re.findall(r"(?im)^\s*(overall_soundscape|non_diegetic_music)\s*:", prompt)
+        if _hdr_hits:
+            _hdr_list = ", ".join(dict.fromkeys(h.lower() for h in _hdr_hits))
+            _msg = (f"! WARNING: prompt contains labeled audio header ({_hdr_list}) — TenStrip HF #77 warns this wrecks "
+                    "10Eros-Max beta7 audio; put plain diegetic sound sentences at the end of detailed_description (R7).")
+            report["warnings"].append(_msg)
+            report["flags"].append({"code": "audio_header_beta7", "why": _msg})
+            print(_msg, file=sys.stderr)
+        try:
+            _lint_items = [{k: v for k, v in it.items() if k != "text"} for it in lint_writer_prompt(raw, cast)[0]]
+        except Exception as _le:
+            _lint_items = []
+            report["warnings"].append(f"advisory lint skipped: {type(_le).__name__}: {_le}")
+        report["lint"] = _lint_items
+        for _it in _lint_items:
+            if _it.get("why"):
+                report["warnings"].append(f"{_it.get('code', 'lint')}: {_it['why']}")
+        for _ci in check_writer_consistency(raw):
+            report["warnings"].append(_ci)
     if mode == "ref":
         prompt = f"{REF_MODE_PICTURE1_LEAD}\n\n{prompt.strip()}"
         report["still_mode"] = "ref"
     g = copy.deepcopy(base_graph)
-    g["c0"]["inputs"].update({"prompt": prompt.strip(), "length": validate_single_clip_frames(frames),
+    g["c0"]["inputs"].update({"prompt": prompt.strip(), "length": frames,
                               "width": width, "height": height})
     g["noise"]["inputs"]["noise_seed"] = seed
     g["save"]["inputs"]["filename_prefix"] = prefix
@@ -6419,7 +6519,7 @@ def main(argv=None) -> int:
     aliases_path = Path(__file__).parent / "aliases.json"
 
     if args.frames is not None:
-        frames = args.frames
+        frames = align_h3_frames(args.frames)
     elif args.seconds is not None:
         frames = snap_h3_frames(args.seconds, max_frames=SINGLE_CLIP_MAX_FRAMES)
     else:

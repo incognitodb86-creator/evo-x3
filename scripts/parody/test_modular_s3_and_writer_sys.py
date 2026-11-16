@@ -571,6 +571,8 @@ def test_submit_writer_run_male_solo_strips_dress_and_woman_voice(tmp_path):
     low = ptxt.lower()
     assert "sheer white halter dress" not in low
     assert "woman's voice" not in low
-    assert "man's voice" in low
+    assert "too close." in low  # U52: writer text passes through verbatim
+    cast_written = json.loads((tmp_path / "ms1" / "cast.json").read_text(encoding="utf-8"))
+    assert "man's voice" in (cast_written.get("voice_s1") or "").lower()
 
 

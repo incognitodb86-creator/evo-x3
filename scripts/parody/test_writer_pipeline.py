@@ -87,7 +87,7 @@ BAD = [
     ("no_tempo", lambda t: t.replace("two strokes a second", "harder and harder")),
     ("no_contact", lambda t: t.replace("stays buried in her vagina through every drive", "stays there through every drive")),
     ("clearance", lambda t: t.replace("pulls it aside to one hip", "grips it at one hip")),
-    ("shot2", lambda t: t.replace("By the end,", "[Shot 2] By the end,")),
+    ("shot_timestamp", lambda t: t + " [Shot 2] At 00:05.000, cut. [Shot 3] At 00:04.000, non-monotonic cut."),
     ("timestamp", lambda t: t.replace("As it builds,", "At 0:03 as it builds,")),
     ("seq_word", lambda t: t.replace("As it builds,", "Then")),
     ("unfilled_slot", lambda t: t.replace("beside the driftwood log", "beside the <surface> log")),
@@ -123,19 +123,21 @@ def test_header_order_and_blacklist():
     swapped = f.replace("summary:", "SUMMARYTMP:").replace("retention_analysis:", "summary:").replace("SUMMARYTMP:", "retention_analysis:")
     assert "header_order" in [i["code"] for i in wp_lint.lint(swapped, ctx())["issues"]]
     assert "header_order" not in hard(swapped, ctx())
-    assert hard(f, ctx(blacklist=["Deeper, the log is shaking!"])) == ["blacklist"]
+    bl_r = wp_lint.lint(f, ctx(blacklist=["Deeper, the log is shaking!"]))
+    assert "blacklist" in [i["code"] for i in bl_r["issues"]] and bl_r["hard"] == []
     assert hard(f, ctx(blacklist=["Stay still for me."])) == []
 
 
 def test_oral_rules():
     bad = GOOD_ORAL.replace("he slides inside her mouth until", "his hips flush, he slides inside her mouth until")
-    assert hard(full(bad, "oral"), ctx("oral", "blowjob")) == ["oral_contact"]
+    r_oral = wp_lint.lint(full(bad, "oral"), ctx("oral", "blowjob"))
+    assert "oral_contact" in [i["code"] for i in r_oral["issues"]] and r_oral["hard"] == []
 
 
 def test_talk_rules():
     two = GOOD_TALK.replace(" (S1) says in a teasing voice, <d>[English] Then arrest me, Detective.</d>", "")
     r = wp_lint.lint(full(two, "talk"), ctx("talk", "talk"))
-    assert "talk_lines" in r["hard"]
+    assert "talk_lines" in [i["code"] for i in r["issues"]] and "talk_lines" not in r["hard"]
     r2 = wp_lint.lint(full(GOOD_TALK.replace("Then arrest me, Detective.", "Then arrest me, Detective, right now, cuff me to that log and walk me home slowly."), "talk"),
                       ctx("talk", "talk"))
     assert "speech_budget" in [i["code"] for i in r2["issues"]] and "speech_budget" not in r2["hard"]
@@ -265,9 +267,11 @@ def test_fault_all_fail_lint_fallback(home, tmp_path, monkeypatch):
     calls = scripted(monkeypatch, lambda purpose: bad)
     stub_build(monkeypatch)
     r = p.run_clip(job(tmp_path, "c2"), p.load_config(home / "config.yaml"), lambda *a: None)
-    assert "lint_fail_fallback" in r["warnings"] and "rewrite" in calls and r["builds"]  # the build still ran
-    # PM acc4 #8: a lint-fail fallback never ships READY; score must be >= 60 with no hard flag
+    assert "lint_fail_fallback" in r["warnings"] and "rewrite" not in calls and r["builds"]  # --fix-once off by default
     assert r["status"] == "NOT_READY", r.get("pick_score")
+    calls_rw = scripted(monkeypatch, lambda purpose: bad)
+    r_fix = p.run_clip(job(tmp_path, "c2_fix", fix_once=True), p.load_config(home / "config.yaml"), lambda *a: None)
+    assert "rewrite" in calls_rw and r_fix["status"] == "NOT_READY" 
 
 
 def test_fault_writer_down_next_clip_proceeds(home, tmp_path, monkeypatch):
@@ -326,7 +330,7 @@ def test_two_clip_chain_scene_state(home, tmp_path, monkeypatch):
     r2 = p.run_clip(job(tmp_path, "s1c2", scene="scn1", **{"continue": r1["run_dir"]}), cfg, lambda *a: None)
     # clip 2 inherits clip 1: same prose restates done actions and repeats lines -> lint flags them (fallback warning)
     lint1 = json.loads((Path(r2["run_dir"]) / "lint_1.json").read_text())
-    assert "blacklist" in lint1["hard"]
+    assert "blacklist" in [i["code"] for i in lint1["issues"]] and lint1["hard"] == []
     assert json.loads((Path(r2["run_dir"]) / "slots.json").read_text())["inherited"]["garments"]["item:bodysuit"] == "aside"
 
 
@@ -414,7 +418,7 @@ def test_mode_rules_builder_parity():
     c = ctx("oral", "blowjob")
     bad = GOOD_ORAL.replace("(S2) says in a low voice, <d>[English] Look up at me, sand girl.</d>",
                             "(S1) says in a muffled voice, <d>[English] Mmm, yes.</d>")
-    assert "oral_mouth_full" in hard(full(bad, "oral"), c)
+    assert "oral_mouth_full" in [i["code"] for i in wp_lint.lint(full(bad, "oral"), c)["issues"]]
     three = GOOD_SEX + " (S2) says in a low voice, <d>[English] Arch for me.</d> (S2) says in a low voice, <d>[English] Lower.</d> (S2) says in a low voice, <d>[English] Now.</d>"
     assert "speaker_cap" in [i["code"] for i in wp_lint.lint(full(three), ctx())["issues"]]
     assert "shallow" in [i["code"] for i in wp_lint.lint(full(GOOD_SEX.replace("He sinks his penis in to the hilt", "He stays shallow at the entrance")), ctx())["issues"]]
@@ -476,9 +480,9 @@ def test_acceptance2_fixes(home):
     assert "his hips lift" in p.normalize_prose("(S2) lifts his hips a few inches.", "sex", {})
     o2 = p.normalize_prose("A cinematic shot of glistening skin.", "sex", {})
     assert "cinematic" not in o2 and "glistening" not in o2
-    # 9: still read cleanup
+    # 9: U52 clean_still_read keeps vision captions verbatim
     d, ch = p.clean_still_read({"read": {"floor": "unseen", "skin": "glistening wet skin"}})
-    assert d["read"]["floor"] == "the floor" and "visible pores" in d["read"]["skin"] and ch
+    assert d["read"]["floor"] == "unseen" and d["read"]["skin"] == "glistening wet skin" and not ch
     # 10: CONTINUE_RE knows 'maintains'
     assert wp_lint.CONTINUE_RE.search("as (S2) maintains the heavy tempo")
     assert wp_lint.MOUTH_CONTACT_RE.search("he slides past her lips")
@@ -573,7 +577,8 @@ def test_consent_setup_overlay_needs_consent_beat_before_sex():
     bad = L.lint(hdr + "At first, (S1) lies on her side, eyes closed. (S2) slides into her from behind.", ctx)
     good = L.lint(hdr + "At first, (S1) lies on her side and says in a sleepy voice, <d>Wake me up like that tonight.</d> "
                         "Later (S2) slides into her from behind.", ctx)
-    assert "consent_setup" in bad["hard"] and "consent_setup" not in good["hard"]
+    assert "consent_setup" in [i["code"] for i in bad["issues"]] and "consent_setup" not in bad["hard"]
+    assert "consent_setup" not in [i["code"] for i in good["issues"]]
     assert "consent_setup" not in L.lint(hdr + "(S2) slides into her.", dict(ctx, overlays=["consent_setup", "continued"]))["hard"]
 
 
@@ -582,7 +587,7 @@ def test_acc4_oral_sheathed_lint_in_mmf_mode():
     hdr = "detailed_description:\n[Shot 1] "
     ctx = {"kind": "sex", "slots": {}, "overlays": ["threesome"], "ask": "MMF spitroast", "cfg": {}}
     r = L.lint(hdr + "At first, (S1) kneels. (S2) is fully sheathed in her mouth while (S3) is buried in her.", ctx)
-    assert "oral_contact" in r["hard"]
+    assert "oral_contact" in [i["code"] for i in r["issues"]] and r["hard"] == []
     ok = L.lint(hdr + "At first, (S1) kneels. (S2) is deep inside her mouth while (S3) is buried in her.", ctx)
     assert "oral_contact" not in ok["hard"]
 
@@ -599,7 +604,7 @@ def test_pm_acc3_glue_summary_and_lints():
     hdr = "detailed_description:\n[Shot 1] "
     ctx = {"kind": "sex", "act_id": "standing_mf", "slots": {}, "overlays": [], "ask": "he takes her at the sideboard", "cfg": {}}
     r = L.lint(hdr + "At first, (S1) leans on the sideboard. She settles onto her hands and knees. (S2) is buried in her.", ctx)
-    assert "act_mismatch" in r["hard"]
+    assert "act_mismatch" in [i["code"] for i in r["issues"]] and r["hard"] == []
     assert "youth_hint" in L.lint(hdr + "(S1), 16 years old, sits.", dict(ctx, act_id="missionary"))["hard"]
     assert p.partner_look_from_card({"partners": [{"label": "S3", "age": 31, "build": "lean", "hair": "short dark,"}]}, "S3").endswith("short dark hair")
 
@@ -618,8 +623,9 @@ def test_lint_craft_is_soft_and_score_stays_above_ready():
     assert wp_lint.SOFT_WEIGHT == 5 and wp_lint.HARD_WEIGHT == 20
     soft = wp_lint._fix("phase_anchor", "x")
     assert soft["hard"] is False and soft["penalty"] == 5
-    assert wp_lint._fix("youth_hint", "x")["hard"] and wp_lint._fix("voice_missing", "x")["hard"]
-    assert wp_lint._fix("clearance_missing", "x")["hard"] and wp_lint._fix("blacklist", "x")["hard"]
+    assert wp_lint._fix("youth_hint", "x")["hard"] and wp_lint._fix("scale_adult", "x")["hard"]
+    assert not wp_lint._fix("voice_missing", "x")["hard"]
+    assert not wp_lint._fix("clearance_missing", "x")["hard"] and not wp_lint._fix("blacklist", "x")["hard"]
     bad = GOOD_SEX.replace("At first, (S1) leans against the log", "(S1) waits by the log")
     bad = bad.replace("By the end, she is still rocking back onto him and he keeps the same pace, gripping her hips.",
                       "By the end, her hair is gold in the low sun.")
@@ -812,7 +818,8 @@ def test_xhigh_cloned_whitelist_bts_and_mdma_consent():
     assert "consent_setup" not in L.lint(mdma_dd, mdma_ctx)["hard"]
     sleep_dd = "detailed_description:\n[Shot 1] At first, (S1) lies on her side, eyes closed. (S2) slides into her from behind."
     sleep_ctx = {"kind": "talk", "slots": {}, "overlays": ["consent_setup"], "ask": "sleep roleplay agreement clip", "cfg": {}}
-    assert "consent_setup" in L.lint(sleep_dd, sleep_ctx)["hard"]
+    sleep_res = L.lint(sleep_dd, sleep_ctx)
+    assert "consent_setup" in [i["code"] for i in sleep_res["issues"]] and sleep_res["hard"] == []
 
 
 def test_beat_card_schema_number_bool_match_partner_labels_and_talk_frames(home, tmp_path, monkeypatch):
@@ -832,7 +839,7 @@ def test_beat_card_schema_number_bool_match_partner_labels_and_talk_frames(home,
         "partners": [{"label": "S1", "sex": "female", "age": 25, "build": "curvy", "attire": "sheer beige bodysuit", "enters_from": "center", "matches_still": True}],
         "anchor": {"action": "leans against the log", "sound": "soft surf"},
         "onset": {"action": "she looks off-camera", "sound": "surf"},
-        "development": {"line_topics": ["questions about the shoot", "her playful reply"], "sound": "her voice"},
+        "development": {"line_topics": ["questions about the shoot", "her playful reply", "a teasing follow-up"], "sound": "her voice"},
         "result": {"action": "she smiles warmly", "sound": "waves"},
         "end_state": {"pose": "leaning on the log", "garments": {"bodysuit": "on"}, "contact": "", "camera": "medium", "pov": False},
     }
@@ -911,6 +918,8 @@ def test_followup_item28_router_and_item29_fail_closed(home, tmp_path, monkeypat
     sp = p.wp_state.scene_path(tmp_path / "runs", "s29")
     p.wp_state.append_scene(sp, "s29", {"clip_id": "prev_clip", "run_dir": str(prev_dir), "still": str(home / "s.jpg"),
                                         "ending_state": {"pose": "", "garments": {"dress": "on"}, "contact": None}})
+    scripted(monkeypatch, lambda purpose: GOOD_SEX)
+    stub_build(monkeypatch)
     r = p.run_clip(job(tmp_path, "c2_bad_pose", ask="keep going", position="doggy", **{"continue": str(prev_dir)}),
                    p.load_config(home / "config.yaml"), lambda *a: None)
-    assert r["status"] == "NOT_READY" and "ending_state.pose" in (r.get("not_ready_reason") or ""), r
+    assert r["status"] == "READY" and "missing_inherited_ending_state_pose" in (r.get("warnings") or []), r
