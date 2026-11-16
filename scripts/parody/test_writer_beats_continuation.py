@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import sys
 import unittest
+from unittest import mock
 
 import build_request as br
 
@@ -147,23 +148,51 @@ class TestWriterBeatsContinuation(unittest.TestCase):
     VOICE_REFMOD = "minimaxh3_oc_poolclub_v1_refmod_audio"
     LOOK_REFMOD = "minimaxh3_oc_poolclub_v1_refmod_visual"
 
-    def test_voice_refmod_is_on_beat_one_only_and_cond_audio_rows_are_never_refmod_vs_refmod_plus_tail(self):
+    # 2026-11-16 voice fix: the short value tensor was ComfyUI-H3-Multishot's extra_conds wrapper dropping the tail
+    # keyframe audio (upstream issue #23). With the community fix the runtime packs 2*voice + 2*tail rows, equal to
+    # reserved, so the full 25 s voice RefMod stays on every beat. Without it (runtime_packs_tail_audio False) the
+    # builder falls back to the 8ee347e voice-off continuation beats.
+    def test_voice_refmod_falls_back_to_beat_one_only_when_runtime_drops_tail_audio(self):
         base = _base_graph()
         base["refmods"]["inputs"]["mod_1"], base["refmods"]["inputs"]["mod_2"] = self.VOICE_REFMOD, self.LOOK_REFMOD
-        g, prompt_all, plan = _build(base_graph=base)
+        with mock.patch.object(br, "runtime_packs_tail_audio", return_value=False):
+            g, _, plan = _build(base_graph=base)
+        for n in (2, 3):
+            self.assertEqual(g[f"c{n}_refapply"]["inputs"]["mods"], [f"c{n}_refmods", 0])
+            self.assertEqual(g[f"c{n}_refmods"]["inputs"]["mod_1"], "(none)")
+        rows = {r["node"]: r for r in plan["cond_audio_rows"]}
+        for n, overlap_audio_t in ((2, 65), (3, 37)):
+            r = rows[f"c{n}_refapply"]
+            self.assertEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (0, 2 * overlap_audio_t))
+            self.assertTrue(r["ok"])
+
+    def test_runtime_packs_tail_audio_reads_the_multishot_wrapper(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "h3_avbank_probe.py"
+            self.assertTrue(br.runtime_packs_tail_audio(str(p)))  # no wrapper: core merges both
+            p.write_text('        if aud:\n            payload["cond_audio_latents"] = aud\n', encoding="utf-8")
+            self.assertFalse(br.runtime_packs_tail_audio(str(p)))  # unpatched upstream v2.7.2
+            p.write_text('        payload["cond_audio_latents"] = (\n            [k["audio_latent"] for k in kf\n'
+                         '             if k.get("audio_latent") is not None]\n'
+                         '            + [r["audio_latent"] for r in refs\n'
+                         '               if r.get("audio_latent") is not None])\n', encoding="utf-8")
+            self.assertTrue(br.runtime_packs_tail_audio(str(p)))  # jalberty2018 / issue #23 fix
+
+    def test_voice_refmod_is_on_every_beat_and_cond_audio_rows_pack_refmod_plus_tail(self):
+        base = _base_graph()
+        base["refmods"]["inputs"]["mod_1"], base["refmods"]["inputs"]["mod_2"] = self.VOICE_REFMOD, self.LOOK_REFMOD
+        with mock.patch.object(br, "runtime_packs_tail_audio", return_value=True):
+            g, prompt_all, plan = _build(base_graph=base)
         self.assertEqual(plan["total_frames"], 566)  # the fix did not touch the visible length
         # beat 1 keeps the pair on the shared loader: no window, no tail keyframe, so its 2000 packed rows fill the
         # 2000 slots its layout reserves (that beat is what s0_samp sampled in the run that died at c2_samp)
         self.assertEqual(g["refapply"]["inputs"]["mods"], ["refmods", 0])
         self.assertEqual(g["refmods"]["inputs"]["mod_1"], self.VOICE_REFMOD)
         for n in (2, 3):
-            loader, beat = f"c{n}_refmods", f"c{n}_refapply"
-            self.assertEqual(g[beat]["inputs"]["mods"], [loader, 0], f"beat {n}: still loading the audio RefMod")
-            self.assertEqual(g[loader]["class_type"], "MiniMaxH3RefModsLoader")
-            self.assertEqual(g[loader]["inputs"]["mod_1"], "(none)")
-            self.assertEqual({k: v for k, v in g[loader]["inputs"].items() if k != "mod_1"},
-                             {k: v for k, v in g["refmods"]["inputs"].items() if k != "mod_1"},
-                             f"beat {n}: the audio-free loader changed the visual RefMod or its dials")
+            # the voice-fix state: every beat's RefModApply reads the shared loader (voice + visual RefMod)
+            self.assertEqual(g[f"c{n}_refapply"]["inputs"]["mods"], ["refmods", 0], f"beat {n}: voice dropped")
+            self.assertNotIn(f"c{n}_refmods", g)
         # the dry row math a render cannot pass by padding: a beat packs cond audio only when its packed rows equal
         # the reserved slots (beat 1: 2000 = 2000); a latent-tail beat packs NO cond-audio block, so no indexed
         # assignment is attempted - the state all 44 continuation graphs that produced an mp4 are in.
@@ -175,36 +204,44 @@ class TestWriterBeatsContinuation(unittest.TestCase):
         self.assertTrue(b1["cond_audio_block"] and b1["ok"], b1["error_signature"])
         for n, overlap_audio_t in ((2, 65), (3, 37)):
             r = rows[f"c{n}_refapply"]
-            self.assertEqual(r["audio_refmods"], [])
+            self.assertEqual(r["audio_refmods"], [self.VOICE_REFMOD])  # the full 25 s voice on every beat
             self.assertEqual(r["visual_refmods"], [self.LOOK_REFMOD])  # identity is still conditioned every beat
             self.assertEqual(r["keyframe_cond_audio_rows"], 2 * overlap_audio_t)  # the tail's reserved slots
-            self.assertEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (0, 2 * overlap_audio_t))
-            self.assertFalse(r["cond_audio_block"], f"beat {n}: a cond-audio block on a latent-tail beat")
+            want = 2 * br.MEASURED_AUDIO_REFMOD_LATENT_T + 2 * overlap_audio_t  # 2130 (beat 2), 2074 (beat 3)
+            self.assertEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (want, want))
+            self.assertTrue(r["cond_audio_block"] and r["tail_audio_in_value"])
             self.assertTrue(r["ok"], f"beat {n}: {r['error_signature']}")
+        self.assertEqual([rows[k]["packed_cond_audio_rows"] for k in ("refapply", "c2_refapply", "c3_refapply")],
+                         [2000, 2130, 2074])
         for r in rows.values():  # the live failure shape appears on no beat of the built graph
             self.assertNotEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (2000, 2074))
             self.assertNotEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (2000, 2130))
         # the pre-fix shape, in the runtime's own words (live prompt_id 332f0637: 2000 vs 2000 + 2*65 and 2*37)
-        self.assertEqual(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [65]),
+        self.assertEqual(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [65], tail_in_value=False),
                          {"refmod_cond_audio_rows": 2000, "keyframe_cond_audio_rows": 130,
                           "packed_cond_audio_rows": 2000, "layout_cond_audio_rows": 2130, "row_delta": 130,
-                          "cond_audio_block": True, "ok": False,
+                          "cond_audio_block": True, "tail_audio_in_value": False, "ok": False,
                           "error_signature": "value tensor of shape [2000, 32] cannot be broadcast "
                                              "to indexing result of shape [2130, 32]"})
-        self.assertFalse(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [37])["ok"])
-        self.assertTrue(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [])["ok"])
-        self.assertTrue(br.continuation_cond_audio_rows([], [65])["ok"])  # the wired state: the tail keyframe alone
+        self.assertFalse(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [37],
+                                                         tail_in_value=False)["ok"])
+        self.assertTrue(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [], tail_in_value=False)["ok"])
+        self.assertTrue(br.continuation_cond_audio_rows([], [65], tail_in_value=False)["ok"])
+        # the fixed runtime: packed == reserved for the full 25 s voice on both continuation beats
+        for oat, want in ((65, 2130), (37, 2074)):
+            r = br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [oat], tail_in_value=True)
+            self.assertEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"], r["ok"]), (want, want, True))  # the wired state: the tail keyframe alone
         # A 920-token (23 s) trim is still a mismatch: packed 1840 vs reserved 1970 / 1914.
         # Do not treat layout_rows <= 2000 as ok.
         t23 = br.CONTINUATION_VOICE_REFMOD_LATENT_T
         self.assertEqual((t23, 2 * t23 + 2 * 65, 2 * t23 + 2 * 37), (920, 1970, 1914))
-        self.assertEqual(br.continuation_cond_audio_rows([t23], [65]),
+        self.assertEqual(br.continuation_cond_audio_rows([t23], [65], tail_in_value=False),
                          {"refmod_cond_audio_rows": 1840, "keyframe_cond_audio_rows": 130,
                           "packed_cond_audio_rows": 1840, "layout_cond_audio_rows": 1970, "row_delta": 130,
-                          "cond_audio_block": True, "ok": False,
+                          "cond_audio_block": True, "tail_audio_in_value": False, "ok": False,
                           "error_signature": "value tensor of shape [1840, 32] cannot be broadcast "
                                              "to indexing result of shape [1970, 32]"})
-        self.assertFalse(br.continuation_cond_audio_rows([t23], [37])["ok"])
+        self.assertFalse(br.continuation_cond_audio_rows([t23], [37], tail_in_value=False)["ok"])
         # prompt text is unchanged by the graph change (the allowed hashes of the live pack, live-12d0733)
         for i, node in enumerate(("c0", "c2", "c3"), start=1):
             self.assertIn(f"Marker A{i}", g[node]["inputs"]["prompt"])

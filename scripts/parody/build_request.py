@@ -5196,6 +5196,31 @@ COMFY_REFMOD_DIR = r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refm
 # `minimaxh3_oc_poolclub_v1_refmod_audio_23s` and `is_audio_refmod` still recognises it.
 CONTINUATION_VOICE_REFMOD_SUFFIX = "_23s"
 CONTINUATION_VOICE_REFMOD_LATENT_T = 920
+# Voice fix (Derrick t1848s6811, 2026-11-16): the c2_samp value tensor was short by the tail keyframe audio because
+# ComfyUI-H3-Multishot's h3_avbank_probe.py (imported globally, unused by this graph) wraps MiniMaxH3.extra_conds and,
+# whenever a graph has keyframes AND refs, set cond_audio_latents to the refs' audio only, dropping the latent-tail
+# keyframe audio core had packed (upstream jlucasmcrell/ComfyUI-H3-Multishot issue #23, also #20). The community fix
+# (jalberty2018 fork: keyframe audio first, then refs) is applied on AlienPc; backup + FIX.md in
+# C:\AI\community\_archive\multishot-audio-merge-20261116-0651. With it, packed = 2*voice tokens + 2*tail audio
+# tokens = reserved (2000/2130/2074 on the 192+187+187 pack), so the full voice RefMod stays on every beat.
+# If a pack update reverts the file, runtime_packs_tail_audio() turns False and continuation beats fall back to
+# voice-off (8ee347e) instead of crashing at c2_samp.
+MULTISHOT_AVBANK_PROBE = (r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\custom_nodes\ComfyUI-H3-Multishot"
+                          r"\h3_avbank_probe.py")
+MULTISHOT_REFS_ONLY_AUDIO = 'payload["cond_audio_latents"] = aud'
+
+
+def runtime_packs_tail_audio(probe_path: str = MULTISHOT_AVBANK_PROBE) -> bool:
+    """True when the runtime packs the latent-tail keyframe audio into the cond-audio VALUE tensor.
+
+    Core extra_conds packs keyframe audio then ref audio. The only known wrapper that drops the keyframe audio is
+    the unpatched ComfyUI-H3-Multishot h3_avbank_probe.py (refs-only assignment). No file -> no wrapper -> True.
+    """
+    try:
+        text = Path(probe_path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return True
+    return MULTISHOT_REFS_ONLY_AUDIO not in text
 
 
 def is_audio_refmod(mod_name: Any) -> bool:
@@ -5255,7 +5280,8 @@ def continuation_voice_refmod(mod_name: Any, refmod_dir: str = COMFY_REFMOD_DIR)
 
 
 def continuation_cond_audio_rows(audio_refmod_latent_t: Sequence[int] = (), keyframe_audio_t: Sequence[int] = (),
-                                 row_cap: int = AUDIO_REFMOD_ROW_CAP) -> Dict[str, Any]:
+                                 row_cap: int = AUDIO_REFMOD_ROW_CAP,
+                                 tail_in_value: Optional[bool] = None) -> Dict[str, Any]:
     """Dry row math for one beat's cond_audio: the packed VALUE rows vs the slots PackedLayout reserves.
 
     PackedLayout reserves 2*latent_t cond_audio slots per reference-audio RefMod and 2*audio_t per keyframe, and
@@ -5274,18 +5300,27 @@ def continuation_cond_audio_rows(audio_refmod_latent_t: Sequence[int] = (), keyf
                latent tail, i.e. beat 1's sampled audio.
     A 920-token trim is still a mismatch ([1840, 32] vs [1970, 32] on beat 2, [1840, 32] vs [1914, 32]
     on beat 3). Do not treat layout_rows <= 2000 as ok. `error_signature` is the runtime's own wording.
+
+    2026-11-16 voice fix: `tail_in_value` says whether the runtime packs the tail keyframe audio into the value
+    tensor (None -> runtime_packs_tail_audio()). With the Multishot audio-merge fix it does, so
+    packed = 2*voice tokens + 2*tail audio tokens = reserved for any voice length (25 s: 2000 / 2130 / 2074).
+    tail_in_value=False reproduces the pre-fix runtime (the live [2000, 32] vs [2130, 32] failure).
     """
+    if tail_in_value is None:
+        tail_in_value = runtime_packs_tail_audio()
     refmod_rows = 2 * sum(int(t) for t in audio_refmod_latent_t)
     keyframe_rows = 2 * sum(int(t) for t in keyframe_audio_t)
     layout_rows = refmod_rows + keyframe_rows
-    equal = refmod_rows == layout_rows
-    empty = refmod_rows == 0
+    packed_rows = refmod_rows + (keyframe_rows if tail_in_value else 0)
+    equal = packed_rows == layout_rows
+    empty = packed_rows == 0
     return {"refmod_cond_audio_rows": refmod_rows, "keyframe_cond_audio_rows": keyframe_rows,
-            "packed_cond_audio_rows": refmod_rows, "layout_cond_audio_rows": layout_rows,
-            "row_delta": layout_rows - refmod_rows, "cond_audio_block": refmod_rows > 0,
+            "packed_cond_audio_rows": packed_rows, "layout_cond_audio_rows": layout_rows,
+            "row_delta": layout_rows - packed_rows, "cond_audio_block": packed_rows > 0,
+            "tail_audio_in_value": bool(tail_in_value),
             "ok": equal or empty,
             "error_signature": (None if (equal or empty) else
-                                f"value tensor of shape [{refmod_rows}, 32] cannot be broadcast to "
+                                f"value tensor of shape [{packed_rows}, 32] cannot be broadcast to "
                                 f"indexing result of shape [{layout_rows}, 32]")}
 
 
@@ -5522,6 +5557,8 @@ def add_continuation_beat(cumulative: Dict[str, Any], beat: Dict[str, Any], layo
     # 2*overlap_audio slots that the audio RefMod's value tensor never grows into: value [2000, 32] vs indexing
     # result [2000 + 2*overlap_audio, 32] (2074 at overlap 37, 2130 at 65). continuation_cond_audio_rows() is the
     # dry row check; 44 of 44 continuation graphs that produced an mp4 have no audio RefMod on the tail beat.
+    # 2026-11-16 voice fix: with the Multishot audio-merge fix (runtime_packs_tail_audio) packed == reserved, so the
+    # full voice RefMod stays on this beat via the shared loader; the drop/trim below is only the fallback.
     voice = _continuation_voice_refmods(g, beat, f"c{n}_refmods", layout)
     if voice["swapped"] or voice["dropped"]:
         g[f"c{n}_refapply"]["inputs"]["mods"] = [f"c{n}_refmods", 0]
