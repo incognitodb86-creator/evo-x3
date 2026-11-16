@@ -27,3 +27,6 @@ __pycache__/
 deep-research-bakeoff/searxng/settings.yml
 deep-research-bakeoff/searxng/*.bak-*
 *.bak-*
+
+# Pairing QR PNG encodes a secret
+records/pi-mobile-qr.png
