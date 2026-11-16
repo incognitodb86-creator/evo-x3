@@ -133,7 +133,81 @@ class TestWriterBeatsContinuation(unittest.TestCase):
         self.assertEqual(g["save"]["inputs"]["filename_prefix"], "community/wbc-test/clip")
         self.assertNotIn("LoRA", json.dumps(g))
 
-    def test_authored_prompt_text_is_sent_byte_identical_plus_builder_lead_in(self):
+    # c2_samp cond_audio (Derrick 2026-11-15): a voice-reference RefMod on a latent-tail beat is the one shape the
+    # runtime cannot pack. The poolclub voice RefMod is an audio latent [1, 32, 2, 1000] (refmod_meta latent_t=1000,
+    # 25.0 s at 32 kHz) -> pack_audio gives 2*1000 = 2000 value rows, and PackedLayout reserves 2*latent_t slots for
+    # it: a plain beat (beat 1) is square, and s0_samp sampled it for 66 s. A continuation beat adds one more slot
+    # group - MiniMaxH3LatentTailGuide appends the previous window's audio tail as a keyframe of
+    # overlap_audio_t = audio_t(base) - audio_t(base - overlap), 65 rows x2 at base 192 / overlap 39 and 37 x2 at
+    # base 379 / overlap 22 - and the RefMod's value tensor never grows into those slots:
+    #   value [2000, 32] vs indexing result [2130, 32] (c2_samp, prompt_id 332f0637) and [2074, 32] (beat 3).
+    # All 44 continuation graphs in C:\AI\community\runs that produced an mp4 load no audio RefMod on the tail beat;
+    # the only one that carried it has no output. So the voice reference stays on beat 1 and the voice carries on
+    # the tail, which is beat 1's sampled audio. The visible length is untouched: 192 + 187 + 187 = 566 frames.
+    VOICE_REFMOD = "minimaxh3_oc_poolclub_v1_refmod_audio"
+    LOOK_REFMOD = "minimaxh3_oc_poolclub_v1_refmod_visual"
+
+    def test_voice_refmod_is_on_beat_one_only_and_cond_audio_rows_are_never_refmod_vs_refmod_plus_tail(self):
+        base = _base_graph()
+        base["refmods"]["inputs"]["mod_1"], base["refmods"]["inputs"]["mod_2"] = self.VOICE_REFMOD, self.LOOK_REFMOD
+        g, prompt_all, plan = _build(base_graph=base)
+        self.assertEqual(plan["total_frames"], 566)  # the fix did not touch the visible length
+        # beat 1 keeps the pair on the shared loader: no window, no tail keyframe, so its 2000 packed rows fill the
+        # 2000 slots its layout reserves (that beat is what s0_samp sampled in the run that died at c2_samp)
+        self.assertEqual(g["refapply"]["inputs"]["mods"], ["refmods", 0])
+        self.assertEqual(g["refmods"]["inputs"]["mod_1"], self.VOICE_REFMOD)
+        for n in (2, 3):
+            loader, beat = f"c{n}_refmods", f"c{n}_refapply"
+            self.assertEqual(g[beat]["inputs"]["mods"], [loader, 0], f"beat {n}: still loading the audio RefMod")
+            self.assertEqual(g[loader]["class_type"], "MiniMaxH3RefModsLoader")
+            self.assertEqual(g[loader]["inputs"]["mod_1"], "(none)")
+            self.assertEqual({k: v for k, v in g[loader]["inputs"].items() if k != "mod_1"},
+                             {k: v for k, v in g["refmods"]["inputs"].items() if k != "mod_1"},
+                             f"beat {n}: the audio-free loader changed the visual RefMod or its dials")
+        # the dry row math a render cannot pass by padding: a beat packs cond audio only when its packed rows equal
+        # the reserved slots (beat 1: 2000 = 2000); a latent-tail beat packs NO cond-audio block, so no indexed
+        # assignment is attempted - the state all 44 continuation graphs that produced an mp4 are in.
+        rows = {r["node"]: r for r in plan["cond_audio_rows"]}
+        self.assertEqual(set(rows), {"refapply", "c2_refapply", "c3_refapply"})
+        b1 = rows["refapply"]
+        self.assertEqual((b1["packed_cond_audio_rows"], b1["layout_cond_audio_rows"]),
+                         (2 * br.MEASURED_AUDIO_REFMOD_LATENT_T, 2 * br.MEASURED_AUDIO_REFMOD_LATENT_T))
+        self.assertTrue(b1["cond_audio_block"] and b1["ok"], b1["error_signature"])
+        for n, overlap_audio_t in ((2, 65), (3, 37)):
+            r = rows[f"c{n}_refapply"]
+            self.assertEqual(r["audio_refmods"], [])
+            self.assertEqual(r["visual_refmods"], [self.LOOK_REFMOD])  # identity is still conditioned every beat
+            self.assertEqual(r["keyframe_cond_audio_rows"], 2 * overlap_audio_t)  # the tail's reserved slots
+            self.assertEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (0, 2 * overlap_audio_t))
+            self.assertFalse(r["cond_audio_block"], f"beat {n}: a cond-audio block on a latent-tail beat")
+            self.assertTrue(r["ok"], f"beat {n}: {r['error_signature']}")
+        for r in rows.values():  # the live failure shape appears on no beat of the built graph
+            self.assertNotEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (2000, 2074))
+            self.assertNotEqual((r["packed_cond_audio_rows"], r["layout_cond_audio_rows"]), (2000, 2130))
+        # the pre-fix shape, in the runtime's own words (live prompt_id 332f0637: 2000 vs 2000 + 2*65 and 2*37)
+        self.assertEqual(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [65]),
+                         {"refmod_cond_audio_rows": 2000, "keyframe_cond_audio_rows": 130,
+                          "packed_cond_audio_rows": 2000, "layout_cond_audio_rows": 2130, "row_delta": 130,
+                          "cond_audio_block": True, "ok": False,
+                          "error_signature": "value tensor of shape [2000, 32] cannot be broadcast "
+                                             "to indexing result of shape [2130, 32]"})
+        self.assertFalse(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [37])["ok"])
+        self.assertTrue(br.continuation_cond_audio_rows([br.MEASURED_AUDIO_REFMOD_LATENT_T], [])["ok"])
+        self.assertTrue(br.continuation_cond_audio_rows([], [65])["ok"])  # the wired state: the tail keyframe alone
+        # prompt text is unchanged by the graph change (the allowed hashes of the live pack, live-12d0733)
+        for i, node in enumerate(("c0", "c2", "c3"), start=1):
+            self.assertIn(f"Marker A{i}", g[node]["inputs"]["prompt"])
+            self.assertIn(f"Marker B{i}", g[node]["inputs"]["prompt"])
+        # prompt text is not touched by the graph change: the same pack through the builder with and without a
+        # voice reference gives byte-identical c0/c2/c3 prompts (the live pack's own check is the same comparison
+        # against the approved dry-run graph, and its pack hashes 808424141FE88045 / 7115D0AE1CFBFA53 /
+        # ED7BC54BD52A366E are the beat files, which this change never reads)
+        g_plain, prompt_plain, _ = _build()
+        self.assertEqual([g[n]["inputs"]["prompt"] for n in ("c0", "c2", "c3")],
+                         [g_plain[n]["inputs"]["prompt"] for n in ("c0", "c2", "c3")])
+        self.assertEqual(prompt_all, prompt_plain)
+
+
         g, _, plan = _build()
         for i, (authored, node) in enumerate(zip((BEAT1, BEAT2, BEAT3), ("c0", "c2", "c3")), start=1):
             sent = g[node]["inputs"]["prompt"]
