@@ -1,7 +1,7 @@
 subject_definitions:
-(S1) Pool Blonde (RefMod minimaxh3_oc_poolblonde_v2): Adult woman, 18+. Never age-play.
+(S1) Pool Blonde (RefMod minimaxh3_oc_poolblonde_v2): Adult woman, 18+, consenting adult performer.
 summary:
-[keyframe completion] A 10-second clip, seed 51083601, 243 frames, 768x1344, locked 1-pass beta7_int8HQ. No minors, no real-person likeness.
+[keyframe completion] A 10-second clip, seed 51083601, 243 frames, 768x1344, locked 1-pass beta7_int8HQ. Consenting adults (18+), no real-person likeness.
 retention_analysis:
 The prompt maintains strict adherence to the brief. The "No timestamp" rule is respected.
 detailed_description:

@@ -19,7 +19,7 @@ the graph written is byte-identical to what this script wrote before the flag ex
 """
 import argparse, copy, json, os, sys
 
-COMMUNITY = r"C:\AI\community"  # templates/ and runs/ stay in the community work tree (F6b)
+COMMUNITY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # templates/ and runs/ stay in the community work tree (F6b)
 TEMPLATE = os.path.join(COMMUNITY, "templates", "b2.api.json")
 # per-run field -> (node id, input key). Nothing else may change.
 FIELDS = {
