@@ -22,6 +22,8 @@ json.dump(scrub(d), open(out, 'w'), indent=2); open(out, 'a').write('\n')
 P
 cp /etc/systemd/system/llama-swap.service "$D/systemd/"
 cp /etc/systemd/system/llama-swap.service.d/*.conf "$D/systemd/"
+cp /etc/systemd/system/fedora-first-boot.service /etc/systemd/system/fedora-first-boot.timer "$D/systemd/" 2>/dev/null || true
+cp /usr/local/sbin/fedora-first-boot.sh "$D/bin/" 2>/dev/null || true
 cp /etc/systemd/system/evo-x3-*.service /etc/systemd/system/evo-x3-*.timer "$D/systemd/" 2>/dev/null || true
 cp /etc/containers/systemd/open-webui.container "$D/quadlet/"
 cp ~/.config/containers/systemd/searxng.container "$D/quadlet/" 2>/dev/null || true
