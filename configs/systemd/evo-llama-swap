@@ -1,0 +1,59 @@
+#!/bin/bash
+# Start llama-swap on loopback. Canonical config keeps ${env.LLM_KEY_*} placeholders.
+# v272 rejects empty apiKeys and also fails if those env vars are unset.
+# If Derrick has typed at least one key into /etc/evo-x3/llm.env, use the
+# canonical config (auth on). If every placeholder is still empty, start from a
+# runtime copy with the apiKeys block removed (auth off, loopback only).
+set -euo pipefail
+CONFIG=/etc/evo-x3/llama-swap.yaml
+ENVFILE=/etc/evo-x3/llm.env
+LISTEN="${LISTEN_ADDR:-127.0.0.1:8080}"
+BIN=/usr/local/bin/llama-swap
+
+if [[ -f "$ENVFILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENVFILE"
+  set +a
+fi
+
+keys_present=0
+while IFS= read -r name; do
+  [[ -n "${!name-}" ]] && keys_present=1
+done < <(compgen -v | grep '^LLM_KEY_' || true)
+
+if [[ "$keys_present" -eq 1 ]]; then
+  exec "$BIN" -config "$CONFIG" -listen "$LISTEN"
+fi
+
+runtime=/run/evo-x3/llama-swap.yaml
+mkdir -p /run/evo-x3
+python3 - "$CONFIG" "$runtime" <<'PY'
+import sys
+src, dst = sys.argv[1], sys.argv[2]
+lines = open(src).read().splitlines(True)
+out = []
+i = 0
+while i < len(lines):
+    if lines[i].startswith("apiKeys:"):
+        # skip the apiKeys block (key and dashed entries / blanks immediately in the block)
+        i += 1
+        while i < len(lines):
+            s = lines[i]
+            if s.strip() == "" or s.startswith(" ") or s.startswith("\t") or s.lstrip().startswith("-"):
+                i += 1
+                continue
+            break
+        out.append(
+            "# apiKeys omitted at runtime: /etc/evo-x3/llm.env placeholders are still empty.\n"
+            "# llama-swap v272 rejects empty apiKeys. Auth turns on after keys are typed\n"
+            "# into llm.env and this service is restarted. Loopback only until then.\n"
+        )
+        continue
+    out.append(lines[i])
+    i += 1
+open(dst, "w").writelines(out)
+PY
+chmod 0644 "$runtime"
+echo "llama-swap: starting without API keys because llm.env placeholders are empty; listening on ${LISTEN} only. Type keys into /etc/evo-x3/llm.env and restart to enable auth."
+exec "$BIN" -config "$runtime" -listen "$LISTEN"

@@ -1,0 +1,15 @@
+# EVO-X3 kernel args (live snapshot)
+# Captured: 2026-11-15 6:12 PM CT (America/Chicago)
+# Source: /proc/cmdline and /etc/default/grub. No secrets.
+
+## /proc/cmdline
+BOOT_IMAGE=(hd0,gpt6)/vmlinuz-7.3.3-200.fc44.x86_64 root=/dev/mapper/fedora-root ro rd.lvm.lv=fedora/root rhgb quiet amdgpu.gttsize=122880 ttm.pages_limit=31457280
+
+## /etc/default/grub (relevant lines only)
+GRUB_TIMEOUT=3
+GRUB_DEFAULT=0
+GRUB_DISABLE_SUBMENU=true
+GRUB_TERMINAL_OUTPUT="console"
+GRUB_CMDLINE_LINUX="rd.lvm.lv=fedora/root rhgb quiet amdgpu.gttsize=122880 ttm.pages_limit=31457280"
+GRUB_DISABLE_RECOVERY="true"
+GRUB_ENABLE_BLSCFG=true
