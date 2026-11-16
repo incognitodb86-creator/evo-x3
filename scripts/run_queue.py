@@ -56,7 +56,7 @@ is then ignored; the flag is used only where the graph states no literal value. 
 --detach (phase 2 S11): relaunch this same command through WMI (Win32_Process.Create), so the batch runs outside the
 caller's process tree and job object and survives the pi/herdr pane closing; prints the batch PID and returns at once.
 Output goes to <run dir>\_run_queue.out.log. Forge launch line (then end the turn; no waits or checks):
-  C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_queue.py --run-dir <run dir> [--resume] --detach
+  /home/derekboone/AI/director/.venv/Scripts/python.exe /home/derekboone/AI/community/scripts/run_queue.py --run-dir <run dir> [--resume] --detach
 Exit (also logged as BATCH closed rc=<n> reason=<why>): 0 every queued clip has a DONE ok line, 1 STOP file,
 2 pytest gate failed, 4 ComfyUI down, 5 a clip failed twice (others still rendered), 6 batch ended with clips
 missing a DONE ok line, 7 GPU busy (lock held), 8 uncaught error (reason names it), 9 a previous batch opened and
@@ -76,7 +76,7 @@ import run_graph_job as rgj
 CELL_RE = re.compile(r"^c\d{2}_s\d{6,}$")
 _CELL_CONTRACT = False  # set by main() from the order file; prepare() enforces the tag form
 
-ROOT = r"C:\AI\community"
+ROOT = r"/home/derekboone/AI/community"
 PY = sys.executable
 PYTEST_FILES = [os.path.join("scripts", "tests", "test_p6_review.py"), os.path.join("scripts", "tests", "test_guard_scope.py")]
 ACTIONS = os.path.join(ROOT, "notes", "actions.log")
@@ -89,7 +89,7 @@ QUEUE_TIMEOUT_STOPPING = 10  # short /queue timeout (s) after repeated timeouts 
 
 # RTX 2x ULTRA post-pass (card t286s1226, Derrick 2026-11-06). nvvfx/torch live in ComfyUI's venv, not in the
 # venv that runs this queue, so the frame loop runs there as a child process (frame by frame, never the whole clip in RAM).
-UPSCALE_PY = os.environ.get("RQ_UPSCALE_PY", r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe")
+UPSCALE_PY = os.environ.get("RQ_UPSCALE_PY", r"/home/derekboone/AI/comfy-alienpc/.venv/Scripts/python.exe")
 UPSCALE_TIMEOUT = 1800
 _UPSCALE_SRC = r"""
 import json, subprocess, sys, time

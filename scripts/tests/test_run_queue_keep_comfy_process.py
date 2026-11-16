@@ -295,7 +295,7 @@ class TestChainQueuePassesFlag(unittest.TestCase):
     def test_chain_is_parameterized(self):
         src = open(CHAIN_QUEUE, encoding="utf-8").read()
         self.assertIn('"--run-dir"', src, "chain_queue.py must accept --run-dir (not hard-wired to one run)")
-        self.assertNotIn('ROOT = Path(r"C:\\AI\\community\\runs\\overnight_5min_rough_20261115_v2")', src,
+        self.assertNotIn('ROOT = Path(r"/home/derekboone/AI/community/runs/overnight_5min_rough_20261115_v2")', src,
                          "the finished v2 dir must not stay a module-level constant")
 
     def test_chain_writer_run_call_is_complete(self):

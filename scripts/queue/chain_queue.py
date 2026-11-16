@@ -6,7 +6,7 @@ parameterized by --run-dir / --scene-read and carrying the keep-comfy chain mode
   (POST /free) at batch close but keeps the comfyui_auto PROCESS alive (no ~40 s wake per clip);
 - during the gaps between batches (still_read vision + writer builds, waiting on a render) this
   harness pings llama-swap GET /comfyui/system_stats every PING_SEC so the model's ttl (300 s idle
-  in C:/AI/director/config/llama-swap.yaml) cannot expire mid-chain. /system_stats is in
+  in /home/derekboone/AI/director/config/llama-swap.yaml) cannot expire mid-chain. /system_stats is in
   upstream.ignorePaths, so the ping never WAKES a stopped process (run_graph_job.wake uses GET
   /comfyui/ for that); it only resets the idle timer of a running one. A chain starts on the
   start still: the first queued batch wakes comfyui_auto through the normal run_queue wake path.
@@ -35,7 +35,7 @@ from datetime import datetime
 from pathlib import Path
 
 PY = sys.executable
-SCRIPTS = Path(r"C:\AI\community\scripts")
+SCRIPTS = Path(r"/home/derekboone/AI/community/scripts")
 SUBMIT = SCRIPTS / "parody" / "submit_parody_run.py"
 PARODY = SUBMIT.parent
 for _p in (str(SCRIPTS), str(PARODY)):
@@ -43,7 +43,7 @@ for _p in (str(SCRIPTS), str(PARODY)):
         sys.path.insert(0, _p)
 
 # The finished v2 scene, kept as the default so an old command line still works.
-STILL0 = r"C:\AI\render\stills\approved_characters\GROK_IMAGINE_2026-10-19b\GI183.jpg"
+STILL0 = r"/home/derekboone/AI/render/stills/approved_characters/GROK_IMAGINE_2026-10-19b/GI183.jpg"
 S2 = ("a fictional adult man aged 31, athletic, naturally muscular build with real weight in his "
       "chest and thighs, light tan skin, short dark hair and dark stubble")
 SEED = 51083601  # writer-run default seed, fixed for every clip (build_report.json records it)
