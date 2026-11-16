@@ -160,7 +160,7 @@ def main() -> int:
     """CLI entrypoint for sync_refmods."""
     parser = argparse.ArgumentParser(description="Sync H3 RefMods from HuggingFace")
     parser.add_argument("names", nargs="+", help="Identity names to sync")
-    parser.add_argument("--target-dir", default=r"/home/derekboone/AI/comfy-alienpc/models/refmods", help="Destination folder")
+    parser.add_argument("--target-dir", default=str(Path(__file__).resolve().parents[3] / "comfy-alienpc" / "models" / "refmods"), help="Destination folder")
     parser.add_argument("--dry-run", action="store_true", help="Report missing without downloading")
     args = parser.parse_args()
 
