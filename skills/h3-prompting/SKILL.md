@@ -22,8 +22,7 @@ Model/lane facts (beta7 dials, node names, ports, queue, watch/triage, KEEP poli
 `video-render` and the director - this file is prompt text only.
 
 **Lane split (2026-11-03).** The REF2VA paste lane for H3-Max is the skill `h3-max-ref2va-prompt`
-(`/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`, rules R32-R44, chain lane in its `references\chain-lane.md`);
-REF2VA is the standing Max lane unless Derek names another lane. This file keeps R1-R31, which apply to every lane
+(`~/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`, rules R32-R44, chain lane in its `references/chain-lane.md`, for non-parody picture-reference pastes); named INDEX + RefMod parodies use `h3-parody-identity` and writer runs follow `~/AI/render/AGENTS.md`. This file keeps R1-R31, which apply to every lane
 including REF2VA, plus the rule index (section 9). A rule sentence lives in exactly one file; numbers are box-unique
 and stable; a REF2VA paste is gated by section 5 here **and** section 5 of the REF2VA skill.
 
@@ -123,7 +122,7 @@ and hair only (`<Picture 2>`, `<Picture 3>`); a pose reference (`<Picture 2>` in
 Say which is which in `subject_definitions` and `retention_analysis`.
 
 **R14 - Describe the start image from its own text records** (panel prompt, notes, the run's facts file) - looking
-at the image itself needs Derek's specific permission (`alienpc-pi-rules`). Describe only what the still shows; a cropped still never invents out-of-frame hands, feet, or garment edges. Open on the still's own angle and gaze. Frame 0 is pinned whenever a Cond still or AddGuide is used. A clip that opens on a still runs in four phases, in order, inside `[Shot 1]`: first-frame anchor, action onset, continuous development, result or reaction. Never write "don't look at the camera" or "behind the camera"; a start frame facing the lens snaps the gaze back, so start on the still's gaze instead. The model follows words over pixels for
+at the image itself needs Derek's specific permission (`alienpc-pi-rules`). Describe only what the still shows; a cropped still never invents out-of-frame hands, feet, or garment edges. Open on the still's own angle and gaze. Frame 0 is pinned whenever a Cond still or AddGuide is used; in the default (`guide`) path, the start still is frame 0 and is center-cropped to the canvas, so match `--aspect` to the still (or use `--aspect auto`), or pass `--still-mode ref` so the still is an un-resized reference on `c0` and is not cropped (`--still-mode ref` is implemented but untested on a real render until Derrick runs the later test). A clip that opens on a still runs in four phases, in order, inside `[Shot 1]`: first-frame anchor, action onset, continuous development, result or reaction. Never write "don't look at the camera" or "behind the camera"; a start frame facing the lens snaps the gaze back, so start on the still's gaze instead. The model follows words over pixels for
 materials and wardrobe, so cover in order: fabric and opacity (sheer / mesh / opaque, wet / dry, skin through it),
 fit and construction (straps, ties, how it comes off), light (direction, colour, rim, wet specular), composition
 (crop, camera height, aspect, placement), props and surfaces that move or make sound, hair and visible skin detail (a small catchlight in each eye, natural moisture on the lids, and a few flyaway hairs that move a beat late and then settle). Sheer fabric reads more opaque in gathered folds and more translucent on flat areas, with a thin air gap, a soft fabric shadow on the skin, mesh as a visible thread grid, and the cloth color mixing with the skin tone. Environment response: R23.
@@ -166,13 +165,13 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
 
 ## 7. Pointers (who defers to this file)
 
-- **REF2VA (the standing Max lane): skill `h3-max-ref2va-prompt`** - `/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`
-  (rules R32-R44, its own gate, paste skeleton) and `...\references\chain-lane.md` (multi-cell chains). Its section 2
+- **REF2VA (non-parody picture-reference lane): skill `h3-max-ref2va-prompt`** - `~/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`
+  (rules R32-R44, its own gate, paste skeleton) and `references/chain-lane.md` (multi-cell chains). Its section 2
   is the REF2VA reading of R5, R6, R8-R15; it never restates a rule of this file. The two files this pointer replaces
-  are archived at `/home/derekboone/AI/community/archive/2026-11-03-ref2va-split/`; thin pointers remain at
+  are archived at `~/AI/community/archive/2026-11-03-ref2va-split/`; thin pointers remain at
   [references/ref2va-lane.md](references/ref2va-lane.md) and [references/ref2va-chain-lane.md](references/ref2va-chain-lane.md)
   so old citations resolve.
-- `alienpc-hardcore-i2v-director` lives at `C:\Users\derek\.pi\agent\skills\alienpc-hardcore-i2v-director\SKILL.md` on AlienPc and `/home/derekboone/AI/community/skills/alienpc-hardcore-i2v-director/SKILL.md` on the EVO-X3. It owns still-to-intent matching, director cards and package D triage. Prompt rules stay in this
+- `alienpc-hardcore-i2v-director` lives at `~/AI/community/skills/alienpc-hardcore-i2v-director/SKILL.md` on the EVO-X3 (and `~/.pi/agent/skills/alienpc-hardcore-i2v-director/SKILL.md` on AlienPc). It owns still-to-intent matching, director cards and package D triage. Prompt rules stay in this
   file (R16–R23b, R29a); do not restate them there.
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
 - `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts.
