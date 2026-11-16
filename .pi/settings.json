@@ -26,7 +26,7 @@
   ],
   "defaultProvider": "x3-local",
   "defaultModel": "flash-next",
-  "defaultThinkingLevel": "off",
+  "defaultThinkingLevel": "medium",
   "thinkingBudgets": {
     "minimal": 512,
     "low": 1024,
