@@ -1,9 +1,21 @@
-# Render Pi Session Guide (`/home/derekboone/AI/render/RUN_ME.md`)
-Last Updated: 2026-11-14
+# Render Pi Session Guide (`~/AI/render/RUN_ME.md`)
+Last Updated: 2026-11-16
 
-Quickstart for running the H3 writer pipeline from `/home/derekboone/AI/render` on AlienPc.
+Quickstart for running the H3 writer pipeline from `~/AI/render` (EVO-X3 Linux and AlienPc Windows).
 
-## 1. Launch `pi` Correctly (Model, CWD, Permissions, Guard)
+## 0. EVO-X3 Section (Linux)
+- **User & launcher**: All Render pi panes run as user `evo` (uid 1001, `/home/evo/AI/render`), launched via `~/AI/render/x3/render-pi.sh` (loads `x3-local/gemma4-heretic`, `--thinking medium`, stripped extensions/skills, `~/AI/render/AGENTS.md`):
+  ```bash
+  sudo -n -u evo env XDG_RUNTIME_DIR=/run/user/1001 HOME=/home/evo PATH=/home/evo/.local/bin:/usr/bin bash /home/evo/AI/render/x3/render-pi.sh
+  ```
+- **Python venv**: Use `/home/evo/AI/render/x3/.venv/bin/python3` (`~/AI/render/x3/.venv/bin/python3`); do not call bare `/usr/bin/python3` or Windows `.venv/Scripts/python.exe`.
+- **Dry build & remote queueing**: `render_writer_pipeline.py` and `submit_parody_run.py` are dry by default (`--queue` is refused on Linux). Paste `prompt.txt` to Derrick; only after his explicit yes (and confirming AlienPc's GPU/lease is free), queue remotely over Tailscale Serve `https://alienpc.tailf242b2.ts.net:8446`:
+  ```bash
+  bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick [--dry-run]
+  ```
+- **GPU lock & stills**: `~/AI/locks/gpu-render.lock` (`flock`) is only a local X3 submitter lock — AlienPc's `C:\AI\locks\gpu-render.lock` is invisible from the X3. Pick stills from `~/AI/render/_inputs` or `~/AI/render/stills/approved_characters/POOL`; PixlStash `vault.db` is not on the X3, so pass `--character`/`--names`. Full X3 details: `~/AI/render/x3/README-X3.md`.
+
+## 1. Launch `pi` Correctly (AlienPc Reference; Model, CWD, Permissions, Guard)
 - **Working directory**: `/home/derekboone/AI/render` (reads `/home/derekboone/AI/render/AGENTS.md` and `.pi\agent\pi-permissions.jsonc`).
 - **Model override (mandatory)**: `C:\Users\derek\.pi\agent\settings.json` defaults to `coding_swift15_iq3s_esp`. **Never** run Render chats on that coding default. Always pass Gemma 4 26B A4B Heretic on PolyStrata (`gemma4_heretic_poly_think`, `--thinking medium`):
   ```powershell
