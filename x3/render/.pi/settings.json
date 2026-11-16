@@ -39,6 +39,11 @@
     "-~/AI/fleet-brain/20_skills/current/tech-deals-watch",
     "-~/AI/fleet-brain/20_skills/current/imagine-dump-ops",
     "-~/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
+    "-~/AI/fleet-brain/20_skills/current/h3-hc-render",
+    "-~/AI/fleet-brain/20_skills/current/h3-max-ref2va-prompt",
+    "-~/AI/fleet-brain/20_skills/current/h3-parody-identity",
+    "-~/AI/fleet-brain/20_skills/current/h3-prompting",
+    "-~/AI/fleet-brain/20_skills/current/video-render",
     "-~/AI/community/agent-shared/skills/google-voice-texts"
   ],
   "prompts": [
