@@ -76,17 +76,19 @@ def test_strips_dials_policy_selfgrading_absent_refs_music():
     p, rep = build()
     low = p.lower()
     for bad in ("seed", "768x1344", "243 frames", "beta7", "age-play", "minors", "likeness", "adherence",
-                "respected", "<video 1>", "synth", "non_diegetic_music", "diegetic sound:", "no cuts", "minimaxh3_"):
+                "respected", "<video 1>", "diegetic sound:", "no cuts", "minimaxh3_"):
         assert bad not in low, bad
+    assert "non_diegetic_music:" in low and any("non_diegetic_music" in w for w in rep["warnings"])
     assert any("duplicate detailed_description" in s for s in rep["stripped"])
     assert "duplicate copy" not in p
 
 
 def test_sound_header_becomes_plain_end_sentences():
-    p, _ = build()
+    p, rep = build()
     desc = p.split("detailed_description:\n", 1)[1]
-    assert desc.rstrip().endswith("Skin slaps on skin.")
+    assert "Skin slaps on skin." in desc
     assert "The mattress creaks with each thrust." in desc
+    assert "non_diegetic_music:" in desc and any("non_diegetic_music" in w for w in rep["warnings"])
 
 
 def test_transition_words_removed():
@@ -100,7 +102,7 @@ def test_speech_converted_to_d_with_oc_form_and_capped():
     p, _ = build()
     lines = re.findall(r"<d>\[English\] (.*?)</d>", p)
     assert "Fuck, harder, daddy." in lines and "Take it." in lines
-    assert len(lines) == 3  # S1 capped at 2 lines, S2 has 1
+    assert len(lines) == 5  # U52: convert_speech keeps all spoken lines (no silent/cap drops)
     assert '"' not in re.sub(r"<d>.*?</d>", "", p.split("detailed_description:")[1])
     assert "(S1) says in a low, warm adult woman's voice, <d>" in p
     assert "(S2) says in a contrasting deep, steady adult man's voice, <d>" in p
@@ -151,8 +153,11 @@ def test_consistency_gate_facing_and_surface():
 def test_build_writer_request_sets_graph_fields():
     g0 = {"c0": {"inputs": {"prompt": "old", "length": 124, "width": 1, "height": 1}},
           "noise": {"inputs": {"noise_seed": 1}}, "save": {"inputs": {"filename_prefix": "x"}}, "other": {"inputs": {}}}
-    g, prompt, _ = br.build_writer_request(g0, RAW, dict(CAST, still_read=BED_READ), prefix="community/t/F_01")
-    assert g["c0"]["inputs"]["prompt"] == prompt.strip()
+    with pytest.raises(br.WriterNotReady, match="minor"):
+        br.build_writer_request(g0, RAW, dict(CAST, still_read=BED_READ), prefix="community/t/F_01")
+    clean_raw = RAW.replace("No minors, no real-person likeness.", "Adult scene.")
+    g, prompt, _ = br.build_writer_request(g0, clean_raw, dict(CAST, still_read=BED_READ), prefix="community/t/F_01")
+    assert g["c0"]["inputs"]["prompt"] == clean_raw.strip() == prompt.strip()
     assert (g["c0"]["inputs"]["length"], g["c0"]["inputs"]["width"], g["c0"]["inputs"]["height"]) == (243, 768, 1344)
     assert g["noise"]["inputs"]["noise_seed"] == 51083601
     assert g["save"]["inputs"]["filename_prefix"] == "community/t/F_01"
@@ -259,7 +264,7 @@ def test_fix3_cap_drops_only_the_surplus_line():
            "He thrusts deep. (S1) says in a voice: <d>[English] One.</d> (S1) says in a voice: <d>[English] Two.</d> "
            "Her hips rise to meet him, and (S1) says in a voice: <d>[English] Three.</d> Her thighs shake.")
     p, _ = br.finalize_writer_prompt(raw, CAST)
-    assert re.findall(r"<d>\[English\] (.*?)</d>", p) == ["One.", "Two."]
+    assert re.findall(r"<d>\[English\] (.*?)</d>", p) == ["One.", "Two.", "Three."]
     assert "Her hips rise to meet him" in p and "Her thighs shake." in p
 
 
@@ -374,7 +379,7 @@ def test_speech_budget_drops_whole_lines_from_the_end_with_reason():
     raw = HDR + ("He thrusts deep. (S1) says in a voice: <d>[English] Use my cunt and go deeper right now, daddy.</d> "
                  "(S2) says in a voice: <d>[English] Take every inch of it and do not stop moving.</d> Her thighs shake.")
     p, rep = br.finalize_writer_prompt(raw, _cast(clip_seconds=6))  # 15-word budget
-    assert len(rep["speech"]["dropped"]) == 1 and "budget" in rep["speech"]["dropped"][0]["reason"]
+    assert len(rep["speech"]["dropped"]) == 0 and rep["speech"]["kept"] == 2
     assert "Her thighs shake." in p
 
 
@@ -418,7 +423,7 @@ def test_repair_loop_caps_at_two_rounds_and_build_request_uses_it():
     assert len(calls) == 2 and len(log["rounds"]) == 2 and log["remaining"][0]["code"] == "P1"
     base = {"c0": {"inputs": {"prompt": "", "length": 243, "width": 1, "height": 1}}, "noise": {"inputs": {"noise_seed": 0}},
             "save": {"inputs": {"filename_prefix": ""}}}
-    g, prompt, rep = br.build_writer_request(base, raw, _cast(still_read=BED_READ), "x", frames=243, strict=False,
+    g, prompt, rep = br.build_writer_request(base, raw, _cast(still_read=BED_READ), "x", frames=243, strict=True,
                                              writer=lambda m: re.sub(r"(?s).*?\[(\d+)\].*", r"[\1] She arches on the sheets.", m))
     assert rep["repair"]["rounds"][0]["accepted"] and "She arches on the sheets." in prompt and rep["lint"] == []
 
@@ -951,14 +956,19 @@ def test_dynsafe_opener_list_swaps_only_the_noun_phrase():
 def test_dynsafe_act_false_minor_and_unfixed_conflict_are_not_ready():
     g0 = {"c0": {"inputs": {}}, "noise": {"inputs": {}}, "save": {"inputs": {}}}
     tame = STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> shows. She smiles at him."
+    # Passthrough default does NOT block on act:false; strict=True still raises it
+    _, _, tame_rep = br.build_writer_request(g0, tame, _stage_cast(), prefix="x")
+    assert tame_rep["passthrough"] is True
     with pytest.raises(br.WriterNotReady, match="act:false"):
-        br.build_writer_request(g0, tame, _stage_cast(), prefix="x")
+        br.build_writer_request(g0, tame, _stage_cast(), prefix="x", strict=True)
     minor = STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> shows. She lowers onto her back. He thrusts deep. (S1) says, <d>[English] Not a child.</d>"
+    with pytest.raises(br.WriterNotReady, match="minor"):
+        br.build_writer_request(g0, minor, _stage_cast(), prefix="x")
     with pytest.raises(br.WriterPromptError, match="minor descriptor"):
         br.finalize_writer_prompt(minor, _stage_cast())
     bed = STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> shows. She lowers onto her back on the mattress. He thrusts deep."
     with pytest.raises(br.WriterNotReady, match="unfixed after 2 writer-repair rounds"):
-        br.build_writer_request(g0, bed, _stage_cast(), prefix="x", writer=lambda m: "nothing useful")
+        br.build_writer_request(g0, bed, _stage_cast(), prefix="x", strict=True, writer=lambda m: "nothing useful")
 
 
 # --- dynsafe production hook: submit_parody_run.submit_writer_run (dry run only; nothing is queued) ------------------
@@ -1004,7 +1014,11 @@ def test_hook_refusal_retry_then_not_ready(tmp_path):
     calls = []
     res = spr.submit_writer_run(lambda: calls.append(1) or (F01_REFUSAL, 158), _oc_graph(), tmp_path / "r3", ASK, "missionary",
                                 still_read=POLE_READ, dry_run=True)
-    assert res["status"] == "NOT_READY" and len(calls) == 2 and "refusal phrase" in res["reason"]
+    assert res["status"] == "NOT_READY" and len(calls) == 1 and "refusal phrase" in res["reason"]
+    calls.clear()
+    res_s = spr.submit_writer_run(lambda: calls.append(1) or (F01_REFUSAL, 158), _oc_graph(), tmp_path / "r3_strict", ASK, "missionary",
+                                  still_read=POLE_READ, dry_run=True, strict=True)
+    assert res_s["status"] == "NOT_READY" and len(calls) == 2 and "refusal phrase" in res_s["reason"]
 
 
 def test_hook_ready_dry_run_writes_prompt_and_graph(tmp_path):
@@ -1092,7 +1106,7 @@ def test_hook_packed_beats_not_ready_writes_split_briefs_and_queues_nothing(tmp_
     import submit_parody_run as spr
     raw = (STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> shows. She takes off the black mesh strappy bra "
            "top and drops it on the stage floor. She lowers onto her back on the stage floor. He enters her and thrusts deep.")
-    res = spr.submit_writer_run(raw, _oc_graph(), tmp_path / "r5", ASK, "missionary", still_read=POLE_READ, dry_run=True)
+    res = spr.submit_writer_run(raw, _oc_graph(), tmp_path / "r5", ASK, "missionary", still_read=POLE_READ, dry_run=True, strict=True)
     assert res["status"] == "NOT_READY" and "packed beats" in res["reason"] and not res["submitted"]
     split = _json.loads((tmp_path / "r5" / "split_briefs.json").read_text(encoding="utf-8"))["split"]
     assert split[0].startswith("beat 1") and split[1].startswith("beat 2")
@@ -1112,8 +1126,11 @@ def test_oral_s1_line_on_the_oral_beat_is_not_ready_and_never_deleted():
     p, rep = br.finalize_writer_prompt(raw, c, strict=False)
     assert "you taste so good" in p  # flagged, not silently deleted
     assert any(i["code"] == "D1" for i in br.lint_writer_prompt(raw, c)[0])  # sent back to the writer
+    # Passthrough default logs warning without blocking; strict=True raises D1
+    _, _, rep_pass = br.build_writer_request({"c0": {"inputs": {}}, "noise": {"inputs": {}}, "save": {"inputs": {}}}, raw, c, prefix="x")
+    assert rep_pass["passthrough"] is True
     with pytest.raises(br.WriterPromptError, match="D1"):
-        br.build_writer_request({"c0": {"inputs": {}}, "noise": {"inputs": {}}, "save": {"inputs": {}}}, raw, c, prefix="x")
+        br.build_writer_request({"c0": {"inputs": {}}, "noise": {"inputs": {}}, "save": {"inputs": {}}}, raw, c, prefix="x", strict=True)
 
 
 def test_oral_s2_may_speak_and_her_line_after_she_pulls_off_is_allowed():
@@ -1204,7 +1221,9 @@ def test_soundscape_and_music_headers_flagged_sound_text_kept_verbatim():
     codes = [f["code"] for f in rep["flags"]]
     assert "S6" in codes and "M6" in codes
     assert "Wet impacts land on every stroke and her moans break against the stage floor." in p  # not rewritten
-    assert "overall_soundscape" not in p and "non_diegetic_music" not in p  # the builder adds no such header
+    assert "overall_soundscape:" in p and "non_diegetic_music:" in p  # U52: headers not silently stripped
+    assert any("! WARNING" in w and "overall_soundscape" in w for w in rep["warnings"])
+    assert any("! WARNING" in w and "non_diegetic_music" in w for w in rep["warnings"])
     raw2 = STAGE_HDR + "She lowers onto her back on the stage floor. He thrusts deep while music plays loud. Her moans rise."
     _, rep2 = br.finalize_writer_prompt(raw2, c, strict=False)
     assert any(f["code"] == "M7" for f in rep2["flags"])
@@ -1316,8 +1335,11 @@ def test_w5_credits_slides_aside_and_to_one_side():
 
 def test_frs16_s2_hook_w5_not_ready_nothing_built(tmp_path):
     import submit_parody_run as spr
+    res_pass = spr.submit_writer_run(GOOD, _oc_graph(), tmp_path / "w5_pass", ASK, "missionary", still_read=POLE_READ,
+                                     still_image="community/oc_poolblonde_stage.png", dry_run=True)
+    assert res_pass["status"] == "READY"
     res = spr.submit_writer_run(GOOD, _oc_graph(), tmp_path / "w5", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png", dry_run=True)
+                                still_image="community/oc_poolblonde_stage.png", dry_run=True, strict=True)
     assert res["status"] == "NOT_READY" and "W5" in res["reason"] and not res["submitted"]
     assert not (tmp_path / "w5" / "clip").exists() and (tmp_path / "w5" / "clip_NOT_READY.txt").exists()
 

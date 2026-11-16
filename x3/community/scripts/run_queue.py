@@ -419,10 +419,17 @@ def graph_expect(g):
 
     KEEP Lokken two-pass (b2): c0 is 384x672 then MinimaxH3LatentUpscaler3D mode.scale=2.0 -> final
     768x1344. Multiply by any LatentUpscaler3D scale so OBJECTIVE matches the saved mp4 (FG U5)."""
-    n = next((x for x in (g or {}).values() if x.get("class_type") == "MiniMaxH3ReferenceToVideo"), None)
+    n = None
+    for _ct in ("MiniMaxH3ReferenceToVideo", "MiniMaxH3ImageToVideo", "EmptyMiniMaxH3LatentAV"):
+        n = next((x for x in (g or {}).values() if x.get("class_type") == _ct), None)
+        if n is not None:
+            break
     i = (n or {}).get("inputs", {})
     num = lambda v: int(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
     f, w, h = num(i.get("length")), num(i.get("width")), num(i.get("height"))
+    if f is not None and f >= 1:
+        while f % 17 != 5:
+            f += 1
     # (c) 2026-11-06 brief t224x214 (Derrick): a continuation graph's truth is the CUMULATIVE latent, not the
     # first beat. Each MiniMaxH3GuidedContinuationWindow adds extension_frames visible frames (its 22-frame
     # overlap is hidden context and is trimmed by MiniMaxH3AppendContinuation), so OBJECTIVE must expect

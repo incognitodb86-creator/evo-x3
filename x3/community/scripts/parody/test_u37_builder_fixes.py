@@ -94,8 +94,9 @@ def test_pipeline_cli_rejects_relative_run_dir(tmp_path, monkeypatch, capsys):
 def test_wp_lint_makes_quiet_rewrites_hard_failures(snippet, code):
     bad = twp.GOOD_SEX.replace("At first, ", f"At first, {snippet}")
     res = wp_lint.lint(twp.full(bad), twp.ctx())
-    assert code in res["hard"], (snippet, res["issues"])
-    assert not res["pass"]
+    assert code in [i["code"] for i in res["issues"]], (snippet, res["issues"])
+    assert code not in res["hard"], (snippet, res["hard"])
+    assert res["pass"]
 
 
 def test_allowed_throat_and_negatives_inside_dialogue_still_pass():
@@ -146,9 +147,10 @@ def test_wp_lint_catches_enters_her_mouth_oral_silence_and_deep_in_her_oral_cont
         "(S1) says in a low voice, <d>[English] Look up at me.</d>",
     )
     res = wp_lint.lint(twp.full(bad, "oral"), twp.ctx("oral", "blowjob"))
-    assert "oral_silence" in res["hard"], res["issues"]
-    assert "oral_contact" in res["hard"], res["issues"]
-    assert not res["pass"]
+    codes = [i["code"] for i in res["issues"]]
+    assert "oral_silence" in codes and "oral_contact" in codes, res["issues"]
+    assert "oral_silence" not in res["hard"] and "oral_contact" not in res["hard"]
+    assert res["pass"]
 
 
 def test_pixlstash_lookup_uses_merged_vault_only_and_skips_if_token_absent(tmp_path, monkeypatch):

@@ -292,7 +292,7 @@ BEAT_SCHEMA_TALK = {
         "anchor": BEAT_SCHEMA_SEX["properties"]["anchor"],
         "onset": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
         "development": {"type": "object", "required": ["line_topics", "sound"],
-                        "properties": {"line_topics": {"type": "array", "minItems": 2, "maxItems": 3,
+                        "properties": {"line_topics": {"type": "array", "minItems": 3, "maxItems": 4,
                                                        "items": {"type": "string"}},
                                        "sound": {"type": "string"}}},
         "result": {"type": "object", "required": ["action", "sound"],
@@ -587,6 +587,7 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
         lines.append("SCALE: (S2) is a giant adult man, about twice her height; say that once in his definition and keep the anchor.")
     if re.search(r"(?i)\boversized|massive oversized", ask_l):
         lines.append("SCALE: name the oversized anatomy once with a measurable size, slow entry, and a firm grip.")
+    lines.append("AUDIO (R7 / 10Eros-Max beta7): write 1-3 plain diegetic sound sentences at the end of detailed_description; never write overall_soundscape: or non_diegetic_music: headers.")
     lines.append("Never write 'seats himself'; land the pose in (S1)'s own words.")
     surf_noun = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
     if slots.get("surface_height") == "waist" and kind in ("sex", "transition") and act.get("id") in ("missionary", "mf_anal"):
@@ -664,7 +665,7 @@ def prose_messages(sysprompt: str, brief: str, card: Optional[Dict[str, Any]], k
             "- A sentence that begins 'At first, ' with the still's exact pose, on the still's surface.\n"
             "- " + mode(kind)["onset_hint"] + req +
             "- A sentence that begins 'By the end, ' with the end state, the motion still going.\n"
-            "- One to three plain sound sentences tied to the action.\n"
+            "- One to three plain diegetic sound sentences at the end tied to the action (never write overall_soundscape: or non_diegetic_music: headers).\n"
             "Write every spoken line fresh in this paragraph from the card's line_topics (one <d> pair per line, no quotes inside it). "
             "Dialogue format: (S2) says in a <short voice> voice, <d>[English] words</d>. Write every sentence in your own words; "
             "copy no example phrase from the instructions. Plain text, one paragraph, no header, no Markdown.")
@@ -1120,34 +1121,8 @@ MATTE_SKIN = "damp skin with a soft natural sheen and visible pores"
 
 
 def clean_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
-    """acceptance-2 item 9: 'unseen' floor -> 'the floor'; shiny skin words -> the dry-matte wording. Pipeline data only."""
-    changed: List[str] = []
-    rd = d.get("read") if isinstance(d.get("read"), dict) else d
-
-    def fix(v: Any, key: str) -> Any:
-        if isinstance(v, str):
-            nv = v
-            if key == "floor" and re.fullmatch(r"(?i)\s*(?:unseen|not visible|unknown|none|n/?a|out of frame)\s*", v):
-                nv = "the floor"
-            if _SHINE_RE.search(nv):
-                nv = re.sub(r"(?i)\bher skin (?=glisten)", "", nv)
-                nv = _SHINE_RE.sub(MATTE_SKIN, nv, count=1)
-                nv = _SHINE_RE.sub("", nv)  # #1: never 'damp ... damp'
-                nv = re.sub(r"\s*,\s*(?:,\s*)+", ", ", re.sub(r"\b(?:wet|damp),\s*(?=,|$)", "", nv)).strip(" ,")
-            if nv != v:
-                changed.append(f"{key}: {v[:60]} -> {nv[:60]}")
-            return nv
-        if isinstance(v, dict):
-            return {k: fix(x, k) for k, x in v.items()}
-        if isinstance(v, list):
-            return [fix(x, key) for x in v]
-        return v
-    new = fix(rd, "read")
-    if rd is d:
-        return new, changed
-    out = dict(d)
-    out["read"] = new
-    return out, changed
+    """U52: keep vision still captions verbatim without mutating words."""
+    return dict(d), []
 
 
 def strip_male_solo_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
@@ -1402,10 +1377,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             route = dict(route, position="standing_mf", act_id="standing_mf",
                          warnings=list(route["warnings"]) + [{"warn": "waist_high_reroute", "from": "doggy", "to": "standing_mf", "surface": _sf}])
         elif surface_height(_sf) == "waist" and route["act_id"] in ("cowgirl", "reverse_cowgirl"):
-            # #5: riding on a waist-high top is NOT_READY (surface_mismatch), not a warning
-            result.update(status="NOT_READY", not_ready_reason=f"surface_mismatch: {route['act_id']} on a waist-high {re.sub(r'(?i)^(?:the|a|an)\s+', '', _sf)}; "
-                                                               "use a still with a bed, couch or floor, or a standing act")
-            raise _Stop()
+            _surf_label = re.sub(r"(?i)^(?:the|a|an)\s+", "", _sf)
+            result["warnings"].append(f"surface_mismatch: {route['act_id']} on a waist-high {_surf_label}")
+            log("surface_mismatch_warn", {"run": run_id, "act_id": route["act_id"], "surface": _sf})
         if route["position"] != position:
             log("mode_fallback", {"run": run_id, "position": position, "chosen": route["position"]})
         position, kind, overlays = route["position"], route["mode"], route["overlays"]
@@ -1430,11 +1404,15 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         if is_continue and scene_prev:
             _inh_pose = str(((slots.get("inherited") or {}).get("pose")) or "").strip()
             if not _inh_pose or _inh_pose.lower() in ("none", "null", "-", "the previous clip's end pose"):
-                result.update(status="NOT_READY", not_ready_reason="continued clip missing inherited ending_state.pose")
-                raise _Stop()
+                result["warnings"].append("missing_inherited_ending_state_pose")
+                log("missing_ending_state_pose_warn", {"run": run_id})
         _explicit_frames = bool(job.get("frames"))
         if _explicit_frames:
-            clip_frames = int(job["frames"])
+            try:
+                clip_frames = br.align_h3_frames(int(job["frames"]))
+            except ValueError as e:
+                result.update(status="NOT_READY", not_ready_reason=str(e))
+                raise _Stop()
         elif kind == "talk":
             clip_frames = br.snap_h3_frames(8.0)
         else:
@@ -1594,7 +1572,14 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 card["end_state"]["pose"] = (f"standing at the edge of the {_end_surf}, bent forward at the hips, "
                                              "forearms and chest on it, weight on both feet, (S2) standing behind her")
             wp_state.atomic_write(run_dir / "beat_card.json", json.dumps(card, indent=2, ensure_ascii=False))
-        # 4 prose x N
+        def _materialise_writer_text(raw_text: str) -> Tuple[str, str]:
+            t = raw_text or ""
+            if re.search(r"(?im)^\s*(?:subject_definitions|summary|retention_analysis|detailed_description|integrated_multimodal_description)\s*:", t):
+                return t, wp_lint.get_dd(t)
+            dd_only = t.strip()
+            return assemble_output(dd_only, card, slots, bodies, kind), dd_only
+
+        # 4 prose x N (verbatim writer output; no clean_prose/normalize_prose rewriting)
         n = int(cfg.get("n_candidates", 3))
         cands: Dict[str, Dict[str, Any]] = {}
         for k in range(1, n + 1):
@@ -1602,42 +1587,26 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             raw = client.chat(prose_messages(sysprompt, brief + f"\nLINE ANGLE for this draft: {angle}", card, kind, overlays),
                               sampler, seed_for(run_id, ask, k),
                               cfg.get("prose_max_tokens", 1100), purpose=f"prose_{k}")
-            dd = normalize_prose(clean_prose(raw), kind, slots)
-            full = assemble_output(dd, card, slots, bodies, kind)
+            full, dd = _materialise_writer_text(raw)
             wp_state.atomic_write(run_dir / f"cand_{k}.txt", full)
             lr = wp_lint.lint(full, lint_ctx)
             wp_state.atomic_write(run_dir / f"lint_{k}.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands[f"cand_{k}"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, k)}
-        # 6 single rewrite of the best failing candidate
+        # 6 opt-in single rewrite (--fix-once only; default off per U52)
+        fix_once = bool(job.get("fix_once"))
+        fixed_once = False
         best_name = max(cands, key=lambda c: cands[c]["lint"]["score"])
-        if not any(c["lint"]["pass"] for c in cands.values()):
+        if fix_once and not any(c["lint"]["pass"] for c in cands.values()):
             notes = wp_lint.notes_for_rewrite(cands[best_name]["lint"])
             raw = client.chat(rewrite_messages(sysprompt, brief, card, cands[best_name]["dd"], notes, kind, overlays), sampler,
                               seed_for(run_id, ask, n + 1), cfg.get("prose_max_tokens", 1100), purpose="rewrite")
-            dd = normalize_prose(clean_prose(raw), kind, slots)
-            full = assemble_output(dd, card, slots, bodies, kind)
+            full, dd = _materialise_writer_text(raw)
             wp_state.atomic_write(run_dir / "rewrite.txt", full)
             lr = wp_lint.lint(full, lint_ctx)
             wp_state.atomic_write(run_dir / "lint_rewrite.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands["rewrite"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 1), "notes": notes,
                                 "from": best_name}
-        # 6b acceptance-3: every draft still carries a READY-blocking code -> one more targeted rewrite on those codes only
-        _blk = set((cfg.get("lint") or {}).get("block_ready") or [])
-        if cands and all(set(c["lint"]["hard"]) & _blk for c in cands.values()):
-            src_name = "rewrite" if "rewrite" in cands else best_name
-            src_l = cands[src_name]["lint"]
-            notes = ["FIX THESE FIRST (they block READY): " + "; ".join(i["note"] for i in src_l["issues"] if i["code"] in _blk)]
-            notes += [x for x in wp_lint.notes_for_rewrite(src_l, 3) if x not in notes]
-            raw = client.chat(rewrite_messages(sysprompt, brief, card, cands[src_name]["dd"], notes, kind, overlays), sampler,
-                              seed_for(run_id, ask, n + 3), cfg.get("prose_max_tokens", 1100), purpose="rewrite_block")
-            dd = normalize_prose(clean_prose(raw), kind, slots)
-            full = assemble_output(dd, card, slots, bodies, kind)
-            wp_state.atomic_write(run_dir / "rewrite_block.txt", full)
-            lr = wp_lint.lint(full, lint_ctx)
-            wp_state.atomic_write(run_dir / "lint_rewrite_block.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
-            cands["rewrite_block"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 3), "notes": notes,
-                                      "from": src_name}
-            result["warnings"].append("block_rewrite")
+            fixed_once = True
         # 7 rank and pick
         # Max Architect 2026-11-16 (Derrick t2036u): min_ready_score is reported only; it never keeps a lint-pass draft out of the pool.
         min_score = float(cfg.get("min_ready_score", 60))
@@ -1671,18 +1640,17 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 result["warnings"].append("judge_failed_score_pick")
         chosen = cands[pick]
         wp_state.atomic_write(run_dir / "writer_output.txt", chosen["full"])
-        # 8 build (dry); on NOT_READY one more rewrite from its message, then rebuild once
+        # 8 build (dry); opt-in --fix-once retry on NOT_READY if not already retried
         build = run_build(run_dir, ask, position, still, character, extra=_bx)
         builds = [build]
-        if build["status"] != "READY":
+        if fix_once and not fixed_once and build["status"] != "READY":
             nr = run_dir / "clip_NOT_READY.txt"
             if nr.exists():
                 shutil.move(str(nr), str(run_dir / "clip_NOT_READY_attempt1.txt"))
             notes = ["the builder said: " + str(build["reason"])[:400]] + wp_lint.notes_for_rewrite(chosen["lint"], 4)
             raw = client.chat(rewrite_messages(sysprompt, brief, card, chosen["dd"], notes, kind, overlays), sampler,
                               seed_for(run_id, ask, n + 2), cfg.get("prose_max_tokens", 1100), purpose="rewrite_builder")
-            dd = normalize_prose(clean_prose(raw), kind, slots)
-            full = assemble_output(dd, card, slots, bodies, kind)
+            full, dd = _materialise_writer_text(raw)
             lr = wp_lint.lint(full, lint_ctx)
             wp_state.atomic_write(run_dir / "rewrite_builder.txt", full)
             wp_state.atomic_write(run_dir / "lint_rewrite_builder.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
@@ -1700,7 +1668,16 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         blocking = sorted(set(chosen["lint"]["hard"] or []))
         if float(chosen["lint"].get("score") or 0) < min_score:
             result["warnings"].append("low_score")
-        if status == "READY" and (blocking or not chosen["lint"].get("pass")):
+        # Max Architect 2026-11-16 (Derrick t2070s7558 "Yes, make the checker warn-only"): lint only warns;
+        # only the 18+ safety flags still block.
+        _warn = [h for h in blocking if h not in ("youth_hint", "scale_adult")]
+        if _warn:
+            result["warnings"].append("lint_warn: " + ", ".join(_warn))
+        for _iss in chosen["lint"].get("issues") or []:
+            if _iss.get("code") == "audio_header_beta7":
+                result["warnings"].append(_iss["note"])
+        blocking = [h for h in blocking if h in ("youth_hint", "scale_adult")]
+        if status == "READY" and blocking:
             status = "NOT_READY"
             why = ", ".join(blocking) if blocking else "lint failed"
             build = dict(build, reason="lint hard rule: " + why)
@@ -1804,7 +1781,7 @@ def summary_line(r: Dict[str, Any]) -> str:
          + (f" submitted={r.get('submitted')}" if "submitted" in r else "")
          + (f" lint_fail={r.get('pick_hard')}" if r.get("pick_hard") else ""))
     return (f"{st} run={r.get('run_dir')} {extra} warnings={r.get('warnings')} seconds={r.get('seconds')} "
-            f"pick_json={Path(r.get('run_dir', '.')) / 'pick.json'} queued=False")
+            f"pick_json={Path(r.get('run_dir', '.')) / 'pick.json'} queued={bool(r.get('submitted'))}")
 
 
 def main(argv=None) -> int:
@@ -1830,6 +1807,7 @@ def main(argv=None) -> int:
     ap.add_argument("--shot-count", type=int, default=1, help="B1: shots in a multi clip")
     ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
     ap.add_argument("--config", default=str(CONFIG_PATH))
+    ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
     ap.add_argument("--sampler-arm", help="setup A/B only")
     ap.add_argument("--persona", help="setup persona arm only (current, option1, option2)")
     a = ap.parse_args(argv)
@@ -1861,6 +1839,7 @@ def main(argv=None) -> int:
                      "character": a.character, "scene": a.scene, "continue": a.cont,
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
                      "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode,
+                     "fix_once": bool(a.fix_once),
                      "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []
     for job in jobs:  # one failing clip never blocks the next

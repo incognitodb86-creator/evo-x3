@@ -1281,6 +1281,7 @@ def submit_writer_run(
     size: Optional[str] = None,
     still_mode: str = br.DEFAULT_STILL_MODE,
     yes_derrick: bool = False,
+    strict: bool = False,
 ) -> Dict[str, Any]:
     """Render's production hook for a free-text OC writer prompt: after the writer call, before graph submit.
 
@@ -1317,8 +1318,10 @@ def submit_writer_run(
         return dict(report, run_dir=str(run_dir))
 
     def body() -> Dict[str, Any]:
-        nonlocal raw, still_read, position
+        nonlocal raw, still_read, position, frames
         run_dir.mkdir(parents=True, exist_ok=True)
+        frames = br.align_h3_frames(frames)
+        report["frames"] = frames
         bpath = Path(br.__file__)
         report.update(builder=str(bpath), builder_sha256=hashlib.sha256(bpath.read_bytes()).hexdigest().upper())
         graph0 = json.loads(Path(base_graph).read_text(encoding="utf-8")) if not isinstance(base_graph, dict) else base_graph
@@ -1377,8 +1380,11 @@ def submit_writer_run(
                 report["position"] = position
             if brief.get("not_ready"):
                 _nr = brief["not_ready"]
-                if "still shows" not in _nr or "brief asks for" not in _nr:
-                    return not_ready(_nr)
+                if strict:
+                    if "still shows" not in _nr or "brief asks for" not in _nr:
+                        return not_ready(_nr)
+                else:
+                    report.setdefault("warnings", []).append(_nr)
             report["scene_addenda"] = {
                 k: brief.get(k) for k in (
                     "act_id", "partner_type", "states", "camera_kind", "offscreen_voice",
@@ -1420,17 +1426,21 @@ def submit_writer_run(
                 cast["refmod_trigger"] = str(attach["trigger"]).strip()
             report["still_read"] = still_read
             if callable(raw):
-                raw, gate_log = br.gated_write(raw, cast=dict(cast), ask=ask)
-                report["writer_gate"] = gate_log
-                if raw is None:
-                    return not_ready("writer gate failed twice: " + "; ".join(
-                        r for a in gate_log["attempts"] for r in a["reasons"]))
+                if strict:
+                    raw, gate_log = br.gated_write(raw, cast=dict(cast), ask=ask)
+                    report["writer_gate"] = gate_log
+                    if raw is None:
+                        return not_ready("writer gate failed twice: " + "; ".join(
+                            r for a in gate_log["attempts"] for r in a["reasons"]))
+                else:
+                    _out = raw()
+                    raw = _out[0] if isinstance(_out, tuple) else _out
             if not raw or not str(raw).strip():
                 return not_ready("no writer output")
             (run_dir / "writer_output.txt").write_text(str(raw), encoding="utf-8")
             g, prompt, rep = br.build_writer_request(graph0, str(raw), cast, prefix=f"community/{run_dir.name}/{tag}", seed=seed,
                                                      frames=frames, width=canvas_w, height=canvas_h,
-                                                     strict=True, writer=writer, still_mode=mode)
+                                                     strict=strict, writer=writer, still_mode=mode)
         except br.WriterPromptError as e:
             diag = None
             drep = None
@@ -1465,8 +1475,10 @@ def submit_writer_run(
         if "img_1" not in g:
             return not_ready("base graph has no img_1 start-image node for <Picture 1>")
         g["img_1"]["inputs"]["image"] = (_normalize_comfy_still(still_image) or still_image).strip()
-        report.update(status="READY", chars=len(prompt), prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest().upper(),
-                      build=rep)
+        if isinstance(rep, dict) and rep.get("warnings"):
+            report.setdefault("warnings", []).extend(rep["warnings"])
+        report.update(status="READY", frames=g["c0"]["inputs"]["length"], chars=len(prompt),
+                      prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest().upper(), build=rep)
         (run_dir / f"{tag}_NOT_READY.txt").unlink(missing_ok=True)
         jd = run_dir / tag
         jd.mkdir(parents=True, exist_ok=True)
@@ -1585,6 +1597,8 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--keep-comfy-process", action="store_true",
                     help="With --queue: run_queue.py skips only the llama-swap unload of comfyui_auto at batch "
                          "close, so the next clip in a chain does not pay the ~40 s process wake")
+    ap.add_argument("--strict", action="store_true",
+                    help="Run legacy strict writer-prompt rewriter/gate (off by default; default is advisory passthrough)")
     try:
         a = ap.parse_args(argv)
     except SystemExit:
@@ -1643,7 +1657,8 @@ def _writer_run_cli(argv) -> int:
                               or None, partner_type=(a.partner_type or None), continued=bool(getattr(a, "continued", False)),
                               aspect=(a.aspect or None), size=(a.size or None), still_mode=a.still_mode,
                               **({"frames": br.validate_single_clip_frames(a.frames)} if a.frames else {}),
-                              **({"keep_comfy_process": True} if a.keep_comfy_process else {}))
+                              **({"keep_comfy_process": True} if a.keep_comfy_process else {}),
+                              **({"strict": True} if getattr(a, "strict", False) else {}))
     except Exception as e:
         print(f"NOT_READY submitted=False hook error: {type(e).__name__}: {e}")
         return 3
