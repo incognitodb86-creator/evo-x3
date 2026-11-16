@@ -45,9 +45,10 @@ import wp_lint  # noqa: E402
 import wp_state  # noqa: E402
 from wp_llm import Client, WriterDown  # noqa: E402
 
-PIPE_DIR = Path(os.environ.get("WP_HOME", r"/home/derekboone/AI/render/writer_pipeline"))
+_AI_ROOT = Path(__file__).resolve().parents[3]
+PIPE_DIR = Path(os.environ.get("WP_HOME", str(_AI_ROOT / "render" / "writer_pipeline")))
 CONFIG_PATH = PIPE_DIR / "config.yaml"
-RUNS_ROOT = Path(r"/home/derekboone/AI/community/runs")
+RUNS_ROOT = _AI_ROOT / "community" / "runs"
 SUBMIT_PY = PARODY_DIR / "submit_parody_run.py"
 VERSION = "wp-2026-11-13.1"
 
@@ -1107,7 +1108,7 @@ def kept_lines(full: str, rep: Dict[str, Any]) -> List[str]:
 def auto_still(cfg: Dict[str, Any], run_id: str, ask: str) -> str:
     pool = []
     for g in cfg.get("still_pool") or []:
-        pool += [p for p in glob.glob(g, recursive=True) if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
+        pool += [p for p in glob.glob(os.path.expanduser(g), recursive=True) if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
     if not pool:
         raise RuntimeError("still auto: the still pool is empty")
     return random.Random(seed_for(run_id, ask, 7)).choice(sorted(pool))
@@ -1349,11 +1350,21 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             if not list(prev_run.glob("*.mp4")):
                 result["warnings"] = list(result.get("warnings") or []) + ["chain_unverified"]
         still = str(job.get("still") or "").strip()
-        if not still and not is_continue:  # guard 2026-11-15: a missing --still used to fall back to a random pool still
+        if not still and is_continue:
+            if scene_prev and scene_prev.get("still"):
+                still = str(scene_prev["still"]).strip()
+            elif prev_run and (prev_run / "pick.json").is_file():
+                try:
+                    still = str(json.loads((prev_run / "pick.json").read_text(encoding="utf-8")).get("still") or "").strip()
+                except Exception:
+                    still = ""
+        if not still:  # hard fail when --still is missing (never silently fall back to auto)
             result.update(status="NOT_READY", not_ready_reason="start still missing: pass --still '<the start still path>' "
                           "(or --still auto for a pool pick plus a fresh vision read)")
             raise _Stop()
-        still = still or "auto"
+        if still != "auto" and Path(still).is_absolute() and not Path(still).is_file():
+            result.update(status="NOT_READY", not_ready_reason=f"start still file not found: {still}")
+            raise _Stop()
         if still == "auto":
             if job.get("still_read") and not is_continue:
                 result.update(status="NOT_READY", not_ready_reason="start still missing: --still-read was given with "
@@ -1369,6 +1380,17 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 raise _Stop()
             if _warn:
                 result["warnings"] = list(result.get("warnings") or []) + [_warn]
+        _still_mode = br.normalize_still_mode(job.get("still_mode"))
+        _still_size = br.read_still_size(still)
+        _cw, _ch = br.resolve_canvas(job.get("aspect"), job.get("size"), still_size=_still_size)
+        _shape_warn = br.check_still_canvas_shape(
+            _still_size, _cw, _ch, aspect=job.get("aspect"), size=job.get("size"), still_mode=_still_mode,
+        ) if _still_size else None
+        if _shape_warn:
+            print(_shape_warn, file=sys.stderr)
+            result["warnings"] = list(result.get("warnings") or []) + [_shape_warn]
+            log("still_shape_mismatch", {"run": run_id, "warning": _shape_warn, "canvas": [_cw, _ch],
+                                         "still_size": list(_still_size)})
         # 1 still read
         still_read = ensure_still_read(run_dir, still, job.get("still_read"), client, cfg, log)
         # 2b mode router (coverage B0): act + base mode + overlays; fallbacks are logged, never block
@@ -1536,7 +1558,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + (["--s3-in-frame"] if s3_in_frame else []) + \
             (["--shots", "multi"] if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" else []) + \
             (["--continued"] if scene_prev else []) + \
-            (["--inherited-garments", json.dumps(_inh_g, separators=(",", ":"))] if scene_prev and _inh_g else [])
+            (["--inherited-garments", json.dumps(_inh_g, separators=(",", ":"))] if scene_prev and _inh_g else []) + \
+            (["--aspect", str(job["aspect"])] if job.get("aspect") else []) + \
+            (["--size", str(job["size"])] if job.get("size") else []) + \
+            (["--still-mode", str(job["still_mode"])] if job.get("still_mode") else [])
         if card is None and kind == "talk":
             # BTS/talk: never skip the beat card; use a minimal valid card and keep writing
             card = {
@@ -1767,6 +1792,10 @@ def main(argv=None) -> int:
     ap.add_argument("--continue", dest="cont", help="previous run dir this clip continues")
     ap.add_argument("--partner2-still", help="MMF: (S3) reference still (ComfyUI input path, e.g. community/x.jpg)")
     ap.add_argument("--frames", type=int, help="optional frame cap for VRAM (two reference stills)")
+    ap.add_argument("--aspect", default=None, help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square, or auto")
+    ap.add_argument("--size", default=None, help="Explicit canvas WxH (multiples of 32, 256..2048)")
+    ap.add_argument("--still-mode", default=None, choices=list(br.STILL_MODES),
+                    help="How start still is wired: guide (default frame-0 AddGuide) or ref (un-resized c0 reference, not frame-0 pinned)")
     ap.add_argument("--shots", choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
     ap.add_argument("--shot-count", type=int, default=1, help="B1: shots in a multi clip")
     ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
@@ -1789,9 +1818,16 @@ def main(argv=None) -> int:
         if not (a.run_dir and a.ask and a.position):
             print("NOT_READY usage: render_writer_pipeline.py <run_dir> --ask \"...\" --position <act> --still <path|auto> --character FCSydny")
             return 3
+        if not Path(a.run_dir).is_absolute():
+            print(f"NOT_READY run_dir must be an absolute path: {a.run_dir}")
+            return 3
+        if a.cont and not Path(a.cont).is_absolute():
+            print(f"NOT_READY --continue must be an absolute path: {a.cont}")
+            return 3
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
                      "character": a.character, "scene": a.scene, "continue": a.cont,
-                     "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count})
+                     "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
+                     "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode})
     results = []
     for job in jobs:  # one failing clip never blocks the next
         r = run_clip(job, cfg, log, ov)

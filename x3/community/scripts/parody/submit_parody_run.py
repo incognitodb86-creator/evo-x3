@@ -327,6 +327,7 @@ def submit_parody_job(
     beat_new_shots: Optional[Sequence[Any]] = None,
     prequel_to: Optional[Union[str, Path]] = None,
     keep_comfy_process: bool = False,
+    still_mode: str = br.DEFAULT_STILL_MODE,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
     if run_dir_override is not None and not Path(run_dir_override).is_absolute():
@@ -351,9 +352,11 @@ def submit_parody_job(
         raise ValueError(
             f"--seconds {float(seconds):g} is longer than one shot ({_cap_s:.1f}s): pass 2 or more --beat scenes, "
             "one distinct action per beat, or lower --seconds to fit one shot.")
+    still_mode = br.normalize_still_mode(still_mode)
     if frames is not None:
         frames = br.validate_single_clip_frames(frames)
-    width, height = br.resolve_canvas(aspect, size)
+    if size or (aspect and str(aspect).strip().lower() != "auto"):
+        br.resolve_canvas(aspect, size)
 
     cells: Optional[List[Dict[str, Any]]] = None
     beat_specs: Optional[List[Dict[str, Any]]] = None
@@ -414,6 +417,13 @@ def submit_parody_job(
         resolved3 = _resolve(name3, character3, actor3, tone, total_frames, description3)
     valid_images = validate_reference_images(list(images or []), pools=tuple(image_pools) if image_pools else None) \
         if images else []
+    still_size = br.read_still_size(valid_images[0]) if valid_images else None
+    width, height = br.resolve_canvas(aspect, size, still_size=still_size)
+    shape_warning = br.check_still_canvas_shape(
+        still_size, width, height, aspect=aspect, size=size, still_mode=still_mode,
+    ) if valid_images else None
+    if shape_warning:
+        print(shape_warning, file=sys.stderr)
 
     # 2. Plan C2V continuation (single clip never chains; cells are stitched; 2+ beats use native continuation)
     chain_plan = None
@@ -438,7 +448,8 @@ def submit_parody_job(
     common = dict(resolved=resolved, template_path=template_path, width=width, height=height,
                   pronoun=pronoun, end_action=end_action, images=staged, image_role=image_role,
                   resolved2=resolved2, pronoun2=pronoun2, ambience=ambience,
-                  resolved3=resolved3, pronoun3=pronoun3, partner_type2=partner_type2)
+                  resolved3=resolved3, pronoun3=pronoun3, partner_type2=partner_type2,
+                  still_mode=still_mode)
     jobs: List[Dict[str, Any]] = []
     continuation = None
     if cells is None and not is_multi_beat:
@@ -533,7 +544,10 @@ def submit_parody_job(
         "size": f"{width}x{height}",
         "tags": [j["tag"] for j in jobs],
         "images": staged,
+        "still_mode": still_mode,
     }
+    if shape_warning:
+        summary_info["shape_warning"] = shape_warning
     if target_prequel_mp4:
         summary_info["prequel_to"] = str(target_prequel_mp4)
         summary_info["prequel_stitch"] = True
@@ -1083,6 +1097,7 @@ def prepare_writer_base_graph(
     still_image: Optional[str] = None,
     character: Optional[str] = None,
     names: Optional[Sequence[str]] = None,
+    still_mode: str = br.DEFAULT_STILL_MODE,
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Start from the live locked template when the graph is a previous run or has no still, then attach RefMods."""
     still = (still_image or "").strip() or None
@@ -1096,16 +1111,20 @@ def prepare_writer_base_graph(
     blob = " ".join(mods).lower()
     mods_match_keys = bool(keys) and all(k in blob for k in keys)
 
+    mode = br.normalize_still_mode(still_mode)
+
     def _pin_still(g: Dict[str, Any]) -> Dict[str, Any]:
         if not still:
             return g
-        # The locked template has no img_1: inject AddGuide at frame 0. A director graph that
-        # already has img_1 just gets the new still path; do not re-wire add_guide on a test stub.
+        # The locked template has no img_1: inject AddGuide at frame 0 (or c0 ref in ref mode). A director graph that
+        # already has img_1 just gets the new still path; in ref mode it also strips start-still AddGuide and wires c0.
         if "img_1" in g:
             g.setdefault("img_1", {}).setdefault("inputs", {})["image"] = still
+            if mode == "ref":
+                br._wire_ref_mode_start_still(g)
             report["injected_still"] = True
             return g
-        br.inject_reference_images(g, [still], frame_indices=[0])
+        br.inject_reference_images(g, [still], frame_indices=[0], still_mode=mode)
         report["injected_still"] = True
         return g
 
@@ -1186,6 +1205,8 @@ def prepare_writer_base_graph(
 
     if still and "img_1" not in graph:
         graph = _pin_still(graph)
+    elif still and mode == "ref" and "img_1" in graph:
+        br._wire_ref_mode_start_still(graph)
     report["stems"] = [_mod_stem(m) for m in mods]
     report["source"] = "existing"
     return graph, report
@@ -1238,6 +1259,9 @@ def submit_writer_run(
     partner_type: Optional[str] = None,
     continued: bool = False,
     keep_comfy_process: bool = False,
+    aspect: Optional[str] = None,
+    size: Optional[str] = None,
+    still_mode: str = br.DEFAULT_STILL_MODE,
 ) -> Dict[str, Any]:
     """Render's production hook for a free-text OC writer prompt: after the writer call, before graph submit.
 
@@ -1281,9 +1305,11 @@ def submit_writer_run(
         # Max Architect 3, Derrick t1109u: start from the live locked template when the graph still or
         # RefMods belong to a previous run; attach the matching OC RefMod via still path or character INDEX.
         # Do not run approved_characters-only validate_stills on writer stills.
+        mode = br.normalize_still_mode(still_mode)
         still_for_ref = (still_image or still_path or "").strip() or None
+        still_size = br.read_still_size(still_path or still_for_ref)
         graph0, attach = prepare_writer_base_graph(
-            graph0, still_image=still_for_ref, character=character, names=names,
+            graph0, still_image=still_for_ref, character=character, names=names, still_mode=mode,
         )
         report["refmods"] = {k: attach.get(k) for k in ("template", "template_path", "injected_still", "stems", "source", "index", "trigger") if k in attach}
         if attach.get("reason"):
@@ -1292,7 +1318,21 @@ def submit_writer_run(
         if bad:
             return not_ready("; ".join(bad))
         if isinstance(still_for_ref, str) and still_for_ref and "img_1" not in graph0:
-            br.inject_reference_images(graph0, [still_for_ref], frame_indices=[0])
+            br.inject_reference_images(graph0, [still_for_ref], frame_indices=[0], still_mode=mode)
+        c0_in = (graph0.get("c0") or {}).get("inputs") or {}
+        if aspect is not None or size is not None:
+            canvas_w, canvas_h = br.resolve_canvas(aspect, size, still_size=still_size)
+        else:
+            canvas_w = int(c0_in.get("width") or br.DEFAULT_CANVAS[0])
+            canvas_h = int(c0_in.get("height") or br.DEFAULT_CANVAS[1])
+        shape_warning = br.check_still_canvas_shape(
+            still_size, canvas_w, canvas_h, aspect=aspect, size=size, still_mode=mode,
+        ) if still_size else None
+        if shape_warning:
+            print(shape_warning, file=sys.stderr)
+            report["shape_warning"] = shape_warning
+        report["still_mode"] = mode
+        report["canvas"] = [canvas_w, canvas_h]
         if prequel_to:
             target_path = Path(prequel_to).resolve()
             if not target_path.is_file():
@@ -1368,10 +1408,9 @@ def submit_writer_run(
             if not raw or not str(raw).strip():
                 return not_ready("no writer output")
             (run_dir / "writer_output.txt").write_text(str(raw), encoding="utf-8")
-            c0 = graph0["c0"]["inputs"]
             g, prompt, rep = br.build_writer_request(graph0, str(raw), cast, prefix=f"community/{run_dir.name}/{tag}", seed=seed,
-                                                     frames=frames, width=int(c0.get("width") or br.DEFAULT_CANVAS[0]),
-                                                     height=int(c0.get("height") or br.DEFAULT_CANVAS[1]), strict=True, writer=writer)
+                                                     frames=frames, width=canvas_w, height=canvas_h,
+                                                     strict=True, writer=writer, still_mode=mode)
         except br.WriterPromptError as e:
             diag = None
             drep = None
@@ -1389,11 +1428,9 @@ def submit_writer_run(
             # continuation job (beat 1 = 124f default or sized <= 243f, beat 2 = +187f extension, 311f total visible,
             # start still on beat 1 only). Never submit two separate single-clip jobs.
             if drep and br.packed_split_is_safe(drep) and not prequel_to:
-                c0 = graph0["c0"]["inputs"]
                 g, prompt, rep = br.build_writer_continuation_request(
                     graph0, str(raw), cast, prefix=f"community/{run_dir.name}/{tag}", seed=seed,
-                    width=int(c0.get("width") or br.DEFAULT_CANVAS[0]),
-                    height=int(c0.get("height") or br.DEFAULT_CANVAS[1]), drep=drep,
+                    width=canvas_w, height=canvas_h, drep=drep, still_mode=mode,
                 )
                 report["frames"] = rep["total_frames"]
                 report["continuation"] = {k: rep[k] for k in ("mode", "clip_count", "base_frames", "extension_frames",
@@ -1511,6 +1548,10 @@ def _writer_run_cli(argv) -> int:
     ap.add_argument("--s3-look", default=None, help="S3 description, e.g. 'an adult man, thirty years of age, ...'")
     ap.add_argument("--partner2-still", default=None, help="S3 reference still under ComfyUI input (community/x.jpg) or a full path")
     ap.add_argument("--frames", type=int, default=None, help="frame-count cap (VRAM: two reference stills peak near 15.4/16.3 GB)")
+    ap.add_argument("--aspect", default=None, help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square, or auto")
+    ap.add_argument("--size", default=None, help="Explicit canvas WxH (multiples of 32, 256..2048)")
+    ap.add_argument("--still-mode", default=br.DEFAULT_STILL_MODE, choices=list(br.STILL_MODES),
+                    help="How start still is wired: guide (default frame-0 AddGuide) or ref (un-resized c0 reference, not frame-0 pinned)")
     ap.add_argument("--shots", default=None, choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
     ap.add_argument("--partner-type", default=None, choices=["man", "woman", "futa", "none", "non-human", "faceless"])
     ap.add_argument("--queue", action="store_true", help="Actually queue (only when Derrick said to queue)")
@@ -1569,6 +1610,7 @@ def _writer_run_cli(argv) -> int:
                                                   **({"inherited_garments": inh_garments} if isinstance(inh_garments, dict) and inh_garments else {}),
                                                   **({"scene_read": scene_read} if isinstance(scene_read, dict) else {}))
                               or None, partner_type=(a.partner_type or None), continued=bool(getattr(a, "continued", False)),
+                              aspect=(a.aspect or None), size=(a.size or None), still_mode=a.still_mode,
                               **({"frames": br.validate_single_clip_frames(a.frames)} if a.frames else {}),
                               **({"keep_comfy_process": True} if a.keep_comfy_process else {}))
     except Exception as e:
@@ -1594,7 +1636,7 @@ def main(argv=None) -> int:
     parser.add_argument("--seed", type=int, default=51083601, help="Seed")
     parser.add_argument("--frames", type=int, default=None, help="Exact single-clip frames (H3 grid, max 243 on 16 GB)")
     parser.add_argument("--seconds", type=float, help="Length in seconds (single shot up to the measured ceiling of 243 frames / ~10.1s; longer asks require 2+ --beat)")
-    parser.add_argument("--aspect", help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square")
+    parser.add_argument("--aspect", help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square, or auto")
     parser.add_argument("--size", help="Explicit canvas WxH (multiples of 32, 256..2048)")
     parser.add_argument("--camera", help="Camera framing/motion; motion words drop 'Camera locked off'")
     parser.add_argument("--pronoun", default="she", choices=["she", "he", "they"])
@@ -1604,6 +1646,8 @@ def main(argv=None) -> int:
     parser.add_argument("--image-at", action="append", type=br._parse_image_at_arg, default=[],
                         help="Clip time in seconds for each additional --image pin (at least 0.5s apart, mapped to its beat; accept -1 or 'end' for last frame)")
     parser.add_argument("--image-role", default=br.DEFAULT_IMAGE_ROLE, help="What <Picture N> anchors")
+    parser.add_argument("--still-mode", default=br.DEFAULT_STILL_MODE, choices=list(br.STILL_MODES),
+                        help="How start still is wired: guide (default frame-0 AddGuide) or ref (un-resized c0 reference, not frame-0 pinned)")
     parser.add_argument("--prequel-to", help="Existing mp4 to stitch this prequel in front of [prequel, existing]")
     parser.add_argument("--beat", action="append", default=[], help="Scene beat (repeat 2+ for one native continuation graph, not stitched cells)")
     parser.add_argument("--beat-dialogue", action="append", default=[], help="Spoken line per beat")
@@ -1685,6 +1729,7 @@ def main(argv=None) -> int:
         beat_new_shots=args.beat_new_shot,
         prequel_to=args.prequel_to,
         keep_comfy_process=args.keep_comfy_process,
+        still_mode=args.still_mode,
     )
     if args.wait and not args.dry_run:
         r = res.get("resolved") or {}

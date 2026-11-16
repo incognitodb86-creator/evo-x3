@@ -49,6 +49,13 @@ H3_MIN_FRAMES = 56
 SINGLE_CLIP_MAX_FRAMES = 243
 
 # --- U3: canvas presets ----------------------------------------------------------------------
+CANONICAL_ASPECT_PRESETS: Dict[str, Tuple[int, int]] = {
+    "9:16": (768, 1344),
+    "16:9": (1344, 768),
+    "1:1": (1024, 1024),
+    "4:3": (1152, 864),
+    "3:4": (864, 1152),
+}
 ASPECT_PRESETS: Dict[str, Tuple[int, int]] = {
     "9:16": (768, 1344), "portrait": (768, 1344),
     "16:9": (1344, 768), "landscape": (1344, 768), "widescreen": (1344, 768),
@@ -57,6 +64,21 @@ ASPECT_PRESETS: Dict[str, Tuple[int, int]] = {
     "3:4": (864, 1152),
 }
 DEFAULT_CANVAS = (768, 1344)
+
+STILL_MODES = ("guide", "ref")
+DEFAULT_STILL_MODE = "guide"
+REF_MODE_PICTURE1_LEAD = (
+    "<Picture 1> is the correct scene identity. All lighting, lighting hue, color palette, visual output style, "
+    "camera angle, camera focal length, camera orbit, camera framing, background, background objects, and characters "
+    "fully preserved from <Picture 1>."
+)
+
+
+def normalize_still_mode(still_mode: Optional[str]) -> str:
+    mode = (still_mode or DEFAULT_STILL_MODE).strip().lower()
+    if mode not in STILL_MODES:
+        raise ValueError(f"--still-mode must be one of {', '.join(STILL_MODES)} (got {still_mode!r})")
+    return mode
 
 # --- U4: camera + pronouns -------------------------------------------------------------------
 DEFAULT_CAMERA = "static medium shot, eye level, 50mm lens, shallow depth of field"
@@ -379,8 +401,51 @@ def continuation_scene(scene: Optional[str], pronoun: Optional[str] = None,
     return f"{lead} {action}"
 
 
-def resolve_canvas(aspect: Optional[str] = None, size: Optional[str] = None) -> Tuple[int, int]:
-    """U3: (width, height) from --size WxH (multiples of 32, 256..2048) or an --aspect preset; default 768x1344."""
+def read_still_size(still_path: Optional[Union[str, Path]]) -> Optional[Tuple[int, int]]:
+    """Read (width, height) from still image metadata using PIL without decoding pixels; None if missing/unreadable."""
+    if not still_path:
+        return None
+    p = Path(str(still_path).strip())
+    if not p.is_file() and not p.is_absolute():
+        alt = COMFY_INPUT_COMMUNITY.parent / p
+        if alt.is_file():
+            p = alt
+    if not p.is_file():
+        return None
+    try:
+        from PIL import Image
+        with Image.open(p) as im:
+            w, h = im.size
+        if w > 0 and h > 0:
+            return int(w), int(h)
+    except Exception:
+        return None
+    return None
+
+
+def closest_aspect_preset(still_w: int, still_h: int) -> Tuple[str, Tuple[int, int]]:
+    """Return (canonical_aspect_name, (width, height)) from CANONICAL_ASPECT_PRESETS closest to still_w/still_h."""
+    if still_w <= 0 or still_h <= 0:
+        return "9:16", DEFAULT_CANVAS
+    ratio = float(still_w) / float(still_h)
+    best_name = "9:16"
+    best_dims = DEFAULT_CANVAS
+    best_dist = float("inf")
+    for name, dims in CANONICAL_ASPECT_PRESETS.items():
+        dist = abs(ratio - (float(dims[0]) / float(dims[1])))
+        if dist < best_dist:
+            best_dist = dist
+            best_name = name
+            best_dims = dims
+    return best_name, best_dims
+
+
+def resolve_canvas(
+    aspect: Optional[str] = None,
+    size: Optional[str] = None,
+    still_size: Optional[Tuple[int, int]] = None,
+) -> Tuple[int, int]:
+    """U3 + U41: (width, height) from --size WxH (multiples of 32, 256..2048), --aspect preset or 'auto'; default 768x1344."""
     if size:
         m = re.fullmatch(r"\s*(\d+)\s*[xX*]\s*(\d+)\s*", str(size))
         if not m:
@@ -392,10 +457,70 @@ def resolve_canvas(aspect: Optional[str] = None, size: Optional[str] = None) -> 
         return w, h
     if aspect:
         key = str(aspect).strip().lower()
+        if key == "auto":
+            if still_size and still_size[0] > 0 and still_size[1] > 0:
+                _, dims = closest_aspect_preset(still_size[0], still_size[1])
+                return dims
+            return DEFAULT_CANVAS
         if key not in ASPECT_PRESETS:
-            raise ValueError(f"unknown --aspect {aspect!r}; choose one of {', '.join(ASPECT_PRESETS)}")
+            raise ValueError(f"unknown --aspect {aspect!r}; choose one of {', '.join(ASPECT_PRESETS)}, auto")
         return ASPECT_PRESETS[key]
     return DEFAULT_CANVAS
+
+
+def check_still_canvas_shape(
+    still_path_or_size: Union[str, Path, Tuple[int, int], None],
+    canvas_w: int,
+    canvas_h: int,
+    *,
+    aspect: Optional[str] = None,
+    size: Optional[str] = None,
+    still_mode: Optional[str] = None,
+) -> Optional[str]:
+    """Warn (never raise) when still aspect ratio differs from canvas aspect ratio by > 5%."""
+    if isinstance(still_path_or_size, tuple) and len(still_path_or_size) == 2:
+        sw, sh = int(still_path_or_size[0]), int(still_path_or_size[1])
+    else:
+        sz = read_still_size(still_path_or_size)
+        if sz is None:
+            return None
+        sw, sh = sz
+    if sw <= 0 or sh <= 0 or canvas_w <= 0 or canvas_h <= 0:
+        return None
+    still_ratio = float(sw) / float(sh)
+    canvas_ratio = float(canvas_w) / float(canvas_h)
+    rel_diff = abs(still_ratio - canvas_ratio) / canvas_ratio
+    if rel_diff <= 0.05:
+        return None
+    suggested_aspect, (pw, ph) = closest_aspect_preset(sw, sh)
+    preset_ratio = float(pw) / float(ph)
+    if abs(still_ratio - preset_ratio) / preset_ratio <= 0.05:
+        preset_note = f"matches {suggested_aspect} preset"
+    else:
+        preset_note = f"closest preset {suggested_aspect}"
+    if size:
+        canvas_src = f"--size {size}"
+    elif aspect:
+        canvas_src = f"--aspect {aspect}"
+    else:
+        canvas_src = "default --aspect 9:16"
+    mode = normalize_still_mode(still_mode)
+    if mode == "ref":
+        return (
+            f"WARNING: still shape mismatch ({rel_diff * 100:.1f}% diff): "
+            f"still is {sw}x{sh} (ratio {still_ratio:.3f}, {preset_note}), "
+            f"canvas is {canvas_w}x{canvas_h} (ratio {canvas_ratio:.3f}, via {canvas_src}). "
+            f"In --still-mode ref, the still is used as an un-resized reference on c0 and is not frame-0 pinned "
+            f"(matching canvas preset: --aspect {suggested_aspect})."
+        )
+    crop_side = "top and bottom" if still_ratio < canvas_ratio else "sides"
+    return (
+        f"WARNING: still shape mismatch ({rel_diff * 100:.1f}% diff): "
+        f"still is {sw}x{sh} (ratio {still_ratio:.3f}, {preset_note}), "
+        f"canvas is {canvas_w}x{canvas_h} (ratio {canvas_ratio:.3f}, via {canvas_src}). "
+        f"MiniMaxH3AddGuide will center-crop the still to the canvas ({crop_side} can be cut off); "
+        f"pass --aspect {suggested_aspect} (or --aspect auto) to match the still, or --still-mode ref."
+    )
 
 
 def camera_moves(camera: Optional[str]) -> bool:
@@ -633,6 +758,7 @@ def format_parody_prompt(
     resolved3: Optional[Dict[str, Any]] = None,
     dialogue3: Optional[str] = None,
     pronoun3: Optional[str] = None,
+    still_mode: str = DEFAULT_STILL_MODE,
 ) -> str:
     """Format prompt adhering to Malcolm sample block standards and adults-only guard.
 
@@ -741,6 +867,9 @@ detailed_description:
 {speech_block}
 
 {sound_tail}"""
+
+    if normalize_still_mode(still_mode) == "ref" and image_count > 0:
+        prompt = f"{REF_MODE_PICTURE1_LEAD}\n\n{prompt}"
 
     # Validate against adults guard (guard_ok + an adult statement, same as run_queue's gate)
     if not comm.guard_ok(prompt):
@@ -3611,11 +3740,29 @@ def gated_write(write: Callable[[], Any], cast: Optional[Dict[str, Any]] = None,
     return None, log
 
 
+def _wire_ref_mode_start_still(graph: Dict[str, Any]) -> None:
+    """Wire img_1 as un-resized c0 reference (ref_image_1, ref_image_size='max') and remove start-still AddGuide."""
+    for nid in [
+        k for k, node in list(graph.items())
+        if isinstance(node, dict) and node.get("class_type") == "MiniMaxH3AddGuide"
+        and (k == "add_guide" or (node.get("inputs") or {}).get("image") == ["img_1", 0])
+    ]:
+        del graph[nid]
+    refapply_in = (graph.get("refapply") or {}).get("inputs")
+    if isinstance(refapply_in, dict) and str(refapply_in.get("conditioning", [""])[0]).startswith("add_guide"):
+        refapply_in["conditioning"] = ["c0", 0]
+    c0_in = graph.setdefault("c0", {}).setdefault("inputs", {})
+    if "img_1" in graph:
+        c0_in["ref_images.ref_image_1"] = ["img_1", 0]
+    c0_in["ref_image_size"] = "max"
+
+
 def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, Any], prefix: str,
                          seed: int = 51083601, frames: int = SINGLE_CLIP_MAX_FRAMES,
                          width: int = DEFAULT_CANVAS[0], height: int = DEFAULT_CANVAS[1],
                          strict: bool = True, writer: Optional[Callable[[str], str]] = None,
-                         writer_system: Optional[str] = None, repair_rounds: int = 2
+                         writer_system: Optional[str] = None, repair_rounds: int = 2,
+                         still_mode: str = DEFAULT_STILL_MODE,
                          ) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
     """Embed a finalized writer prompt into a copy of an existing OC RefMod graph (c0 prompt, seed, size, prefix).
     With writer (a callable) or writer_system (uses comm.llm), lint issues go back to the writer first (max 2 rounds)."""
@@ -3653,17 +3800,23 @@ def build_writer_request(base_graph: Dict[str, Any], raw: str, cast: Dict[str, A
             raise WriterNotReady(f"NOT_READY: conflicts still unfixed after {repair_rounds} writer-repair rounds: " +
                                  "; ".join(f"{it['code']} {it.get('why', '')}" for it in unfixed))
     cast = dict(cast, clip_seconds=cast.get("clip_seconds", validate_single_clip_frames(frames) / 24.0))
+    mode = normalize_still_mode(still_mode)
     prompt, report = finalize_writer_prompt(raw, cast, strict=strict)
     if cast.get("ask") and is_act_ask(cast["ask"]) and not report.get("act_written"):
         raise WriterNotReady("NOT_READY: act:false although the ask names an act")
     if repair_log is not None:
         report["repair"] = repair_log
     report["lint"] = [{k: v for k, v in it.items() if k != "text"} for it in lint_writer_prompt(raw, cast)[0]]
+    if mode == "ref":
+        prompt = f"{REF_MODE_PICTURE1_LEAD}\n\n{prompt.strip()}"
+        report["still_mode"] = "ref"
     g = copy.deepcopy(base_graph)
     g["c0"]["inputs"].update({"prompt": prompt.strip(), "length": validate_single_clip_frames(frames),
                               "width": width, "height": height})
     g["noise"]["inputs"]["noise_seed"] = seed
     g["save"]["inputs"]["filename_prefix"] = prefix
+    if mode == "ref":
+        _wire_ref_mode_start_still(g)
     if cast.get("s3_still"):  # Max Architect 3, Derrick t1440 (MMF S3, 2026-11-13): S3 reference still on c0 (multiref_test_20261113 wiring)
         if "img_1" not in g:
             raise WriterNotReady("NOT_READY: an S3 reference still needs img_1 (<Picture 1>) wired first")
@@ -3796,6 +3949,7 @@ def build_writer_continuation_request(
     width: int = DEFAULT_CANVAS[0],
     height: int = DEFAULT_CANVAS[1],
     drep: Optional[Dict[str, Any]] = None,
+    still_mode: str = DEFAULT_STILL_MODE,
 ) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
     """Build ONE 2-beat native latent-tail continuation graph from a packed undress-plus-act writer draft.
 
@@ -3829,7 +3983,10 @@ def build_writer_continuation_request(
         f"{cast['camera_tail']}. The clip opens on <Picture 1>: <Subject 1> {cast['still_wardrobe']}. "
         + (" ".join(undress_sents) if undress_sents else wardrobe_line(cast, state))
     )
+    mode = normalize_still_mode(still_mode)
     prompt1, rep1 = finalize_writer_prompt(b1_desc, cast1, strict=False)
+    if mode == "ref":
+        prompt1 = f"{REF_MODE_PICTURE1_LEAD}\n\n{prompt1.strip()}" 
 
     # Build Beat 2 (continuation from beat 1's closing pose and bare wardrobe: opens already bare, no start photo)
     prompt2_full, _ = finalize_writer_prompt(raw, dict(cast, clip_seconds=layout["window_frames"] / float(H3_FPS)), strict=False)
@@ -3899,10 +4056,16 @@ def build_writer_continuation_request(
     g1["c0"]["inputs"].update({"prompt": prompt1.strip(), "length": b1_frames, "width": width, "height": height, "fps": H3_FPS})
     g1["noise"]["inputs"]["noise_seed"] = seed
     g1["save"]["inputs"]["filename_prefix"] = prefix
+    if mode == "ref":
+        _wire_ref_mode_start_still(g1)
 
     g2 = copy.deepcopy(g1)
     for k in [nid for nid, node in g2.items() if node.get("class_type") in ("MiniMaxH3AddGuide", "LoadImage") or nid == "img_1"]:
         del g2[k]
+    if mode == "ref":
+        for rk in [k for k in list(g2["c0"]["inputs"]) if k.startswith("ref_images.ref_image_")]:
+            del g2["c0"]["inputs"][rk]
+        g2["c0"]["inputs"]["ref_image_size"] = "match"
     g2["refapply"]["inputs"]["conditioning"] = ["c0", 0]
     g2["c0"]["inputs"].update({"prompt": prompt2.strip(), "length": layout["window_frames"],
                                "width": width, "height": height, "fps": H3_FPS})
@@ -5243,6 +5406,7 @@ def inject_reference_images(
     frames: Optional[int] = None,
     snap_token_grid: bool = False,
     frame_indices: Optional[Sequence[int]] = None,
+    still_mode: str = DEFAULT_STILL_MODE,
 ) -> None:
     """U2 (t289u) + argon-low C.2 (A): chain 1..N MiniMaxH3AddGuide keyframes on Beat 1 (in-memory graph only).
 
@@ -5266,6 +5430,7 @@ def inject_reference_images(
     else:
         times = normalize_beat1_image_times(staged, image_times, frames=c0_len, fps=H3_FPS)
 
+    mode = normalize_still_mode(still_mode)
     if graph.get("refapply", {}).get("inputs", {}).get("conditioning") != ["c0", 0]:
         raise ValueError("template drift: refapply.conditioning is not ['c0', 0]; refusing to wire add_guide")
     prev_cond: List[Any] = ["c0", 0]
@@ -5275,6 +5440,14 @@ def inject_reference_images(
         if not rel.startswith("community/"):
             rel = "community/" + rel.split("/")[-1]
         img_id = f"img_{k}"
+        if mode == "ref" and k == 1:
+            graph[img_id] = {
+                "_meta": {"title": "Start image reference (un-resized on c0)"},
+                "class_type": "LoadImage",
+                "inputs": {"image": rel},
+            }
+            _wire_ref_mode_start_still(graph)
+            continue
         guide_id = "add_guide" if k == 1 else f"add_guide_{k}"
         is_last_pin = (k == len(staged))
         is_end_frame = (abs(sec - (c0_len - 1) / float(H3_FPS)) < 1e-5)
@@ -6068,7 +6241,7 @@ def build_continuation_request(resolved: Dict[str, Any], seed: int, prefix: str,
         beat_kwargs.update({k: v for k, v in b_spec.items() if v is not None and k not in ("beat_guides", "images", "image_times")})
         beat_kwargs.update(continuation=True, images=None, image_times=None, frames=step["layout"]["window_frames"],
                            prior_closer=beat_closer(beats[i - 2], beat_kwargs.get("pronoun")),
-                           new_shot=new_shot)
+                           new_shot=new_shot, still_mode=DEFAULT_STILL_MODE)
         beat_graph, prompt = build_parody_request(resolved, seed=seed, prefix=prefix, **beat_kwargs)
         graph = add_continuation_beat(graph, beat_graph, step["layout"], i, beat_guides=b_guides, new_shot=new_shot)
         step_info = dict(step)
@@ -6123,6 +6296,7 @@ def build_parody_request(
     dialogue3: Optional[str] = None,
     pronoun3: Optional[str] = None,
     partner_type2: Optional[str] = None,
+    still_mode: str = DEFAULT_STILL_MODE,
 ) -> Tuple[Dict[str, Any], str]:
     """Build request API graph and prompt text for a parody run (one clip / one cell).
 
@@ -6144,6 +6318,7 @@ def build_parody_request(
         _validate_continuation_place_transition(scene, prior_closer, new_shot=new_shot)
         scene = continuation_scene(scene, pronoun, closer=prior_closer, camera=camera, new_shot=new_shot)
 
+    mode = normalize_still_mode(still_mode)
     staged = list(images or [])
     prompt = format_parody_prompt(
         resolved, dialogue=dialogue, scene=scene, audio_ref=audio_ref, lighting=lighting,
@@ -6151,6 +6326,7 @@ def build_parody_request(
         image_count=len(staged), image_role=image_role,
         resolved2=resolved2, dialogue2=dialogue2, pronoun2=pronoun2, ambience=ambience,
         resolved3=resolved3, dialogue3=dialogue3, pronoun3=pronoun3,
+        still_mode=mode,
     )
 
     # Use make_b2_request.build as foundation
@@ -6187,7 +6363,7 @@ def build_parody_request(
             if resolved2 is not None else resolved.get("refmod_slots", {})
     populate_refmod_slots(graph, slots)
 
-    inject_reference_images(graph, staged, image_times=image_times, frames=frames, frame_indices=frame_indices)
+    inject_reference_images(graph, staged, image_times=image_times, frames=frames, frame_indices=frame_indices, still_mode=mode)
 
     # Verify KEEP dials
     verify_keep_dials(graph)
@@ -6206,7 +6382,7 @@ def main(argv=None) -> int:
     parser.add_argument("--scene", help="Optional scene (rich, multi-sentence welcome; never truncated)")
     parser.add_argument("--summary", help="Optional short summary line (default: first sentence of --scene)")
     parser.add_argument("--camera", help="Camera framing/motion (default static medium shot, 50mm)")
-    parser.add_argument("--aspect", help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square")
+    parser.add_argument("--aspect", help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square, or auto")
     parser.add_argument("--size", help="Explicit canvas WxH (multiples of 32, 256..2048)")
     parser.add_argument("--pronoun", default="she", choices=["she", "he", "they"])
     parser.add_argument("--ambience", help="Soundscape ambience phrase (default: quiet room ambience, soft natural room tone)")
@@ -6216,6 +6392,8 @@ def main(argv=None) -> int:
     parser.add_argument("--image-at", action="append", type=_parse_image_at_arg, default=[],
                         help="Clip time in seconds for each additional --image pin (at least 0.5s apart, within beat 1 length; accept -1 or 'end' for last frame)")
     parser.add_argument("--image-role", default=DEFAULT_IMAGE_ROLE)
+    parser.add_argument("--still-mode", default=DEFAULT_STILL_MODE, choices=list(STILL_MODES),
+                        help="How start still is wired: guide (default frame-0 AddGuide) or ref (un-resized c0 reference, not frame-0 pinned)")
     parser.add_argument("--template", default=str(DEFAULT_REFMOD_TEMPLATE), help="Template JSON path")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
 
@@ -6246,7 +6424,14 @@ def main(argv=None) -> int:
         frames = snap_h3_frames(args.seconds, max_frames=SINGLE_CLIP_MAX_FRAMES)
     else:
         frames = 124
-    w, h = resolve_canvas(args.aspect, args.size)
+    if args.size or (args.aspect and str(args.aspect).strip().lower() != "auto"):
+        resolve_canvas(args.aspect, args.size)
+    valid_imgs = validate_reference_images(args.image) if args.image else []
+    still_sz = read_still_size(valid_imgs[0]) if valid_imgs else None
+    w, h = resolve_canvas(args.aspect, args.size, still_size=still_sz)
+    shape_warn = check_still_canvas_shape(still_sz, w, h, aspect=args.aspect, size=args.size, still_mode=args.still_mode) if valid_imgs else None
+    if shape_warn:
+        print(shape_warn, file=sys.stderr)
 
     req_dict = {
         "names": args.names or [],
@@ -6279,7 +6464,7 @@ def main(argv=None) -> int:
             refmods_dir=refmods_dir,
             aliases_path=aliases_path,
         )
-    staged = stage_reference_images(validate_reference_images(args.image)) if args.image else []
+    staged = stage_reference_images(valid_imgs) if valid_imgs else []
 
     graph, prompt = build_parody_request(
         resolved=resolved,
@@ -6302,6 +6487,7 @@ def main(argv=None) -> int:
         resolved3=resolved3,
         dialogue3=args.dialogue3,
         pronoun3=args.pronoun3,
+        still_mode=args.still_mode,
     )
 
     arm_dir = Path(args.arm_dir)
