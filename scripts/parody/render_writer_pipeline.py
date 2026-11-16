@@ -1724,7 +1724,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             return assemble_output(dd_only, card, slots, bodies, kind), dd_only
 
         # 4 prose x N (verbatim writer output; no clean_prose/normalize_prose rewriting)
-        n = int(cfg.get("n_candidates", 3))
+        n = int(job.get("n_candidates") or cfg.get("n_candidates", 1))
         cands: Dict[str, Dict[str, Any]] = {}
         for k in range(1, n + 1):
             angle = LINE_ANGLES[(seed_for(run_id, ask, 50) + k) % len(LINE_ANGLES)]  # acceptance-2 b: lines differ per draft
@@ -1762,26 +1762,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             result["fallback_reasons"] = worst
             log("lint_fail_fallback", {"run": run_id, "reasons": worst})
         pool.sort(key=lambda c: cands[c]["lint"]["score"], reverse=True)
-        top = cands[pool[0]]["lint"]["score"]
-        tied = [c for c in pool if top - cands[c]["lint"]["score"] <= int(cfg.get("tie_points", 3))]
         pick, judge = pool[0], None
-        if len(tied) > 1:
-            names = [(chr(65 + i), c) for i, c in enumerate(tied)]
-            try:
-                jr = client.chat(judge_messages([(a, cands[c]["dd"]) for a, c in names], brief), cfg["judge_sampler"],
-                                 int(cfg.get("judge_seed", 1234567)), 600, response_format=judge_format([a for a, _ in names]),
-                                 purpose="judge")
-                jd = parse_json(jr)
-                best = judge_letter(jd, [a for a, _ in names])
-                m = dict(names)
-                if best in m:
-                    pick = m[best]
-                judge = {"names": dict(names), "reply": jd}
-            except WriterDown:
-                raise
-            except Exception as e:
-                judge = {"error": str(e)[:200]}
-                result["warnings"].append("judge_failed_score_pick")
         chosen = cands[pick]
         wp_state.atomic_write(run_dir / "writer_output.txt", chosen["full"])
         # 8 build (dry); opt-in --fix-once retry on NOT_READY if not already retried
@@ -1957,6 +1938,7 @@ def main(argv=None) -> int:
     ap.add_argument("--shot-count", type=int, default=1, help="B1: shots in a multi clip")
     ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
     ap.add_argument("--config", default=str(CONFIG_PATH))
+    ap.add_argument("--n-candidates", type=int, default=None, help="A/B test flag: number of prose candidates (default 1)")
     ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
     ap.add_argument("--sampler-arm", help="setup A/B only")
     ap.add_argument("--persona", help="setup persona arm only (current, option1, option2)")
@@ -1989,7 +1971,7 @@ def main(argv=None) -> int:
                      "character": a.character, "actor": a.actor, "names": a.names, "scene": a.scene, "continue": a.cont,
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
                      "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode,
-                     "fix_once": bool(a.fix_once),
+                     "n_candidates": a.n_candidates, "fix_once": bool(a.fix_once),
                      "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []
     for job in jobs:  # one failing clip never blocks the next
