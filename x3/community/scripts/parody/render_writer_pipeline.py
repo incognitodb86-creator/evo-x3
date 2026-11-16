@@ -1409,6 +1409,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
     run_dir.mkdir(parents=True, exist_ok=True)
     run_id = run_dir.name
     ask, position = job["ask"], job["position"]
+    debug = bool(job.get("debug"))
     character = job.get("character")
     identity = resolve_named_identity(ask, character=character, actor=job.get("actor"), names=job.get("names"))
     if not character and identity and identity.get("character"):
@@ -1531,7 +1532,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             result["warnings"].append(w["warn"])
             log(w["warn"], dict(w, run=run_id))
         result.update(position=position, kind=kind, mode=kind, overlays=overlays, act_id=route["act_id"], route=route)
-        wp_state.atomic_write(run_dir / "route.json", json.dumps(route, indent=2, ensure_ascii=False))
+        if debug:
+            wp_state.atomic_write(run_dir / "route.json", json.dumps(route, indent=2, ensure_ascii=False))
         # 2 slots
         last_tone = (state_dir / "last_tone.txt").read_text(encoding="utf-8").strip() if (state_dir / "last_tone.txt").exists() else None
         slots = make_slots(still_read, ask, position, kind, run_id, last_tone, scene_prev, overlays=overlays)
@@ -1566,7 +1568,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         s3_still_pre = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
         if s3_still_pre:
             slots["s3_still"] = s3_still_pre
-        wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
+        if debug:
+            wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
         sysprompt, pmeta = assemble_system(cfg, ask, persona, route["mode_blocks"])
         result.update(pmeta)
         # self-maintenance: cloned phrases follow the prompt sha + recent outputs
@@ -1650,7 +1653,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                     break
                 except Exception as e:
                     log("beat_card_invalid", {"run": run_id, "attempt": attempt, "error": str(e)[:300]})
-                    wp_state.atomic_write(run_dir / f"beat_card_invalid_{attempt}.txt", raw or "")
+                    if debug:
+                        wp_state.atomic_write(run_dir / f"beat_card_invalid_{attempt}.txt", raw or "")
         if card is not None and not _explicit_frames:
             cs = card.get("clip_seconds")
             if isinstance(cs, (int, float)) and not isinstance(cs, bool) and float(cs) > 0:
@@ -1671,7 +1675,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                     slots["max_lines_per_speaker"] = max_lines_spk
                     lint_cfg["speech_words_max"] = speech_words_max
                     lint_cfg["max_lines_per_speaker"] = max_lines_spk
-                    wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
+                    if debug:
+                        wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
                     brief = _build_full_brief()
             card["clip_seconds"] = clip_seconds
         elif card is not None:
@@ -1723,7 +1728,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 _end_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
                 card["end_state"]["pose"] = (f"standing at the edge of the {_end_surf}, bent forward at the hips, "
                                              "forearms and chest on it, weight on both feet, (S2) standing behind her")
-            wp_state.atomic_write(run_dir / "beat_card.json", json.dumps(card, indent=2, ensure_ascii=False))
+            if debug:
+                wp_state.atomic_write(run_dir / "beat_card.json", json.dumps(card, indent=2, ensure_ascii=False))
         def _materialise_writer_text(raw_text: str) -> Tuple[str, str]:
             t = raw_text or ""
             if re.search(r"(?im)^\s*(?:subject_definitions|summary|retention_analysis|detailed_description|integrated_multimodal_description)\s*:", t):
@@ -1740,9 +1746,11 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                               sampler, seed_for(run_id, ask, k),
                               cfg.get("prose_max_tokens", 1100), purpose=f"prose_{k}")
             full, dd = _materialise_writer_text(raw)
-            wp_state.atomic_write(run_dir / f"cand_{k}.txt", full)
+            if debug:
+                wp_state.atomic_write(run_dir / f"cand_{k}.txt", full)
             lr = wp_lint.lint(full, lint_ctx, minimal=True)
-            wp_state.atomic_write(run_dir / f"lint_{k}.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
+            if debug:
+                wp_state.atomic_write(run_dir / f"lint_{k}.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands[f"cand_{k}"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, k)}
         # 6 opt-in single rewrite (--fix-once only; default off per U52)
         fix_once = bool(job.get("fix_once"))
@@ -1753,9 +1761,11 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             raw = client.chat(rewrite_messages(sysprompt, brief, card, cands[best_name]["dd"], notes, kind, overlays), sampler,
                               seed_for(run_id, ask, n + 1), cfg.get("prose_max_tokens", 1100), purpose="rewrite")
             full, dd = _materialise_writer_text(raw)
-            wp_state.atomic_write(run_dir / "rewrite.txt", full)
+            if debug:
+                wp_state.atomic_write(run_dir / "rewrite.txt", full)
             lr = wp_lint.lint(full, lint_ctx, minimal=True)
-            wp_state.atomic_write(run_dir / "lint_rewrite.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
+            if debug:
+                wp_state.atomic_write(run_dir / "lint_rewrite.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands["rewrite"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 1), "notes": notes,
                                 "from": best_name}
             fixed_once = True
@@ -1787,8 +1797,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                               seed_for(run_id, ask, n + 2), cfg.get("prose_max_tokens", 1100), purpose="rewrite_builder")
             full, dd = _materialise_writer_text(raw)
             lr = wp_lint.lint(full, lint_ctx, minimal=True)
-            wp_state.atomic_write(run_dir / "rewrite_builder.txt", full)
-            wp_state.atomic_write(run_dir / "lint_rewrite_builder.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
+            if debug:
+                wp_state.atomic_write(run_dir / "rewrite_builder.txt", full)
+            if debug:
+                wp_state.atomic_write(run_dir / "lint_rewrite_builder.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands["rewrite_builder"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 2), "notes": notes}
             pick, chosen = "rewrite_builder", cands["rewrite_builder"]
             wp_state.atomic_write(run_dir / "writer_output.txt", full)
@@ -1947,6 +1959,7 @@ def main(argv=None) -> int:
     ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
     ap.add_argument("--config", default=str(CONFIG_PATH))
     ap.add_argument("--n-candidates", type=int, default=None, help="A/B test flag: number of prose candidates (default 1)")
+    ap.add_argument("--debug", action="store_true", help="Write debug per-run files (cand_*, lint_*, slots.json, route.json, beat_card*)")
     ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
     ap.add_argument("--sampler-arm", help="setup A/B only")
     ap.add_argument("--persona", help="setup persona arm only (current, option1, option2)")
@@ -1979,7 +1992,7 @@ def main(argv=None) -> int:
                      "character": a.character, "actor": a.actor, "names": a.names, "scene": a.scene, "continue": a.cont,
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
                      "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode,
-                     "n_candidates": a.n_candidates, "fix_once": bool(a.fix_once),
+                     "n_candidates": a.n_candidates, "debug": bool(a.debug), "fix_once": bool(a.fix_once),
                      "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []
     for job in jobs:  # one failing clip never blocks the next

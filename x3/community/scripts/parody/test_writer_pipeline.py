@@ -251,7 +251,7 @@ def test_happy_path_and_blacklist_update(home, tmp_path, monkeypatch):
     scripted(monkeypatch, lambda purpose: GOOD_SEX)
     stub_build(monkeypatch)
     cfg = p.load_config(home / "config.yaml")
-    r = p.run_clip(job(tmp_path, "c1"), cfg, lambda *a: None)
+    r = p.run_clip(job(tmp_path, "c1", debug=True), cfg, lambda *a: None)
     assert r["status"] == "READY" and r["pick"].startswith("cand_") and r["warnings"] == []
     d = Path(r["run_dir"])
     for f in ("still_read.json", "slots.json", "beat_card.json", "cand_1.txt", "lint_1.json", "pick.json", "writer_output.txt"):
@@ -327,7 +327,7 @@ def test_two_clip_chain_scene_state(home, tmp_path, monkeypatch):
     for k in ("clip_id", "primary_beat", "opening_state", "ending_state", "anchors", "camera", "spoken_dialogue", "ambient_sfx",
               "frame_budget", "method", "done_actions"):
         assert k in st["clips"][0], k
-    r2 = p.run_clip(job(tmp_path, "s1c2", scene="scn1", **{"continue": r1["run_dir"]}), cfg, lambda *a: None)
+    r2 = p.run_clip(job(tmp_path, "s1c2", scene="scn1", debug=True, **{"continue": r1["run_dir"]}), cfg, lambda *a: None)
     # clip 2 inherits clip 1: same prose restates done actions and repeats lines -> lint flags them (fallback warning)
     lint1 = json.loads((Path(r2["run_dir"]) / "lint_1.json").read_text())
     assert "blacklist" in [i["code"] for i in lint1["issues"]] and lint1["hard"] == []
