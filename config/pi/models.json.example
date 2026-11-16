@@ -1,0 +1,101 @@
+{
+  "providers": {
+    "x3-local": {
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "api": "openai-completions",
+      "apiKey": "<from /etc/evo-x3/llm.env>",
+      "models": [
+        {
+          "id": "gemma4-heretic",
+          "name": "X3 local Gemma 4 26B A4B Heretic Q8_0 + official unsloth mmproj BF16 vision (llama.cpp Vulkan)",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 64
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "supportsReasoningEffort": false,
+            "supportsDeveloperRole": false
+          }
+        },
+        {
+          "id": "gemma4-heretic-sub",
+          "name": "X3 local Gemma 4 26B A4B Heretic Q8_0 subagent (maxTokens 4096, thinking off)",
+          "reasoning": false,
+          "contextWindow": 262144,
+          "maxTokens": 4096,
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "supportsReasoningEffort": false,
+            "supportsDeveloperRole": false
+          }
+        },
+        {
+          "id": "qwen27b",
+          "name": "X3 local Qwen3.8-27B UD-Q8_K_XL + DFlash2 (Gufo)",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template"
+          }
+        },
+        {
+          "id": "flash-next",
+          "name": "X3 local Qwen3.8-Flash-Next native HGN v2 (Halogen 0.20.5)",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template"
+          }
+        },
+        {
+          "id": "flash-next-sub",
+          "name": "X3 local Qwen3.8-Flash-Next native HGN v2 (Halogen 0.20.5) subagent 128K/8K",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 8192,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template"
+          }
+        }
+      ]
+    }
+  }
+}

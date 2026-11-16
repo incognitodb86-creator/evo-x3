@@ -1,0 +1,10 @@
+START Sun Nov 15 07:40:39 AM CST 2026
+./embed-small/nomic-embed-text-v1.5.Q8_0.gguf: OK
+./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf: OK
+./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf: OK
+./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf: OK
+./flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf: OK
+./flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf: OK
+./gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf: OK
+./qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf: OK
+EXIT 0 Sun Nov 15 07:42:10 AM CST 2026

@@ -1,0 +1,24 @@
+importing setup.py ...
+get_llama_cpp(vision=True) ...
+llama /srv/bakeoff/src/PolyStrata/third_party/llama.cpp-69f201a
+vsrc 68eadd07fce1dbf1 BUILD backup already made
+  Compiling the image encoder (for the CPU) ...
+  > /usr/bin/cmake -G Ninja -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -S /srv/bakeoff/src/PolyStrata/tools/vision -B /srv/bakeoff/src/PolyStrata/build-vision -DCMAKE_BUILD_TYPE=Release -DLLAMA_DIR=/srv/bakeoff/src/PolyStrata/third_party/llama.cpp-69f201a -DSTRATA_VISION_CUDA=OFF -DSTRATA_PORTABLE=OFF
+-- strata-vision: native build for this CPU (STRATA_PORTABLE=OFF) - not for other PCs
+-- llama.cpp version: 0.6.0-dev
+CMAKE_BUILD_TYPE=Release
+-- Warning: ccache not found - consider installing it for faster compilation or disable this warning with GGML_CCACHE=OFF
+-- CMAKE_SYSTEM_PROCESSOR: x86_64
+-- GGML_SYSTEM_ARCH: x86
+-- Including CPU backend
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu: -march=native 
+-- ggml version: 0.26.0
+-- ggml commit:  67dde64
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /srv/bakeoff/src/PolyStrata/build-vision
+  > /usr/bin/cmake --build /srv/bakeoff/src/PolyStrata/build-vision --target strata-vision -j 16
+ninja: no work to do.
+  [ok] engine: /srv/bakeoff/src/PolyStrata/engine-poly/strata, image encoder (CPU): /srv/bakeoff/src/PolyStrata/engine-poly/strata-vision
+DONE True /srv/bakeoff/src/PolyStrata/engine-poly/strata-vision

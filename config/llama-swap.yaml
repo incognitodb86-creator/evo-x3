@@ -1,0 +1,250 @@
+# llama-swap configuration for EVO-X3 (overnight 2026-11-14, plan rev 8)
+#
+# RULES:
+# 1. Callers pick a model by name; there is no single implicit default.
+# 2. No secrets in this file. apiKeys are ${env.*} placeholders from /etc/evo-x3/llm.env
+#    (0600, root:root). Derrick types every key. Empty placeholders are not credentials.
+# 3. Loopback only: llama-swap -listen 127.0.0.1:8080; engines on 127.0.0.1:8081.
+# 4. captureBuffer: 0 (no prompt capture).
+#
+# Image digests pinned at pull time 2026-11-14 CT:
+#   gufo-runtime 0.34.0 (2845939) @ sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133
+#   kyuz0 vulkan-radv llama.cpp 1.0.0-dev build 12405 commit 9f26fe11c
+#     @ sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+#
+# Context notes (q8_0 KV unless stated):
+#   2026-11-15 07:38 CT reboot applied amdgpu.gttsize=122880 ttm.pages_limit=31457280.
+#   UPDATE 2026-11-15 PM: BIOS UMA is now minimal (mem_info_vram_total 1 GiB, GTT 120 GiB); notes below are history.
+#   BIOS UMA was 64 GB (Derrick's morning task is 512 MB). Visible now:
+#     OS RAM ~62 GiB, mem_info_vram_total=64.00 GiB, mem_info_gtt_total=62.41 GiB
+#     (GTT rose from ~31 GiB to ~62 GiB after the kernel caps).
+#   After UMA 512 MB, GTT should be ~120 GiB under the same caps.
+#   See comments on each model.
+
+healthCheckTimeout: 900
+captureBuffer: 0
+includeAliasesInList: true
+
+apiKeys:
+  - "${env.LLM_KEY_ALIENPC}"
+  - "${env.LLM_KEY_PI}"
+  - "${env.LLM_KEY_BOX}"
+  - "${env.LLM_KEY_HERMES}"
+  - "${env.LLM_KEY_DERRICK_LAPTOP}"
+
+globalConcurrencyLimit: 6
+
+# U13-style groups so the embedding model can stay loaded beside a main model.
+# persistent: true is required on "small" (a group's exclusive defaults to true).
+routing:
+  router:
+    use: group
+    settings:
+      groups:
+        "main":
+          swap: true
+          exclusive: true
+          members:
+            - "flash-next"
+            - "flash-next-gufo"
+            - "flash-next-uncensored"
+            - "gemma4-heretic"
+            - "qwen27b"
+        "small":
+          swap: false
+          persistent: true
+          exclusive: false
+          members:
+            - "embed-small"
+
+models:
+  "flash-next":
+    # U26 2026-11-15 ~5:30 PM CT (Derrick t1774s6524 "Move Forge to Halogen native and test it at full context"):
+    # official Peonist Halogen native v2 checkpoint (peonist-ai/halogen-qwen3.8-flash-next: qwen38-flash-next-v2.hgn
+    # 62.1 GiB + n-gram table 47.7 GiB mmap, not held + MTP head built in) on halogen-flash-server 0.20.5 (official image,
+    # pulled 2026-11-15, same checkpoints as 0.20.4). Full native context: HALOGEN_CTX=262144 per request; default KV pool
+    # 524288 positions (two full conversations resident, 4 slots) because it fits: engine-measured 88.9 GiB in all
+    # (62.1 weights + 14.4 KV pool + 12.4 working), GTT peak 27.0 GiB of 120. U26 bench (cold, effort low): 18k prefill
+    # 1,870 tok/s, decode 85 long / 64 prose; 127k prefill 1,807 / decode 69; 237k prefill 1,707 / decode 58; tools 3/3.
+    # Sampling defaults = Qwen card / old Gufo preset (1.0 / 0.95 / 20); requests that send their own win. Effort medium.
+    # Loopback publish (-p 127.0.0.1) instead of --network=host: the image's API binds [::], host network would expose it.
+    # Rollback: slot "flash-next-gufo" below (or backup llama-swap.yaml.bak-20261115-172352-pre-u26-halogen).
+    cmd: |
+      podman run --rm --name llama-swap-flash-next
+        -p 127.0.0.1:8081:8731
+        --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
+        -e HALOGEN_MODEL_ID=flash-next -e HALOGEN_CTX=262144
+        -e HALOGEN_REASONING_EFFORT=medium
+        -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
+        -v /srv/models/flash-next-halogen:/models:ro
+        ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+    proxy: "http://127.0.0.1:8081"
+    ttl: 86400
+    # U27 2026-11-15 (Derrick t1784s6566 Phase 1/4): concurrencyLimit 1->4 (Halogen has 4 slots, shared KV pool, no new memory);
+    # weights moved /srv/bakeoff/halogen-models -> /srv/models/flash-next-halogen (old path is a symlink).
+    concurrencyLimit: 4
+    # U29 2026-11-15 (Derrick t1811s6675): alias on the SAME slot, not a new exclusive-group member.
+    # Subagents use flash-next-sub; llama-swap sends useModelName flash-next to Halogen.
+    aliases:
+      - "flash-next-sub"
+    useModelName: "flash-next"
+    checkEndpoint: "/health"
+
+  "flash-next-uncensored":
+    # U26 2026-11-15 ~6:25 PM CT (Derrick t1774s6524 "Download and test the abliterated Flash-Next in Halogen's format"):
+    # NON-PRODUCTION slot; not Forge's default. johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN @e3c04876
+    # (community bf16-to-hgn native v2 conversion of huihui-ai's abliterated BF16; MTP head, n-gram table and tokenizer from
+    # the same source; Qwen Community License 1.0, LICENSE beside the weights). sha256 OK: model.hgn 6d5f4c66..., ngram
+    # 339f5c50..., vision b6ca6716... in /srv/models/flash-next-uncensored-hgn (110.7 GiB). Same engine/flags as flash-next.
+    # U26 bench (cold, effort low): load 25 s; 18k prefill 1,859 / decode 81 long, 61 prose; 127k 1,790 / 71; 237k 1,688 / 69,
+    # needle found at both; tools 3/3; Forge coding task pass; write1/write2 pass; refusal probes comply 3/3 (stock refuses
+    # explicit_adult). 88.9 GiB engine total, same as stock. Vision sidecar present but not loaded (text-only slot).
+    cmd: |
+      podman run --rm --name llama-swap-flash-next-uncensored
+        -p 127.0.0.1:8081:8731
+        --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
+        -e HALOGEN_MODEL_ID=flash-next-uncensored -e HALOGEN_CTX=262144
+        -e HALOGEN_CHECKPOINT=/models/model.hgn
+        -e HALOGEN_REASONING_EFFORT=medium
+        -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
+        -v /srv/models/flash-next-uncensored-hgn:/models:ro
+        ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+    proxy: "http://127.0.0.1:8081"
+    ttl: 3600
+    concurrencyLimit: 1
+    checkEndpoint: "/health"
+
+  "flash-next-gufo":
+    # U26 2026-11-15 ~5:30 PM CT: ROLLBACK slot. This was "flash-next" (Gufo) until Derrick t1774s6524 moved Forge to Halogen.
+    # To roll back: rename this back to "flash-next" and the Halogen slot above to "flash-next-halogen", restart llama-swap.
+    # Qwen3.8-Flash-Next UD-Q4_K_XL (4 shards, 111.3 GB) + shared Q8 MTP (2.79 GB)
+    # Official source: unsloth/Qwen3.8-Flash-Next-GGUF
+    # Official Gufo flags: `gufo serve llm` with --mtp-model and --speculative mtp
+    # (not llama.cpp --mtp / --flash-attn). Native context 262144.
+    # Weights 103.69 GiB + shared Q8 MTP 2.60 GiB. At --context 262144 --sessions 1 measured ~108-115 GiB of the
+    # 120 GiB GTT (KV/state ~27.5 KiB/token with MTP, ~6.9 GiB; LLMKube 108,240 MiB on one Strix Halo).
+    # --sessions 1.
+    # TUNE 2026-11-15 ~4 PM CT (Derrick t1760u): full native 262144 context (Gufo doc: ~27.5 KiB/token with MTP =
+    # (103.69 + 2.60 + 6.9 = ~113 GiB of the 120 GiB GTT). --cache-ram-bytes 2 GiB because the auto default
+    # (half of free RAM, up to 32 GiB) would overcommit UMA. --preserve-thinking on per Qwen/Unsloth for multi-turn
+    # coding. Sampling left on Gufo's model/thinking preset (= card: 1.0/0.95/20/0, presence 0). Effort medium default,
+    # per-request override (xhigh for planning). Vision: Flash-Next is multimodal via mmproj-BF16.gguf (not downloaded).
+    cmd: |
+      podman run --rm --name llama-swap-flash-next-gufo
+        --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133
+        gufo serve llm --host 127.0.0.1 --port 8081
+        --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+        --mtp-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+        --speculative mtp
+        --context 262144 --sessions 1
+        --cache-ram-bytes 2147483648
+        --preserve-thinking on
+        --served-model-name flash-next-gufo
+        --reasoning-effort medium
+        --log-progress
+    proxy: "http://127.0.0.1:8081"
+    ttl: 86400
+    concurrencyLimit: 1
+    checkEndpoint: "/health"
+
+  "gemma4-heretic":
+    # Gemma 4 26B A4B IT Heretic Q8_0 (25.01 GiB / 26,859,855,008 bytes)
+    # Official GGUF: mradermacher/gemma-4-26B-A4B-it-heretic-GGUF
+    # (quant of coder3101/gemma-4-26B-A4B-it-heretic, Heretic v1.2.0 ARA)
+    # llama.cpp / Unsloth-style Strix Halo flags + Google Gemma sampling defaults.
+    # Native context 256K. Running -np 2 -c 524288 = 262144 per slot, f16 KV (see TUNE below).
+    # TUNE 2026-11-15 ~4 PM CT (Derrick t1760u "do research and verify everything"): f16 KV (default; Gemma 4 KV is
+    # ~5 GiB per 262K at f16, so q8 buys nothing and r/LocalLLaMA reports q8 KV hurts vision), -np 2 x 262144 = -c 524288,
+    # image budget 560-1120 (Google card budgets 70/140/280/560/1120; default 280 is weak on detail), -ub 2048 because
+    # Gemma 4 image tokens are non-causal and must fit one ubatch. Sources: ~/evo-x3/records/U24-model-tuning-20261115.md
+    # VISION (permanent, Derrick 2026-11-15 ~3:36 PM CT "Yes, make the fixes and rerun the Q8 vs Q4 test"):
+    # --mmproj: U25 2026-11-15 ~4:45 PM CT (Derrick t1769s6505) now the official unsloth/gemma-4-26B-A4B-it-GGUF
+    # mmproj-BF16.gguf (1,194,828,256 B, sha256 41926ed5...), saved as gemma-4-26B-A4B-it-unsloth-mmproj-BF16.gguf.
+    # Old Gemma-4-26B-A4B-Heretic.mmproj-Q8_0.gguf (from mradermacher/gemma-4-26b-a4b-heretic-GGUF, a different
+    # Heretic upload) kept on disk as rollback. THINKING is per request, as on AlienPc gemma4_heretic_poly_think:
+    # pi sends chat_template_kwargs {enable_thinking: true, preserve_thinking: true} (thinkingFormat
+    # qwen-chat-template); the writer pipeline sends enable_thinking false. --reasoning-format deepseek
+    # returns thoughts in reasoning_content.
+    cmd: |
+      podman run --rm --name llama-swap-gemma4-heretic
+        --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+        llama-server --host 127.0.0.1 --port 8081
+        -m /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf
+        --mmproj /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-unsloth-mmproj-BF16.gguf
+        --jinja --load-mode none -fa on
+        --reasoning-format deepseek
+        -np 2 -c 524288
+        -b 2048 -ub 2048
+        --image-min-tokens 560 --image-max-tokens 1120
+        --temp 1.0 --top-p 0.95 --top-k 64
+        --alias gemma4-heretic
+    proxy: "http://127.0.0.1:8081"
+    ttl: 3600
+    # U27 2026-11-15 ~7:08 PM CT: tried -np 4 -c 1048576 / concurrencyLimit 4 (Phase 1); llama-server aborted twice in
+    # server_slot::prompt_save (GGML_ASSERT tensor not allocated, kyuz0 build 12405) on a Render subagent run. Rolled back to -np 2.
+    concurrencyLimit: 2
+    # U31 2026-11-15 (Derrick t1819u): alias on the SAME slot, not a new exclusive-group member.
+    # Render subagents use gemma4-heretic-sub (maxTokens 4096, thinking off in models.json).
+    aliases:
+      - "gemma4-heretic-sub"
+    useModelName: "gemma4-heretic"
+    checkEndpoint: "/health"
+
+  "qwen27b":
+    # Qwen3.8-27B UD-Q8_K_XL (29.30 GiB / 31,457,991,680 bytes, sha256 af36ecb6...) + DFlash2 draft Q4_K_M
+    # (1,143,006,816 bytes, sha256 1a25c568...). Official sources (Gufo models.lock.json "qwen27-q8"):
+    # unsloth/Qwen3.8-27B-GGUF and z-lab/Qwen3.8-27B-DFlash2-GGUF@2d9571f8. Old Q4 file kept on disk
+    # (Qwen3.8-27B-UD-Q4_K_XL.gguf) as the rollback (backup llama-swap.yaml.bak-20261115-170054-pre-mmproj-q8).
+    # U25 2026-11-15 ~5 PM CT (Derrick t1769s6505 "upgrade qwen27b to Q8 on Gufo and test it"): moved from
+    # kyuz0 llama.cpp to Gufo 0.34.0 with the docs/models/qwen3.8-27b.md recipe: --speculative dflash2
+    # --dflash-model. DFlash2 keeps the target's output distribution (greedy = exact AR output).
+    # Context: --context 262144 per session (native), --sessions 2. Gufo BENCHMARKS (Q8, C1 262144):
+    # peak 53-63 GiB; two sessions fit in the 120 GiB GTT with the exclusive group.
+    # Sampling/thinking: Gufo model/thinking preset (= Qwen card), thinking per request.
+    # --cache-ram-bytes 2 GiB as on flash-next (auto = half of free RAM, up to 32 GiB).
+    # No mmproj-BF16.gguf beside the model, so this slot is text-only (vision optional, 0.93 GB).
+    cmd: |
+      podman run --rm --name llama-swap-qwen27b
+        --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133
+        gufo serve llm --host 127.0.0.1 --port 8081
+        --model /srv/models/qwen27b/Qwen3.8-27B-UD-Q8_K_XL.gguf
+        --speculative dflash2
+        --dflash-model /srv/models/qwen27b/Qwen3.8-27B-DFlash2-Q4_K_M.gguf
+        --context 262144 --sessions 2
+        --cache-ram-bytes 2147483648
+        --served-model-name qwen27b
+        --log-progress
+    proxy: "http://127.0.0.1:8081"
+    ttl: 1800
+    concurrencyLimit: 2
+    checkEndpoint: "/health"
+
+  "embed-small":
+    # nomic-embed-text-v1.5 Q8_0 (139.4 MiB / 146,146,432 bytes)
+    # Official source: nomic-ai/nomic-embed-text-v1.5-GGUF
+    # TUNE 2026-11-15: nomic GGUF card: llama.cpp defaults to 2048; full 8192 needs -c 8192 -b 8192
+    # --rope-scaling yarn --rope-freq-scale .75. Callers must prefix search_query: / search_document:.
+    # Native context 8192. Tiny; fits easily now and after UMA 512 MB.
+    # Loopback port 8083 so it can stay resident beside a main-group engine on 8081.
+    cmd: |
+      podman run --rm --name llama-swap-embed-small
+        --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+        llama-server --host 127.0.0.1 --port 8083
+        -m /srv/models/embed-small/nomic-embed-text-v1.5.Q8_0.gguf
+        --embeddings -c 8192 -b 8192 -ub 8192 --rope-scaling yarn --rope-freq-scale 0.75 --no-slots
+        --alias embed-small
+    proxy: "http://127.0.0.1:8083"
+    ttl: 86400
+    checkEndpoint: "/health"

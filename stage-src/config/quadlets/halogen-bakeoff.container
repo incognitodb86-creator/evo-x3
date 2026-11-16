@@ -1,0 +1,22 @@
+# Podman Quadlet: Halogen Bake-off Arm (U6 — Not Default)
+# Replace PIN_DIGEST_AT_BUILD_TIME and exact image URI from verified live pull on Fedora.
+
+[Unit]
+Description=EVO-X3 Halogen Bake-off Engine (127.0.0.1:8081)
+After=network-online.target
+
+[Container]
+# Proprietary Peonist LLC EULA; verify image path & pin digest before U6 test
+Image=ghcr.io/peonist-ai/halogen-flash-server@sha256:PIN_DIGEST_AT_BUILD_TIME
+ContainerName=evo-halogen-bakeoff
+Network=host
+AddDevice=/dev/kfd
+AddDevice=/dev/dri
+GroupAdd=keep-groups
+Volume=/srv/models:/srv/models:ro,Z
+# U6/Plan gotcha: set server-side reasoning effort low/medium (unset defaults to xhigh)
+Exec=--host 127.0.0.1 --port 8081 --reasoning-effort medium
+
+[Service]
+Restart=no
+TimeoutStartSec=300

@@ -1,0 +1,29 @@
+# Podman Quadlet: Gufo Engine (U6 — Plan Q3=A Pick)
+# Place in /etc/containers/systemd/gufo.container (or ~/.config/containers/systemd/)
+# Replace PIN_DIGEST_AT_BUILD_TIME with verified sha256 digest from live pull on Fedora.
+
+[Unit]
+Description=EVO-X3 Gufo LLM Engine (127.0.0.1:8081)
+After=network-online.target
+
+[Container]
+# Pin exact digest before starting, e.g.:
+# Image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:PIN_DIGEST_AT_BUILD_TIME
+Image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:PIN_DIGEST_AT_BUILD_TIME
+ContainerName=evo-gufo
+Network=host
+AddDevice=/dev/kfd
+AddDevice=/dev/dri
+GroupAdd=keep-groups
+Volume=/srv/models:/srv/models:ro,Z
+Environment=HSA_OVERRIDE_GFX_VERSION=11.5.1
+# Note: adjust CLI flags after checking Gufo's exact CLI help in U6/U12 build-time check
+Exec=--host 127.0.0.1 --port 8081 --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL.gguf --mtp /srv/models/flash-next/mtp-shared-Q8_0.gguf --no-mmap --flash-attn --cache-type-k q8_0 --cache-type-v q8_0 --parallel 2 --ctx-size 131072 --no-slots
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

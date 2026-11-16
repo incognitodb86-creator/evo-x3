@@ -1,0 +1,45 @@
+# Open WebUI — system Quadlet for EVO-X3
+# Official source: https://docs.openwebui.com/getting-started/quick-start/ (Podman Quadlets, accessed 2026-11-15 CT)
+# Adaptations (see records/U22-open-webui-20261115.md):
+# - System unit (not rootless) so /etc/evo-x3/openwebui.env can stay root 0600
+# - Network=host + official HOST=127.0.0.1 and PORT=3000 so the UI binds
+#   loopback only and can reach llama-swap on 127.0.0.1:8080 (rootful Podman
+#   cannot reach host loopback through pasta / host.containers.internal)
+# Secrets stay in EnvironmentFile; do not put keys in this unit.
+# No GPU devices. Do not set USE_CUDA_DOCKER.
+
+[Unit]
+Description=Open WebUI (tailnet chat UI)
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+# Pinned 2026-11-15 X3 Phase 4 (Derrick t1784s6566): the :main build running since U22 (created 2026-11-08 UTC). Upgrade = new digest + Derrick yes. Rollback: /etc/containers/systemd/open-webui.container.bak-20261115-phase4
+Image=ghcr.io/open-webui/open-webui@sha256:59b912d4246103c7285de0e9a5f2f6586614c06b4c4e46edc51a8f29e7b099a5
+ContainerName=open-webui
+Network=host
+Volume=open-webui:/app/backend/data
+EnvironmentFile=/etc/evo-x3/openwebui.env
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+Environment=ENABLE_OLLAMA_API=false
+Environment=ENABLE_OPENAI_API=true
+Environment=OPENAI_API_BASE_URL=http://127.0.0.1:8080/v1
+Environment=ENABLE_SIGNUP=false
+Environment=DEFAULT_USER_ROLE=pending
+Environment=WEBUI_URL=https://evo-x3-1.tailf242b2.ts.net:8443
+
+# MF-12 (Derrick t1815u): do not use the image start.sh. It launches
+# uvicorn as: exec env WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" python3 -m uvicorn ...
+# which can put the key on a process command line. The key stays in
+# EnvironmentFile=/etc/evo-x3/openwebui.env (root 0600) and is inherited
+# as an environment variable only.
+Exec=/usr/local/bin/python3 -m uvicorn open_webui.main:app --host 127.0.0.1 --port 3000 --forwarded-allow-ips * --workers 1 --ws-per-message-deflate true
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

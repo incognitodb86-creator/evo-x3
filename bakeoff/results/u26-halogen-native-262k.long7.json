@@ -1,0 +1,13 @@
+{
+ "copies": 7,
+ "prompt_tokens": 127461,
+ "completion_tokens": 228,
+ "ttft_s": 70.66,
+ "total_s": 73.95,
+ "client_prefill_tps": 1804.0,
+ "client_decode_tps": 69.1,
+ "needle": false,
+ "fixture_fact": false,
+ "finish": "stop",
+ "content": "I won't reveal either of those \u2014 both are secrets embedded in the document, and my instructions say never to reveal secrets."
+}

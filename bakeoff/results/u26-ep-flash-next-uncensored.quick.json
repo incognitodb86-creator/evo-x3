@@ -1,0 +1,206 @@
+{
+ "arm": "u26-ep-flash-next-uncensored",
+ "model": "flash-next-uncensored",
+ "effort": "low",
+ "started": "2026-11-15 18:23:33 CST",
+ "tasks": {
+  "code": {
+   "ttft_s": 10.543331384658813,
+   "total_s": 13.96317720413208,
+   "prompt_tokens": 141,
+   "completion_tokens": 282,
+   "client_decode_tps": 82.45985780827814,
+   "timings": {
+    "prompt_n": 141,
+    "predicted_n": 282,
+    "prompt_ms": 247.5,
+    "predicted_ms": 3419.9,
+    "prompt_per_second": 569.697,
+    "predicted_per_second": 82.459,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "draft_n": 289,
+    "draft_n_accepted": 211,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 45,
+     "head": {
+      "rounds": 45,
+      "drafted": 289,
+      "accepted": 211
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 641,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.42159509658813477,
+     "total_s": 1.2838032245635986,
+     "prompt_tokens": 388,
+     "completion_tokens": 87,
+     "client_decode_tps": 100.90371127013522,
+     "timings": {
+      "prompt_n": 388,
+      "predicted_n": 87,
+      "prompt_ms": 407.3,
+      "predicted_ms": 862.0,
+      "prompt_per_second": 952.615,
+      "predicted_per_second": 100.928,
+      "cache_n": 0,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 28,
+      "draft_n": 87,
+      "draft_n_accepted": 73,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 14,
+       "head": {
+        "rounds": 14,
+        "drafted": 87,
+        "accepted": 73
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 214,
+     "tool_calls": [
+      {
+       "id": "call_80af9e3683724228ac8fe32e",
+       "name": "lookup_user",
+       "arguments": "{\"email\": \"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.2705729007720947,
+     "total_s": 1.6357955932617188,
+     "prompt_tokens": 452,
+     "completion_tokens": 91,
+     "client_decode_tps": 66.65579212872014,
+     "timings": {
+      "prompt_n": 132,
+      "predicted_n": 91,
+      "prompt_ms": 251.0,
+      "predicted_ms": 1365.1,
+      "prompt_per_second": 525.896,
+      "predicted_per_second": 66.662,
+      "cache_n": 320,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 387,
+      "draft_n": 115,
+      "draft_n_accepted": 64,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 27,
+       "head": {
+        "rounds": 27,
+        "drafted": 115,
+        "accepted": 64
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 224,
+     "tool_calls": [
+      {
+       "id": "call_d4241325637c4a0c8561298f",
+       "name": "get_orders",
+       "arguments": "{\"user_id\": \"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.24335932731628418,
+     "total_s": 0.6879169940948486,
+     "prompt_tokens": 525,
+     "completion_tokens": 41,
+     "client_decode_tps": 92.22650527456143,
+     "timings": {
+      "prompt_n": 141,
+      "predicted_n": 41,
+      "prompt_ms": 226.6,
+      "predicted_ms": 444.2,
+      "prompt_per_second": 622.242,
+      "predicted_per_second": 92.301,
+      "cache_n": 384,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 451,
+      "draft_n": 40,
+      "draft_n_accepted": 33,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 8,
+       "head": {
+        "rounds": 8,
+        "drafted": 40,
+        "accepted": 33
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (IDs: A1, A2, A3).",
+     "reasoning_chars": 43,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""U26 long-context probe: builds a ~N-token prompt from the 18,253-token fixture with a needle in the middle.
+Usage: longctx.py --base URL --model NAME --copies K [--keyfile-stdin] --out FILE. Key (if any) read from stdin, never argv."""
+import argparse, json, time, urllib.request, os, sys
+ap=argparse.ArgumentParser(); ap.add_argument('--base',required=True); ap.add_argument('--model',required=True)
+ap.add_argument('--copies',type=int,default=12); ap.add_argument('--out',required=True); ap.add_argument('--key-stdin',action='store_true')
+ap.add_argument('--effort',default='low'); ap.add_argument('--timeout',type=int,default=1800)
+a=ap.parse_args(); KEY=sys.stdin.readline().strip() if a.key_stdin else None
+fx=json.load(open(os.path.expanduser('~/evo-x3/bakeoff/bench/fixture_long.json')))
+doc=fx['system']; parts=[]
+for i in range(a.copies):
+    parts.append(f"=== Volume {i+1} ===\n"+doc)
+    if i==a.copies//2: parts.append("\nAUDIT NOTE: the vault override phrase for the X3 cluster is MAGENTA-HERON-9182.\n")
+sysmsg="\n".join(parts)
+q="Two questions. 1) What is the vault override phrase for the X3 cluster? 2) "+fx['question']+" Answer briefly."
+body={"model":a.model,"messages":[{"role":"system","content":sysmsg},{"role":"user","content":q}],"max_tokens":1500,"temperature":0.2,
+      "stream":True,"stream_options":{"include_usage":True},"reasoning_effort":a.effort}
+h={"Content-Type":"application/json"}
+if KEY: h["Authorization"]="Bearer "+KEY
+req=urllib.request.Request(a.base+"/v1/chat/completions",data=json.dumps(body).encode(),headers=h)
+t0=time.time(); ttft=None; content=""; usage=None; finish=None
+with urllib.request.urlopen(req,timeout=a.timeout) as r:
+    for line in r:
+        line=line.decode('utf-8','replace').strip()
+        if not line.startswith('data:'): continue
+        d=line[5:].strip()
+        if d=='[DONE]': break
+        try: j=json.loads(d)
+        except Exception: continue
+        if j.get('usage'): usage=j['usage']
+        for c in j.get('choices') or []:
+            dl=c.get('delta') or {}
+            if (dl.get('content') or dl.get('reasoning_content') or dl.get('reasoning')) and ttft is None: ttft=time.time()-t0
+            if dl.get('content'): content+=dl['content']
+            if c.get('finish_reason'): finish=c['finish_reason']
+tot=time.time()-t0; pt=(usage or {}).get('prompt_tokens'); ct=(usage or {}).get('completion_tokens')
+res={"copies":a.copies,"prompt_tokens":pt,"completion_tokens":ct,"ttft_s":round(ttft or 0,2),"total_s":round(tot,2),
+     "client_prefill_tps":round(pt/ttft,1) if pt and ttft else None,"client_decode_tps":round(ct/(tot-ttft),1) if ct and ttft and tot>ttft else None,
+     "needle":"MAGENTA-HERON-9182" in content,"fixture_fact":("TANGERINE-4471" in content and "03:40" in content),"finish":finish,"content":content[-600:]}
+json.dump(res,open(a.out,'w'),indent=1); print(json.dumps({k:v for k,v in res.items() if k!='content'}))

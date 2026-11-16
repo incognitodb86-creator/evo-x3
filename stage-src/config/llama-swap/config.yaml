@@ -1,0 +1,76 @@
+# llama-swap configuration for EVO-X3 (Phase A2 — Brief rev 5 + Plan rev 8)
+#
+# CRITICAL RULES:
+# 1. NO SINGLE DEFAULT MODEL (Brief rev 5, t311s1125/t312u/t313u):
+#    Callers pick the model explicitly by name:
+#      - flash-next      : coding, general, tools, long context
+#      - gemma4-heretic  : writing (prompts, fiction, uncensored)
+#      - qwen27b         : dense fallback
+# 2. NO SECRETS IN FILE: apiKeys use ${env.*} placeholders resolved from root-only 0600 EnvironmentFile.
+# 3. LOOPBACK ONLY: run with -listen 127.0.0.1:8080 (or 127.0.0.1:8082 behind U14 evo-rate-proxy).
+# 4. ZERO PROMPT CAPTURE (Plan U14): captureBuffer: 0; do NOT enable store.persistCaptures.
+
+healthCheckTimeout: 300
+captureBuffer: 0
+
+apiKeys:
+  - "${env.LLM_KEY_ALIENPC}"
+  - "${env.LLM_KEY_PI}"
+  - "${env.LLM_KEY_BOX}"
+  - "${env.LLM_KEY_HERMES}"
+  - "${env.LLM_KEY_DERRICK_LAPTOP}"
+
+globalConcurrencyLimit: 4
+
+models:
+  "flash-next":
+    # Coding, general, tools, long context (111.3 GB + 2.79 GB Q8 MTP head)
+    # Check Gufo exact CLI flags during U6/U12 live verification on Fedora
+    cmd: |
+      podman run --rm --name llama-swap-flash-next
+        --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups
+        -v /srv/models:/srv/models:ro,Z
+        -e HSA_OVERRIDE_GFX_VERSION=11.5.1
+        ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:PIN_DIGEST_AT_BUILD_TIME
+        --host 127.0.0.1 --port 8081
+        --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL.gguf
+        --mtp /srv/models/flash-next/mtp-shared-Q8_0.gguf
+        --no-mmap --flash-attn --cache-type-k q8_0 --cache-type-v q8_0
+        --parallel 2 --ctx-size 131072 --no-slots
+    proxy: "http://127.0.0.1:8081"
+    ttl: 86400
+    concurrencyLimit: 2
+    checkEndpoint: "/health"
+
+  "gemma4-heretic":
+    # Writing (prompts, fiction, uncensored) — Gemma 4 26B A4B Heretic
+    # U20 later benchmarks PolyStrata strata-poly vs kyuz0 llama.cpp Vulkan RADV
+    cmd: |
+      podman run --rm --name llama-swap-gemma4-heretic
+        --network=host --device=/dev/dri --group-add=keep-groups
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv@sha256:PIN_DIGEST_AT_BUILD_TIME
+        llama-server --host 127.0.0.1 --port 8081
+        -m /srv/models/gemma4-heretic/gemma4-26b-a4b-heretic.gguf
+        --jinja --no-mmap -fa 1 --load-mode none
+        -ctk q8_0 -ctv q8_0 -np 2 -c 65536 --no-slots
+    proxy: "http://127.0.0.1:8081"
+    ttl: 3600
+    concurrencyLimit: 2
+    checkEndpoint: "/health"
+
+  "qwen27b":
+    # Dense fallback (17.6 GB) via kyuz0 Vulkan RADV
+    cmd: |
+      podman run --rm --name llama-swap-qwen27b
+        --network=host --device=/dev/dri --group-add=keep-groups
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv@sha256:PIN_DIGEST_AT_BUILD_TIME
+        llama-server --host 127.0.0.1 --port 8081
+        -m /srv/models/qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf
+        --jinja --no-mmap -fa 1 --load-mode none
+        -ctk q8_0 -ctv q8_0 -np 2 -c 65536 --no-slots
+    proxy: "http://127.0.0.1:8081"
+    ttl: 1800
+    concurrencyLimit: 2
+    checkEndpoint: "/health"

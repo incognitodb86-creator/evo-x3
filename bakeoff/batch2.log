@@ -1,0 +1,27 @@
+=== u20-heretic-q4km-vulkan start 2026-11-15 09:50:53 CST
+LOAD_S 4 up=1
+long {"ttft_s": 17.08, "total_s": 17.77, "prompt_tokens": 18709, "completion_tokens": 43, "client_decode_tps": 61.9, "finish": "stop", "pass": true}
+decode {"ttft_s": 1.02, "total_s": 15.53, "prompt_tokens": 35, "completion_tokens": 900, "client_decode_tps": 62.05, "finish": "length", "pass": true}
+write1 {"ttft_s": 0.21, "total_s": 31.05, "prompt_tokens": 42, "completion_tokens": 1877, "client_decode_tps": 60.86, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.21, "total_s": 37.18, "prompt_tokens": 39, "completion_tokens": 2239, "client_decode_tps": 60.55, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+=== u20-heretic-q4km-vulkan end 2026-11-15 09:52:42 CST
+=== u20-heretic-q4km-rocm start 2026-11-15 09:52:45 CST
+LOAD_S 3 up=1
+long {"ttft_s": 16.17, "total_s": 17.09, "prompt_tokens": 18709, "completion_tokens": 43, "client_decode_tps": 46.42, "finish": "stop", "pass": true}
+decode {"ttft_s": 0.24, "total_s": 16.21, "prompt_tokens": 35, "completion_tokens": 900, "client_decode_tps": 56.36, "finish": "length", "pass": true}
+write1 {"ttft_s": 0.18, "total_s": 24.54, "prompt_tokens": 42, "completion_tokens": 1359, "client_decode_tps": 55.79, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.18, "total_s": 22.25, "prompt_tokens": 39, "completion_tokens": 1235, "client_decode_tps": 55.96, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+=== u20-heretic-q4km-rocm end 2026-11-15 09:54:14 CST
+=== u20-heretic-q8-vulkan-prod-write start 2026-11-15 09:54:17 CST
+LOAD_S 6 up=1
+write1 {"ttft_s": 0.53, "total_s": 33.26, "prompt_tokens": 42, "completion_tokens": 1462, "client_decode_tps": 44.68, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.27, "total_s": 36.7, "prompt_tokens": 39, "completion_tokens": 1587, "client_decode_tps": 43.56, "finish": "stop", "pass": true}
+=== u20-heretic-q8-vulkan-prod-write end 2026-11-15 09:55:33 CST
+=== u20-heretic-q8-rocm-write start 2026-11-15 09:55:37 CST
+LOAD_S 3 up=1
+write1 {"ttft_s": 0.31, "total_s": 28.02, "prompt_tokens": 42, "completion_tokens": 1162, "client_decode_tps": 41.93, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.23, "total_s": 99.59, "prompt_tokens": 39, "completion_tokens": 4000, "client_decode_tps": 40.26, "finish": "length", "pass": false}
+=== u20-heretic-q8-rocm-write end 2026-11-15 09:57:47 CST
+BATCH2_DONE

@@ -1,0 +1,296 @@
+{
+ "arm": "u6-halogen",
+ "model": "qwen3.8-flash-next",
+ "effort": "low",
+ "started": "2026-11-15 10:01:48 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 9.244526624679565,
+   "total_s": 10.458420991897583,
+   "prompt_tokens": 18253,
+   "completion_tokens": 102,
+   "client_decode_tps": 84.02708073665575,
+   "timings": {
+    "prompt_n": 18253,
+    "predicted_n": 102,
+    "prompt_ms": 9193.4,
+    "predicted_ms": 1210.3,
+    "prompt_per_second": 1985.446,
+    "predicted_per_second": 84.277,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "draft_n": 106,
+    "draft_n_accepted": 83,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 19,
+     "head": {
+      "rounds": 19,
+      "drafted": 106,
+      "accepted": 83
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 256,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "code": {
+   "ttft_s": 0.2671847343444824,
+   "total_s": 2.8406150341033936,
+   "prompt_tokens": 141,
+   "completion_tokens": 210,
+   "client_decode_tps": 81.60314270787657,
+   "timings": {
+    "prompt_n": 141,
+    "predicted_n": 210,
+    "prompt_ms": 258.9,
+    "predicted_ms": 2572.7,
+    "prompt_per_second": 544.612,
+    "predicted_per_second": 81.626,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 28,
+    "draft_n": 244,
+    "draft_n_accepted": 168,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 42,
+     "head": {
+      "rounds": 42,
+      "drafted": 244,
+      "accepted": 168
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 383,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.4317338466644287,
+     "total_s": 1.612497091293335,
+     "prompt_tokens": 388,
+     "completion_tokens": 97,
+     "client_decode_tps": 82.1502536103124,
+     "timings": {
+      "prompt_n": 388,
+      "predicted_n": 97,
+      "prompt_ms": 420.1,
+      "predicted_ms": 1179.7,
+      "prompt_per_second": 923.59,
+      "predicted_per_second": 82.224,
+      "cache_n": 0,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 29,
+      "draft_n": 113,
+      "draft_n_accepted": 77,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 19,
+       "head": {
+        "rounds": 19,
+        "drafted": 113,
+        "accepted": 77
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "I'll look up the user by email first, then check their orders.",
+     "reasoning_chars": 228,
+     "tool_calls": [
+      {
+       "id": "call_bdc5acd7725b4d47b6d7852e",
+       "name": "lookup_user",
+       "arguments": "{\"email\": \"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.28580260276794434,
+     "total_s": 0.9227502346038818,
+     "prompt_tokens": 452,
+     "completion_tokens": 52,
+     "client_decode_tps": 81.6393646838991,
+     "timings": {
+      "prompt_n": 132,
+      "predicted_n": 52,
+      "prompt_ms": 265.2,
+      "predicted_ms": 636.0,
+      "prompt_per_second": 497.738,
+      "predicted_per_second": 81.761,
+      "cache_n": 320,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 387,
+      "draft_n": 61,
+      "draft_n_accepted": 42,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 10,
+       "head": {
+        "rounds": 10,
+        "drafted": 61,
+        "accepted": 42
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 50,
+     "tool_calls": [
+      {
+       "id": "call_002e66cce55041839331dfcc",
+       "name": "get_orders",
+       "arguments": "{\"user_id\": \"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.25916194915771484,
+     "total_s": 0.7211587429046631,
+     "prompt_tokens": 525,
+     "completion_tokens": 34,
+     "client_decode_tps": 73.59358432825616,
+     "timings": {
+      "prompt_n": 141,
+      "predicted_n": 34,
+      "prompt_ms": 237.3,
+      "predicted_ms": 460.2,
+      "prompt_per_second": 594.185,
+      "predicted_per_second": 73.881,
+      "cache_n": 384,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 451,
+      "draft_n": 40,
+      "draft_n_accepted": 26,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 8,
+       "head": {
+        "rounds": 8,
+        "drafted": 40,
+        "accepted": 26
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders**.",
+     "reasoning_chars": 79,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  },
+  "decode": {
+   "ttft_s": 0.17110753059387207,
+   "total_s": 9.854533195495605,
+   "prompt_tokens": 59,
+   "completion_tokens": 591,
+   "client_decode_tps": 61.03212029004587,
+   "timings": {
+    "prompt_n": 59,
+    "predicted_n": 591,
+    "prompt_ms": 163.1,
+    "predicted_ms": 9682.7,
+    "prompt_per_second": 361.741,
+    "predicted_per_second": 61.037,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 33,
+    "draft_n": 504,
+    "draft_n_accepted": 336,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 228,
+     "head": {
+      "rounds": 228,
+      "drafted": 504,
+      "accepted": 336
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "# How a Heat Pump Works\n\nA heat pump is a device that moves heat from one place to another, using electricity to power the process. It\u2019s like a refrigerator, but in reverse.\n\nHere\u2019s the basic idea: heat naturally flows from warm places to cool places. A heat pump does the opposite \u2014 it takes heat from a cooler place and pushes it into a warmer place. This sounds counterintuitive, but it\u2019s exactly what your refrigerator does when it pulls heat out of the inside compartment and dumps it into your kitchen.\n\n**The Four Main Parts**\n\nA heat pump has four key components that work together in a loop:\n\n1. **The evaporator** \u2013 This is a coil that absorbs heat from the outside air (or ground). Even when it\u2019s cold outside, there\u2019s still heat energy in the air. The refrigerant inside the coil is very cold and low-pressure, so it pulls heat from the surrounding air and evaporates into a gas.\n\n2. **The compressor** \u2013 This squeezes that gas, which raises both its pressure and its temperature. Think of how a bicycle pump gets warm when you use it \u2014 compressing a gas heats it up. Now the refrigerant is a hot, high-pressure gas.\n\n3. **The condenser** \u2013 This is another coil, located inside your home. The hot gas flows through it and releases its heat into your house. As it gives up heat, the gas condenses back into a liquid.\n\n4. **The expansion valve** \u2013 This is a tiny opening that lets the high-pressure liquid suddenly drop to low pressure. This makes it very cold again, ready to go back to the evaporator and absorb more heat.\n\n**Why It\u2019s Efficient**\n\nThe magic of a heat pump is that it doesn\u2019t create heat \u2014 it moves existing heat. For every unit of electricity it uses, it can move two to four units of heat energy into your home. That means you get more warmth than the electricity you pay for. A traditional electric heater converts electricity directly into heat, so one unit of electricity gives you one unit of heat. A heat pump gives you two to four times that.\n\n**Two-Way Street**\n\nMost heat pumps can also work in reverse. In summer, they pull heat out of your house and dump it outside, acting like an air conditioner. The same four components just work in the opposite direction.\n\n**In Simple Terms**\n\nImagine using a sponge to soak up water from a puddle, then squeezing it into a bucket. You\u2019re not creating water \u2014 you\u2019re just moving it from one place to another. A heat pump does the same thing with heat. It soaks up warmth from the outside air and squeezes it into your home.",
+   "reasoning_chars": 115,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

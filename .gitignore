@@ -1,0 +1,24 @@
+# EVO-X3 host repo (U34). No weights, no secrets, no venvs, no binaries.
+.venv*/
+*.gguf
+*.hgn
+*.safetensors
+*.bin
+*.tar.gz
+*.aria
+*.nohup
+models.json
+models.json.*
+!models.json.example
+auth.json
+models-store.json
+*.env
+*.cred
+hdr
+**/hdr
+*.pid
+sessions/
+_archive/
+bench/**/raw*
+__pycache__/
+*.pyc

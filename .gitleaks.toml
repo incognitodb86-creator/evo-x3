@@ -1,0 +1,5 @@
+[extend]
+useDefault = true
+[allowlist]
+description = "sha256 file hashes in benchmark environment headers are not secrets"
+regexes = ['''^[0-9a-f]{64}$''']

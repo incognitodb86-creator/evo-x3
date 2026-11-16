@@ -1,0 +1,98 @@
+# llama-swap U13 configuration (deploy ONLY AFTER day-1 setup is live, per R11)
+# Adds persistent "small" embedding group alongside "main" without unloading flash-next.
+# Note: persistent: true on "small" is REQUIRED (exclusive defaults to true on groups).
+
+healthCheckTimeout: 300
+captureBuffer: 0
+
+apiKeys:
+  - "${env.LLM_KEY_ALIENPC}"
+  - "${env.LLM_KEY_PI}"
+  - "${env.LLM_KEY_BOX}"
+  - "${env.LLM_KEY_HERMES}"
+  - "${env.LLM_KEY_DERRICK_LAPTOP}"
+
+globalConcurrencyLimit: 6
+
+routing:
+  router:
+    use: group
+
+groups:
+  "main":
+    swap: true
+    exclusive: true
+    members:
+      - "flash-next"
+      - "gemma4-heretic"
+      - "qwen27b"
+
+  "small":
+    swap: false
+    persistent: true
+    exclusive: false
+    members:
+      - "embed-small"
+
+models:
+  "flash-next":
+    cmd: |
+      podman run --rm --name llama-swap-flash-next
+        --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups
+        -v /srv/models:/srv/models:ro,Z
+        -e HSA_OVERRIDE_GFX_VERSION=11.5.1
+        ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:PIN_DIGEST_AT_BUILD_TIME
+        --host 127.0.0.1 --port 8081
+        --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL.gguf
+        --mtp /srv/models/flash-next/mtp-shared-Q8_0.gguf
+        --no-mmap --flash-attn --cache-type-k q8_0 --cache-type-v q8_0
+        --parallel 2 --ctx-size 131072 --no-slots
+    proxy: "http://127.0.0.1:8081"
+    ttl: 86400
+    concurrencyLimit: 2
+    checkEndpoint: "/health"
+
+  "gemma4-heretic":
+    cmd: |
+      podman run --rm --name llama-swap-gemma4-heretic
+        --network=host --device=/dev/dri --group-add=keep-groups
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv@sha256:PIN_DIGEST_AT_BUILD_TIME
+        llama-server --host 127.0.0.1 --port 8081
+        -m /srv/models/gemma4-heretic/gemma4-26b-a4b-heretic.gguf
+        --jinja --no-mmap -fa 1 --load-mode none
+        -ctk q8_0 -ctv q8_0 -np 2 -c 65536 --no-slots
+    proxy: "http://127.0.0.1:8081"
+    ttl: 3600
+    concurrencyLimit: 2
+    checkEndpoint: "/health"
+
+  "qwen27b":
+    cmd: |
+      podman run --rm --name llama-swap-qwen27b
+        --network=host --device=/dev/dri --group-add=keep-groups
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv@sha256:PIN_DIGEST_AT_BUILD_TIME
+        llama-server --host 127.0.0.1 --port 8081
+        -m /srv/models/qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf
+        --jinja --no-mmap -fa 1 --load-mode none
+        -ctk q8_0 -ctv q8_0 -np 2 -c 65536 --no-slots
+    proxy: "http://127.0.0.1:8081"
+    ttl: 1800
+    concurrencyLimit: 2
+    checkEndpoint: "/health"
+
+  "embed-small":
+    # Runs on separate loopback port 8083 so it stays resident beside flash-next on 8081
+    cmd: |
+      podman run --rm --name llama-swap-embed-small
+        --network=host --device=/dev/dri --group-add=keep-groups
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv@sha256:PIN_DIGEST_AT_BUILD_TIME
+        llama-server --host 127.0.0.1 --port 8083
+        -m /srv/models/embed-small/embed.gguf
+        --embeddings --no-mmap -fa 1 --load-mode none -c 8192 --no-slots
+    proxy: "http://127.0.0.1:8083"
+    ttl: 0
+    concurrencyLimit: 4
+    checkEndpoint: "/health"
