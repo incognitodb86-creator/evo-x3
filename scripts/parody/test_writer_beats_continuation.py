@@ -103,11 +103,24 @@ class TestWriterBeatsContinuation(unittest.TestCase):
         self.assertEqual(plan["clip_count"], 3)
         self.assertEqual(plan["base_frames"], 192)
         self.assertEqual(plan["total_frames"], 566)
-        self.assertEqual(plan["overlap_frames"], 22)
+        self.assertEqual(plan["overlap_frames"], 22)  # asked for
+        self.assertEqual(plan["overlap_frames_applied"], [39, 22])  # each beat's audio-aligned 17k + 5 value
         self.assertEqual([b["frames"] for b in plan["beats"]], [192, 379, 566])
-        for b in plan["beats"][1:]:
-            self.assertEqual(b["layout"]["window_frames"], 209)
-            self.assertLessEqual(b["layout"]["window_frames"], br.CONTINUATION_WINDOW_MAX_FRAMES)
+        b2_lay, b3_lay = (b["layout"] for b in plan["beats"][1:])
+        # c2-samp fix: every continuation window's allocated audio length must equal the official
+        # temporal_shape(window) length that MiniMaxH3ReferenceToVideo conditions for that window_length. Off a
+        # 192-frame tail the asked 22/187 gives 349 tokens for a 348-token 209f window, and that beat's sampler
+        # fails (live run prompt_id 26a05372: shape mismatch [2000, 32] vs [2074, 32] at c2_samp). Beat 3 from the
+        # 379-frame latent keeps 22. The visible 192 + 187 + 187 = 566 frames are unchanged.
+        self.assertEqual((b2_lay["overlap_frames"], b2_lay["window_frames"]), (39, 226))
+        self.assertEqual((b3_lay["overlap_frames"], b3_lay["window_frames"]), (22, 209))
+        for lay in (b2_lay, b3_lay):
+            self.assertLessEqual(lay["window_frames"], br.CONTINUATION_WINDOW_MAX_FRAMES)
+            self.assertEqual(lay["window_audio_t"], lay["window_audio_official_t"])
+            self.assertTrue(br.continuation_window_audio_is_aligned(
+                lay["base_frames"], lay["overlap_frames"], lay["extension_frames"]))
+        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 39)
+        self.assertEqual(g["c3_gen"]["inputs"]["overlap_frames"], 22)
         self.assertEqual({k for k in g if re.fullmatch(r"c\d", k)}, {"c0", "c2", "c3"})
         self.assertEqual(g["c2_gen"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
         self.assertEqual(g["c3_gen"]["inputs"]["previous_av_latent"], ["c2_append", 0])
