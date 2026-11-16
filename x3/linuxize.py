@@ -13,7 +13,7 @@ Usage: linuxize.py FILE... (in place; writes FILE.bak-x3linux once before the fi
 import re, sys
 from pathlib import Path
 
-HOME = "/home/derekboone"
+HOME = str(Path.home())
 SEP = r"(?:\\\\|\\|/)"
 SEG = r"[^\s\"'`|?\\/:;,()\[\]{}]+"
 def path_re(prefix):

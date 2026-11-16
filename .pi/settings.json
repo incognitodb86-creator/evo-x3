@@ -30,19 +30,19 @@
     "-builtin:llama.cpp"
   ],
   "skills": [
-    "/home/derekboone/AI/community/skills",
-    "/home/derekboone/AI/community/agent-shared/skills",
-    "/home/derekboone/AI/fleet-brain/20_skills/current",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/fantasy-news-scout",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/household-money-tracker",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/tech-deals-watch",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/imagine-dump-ops",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
-    "-/home/derekboone/AI/community/agent-shared/skills/google-voice-texts"
+    "~/AI/community/skills",
+    "~/AI/community/agent-shared/skills",
+    "~/AI/fleet-brain/20_skills/current",
+    "-~/AI/fleet-brain/20_skills/current/fantasy-news-scout",
+    "-~/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
+    "-~/AI/fleet-brain/20_skills/current/household-money-tracker",
+    "-~/AI/fleet-brain/20_skills/current/tech-deals-watch",
+    "-~/AI/fleet-brain/20_skills/current/imagine-dump-ops",
+    "-~/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
+    "-~/AI/community/agent-shared/skills/google-voice-texts"
   ],
   "prompts": [
-    "/home/derekboone/AI/community/agent-shared/prompts"
+    "~/AI/community/agent-shared/prompts"
   ],
   "compaction": {
     "enabled": true,
