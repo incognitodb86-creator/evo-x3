@@ -3465,6 +3465,24 @@ def lint_writer_prompt(raw: str, cast: Dict[str, Any]) -> Tuple[List[Dict[str, A
         if covered and pen is not None:
             issues.append({"code": "W5", "idx": pen, "text": units[pen],
                            "why": _LINT_CODES["W5"].format(items=" and ".join(covered))})
+    _neg_lint_rx = re.compile(
+        r"(?i)\b(?:not|never|nothing|no|without|avoid|neither|nor|nowhere|cannot|"
+        r"don't|doesn't|didn't|won't|can't|isn't|aren't|wasn't|weren't|couldn't|wouldn't|shouldn't)\b"
+    )
+    for i, u in enumerate(units):
+        pu = _D_RE.sub("", u)
+        _dm = _DIAL_RE.search(pu) or re.search(r"(?i)\b\d{1,3}fps\b", pu)
+        if _dm:
+            issues.append({"code": "dial", "idx": i, "text": u,
+                           "why": f"remove technical/dial term '{_dm.group(0)}'; film look is light, lens and grain words"})
+        elif _THROAT_RE.search(pu):
+            issues.append({"code": "throat", "idx": i, "text": u,
+                           "why": "write throat contact exactly as 'his hand on her throat' (never slide/grip/close/choke throat wording)"})
+        elif (_neg_lint_rx.search(pu) or _NEGATION_START_RE.search(pu) or _NEGATION_CLAUSE_RE.search(pu)
+              or any(rx.search(pu) for rx, _ in _NEG_MAP)):
+            _nm = _neg_lint_rx.search(pu)
+            issues.append({"code": "negatives", "idx": i, "text": u,
+                           "why": f"negative wording outside <d> ('{_nm.group(0) if _nm else 'negation'}'); state it positively"})
     seen, uniq = set(), []
     for it in sorted(issues, key=lambda x: x["idx"]):
         if it["idx"] not in seen:
