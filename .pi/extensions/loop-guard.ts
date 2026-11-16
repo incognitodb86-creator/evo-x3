@@ -1,23 +1,14 @@
 /**
- * loop-guard: stops the run on two kinds of loops.
- *  Rule 1 (2026-10-30, Forge/Sydney): the SAME tool call (same tool name + identical
- *    args) 3 times in a row.
- *  Rule 2 (Max Architect 3, 2026-11-13, Derrick t1355): the parody writer check
- *    (submit_parody_run.py, e.g. `writer-run`) called more than RUN_LIMIT times on the
- *    same run folder in one agent run, even when the arguments differ each time
- *    (Gemma 2026-11-13 retried 40-70 slightly varied writer-run calls).
+ * loop-guard: stops the run when the SAME tool call (same tool name + identical
+ *   args) is made 3 times in a row (2026-10-30, Forge/Sydney).
+ * Rule 2 (per-folder writer-run cap) was removed Max Architect 2026-11-16 (Derrick t2036u).
  * No network, no file I/O, no env/credential access. Pure in-memory counters.
  * Rule 1 modelled on the tool_call hook in alisorcorp/pi-small-model-addons@e251d0b
  * repetition-loop-abort.ts.
- *
- * 2026-11-15 U31 (Antigravity SF-01, Derrick t1819u): parse CLI flags without
- * assuming positional order, keep Linux path case, and do not clear per-folder
- * runCounts on agent_settled or on a trip (only session_start resets them).
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const LIMIT = 3;
-const RUN_LIMIT = 4; // 5th check call on the same run folder is blocked
 
 function stable(v: unknown): string {
   if (v === null || typeof v !== "object") return JSON.stringify(v);
@@ -100,31 +91,11 @@ export function parodyRunKey(input: unknown): string | null {
 export default function (pi: ExtensionAPI) {
   let last = "";
   let count = 0;
-  const runCounts = new Map<string, number>();
   const resetStreak = () => { last = ""; count = 0; };
-  const resetAll = () => { resetStreak(); runCounts.clear(); };
-  pi.on("session_start", resetAll);
-  // agent_settled fires between tool rounds; clearing runCounts there let the writer retry cap reset (SF-01).
+  pi.on("session_start", resetStreak);
   pi.on("agent_settled", resetStreak);
 
   pi.on("tool_call", async (event, ctx) => {
-    // Rule 2: repeated writer checks on one run folder, args may differ.
-    let runKey: string | null = null;
-    try { runKey = parodyRunKey(event.input); } catch { runKey = null; }
-    if (runKey) {
-      const n = (runCounts.get(runKey) ?? 0) + 1;
-      runCounts.set(runKey, n);
-      if (n > RUN_LIMIT) {
-        resetStreak();
-        if (ctx.hasUI) ctx.ui.notify(`loop-guard: submit_parody_run called ${n}x on the same run folder - stopping`, "warning");
-        return {
-          block: true,
-          terminate: true,
-          reason: `loop-guard: submit_parody_run has already run ${RUN_LIMIT} times on this run folder in this run. Stopping; report the last NOT_READY reasons to Derrick instead of retrying.`,
-        };
-      }
-    }
-
     // Rule 1: identical call repeated.
     let key: string;
     try { key = event.toolName + "::" + stable(event.input); } catch { key = event.toolName + "::?"; }
