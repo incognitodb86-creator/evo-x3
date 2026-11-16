@@ -5190,7 +5190,7 @@ MEASURED_AUDIO_REFMOD_LATENT_T = 1000
 AUDIO_REFMOD_ROW_CAP = 2 * MEASURED_AUDIO_REFMOD_LATENT_T
 # A voice RefMod cut down is a NEW file beside the original, never an edit of it:
 # scripts/parody/voice_refmod_trim.py slices the latent on a speech gap and writes the trimmed copy.
-COMFY_REFMOD_DIR = r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods"
+COMFY_REFMOD_DIR = r"/home/derekboone/AI/comfy-alienpc/models/refmods"
 # The trimmed copy's mod name is the ORIGINAL name plus this suffix: voice_refmod_trim.py writes
 # `<stem>_23s.safetensors` beside the original, so `minimaxh3_oc_poolclub_v1_refmod_audio` gains
 # `minimaxh3_oc_poolclub_v1_refmod_audio_23s` and `is_audio_refmod` still recognises it.
@@ -5201,11 +5201,11 @@ CONTINUATION_VOICE_REFMOD_LATENT_T = 920
 # whenever a graph has keyframes AND refs, set cond_audio_latents to the refs' audio only, dropping the latent-tail
 # keyframe audio core had packed (upstream jlucasmcrell/ComfyUI-H3-Multishot issue #23, also #20). The community fix
 # (jalberty2018 fork: keyframe audio first, then refs) is applied on AlienPc; backup + FIX.md in
-# C:\AI\community\_archive\multishot-audio-merge-20261116-0651. With it, packed = 2*voice tokens + 2*tail audio
+# /home/derekboone/AI/community/_archive/multishot-audio-merge-20261116-0651. With it, packed = 2*voice tokens + 2*tail audio
 # tokens = reserved (2000/2130/2074 on the 192+187+187 pack), so the full voice RefMod stays on every beat.
 # If a pack update reverts the file, runtime_packs_tail_audio() turns False and continuation beats fall back to
 # voice-off (8ee347e) instead of crashing at c2_samp.
-MULTISHOT_AVBANK_PROBE = (r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\custom_nodes\ComfyUI-H3-Multishot"
+MULTISHOT_AVBANK_PROBE = (r"/home/derekboone/AI/comfy-alienpc/custom_nodes/ComfyUI-H3-Multishot"
                           r"\h3_avbank_probe.py")
 MULTISHOT_REFS_ONLY_AUDIO = 'payload["cond_audio_latents"] = aud'
 

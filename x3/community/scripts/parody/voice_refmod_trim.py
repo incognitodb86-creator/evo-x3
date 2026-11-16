@@ -32,11 +32,11 @@ optional steps that need the installed audio VAE, so run this file with the Comf
 
 Usage:
   python voice_refmod_trim.py --scan
-  python voice_refmod_trim.py --decode-source C:\AI\community\runs\<run>\dry-voice-cap\source_25s.wav
+  python voice_refmod_trim.py --decode-source /home/derekboone/AI/community/runs/<run>/dry-voice-cap/source_25s.wav
   python voice_refmod_trim.py --tokens 920 --dry-run --list-candidates \
-      --from-wav C:\AI\community\runs\<run>\dry-voice-cap\source_25s.wav
+      --from-wav /home/derekboone/AI/community/runs/<run>/dry-voice-cap/source_25s.wav
   python voice_refmod_trim.py --tokens 920 --from-wav ...\source_25s.wav \
-      --decode C:\AI\community\runs\<run>\dry-voice-cap\trimmed_23s.wav
+      --decode /home/derekboone/AI/community/runs/<run>/dry-voice-cap/trimmed_23s.wav
 """
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ TOKENS_PER_SECOND = 40.0          # the 40 Hz audio-latent rate (build_request.A
 TOKEN_MS = 25.0                   # one latent token = 25 ms
 SAMPLES_PER_TOKEN = 800           # 32 kHz / 40 Hz
 SAMPLE_RATE = 32000               # the sample rate the H3 audio VAE encodes at (audio.py: encode_audio)
-REFMOD_DIR = Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods")
+REFMOD_DIR = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
 AUDIO_VAE = REFMOD_DIR.parent / "audio_vae" / "minimax_h3_audio_vae_fp32.safetensors"
 DEFAULT_SOURCE = REFMOD_DIR / "minimaxh3_oc_poolclub_v1_refmod_audio.safetensors"
 COND_AUDIO_ROW_CAP = 2000         # build_request.AUDIO_REFMOD_ROW_CAP = 2 * latent_t of the base reference

@@ -142,7 +142,7 @@ class TestWriterBeatsContinuation(unittest.TestCase):
     # overlap_audio_t = audio_t(base) - audio_t(base - overlap), 65 rows x2 at base 192 / overlap 39 and 37 x2 at
     # base 379 / overlap 22 - and the RefMod's value tensor never grows into those slots:
     #   value [2000, 32] vs indexing result [2130, 32] (c2_samp, prompt_id 332f0637) and [2074, 32] (beat 3).
-    # All 44 continuation graphs in C:\AI\community\runs that produced an mp4 load no audio RefMod on the tail beat;
+    # All 44 continuation graphs in /home/derekboone/AI/community/runs that produced an mp4 load no audio RefMod on the tail beat;
     # the only one that carried it has no output. So the voice reference stays on beat 1 and the voice carries on
     # the tail, which is beat 1's sampled audio. The visible length is untouched: 192 + 187 + 187 = 566 frames.
     VOICE_REFMOD = "minimaxh3_oc_poolclub_v1_refmod_audio"
