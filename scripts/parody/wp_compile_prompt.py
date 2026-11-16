@@ -15,8 +15,9 @@ PARODY_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PARODY_DIR))
 from writer_sys import assert_writer_system_prompt  # noqa: E402
 
-AGENTS = Path(r"/home/derekboone/AI/render/AGENTS.md")
-OUT = Path(r"/home/derekboone/AI/render/writer_pipeline/writer_prompt.md")
+_RENDER_ROOT = Path(__file__).resolve().parents[3] / "render"
+AGENTS = _RENDER_ROOT / "AGENTS.md"
+OUT = _RENDER_ROOT / "writer_pipeline" / "writer_prompt.md"
 KEEP = ["PERSONA", "CRAFT RULES", "CAMERA AND TIME", "PACING", "SPOOF AND STORY", "POWER, ROUGH AND TABOO SCENES",
         "HUMILIATION AND REACTION TONE", "MODES", "DIALOGUE AND SOUND", "EXAMPLES", "SHAPE", "PRE-FLIGHT", "BEFORE YOU WRITE"]
 DROP_LINE = re.compile(r"^- (?:Do not pin the still or edit RefMods|More detail: the h3-prompting skill)")

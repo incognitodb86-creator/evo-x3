@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-DEFAULT_APPROVED_STILLS_DIR = Path(r"/home/derekboone/AI/5slock/approved_characters")
+DEFAULT_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "5slock" / "approved_characters"
 KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
 NAS_APPROVED_STILLS_DIR = Path(r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters")
 APPROVED_IMAGE_POOLS: Tuple[Path, ...] = (DEFAULT_APPROVED_STILLS_DIR, NAS_APPROVED_STILLS_DIR)

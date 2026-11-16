@@ -45,9 +45,10 @@ import wp_lint  # noqa: E402
 import wp_state  # noqa: E402
 from wp_llm import Client, WriterDown  # noqa: E402
 
-PIPE_DIR = Path(os.environ.get("WP_HOME", r"/home/derekboone/AI/render/writer_pipeline"))
+_AI_ROOT = Path(__file__).resolve().parents[3]
+PIPE_DIR = Path(os.environ.get("WP_HOME", str(_AI_ROOT / "render" / "writer_pipeline")))
 CONFIG_PATH = PIPE_DIR / "config.yaml"
-RUNS_ROOT = Path(r"/home/derekboone/AI/community/runs")
+RUNS_ROOT = _AI_ROOT / "community" / "runs"
 SUBMIT_PY = PARODY_DIR / "submit_parody_run.py"
 VERSION = "wp-2026-11-13.1"
 
@@ -1107,7 +1108,7 @@ def kept_lines(full: str, rep: Dict[str, Any]) -> List[str]:
 def auto_still(cfg: Dict[str, Any], run_id: str, ask: str) -> str:
     pool = []
     for g in cfg.get("still_pool") or []:
-        pool += [p for p in glob.glob(g, recursive=True) if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
+        pool += [p for p in glob.glob(os.path.expanduser(g), recursive=True) if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
     if not pool:
         raise RuntimeError("still auto: the still pool is empty")
     return random.Random(seed_for(run_id, ask, 7)).choice(sorted(pool))

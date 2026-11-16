@@ -20,7 +20,9 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import yaml
 
 # Add community scripts to path for make_b2_request and comm
-SCRIPTS_DIR = Path(r"/home/derekboone/AI/community/scripts")
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent
+_COMMUNITY_ROOT = SCRIPTS_DIR.parent
+_AI_ROOT = _COMMUNITY_ROOT.parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
@@ -34,8 +36,8 @@ if str(PARODY_DIR) not in sys.path:
 from writer_sys import assert_writer_system_prompt, AgentInstructionsInWriterPrompt
 import scene_addenda
 
-DEFAULT_REFMOD_TEMPLATE = Path(r"/home/derekboone/AI/community/templates/b2_refmod.api.json")
-COMFY_INPUT_COMMUNITY = Path(r"/home/derekboone/AI/comfy-alienpc/input/community")
+DEFAULT_REFMOD_TEMPLATE = _COMMUNITY_ROOT / "templates" / "b2_refmod.api.json"
+COMFY_INPUT_COMMUNITY = _AI_ROOT / "comfy-alienpc" / "input" / "community"
 
 # --- U1: H3 frame grid + single-clip ceiling -------------------------------------------------
 H3_FPS = 24
@@ -5190,7 +5192,7 @@ MEASURED_AUDIO_REFMOD_LATENT_T = 1000
 AUDIO_REFMOD_ROW_CAP = 2 * MEASURED_AUDIO_REFMOD_LATENT_T
 # A voice RefMod cut down is a NEW file beside the original, never an edit of it:
 # scripts/parody/voice_refmod_trim.py slices the latent on a speech gap and writes the trimmed copy.
-COMFY_REFMOD_DIR = r"/home/derekboone/AI/comfy-alienpc/models/refmods"
+COMFY_REFMOD_DIR = str(_AI_ROOT / "comfy-alienpc" / "models" / "refmods")
 # The trimmed copy's mod name is the ORIGINAL name plus this suffix: voice_refmod_trim.py writes
 # `<stem>_23s.safetensors` beside the original, so `minimaxh3_oc_poolclub_v1_refmod_audio` gains
 # `minimaxh3_oc_poolclub_v1_refmod_audio_23s` and `is_audio_refmod` still recognises it.
@@ -5205,8 +5207,7 @@ CONTINUATION_VOICE_REFMOD_LATENT_T = 920
 # tokens = reserved (2000/2130/2074 on the 192+187+187 pack), so the full voice RefMod stays on every beat.
 # If a pack update reverts the file, runtime_packs_tail_audio() turns False and continuation beats fall back to
 # voice-off (8ee347e) instead of crashing at c2_samp.
-MULTISHOT_AVBANK_PROBE = (r"/home/derekboone/AI/comfy-alienpc/custom_nodes/ComfyUI-H3-Multishot"
-                          r"\h3_avbank_probe.py")
+MULTISHOT_AVBANK_PROBE = str(_AI_ROOT / "comfy-alienpc" / "custom_nodes" / "ComfyUI-H3-Multishot" / "h3_avbank_probe.py")
 MULTISHOT_REFS_ONLY_AUDIO = 'payload["cond_audio_latents"] = aud'
 
 
@@ -6034,8 +6035,8 @@ def main(argv=None) -> int:
 
     # Import resolve from same package
     from resolve import resolve_identities, validate_reference_images
-    index_dir = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
-    refmods_dir = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
+    index_dir = _COMMUNITY_ROOT / "index" / "h3-known-characters"
+    refmods_dir = Path(COMFY_REFMOD_DIR)
     aliases_path = Path(__file__).parent / "aliases.json"
 
     if args.frames is not None:
