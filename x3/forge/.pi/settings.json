@@ -35,27 +35,27 @@
   },
   "extensions": [
     "-builtin:llama.cpp",
-    "/home/derekboone/AI/community/agent-shared/extensions"
+    "/home/evo/AI/community/agent-shared/extensions"
   ],
   "skills": [
-    "/home/derekboone/AI/community/skills",
-    "/home/derekboone/AI/community/agent-shared/skills",
-    "/home/derekboone/AI/fleet-brain/20_skills/current",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/fantasy-news-scout",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/household-money-tracker",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/tech-deals-watch",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/imagine-dump-ops",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-hc-render",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-max-ref2va-prompt",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-parody-identity",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-prompting",
-    "-/home/derekboone/AI/fleet-brain/20_skills/current/video-render",
-    "-/home/derekboone/AI/community/agent-shared/skills/google-voice-texts"
+    "/home/evo/AI/community/skills",
+    "/home/evo/AI/community/agent-shared/skills",
+    "/home/evo/AI/fleet-brain/20_skills/current",
+    "-/home/evo/AI/fleet-brain/20_skills/current/fantasy-news-scout",
+    "-/home/evo/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
+    "-/home/evo/AI/fleet-brain/20_skills/current/household-money-tracker",
+    "-/home/evo/AI/fleet-brain/20_skills/current/tech-deals-watch",
+    "-/home/evo/AI/fleet-brain/20_skills/current/imagine-dump-ops",
+    "-/home/evo/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
+    "-/home/evo/AI/fleet-brain/20_skills/current/h3-hc-render",
+    "-/home/evo/AI/fleet-brain/20_skills/current/h3-max-ref2va-prompt",
+    "-/home/evo/AI/fleet-brain/20_skills/current/h3-parody-identity",
+    "-/home/evo/AI/fleet-brain/20_skills/current/h3-prompting",
+    "-/home/evo/AI/fleet-brain/20_skills/current/video-render",
+    "-/home/evo/AI/community/agent-shared/skills/google-voice-texts"
   ],
   "prompts": [
-    "/home/derekboone/AI/community/agent-shared/prompts"
+    "/home/evo/AI/community/agent-shared/prompts"
   ],
   "compaction": {
     "enabled": true,

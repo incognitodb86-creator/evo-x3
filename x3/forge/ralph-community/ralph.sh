@@ -49,13 +49,20 @@ echo $$ >"$lock"
 trap 'rm -f "$lock"' EXIT
 stall=0; stopReason=''
 
-# GPU lock rule (same semantics as AlienPc gpu_guard): a lock with a live PID defers; a dead PID is stale and ignored.
+# GPU lock rule: test with flock -n (same as queue-remote.sh / remote_comfy.py).
+# A 0-byte or unlocked file is free; only an active flock is busy.
 lock_pid() { [ -f "$GpuLockPath" ] || { echo 0; return; }; local p; p="$(grep -oE '[0-9]+' "$GpuLockPath" | head -1)"; echo "${p:--1}"; }
 gpu_busy() {
-  local p; p="$(lock_pid)"
-  [ "$p" = 0 ] && return 1
-  if [ "$p" = -1 ]; then BUSY="lock $GpuLockPath present without a pid"; return 0; fi
-  if kill -0 "$p" 2>/dev/null; then BUSY="lock held by live pid $p"; return 0; fi
+  [ -e "$GpuLockPath" ] || return 1
+  if ! flock -n "$GpuLockPath" true 2>/dev/null; then
+    local p; p="$(lock_pid)"
+    if [ "$p" -gt 0 ] 2>/dev/null; then
+      BUSY="flock held on $GpuLockPath (pid $p)"
+    else
+      BUSY="flock held on $GpuLockPath"
+    fi
+    return 0
+  fi
   return 1
 }
 in_tree() { # $1 child pid, $2 root pid
