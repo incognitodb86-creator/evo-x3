@@ -3139,7 +3139,7 @@ def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) 
     else:
         subject_definitions_lines = [
             f"{R11_PICTURE}, and {_scene(cast)['setting']}, its light and the opening framing: {cast['still']}.",
-            f"{R11_SUBJECT}; {cast['woman']}; she is (S1), and <Audio 1> defines her voice timbre.",
+            f"{R11_SUBJECT}; {cast['woman']}; she is (S1)" + _trigger_clause(cast) + ", and <Audio 1> defines her voice timbre.",
         ]
     off_s2 = bool(cast.get("off_still_s2"))
     off_s3 = bool(cast.get("off_still_s3")) and not cast.get("s3_in_frame")  # acc4: continued MMF, S3 is in the inherited frame
@@ -3851,7 +3851,7 @@ def build_writer_continuation_request(
         camera=b2_kept[0] if b2_kept and _CAMERA_SENTENCE_RE.search(_D_RE.sub("", b2_kept[0])) else None,
     )
     subj2 = "\n".join([
-        f"<Subject 1> is the exact same woman from beat 1, preserving her face, hairstyle, body, skin and figure with complete fidelity; {cast['woman']}; she is (S1), and <Audio 1> defines her voice timbre.",
+        f"<Subject 1> is the exact same woman from beat 1, preserving her face, hairstyle, body, skin and figure with complete fidelity; {cast['woman']}; she is (S1)" + _trigger_clause(cast) + ", and <Audio 1> defines her voice timbre.",
         f"<Subject 2> is {cast['man']}; he is (S2).",
         R11_HAND,
     ])

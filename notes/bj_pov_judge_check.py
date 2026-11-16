@@ -19,18 +19,18 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(r"C:\AI\community")
-RUNDIR = ROOT / "runs" / "bj_pov_20261030" / "b1_s51083020"
-CLIP = RUNDIR / "bj_pov_b1_s51083020.mp4"
-PROMPT_OF_RECORD = Path(r"C:/Users/derek/sydney/prompts/bj_pov_cell1_20261030.txt")
-START_IMG = "community/bj_pov_20261030/start_pov_768x1344.png"
-FACE_A = "community/bj_pov_20261030/face_a.png"
-FACE_B = "community/bj_pov_20261030/face_b.png"
-STAGE = ROOT / "review" / "bj-pov-2026-10-30"
+RUNDIR = Path(r"C:\Users\derek\sydney\work\bj_pov_20261102\d1_s51083111")  # retargeted 2026-11-02 brief (e)
+CLIP = RUNDIR / "d1_s51083111.mp4"
+PROMPT_OF_RECORD = RUNDIR / "d1_s51083111_prompt_of_record.txt"  # c0 prompt from d1 api.json
+START_IMG = "community/bj_pov_20261102/start_bj_768x1344.png"
+FACE_A = "community/bj_pov_20261102/face_a.png"
+FACE_B = "community/bj_pov_20261102/face_b.png"
+STAGE = ROOT / "review" / "bj-pov-d1-2026-11-02"
 JRUNS, JPROMPTS, JOUT = STAGE / "judge_runs", STAGE / "judge_prompts", STAGE / "judge_out"
 MANIFEST = STAGE / "judge_manifest.json"
 JUDGE_DIR = ROOT / "judge"
 sys.path.insert(0, str(JUDGE_DIR))
-TAG = "bjpov_b1_s51083020"
+TAG = "bjpov_d1_s51083111"
 POSE = ("the act is oral, not a target pose: by the last frame the woman's mouth is on the man's shaft with "
         "deep oral contact and the motion is still running; judge anatomy and the contact, and treat the "
         "start-image comparison checks as not applicable (the start image is the man's own lap and contains "
@@ -52,7 +52,7 @@ def build():
         shutil.copyfile(CLIP, dst)
     jobs = [{"tag": TAG, "guides": [{"image": START_IMG}],
              "refs": [START_IMG, FACE_A, FACE_B], "prompt_file": "bj_pov_prompt.txt",
-             "pose": POSE, "arm": "b1_s51083020", "judged_file": str(CLIP),
+             "pose": POSE, "arm": "d1_s51083111", "judged_file": str(CLIP),
              "judged_size": "768x1344", "instrument_caveat": CAVEAT}]
     MANIFEST.write_text(json.dumps({"jobs": jobs}, indent=1), encoding="utf-8")
     print("staged 1 clip, manifest", MANIFEST, "refs=%d" % len(jobs[0]["refs"]))
