@@ -9,7 +9,7 @@ timeout_s: 900
 retry_backoff_s: [10, 30, 90]
 writer_prompt: writer_prompt.md          # relative to /home/evo/AI/render/writer_pipeline
 writer_prompt_sha256: 7a9479b545df5475968202967808f305e3a86670702e514d49207659f360508c
-persona: current                        # frozen by the persona arm (current | option1 | option2)
+persona: current                        # pinned
 n_candidates: 1
 min_ready_score: 60  # reported only; never blocks READY (Max Architect 2026-11-16 (Derrick t2036u))
 tie_points: 3
@@ -20,11 +20,6 @@ samplers:
     top_p: 0.95
     top_k: 64
     min_p: 0.10
-  B:   # spec arm B; DRY / XTC are not implemented by PolyStrata (serve/server.py sampling_keys), so they are not sent
-    temperature: 1.0
-    top_p: 0.95
-    top_k: 64
-    min_p: 0.03
 beat_card_sampler:
   temperature: 0.7
 beat_card_max_tokens: 1400
