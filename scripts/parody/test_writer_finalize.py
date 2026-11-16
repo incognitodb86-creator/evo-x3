@@ -244,7 +244,7 @@ def test_fix3_a02_regression_all_four_spoken_lines_and_closing_text_survive():
 
 
 def test_fix3_a02_real_writer_output_keeps_four_lines():
-    raw_path = Path(r"/home/derekboone/AI/community/runs/oc_10pos_20261111/writer_test_pipeline/A/02_doggy/writer_output.txt")
+    raw_path = Path(__file__).resolve().parents[2] / "runs" / "oc_10pos_20261111" / "writer_test_pipeline" / "A" / "02_doggy" / "writer_output.txt"
     if not raw_path.exists():
         pytest.skip("A_02 writer output not on this machine")
     p, _ = br.finalize_writer_prompt(raw_path.read_text(encoding="utf-8"), DOGGY, strict=False)
@@ -1546,7 +1546,7 @@ def test_step1_w4_does_not_drop_partner_garments_or_still_garments():
 
 
 def test_step1_comm_bad_re_loosened_for_adult_dirty_talk_and_18_plus_preserved():
-    sys.path.insert(0, str(Path(r"/home/derekboone/AI/community/scripts")))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     import comm
     assert comm.guard_ok("good girl, take it")
     assert comm.guard_ok("bad girls get punished")
