@@ -28,9 +28,7 @@ exec pi --approve \
   -e "$R/.pi/npm/node_modules/pi-memory/index.ts" \
   --no-mcp \
   --no-skills \
-  --skill "$S/video-render" --skill "$S/image-render" --skill "$S/comfy-render" \
-  --skill "$S/h3-parody-identity" --skill "$S/h3-prompting" --skill "$S/h3-max-ref2va-prompt" \
-  --skill "$S/h3-hc-render" --skill "$S/alienpc-hardcore-i2v-director" --skill "$S/alienpc-stills-pose-edit-prompting" \
+  --skill "$S/h3-parody-identity" --skill "$S/h3-prompting" \
   --no-context-files \
   --append-system-prompt "$R/AGENTS.md" \
   --model "${RENDER_MODEL:-x3-local/gemma4-heretic}" \
