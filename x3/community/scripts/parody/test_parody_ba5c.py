@@ -153,7 +153,7 @@ class TestBA5cFixes(unittest.TestCase):
         self.assertFalse(result["submitted"])
         self.assertEqual(result["returncode"], 7)
         with mock.patch.object(spr, "submit_parody_job", return_value=result):
-            self.assertEqual(spr.main(["--name", "Testa Char", "--description", BIO]), 7)
+            self.assertEqual(spr.classic_main(["--name", "Testa Char", "--description", BIO]), 7)
 
     def test_detached_queue_log_rc7_is_gpu_busy(self):
         run_dir = self.root / "detached"
