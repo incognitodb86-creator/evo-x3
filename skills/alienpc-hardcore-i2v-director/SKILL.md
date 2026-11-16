@@ -1,11 +1,11 @@
 ---
 name: alienpc-hardcore-i2v-director
-description: Use when Derrick wants approved Condition stills animated into hardcore I2V clips on AlienPc (MiniMax-H3 / 10Eros-Max via llama-swap :8080/comfyui). Covers still-to-intent matching, the director card, and package D triage. KEEP is Derrick's GO only.
+description: Use when Derrick wants approved Condition stills animated into hardcore I2V clips on AlienPc (MiniMax-H3 / 10Eros-Max via Tailscale Serve :8446 / queue-remote.sh from the X3). Covers still-to-intent matching, the director card, and package D triage. KEEP is Derrick's GO only.
 ---
 
 # AlienPc hardcore I2V director
 
-> Render rules live in /home/derekboone/AI/render/AGENTS.md; run render work from /home/derekboone/AI/render. Character sheets: [references/characters/sydney.md](references/characters/sydney.md).
+> Render rules live in ~/AI/render/AGENTS.md; run render work from ~/AI/render. Character sheets: [references/characters/sydney.md](references/characters/sydney.md).
 
 Identity = same character as the Cond. Records decide whether a character is fictional: approved_characters/INDEX.csv or max-DECISIONS.md. A face, a resemblance or a shared word in a filename ("Sheer", "Sarah") is never evidence. If you have a real concern, say it once, in one line, with the record, and pause that one item. Once Derrick answers, it's settled: don't raise it again.
 
@@ -14,9 +14,9 @@ Identity = same character as the Cond. Records decide whether a character is fic
 
 ## Where things live
 - Render settings (current KEEP = B2, beta7) and how to render: the `/render` prompt template (`/home/derekboone/AI/community/agent-shared/prompts/render.md`) and skill `/home/derekboone/AI/community/skills/h3-hc-render/SKILL.md`. Don't restate settings here.
-- Prompt wording (R1-R31, all lanes): `/home/derekboone/AI/community/skills/h3-prompting/SKILL.md`. **REF2VA is the standing Max lane:**
+- Prompt wording (R1-R31, all lanes): `~/AI/community/skills/h3-prompting/SKILL.md`. **REF2VA picture-reference lane (non-parody):**
   the paste shape, the label set, task-type tags, retention, frame anchors, style opening, language, speech form and the
-  extra gate (R32-R44) are the skill `/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md` (chain: `...\references\chain-lane.md`).
+  extra gate (R32-R44) are the skill `~/AI/community/skills/h3-max-ref2va-prompt/SKILL.md` (chain: `references/chain-lane.md`).
   Cite `R<n>`; don't restate.
 - Stills pose unlock: [alienpc-stills-pose-edit-prompting](../alienpc-stills-pose-edit-prompting/SKILL.md). Ops and package D triage: [video-render](../video-render/SKILL.md).
 
@@ -45,6 +45,6 @@ Identity = same character as the Cond. Records decide whether a character is fic
 - *Beat 2 (Native Join, ordinary hold):* `The camera holds a static shot.` Seamless join from Beat 1: hands anchored, eyeline held. Composed line: "Right where you are." Breath and friction.
 
 ## Notes
-- Production host is Max on llama-swap :8080/comfyui. Ports :8188 and :8189 are retired.
+- Production render host is AlienPc ComfyUI (from the X3, queued via `~/AI/render/x3/queue-remote.sh` over Tailscale Serve `https://alienpc.tailf242b2.ts.net:8446`; AlienPc local: `llama-swap :8080/comfyui`). Ports :8188 and :8189 are retired.
 - A ~1 min product needs a beat sheet with distinct primary motion per clip; continuous long asks use 2+ explicit native beats (carrying camera/pose across native joins) not separate clips; stitches without beats are method smokes only.
 - Out of scope: ReActor face paste, EmptyLatent as Cond, Artframe, soft-sway lanes.

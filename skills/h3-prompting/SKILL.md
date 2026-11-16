@@ -22,8 +22,7 @@ Model/lane facts (beta7 dials, node names, ports, queue, watch/triage, KEEP poli
 `video-render` and the director - this file is prompt text only.
 
 **Lane split (2026-11-03).** The REF2VA paste lane for H3-Max is the skill `h3-max-ref2va-prompt`
-(`/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`, rules R32-R44, chain lane in its `references\chain-lane.md`);
-REF2VA is the standing Max lane unless Derek names another lane. This file keeps R1-R31, which apply to every lane
+(`~/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`, rules R32-R44, chain lane in its `references/chain-lane.md`, for non-parody picture-reference pastes); named INDEX + RefMod parodies use `h3-parody-identity` and writer runs follow `~/AI/render/AGENTS.md`. This file keeps R1-R31, which apply to every lane
 including REF2VA, plus the rule index (section 9). A rule sentence lives in exactly one file; numbers are box-unique
 and stable; a REF2VA paste is gated by section 5 here **and** section 5 of the REF2VA skill.
 
@@ -166,13 +165,13 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
 
 ## 7. Pointers (who defers to this file)
 
-- **REF2VA (the standing Max lane): skill `h3-max-ref2va-prompt`** - `/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`
-  (rules R32-R44, its own gate, paste skeleton) and `...\references\chain-lane.md` (multi-cell chains). Its section 2
+- **REF2VA (non-parody picture-reference lane): skill `h3-max-ref2va-prompt`** - `~/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`
+  (rules R32-R44, its own gate, paste skeleton) and `references/chain-lane.md` (multi-cell chains). Its section 2
   is the REF2VA reading of R5, R6, R8-R15; it never restates a rule of this file. The two files this pointer replaces
-  are archived at `/home/derekboone/AI/community/archive/2026-11-03-ref2va-split/`; thin pointers remain at
+  are archived at `~/AI/community/archive/2026-11-03-ref2va-split/`; thin pointers remain at
   [references/ref2va-lane.md](references/ref2va-lane.md) and [references/ref2va-chain-lane.md](references/ref2va-chain-lane.md)
   so old citations resolve.
-- `alienpc-hardcore-i2v-director` lives at `C:\Users\derek\.pi\agent\skills\alienpc-hardcore-i2v-director\SKILL.md` on AlienPc and `/home/derekboone/AI/community/skills/alienpc-hardcore-i2v-director/SKILL.md` on the EVO-X3. It owns still-to-intent matching, director cards and package D triage. Prompt rules stay in this
+- `alienpc-hardcore-i2v-director` lives at `~/AI/community/skills/alienpc-hardcore-i2v-director/SKILL.md` on the EVO-X3 (and `~/.pi/agent/skills/alienpc-hardcore-i2v-director/SKILL.md` on AlienPc). It owns still-to-intent matching, director cards and package D triage. Prompt rules stay in this
   file (R16–R23b, R29a); do not restate them there.
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
 - `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts.
