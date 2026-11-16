@@ -781,6 +781,14 @@ R11_PICTURE = "<Picture 1> is the reference image defining the exact visual appe
 R11_SUBJECT = ("<Subject 1> is the exact same woman shown in <Picture 1> of the reference pictures and in the first 5 seconds of "
                "this clip, preserving her face, hairstyle, body, skin and figure with complete fidelity")
 R11_HAND = "HAND ANATOMY HARD-LOCKED - exactly five separate fingers, readable knuckles, no melt, merge or extra digit"
+
+
+def _trigger_clause(cast: Dict[str, Any]) -> str:
+    """The trained RefMod trigger word of the attached OC visual RefMod (Derrick 2026-11-14), named once in the
+    <Subject 1> line. cast['refmod_trigger'] is set by submit_parody_run from the RefMod's own subject_name, so it
+    can only be a trigger that is loaded in this graph (R31). Empty for INDEX/celebrity RefMods: no trained trigger."""
+    t = re.sub(r"[^A-Za-z0-9_-]", "", str(cast.get("refmod_trigger") or "").strip())
+    return f", {t}" if t else ""
 TASK_TAG = "[reference generation]"
 
 _SECTION_RE = re.compile(
@@ -4040,6 +4048,11 @@ def build_writer_beats_continuation_request(
         "overlap_frames": overlap_frames,
         # per-beat applied overlaps (each is the audio-aligned 17k + 5 value nearest the one asked for)
         "overlap_frames_applied": [int(b["layout"]["overlap_frames"]) for b in chain[1:]],
+        # the c2_samp cond_audio row check, per beat, from the built graph (no render): packed value rows must
+        # equal the slots PackedLayout reserves. Beat 1 keeps the voice reference (rows equal); continuation
+        # beats carry only the tail keyframe rows (also equal). See continuation_cond_audio_rows().
+        "cond_audio_rows": continuation_audio_refmod_report(
+            g, {f"c{i}": step["layout"] for i, step in enumerate(chain[1:], start=2)}),
         "fps": H3_FPS,
         "stitched": False,
         "start_image": start_image or "",
@@ -5001,6 +5014,122 @@ def populate_refmod_slots(graph: Dict[str, Any], refmod_slots: Dict[str, Any]) -
         inputs[copies_key] = copies
 
 
+# --- audio-latent RefMods vs the continuation window's cond_audio slots (Derrick 2026-11-15, c2_samp) ------
+#
+# A voice-reference RefMod ships as an audio latent tensor [1, 32, 2, T] (e.g. the 25.0 s poolclub voice
+# reference: T=1000). The runtime packs it to 2*T rows (pack_audio) and PackedLayout reserves the SAME 2*T
+# cond_audio slots for it, so a plain beat (beat 1) packs exactly: 2000 value rows into 2000 slots, and
+# s0_samp samples it fine.
+#
+# A continuation beat adds ONE more cond_audio slot group: MiniMaxH3LatentTailGuide appends the previous
+# window's audio tail as a KEYFRAME, and MiniMaxH3GuidedContinuationWindow emits audio_t = 2*overlap_audio.
+# The sampled value tensor does not grow with it, and the runtime stops at the first shape mismatch:
+#   value [2*T, 32] (=2000) vs indexing result [2*T + 2*overlap_audio, 32] (=2074 at overlap 37, 2130 at 65).
+# Measured 2026-11-15 on the 192 + 187 + 187 pack: beat 2 (window 39+187, overlap_audio_t 65) died at c2_samp with
+# [2000, 32] vs [2130, 32] and beat 3 (window 22+187, overlap_audio_t 37) is the same shape at [2074, 32].
+# All 44 continuation graphs in the run archive that produced an mp4 load NO audio-latent RefMod on the tail
+# beat; the only one that did has no output. So the voice reference belongs on beat 1 only, and on a
+# continuation beat the voice travels in the latent tail. See continuation_cond_audio_rows().
+AUDIO_REFMOD_MARKER = "_refmod_audio"
+# measured audio latent frames of the FCSydny voice RefMod (minimaxh3_oc_poolclub_v1_refmod_audio.safetensors:
+# tensor [1, 32, 2, 1000], refmod_meta latent_t=1000, 25.0 s at 32 kHz); 2*1000 = the 2000 rows in the error.
+MEASURED_AUDIO_REFMOD_LATENT_T = 1000
+
+
+def is_audio_refmod(mod_name: Any) -> bool:
+    """True for an audio-latent (voice) RefMod: the OC export names them `<stem>_refmod_audio`."""
+    return isinstance(mod_name, str) and AUDIO_REFMOD_MARKER in mod_name
+
+
+def continuation_cond_audio_rows(audio_refmod_latent_t: Sequence[int] = (), keyframe_audio_t: Sequence[int] = (),
+                                 ) -> Dict[str, Any]:
+    """Dry row math for one beat's cond_audio: the packed VALUE rows vs the slots PackedLayout reserves.
+
+    PackedLayout reserves 2*latent_t cond_audio slots per reference-audio RefMod and 2*audio_t per keyframe, and
+    the reference audio reaches the value tensor as pack_audio([B, 32, 2, T]) -> [2*T, 32]. A continuation
+    window's extra keyframe is the latent tail, and its audio length (overlap_audio_t) is reserved in the slots
+    while the packed reference rows stay 2*latent_t -> the sampler dies on the broadcast:
+        [2*latent_t, 32] vs [2*latent_t + 2*overlap_audio_t, 32]  (live: [2000, 32] vs [2130, 32]).
+    A beat is `ok` in exactly two states:
+      equal  - the beat reserves nothing beyond its reference audio (beat 1: 2000 rows, 2000 slots, sampled by
+               s0_samp for 66 s in the same run that failed at c2_samp);
+      empty  - the beat has no reference audio at all (packed rows 0): the cond-audio block is not packed and no
+               indexed assignment is attempted, which is how all 44 continuation graphs that produced an mp4 pass
+               while carrying a latent tail. The voice then comes from that tail, i.e. beat 1's sampled audio.
+    Any other pair is the c2_samp failure and `error_signature` is the runtime's own wording of it.
+    """
+    refmod_rows = 2 * sum(int(t) for t in audio_refmod_latent_t)
+    keyframe_rows = 2 * sum(int(t) for t in keyframe_audio_t)
+    layout_rows = refmod_rows + keyframe_rows
+    return {"refmod_cond_audio_rows": refmod_rows, "keyframe_cond_audio_rows": keyframe_rows,
+            "packed_cond_audio_rows": refmod_rows, "layout_cond_audio_rows": layout_rows,
+            "row_delta": layout_rows - refmod_rows, "cond_audio_block": refmod_rows > 0,
+            "ok": refmod_rows == 0 or layout_rows == refmod_rows,
+            "error_signature": (None if (refmod_rows == 0 or layout_rows == refmod_rows) else
+                                f"value tensor of shape [{refmod_rows}, 32] cannot be broadcast to "
+                                f"indexing result of shape [{layout_rows}, 32]")}
+
+
+def continuation_audio_refmod_report(graph: Dict[str, Any],
+                                    beat_layouts: Optional[Dict[str, Dict[str, Any]]] = None,
+                                    ) -> List[Dict[str, Any]]:
+    """Per-beat cond_audio row math, read off a built graph (no render): the packed VALUE rows a beat's RefMods
+    produce vs the slots PackedLayout reserves for those RefMods plus that beat's latent-tail keyframe audio.
+
+    `beat_layouts` maps a beat's node prefix ("c2", "c3") to its continuation layout, which carries the exact
+    overlap_audio_t the tail keyframe has; without it the tail audio is sized at the overlap boundary
+    (audio_t(overlap_frames)), the same number on any audio-aligned base. Beat 1 has no window and no keyframe
+    audio, so it always reports equal; a continuation beat that loads an audio RefMod and has a tail is the
+    c2_samp failure, and its row_delta is the 2*overlap_audio the value tensor is short by.
+    """
+    loader_mods = {nid: [nd["inputs"].get(f"mod_{i}") for i in range(1, 9)]
+                   for nid, nd in graph.items()
+                   if isinstance(nd, dict) and nd.get("class_type") == "MiniMaxH3RefModsLoader"}
+    windows = {nid[: -len("_gen")] for nid, nd in graph.items()
+               if isinstance(nd, dict) and nd.get("class_type") == "MiniMaxH3GuidedContinuationWindow"}
+    out: List[Dict[str, Any]] = []
+    for nid, nd in sorted(graph.items()):
+        if not (isinstance(nd, dict) and nd.get("class_type") == "MiniMaxH3RefModApply"):
+            continue
+        key = nid[: -len("_refapply")] if nid.endswith("_refapply") else ""
+        mods = loader_mods.get((nd["inputs"].get("mods") or [""])[0], [])
+        audio_t = [MEASURED_AUDIO_REFMOD_LATENT_T for m in mods if is_audio_refmod(m)]
+        tail_audio_t: List[int] = []
+        if key in windows:
+            lay = (beat_layouts or {}).get(key) or {}
+            tail_audio_t = [int(lay["overlap_audio_t"]) if "overlap_audio_t" in lay
+                            else continuation_audio_t(graph[f"{key}_gen"]["inputs"]["overlap_frames"])]
+        rows = continuation_cond_audio_rows(audio_t, tail_audio_t)
+        rows.update({"node": nid, "beat": key or "1", "tail_keyframe": bool(tail_audio_t),
+                     "audio_refmods": [m for m in mods if is_audio_refmod(m)],
+                     "visual_refmods": [m for m in mods if isinstance(m, str) and m != "(none)"
+                                        and not is_audio_refmod(m)]})
+        out.append(rows)
+    return out
+
+
+def _continuation_audio_free_refmods(graph: Dict[str, Any], beat: Dict[str, Any], node_id: str) -> List[str]:
+    """Wire one audio-free RefMod loader for a continuation beat and point that beat's RefModApply at it.
+
+    The identity RefMods stay: the visual RefMod re-applies on the continuation beat, the latent tail carries
+    the voice (the tail IS the previous beat's sampled audio, voiced by the beat-1 reference). Returns the
+    dropped audio RefMod names. Nothing is dropped when the pack uses no voice reference.
+    """
+    beat_inputs = beat["refmods"].get("inputs") or {}
+    audio_slots = [i for i in range(1, 9) if is_audio_refmod(beat_inputs.get(f"mod_{i}"))]
+    if not audio_slots:
+        return []
+    loader = copy.deepcopy(beat["refmods"])
+    dropped = [str(loader["inputs"][f"mod_{i}"]) for i in audio_slots]
+    for i in audio_slots:
+        loader["inputs"][f"mod_{i}"] = "(none)"  # the loader's own "None" slot value
+    graph[node_id] = loader
+    graph[node_id]["_meta"] = {"title": f"{node_id}: identity RefMod load for the continuation beat, "
+                                        f"voice reference not attached (c2_samp: 2*latent_t value rows vs "
+                                        f"2*latent_t + 2*overlap_audio cond_audio slots)"}
+    return dropped
+
+
 def verify_keep_dials(graph: Dict[str, Any]) -> None:
     """Verify frozen KEEP dials on REF2VA 10strip eros beta7 int8HQ 8-step TURBO graph."""
     if "unet" not in graph:
@@ -5090,6 +5219,8 @@ def add_continuation_beat(cumulative: Dict[str, Any], beat: Dict[str, Any], layo
     # guided_continuation.json wires all three previous_av_latent inputs; c0 output 1 is the UNSAMPLED latent.
     # Every later beat continues the latent its previous beat appended. The latent tail guides frame 0, so no
     # start photo is wired here.
+    # A voice-reference (audio-latent) RefMod is attached on beat 1 only; the continuation beat's loader drops it
+    # (_continuation_audio_free_refmods) and the voice carries on the tail, which is beat 1's sampled audio.
     prev_latent = ["s0_samp", 0] if index == 2 else [f"c{index - 1}_append", 0]
     base = cumulative.get("c0", {}).get("inputs", {})
     if (base.get("width"), base.get("height"), base.get("fps")) != (
@@ -5115,6 +5246,14 @@ def add_continuation_beat(cumulative: Dict[str, Any], beat: Dict[str, Any], layo
     g[f"c{n}_refapply"] = copy.deepcopy(beat["refapply"])
     g[f"c{n}_refapply"]["_meta"] = {"title": f"Beat {n}: RefMod retention 1.0 on the continuation beat"}
     g[f"c{n}_refapply"]["inputs"]["conditioning"] = [f"c{n}", 0]
+    # c2_samp cond_audio cap (Derrick 2026-11-15): this beat's RefModApply gets an audio-free copy of the loader.
+    # The visual RefMod and the latent tail stay; the voice reference stays on beat 1, where its 2*T packed rows
+    # equal the 2*T cond_audio slots PackedLayout reserves. On a continuation beat the tail keyframe adds
+    # 2*overlap_audio slots that the audio RefMod's value tensor never grows into: value [2000, 32] vs indexing
+    # result [2000 + 2*overlap_audio, 32] (2074 at overlap 37, 2130 at 65). continuation_cond_audio_rows() is the
+    # dry row check; 44 of 44 continuation graphs that produced an mp4 have no audio RefMod on the tail beat.
+    if _continuation_audio_free_refmods(g, beat, f"c{n}_refmods"):
+        g[f"c{n}_refapply"]["inputs"]["mods"] = [f"c{n}_refmods", 0]
 
     # argon-low C.3 (B) + C.4 (C): optional AddGuide keyframe(s) on the continuation beat at frame_idx >= overlap_frames
     tail_positive: List[Any] = [f"c{n}_refapply", 0]
