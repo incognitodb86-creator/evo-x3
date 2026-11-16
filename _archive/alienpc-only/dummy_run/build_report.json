@@ -1,6 +1,6 @@
 {
   "hook": "submit_parody_run.submit_writer_run",
-  "builder": "/home/derekboone/AI/community/scripts/parody/build_request.py",
+  "builder": "/home/evo/AI/community/scripts/parody/build_request.py",
   "builder_sha256": "E5BF183DA6A8F14B5725C212BF25E5929FA330087607A3EF485839786F43B9C7",
   "ask": "brief",
   "position": "missionary",
@@ -17,5 +17,5 @@
     ],
     "source": "existing"
   },
-  "reason": "target clip to prequel not found: /home/derekboone/AI/community/non_existent_file.mp4"
+  "reason": "target clip to prequel not found: /home/evo/AI/community/non_existent_file.mp4"
 }

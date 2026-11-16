@@ -12,7 +12,7 @@ Plan: brain 40_projects/max-fix-tests/plans/2026-10-30-pi-google-voice-plan.md (
 - Read: list threads; inbound texts are read only, never auto-replied.
 - Send one text: 1) draft the recipient and the exact text; 2) show both to Derrick and ask "Send this exact text?"; 3) only after his exact yes for THAT message, click Send once; 4) confirm it shows as sent. Any change to the text = ask again. No loops, no bulk, no scheduled or follow-up texts.
 - If Voice shows a sign-in page, stop and tell Derrick to sign in himself in that browser window; never type his password.
-- Not while /home/derekboone/AI/locks/gpu-render.lock exists if the step needs desktop control.
+- Not while /home/evo/AI/locks/gpu-render.lock exists if the step needs desktop control.
 - Privacy: never write phone numbers, contact names or message text into logs, notes, actions.log or files. Records say only "text sent (approved)" or "contact found / not found".
 - Contacts: read-only Google Contacts MCP (workspace-mcp --tools contacts --read-only) once Derrick finishes the Google sign-in; until then say contacts are not connected.
 - Google's rules ban automated messaging; Derrick accepted that risk only for texts he approves one at a time.

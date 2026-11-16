@@ -4226,7 +4226,7 @@ eeds_derrick.md (backup needs_derrick.md.bak-20261107-chatreview); no .pi config
 2026-11-15T18:05:00-06:00 FIX ralph-test MAX-4: scratch/list.txt = one.txt/sum.py/two.txt sorted; Pass `cat scratch/list.txt` prints 3 names PASS
 2026-11-15T18:05:00-06:00 DONE MAX block ralph-test-20261115: 4/4 items ticked, loop-report.md written, Loop done: MAX
 2026-11-15T20:07:01-0600 START U31 Antigravity (Argon/executor) implementing open agy-redteam-review-20261115.md audit fixes per U31-agy-brief.md
-2026-11-15T20:12:33-0600 DONE U31 Antigravity implemented open agy-redteam-review-20261115.md fixes; Render subagent rerun PASS (gemma4-heretic-sub, np2); open-webui ENABLE_SIGNUP=false live; commits etc=9a3b135 render=513fd09; record=/home/derekboone/evo-x3/records/U31-agy-audit-fixes-20261115.md
+2026-11-15T20:12:33-0600 DONE U31 Antigravity implemented open agy-redteam-review-20261115.md fixes; Render subagent rerun PASS (gemma4-heretic-sub, np2); open-webui ENABLE_SIGNUP=false live; commits etc=9a3b135 render=513fd09; record=/home/evo/evo-x3/records/U31-agy-audit-fixes-20261115.md
 2026-11-15T20:35:13-0600 START U21/U32 Antigravity (Argon) running B1-B5 benchmarks and U32 deep-research bake-off on EVO-X3 per U21-agy-brief.md
 2026-11-15T14:15:36-06:00 run_queue clip_01: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
 2026-11-15T14:15:36-06:00 run_queue clip_01: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601
@@ -4417,3 +4417,41 @@ eeds_derrick.md (backup needs_derrick.md.bak-20261107-chatreview); no .pi config
 2026-11-15T23:59:34-06:00 run_queue live-8ee347e: DONE pos=1 tag=clip ok 768x1344 566f audio yes wall=?s bytes=8107181 retry=False
 2026-11-16T00:00:00-06:00 run_queue live-8ee347e: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=566 audio=yes bytes=67449223 elapsed=23.7s raw=clip_raw.mp4
 2026-11-16T00:00:00-06:00 run_queue live-8ee347e: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-16T14:41:35-06:00 run_queue guide: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-16T14:41:35-06:00 run_queue guide: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0
+2026-11-16T14:42:08-06:00 run_queue ref: GPU_BUSY batch: gpu-render.lock held by a live PID - nothing queued (rc 7)
+2026-11-16T14:42:08-06:00 run_queue ref: BATCH closed rc=7 reason=GPU busy (gpu-render.lock held by a live PID) done=0/1: nothing queued
+2026-11-16T14:47:02-06:00 run_queue guide: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=4084081 retry=False
+2026-11-16T14:47:02-06:00 run_queue guide: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-16T14:47:02-06:00 run_queue guide: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-16T14:50:09-06:00 run_queue ref: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-16T14:50:09-06:00 run_queue ref: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0
+2026-11-16T14:55:14-06:00 run_queue ref: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3703770 retry=False
+2026-11-16T14:55:14-06:00 run_queue ref: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-16T14:55:14-06:00 run_queue ref: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-16T15:17:45-06:00 run_queue guide: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-16T15:17:45-06:00 run_queue guide: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0
+2026-11-16T15:20:03-06:00 run_queue guide: FAIL pos=1 tag=clip objective frames 124 != 120
+2026-11-16T15:20:03-06:00 run_queue guide: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0 (the one allowed unchanged retry)
+2026-11-16T15:20:09-06:00 run_queue guide: FAIL pos=1 tag=clip objective frames 124 != 120
+2026-11-16T15:20:09-06:00 run_queue guide: FAIL pos=1 tag=clip failed twice (one unchanged retry used) - skipped
+2026-11-16T15:20:09-06:00 run_queue guide: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-16T15:20:09-06:00 run_queue guide: BATCH closed rc=5 reason=1 clip(s) failed twice: clip done=0/1: comfyui_auto unloaded, lock released
+2026-11-16T15:27:38-06:00 run_queue ref: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-16T15:27:38-06:00 run_queue ref: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0
+2026-11-16T15:29:52-06:00 run_queue ref: FAIL pos=1 tag=clip objective frames 124 != 120
+2026-11-16T15:29:52-06:00 run_queue ref: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0 (the one allowed unchanged retry)
+2026-11-16T15:29:57-06:00 run_queue ref: FAIL pos=1 tag=clip objective frames 124 != 120
+2026-11-16T15:29:57-06:00 run_queue ref: FAIL pos=1 tag=clip failed twice (one unchanged retry used) - skipped
+2026-11-16T15:29:57-06:00 run_queue ref: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-16T15:29:57-06:00 run_queue ref: BATCH closed rc=5 reason=1 clip(s) failed twice: clip done=0/1: comfyui_auto unloaded, lock released
+2026-11-16T16:06:20-06:00 run_queue guide: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-16T16:06:20-06:00 run_queue guide: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0
+2026-11-16T16:08:22-06:00 run_queue guide: DONE pos=1 tag=clip ok 768x1344 124f audio yes wall=?s bytes=1295402 retry=False
+2026-11-16T16:08:22-06:00 run_queue guide: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-16T16:08:22-06:00 run_queue guide: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-16T16:10:17-06:00 run_queue ref: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-16T16:10:17-06:00 run_queue ref: START pos=1 tag=clip arm=oc_writer scene=x3 seed=0
+2026-11-16T16:12:25-06:00 run_queue ref: DONE pos=1 tag=clip ok 768x1344 124f audio yes wall=?s bytes=1436029 retry=False
+2026-11-16T16:12:25-06:00 run_queue ref: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-16T16:12:25-06:00 run_queue ref: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
