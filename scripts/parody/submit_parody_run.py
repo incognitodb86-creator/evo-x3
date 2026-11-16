@@ -40,11 +40,12 @@ import time
 from typing import Any, Dict, List, Optional, Sequence, Union, Tuple
 
 # Add community scripts to path
-SCRIPTS_DIR = Path(r"/home/derekboone/AI/community/scripts")
+PARODY_DIR = Path(__file__).resolve().parent
+SCRIPTS_DIR = PARODY_DIR.parent
+_AI_ROOT = SCRIPTS_DIR.parents[1]
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-PARODY_DIR = SCRIPTS_DIR / "parody"
 if str(PARODY_DIR) not in sys.path:
     sys.path.insert(0, str(PARODY_DIR))
 
@@ -55,14 +56,14 @@ from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities, validate_reference_images
 from run_record import RUNS_ROOT, save_run_record
 
-INDEX_DIR = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
-REFMODS_DIR = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
+INDEX_DIR = SCRIPTS_DIR.parent / "index" / "h3-known-characters"
+REFMODS_DIR = _AI_ROOT / "comfy-alienpc" / "models" / "refmods"
 ALIASES_PATH = PARODY_DIR / "aliases.json"
 RUN_QUEUE_PY = SCRIPTS_DIR / "run_queue.py"
 STITCH_PY = SCRIPTS_DIR / "queue" / "take_chain_stitch.py"
 PI_QNAP_PY = SCRIPTS_DIR / "pi_qnap.py"
-COMFY_OUT_COMMUNITY = Path(r"/home/derekboone/AI/comfy-alienpc/output/community")
-QUEUE_PYTHON = Path(r"/home/derekboone/AI/director/.venv/Scripts/python.exe")
+COMFY_OUT_COMMUNITY = _AI_ROOT / "comfy-alienpc" / "output" / "community"
+QUEUE_PYTHON = _AI_ROOT / "director" / ".venv" / "Scripts" / "python.exe"
 QUEUE_TAG = "clip"
 GPU_BUSY_RC = 7
 WAIT_POLL_SEC = 5
@@ -328,6 +329,8 @@ def submit_parody_job(
     keep_comfy_process: bool = False,
 ) -> Dict[str, Any]:
     """Execute full parody pipeline from request to verified artifacts."""
+    if run_dir_override is not None and not Path(run_dir_override).is_absolute():
+        raise ValueError(f"--run-dir must be an absolute path: {run_dir_override}")
     if not description or not str(description).strip():
         raise ValueError("Biometric description (--description) is required for submit.")
     for _nm in (name, character, name2, character2, name3, character3):
@@ -421,6 +424,8 @@ def submit_parody_job(
     # 3. Determine run folder
     if run_dir_override:
         run_dir = Path(run_dir_override)
+        if not run_dir.is_absolute():
+            raise ValueError(f"--run-dir must be an absolute path: {run_dir_override}")
         run_name = run_dir.name
     else:
         ident_slug = slug or (character or actor or name).lower().replace(" ", "_")
@@ -723,12 +728,11 @@ _OC_PATH_COMPONENT_ALIASES = {
 }
 
 _PIXLSTASH_VAULTS = (
-    Path(r"/home/derekboone/AI/5slock/approved_characters/vault.db"),
-    Path(r"/home/derekboone/AI/5slock/libraries/vault.db"),
+    _AI_ROOT / "5slock" / "libraries" / "vault.db",
 )
 _STILL_LIBRARY_ROOTS = (
-    Path(r"/home/derekboone/AI/5slock/approved_characters"),
-    Path(r"/home/derekboone/AI/render/stills/approved_characters"),
+    _AI_ROOT / "render" / "stills" / "approved_characters",
+    _AI_ROOT / "5slock" / "libraries",
 )
 
 
@@ -1399,6 +1403,8 @@ def submit_writer_run(
         # frs16 S6: the OC writer lane always opens on the start still; no path = NOT_READY (never the base graph's old img_1)
         if not (isinstance(still_image, str) and still_image.strip()):
             return not_ready("no start-still path for img_1 (<Picture 1>); pass the still under ComfyUI input, e.g. community/x.png")
+        if Path(still_image.strip()).is_absolute() and not Path(still_image.strip()).is_file():
+            return not_ready(f"start still file not found: {still_image}")
         if "img_1" not in g:
             return not_ready("base graph has no img_1 start-image node for <Picture 1>")
         g["img_1"]["inputs"]["image"] = (_normalize_comfy_still(still_image) or still_image).strip()
@@ -1519,6 +1525,15 @@ def _writer_run_cli(argv) -> int:
         print("NOT_READY submitted=False bad writer-run arguments (see usage above)")
         return 3
     d = Path(a.run_dir)
+    if not d.is_absolute():
+        print(f"NOT_READY submitted=False run_dir must be an absolute path: {a.run_dir}")
+        return 3
+    if not (a.still or "").strip():
+        print("NOT_READY submitted=False start still missing: pass --still '<the start still path>'")
+        return 3
+    if Path(a.still.strip()).is_absolute() and not Path(a.still.strip()).is_file():
+        print(f"NOT_READY submitted=False start still not found: {a.still}")
+        return 3
     try:
         missing = [n for n in ("writer_output.txt", "still_read.json") if not (d / n).is_file()]
         if missing:

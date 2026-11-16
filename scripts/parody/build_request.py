@@ -20,7 +20,9 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import yaml
 
 # Add community scripts to path for make_b2_request and comm
-SCRIPTS_DIR = Path(r"/home/derekboone/AI/community/scripts")
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent
+_COMMUNITY_ROOT = SCRIPTS_DIR.parent
+_AI_ROOT = _COMMUNITY_ROOT.parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
@@ -34,8 +36,8 @@ if str(PARODY_DIR) not in sys.path:
 from writer_sys import assert_writer_system_prompt, AgentInstructionsInWriterPrompt
 import scene_addenda
 
-DEFAULT_REFMOD_TEMPLATE = Path(r"/home/derekboone/AI/community/templates/b2_refmod.api.json")
-COMFY_INPUT_COMMUNITY = Path(r"/home/derekboone/AI/comfy-alienpc/input/community")
+DEFAULT_REFMOD_TEMPLATE = _COMMUNITY_ROOT / "templates" / "b2_refmod.api.json"
+COMFY_INPUT_COMMUNITY = _AI_ROOT / "comfy-alienpc" / "input" / "community"
 
 # --- U1: H3 frame grid + single-clip ceiling -------------------------------------------------
 H3_FPS = 24
@@ -3463,6 +3465,24 @@ def lint_writer_prompt(raw: str, cast: Dict[str, Any]) -> Tuple[List[Dict[str, A
         if covered and pen is not None:
             issues.append({"code": "W5", "idx": pen, "text": units[pen],
                            "why": _LINT_CODES["W5"].format(items=" and ".join(covered))})
+    _neg_lint_rx = re.compile(
+        r"(?i)\b(?:not|never|nothing|no|without|avoid|neither|nor|nowhere|cannot|"
+        r"don't|doesn't|didn't|won't|can't|isn't|aren't|wasn't|weren't|couldn't|wouldn't|shouldn't)\b"
+    )
+    for i, u in enumerate(units):
+        pu = _D_RE.sub("", u)
+        _dm = _DIAL_RE.search(pu) or re.search(r"(?i)\b\d{1,3}fps\b", pu)
+        if _dm:
+            issues.append({"code": "dial", "idx": i, "text": u,
+                           "why": f"remove technical/dial term '{_dm.group(0)}'; film look is light, lens and grain words"})
+        elif _THROAT_RE.search(pu):
+            issues.append({"code": "throat", "idx": i, "text": u,
+                           "why": "write throat contact exactly as 'his hand on her throat' (never slide/grip/close/choke throat wording)"})
+        elif (_neg_lint_rx.search(pu) or _NEGATION_START_RE.search(pu) or _NEGATION_CLAUSE_RE.search(pu)
+              or any(rx.search(pu) for rx, _ in _NEG_MAP)):
+            _nm = _neg_lint_rx.search(pu)
+            issues.append({"code": "negatives", "idx": i, "text": u,
+                           "why": f"negative wording outside <d> ('{_nm.group(0) if _nm else 'negation'}'); state it positively"})
     seen, uniq = set(), []
     for it in sorted(issues, key=lambda x: x["idx"]):
         if it["idx"] not in seen:
@@ -4089,6 +4109,133 @@ def rebase_continuation_shot_clocks(text: str, requested_overlap_frames: int, ap
     return out, report
 
 
+DEFAULT_SEAM_AUDIO_CROSSFADE = False
+DEFAULT_SEAM_CROSSFADE_MODE = "declick"
+DEFAULT_SEAM_CROSSFADE_MS = 15.0
+DEFAULT_SOFT_AV_RELEASE_TICKS = 8
+AUDIO_LATENT_SAMPLE_RATE = 32000
+AUDIO_LATENT_TOKENS_PER_SEC = 40
+
+
+def soft_av_release_weights(overlap_audio_tokens: int, release_ticks: int = DEFAULT_SOFT_AV_RELEASE_TICKS) -> List[float]:
+    """TimelineDirector-style half-cosine Soft AV release weights across `overlap_audio_tokens` (40 Hz).
+
+    Earlier overlap ticks stay exact (1.0); the final `release_ticks` ticks release smoothly via
+    0.5 * (1 + cos(pi * (i + 1) / (k + 1))) into newly generated audio.
+    """
+    total = max(int(overlap_audio_tokens), 0)
+    if total == 0:
+        return []
+    k = min(max(int(release_ticks), 0), total)
+    if k == 0:
+        return [1.0] * total
+    weights = [1.0] * (total - k)
+    for i in range(k):
+        weights.append(round(0.5 * (1.0 + math.cos(math.pi * (i + 1) / (k + 1))), 6))
+    return weights
+
+
+def _rms_dbfs(chunk: Sequence[float]) -> Tuple[float, float]:
+    if not chunk:
+        return 0.0, -120.0
+    rms = math.sqrt(sum(float(x) * float(x) for x in chunk) / len(chunk))
+    dbfs = 20.0 * math.log10(max(rms, 1e-6))
+    return round(rms, 6), round(dbfs, 2)
+
+
+def trace_seam_loudness(
+    samples: Sequence[float],
+    seam_sample: int,
+    sample_rate: int = AUDIO_LATENT_SAMPLE_RATE,
+    window_ms: float = 100.0,
+) -> Dict[str, Any]:
+    """Measure RMS/dBFS windows and step discontinuity across a continuation audio seam."""
+    n = len(samples)
+    seam = max(0, min(int(seam_sample), n))
+    win = max(1, int(round(sample_rate * window_ms / 1000.0)))
+    tick = max(1, int(round(sample_rate / AUDIO_LATENT_TOKENS_PER_SEC)))  # 800 samples = 25 ms at 32 kHz
+    segments = {
+        "pre_overlap_tail": _rms_dbfs(samples[max(0, seam - 2 * win):max(0, seam - win)]),
+        "overlap_tail": _rms_dbfs(samples[max(0, seam - win):seam]),
+        "seam_join": _rms_dbfs(samples[max(0, seam - win // 2):min(n, seam + win // 2)]),
+        "post_seam": _rms_dbfs(samples[seam:min(n, seam + win)]),
+    }
+    tick_trace = []
+    for k in range(-4, 4):
+        a = max(0, seam + k * tick)
+        b = min(n, seam + (k + 1) * tick)
+        if b > a:
+            rms, dbfs = _rms_dbfs(samples[a:b])
+            tick_trace.append({"tick_offset": k, "rms": rms, "dbfs": dbfs})
+    step_delta = abs(float(samples[seam]) - float(samples[seam - 1])) if 0 < seam < n else 0.0
+    return {
+        "seam_sample": seam,
+        "sample_rate": int(sample_rate),
+        "window_ms": float(window_ms),
+        "segments": {k: {"rms": v[0], "dbfs": v[1]} for k, v in segments.items()},
+        "tick_trace_25ms": tick_trace,
+        "seam_step_delta": round(step_delta, 6),
+    }
+
+
+def apply_seam_audio_crossfade(
+    prev_samples: Sequence[float],
+    next_samples: Sequence[float],
+    sample_rate: int = AUDIO_LATENT_SAMPLE_RATE,
+    crossfade_ms: float = DEFAULT_SEAM_CROSSFADE_MS,
+    mode: str = DEFAULT_SEAM_CROSSFADE_MODE,
+    release_ticks: int = DEFAULT_SOFT_AV_RELEASE_TICKS,
+) -> Tuple[List[float], Dict[str, Any]]:
+    """Optional short audio crossfade across an overlap seam, returning `(samples, loudness_trace)`.
+
+    Modes:
+      - 'declick': half-cosine ~15 ms audio de-click crossfade across the seam (Herrgott v1.4 pattern)
+      - 'soft_av': half-cosine Soft AV release over the final `release_ticks` audio-latent ticks (TimelineDirector)
+      - 'none': straight concatenation (for baseline comparison)
+    """
+    if mode not in ("declick", "soft_av", "none"):
+        raise ValueError(f"unsupported seam audio crossfade mode {mode!r}")
+    prev_f = [float(x) for x in prev_samples]
+    next_f = [float(x) for x in next_samples]
+    raw_joined = prev_f + next_f
+    seam = len(prev_f)
+    before = trace_seam_loudness(raw_joined, seam, sample_rate=sample_rate)
+    if mode == "none" or not prev_f or not next_f:
+        return raw_joined, {
+            "mode": mode, "crossfade_ms": float(crossfade_ms), "crossfade_samples": 0,
+            "release_ticks": int(release_ticks), "before": before, "after": before,
+        }
+    if mode == "soft_av":
+        samples_per_tick = max(1, int(round(sample_rate / AUDIO_LATENT_TOKENS_PER_SEC)))
+        xfade_n = min(len(prev_f), len(next_f), max(2, int(release_ticks) * samples_per_tick))
+    else:
+        xfade_n = min(len(prev_f), len(next_f), max(2, int(round(sample_rate * float(crossfade_ms) / 1000.0))))
+    blended = [
+        (0.5 * (1.0 + math.cos(math.pi * (i + 1) / (xfade_n + 1)))) * prev_f[-xfade_n + i]
+        + (1.0 - 0.5 * (1.0 + math.cos(math.pi * (i + 1) / (xfade_n + 1)))) * next_f[i]
+        for i in range(xfade_n)
+    ]
+    out = prev_f[:-xfade_n] + blended + next_f[xfade_n:]
+    after = trace_seam_loudness(out, len(prev_f) - xfade_n // 2, sample_rate=sample_rate)
+    return out, {
+        "mode": mode,
+        "crossfade_ms": round(xfade_n * 1000.0 / float(sample_rate), 3),
+        "crossfade_samples": xfade_n,
+        "release_ticks": int(release_ticks),
+        "before": before,
+        "after": after,
+    }
+
+
+def parse_plan_end_actions(plan_path: Path) -> List[str]:
+    """Extract `- end_action (...): <text>` lines from a beat pack PLAN.md in beat order."""
+    text = Path(plan_path).read_text(encoding="utf-8")
+    return [
+        m.group(1).strip()
+        for m in re.finditer(r"^\s*-\s*end_action\b[^:]*:\s*(.+?)\s*$", text, re.MULTILINE)
+    ]
+
+
 def build_writer_beats_continuation_request(
     base_graph: Dict[str, Any],
     beat_prompts: Sequence[str],
@@ -4103,6 +4250,10 @@ def build_writer_beats_continuation_request(
     pronoun: Optional[str] = None,
     new_shots: Optional[Sequence[int]] = None,
     beat_guides: Optional[Dict[int, Sequence[Dict[str, Any]]]] = None,
+    audio_seam_crossfade: bool = DEFAULT_SEAM_AUDIO_CROSSFADE,
+    audio_seam_crossfade_mode: str = DEFAULT_SEAM_CROSSFADE_MODE,
+    audio_seam_crossfade_ms: float = DEFAULT_SEAM_CROSSFADE_MS,
+    audio_seam_release_ticks: int = DEFAULT_SOFT_AV_RELEASE_TICKS,
 ) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
     """ONE native latent-tail continuation graph from 2+ finished writer-format beat prompts, in order.
 
@@ -4173,6 +4324,49 @@ def build_writer_beats_continuation_request(
         g = add_continuation_beat(g, bg, step["layout"], i, beat_guides=(beat_guides or {}).get(i),
                                   new_shot=(i in cut_beats))
 
+    # Verify one applied overlap drives carry, trim, assembly, and shot clocks for every continuation beat.
+    overlap_consistency: List[Dict[str, Any]] = []
+    seam_crossfade_beats: List[Dict[str, Any]] = []
+    for step in chain[1:]:
+        idx = int(step["index"])
+        lay = step["layout"]
+        app_ov = int(lay["overlap_frames"])
+        carry_ov = int(g[f"c{idx}_gen"]["inputs"]["overlap_frames"])
+        trim_refs = (
+            g[f"c{idx}_append"]["inputs"].get("overlap_video_tokens"),
+            g[f"c{idx}_append"]["inputs"].get("overlap_audio_tokens"),
+        )
+        asm_len_ref = g[f"c{idx}"]["inputs"].get("length")
+        clock_ov = int((step.get("shot_clocks") or {}).get("applied_overlap_frames", app_ov))
+        consistent = (
+            carry_ov == app_ov
+            and trim_refs == ([f"c{idx}_gen", 2], [f"c{idx}_gen", 3])
+            and asm_len_ref == [f"c{idx}_gen", 1]
+            and int(lay["window_frames"]) == app_ov + int(lay["extension_frames"])
+            and clock_ov == app_ov
+        )
+        if not consistent:
+            raise ValueError(f"beat {idx} overlap mismatch across carry/trim/assembly/shot_clocks")
+        overlap_consistency.append({
+            "beat": idx,
+            "requested_overlap_frames": int(lay["requested_overlap_frames"]),
+            "applied_overlap_frames": app_ov,
+            "carry_overlap_frames": carry_ov,
+            "trim_source": f"c{idx}_gen",
+            "assembly_window_frames": int(lay["window_frames"]),
+            "shot_clock_applied_overlap_frames": clock_ov,
+            "overlap_audio_t": int(lay["overlap_audio_t"]),
+            "consistent": consistent,
+        })
+        seam_crossfade_beats.append({
+            "beat": idx,
+            "overlap_audio_t": int(lay["overlap_audio_t"]),
+            "soft_av_weights": (
+                soft_av_release_weights(int(lay["overlap_audio_t"]), release_ticks=audio_seam_release_ticks)
+                if audio_seam_crossfade else []
+            ),
+        })
+
     prompt_all = "\n\n".join(f"===== beat {k} =====\n{p}" for k, p in enumerate(prompts, start=1))
     return g, prompt_all, {
         "mode": "native_latent_tail_continuation",
@@ -4187,6 +4381,15 @@ def build_writer_beats_continuation_request(
         # per-beat applied overlaps (each is the audio-aligned 5n + 5 value the layout takes nearest the ask:
         # 22 -> 39 for beat 2 of this pack, 22 -> 22 for beat 3)
         "overlap_frames_applied": [int(b["layout"]["overlap_frames"]) for b in chain[1:]],
+        "overlap_consistency": overlap_consistency,
+        "audio_seam_crossfade": {
+            "enabled": bool(audio_seam_crossfade),
+            "default_enabled": DEFAULT_SEAM_AUDIO_CROSSFADE,
+            "mode": audio_seam_crossfade_mode,
+            "crossfade_ms": float(audio_seam_crossfade_ms),
+            "release_ticks": int(audio_seam_release_ticks),
+            "beats": seam_crossfade_beats,
+        },
         # the c2_samp cond_audio row check, per beat, from the built graph (no render): packed value rows must
         # equal the slots PackedLayout reserves. Beat 1 keeps the voice reference (rows equal); continuation
         # beats carry only the tail keyframe rows (also equal). See continuation_cond_audio_rows().
@@ -5190,7 +5393,7 @@ MEASURED_AUDIO_REFMOD_LATENT_T = 1000
 AUDIO_REFMOD_ROW_CAP = 2 * MEASURED_AUDIO_REFMOD_LATENT_T
 # A voice RefMod cut down is a NEW file beside the original, never an edit of it:
 # scripts/parody/voice_refmod_trim.py slices the latent on a speech gap and writes the trimmed copy.
-COMFY_REFMOD_DIR = r"/home/derekboone/AI/comfy-alienpc/models/refmods"
+COMFY_REFMOD_DIR = str(_AI_ROOT / "comfy-alienpc" / "models" / "refmods")
 # The trimmed copy's mod name is the ORIGINAL name plus this suffix: voice_refmod_trim.py writes
 # `<stem>_23s.safetensors` beside the original, so `minimaxh3_oc_poolclub_v1_refmod_audio` gains
 # `minimaxh3_oc_poolclub_v1_refmod_audio_23s` and `is_audio_refmod` still recognises it.
@@ -5205,8 +5408,7 @@ CONTINUATION_VOICE_REFMOD_LATENT_T = 920
 # tokens = reserved (2000/2130/2074 on the 192+187+187 pack), so the full voice RefMod stays on every beat.
 # If a pack update reverts the file, runtime_packs_tail_audio() turns False and continuation beats fall back to
 # voice-off (8ee347e) instead of crashing at c2_samp.
-MULTISHOT_AVBANK_PROBE = (r"/home/derekboone/AI/comfy-alienpc/custom_nodes/ComfyUI-H3-Multishot"
-                          r"\h3_avbank_probe.py")
+MULTISHOT_AVBANK_PROBE = str(_AI_ROOT / "comfy-alienpc" / "custom_nodes" / "ComfyUI-H3-Multishot" / "h3_avbank_probe.py")
 MULTISHOT_REFS_ONLY_AUDIO = 'payload["cond_audio_latents"] = aud'
 
 
@@ -6034,8 +6236,8 @@ def main(argv=None) -> int:
 
     # Import resolve from same package
     from resolve import resolve_identities, validate_reference_images
-    index_dir = Path(r"/home/derekboone/AI/community/index/h3-known-characters")
-    refmods_dir = Path(r"/home/derekboone/AI/comfy-alienpc/models/refmods")
+    index_dir = _COMMUNITY_ROOT / "index" / "h3-known-characters"
+    refmods_dir = Path(COMFY_REFMOD_DIR)
     aliases_path = Path(__file__).parent / "aliases.json"
 
     if args.frames is not None:

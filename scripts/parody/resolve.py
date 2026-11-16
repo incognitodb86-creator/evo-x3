@@ -11,10 +11,19 @@ from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-DEFAULT_APPROVED_STILLS_DIR = Path(r"/home/derekboone/AI/5slock/approved_characters")
+DEFAULT_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "5slock" / "approved_characters"
+RENDER_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "render" / "stills" / "approved_characters"
+_HOME_RENDER_APPROVED_STILLS_DIR = Path("~/AI/render/stills/approved_characters").expanduser()
 KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
 NAS_APPROVED_STILLS_DIR = Path(r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters")
-APPROVED_IMAGE_POOLS: Tuple[Path, ...] = (DEFAULT_APPROVED_STILLS_DIR, NAS_APPROVED_STILLS_DIR)
+APPROVED_IMAGE_POOLS: Tuple[Path, ...] = tuple(
+    dict.fromkeys((
+        DEFAULT_APPROVED_STILLS_DIR,
+        RENDER_APPROVED_STILLS_DIR,
+        _HOME_RENDER_APPROVED_STILLS_DIR,
+        NAS_APPROVED_STILLS_DIR,
+    ))
+)
 REFERENCE_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
 MAX_REFERENCE_IMAGES = 4
 
@@ -251,7 +260,7 @@ def validate_reference_images(
     for raw in imgs:
         if "sydney" in raw.lower():
             raise ValueError(f"Sydney paths are strictly prohibited as reference images: {raw}")
-        cand = Path(raw)
+        cand = Path(raw).expanduser() if raw.startswith("~") else Path(raw)
         tries = [cand] if cand.is_absolute() or str(cand).startswith("\\\\") else [pl / cand for pl in pool_list]
         found = None
         for t in tries:
