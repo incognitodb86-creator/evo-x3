@@ -1,0 +1,161 @@
+{
+ "arm": "halogen-drill-tool",
+ "model": "flash-next",
+ "effort": "low",
+ "started": "2026-11-17 07:33:34 CST",
+ "tasks": {
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 25.745465517044067,
+     "total_s": 26.473218202590942,
+     "prompt_tokens": 388,
+     "completion_tokens": 65,
+     "client_decode_tps": 89.31605652702646,
+     "timings": {
+      "prompt_n": 388,
+      "predicted_n": 65,
+      "prompt_ms": 439.3,
+      "predicted_ms": 727.9,
+      "prompt_per_second": 883.223,
+      "predicted_per_second": 89.298,
+      "cache_n": 0,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "draft_n": 71,
+      "draft_n_accepted": 53,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 12,
+       "head": {
+        "rounds": 12,
+        "drafted": 71,
+        "accepted": 53
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 147,
+     "tool_calls": [
+      {
+       "id": "call_89d0a36bbe6043459d276e7f",
+       "name": "lookup_user",
+       "arguments": "{\"email\": \"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.2608520984649658,
+     "total_s": 0.7319900989532471,
+     "prompt_tokens": 452,
+     "completion_tokens": 45,
+     "client_decode_tps": 95.51341635224199,
+     "timings": {
+      "prompt_n": 132,
+      "predicted_n": 45,
+      "prompt_ms": 251.4,
+      "predicted_ms": 471.3,
+      "prompt_per_second": 525.06,
+      "predicted_per_second": 95.481,
+      "cache_n": 320,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 387,
+      "draft_n": 45,
+      "draft_n_accepted": 37,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 8,
+       "head": {
+        "rounds": 8,
+        "drafted": 45,
+        "accepted": 37
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 43,
+     "tool_calls": [
+      {
+       "id": "call_a5d8cc311e4d452c916d040c",
+       "name": "get_orders",
+       "arguments": "{\"user_id\": \"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.23672056198120117,
+     "total_s": 0.8175632953643799,
+     "prompt_tokens": 525,
+     "completion_tokens": 44,
+     "client_decode_tps": 75.75200217056593,
+     "timings": {
+      "prompt_n": 141,
+      "predicted_n": 44,
+      "prompt_ms": 225.7,
+      "predicted_ms": 580.9,
+      "prompt_per_second": 624.723,
+      "predicted_per_second": 75.745,
+      "cache_n": 384,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 451,
+      "draft_n": 54,
+      "draft_n_accepted": 34,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 10,
+       "head": {
+        "rounds": 10,
+        "drafted": 54,
+        "accepted": 34
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (A1, A2, A3).",
+     "reasoning_chars": 79,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

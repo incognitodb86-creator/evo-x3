@@ -1,0 +1,4 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+Meanwhile, read the lint and write path.
+error: Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 34h54m12s. (response may be truncated)
+AGY_ERROR: {"short_error":"RESOURCE_EXHAUSTED (code 429): Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 34h54m12s.","status":"RESOURCE_EXHAUSTED","error_code":429,"code_kind":"http","retryable":true,"error_id":"a0487c26-6826-4a94-8d1b-f947c8296331-110"}

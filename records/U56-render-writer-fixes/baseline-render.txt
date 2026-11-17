@@ -1,0 +1,4 @@
+...                                                                      [100%]
+3 passed in 0.05s
+/usr/sbin/node
+loop-guard unit tests OK 8

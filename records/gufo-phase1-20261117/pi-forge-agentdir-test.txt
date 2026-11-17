@@ -1,0 +1,3 @@
+2026-11-17 ~07:33 CST, Gufo 2x262144 + label=disable live, PI_CODING_AGENT_DIR=/home/evo/.pi/panes/forge, pi 1.5.2 -p --no-session --no-extensions --thinking low
+flash-next -> PONG, wall 2.0 s ; flash-next-sub -> PONG, wall 2.0 s
+(Earlier same test at 07:30 under 1x131072 after JoyCaption start: "component in-pass prefill failed: n-gram table read failed" — SELinux :Z, see U2-selinux-fix-test.txt)

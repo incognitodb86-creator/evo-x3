@@ -1,0 +1,247 @@
+     1	"""Mode router for the Render writer pipeline (coverage addendum B0, Python, no LLM).
+     2	
+     3	route_mode(ask, position, still_read, cfg, continued) -> {act_id, position, mode, overlays, mode_blocks, warnings}
+     4	- act: --position by id/alias (acts.yaml via the builder), else an act alias named in the ask, else the closest act name,
+     5	  else a still-pose guess; every fallback is logged as a warning and never blocks.
+     6	- mode: one base block per clip (talk, strip, transition, oral, partner, solo, sex) keyed off the act + ask keywords.
+     7	- overlays: cinematic, gonzo, pov, edge, forced_orgasm, defeat, cnc, taboo_role, spoof, bts, restraints, toy, threesome,
+     8	  continued, nonhuman, scale. Overlays add notes to the base card and turn on their lint rules; they are never new acts.
+     9	"""
+    10	from __future__ import annotations
+    11	
+    12	import difflib
+    13	import re
+    14	from typing import Any, Dict, List, Optional
+    15	
+    16	import build_request as br
+    17	
+    18	OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every hit is an overlay
+    19	    ("cinematic", r"\bcinematic|\bmovie\b|\bfilm\b|high-end"),
+    20	    ("gonzo", r"\bgonzo\b|\bamateur\b|\braw\b"),
+    21	    ("pov", r"\bpov\b|point of view|into the lens"),
+    22	    ("edge", r"(?:(?<!pool )(?<!water.s )\bedges?\b(?!\s+of\b)|\bedging\b|\bdenial\b|\bteas(?:e|es|ing)\b)"),
+    23	    ("forced_orgasm", r"forced orgasm|overstim\w*"),
+    24	    ("defeat", r"superheroine|\bheroine\b|\bperil\b|\bdefeated\b"),
+    25	    ("cnc", r"\bcnc\b|reluctan\w*|\bresist\w*|non-?con\w*"),
+    26	    ("taboo_role", r"\bdaddy\b|\bstep-?(?:brother|sister|dad|mom|father|mother|son|daughter)\b|\b(?:brother|sister|uncle|cousin)\b|roleplay"),
+    27	    ("spoof", r"\bspoof\b|\bparody\b|infomercial|\bnoir\b|space-captain|sitcom|\bvampire\b|\bcostume\b|\bcosplay\b"),
+    28	    ("vhs", r"\bvhs\b|\bcamcorder\b|\bhandycam\b"),
+    29	    ("bts", r"\bbts\b|\binterview\b|off[- ]?screen interviewer"),
+    30	    ("restraints", r"\brestrain\w*|\btied\b|\bcuff\w*|\bbound\b|\bropes?\b|strapped"),
+    31	    ("toy", r"\btoys?\b|vibrator|dildo|\bplug\b|\bwand\b"),
+    32	    # lost-features audit (Derrick, Prompt maker t243s811): creature partners and size play, no literal 'non-human' needed
+    33	    ("nonhuman", br._CREATURE_RE.pattern.replace("(?i)", "")),
+    34	    # Derrick t1454u/t1455u: sleep, hypnosis/mind-control and sedative themes are agreed adult roleplay: one consent line or wink in clip 1 (t1457u)
+    35	    ("consent_setup", r"\basleep\b|\bsleep(?:ing|s)?\b|\bhypno\w*|mind[- ]?control\w*|\btrance\b|\bsedat\w*|\bdrugged\b|\bmdma\b"),
+    36	    ("states", r"\basleep\b|\bsleep(?:ing|s)?\b|\bhypno\w*|mind[- ]?control\w*|\btrance\b|\bsedat\w*|\bdrugged\b|\bmdma\b|\bhigh\b|\btelekinesis\b"),
+    37	    ("scale", r"\btiny\b|\bfair(?:y|ies)\b|\bpixie|\bminiature\b|\bgiant(?:ess)?\b|\boversized\b|"
+    38	              r"\b(?:massive|huge|enormous) (?:cock|dick|shaft|size)\b|size difference|\bcarr(?:y|ies|ied|ying)\b|"
+    39	              r"held in (?:the )?air|\blifts? (?:her (?:up|off|into)|the tiny)\b"),
+    40	]
+    41	TRANSITION_RE = re.compile(r"(?i)position change|\bswitch(?:es)? to\b|turns her over|\bfrom (?:missionary|doggy|cowgirl|spooning)\b[^.]{0,30}\bto\b|rolls her (?:over|onto)")
+    42	STRIP_RE = re.compile(r"(?i)\bstrip\w*|\bundress\w*|slow reveal|\bpeels?\b")
+    43	SEX_WORDS_RE = re.compile(r"(?i)\b(?:sex|fucks?|takes her|thrusts?|rides?|riding|penetrat\w*|inside her)\b")
+    44	# mode-block labels in writer_prompt.md MODES (only the blocks for this clip are kept)
+    45	BLOCK_FOR = {"cinematic": "Cinematic", "gonzo": "Gonzo", "pov": "Gonzo", "edge": "Teasing and edging",
+    46	             "forced_orgasm": "Forced orgasm", "strip": "Strip and undress", "defeat": "Superheroine defeat",
+    47	             "toy": "Toys", "vhs": "Camera and look", "states": "States"}
+    48	
+    49	
+    50	def _alias_index() -> Dict[str, str]:
+    51	    idx = {}
+    52	    for act_id, e in br.load_acts_registry().items():
+    53	        idx[act_id.lower()] = act_id
+    54	        idx[act_id.lower().replace("_", " ")] = act_id
+    55	        for a in e.get("aliases", []) or []:
+    56	            idx[a.lower()] = act_id
+    57	    return idx
+    58	
+    59	
+    60	def resolve_act(position: str, ask: str, still_read: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    61	    warnings: List[Dict[str, Any]] = []
+    62	    e = br.get_act(position or "")
+    63	    if e:
+    64	        return {"act_id": e.get("id") or position, "warnings": warnings}
+    65	    # PM acc4 #11: an unknown sensual ask routes to tease, not talk
+    66	    if re.search(r"(?i)\bsensual\b", (position or "") + " " + (ask or "")) and not SEX_WORDS_RE.search(ask or ""):
+    67	        warnings.append({"warn": "mode_fallback", "why": "unknown sensual ask; routed to tease", "chosen": "tease"})
+    68	        return {"act_id": "tease", "warnings": warnings}
+    69	    idx = _alias_index()
+    70	    a = (ask or "").lower()
+    71	    hits = sorted(((len(k), v) for k, v in idx.items() if re.search(r"(?<![\w-])" + re.escape(k) + r"(?![\w-])", a)), reverse=True)
+    72	    if hits:
+    73	        act = hits[0][1]
+    74	        warnings.append({"warn": "mode_fallback", "why": f"unknown --position {position!r}; act named in the ask", "chosen": act})
+    75	        return {"act_id": act, "warnings": warnings}
+    76	    close = difflib.get_close_matches((position or "").lower(), list(idx), n=1, cutoff=0.6)
+    77	    if not close and position:
+    78	        pref = [k for k in idx if k.startswith((position or "").lower()) or (position or "").lower() in k.split(" ")]
+    79	        close = sorted(pref, key=len)[:1]
+    80	    if close:
+    81	        act = idx[close[0]]
+    82	        warnings.append({"warn": "mode_fallback", "why": f"unknown --position {position!r}; closest act name", "chosen": act})
+    83	        return {"act_id": act, "warnings": warnings}
+    84	    rd = br._unwrap_still_read(still_read or {}) if still_read else {}
+    85	    pose = str(rd.get("pose") or "").lower()
+    86	    act = "missionary" if re.search(r"lying|lies|on her back", pose) else ("blowjob" if "kneel" in pose else "talk")
+    87	    warnings.append({"warn": "mode_fallback", "why": f"unknown --position {position!r}, no act in the ask; still pose {pose!r}",
+    88	                     "chosen": act})
+    89	    return {"act_id": act, "warnings": warnings}
+    90	
+    91	
+    92	def route_mode(ask: str, position: str, still_read: Optional[Dict[str, Any]], cfg: Dict[str, Any],
+    93	               continued: bool = False) -> Dict[str, Any]:
+    94	    r = resolve_act(position, ask, still_read)
+    95	    act_id, warnings = r["act_id"], r["warnings"]
+    96	    kinds = cfg.get("position_kinds") or {}
+    97	    base = next((k for k, acts in kinds.items() if act_id in (acts or [])), None)
+    98	    if base is None:
+    99	        base = "sex"
+   100	        warnings.append({"warn": "mode_fallback", "why": f"act {act_id!r} has no position_kinds line", "chosen": "sex"})
+   101	    a = ask or ""
+   102	    if act_id == "tease" or (base == "solo" and STRIP_RE.search(a)):
+   103	        base = "strip"
+   104	    elif base in ("sex",) and TRANSITION_RE.search(a):
+   105	        base = "transition"
+   106	    overlays = [o for o, pat in OVERLAY_RE if re.search(r"(?i)" + pat, a)]
+   107	    rd = br._unwrap_still_read(still_read or {}) if still_read else {}
+   108	    if "pov" not in overlays and re.search(r"(?i)\bpov\b", str(rd.get("framing") or "")):
+   109	        overlays.append("pov")
+   110	    if rd.get("restraints") and "restraints" not in overlays:
+   111	        overlays.append("restraints")
+   112	    if br._THREE_BODY_ASK_RE.search(a) or int((br.get_act(act_id) or {}).get("bodies") or 2) == 3 and base != "talk":
+   113	        overlays.append("threesome")
+   114	    if br._GROUP_GT3_ASK_RE.search(a):
+   115	        warnings.append({"warn": "group_gt3", "why": "more than three people asked; written as a threesome (max 3)", "chosen": "threesome"})
+   116	        if "threesome" not in overlays:
+   117	            overlays.append("threesome")
+   118	    if continued:
+   119	        overlays.append("continued")
+   120	    # deterministic conflicts: oral/strip/talk keep edge as tempo only; tease act is strip, not edge
+   121	    if base in ("strip", "talk", "solo") and "edge" in overlays:
+   122	        overlays.remove("edge")
+   123	    if base == "strip" and SEX_WORDS_RE.search(a) and act_id == "tease":
+   124	        warnings.append({"warn": "strip_then_sex", "why": "strip and sex in one ask: this clip is the strip; run the sex as the next clip on the same --scene"})
+   125	    tone_flags = [o for o in overlays if o in ("spoof", "cinematic", "gonzo")]
+   126	    blocks = sorted({BLOCK_FOR[o] for o in overlays + [base] if o in BLOCK_FOR})
+   127	    return {"act_id": act_id, "position": act_id, "mode": base, "overlays": overlays, "tone_flags": tone_flags,
+   128	            "mode_blocks": blocks, "warnings": warnings}
+   129	"""Writer calls through the existing llama-swap endpoint (GPU lock gate :8085 -> llama-swap :8080).
+   130	
+   131	The key comes from the LLAMA_SWAP_KEY environment variable, else from pi's models.json provider entry. It is never
+   132	logged, printed or put on a command line (Max Architect 3, 2026-11-13).
+   133	"""
+   134	from __future__ import annotations
+   135	
+   136	import json
+   137	import os
+   138	import re
+   139	import socket
+   140	import time
+   141	import urllib.error
+   142	import urllib.request
+   143	from pathlib import Path
+   144	from typing import Any, Dict, List, Optional
+   145	
+   146	PI_MODELS = Path(os.path.expanduser(r"~/.pi/agent/models.json"))
+   147	
+   148	
+   149	class WriterDown(RuntimeError):
+   150	    """The writer server was unreachable or timed out after every retry."""
+   151	
+   152	
+   153	def _api_key() -> Optional[str]:
+   154	    k = os.environ.get("LLAMA_SWAP_KEY")
+   155	    if k:
+   156	        return k
+   157	    try:  # Windows user-scope env (a process started before the variable was set does not see it)
+   158	        import winreg
+   159	        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as h:
+   160	            v, _ = winreg.QueryValueEx(h, "LLAMA_SWAP_KEY")
+   161	            if v:
+   162	                return v
+   163	    except Exception:
+   164	        pass
+   165	    try:
+   166	        d = json.loads(PI_MODELS.read_text(encoding="utf-8"))
+   167	        provs = d["providers"]  # EVO-X3 2026-11-15: pi provider is x3-local; AlienPc: llama-swap
+   168	        v = (provs.get("llama-swap") or provs.get("x3-local") or {}).get("apiKey")
+   169	        if isinstance(v, str) and v.startswith("!"):  # EVO-X3 2026-11-15: pi resolves "!cmd" keys; do the same
+   170	            cmd = v[1:].strip()
+   171	            if cmd.startswith("cat ") and " " not in cmd[4:].strip():
+   172	                return Path(os.path.expanduser(cmd[4:].strip())).read_text(encoding="utf-8").strip() or None
+   173	            import subprocess
+   174	            return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=20).stdout.strip() or None
+   175	        if isinstance(v, str) and v:
+   176	            return os.environ.get(v, v) if re.fullmatch(r"[A-Z_][A-Z0-9_]*", v) else v
+   177	    except Exception:
+   178	        pass
+   179	    return None
+   180	
+   181	
+   182	def strip_think(text: str) -> str:
+   183	    t = text or ""
+   184	    if "</think>" in t:
+   185	        t = t.split("</think>")[-1]
+   186	    t = re.sub(r"(?s)<\|channel\>thought.*?<channel\|>", "", t)
+   187	    return t.strip()
+   188	
+   189	
+   190	class Client:
+   191	    def __init__(self, cfg: Dict[str, Any], log=None):
+   192	        self.cfg = cfg
+   193	        self.base = cfg.get("endpoint", "http://127.0.0.1:8085/v1").rstrip("/")
+   194	        self.model = cfg["model_alias"]
+   195	        self.timeout = float(cfg.get("timeout_s", 600))
+   196	        self.backoff = list(cfg.get("retry_backoff_s", [10, 30, 90]))
+   197	        self.log = log or (lambda *a, **k: None)
+   198	        self.calls: List[Dict[str, Any]] = []
+   199	        self._fail_after = int(os.environ.get("WP_FAULT_WRITER_DOWN_AFTER", "-1"))  # fault drill only
+   200	
+   201	    def chat(self, messages: List[Dict[str, Any]], sampler: Dict[str, Any], seed: int, max_tokens: int,
+   202	             response_format: Optional[Dict[str, Any]] = None, purpose: str = "") -> str:
+   203	        body: Dict[str, Any] = {"model": self.model, "messages": messages, "max_tokens": int(max_tokens), "stream": False,
+   204	                                "seed": int(seed), "cache_prompt": True}
+   205	        for k in ("temperature", "top_p", "top_k", "min_p", "presence_penalty", "frequency_penalty", "repetition_penalty",
+   206	                  "penalty_last_n"):
+   207	            if sampler.get(k) is not None:
+   208	                body[k] = sampler[k]
+   209	        if sampler.get("dry_multiplier"):  # passed through; servers without DRY ignore unknown keys
+   210	            for k in ("dry_multiplier", "dry_base", "dry_allowed_length", "dry_penalty_last_n", "dry_sequence_breakers"):
+   211	                if sampler.get(k) is not None:
+   212	                    body[k] = sampler[k]
+   213	        body["chat_template_kwargs"] = {"enable_thinking": bool(self.cfg.get("thinking", False))}
+   214	        if response_format:
+   215	            body["response_format"] = response_format
+   216	        data = json.dumps(body).encode("utf-8")
+   217	        headers = {"Content-Type": "application/json"}
+   218	        key = _api_key()
+   219	        if key:
+   220	            headers["Authorization"] = "Bearer " + key
+   221	        attempts = [0.0] + [float(b) for b in self.backoff]
+   222	        last_err = None
+   223	        for n, wait in enumerate(attempts):
+   224	            if n:
+   225	                self.log("writer_retry", {"purpose": purpose, "attempt": n, "sleep_s": wait, "error": last_err})
+   226	                time.sleep(wait)
+   227	            t0 = time.time()
+   228	            try:
+   229	                if 0 <= self._fail_after <= len(self.calls):
+   230	                    raise urllib.error.URLError("fault drill: writer server killed")
+   231	                req = urllib.request.Request(self.base + "/chat/completions", data=data, headers=headers, method="POST")
+   232	                with urllib.request.urlopen(req, timeout=self.timeout) as r:
+   233	                    out = json.loads(r.read().decode("utf-8"))
+   234	                msg = out["choices"][0]["message"]
+   235	                text = strip_think(msg.get("content") or "")
+   236	                usage = out.get("usage") or {}
+   237	                self.calls.append({"purpose": purpose, "seconds": round(time.time() - t0, 2), "seed": seed,
+   238	                                   "completion_tokens": usage.get("completion_tokens"), "prompt_tokens": usage.get("prompt_tokens"),
+   239	                                   "finish": out["choices"][0].get("finish_reason")})
+   240	                return text
+   241	            except urllib.error.HTTPError as e:
+   242	                last_err = f"HTTP {e.code}"
+   243	                if e.code < 500 and e.code != 429:
+   244	                    raise WriterDown(f"writer HTTP {e.code} ({purpose})")
+   245	            except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, OSError) as e:
+   246	                last_err = f"{type(e).__name__}: {str(e)[:120]}"
+   247	        raise WriterDown(f"writer unreachable after {len(attempts)} tries ({purpose}): {last_err}")

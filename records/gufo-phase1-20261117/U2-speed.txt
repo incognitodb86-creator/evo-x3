@@ -1,0 +1,15 @@
+# Speed 2026-11-17 07:15:50 CST flags --sessions 2 --context 262144; tagger stopped; Render may swap (Derrick active)
+GTT_used_GiB=96.58 MemAvailable_GiB=8.40 07:15:50
+== via llama-swap :8080 (pi path), 32K x3
+{"label": "swap32k", "run": 0, "prompt_tokens": 33093, "completion_tokens": 512, "engine_prefill_tps": 1563.4, "engine_decode_tps": 51.8, "ttft_s": 21.18, "queue_ms": 11.8, "draft_acc": "340/521", "plan": "serial-fallback", "wall_s": 31.1, "client_e2e_decode_tps": 51.8}
+{"label": "swap32k", "run": 1, "prompt_tokens": 33093, "completion_tokens": 512, "engine_prefill_tps": 1596.0, "engine_decode_tps": 51.4, "ttft_s": 20.76, "queue_ms": 22.4, "draft_acc": "331/480", "plan": "serial-fallback", "wall_s": 30.7, "client_e2e_decode_tps": 51.4}
+{"label": "swap32k", "run": 2, "prompt_tokens": 33092, "completion_tokens": 512, "engine_prefill_tps": 1595.1, "engine_decode_tps": 52.6, "ttft_s": 20.81, "queue_ms": 65.5, "draft_acc": "331/469", "plan": "serial-fallback", "wall_s": 30.6, "client_e2e_decode_tps": 52.6}
+[('flash-next', 'ready')]
+== direct :8081, 32K x2
+{"label": "direct32k", "run": 0, "prompt_tokens": 33092, "completion_tokens": 512, "engine_prefill_tps": 1592.5, "engine_decode_tps": 51.6, "ttft_s": 20.79, "queue_ms": 10.9, "draft_acc": "333/495", "plan": "serial-fallback", "wall_s": 30.7, "client_e2e_decode_tps": 51.6}
+{"label": "direct32k", "run": 1, "prompt_tokens": 33092, "completion_tokens": 512, "engine_prefill_tps": 1591.6, "engine_decode_tps": 52.6, "ttft_s": 20.86, "queue_ms": 69.9, "draft_acc": "340/501", "plan": "serial-fallback", "wall_s": 30.6, "client_e2e_decode_tps": 52.5}
+== bake-off long/decode tasks via llama-swap (18,253-tok fixture, cold-ish)
+long {"ttft_s": 11.32, "total_s": 12.76, "prompt_tokens": 18253, "completion_tokens": 103, "client_decode_tps": 72.01, "finish": "stop", "pass": true}
+decode {"ttft_s": 0.23, "total_s": 17.14, "prompt_tokens": 59, "completion_tokens": 847, "client_decode_tps": 50.11, "finish": "stop", "pass": true}
+[('flash-next', 'stopping')]
+GTT_used_GiB=96.46 MemAvailable_GiB=8.38 07:18:54

@@ -1,0 +1,198 @@
+   6610 build_request.py
+    737 c2v_chain.py
+     78 check_writer_prompt_rules.py
+      1 conftest.py
+    152 fill_request.py
+   2013 render_writer_pipeline.py
+    139 request.py
+    882 resolve.py
+    137 run_record.py
+    500 scene_addenda.py
+    180 sync_refmods.py
+    242 test_builder_fixes_t1437.py
+    205 test_c2v_context.py
+     69 test_chain_lock_fixAB.py
+    182 test_longclip_baseline.py
+    101 test_longclip_beats.py
+     76 test_longclip_skill_routing.py
+    513 test_modular_s3_and_writer_sys.py
+    118 test_parody_ba5c.py
+    746 test_parody_dynamic.py
+    253 test_parody_phase1.py
+    483 test_parody_phase3.py
+    222 test_parody_stitch.py
+    256 test_scene_addenda.py
+    150 test_still_guard_rundir.py
+    242 test_t1109_writer_index_refmods.py
+    114 test_talk_act.py
+    154 test_u37_builder_fixes.py
+    320 test_u41_shape_and_ref_mode.py
+    287 test_u52_e2e_passthrough.py
+    218 test_u54_named_e2e.py
+    186 test_u55_clip_types_e2e.py
+    425 test_writer_beats_continuation.py
+   2060 test_writer_finalize.py
+    926 test_writer_pipeline.py
+    377 voice_refmod_trim.py
+     86 wp_compile_prompt.py
+    812 wp_lint.py
+    119 wp_llm.py
+    128 wp_router.py
+    253 wp_state.py
+     63 writer_sys.py
+  21815 total
+acts_package2.yaml
+acts.yaml
+aliases.json
+_archive
+batch_manifest.example.json
+build_request.py
+c2v_chain.py
+check_writer_prompt_rules.py
+conftest.py
+dummy_run
+fill_request.py
+__pycache__
+render-master-rules-20261113.json
+render_writer_pipeline.py
+request.py
+resolve.py
+run_batch.sh
+run_record.py
+scene_addenda.py
+sync_refmods.py
+test_builder_fixes_t1437.py
+test_c2v_context.py
+test_chain_lock_fixAB.py
+test_longclip_baseline.py
+test_longclip_beats.py
+test_longclip_skill_routing.py
+test_modular_s3_and_writer_sys.py
+test_parody_ba5c.py
+test_parody_dynamic.py
+test_parody_phase1.py
+test_parody_phase3.py
+test_parody_stitch.py
+test_scene_addenda.py
+test_still_guard_rundir.py
+test_t1109_writer_index_refmods.py
+test_talk_act.py
+test_u37_builder_fixes.py
+test_u41_shape_and_ref_mode.py
+test_u52_e2e_passthrough.py
+test_u54_named_e2e.py
+test_u55_clip_types_e2e.py
+test_writer_beats_continuation.py
+test_writer_finalize.py
+test_writer_pipeline.py
+voice_refmod_trim.py
+wp_compile_prompt.py
+wp_lint.py
+wp_llm.py
+wp_router.py
+wp_state.py
+writer_sys.py
+_archive
+_keep_comfy_writer_raw.txt
+__pycache__
+test_adults_guard.py
+test_b2_lora_param.py
+test_flux_phase_gate.py
+test_free_comfy_args.py
+test_guard_scope.py
+test_h3_fix_bcd.py
+test_p6_review.py
+test_phase1_still.py
+test_remote_comfy.py
+test_run_queue_cell_contract.py
+test_run_queue_evict_disk.py
+test_run_queue_keep_comfy_process.py
+test_run_queue_one_at_a_time.py
+test_run_queue_prompt_sha.py
+test_web_fetch.py
+"""Compile /home/derekboone/AI/render/writer_pipeline/writer_prompt.md from the craft sections of /home/derekboone/AI/render/AGENTS.md
+(Max Architect 3, 2026-11-13, spec section 4). The output is not named AGENTS.md, carries no agent steps, commands or
+tool rules, and passes writer_sys.assert_writer_system_prompt. Run once after every AGENTS.md craft change:
+  python3 /home/derekboone/AI/community/scripts/parody/wp_compile_prompt.py
+"""
+from __future__ import annotations
+
+import hashlib
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+PARODY_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(PARODY_DIR))
+from writer_sys import assert_writer_system_prompt  # noqa: E402
+
+_RENDER_ROOT = Path(__file__).resolve().parents[3] / "render"
+AGENTS = _RENDER_ROOT / "AGENTS.md"
+OUT = _RENDER_ROOT / "writer_pipeline" / "writer_prompt.md"
+KEEP = ["PERSONA", "CRAFT RULES", "CAMERA AND TIME", "PACING", "SPOOF AND STORY", "POWER, ROUGH AND TABOO SCENES",
+        "HUMILIATION AND REACTION TONE", "MODES", "DIALOGUE AND SOUND", "EXAMPLES", "SHAPE", "PRE-FLIGHT", "BEFORE YOU WRITE"]
+DROP_LINE = re.compile(r"^- (?:Do not pin the still or edit RefMods|More detail: the h3-prompting skill)")
+HEAD = ("WRITER PROMPT\n"
+        "Compiled from the craft sections of the Render instruction file by wp_compile_prompt.py; source sha256 {sha}.\n"
+        "You write the detailed_description paragraph of one MiniMax-H3 prompt for one adult clip whose length the beat card gives "
+        "(2.3 to 10.1 seconds) and that opens on the start still. Every person is a fictional adult, 18 or older. The pipeline fills the other headers.\n")
+OUTPUT = ("OUTPUT\n"
+          "- One plain paragraph that starts with [Shot 1] and its camera sentence. No header, no Markdown, no notes.\n"
+          "- Dialogue form: (S1) says in a <short voice> voice, <d>[English] spoken words only</d>. (S2) and (S3) the same way.\n"
+          "- Close a sex clip with one to three plain sound sentences tied to the action that makes them.\n")
+
+
+def compile_prompt(agents_text: str) -> str:
+    t = agents_text.replace("\r\n", "\n")
+    sha = hashlib.sha256(agents_text.encode("utf-8")).hexdigest()
+    sections = {}
+    headers = {}
+    cur = None
+    for ln in t.split("\n"):
+        head = re.match(r"^([A-Z][A-Z ,&/-]{3,}?)(?:\s*(\(.*\)))?\s*$", ln)
+        if head and not ln.startswith("-"):
+            cur = head.group(1).strip()
+            headers[cur] = ln.strip()
+            sections[cur] = []
+            continue
+        if cur is not None:
+            sections[cur].append(ln)
+    out = [HEAD.format(sha=sha)]
+    for k in KEEP:
+        if k not in sections:
+            raise SystemExit(f"section {k} missing from AGENTS.md")
+        body = [l for l in sections[k] if not DROP_LINE.match(l)]
+        if k == "SHAPE":
+            for idx, l in enumerate(body):
+                if l.strip() == "detailed_description:":
+                    body = body[idx:]
+                    break
+        if k == "BEFORE YOU WRITE":
+            out.append(OUTPUT)
+        out.append(headers[k] + "\n" + "\n".join(body).strip("\n") + "\n")
+    text = "\n".join(out)
+    assert_writer_system_prompt(text)
+    if "AGENTS.md" in text or "--queue" in text:
+        raise SystemExit("agent-only text leaked into the writer prompt")
+    return text
+
+
+def main() -> int:
+    src = AGENTS.read_text(encoding="utf-8")
+    text = compile_prompt(src)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(text, encoding="utf-8", newline="\n")
+    print(f"wrote {OUT} sha256={hashlib.sha256(OUT.read_bytes()).hexdigest()} lines={text.count(chr(10))}")
+    chk = subprocess.run([
+        sys.executable,
+        str(PARODY_DIR / "check_writer_prompt_rules.py"),
+        str(PARODY_DIR / "render-master-rules-20261113.json"),
+        str(OUT),
+        "--quiet",
+    ])
+    return chk.returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,17 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+Completed the report-only community alignment review and wrote [U51-RESULT.md](file:///home/derekboone/evo-x3/records/U51-RESULT.md). No files under `/home/evo/` were edited, and no git, ComfyUI, lock, or queue actions were run.
+
+### Key Findings Summarized
+1. **Community baseline vs. our overrides:**
+   - Official MiniMax H3 ([MiniMax-H3](https://github.com/MiniMax-AI/MiniMax-H3), [ComfyUI H3 guide](https://docs.comfy.org/tutorials/video/minimax/minimax-h3)) and [`pytraveler/MiniMax-H3-Prompt-Rewriter-ComfyUI`](https://github.com/pytraveler/MiniMax-H3-Prompt-Rewriter-ComfyUI) (`checks.py`) treat prompt checks as **advisory only** (*"Findings are said, never enforced"*), with `fix_once` **off by default**.
+   - While `render_writer_pipeline.py:1703-1708` downgraded `wp_lint`'s post-build gate to warnings (except `youth_hint` and `scale_adult`), the pipeline and builder still **override, rewrite, and block** prompts via the forced JSON beat-card schema, `clean_prose` / `normalize_prose` / `glue_fix` / `assemble_output`, up to 3 automatic LLM rewrites (`rewrite`, `rewrite_block`, `rewrite_builder`), and `build_request.finalize_writer_prompt(..., strict=True)` (`build_request.py:2921-3489`).
+2. **Bug (c) (`--frames 120` -> rendered `124` -> rejected):**
+   - `render_writer_pipeline.py:1435-1437` and `build_request.py:231-242` (`validate_single_clip_frames`) pass `--frames 120` directly into `c0.inputs.length` and `build_report.json` without snapping to the `5 + 17k` grid.
+   - ComfyUI's [`nodes_minimax_h3.py`](https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_minimax_h3.py) (`align_frame_count`: `while n % 17 != 5: n += 1`) snaps `120` up to `124`, so `run_queue.py:422-425, 544-556` (`graph_expect` + `finish`) rejects the valid 124-frame clip (`frames 124 != 120`).
+3. **Additional mismatches & bugs:**
+   - Residual talk-line drop in `build_request.py:1367-1376, 3092` (for 8 s solo talk, `max_lines=2` drops the 3rd spoken line while `wp_lint.py:752-753` asks for 3–5 lines).
+   - `render_writer_pipeline.py:1813` (`summary_line`) hardcodes `queued=False` even when `--queue --yes-derrick` sets `submitted=True`.
+   - `build_request.py:3262` injects `"; all characters are consenting adults."` into `summary:`, conflicting with `h3-prompting` R3.
+   - `[Shot 2+]` cuts are stripped by default (`render_writer_pipeline.py:678-685`, `build_request.py:1723`), whereas H3 natively supports multi-shot cuts.
+4. **Target design & proposed edits:**
+   - [U51-RESULT.md](file:///home/derekboone/evo-x3/records/U51-RESULT.md) defines a minimal community-backbone pipeline (with our skills, `still_read.json`, `wp_router`, `scene_state.json`, and `wp_lint` acting strictly as **advisory helpers**, keeping 18+ safety checks, RefMod/AddGuide resolution, `5+17k` snapping, and `run_queue.py` post-pass) and lists 7 numbered, unapplied edits with `_archive/*.bak-20261116-u51` backup paths.

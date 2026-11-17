@@ -1,0 +1,17 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+Completed all steps of [U38-forge-parity-brief-20261116.md](file:///home/derekboone/evo-x3/records/U38-forge-parity-brief-20261116.md) in order and wrote [U38-RESULT.md](file:///home/derekboone/evo-x3/records/U38-RESULT.md).
+
+### Summary
+- **Backup & Config:** Backed up `/home/evo/.pi/agent/mcp.json` to `/home/evo/.pi/agent/_archive/mcp.json.bak-u38` (`0600`), left `homeassistant` and `gitea` unchanged, and kept `mcp.json` and `/home/evo/.config/forge-mcp/` uncommitted.
+- **Installed & Enabled (as `evo`):**
+  - `playwright`: `@playwright/mcp@0.0.85` + Chromium `v1254` (`158.0.8127.18`), headless with profile `/home/evo/.cache/forge-playwright` (25 tools).
+  - `searxng`: `mcp-searxng@2.10.1` pointed at `http://127.0.0.1:8888` (4 tools).
+  - `fetch`: `mcp-server-fetch==2026.11.11` via `/usr/bin/uvx` (`uv` `0.13.7-3.fc44` installed via `dnf`) (1 tool).
+- **Installed & Disabled (pending Derrick's keys):**
+  - `vaultwarden`: `@bitwarden/mcp-server@2026.7.0` + `@bitwarden/cli@2026.10.1`, placeholder `/home/evo/.config/forge-mcp/vaultwarden.env` (`0600`) + `run-vaultwarden-mcp.sh` (`0700`).
+  - `google-workspace`: `workspace-mcp==2.5.0` (`taylorwilsdon/google_workspace_mcp`), placeholder `/home/evo/.config/forge-mcp/google-workspace.env` (`0600`) + `run-google-workspace-mcp.sh` (`0700`).
+  - `unifi`: `unifi-network-mcp==0.46.0` (`sirkirby/unifi-network-mcp`), placeholder `/home/evo/.config/forge-mcp/unifi.env` (`0600`, `UNIFI_READ_ONLY=true`) + `run-unifi-mcp.sh` (`0700`).
+- **Verification (as `evo`):**
+  - `pi mcp list --json` showed `gitea` (28), `playwright` (25), `searxng` (4), and `fetch` (1) connected, and `vaultwarden`, `google-workspace`, `unifi` disabled.
+  - Live MCP stdio calls verified: `playwright` opened `https://example.com` (title `"Example Domain"`), `searxng_web_search` returned 3,420 chars of results, and `fetch` returned `HTTP/1.1 200 OK` with `Example Domain` content.
+- **Docs:** Wrote [U38-keys-howto.md](file:///home/derekboone/evo-x3/records/U38-keys-howto.md) and [U38-RESULT.md](file:///home/derekboone/evo-x3/records/U38-RESULT.md).

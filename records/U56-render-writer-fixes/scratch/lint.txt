@@ -1,0 +1,812 @@
+     1	"""Render writer pipeline linter (Max Architect 3, 2026-11-13, Derrick t1409u; spec render-writer-pipeline-handoff-20261113.md).
+     2	
+     3	Deterministic, CPU only. Scores one candidate 0-100 and lists hard fails. Every builder regex is IMPORTED from
+     4	build_request.py (never copied), so the linter follows the builder when its regexes change.
+     5	"""
+     6	from __future__ import annotations
+     7	
+     8	import difflib
+     9	import re
+    10	from typing import Any, Dict, Iterable, List, Optional, Sequence
+    11	
+    12	import build_request as br
+    13	
+    14	# --- imported builder regexes (spec section 5; live line numbers re-checked 2026-11-13) -------------------------------
+    15	PRIMARY_RE = br._PRIMARY_RE
+    16	TEMPO_RE = br._TEMPO_RE
+    17	CONTACT_RE = br._CONTACT_RE
+    18	ASIDE_RE = br._ASIDE_RE
+    19	REMOVE_VERB_RE = br._REMOVE_VERB_RE
+    20	PENETRATION_RE = br._PENETRATION_RE
+    21	OPENER_RE = br._OPENER_RE
+    22	ACT_RE = br._ACT_RE
+    23	BODY_SOUND_RE = br._BODY_SOUND_RE
+    24	SECTION_RE = br._SECTION_RE
+    25	CAMERA_SENTENCE_RE = br._CAMERA_SENTENCE_RE
+    26	NEG_WORD_RE = br._NEG_WORD_RE
+    27	D_RE = br._D_RE
+    28	
+    29	# --- pipeline-only patterns (not in the builder) -------------------------------------------------------------------
+    30	SHOT2_RE = re.compile(r"\[Shot\s*(?:[2-9]|\d{2,})\]", re.I)
+    31	TIMESTAMP_RE = re.compile(r"\b\d{1,2}:\d{2}(?:\.\d+)?\b|\b\d+(?:\.\d+)?\s*(?:s|sec|secs|seconds)\b|~\s*\d", re.I)
+    32	SEQ_WORD_RE = re.compile(r"\b(then|after|afterwards|afterward|next)\b", re.I)
+    33	ALLOWED_TOKEN_RE = re.compile(r"^</?d>$|^<(?:Picture|Subject|Audio) \d+>$", re.I)
+    34	ANGLE_TOKEN_RE = re.compile(r"<[^<>\n]{1,60}>")
+    35	POSE_CHAIN_RE = re.compile(r"(?i)\b(?:lies? back|lying back|lowers? (?:herself|her)|turns?|bends?|kneels?|kneeling|climbs?|"
+    36	                           r"braces?|drops? (?:to|onto|down)|rolls?|straddl\w*|sinks? (?:down|onto)|leans? (?:over|forward|back)|"
+    37	                           r"steps?|walks?|crosses|shuts?|closes? the|slams?|sets? (?:down|the)|reaches?|tosses?|grabs?|pulls?|pushes?|"
+    38	                           r"enters?|comes? in|stops?|rises?|sits?|stands? up|opens?|slides?|hooks?|tugs?|hikes?|spreads?|"
+    39	                           r"guides?|positions?|lifts?|parts?|arches?|presses?)\b")
+    40	RESULT_RE = re.compile(r"(?i)\b(?:by the end|as the clip ends|on the last frame|by the last frame|as the take ends|at the end)\b")
+    41	SOUND_NOUN_RE = re.compile(r"(?i)\b(?:sound\w*|creak\w*|rustl\w*|thud\w*|click\w*|hum\w*|waves?|slap\w*|rasp\w*|crackl\w*|"
+    42	                           r"hiss\w*|patter\w*|echo\w*|knock\w*|thump\w*|scrape\w*|squeak\w*|whisper\w*|rattl\w*|jingl\w*|"
+    43	                           r"splash\w*|surf|wind|rain|traffic|siren\w*|footsteps?|door\w*|fabric|rumbl\w*|buzz\w*|tick\w*|drip\w*)\b")
+    44	CONTINUE_RE = re.compile(r"(?i)\b(?:\w+ing|keeps?|still|continues?|on and on|without stopping|maintains?|keeps up|"
+    45	                         r"holds the (?:pace|tempo|rhythm))\b")
+    46	SUBJECT_START_RE = re.compile(r"^\s*(\(S[123]\)|<Subject [123]>|she|he|her|his|they|the camera)\b", re.I)
+    47	WORD_RE = re.compile(r"[a-z0-9']+")
+    48	
+    49	SEX_KINDS = ("sex", "oral")
+    50	# Per-mode act rules (one block per mode; a new mode is one entry here plus one in the pipeline's MODES).
+    51	# primary: PRIMARY MOTION with a tempo word is required; contact: a _CONTACT_RE join word is required;
+    52	# banned_contact: join words that are wrong for the mode; clearance: a garment over the join must go aside;
+    53	# dev: what marks the development phase (the PRIMARY line, or the second spoken line for talk).
+    54	MODE_RULES: Dict[str, Dict[str, Any]] = {
+    55	    "sex": {"primary": True, "contact": True, "contact_hint": "inside her, buried in her, deep in her or hips flush",
+    56	            "banned_contact": None, "clearance": True, "dev": "primary", "min_lines": 0},
+    57	    "oral": {"primary": True, "contact": True, "contact_hint": "inside her mouth",
+    58	             "banned_contact": r"\b(?:hips flush|sheathed)\b|\b(?:deep in|buried in|inside) her\b(?!\s+(?:mouth|throat)\b)",
+    59	             "banned_hint": "oral contact names the mouth (inside her mouth), never vaginal terms (deep in her / buried in her), hips flush or sheathed",
+    60	             "clearance": False, "dev": "primary", "min_lines": 0},
+    61	    # partner present but no penetration join (titjob, finish): motion and tempo yes, join keyword no
+    62	    "partner": {"primary": True, "contact": False, "banned_contact": None, "clearance": False, "dev": "primary", "min_lines": 0},
+    63	    "solo": {"primary": True, "contact": False, "banned_contact": None, "clearance": False, "dev": "primary", "min_lines": 0},
+    64	    "talk": {"primary": False, "contact": False, "banned_contact": None, "clearance": False, "dev": "lines", "min_lines": 3},
+    65	    # strip (--position tease): PRIMARY MOTION is the removal with a tempo word, 1-3 removals, no contact
+    66	    "strip": {"primary": True, "contact": False, "banned_contact": None, "clearance": False, "dev": "primary", "min_lines": 0,
+    67	              "removals": (1, 3)},
+    68	    # position change: the landing in the new pose is the development; contact may be held, no full PRIMARY MOTION needed
+    69	    "transition": {"primary": False, "contact": False, "banned_contact": None, "clearance": True, "dev": "pos", "min_lines": 0},
+    70	}
+    71	
+    72	# imported builder regexes for the builder-parity rules (coverage addendum B3)
+    73	DIAL_RE = br._DIAL_RE
+    74	THROAT_RE = br._THROAT_RE
+    75	CAMERA_MOTION_RE = br._CAMERA_MOTION_RE
+    76	ORAL_ACT_RE = br._ORAL_ACT_RE
+    77	MOUTH_FREE_RE = br._MOUTH_FREE_RE
+    78	RISE_RE, SINK_RE, HIS_LIFT_RE, MEET_RE = br._RISE_RE, br._SINK_RE, br._HIS_LIFT_RE, br._MEET_RE
+    79	SPEAKER_D_RE = re.compile(r"\((S[123])\)[^<.\n!?;]{0,120}?<d>|<d>")
+    80	SHALLOW_RE = re.compile(r"(?i)\b(?:shallow(?!,?\s+(?:breath|breathing|gasp|pant|exhale|inhale))\w*|at the entrance|just the tip|half[- ]depth|only the tip)\b")
+    81	NARR_RE = re.compile(r"(?i)\b(?:dominates? her|submits?|feels? (?:humiliated|ashamed|degraded)|she (?:orgasms|cums|climaxes))\b")
+    82	PANEL_RE = re.compile(r"(?i)\bpanels?\b")
+    83	CAM_BIG_RE = re.compile(r"(?i)\b(?:orbit\w*|360|whip[- ]?pan\w*|crane\w*|\barcs?\b|arcing)\b")
+    84	SAFEWORD_RE = re.compile(r"(?i)\bsafe ?word\b")
+    85	RELEASE_RE = re.compile(r"(?i)\b(?:unties?|untied|unbuckl\w*|uncuff\w*|releases? her (?:wrists|ankles|hands)|frees? her (?:wrists|hands))\b")
+    86	RESTRAINT_RE = re.compile(r"(?i)\b(?:tied|bound|cuff\w*|rope\w*|strap\w*|restrain\w*|pinned|pins? her wrists)\b")
+    87	ROLE_RE = re.compile(r"(?i)\b(?:daddy|step-?(?:brother|sister|dad|mom|father|mother|son|daughter)|brother|sister|uncle|cousin)\b")
+    88	WET_RE = re.compile(r"(?i)\b(?:wet\w*|oil\w*|oily|sweat\w*|glisten\w*|slick\w*)\b")
+    89	PER_SEC_RE = re.compile(r"(?i)\b(one|two|three|four|five|\d+(?:\.\d+)?)\s+(?:\w+\s+){0,3}?(?:strokes?|thrusts?|beats?|cycles?|bobs?|drives?|moves?)\s+(?:a|per|every)\s+(half\s+)?second")
+    90	_NUM = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
+    91	
+    92	
+    93	def tempo_rate(text: str) -> Optional[float]:
+    94	    m = PER_SEC_RE.search(text or "")
+    95	    if not m:
+    96	        return None
+    97	    n = _NUM.get(m.group(1).lower()) or float(m.group(1))
+    98	    return n * (2 if m.group(2) else 1)
+    99	
+   100	
+   101	def speaker_counts(dd: str) -> Dict[str, int]:
+   102	    out: Dict[str, int] = {}
+   103	    text = dd or ""
+   104	    for m in SPEAKER_D_RE.finditer(text):
+   105	        pre = text[max(0, m.start() - 100):max(0, m.end() - 3)]
+   106	        spk = "?" if _INTERVIEWER_LEAD_RE.search(pre) else (m.group(1) or "?")
+   107	        out[spk] = out.get(spk, 0) + 1
+   108	    return out
+   109	
+   110	
+   111	def oral_mouth_talk(dd: str) -> bool:
+   112	    """True when (S1) has a <d> line while her mouth is on him (the builder's D1 rule, imported regexes)."""
+   113	    masked = D_RE.sub(lambda x: " " * len(x.group(0)), dd)
+   114	    ev = sorted([(m.start(), "on") for m in ORAL_ACT_RE.finditer(masked)] + [(m.start(), "off") for m in MOUTH_FREE_RE.finditer(masked)]
+   115	                + [(m.start(), "d") for m in SPEAKER_D_RE.finditer(dd) if (m.group(1) or "") == "S1"])
+   116	    on = False
+   117	    for _, k in ev:
+   118	        if k == "on":
+   119	            on = True
+   120	        elif k == "off":
+   121	            on = False
+   122	        elif on:
+   123	            return True
+   124	    return False
+   125	
+   126	
+   127	def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str, Any], kind: str, prim_idx: Optional[int]) -> List[Dict[str, Any]]:
+   128	    """Builder-parity and overlay rules (coverage addendum B3); hard unless marked soft."""
+   129	    out: List[Dict[str, Any]] = []
+   130	    cast = ctx.get("cast") or {}
+   131	    ov = set(ctx.get("overlays") or [])
+   132	    ask = ctx.get("ask") or ""
+   133	    act = ctx.get("act_id") or ""
+   134	    cfg = ctx.get("cfg") or {}
+   135	    # L-POS: the act's landing words (builder position_check) in the prose
+   136	    pc = cast.get("position_check")
+   137	    if pc and kind != "talk" and not re.search(pc, plain, re.I):
+   138	        out.append(_fix("pose_landing", f"land the pose in the builder's words for {act} (e.g. one of: {pc[:120]})"))
+   139	    # L-PARTNER: an off-still partner must be defined (builder writer_defined_missing_person)
+   140	    if cast.get("off_still_s2") and not br.writer_defined_missing_person(full, 2):
+   141	        out.append(_fix("partner_gate", "define (S2) when he enters: look or clothes and 'enters from' in one sentence"))
+   142	    if cast.get("off_still_s3") and not br.writer_defined_missing_person(full, 3):
+   143	        out.append(_fix("partner_gate_s3", "define (S3) when they enter: look or clothes and 'enters from' in one sentence"))
+   144	    # L-VOICE (acceptance-1 f): a speaker the builder has no voice for gets 'a distinct adult voice for (Sn)'
+   145	    if cast:
+   146	        for n in sorted(set(re.findall(r"\(S([23])\)[^<.!?]{0,120}<d>", dd))):
+   147	            if not cast.get(f"voice_s{n}"):
+   148	                if re.search(rf"(?i)\(S{n}\)[^<.!?]{{0,60}}\boff[- ]?screen", dd):
+   149	                    out.append(_fix("voice_missing", f"off-screen interviewer has no (S{n}) label; rewrite without (S{n}) as 'An off-screen interviewer asks, <d>...</d>'"))
+   150	                else:
+   151	                    out.append(_fix("voice_missing", f"(S{n}) has no voice in this clip's cast (talk/solo act); give the line to (S1) "
+   152	                                                     f"or make it an off-screen voice"))
+   153	    # L-FUTA: builder P2-FUTA-AS-MAN
+   154	    if re.search(r"(?i)\bfuta\b", ask) and re.search(r"(?i)\b(?:he|his|him|himself|the man)\b", plain):
+   155	        out.append(_fix("futa_pronoun", "the futa partner is she/her; no he, his, him or the man"))
+   156	    # L-SPK2: the builder keeps at most max_lines_per_speaker lines per speaker
+   157	    max_spk = int(cfg.get("max_lines_per_speaker", 2))
+   158	    for spk, n in speaker_counts(dd).items():
+   159	        if n > max_spk:
+   160	            out.append(_fix("speaker_cap", f"({spk}) has {n} lines; the builder keeps {max_spk} per speaker, so give at most {max_spk}"))
+   161	    # acceptance-2 item 10: silent mouth in every act (oral, mmf/spitroast, finish, titjob) once her mouth is on him
+   162	    first_contact = next((i for i, x in enumerate(sents) if MOUTH_CONTACT_RE.search(outside_d(x))), None)
+   163	    if first_contact is not None and any(re.search(r"\(S1\)[^<]{0,120}<d>", x) for x in sents[first_contact:]):
+   164	        out.append(_fix("oral_silence", "after her mouth is on him only (S2) speaks; give (S1) wet suction and breath instead"))
+   165	    if (kind == "oral" or act in ("finish", "titjob", "blowjob") or "toy" in ov) and SLAP_RE.search(plain):
+   166	        out.append(_fix("oral_sound", "no slap foley here: wet suction, breath, fabric or the toy's hum"))
+   167	    if re.search(r"<d>[^<]*<d>|</d>\s*</d>", dd) or any("[" in re.sub(r"^\s*\[English\]\s*", "", m) or "PRIMARY MOTION" in m
+   168	                                                       for m in re.findall(r"<d>(.*?)</d>", dd, flags=re.S)):
+   169	        out.append(_fix("nested_d", "one <d>[English] words</d> pair per spoken line: no nesting, no other [brackets], no labels inside"))
+   170	    if TAG_WORDS_RE.search(full):
+   171	        out.append(_fix("tag_words", "remove the words cinematic / beautiful (summary and prose)"))
+   172	    # act_mismatch: another act's landing words in a non-transition clip (c3b standing_mf landing missionary)
+   173	    if kind not in ("transition", "talk") and act in ACT_LANDING:
+   174	        body_s = [outside_d(x) for x in sents if not OPENER_RE.search(x)]
+   175	        for other, rx in ACT_LANDING.items():
+   176	            if other != act and other not in ACT_COMPAT.get(act, ()) and any(re.search(rx, x) for x in body_s):
+   177	                out.append(_fix("act_mismatch", f"this clip is {act}; remove the {other} landing words and land in {act}'s own pose"))
+   178	                break
+   179	    if act == "standing_mf" and any(re.search(r"(?i)hands and knees|on all fours|(?<!standing )\bdoggy\b", outside_d(x))
+   180	                                    for x in sents if not OPENER_RE.search(x)):  # PM acc3 #4
+   181	        out.append(_fix("act_mismatch", "standing_mf lands 'bent forward over the surface, both feet planted'; never hands and knees, all fours or doggy"))
+   182	    _pt = ctx.get("s3_picture") or 2  # PM acc3 #8: a <Picture N> tag (N>=2) only next to (S3)/<Subject 3>
+   183	    for x in sents:
+   184	        if re.search(rf"<Picture {_pt}>", x) and not re.search(r"\(S3\)|<Subject 3>", x):
+   185	            out.append(_fix("picture_tag", f"<Picture {_pt}> belongs only in a sentence about (S3)"))
+   186	            break
+   187	    if kind == "oral" and oral_mouth_talk(dd):
+   188	        out.append(_fix("oral_mouth_full", "(S1) speaks only while her mouth is free; move her line before he enters her mouth or after she pulls off"))
+   189	    pm_s = outside_d(sents[prim_idx]) if prim_idx is not None else ""
+   190	    if act == "cowgirl" and not (RISE_RE.search(pm_s) and SINK_RE.search(pm_s) and HIS_LIFT_RE.search(pm_s)
+   191	                                 and br._LIFT_MEASURE_RE.search(pm_s) and MEET_RE.search(pm_s)):
+   192	        out.append(_fix("ride_both", "write this clause word for word in the PRIMARY MOTION sentence: 'she rises and sinks on him, his hips "
+   193	                                     f"lifting a few inches off the {(ctx.get('slots') or {}).get('surface') or 'surface'} to meet her as she sinks'"))
+   194	    if DIAL_RE.search(plain) or re.search(r"(?i)\b\d{1,3}fps\b", plain):
+   195	        _dm = DIAL_RE.search(plain) or re.search(r"(?i)\b\d{1,3}fps\b", plain)
+   196	        out.append(_fix("dial", f"remove the technical term '{_dm.group(0)}'; film look is light, lens and grain words"))
+   197	    if THROAT_RE.search(plain):
+   198	        out.append(_fix("throat", "write throat contact exactly as 'his hand on her throat' (never slide/grip/close/choke throat wording)"))
+   199	    if kind == "sex" and SHALLOW_RE.search(plain):  # partner (titjob/finish) has no entry depth
+   200	        out.append(_fix("shallow", "the builder keeps full entry; show denial with tempo or a full pull-out pause"))
+   201	    if NARR_RE.search(plain):
+   202	        out.append(_fix("narrate", "show the dynamic in grip, gaze and breath instead of naming it"))
+   203	    if PANEL_RE.search(plain):
+   204	        out.append(_fix("panel", "name the garment by the still's own noun, never 'panel'"))
+   205	    cam = [s for s in sents if re.search(r"(?i)\bcamera\b", s) and CAMERA_MOTION_RE.search(outside_d(s))]
+   206	    if len(cam) > 1:
+   207	        out.append(_fix("camera_jobs", f"one camera job per clip; {len(cam)} camera-move sentences"))
+   208	    big = CAM_BIG_RE.search(" ".join(s for s in sents if re.search(r"(?i)\bcamera\b", s)))
+   209	    if big and not CAM_BIG_RE.search(ask):
+   210	        out.append(_fix("camera_big", f"use a stable camera move (held, slow push-in, slow pull-out); drop '{big.group(0)}'"))
+   211	    fillers = [norm(f) for f in (cfg.get("filler_lines") or [])]
+   212	    for l in spoken_lines(dd):
+   213	        if any(f and re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", l) for f in fillers) and l not in norm(ask):  # PM acc3 #8: substrings
+   214	            out.append(_fix("filler", f"line '{l}' is a stock filler; write a line about the still"))
+   215	    if "pov" in ov:
+   216	        if re.search(r"(?i)\bhand-?held\b", " ".join(cam)) or re.search(r"(?i)\bextreme close", plain):
+   217	            out.append(_fix("pov_camera", "POV: eye line of the dominant, medium or medium-close, one simple move, no handheld lead"))
+   218	    if "restraints" in ov:
+   219	        if not RESTRAINT_RE.search(plain):
+   220	            out.append(_fix("restraint_named", "name the restraint, who set it and its limit once"))
+   221	        if RELEASE_RE.search(plain) and not RELEASE_RE.search(ask):
+   222	            out.append(_fix("restraint_release", "the restraint stays on to the last frame"))
+   223	    if "cnc" in ov and SAFEWORD_RE.search(dd) and not SAFEWORD_RE.search(ask):
+   224	        out.append(_fix("safeword", "no safeword unless the ask names one"))
+   225	    if "taboo_role" in ov:
+   226	        titles = {m.group(0).lower().replace("-", "") for m in ROLE_RE.finditer(dd)}
+   227	        if len(titles) > 1:
+   228	            out.append(_fix("role_titles", f"one role per clip; titles used: {', '.join(sorted(titles))}"))
+   229	    rules = mode_rules(kind)
+   230	    if rules.get("removals"):
+   231	        n = len([s for s in sents if REMOVE_VERB_RE.search(outside_d(s))])
+   232	        lo, hi = rules["removals"]
+   233	        if not (lo <= n <= hi):
+   234	            out.append(_fix("strip_removals", f"a strip clip has {lo}-{hi} removal steps, each with where the garment lands; found {n}"))
+   235	        if CONTACT_RE.search(plain):
+   236	            out.append(_fix("strip_contact", "a strip clip has no penetration contact"))
+   237	    op = opening_sentence(dd)
+   238	    if not (ctx.get("slots") or {}).get("inherited") and re.search(r"(?i)\bat first,\s*\(S1\)\s+(?:leans|sits|stands|is (?:leaning|sitting|standing))\b", dd):
+   239	        out.append(_fix("opening_stock", "open 'At first,' on the lead detail from the brief, not '(S1) leans/sits/stands'", False, 5))
+   240	    for prev in ctx.get("recent_openings") or []:
+   241	        if op and prev and difflib.SequenceMatcher(None, op, prev).ratio() >= float(cfg.get("opening_ratio", 0.85)):
+   242	            out.append(_fix("opening_repeat", "the 'At first' sentence repeats a recent clip; open on a different detail of the still"))
+   243	            break
+   244	    # soft
+   245	    if (ctx.get("slots") or {}).get("surface_height") == "waist" and re.search(r"(?i)\b(?:he|\(S2\))\b[^.]{0,40}\bkneel\w*", plain):
+   246	        out.append(_fix("height", "the surface is waist-high: he stands at its edge instead of kneeling on it", False, 10))
+   247	    if WET_RE.search(plain) and not (ctx.get("wet_ok")):
+   248	        out.append(_fix("wet_unasked", "wet, oil or sweat words only when the still or the ask has them", False, 5))
+   249	    rate = tempo_rate(sents[prim_idx]) if prim_idx is not None else None
+   250	    tr = (cfg.get("tempo_range") or {}).get("edge" if "edge" in ov else kind)
+   251	    if rate is not None and tr and not (tr[0] <= rate <= tr[1]):
+   252	        out.append(_fix("tempo_range", f"tempo {rate:g}/s is outside {tr[0]}-{tr[1]}/s for this mode", False, 5))
+   253	    return out
+   254	
+   255	
+   256	def mode_rules(kind: str) -> Dict[str, Any]:
+   257	    return MODE_RULES.get(kind) or MODE_RULES["sex"]
+   258	# U52: Only 18+ safety codes stay hard; all other craft/format rules are advisory warnings/notes.
+   259	SAFETY_HARD = frozenset({"youth_hint", "scale_adult"})
+   260	HARD_WEIGHT = 20
+   261	SOFT_WEIGHT = 5
+   262	
+   263	
+   264	def norm(s: str) -> str:
+   265	    s = re.sub(r"\[English\]", " ", s or "", flags=re.I)
+   266	    return " ".join(WORD_RE.findall(s.lower()))
+   267	
+   268	
+   269	def spoken_lines(text: str) -> List[str]:
+   270	    return [norm(m.group(1)) for m in D_RE.finditer(text or "") if norm(m.group(1))]
+   271	
+   272	
+   273	_INTERVIEWER_LEAD_RE = re.compile(
+   274	    r"(?i)(?:(?:an?\s+)?off[- ]?screen(?:\s+interviewer|\s+voice)?[^.<\n]{0,60}\b(?:asks?|says?|prompts?)|"
+   275	    r"(?:the\s+)?interviewer[^.<\n]{0,60}\b(?:asks?|says?|prompts?)|"
+   276	    r"off[- ]?screen(?:\s+interviewer)?|\(S2\)[^.<]{0,40}\basks)\s*[,:]?\s*$"
+   277	)
+   278	
+   279	
+   280	def talk_counted_lines(dd: str, ctx: Optional[Dict[str, Any]] = None) -> List[str]:
+   281	    """BTS: off-screen interviewer questions are scripted but do not count toward talk_lines."""
+   282	    out = []
+   283	    text = dd or ""
+   284	    for m in D_RE.finditer(text):
+   285	        pre = text[max(0, m.start() - 100):m.start()]
+   286	        if _INTERVIEWER_LEAD_RE.search(pre):
+   287	            continue
+   288	        n = norm(m.group(1))
+   289	        if n:
+   290	            out.append(n)
+   291	    return out
+   292	
+   293	
+   294	
+   295	def spoken_words(text: str) -> int:
+   296	    return sum(len(l.split()) for l in spoken_lines(text))
+   297	
+   298	
+   299	def outside_d(text: str) -> str:
+   300	    return D_RE.sub(" ", text or "")
+   301	
+   302	
+   303	def split_sentences(dd: str) -> List[str]:
+   304	    """Sentences of detailed_description, with <d> spans kept inside their sentence."""
+   305	    body = re.sub(r"^\s*\[Shot 1\]\s*", "", (dd or "").strip())
+   306	    spans: List[str] = []
+   307	
+   308	    def keep(m):
+   309	        spans.append(m.group(0))
+   310	        return f"\x00{len(spans) - 1}\x00"
+   311	    masked = D_RE.sub(keep, body)
+   312	    parts = [p.strip() for p in re.split(r"(?:(?<=[.!?])|(?<=\x00))\s+(?=[A-Z(<\x00\"])", masked) if p.strip()]
+   313	    out = []
+   314	    for p in parts:
+   315	        out.append(re.sub(r"\x00(\d+)\x00", lambda m: spans[int(m.group(1))], p))
+   316	    # a sentence that is only a <d> span joins its speaker lead
+   317	    merged: List[str] = []
+   318	    for s in out:
+   319	        if merged and s.lstrip().lower().startswith("<d>"):
+   320	            merged[-1] = merged[-1] + " " + s
+   321	        else:
+   322	            merged.append(s)
+   323	    return merged
+   324	
+   325	
+   326	_ACTOR_VERB_RE = re.compile(r"(?i)(?:\b(?:he|she|they)|\(S[123]\)|<Subject [123]>)\s+(?:\w+ly\s+)?\w+(?:s|es)\b")
+   327	
+   328	
+   329	def _sound_words(s: str) -> List[str]:
+   330	    hits = [m.group(0) for m in BODY_SOUND_RE.finditer(s)] + [m.group(0) for m in SOUND_NOUN_RE.finditer(s)]
+   331	    return [h for h in hits if not h.lower().startswith("wet")]
+   332	
+   333	
+   334	VOCAL_SOUND_RE = re.compile(r"(?i)\b(?:huff\w*|groan\w*|moan\w*|gasp\w*|sigh\w*|whimper\w*|grunt\w*|pant\w*|"
+   335	                            r"breath\w*|giggl\w*|laugh\w*|whine\w*|squeal\w*|hiss\w*|creak\w*|slap\w*|squelch\w*|thud\w*|"
+   336	                            r"rustl\w*|murmur\w*|chuckl\w*|purr\w*|exhal\w*|inhal\w*)\b")
+   337	
+   338	
+   339	def opening_sentence(dd: str) -> str:
+   340	    m = re.search(r"(?i)\bat first,[^.!?]*[.!?]", dd or "")
+   341	    return norm(m.group(0)) if m else ""
+   342	
+   343	
+   344	MOUTH_CONTACT_RE = re.compile(r"(?i)\b(?:inside her mouth|into her mouth|in her mouth|enters? her mouth|past her lips|between her lips|at her lips|"
+   345	                              r"against her lips)\b|\blips (?:close|wrap|seal|part)\w* (?:around|over)")
+   346	SLAP_RE = re.compile(r"(?i)\b(?:slap\w*|smack\w*)\b")  # acceptance-3 (m19): soft 'skin on skin' sliding is not slap foley
+   347	ORAL_SHEATHED_RE = re.compile(r"(?i)\b(?:sheathed|hips flush)\b[^.;]{0,40}\b(?:mouth|throat|lips)\b|\b(?:mouth|throat|lips)\b[^.;]{0,20}\bsheathed\b")
+   348	TAG_WORDS_RE = re.compile(r"(?i)\b(?:cinematic|beautiful)\b")
+   349	# lost-features audit (Derrick t243s811): youth hint = hard stop; tiny/fairy = adult proportions stated (hard)
+   350	UNDER18_AGE_RE = re.compile(r"(?i)\b(?:(?:[1-9]|1[0-7])\s*(?:-\s*)?(?:years?|yrs?)(?:\s*-?\s*old|\s+of\s+age)|aged\s+(?:[1-9]|1[0-7])\b|age\s+(?:[1-9]|1[0-7])\b)")
+   351	YOUTH_RE = re.compile(r"(?i)\b(?:child\w*|kids?|teen\w*|tween|underage|under-age|minor|loli\w*|shota\w*|schoolgirl|little girl|"
+   352	                      r"pre-?pubescent|pre-?teen|young-looking|baby-?faced|juvenile|jailbait|barely legal|flat-chested girl)\b")
+   353	CONSENT_RE = re.compile(r"(?i)\b(?:nods?|nodding|winks?|winking)\b|<d>[^<]*\b(?:yes|yeah|okay|ok|deal|tonight|wake me|do it|"
+   354	                        r"i want|let's play|our game|you promised|go ahead|put me under|i'm ready)\b[^<]*</d>")
+   355	SEX_START_RE = re.compile(r"(?i)\b(?:enters her|slides into her|pushes into her|sinks (?:onto|down on) him|inside her|takes him into her mouth|"
+   356	                          r"lips (?:close|wrap) (?:around|over) (?:him|the)|thrusts?|grinds? (?:on|against) him|penetrat\w*)\b")
+   357	TINY_RE = re.compile(r"(?i)\b(?:tiny|fair(?:y|ies)|pixie\w*|miniature)\b")
+   358	ADULT_SCALE_PARTS = [
+   359	    ("face", re.compile(r"(?i)\badult(?:'s)? (?:woman's )?face\b|\b(?:her|a) (?:\w+ )?adult face\b")),
+   360	    ("breasts", re.compile(r"(?i)\badult breasts\b|\b(?:full|heavy|round) adult breasts\b")),
+   361	    ("hips", re.compile(r"(?i)\badult hips\b|\b(?:wide|curved|full) adult hips\b")),
+   362	    ("proportions", re.compile(r"(?i)\badult(?: woman's)? (?:proportions|body|figure)\b")),
+   363	]
+   364	SCALE_ANCHOR_RE = re.compile(r"(?i)\bno (?:taller|bigger|larger) than\b|\b(?:the size of|fits in|in the palm of|as tall as|"
+   365	                             r"reaches (?:his|the))\b|\b\d+ (?:inches|centimet(?:er|re)s|cm) tall\b")
+   366	ACT_LANDING = {"missionary": r"(?i)\bmissionary\b|\bon her back\b", "doggy": r"(?i)\bhands and knees\b|\bon all fours\b",
+   367	               "cowgirl": r"(?i)\bastride\b|\bstraddl\w*|\bcowgirl\b",
+   368	               "standing_mf": r"(?i)\bbends? forward at the hips\b|\bstanding (?:sex|doggy|missionary)\b"}
+   369	ACT_COMPAT = {"mf_anal": ("doggy", "missionary"), "mmf": ("doggy",), "standing_mf": ()}
+   370	CLEAR_WORD_RE = re.compile(r"(?i)\b(?:aside|to one side|off|up to her waist|slides? (?:it|them|her [\w -]+) up)\b")
+   371	
+   372	
+   373	def is_sound_sentence(s: str) -> bool:
+   374	    """A closing / ambient sound sentence (no speaker, no actor doing an action)."""
+   375	    if D_RE.search(s) or OPENER_RE.search(s) or PRIMARY_RE.search(s):
+   376	        return False
+   377	    if VOCAL_SOUND_RE.search(s) and not RESULT_RE.search(s) and len(s.split()) <= 22:
+   378	        return True  # 'S1 lets out a defiant huff.', 'A low groan from (S2) accompanies ...'
+   379	    if _ACTOR_VERB_RE.search(s):
+   380	        return False
+   381	    if re.search(r"(?i)\b(?:sound|sounds|is heard|are heard|fills? the|carr(?:y|ies) over)\b", s):
+   382	        return True
+   383	    return bool(_sound_words(s)) and len(s.split()) <= 20
+   384	
+   385	
+   386	def get_sections(full: str) -> List[str]:
+   387	    return [m.group(1).lower() for m in SECTION_RE.finditer(full or "")]
+   388	
+   389	
+   390	def get_dd(full: str) -> str:
+   391	    m = re.search(r"(?im)^\s*detailed_description\s*:\s*", full or "")
+   392	    if not m:
+   393	        return (full or "").strip()
+   394	    rest = full[m.end():]
+   395	    m2 = re.search(r"(?im)^\s*continuation\s*:\s*", rest)
+   396	    return (rest[:m2.start()] if m2 else rest).strip()
+   397	
+   398	
+   399	def _head_noun(phrase: str) -> str:
+   400	    words = WORD_RE.findall((phrase or "").lower())
+   401	    return words[-1] if words else ""
+   402	
+   403	
+   404	_STOP = {"the", "a", "an", "and", "of", "with", "at", "in", "on", "soft", "warm", "light", "lit", "glow", "from"}
+   405	
+   406	
+   407	def required_slots(slots: Dict[str, Any]) -> Dict[str, List[str]]:
+   408	    """Words the detailed_description must carry: surface noun AND garment noun AND (light word OR place word)."""
+   409	    req: Dict[str, List[str]] = {}
+   410	    if slots.get("surface"):
+   411	        req["surface"] = [_head_noun(slots["surface"])]
+   412	    if slots.get("garment_noun"):
+   413	        # any garment the still shows counts (acceptance-3: doggy prose names the bikini bottom, not the top)
+   414	        g = [slots["garment_noun"]] + [_head_noun(x) for x in (slots.get("garments_all") or []) + (slots.get("join_garments") or [])]
+   415	        req["garment"] = [w for i, w in enumerate(g) if w and w not in g[:i]]
+   416	    lp = []
+   417	    for k in ("light", "place"):
+   418	        for w in WORD_RE.findall((slots.get(k) or "").lower()):
+   419	            if len(w) > 3 and w not in _STOP:
+   420	                lp.append(w)
+   421	    if lp:
+   422	        req["light_or_place"] = sorted(set(lp))
+   423	    return req
+   424	
+   425	
+   426	def _has_word(text_norm: str, w: str) -> bool:
+   427	    w = w.lower()
+   428	    if w.endswith("s") and not w.endswith("ss") and len(w) > 3:
+   429	        w = w[:-1]  # one plural s only: 'dress' stays 'dress' (rstrip made it 'dre')
+   430	    return bool(re.search(r"\b" + re.escape(w) + r"(?:s|es)?\b", text_norm))
+   431	
+   432	
+   433	_BL_STOP = {"the", "a", "an", "and", "you", "your", "i", "me", "my", "it", "is", "it's", "this", "that", "so", "to", "of", "on",
+   434	            "in", "for", "be", "are", "don't", "do", "oh", "yes", "god"}
+   435	
+   436	
+   437	def blacklist_hits(lines: Sequence[str], blacklist: Iterable[str], ratio: float = 0.8) -> List[Dict[str, Any]]:
+   438	    hits = []
+   439	    bl = [norm(b) for b in blacklist if norm(b)]
+   440	    for l in lines:
+   441	        nl = norm(l)
+   442	        for b in bl:
+   443	            r = 1.0 if nl == b else difflib.SequenceMatcher(None, nl, b).ratio()
+   444	            lw, bw = set(nl.split()) - _BL_STOP, set(b.split()) - _BL_STOP
+   445	            jac = len(lw & bw) / max(1, len(lw | bw)) if lw and bw else 0.0
+   446	            if r >= ratio or (jac >= 0.6 and len(lw & bw) >= 2):
+   447	                hits.append({"line": l, "blacklisted": b, "ratio": round(r, 3)})
+   448	                break
+   449	    return hits
+   450	
+   451	
+   452	_MANDATED_CLONE_RE = re.compile(
+   453	    r"(?i)\b(?:"
+   454	    r"shot \d+ the camera is|"
+   455	    r"the camera (?:is|holds) a|"
+   456	    r"\(?\bs[123]\b\)? says in a|"
+   457	    r"says in a (?:low|soft|warm|steady|sharp|playful|husky|deep)|"
+   458	    r"(?:his|her) (?:penis|shaft) (?:pushes|drives|slides|sinks|thrusts|enters) into her|"
+   459	    r"until his hips (?:are|meet)|"
+   460	    r"stays (?:buried|deep|fully sheathed|inside)|"
+   461	    r"flush against her buttocks|"
+   462	    r"to one side at her hip where it stays"
+   463	    r")\b"
+   464	)
+   465	
+   466	
+   467	def cloned_hits(dd: str, phrases: Iterable[str]) -> List[str]:
+   468	    t = " " + norm(dd) + " "
+   469	    out = []
+   470	    for p in phrases:
+   471	        pn = norm(p)
+   472	        if not pn or (len(pn.split()) <= 8 and _MANDATED_CLONE_RE.search(pn)):
+   473	            continue
+   474	        if (" " + pn + " ") in t:
+   475	            out.append(p)
+   476	    return out
+   477	
+   478	
+   479	def ngrams(words: List[str], n: int) -> List[str]:
+   480	    return [" ".join(words[i:i + n]) for i in range(max(0, len(words) - n + 1))]
+   481	
+   482	
+   483	def _clear_needed(slots: Dict[str, Any], kind: str) -> bool:
+   484	    return bool(mode_rules(kind)["clearance"]) and bool(slots.get("join_garments"))
+   485	
+   486	
+   487	def join_noun(slots: Dict[str, Any]) -> str:
+   488	    """The garment that covers the join, by its short noun ('bikini bottom', 'dress', 'panties')."""
+   489	    j = (slots.get("join_garments") or [""])[0]
+   490	    w = WORD_RE.findall(j.lower())
+   491	    if not w:
+   492	        return slots.get("garment_noun") or "garment"
+   493	    if w[-1] in ("bottom", "bottoms", "top", "piece") and len(w) > 1:
+   494	        return " ".join(w[-2:])
+   495	    return w[-1]
+   496	
+   497	
+   498	def _join_inherited_clear(slots: Dict[str, Any], scene: Optional[Dict[str, Any]]) -> bool:
+   499	    """A continued clip whose previous clip already left every join garment aside/off/up needs no new clearance."""
+   500	    gar = ((scene or {}).get("ending_state") or {}).get("garments") or (slots.get("inherited") or {}).get("garments") or {}
+   501	    if not gar or not slots.get("join_garments"):
+   502	        return False
+   503	    # builder state keys (c1b: {'panties': 'aside'} for a 'bikini bottom'): every join key it tracks is aside/off
+   504	    jk = [k for k in gar if str(k).replace("item:", "") in br._JOIN_KEYS]
+   505	    if jk and all(re.search(r"(?i)aside|bunch|gather|off|up|removed|floor", str(gar[k])) for k in jk):
+   506	        return True
+   507	    for j in slots["join_garments"]:
+   508	        hn = _head_noun(j)
+   509	        pos = next((str(v) for k, v in gar.items() if _head_noun(str(k).replace("item:", "")) == hn or norm(str(k)) == norm(j)), "")
+   510	        if not re.search(r"(?i)aside|bunch|gather|off|up|removed|floor", pos):
+   511	            return False
+   512	    return True
+   513	
+   514	
+   515	def _fix(code: str, note: str, hard: Optional[bool] = None, pen: Optional[int] = None) -> Dict[str, Any]:
+   516	    if hard is None:
+   517	        hard = code in SAFETY_HARD
+   518	    return {"code": code, "note": note, "hard": hard, "penalty": HARD_WEIGHT if hard else (SOFT_WEIGHT if pen is None else pen)}
+   519	
+   520	
+   521	def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any]:
+   522	    """ctx: kind (sex|oral|talk|solo), slots, blacklist (list[str]), cloned (list[str]), cfg (lint block),
+   523	    scene (optional previous scene entry), builder_preview (optional callable full_text -> dict)."""
+   524	    cfg = ctx.get("cfg") or {}
+   525	    kind = ctx.get("kind", "sex")
+   526	    rules = mode_rules(kind)
+   527	    slots = ctx.get("slots") or {}
+   528	    dd = get_dd(full)
+   529	    issues: List[Dict[str, Any]] = []
+   530	    sents = split_sentences(dd)
+   531	    plain = outside_d(dd)
+   532	
+   533	    # -- format (all) --
+   534	    secs = get_sections(full)
+   535	    want = ["subject_definitions", "summary", "retention_analysis", "detailed_description"]
+   536	    core = [s for s in secs if s in want]
+   537	    if core != want or (secs and secs[-1] not in ("detailed_description", "continuation")):
+   538	        issues.append(_fix("header_order", "the four headers must appear once each, in order: subject_definitions, summary, "
+   539	                           "retention_analysis, detailed_description"))
+   540	    _audio_hdrs = re.findall(r"(?im)^\s*(overall_soundscape|non_diegetic_music)\s*:", full or "")
+   541	    if _audio_hdrs:
+   542	        _u_hdrs = ", ".join(dict.fromkeys(h.lower() for h in _audio_hdrs))
+   543	        issues.append(_fix(
+   544	            "audio_header_beta7",
+   545	            f"! WARNING: labeled audio header ({_u_hdrs}) wrecks 10Eros-Max beta7 audio (TenStrip HF #77); "
+   546	            "move sound to plain diegetic sentences at the end of detailed_description (R7)",
+   547	            hard=False,
+   548	            pen=HARD_WEIGHT,
+   549	        ))
+   550	    _shot_cuts = list(re.finditer(
+   551	        r"\[Shot\s*(\d+)\]\s*(?:At\s+(?:(\d{1,2}):)?(\d{1,2}(?:\.\d+)?)(?=\s|,|$))?",
+   552	        dd or "", re.I,
+   553	    ))
+   554	    _clip_s = (ctx.get("slots") or {}).get("clip_seconds") or ctx.get("clip_seconds")
+   555	    _prev_t = -1.0
+   556	    for _sm in _shot_cuts:
+   557	        _sn = int(_sm.group(1))
+   558	        if _sn >= 2 and _sm.group(3) is not None:
+   559	            _t = (int(_sm.group(2) or 0) * 60.0) + float(_sm.group(3))
+   560	            if _t <= _prev_t:
+   561	                issues.append(_fix("shot_timestamp", f"[Shot {_sn}] timestamp {_t:.3f}s is non-monotonic (<= previous cut {_prev_t:.3f}s)", False))
+   562	            elif _clip_s is not None and _t > float(_clip_s):
+   563	                issues.append(_fix("shot_timestamp", f"[Shot {_sn}] timestamp {_t:.3f}s exceeds clip length ({float(_clip_s):.2f}s)", False))
+   564	            _prev_t = _t
+   565	    _plain_no_cut_ts = re.sub(r"\[Shot\s*\d+\]\s*At\s+\d{1,2}:\d{2}(?:\.\d+)?", "", plain, flags=re.I)
+   566	    if TIMESTAMP_RE.search(_plain_no_cut_ts):
+   567	        issues.append(_fix("timestamp", "remove the timestamp or seconds; order comes from phase words (At first, as it builds, by the end)"))
+   568	    m = SEQ_WORD_RE.search(plain)
+   569	    if m:
+   570	        issues.append(_fix("seq_word", f"replace '{m.group(0)}' with a phase word (as, as it builds, by the end)"))
+   571	    for tok in ANGLE_TOKEN_RE.findall(full):
+   572	        if not ALLOWED_TOKEN_RE.match(tok):
+   573	            issues.append(_fix("unfilled_slot", f"fill the blank {tok} with the real noun"))
+   574	            break
+   575	
+   576	    # -- required still slots (all) --
+   577	    dn = norm(dd)
+   578	    req = required_slots(slots)
+   579	    for name, words in req.items():
+   580	        if not any(_has_word(dn, w) for w in words):
+   581	            issues.append(_fix("slot_" + name, f"name the still's {name.replace('_', ' ')} ({' / '.join(words[:3])}) in the prose"))
+   582	
+   583	    # -- scale (lost-features audit): tiny/fairy women are adults at miniature scale; any youth hint is a hard stop --
+   584	    yh = (YOUTH_RE.search(dd) or YOUTH_RE.search(ctx.get("ask") or "") or UNDER18_AGE_RE.search(full)
+   585	          or UNDER18_AGE_RE.search(ctx.get("ask") or ""))
+   586	    if yh:
+   587	        issues.append(_fix("youth_hint", f"hard stop: '{yh.group(0)}' reads as a minor; every person is an adult woman or man, 18+"))
+   588	    if "scale" in (ctx.get("overlays") or []) and TINY_RE.search((ctx.get("ask") or "") + " " + dd):
+   589	        miss = [w for w, rx in ADULT_SCALE_PARTS if not rx.search(plain)]
+   590	        if miss:
+   591	            issues.append(_fix("scale_adult", "a tiny or fairy woman is an adult woman at miniature scale: state her adult "
+   592	                                              + ", ".join(miss) + " in the prose (e.g. 'her adult face, full adult breasts, wide adult hips, "
+   593	                                              "an adult woman's proportions at miniature scale')"))
+   594	        if not SCALE_ANCHOR_RE.search(plain):
+   595	            issues.append(_fix("scale_anchor", "fix one measurable scale anchor (e.g. 'no taller than his forearm') and keep it", False, 5))
+   596	    if minimal:
+   597	        _lines = spoken_lines(dd)
+   598	        _words = sum(len(l.split()) for l in _lines)
+   599	        for h in blacklist_hits(_lines, ctx.get("blacklist") or [], float(cfg.get("blacklist_ratio", 0.8))):
+   600	            focus = slots.get("line_focus_text") or slots.get("line_focus") or "the still"
+   601	            issues.append(_fix("blacklist", f"line '{h['line']}' is in the last-20 list; write a new line about {focus}"))
+   602	        hard = [i for i in issues if i["hard"]]
+   603	        score = max(0, 100 - sum(i["penalty"] for i in issues))
+   604	        wc = len(WORD_RE.findall(norm(D_RE.sub(" ", dd))))
+   605	        return {"score": score, "pass": not hard, "hard": [i["code"] for i in hard], "issues": issues,
+   606	                "spoken_words": _words, "lines": _lines, "words": wc, "sentences": len(sents),
+   607	                "phases": {"anchor": -1, "onset": -1, "development": -1, "result": -1},
+   608	                "builder_preview": None}
+   609	
+   610	    # -- consent beat (Derrick rule call 2, t1526s5657): agreement goes in its own separate agreement clip,
+   611	    # not inside the sex clip. Only the agreement clip itself (talk / explicit agreement clip) requires CONSENT_RE.
+   612	    _is_agreement_clip = (kind == "talk" or bool(re.search(r"(?i)\bagreement clip\b", ctx.get("ask") or "")))
+   613	    if "consent_setup" in (ctx.get("overlays") or []) and "continued" not in (ctx.get("overlays") or []) and _is_agreement_clip:
+   614	        sx = SEX_START_RE.search(dd)
+   615	        before = dd[:sx.start()] if sx else dd
+   616	        if not CONSENT_RE.search(before):
+   617	            issues.append(_fix("consent_setup", "agreement clip: include the explicit consensual agreement line or nod"))
+   618	
+   619	    # -- speech budget + freshness (all) --
+   620	    lines = spoken_lines(dd)
+   621	    words = sum(len(l.split()) for l in lines)
+   622	    budget = int(cfg.get("speech_words_max", 25))
+   623	    if words > budget:
+   624	        issues.append(_fix("speech_budget", f"spoken words total {words}; cut to {budget} or fewer (short lines)"))
+   625	    for h in blacklist_hits(lines, ctx.get("blacklist") or [], float(cfg.get("blacklist_ratio", 0.8))):
+   626	        focus = slots.get("line_focus_text") or slots.get("line_focus") or "the still"
+   627	        issues.append(_fix("blacklist", f"line '{h['line']}' is in the last-20 list; write a new line about {focus}"))
+   628	    for idx_c, p in enumerate(cloned_hits(dd, ctx.get("cloned") or [])):
+   629	        issues.append(_fix("cloned", f"the phrase '{p}' is copied from the instructions; say it in your own words",
+   630	                           False, 5 if idx_c < 2 else 0))
+   631	
+   632	    # -- act rules --
+   633	    prim_idx = next((i for i, s in enumerate(sents) if PRIMARY_RE.search(s)), None)
+   634	    if rules["primary"]:
+   635	        if prim_idx is None:
+   636	            issues.append(_fix("no_primary", "add one 'PRIMARY MOTION - ...' sentence with the motion and its tempo"))
+   637	        else:
+   638	            if not TEMPO_RE.search(sents[prim_idx]):
+   639	                issues.append(_fix("no_tempo", "PRIMARY MOTION has no tempo word; use 'strokes a second', 'per second' or 'cycle'"))
+   640	    _facial_finish = (
+   641	        str(slots.get("position") or "").lower() == "finish"
+   642	        or bool(re.search(r"(?i)\b(?:facial|cum(?:shot)? on her face|finishes? on her)\b", ctx.get("ask") or ""))
+   643	    )
+   644	    if rules["contact"] and not _facial_finish and not CONTACT_RE.search(plain):
+   645	        issues.append(_fix("no_contact", f"the contact sentence needs one join word ({rules['contact_hint']}) and must hold through the motion"))
+   646	    if rules.get("banned_contact") and re.search(r"(?i)" + rules["banned_contact"], plain):
+   647	        issues.append(_fix(kind + "_contact", rules.get("banned_hint") or "wrong join words for this mode"))
+   648	    if kind != "oral" and ORAL_SHEATHED_RE.search(plain):  # acc4: mmf/spitroast oral words too
+   649	        issues.append(_fix("oral_contact", "oral contact names the mouth (inside her mouth), never sheathed or hips flush"))
+   650	    if (rules["contact"] or kind in ("sex", "oral")) and not _facial_finish:
+   651	        if not re.search(r"(?i)\b(?:penis|cock|shaft|glans|vagina|pussy|anus|asshole|mouth|lips|vulvas?|clitoris|clit)\b", plain):
+   652	            issues.append(_fix("contact_anatomy", "the entry or contact sentence must name penis, vagina, anus, mouth, vulva, vulvas or clitoris; 'thrusts into her' alone is not enough"))
+   653	    if re.search(r"(?i)\bseats himself\b", plain):
+   654	        issues.append(_fix("seats_himself", "do not write 'seats himself'; land the pose in (S1)'s own words", False, 5))
+   655	    if re.search(r"(?i)\b(?:says|asks)\s*,\s*(?:and\s+)?\(S\d\)\s+(?:says|asks)\b", plain):
+   656	        issues.append(_fix("double_says", "do not write a doubled speech verb ('says, (S1) says' or 'asks, and (S2) says'); one verb per line"))
+   657	    for sl in lines:
+   658	        if re.search(r"(?i)\b(?:your|my|his) hands\b|\bhands (?:are|feel|won't|on me|on you)\b|\b(?:too tight|so strong|so heavy|won't let go)\b|\b(?:your|his) grip\b", sl):
+   659	            issues.append(_fix("hands_line", "spoken lines never mention his or her hands, grip or strength; write a new line about the act or the body"))
+   660	            break
+   661	
+   662	    if _clear_needed(slots, kind) and not _join_inherited_clear(slots, ctx.get("scene")):
+   663	        gnoun = join_noun(slots)
+   664	        # builder parity: the builder's own W5 credit (active pull/slide/tug ... aside|up, or a removal verb)
+   665	        cleared = br._join_cleared_still_on(plain) or REMOVE_VERB_RE.search(plain)
+   666	        if not cleared:
+   667	            issues.append(_fix("clearance", f"the {gnoun} covers the join; write '(S2) pulls her {gnoun} aside' (or slides it up) before entry and say where it stays"))
+   668	        # clearance_missing (acceptance-2 c1a): the first entry/contact sentence comes before any clearance sentence
+   669	        entry = next((i for i, x in enumerate(sents) if br._JOIN_PEN_RE.search(outside_d(x)) or CONTACT_RE.search(outside_d(x))), None)
+   670	        clear = next((i for i, x in enumerate(sents) if CLEAR_WORD_RE.search(outside_d(x)) and
+   671	                      (br._join_cleared_still_on(outside_d(x)) or REMOVE_VERB_RE.search(outside_d(x)))), None)
+   672	        if entry is not None and (clear is None or clear > entry):
+   673	            issues.append(_fix("clearance_missing", f"clear the {gnoun} BEFORE he enters: '(S2) pulls her {gnoun} aside to one side at her hip, where it stays.'"))
+   674	
+   675	    # -- four phases (t222) --
+   676	    content = [i for i, s in enumerate(sents) if not CAMERA_SENTENCE_RE.search(s) and not is_sound_sentence(s)]
+   677	    # anchor: the first sentence that matches the builder's opener (the camera sentence comes before it)
+   678	    anchor = next((i for i in content[:3] if OPENER_RE.search(sents[i])), None)
+   679	    if anchor is None:
+   680	        issues.append(_fix("phase_anchor", "open the action with 'At first, ...' and the still's exact pose"))
+   681	        anchor = content[0] if content else -1
+   682	    onset = next((i for i in content if i > anchor and (ASIDE_RE.search(outside_d(sents[i])) or PENETRATION_RE.search(outside_d(sents[i]))
+   683	                                                         or POSE_CHAIN_RE.search(outside_d(sents[i])))), None)
+   684	    if rules["dev"] == "lines":
+   685	        d_idx = [i for i, s in enumerate(sents) if D_RE.search(s)]
+   686	        dev = d_idx[1] if len(d_idx) >= 2 else None
+   687	        if dev is None:
+   688	            issues.append(_fix("phase_development", "talk development needs at least two spoken lines"))
+   689	    elif rules["dev"] == "pos":
+   690	        pc = (ctx.get("cast") or {}).get("position_check")
+   691	        dev = next((i for i in content if i > (onset if onset is not None else anchor) and pc and re.search(pc, outside_d(sents[i]), re.I)), None)
+   692	        if dev is None:
+   693	            issues.append(_fix("phase_development", "land the new pose in the builder's words for the act"))
+   694	    else:
+   695	        dev = prim_idx
+   696	    if onset is None:
+   697	        issues.append(_fix("phase_onset", "add the onset: the exit from the still pose, the clearance and the entry (or the one physical action)"))
+   698	    res = next((i for i in reversed(range(len(sents))) if RESULT_RE.search(outside_d(sents[i]))), None)
+   699	    if res is None:
+   700	        pure = [i for i in content if not D_RE.search(sents[i])]
+   701	        res = pure[-1] if pure else None
+   702	    order = [x for x in (anchor, onset, dev, res)]
+   703	    if None not in order and not (order[0] < order[1] < order[2] < order[3]):
+   704	        issues.append(_fix("phase_order", "keep the four phases in order: At first (still pose), the onset, the development "
+   705	                           "(PRIMARY MOTION or the talk), then the result 'by the end ...'"))
+   706	    elif res is None:
+   707	        issues.append(_fix("phase_result", "close the action with a result sentence ('by the end ...') where the motion is still going"))
+   708	    pure_action = [i for i in content if not D_RE.search(sents[i]) and not is_sound_sentence(sents[i])]
+   709	    if pure_action:
+   710	        last = outside_d(sents[pure_action[-1]])
+   711	        if not (ACT_RE.search(last) or CONTINUE_RE.search(last)):
+   712	            issues.append(_fix("static_end", "the last action sentence must keep motion alive (a continuing -ing verb, 'keeps', 'still')"))
+   713	
+   714	    # soft: sound per phase
+   715	    bounds = [b for b in (anchor if anchor is not None and anchor >= 0 else 0, onset, dev, res) if b is not None]
+   716	    pen_sound = int(cfg.get("pen_phase_no_sound", 5))
+   717	    if len(bounds) == 4 and bounds == sorted(bounds):
+   718	        spans = [(bounds[0], bounds[1]), (bounds[1], bounds[2]), (bounds[2], bounds[3]), (bounds[3], len(sents))]
+   719	        closing = " ".join(s for s in sents if is_sound_sentence(s))
+   720	        for k, (a, b) in enumerate(spans):
+   721	            seg = " ".join(sents[a:max(b, a + 1)])
+   722	            if not (BODY_SOUND_RE.search(outside_d(seg)) or SOUND_NOUN_RE.search(outside_d(seg))):
+   723	                if not (k == 3 and closing):
+   724	                    issues.append(_fix("phase_sound", f"phase {['anchor', 'onset', 'development', 'result'][k]} has no sound", False, pen_sound))
+   725	
+   726	    # -- chain (cross-clip) --
+   727	    prev = ctx.get("scene")
+   728	    if prev:
+   729	        on_text = " ".join(sents[(onset or 0):(dev or len(sents))]).lower()
+   730	        for act in prev.get("done_actions") or []:
+   731	            a = norm(act)
+   732	            for s in split_sentences(on_text):
+   733	                if a and difflib.SequenceMatcher(None, a, norm(s)).ratio() >= 0.8 or (a and a in norm(s)):
+   734	                    issues.append(_fix("chain_restate", f"'{act}' already happened in the last clip; continue from it"))
+   735	                    break
+   736	        for noun, pos in ((prev.get("ending_state") or {}).get("garments") or {}).items():
+   737	            n = _head_noun(noun.replace("item:", ""))
+   738	            if pos and re.search(r"(?i)aside|bunch|off|up|removed", str(pos)) and n:
+   739	                if re.search(r"(?i)\b" + re.escape(n) + r"\b[^.]{0,40}\b(?:covers?|covering|back in place|smoothed (?:down|back)|in place)\b", plain):
+   740	                    issues.append(_fix("chain_garment_reset", f"the {n} stays {pos} from the last clip; never put it back"))
+   741	        if (prev.get("ending_state") or {}).get("pov") and not re.search(r"(?i)\bpov\b|into the lens|toward the lens", plain) \
+   742	                and not ctx.get("ask_pov_change"):
+   743	            issues.append(_fix("chain_pov", "the last clip was POV; keep the POV angle"))
+   744	
+   745	    # -- hard negatives check (previously soft + quietly stripped/rewritten) --
+   746	    _neg_rx = re.compile(
+   747	        r"(?i)\b(?:not|never|nothing|no|without|avoid|neither|nor|nowhere|cannot|"
+   748	        r"don't|doesn't|didn't|won't|can't|isn't|aren't|wasn't|weren't|couldn't|wouldn't|shouldn't)\b"
+   749	    )
+   750	    neg = _neg_rx.findall(plain)
+   751	    if neg:
+   752	        issues.append(_fix("negatives", f"{len(neg)} negative word(s) outside <d> ('{neg[0]}'); state every action and camera hold positively"))
+   753	    run, prev_subj, worst = 1, None, 1
+   754	    for s in sents:
+   755	        m = SUBJECT_START_RE.match(s)
+   756	        subj = m.group(1).lower() if m else None
+   757	        run = run + 1 if subj and subj == prev_subj else 1
+   758	        worst = max(worst, run)
+   759	        prev_subj = subj
+   760	    if worst >= 3:
+   761	        issues.append(_fix("same_subject", f"{worst} sentences in a row open with the same subject; vary the rhythm", False, 5))
+   762	    w = WORD_RE.findall(norm(outside_d(dd)))
+   763	    grams = ngrams(w, 4)
+   764	    rep = {g for g in grams if grams.count(g) > 1 and not set(g.split()) <= {"the", "her", "his", "of", "a", "and", "s1", "s2", "in", "on"}}
+   765	    if rep:
+   766	        issues.append(_fix("repeat_4gram", f"repeated wording: '{sorted(rep)[0]}'", False, min(10, 2 * len(rep))))
+   767	    lo, hi = int(cfg.get("words_min", 90)), int(cfg.get("words_max", 190))
+   768	    wc = len(WORD_RE.findall(norm(D_RE.sub(" ", dd))))
+   769	    if wc < lo or wc > hi:
+   770	        issues.append(_fix("length", f"detailed_description has {wc} words outside speech; aim for {lo}-{hi}", False, 10))
+   771	    counted = talk_counted_lines(dd, ctx)
+   772	    all_spoken = spoken_lines(dd)
+   773	    _is_bts_qna = (
+   774	        "bts" in (ctx.get("overlays") or [])
+   775	        or bool(re.search(r"(?i)\b(?:bts|behind[- ]the[- ]scenes|interview\w*|off[- ]?screen)\b", ctx.get("ask") or ""))
+   776	    )
+   777	    if rules["min_lines"]:
+   778	        if _is_bts_qna and len(all_spoken) > len(counted):
+   779	            if len(counted) < 2 or len(all_spoken) < rules["min_lines"]:
+   780	                issues.append(_fix("talk_lines", "BTS interview needs at least 2 answers from (S1) and 3 to 5 total spoken lines including interviewer questions"))
+   781	        elif len(counted) < rules["min_lines"]:
+   782	            issues.append(_fix("talk_lines", f"note: talk-only suggests 3-5 short lines (1-2 per speaker is fine in 10-15s); it has {len(counted)}", False))
+   783	    if kind == "talk" and re.search(r"\(S2\)|<Subject 2>", dd) and not re.search(
+   784	            r"(?i)(?:subject_definitions:)?[^\n]*<(?:Subject 2)>|\(S2\) is ", full):
+   785	        issues.append(_fix("talk_s2_defined", "(S2) is named in the talk; define them in subject_definitions (look or clothes, BTS interviewer included)"))
+   786	
+   787	    issues += mode_checks(dd, full, sents, plain, ctx, kind, prim_idx)
+   788	
+   789	    # -- builder preview (CPU-only finalize on this candidate) --
+   790	    bp = ctx.get("builder_preview")
+   791	    preview = None
+   792	    if callable(bp):
+   793	        preview = bp(full)
+   794	        if preview.get("error"):
+   795	            issues.append(_fix("builder", "the builder rejects it: " + preview["error"][:300]))
+   796	        if preview.get("not_ready"):  # finalized-state gates (W5 final, R1, D1, P2 ...) seen before the dry build
+   797	            issues.append(_fix("builder", "the builder would return NOT_READY: " + preview["not_ready"][:300]))
+   798	        added = " | ".join(preview.get("added") or [])
+   799	        if rules["primary"] and "PRIMARY MOTION with tempo" in added:
+   800	            issues.append(_fix("builder_primary", "the builder would replace your PRIMARY MOTION; keep the 'PRIMARY MOTION -' form with a tempo word"))
+   801	        if rules["contact"] and "contact geometry line" in added:
+   802	            issues.append(_fix("builder_contact", "the builder would inject its own contact line; your contact sentence needs a join word"))
+   803	    hard = [i for i in issues if i["hard"]]
+   804	    score = max(0, 100 - sum(i["penalty"] for i in issues))
+   805	    return {"score": score, "pass": not hard, "hard": [i["code"] for i in hard], "issues": issues,
+   806	            "spoken_words": words, "lines": lines, "words": wc, "sentences": len(sents),
+   807	            "phases": {"anchor": anchor, "onset": onset, "development": dev, "result": res},
+   808	            "builder_preview": preview}
+   809	
+   810	
+   811	def notes_for_rewrite(result: Dict[str, Any], limit: int = 8) -> List[str]:
+   812	    return [i["note"] for i in sorted(result["issues"], key=lambda i: (not i["hard"], -i["penalty"]))][:limit]

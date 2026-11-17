@@ -1,0 +1,6 @@
+# Uncensored vision test 2026-11-17 07:51:29 CST
+106a107,108
+>     # VISION 2026-11-17 (Derrick t42u "There should be a vision model for flashnext? Enable it"): HALOGEN_VISION_TOWER=1 loads
+>     # qwen38-flash-next-vision.hgn (BF16 tower from the same source snapshot, sha b6ca6716..., per the pack README). Render+Forge use this slot.
+112a115
+>         -e HALOGEN_VISION_TOWER=1

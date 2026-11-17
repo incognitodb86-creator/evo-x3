@@ -1,0 +1,13 @@
+# SELinux fix test, 2x262144 + label=disable 2026-11-17 07:32:30 CST
+be1e4075e6d7063d6e2f780ee977f338b672c0e16bb7a2b6f2159e607958d1fe  /etc/evo-x3/llama-swap.yaml
+FN before small-group start: 200 26.568003s
+  -> 'PONG'
+embed-small 200
+FN after embed-small start (relabels /srv/models): 200 1.058508s
+  -> 'PONG'
+FN again: 200 0.445673s
+  -> 'PONG'
+[('embed-small', 'ready'), ('flash-next', 'ready')]
+GTT_used_GiB=96.79 MemAvailable_GiB=8.17 07:33:07
+FN label: 
+new AVC denials for gufo since restart: 0

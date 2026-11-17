@@ -1,0 +1,17 @@
+# All-loaded test FALLBACK 1x131072 2026-11-17 07:28:51 CST
+active
+flash-next 200
+embed-small 200
+[('embed-small', 'ready'), ('flash-next', 'ready')]
+GTT_used_GiB=86.34 MemAvailable_GiB=18.50 07:29:22
+MemAvailable:   19393976 kB
+SwapFree:             92 kB
+embed-small False
+flash-next True
+## + joycaption (1x131072) 07:29:33
+joycaption 200 4.433499s
+[('embed-small', 'ready'), ('flash-next', 'ready'), ('joycaption', 'ready')]
+GTT_used_GiB=95.61 MemAvailable_GiB=9.24 07:29:40
+MemAvailable:    9686616 kB
+Ref2VA NOT loaded: Halogen-baseline delta for ref2va-27b was GTT +19.06 GiB / MemAvailable -19.42 GiB (U1a-all-loaded-halogen.txt); loading it here would take MemAvailable below 0 -> OOM risk to Gufo/pi panes.
+## n-gram failure under JoyCaption co-residence (1x131072) 07:30:35; stopping joycaption container
