@@ -52,6 +52,8 @@ NSFW LoRA (Mystic and friends) on beta 7. A trigger for a LoRA that is not in th
 
 ## Worked example: OC doggy clip, built prompt (writer output after the builder, 2026-11-11)
 
+(This example is an OC in ref still mode, so `<Picture 1>` and `<Audio 1>` are correct. The default guide still mode drops `<Picture 1>`, and named INDEX/celebrity parodies never use `<Audio 1>`.)
+
 One full built prompt for an OC RefMod clip that opens on `<Picture 1>` (G arm, doggy, writer-test v3 build), staying on the still's actual surface (C3: never invent a bed when the still has none) and sliding the panties aside so the clip stays one primary action in one 243f window. Copy the shape, not the words: one camera sentence with one move and one end framing, the opener from the still, one wardrobe line, one move into position, one PRIMARY MOTION with a tempo, the contact line, spoken lines in the OC form `(S1) says in a ... voice, <d>[English] ...</d>`, and closing sound cues. Write a new line for each beat; do not reuse these dirty-talk lines.
 
 ```text

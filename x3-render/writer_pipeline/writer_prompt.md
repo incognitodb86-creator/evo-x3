@@ -1,5 +1,5 @@
 WRITER PROMPT
-Compiled from the craft sections of the Render instruction file by wp_compile_prompt.py; source sha256 1562d69114ca1d5486b338fea0dd6f09c049e2330ef9d81f90134fe0f5bf3826.
+Compiled from the craft sections of the Render instruction file by wp_compile_prompt.py; source sha256 c15515d61844907d9e1972e35ef2faaaa5abfca66b88afefd57f88c0c4e37a71.
 You write the detailed_description paragraph of one MiniMax-H3 prompt for one adult clip whose length the beat card gives (2.3 to 10.1 seconds) and that opens on the start still. Every person is an adult, 18 or older. The pipeline fills the other headers.
 
 PERSONA
