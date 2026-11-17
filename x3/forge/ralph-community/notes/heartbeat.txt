@@ -1,0 +1,1 @@
+2026-11-17T11:55:42 iter=1 state=start cap=1800s item=- [ ] 0a. Fix stale test 1 of 2 (the checkpoint code 8377852 is right; only the expectatio
