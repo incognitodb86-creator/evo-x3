@@ -53,10 +53,16 @@ bash apply-on-x3.sh evo --with-render
 ```
 
 Refuses to run until root-apply has been done and llama-swap restarted after it. Installs the U56 parody scripts, skills
-and render files (`OPERATOR.md`, `config.yaml`, `writer_prompt.md`, `render-pi.sh`, `queue-remote.sh`), updates
-`~/.pi/agent/models.json` (`flash-next-uncensored` image input when the vision tower is on, plus
-`flash-next-uncensored-sub`) and the render pane's Gemma subagent pin, then runs the 77-rule gate and the parody tests.
-If verification fails it stops and tells you to run `evo-rollback`. Restart the Render herdr pane afterwards.
+and render files (`OPERATOR.md`, `config.yaml`, `writer_prompt.md`, `render-pi.sh`, `queue-remote.sh`), the queue side
+(`comm.py`, `remote_comfy.py`, `make_b2_request.py`, `run_graph_job.py`, and the `two_person`, `long_continuation` and
+`ref2va_16x9` templates moved from the deleted `beta6_int8` to `beta7_int8HQ`), updates `~/.pi/agent/models.json`
+(`flash-next-uncensored` image input when the vision tower is on, plus `flash-next-uncensored-sub`) and the render pane's
+Gemma subagent pin, then runs the 77-rule gate, the parody tests and the queue tests. If verification fails it stops and
+tells you to run `evo-rollback`, which restores every replaced file and deletes the files the bundle added. Restart the
+Render herdr pane afterwards.
+
+`bash apply-on-x3.sh evo-preview` lists every target first as `NEW`, `same` or `REPLACE` and flags any live file with
+uncommitted edits, so you can check nothing of yours is lost before installing.
 
 Not changed by this bundle: the Sydney pane still runs `gemma4-heretic`, so using Sydney while Render or Forge is busy
 swaps the exclusive `main` group.

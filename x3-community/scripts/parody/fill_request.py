@@ -104,13 +104,19 @@ def fill_request(
     c0_in = g["c0"]["inputs"]
     c0_in.update(prompt=final_prompt, width=int(width), height=int(height))
     if isinstance(c0_in.get("length"), int) and frames is not None and "win1" not in g:
-        c0_in["length"] = int(br.align_h3_frames(int(frames)))
+        try:
+            c0_in["length"] = int(br.align_h3_frames(int(frames)))
+        except ValueError as e:
+            return _fail(str(e))
     if "c1" in g: g["c1"]["inputs"].update(prompt=(continuation_prompt or final_prompt).strip(), width=int(width), height=int(height))
     if (s_rel := _stage_still(still_image)):
         for nid in ("img_1", "img"):
             if nid in g: g[nid]["inputs"]["image"] = s_rel; break
     if (p2_rel := _stage_still(partner2_still)) and "img2" in g: g["img2"]["inputs"]["image"] = p2_rel
+    warnings: List[str] = []
     if "refmods" in g:
+        if len(stems) > 8:
+            warnings.append(f"refmod_slots_truncated:{len(stems)}->8")
         for i in range(1, 9): g["refmods"]["inputs"][f"mod_{i}"] = res._mod_stem(stems[i - 1]) if i <= len(stems) else "(none)"
     if "noise" in g: g["noise"]["inputs"]["noise_seed"] = int(seed)
     if "save" in g: g["save"]["inputs"]["filename_prefix"] = f"community/{run_dir.name}/clip"
@@ -120,7 +126,9 @@ def fill_request(
     if (nr := run_dir / "clip_NOT_READY.txt").exists(): nr.unlink()
     total_frames = (int(c0_in["length"]) + int(g["win1"]["inputs"].get("extension_frames") or 0)) if "win1" in g else (int(c0_in["length"]) if isinstance(c0_in.get("length"), int) else int(frames or 243))
     rep.update(status="READY", template=tname, template_path=str(tpath), still_mode=mode, canvas=[int(width), int(height)],
-               frames=total_frames, refmods={"stems": stems, **id_info}, build={"total_frames": total_frames})
+               frames=total_frames, refmods={"stems": stems[:8], **id_info}, build={"total_frames": total_frames})
+    if warnings:
+        rep["warnings"] = warnings
     marker, order_file = run_dir / "DRY_RUN", run_dir / "_render_order.json"
     if dry_run:
         if order_file.exists(): order_file.unlink()

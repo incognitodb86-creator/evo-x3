@@ -24,14 +24,17 @@ VISION_FILE="/srv/models/flash-next-uncensored-hgn/qwen38-flash-next-vision.hgn"
 ROLLBACK_ROOTS=(/home/evo/AI /home/evo/evo-x3 /home/evo/.pi)
 
 backup_to_archive() {
-  local target="$1" dir base dst
-  [ -f "$target" ] || return 0
-  dir="$(dirname "$target")"; base="$(basename "$target")"; dst="$dir/_archive/${base}.bak-${STAMP}"
+  local target="$1" dir base dst added
+  dir="$(dirname "$target")"; base="$(basename "$target")"
+  dst="$dir/_archive/${base}.bak-${STAMP}"; added="$dir/_archive/${base}.added-${STAMP}"
+  # Keep the FIRST record: a re-run must not replace the original with an already-updated copy.
+  if [ -e "$dst" ] || [ -e "$added" ]; then echo "  backup kept -> $dir/_archive/${base}.*-${STAMP}"; return 0; fi
   mkdir -p "$dir/_archive"
-  # Keep the FIRST backup: a re-run must not replace the original with an already-updated copy.
-  if [ -e "$dst" ]; then echo "  backup kept -> $dst"; return 0; fi
-  cp -p "$target" "$dst"
-  echo "  backup -> $dst"
+  if [ -f "$target" ]; then
+    cp -p "$target" "$dst"; echo "  backup -> $dst"
+  else
+    : > "$added"; echo "  new file (evo-rollback removes it) -> $target"
+  fi
 }
 
 need_user() {
@@ -45,10 +48,63 @@ stray_check() {
   fi
 }
 
+# Install lists, one "mode<TAB>bundle path<TAB>live path" per line; evo-preview and apply_evo both read them.
+test_pairs() {
+  local f
+  for f in render-master-rules-20261113.json test_writer_pipeline.py test_modular_s3_and_writer_sys.py; do
+    printf '0644\tx3-community/scripts/parody/%s\t/home/evo/AI/community/scripts/parody/%s\n' "$f" "$f"
+  done
+}
+render_pairs() {
+  local f
+  for f in aliases.json render_writer_pipeline.py wp_lint.py wp_router.py fill_request.py resolve.py \
+           test_u52_e2e_passthrough.py test_u54_named_e2e.py test_u55_clip_types_e2e.py; do
+    printf '0644\tx3-community/scripts/parody/%s\t/home/evo/AI/community/scripts/parody/%s\n' "$f" "$f"
+  done
+  # Queue/ComfyUI side (AlienPc hardening): beta7_int8HQ templates, LOST_PROMPT abort, remote eviction harvest, 17k+5 snapping.
+  for f in scripts/comm.py scripts/remote_comfy.py scripts/make_b2_request.py scripts/run_graph_job.py \
+           scripts/tests/test_remote_comfy.py scripts/tests/test_alienpc_comfy_hardening.py sy_test_graph.json \
+           templates/two_person.api.json templates/long_continuation.api.json templates/ref2va_16x9.api.json; do
+    printf '0644\tx3-community/%s\t/home/evo/AI/community/%s\n' "$f" "$f"
+  done
+  for f in h3-parody-identity/SKILL.md h3-prompting/SKILL.md h3-prompting/references/wording.md \
+           h3-prompting/references/longclip-beat-sheet.md h3-hc-render/SKILL.md video-render/SKILL.md; do
+    printf '0644\tx3-community/skills/%s\t/home/evo/AI/community/skills/%s\n' "$f" "$f"
+  done
+  for f in AGENTS.md OPERATOR.md RUN_ME.md writer_pipeline/personas/current.md writer_pipeline/config.yaml \
+           writer_pipeline/writer_prompt.md; do
+    printf '0644\tx3-render/%s\t/home/evo/AI/render/%s\n' "$f" "$f"
+  done
+  for f in x3/render-pi.sh x3/queue-remote.sh; do
+    printf '0755\tx3-render/%s\t/home/evo/AI/render/%s\n' "$f" "$f"
+  done
+}
+
+install_pairs() {
+  local mode src dst
+  while IFS=$'\t' read -r mode src dst; do
+    backup_to_archive "$dst"
+    install -m "$mode" "$BUNDLE_ROOT/$src" "$dst"
+  done
+}
+
 evo_preview() {
   need_user evo
   echo "=== ralph.sh: live (-) vs bundle (+). Live has uncommitted edits; make sure nothing below is lost. ==="
   diff -u "$FORGE_RC/ralph.sh" "$BUNDLE_ROOT/x3-forge/ralph-community/ralph.sh" || true
+  echo "=== --with-tests (first 3) and --with-render (all) targets ==="
+  local mode src dst st note n_edit=0
+  while IFS=$'\t' read -r mode src dst; do
+    if [ ! -e "$dst" ]; then st="NEW"
+    elif cmp -s "$BUNDLE_ROOT/$src" "$dst"; then st="same"
+    else st="REPLACE"; fi
+    note=""
+    if [ -e "$dst" ] && [ -n "$(git -C "$(dirname "$dst")" status --porcelain -- "$(basename "$dst")" 2>/dev/null)" ]; then
+      note="   <- uncommitted live edits; review: diff -u $dst $BUNDLE_ROOT/$src"; n_edit=$((n_edit+1))
+    fi
+    printf '  %-8s %s%s\n' "$st" "$dst" "$note"
+  done < <(test_pairs; render_pairs)
+  echo "=== $n_edit target(s) have uncommitted live edits. All replaced files are backed up; evo-rollback restores them. ==="
 }
 
 # --with-render points the Render pane at flash-next-uncensored with image input. That is only safe once root-apply
@@ -76,12 +132,16 @@ require_root_applied() {
 
 evo_rollback() {
   need_user evo
-  local n=0 bak orig
+  local n=0 m=0 bak orig
   while IFS= read -r -d '' bak; do
     orig="$(dirname "$(dirname "$bak")")/$(basename "$bak" ".bak-${STAMP}")"
     cp -p "$bak" "$orig"; echo "  restored $orig"; n=$((n+1))
   done < <(find "${ROLLBACK_ROOTS[@]}" -path "*/_archive/*.bak-${STAMP}" -type f -print0 2>/dev/null)
-  echo "=== rollback restored $n file(s). Files the bundle added (OPERATOR.md, run-u56-pass.sh, fix_plan.u56-item0.md) are left in place and are unused by the old files. ==="
+  while IFS= read -r -d '' bak; do
+    orig="$(dirname "$(dirname "$bak")")/$(basename "$bak" ".added-${STAMP}")"
+    rm -f "$orig" "$bak"; echo "  removed added $orig"; m=$((m+1))
+  done < <(find "${ROLLBACK_ROOTS[@]}" -path "*/_archive/*.added-${STAMP}" -type f -print0 2>/dev/null)
+  echo "=== rollback restored $n file(s) and removed $m added file(s). run-u56-pass.sh and fix_plan.u56-item0.md are left in place (unused by the old ralph.sh). ==="
 }
 
 apply_evo() {
@@ -96,35 +156,15 @@ apply_evo() {
   echo "  Forge .pi/settings.json is NOT touched (live already pins flash-next-uncensored + 131K compaction)."
 
   if [ "$OPT" = "--with-tests" ] || [ "$OPT" = "--with-render" ]; then
-    local par="/home/evo/AI/community/scripts/parody"
-    echo "=== [evo] Installing the 3 fixed U56 test files into $par ==="
-    for f in render-master-rules-20261113.json test_writer_pipeline.py test_modular_s3_and_writer_sys.py; do
-      backup_to_archive "$par/$f"
-      install -m 0644 "$BUNDLE_ROOT/x3-community/scripts/parody/$f" "$par/$f"
-    done
+    echo "=== [evo] Installing the 3 fixed U56 test files into /home/evo/AI/community/scripts/parody ==="
+    install_pairs < <(test_pairs)
   fi
 
   if [ "$OPT" = "--with-render" ]; then
     local par="/home/evo/AI/community/scripts/parody"
-    local skroot="/home/evo/AI/community/skills"
     local ren="/home/evo/AI/render"
     echo "=== [evo --with-render] Installing Render pipeline scripts, skills, OPERATOR.md, config.yaml & writer_prompt.md ==="
-    for f in aliases.json render_writer_pipeline.py wp_lint.py wp_router.py fill_request.py resolve.py test_u52_e2e_passthrough.py test_u54_named_e2e.py test_u55_clip_types_e2e.py; do
-      backup_to_archive "$par/$f"
-      install -m 0644 "$BUNDLE_ROOT/x3-community/scripts/parody/$f" "$par/$f"
-    done
-    for sk in h3-parody-identity/SKILL.md h3-prompting/SKILL.md h3-prompting/references/wording.md h3-prompting/references/longclip-beat-sheet.md h3-hc-render/SKILL.md video-render/SKILL.md; do
-      backup_to_archive "$skroot/$sk"
-      install -m 0644 "$BUNDLE_ROOT/x3-community/skills/$sk" "$skroot/$sk"
-    done
-    for rf in AGENTS.md OPERATOR.md RUN_ME.md writer_pipeline/personas/current.md writer_pipeline/config.yaml writer_pipeline/writer_prompt.md; do
-      backup_to_archive "$ren/$rf"
-      install -m 0644 "$BUNDLE_ROOT/x3-render/$rf" "$ren/$rf"
-    done
-    for rx in x3/render-pi.sh x3/queue-remote.sh; do
-      backup_to_archive "$ren/$rx"
-      install -m 0755 "$BUNDLE_ROOT/x3-render/$rx" "$ren/$rx"
-    done
+    install_pairs < <(render_pairs)
     if [ -L /home/evo/evo-x3/pi-chats/render-pi.sh ]; then
       ln -sfn /home/evo/AI/render/x3/render-pi.sh /home/evo/evo-x3/pi-chats/render-pi.sh
     elif [ -f /home/evo/evo-x3/pi-chats/render-pi.sh ]; then
@@ -184,7 +224,9 @@ PY
         parody/test_u52_e2e_passthrough.py \
         parody/test_u54_named_e2e.py \
         parody/test_u55_clip_types_e2e.py \
-        parody/test_u37_builder_fixes.py ); then
+        parody/test_u37_builder_fixes.py \
+        tests/test_remote_comfy.py tests/test_alienpc_comfy_hardening.py tests/test_h3_fix_bcd.py \
+        tests/test_run_queue_one_at_a_time.py ); then
       echo "VERIFY FAILED after install. Restore everything with: bash $0 evo-rollback" >&2
       exit 4
     fi
