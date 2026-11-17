@@ -51,6 +51,6 @@ Quickstart for running the H3 writer pipeline on EVO-X3 Linux (`/home/evo/AI/ren
 ## 4. Forbidden in Render Sessions
 - Writing outside `/home/evo/AI/community/runs/*`.
 - Queueing without Derrick explicit yes (`--queue --yes-derrick`).
-- Reading builder internals (`build_request.py`, `submit_parody_run.py`, `acts.yaml`), `.env`/keys/tokens, or `/home/evo/AI/sydney/`.
+- Reading builder internals (`build_request.py`, `fill_request.py`, `acts.yaml`), `.env`/keys/tokens, or `/home/evo/AI/sydney/`.
 - Opening or browsing PixlStash library contents/captions.
 - Editing `llama-swap.yaml`, ComfyUI install, or interrupting active GPU renders (`/home/evo/AI/locks/gpu-render.lock`).

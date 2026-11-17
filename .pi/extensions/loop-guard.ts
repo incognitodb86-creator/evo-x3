@@ -58,7 +58,7 @@ export function runDirFromCmd(cmd: string): string {
     if (eq) return eq[1];
     if (/^--run-dir$/i.test(t) || /^--rundir$/i.test(t)) return tokens[i + 1] ?? "";
   }
-  const idx = tokens.findIndex((t) => /(?:submit_parody_run|render_writer_pipeline)(?:\.py)?/i.test(t));
+  const idx = tokens.findIndex((t) => /(?:fill_request|render_writer_pipeline)(?:\.py)?/i.test(t));
   const start = idx >= 0 ? idx + 1 : 0;
   for (let i = start; i < tokens.length; i++) {
     const t = tokens[i];
@@ -66,8 +66,7 @@ export function runDirFromCmd(cmd: string): string {
       if (!t.includes("=") && !BOOL_FLAGS.test(t) && tokens[i + 1] && !isFlag(tokens[i + 1])) i++;
       continue;
     }
-    if (/^writer-run$/i.test(t)) continue;
-    return t;
+        return t;
   }
   return "";
 }
@@ -79,11 +78,11 @@ export function normalizeRunDir(dir: string): string {
   return norm;
 }
 
-/** Returns a per-run-folder key when the call runs submit_parody_run.py or render_writer_pipeline.py, else null. */
+/** Returns a per-run-folder key when the call runs fill_request.py or render_writer_pipeline.py, else null. */
 export function parodyRunKey(input: unknown): string | null {
   if (input === null || typeof input !== "object") return null;
   const cmd = (input as Record<string, unknown>).command;
-  if (typeof cmd !== "string" || !/(?:submit_parody_run|render_writer_pipeline)/i.test(cmd)) return null;
+  if (typeof cmd !== "string" || !/(?:fill_request|render_writer_pipeline)/i.test(cmd)) return null;
   const norm = normalizeRunDir(runDirFromCmd(cmd));
   return "parody::" + (norm || "?");
 }

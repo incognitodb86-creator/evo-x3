@@ -12,22 +12,24 @@ sub("community/scripts/parody/wp_llm.py",
     '        v = d["providers"]["llama-swap"].get("apiKey")',
     '        provs = d["providers"]  # EVO-X3 2026-11-15: pi provider is x3-local; AlienPc: llama-swap\n'
     '        v = (provs.get("llama-swap") or provs.get("x3-local") or {}).get("apiKey")')
-# 2 submit_parody_run: no local queue route on the X3
-p = Path("community/scripts/parody/submit_parody_run.py"); raw = p.read_bytes(); t = raw.decode("utf-8")
-nl = "\r\n" if "\r\n" in t else "\n"
-old = "python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable"
-if "EVO-X3 2026-11-15: no local" not in t:
-    out = []; n = 0
-    for line in t.splitlines(keepends=True):
-        if old in line:
-            ind = line[:len(line) - len(line.lstrip())]
-            out.append(ind + 'if os.name != "nt":  # EVO-X3 2026-11-15: no local ComfyUI/run_queue route; renders stay on AlienPc' + nl)
-            out.append(ind + '    raise RuntimeError("X3: --queue is not wired through run_queue.py; after Derrick\'s yes use "' + nl)
-            out.append(ind + '                       "~/AI/render/x3/queue-remote.sh <run_dir> (AlienPc ComfyUI over the tailnet)")' + nl)
-            n += 1
-        out.append(line)
-    p.write_text("".join(out), encoding="utf-8"); print("queue guards", n)
-assert "\nimport os" in t
+# 2 archived submit_parody_run (replaced by fill_request.py + run_queue.py in U55)
+_spr = Path("community/scripts/parody/submit_parody_run.py")
+if _spr.is_file():
+    p = _spr; raw = p.read_bytes(); t = raw.decode("utf-8")
+    nl = "\r\n" if "\r\n" in t else "\n"
+    old = "python = str(QUEUE_PYTHON) if QUEUE_PYTHON.is_file() else sys.executable"
+    if "EVO-X3 2026-11-15: no local" not in t:
+      out = []; n = 0
+      for line in t.splitlines(keepends=True):
+          if old in line:
+              ind = line[:len(line) - len(line.lstrip())]
+              out.append(ind + 'if os.name != "nt":  # EVO-X3 2026-11-15: no local ComfyUI/run_queue route; renders stay on AlienPc' + nl)
+              out.append(ind + '    raise RuntimeError("X3: --queue is not wired through run_queue.py; after Derrick\'s yes use "' + nl)
+              out.append(ind + '                       "~/AI/render/x3/queue-remote.sh <run_dir> (AlienPc ComfyUI over the tailnet)")' + nl)
+              n += 1
+          out.append(line)
+      p.write_text("".join(out), encoding="utf-8"); print("queue guards", n)
+    assert "\nimport os" in t
 # 3 writer pipeline config -> X3 llama-swap
 sub("render/writer_pipeline/config.yaml",
     "endpoint: http://127.0.0.1:8085/v1      # GPU lock gate -> llama-swap; requests wait while a render holds the GPU lock",
