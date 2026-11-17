@@ -1223,6 +1223,7 @@ def run_build(run_dir: Path, ask: str, position: str, still: str, character: Opt
     still_mode = _opt("--still-mode") or "guide"
     p2_still, tname = _opt("--partner2-still"), _opt("--template")
     raw = (run_dir / "writer_output.txt").read_text(encoding="utf-8") if (run_dir / "writer_output.txt").is_file() else ""
+    still = fr.pixl_abs(still)
     w, h = br.resolve_canvas(aspect, size, still_size=br.read_still_size(still) if still else None)
     rep = fr.fill_request(
         raw, run_dir, ask=ask, position=position, still_image=(still or None), partner2_still=p2_still,
@@ -1460,7 +1461,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             result["chain"] = "dry_chain"
             if not list(prev_run.glob("*.mp4")):
                 result["warnings"] = list(result.get("warnings") or []) + ["chain_unverified"]
-        still = str(job.get("still") or "").strip()
+        still = fr.pixl_abs(str(job.get("still") or "").strip())
         if not still and is_continue:
             if scene_prev and scene_prev.get("still"):
                 still = str(scene_prev["still"]).strip()
