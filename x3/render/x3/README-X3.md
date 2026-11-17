@@ -15,7 +15,7 @@ Installed 2026-11-15 by Max Architect. Derrick, 2:09–2:10 PM CT: "Yes, add the
 | `...\ComfyUI\input|output\community` | `~/AI/comfy-alienpc/input|output/community` | local staging only |
 | `C:\Users\derek\5slock` (PixlStash) | `~/AI/5slock` (empty) | never copied |
 
-Path rewrite: `x3/linuxize.py` (idempotent, writes `*.bak-x3linux` for untracked files). Non-path changes: `x3/x3_adapt.py`: `wp_llm.py` reads pi's `x3-local` key the way pi does (`!cat` key file, in-process, never printed); `submit_parody_run.py --queue` refuses on Linux and points to `x3/queue-remote.sh`; `writer_pipeline/config.yaml` endpoint `http://127.0.0.1:8080/v1`, `model_alias: gemma4-heretic`; `AGENTS.md` launch line.
+Path rewrite: `x3/linuxize.py` (idempotent, writes `*.bak-x3linux` for untracked files). Non-path changes: `x3/x3_adapt.py`: `wp_llm.py` reads pi's `x3-local` key the way pi does (`!cat` key file, in-process, never printed); `render_writer_pipeline.py --queue --yes-derrick` fills the template and queues via `x3/queue-remote.sh` (`run_queue.py --remote`); `writer_pipeline/config.yaml` endpoint `http://127.0.0.1:8080/v1`, `model_alias: gemma4-heretic`; `AGENTS.md` launch line.
 
 ## Start Render on the X3 (also linked at `~/evo-x3/pi-chats/render-pi.sh`)
 All agent panes and host services (`herdr-server`, `pi-mobile-hub`, `herdr-panes`) run as user `evo` (uid 1001, no sudo, `/home/evo`), NOT `derekboone`. Phone link runs via `pi-mobile-hub` (`127.0.0.1:7878`) published on Tailscale Serve `https://evo-x3-1.tailf242b2.ts.net:8444` (`herdr-panes.sh` passes `--remote -e pi-mobile -e herdr-agent-state`).
@@ -30,7 +30,7 @@ sudo -n -u evo env XDG_RUNTIME_DIR=/run/user/1001 HOME=/home/evo PATH=/home/evo/
 - Python: `~/AI/render/x3/.venv` (Python 3.14; `requirements-x3.txt`: pysbd 0.3.4, PyYAML 6.0.3, pillow, numpy, opencv-python-headless, pytest).
 
 ## Rendering (AlienPc ComfyUI over the tailnet)
-Dry run only by default, same as AlienPc: READY writes `prompt.txt`, `clip/request.api.json`, `build_report.json`, `DRY_RUN`. Paste `prompt.txt` to Derrick. Only after his explicit yes for that prompt (and after rebuilding with `submit_parody_run.py --queue` to write `_render_order.json`):
+Dry run only by default, same as AlienPc: READY writes `prompt.txt`, `clip/request.api.json`, `build_report.json`, `DRY_RUN`. Paste `prompt.txt` to Derrick. Only after his explicit yes for that prompt (and with `render_writer_pipeline.py --queue --yes-derrick` to write `_render_order.json` and queue in one pass):
 ```bash
 bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick [--dry-run]
 ```
