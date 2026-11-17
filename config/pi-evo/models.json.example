@@ -100,13 +100,34 @@
         },
         {
           "id": "flash-next-uncensored",
-          "name": "X3 local Huihui Qwen3.8-Flash-Next abliterated HGN (Halogen 0.20.5) NON-PRODUCTION, 1 slot",
+          "name": "X3 local Huihui Qwen3.8-Flash-Next abliterated HGN + vision tower (Halogen 0.20.5) 4 slots",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template"
+          }
+        },
+        {
+          "id": "flash-next-uncensored-sub",
+          "name": "X3 local Huihui Qwen3.8-Flash-Next abliterated HGN (Halogen 0.20.5) subagent 128K/8K",
           "reasoning": true,
           "input": [
             "text"
           ],
-          "contextWindow": 262144,
-          "maxTokens": 32768,
+          "contextWindow": 131072,
+          "maxTokens": 8192,
           "samplingParams": {
             "temperature": 1.0,
             "top_p": 0.95,

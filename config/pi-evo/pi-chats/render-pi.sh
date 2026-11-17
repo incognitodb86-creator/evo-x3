@@ -17,7 +17,9 @@
 set -euo pipefail
 R="$HOME/AI/render"; S="$HOME/AI/community/skills"
 cd "$R"
+export PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/panes/render}"
 export PATH="$R/x3/.venv/bin:$HOME/.local/bin:$PATH"
+[ -r "$HOME/.config/pixlstash/render-read.token" ] && export PIXL_KEY="$(tr -d '[:space:]' < "$HOME/.config/pixlstash/render-read.token")"
 exec pi --approve \
   --no-extensions \
   -e "$R/.pi/npm/node_modules/pi-permission-system/index.ts" \
@@ -27,11 +29,9 @@ exec pi --approve \
   -e "$R/.pi/npm/node_modules/pi-memory/index.ts" \
   --no-mcp \
   --no-skills \
-  --skill "$S/video-render" --skill "$S/image-render" --skill "$S/comfy-render" \
-  --skill "$S/h3-parody-identity" --skill "$S/h3-prompting" --skill "$S/h3-max-ref2va-prompt" \
-  --skill "$S/h3-hc-render" --skill "$S/alienpc-hardcore-i2v-director" --skill "$S/alienpc-stills-pose-edit-prompting" \
+  --skill "$S/h3-parody-identity" --skill "$S/h3-prompting" \
   --no-context-files \
-  --append-system-prompt "$R/AGENTS.md" \
-  --model "${RENDER_MODEL:-x3-local/gemma4-heretic}" \
-  --thinking medium \
+  --append-system-prompt "${RENDER_PROMPT_FILE:-$R/OPERATOR.md}" \
+  --model "${RENDER_MODEL:-x3-local/flash-next-uncensored}" \
+  --thinking "${RENDER_THINKING:-low}" \
   "$@"
