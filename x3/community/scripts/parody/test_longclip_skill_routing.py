@@ -28,7 +28,6 @@ FORBIDDEN_FILES = [
     REPO_ROOT / "scripts" / "parody" / "resolve.py",
     REPO_ROOT / "scripts" / "parody" / "build_request.py",
     REPO_ROOT / "scripts" / "parody" / "run_record.py",
-    REPO_ROOT / "scripts" / "parody" / "submit_parody_run.py",
     REPO_ROOT / "scripts" / "parody" / "test_parody_reflora.py",
     REPO_ROOT / "skills" / "h3-parody-identity" / "SKILL.md",
 ]

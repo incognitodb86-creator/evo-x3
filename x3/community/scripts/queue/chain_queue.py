@@ -17,7 +17,7 @@ mouth guard); a new scene passes --run-dir plus its own --scene-read and, when i
 continued clip, --inherited-garments from the previous clip's tracked end state. The v1
 stale-garment auto-correction (W5 override without evidence) stays REMOVED: any W5 override needs
 a frame-crop evidence file and is not done by this harness.
-Uses submit_parody_run.py writer-run, run_queue (gpu_lock per clip) and
+Uses fill_request.py, run_queue (gpu_lock per clip) and
 render_writer_pipeline.chain_start_still / build_request.vision_read. No pipeline edits.
 One fixed seed (writer-run default 51083601). Stops at the first NOT_READY or failed clip.
 """
@@ -36,7 +36,7 @@ from pathlib import Path
 
 PY = sys.executable
 SCRIPTS = Path(__file__).resolve().parent.parent
-SUBMIT = SCRIPTS / "parody" / "submit_parody_run.py"
+SUBMIT = SCRIPTS / "parody" / "fill_request.py"
 PARODY = SUBMIT.parent
 for _p in (str(SCRIPTS), str(PARODY)):
     if _p not in sys.path:
@@ -150,22 +150,20 @@ class Chain:
 
     def writer_run(self, d: Path, pos: str, frames: int, still: str, continued: bool, garments, queue: bool) -> dict:
         cmd = [
-            PY, str(SUBMIT), "writer-run", str(d),
+            PY, str(SUBMIT), str(d),
             "--ask", self.ask_of(d), "--position", pos, "--still", still,
-            "--character", "FCSydny", "--frames", str(frames), "--shots", "multi",
-            "--partner-type", "man", "--s2-look", self.s2,
+            "--character", "FCSydny", "--frames", str(frames),
         ]
-        if continued:
-            cmd += ["--continued", "--scene-read", str(self.scene_read)]
-        if garments:
-            cmd += ["--inherited-garments", json.dumps(garments)]
         if queue:
             cmd.append("--queue")
-            # chain mode (keep-comfy-part1): the queued batch keeps comfyui_auto's process alive;
-            # this harness carries it across the gaps with ping(). Only on the queued call.
-            cmd.append("--keep-comfy-process")
         t0 = time.time()
         p = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PARODY), timeout=240 if not queue else 200)
+        if queue and p.returncode == 0:
+            q_cmd = [PY, "-u", str(SCRIPTS / "run_queue.py"), "--run-dir", str(d), "--frames", str(frames), "--detach"]
+            # chain mode (keep-comfy-part1): the queued batch keeps comfyui_auto's process alive;
+            # this harness carries it across the gaps with ping(). Only on the queued call.
+            q_cmd.append("--keep-comfy-process")
+            p = subprocess.run(q_cmd, capture_output=True, text=True, cwd=str(SCRIPTS.parent), timeout=200)
         sec = round(time.time() - t0, 2)
         st, reason, seed = "UNKNOWN", "", None
         br_path = d / "build_report.json"

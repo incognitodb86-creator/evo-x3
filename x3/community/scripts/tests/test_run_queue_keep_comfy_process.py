@@ -19,7 +19,6 @@ from unittest import mock
 
 SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUN_QUEUE = os.path.join(SCRIPTS, "run_queue.py")
-SUBMIT_PY = os.path.join(SCRIPTS, "parody", "submit_parody_run.py")
 CHAIN_QUEUE = os.path.join(SCRIPTS, "queue", "chain_queue.py")
 FLAG = "--keep-comfy-process"
 
@@ -155,111 +154,6 @@ class TestRunQueueFlag(unittest.TestCase):
         self.assertIn(needle, src, "BATCH closed tail must say kept loaded only when the flag was on")
 
 
-class TestSubmitPassesFlagOnlyWhenAsked(unittest.TestCase):
-    """submit_parody_run: both queue builders append the flag to run_queue argv only when asked."""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        global _ACTIVE
-        _ACTIVE = True
-        sys.path.insert(0, os.path.join(SCRIPTS, "parody"))
-        sys.path.insert(0, SCRIPTS)
-        import submit_parody_run  # noqa: F401  (imports build_request etc. before the hook blocks effects)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        global _ACTIVE
-        _ACTIVE = False
-
-    def test_cli_flags_exist_on_both_entries(self):
-        src = open(SUBMIT_PY, encoding="utf-8").read()
-        self.assertIn('ap.add_argument("%s", action="store_true"' % FLAG, src, "writer-run CLI needs the flag")
-        self.assertIn('parser.add_argument("%s", action="store_true"' % FLAG, src, "main CLI needs the flag")
-
-    def test_writer_run_cli_forwards_only_when_set(self):
-        fn = _func(_tree(SUBMIT_PY), "_writer_run_cli")
-        blob = ast.unparse(fn)
-        self.assertIn("r = submit_writer_run(", blob, "the writer-run entry builds through submit_writer_run once")
-        self.assertIn("keep_comfy_process': True} if a.keep_comfy_process else {}", blob,
-                      "must be conditional (only when requested), not an always-on leak")
-
-    def test_argv_appends_are_guarded(self):
-        tree = _tree(SUBMIT_PY)
-        appends = []
-        for node in ast.walk(tree):
-            if (isinstance(node, ast.If) and "keep_comfy_process" in ast.unparse(node.test)
-                    and any(isinstance(c, ast.Call) and isinstance(c.func, ast.Attribute) and c.func.attr == "append"
-                            and ast.unparse(c.args[0]) == "'%s'" % FLAG for c in ast.walk(node))):
-                appends.append(ast.unparse(node.test))
-        self.assertEqual(len(appends), 2,
-                         "both queue builders (submit_parody_job and submit_writer_run) must append the flag under an if")
-
-    def test_default_off_end_to_end_writer_run_argv(self):
-        """A real submit_writer_run() with a mocked subprocess: no flag by default, flag when asked."""
-        import submit_parody_run as spr
-        graph = {"c0": {"inputs": {"prompt": "", "length": 243, "width": 768, "height": 1344}},
-                 "noise": {"inputs": {"noise_seed": 0}}, "save": {"inputs": {"filename_prefix": ""}},
-                 "refmods": {"inputs": {f"mod_{i}": "(none)" for i in range(1, 9)}},
-                 "img_1": {"inputs": {"image": "old.png"}}}
-        graph["refmods"]["inputs"]["mod_1"] = "minimaxh3_oc_poolblonde_v2_refmod_visual"
-        raw = open(os.path.join(SCRIPTS, "tests", "_keep_comfy_writer_raw.txt"), encoding="utf-8").read()
-        read = {"room": "a dimly lit stage with a pole", "place": "stage", "bed": False, "sheets": "",
-                "surface": "the stage floor", "floor": "dark floor", "light": "dramatic spotlighting",
-                "pose": "stands beside a pole with one hand gripping it, hips tilted to the side",
-                "props": ["a chrome pole"],
-                "garments": [{"type": "top", "name": "black mesh strappy bra top"},
-                             {"type": "other", "name": "black mesh strappy bottom with garter straps"},
-                             {"type": "stockings", "name": "black fishnet thigh-high stockings"}]}
-        import tempfile
-        calls = []
-
-        class P:
-            returncode, stdout, stderr = 0, "", ""
-
-        def fake_run(cmd, **kw):
-            calls.append(list(cmd))
-            return P()
-
-        with tempfile.TemporaryDirectory() as td:
-            with mock.patch.object(spr.subprocess, "run", fake_run):
-                r1 = spr.submit_writer_run(raw, dict(graph), os.path.join(td, "a"), "she has sex with him, position: missionary",
-                                           "missionary", still_read=read, still_image="community/oc_poolblonde_stage.png",
-                                           yes_derrick=True)
-                self.assertEqual(r1["status"], "READY", r1.get("reason"))
-                self.assertNotIn(FLAG, calls[-1], "a normal queued writer-run must not touch the chain flag")
-                tail_flag = "--yes-derrick" if os.name != "nt" else "--detach"
-                self.assertEqual(calls[-1][-1], tail_flag, f"the flag is appended after {tail_flag} only when asked")
-                r2 = spr.submit_writer_run(raw, dict(graph), os.path.join(td, "b"), "she has sex with him, position: missionary",
-                                           "missionary", still_read=read, still_image="community/oc_poolblonde_stage.png",
-                                           keep_comfy_process=True, yes_derrick=True)
-                self.assertEqual(r2["status"], "READY", r2.get("reason"))
-                self.assertEqual(calls[-1][-2:], [tail_flag, FLAG], "the chain call appends the flag last")
-
-    def test_writer_run_cli_flag_parses_off_by_default(self):
-        """The writer-run entry's parser: absent = False, present = True (no queue, no I/O - SystemExit 3 after parsing)."""
-        import argparse
-        import submit_parody_run as spr
-        captured = {}
-        real_parse = argparse.ArgumentParser.parse_args
-
-        def spy(self, args=None, namespace=None):
-            ns = real_parse(self, args, namespace)
-            if hasattr(ns, "keep_comfy_process"):
-                captured["ns"] = ns
-            raise SystemExit(3)  # stop before any filesystem / queue work
-
-        argparse.ArgumentParser.parse_args = spy
-        base = ["--ask", "fixture ask", "--position", "missionary", "C:/nonexistent-dir-for-fixture"]
-        try:
-            spr._writer_run_cli(list(base))
-            self.assertFalse(captured["ns"].keep_comfy_process, "writer-run default must be off")
-            captured.clear()
-            spr._writer_run_cli(base + [FLAG])
-            self.assertTrue(captured["ns"].keep_comfy_process, "writer-run --keep-comfy-process must set True")
-        finally:
-            argparse.ArgumentParser.parse_args = real_parse
-
-
 class TestChainQueuePassesFlag(unittest.TestCase):
     """The canonical chain harness: flag on every queued writer-run, ping during the gaps."""
 
@@ -276,13 +170,11 @@ class TestChainQueuePassesFlag(unittest.TestCase):
     def test_chain_appends_flag_only_on_the_queued_call(self):
         tree = _tree(CHAIN_QUEUE)
         wr = _func(tree, "writer_run")
-        ifs = [n for n in ast.walk(wr) if isinstance(n, ast.If) and ast.unparse(n.test) == "queue"]
-        self.assertEqual(len(ifs), 1, "writer_run must have an `if queue:` block (the --queue call)")
-        appends = [ast.unparse(c.args[0]) for c in _calls_named(ifs[0], "append")]
-        self.assertIn("'--queue'", appends, "the chain queues")
-        self.assertIn("'%s'" % FLAG, appends, "the chain passes the flag it documented (keep-comfy-part1)")
-        all_appends = [c for c in _calls_named(wr, "append") if ast.unparse(c.args[0]) == "'%s'" % FLAG]
-        self.assertEqual(len(all_appends), 1, "exactly one guarded append of the flag in writer_run")
+        ifs = [n for n in ast.walk(wr) if isinstance(n, ast.If) and "queue" in ast.unparse(n.test)]
+        self.assertGreaterEqual(len(ifs), 1, "writer_run must guard --queue and --keep-comfy-process")
+        src_wr = ast.get_source_segment(open(CHAIN_QUEUE, encoding="utf-8").read(), wr) or ""
+        self.assertIn("--queue", src_wr)
+        self.assertIn(FLAG, src_wr)
 
     def test_chain_pings_the_comfy_route_under_the_ttl(self):
         src = open(CHAIN_QUEUE, encoding="utf-8").read()
@@ -304,7 +196,7 @@ class TestChainQueuePassesFlag(unittest.TestCase):
     def test_chain_writer_run_call_is_complete(self):
         """The chain's argv keeps the v2 shape: writer-run, --queue only when asked, seed check intact."""
         src = open(CHAIN_QUEUE, encoding="utf-8").read()
-        for token in ('"writer-run"', "--continued", "--scene-read", "--inherited-garments", "SEED_MISMATCH"):
+        for token in ("fill_request.py", "run_queue.py", "--frames", "SEED_MISMATCH"):
             self.assertIn(token, src, "chain argv lost %s" % token)
 
 

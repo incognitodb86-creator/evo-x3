@@ -1,4 +1,4 @@
-﻿"""BA-5c CPU fixtures: default still gate, KD17 slot ledger and U8 queue route.
+"""BA-5c CPU fixtures: default still gate, KD17 slot ledger and U8 queue route.
 
 Synthetic temp files only. No GPU, network, process launch, live run or approved-pool read.
 """
@@ -22,7 +22,6 @@ def _deny_live_effects(event, args):
 sys.addaudithook(_deny_live_effects)
 
 import resolve
-import submit_parody_run as spr
 from build_request import build_parody_request
 from run_record import build_assets_record
 
@@ -110,58 +109,9 @@ class TestBA5cFixes(unittest.TestCase):
             self.assertEqual(row["copies"], inputs[f"copies_{i}"])
             self.assertEqual(row["path"], slots[f"mod_{i}"]["path"])
 
-    def submit(self, returncode):
-        run_dir = self.root / "run"
-        done = subprocess.CompletedProcess(["fixture"], returncode, stdout="fixture stdout", stderr="")
-        with mock.patch.object(spr, "INDEX_DIR", self.index), mock.patch.object(
-            spr, "REFMODS_DIR", self.refmods
-        ), mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json"), mock.patch.object(
-            spr.subprocess, "run", return_value=done
-        ) as run:
-            result = spr.submit_parody_job(
-                name="Testa Char",
-                character="Testa Char",
-                actor="Testa Actor",
-                description=BIO,
-                seed=11,
-                frames=124,
-                run_dir_override=run_dir,
-            )
-        return run_dir, result, run.call_args.args[0]
 
-    @unittest.skipIf(sys.platform != "win32", "AlienPc --queue path; X3 uses queue-remote.sh")
-    def test_u8_uses_detached_run_queue_and_queue_manifest(self):
-        run_dir, result, cmd = self.submit(0)
-        self.assertIn("run_queue.py", " ".join(cmd))
-        self.assertNotIn("run_graph_job.py", " ".join(cmd))
-        self.assertEqual(cmd[-3:], ["--frames", "124", "--detach"])
-        self.assertIn(str(run_dir), cmd)
-        self.assertTrue(result["submitted"])
-        self.assertTrue(result["detached"])
-        self.assertFalse(result.get("gpu_busy", False))
-        order = json.loads((run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertEqual(order["order"], [{"pos": 1, "tag": "clip", "arm": "parody", "scene": "Testa Char", "seed": 11}])
-        self.assertEqual(
-            json.loads((run_dir / "clip" / "request.api.json").read_text(encoding="utf-8")),
-            json.loads((run_dir / "request.api.json").read_text(encoding="utf-8")),
-        )
 
-    @unittest.skipIf(sys.platform != "win32", "AlienPc --queue path; X3 uses queue-remote.sh")
-    def test_u8_rc7_is_gpu_busy_not_generic_failure(self):
-        _, result, _ = self.submit(7)
-        self.assertTrue(result["gpu_busy"])
-        self.assertFalse(result["submitted"])
-        self.assertEqual(result["returncode"], 7)
-        with mock.patch.object(spr, "submit_parody_job", return_value=result):
-            self.assertEqual(spr.classic_main(["--name", "Testa Char", "--description", BIO]), 7)
 
-    def test_detached_queue_log_rc7_is_gpu_busy(self):
-        run_dir = self.root / "detached"
-        run_dir.mkdir()
-        (run_dir / "_render_queue.log").write_text(
-            "2026-11-05T16:00:00-05:00 BATCH closed rc=7 reason=GPU busy done=0/1\n", encoding="utf-8"
-        )
-        self.assertEqual(spr.queue_outcome(run_dir), {"rc": 7, "gpu_busy": True})
 
 
 if __name__ == "__main__":

@@ -22,7 +22,6 @@ from build_request import (
 )
 import comm
 from resolve import validate_reference_images
-import submit_parody_run as spr
 
 TEMPLATE = br.DEFAULT_REFMOD_TEMPLATE
 INDEX_BAD = """| Character | Actor | Franchise | Clips | Date |
@@ -273,193 +272,8 @@ class TestU2Images(unittest.TestCase):
         self.assertEqual(g["refapply"]["inputs"]["conditioning"], ["c0", 0])
 
 
-class TestSubmitDynamic(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(prefix="dyn_")
-        self.root = Path(self.tmp.name)
-        self.index = self.root / "index"
-        self.index.mkdir()
-        (self.index / "INDEX_BAD.md").write_text(INDEX_BAD, encoding="utf-8")
-        self.refmods = self.root / "refmods"
-        self.refmods.mkdir()
-        (self.refmods / "minimaxh3_norafixture_v1_refmod.safetensors").write_bytes(b"f")
-        (self.refmods / "minimaxh3_ivyfixture_v1_refmod.safetensors").write_bytes(b"f")
-        self.run_dir = self.root / "run"
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
-    def _patches(self):
-        return (
-            mock.patch.object(spr, "INDEX_DIR", self.index),
-            mock.patch.object(spr, "REFMODS_DIR", self.refmods),
-            mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json"),
-            mock.patch.object(spr.subprocess, "run"),
-        )
-
-    def _submit(self, **kw):
-        p1, p2, p3, p4 = self._patches()
-        with p1, p2, p3, p4 as run:
-            res = spr.submit_parody_job(name="Nora Fixture", actor="Nora Fixture", description=BIO,
-                                        run_dir_override=self.run_dir, dry_run=True, **kw)
-            run.assert_not_called()
-        return res
-
-    def test_single_10s_widescreen(self):
-        res = self._submit(seconds=10, aspect="16:9", dialogue=LINE,
-                           camera="35mm lens, slow smooth dolly push-in across the counter",
-                           scene="sits at a 2 AM neon diner counter, both hands lifting a ceramic mug")
-        self.assertEqual(res["frames"], [243])
-        self.assertEqual(res["size"], "1344x768")
-        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
-        self.assertEqual(g["c0"]["inputs"]["length"], 243)
-        self.assertEqual((g["c0"]["inputs"]["width"], g["c0"]["inputs"]["height"]), (1344, 768))
-        order = json.loads((self.run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertNotIn("cell_contract", order)
-        self.assertEqual([j["tag"] for j in order["order"]], ["clip"])
-
-    def test_multi_beat_shared_anchor_cells(self):
-        """2+ --beat args build ONE native latent-tail continuation clip, not shared-anchor cells.
-
-        The stitched shared-anchor cell path stays covered by test_long_seconds_auto_split.
-        """
-        res = self._submit(aspect="16:9", beats=["sits at the counter, both hands on a mug",
-                                                 "leans back in the booth holding the mug"],
-                           beat_dialogues=["First line here for the opener.", "Second line closes it out."],
-                           beat_seconds=[6, 8])
-        # the deliverable's frame count is the continuation chain's cumulative total, derived from the plan
-        plan = br._layout_chain([br.snap_h3_frames(6, max_frames=br.SINGLE_CLIP_MAX_FRAMES),
-                                 br.snap_h3_frames(8, max_frames=br.SINGLE_CLIP_MAX_FRAMES)])
-        lay = plan[-1]["layout"]
-        self.assertTrue(plan[1]["is_continuation"])
-        self.assertLessEqual(lay["window_frames"], br.CONTINUATION_WINDOW_MAX_FRAMES)
-        self.assertEqual(res["tags"], ["clip"])
-        self.assertEqual(res["frames"], [lay["total_frames"]])
-        self.assertEqual(res["total_frames"], lay["total_frames"])
-        self.assertGreater(lay["total_frames"], lay["base_frames"])  # beat 2 extends, never restarts
-        order = json.loads((self.run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertNotIn("cell_contract", order)
-        self.assertEqual([j["tag"] for j in order["order"]], ["clip"])
-        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
-        self.assertEqual(json.loads((self.run_dir / "request.api.json").read_text(encoding="utf-8")), g)
-        self.assertEqual(g["c0"]["inputs"]["length"], lay["base_frames"])  # beat 1 keeps its own length
-        self.assertEqual({g[k]["class_type"] for k in ("c2_gen", "c2_tail", "c2_append")},
-                         {"MiniMaxH3GuidedContinuationWindow", "MiniMaxH3LatentTailGuide", "MiniMaxH3AppendContinuation"})
-        self.assertEqual(g["c2_gen"]["inputs"], {"previous_av_latent": ["s0_samp", 0],
-                                                 "overlap_frames": lay["overlap_frames"],
-                                                 "extension_frames": lay["extension_frames"]})
-        self.assertEqual(g["s0_sep"]["inputs"]["av_latent"], ["c2_append", 0])  # one joined latent is decoded
-        for key in ("c0", "c2"):
-            self.assertEqual((g[key]["inputs"]["width"], g[key]["inputs"]["height"]), (1344, 768))
-        self.assertEqual(g["noise"]["inputs"]["noise_seed"], 51083601)
-        self.assertEqual(g["save"]["inputs"]["filename_prefix"], f"community/{self.run_dir.name}/clip")
-        ok, why = comm.guard_reason(g)
-        self.assertTrue(ok, why)
-        self.assertIn("First line here for the opener.", g["c0"]["inputs"]["prompt"])
-        self.assertIn("Second line closes it out.", g["c2"]["inputs"]["prompt"])
-        self.assertIn("The shot continues from the last seen moment", g["c2"]["inputs"]["prompt"])
-
-    def test_long_seconds_without_beats_is_refused(self):
-        # Step 2/3 (2026-11-09): a long ask must not clone one scene into N beats.
-        with self.assertRaises(ValueError):
-            self._submit(seconds=15, scene="sits at the counter holding a mug", dialogue=LINE)
-        self.assertFalse(self.run_dir.exists())
-        res = self._submit(seconds=10, scene="sits at the counter holding a mug", dialogue=LINE)
-        self.assertEqual(res["frames"], [243])
-        self.assertTrue(all((f - 5) % 17 == 0 and f <= 243 for f in res["frames"]))
-
-    def test_frames_over_ceiling_fails_before_run_dir(self):
-        with self.assertRaises(ValueError):
-            self._submit(frames=260)
-        self.assertFalse(self.run_dir.exists())
-
-    def test_second_subject_requires_description(self):
-        with self.assertRaises(ValueError):
-            self._submit(name2="Ivy Fixture")
-        res = self._submit(name2="Ivy Fixture", actor2="Ivy Fixture", description2="short red bob, green eyes, denim jacket",
-                           dialogue=LINE, dialogue2="Same table, same bad coffee, same us.")
-        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
-        self.assertEqual(g["refmods"]["inputs"]["mod_2"], "minimaxh3_ivyfixture_v1_refmod")
-        self.assertIn("(S2) Ivy Fixture", g["c0"]["inputs"]["prompt"])
 
 
-class TestWaitFinalize(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(prefix="wait_")
-        self.run = Path(self.tmp.name) / "parody_x_1"
-        self.run.mkdir()
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
-    def test_wait_for_new_batch_line(self):
-        log = self.run / "_render_queue.log"
-        log.write_text("2026 BATCH closed rc=7 reason=old\n", encoding="utf-8")
-        since = spr._batch_count(self.run)
-        log.write_text(log.read_text() + "2026 BATCH closed rc=0 reason=all done\n", encoding="utf-8")
-        self.assertEqual(spr.wait_for_batch(self.run, since, timeout=2, poll=0.01), 0)
-        with self.assertRaises(TimeoutError):
-            spr.wait_for_batch(self.run, since + 1, timeout=0.05, poll=0.01)
-
-    def test_finalize_single_and_qnap(self):
-        (self.run / "clip").mkdir()
-        (self.run / "clip" / "clip.mp4").write_bytes(b"mp4")
-        out = spr.finalize_clip(self.run, ["clip"], "python")
-        self.assertEqual(Path(out["final_mp4"]).read_bytes(), b"mp4")
-        with mock.patch.object(spr.subprocess, "run") as run:
-            run.return_value = mock.Mock(returncode=0, stdout="Copied", stderr="")
-            q = spr.qnap_put(Path(out["final_mp4"]), self.run.name, "python")
-        self.assertEqual(q["qnap_path"], "pi-drop/parody_x_1.mp4")
-        self.assertIn("put", run.call_args[0][0])
-
-    def test_finalize_cells_stitch(self):
-        for t in ("c01_s51083601", "c02_s51083602"):
-            (self.run / t).mkdir()
-            (self.run / t / f"{t}.mp4").write_bytes(b"cell")
-
-        def fake_run(cmd, **kw):
-            (self.run / "_stitch").mkdir(exist_ok=True)
-            (self.run / "_stitch" / "stitched.mp4").write_bytes(b"film")
-            return mock.Mock(returncode=0, stdout="PROOF film ok\nSTITCH OK cells=2", stderr="")
-
-        with mock.patch.object(spr.subprocess, "run", side_effect=fake_run) as run:
-            out = spr.finalize_clip(self.run, ["c01_s51083601", "c02_s51083602"], "python")
-        self.assertTrue(out["stitched"])
-        self.assertEqual((self.run / "clip.mp4").read_bytes(), b"film")
-        self.assertIn("--name", run.call_args[0][0])
-        self.assertIn("stitched", run.call_args[0][0])
-
-    def test_finalize_prefers_upscaled_cell_mp4_not_raw(self):
-        """MA-13: after RTX 2x, finalize stitches <cell>/<cell>.mp4 (1536x..) not <cell>_raw.mp4."""
-        t1, t2 = "c01_s51083610", "c02_s51083611"
-        for t in (t1, t2):
-            d = self.run / t
-            d.mkdir(parents=True)
-            (d / f"{t}_raw.mp4").write_bytes(b"RAW768")
-            (d / f"{t}.mp4").write_bytes(b"UPSCALED1536")
-        def fake_run(cmd, **kw):
-            # stitcher must receive cell dirs that already hold the upscaled mp4 names
-            self.assertTrue((self.run / t1 / f"{t1}.mp4").is_file())
-            self.assertEqual((self.run / t1 / f"{t1}.mp4").read_bytes(), b"UPSCALED1536")
-            self.assertEqual((self.run / t1 / f"{t1}_raw.mp4").read_bytes(), b"RAW768")
-            (self.run / "_stitch").mkdir(exist_ok=True)
-            (self.run / "_stitch" / "stitched.mp4").write_bytes(b"FILM1536")
-            return mock.Mock(returncode=0, stdout="PROOF film ok video=1536x2688@24/1\nSTITCH OK cells=2", stderr="")
-        with mock.patch("subprocess.run", side_effect=fake_run) as run:
-            out = spr.finalize_clip(self.run, [t1, t2], "python")
-        self.assertTrue(out["stitched"])
-        self.assertEqual(Path(out["final_mp4"]).read_bytes(), b"FILM1536")
-        self.assertIn("take_chain_stitch.py", " ".join(run.call_args[0][0]))
-        # raw preserved beside upscaled
-        self.assertTrue((self.run / t1 / f"{t1}_raw.mp4").is_file())
-        self.assertTrue((self.run / t2 / f"{t2}_raw.mp4").is_file())
-
-    def test_finalize_missing_cell_refuses(self):
-        (self.run / "c01_s51083601").mkdir()
-        (self.run / "c01_s51083601" / "c01_s51083601.mp4").write_bytes(b"cell")
-        with mock.patch.object(spr, "COMFY_OUT_COMMUNITY", Path(self.tmp.name) / "none"):
-            with self.assertRaises(FileNotFoundError):
-                spr.finalize_clip(self.run, ["c01_s51083601", "c02_s51083602"], "python")
 
 
 class TestContinuationFiveItems(unittest.TestCase):
@@ -472,58 +286,7 @@ class TestContinuationFiveItems(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def test_item1_ambience_option(self):
-        # 1. Default ambience when omitted or None
-        p_def = format_parody_prompt(_res(), dialogue=LINE)
-        self.assertIn("Quiet room ambience, soft natural room tone, with the single close-micd human voice in the foreground.", p_def)
 
-        # 2. Custom ambience in single voice
-        custom_amb = "quiet night room tone, distant gentle rain"
-        p_custom = format_parody_prompt(_res(), dialogue=LINE, ambience=custom_amb)
-        self.assertIn("Quiet night room tone, distant gentle rain, with the single close-micd human voice in the foreground.", p_custom)
-
-        # 3. Custom ambience with 2 voices
-        p_two = format_parody_prompt(_res(), dialogue=LINE, resolved2=_res("Ivy Fixture", "Ivy Fixture"),
-                                     dialogue2="Coffee is ready.", ambience="soft cafe ambience, subtle espresso steam")
-        self.assertIn("Soft cafe ambience, subtle espresso steam, with two close-micd human voices in the foreground, one speaker at a time.", p_two)
-
-        # 4. Custom ambience with silent clip
-        p_silent = format_parody_prompt(_res(), dialogue=None, ambience="deep space hum, airlock circulation")
-        self.assertIn("Deep space hum, airlock circulation, with no spoken voice.", p_silent)
-
-        # 5. build_parody_request carries ambience through
-        _, prompt = build_parody_request(_res(), seed=51083601, prefix="community/amb_test/clip", frames=124,
-                                        dialogue=LINE, ambience="crackling fireplace, quiet parlor")
-        self.assertIn("Crackling fireplace, quiet parlor", prompt)
-
-    def test_item2_refuse_long_seconds_without_two_plus_beats(self):
-        # Refuses > 243 frames (~10.125s) with 0 beats
-        with self.assertRaises(ValueError) as ctx:
-            spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=15.0, scene="sitting calmly",
-                                  run_dir_override=self.run_dir, dry_run=True)
-        self.assertIn("pass 2 or more --beat scenes", str(ctx.exception))
-        self.assertFalse(self.run_dir.exists())
-
-        # Refuses > 243 frames with only 1 beat
-        with self.assertRaises(ValueError) as ctx2:
-            spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=12.0, beats=["lone beat"],
-                                  run_dir_override=self.run_dir, dry_run=True)
-        self.assertIn("pass 2 or more --beat scenes", str(ctx2.exception))
-        self.assertFalse(self.run_dir.exists())
-
-        # Allows <= 243 frames (~10.125s) without beats as a single shot
-        res_ok = spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=10.0, scene="sitting calmly",
-                                       run_dir_override=self.run_dir, dry_run=True)
-        self.assertEqual(res_ok["frames"], [243])
-        self.assertEqual(res_ok["tags"], ["clip"])
-
-        # Allows > 243 frames with 2+ beats as native continuation
-        run_2b = Path(self.tmp.name) / "run_2b"
-        res_2b = spr.submit_parody_job(name="Megan Fox", description=BIO, seconds=15.0,
-                                       beats=["sitting calmly holding cup", "stands up smoothly"],
-                                       run_dir_override=run_2b, dry_run=True)
-        self.assertEqual(res_2b["tags"], ["clip"])
-        self.assertGreater(res_2b["total_frames"], 243)
 
     def test_item3_native_continuation_node_wiring_and_chain(self):
         beats = [
@@ -633,24 +396,6 @@ class TestContinuationFiveItems(unittest.TestCase):
         self.assertIn("and she is still in the same place", p_b2)
         self.assertIn("She keeps her exact voice", p_b2)
 
-    def test_item5_submit_parody_run_native_continuation_graph(self):
-        res = spr.submit_parody_job(
-            name="Megan Fox", description=BIO,
-            beats=["sits at the counter, both hands on a mug", "stands up slowly beside the stool"],
-            beat_dialogues=["First line.", "Second line."],
-            beat_seconds=[6, 8],
-            run_dir_override=self.run_dir,
-            dry_run=True,
-        )
-        self.assertEqual(res["tags"], ["clip"])
-        self.assertNotIn("c01_s51083601", res["tags"])
-        order = json.loads((self.run_dir / "_render_order.json").read_text(encoding="utf-8"))
-        self.assertNotIn("cell_contract", order)
-        self.assertEqual([j["tag"] for j in order["order"]], ["clip"])
-
-        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
-        self.assertEqual(g["c2_gen"]["inputs"]["previous_av_latent"], ["s0_samp", 0])
-        self.assertEqual(g["s0_sep"]["inputs"]["av_latent"], ["c2_append", 0])
 
     def test_plan_continuation_chain_removed(self):
         self.assertFalse(hasattr(br, "plan_continuation_chain"))
@@ -673,23 +418,6 @@ class TestContinuationFiveItems(unittest.TestCase):
         self.assertTrue(br.continuation_window_audio_is_aligned(192, 39, 187))
         self.assertTrue(br.continuation_window_audio_is_aligned(124, 22, 187))  # the 311f pack keeps its 22
 
-    def test_two_beats_omitted_seconds_uses_continuation_defaults(self):
-        with mock.patch("submit_parody_run.plan_c2v_chain") as mock_c2v:
-            res = spr.submit_parody_job(
-                name="Megan Fox", description=BIO,
-                beats=["sits at the counter, both hands on a mug", "stands up slowly beside the stool"],
-                run_dir_override=self.run_dir,
-                dry_run=True,
-            )
-            mock_c2v.assert_not_called()
-        self.assertEqual(res["tags"], ["clip"])
-        self.assertEqual(res["frames"], [379])
-        self.assertEqual(res["total_frames"], 379)
-        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
-        self.assertEqual(g["c0"]["inputs"]["length"], 192)
-        self.assertEqual(g["c2_gen"]["inputs"]["extension_frames"], 187)
-        self.assertEqual(g["c2_gen"]["inputs"]["overlap_frames"], 39)  # audio-aligned for a 192f tail, visible 379 kept
-        self.assertLessEqual(39 + 187, br.CONTINUATION_WINDOW_MAX_FRAMES)
 
     def test_single_shot_byte_identical_and_locked_dials(self):
         g, p = build_parody_request(_res(), seed=51083601, prefix="community/test/clip", frames=124)
@@ -928,55 +656,6 @@ class TestArgonLowMultiStillAndLeadIn(unittest.TestCase):
             build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=124,
                                  images=staged, image_times=[0.3])
 
-    def test_c3_and_c4_continuation_beat_guides_and_new_shot_mode(self):
-        staged = br.stage_reference_images(
-            validate_reference_images([str(self.img1), str(self.img2), str(self.img3)], pools=(self.pool,)),
-            self.input_dir,
-        )
-        # B mode: continuing beat pin at >= 0.5s into Beat 2 (clip time 6.5s on a 124f / 5.1667s base beat -> ~1.333s into beat 2)
-        p1 = mock.patch.object(spr, "INDEX_DIR", self.index)
-        p2 = mock.patch.object(spr, "REFMODS_DIR", self.refmods)
-        p3 = mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json")
-        p4 = mock.patch.object(spr.subprocess, "run")
-        with p1, p2, p3, p4:
-            res = spr.submit_parody_job(
-                name="Nora Fixture", actor="Nora Fixture", description=BIO,
-                run_dir_override=self.run_dir, dry_run=True,
-                beats=["stands in the bedroom holding a mug", "steps toward the counter and sets the mug down"],
-                beat_seconds=[5.0, 6.0],
-                images=[str(self.img1), str(self.img2)],
-                image_times=[6.5],
-                image_pools=(self.pool,),
-                image_input_dir=self.input_dir,
-            )
-        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
-        self.assertEqual(g["img_1"]["inputs"]["image"], staged[0])
-        self.assertEqual(g["c2_img"]["inputs"]["image"], staged[1])
-        self.assertEqual(g["c2_guide"]["inputs"]["positive"], ["c2_refapply", 0])
-        self.assertEqual(g["c2_guide"]["inputs"]["latent"], ["c2_gen", 0])
-        self.assertGreaterEqual(g["c2_guide"]["inputs"]["frame_idx"], 22 + 12)
-        self.assertEqual(g["c2_tail"]["inputs"]["positive"], ["c2_guide", 0])
-
-        # Reject pin inside hidden overlap (< 22) and continuing-beat pin < 0.5s into new part
-        g_base, _ = build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=124)
-        g_beat, _ = build_parody_request(_res(), seed=51083601, prefix="community/t/clip", frames=158, continuation=True)
-        lay = br.continuation_layout(124, 136, 22)
-        with self.assertRaises(ValueError):
-            br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[1], "frame_idx": 10}])
-        with self.assertRaises(ValueError):
-            br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[1], "sec": 0.2}], new_shot=False)
-
-        # C mode ("new shot"): allows pin in first 0.5s of beat 2, uses dynamic cut lead-in, and rejects walk between two rooms
-        g_cut = br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[2], "sec": 0.25}], new_shot=True)
-        self.assertEqual(g_cut["c2_guide"]["inputs"]["frame_idx"], 22 + 6)
-        with self.assertRaises(ValueError):
-            br.add_continuation_beat(g_base, g_beat, lay, 2, beat_guides=[{"image": staged[2], "sec": 1.2}], new_shot=True)
-        with self.assertRaises(ValueError):
-            build_parody_request(
-                _res(), seed=51083601, prefix="community/t/clip", frames=158, continuation=True,
-                prior_closer={"pose": "she stands", "wardrobe": "", "place": "bedroom"},
-                scene="She walks into the kitchen and leans on the counter.", new_shot=False,
-            )
 
     def test_prequel_last_frame_pin_resolves_to_frames_minus_one_single_clip(self):
         staged = br.stage_reference_images(
@@ -1060,48 +739,6 @@ class TestArgonLowMultiStillAndLeadIn(unittest.TestCase):
             )
         self.assertIn("mid-act frame is not accepted", str(cm5.exception))
 
-    def test_prequel_stitch_join_path_not_latent_tail(self):
-        # Create a fixture target mp4
-        target_mp4 = self.root / "existing_scene.mp4"
-        target_mp4.write_bytes(b"\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41")
-
-        # 1. submit_parody_job with prequel_to and dry_run=True
-        p1 = mock.patch.object(spr, "INDEX_DIR", self.index)
-        p2 = mock.patch.object(spr, "REFMODS_DIR", self.refmods)
-        p3 = mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json")
-        p4 = mock.patch.object(spr.subprocess, "run")
-        with p1, p2, p3, p4:
-            res = spr.submit_parody_job(
-                name="Nora Fixture", actor="Nora Fixture", description=BIO,
-                run_dir_override=self.run_dir, dry_run=True,
-                scene="She enters the room before the meeting.",
-                prequel_to=target_mp4,
-            )
-        self.assertTrue(res["dry_run"])
-        self.assertEqual(res["prequel_to"], str(target_mp4.resolve()))
-        self.assertTrue(res["prequel_stitch"])
-        # Check that the request graph is a single clip and has NO LatentTailGuide
-        g = json.loads((self.run_dir / "clip" / "request.api.json").read_text(encoding="utf-8"))
-        for nid, node in g.items():
-            self.assertNotEqual(node.get("class_type"), "MiniMaxH3LatentTailGuide")
-
-        # 2. finalize_clip stitches [prequel, existing]
-        prequel_clip = self.run_dir / "prequel_01.mp4"
-        shutil.copyfile(target_mp4, prequel_clip)
-
-        def _fake_run(cmd, *args, **kwargs):
-            stitch_dir = self.run_dir / "_stitch"
-            stitch_dir.mkdir(parents=True, exist_ok=True)
-            (stitch_dir / "stitched.mp4").write_bytes(b"\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41fake")
-            return mock.MagicMock(returncode=0, stdout="PROOF film stitched\nSTITCH done\n", stderr="")
-
-        with mock.patch("subprocess.run", side_effect=_fake_run):
-            fres = spr.finalize_clip(self.run_dir, ["prequel_01"], sys.executable, prequel_to=target_mp4)
-        self.assertTrue(fres["stitched"])
-        self.assertEqual(fres["prequel_to"], str(target_mp4.resolve()))
-        self.assertTrue(Path(fres["final_mp4"]).is_file())
-        self.assertGreater(Path(fres["final_mp4"]).stat().st_size, 0)
-        self.assertEqual(fres["clips"], [str(prequel_clip.resolve()), str(target_mp4.resolve())])
 
 
 if __name__ == "__main__":

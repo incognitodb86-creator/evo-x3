@@ -28,7 +28,6 @@ from c2v_chain import plan_c2v_chain
 from resolve import resolve_identities
 from run_record import build_assets_record, save_run_record, verify_run_artifacts
 import comm
-import submit_parody_run as spr
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -243,17 +242,6 @@ class TestParodyPhase3(unittest.TestCase):
         # Must NOT contain the other banned generic-only filler
         self.assertNotIn("natural authentic human appearance", prompt)
 
-    def test_submit_requires_description(self):
-        """submit_parody_job rejects call when description is missing."""
-        from submit_parody_run import submit_parody_job
-        with self.assertRaises(ValueError) as ctx:
-            submit_parody_job(
-                name="Emilia Clarke",
-                character="Daenerys Targaryen",
-                description=None,
-                dry_run=True,
-            )
-        self.assertIn("description", str(ctx.exception).lower())
 
 
 U1_BIO = "long dark glossy layered hair, smoky winged eyeliner, full glossy lips, cropped zip hoodie, low-rise mini skirt"
@@ -361,72 +349,6 @@ class TestU1OpenSlotsAndVoice(unittest.TestCase):
                 format_parody_prompt(r, dialogue=d)
 
 
-class TestU1SubmitGateAndSydneyFixture(unittest.TestCase):
-    """U1 (KTD3): missing-RefMod fail-closed and synthetic Sydney Sweeney request build (CPU only)."""
-
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(prefix="u1_")
-        self.root = Path(self.tmp.name)
-        self.index = self.root / "index"
-        self.index.mkdir()
-        (self.index / "INDEX_BAD.md").write_text(U1_INDEX_BAD, encoding="utf-8")
-        self.refmods = self.root / "refmods"
-        self.refmods.mkdir()
-        self.run_dir = self.root / "run"
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
-    def _patches(self):
-        return (
-            mock.patch.object(spr, "INDEX_DIR", self.index),
-            mock.patch.object(spr, "REFMODS_DIR", self.refmods),
-            mock.patch.object(spr, "ALIASES_PATH", self.root / "no-aliases.json"),
-            mock.patch.object(spr.subprocess, "run"),
-        )
-
-    def _assert_fail_closed(self, name):
-        p1, p2, p3, p4 = self._patches()
-        with p1, p2, p3, p4 as run:
-            with self.assertRaises(ValueError) as ctx:
-                spr.submit_parody_job(name=name, description=U1_BIO, run_dir_override=self.run_dir)
-            run.assert_not_called()
-        self.assertIn("refmod", str(ctx.exception).lower())
-        self.assertFalse(self.run_dir.exists())
-
-    def test_missing_refmod_index_bad_fails_closed(self):
-        self._assert_fail_closed("Nora Fixture")
-
-    def test_missing_refmod_index_none_fails_closed(self):
-        self._assert_fail_closed("Unlisted Fixture Person")
-
-    def test_sydney_synthetic_fixture_builds_valid_graph(self):
-        (self.refmods / "minimaxh3_sydneysweeney_v1_refmod.safetensors").write_bytes(b"fixture")
-        p1, p2, p3, p4 = self._patches()
-        with p1, p2, p3, p4 as run:
-            res = spr.submit_parody_job(
-                name="Sydney Sweeney",
-                actor="Sydney Sweeney",
-                description="wavy honey-blonde hair, bright blue eyes, soft round face, fitted white tank top",
-                dialogue="Relax, I always look this good before breakfast.",
-                scene="perched on a penthouse bar stool, swirling a drink",
-                run_dir_override=self.run_dir,
-                dry_run=True,
-            )
-            run.assert_not_called()
-        self.assertTrue(res["dry_run"])
-        self.assertEqual(res["resolved"]["index_status"], "bad")
-        graph = json.loads((self.run_dir / "request.api.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(graph), 20)
-        self.assertEqual((graph["c0"]["inputs"]["width"], graph["c0"]["inputs"]["height"]), (768, 1344))
-        self.assertEqual(graph["refmods"]["inputs"]["mod_1"], "minimaxh3_sydneysweeney_v1_refmod")
-        verify_keep_dials(graph)
-        ok, reason = comm.guard_reason(graph)
-        self.assertTrue(ok, reason)
-        prompt = (self.run_dir / "prompt.txt").read_text(encoding="utf-8")
-        self.assertIn("(S1) says in Sydney Sweeney's exact voice with signature vocal timbre: <d>[English] ", prompt)
-        self.assertIn("perched on a penthouse bar stool", prompt.split("detailed_description:")[1])
-        self.assertEqual(_u1_subject_block(prompt).lower().count("featuring"), 1)
 
 class TestU3LightingAndTone(unittest.TestCase):
     """U3 (R6/R7): lighting-cue gate and satire tone dedupe in format_parody_prompt."""

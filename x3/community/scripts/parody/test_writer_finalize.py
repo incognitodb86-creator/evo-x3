@@ -988,50 +988,12 @@ GOOD = (STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> 
 GOOD_ASIDE = GOOD.replace("He enters her", "She pulls her thong aside, and he enters her")
 
 
-def test_hook_not_ready_without_still_read(tmp_path):
-    import submit_parody_run as spr
-    res = spr.submit_writer_run(GOOD, _oc_graph(), tmp_path / "r1", ASK, "missionary", dry_run=True)
-    assert res["status"] == "NOT_READY" and not res["submitted"]
-    assert (tmp_path / "r1" / "clip_NOT_READY.txt").read_text().startswith("NOT_READY: no still read")
-    assert '"NOT_READY"' in (tmp_path / "r1" / "build_report.json").read_text()
-    assert not (tmp_path / "r1" / "_render_order.json").exists()
 
 
-def test_hook_allows_non_oc_refmods(tmp_path):
-    import json as _json
-    import submit_parody_run as spr
-    g0 = _oc_graph(("minimaxh3_zendaya_v1_refmod",))
-    g0["img_1"]["inputs"]["image"] = "community/generic_stage.png"
-    res = spr.submit_writer_run(GOOD_ASIDE, g0, tmp_path / "r2", ASK, "missionary",
-                                still_read=POLE_READ, still_image="community/generic_stage.png", dry_run=True)
-    assert res["status"] == "READY" and res["dry_run"] and not res["submitted"]
-    g = _json.loads((tmp_path / "r2" / "clip" / "request.api.json").read_text(encoding="utf-8"))
-    assert g["refmods"]["inputs"]["mod_1"] == "minimaxh3_zendaya_v1_refmod"
 
 
-def test_hook_refusal_retry_then_not_ready(tmp_path):
-    import submit_parody_run as spr
-    calls = []
-    res = spr.submit_writer_run(lambda: calls.append(1) or (F01_REFUSAL, 158), _oc_graph(), tmp_path / "r3", ASK, "missionary",
-                                still_read=POLE_READ, dry_run=True)
-    assert res["status"] == "NOT_READY" and len(calls) == 1 and "refusal phrase" in res["reason"]
-    calls.clear()
-    res_s = spr.submit_writer_run(lambda: calls.append(1) or (F01_REFUSAL, 158), _oc_graph(), tmp_path / "r3_strict", ASK, "missionary",
-                                  still_read=POLE_READ, dry_run=True, strict=True)
-    assert res_s["status"] == "NOT_READY" and len(calls) == 2 and "refusal phrase" in res_s["reason"]
 
 
-def test_hook_ready_dry_run_writes_prompt_and_graph(tmp_path):
-    import json as _json
-    import submit_parody_run as spr
-    res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / "r4", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png", dry_run=True)
-    assert res["status"] == "READY" and res["dry_run"] and not res["submitted"]
-    g = _json.loads((tmp_path / "r4" / "clip" / "request.api.json").read_text(encoding="utf-8"))
-    prompt = (tmp_path / "r4" / "prompt.txt").read_text(encoding="utf-8")
-    assert g["c0"]["inputs"]["prompt"] == prompt.strip() and g["img_1"]["inputs"]["image"] == "community/oc_poolblonde_stage.png"
-    assert g["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_poolblonde_v2_refmod_visual"  # graph dials untouched
-    assert "bedroom" not in prompt and "the stage floor" in prompt
 
 
 def test_dynsafe_end_framing_forms_do_not_raise_k4():
@@ -1101,16 +1063,6 @@ def test_brief4_removed_garment_needs_a_named_surface_w6():
     assert f"she took off stays on {c['garments_floor']}" in br.wardrobe_line(c, rep["state"])
 
 
-def test_hook_packed_beats_not_ready_writes_split_briefs_and_queues_nothing(tmp_path):
-    import json as _json
-    import submit_parody_run as spr
-    raw = (STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> shows. She takes off the black mesh strappy bra "
-           "top and drops it on the stage floor. She lowers onto her back on the stage floor. He enters her and thrusts deep.")
-    res = spr.submit_writer_run(raw, _oc_graph(), tmp_path / "r5", ASK, "missionary", still_read=POLE_READ, dry_run=True, strict=True)
-    assert res["status"] == "NOT_READY" and "packed beats" in res["reason"] and not res["submitted"]
-    split = _json.loads((tmp_path / "r5" / "split_briefs.json").read_text(encoding="utf-8"))["split"]
-    assert split[0].startswith("beat 1") and split[1].startswith("beat 2")
-    assert not (tmp_path / "r5" / "clip").exists() and (tmp_path / "r5" / "clip_NOT_READY.txt").exists()
 
 
 # --- oralfoley (Derrick via Prompt maker, 2026-11-11: "Yes send all revised riles"): flags / NOT_READY only --------------
@@ -1333,81 +1285,12 @@ def test_w5_credits_slides_aside_and_to_one_side():
     assert "w5_final" not in rep2 and "packed_beats" not in rep2 and "panties" in (rep2["state"].get("writer_aside") or [])
 
 
-def test_frs16_s2_hook_w5_not_ready_nothing_built(tmp_path):
-    import submit_parody_run as spr
-    res_pass = spr.submit_writer_run(GOOD, _oc_graph(), tmp_path / "w5_pass", ASK, "missionary", still_read=POLE_READ,
-                                     still_image="community/oc_poolblonde_stage.png", dry_run=True)
-    assert res_pass["status"] == "READY"
-    res = spr.submit_writer_run(GOOD, _oc_graph(), tmp_path / "w5", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png", dry_run=True, strict=True)
-    assert res["status"] == "NOT_READY" and "W5" in res["reason"] and not res["submitted"]
-    assert not (tmp_path / "w5" / "clip").exists() and (tmp_path / "w5" / "clip_NOT_READY.txt").exists()
 
 
-def test_frs16_s3_any_hook_error_is_not_ready_never_a_traceback(tmp_path, monkeypatch):
-    import submit_parody_run as spr
-    res = spr.submit_writer_run(GOOD_ASIDE, tmp_path / "missing.api.json", tmp_path / "e1", ASK, "missionary",
-                                still_read=POLE_READ, still_image="community/oc_poolblonde_stage.png", dry_run=True)
-    assert res["status"] == "NOT_READY" and "FileNotFoundError" in res["reason"] and not res["submitted"]
-    assert (tmp_path / "e1" / "clip_NOT_READY.txt").read_text().startswith("NOT_READY: hook error")
-    g = _oc_graph()
-    del g["c0"]
-    res = spr.submit_writer_run(GOOD_ASIDE, g, tmp_path / "e2", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png", dry_run=True)
-    assert res["status"] == "NOT_READY" and "KeyError" in res["reason"]
-
-    def no_pysbd(*a, **k):
-        raise ImportError("No module named 'pysbd'")
-    monkeypatch.setattr(spr.br, "build_writer_request", no_pysbd)
-    res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / "e3", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png", dry_run=True)
-    assert res["status"] == "NOT_READY" and "ImportError" in res["reason"]
-    assert '"NOT_READY"' in (tmp_path / "e3" / "build_report.json").read_text()
 
 
-@pytest.mark.skipif(sys.platform != "win32", reason="AlienPc --queue / Windows vault paths; X3 uses queue-remote.sh and has no vault.db")
-def test_frs16_s3_queue_failures_are_not_ready_with_a_mocked_queue(tmp_path, monkeypatch):
-    import subprocess as _sp
-    import submit_parody_run as spr
-    calls = []
-
-    class P:
-        def __init__(self, rc):
-            self.returncode, self.stdout, self.stderr = rc, "", ""
-
-    def fake(rc=None, exc=None):
-        def run(cmd, **k):
-            calls.append(cmd)
-            if exc:
-                raise exc
-            return P(rc)
-        return run
-    monkeypatch.setattr(spr.subprocess, "run", fake(exc=_sp.TimeoutExpired(["run_queue.py"], 180)))
-    res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / "q1", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png")
-    assert res["status"] == "NOT_READY" and "did not return within 180 s" in res["reason"] and not res["submitted"]
-    monkeypatch.setattr(spr.subprocess, "run", fake(rc=1))
-    res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / "q2", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png")
-    assert res["status"] == "NOT_READY" and "returncode 1; nothing queued" in res["reason"] and not res["submitted"]
-    monkeypatch.setattr(spr.subprocess, "run", fake(rc=0))
-    res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / "q3", ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png")
-    assert res["status"] == "READY" and res["submitted"] and (tmp_path / "q3" / "_render_order.json").exists()
-    assert not (tmp_path / "q3" / "DRY_RUN").exists() and len(calls) == 3 and "--detach" in calls[-1]
 
 
-def test_frs16_s4_dry_run_is_marked_and_has_no_render_order(tmp_path, monkeypatch):
-    import submit_parody_run as spr
-    monkeypatch.setattr(spr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("dry run queued")))
-    d = tmp_path / "dry"
-    d.mkdir()
-    (d / "_render_order.json").write_text("{}", encoding="utf-8")  # a stale order from an earlier run goes
-    res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), d, ASK, "missionary", still_read=POLE_READ,
-                                still_image="community/oc_poolblonde_stage.png", dry_run=True)
-    assert res["status"] == "READY" and res["dry_run"] and not res["submitted"]
-    assert (d / "DRY_RUN").exists() and not (d / "_render_order.json").exists()
-    assert (d / "clip" / "request.api.json").exists() and (d / "prompt.txt").exists()
 
 
 def test_frs16_s5_callable_writer_still_gets_exactly_one_retry():
@@ -1416,56 +1299,9 @@ def test_frs16_s5_callable_writer_still_gets_exactly_one_retry():
     assert raw is None and len(calls) == 2 and len(log["attempts"]) == 2
 
 
-def test_frs16_s6_missing_or_empty_still_path_is_not_ready(tmp_path):
-    import submit_parody_run as spr
-    for i, still in enumerate((None, "", "   ")):
-        res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / f"s{i}", ASK, "missionary", still_read=POLE_READ,
-                                    still_image=still, dry_run=True)
-        assert res["status"] == "NOT_READY" and "no start-still path" in res["reason"], still
-        assert not (tmp_path / f"s{i}" / "clip").exists()
 
 
 # --- argon-low Section B (2026-11-11): packed undress-plus-act with complete safe split -> ONE 2-beat continuation -------
-@pytest.mark.skipif(sys.platform != "win32", reason="AlienPc --queue / Windows vault paths; X3 uses queue-remote.sh and has no vault.db")
-def test_argonlow_packed_undress_plus_act_becomes_one_2beat_continuation(tmp_path, monkeypatch):
-    import json as _json
-    import submit_parody_run as spr
-    calls = []
-
-    class P:
-        returncode, stdout, stderr = 0, "queued", ""
-
-    monkeypatch.setattr(spr.subprocess, "run", lambda cmd, **k: calls.append(cmd) or P())
-    raw = (STAGE_HDR + "At first she stands beside the pole exactly as <Picture 1> shows. " + F02_UNDRESS +
-           " She lowers onto her back on the stage floor. He enters her and thrusts deep. "
-           "Wet slaps and her ragged moans echo across the stage floor.")
-    res = spr.submit_writer_run(
-        raw, _oc_graph(), tmp_path / "packed_ok",
-        "she takes off her lingerie and has sex with him, position: missionary",
-        "missionary", still_read=POLE_READ, still_image="community/oc_poolblonde_stage.png",
-    )
-    assert res["status"] == "READY" and res["submitted"]
-    cont = res["continuation"]
-    assert cont["mode"] == "native_latent_tail_continuation"
-    assert cont["clip_count"] == 2
-    assert cont["base_frames"] == 124 and cont["extension_frames"] == 187 and cont["total_frames"] == 311
-    # Queued once as ONE job (never two single-clip jobs)
-    assert len(calls) == 1
-    order = _json.loads((tmp_path / "packed_ok" / "_render_order.json").read_text(encoding="utf-8"))
-    assert len(order["order"]) == 1 and order["order"][0]["tag"] == "clip"
-    g = _json.loads((tmp_path / "packed_ok" / "clip" / "request.api.json").read_text(encoding="utf-8"))
-    # Start image on beat 1 only; beat 2 inherits latent tail + RefMods
-    assert g["c0"]["inputs"]["length"] == 124
-    assert g["img_1"]["inputs"]["image"] == "community/oc_poolblonde_stage.png"
-    assert "c2_gen" in g and "c2_tail" in g and "c2_append" in g and "c2_refapply" in g
-    assert g["c2_gen"]["inputs"] == {"previous_av_latent": ["s0_samp", 0], "overlap_frames": 22, "extension_frames": 187}
-    assert g["s0_sep"]["inputs"]["av_latent"] == ["c2_append", 0]
-    assert not [k for k in g if k.startswith("c2_img") or k == "c2_guide" or k.startswith("c2_guide_")]
-    # Beat 2 prompt opens already bare per R12/A.3 without restating <Picture 1> opener
-    p2 = g["c2"]["inputs"]["prompt"]
-    assert "The clip opens on <Picture 1>" not in p2
-    assert "takes off the black mesh halter top" not in p2
-    assert "took off in the previous beat stay on" in p2
 
 
 def test_argonlow_undress_beat_sizing_and_nude_still_no_undress_beat():
@@ -1731,148 +1567,13 @@ def test_step2_still_read_v2_schema_and_people_count_mismatch():
         br.make_cast(v2_3p, "missionary", "they have sex")
 
 
-def test_step4_prequel_stitch_join_and_last_frame_pin(tmp_path):
-    import submit_parody_run as spr
-    # 1. Prequel target mp4 fixture
-    target_mp4 = tmp_path / "existing_scene.mp4"
-    target_mp4.write_bytes(b"dummy_mp4_bytes")
-
-    # 2. submit_writer_run with prequel_to records prequel info and does NOT promote to latent-tail
-    base_graph = {
-        "c0": {"inputs": {"width": 768, "height": 1344, "length": 124}},
-        "refmods": {"inputs": {"mod_1": "minimaxh3_oc_poolblonde_v2"}},
-        "img_1": {"inputs": {"image": "community/still.png"}},
-    }
-    # A packed undress+act draft that would normally trigger 2-beat continuation
-    packed_raw = (
-        "detailed_description:\n"
-        "[Shot 1] The camera holds a locked medium shot. She stands by the bed and peels off the sheer panties. "
-        "She then lies on her back, and he kneels between her thighs. He thrusts into her deep and steady. "
-        'She moans "Yes."\n'
-        "diegetic sound:\nSoft breathing."
-    )
-    # With prequel_to: it must NOT convert to latent-tail
-    res = spr.submit_writer_run(
-        packed_raw, base_graph, tmp_path / "run_prequel",
-        "pool blonde prequel to existing clip", "missionary",
-        still_image="community/oc_poolblonde_still.png", still_read=BED_READ,
-        dry_run=True, prequel_to=target_mp4,
-    )
-    assert res["status"] in ("READY", "NOT_READY")
-    # Crucially, continuation mode was NOT applied because prequel_to was passed
-    assert "continuation" not in res
-    assert res.get("prequel_to") == str(target_mp4.resolve())
-
-    # 3. Missing target fails closed
-    missing_mp4 = tmp_path / "does_not_exist.mp4"
-    res_missing = spr.submit_writer_run(
-        packed_raw, base_graph, tmp_path / "run_missing",
-        "pool blonde prequel to missing", "missionary",
-        still_image="community/oc_poolblonde_still.png", still_read=BED_READ,
-        dry_run=True, prequel_to=missing_mp4,
-    )
-    assert res_missing["status"] == "NOT_READY"
-    assert "target clip to prequel not found" in res_missing["reason"]
 
 
 # --- t105u–t110u addendum tests (2026-11-11 modular builder upgrade) -------------------------------
-def test_t105u_group_sex_gt3_fails_closed(tmp_path):
-    import submit_parody_run as spr
-    gt3_asks = [
-        "gangbang with four men",
-        "wild orgy in the living room",
-        "foursome with friends",
-        "bukkake scene after the shoot",
-        "group sex with more than 3 bodies",
-    ]
-    for ask_text in gt3_asks:
-        with pytest.raises(br.WriterNotReady, match="group sex with >3 bodies"):
-            br.make_cast(BED_READ, "missionary", ask_text)
-
-        res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / f"gt3_{abs(hash(ask_text))}",
-                                    ask_text, "missionary", still_read=POLE_READ, dry_run=True)
-        assert res["status"] == "NOT_READY"
-        assert "group sex with >3 bodies" in res["reason"]
-
-    # Position itself naming >3 bodies also fails closed
-    with pytest.raises(br.WriterNotReady, match="group sex with >3 bodies"):
-        br.make_cast(BED_READ, "gangbang", "gangbang scene")
 
 
-def test_t105u_ffm_mmf_threesome_fails_closed(tmp_path):
-    import submit_parody_run as spr
-    # >3 bodies (gangbang, orgy, foursome, bukkake) still fail closed on hook and make_cast
-    gt3_asks = [
-        "gangbang on the bed",
-        "orgy in the living room",
-        "foursome with four adults",
-        "bukkake scene",
-    ]
-    for ask_text in gt3_asks:
-        with pytest.raises(br.WriterNotReady, match="group sex with >3 bodies"):
-            br.make_cast(BED_READ, "missionary", ask_text)
-
-        res = spr.submit_writer_run(GOOD_ASIDE, _oc_graph(), tmp_path / f"three_{abs(hash(ask_text))}",
-                                    ask_text, "missionary", still_read=POLE_READ, dry_run=True)
-        assert res["status"] == "NOT_READY"
-        assert "group sex with >3 bodies" in res["reason"]
-
-    # 3-person acts now build without failing
-    c_ffm = br.make_cast(BED_READ, "ffm", "two women and one man")
-    assert c_ffm["act_id"] == "ffm"
-    c_mmf = br.make_cast(BED_READ, "mmf", "two men and one woman")
-    assert c_mmf["act_id"] == "mmf" 
 
 
-def test_t105u_partner_type_non_human_and_faceless_load_only_her_refmod(tmp_path):
-    import json
-    import submit_parody_run as spr
-    # 1. Non-human partner
-    c_nh = br.make_cast(BED_READ, "missionary", "she has sex with a non-human partner", partner_type="non-human")
-    assert c_nh["partner_type"] == "non-human"
-    assert c_nh["man"] == ""
-    assert c_nh["his_clothes"] == ""
-    assert c_nh["voice_s2"] == ""
-    assert c_nh["camera_tail"] == "keeping her face in frame"
-
-    # Base graph has her RefMod in mod_1 and Adam Jensen (partner) in mod_2
-    base_g = _oc_graph(("minimaxh3_oc_poolblonde_v2_refmod_visual", "minimaxh3_adamjensen_v1_refmod"))
-    g_nh, _, _ = br.build_writer_request(base_g, GOOD, c_nh, prefix="test_nh", strict=False)
-    assert g_nh["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_poolblonde_v2_refmod_visual"
-    for i in range(2, 9):
-        assert g_nh["refmods"]["inputs"][f"mod_{i}"] == "(none)"
-
-    # End-to-end through submit_writer_run
-    res_nh = spr.submit_writer_run(GOOD_ASIDE, base_g, tmp_path / "run_nh", "she is with a non-human creature",
-                                   "missionary", still_read=POLE_READ, still_image="community/oc_poolblonde_still.png",
-                                   cast_overrides={"partner_type": "non-human"}, dry_run=True)
-    assert res_nh["status"] == "READY"
-    saved_nh = json.loads((tmp_path / "run_nh" / "clip" / "request.api.json").read_text(encoding="utf-8"))
-    assert saved_nh["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_poolblonde_v2_refmod_visual"
-    for i in range(2, 9):
-        assert saved_nh["refmods"]["inputs"][f"mod_{i}"] == "(none)"
-
-    # 2. Faceless partner
-    c_face = br.make_cast(BED_READ, "missionary", "she has sex with a faceless partner", partner_type="faceless")
-    assert c_face["partner_type"] == "faceless"
-    assert c_face["man"] == ""
-    assert c_face["his_clothes"] == ""
-    assert c_face["voice_s2"] == ""
-    assert c_face["camera_tail"] == "keeping her face in frame"
-
-    g_face, _, _ = br.build_writer_request(base_g, GOOD, c_face, prefix="test_face", strict=False)
-    assert g_face["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_poolblonde_v2_refmod_visual"
-    for i in range(2, 9):
-        assert g_face["refmods"]["inputs"][f"mod_{i}"] == "(none)"
-
-    res_face = spr.submit_writer_run(GOOD_ASIDE, base_g, tmp_path / "run_face", "she is with a faceless partner",
-                                     "missionary", still_read=POLE_READ, still_image="community/oc_poolblonde_still.png",
-                                     cast_overrides={"partner_type": "faceless"}, dry_run=True)
-    assert res_face["status"] == "READY"
-    saved_face = json.loads((tmp_path / "run_face" / "clip" / "request.api.json").read_text(encoding="utf-8"))
-    assert saved_face["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_poolblonde_v2_refmod_visual"
-    for i in range(2, 9):
-        assert saved_face["refmods"]["inputs"][f"mod_{i}"] == "(none)"
 
 
 def test_t105u_settings_roles_races_pass_through_no_new_modules():

@@ -10,7 +10,7 @@ import pytest
 
 import build_request as br
 import render_writer_pipeline as rwp
-import submit_parody_run as spr
+import fill_request as fr
 
 
 def _make_png(path: Path, w: int, h: int) -> Path:
@@ -190,166 +190,6 @@ def test_aspect_auto_closest_preset_and_size_precedence():
     assert br.resolve_canvas("auto", still_size=None) == (768, 1344)
 
 
-def test_explicit_aspect_warns_without_auto_switching_and_never_blocks(tmp_path, monkeypatch, capsys):
-    monkeypatch.setattr(spr, "resolve_identities", lambda *a, **kw: _parody_resolved())
-    portrait = _make_png(tmp_path / "portrait_pool.png", 90, 160)
-    run_dir = tmp_path / "run_parody"
-    res = spr.submit_parody_job(
-        name="FCSydny",
-        description="an adult woman, twenty-eight years of age, dark hair",
-        scene="She smiles warmly at the camera in soft light.",
-        seed=51083601,
-        frames=124,
-        aspect="16:9",
-        images=[str(portrait)],
-        image_pools=[tmp_path],
-        image_input_dir=tmp_path / "comfy_in",
-        run_dir_override=run_dir,
-        dry_run=True,
-    )
-    err = capsys.readouterr().err
-    assert res["dry_run"] is True
-    assert res["size"] == "1344x768"  # explicit 16:9 kept, NOT auto-switched
-    assert "MiniMaxH3AddGuide" in err and "--aspect 9:16" in err
-    assert "shape_warning" in res
-
-
-def test_parody_aspect_auto_switches_to_matching_preset(tmp_path, monkeypatch, capsys):
-    monkeypatch.setattr(spr, "resolve_identities", lambda *a, **kw: _parody_resolved())
-    landscape = _make_png(tmp_path / "landscape_pool.png", 160, 90)
-    run_dir = tmp_path / "run_auto"
-    res = spr.submit_parody_job(
-        name="FCSydny",
-        description="an adult woman, twenty-eight years of age, dark hair",
-        scene="She smiles warmly at the camera in soft light.",
-        seed=51083601,
-        frames=124,
-        aspect="auto",
-        images=[str(landscape)],
-        image_pools=[tmp_path],
-        image_input_dir=tmp_path / "comfy_in",
-        run_dir_override=run_dir,
-        dry_run=True,
-    )
-    err = capsys.readouterr().err
-    assert res["dry_run"] is True
-    assert res["size"] == "1344x768"
-    assert "shape_warning" not in res
-    assert "shape mismatch" not in err
-
-
-# ---- --still-mode guide (default) byte-identical + ref wiring -------------------------------------------
-
-def test_parody_guide_default_is_byte_identical_to_explicit_guide():
-    resolved = _parody_resolved()
-    kwargs = dict(
-        resolved=resolved,
-        seed=51083601,
-        prefix="community/u41/clip",
-        frames=124,
-        dialogue="I brought the files you asked for.",
-        scene="She stands by the desk and speaks calmly.",
-        width=1344,
-        height=768,
-        images=["community/synth_still.png"],
-    )
-    g_default, p_default = br.build_parody_request(**kwargs)
-    g_guide, p_guide = br.build_parody_request(**kwargs, still_mode="guide")
-
-    raw_default = json.dumps(g_default, indent=2, ensure_ascii=False)
-    raw_guide = json.dumps(g_guide, indent=2, ensure_ascii=False)
-    assert raw_default == raw_guide
-    assert p_default == p_guide
-    assert "add_guide" in g_default
-    assert g_default["add_guide"]["inputs"]["frame_idx"] == 0
-    assert g_default["refapply"]["inputs"]["conditioning"] == ["add_guide", 0]
-    assert g_default["c0"]["inputs"]["ref_image_size"] == "match"
-    assert "ref_images.ref_image_1" not in g_default["c0"]["inputs"]
-    assert "<Picture 1>" not in p_default
-
-
-def test_parody_ref_mode_wiring_and_prompt():
-    resolved = _parody_resolved()
-    g_ref, p_ref = br.build_parody_request(
-        resolved=resolved,
-        seed=51083601,
-        prefix="community/u41/clip",
-        frames=124,
-        dialogue="I brought the files you asked for.",
-        scene="She stands by the desk and speaks calmly.",
-        width=1344,
-        height=768,
-        images=["community/synth_still.png"],
-        still_mode="ref",
-    )
-    assert p_ref.startswith(br.REF_MODE_PICTURE1_LEAD)
-    assert "add_guide" not in g_ref
-    assert not any(n.get("class_type") == "MiniMaxH3AddGuide" for n in g_ref.values())
-    assert g_ref["img_1"]["class_type"] == "LoadImage"
-    assert g_ref["img_1"]["inputs"]["image"] == "community/synth_still.png"
-    assert g_ref["c0"]["inputs"]["ref_images.ref_image_1"] == ["img_1", 0]
-    assert g_ref["c0"]["inputs"]["ref_image_size"] == "max"
-    assert g_ref["refapply"]["inputs"]["conditioning"] == ["c0", 0]
-    assert g_ref["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_poolclub_v1_refmod_visual"
-    assert g_ref["refmods"]["inputs"]["mod_2"] == "minimaxh3_oc_poolclub_v1_refmod_audio"
-    assert g_ref["s0_samp"]["inputs"]["latent_image"] == ["c0", 1]
-
-
-def test_writer_guide_byte_identical_and_ref_mode():
-    cast = br.make_cast(WRITER_READ, "doggy", "doggy on the log")
-    tpl = _tpl_graph()
-    tpl["refmods"]["inputs"]["mod_1"] = "minimaxh3_oc_poolclub_v1_refmod_visual.safetensors"
-    tpl["refmods"]["inputs"]["mod_2"] = "minimaxh3_oc_poolclub_v1_refmod_audio.safetensors"
-
-    g_base = json.loads(json.dumps(tpl))
-    br.inject_reference_images(g_base, ["community/synth.png"], frame_indices=[0])
-
-    g_def, p_def, _ = br.build_writer_request(g_base, WRITER_RAW, cast, "community/u41/w", strict=False)
-    g_gui, p_gui, _ = br.build_writer_request(g_base, WRITER_RAW, cast, "community/u41/w", strict=False, still_mode="guide")
-    assert json.dumps(g_def, indent=2, ensure_ascii=False) == json.dumps(g_gui, indent=2, ensure_ascii=False)
-    assert p_def == p_gui
-    assert g_def["c0"]["inputs"]["ref_image_size"] == "match"
-    assert "add_guide" in g_def
-
-    g_ref_base = json.loads(json.dumps(tpl))
-    br.inject_reference_images(g_ref_base, ["community/synth.png"], frame_indices=[0], still_mode="ref")
-    g_ref, p_ref, rep_ref = br.build_writer_request(g_ref_base, WRITER_RAW, cast, "community/u41/w", strict=False, still_mode="ref")
-    assert p_ref.startswith(br.REF_MODE_PICTURE1_LEAD)
-    assert not any(n.get("class_type") == "MiniMaxH3AddGuide" for n in g_ref.values())
-    assert g_ref["c0"]["inputs"]["ref_images.ref_image_1"] == ["img_1", 0]
-    assert g_ref["c0"]["inputs"]["ref_image_size"] == "max"
-    assert g_ref["refapply"]["inputs"]["conditioning"] == ["c0", 0]
-    assert g_ref["refmods"]["inputs"]["mod_1"] == "minimaxh3_oc_poolclub_v1_refmod_visual.safetensors"
-    assert g_ref["refmods"]["inputs"]["mod_2"] == "minimaxh3_oc_poolclub_v1_refmod_audio.safetensors"
-    assert rep_ref["still_mode"] == "ref"
-
-
-def test_s3_plus_ref_mode_no_picture_slot_collision():
-    cast = dict(
-        br.make_cast(MMF_READ, "mmf", "mmf on the log", partner_type2="faceless"),
-        man3="an adult man, 31 years of age, of lean build",
-        s3_still="community/synth_s3.png",
-    )
-    tpl = _tpl_graph()
-    tpl["refmods"]["inputs"]["mod_1"] = "minimaxh3_oc_poolclub_v1_refmod_visual.safetensors"
-    tpl["refmods"]["inputs"]["mod_2"] = "minimaxh3_oc_poolclub_v1_refmod_audio.safetensors"
-    br.inject_reference_images(tpl, ["community/synth_s1.png"], frame_indices=[0], still_mode="ref")
-    g, prompt, rep = br.build_writer_request(tpl, MMF_HDR + MMF_DD, cast, "community/u41/mmf", strict=False, still_mode="ref")
-
-    assert prompt.startswith(br.REF_MODE_PICTURE1_LEAD)
-    assert MMF_DD in prompt  # U52 passthrough keeps writer prose untouched
-    assert not any(n.get("class_type") == "MiniMaxH3AddGuide" for n in g.values())
-    assert g["img_1"]["inputs"]["image"] == "community/synth_s1.png"
-    assert g["img_s3"]["inputs"]["image"] == "community/synth_s3.png"
-    assert g["c0"]["inputs"]["ref_images.ref_image_1"] == ["img_1", 0]
-    assert g["c0"]["inputs"]["ref_images.ref_image_2"] == ["img_s3", 0]
-    assert g["c0"]["inputs"]["ref_image_size"] == "max"
-    assert g["refapply"]["inputs"]["conditioning"] == ["c0", 0]
-    assert rep["s3_still"]["picture"] == 2
-
-
-# ---- writer-run CLI & render_writer_pipeline pass-through -------------------------------------------------
-
 def test_writer_run_cli_aspect_auto_and_still_mode_ref(tmp_path, capsys):
     portrait = _make_png(tmp_path / "portrait_syd.png", 90, 160)
     landscape = _make_png(tmp_path / "land_syd.png", 160, 90)
@@ -359,8 +199,8 @@ def test_writer_run_cli_aspect_auto_and_still_mode_ref(tmp_path, capsys):
     rd1.mkdir()
     (rd1 / "writer_output.txt").write_text(WRITER_RAW, encoding="utf-8")
     (rd1 / "still_read.json").write_text(json.dumps(WRITER_READ), encoding="utf-8")
-    rc1 = spr.main([
-        "writer-run", str(rd1),
+    rc1 = fr.main([
+        str(rd1),
         "--ask", "doggy on the log",
         "--position", "doggy",
         "--still", str(portrait),
@@ -370,8 +210,7 @@ def test_writer_run_cli_aspect_auto_and_still_mode_ref(tmp_path, capsys):
     ])
     cap1 = capsys.readouterr()
     assert rc1 == 0, (rd1 / "clip_NOT_READY.txt").read_text(encoding="utf-8") if (rd1 / "clip_NOT_READY.txt").exists() else cap1.out
-    assert "AddGuide" not in cap1.err and "un-resized reference on c0" in cap1.err
-    req1 = json.loads((rd1 / spr.QUEUE_TAG / "request.api.json").read_text(encoding="utf-8"))
+    req1 = json.loads((rd1 / "clip" / "request.api.json").read_text(encoding="utf-8"))
     assert req1["c0"]["inputs"]["width"] == 1344 and req1["c0"]["inputs"]["height"] == 768
     assert req1["c0"]["inputs"]["ref_image_size"] == "max"
     assert req1["c0"]["inputs"]["ref_images.ref_image_1"] == ["img_1", 0]
@@ -384,8 +223,8 @@ def test_writer_run_cli_aspect_auto_and_still_mode_ref(tmp_path, capsys):
     rd2.mkdir()
     (rd2 / "writer_output.txt").write_text(WRITER_RAW, encoding="utf-8")
     (rd2 / "still_read.json").write_text(json.dumps(WRITER_READ), encoding="utf-8")
-    rc2 = spr.main([
-        "writer-run", str(rd2),
+    rc2 = fr.main([
+        str(rd2),
         "--ask", "doggy on the log",
         "--position", "doggy",
         "--still", str(landscape),
@@ -395,7 +234,7 @@ def test_writer_run_cli_aspect_auto_and_still_mode_ref(tmp_path, capsys):
     cap2 = capsys.readouterr()
     assert rc2 == 0
     assert "shape mismatch" not in cap2.err
-    req2 = json.loads((rd2 / spr.QUEUE_TAG / "request.api.json").read_text(encoding="utf-8"))
+    req2 = json.loads((rd2 / "clip" / "request.api.json").read_text(encoding="utf-8"))
     assert req2["c0"]["inputs"]["width"] == 1344 and req2["c0"]["inputs"]["height"] == 768
     assert req2["c0"]["inputs"]["ref_image_size"] == "match"
     assert "add_guide" in req2

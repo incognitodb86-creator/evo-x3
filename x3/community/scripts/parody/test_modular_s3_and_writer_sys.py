@@ -11,7 +11,6 @@ import re
 import pytest
 
 import build_request as br
-import submit_parody_run as spr
 from writer_sys import (
     assert_writer_system_prompt,
     build_writer_system_prompt,
@@ -283,15 +282,6 @@ def test_r12_subject_3_is_never_used_as_place():
     assert "<Subject 3>" not in c["still"]
 
 
-def test_r13_prequel_last_frame_pin():
-    """R13: Prequel last-frame pin adds second guide at frame_idx -1 (resolved to frames - 1), start still not named <Picture 2>."""
-    # prequel_to target validation in submit_writer_run
-    res = spr.submit_writer_run("raw output", _dummy_refmod_graph(1), Path("dummy_run"),
-                                "brief", "missionary", prequel_to="non_existent_file.mp4")
-    assert res["status"] == "NOT_READY"
-    assert "target clip to prequel not found" in res["reason"]
-
-
 def test_r14_dials_sampler_lock_unchanged_age_floor_18_plus():
     """R14: Dials/sampler/lock unchanged, age floor 18+."""
     import comm
@@ -468,7 +458,7 @@ def test_flash_issues_1_3_4():
 
 
 def test_part4_pixlstash_stills_vault_and_voice_ref_attach():
-    import submit_parody_run as spr
+    import resolve as spr
     vaults = [p.as_posix().lower() for p in spr._PIXLSTASH_VAULTS]
     assert len(vaults) == 1
     assert vaults[0].endswith("5slock/libraries/vault.db")
@@ -478,11 +468,10 @@ def test_part4_pixlstash_stills_vault_and_voice_ref_attach():
     stems = res.get("stems") or []
     assert "minimaxh3_oc_poolclub_v1_refmod_audio" in stems
     assert "minimaxh3_oc_poolclub_v1_refmod_visual" in stems
-    assert spr._writer_refmods_ok({"refmods": {"inputs": {"mod_1": "some_non_oc_refmod"}}}) == []
 
 
 def test_part4_all_refmods_and_pixlstash_celebrity_tag(monkeypatch):
-    import submit_parody_run as spr
+    import resolve as spr
     z = spr.resolve_writer_refmods(character="Zendaya")
     assert not z.get("reason"), z
     assert any("zendaya" in x for x in (z.get("stems") or []))
@@ -520,59 +509,5 @@ def test_contact_regex_and_prompt_compiler_77_rules():
     fails = [(r["id"], chk.check(r, compiled, lines, ratio)) for r in rules_data["rules"]
              if r.get("severity") != "retired" and chk.check(r, compiled, lines, ratio)[0] != "PASS"]
     assert fails == [], fails
-
-
-def test_submit_writer_run_male_solo_strips_dress_and_woman_voice(tmp_path):
-    import submit_parody_run as spr
-    sr = {
-        "read": {
-            "room": "high-rise apartment",
-            "place": "by a window",
-            "surface": "wooden sideboard",
-            "bed": False,
-            "floor": "the floor",
-            "pose": "leaning, standing",
-            "facing_camera": True,
-            "framing": "medium shot",
-            "light": "soft evening light from window",
-            "people": 1,
-            "garments": [{"type": "dress", "name": "sheer white halter dress", "look": "white"}],
-            "build": "curvy",
-            "skin": "fair",
-            "hair": "blonde",
-        }
-    }
-    raw = (
-        "subject_definitions:\n"
-        "<Picture 1> defines the high-rise apartment, its soft evening light and framing.\n"
-        "<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1).\n\n"
-        "summary:\n(S1) edges beside the sideboard.\n\n"
-        "retention_analysis:\n<Picture 1>: fully_preserved - high-rise apartment, wooden sideboard, floor, light and framing.\n\n"
-        "detailed_description:\n"
-        "[Shot 1] The camera is a fixed medium shot at chest height in soft evening light. "
-        "At first, (S1) leans beside the wooden sideboard on his feet, by the window. "
-        "As it builds, his lounge pants sit down at mid-thigh, and PRIMARY MOTION - he grips his shaft and edges with steady slow strokes at one cycle per second, his breath hitching. "
-        "(S1) says, <d>[English] Too close.</d> "
-        "By the end, he holds his grip beside the sideboard, still stroking steadily with a soft gasp.\n"
-    )
-    g0 = {
-        "c0": {"inputs": {"prompt": "", "length": 243, "width": 768, "height": 1344}},
-        "noise": {"inputs": {"noise_seed": 0}},
-        "save": {"inputs": {"filename_prefix": ""}},
-        "refmods": {"inputs": {f"mod_{i}": ("minimaxh3_oc_poolclub_v1_refmod_visual" if i == 1 else "(none)") for i in range(1, 9)}},
-        "img_1": {"inputs": {"image": "community/POOL_F034.jpg"}},
-    }
-    res = spr.submit_writer_run(
-        raw, g0, tmp_path / "ms1", "male solo edging", "male_solo",
-        still_read=sr, still_image="community/POOL_F034.jpg", dry_run=True,
-    )
-    assert res["status"] == "READY", res
-    ptxt = (tmp_path / "ms1" / "prompt.txt").read_text(encoding="utf-8")
-    low = ptxt.lower()
-    assert "sheer white halter dress" not in low
-    assert "woman's voice" not in low
-    assert "too close." in low  # U52: writer text passes through verbatim
-    cast_written = json.loads((tmp_path / "ms1" / "cast.json").read_text(encoding="utf-8"))
-    assert "man's voice" in (cast_written.get("voice_s1") or "").lower()
 
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 DEFAULT_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "5slock" / "approved_characters"
 RENDER_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "render" / "stills" / "approved_characters"
@@ -441,3 +441,442 @@ def resolve_identities(
         "dropped_refmods": [str(m[0]) for m in dropped_refmods],
         "stills": validated_stills,
     }
+
+
+# --- OC / INDEX / PixlStash RefMod picker (moved from submit_parody_run.py in U55) ---
+_PARODY_DIR = Path(__file__).resolve().parent
+_AI_ROOT = _PARODY_DIR.parents[2]
+INDEX_DIR = _AI_ROOT / "community" / "index" / "h3-known-characters"
+REFMODS_DIR = _AI_ROOT / "comfy-alienpc" / "models" / "refmods"
+ALIASES_PATH = _PARODY_DIR / "aliases.json"
+_CONTINUATION_VOICE_SUFFIX = "_23s"
+def _mod_stem(value: str) -> str:
+    v = Path(str(value)).name
+    return v[:-12] if v.lower().endswith(".safetensors") else v
+
+
+
+_OC_KEY_RE = re.compile(r"(?i)minimaxh3_oc_([^_]+)_")
+_OC_VER_RE = re.compile(r"(?i)_v(\d+)_")
+
+
+def _keep_highest_oc_version(stems: Sequence[str]) -> List[str]:
+    """When multiple versions (v1, v2) of the same OC key appear in stems, keep only the highest version.
+
+    A voice RefMod trimmed to fit a continuation beat's cond_audio cap (`<name>_23s`,
+    build_request.CONTINUATION_VOICE_REFMOD_SUFFIX) is a DERIVED copy of a reference that exists in full form:
+    build_request._continuation_voice_refmods wires it on one continuation beat from that beat's own layout.
+    It is never a character's voice reference for a base beat - two audio RefMods there pack
+    2*(1000+920)=3840 rows against the 2000 a voice reference carries, the over-cap family of the live c2_samp
+    failure (2026-11-15, [2000,32] vs [2130,32]). So a trim is dropped exactly when the file it was cut from is
+    in the same list; a list with only a trim keeps it (a character whose full reference is not installed).
+    """
+    max_ver: Dict[str, int] = {}
+    for s in stems:
+        m = _OC_KEY_RE.search(s)
+        if m:
+            vm = _OC_VER_RE.search(s)
+            ver = int(vm.group(1)) if vm else 0
+            k = m.group(1).lower()
+            if ver > max_ver.get(k, -1):
+                max_ver[k] = ver
+    out: List[str] = []
+    for s in stems:
+        m = _OC_KEY_RE.search(s)
+        if m:
+            vm = _OC_VER_RE.search(s)
+            ver = int(vm.group(1)) if vm else 0
+            k = m.group(1).lower()
+            if ver < max_ver.get(k, 0):
+                continue
+        out.append(s)
+    trim = _CONTINUATION_VOICE_SUFFIX
+    drop = {s for s in out if str(s).endswith(trim) and str(s)[: -len(trim)] in out}
+    return [s for s in out if s not in drop]
+
+
+def installed_oc_refmod_keys(refmods_dir: Optional[Path] = None) -> Dict[str, List[str]]:
+    """Map oc_* keys (poolclub, poolblonde) to installed RefMod stems (highest v<N> pair per key)."""
+    d = Path(refmods_dir or REFMODS_DIR)
+    keys: Dict[str, List[str]] = {}
+    if not d.is_dir():
+        return keys
+    for f in sorted(d.glob("*.safetensors")):
+        m = _OC_KEY_RE.search(f.stem)
+        if m:
+            keys.setdefault(m.group(1).lower(), []).append(f.stem)
+    for k, stems in list(keys.items()):
+        keys[k] = _keep_highest_oc_version(stems)
+    return keys
+
+
+def oc_keys_in_text(*parts: Optional[str]) -> List[str]:
+    blob = " ".join(p for p in parts if p).replace("\\", "/").lower()
+    if not blob:
+        return []
+    found: List[str] = []
+    for k in installed_oc_refmod_keys():
+        token = r"(?:^|[/_\s-])%s(?:[/_\s-]|$)"
+        if re.search(r"(?i)" + (token % ("oc[_-]?" + re.escape(k))), blob) or re.search(
+            r"(?i)" + (token % re.escape(k)), blob
+        ):
+            found.append(k)
+    return found
+
+
+
+# Exact path components (case-insensitive) that resolve to an OC key.
+# Not substring matches. Do not alias SYDNEY or ORC_POOL_EDGE.
+_OC_PATH_COMPONENT_ALIASES = {
+    "pool": "poolclub",  # approved_characters\POOL -> trained trigger FCSydny
+    "fcmegan": "meganfox",  # approved_characters\FCMegan -> minimaxh3_meganfox_v1_refmod
+}
+
+_PIXLSTASH_VAULTS = (
+    _AI_ROOT / "5slock" / "libraries" / "vault.db",
+)
+_STILL_LIBRARY_ROOTS = (
+    _AI_ROOT / "render" / "stills" / "approved_characters",
+    _AI_ROOT / "5slock" / "libraries",
+)
+
+
+def _norm_fs(path: Optional[str]) -> str:
+    return str(path or "").replace("\\", "/").lower()
+
+
+def _still_path_parts(still_image: Optional[str]) -> List[str]:
+    if not still_image:
+        return []
+    rel = _norm_fs(still_image)
+    for root in _STILL_LIBRARY_ROOTS:
+        prefix = _norm_fs(str(root)).rstrip("/") + "/"
+        if rel.startswith(prefix):
+            rel = rel[len(prefix):]
+            break
+    return [p for p in rel.split("/") if p]
+
+
+def _safetensors_metadata(path: Path) -> Dict[str, Any]:
+    """Read the safetensors JSON header only (no tensor load)."""
+    try:
+        with path.open("rb") as f:
+            n = int.from_bytes(f.read(8), "little")
+            if n <= 0 or n > 4_000_000:
+                return {}
+            raw = f.read(n)
+        header = json.loads(raw.decode("utf-8"))
+        meta = header.get("__metadata__") or {}
+        if not isinstance(meta, dict):
+            return {}
+        out: Dict[str, Any] = {}
+        for k, v in meta.items():
+            if isinstance(v, str):
+                try:
+                    out[k] = json.loads(v)
+                except Exception:
+                    out[k] = v
+            else:
+                out[k] = v
+        return out
+    except Exception:
+        return {}
+
+
+def trained_oc_subject_keys(refmods_dir: Optional[Path] = None) -> Dict[str, str]:
+    """Map a normalized trained subject_name (e.g. fcsydny) to an OC key (poolclub).
+
+    Prefers top-level subject_name over nested refmod_meta.subject_name.
+    """
+    d = Path(refmods_dir or REFMODS_DIR)
+    mapping: Dict[str, str] = {}
+    if not d.is_dir():
+        return mapping
+    for f in d.glob("minimaxh3_oc_*_refmod_visual.safetensors"):
+        m = _OC_KEY_RE.search(f.stem)
+        if not m:
+            continue
+        key = m.group(1).lower()
+        meta = _safetensors_metadata(f)
+        top = meta.get("subject_name")
+        if not isinstance(top, str):
+            top = ""
+        nested = ""
+        rm = meta.get("refmod_meta")
+        if isinstance(rm, dict):
+            nested = rm.get("subject_name") or ""
+        if not isinstance(nested, str):
+            nested = ""
+        subject = (top.strip() or nested.strip())
+        if subject:
+            mapping[_norm_ident(subject)] = key
+    return mapping
+
+
+def oc_keys_from_path_components(still_image: Optional[str]) -> List[str]:
+    found: List[str] = []
+    for part in _still_path_parts(still_image):
+        alias = _OC_PATH_COMPONENT_ALIASES.get(part.lower())
+        if alias and alias not in found:
+            found.append(alias)
+    return found
+
+
+def pixlstash_character_names_for_still(still_image: Optional[str]) -> List[str]:
+    """PixlStash character names tagged on this still. Empty if the vault is missing."""
+    if not still_image:
+        return []
+    rel = "/".join(_still_path_parts(still_image))
+    candidates = {_norm_fs(still_image)}
+    try:
+        resolved = Path(still_image)
+        if resolved.exists():
+            candidates.add(_norm_fs(str(resolved.resolve())))
+    except Exception:
+        pass
+    if rel:
+        for root in _STILL_LIBRARY_ROOTS:
+            candidates.add(_norm_fs(str(root / rel)))
+        candidates.add(_norm_fs(rel))
+    names: List[str] = []
+    import sqlite3
+    for vault in _PIXLSTASH_VAULTS:
+        if not vault.is_file():
+            continue
+        try:
+            con = sqlite3.connect("file:%s?mode=ro" % vault.as_posix(), uri=True)
+            cur = con.cursor()
+            rows = cur.execute(
+                """
+                SELECT c.name, p.file_path
+                FROM face f
+                JOIN character c ON c.id = f.character_id
+                JOIN picture p ON p.id = f.picture_id
+                WHERE f.character_id IS NOT NULL
+                """
+            ).fetchall()
+            con.close()
+        except Exception:
+            continue
+        for name, fpath in rows:
+            if not name:
+                continue
+            fp = _norm_fs(fpath)
+            if fp in candidates or (rel and (fp.endswith("/" + rel.lower()) or fp == rel.lower())):
+                if name not in names:
+                    names.append(name)
+        if names:
+            return names
+    return names
+
+
+def oc_keys_from_trained_subjects(*names: Optional[str]) -> List[str]:
+    mapping = trained_oc_subject_keys()
+    if not mapping:
+        return []
+    found: List[str] = []
+    for name in names:
+        if not name:
+            continue
+        key = mapping.get(_norm_ident(name))
+        if key and key not in found:
+            found.append(key)
+    return found
+
+
+def oc_keys_for_still_and_names(still_image: Optional[str] = None, *name_parts: Optional[str]) -> List[str]:
+    """OC keys from path tokens, the POOL folder alias, trained triggers, and PixlStash tags."""
+    found: List[str] = []
+
+    def add(keys: List[str]) -> None:
+        for k in keys:
+            if k and k not in found:
+                found.append(k)
+
+    add(oc_keys_in_text(still_image, *name_parts))
+    add(oc_keys_from_path_components(still_image))
+    add(oc_keys_from_trained_subjects(*name_parts))
+    mapping = trained_oc_subject_keys()
+    if mapping:
+        for part in _still_path_parts(still_image):
+            for token in (part, Path(part).stem):
+                key = mapping.get(_norm_ident(token))
+                if key and key not in found:
+                    found.append(key)
+    add(oc_keys_from_trained_subjects(*pixlstash_character_names_for_still(still_image)))
+    return found
+
+
+def _is_writer_lane_refmod(stem: str) -> bool:
+    return bool(_mod_stem(stem))
+
+
+def _stems_for_character_name(name: str) -> List[str]:
+    if not (name or "").strip():
+        return []
+    norm_q = re.sub(r"[^a-z0-9]", "", name.lower())
+    files = (find_refmods_for_name(norm_q, REFMODS_DIR) or []) if norm_q else []
+    if not files and norm_q:
+        alias_target = _OC_PATH_COMPONENT_ALIASES.get(norm_q) or (load_aliases(ALIASES_PATH) or {}).get(norm_q)
+        if alias_target:
+            alias_norm = re.sub(r"[^a-z0-9]", "", alias_target.lower())
+            files = (find_refmods_for_name(alias_norm, REFMODS_DIR) or []) if alias_norm else []
+    stems = [_mod_stem(getattr(f, "stem", f)) for f in files]
+    key = trained_oc_subject_keys().get(_norm_ident(name))
+    if key:
+        for s in installed_oc_refmod_keys().get(key, []):
+            if s not in stems:
+                stems.append(s)
+    return _keep_highest_oc_version(stems)
+
+
+
+def _norm_ident(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+
+def _name_matches_field(name: str, field: str) -> bool:
+    n, f = _norm_ident(name), _norm_ident(field)
+    if not n or not f:
+        return False
+    if n == f:
+        return True
+    # Token match, but skip short fragments ("the", "of").
+    return n in f.split() and len(n) >= 4
+
+
+def index_named_identity(name: Optional[str]) -> bool:
+    """True when the name is a character INDEX or aliases entry, not an installed OC key."""
+    if not (name or "").strip():
+        return False
+    n = _norm_ident(name)
+    if n in installed_oc_refmod_keys() or n in trained_oc_subject_keys():
+        return False
+    try:
+        aliases = load_aliases(ALIASES_PATH) or {}
+        for k, v in aliases.items():
+            if _name_matches_field(n, k) or _name_matches_field(n, v):
+                return True
+        for row in load_index_files(INDEX_DIR) or []:
+            if _name_matches_field(n, str(row.get("character") or "")) or _name_matches_field(n, str(row.get("actor") or "")):
+                return True
+    except Exception:
+        return False
+    return False
+
+
+def resolve_writer_refmods(
+    still_image: Optional[str] = None,
+    character: Optional[str] = None,
+    names: Optional[Sequence[str]] = None,
+) -> Dict[str, Any]:
+    """Pick installed visual/audio RefMods for the writer hook across OC, INDEX, and PixlStash tags.
+
+    Uses aliases + INDEX + local RefMod files (all adult RefMods and voice refs allowed), trained
+    RefMod triggers (e.g. FCSydny), PixlStash character tags, or approved POOL path components.
+    Never guesses a likeness from a bare still filename, and never reuses the previous run's RefMods.
+    Stills are not passed to validate_stills (writer stills may live outside approved_characters).
+    """
+    out: Dict[str, Any] = {"stems": [], "source": None, "reason": None, "index": None, "trigger": None}
+    char = (character or "").strip() or None
+    name_list = [n for n in (list(names) if names else []) if str(n).strip()]
+
+    def _oc_trigger(stems: Sequence[str]) -> Optional[str]:
+        """The trained RefMod trigger word (e.g. FCSydny) of the visual RefMod just attached, from its own
+        safetensors subject_name. Only for minimaxh3_oc_* files; None for INDEX/celebrity RefMods."""
+        d = Path(REFMODS_DIR)
+        for s in stems:
+            stem = _mod_stem(str(s))
+            if not re.search(r"(?i)^minimaxh3_oc_", stem):
+                continue
+            f = d / (stem + ".safetensors")
+            if not f.is_file():
+                continue
+            subj = _safetensors_metadata(f).get("subject_name")
+            if isinstance(subj, str) and subj.strip():
+                return subj.strip()
+        return None
+
+    def _resolve_names(targets: Sequence[str]) -> List[str]:
+        found: List[str] = []
+        seen: set = set()
+        for n in targets:
+            for s in _stems_for_character_name(str(n)):
+                if _is_writer_lane_refmod(s) and s not in seen:
+                    seen.add(s)
+                    found.append(s)
+        try:
+            tlist = [str(n).strip() for n in targets if str(n).strip()]
+            req = {
+                "names": tlist,
+                "character": tlist[0] if tlist else "",
+                "actor": "",
+                "tone": "",
+                "length_s": 10,
+                "description": "adult figure with eyes, hair, and outfit",
+            }
+            resolved = resolve_identities(req, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
+            loaded = [_mod_stem(x) for x in (resolved.get("loaded_refmods") or [])]
+            out["index"] = {
+                "index_status": resolved.get("index_status"),
+                "index_flag": resolved.get("index_flag"),
+                "loaded": loaded,
+            }
+            for s in loaded:
+                if _is_writer_lane_refmod(s) and s not in seen:
+                    seen.add(s)
+                    found.append(s)
+        except Exception as e:
+            out["index_error"] = f"{type(e).__name__}: {e}"
+        return _keep_highest_oc_version(found)
+
+    if char or name_list:
+        targets = ([char] if char else []) + [n for n in name_list if n != char]
+        matched = _resolve_names(targets)
+        if matched:
+            out["stems"] = matched
+            out["source"] = "character"
+            out["trigger"] = _oc_trigger(matched)
+            return out
+        who = char or (name_list[0] if name_list else "named identity")
+        out["reason"] = f"no local RefMod installed for '{who}' in {REFMODS_DIR}"
+        return out
+
+    keys = oc_keys_for_still_and_names(still_image, char, " ".join(str(n) for n in name_list))
+    if keys:
+        inst = installed_oc_refmod_keys()
+        stems: List[str] = []
+        seen: set = set()
+        for k in keys:
+            for s in inst.get(k, []):
+                if s not in seen:
+                    seen.add(s)
+                    stems.append(s)
+            if not inst.get(k):
+                for s in _stems_for_character_name(k):
+                    if _is_writer_lane_refmod(s) and s not in seen:
+                        seen.add(s)
+                        stems.append(s)
+        if stems:
+            out["stems"] = _keep_highest_oc_version(stems)
+            out["source"] = "still_path"
+            out["trigger"] = _oc_trigger(out["stems"])
+            return out
+
+    tagged = pixlstash_character_names_for_still(still_image)
+    if tagged:
+        matched = _resolve_names(tagged)
+        if matched:
+            out["stems"] = matched
+            out["source"] = "pixlstash"
+            out["trigger"] = _oc_trigger(matched)
+            return out
+
+    out["reason"] = (
+        "no RefMod matched this still via installed files, the trained trigger, "
+        "the POOL folder, a PixlStash character tag, or the character name; "
+        "will not reuse the previous run's RefMods. Pass a still tagged or filed as the character "
+        "(for example FCSydny / poolclub or poolblonde), or pass --character <name>."
+    )
+    return out
+

@@ -3,7 +3,7 @@
 
 One clip, end to end, no human step:
   still read -> slots -> four-phase beat card (json_schema) -> N prose candidates -> linter -> one targeted rewrite ->
-  rank (+ judge on a tie) -> build_request dry run (submit_parody_run.py writer-run, never --queue) -> blacklist,
+  rank (+ judge on a tie) -> fill_request dry run (fill_request.py, never --queue) -> blacklist,
   recent outputs and scene_state updates.
 Failures degrade (fallback pick + warning, NOT_READY recorded, writer_down) and never block the next ask.
 
@@ -39,6 +39,7 @@ if str(PARODY_DIR) not in sys.path:
 import yaml  # noqa: E402
 
 import build_request as br  # noqa: E402
+import fill_request as fr  # noqa: E402
 import scene_addenda  # noqa: E402
 import wp_router  # noqa: E402
 from writer_sys import build_writer_system_prompt  # noqa: E402
@@ -50,7 +51,6 @@ _AI_ROOT = Path(__file__).resolve().parents[3]
 PIPE_DIR = Path(os.environ.get("WP_HOME", str(_AI_ROOT / "render" / "writer_pipeline")))
 CONFIG_PATH = PIPE_DIR / "config.yaml"
 RUNS_ROOT = _AI_ROOT / "community" / "runs"
-SUBMIT_PY = PARODY_DIR / "submit_parody_run.py"
 VERSION = "wp-2026-11-13.1"
 
 TONES = ("ashamed", "bratty", "reluctant", "eager", "silent")
@@ -563,7 +563,6 @@ def resolve_named_identity(
 ) -> Optional[Dict[str, Any]]:
     """Fix 1: One path for named people. Detect/resolve any named character or celeb in the ask or flags."""
     import resolve as _res
-    import submit_parody_run as _spr
 
     char = (character or "").strip() or None
     act = (actor or "").strip() or None
@@ -630,7 +629,7 @@ def resolve_named_identity(
     if not res_char and targets:
         res_char = targets[0]
 
-    picked = _spr.resolve_writer_refmods(still_image=None, character=res_char, names=targets)
+    picked = _res.resolve_writer_refmods(still_image=None, character=res_char, names=targets)
     all_names = list(dict.fromkeys([x for x in (res_char, res_actor, *targets) if x]))
     return {
         "character": res_char,
@@ -1210,29 +1209,30 @@ def partner_look_from_card(card: Optional[Dict[str, Any]], label: str = "S3") ->
 
 def run_build(run_dir: Path, ask: str, position: str, still: str, character: Optional[str], timeout: int = 300,
               extra: Optional[List[str]] = None, names: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Existing dry-run hook. Never passes --queue."""
-    cmd = [sys.executable, str(SUBMIT_PY), "writer-run", str(run_dir), "--ask", ask, "--position", position, "--still", still]
-    cmd += list(extra or [])
-    if character:
-        cmd += ["--character", character]
-    if names:
-        cmd += ["--names", *[str(n) for n in names if str(n).strip()]]
-    if partner_type_for(position, ask) and "--partner-type" not in cmd:
-        cmd += ["--partner-type", partner_type_for(position, ask)]
-    if partner_type2_for(position, ask) and "--partner-type2" not in cmd:
-        cmd += ["--partner-type2", partner_type2_for(position, ask)]
-    assert "--queue" not in cmd
+    """Fill the saved template request.api.json in run_dir from writer_output.txt."""
     t0 = time.time()
-    p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=str(PARODY_DIR))
-    rep = {}
-    try:
-        rep = json.loads((run_dir / "build_report.json").read_text(encoding="utf-8"))
-    except Exception:
-        pass
-    line = (p.stdout or "").strip().splitlines()[-1] if (p.stdout or "").strip() else ""
-    status = "READY" if p.returncode == 0 and rep.get("status") == "READY" else "NOT_READY"
-    return {"status": status, "rc": p.returncode, "stdout": line[:600], "stderr": (p.stderr or "")[-600:], "report": rep,
-            "seconds": round(time.time() - t0, 2), "reason": rep.get("reason") or line}
+    ex = list(extra or [])
+    def _opt(flag: str) -> Optional[str]:
+        return ex[ex.index(flag) + 1] if flag in ex and ex.index(flag) + 1 < len(ex) else None
+    ex_names: List[str] = list(names or [])
+    if "--names" in ex:
+        i = ex.index("--names") + 1
+        while i < len(ex) and not str(ex[i]).startswith("--"):
+            ex_names.append(str(ex[i])); i += 1
+    frames_s, aspect, size = _opt("--frames"), _opt("--aspect"), _opt("--size")
+    still_mode = _opt("--still-mode") or "guide"
+    p2_still, tname = _opt("--partner2-still"), _opt("--template")
+    raw = (run_dir / "writer_output.txt").read_text(encoding="utf-8") if (run_dir / "writer_output.txt").is_file() else ""
+    w, h = br.resolve_canvas(aspect, size, still_size=br.read_still_size(still) if still else None)
+    rep = fr.fill_request(
+        raw, run_dir, ask=ask, position=position, still_image=(still or None), partner2_still=p2_still,
+        character=character, names=(ex_names or None), template_name=tname, still_mode=still_mode,
+        width=w, height=h, frames=int(frames_s) if frames_s else None, dry_run=("--queue" not in ex),
+    )
+    status = "READY" if rep.get("status") == "READY" else "NOT_READY"
+    return {"status": status, "rc": 0 if status == "READY" else 3,
+            "stdout": "%s template=%s" % (status, rep.get("template", "")), "stderr": "",
+            "report": rep, "seconds": round(time.time() - t0, 2), "reason": rep.get("reason") or ""}
 
 
 def kept_lines(full: str, rep: Dict[str, Any]) -> List[str]:
@@ -1408,6 +1408,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
     run_dir.mkdir(parents=True, exist_ok=True)
     run_id = run_dir.name
     ask, position = job["ask"], job["position"]
+    raw_position = position
     debug = bool(job.get("debug"))
     character = job.get("character")
     identity = resolve_named_identity(ask, character=character, actor=job.get("actor"), names=job.get("names"))
@@ -1468,7 +1469,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                     still = str(json.loads((prev_run / "pick.json").read_text(encoding="utf-8")).get("still") or "").strip()
                 except Exception:
                     still = ""
-        if not still:  # hard fail when --still is missing (never silently fall back to auto)
+        if not still and job.get("template") != "named_parody":  # hard fail when --still is missing (never silently fall back to auto)
             result.update(status="NOT_READY", not_ready_reason="start still missing: pass --still '<the start still path>' "
                           "(or --still auto for a pool pick plus a fresh vision read)")
             raise _Stop()
@@ -1491,7 +1492,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             if _warn:
                 result["warnings"] = list(result.get("warnings") or []) + [_warn]
         _still_mode = br.normalize_still_mode(job.get("still_mode"))
-        _still_size = br.read_still_size(still)
+        _still_size = br.read_still_size(still) if still else None
         _cw, _ch = br.resolve_canvas(job.get("aspect"), job.get("size"), still_size=_still_size)
         _shape_warn = br.check_still_canvas_shape(
             _still_size, _cw, _ch, aspect=job.get("aspect"), size=job.get("size"), still_mode=_still_mode,
@@ -1502,7 +1503,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             log("still_shape_mismatch", {"run": run_id, "warning": _shape_warn, "canvas": [_cw, _ch],
                                          "still_size": list(_still_size)})
         # 1 still read
-        still_read = ensure_still_read(run_dir, still, job.get("still_read"), client, cfg, log)
+        still_read = ensure_still_read(run_dir, still, job.get("still_read"), client, cfg, log) if still else {"read": {}}
         # 2b mode router (coverage B0): act + base mode + overlays; fallbacks are logged, never block
         route = wp_router.route_mode(ask, position, still_read, cfg, continued=bool(scene_prev))
         # acceptance-2 item 3: doggy on a waist-high-only surface is standing_mf (bent over its edge); cowgirl there warns
@@ -1546,11 +1547,16 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 log("missing_ending_state_pose_warn", {"run": run_id})
         _explicit_frames = bool(job.get("frames"))
         if _explicit_frames:
-            try:
-                clip_frames = br.align_h3_frames(int(job["frames"]))
-            except ValueError as e:
-                result.update(status="NOT_READY", not_ready_reason=str(e))
-                raise _Stop()
+            if job.get("template") == "long_continuation":
+                clip_frames = int(job["frames"])
+            else:
+                try:
+                    clip_frames = br.align_h3_frames(int(job["frames"]))
+                except ValueError as e:
+                    result.update(status="NOT_READY", not_ready_reason=str(e))
+                    raise _Stop()
+        elif job.get("template") == "long_continuation":
+            clip_frames = 481
         elif kind == "talk":
             clip_frames = br.snap_h3_frames(8.0)
         else:
@@ -1696,7 +1702,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             (["--inherited-garments", json.dumps(_inh_g, separators=(",", ":"))] if scene_prev and _inh_g else []) + \
             (["--aspect", str(job["aspect"])] if job.get("aspect") else []) + \
             (["--size", str(job["size"])] if job.get("size") else []) + \
-            (["--still-mode", str(job["still_mode"])] if job.get("still_mode") else [])
+            (["--still-mode", str(job["still_mode"])] if job.get("still_mode") else []) + \
+            (["--template", str(job["template"])] if job.get("template") else [])
         if card is None and kind == "talk":
             # BTS/talk: never skip the beat card; use a minimal valid card and keep writing
             card = {
@@ -1784,8 +1791,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         wp_state.atomic_write(run_dir / "writer_output.txt", chosen["full"])
         # 8 build (dry); opt-in --fix-once retry on NOT_READY if not already retried
         _id_names = [str(n) for n in ((identity or {}).get("names") or []) if str(n).strip()]
-        _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else [])
-        build = run_build(run_dir, ask, position, still, character, extra=_bx_build)
+        _q_flag = ["--queue"] if (job.get("queue") and job.get("yes_derrick")) else []
+        _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else []) + _q_flag
+        build = run_build(run_dir, ask, raw_position, still, character, extra=_bx_build)
         builds = [build]
         if fix_once and not fixed_once and build["status"] != "READY":
             nr = run_dir / "clip_NOT_READY.txt"
@@ -1804,8 +1812,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             pick, chosen = "rewrite_builder", cands["rewrite_builder"]
             wp_state.atomic_write(run_dir / "writer_output.txt", full)
             _id_names = [str(n) for n in ((identity or {}).get("names") or []) if str(n).strip()]
-            _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else [])
-            build = run_build(run_dir, ask, position, still, character, extra=_bx_build)
+            _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else []) + _q_flag
+            build = run_build(run_dir, ask, raw_position, still, character, extra=_bx_build)
             builds.append(build)
         status = build["status"]
         # acceptance-1 fix c: these hard rules block READY even when the builder passes (others fall back with a warning)
@@ -1951,6 +1959,7 @@ def main(argv=None) -> int:
     ap.add_argument("--frames", type=int, help="optional frame cap for VRAM (two reference stills)")
     ap.add_argument("--aspect", default=None, help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square, or auto")
     ap.add_argument("--size", default=None, help="Explicit canvas WxH (multiples of 32, 256..2048)")
+    ap.add_argument("--template", default=None, choices=list(fr.TEMPLATES), help="Optional explicit template override")
     ap.add_argument("--still-mode", default=None, choices=list(br.STILL_MODES),
                     help="How start still is wired: guide (default frame-0 AddGuide) or ref (un-resized c0 reference, not frame-0 pinned)")
     ap.add_argument("--shots", choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
@@ -1988,7 +1997,7 @@ def main(argv=None) -> int:
         jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
                      "character": a.character, "actor": a.actor, "names": a.names, "scene": a.scene, "continue": a.cont,
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
-                     "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode,
+                     "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode, "template": a.template,
                      "n_candidates": a.n_candidates, "debug": bool(a.debug), "fix_once": bool(a.fix_once),
                      "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []
