@@ -26,6 +26,8 @@ PY=${RQ_PY:-$HOME/AI/render/x3/.venv/bin/python}
 # Check /system_stats first (in AlienPc llama-swap ignorePaths -> 409 when unloaded, so preflight never wakes ComfyUI early);
 # only inspect /queue when ComfyUI is already loaded (200).
 COMFY_BASE_URL="${COMFY_API:-https://alienpc.tailf242b2.ts.net:8446}"
+# If AlienPc ComfyUI is busy, run_queue.py --remote waits up to 30 min for it instead of failing the detached job.
+export RQ_REMOTE_BUSY_WAIT_SEC="${RQ_REMOTE_BUSY_WAIT_SEC:-1800}"
 if [ "$DRY" = 0 ]; then
   st_code=$(curl -sS -o /dev/null -m 4 -w '%{http_code}' "$COMFY_BASE_URL/system_stats" 2>/dev/null || printf '000')
   if [ "$st_code" = "200" ]; then
