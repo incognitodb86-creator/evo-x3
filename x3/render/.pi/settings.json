@@ -24,7 +24,7 @@
     }
   ],
   "defaultProvider": "x3-local",
-  "defaultModel": "gemma4-heretic",
+  "defaultModel": "flash-next-uncensored",
   "defaultThinkingLevel": "off",
   "extensions": [
     "-builtin:llama.cpp"
@@ -59,7 +59,7 @@
     "autoResize": true
   },
   "subagents": {
-    "defaultModel": "x3-local/gemma4-heretic-sub",
+    "defaultModel": "x3-local/flash-next-uncensored",
     "disableThinking": true,
     "defaultThinking": "off"
   }

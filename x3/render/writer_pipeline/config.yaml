@@ -3,7 +3,7 @@
 # acceptance\sampler_ab.json); never re-tuned automatically.
 version: wp-2026-11-13.1
 endpoint: http://127.0.0.1:8080/v1      # EVO-X3 llama-swap (loopback; key read in-process from pi models.json x3-local). AlienPc used the :8085 GPU-lock gate
-model_alias: gemma4-heretic  # EVO-X3: Gemma 4 26B A4B Heretic Q8_0 llama.cpp Vulkan (AlienPc: gemma4_heretic_poly_think). same served model as Render's pi chat (no llama-swap swap between Render and the pipeline)
+model_alias: flash-next-uncensored  # EVO-X3: Gemma 4 26B A4B Heretic Q8_0 llama.cpp Vulkan (AlienPc: gemma4_heretic_poly_think). same served model as Render's pi chat (no llama-swap swap between Render and the pipeline)
 thinking: false                         # chat_template_kwargs.enable_thinking (Gemma thinking is on/off only)
 timeout_s: 900
 retry_backoff_s: [10, 30, 90]
