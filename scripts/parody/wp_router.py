@@ -23,7 +23,8 @@ OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every 
     ("forced_orgasm", r"forced orgasm|overstim\w*"),
     ("defeat", r"superheroine|\bheroine\b|\bperil\b|\bdefeated\b"),
     ("cnc", r"\bcnc\b|reluctan\w*|\bresist\w*|non-?con\w*"),
-    ("taboo_role", r"\bdaddy\b|\bstep-?(?:brother|sister|dad|mom|father|mother|son|daughter)\b|\b(?:brother|sister|uncle|cousin)\b|roleplay"),
+    ("taboo_role", r"\b(?:daddy|mommy|incest)\b|\bstep-?(?:brother|sister|dad|mom|father|mother|son|daughter|aunt|uncle|cousin)\b|"
+                   r"\b(?:brother|sister|mom|mother|dad|father|son|daughter|aunt|uncle|cousin)\b|roleplay"),
     ("spoof", r"\bspoof\b|\bparody\b|infomercial|\bnoir\b|space-captain|sitcom|\bvampire\b|\bcostume\b|\bcosplay\b"),
     ("vhs", r"\bvhs\b|\bcamcorder\b|\bhandycam\b"),
     ("bts", r"\bbts\b|\binterview\b|off[- ]?screen interviewer"),

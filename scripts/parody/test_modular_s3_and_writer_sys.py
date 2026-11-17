@@ -484,6 +484,7 @@ def test_part4_all_refmods_and_pixlstash_celebrity_tag(monkeypatch):
 
 
 def test_contact_regex_and_prompt_compiler_77_rules():
+    import os
     import wp_compile_prompt as wpc
     import check_writer_prompt_rules as chk
 
@@ -495,7 +496,18 @@ def test_contact_regex_and_prompt_compiler_77_rules():
     ):
         assert br._CONTACT_RE.search(phrase), phrase
 
-    agents_src = Path(r"/home/evo/AI/render/AGENTS.md").read_text(encoding="utf-8")
+    wt_render = os.environ.get("RALPH_FORGE_WORKTREE")
+    sibling_render = Path(__file__).resolve().parents[3] / "render" / "AGENTS.md"
+    sibling_x3_render = Path(__file__).resolve().parents[3] / "x3-render" / "AGENTS.md"
+    if wt_render and (Path(wt_render) / "AGENTS.md").is_file():
+        agents_path = Path(wt_render) / "AGENTS.md"
+    elif Path(r"/home/evo/AI/render/AGENTS.md").is_file():
+        agents_path = Path(r"/home/evo/AI/render/AGENTS.md")
+    elif sibling_render.is_file():
+        agents_path = sibling_render
+    else:
+        agents_path = sibling_x3_render
+    agents_src = agents_path.read_text(encoding="utf-8")
     compiled = wpc.compile_prompt(agents_src)
     assert "MODES (use only when the ask calls for one)" in compiled
     assert "EXAMPLES (level of detail only;" in compiled

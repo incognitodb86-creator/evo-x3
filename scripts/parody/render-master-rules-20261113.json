@@ -356,12 +356,12 @@
   },
   {
    "id": "R22",
-   "title": "Default tone when the ask names none",
-   "derrick_ask": "No unasked reluctance (acc-4 fix 15)",
-   "source": "acc-4 recurring issue 5; audit block 14",
+   "title": "Default tone on rough sex vs explicit soft asks",
+   "derrick_ask": "Rough/dominant/CNC/degrading default on sex clips; eager or playful when ask explicitly requests soft/gentle/romantic",
+   "source": "Derrick U56 polish 2026-11-17; AGENTS.md HUMILIATION AND REACTION TONE",
    "audit_status": "M",
    "severity": "hard",
-   "restore_text": "If the ask names no tone, use eager or playful. Ashamed or reluctant only when the ask, CNC, defeat or forced orgasm names it.",
+   "restore_text": "On rough/dominant default sex clips, rotate across reluctant, ashamed, bratty (overridden) or eager (used/free-use); if the ask explicitly requests soft, gentle or romantic and names no tone, use eager or playful:",
    "checks": [
     "names no tone, use eager or playful"
    ],
@@ -454,10 +454,10 @@
    "source": "memory 11-13; restore #5; writer_prompt L40",
    "audit_status": "P",
    "severity": "hard",
-   "restore_text": "- Per clip, pick one continuous [Shot 1], or 2–3 cuts of the same beat when coverage adds information; neither is forced. A cut is written \"[Shot N] At MM:SS.mmm, the camera cuts to ...\" and only ships when the run allows cuts (multi-shot); otherwise write a second angle as one motivated camera move in prose (\"the camera pushes in slowly to her face\"). Later angles are earned by the action, not added for variety.",
+   "restore_text": "- One continuous [Shot 1] is the default. Use 2-3 cuts of the same beat only when the run passes --shots multi or the ask asks for coverage: [Shot 1] has no timestamp, later cuts are \"[Shot N] At MM:SS.mmm, the camera cuts to ...\". Talk, flirt and tease clips stay one shot. On an act clip, [Shot 1] names the act word. A held shot or slow pull-out stays as written.",
    "checks": [
     "2.3 cuts of the same beat",
-    "neither is forced"
+    "One continuous \\[Shot 1\\] is the default"
    ],
    "detail_checks": [],
    "forbidden": [],

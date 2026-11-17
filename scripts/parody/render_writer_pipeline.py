@@ -99,18 +99,22 @@ def acts_bodies(position: str) -> int:
 
 
 # ---- slots ----------------------------------------------------------------------------------------------------------
-def pick_tone(ask: str, rng: random.Random, last: Optional[str], overlays: Optional[List[str]] = None) -> str:
-    """Reluctant/ashamed only when the ask or a cnc/defeat/forced overlay names it (PM acc4 #15)."""
+_SOFT_ASK_RE = re.compile(r"(?i)\b(?:soft|gentle|gently|sensual|romantic|sweet|tender|loving|playful|eager)\b")
+
+
+def pick_tone(ask: str, rng: random.Random, last: Optional[str], overlays: Optional[List[str]] = None, kind: str = "") -> str:
+    """Rough/dominant default on sex/oral/partner clips rotates all 5 reaction tones unless ask explicitly names a soft/eager tone."""
     for tone, pat in TONE_WORDS:
         if re.search(r"(?i)\b(?:" + pat + r")", ask or ""):
             return tone
     overlays = overlays or []
-    named = any(o in overlays for o in ("cnc", "defeat", "forced_orgasm"))
+    named_hard = any(o in overlays for o in ("cnc", "defeat", "forced_orgasm", "taboo_role", "restraints"))
+    soft_ask = bool(_SOFT_ASK_RE.search(ask or "")) or kind == "talk"
     choices = [t for t in TONES if t != last]
-    if not named:
+    if soft_ask and not named_hard:
         choices = [t for t in choices if t not in ("ashamed", "reluctant")]
     if not choices:
-        choices = ["eager", "bratty", "silent"]
+        choices = ["eager", "bratty", "silent"] if (soft_ask and not named_hard) else list(TONES)
     return rng.choice(choices)
 
 
@@ -180,7 +184,7 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
         "floor": f.get("floor") or "", "pose": f.get("pose") or "", "facing_camera": bool(read.get("facing_camera")),
         "framing": read.get("framing") or "", "hair": read.get("hair") or "", "skin": read.get("skin") or "",
         "build": read.get("build") or "", "props": f["props"], "restraints": f["restraints"],
-        "tone": pick_tone(ask, rng, last_tone, overlays), "line_focus": focus, "line_focus_text": focus_text,
+        "tone": pick_tone(ask, rng, last_tone, overlays, kind=kind), "line_focus": focus, "line_focus_text": focus_text,
         "position": position, "kind": kind,
         "opening_lead": rng.choice(MALE_OPENING_LEADS if is_male_solo else OPENING_LEADS),
     }
@@ -406,7 +410,9 @@ OVERLAY_NOTES: Dict[str, str] = {
     "forced_orgasm": "Forced orgasm: one or two overstimulation cues in the body, PRIMARY MOTION keeps going through the result, her lines are fragments of three words or fewer.",
     "defeat": "Superheroine defeat: an original adult heroine, one strength beat, one break moment, one costume move that stays, her voice drops; no named hero and no quoted line. Her lines and her face carry the tone slot from the first line to the last frame.",
     "cnc": "Consensual non-consent fantasy between adults: one protest beat inside the action and his override by grip or command; no safeword unless asked.",
-    "taboo_role": "Role-play between adults: one role for the clip, at most one title per line, tied to something visible.",
+    "taboo_role": ("Adult taboo family roleplay: one role for the clip, spoken with psychological stakes "
+                   "(secrecy/proximity risk, crossing the forbidden line, household authority, possessive claiming) "
+                   "and tied to what is visible right now; Line 2 answers Line 1 directly in her reaction tone."),
     "spoof": "Spoof (tone overlay): satirical or parody genre flavour, cadence, and one visual nod; film look as light, lens and grain words. Tone only — never drops or blocks named characters or actors.",
     "vhs": "VHS camcorder look: soft analog camcorder video with slight colour bleed and tracking lines, handheld camcorder energy, never a phone or smartphone.",
     "states": "States / fantasy setup: keep every character an adult; any consent/roleplay agreement belongs in its own separate setup clip, never inside the sex clip.",
@@ -555,6 +561,146 @@ def _known_identity_tokens() -> Tuple[Dict[str, str], List[Dict[str, Any]]]:
     return aliases, rows
 
 
+_COMMON_WORD_INDEX_COLLISIONS = frozenset({
+    "angel", "alice", "barbie", "belle", "blake", "charlotte", "chase", "chuck", "claire", "data",
+    "diana", "django", "elena", "grace", "helen", "jack", "jane", "josh", "jules", "kelly", "lucy",
+    "max", "maya", "monk", "penny", "robin", "rose", "ruby", "sara", "sarah", "violet", "will",
+})
+# Default iconic INDEX voice-anchor role when an ask names only the actor/actress.
+# Pairing an actress (even on INDEX_BAD) with her iconic INDEX character — or naming her directly with signature vocal
+# timbre when she has no separate character row (pop stars, models, streamers) — carries her real voice in H3 while
+# her visual RefMod locks face likeness.
+_DEFAULT_ICONIC_VOICE_ROLE = {
+    "sydneysweeney": ("Cassie Howard", "Sydney Sweeney", "a low, soft, breathy vocal-fry cadence"),
+    "emiliaclarke": ("Daenerys Targaryen", "Emilia Clarke", "a crisp low British contralto cadence"),
+    "meganfox": ("Jennifer Check", "Megan Fox", "a low, sultry, husky chest-voice drawl"),
+    "alexandradaddario": ("Lisa Tragnetti", "Alexandra Daddario", "a breathy, close, low chest register"),
+    "zendaya": ("Rue Bennett", "Zendaya", "a dry, low, unhurried vocal-fry cadence"),
+    "jennaortega": ("Wednesday Addams", "Jenna Ortega", "a dry, deadpan low monotone"),
+    "margotrobbie": ("Harley Quinn", "Margot Robbie", "a sharp, breathy, playful-edge chest voice"),
+    "jenniferaniston": ("Rachel Green", "Jennifer Aniston", "a warm, slightly raspy conversational chest register"),
+    "scarlettjohansson": ("Natasha Romanoff", "Scarlett Johansson", "a smoky, low, raspy contralto"),
+    "natalieportman": ("Nina Sayers", "Natalie Portman", "a soft, tight, controlled breathy register"),
+    "angelinajolie": ("Lara Croft", "Angelina Jolie", "a low, smooth, commanding contralto"),
+    "anadearmas": ("Marta Cabrera", "Ana de Armas", "a soft, warm, lightly accented low chest voice"),
+    "ellapurnell": ("Jinx", "Ella Purnell", "a smoky, sharp, close chest register"),
+    "annehathaway": ("Andy Sachs", "Anne Hathaway", "a clear, warm, expressive low chest register"),
+    "emmawatson": ("Hermione Granger", "Emma Watson", "a crisp, articulate British chest register"),
+    "emmastone": ("Cruella de Vil", "Emma Stone", "a low, smoky, raspy vocal-fry cadence"),
+    "jenniferlawrence": ("Katniss Everdeen", "Jennifer Lawrence", "a low, husky, grounded chest voice"),
+    "florencepugh": ("Yelena Belova", "Florence Pugh", "a deep, husky, low raspy contralto"),
+    "anyataylorjoy": ("Beth Harmon", "Anya Taylor-Joy", "a cool, low, unhurried velvety cadence"),
+    "anyachalotra": ("Yennefer of Vengerberg", "Anya Chalotra", "a low, rich, commanding British contralto"),
+    "elizabetholsen": ("Scarlet Witch", "Elizabeth Olsen", "a soft, breathy, intimate low chest voice"),
+    "galgadot": ("Diana Prince / Wonder Woman", "Gal Gadot", "a warm, low, lightly accented contralto"),
+    "haileesteinfeld": ("Vi", "Hailee Steinfeld", "a low, grounded, slightly husky chest register"),
+    "blakelively": ("Serena van der Woodsen", "Blake Lively", "a warm, breathy, unhurried vocal-fry drawl"),
+    "leightonmeester": ("Blair Waldorf", "Leighton Meester", "a poised, low, clipped velvet cadence"),
+    "dakotajohnson": ("Anastasia Steele", "Dakota Johnson", "a soft, breathy, hushed low whisper-register"),
+    "kristenstewart": ("Bella Swan", "Kristen Stewart", "a low, breathy, clipped dry vocal fry"),
+    "kristenbell": ("Veronica Mars", "Kristen Bell", "a crisp, dry, close chest voice"),
+    "alisonbrie": ("Annie Edison", "Alison Brie", "a soft, breathy, close chest register"),
+    "aubreyplaza": ("April Ludgate", "Aubrey Plaza", "a flat, low, deadpan vocal-fry monotone"),
+    "katdennings": ("Max Black", "Kat Dennings", "a low, sultry, dry sarcastic chest voice"),
+    "kaleycuoco": ("Penny", "Kaley Cuoco", "a warm, slightly raspy conversational chest register"),
+    "melissarauch": ("Bernadette Rostenkowski", "Melissa Rauch", "a tight, breathy close register"),
+    "courteneycox": ("Monica Geller", "Courteney Cox", "a clear, tight, grounded chest register"),
+    "sofiavergara": ("Gloria Pritchett", "Sofia Vergara", "a rich, husky, Colombian-accented chest register"),
+    "arielwinter": ("Alex Dunphy", "Ariel Winter", "a low, breathy, sharp chest register"),
+    "salmahayek": ("Santanico Pandemonium", "Salma Hayek", "a sultry, low, smoky accented contralto"),
+    "penelopecruz": ("Angelica Teach", "Penélope Cruz", "a warm, husky, Spanish-accented contralto"),
+    "monicabellucci": ("Malèna Scordia", "Monica Bellucci", "a deep, velvety, hushed Italian contralto"),
+    "evagreen": ("Vanessa Ives", "Eva Green", "a dark, low, smoky French-tinged contralto"),
+    "evalongoria": ("Gabrielle Solis", "Eva Longoria", "a warm, sultry, low chest voice"),
+    "katebeckinsale": ("Selene", "Kate Beckinsale", "a cool, breathy, poised British chest register"),
+    "charlizetheron": ("Lorraine Broughton", "Charlize Theron", "a low, smoky, commanding contralto"),
+    "emilyblunt": ("Rita Vrataski", "Emily Blunt", "a crisp, low, composed British chest voice"),
+    "rosamundpike": ("Amy Dunne", "Rosamund Pike", "a cool, low, velvety British contralto"),
+    "rachelmcadams": ("Regina George", "Rachel McAdams", "a smooth, breathy, pointed chest register"),
+    "amandaseyfried": ("Needy Lesnicki", "Amanda Seyfried", "a soft, breathy, close chest voice"),
+    "annakendrick": ("Beca Mitchell", "Anna Kendrick", "a dry, crisp, close chest register"),
+    "aliciasilverstone": ("Cher Horowitz", "Alicia Silverstone", "a soft, breathy vocal-fry drawl"),
+    "aliceeve": ("Dr. Carol Marcus", "Alice Eve", "a soft, poised, low British chest voice"),
+    "oliviawilde": ("Quorra", "Olivia Wilde", "a low, sultry, smoky chest register"),
+    "ninadobrev": ("Elena Gilbert", "Nina Dobrev", "a warm, breathy, low chest register"),
+    "sarahmichellegellar": ("Buffy Summers", "Sarah Michelle Gellar", "a tight, breathy, grounded chest voice"),
+    "alysonhannigan": ("Willow Rosenberg", "Alyson Hannigan", "a soft, breathy, hesitant close voice"),
+    "gilliananderson": ("Dana Scully", "Gillian Anderson", "a low, hushed, smoky contralto"),
+    "jeriryan": ("Seven of Nine", "Jeri Ryan", "a cool, low, measured contralto"),
+    "triciahelfer": ("Number Six", "Tricia Helfer", "a low, sultry, breathy whisper-contralto"),
+    "katherynwinnick": ("Lagertha", "Katheryn Winnick", "a low, husky, steady chest register"),
+    "lenaheadey": ("Cersei Lannister", "Lena Headey", "a low, cold, unhurried British contralto"),
+    "sophieturner": ("Sansa Stark", "Sophie Turner", "a soft, low, breathy British chest register"),
+    "maisiewilliams": ("Arya Stark", "Maisie Williams", "a low, clipped British chest voice"),
+    "emmadarcy": ("Rhaenyra Targaryen", "Emma D'Arcy", "a low, smoky, hushed British contralto"),
+    "erinmoriarty": ("Starlight / Annie January", "Erin Moriarty", "a soft, breathy, tight chest register"),
+    "brycedallashoward": ("Claire Dearing", "Bryce Dallas Howard", "a warm, breathy chest register"),
+    "christinahendricks": ("Joan Holloway", "Christina Hendricks", "a rich, sultry, unhurried purring chest voice"),
+    "rheaseehorn": ("Kim Wexler", "Rhea Seehorn", "a low, husky, composed chest register"),
+    "sarahsnook": ("Siobhan Roy", "Sarah Snook", "a low, dry, clipped chest voice"),
+    "jodiecomer": ("Villanelle", "Jodie Comer", "a low, playful-cold, close chest voice"),
+    "vanessakirby": ("Princess Margaret", "Vanessa Kirby", "a deep, smoky, breathy British contralto"),
+    "kellyreilly": ("Beth Dutton", "Kelly Reilly", "a low, gravelly, smoky rasp"),
+    "sharonstone": ("Catherine Tramell", "Sharon Stone", "a low, smoky, unhurried contralto"),
+    "pamelaanderson": ("C.J. Parker", "Pamela Anderson", "a soft, breathy, sultry whisper-drawl"),
+    "deniserichards": ("Kelly Van Ryan", "Denise Richards", "a soft, breathy, low vocal-fry cadence"),
+    "krystenritter": ("Jessica Jones", "Krysten Ritter", "a dry, low, deadpan vocal-fry register"),
+    "brielarson": ("Carol Danvers", "Brie Larson", "a grounded, low chest register"),
+    "zoesaldana": ("Gamora", "Zoe Saldana", "a low, husky, steady chest voice"),
+    "karengillan": ("Amy Pond", "Karen Gillan", "a warm, breathy Scottish chest register"),
+    "jennacoleman": ("Clara Oswald", "Jenna Coleman", "a crisp, breathy British chest voice"),
+    "jennafischer": ("Pam Beesly", "Jenna Fischer", "a soft, quiet, hesitant close voice"),
+    "keiraknightley": ("Elizabeth Swann", "Keira Knightley", "a breathy, low British chest register"),
+    "nicolekidman": ("Celeste Wright", "Nicole Kidman", "a hushed, breathy, low velvety voice"),
+    "reesewitherspoon": ("Annette Hargrove", "Reese Witherspoon", "a soft, breathy Southern-tinged chest voice"),
+    "camerondiaz": ("Natalie Cook", "Cameron Diaz", "a warm, breathy, husky chest register"),
+    "lucyliu": ("Alex Munday", "Lucy Liu", "a cool, low, composed chest voice"),
+    "umathurman": ("Mia Wallace", "Uma Thurman", "a deep, smoky, unhurried contralto"),
+    "michellepfeiffer": ("Catwoman / Selina Kyle", "Michelle Pfeiffer", "a low, breathy, sultry purr"),
+    "halleberry": ("Ororo Munroe / Storm", "Halle Berry", "a soft, low, breathy chest register"),
+    "jenniferlopez": ("Selena Quintanilla", "Jennifer Lopez", "a husky, low, breathy chest voice"),
+    "morenabaccarin": ("Inara Serra", "Morena Baccarin", "a warm, low, velvety contralto"),
+    "yvonnestrahovski": ("Sarah Walker", "Yvonne Strahovski", "a soft, low, breathy chest register"),
+    "laurengerman": ("Chloe Decker", "Lauren German", "a low, slightly husky chest voice"),
+    "alexisbledel": ("Rory Gilmore", "Alexis Bledel", "a soft, quiet, breathy close register"),
+    "mayahawke": ("Robin Buckley", "Maya Hawke", "a husky, slightly raspy low chest voice"),
+    "sadiesink": ("Max Mayfield", "Sadie Sink", "a low, grounded, tight chest voice"),
+    "milliebobbybrown": ("Enola Holmes", "Millie Bobby Brown", "a crisp, breathy low chest register"),
+    # Solo-name singers, models & creators (RefMod face + actor-alone signature vocal timbre works directly)
+    "arianagrande": ("Ariana Grande", "Ariana Grande", "a soft, airy, breathy whisper-register"),
+    "taylorswift": ("Taylor Swift", "Taylor Swift", "a warm, low, breathy conversational vocal fry"),
+    "sabrinacarpenter": ("Sabrina Carpenter", "Sabrina Carpenter", "a soft, breathy, teasing vocal-fry drawl"),
+    "oliviarodrigo": ("Olivia Rodrigo", "Olivia Rodrigo", "a breathy, close, vocal-fry chest register"),
+    "dualipa": ("Dua Lipa", "Dua Lipa", "a deep, smoky, husky British contralto"),
+    "billieeilish": ("Billie Eilish", "Billie Eilish", "a hushed, close-mic, low breathy vocal fry"),
+    "mileycyrus": ("Miley Cyrus", "Miley Cyrus", "a deep, gravelly, smoky raspy contralto"),
+    "selenagomez": ("Selena Gomez", "Selena Gomez", "a low, soft, husky monotone vocal fry"),
+    "madisonbeer": ("Madison Beer", "Madison Beer", "a soft, sultry, breathy vocal-fry whisper"),
+    "oliviadunne": ("Olivia Dunne", "Olivia Dunne", "a soft, breathy, close vocal-fry register"),
+    "rihanna": ("Rihanna", "Rihanna", "a low, smoky, Bajan-tinged contralto"),
+    "ladygaga": ("Lady Gaga", "Lady Gaga", "a low, smoky, resonant contralto"),
+    "zoeydeschanel": ("Jess Day", "Zooey Deschanel", "a warm, quirky, slightly husky chest register"),
+    "juliagarner": ("Ruth Langmore", "Julia Garner", "a sharp, gravelly Southern-raspy chest register"),
+    "emilyratajkowski": ("Emily Ratajkowski", "Emily Ratajkowski", "a low, sultry, breathy vocal-fry cadence"),
+    "kimkardashian": ("Kim Kardashian", "Kim Kardashian", "a soft, low, unhurried vocal-fry drawl"),
+    "kendalljenner": ("Kendall Jenner", "Kendall Jenner", "a low, dry, relaxed vocal-fry cadence"),
+    "bellahadid": ("Bella Hadid", "Bella Hadid", "a low, hushed, breathy chest register"),
+    "kateupton": ("Kate Upton", "Kate Upton", "a warm, breathy chest register"),
+    "milakunis": ("Mila Kunis", "Mila Kunis", "a low, husky, dry chest register"),
+    "jessicaalba": ("Jessica Alba", "Jessica Alba", "a soft, warm, breathy chest register"),
+    "madelainepetsch": ("Madelaine Petsch", "Madelaine Petsch", "a poised, breathy, low vocal-fry cadence"),
+    "margaretqualley": ("Margaret Qualley", "Margaret Qualley", "a soft, low, breathy drawl"),
+    "adriaarjona": ("Adria Arjona", "Adria Arjona", "a warm, sultry, low chest register"),
+    "zoekravitz": ("Zoe Kravitz", "Zoe Kravitz", "a low, hushed, smoky vocal-fry cadence"),
+    "hayleyatwell": ("Hayley Atwell", "Hayley Atwell", "a rich, low, poised British contralto"),
+    "rebeccaferguson": ("Rebecca Ferguson", "Rebecca Ferguson", "a low, hushed, smoky contralto"),
+    "nataliedormer": ("Margaery Tyrell", "Natalie Dormer", "a low, smoky, purring British contralto"),
+    "amouranth": ("Amouranth", "Amouranth", "a soft, breathy, close-mic whisper-fry"),
+    "pokimane": ("Pokimane", "Pokimane", "a soft, breathy, close conversational register"),
+    "valkyrae": ("Valkyrae", "Valkyrae", "a low, slightly raspy close chest voice"),
+}
+
+
 def resolve_named_identity(
     ask: str,
     character: Optional[str] = None,
@@ -569,20 +715,35 @@ def resolve_named_identity(
     name_list = [str(n).strip() for n in (names or []) if str(n).strip()]
 
     aliases, rows = _known_identity_tokens()
+    raw_aliases: Dict[str, str] = {}
+    ali_path = PARODY_DIR / "aliases.json"
+    if ali_path.is_file():
+        try:
+            raw_aliases = {str(k).strip(): str(v).strip() for k, v in json.loads(ali_path.read_text(encoding="utf-8")).items()}
+        except Exception:
+            raw_aliases = {}
+
     ask_s = ask or ""
     if not (char or act or name_list) and ask_s:
         candidates_to_scan: List[str] = []
-        for k in aliases:
+        for k in raw_aliases:
             if len(k) >= 4:
                 candidates_to_scan.append(k)
         for r in rows:
             for fld in (r.get("character"), r.get("actor")):
                 v = (fld or "").strip()
-                if len(v) >= 4:
-                    candidates_to_scan.append(v)
+                if len(v) < 4:
+                    continue
+                # Single-word INDEX entries that collide with common English words require explicit --character/--names
+                # unless capitalized as a multi-word name or present in aliases.json.
+                if " " not in v and v.lower() in _COMMON_WORD_INDEX_COLLISIONS and v.lower() not in {x.lower() for x in raw_aliases}:
+                    continue
+                candidates_to_scan.append(v)
         candidates_to_scan = sorted(set(candidates_to_scan), key=len, reverse=True)
         matched_from_ask: List[str] = []
         for cand in candidates_to_scan:
+            if " " not in cand and cand.lower() in _COMMON_WORD_INDEX_COLLISIONS:
+                continue
             if re.search(r"(?i)\b" + re.escape(cand) + r"\b", ask_s):
                 if not any(cand.lower() in m.lower() for m in matched_from_ask):
                     matched_from_ask.append(cand)
@@ -600,7 +761,6 @@ def resolve_named_identity(
             targets.append(item)
 
     idx_dir = _AI_ROOT / "community" / "index" / "h3-known-characters"
-    ali_path = PARODY_DIR / "aliases.json"
     ref_dir = _AI_ROOT / "comfy-alienpc" / "models" / "refmods"
     req = {
         "names": targets,
@@ -611,11 +771,14 @@ def resolve_named_identity(
         "description": "adult figure with eyes, hair, and outfit",
     }
     resolved = _res.resolve_identities(req, index_dir=idx_dir, refmods_dir=ref_dir, aliases_path=ali_path)
-    matched_rows = resolved.get("matched_index_rows") or []
+    matched_rows = resolved.get("index_rows") or resolved.get("matched_index_rows") or []
     res_char = char
     res_actor = act
     if matched_rows:
-        r0 = matched_rows[0]
+        # Prefer a character+actor pair over a bare "Real Person / Celebrity" self-row when the caller didn't force character==actor
+        paired_row = next((r for r in matched_rows if r.get("character") and r.get("actor")
+                           and _res._normalize_key(r["character"]) != _res._normalize_key(r["actor"])), None)
+        r0 = paired_row if (paired_row and not char) else matched_rows[0]
         res_char = res_char or r0.get("character")
         res_actor = res_actor or r0.get("actor")
     if not res_actor:
@@ -630,6 +793,25 @@ def resolve_named_identity(
         res_char = targets[0]
 
     picked = _res.resolve_writer_refmods(still_image=None, character=res_char, names=targets)
+    stems = list(picked.get("stems") or [])
+    has_audio_refmod = any(_res._is_voice_refmod(s) for s in stems)
+
+    # Upgrade bare actor/alias (including visual-only FCMegan -> Megan Fox) to their iconic INDEX character+actor voice pair
+    voice_cue_hint = ""
+    if not has_audio_refmod:
+        for probe in (res_actor, res_char, *targets):
+            nk = _res._normalize_key(probe or "")
+            if nk in aliases:
+                nk = _res._normalize_key(aliases[nk])
+            if nk in _DEFAULT_ICONIC_VOICE_ROLE:
+                ic_char, ic_act, ic_cue = _DEFAULT_ICONIC_VOICE_ROLE[nk]
+                if not res_actor or _res._normalize_key(res_actor) == _res._normalize_key(probe or "") or str(res_char or "").upper() == "FCMEGAN":
+                    res_actor = ic_act
+                if not res_char or _res._normalize_key(res_char) == _res._normalize_key(res_actor) or str(res_char or "").upper() == "FCMEGAN":
+                    res_char = ic_char
+                voice_cue_hint = ic_cue
+                break
+
     all_names = list(dict.fromkeys([x for x in (res_char, res_actor, *targets) if x]))
     return {
         "character": res_char,
@@ -637,7 +819,10 @@ def resolve_named_identity(
         "names": all_names,
         "index_status": resolved.get("index_status") or "none",
         "index_flag": resolved.get("index_flag") or "index:none",
-        "refmods": list(picked.get("stems") or []),
+        "refmods": stems,
+        "has_audio_refmod": has_audio_refmod,
+        "is_oc": bool(has_audio_refmod or (picked.get("trigger") and _res.is_oc_name(res_char) and str(res_char or "").upper() != "FCMEGAN")),
+        "voice_cue_hint": voice_cue_hint,
         "trigger": picked.get("trigger"),
         "reason": picked.get("reason"),
     }
@@ -709,9 +894,8 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
                      "along his shaft." + " Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
     if slots.get("place"):
         lines.append(f"PLACE & WARDROBE: keep the still for face, body, light and framing; if the ask specifies a different setting, wardrobe or lines, the ask beats the still (otherwise use {slots['place']}).")
-    lines.append("LINES: line_topics never name the surface, the floor or the furniture, never his grip, his hands or his strength, "
-                 "and never the word deep; each line is "
-                 "spoken to the partner about the act, his body or hers, in the tone slot.")
+    lines.append("REALISM & CINEMA LOOK: shoot raw unretouched 35mm cinema texture—matte skin with visible pores, fine vellus hair, natural creases and subtle flush, shallow optical depth of field and shadow grain; never airbrushed, waxy, plastic or glossy AI sheen.")
+    lines.append("LINES: spoken lines use natural contractions, raw spoken vernacular (cock, cunt, pussy, throat, breed inside <d>; clinical anatomy stays in the action prose), and psychological or taboo stakes (secrecy, getting caught, authority, ownership, power gap) in a connected Command -> Cracked Reply arc; never robotic furniture inventory or stock clichés.")
     if slots.get("opening_lead") and not slots.get("inherited"):
         if (position == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or ""):
             lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's setting and {surf_noun} "
@@ -743,11 +927,17 @@ def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodie
         ichar = ident.get("character") or ""
         iact = ident.get("actor") or ""
         iflag = ident.get("index_flag") or "index:none"
+        has_voice_ref = bool(ident.get("has_audio_refmod", ident.get("is_oc")))
+        vcue = ident.get("voice_cue_hint") or "a low, close chest/vocal-fry register"
         if ichar and iact and ichar.lower() != iact.lower():
-            lines.append(f"IDENTITY (parody): (S1) is {ichar} (played by {iact}, {iflag}). Name both {ichar} and {iact} in subject_definitions:, and match <Audio 1> to {iact}\x27s {ichar} voice.")
+            voice_note = (f"match <Audio 1> to {iact}\x27s {ichar} voice." if has_voice_ref else
+                          f"never write <Audio 1>; write '(S1) says in {iact}\x27s exact {ichar} voice with signature vocal timbre, {vcue}, <breath/strain cue>: <d>[English] ...</d>' (keep register low/true, put distress in breath and pacing, never high/shrill pitch).")
+            lines.append(f"IDENTITY (parody): (S1) is {ichar} (played by {iact}, {iflag}). Name both {ichar} and {iact} in subject_definitions:, and {voice_note}")
         elif ichar or iact:
             who = ichar or iact
-            lines.append(f"IDENTITY (parody): (S1) is {who} ({iflag}). Name {who} in subject_definitions:, and match <Audio 1> to {who}\x27s voice.")
+            voice_note = (f"match <Audio 1> to {who}\x27s voice." if has_voice_ref else
+                          f"never write <Audio 1>; write '(S1) says in {who}\x27s exact voice with signature vocal timbre, {vcue}: <d>[English] ...</d>'.")
+            lines.append(f"IDENTITY (parody): (S1) is {who} ({iflag}). Name {who} in subject_definitions:, and {voice_note}")
     if slots.get("inherited"):
         inh = slots["inherited"]
         def _nz(x):
@@ -964,30 +1154,45 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     place = slots.get("place") or "setting"
     light = slots.get("light") or "light"
     hair = slots.get("hair") or "her hair as shown"
+    attire_s1 = _clean_attr(slots.get("garment") or (", ".join(slots.get("garments_all") or [])), "")
+    attire_clause = f", in {attire_s1}" if attire_s1 else ""
     position = slots.get("position") or ""
+    still_mode = str(slots.get("still_mode") or "").strip().lower()
+    use_ref_pic = (still_mode != "guide")  # ref mode + legacy unit-test callers without still_mode keep <Picture 1>
     is_male_solo = (position == "male_solo") or re.search(r"(?i)\bmale solo\b", slots.get("ask") or "")
+    ident = slots.get("identity") or {}
+    ichar = (ident.get("character") or "").strip()
+    iact = (ident.get("actor") or "").strip()
+    has_ident_audio = bool(ident.get("has_audio_refmod", ident.get("is_oc")))
+    is_named_parody = bool((ichar or iact) and not has_ident_audio)
+    has_audio_ref = bool(not is_named_parody and (has_ident_audio or not still_mode))
     if is_male_solo:
-        sd = [f"<Picture 1> is the reference image defining the {place}, its {light} and the opening framing.",
-              f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1), and "
-              f"<Audio 1> defines his voice timbre."]
-    else:
-        ident = slots.get("identity") or {}
-        ichar = (ident.get("character") or "").strip()
-        iact = (ident.get("actor") or "").strip()
-        if ichar and iact and ichar.lower() != iact.lower():
-            id_prefix = f"{ichar} ({iact}), "
-            voice_tail = f"<Audio 1> defines {iact}\x27s exact {ichar} voice timbre."
-        elif ichar or iact:
-            who = ichar or iact
-            id_prefix = f"{who}, "
-            voice_tail = f"<Audio 1> defines {who}\x27s voice timbre."
+        if use_ref_pic:
+            sd = [f"<Picture 1> is the reference image defining the {place}, its {light} and the opening framing.",
+                  f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1)" +
+                  (", and <Audio 1> defines his voice timbre." if has_audio_ref else ".")]
         else:
-            id_prefix = ""
-            voice_tail = "<Audio 1> defines her voice timbre."
-        sd = [f"<Picture 1> is the reference image defining the exact appearance, face and hairstyle of <Subject 1>, and the {place}, "
-              f"its {light} and the opening framing.",
-              f"<Subject 1> is {id_prefix}the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, {hair}; she is (S1), and "
-              f"{voice_tail}"]
+            sd = [f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1)."]
+    elif is_named_parody:
+        who_label = f"{ichar} ({iact})" if (ichar and iact and ichar.lower() != iact.lower()) else (ichar or iact)
+        if use_ref_pic and still_mode == "ref":
+            sd = [f"<Picture 1> is the reference image defining the {place}, its {light}, the wardrobe and the opening framing.",
+                  f"<Subject 1> is {who_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1)."]
+        else:
+            sd = [f"<Subject 1> is {who_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1)."]
+    else:
+        who = ichar or iact
+        id_prefix = f"{who}, " if who else ""
+        voice_tail = (f", and <Audio 1> defines {who}\x27s voice timbre." if (has_audio_ref and who) else
+                      (", and <Audio 1> defines her voice timbre." if has_audio_ref else "."))
+        if use_ref_pic:
+            sd = [f"<Picture 1> is the reference image defining the exact appearance, face and hairstyle of <Subject 1>, and the {place}, "
+                  f"its {light} and the opening framing.",
+                  f"<Subject 1> is {id_prefix}the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, {hair}; she is (S1)"
+                  f"{voice_tail}"]
+        else:
+            role_label = who or "the woman"
+            sd = [f"<Subject 1> is {role_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1){voice_tail}"]
     partners = (card or {}).get("partners") or []
     want = 1 if bodies == 2 or kind == "talk" else (2 if bodies >= 3 else 0)
     if kind == "talk" and not re.search(r"\(S2\)", dd):
@@ -1043,10 +1248,24 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     summary = re.sub(r"\s{2,}", " ", re.sub(r"(?i)\b(?:cinematic|beautiful(?:ly)?)\b,?\s*", "", summary)).strip()
     summary = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", summary)
     summary = re.sub(r"\b(?:A|An) (?=[aeiou])", "An ", re.sub(r"\bAn (?=[^aeiouAEIOU])", "A ", summary))
-    ret_line = ("<Subject 1>: not_in_clip - clip is male solo, (S1) is the man. <Picture 1>: fully_preserved - the "
-                f"{place}, the light and the opening framing." if is_male_solo else
-                "<Subject 1>: fully_preserved - face, hair and body from <Picture 1>. <Picture 1>: fully_preserved - the "
-                f"{place}, the light and the opening framing.")
+    if still_mode == "ref" and not summary.lower().startswith("[reference generation]"):
+        summary = f"[reference generation] {summary}"
+    elif still_mode == "guide":
+        summary = re.sub(r"(?i)^\[reference generation\]\s*", "", summary).strip()
+    if is_male_solo:
+        ret_line = (f"<Subject 1>: not_in_clip - clip is male solo, (S1) is the man. <Picture 1>: fully_preserved - the "
+                    f"{place}, the light and the opening framing." if use_ref_pic else
+                    f"<Subject 1>: fully_preserved - the man as described. The opening frame: fully_preserved - the "
+                    f"{place}, the light and the opening framing.")
+    elif use_ref_pic and not is_named_parody:
+        ret_line = ("<Subject 1>: fully_preserved - face, hair and body from <Picture 1>. <Picture 1>: fully_preserved - the "
+                    f"{place}, the light and the opening framing.")
+    elif use_ref_pic and is_named_parody:
+        ret_line = ("<Subject 1>: fully_preserved - face, hair and body as described. <Picture 1>: fully_preserved - the "
+                    f"{place}, the light, the wardrobe and the opening framing.")
+    else:
+        ret_line = ("<Subject 1>: fully_preserved - face, hair and body as described. The opening frame: fully_preserved - the "
+                    f"{place}, the light and the opening framing.")
     out = ["subject_definitions:", *sd, "", "summary:", summary + ".", "", "retention_analysis:",
            ret_line, "", "detailed_description:", dd]
     if continuation:
@@ -1300,9 +1519,11 @@ def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[s
         return d
 
     def vision_chat(messages):
-        return client.chat(messages, {"temperature": 0.2, "top_k": 20, "top_p": 0.9}, 7, 1024, purpose="vision_read")
+        v_model = cfg.get("vision_model_alias") or cfg.get("model_alias")
+        v_client = Client({**cfg, "model_alias": v_model}, log) if v_model != cfg.get("model_alias") else client
+        return v_client.chat(messages, {"temperature": 0.2, "top_k": 20, "top_p": 0.9}, 7, 1024, purpose="vision_read")
     read = br.vision_read(still, vision_chat)
-    d = {"read": read, "source": still, "how": "pipeline vision_read via " + cfg["model_alias"]}
+    d = {"read": read, "source": still, "how": "pipeline vision_read via " + str(cfg.get("vision_model_alias") or cfg["model_alias"])}
     wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
     log("still_read_vision", {"run": run_dir.name, "still": still})
     return d
@@ -1538,6 +1759,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         # 2 slots
         last_tone = (state_dir / "last_tone.txt").read_text(encoding="utf-8").strip() if (state_dir / "last_tone.txt").exists() else None
         slots = make_slots(still_read, ask, position, kind, run_id, last_tone, scene_prev, overlays=overlays)
+        slots["still_mode"] = _still_mode
         if identity:
             slots["identity"] = identity
             result["identity"] = identity
@@ -1737,11 +1959,37 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                                              "forearms and chest on it, weight on both feet, (S2) standing behind her")
             if debug:
                 wp_state.atomic_write(run_dir / "beat_card.json", json.dumps(card, indent=2, ensure_ascii=False))
+            # U56 Goal #4: every clip persists its planning beat sheet (all 9 canonical fields) in the run folder; timestamps never enter prompt.txt
+            _bs_method = ("in-clip [Shot N]" if (job.get("shots") == "multi" and int(job.get("shot_count") or 1) > 1) else
+                          ("native A/V continuation" if (job.get("template") == "long_continuation" or is_continue) else "planned cut"))
+            _bs_ident = f"{(identity or {}).get('character') or ''} ({(identity or {}).get('actor') or ''})".strip(" ()") or (character or "S1")
+            wp_state.atomic_write(run_dir / "beat_sheet.json", json.dumps({
+                "clip_shot_id": run_id,
+                "primary_beat": ((card or {}).get("development") or {}).get("primary_motion") or (card or {}).get("summary") or f"{position} ({kind})",
+                "opening_ending_state": {
+                    "opening": (slots.get("inherited") or {}).get("pose") or slots.get("pose") or ((card or {}).get("anchor") or {}).get("pose") or "as shown",
+                    "ending": ((card or {}).get("end_state") or {}),
+                },
+                "anchors": {
+                    "identity": _bs_ident,
+                    "wardrobe": slots.get("garments_all") or [],
+                    "location": slots.get("place"),
+                    "surface": slots.get("surface"),
+                    "props": slots.get("props") or [],
+                },
+                "camera_continuity_vs_cut": (card or {}).get("camera") or ("continuity from previous beat" if is_continue else "single continuous [Shot 1]"),
+                "spoken_dialogue_topics": ((card or {}).get("development") or {}).get("line_topics") or _q_ask or [],
+                "ambient_sfx": [((card or {}).get(p) or {}).get("sound") for p in ("anchor", "onset", "development", "result") if ((card or {}).get(p) or {}).get("sound")],
+                "frame_budget": {"frames": clip_frames, "seconds": clip_seconds, "grid": "17n+5 @ 24fps"},
+                "method": _bs_method,
+                "card": card,
+            }, indent=2, ensure_ascii=False))
         def _materialise_writer_text(raw_text: str) -> Tuple[str, str]:
             t = raw_text or ""
             if re.search(r"(?im)^\s*(?:subject_definitions|summary|retention_analysis|detailed_description|integrated_multimodal_description)\s*:", t):
                 return t, wp_lint.get_dd(t)
-            dd_only = t.strip()
+            # U56 Goal #1: strip stray overall_soundscape / non_diegetic_music headers if emitted on bare prose while keeping sound sentences
+            dd_only = re.sub(r"(?im)^\s*(?:overall_soundscape|non_diegetic_music)\s*:\s*", "", t).strip()
             return assemble_output(dd_only, card, slots, bodies, kind), dd_only
 
         # 4 prose x N (verbatim writer output; no clean_prose/normalize_prose rewriting)
@@ -1825,15 +2073,16 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         blocking = sorted(set(chosen["lint"]["hard"] or []))
         if float(chosen["lint"].get("score") or 0) < min_score:
             result["warnings"].append("low_score")
-        # Max Architect 2026-11-16 (Derrick t2070s7558 "Yes, make the checker warn-only"): lint only warns;
-        # only the 18+ safety flags still block.
-        _warn = [h for h in blocking if h not in ("youth_hint", "scale_adult")]
+        # Max Architect 2026-11-16 (Derrick t2070s7558 "Yes, make the checker warn-only") + U56 hard stops:
+        # 18+ safety flags plus U56 HARD_STOP (cowgirl_check, stock_talk) block READY; other lint flags warn only.
+        _hard_stops = getattr(wp_lint, "HARD_STOP", frozenset({"youth_hint", "scale_adult"}))
+        _warn = [h for h in blocking if h not in _hard_stops]
         if _warn:
             result["warnings"].append("lint_warn: " + ", ".join(_warn))
         for _iss in chosen["lint"].get("issues") or []:
             if _iss.get("code") == "audio_header_beta7":
                 result["warnings"].append(_iss["note"])
-        blocking = [h for h in blocking if h in ("youth_hint", "scale_adult")]
+        blocking = [h for h in blocking if h in _hard_stops]
         if status == "READY" and blocking:
             status = "NOT_READY"
             why = ", ".join(blocking) if blocking else "lint failed"
@@ -1886,6 +2135,14 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             wp_state.append_recent(recent_path, run_id, chosen["dd"])
             wp_state.atomic_write(state_dir / "last_tone.txt", slots["tone"])
             result["kept_lines"] = kl
+            _bs_file = run_dir / "beat_sheet.json"
+            if _bs_file.is_file():
+                try:
+                    _bs_doc = json.loads(_bs_file.read_text(encoding="utf-8"))
+                    _bs_doc["spoken_dialogue"] = kl
+                    wp_state.atomic_write(_bs_file, json.dumps(_bs_doc, indent=2, ensure_ascii=False))
+                except Exception:
+                    pass
             if scene_id:
                 es = dict((card or {}).get("end_state") or {})
                 bstate = (build["report"].get("build") or {}).get("state") or {}
