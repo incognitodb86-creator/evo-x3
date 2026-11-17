@@ -14,7 +14,7 @@ Max=10; Model='x3-local/flash-next'; GpuWaits=30; GpuWaitSec=120
 GpuLockPath="$HOME/AI/locks/gpu-render.lock"; IterationTimeoutSec=7200; CommandOverride=''; LogPath=''
 PassLimitSec=3600; LockPollSec=2; MemoryRoot="$HOME/AI/fleet-brain/25_memory/shared"; WorkDir="$HOME/AI/forge"
 TargetRepo='auto'; WorktreeRoot="$HOME/AI/_worktrees"; NoWorktree=0
-MaxDiffFiles=10; StaleHours=12; ClearStale=0; BackpressureCmd=''
+MaxDiffFiles=10; StaleHours=12; ClearStale=0; BackpressureCmd=''; PiCwd=''  # U56: -PiCwd target|<dir> runs pi there instead of in the work repo
 while [ $# -gt 0 ]; do
   case "$1" in
     -Max|--max) Max="$2"; shift 2;;
@@ -36,6 +36,7 @@ while [ $# -gt 0 ]; do
     -BackpressureCmd) BackpressureCmd="$2"; shift 2;;
     -CommandOverride) CommandOverride="$2"; shift 2;;
     -LogPath) LogPath="$2"; shift 2;;
+    -PiCwd) PiCwd="$2"; shift 2;;
     *) echo "unknown arg $1" >&2; exit 5;;
   esac
 done
@@ -376,6 +377,7 @@ if not agents_md.exists() or not agents_md.read_text(encoding="utf-8").strip():
     raise SystemExit(f"AGENTS.md missing or empty at {agents_md}")
 
 def remap(p_str: str) -> pathlib.Path:
+    p_str = str(pathlib.Path(p_str).expanduser())  # U56: Render settings use ~/ skill roots
     for prefix in ("/home/evo/AI/community", "/home/derekboone/AI/community"):
         if p_str.startswith(prefix):
             return pathlib.Path(str(comm_root) + p_str[len(prefix):])
@@ -439,6 +441,8 @@ PY
 clear_stale_fix_plan
 build_loop_policy
 setup_worktrees
+PassCwd="$RunWorkDir"
+if [ "$PiCwd" = target ] && [ -n "$wtTargetDir" ]; then PassCwd="$wtTargetDir"; elif [ -n "$PiCwd" ] && [ "$PiCwd" != target ] && [ -d "$PiCwd" ]; then PassCwd="$PiCwd"; fi
 
 for ((i=1; i<=Max; i++)); do
   log "iter $i of $Max start"
@@ -462,11 +466,11 @@ for ((i=1; i<=Max; i++)); do
   echo "$(date +%Y-%m-%dT%H:%M:%S) iter=$i state=start cap=${passCap}s item=$topItem" >"$hb"
   # Shared fleet memory for this pass only (process scope; Sydney's sessions never see it).
   export PI_MEMORY_DIR="$MemoryRoot"; mkdir -p "$MemoryRoot"
-  log "iter $i : PI_MEMORY_DIR=$PI_MEMORY_DIR cwd=$RunWorkDir (process scope, this pass only)"
+  log "iter $i : PI_MEMORY_DIR=$PI_MEMORY_DIR cwd=$PassCwd (process scope, this pass only)"
   if [ -n "$CommandOverride" ]; then
-    setsid bash -c "cd \"$RunWorkDir\" && $CommandOverride" >"$iterTmp" 2>&1 &
+    setsid bash -c "cd \"$PassCwd\" && $CommandOverride" >"$iterTmp" 2>&1 &
   else
-    setsid bash -c 'cd "$1" && exec pi --approve --print --model "$2" --no-session "@$3/PROMPT.md"' _ "$RunWorkDir" "$Model" "$K" >"$iterTmp" 2>&1 &
+    setsid bash -c 'cd "$1" && exec pi --approve --print --model "$2" --no-session "@$3/PROMPT.md"' _ "$PassCwd" "$Model" "$K" >"$iterTmp" 2>&1 &
   fi
   pp=$!; start=$(date +%s); lockEnd=''; timedOut=0
   while kill -0 "$pp" 2>/dev/null; do
