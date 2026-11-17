@@ -31,6 +31,11 @@ FIELDS = {
 }
 
 
+def snap_h3_frames(n: int) -> int:
+    """Snap a positive frame count up onto MiniMax-H3's 17k + 5 temporal grid (5, 22, ..., 124, ..., 243)."""
+    return 5 if n <= 5 else 5 + ((n - 5 + 16) // 17) * 17
+
+
 # RefMod identity slot: kept out of FIELDS so a template with no refmods node is untouched by its absence.
 REFMOD_FIELD = ("refmods", "mod_1")
 
@@ -89,7 +94,8 @@ def main(argv=None):
     ap.add_argument("--lora", help="set or inject face LoRA, e.g. FC_ARIANA_h3_face_v1.safetensors")
     ap.add_argument("--strength", type=float, default=0.7, help="LoRA model strength (default: 0.7)")
     ap.add_argument("--prefix", required=True, help="SaveVideo filename_prefix, e.g. community/<run>/<tag>")
-    ap.add_argument("--frames", type=int, default=None, help="c0.length; default = template value (example only)")
+    ap.add_argument("--frames", type=int, default=None, help="c0.length; default = template value (snapped up to 17k+5 H3 grid)")
+    ap.add_argument("--no-snap-frames", action="store_true", help="keep off-grid --frames literal instead of snapping to 17k+5")
     ap.add_argument("--template", default=TEMPLATE)
     ap.add_argument("--force", action="store_true", help="overwrite an existing request.api.json")
     a = ap.parse_args(argv)
@@ -115,9 +121,15 @@ def main(argv=None):
     frames = a.frames if a.frames is not None else tpl["c0"]["inputs"]["length"]
     if frames < 1:
         ap.error("--frames must be positive")
-    if (frames - 5) % 17:
-        print("WARNING: %d frames is off the H3 grid ((frames - 5) %% 17 == 0, e.g. 124, 243)" % frames,
-              file=sys.stderr)
+    if frames < 5 or (frames - 5) % 17:
+        snapped = snap_h3_frames(frames)
+        if a.no_snap_frames:
+            print("WARNING: %d frames is off the H3 grid ((frames - 5) %% 17 == 0, e.g. 124, 243)" % frames,
+                  file=sys.stderr)
+        else:
+            print("NOTE: snapped --frames %d -> %d onto MiniMax-H3 17k+5 grid" % (frames, snapped),
+                  file=sys.stderr)
+            frames = snapped
 
     g = build(tpl, prompt=prompt, seed=a.seed, image=a.image, prefix=a.prefix, frames=frames,
               refmod=a.refmod, lora=a.lora, strength=a.strength)

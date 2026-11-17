@@ -1,9 +1,10 @@
   comfyui_auto:
     aliases:
       - ls_comfyui
-    cmd: 'C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe -u C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --disable-pinned-memory --reserve-vram 1.5'
+    cmd: 'C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe -u C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --use-ck-attention --disable-pinned-memory --reserve-vram 1.5'
     cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'  # ALI-156: waits for the render queue (max 1800 s), then taskkill
     checkEndpoint: /
+    concurrencyLimit: 999
     ttl: 300  # RENDER-TIMEOUT self-heal: unload comfyui_auto after 300 s idle, so a driver that died without an unload does not strand the GPU. The published timer "measures inactivity, not lifetime - it resets on every request" (C:/AI/community/notes/web/rt_ls_ttl-and-unloading.txt:41; 300-900 s is the published range at :91-94) and the runner polls /comfyui every 60 s, so a render keeps the timer reset. This line used to claim "The group is persistent" - that was false from director 36dadae (2026-10-25 19:35) until 2026-10-26: see the GPU-LOCK note above `routing:`. Gate: C:/Users/derek/5slock/ralph-community/notes/rt_window_probe.py RT_TTL_SELFHEAL
     unloadTimeout: 1900  # ALI-156: > graceful-stop cap (1800 s). Per docs/kb/guides/model-runtime/ttl-and-unloading.md, unloadTimeout applies to all unloads (TTL, API, and swaps).
     unlisted: true
@@ -13,9 +14,10 @@
   comfyui_longvideo:
     aliases:
       - ls_comfyui_longvideo
-    cmd: 'C:\AI\comfy-longvideo\ComfyUI\.venv\Scripts\python.exe -u C:\AI\comfy-longvideo\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --disable-pinned-memory --reserve-vram 1.5 --input-directory C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input'
+    cmd: 'C:\AI\comfy-longvideo\ComfyUI\.venv\Scripts\python.exe -u C:\AI\comfy-longvideo\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --use-ck-attention --disable-pinned-memory --reserve-vram 1.5 --input-directory C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input'
     cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'
     checkEndpoint: /
+    concurrencyLimit: 999
     ttl: 600
     unloadTimeout: 1900
     unlisted: true

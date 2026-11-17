@@ -20,12 +20,35 @@ ANTIBURN = "h3_antiburn_universal_v1.safetensors"
 SUBMIT_TIMEOUT = 1200   # = live healthCheckTimeout; the /prompt POST waits behind a comfyui_auto start
 POLL_TIMEOUT = 120      # one /history read; ComfyUI answers slowly while it renders
 POLL_SEC = 60           # every /comfyui request is a wake, so the cadence sits above the measured ~90 s start
+LOST_PROMPT_MISSES = 3  # consecutive polls missing from both /queue and /history before aborting as evicted
 LOG = os.path.join(W, "community.log")
+
+
+def check_launch_argv(st, logfile=None, require_ck=None):
+    """Audit ComfyUI system_stats['system']['argv'] for RTX 5070 Ti baseline flags.
+    Logs ARGV_WARN by default; raises RuntimeError('ARGV_MISMATCH: ...') when require_ck is True or RQ_REQUIRE_CK_ARGV=1."""
+    if not isinstance(st, dict):
+        return []
+    argv = (st.get("system") or {}).get("argv")
+    if not isinstance(argv, list) or not argv:
+        return []
+    missing = [flag for flag in ("--use-ck-attention", "--disable-pinned-memory") if flag not in argv]
+    if not missing:
+        return []
+    enforce = (os.environ.get("RQ_REQUIRE_CK_ARGV", "").strip() in ("1", "true", "yes")) if require_ck is None else bool(require_ck)
+    msg = f"ComfyUI booted without {' '.join(missing)} (argv={argv})"
+    if enforce:
+        log(f"ARGV_MISMATCH {msg}", logfile)
+        raise RuntimeError("ARGV_MISMATCH: " + msg)
+    log(f"ARGV_WARN {msg}", logfile)
+    return missing
 
 def log(s, logfile=None):
     line = f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} CT {s}"
     print(line, flush=True)
     for f in {LOG, logfile} - {None}:
+        if os.path.dirname(f):
+            os.makedirs(os.path.dirname(f), exist_ok=True)
         open(f, "a", encoding="utf-8").write(line + "\n")
 
 def http(url, data=None, timeout=60, method=None):
@@ -229,6 +252,7 @@ def ensure_comfy(logfile=None):
             if n and n != "comfyui_auto": http(LS + "/api/models/unload/" + n, timeout=120, method="POST")
     t0 = time.time()
     st = http(BASE + "/system_stats", timeout=300)
+    check_launch_argv(st, logfile)
     log(f"COMFY ready v{st['system']['comfyui_version']} wait={time.time()-t0:.0f}s vram_free={st['devices'][0].get('vram_free',0)/2**30:.1f}GiB", logfile)
 
 def free_comfy(logfile: str | None = None) -> dict | None:
@@ -301,11 +325,24 @@ def fetch(pid, tag, meta, outdir, t0, logfile=None, out=None):
     log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile)
     return outcome(out, "node_error", pid, note=json.dumps(msgs)[:300])
 
+def _in_comfy_queue(pid):
+    """True when pid is in queue_running or queue_pending, False when /queue answered without pid, None on HTTP error."""
+    try:
+        q = http(BASE + "/queue", timeout=POLL_TIMEOUT)
+    except Exception:
+        return None
+    if not isinstance(q, dict):
+        return None
+    qids = {x[1] for x in (q.get("queue_running") or []) + (q.get("queue_pending") or []) if isinstance(x, (list, tuple)) and len(x) > 1}
+    return pid in qids
+
+
 def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=None):
     """One job, submit then wait (submit() + fetch() every `poll` s). Batches use run_queue.py's up-front queue."""
     t0 = time.time()
     pid = submit(g, tag, meta, outdir, logfile, out)
     if pid is None: return None
+    misses = 0
     while time.time() - t0 < timeout:
         time.sleep(poll)
         try: r = fetch(pid, tag, meta, outdir, t0, logfile, out)
@@ -318,7 +355,22 @@ def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=Non
                 log(f"poll stop {tag} comfyui_auto is not running: prompt_id {pid} is in no live history", logfile)
                 return outcome(out, "evicted", pid, note="history lost with the comfyui_auto process")
             continue
-        if r is PENDING: continue
+        if r is PENDING:
+            q_present = _in_comfy_queue(pid)
+            if q_present is False:
+                try:
+                    r2 = fetch(pid, tag, meta, outdir, t0, logfile, out)
+                except Exception:
+                    r2 = PENDING
+                if r2 is not PENDING:
+                    return r2
+                misses += 1
+                if misses >= LOST_PROMPT_MISSES:
+                    log(f"poll stop {tag} LOST_PROMPT: prompt_id {pid} absent from /queue and /history for {misses} polls", logfile)
+                    return outcome(out, "evicted", pid, note=f"LOST_PROMPT: missing from /queue and /history for {misses} polls")
+            elif q_present is True:
+                misses = 0
+            continue
         return r
     log(f"JOB timeout {tag}", logfile)
     try:
