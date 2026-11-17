@@ -1,0 +1,10 @@
+=== u6-strata-fn-q4kxl start 2026-11-15 11:32:36 CST
+CMD: /srv/bakeoff/src/PolyStrata/.venv/bin/python /srv/bakeoff/src/PolyStrata/serve/server.py --engine strata --config /srv/bakeoff/src/PolyStrata/strata-unsloth-ud-q4_k_xl.json --port 8090
+LOAD_S 40 up=1
+long {"ttft_s": 39.98, "total_s": 42.24, "prompt_tokens": 18253, "completion_tokens": 104, "client_decode_tps": 46.0, "finish": "stop", "pass": true}
+code {"ttft_s": 2.37, "total_s": 7.27, "prompt_tokens": 141, "completion_tokens": 188, "client_decode_tps": 38.43, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.93, "total_s": 23.35, "prompt_tokens": 59, "completion_tokens": 781, "client_decode_tps": 34.83, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124          90           0           1          36          34
+=== u6-strata-fn-q4kxl end 2026-11-15 11:34:40 CST

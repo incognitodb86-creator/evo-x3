@@ -1,0 +1,21 @@
+{
+  "hook": "submit_parody_run.submit_writer_run",
+  "builder": "/home/evo/AI/community/scripts/parody/build_request.py",
+  "builder_sha256": "E5BF183DA6A8F14B5725C212BF25E5929FA330087607A3EF485839786F43B9C7",
+  "ask": "brief",
+  "position": "missionary",
+  "seed": 51083601,
+  "frames": 243,
+  "status": "NOT_READY",
+  "submitted": false,
+  "at": "2026-11-15 16:00:53 CT",
+  "refmods": {
+    "template": false,
+    "injected_still": false,
+    "stems": [
+      "minimaxh3_oc_mod_1"
+    ],
+    "source": "existing"
+  },
+  "reason": "target clip to prequel not found: /home/evo/AI/community/non_existent_file.mp4"
+}

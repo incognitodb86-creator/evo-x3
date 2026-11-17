@@ -1,0 +1,46 @@
+{
+  "scene": "GI063",
+  "card_kind": "candidate",
+  "card_source": "caption of the exact start still by coding_sc117_strata (Strata uncensored 27B, reasoning_effort=none) at temperature 0, top_k 1, top_p 1.0, max_tokens 700, seed 1, 2026-10-26 01:20 CT; verbatim bytes in C:/AI/community/notes/orcrobot_card_caption.json; request/params in notes/orcrobot_card_request.json; gate built from the caption text by notes/orcrobot_card_build.py",
+  "card_sha256": "eef27c40556b732c38eba6035df87a464765c13be0bbb7b63698538842ca782e",
+  "captured_at": "2026-10-26 01:20 CT",
+  "age_note": "the caption states no ages: it says only 'human, appears caucasian' and 'anthropomorphic metallic robot', and its own notes say 'No stated ages', 'No human skin texture description provided for the robot'. So this card asserts no age for either figure. The age floor is the fiction lock's own words, 'every character is a fictional adult aged 21+' (C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md), and any age a prompt names is a canon declaration, not a sighting - age_min is that floor, not a reading of the picture.",
+  "consent_note": "the caption records the woman chained at the wrists and ankles to the bench and gives no consent signal at all, so this card asserts no consent state and its gate requires the prompt to say the record gives no consent evidence; the question stays in C:/AI/community/notes/needs_derrick.md row 21",
+  "refusal_note": "the caption carries no refusal boilerplate and no filler opener, and it names one non-obvious detail that the 2026-10-25 04:43 AM REFUSAL_TRUNCATED caption did not: 'clear high-heeled sandals with straps' on the woman's feet. The caption is a description of the still only; it is not a judgment of rendered output.",
+  "caption_verbatim": "A photorealistic, cinematic 16:9 horizontal image depicts a dark interior, likely a studio or interrogation-style chamber, with matte black walls and indistinct equipment at the far edges. A woman with long wavy blonde hair, wearing a pink lace lingerie set, black fishnet stockings on her right leg, and clear high-heeled sandals, lies prone on a black padded bench. She is chained at the wrists and ankles with heavy silver chains to the bench. She is bound; her head is turned toward the camera, mouth slightly open with visible drool. She is not gagged. Behind her stands an anthropomorphic metallic robot with a smooth dome head, articulated limbs, and black shorts, bent at the waist, its right hand gripping her right buttock, its left arm extended with a cylindrical metallic appendage. In the background, a large flat-screen TV displays a blurred image of a similar scene.",
+  "figures": [
+    {
+      "n": 1,
+      "label": "the woman",
+      "species": "human, appears caucasian (caption words)",
+      "appearance_position": "long wavy blonde hair, pink lace lingerie set, black fishnet stockings on her right leg, clear high-heeled sandals, prone on a black padded bench, head turned toward the camera, mouth slightly open, drool visible, chained at the wrists and ankles with heavy silver chains to the bench, not gagged",
+      "refusal_truncated": false,
+      "card_source": "caption of the exact start still, 2026-10-26 01:20 CT"
+    },
+    {
+      "n": 2,
+      "label": "the robot",
+      "species": "anthropomorphic metallic robot (caption words), a fictional non-human build",
+      "appearance_position": "smooth dome head, articulated limbs, black shorts, bent at the waist, right hand gripping her right buttock, left arm extended with a cylindrical metallic appendage",
+      "refusal_truncated": false,
+      "card_source": "caption of the exact start still, 2026-10-26 01:20 CT"
+    }
+  ],
+  "room_light": {
+    "room": "a dark interior, likely a studio or interrogation-style chamber, with matte black walls and indistinct equipment at the far edges; a black padded bench; heavy silver chains; a large flat-screen TV in the background",
+    "light": "strong directional lighting from the front-left, soft shadows under the bench, a cool blue glow from a light source on the right, a muted, high-contrast color palette",
+    "refusal_truncated": false
+  },
+  "quotes": [
+    "human, appears caucasian",
+    "long wavy blonde hair, pink lace lingerie set, black fishnet stockings on her right leg, and clear high-heeled sandals, lies prone on a black padded bench",
+    "chained at the wrists and ankles with heavy silver chains to the bench",
+    "her head is turned toward the camera, mouth slightly open with visible drool",
+    "She is bound",
+    "She is not gagged",
+    "anthropomorphic metallic robot with a smooth dome head, articulated limbs, and black shorts, bent at the waist, its right hand gripping her right buttock, its left arm extended with a cylindrical metallic appendage",
+    "a dark interior, likely a studio or interrogation-style chamber, with matte black walls and indistinct equipment at the far edges",
+    "large flat-screen TV displays a blurred image of a similar scene",
+    "Strong directional lighting from the front-left, soft shadows under the bench, a cool blue glow from a light source on the right, a muted, high-contrast color palette"
+  ]
+}

@@ -1,0 +1,216 @@
+{
+ "arm": "u19-iommu-on",
+ "model": "flash-next",
+ "effort": "low",
+ "started": "2026-11-15 10:16:09 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 11.339555025100708,
+   "total_s": 12.665992259979248,
+   "prompt_tokens": 18253,
+   "completion_tokens": 101,
+   "client_decode_tps": 76.14382146717136,
+   "timings": {
+    "prompt_n": 18253,
+    "prompt_ms": 11322.31177,
+    "prompt_per_token_ms": 0.6202986780255301,
+    "prompt_per_second": 1612.1266019510076,
+    "predicted_n": 101,
+    "predicted_ms": 1320.6120859999999,
+    "predicted_per_token_ms": 13.075367188118811,
+    "predicted_per_second": 76.47968776805516,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 28.476048,
+    "cache_disk_enqueue_ms": 0.004291,
+    "draft_rounds": 17,
+    "draft_n": 101,
+    "draft_n_accepted": 84,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 18253,
+     "captures": 6,
+     "captured_capacity_bytes": 1315045376,
+     "borrowed_capacity_bytes": 498401280,
+     "copied_payload_bytes": 805979668,
+     "captured_checkpoint_ids": [
+      2,
+      484,
+      969,
+      1454,
+      1939,
+      2145
+     ],
+     "global_spill": {
+      "idle_bytes": 0,
+      "foreground_bytes": 0,
+      "idle_copy_ms": 0,
+      "foreground_copy_ms": 0,
+      "stream_wait_ms": 0,
+      "residual_wait_ms": 2.659128,
+      "reassignments": 1,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3502157186,
+     "global_ram_bytes": 3502157186,
+     "global_peak_ledger_bytes": 3502191056,
+     "global_peak_ram_bytes": 3502191056,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1898315776,
+       "reserved_bytes": 0,
+       "peak_bytes": 2276130816
+      },
+      "backing_assigned": {
+       "bytes": 498401280,
+       "reserved_bytes": 498401280,
+       "peak_bytes": 498860032
+      },
+      "backing_materialized": {
+       "bytes": 4653056,
+       "reserved_bytes": 0,
+       "peak_bytes": 4653056
+      },
+      "private_state": {
+       "bytes": 800980992,
+       "reserved_bytes": 0,
+       "peak_bytes": 800980992
+      },
+      "private_tail": {
+       "bytes": 11010048,
+       "reserved_bytes": 0,
+       "peak_bytes": 11010048
+      },
+      "metadata": {
+       "bytes": 288796034,
+       "reserved_bytes": 0,
+       "peak_bytes": 288829904
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 25,
+    "lookup_n_accepted": 18
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 259,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.23083877563476562,
+   "total_s": 16.932562589645386,
+   "prompt_tokens": 59,
+   "completion_tokens": 810,
+   "client_decode_tps": 48.49798793346787,
+   "timings": {
+    "prompt_n": 59,
+    "prompt_ms": 190.225613,
+    "prompt_per_token_ms": 3.22416293220339,
+    "prompt_per_second": 310.1580227264138,
+    "predicted_n": 810,
+    "predicted_ms": 16696.763513999995,
+    "predicted_per_token_ms": 20.61328828888888,
+    "predicted_per_second": 48.51239578980841,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 6.056579,
+    "cache_disk_enqueue_ms": 0.00166,
+    "draft_rounds": 322,
+    "draft_n": 807,
+    "draft_n_accepted": 488,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 59,
+     "captures": 2,
+     "captured_capacity_bytes": 270532608,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 269015804,
+     "captured_checkpoint_ids": [
+      2147,
+      2148
+     ],
+     "global_spill": {
+      "idle_bytes": 37486592,
+      "foreground_bytes": 460914688,
+      "idle_copy_ms": 2.955774,
+      "foreground_copy_ms": 34.806603,
+      "stream_wait_ms": 0.340758,
+      "residual_wait_ms": 41.740294,
+      "reassignments": 2,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3501908934,
+     "global_ram_bytes": 3501908934,
+     "global_peak_ledger_bytes": 3502191056,
+     "global_peak_ram_bytes": 3502191056,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1627783168,
+       "reserved_bytes": 0,
+       "peak_bytes": 2276130816
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 498860032
+      },
+      "backing_materialized": {
+       "bytes": 503054336,
+       "reserved_bytes": 0,
+       "peak_bytes": 503054336
+      },
+      "private_state": {
+       "bytes": 1067974656,
+       "reserved_bytes": 0,
+       "peak_bytes": 1067974656
+      },
+      "private_tail": {
+       "bytes": 14548992,
+       "reserved_bytes": 0,
+       "peak_bytes": 14548992
+      },
+      "metadata": {
+       "bytes": 288547782,
+       "reserved_bytes": 0,
+       "peak_bytes": 288829904
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    }
+   },
+   "content": "# How a Heat Pump Works\n\nThink of a heat pump as a heat mover, not a heat maker. That single distinction is the key to understanding the whole thing.\n\nA furnace burns fuel to create heat. An electric heater converts electricity directly into warmth. A heat pump does neither. Instead, it takes heat that already exists somewhere and moves it somewhere else. In winter, it grabs heat from the cold outdoor air and dumps it inside your house. In summer, it does the reverse, pulling heat from inside your home and dumping it outside. It's the same basic machine running in two directions.\n\n**How does it grab heat from cold air?**\n\nThis is the part that trips people up. Even on a freezing day, the air outside still contains thermal energy. Things only feel cold because they have less heat than your skin, but they still have plenty. A heat pump is designed to extract that remaining warmth.\n\nThe machine uses a special fluid called a refrigerant, which has a very low boiling point. Under normal pressure, it boils at a temperature far below freezing. So when cold outdoor air blows over coils filled with this liquid refrigerant, the refrigerant absorbs heat from the air and boils into a gas. The air gets slightly colder, and the refrigerant now carries that captured heat energy inside itself.\n\n**The compressor is the engine.**\n\nThe low-pressure gas then flows into a compressor. The compressor squeezes the gas into a much smaller space. When you compress a gas, its temperature rises dramatically. Think of how a bicycle pump gets warm when you use it. The refrigerant is now a hot, high-pressure gas carrying heat energy that was originally pulled from cold air.\n\n**Releasing the heat inside.**\n\nThis hot gas flows through coils inside your home. Because the gas is now much hotter than the indoor air, heat naturally flows from the gas into the room. A fan blows air across these coils to speed up the transfer. As the gas gives up its heat, it cools and condenses back into a liquid.\n\n**Starting the cycle over.**\n\nThe now-cool liquid still has some heat left in it and is still at high pressure. It passes through a small restriction called an expansion valve. This valve suddenly drops the pressure, which causes the liquid's temperature to plummet\u2014much colder than the outdoor air. Now it's ready to absorb more heat from outside, and the whole cycle repeats.\n\n**Why it's so efficient.**\n\nBecause the heat pump is moving existing heat rather than creating it from scratch, it can deliver three to four units of heat for every one unit of electricity it uses. A conventional electric heater can only deliver one unit of heat per unit of electricity. The extra heat isn't coming from nowhere\u2014it's borrowed from the outside air. You're essentially using electricity to power the \"\u642c\u8fd0\" (the moving), not the heating itself.\n\n**The catch.**\n\nHeat pumps work best in moderate climates. When outdoor temperatures drop extremely low\u2014say, below -15\u00b0C or so\u2014there's less heat available in the air to extract, and the system has to work harder. Performance drops, and some heat pumps switch to backup electric heating, which is less efficient. But for most of the year in most places, a heat pump is one of the most energy-efficient ways to heat a building.",
+   "reasoning_chars": 556,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

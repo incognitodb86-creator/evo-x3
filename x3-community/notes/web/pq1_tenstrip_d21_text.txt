@@ -1,0 +1,15 @@
+Here is a tentative suggestion: when adding layers from other models, please try to avoid merging LoRAs. While integrating LoRAs does enhance the model's dynamics and motion, the fact is that many LoRAs are trained on AI-generated datasets with severely distorted proportions. Once the LoRA parameters are applied, the proportions between characters and scenes become completely unrecognizable. In a sense, this can actually be considered a degradation in quality.
+
+ See translation snh3 Aug 25 <div
+
+---- block ----
+
+i would also request this without turbo loras baked in.
+
+ See translation TenStrip Owner Aug 25 <div
+
+---- block ----
+
+I tested it for days, "completely unrecognizable" is way beyond their effect. You need to check your sampling and prompting. 6 step simple and use an LLM enhancing with the r2va dev prompting guide, using all subject descriptions, overall descriptions, and proper tagging in the prompt.
+
+ See translation TenStrip changed discussion status to closed Aug 25 Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images <div class="mb-4 overflow-hidden rounded-lg rounded-t-non

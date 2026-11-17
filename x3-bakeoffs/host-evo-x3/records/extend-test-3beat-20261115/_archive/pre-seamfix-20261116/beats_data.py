@@ -1,0 +1,58 @@
+# Source data for the 3-beat native latent-tail EXTEND test (Prompt maker, 2026-11-15). Cast, set, light and bios are
+# imported verbatim from the v2 overnight pack (Fix B lock). Start still GI183 guides beat 1 only.
+import sys
+V2 = "/workspace/maxops/prompts/overnight-5min-rough-20261115-v2"
+sys.path.insert(0, V2)
+from clips_data import LIGHT, S1_BIO, S2_BIO, ROOM, CAM, STILL  # noqa: E402,F401
+
+WARD_B1 = ("Wardrobe at the start of this clip: <Subject 1> wears the pink sheer string bikini top and bottom, the thin belly "
+           "chain, the necklace and the white over-the-knee high-heel boots; <Subject 2> is shirtless in navy boxer briefs, barefoot.")
+WARD_CONT = ("Wardrobe at the start of this beat: <Subject 1> wears the pink sheer string bikini top, the thin belly chain, the "
+             "necklace and the white over-the-knee high-heel boots, with the narrow pink bikini bottom pulled aside to her right "
+             "buttock, its string pressing a thin line into her skin; <Subject 2> is shirtless and barefoot with his navy boxer "
+             "briefs slid down to mid-thigh.")
+# Same state as WARD_CONT, written as a Shot 1 sentence so the join reads clear at every beat start (W5).
+WARD_LINE = ("Her pink sheer bikini top stays on, the narrow pink bikini bottom stays pulled aside to her right buttock with its "
+             "string pressing a thin line into her skin, the belly chain, the necklace and the white over-the-knee boots stay on, "
+             "and his navy boxer briefs sit slid down at mid-thigh.")
+
+BEATS = []
+def beat(**kw):
+    kw.setdefault("moved", [])
+    BEATS.append(kw)
+
+beat(id=1, frames=192, window=192, kind="act", act="doggy", pos="doggy", peak=False, method="native A/V continuation, base window",
+ primary="Bent-over doggy at the bed edge: from the GI183 stand he turns her by the hair, bends her over, clears the join and enters by ~3 s; steady one-a-second thrusts.",
+ open="Frame 0 = GI183: standing on the hardwood, he leans in at screen left in navy briefs, right hand on her breast, thigh between her legs; she stands at screen right in the pink sheer string bikini, belly chain, necklace, white over-the-knee boots, eyes on the lens.",
+ end="Bent over the low bed edge facing screen right, palms on the sheets, boots apart on the floor; he stands behind at screen left, joined, both hands on her hip bones, steady one-a-second thrusts running; framing = her face MCU (MCU_HER_3Q).",
+ end_action="stays bent over the low bed edge with her palms on the grey sheets while his steady strokes keep landing",
+ frame0="<Subject 2> leaning in at frame left with his hand on her breast, <Subject 1> at frame right in the pink bikini and white boots, both standing, as the still shows",
+ summary="Beside the low bed the man turns the woman by her hair, bends her over the bed edge and fucks her doggy-style from behind at a steady pace.",
+ shots=[(None, "FULL_STILL", "At first, the two adults stand pressed together on the dark hardwood floor exactly as <Picture 1> shows: <Subject 2> at screen left, shirtless in navy boxer briefs, his right hand on her breast; <Subject 1> at screen right in the pink sheer string bikini and the white over-the-knee boots, her eyes on the lens. His grip leads: his left hand closes in her platinum hair and turns her a quarter turn toward the low bed at screen right, her weight shifting onto her right boot, and she bends forward at the hips and plants both palms flat on the grey-lavender sheets, five fingers spread, the mattress sinking under her hands, her boots planted apart on the hardwood and her knees soft. He steps in behind her at screen left, slides his navy boxer briefs down to mid-thigh, pulls the narrow pink bikini bottom aside to her right buttock with two fingers, and his penis enters her vagina from behind in one push, his hips pressing flush against her buttocks."),
+        ("00:03.250", "MED_HIP", "As it builds, PRIMARY MOTION - (S2) settles into steady doggy thrusts with full-depth travel at one stroke a second, both hands clamping her hip bones, thumbs pressing dents into her skin, his hips meeting her buttocks at the bottom of each stroke; her buttocks ripple on each impact, her breasts swing under the sheer pink top and settle a beat late, and her spread fingers flex against the grey sheets on each impact. (S2) says in a deep, rough, low voice, <d>[English] Your pussy's dripping down my balls.</d>"),
+        ("00:06.000", "MCU_HER_3Q", "By the end, her mouth falls open and her eyes half close, her platinum hair swinging forward a beat late with each stroke. (S1) says in a hoarse, eager voice, <d>[English] Deeper. Ruin me on that cock.</d>")],
+ sfx="Skin claps on every stroke, the low bed creaks under her palms, and her moans catch on each impact.")
+
+beat(id=2, frames=187, window=209, kind="act", act="doggy", pos="doggy", peak=False, method="native A/V continuation, extension 1",
+ primary="Same bent-over doggy, harder: he wraps her hair around his fist, hauls her up into a deep arch and speeds to two hard strokes a second.",
+ open="(inherits beat 1 end, latent tail) Bent over the bed edge, joined, steady strokes running; her face MCU framing.",
+ end="Her back arched deep, head and shoulders pulled up by the hair wrapped in his right fist, his left hand on her hip, hard two-a-second thrusts running; framing = side medium at hip height (MED_HIP).",
+ end_action="stays bent over the low bed edge, arched deep with her hair in his fist while his hard thrusts keep landing",
+ frame0="<Subject 1> bent over the low bed edge at frame right with her palms on the sheets, <Subject 2> standing behind her at frame left, joined, his hands on her hips",
+ summary="Bent over the low bed edge, the woman takes harder doggy-style fucking as the man wraps her hair around his fist and pulls her up into a deep arch.",
+ shots=[(None, "MCU_HER_3Q", "At first, <Subject 1> is bent over the low bed edge at screen right with her palms on the sheets and her mouth open, and <Subject 2> stands behind her at screen left, his penis inside her vagina from behind, the steady strokes running. His grip leads: his right hand gathers her platinum hair at the back of her head and wraps it twice around his fist, five fingers closing over it, knuckles going pale."),
+        ("00:03.250", "HIGH_REAR", "As it builds, he pulls her head and shoulders up by the hair, her arms straightening and her lower back arching deep while his left hand keeps her hip. PRIMARY MOTION - (S2) drives hard, deep doggy thrusts at two strokes a second, using her hair as a handle so each pull meets each drive, his hips flush against her buttocks on every stroke; her buttocks ripple and redden at the point of impact, her breasts bounce under the sheer pink top, and her boot heels lift off the hardwood on the hardest drives. (S2) says in a deep, rough, hoarse voice, <d>[English] Scream for it. Let the whole building hear.</d>"),
+        ("00:06.250", "MED_HIP", "By the end, her arched back holds its curve, his fist stays wrapped in her hair, and the hard thrusts keep landing. (S1) says in a hoarse, breathless voice, <d>[English] Pull harder. Fuck me raw.</d>")],
+ sfx="Skin slaps hard on each drive, a sharp gasp breaks from her with every pull of her hair, and the grey headboard knocks the charcoal wall.")
+
+beat(id=3, frames=187, window=209, kind="act", act="doggy", pos="doggy", peak=True, method="native A/V continuation, extension 2",
+ primary="Same bent-over doggy, deep and slow: he lets her hair go, takes her hips and shifts to long full-length strokes with a grind at depth, building toward his climb.",
+ open="(inherits beat 2 end, latent tail) Arched deep, hair in his fist, hard thrusts running; side medium at hip height.",
+ end="Bent over the bed edge, his palms on her hips, long deep strokes still landing; his face MCU, jaw clenched, breath ragged, close to his peak (no finish in this beat).",
+ end_action="stays bent over the low bed edge, rocking back onto his long deep strokes as he nears his climax",
+ frame0="<Subject 1> bent over the low bed edge at frame right, arched with her hair in the fist of <Subject 2>, who stands behind her at frame left, joined",
+ summary="Still bent over the low bed edge, the man slows the doggy-style fucking to long, deep strokes and grinds toward his climax.",
+ shots=[(None, "MED_HIP", "At first, <Subject 1> is bent over the low bed edge at screen right with her back arched and her hair wrapped in his right fist, and <Subject 2> stands behind her at screen left, his penis deep in her vagina from behind. He leads with the hips: his fist opens and her hair falls forward over her shoulder, both his palms take her hip bones, five fingers spread. PRIMARY MOTION - (S2) shifts to long, deep strokes at one stroke every two seconds, drawing his shaft back until only the glans stays inside her and sinking in until his hips press flush against her buttocks, grinding there for a breath on each stroke; her buttocks press back to meet him, and her breasts sway under the sheer pink top. (S1) says in a hoarse, eager voice, <d>[English] Stay buried. Give me every drop.</d>"),
+        ("00:03.500", "INSERT_JOIN", "As it builds, the long strokes quicken slightly, his shaft travelling its full length in and out of her vagina, the pink bikini strip held aside against her right buttock, his thighs tightening against the backs of hers."),
+        ("00:05.750", "MCU_HIM_3Q", "By the end, his jaw clenches and his breath goes ragged, his fingers pressing pale dents into her hips, the deep strokes still landing as he climbs toward his peak. (S2) says in a deep, strained, hoarse voice, <d>[English] Fuck, I'm close. Squeeze that cunt.</d>")],
+ sfx="A wet slide sounds on each long stroke, the low bed creaks as she rocks back, and his breath grunts through his teeth.")

@@ -1,0 +1,11 @@
+=== u20-heretic-q4km-polystrata start 2026-11-15 10:09:33 CST
+CMD: /srv/bakeoff/src/PolyStrata/.venv/bin/python /srv/bakeoff/src/PolyStrata/serve/server.py --engine strata --config /srv/bakeoff/src/PolyStrata/strata-gemma4-heretic-q4km.json --port 8093
+LOAD_S 11 up=1
+long {"ttft_s": 20.31, "total_s": 20.85, "prompt_tokens": 18709, "completion_tokens": 43, "client_decode_tps": 80.16, "finish": "stop", "pass": true}
+decode {"ttft_s": 0.49, "total_s": 14.68, "prompt_tokens": 35, "completion_tokens": 900, "client_decode_tps": 63.46, "finish": "length", "pass": true}
+write1 {"ttft_s": 0.81, "total_s": 18.92, "prompt_tokens": 42, "completion_tokens": 1113, "client_decode_tps": 61.44, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.44, "total_s": 36.22, "prompt_tokens": 39, "completion_tokens": 2261, "client_decode_tps": 63.18, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+               total        used        free      shared  buff/cache   available
+Mem:             124          22           6           0          96         101
+=== u20-heretic-q4km-polystrata end 2026-11-15 10:11:20 CST

@@ -1,0 +1,6 @@
+start=2026-11-16 15:22:09 America/Chicago
+model=gemini-4-hydrogen-high
+cwd=/home/derekboone/evo-x3
+brief=/home/derekboone/evo-x3/records/U50-render-e2e-contract-brief-20261116.md
+pid_wrapper=185616
+host=evo-X3

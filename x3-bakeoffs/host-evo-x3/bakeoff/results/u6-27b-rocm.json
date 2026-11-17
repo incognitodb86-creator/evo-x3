@@ -1,0 +1,165 @@
+{
+ "arm": "u6-27b-rocm",
+ "model": "qwen27b",
+ "effort": "low",
+ "started": "2026-11-15 09:41:53 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 55.778573751449585,
+   "total_s": 64.40599322319031,
+   "prompt_tokens": 18253,
+   "completion_tokens": 98,
+   "client_decode_tps": 11.359132394222963,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18253,
+    "prompt_ms": 55753.041,
+    "prompt_per_token_ms": 3.0544590478277542,
+    "prompt_per_second": 327.3902135670053,
+    "predicted_n": 98,
+    "predicted_ms": 8626.273,
+    "predicted_per_token_ms": 88.93064948453608,
+    "predicted_per_second": 11.244717156528665
+   },
+   "content": "The on-call codename is **TANGERINE-4471** and the maintenance window is **Tuesday 03:40**.",
+   "reasoning_chars": 222,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "longdecode": {
+   "ttft_s": 0.4186551570892334,
+   "total_s": 81.00066900253296,
+   "prompt_tokens": 18244,
+   "completion_tokens": 900,
+   "client_decode_tps": 11.168745443942363,
+   "timings": {
+    "cache_n": 18216,
+    "prompt_n": 28,
+    "prompt_ms": 380.116,
+    "prompt_per_token_ms": 13.575571428571427,
+    "prompt_per_second": 73.6617243157352,
+    "predicted_n": 900,
+    "predicted_ms": 80580.912,
+    "predicted_per_token_ms": 89.63393993325917,
+    "predicted_per_second": 11.156488276032418
+   },
+   "content": "PolyStrata is a local inference engine for Qwen3.8-Flash-Next, a large MoE (mixture-of-experts) model from ISTA-DASLab's GSQ-RCO quantizations. It runs on consumer hardware by splitting expert computation between GPU and CPU, keeping the most-used experts in VRAM and computing the rest on the CPU. The engine is versioned at 0.1.26 for the main benchmarked results, with newer versions (up to 0.1.45) adding fused kernels, adaptive tier management, and various optimization switches.\n\nThree quantized model sizes are offered: Q2_0 (66 GB download, ~34 GB RAM for experts, fastest), IQ2_XS (68 GB, ~36 GB, slightly better quality at similar speed), and IQ3_XXS (76 GB, ~43 GB, best quality but slower due to more CPU work). A fourth option, the Coder, is an expert-pruned release keeping 256 of 512 experts per layer, running on just 32 GB of RAM and targeting code tasks at 91.3% of full-model SWE-bench performance. A fifth option, Swift 1.5, is a fine-tune that produces shorter thinking chains (63% fewer thinking tokens) at the same speed. An experimental 4-bit Unsloth UD-Q4_K_XL (111 GB) runs at 7-8.5 tokens/s on a 64 GB PC, reading most experts from SSD.\n\nOn the reference hardware (RTX 5070 12 GB, Ryzen 5 7600, 64 GB DDR5-5200, Windows), Q2_0 processes prompts at roughly 1,300 tokens/s at 4K context and generates output at about 93 tokens/s at 4K, dropping to 60-76 tokens/s at 128K-262K. Newer engine versions (0.1.36) improve prompt speed by 16-22% through fused int8 tensor-core kernels and decode speed by roughly 5-18% via thread-block cluster argmax on RTX 50 series. AMD support exists through ROCm/HIP, with an RX 7900 XTX row showing IQ3_S at 1,275 prompt / 60-65 output tokens/s.\n\nRequirements are modest: an NVIDIA RTX 20/30/40/50 series GPU with at least 12 GB VRAM (8 GB works slowly), 64 GB RAM recommended, an x86-64 CPU with AVX2, and about 70-80 GB disk space. The OS is Windows 10/11 or Linux. Only a graphics driver is needed beforehand; the installer handles Python, CUDA libraries, the engine binary, and the model download. On Windows, double-clicking START-HERE.bat asks four questions (model family, size, context length, images) and does everything else. On Linux, ./setup.sh does the same.\n\nThe engine's key architectural features include: an expert profile that ranks all 24,576 experts by usage frequency to decide which reside in VRAM; an adaptive tier that swaps experts in and out of VRAM as the conversation evolves; KV streaming that keeps the KV cache in RAM for contexts above 64K, freeing VRAM for more experts; speculative decoding with a multi-token prediction (MTP) draft layer; and a low-RAM mode that maps experts from a file on disk when RAM cannot hold them all, with a resident variant that copies only the hottest non-GPU experts into pinned RAM.\n\nNotable optimization switches include fused prompt kernels (STRATA_PF_FUSED), 4-bit or hybrid K8V4 KV caches, a draft vocabulary subset for C",
+   "reasoning_chars": 299,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.6241450309753418,
+   "total_s": 68.34379124641418,
+   "prompt_tokens": 59,
+   "completion_tokens": 809,
+   "client_decode_tps": 11.946311671893566,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 59,
+    "prompt_ms": 460.314,
+    "prompt_per_token_ms": 7.801932203389831,
+    "prompt_per_second": 128.17337730331903,
+    "predicted_n": 809,
+    "predicted_ms": 67719.57,
+    "predicted_per_token_ms": 83.811349009901,
+    "predicted_per_second": 11.931558336829367
+   },
+   "content": "# How a Heat Pump Works\n\nA heat pump might sound like a device that generates heat, but that's not really what it does. A heat pump *moves* heat from one place to another. That distinction is the whole secret to why they're so much more efficient than a gas furnace or an electric resistance heater.\n\nHere's the basic idea: even on a cold winter day, the outside air still contains heat. It's just a small amount, and it's spread out. A heat pump is designed to gather that scattered heat and concentrate it, then deliver it indoors. In summer, it does the reverse, pulling heat out of your home and dumping it outside.\n\nSo how does it actually pull heat out of cold air? That's where a small refrigerant loop comes in.\n\nThe system has four main parts: an outdoor coil, a compressor, an indoor coil, and a valve called an expansion device. The refrigerant (a special fluid) circulates through these parts in a continuous loop, and it changes between gas and liquid as it goes.\n\n**Step one: Absorption.** The refrigerant enters the outdoor coil as a cold, low-pressure liquid. Because it's colder than the outside air, heat from the air flows into the refrigerant. The refrigerant absorbs that heat and boils into a low-pressure gas. This is the same principle as why sweat cools your skin\u2014when a liquid evaporates, it pulls heat from its surroundings.\n\n**Step two: Compression.** The compressor, which is basically a pump, takes that low-pressure gas and squeezes it into a high-pressure gas. This is the part that uses electricity. When you compress a gas, it gets hotter. A lot hotter, in fact. The refrigerant is now a hot, high-pressure gas, even though it started out as a cold liquid that only absorbed a modest amount of heat from the air.\n\n**Step three: Release.** The hot gas flows into the indoor coil. Because it's now hotter than your indoor air, it dumps its heat into the room. As it loses heat, the refrigerant condenses back into a liquid. Your living room gets warmer.\n\n**Step four: Expansion.** The liquid then passes through the expansion valve, which suddenly drops its pressure. This causes it to cool dramatically, and now it's a cold, low-pressure liquid again\u2014ready to go back to the outdoor coil and repeat the cycle.\n\nThe key insight is this: the compressor uses a relatively small amount of electrical energy, but it's *amplifying* the heat it collected from the outside air. For every one unit of electrical energy the compressor uses, the system might deliver three, four, or even five units of heat into your home. That's why heat pumps can be three to five times more efficient than a resistance electric heater, which converts every unit of electricity directly into heat with nothing extra.\n\nIn summer, a valve called a reversing valve simply flips the direction of flow through the system. Now the indoor coil becomes the cold coil that absorbs heat from your home, and the outdoor coil becomes the hot coil that releases it outside. Same machine, same parts, just reversed.\n\nThat's why a single heat pump can both heat and cool a building. It's not creating comfort from scratch\u2014it's just being a very good at moving heat where you want it to be.",
+   "reasoning_chars": 500,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 1.378657341003418,
+     "total_s": 7.085895299911499,
+     "prompt_tokens": 388,
+     "completion_tokens": 69,
+     "client_decode_tps": 12.089911178892075,
+     "timings": {
+      "cache_n": 0,
+      "prompt_n": 388,
+      "prompt_ms": 1329.609,
+      "prompt_per_token_ms": 3.4268273195876287,
+      "prompt_per_second": 291.8151125631671,
+      "predicted_n": 69,
+      "predicted_ms": 5707.3,
+      "predicted_per_token_ms": 83.93088235294118,
+      "predicted_per_second": 11.91456555639269
+     },
+     "content": "",
+     "reasoning_chars": 162,
+     "tool_calls": [
+      {
+       "id": "kWTA6Ejm4RXQjFsku1sWY7IzNyK6BXst",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.3770909309387207,
+     "total_s": 5.0844714641571045,
+     "prompt_tokens": 452,
+     "completion_tokens": 57,
+     "client_decode_tps": 12.108645051694968,
+     "timings": {
+      "cache_n": 384,
+      "prompt_n": 68,
+      "prompt_ms": 370.282,
+      "prompt_per_token_ms": 5.445323529411764,
+      "prompt_per_second": 183.6438174148352,
+      "predicted_n": 57,
+      "predicted_ms": 4707.28,
+      "predicted_per_token_ms": 84.05857142857143,
+      "predicted_per_second": 11.896466749375435
+     },
+     "content": "",
+     "reasoning_chars": 69,
+     "tool_calls": [
+      {
+       "id": "J68M0n5eR5ZcS2WceFfQEks6IhPzTcPy",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.41437220573425293,
+     "total_s": 3.10756778717041,
+     "prompt_tokens": 525,
+     "completion_tokens": 33,
+     "client_decode_tps": 12.253101938628095,
+     "timings": {
+      "cache_n": 448,
+      "prompt_n": 77,
+      "prompt_ms": 406.988,
+      "prompt_per_token_ms": 5.285558441558441,
+      "prompt_per_second": 189.1947674132898,
+      "predicted_n": 33,
+      "predicted_ms": 2693.082,
+      "predicted_per_token_ms": 84.1588125,
+      "predicted_per_second": 11.882296937115171
+     },
+     "content": "Dana (dana@example.com) has **3 orders**: A1, A2, and A3.",
+     "reasoning_chars": 22,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

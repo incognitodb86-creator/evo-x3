@@ -1,0 +1,6 @@
+=== u19-iommu-on-r2 start 2026-11-15 10:51:33 CST
+LOAD_S 27 up=1
+long {"ttft_s": 11.3, "total_s": 13.01, "prompt_tokens": 18253, "completion_tokens": 105, "client_decode_tps": 61.31, "finish": "stop", "pass": true}
+decode {"ttft_s": 0.22, "total_s": 23.48, "prompt_tokens": 59, "completion_tokens": 868, "client_decode_tps": 37.32, "finish": "stop", "pass": true}
+=== u19-iommu-on-r2 end 2026-11-15 10:52:36 CST
+U19_ARM_DONE

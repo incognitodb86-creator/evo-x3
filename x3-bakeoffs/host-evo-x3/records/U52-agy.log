@@ -1,0 +1,26 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+Running the `parody` pytest suite after applying Edits 1–7 to inspect which existing tests asserted the old blocking/rewriting behavior.
+Running the full `parody` pytest suite including the new U52 end-to-end tests.
+Waiting for the full `parody` pytest run to complete.
+Running final verification of the `parody` and `run_queue` test suites after committing.
+Applied all 7 U51 edits with the beta7 corrections and recorded the full report in [U52-RESULT.md](file:///home/derekboone/evo-x3/records/U52-RESULT.md). No renders or queue calls were run.
+
+### Summary of Changes
+1. **Prompt & doc alignment first (Edit 6 & Edit 7):**
+   - Updated [ref2va-system-prompt.md](file:///home/evo/AI/render/rewriter/ref2va-system-prompt.md) and [writer_prompt.md](file:///home/evo/AI/render/writer_pipeline/writer_prompt.md) to R7 / TenStrip beta7 HF #77 (no `overall_soundscape:` or `non_diegetic_music:` headers; plain diegetic sound sentences at the end of `detailed_description`).
+   - Updated [AGENTS.md](file:///home/evo/AI/render/AGENTS.md) so skills/craft rules are advice, Render may write `writer_output.txt` directly and call `submit_parody_run.py writer-run` or use `render_writer_pipeline.py` as a helper, and removed the "builder rejects/rewrites" and "do not edit `writer_output.txt`" constraints.
+   - Updated [SKILL.md](file:///home/evo/AI/community/skills/h3-prompting/SKILL.md) to mark R5–R31 (except R4 18+ guard) as craft advice, added the `17n+5` frame-grid note, reworded `NOT_READY` / `do not loosen` phrasing as advice, and corrected citations (`Portland01` for `#63` retention format in beta6, `#49` unverified as TenStrip, R9 long-prompt TenStrip attribution unverified).
+   - Updated [queue-remote.sh](file:///home/evo/AI/render/x3/queue-remote.sh) line 32 to `"X3 submitter busy: waiting in background..."`.
+2. **Code changes (Edits 1–5):**
+   - [build_request.py](file:///home/evo/AI/community/scripts/parody/build_request.py): added `align_h3_frames()` (`17n+5`, >243 raises), wired into `validate_single_clip_frames` and `main()`; made `build_writer_request` advisory/passthrough by default (`strict=False`) with checks routed to warnings (keeping 18+, empty/refusal, and missing still/RefMod/graph hard stops); removed `"; all characters are consenting adults."` injection; stopped `convert_speech` from dropping spoken lines; removed silent stripping of `overall_soundscape:` / `non_diegetic_music:`.
+   - [run_queue.py](file:///home/evo/AI/community/scripts/run_queue.py): `graph_expect` now inspects `MiniMaxH3ReferenceToVideo`, `MiniMaxH3ImageToVideo`, and `EmptyMiniMaxH3LatentAV` and applies `17n+5` alignment to `f`.
+   - [render_writer_pipeline.py](file:///home/evo/AI/community/scripts/parody/render_writer_pipeline.py): snaps explicit `--frames` via `br.align_h3_frames` before the writer call; keeps writer text verbatim; replaced automatic `rewrite`/`rewrite_block`/`rewrite_builder` loops with opt-in `--fix-once` (default off); downgraded `surface_mismatch` and `missing_inherited_ending_state_pose` to warnings; stopped `clean_still_read` from mutating captions; fixed `summary_line` `queued={bool(r.get('submitted'))}`.
+   - [wp_lint.py](file:///home/evo/AI/community/scripts/parody/wp_lint.py): removed `[Shot 2+]` ban and added soft `shot_timestamp` check; set `SAFETY_HARD = frozenset({"youth_hint", "scale_adult"})`; made `talk_lines` a soft note; added loud `! WARNING` (`audio_header_beta7`, non-blocking, non-stripping) for `overall_soundscape:` / `non_diegetic_music:`.
+   - [submit_parody_run.py](file:///home/evo/AI/community/scripts/parody/submit_parody_run.py): `submit_writer_run` / `writer-run` aligns frames and defaults to advisory passthrough (`--strict` opts into legacy strict checking).
+
+### Commits & Verification
+- `/home/evo/AI/community`: `a5025fc3f81956ec8e794bf5c3e4aecc009015b2` (13 files, explicit paths, author `Max Architect <max@fleet.local>`).
+- `/home/evo/AI/render`: `a53dedd3d1b6bcd263164fc692c01921481e968b` (4 files, explicit paths, author `Max Architect <max@fleet.local>`).
+- `parody` suite: `581 passed, 5 skipped in 12.47s` (includes all 7 tests in [test_u52_e2e_passthrough.py](file:///home/evo/AI/community/scripts/parody/test_u52_e2e_passthrough.py)).
+- `run_queue` & guard tests (`tests/test_run_queue_cell_contract.py`, `tests/test_run_queue_evict_disk.py`, `tests/test_run_queue_prompt_sha.py`, `tests/test_adults_guard.py`, `tests/test_guard_scope.py`): `35 passed in 0.09s`.

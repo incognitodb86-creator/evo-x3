@@ -1,0 +1,4 @@
+{"ts": "2026-11-15 14:32:54 CT", "event": "still_read_cleaned", "run": "q8_ask1", "changed": ["floor: unseen -> the floor", "skin: glistening, wet -> damp skin with a soft natural sheen and visible pores, wet"]}
+{"ts": "2026-11-15 14:33:53 CT", "event": "clip_done", "run": "q8_ask1", "status": "READY", "seconds": 59.0, "pick": "rewrite", "warnings": []}
+{"ts": "2026-11-15 14:35:15 CT", "event": "still_read_cleaned", "run": "q8_ask2", "changed": ["skin: glistening, wet, oily -> damp skin with a soft natural sheen and visible pores"]}
+{"ts": "2026-11-15 14:36:08 CT", "event": "clip_done", "run": "q8_ask2", "status": "READY", "seconds": 52.5, "pick": "cand_3", "warnings": []}

@@ -1,0 +1,39 @@
+--- a/pi-permissions.jsonc
++++ b/pi-permissions.jsonc
+@@ -13,6 +13,12 @@
+     "write": "ask",
+     "bash": "ask",
+     "powershell": "allow", // Derek 2026-10-20 2:25 PM CT: unblock Forge from powershell
++    // community (ALI-163, 2026-10-23 11:49 AM CT, Derrick "Yes, switch Forge to the community permissions (1, 2, 4, 5)"): reads widen to C:/AI/* and
++    // ComfyUI custom_nodes source (special.external_directory below). Writes do NOT widen: these denies sit ABOVE every existing edit/write allow (last match wins).
++    "edit:C:/AI/*": "deny",
++    "write:C:/AI/*": "deny",
++    "edit:C:/Users/derek/HardcoreNSFW-TestRuntime/*": "deny",
++    "write:C:/Users/derek/HardcoreNSFW-TestRuntime/*": "deny",
+     "read:C:/Users/derek/.pi/agent/sessions/*": "deny",
+     "read:C:/AI/part1-2026-10-15/pi-sessions/*": "deny",
+     "read:*/sessions/*": "deny",
+@@ -598,6 +604,22 @@
+     "external_directory:C:/AI/security/skillspector/*": "allow",
+     // readme (ALI-163, 2026-10-23 11:07 AM CT, Derrick "Yes do it"): file tools may open custom_nodes/**/README*.md only (edit/write denied in tools). Nothing else in HardcoreNSFW-TestRuntime.
+     "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*.md": "allow",
+-    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*/*": "deny" // README* must be the file, not a folder
++    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*/README*/*": "deny", // README* must be the file, not a folder
++    // community (ALI-163, 2026-10-23 11:49 AM CT, Derrick "Yes, switch Forge to the community permissions (1, 2, 4, 5)"): file tools may READ all of C:/AI and the
++    // ComfyUI custom_nodes source (edit/write stay denied in tools above). Secret and finance paths stay blocked (listed last so they win; the guard also blocks them for Forge).
++    "external_directory:C:/AI": "allow",
++    "external_directory:C:/AI/*": "allow",
++    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes": "allow",
++    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*": "allow",
++    "external_directory:*/.env*": "deny",
++    "external_directory:*.key": "deny",
++    "external_directory:*.pem": "deny",
++    "external_directory:*rclone*": "deny",
++    "external_directory:*/sessions/*": "deny",
++    "external_directory:*/pi-sessions/*": "deny",
++    "external_directory:*/.git/config": "deny",
++    "external_directory:C:/Users/derek/.pi/agent/auth.json": "deny",
++    "external_directory:D:/Apps/finance-app*": "deny",
++    "external_directory:C:/Apps/finance-app*": "deny"
+   }
+ }

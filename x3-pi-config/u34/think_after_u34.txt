@@ -1,0 +1,7 @@
+main_default {"wall_s": 11.2, "reasoning_chars": 200, "reasoning_tokens": 67, "completion_tokens": 70, "answer": "9"}
+sub_default {"wall_s": 0.7, "reasoning_chars": 111, "reasoning_tokens": 41, "completion_tokens": 44, "answer": "9"}
+sub_req_xhigh {"wall_s": 0.3, "reasoning_chars": 58, "reasoning_tokens": 21, "completion_tokens": 24, "answer": "9"}
+main_think_on {"wall_s": 16.4, "reasoning_chars": 350, "reasoning_tokens": null, "completion_tokens": 121, "answer": "9"}
+main_default {"wall_s": 3.1, "reasoning_chars": 423, "reasoning_tokens": null, "completion_tokens": 142, "answer": "9"}
+sub_default {"wall_s": 0.2, "reasoning_chars": 0, "reasoning_tokens": null, "completion_tokens": 2, "answer": "9"}
+sub_req_think_on {"wall_s": 0.1, "reasoning_chars": 0, "reasoning_tokens": null, "completion_tokens": 2, "answer": "9"}

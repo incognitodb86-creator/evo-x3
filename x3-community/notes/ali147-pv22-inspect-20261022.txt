@@ -1,0 +1,251 @@
+== listing C:/AI/community/runs/p7_r2_c3_pmot_full_pool
+       3346136  contact_sheet.png
+       1238781  contact_sheet.png.row0.png
+        954925  contact_sheet.png.row1.png
+       1151739  contact_sheet.png.row2.png
+           398  notes.md
+         10885  p7_r2_c3_pmot_full_pool_seg1.api.json
+       5781774  p7_r2_c3_pmot_full_pool_seg1.mp4
+          1332  p7_r2_c3_pmot_full_pool_seg1.mp4.json
+         11098  p7_r2_c3_pmot_full_pool_seg2.api.json
+       4958001  p7_r2_c3_pmot_full_pool_seg2.mp4
+          1385  p7_r2_c3_pmot_full_pool_seg2.mp4.json
+         10910  p7_r2_c3_pmot_full_pool_seg3.api.json
+       5624126  p7_r2_c3_pmot_full_pool_seg3.mp4
+          1352  p7_r2_c3_pmot_full_pool_seg3.mp4.json
+      16311891  p7_r2_c3_pmot_full_pool_stitched.mp4
+           258  p7_r2_c3_pmot_full_pool_stitched.mp4.txt
+            -1  prompts
+          4156  results.json
+          1968  run.log
+== listing C:/AI/community/specs/prompt_v2
+           715  SHA256SUMS.txt
+          4411  v2_seg1_c0_r2v.txt
+          2769  v2_seg1_c1_t2va.txt
+          4358  v2_seg3_c0_r2v.txt
+          2903  v2_seg3_c1_t2va.txt
+== listing C:/AI/community/runs/ali147_pool_promptv2_s51080000
+         19191  PROOF.md
+         12480  ali147_pool_promptv2_s51080000.api.json
+       6397658  ali147_pool_promptv2_s51080000.mp4
+           533  ali147_pool_promptv2_s51080000.mp4.json
+       1746695  ali147_pool_promptv2_s51080000_stills_contact.png
+          9572  fairness.txt
+         13725  graph_diff.txt
+           653  objective.json
+         12480  request.api.json
+           635  status.log
+== arm dir exists: False
+== p7 dir
+         18110  AUDIT_2026-10-21_community_10eros.md
+          9328  KNOBS.md
+          7412  KNOBS.md.bak-20261021-pool
+          9152  KNOBS.md.bak-20261022-narrow
+         26907  P6_METRICS_PREVIEW.json
+          1408  P6_METRICS_PREVIEW.log
+          2190  P6_METRICS_PREVIEW.md
+            -1  P6_METRICS_PREVIEW_work
+            -1  _scratch
+            -1  jobs
+            -1  notes
+             0  preview.err
+           704  preview.out
+            -1  reviews
+             0  unittest.err
+           101  unittest.out
+== p7 jobs
+             0  ali147_pool_dip_s51080000.err.out
+             0  ali147_pool_dip_s51080000.err.out.failed-20261022
+           575  ali147_pool_dip_s51080000.out
+           568  ali147_pool_dip_s51080000.out.failed-20261022
+           851  ali147_pool_dip_s51080000.result.json
+           852  ali147_pool_dip_s51080000.result.json.failed-20261022
+             0  ali147_pool_fix1_s51080000.err.out
+           607  ali147_pool_fix1_s51080000.out
+           833  ali147_pool_fix1_s51080000.result.json
+             0  ali147_pool_fix4_s51080000.err.out
+             0  ali147_pool_fix4_s51080000.err.out.failed-20261022
+           610  ali147_pool_fix4_s51080000.out
+          5720  ali147_pool_fix4_s51080000.out.failed-20261022
+           833  ali147_pool_fix4_s51080000.result.json
+           890  ali147_pool_fix4_s51080000.result.json.failed-20261022
+             0  ali147_pool_fix5_s51080000.err.out
+           607  ali147_pool_fix5_s51080000.out
+           833  ali147_pool_fix5_s51080000.result.json
+             0  ali147_pool_promptv2_s51080000.err.out
+           635  ali147_pool_promptv2_s51080000.out
+           863  ali147_pool_promptv2_s51080000.result.json
+             0  ali147_pool_refsheet_b_s51080000.err.out
+           649  ali147_pool_refsheet_b_s51080000.out
+           879  ali147_pool_refsheet_b_s51080000.result.json
+             0  ali147_pool_refsheet_s51080000.err.out
+           635  ali147_pool_refsheet_s51080000.out
+           865  ali147_pool_refsheet_s51080000.result.json
+             0  p7_final_rank.err.out
+           730  p7_final_rank.out
+           643  p7_final_rank.result.json
+             0  p7_r1_c1_pmot.err.out
+           784  p7_r1_c1_pmot.out
+           509  p7_r1_c1_pmot.result.json
+             0  p7_r1_c1_pmot_full.err.out
+          1868  p7_r1_c1_pmot_full.out
+           624  p7_r1_c1_pmot_full.result.json
+             0  p7_r1_c2_st12.err.out
+           473  p7_r1_c2_st12.out
+           509  p7_r1_c2_st12.result.json
+             0  p7_r1_c3_ab05.err.out
+           471  p7_r1_c3_ab05.out
+           507  p7_r1_c3_ab05.result.json
+             0  p7_r1_full_review.err.out
+           617  p7_r1_full_review.out
+           658  p7_r1_full_review.result.json
+             0  p7_r1_probe_review.err.out
+          1063  p7_r1_probe_review.out
+           662  p7_r1_probe_review.result.json
+           619  p7_r1_rank.result.json
+             0  p7_r2_c1_sd1000.err.out
+           545  p7_r2_c1_sd1000.out
+           516  p7_r2_c1_sd1000.result.json
+             0  p7_r2_c2_ab03.err.out
+           471  p7_r2_c2_ab03.out
+           510  p7_r2_c2_ab03.result.json
+             0  p7_r2_c3_pmot.err.out
+           784  p7_r2_c3_pmot.out
+           510  p7_r2_c3_pmot.result.json
+             0  p7_r2_c3_pmot_full.err.out
+          1354  p7_r2_c3_pmot_full.out
+             0  p7_r2_c3_pmot_full_pool.err.out
+          1968  p7_r2_c3_pmot_full_pool.out
+           646  p7_r2_c3_pmot_full_pool.result.json
+             0  p7_r2_full_review.err.out
+           647  p7_r2_full_review.out
+           659  p7_r2_full_review.result.json
+             0  p7_r2_probe_review.err.out
+          1069  p7_r2_probe_review.out
+           661  p7_r2_probe_review.result.json
+             0  p7_r3_c3_sd1000.err.out
+           800  p7_r3_c3_sd1000.out
+           516  p7_r3_c3_sd1000.result.json
+             0  p7_r3_probe_review.err.out
+           616  p7_r3_probe_review.out
+           663  p7_r3_probe_review.result.json
+           116  request_iter01.json
+           119  request_iter02.json
+           116  request_iter03.json
+           116  request_iter04.json
+           184  request_iter05.json
+            63  request_iter06.json
+           117  request_iter07.json
+           277  request_iter08.json
+           193  request_iter09.json
+== SRC C:/AI/community/runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3.api.json
+bytes 10910 sha256 c5b6726c1d5870f597ba51fcf65499d489be9a1755ebf1905ab8fac5960e8fec
+CRLF 348 LF 348 trailing_newline False
+first 260: b'{\r\n "clip": {\r\n  "class_type": "CLIPLoader",\r\n  "inputs": {\r\n   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",\r\n   "type": "minimax",\r\n   "device": "default"\r\n  }\r\n },\r\n "vvae": {\r\n  "class_type": "VAELoader",\r\n  "inputs": {\r\n   "vae_name": "mini'
+last 120: b' "community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3",\r\n   "format": "auto",\r\n   "codec": "auto"\r\n  }\r\n }\r\n}'
+top-level type dict
+top keys: ["clip", "vvae", "avae", "ksel", "noise", "unet", "m_attn", "m_vsa", "m_shift", "img", "c0", "s0_sched", "s0_guide", "s0_samp", "win1", "c1", "tail1", "s1_sched", "s1_guide", "s1_samp", "app1", "dec_v", "dec_a", "mkvid", "save"]
+  node app1   MiniMaxH3AppendContinuation        inputs=["overlap_audio_tokens", "overlap_video_tokens", "previous_av_latent", "sampled_window", "transition_audio_tokens", "transition_video_tokens"]
+  node avae   VAELoader                          inputs=["vae_name"]
+  node c0     MiniMaxH3ReferenceToVideo          inputs=["audio_vae", "clip", "height", "length", "prompt", "ref_image_size", "ref_images.ref_image_1", "vae", "width"]
+  node c1     MiniMaxH3ImageToVideo              inputs=["clip", "height", "length", "prompt", "vae", "width"]
+  node clip   CLIPLoader                         inputs=["clip_name", "device", "type"]
+  node dec_a  VAEDecodeAudio                     inputs=["samples", "vae"]
+  node dec_v  VAEDecode                          inputs=["samples", "vae"]
+  node img    LoadImage                          inputs=["image"]
+  node ksel   KSamplerSelect                     inputs=["sampler_name"]
+  node m_attn ModelAttentionBackend              inputs=["attention", "model"]
+  node m_shift MiniMaxH3SigmaShift                inputs=["model", "shift_audio", "shift_video"]
+  node m_vsa  BlockSparseAttention               inputs=["dense_blocks", "end_percent", "extra_tokens", "min_tokens", "model", "selection", "selection.keep_percent", "sink_conditioning", "start_percent", "verbose"]
+  node mkvid  CreateVideo                        inputs=["audio", "fps", "images"]
+  node noise  RandomNoise                        inputs=["noise_seed"]
+  node s0_guide BasicGuider                        inputs=["conditioning", "model"]
+  node s0_samp SamplerCustomAdvanced              inputs=["guider", "latent_image", "noise", "sampler", "sigmas"]
+  node s0_sched BasicScheduler                     inputs=["denoise", "model", "scheduler", "steps"]
+  node s1_guide BasicGuider                        inputs=["conditioning", "model"]
+  node s1_samp SamplerCustomAdvanced              inputs=["guider", "latent_image", "noise", "sampler", "sigmas"]
+  node s1_sched BasicScheduler                     inputs=["denoise", "model", "scheduler", "steps"]
+  node save   SaveVideo                          inputs=["codec", "filename_prefix", "format", "video"]
+  node tail1  MiniMaxH3LatentTailGuide           inputs=["overlap_audio_tokens", "overlap_video_tokens", "positive", "previous_av_latent", "target_av_latent"]
+  node unet   UNETLoader                         inputs=["unet_name", "weight_dtype"]
+  node vvae   VAELoader                          inputs=["vae_name"]
+  node win1   MiniMaxH3GuidedContinuationWindow  inputs=["extension_frames", "overlap_frames", "previous_av_latent"]
+  str avae.vae_name STR sha256 05719b63960c4bd2378b525c19a7af21485c344c1b090fd1c1c9335ca7ff448e head 'minimax_h3_audio_vae_fp32.safetensors'
+  str c0.prompt PROMPT-LEN-3354 sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76 head 'subject_definitions:\n<Subject 1> is the adult woman whose appearance c'
+  str c0.ref_image_size STR sha256 4945a70fa7f9c13fe1931a3372ac5798140d42eba74d0dd805a4a216ed3a8142 head 'match'
+  str c1.prompt PROMPT-LEN-2269 sha256 dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89 head 'integrated_multimodal_description: [Shot 1] Live-action, cinematic, a '
+  str clip.clip_name STR sha256 48b22d3506fc69910fdf217511a944cd8eba363de43fd55cfb3360137660e87d head 'qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors'
+  str clip.type STR sha256 e1517be14d06cdb72af7bb52a289a0d5eab667e8b52ec4bac02914e1245f8a40 head 'minimax'
+  str clip.device STR sha256 37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f head 'default'
+  str img.image STR sha256 04a31e4407abbcfe97505cf2ea11e3cb6079551df854813d73f92d164b50223e head 'community/POOL_768x1344.png'
+  str ksel.sampler_name STR sha256 c23c23a7c71feb7e0bd8f3b0d1eb5603df23a831bb6a4ec36a407f571e02df43 head 'euler'
+  str m_attn.attention STR sha256 4a9f36696793ac5d18403e574312100ad8e4f6f0f6cb8290b08d39543e161eee head 'comfy kitchen attention'
+  str m_vsa.selection STR sha256 e323c389c7991c5796391b61a0c6fca3df037f7b5d0475ccbd5ffea21a6630a8 head 'vsa'
+  str m_vsa.sink_conditioning STR sha256 a76a4c510d7b287702f5204508cd53c58c4779d83043ebd1028649ad356add9b head 'exact_kv_and_rows'
+  str s0_sched.scheduler STR sha256 a7a39b72f29718e653e73503210fbb597057b7a1c77d1fe321a1afcff041d4e1 head 'simple'
+  str s1_sched.scheduler STR sha256 a7a39b72f29718e653e73503210fbb597057b7a1c77d1fe321a1afcff041d4e1 head 'simple'
+  str save.filename_prefix PROMPT-LEN-62 sha256 bf21fde2efd66b9af17b5a3871dd535f3f1970b17b6dfb705dde8fd587c47200 head 'community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3'
+  str save.format STR sha256 929260ad9b9ea9fe0f3553dd964f4ff3deb5792efd031a2b90f573fe91f012bb head 'auto'
+  str save.codec STR sha256 929260ad9b9ea9fe0f3553dd964f4ff3deb5792efd031a2b90f573fe91f012bb head 'auto'
+  str unet.unet_name STR sha256 fddd3c0b1d76eaf6f8082d79238c7a4b6ae6f1f0c8b941cddd429f5e67c8676b head '10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors'
+  str unet.weight_dtype STR sha256 37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f head 'default'
+  str vvae.vae_name STR sha256 5f7b6d8c6e6562bb224d1c9bd484a8de91c66c918421aa817b7bc720871fa662 head 'minimax_h3_video_vae_int8_convrot.safetensors'
+seed-like 51080002 at 507
+  detail avae VAELoader {"vae_name": "minimax_h3_audio_vae_fp32.safetensors"}
+  detail c0 MiniMaxH3ReferenceToVideo {"clip": ["clip", 0], "vae": ["vvae", 0], "audio_vae": ["avae", 0], "prompt": "subject_definitions:\n<Subject 1> is the adult woman whose appearance comes from <Picture 1>, with long straight blonde hair worn loose past her shoulders, blue eyes, a slim and toned body, lightly tanned skin, and a wet, sheer champagne-beige scoop-neck bikini top and matching sheer low-rise bikini bottoms.\n\nsummary:\n[reference generation] The target video is a 10-second clip featuring <Subject 1>, the adult woman defined from <Picture 1>. The shot composes a new scene on a white leather sofa while preserving he
+  detail c1 MiniMaxH3ImageToVideo {"clip": ["clip", 0], "vae": ["vvae", 0], "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, a medium shot frames an adult woman in her late twenties, with long straight blonde hair worn loose past her shoulders, blue eyes, slim and toned with lightly tanned skin, lying on a white leather sofa after the previous action. The wet sheer champagne-beige scoop-neck bikini top and matching sheer low-rise bikini bottoms are no longer on her body; the matching bottoms lie dropped on the floor beside the sofa, and her body is nude. The camera holds a static shot with no cut.
+  detail clip CLIPLoader {"clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors", "type": "minimax", "device": "default"}
+  detail img LoadImage {"image": "community/POOL_768x1344.png"}
+  detail m_attn ModelAttentionBackend {"model": ["unet", 0], "attention": "comfy kitchen attention"}
+  detail m_shift MiniMaxH3SigmaShift {"model": ["m_vsa", 0], "shift_video": 10.0, "shift_audio": 3.0}
+  detail m_vsa BlockSparseAttention {"model": ["m_attn", 0], "selection": "vsa", "selection.keep_percent": 10, "start_percent": 0.2, "end_percent": 1.0, "dense_blocks": "", "min_tokens": 12288, "extra_tokens": 256, "sink_conditioning": "exact_kv_and_rows", "verbose": false}
+  detail noise RandomNoise {"noise_seed": 51080002}
+  detail s0_sched BasicScheduler {"model": ["m_shift", 0], "scheduler": "simple", "steps": 10, "denoise": 1.0}
+  detail s1_sched BasicScheduler {"model": ["m_shift", 0], "scheduler": "simple", "steps": 10, "denoise": 1.0}
+  detail save SaveVideo {"video": ["mkvid", 0], "filename_prefix": "community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3", "format": "auto", "codec": "auto"}
+  detail unet UNETLoader {"unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors", "weight_dtype": "default"}
+  detail vvae VAELoader {"vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"}
+EXACT FORMAT MATCH indent=1 newline='\r\n'
+seg1 api.json bytes 10885 sha256 c3dedab341f2b108ee31dd1aadd51a00b9a74008ca8511b604d3962d20d125d3
+seg1 nodes ["app1", "avae", "c0", "c1", "clip", "dec_a", "dec_v", "img", "ksel", "m_attn", "m_shift", "m_vsa", "mkvid", "noise", "s0_guide", "s0_samp", "s0_sched", "s1_guide", "s1_samp", "s1_sched", "save", "tail1", "unet", "vvae", "win1"]
+seg3 nodes ["app1", "avae", "c0", "c1", "clip", "dec_a", "dec_v", "img", "ksel", "m_attn", "m_shift", "m_vsa", "mkvid", "noise", "s0_guide", "s0_samp", "s0_sched", "s1_guide", "s1_samp", "s1_sched", "save", "tail1", "unet", "vvae", "win1"]
+common ["app1", "avae", "c0", "c1", "clip", "dec_a", "dec_v", "img", "ksel", "m_attn", "m_shift", "m_vsa", "mkvid", "noise", "s0_guide", "s0_samp", "s0_sched", "s1_guide", "s1_samp", "s1_sched", "save", "tail1", "unet", "vvae", "win1"]
+  node app1 IDENTICAL
+  node avae IDENTICAL
+  node c0 DIFFERS len 3558 vs 3617
+  node c1 DIFFERS len 2466 vs 2432
+  node clip IDENTICAL
+  node dec_a IDENTICAL
+  node dec_v IDENTICAL
+  node img IDENTICAL
+  node ksel IDENTICAL
+  node m_attn IDENTICAL
+  node m_shift IDENTICAL
+  node m_vsa IDENTICAL
+  node mkvid IDENTICAL
+  node noise DIFFERS len 65 vs 65
+  node s0_guide IDENTICAL
+  node s0_samp IDENTICAL
+  node s0_sched IDENTICAL
+  node s1_guide IDENTICAL
+  node s1_samp IDENTICAL
+  node s1_sched IDENTICAL
+  node save DIFFERS len 182 vs 182
+  node tail1 IDENTICAL
+  node unet IDENTICAL
+  node vvae IDENTICAL
+  node win1 IDENTICAL
+== SHA256SUMS.txt
+bytes 715 sha256 bbdf651307ec71911ed105146b8d134577cea7ca2ed072ef9c5b1fc66b372b03
+  5b719feb800ce389d3900a820f79092e1404fe2056e7e8e02996da171546c38b  v2_rs016_c1_r2v.txt
+  889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6  v2_seg1_c0_r2v.txt
+  2af197051066cde01c0d7f0e69d48a75e57469bbe56b081e47ea28774ca3d3dd  v2_seg1_c1_r2v_fix1.txt
+  655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b  v2_seg1_c1_t2va.txt
+  ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b  v2_seg3_c0_r2v.txt
+  2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383  v2_seg3_c1_t2va.txt
+  04171a08afc2a371a26566202d499fb5dfad0bec738c625b192a183eedc284c2  stillfix_A_anatomy_ref_klein.txt
+  e31fc04ca7f1217a75f2439adecbb918a84dc2fa737af7cc6cf421a2756c158c  stillfix_B_matte_skin_klein.txt
+prompt v2_seg3_c0_r2v.txt bytes 4358 sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b crlf 0 trailing_nl False
+  chars 4358 head 'subject_definitions:\n<Subject 1> is the adult woman shown in <Picture 1>, with long straight blonde hair worn loose past' tail ' light leather contact, and a brief fabric rustle on the floor are audible during the movement.\n\nnon_diegetic_music:\nN/A'
+prompt v2_seg3_c1_t2va.txt bytes 2903 sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383 crlf 0 trailing_nl False
+  chars 2903 head 'integrated_multimodal_description: [Shot 1] Live-action, cinematic. Photorealistic skin and anatomy: natural matte skin ' tail 'ern and gentle low-frequency pulses that swell slightly as she rolls onto her side and then fade quietly after the kiss.'

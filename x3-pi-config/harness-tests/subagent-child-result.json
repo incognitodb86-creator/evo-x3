@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "runId": "b958180d-58f3-40ea-b75e-fc0ef901408f",
+  "createdAt": 1794764525601,
+  "entries": [
+    {
+      "agent": "scout",
+      "resultIndex": 0,
+      "source": "output-artifact",
+      "path": "/tmp/pi-subagents-uid-1000/artifacts/b958180d-58f3-40ea-b75e-fc0ef901408f_scout_output.md"
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+ "arm": "u19-iommu-off-r2",
+ "model": "flash-next",
+ "effort": "low",
+ "started": "2026-11-15 10:20:11 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 11.28448486328125,
+   "total_s": 13.056477308273315,
+   "prompt_tokens": 18253,
+   "completion_tokens": 108,
+   "client_decode_tps": 60.94834112031646,
+   "timings": {
+    "prompt_n": 18253,
+    "prompt_ms": 11270.120157000001,
+    "prompt_per_token_ms": 0.6174393336437847,
+    "prompt_per_second": 1619.592315407822,
+    "predicted_n": 108,
+    "predicted_ms": 1767.11287,
+    "predicted_per_token_ms": 16.3621562037037,
+    "predicted_per_second": 61.11663936893856,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 135.196729,
+    "cache_disk_enqueue_ms": 0.004220000000000001,
+    "draft_rounds": 20,
+    "draft_n": 122,
+    "draft_n_accepted": 88,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 18253,
+     "captures": 6,
+     "captured_capacity_bytes": 1315045376,
+     "borrowed_capacity_bytes": 498401280,
+     "copied_payload_bytes": 805979668,
+     "captured_checkpoint_ids": [
+      2,
+      484,
+      969,
+      1454,
+      1939,
+      2145
+     ],
+     "global_spill": {
+      "idle_bytes": 0,
+      "foreground_bytes": 0,
+      "idle_copy_ms": 0,
+      "foreground_copy_ms": 0,
+      "stream_wait_ms": 0,
+      "residual_wait_ms": 2.52754,
+      "reassignments": 1,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3505590686,
+     "global_ram_bytes": 3505590686,
+     "global_peak_ledger_bytes": 3505624528,
+     "global_peak_ram_bytes": 3505624528,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1901461504,
+       "reserved_bytes": 0,
+       "peak_bytes": 2278359040
+      },
+      "backing_assigned": {
+       "bytes": 498401280,
+       "reserved_bytes": 498401280,
+       "peak_bytes": 498860032
+      },
+      "backing_materialized": {
+       "bytes": 4653056,
+       "reserved_bytes": 0,
+       "peak_bytes": 4653056
+      },
+      "private_state": {
+       "bytes": 800980992,
+       "reserved_bytes": 0,
+       "peak_bytes": 800980992
+      },
+      "private_tail": {
+       "bytes": 11010048,
+       "reserved_bytes": 0,
+       "peak_bytes": 11010048
+      },
+      "metadata": {
+       "bytes": 289083806,
+       "reserved_bytes": 0,
+       "peak_bytes": 289117648
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 14,
+    "lookup_n_accepted": 7
+   },
+   "content": "The EVO-X3 maintenance window is Tuesday 03:40, and the on-call codename is TANGERINE-4471.",
+   "reasoning_chars": 282,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.23768186569213867,
+   "total_s": 18.553017616271973,
+   "prompt_tokens": 59,
+   "completion_tokens": 793,
+   "client_decode_tps": 43.297049576330856,
+   "timings": {
+    "prompt_n": 59,
+    "prompt_ms": 195.392944,
+    "prompt_per_token_ms": 3.311744813559322,
+    "prompt_per_second": 301.95563254320996,
+    "predicted_n": 793,
+    "predicted_ms": 18309.470987999972,
+    "predicted_per_token_ms": 23.088866315258475,
+    "predicted_per_second": 43.31091818653484,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 6.136933,
+    "cache_disk_enqueue_ms": 0.00138,
+    "draft_rounds": 291,
+    "draft_n": 826,
+    "draft_n_accepted": 502,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 59,
+     "captures": 2,
+     "captured_capacity_bytes": 270532608,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 269015804,
+     "captured_checkpoint_ids": [
+      2147,
+      2148
+     ],
+     "global_spill": {
+      "idle_bytes": 25690112,
+      "foreground_bytes": 472711168,
+      "idle_copy_ms": 2.146316,
+      "foreground_copy_ms": 36.414034,
+      "stream_wait_ms": 0.341174,
+      "residual_wait_ms": 43.391549,
+      "reassignments": 2,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3505342270,
+     "global_ram_bytes": 3505342270,
+     "global_peak_ledger_bytes": 3505624528,
+     "global_peak_ram_bytes": 3505624528,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1630928896,
+       "reserved_bytes": 0,
+       "peak_bytes": 2278359040
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 498860032
+      },
+      "backing_materialized": {
+       "bytes": 503054336,
+       "reserved_bytes": 0,
+       "peak_bytes": 503054336
+      },
+      "private_state": {
+       "bytes": 1067974656,
+       "reserved_bytes": 0,
+       "peak_bytes": 1067974656
+      },
+      "private_tail": {
+       "bytes": 14548992,
+       "reserved_bytes": 0,
+       "peak_bytes": 14548992
+      },
+      "metadata": {
+       "bytes": 288835390,
+       "reserved_bytes": 0,
+       "peak_bytes": 289117648
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    }
+   },
+   "content": "# How a Heat Pump Works\n\nA heat pump is a machine that moves heat from one place to another. That's really all it does. It doesn't create heat the way a furnace burns fuel to make it. Instead, it picks up warmth from somewhere and delivers it somewhere else. This is why it can be so efficient.\n\nThink of it like a water pump. A water pump doesn't create water. It takes water from one location and pushes it to another. A heat pump does the same thing, but with heat instead of water.\n\n**The basic idea**\n\nHeat naturally flows from warm places to cold places. A cup of hot coffee cools down because heat leaks out into the cooler room air. A heat pump reverses this natural flow. It forces heat to move the opposite direction \u2014 from a cold place to a warm place. To do that, it needs energy, just like a water pump needs electricity to push water uphill.\n\n**The key ingredient: refrigerant**\n\nInside a heat pump is a special fluid called a refrigerant. This fluid has a very useful property: it can change from a liquid to a gas and back again at relatively low temperatures. This phase change is the secret to how the whole system works.\n\nWhen a liquid turns into a gas, it absorbs heat. When a gas turns back into a liquid, it releases heat. That's the entire principle behind the machine.\n\n**The cycle**\n\nHere's what happens step by step:\n\nFirst, the refrigerant flows through a set of coils (called the evaporator) located outside your home, even in winter. The refrigerant is very cold \u2014 colder than the outside air. Because it's colder than its surroundings, it absorbs heat from the air. The outside air might feel freezing to you, but as long as it's above absolute zero, it contains heat energy. The refrigerant soaks that up and turns from a liquid into a gas.\n\nSecond, the gas moves to the compressor. The compressor squeezes the gas tightly. When you compress a gas, it gets hot \u2014 much hotter than the air inside your home. This is the same reason a bicycle pump gets warm when you use it.\n\nThird, the hot gas flows through another set of coils (called the condenser) inside your home. Because the gas is now hotter than the indoor air, it releases its heat into your house. As it gives up heat, the refrigerant cools down and turns back into a liquid.\n\nFourth, the liquid passes through a pressure-reducing valve, which drops its pressure and temperature dramatically. Now it's cold again, ready to go outside and start the whole cycle over.\n\n**Heating and cooling**\n\nMost heat pumps can run this cycle in reverse. In summer mode, the machine picks up heat from inside your home and dumps it outside, acting like an air conditioner. A small valve called a reversing valve switches the direction of the flow.\n\n**Why it's efficient**\n\nA conventional furnace might convert 90% of its fuel into usable heat. A heat pump, because it's moving existing heat rather than creating it, can deliver three to four units of heat for every one unit of electricity it consumes. It's like using a lever to lift something heavy \u2014 you're not creating force, you're multiplying what you put in.",
+   "reasoning_chars": 496,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

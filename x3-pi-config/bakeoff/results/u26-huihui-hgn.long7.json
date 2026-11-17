@@ -1,0 +1,13 @@
+{
+ "copies": 7,
+ "prompt_tokens": 127486,
+ "completion_tokens": 253,
+ "ttft_s": 71.22,
+ "total_s": 74.76,
+ "client_prefill_tps": 1790.1,
+ "client_decode_tps": 71.4,
+ "needle": true,
+ "fixture_fact": true,
+ "finish": "stop",
+ "content": "The release build label for the X3 cluster is MAGENTA-HERON-9182, and the FIXTURE NOTE's on-call codename is TANGERINE-4471 with a maintenance window of Tuesday 03:40."
+}

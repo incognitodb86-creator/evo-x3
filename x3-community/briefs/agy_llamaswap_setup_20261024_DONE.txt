@@ -1,0 +1,112 @@
+================================================================================
+ANTIGRAVITY (FLASH HIGH) LLAMA-SWAP + RENDER PATH SETUP REPORT
+Date: 2026-10-24
+Brief: C:\AI\community\briefs\agy_llamaswap_setup_20261024.md
+================================================================================
+
+1. WHAT CHANGED (SETTINGS & CODE ALIGNMENT)
+--------------------------------------------------------------------------------
+- scripts/comm.py:
+  Old: BASE = LS + "/upstream/comfyui_auto"
+  New: BASE = LS + "/comfyui"
+  URL: https://github.com/mostlygeek/llama-swap/blob/main/docs/kb/guides/upstreams/comfyui.md
+  Reason: Uses llama-swap's dedicated /comfyui/ passthrough route reserved for comfyui_auto.
+
+- scripts/comfy_ctl.py:
+  Old: COMFY = "http://127.0.0.1:10004"
+  New: COMFY = LS + "/comfyui"
+  URL: https://github.com/mostlygeek/llama-swap/blob/main/docs/kb/guides/upstreams/comfyui.md
+  Reason: Removes dependency on hardcoded port; llama-swap dynamically proxies /comfyui/.
+
+- scripts/run_graph_job.py:
+  Old: COMFY = "http://127.0.0.1:10004" / wake GET /comfyui/
+  New: COMFY = LS + "/comfyui" / wake polls /comfyui/system_stats
+  URL: https://github.com/mostlygeek/llama-swap/blob/main/docs/kb/guides/upstreams/comfyui.md
+  Reason: Root GET /comfyui/ is in the ignored set and returns 404 while model is unloaded.
+          Polling /comfyui/system_stats triggers model wake and readiness wait up to healthCheckTimeout.
+
+- scripts/run_graph_job.py (contact sheets):
+  Old: Sampled +-1.5s around fixed 10/20/30/40/50s marks (intended for 60s clips).
+  New: Generates stills every second for clips <= 25s (16 stills across 0-15s).
+  URL: https://ffmpeg.org/ffmpeg-filters.html
+
+- config/llama-swap.yaml:
+  Verified: upstream.ignorePaths contains static assets + '^/api/jobs$' + '^/ws(/|$)'
+  Verified: comfyui_longvideo uses comfy_graceful_stop.ps1 with unloadTimeout: 1900
+  URL: https://github.com/mostlygeek/llama-swap/blob/main/docs/kb/guides/upstreams/comfyui.md
+
+- 5slock/ralph-community/AGENTS.md:
+  Old: ComfyUI: http://127.0.0.1:10004 (llama-swap upstream comfyui_auto)
+  New: ComfyUI: http://127.0.0.1:8080/comfyui/ (llama-swap route comfyui_auto); documented swap render flow.
+  Line count preserved at 39 lines.
+
+- community/notes/needs_derrick.md:
+  Row 13 marked resolved with reference to ca2_usage_audit_20261024.md.
+
+- 5slock/ralph-community/fix_plan.md:
+  Item 0.2 CA2 marked ticked [x] with reference to ca2_usage_audit_20261024.md.
+
+
+2. COMMITS
+--------------------------------------------------------------------------------
+Repository: C:\Users\derek\5slock\ralph-community
+  - b28bac9: "Forge WIP before agy setup" (Forge uncommitted work committed as-is)
+  - f4e3143: "AGENTS.md: document llama-swap /comfyui/ render flow and route"
+  - fa1abfc: "fix_plan: tick 0.2 CA2 usage audit done by Antigravity"
+
+Repository: C:\AI\community
+  - d4d975b: "0.2 CA2: community usage audit notes/ca2_usage_audit_20261024.md + switch ComfyUI endpoints to llama-swap /comfyui/ route"
+  - cd83ead: "needs_derrick: row 13 resolved - llama-swap /comfyui/ render flow active"
+  - e321060: "run_graph_job: contact sheet stills every second for clips <= 25s per brief"
+
+
+3. RENDER VERIFICATION (ALL 6 HC15 CLIPS)
+--------------------------------------------------------------------------------
+Clip 1:
+  ID: ali163_hc15_bd002_s51150001
+  MP4: C:\AI\community\runs\hc15_bd002_s51150001\ali163_hc15_bd002_s51150001.mp4
+  ffprobe: 1344x768 fps=24/1 frames=362 audio=True (473 pkts) duration=15.083333s bytes=5840838
+  Contact Sheet: C:\AI\community\runs\hc15_bd002_s51150001\ali163_hc15_bd002_s51150001_stills_contact.png
+  Render Time: 757.4 s (~12.6 min)
+
+Clip 2:
+  ID: ali163_hc15_bd006_s51150002
+  MP4: C:\AI\community\runs\hc15_bd006_s51150002\ali163_hc15_bd006_s51150002.mp4
+  ffprobe: 1344x768 fps=24/1 frames=362 audio=True (473 pkts) duration=15.083333s bytes=5428691
+  Contact Sheet: C:\AI\community\runs\hc15_bd006_s51150002\ali163_hc15_bd006_s51150002_stills_contact.png
+  Render Time: 752.5 s (~12.5 min)
+
+Clip 3:
+  ID: ali163_hc15_bd013_s51150003
+  MP4: C:\AI\community\runs\hc15_bd013_s51150003\ali163_hc15_bd013_s51150003.mp4
+  ffprobe: 1344x768 fps=24/1 frames=362 audio=True (473 pkts) duration=15.083333s bytes=6377641
+  Contact Sheet: C:\AI\community\runs\hc15_bd013_s51150003\ali163_hc15_bd013_s51150003_stills_contact.png
+  Render Time: 752.4 s (~12.5 min)
+
+Clip 4:
+  ID: ali163_hc15_gi046_s51150004
+  MP4: C:\AI\community\runs\hc15_gi046_s51150004\ali163_hc15_gi046_s51150004.mp4
+  ffprobe: 1344x768 fps=24/1 frames=362 audio=True (473 pkts) duration=15.083333s bytes=4356014
+  Contact Sheet: C:\AI\community\runs\hc15_gi046_s51150004\ali163_hc15_gi046_s51150004_stills_contact.png
+  Render Time: 777.1 s (~13.0 min)
+
+Clip 5:
+  ID: ali163_hc15_gi063_s51150005
+  MP4: C:\AI\community\runs\ali163_hc15_gi063_s51150005\ali163_hc15_gi063_s51150005.mp4
+  ffprobe: 1344x768 fps=24/1 frames=362 audio=True (473 pkts) duration=15.083333s bytes=4376118
+  Contact Sheet: C:\AI\community\runs\ali163_hc15_gi063_s51150005\ali163_hc15_gi063_s51150005_stills_contact.png
+  Render Time: 787.5 s (~13.1 min)
+
+Clip 6:
+  ID: ali163_hc15_gi072_s51150006
+  MP4: C:\AI\community\runs\ali163_hc15_gi072_s51150006\ali163_hc15_gi072_s51150006.mp4
+  ffprobe: 1344x768 fps=24/1 frames=362 audio=True (473 pkts) duration=15.083333s bytes=5858419
+  Contact Sheet: C:\AI\community\runs\ali163_hc15_gi072_s51150006\ali163_hc15_gi072_s51150006_stills_contact.png
+  Render Time: 802.5 s (~13.4 min)
+
+
+4. ANYTHING NOT DONE AND WHY
+--------------------------------------------------------------------------------
+None. All 7 requirements of the brief have been executed to full completion.
+Forge loop is restarted per step 6 instruction.
+================================================================================

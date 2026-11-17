@@ -1,0 +1,386 @@
+{
+ "arm": "u6-uncens-fn-halogen",
+ "model": "qwen3.8-flash-next",
+ "effort": "low",
+ "started": "2026-11-15 13:41:14 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 9.860785722732544,
+   "total_s": 11.63489055633545,
+   "prompt_tokens": 18253,
+   "completion_tokens": 109,
+   "client_decode_tps": 61.439435784997855,
+   "timings": {
+    "prompt_n": 18253,
+    "predicted_n": 109,
+    "prompt_ms": 9807.4,
+    "predicted_ms": 1772.0,
+    "prompt_per_second": 1861.146,
+    "predicted_per_second": 61.512,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "draft_n": 137,
+    "draft_n_accepted": 87,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 22,
+     "head": {
+      "rounds": 22,
+      "drafted": 137,
+      "accepted": 87
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 304,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "code": {
+   "ttft_s": 0.31684327125549316,
+   "total_s": 2.448580741882324,
+   "prompt_tokens": 141,
+   "completion_tokens": 149,
+   "client_decode_tps": 69.89603647403496,
+   "timings": {
+    "prompt_n": 141,
+    "predicted_n": 149,
+    "prompt_ms": 309.9,
+    "predicted_ms": 2131.7,
+    "prompt_per_second": 454.985,
+    "predicted_per_second": 69.897,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 28,
+    "draft_n": 159,
+    "draft_n_accepted": 119,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 30,
+     "head": {
+      "rounds": 30,
+      "drafted": 159,
+      "accepted": 119
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 259,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.4968557357788086,
+     "total_s": 1.6069884300231934,
+     "prompt_tokens": 388,
+     "completion_tokens": 66,
+     "client_decode_tps": 59.452352265801075,
+     "timings": {
+      "prompt_n": 388,
+      "predicted_n": 66,
+      "prompt_ms": 487.6,
+      "predicted_ms": 1109.0,
+      "prompt_per_second": 795.734,
+      "predicted_per_second": 59.513,
+      "cache_n": 0,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 29,
+      "draft_n": 84,
+      "draft_n_accepted": 51,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 15,
+       "head": {
+        "rounds": 15,
+        "drafted": 84,
+        "accepted": 51
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 157,
+     "tool_calls": [
+      {
+       "id": "call_ce398ee36df342a7a057e9bb",
+       "name": "lookup_user",
+       "arguments": "{\"email\": \"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.3395419120788574,
+     "total_s": 1.092029333114624,
+     "prompt_tokens": 452,
+     "completion_tokens": 51,
+     "client_decode_tps": 67.77521932499641,
+     "timings": {
+      "prompt_n": 132,
+      "predicted_n": 51,
+      "prompt_ms": 322.9,
+      "predicted_ms": 751.9,
+      "prompt_per_second": 408.795,
+      "predicted_per_second": 67.828,
+      "cache_n": 320,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 387,
+      "draft_n": 52,
+      "draft_n_accepted": 40,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 11,
+       "head": {
+        "rounds": 11,
+        "drafted": 52,
+        "accepted": 40
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 63,
+     "tool_calls": [
+      {
+       "id": "call_28fe2f3b74de4f7290cabf21",
+       "name": "get_orders",
+       "arguments": "{\"user_id\": \"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.31523990631103516,
+     "total_s": 0.6996610164642334,
+     "prompt_tokens": 525,
+     "completion_tokens": 23,
+     "client_decode_tps": 59.830221058448416,
+     "timings": {
+      "prompt_n": 141,
+      "predicted_n": 23,
+      "prompt_ms": 293.9,
+      "predicted_ms": 382.8,
+      "prompt_per_second": 479.755,
+      "predicted_per_second": 60.084,
+      "cache_n": 384,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 451,
+      "draft_n": 30,
+      "draft_n_accepted": 18,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 5,
+       "head": {
+        "rounds": 5,
+        "drafted": 30,
+        "accepted": 18
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders**.",
+     "reasoning_chars": 18,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  },
+  "decode": {
+   "ttft_s": 0.615619421005249,
+   "total_s": 5.280913352966309,
+   "prompt_tokens": 59,
+   "completion_tokens": 208,
+   "client_decode_tps": 44.584543446454845,
+   "timings": {
+    "prompt_n": 59,
+    "predicted_n": 208,
+    "prompt_ms": 607.4,
+    "predicted_ms": 4665.2,
+    "prompt_per_second": 97.135,
+    "predicted_per_second": 44.585,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 33,
+    "draft_n": 143,
+    "draft_n_accepted": 96,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 85,
+     "head": {
+      "rounds": 85,
+      "drafted": 143,
+      "accepted": 96
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "A heat pump is a device that moves heat from one place to another. It\u2019s like a sponge for heat: instead of burning fuel to make warmth, it simply picks up heat from the outside air (or the ground) and moves it inside your home. In the summer, it can do the opposite, moving heat from inside your house to the outside, which cools your home.\n\nThe secret behind this magic trick is a special liquid called a refrigerant, which flows through a closed loop of pipes inside the heat pump. This refrigerant has a very low boiling point, meaning it turns into a gas at very low temperatures.\n\nThe process starts with an evaporator, which is a set of coils that absorb heat from the outside air. Even when it feels cold outside, there is still heat energy in the air. The refrigerant absorbs this heat and evaporates into a gas.",
+   "reasoning_chars": 115,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write1": {
+   "ttft_s": 0.25754404067993164,
+   "total_s": 9.815380573272705,
+   "prompt_tokens": 69,
+   "completion_tokens": 413,
+   "client_decode_tps": 43.21061556050328,
+   "timings": {
+    "prompt_n": 69,
+    "predicted_n": 413,
+    "prompt_ms": 246.1,
+    "predicted_ms": 9557.7,
+    "prompt_per_second": 280.374,
+    "predicted_per_second": 43.211,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 36,
+    "draft_n": 311,
+    "draft_n_accepted": 191,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 221,
+     "head": {
+      "rounds": 221,
+      "drafted": 311,
+      "accepted": 191
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "Maren found it at the base of the fog signal building, where the dune grass broke into gravel. A letter in a plastic grocery bag, the kind with blue handles. She picked it up by a corner and shook out three inches of sand.\n\nThe envelope had been through the wringer. Postmark from Harwich, Massachusetts. Dated June 3rd. It was now November. The ink had bled into something purple and illegible except for the recipient's name, which remained clear: *Dear Son.*\n\nShe carried it back along the concrete path. Her boots still rang with the day's chill. Inside the keeper's cottage, she set it on the kitchen table beside a cold cup of tea and a jar of WD-40 and a radio she hadn't turned on in two days because the frequency had gone dead.\n\nThe handwriting slanted left, the way schoolteachers corrected. The paper had softened to cloth along its edges, but the first line survived: *I should have said this differently.*\n\nShe sat. She read the whole thing. Then she folded it back along its original crease and put it in the drawer with the others.",
+   "reasoning_chars": 794,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.6300768852233887,
+   "total_s": 6.953907012939453,
+   "prompt_tokens": 63,
+   "completion_tokens": 317,
+   "client_decode_tps": 50.12784872424914,
+   "timings": {
+    "prompt_n": 63,
+    "predicted_n": 317,
+    "prompt_ms": 618.5,
+    "predicted_ms": 6323.6,
+    "prompt_per_second": 101.859,
+    "predicted_per_second": 50.13,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 35,
+    "draft_n": 234,
+    "draft_n_accepted": 176,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 141,
+     "head": {
+      "rounds": 141,
+      "drafted": 234,
+      "accepted": 176
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "**The Skillet That Doesn't Care About Your Feelings.**\n\nNon-stick pans coddle you. This one demands something back.\n\nPre-seasoned and ready to scream, this 10.25-inch cast-iron skillet takes a sear and gives you back something better. Sear the steak. Bake the cornbread. Make the frittata. Get it filthy. Then burn the filth off with a blowtorch and a paper towel and oil, and it'll look at you like nothing happened.\n\nHere's the part nobody tells you: every time you cook in cast iron, a measurable amount of dietary iron migrates into your food\u2014up to 20 times more than a stainless steel pan. Acidic foods like tomato sauce pull the most. You're not just cooking dinner. You're quietly supplementing.\n\nIt weighs 7.5 pounds. It will outlive you. Get it while it's cheap.",
+   "reasoning_chars": 543,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

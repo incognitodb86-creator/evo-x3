@@ -1,0 +1,15 @@
+=== u19-iommu-on-r2 start 2026-11-15 10:51:33 CST
+CMD: sudo podman run --rm --name bake-arm --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined --ulimit memlock=-1:-1 -v /srv/models:/srv/models:ro,Z ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133 gufo serve llm --host 127.0.0.1 --port 8090 --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf --mtp-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf --speculative mtp --context 32768 --sessions 1 --served-model-name flash-next --reasoning-effort low --log-progress
+LOAD_S 27 up=1
+long {"ttft_s": 11.3, "total_s": 13.01, "prompt_tokens": 18253, "completion_tokens": 105, "client_decode_tps": 61.31, "finish": "stop", "pass": true}
+decode {"ttft_s": 0.22, "total_s": 23.48, "prompt_tokens": 59, "completion_tokens": 868, "client_decode_tps": 37.32, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124          89          32           0           3          34
+=== u19-iommu-on-r2 end 2026-11-15 10:52:36 CST
+temp1:        +45.5°C  (high = +120.0°C)
+edge:         +45.0°C  
+temp1:        +48.0°C  
+temp1:        +42.0°C  
+2026-11-15 16:52:11 [INFO] [progress] request=1 phase=prefill tokens=18253/18253 percentage=100.0 chunk_tps=1367.8 avg_tps=1617.9
+2026-11-15 16:52:13 [INFO] [progress] request=1 phase=decode tokens=105/1200 percentage=8.8 chunk_tps=57.2 avg_tps=61.8 draft_accepted=85 draft_proposed=115 acceptance_percentage=73.9
+2026-11-15 16:52:36 [INFO] [progress] request=2 phase=decode tokens=868/900 percentage=96.4 chunk_tps=39.7 avg_tps=37.3 draft_accepted=524 draft_proposed=922 acceptance_percentage=56.8

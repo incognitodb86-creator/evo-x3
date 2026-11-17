@@ -1,0 +1,198 @@
+[civitai model 3010554] Moody Minimax H3 Prompt Writing Skill - LLM SYSTEM PROMPT | type Other | nsfw False | tags tool
+
+---- block ----
+
+Drop in my Telegram Group and Discord group for chats, questions, feedbacks. 欢迎加入 纸飞机 和 Discord 群组。 
+
+ RH体验地址（邀请码Invite Code: cptpovgo）： https://www.runninghub.ai/user-center/1993809672580788226?inviteCode=cptpovgo 
+喜欢我的作品吗？🎨 我会持续免费分享更多优质内容✨，欢迎支持一下，请我喝杯咖啡吧！💖 Like my work? 🎨 I share most of my work for free ✨, so support me by buying me a coffee ☕️! Drop by my discord channel for supporter perks. 想赞助一下？来我 Discord，里面有链接和特别福利和专属模型下载哦！
+
+ CivitAI 邀请码 Referral Code: R44VYP99 Extra 2.5k Buzz on membership purchase， 买会员送2千5闪电!
+
+ Ko-fi: ko-fi.com/catlover1937 
+
+ Please do not redistribute without consent. 如非作者同意禁止搬运到其他平台，如国内Up主需要转发网盘请备注出处。
+
+ WOULD YOU PLEASE CLICK THE LIKE BUTTON? 拜托动动您可爱的小手点个赞好吗？ 
+
+ 🎬 Moody MiniMax H3 Video Prompt Skill Release I'm releasing my personal MiniMax H3 video prompting skill , designed to help you turn simple ideas into detailed, cinematic video prompts.
+
+ When your AI-generated video looks weird, characters move unnaturally, the camera randomly jumps around, or the whole scene feels like a collection of disconnected clips, it usually comes down to two things:
+
+ 🚫 The video model has limitations. 
+
+ ✍️ Your prompt writing sucks. 
+
+ And honestly, a lot of the time, it's probably #2. 😅
+
+ People constantly complain:
+
+ ❌ "The character keeps teleporting." 
+❌ "The camera changes angles for no reason." 
+❌ "The movements look unnatural." 
+❌ "The AI completely ignores my instructions." 
+
+ But here's the thing: a video prompt is not just an image prompt with some movement added. 
+
+ You're not describing a picture anymore. You're directing an entire sequence of events.
+
+ 🛑 Stop writing video prompts like image prompts. Humans tend to describe what they want to see, but often forget to explain how things actually happen .
+
+ Where does the character start? How does the movement begin? What happens next? Where is the camera? What should stay consistent?
+
+ These details matter.
+
+ Instead of trying to figure all of this out yourself, feed Moody MiniMax H3 Prompt Skill into your LLM / AI Agent, describe your video idea in normal language, and let AI handle the directing. 🤖🎬
+
+ 🎥 Think of It as Your Personal AI Film Director This Skill goes beyond basic prompt enhancement. It's designed to help structure the visual, temporal, and audio elements of AI-generated video.
+
+ 🎞️ Natural Motion & Continuity 
+
+ Characters shouldn't randomly teleport, change poses between shots, or suddenly appear somewhere else.
+
+ The Skill emphasizes continuous movement, logical action sequences, consistent positioning, and natural transitions.
+
+ 📷 Cinematic Camera Direction 
+
+ Camera movement should serve the scene, not randomly change angles every two seconds.
+
+ The Skill helps describe framing, camera movement, shot transitions, visual composition, and cinematic pacing.
+
+ 🎭 Character Consistency & Reference Control 
+
+ When working with reference images, videos, or other visual assets, the Skill helps identify what should remain consistent and what can change.
+
+ Characters, clothing, environments, props, and visual details are tracked throughout the sequence.
+
+ 🎙️ Dialogue, Sound & Audio Direction 
+
+ Video isn't just about visuals.
+
+ The Skill also structures dialogue, speaker identification, environmental sounds, audio references, and background music, helping create a more coherent audiovisual experience.
+
+ 🧩 Structured Video Prompting 
+
+ For complex reference-based tasks, the Skill organizes information into clearly defined sections, including subject definitions, reference relationships, continuity analysis, detailed shot descriptions, and audio direction.
+
+ This is especially useful when combining multiple references into a single video.
+
+ 💡 Less Random AI Chaos. More Actual Directing. One of the biggest problems with AI video prompting is that people keep asking for cinematic results without actually describing the cinematography.
+
+ A good video prompt needs more than a beautiful scene. It needs direction, timing, movement, and continuity. 
+
+ This Skill incorporates structured video-prompting techniques and cinematic principles to help your LLM translate ideas into clearer instructions for MiniMax H3.
+
+ You focus on the story and creativity. Let AI figure out how to communicate the scene.
+
+ AI knows how to communicate with AI better than most humans do. 
+
+ 💡 Before blaming the video model, fix the prompt.
+
+ ❤️ Special Thanks Special thanks to @noway163 for his contributions and inspiration. @lenfari for techinical support.
+
+ He's an absolute master of prompting and one of the most impressive AIGC "film directors" I've seen. 🎬🔥
+
+ You can find him in the Moody Discord channel .
+
+ If you're interested in cinematic prompting, camera language, shot composition, visual storytelling, and getting AI to actually understand your scenes, definitely check out his work.
+
+ 
+
+ 
+
+ 🎬 Moody MiniMax H3 视频提示词 Skill 正式发布 这次我把自己的 MiniMax H3 视频提示词 Skill 也放出来了，专门用来帮助大家把简单的视频创意转换成更加完整、专业的电影感视频提示词。
+
+ 当你发现 AI 生成的视频动作奇怪、人物莫名其妙地瞬移、镜头乱切，或者整段视频看起来像几个毫无关联的片段拼在一起时，通常就两个原因：
+
+ 🚫 视频模型本身的能力有限 
+
+ ✍️ 你的提示词写得不行 
+
+ 说实话， 很多时候，大概率是第二种。 😅
+
+ 我经常看到有人吐槽：
+
+ ❌ “人物怎么突然瞬移了？” 
+❌ “镜头为什么一直乱切？” 
+❌ “人物动作一点都不自然。” 
+❌ “AI 根本不按照我的要求来。” 
+
+ 但问题是， 视频提示词并不是给图片提示词加上几个动作描述那么简单。 
+
+ 你现在不是在描述一张静态图片，而是在指导一整段视频应该如何发生。
+
+ 🛑 别再用写图片提示词的方式写视频了。 很多人在写视频提示词的时候，只会描述自己想看到什么，却忽略了更重要的问题：
+
+ 这个画面究竟应该怎样发生？ 
+
+ 人物从哪里开始移动？动作怎么衔接？镜头应该在哪里？什么时候需要切镜头？哪些东西必须保持一致？
+
+ 这些细节都会影响最终的视频效果。
+
+ 所以，与其自己费尽心思研究怎么写，不如直接把 Moody MiniMax H3 Prompt Skill 喂给你的 LLM / AI Agent。
+
+ 然后像平时聊天一样，告诉 AI 你想拍什么，让 AI 帮你完成专业的视频提示词编写。🤖🎬
+
+ 🎥 相当于给你配了一个 AI 视频导演 这次的 Skill 不只是简单地帮你扩写提示词，而是针对 AI 视频生成的特点，加入了更加完整的视觉、时间和声音描述逻辑。
+
+ 🎞️ 自然动作与镜头连续性 
+
+ 人物不应该上一秒还站着，下一秒突然换了姿势或瞬移到另一个地方。
+
+ Skill 会更加注重人物动作的自然衔接、空间关系、位置变化，以及镜头之间的连续性。
+
+ 📷 电影级镜头语言 
+
+ 镜头不是切得越多就越有电影感。
+
+ 什么时候应该固定机位？什么时候应该跟拍？什么时候适合推进镜头？什么时候才真正需要切换视角？
+
+ Skill 会帮助 AI 更合理地组织镜头运动、画面构图、景别变化以及整体节奏。
+
+ 🎭 人物一致性与参考素材控制 
+
+ 当你使用参考图片、参考视频或其他素材时，Skill 会帮助 AI 区分哪些内容需要保留，哪些内容可以修改。
+
+ 包括人物外观、服装、环境、道具以及不同镜头之间的视觉连续性。
+
+ 🎙️ 对白、环境音与声音设计 
+
+ 视频不只有画面，声音同样重要。
+
+ Skill 包含了对白、说话者身份、环境音效、参考音频，以及背景音乐等内容的组织规则。
+
+ 尤其是在多人对话的场景中，明确谁在说话、什么时候说话，以及声音和动作之间的关系，可以让提示词更加清晰。
+
+ 🧩 结构化视频提示词 
+
+ 对于复杂的多参考素材任务，Skill 会将内容整理成更加清晰的结构，包括：
+
+ 人物与素材定义、参考关系、内容保留分析、详细镜头描述、声音设计等。
+
+ 让 AI 不只是理解你想要的画面，还能更清楚地理解不同素材之间应该如何组合。
+
+ 💡 少一点 AI 乱来，多一点真正的导演思维。 很多人要求 AI 生成电影级画面，但写出来的提示词却只有一句：
+
+ “一个女孩走在街上，电影感，高清，专业摄影。” 
+
+ 然后就开始抱怨 AI 不听话。😂
+
+ 电影感不是多写几个 Cinematic、Masterpiece、8K 就能解决的。 
+
+ 真正重要的是镜头语言、动作设计、时间逻辑、空间连续性，以及画面应该如何一步步发展。
+
+ 这个 Skill 就是为了帮助你的 LLM 更合理地组织这些内容，把简单的创意转换成更加清晰、适合 MiniMax H3 使用的视频提示词。
+
+ 你负责想故事，AI 负责当导演。 
+
+ 让 AI 去跟 AI 沟通，很多时候比人类自己硬写效果更好。
+
+ 💡 所以在怪视频模型之前，先看看是不是你的提示词有问题。
+
+ ❤️ 特别感谢 特别感谢 @noway163 的贡献与启发。 @lenfari 的技术支持！
+
+ 他是真的 Prompt 大师 ，也是我见过最强悍的 AIGC “导演”之一。🎬🔥
+
+ 你可以在 Moody Discord 频道 找到他。
+
+ 如果你对电影感提示词、镜头语言、构图、场景调度、人物动作、叙事，以及怎么让 AI 真正理解你脑子里的画面感兴趣，强烈建议去看看他的作品。

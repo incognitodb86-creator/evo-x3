@@ -1,0 +1,23 @@
+# U45 Pre-Merge Baseline (`scripts/tests`)
+Commit: 1b1a88d4c237571bb11258d8d9d1ff69b8bda4db (x3-linux with step-1 11-file commit; pre-u45 stashed)
+Python: /home/evo/AI/render/x3/.venv/bin/python
+CWD: /home/evo/AI/community (as user evo)
+
+## 1. Unfiltered run: `pytest -q scripts/tests`
+- Result: 2 errors during collection (0 tests ran, exit code 2)
+- Uncollectable node IDs:
+  - `scripts/tests/test_free_comfy_args.py` (`StopIteration`: `CANDIDATES = [r"C:\AI\community\scripts", r"C:\AI\lib", r"C:\AI\community"]`)
+  - `scripts/tests/test_phase1_still.py` (`FileNotFoundError`: `'C:\\AI\\community/templates/flux_stills_s2_bfs.api.json'`)
+
+## 2. Filtered run (excluding the 2 uncollectable files):
+Command: `pytest -q scripts/tests --ignore=scripts/tests/test_free_comfy_args.py --ignore=scripts/tests/test_phase1_still.py`
+- Result: 116 passed, 2 skipped, 8 failed, 0 errors (exit code 1)
+- Failing node IDs (8):
+  - `scripts/tests/test_b2_lora_param.py::TestB2LoraParam::test_cli_lora_none_builds_the_plain_graph` (`FileNotFoundError: 'C:\\AI\\community/templates/b2.api.json'`)
+  - `scripts/tests/test_b2_lora_param.py::TestB2LoraParam::test_lora_injects_the_face_lora_on_the_model_chain` (`FileNotFoundError: 'C:\\AI\\community/templates/b2.api.json'`)
+  - `scripts/tests/test_b2_lora_param.py::TestB2LoraParam::test_lora_none_is_the_plain_b2_graph` (`FileNotFoundError: 'C:\\AI\\community/templates/b2.api.json'`)
+  - `scripts/tests/test_b2_lora_param.py::TestB2LoraParam::test_strength_is_applied` (`FileNotFoundError: 'C:\\AI\\community/templates/b2.api.json'`)
+  - `scripts/tests/test_run_queue_keep_comfy_process.py::TestSubmitPassesFlagOnlyWhenAsked::test_default_off_end_to_end_writer_run_argv` (`RuntimeError: X3: --queue is not wired through run_queue.py...`)
+  - `scripts/tests/test_run_queue_one_at_a_time.py::TestRunQueueOneAtATime::test_eviction_fails_into_retry_wave` (`FileNotFoundError: 'C:\\AI\\community/community.log'`)
+  - `scripts/tests/test_run_queue_one_at_a_time.py::TestRunQueueOneAtATime::test_free_comfy_calls_api_free_when_loaded` (`FileNotFoundError: 'C:\\AI\\community/community.log'`)
+  - `scripts/tests/test_run_queue_one_at_a_time.py::TestRunQueueOneAtATime::test_job_timeout_cancels_via_interrupt_and_queue_delete` (`FileNotFoundError: 'C:\\AI\\community/community.log'`)

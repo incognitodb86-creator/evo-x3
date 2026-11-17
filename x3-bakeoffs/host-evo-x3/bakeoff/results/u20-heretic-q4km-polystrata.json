@@ -1,0 +1,202 @@
+{
+ "arm": "u20-heretic-q4km-polystrata",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 10:09:44 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 20.310795068740845,
+   "total_s": 20.847245454788208,
+   "prompt_tokens": 18709,
+   "completion_tokens": 43,
+   "client_decode_tps": 80.15652727334141,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18709,
+    "prompt_ms": 20131.0,
+    "prompt_per_token_ms": 1.076,
+    "prompt_per_second": 929.4,
+    "predicted_n": 43,
+    "predicted_ms": 646.5,
+    "predicted_per_token_ms": 14.693,
+    "predicted_per_second": 68.1,
+    "draft_n": 37,
+    "draft_n_accepted": 32
+   },
+   "content": "The on-call codename is TANGERINE-4471, and the EVO-X3 maintenance window is Tuesday 03:40 (FIXTURE NOTE).",
+   "reasoning_chars": 0,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.49410009384155273,
+   "total_s": 14.676153898239136,
+   "prompt_tokens": 35,
+   "completion_tokens": 900,
+   "client_decode_tps": 63.460484102868605,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 35,
+    "prompt_ms": 242.3,
+    "prompt_per_token_ms": 6.923,
+    "prompt_per_second": 144.4,
+    "predicted_n": 900,
+    "predicted_ms": 14273.2,
+    "predicted_per_token_ms": 15.859,
+    "predicted_per_second": 63.1,
+    "draft_n": 840,
+    "draft_n_accepted": 545
+   },
+   "content": "Imagine you are sitting on a beach on a chilly autumn day. Even though the air feels cool to you, the sand under your feet holds a certain amount of warmth. If you could somehow \"grab\" that warmth from the sand and move it into your house, you wouldn't need to burn any wood or gas to stay warm.\n\nThat is essentially how a heat pump works. Unlike a traditional furnace, which *creates* heat by burning fuel (like gas or oil) or using electricity to heat a wire, a heat pump doesn't create heat. Instead, it simply **moves** heat from one place",
+   "reasoning_chars": 3011,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "write1": {
+   "ttft_s": 0.8064143657684326,
+   "total_s": 18.921769380569458,
+   "prompt_tokens": 42,
+   "completion_tokens": 1113,
+   "client_decode_tps": 61.43959083830436,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 42,
+    "prompt_ms": 454.1,
+    "prompt_per_token_ms": 10.812,
+    "prompt_per_second": 92.5,
+    "predicted_n": 1113,
+    "predicted_ms": 18281.5,
+    "predicted_per_token_ms": 16.411,
+    "predicted_per_second": 60.9,
+    "draft_n": 992,
+    "draft_n_accepted": 629
+   },
+   "content": "Stellan\u2019s boots crunched through a mosaic of pulverized cockles and salt-bleached driftwood. The morning tide had retreated, leaving the basalt ribs of the coast slick and glistening like raw meat. He wasn't looking for treasures; he was simply scouring the tide line for anything the Atlantic had vomited up.\n\nHis gaze snagged on a shard of something unnatural amidst a clump of bladderwrack. It wasn't the translucent shimmer of a jellyfish or the matte grey of a stone. It was a heavy, cream-colored scrap, pinned against a jagged rock by a tangle of dark, rubbery kelp.\n\nHe knelt, his knees biting into the freezing, sodden sand. As he pried the object free, the weight of it surprised him\u2014dense, like wet vellum. There was no envelope, no postage. The edges were frayed, nibbled by brine, yet the script remained unnervingly crisp. A single line of calligraphy, rendered in an ink the color of dried pomegranate, spiraled across the center: *The clock has stopped in the cellar.*\n\nStellan stared. Above him, the lighthouse lantern groaned, a rhythmic, mechanical heartbeat. The ocean hissed, a long, receding breath.",
+   "reasoning_chars": 3460,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.4362766742706299,
+   "total_s": 36.224907875061035,
+   "prompt_tokens": 39,
+   "completion_tokens": 2261,
+   "client_decode_tps": 63.17648717311281,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 39,
+    "prompt_ms": 225.1,
+    "prompt_per_token_ms": 5.772,
+    "prompt_per_second": 173.3,
+    "predicted_n": 2261,
+    "predicted_ms": 35831.1,
+    "predicted_per_token_ms": 15.84,
+    "predicted_per_second": 63.1,
+    "draft_n": 2191,
+    "draft_n_accepted": 1417
+   },
+   "content": "Meet the Ironclad. Stop buying disposable pans and start building a legacy. Forged from high-carbon, heavy-duty iron, this skillet is the heavyweight champion of your kitchen. From blistering stovetop sears to oven-baked cornbread, its unparalleled heat retention delivers a flawless, golden crust every single time. It\u2019s rugged, it\u2019s indestructible, and it\u2019s built to last generations.\n\nBut here\u2019s the kicker: it\u2019s so perfectly weighted and durable, it has actually been known to double as a legitimate 5-pound kettlebell for quick, mid-breakfast home workouts.\n\nThis isn't just cookware; it's an heirloom. It\u2019s the last pan you\u2019ll ever buy, and the first one your grandkids will fight over. Use it to master the flame, or just to master your morning strength routine. \n\n**The Ironclad. Cook like a legend.**",
+   "reasoning_chars": 8270,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.4944596290588379,
+     "total_s": 2.1382222175598145,
+     "prompt_tokens": 143,
+     "completion_tokens": 133,
+     "client_decode_tps": 80.91192787231451,
+     "timings": {
+      "cache_n": 0,
+      "prompt_n": 143,
+      "prompt_ms": 294.4,
+      "prompt_per_token_ms": 2.059,
+      "prompt_per_second": 485.7,
+      "predicted_n": 133,
+      "predicted_ms": 1686.9,
+      "predicted_per_token_ms": 12.589,
+      "predicted_per_second": 79.4,
+      "draft_n": 109,
+      "draft_n_accepted": 93
+     },
+     "content": "",
+     "reasoning_chars": 388,
+     "tool_calls": [
+      {
+       "id": "call_81c1b8db0f494584a87c538b",
+       "name": "lookup_user",
+       "arguments": "{\"email\": \"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.5157034397125244,
+     "total_s": 0.6873953342437744,
+     "prompt_tokens": 190,
+     "completion_tokens": 26,
+     "client_decode_tps": 151.4340561677924,
+     "timings": {
+      "cache_n": 142,
+      "prompt_n": 48,
+      "prompt_ms": 196.2,
+      "prompt_per_token_ms": 4.087,
+      "prompt_per_second": 244.6,
+      "predicted_n": 26,
+      "predicted_ms": 295.6,
+      "predicted_per_token_ms": 10.948,
+      "predicted_per_second": 91.3,
+      "draft_n": 20,
+      "draft_n_accepted": 19
+     },
+     "content": "",
+     "reasoning_chars": 0,
+     "tool_calls": [
+      {
+       "id": "call_7995cdc92d87467bae058a6e",
+       "name": "get_orders",
+       "arguments": "{\"user_id\": \"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.38753366470336914,
+     "total_s": 2.3396735191345215,
+     "prompt_tokens": 246,
+     "completion_tokens": 152,
+     "client_decode_tps": 77.86327380949473,
+     "timings": {
+      "cache_n": 189,
+      "prompt_n": 57,
+      "prompt_ms": 205.2,
+      "prompt_per_token_ms": 3.6,
+      "prompt_per_second": 277.8,
+      "predicted_n": 152,
+      "predicted_ms": 1995.2,
+      "predicted_per_token_ms": 13.041,
+      "predicted_per_second": 76.7,
+      "draft_n": 132,
+      "draft_n_accepted": 106
+     },
+     "content": "Dana (dana@example.com) has 3 orders.",
+     "reasoning_chars": 397,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

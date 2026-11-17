@@ -1,0 +1,7 @@
+=== u6-uncens-fn-gufo start 2026-11-15 13:42:13 CST
+CMD: sudo podman run --rm --name bake-gufo --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined --ulimit memlock=-1:-1 -v /srv/models:/srv/models:ro,Z -v /srv/bakeoff/fn-uncens-iq4xs:/srv/uncens:ro,Z ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133 gufo serve llm --host 127.0.0.1 --port 8090 --model /srv/uncens/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf --mtp-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf --speculative mtp --context 32768 --sessions 1 --served-model-name flash-next --reasoning-effort low --log-progress
+ENGINE EXITED during load
+LOAD_S 1 up=0
+               total        used        free      shared  buff/cache   available
+Mem:             124           3          91           0          31         121
+=== u6-uncens-fn-gufo end 2026-11-15 13:42:14 CST

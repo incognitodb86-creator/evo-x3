@@ -1,0 +1,177 @@
+{
+ "arm": "u6-strixllama",
+ "model": "flash-next",
+ "effort": "low",
+ "started": "2026-11-15 09:26:04 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 15.848815679550171,
+   "total_s": 18.642914533615112,
+   "prompt_tokens": 18253,
+   "completion_tokens": 104,
+   "client_decode_tps": 37.22130297884686,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18253,
+    "prompt_ms": 15828.146,
+    "prompt_per_token_ms": 0.8671531255136142,
+    "prompt_per_second": 1153.198864857577,
+    "predicted_n": 104,
+    "predicted_ms": 2792.515,
+    "predicted_per_token_ms": 27.111796116504852,
+    "predicted_per_second": 36.88431396071284,
+    "draft_n": 139,
+    "draft_n_accepted": 77
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 264,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "code": {
+   "ttft_s": 0.899813175201416,
+   "total_s": 5.2725443840026855,
+   "prompt_tokens": 141,
+   "completion_tokens": 204,
+   "client_decode_tps": 46.652764658709515,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 141,
+    "prompt_ms": 652.235,
+    "prompt_per_token_ms": 4.625780141843972,
+    "prompt_per_second": 216.17975116330769,
+    "predicted_n": 204,
+    "predicted_ms": 4371.024,
+    "predicted_per_token_ms": 21.532137931034484,
+    "predicted_per_second": 46.44220667742844,
+    "draft_n": 223,
+    "draft_n_accepted": 148
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 420,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.9944658279418945,
+     "total_s": 2.775259494781494,
+     "prompt_tokens": 388,
+     "completion_tokens": 84,
+     "client_decode_tps": 47.16997907403614,
+     "timings": {
+      "cache_n": 0,
+      "prompt_n": 388,
+      "prompt_ms": 898.553,
+      "prompt_per_token_ms": 2.3158582474226805,
+      "prompt_per_second": 431.8053581703027,
+      "predicted_n": 84,
+      "predicted_ms": 1778.802,
+      "predicted_per_token_ms": 21.43134939759036,
+      "predicted_per_second": 46.66061765165544,
+      "draft_n": 72,
+      "draft_n_accepted": 59
+     },
+     "content": "",
+     "reasoning_chars": 242,
+     "tool_calls": [
+      {
+       "id": "RM5IJUMi8bYdqNgnD4FrcEim0bPCVhiR",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.3911879062652588,
+     "total_s": 1.3646690845489502,
+     "prompt_tokens": 452,
+     "completion_tokens": 49,
+     "client_decode_tps": 50.334820120908844,
+     "timings": {
+      "cache_n": 384,
+      "prompt_n": 68,
+      "prompt_ms": 383.368,
+      "prompt_per_token_ms": 5.637764705882353,
+      "prompt_per_second": 177.37526345443544,
+      "predicted_n": 49,
+      "predicted_ms": 973.302,
+      "predicted_per_token_ms": 20.277125,
+      "predicted_per_second": 49.31665608413421,
+      "draft_n": 39,
+      "draft_n_accepted": 36
+     },
+     "content": "",
+     "reasoning_chars": 42,
+     "tool_calls": [
+      {
+       "id": "xPUX8TGucpkJ51Tqbqs9KdBHyK6GrVGF",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.4088449478149414,
+     "total_s": 1.0923683643341064,
+     "prompt_tokens": 525,
+     "completion_tokens": 33,
+     "client_decode_tps": 48.27925306210007,
+     "timings": {
+      "cache_n": 448,
+      "prompt_n": 77,
+      "prompt_ms": 398.803,
+      "prompt_per_token_ms": 5.17925974025974,
+      "prompt_per_second": 193.07778527242775,
+      "predicted_n": 33,
+      "predicted_ms": 682.367,
+      "predicted_per_token_ms": 21.32396875,
+      "predicted_per_second": 46.89558551336744,
+      "draft_n": 27,
+      "draft_n_accepted": 23
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (A1, A2, A3).",
+     "reasoning_chars": 19,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  },
+  "decode": {
+   "ttft_s": 0.7756288051605225,
+   "total_s": 24.509236097335815,
+   "prompt_tokens": 59,
+   "completion_tokens": 856,
+   "client_decode_tps": 36.06699940140215,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 59,
+    "prompt_ms": 617.21,
+    "prompt_per_token_ms": 10.461186440677967,
+    "prompt_per_second": 95.59145185593233,
+    "predicted_n": 856,
+    "predicted_ms": 23732.127,
+    "predicted_per_token_ms": 27.756873684210525,
+    "predicted_per_second": 36.02711210840899,
+    "draft_n": 972,
+    "draft_n_accepted": 532
+   },
+   "content": "# How a Heat Pump Works\n\nImagine you have a sponge soaked with water. You can squeeze it in one place and release the water somewhere else. A heat pump does something similar, but with heat instead of water.\n\nMost heating systems *create* heat\u2014by burning gas, for example. A heat pump doesn't do that. Instead, it *moves* heat from one place to another. In winter, it pulls heat from outside your home and dumps it inside. In summer, it runs the process in reverse, pulling heat out of your house and releasing it outside. This is why a heat pump can be far more efficient than a furnace: it's not making energy, just relocating it.\n\nThe key to this trick is a special fluid called a **refrigerant**. This liquid boils at very low temperatures, which means it can absorb heat from cold outdoor air and still turn into a gas. That's the whole secret\u2014cold air still contains heat energy, and the refrigerant is designed to grab it.\n\nHere's what happens step by step:\n\n**1. The Evaporator (outside coil)**\nThe refrigerant enters this coil as a cold, low-pressure liquid. Even if it's freezing outside, the refrigerant is even colder, so heat from the outdoor air flows into it. The refrigerant absorbs that heat and boils into a gas. You're essentially stealing warmth from the air\u2014even very cold air still has some.\n\n**2. The Compressor**\nThe gas moves to the compressor, which squeezes it tightly. When you compress a gas, it gets hot. Think of how a bicycle pump gets warm when you use it. This step takes the low-grade heat the refrigerant absorbed outside and concentrates it into a much higher temperature.\n\n**3. The Condenser (inside coil)**\nNow the refrigerant is a hot, high-pressure gas. It flows through a coil inside your home, where it releases its heat into the air. A fan blows air over this coil, warming your rooms. As it gives up its heat, the refrigerant condenses back into a liquid.\n\n**4. The Expansion Valve**\nThe liquid passes through a tiny valve that suddenly drops its pressure. This causes the refrigerant to cool dramatically, ready to absorb more heat from outside. The cycle starts over.\n\nThat's the whole loop. Four parts, one fluid, and heat keeps getting moved from one side to the other.\n\nIn cooling mode, a small valve called a **reversing valve** flips the direction. Now the indoor coil acts as the evaporator (absorbing heat from your rooms) and the outdoor coil acts as the condenser (dumping that heat outside). It's the same machinery doing the opposite job.\n\n**Why is this efficient?**\nFor every unit of electricity you feed into the compressor, you typically get three to four units of heat moved indoors. A gas furnace, by contrast, converts energy at maybe 90\u201395% efficiency. The heat pump's magic number\u2014called its coefficient of performance\u2014happens because you're not paying to *create* heat, only to *transport* it. The compressor is just the engine driving the sponge from one end of the cycle to the other.\n\nThere are limits, of course. When it's extremely cold outside, there's less heat available to steal, and the compressor has to work harder. That's why some heat pumps struggle in arctic temperatures. But for most climates, a heat pump is one of the most energy-efficient ways to heat and cool a building.",
+   "reasoning_chars": 546,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

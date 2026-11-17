@@ -1,0 +1,7 @@
+=== u15-glm-maya-s24 start 2026-11-15 11:53:25 CST
+CMD: sudo podman run --rm --name bake-arm --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined --ipc=host --ulimit memlock=-1:-1 -v /srv/bakeoff/glm:/srv/bakeoff/glm:Z docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:cf0d43fe54fae7a744942c49656e3c7b2be9890b4d6b3c60a5570f06874efb8c maya-serve --family glm --pack /srv/bakeoff/glm/Maya-S24-pack --model-name glm-maya-s24 --context 32768 --mode mtp --host 127.0.0.1 --port 8090
+ENGINE EXITED during load
+LOAD_S 2 up=0
+               total        used        free      shared  buff/cache   available
+Mem:             124           2           1           0         122         122
+=== u15-glm-maya-s24 end 2026-11-15 11:53:27 CST

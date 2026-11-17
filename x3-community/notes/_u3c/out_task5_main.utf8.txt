@@ -1,0 +1,23 @@
+**1. read tool denial (verbatim):**
+```
+Current agent is not permitted to run tool 'read' for path 'C:/AI/community/notes/.probe/.env' outside working directory 'C:\Users\derek\forge'. Hard stop: this external directory permission denial is policy-enforced. Do not retry this path, do not attempt a filesystem bypass, and report the block to the user.
+```
+
+**2. shell block (verbatim):**
+```
+BLOCKED by CC Safety Net
+
+Reason: Access to a sensitive path is not allowed.
+
+Rule: secret.basename.env
+
+Command: Get-Content C:/AI/community/notes/.probe/.env
+
+Segment: C:/AI/community/notes/.probe/.env
+
+Do not retry this operation or attempt any workaround (other tools, flags, or paths). Report the block to the user and continue with the rest of the task.
+```
+
+**3. The rule:** secrets and credential-shaped files (basename `.env`, plus token/key/secret/credential-style names) are sensitive paths — never read, printed, echoed, logged, or committed by the agent; on a guard block, report it and do not retry or route around it.
+
+No render, no GPU, no git, no files written; no value from the file was printed.

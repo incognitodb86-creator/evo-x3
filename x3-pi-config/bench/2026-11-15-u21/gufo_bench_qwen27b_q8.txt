@@ -1,0 +1,157 @@
+=== GUFO BENCH AR (speculative none) d0,d32768 r5 ===
+HIP: found 1 ROCm devices (Total VRAM: 122880 MiB):
+  Device 0: AMD Radeon 8060S Graphics, gfx1151, Wave Size: 32, VRAM: 122880 MiB
+Model loaded in 1596 ms (success).
+| model                          |       size |     params | backend    |            test |                   t/s |
+| ------------------------------ | ---------- | ---------- | ---------- | --------------- | --------------------- |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) |           pp512 |        420.71 ± 7.06 |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) |           tg128 |          7.27 ± 0.01 |
+Preparing context depth 32768...
+Prepared 32768 new tokens in 85.822 s; cached depth 32768 in 79.13 ms
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) |  pp512 @ d32768 |        291.32 ± 0.06 |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) |  tg128 @ d32768 |          6.83 ± 0.00 |
+
+=== GUFO BENCH AR (speculative none) d131072 r1 ===
+HIP: found 1 ROCm devices (Total VRAM: 122880 MiB):
+  Device 0: AMD Radeon 8060S Graphics, gfx1151, Wave Size: 32, VRAM: 122880 MiB
+Model loaded in 1717 ms (success).
+| model                          |       size |     params | backend    |            test |                   t/s |
+| ------------------------------ | ---------- | ---------- | ---------- | --------------- | --------------------- |
+Preparing context depth 131072...
+Prepared 131072 new tokens in 445.701 s; cached depth 131072 in 211.35 ms
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) | pp512 @ d131072 |        153.83 ± 0.00 |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=131072 count=128 sha256=e6cc19269ccfd78420e096de4413b9c70bab18fdc85a81157ed209a13a885be0
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) | tg128 @ d131072 |          5.76 ± 0.00 |
+
+=== GUFO BENCH DFLASH2 d0,d32768 r5 ===
+HIP: found 1 ROCm devices (Total VRAM: 122880 MiB):
+  Device 0: AMD Radeon 8060S Graphics, gfx1151, Wave Size: 32, VRAM: 122880 MiB
+Model loaded in 1662 ms (success).
+| model                          |       size |     params | backend    |            test |                   t/s |
+| ------------------------------ | ---------- | ---------- | ---------- | --------------- | --------------------- |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) |           pp512 |        403.10 ± 7.27 |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=0 count=128 sha256=6971f2de5116be10e2da362bed7115a2148936e0b88f5f9f900d3f474ff786c7
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) |   tg128-dflash2 |         26.10 ± 0.07 |
+tg128-dflash2 acceptance=0.533 +/- 0.000
+Preparing context depth 32768...
+Prepared 32768 new tokens in 86.652 s; cached depth 32768 in 74.66 ms
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) |  pp512 @ d32768 |        280.06 ± 0.13 |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=32768 count=128 sha256=b87a77219a8b668397702b51e7895772f75a90d3d07f86ca334d852d1d15336d
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) | tg128 @ d32768-dflash2 |         43.79 ± 0.01 |
+tg128 @ d32768-dflash2 acceptance=1.000 +/- 0.000
+
+=== GUFO BENCH DFLASH2 d131072 r1 ===
+HIP: found 1 ROCm devices (Total VRAM: 122880 MiB):
+  Device 0: AMD Radeon 8060S Graphics, gfx1151, Wave Size: 32, VRAM: 122880 MiB
+Model loaded in 1724 ms (success).
+| model                          |       size |     params | backend    |            test |                   t/s |
+| ------------------------------ | ---------- | ---------- | ---------- | --------------- | --------------------- |
+Preparing context depth 131072...
+Prepared 131072 new tokens in 448.159 s; cached depth 131072 in 207.60 ms
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:606
+| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) | pp512 @ d131072 |        151.08 ± 0.00 |
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+HIP error: no error at /build/source/src/models/qwen/drivers.cpp:588
+[QwenBenchTrace]: depth=131072 count=128 sha256=e6cc19269ccfd78420e096de4413b9c70bab18fdc85a81157ed209a13a885be0| Qwen3.8-27B Q8_0               |  29.30 GiB |    27.32 B | ROCm (HIP) | tg128 @ d131072-dflash2 |         10.58 ± 0.00 |
+
+tg128 @ d131072-dflash2 acceptance=0.332 +/- 0.000
+

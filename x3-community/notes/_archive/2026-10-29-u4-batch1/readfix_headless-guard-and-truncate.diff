@@ -1,0 +1,60 @@
+--- ../headless-guard-and-truncate.ts	2026-10-23 13:12:05.112315382 -0500
++++ g.ts	2026-10-23 13:45:27.797688352 -0500
+@@ -254,6 +254,45 @@
+ }
+ const COMFY_BUSY_REASON = "a render is running (gpu_guard.ps1 BUSY: ComfyUI queue, render process or GPU lock), so ComfyUI is not stopped or restarted. Wait for the job to finish (python C:/AI/community/scripts/comfy_ctl.py status), then retry.";
+ 
++// readfix 2026-10-23 (ALI-163, Derrick 11:09 AM CT "Yes don't be so restrictive to forge wtf"): pi-permissions now lets bash run
++// `python -c "<code>"` (code may span lines and contain ';') and read commands ending in `2>/dev/null` / `2>$null`. pi's wildcards can't
++// see quotes, so the shape is checked here: Forge sessions get exactly one quoted -c argument (no $( or backtick inside double quotes) and
++// nothing after it but the stderr redirect; non-Forge sessions keep the old floor (no ';', newline or '>/' in those commands).
++const STDERR_NULL = /\s+2>\s*(?:\/dev\/null|\$null)\s*$/;
++const PY_C = /^\s*python3?(?:\.exe)?\s+-c\s+/i;
++export interface RelaxShape { wasDenied: boolean; bad: string | null }
++export function relaxedShape(command: string): RelaxShape | null {
++	const hasNull = STDERR_NULL.test(command);
++	const body = command.replace(STDERR_NULL, "");
++	const m = PY_C.exec(body);
++	if (m) {
++		const rest = body.slice(m[0].length);
++		const wasDenied = /[;\n\r]|>\/|>\s*\$null/.test(command);
++		const q = rest[0];
++		if (q !== '"' && q !== "'") return { wasDenied, bad: "python -c needs its code as one quoted argument (\"...\" or '...')." };
++		let k = 1;
++		if (q === "'") {
++			k = rest.indexOf("'", 1);
++		} else {
++			for (; k < rest.length; k++) {
++				const c = rest[k];
++				if (c === "\\") { k++; continue; }
++				if (c === "`" || (c === "$" && rest[k + 1] === "(")) return { wasDenied, bad: "no $( ) or backtick inside python -c \"...\" (bash would run it); use single quotes or a .py file." };
++				if (c === '"') break;
++			}
++			if (k >= rest.length) k = -1;
++		}
++		if (k < 0) return { wasDenied, bad: "python -c code has no closing quote." };
++		if (rest.slice(k + 1).trim() !== "") return { wasDenied, bad: "nothing may follow python -c \"...\" except 2>/dev/null (no ; && | > or a second command)." };
++		return { wasDenied, bad: null };
++	}
++	if (hasNull) {
++		const bad = /[;&|`<>\n\r]|\$\(/.test(body) ? "only one plain read command may end in 2>/dev/null (no ; && | > < or $( before it)." : null;
++		return { wasDenied: /2>\s*\/dev\/null/.test(command), bad };
++	}
++	return null;
++}
++
+ export interface EvalOptions {
+ 	/** true = headless run (ctx.hasUI === false): the K4 command allowlist applies. */
+ 	headless?: boolean;
+@@ -280,6 +319,11 @@
+ 			return { id: "allowlist-missing", reason: `the command allowlist (${ALLOWLIST_FILE}) could not be loaded (${String(alErr)}); all shell commands are blocked until the supervisor fixes it.` };
+ 		}
+ 		if (forge && COMFY_STOP.test(args.command) && renderRunning()) return { id: "comfy-restart-busy", reason: COMFY_BUSY_REASON };
++		if (toolName === "bash") {
++			const rs = relaxedShape(args.command);
++			if (rs && !forge && rs.wasDenied) return { id: "forge-only-relax", reason: "multi-line or ';' python -c and 2>/dev/null are relaxed for Forge sessions only; write the code to a .py file and run it." };
++			if (rs && forge && rs.bad) return { id: "python-c-shape", reason: rs.bad };
++		}
+ 		if (!opts.headless && !al.applyInUI) return null;
+ 		if (opts.headless && isForgeSession(opts.cwd || process.cwd(), al)) {
+ 			if (FORGE_FINANCE.test(args.command)) return { id: "finance-paths", reason: FINANCE_REASON };

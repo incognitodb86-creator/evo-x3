@@ -1,0 +1,57 @@
+{
+  "slot": "flash-next",
+  "at_ct": "2026-11-15 20:39:30 CST",
+  "http_status": 200,
+  "wall_s": 3.418,
+  "coherent_pass": true,
+  "content": "Unified memory allocation limits matter on AMD Strix Halo APUs because the large pool of high-bandwidth GDDR7 memory is shared between the CPU and the integrated GPU, meaning that memory allocated for one subsystem is directly subtracted from what is available for the other. This creates a zero-sum trade-off where aggressive memory allocation for AI workloads or graphics rendering can starve the CPU of necessary resources, potentially causing system instability or severe performance degradation. Therefore, developers and system administrators must carefully manage memory budgets to prevent the GPU from consuming too much of the unified pool, which would otherwise leave insufficient memory for general system operations and CPU-bound tasks.",
+  "reasoning_chars": 115,
+  "usage": {
+    "prompt_tokens": 60,
+    "completion_tokens": 156,
+    "total_tokens": 216,
+    "completion_tokens_details": {
+      "reasoning_tokens": 26,
+      "reasoning_closed_at": 1,
+      "reasoning_closed_by": "answer_room"
+    }
+  },
+  "timings": {
+    "prompt_n": 60,
+    "predicted_n": 156,
+    "prompt_ms": 163.8,
+    "predicted_ms": 3246.5,
+    "prompt_per_second": 366.3,
+    "predicted_per_second": 48.052,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 3,
+    "draft_n": 177,
+    "draft_n_accepted": 68,
+    "speculation": {
+      "drafter": "mtp",
+      "rounds": 62,
+      "head": {
+        "rounds": 62,
+        "drafted": 177,
+        "accepted": 68
+      },
+      "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+      },
+      "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+      }
+    }
+  },
+  "finish_reason": "stop",
+  "journal_tail": [
+    "2026-11-15T20:39:30-06:00 evo-X3 llama-swap-flash-next[128322]: serve_api: mtp 156 tok in 3.25s = 48.05 t/s | 62 rounds, commit 2.10/round | prompt 60, prefill 0.16s (60 new) | detok 13us/tok | 26 tok with the head off | pool 21504/524288 4% | think on, closed at 1 by answer room",
+    "2026-11-15T20:39:30-06:00 evo-X3 llama-swap-flash-next[128322]: INFO:     10.88.0.1:41002 - \"POST /v1/chat/completions HTTP/1.1\" 200 OK"
+  ]
+}

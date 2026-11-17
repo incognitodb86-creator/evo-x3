@@ -1,0 +1,46 @@
+p7/JOB_REQUEST.json bytes 122 sha256 4766e4c9b0c64b3bafc9a2170d777ea559212b6852d10e5381b81bbafc61003e
+exact bytes: '{"jobs": [{"id": "ali147_pool_promptv2_seg3_s51080002", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}\n'
+PASS bytes are byte-for-byte the accepted model request shape (C:/AI/community/p7/jobs/request_iter07.json, indent=2 + trailing newline) with the id replaced once
+PASS LF only, trailing newline present (same as every archived request_iter*.json)
+PASS the new id appears exactly once and the model id is gone
+PASS top-level keys exactly ['jobs']
+PASS exactly ONE job
+PASS job keys and order exactly id, kind, frames, frames_tol, minutes (as the model)
+PASS id = ali147_pool_promptv2_seg3_s51080002
+PASS kind = graph
+PASS frames 481 / frames_tol 0 / minutes 60 (60 = PRE-JOB gate, ralph.ps1 clamps 30..180)
+PASS frames matches the graph itself: c0.length 243 + win1.extension_frames 238 = 481
+PASS CreateVideo fps 24 -> duration 481/24 = 20.0417 s
+PASS save.filename_prefix routes output into community/ali147_pool_promptv2_seg3_s51080002
+ralph.ps1 -notmatch patterns: 4
+PASS found the p7 id patterns in the live ralph.ps1: 2
+PASS id matches ^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$
+PASS id matches ^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$
+PASS absent (id free, no prior render): p7/jobs/ali147_pool_promptv2_seg3_s51080002.result.json
+PASS absent (id free, no prior render): p7/jobs/ali147_pool_promptv2_seg3_s51080002.out
+PASS absent (id free, no prior render): p7/jobs/ali147_pool_promptv2_seg3_s51080002.err.out
+PASS absent (id free, no prior render): runs/ali147_pool_promptv2_seg3_s51080002/status.log
+PASS absent (id free, no prior render): runs/ali147_pool_promptv2_seg3_s51080002/objective.json
+PASS absent (id free, no prior render): runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.mp4
+PASS absent (id free, no prior render): runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.api.json
+PASS absent (id free, no prior render): p7/jobs/ali147_pool_promptv2_seg3_s51080002.result.json.failed-20261022
+p7_budget.json {"used_min": 342, "jobs": 24, "cap_min": 390, "job_cap": 27, "updated": "2026-10-22T22:36:32"}
+PASS used_min 342 < cap_min 390 (this job ~14 min at the 481-frame baseline)
+PASS jobs 24 < job_cap 27
+PASS comm.guard_ok passes on both prompts (the harness's own pre-render call)
+PASS the graph the job names differs from the base seg3 graph in exactly ['c0','c1','save']: ["c0", "c1", "save"]
+PASS c0 inputs changed exactly ["prompt"]: got ["prompt"]
+PASS c1 inputs changed exactly ["prompt"]: got ["prompt"]
+PASS save inputs changed exactly ["filename_prefix"]: got ["filename_prefix"]
+PASS arm artifact present: fairness.txt
+PASS arm artifact present: graph_diff.txt
+PASS arm artifact present: PROOF.md
+PASS arm artifact present: request.api.json
+PASS arm dir holds exactly the 4 allowed files
+
+The harness consumes p7/JOB_REQUEST.json at exit (moves it to p7/jobs/request_iter<NN>.json), so a
+re-request needs the file rewritten. Verify the RENDER in the next iteration per PROOF.md: result.json
+ok, status.log JOB end ok, cmp request.api.json vs <id>.api.json, ffprobe -count_packets 481,
+objective.json, sha256, contact-sheet coverage (a 481-frame sheet samples frames 204-276 and
+444/456/468/480 only, never 0/200/300/400). sbs_base_seg3_promptv2.mp4 and the fixed-frame stills
+are Max/harness outputs (run_graph_job.py has no hstack path), never Forge files. KEEP is Derek's.

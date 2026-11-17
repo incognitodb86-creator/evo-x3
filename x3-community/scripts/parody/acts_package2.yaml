@@ -1,0 +1,51 @@
+# Package 2 (t126u-t127u) acts.yaml additions. Merge these rows into the LIVE
+# C:\AI\community\scripts\parody\acts.yaml (19 acts after the flash-high planfix, sha 09ACDF81...).
+# Match the live row schema (field names) when merging; values below follow the plan's field list:
+# id, body count, partner types, contact verbs, motion verbs, default camera, still-read must-keeps,
+# known_bad, status. All untested; quality unpromised on the current lock. No new rule pack.
+# NOT act ids (writer-brief states on a named act): sleeping, already_out (rufie), mdma, mind_control, telekinesis.
+# NOT act ids (writer-brief + still): pregnancy / body niche, caught / shoplifter, film looks, costumes.
+acts:
+  - id: male_solo
+    bodies: 1
+    partner_types: [none]
+    performer: man
+    aliases: [jerk off, jerking off, jack off, edging, male solo, solo guy]
+    finish_variants: [ruined_orgasm]
+    contact_verbs: [strokes himself, grips his shaft]
+    motion_verbs: [slow strokes, speeds up, edges and stops]
+    default_camera: third_person
+    must_keep: [his hand, his body]
+    known_bad: []
+    status: untested
+  - id: standing_mf
+    bodies: 2
+    partner_types: [man]
+    aliases: [standing sex, standing fuck, standing missionary, standing doggy]
+    not_carried: 1
+    contact_verbs: [thrusts into her, presses against her]
+    motion_verbs: [hip thrusts, both feet planted]
+    default_camera: third_person
+    must_keep: [both standing, feet on the floor]
+    known_bad: [carried sex is not this act]
+    status: untested
+  - id: airplane
+    bodies: 2
+    partner_types: [man]
+    aliases: [airplane position, airplane]
+    contact_verbs: [thrusts into her]
+    motion_verbs: [hip thrusts, holds her thighs]
+    default_camera: third_person
+    must_keep: [her legs held up and out]
+    known_bad: []
+    status: untested
+  - id: piledriver
+    bodies: 2
+    partner_types: [man]
+    aliases: [piledriver, pile driver]
+    contact_verbs: [drives down into her]
+    motion_verbs: [downward thrusts]
+    default_camera: third_person
+    must_keep: [her hips raised over her shoulders]
+    known_bad: []
+    status: untested

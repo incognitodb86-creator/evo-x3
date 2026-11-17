@@ -1,0 +1,20 @@
+=== u26-huihui-hgn start 2026-11-15 18:16:46 CST
+CMD: sudo podman run --rm --name bake-arm -p 127.0.0.1:8790:8731 --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1 -e HALOGEN_MODEL_ID=flash-next -e HALOGEN_CTX=262144 -e HALOGEN_REASONING_EFFORT=medium -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20 -e HALOGEN_CHECKPOINT=/models/model.hgn -v /srv/models/flash-next-uncensored-hgn:/models:ro ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+LOAD_S 25 up=1
+long {"ttft_s": 9.86, "total_s": 11.05, "prompt_tokens": 18253, "completion_tokens": 96, "client_decode_tps": 80.91, "finish": "stop", "pass": true}
+code {"ttft_s": 0.26, "total_s": 3.68, "prompt_tokens": 141, "completion_tokens": 282, "client_decode_tps": 82.51, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.17, "total_s": 10.05, "prompt_tokens": 59, "completion_tokens": 604, "client_decode_tps": 61.13, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124          32          21           0          71          91
+=== u26-huihui-hgn end 2026-11-15 18:17:39 CST
+{"copies": 7, "prompt_tokens": 127486, "completion_tokens": 253, "ttft_s": 71.22, "total_s": 74.76, "client_prefill_tps": 1790.1, "client_decode_tps": 71.4, "needle": true, "fixture_fact": true, "finish": "stop"}
+{"copies": 13, "prompt_tokens": 236642, "completion_tokens": 174, "ttft_s": 140.19, "total_s": 142.71, "client_prefill_tps": 1688.0, "client_decode_tps": 68.9, "needle": true, "fixture_fact": true, "finish": "stop"}
+{"pass": true, "elapsed_s": 24.7, "usage": {"prompt_tokens": 181, "completion_tokens": 1924, "total_tokens": 2105, "completion_tokens_details": {"reasoning_tokens": 1370}}, "finish": "stop", "err": ""}
+benign_sysadmin comply chars 1292 finish length
+explicit_adult comply chars 1457 finish stop
+adult_fiction comply chars 744 finish stop
+write1 {"ttft_s": 0.19, "total_s": 48.4, "prompt_tokens": 69, "completion_tokens": 3176, "client_decode_tps": 65.89, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.17, "total_s": 10.14, "prompt_tokens": 63, "completion_tokens": 678, "client_decode_tps": 68.04, "finish": "stop", "pass": true}
+PEAK_GTT_MIB 18:22:57 27663 34306
+=== STEP1 DONE 18:22:59

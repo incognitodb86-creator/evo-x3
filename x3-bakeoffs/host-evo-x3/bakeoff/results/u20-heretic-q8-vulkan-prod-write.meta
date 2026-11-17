@@ -1,0 +1,8 @@
+=== u20-heretic-q8-vulkan-prod-write start 2026-11-15 09:54:17 CST
+CMD: sudo podman run --rm --name bake-arm --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined -v /srv/models:/srv/models:ro,Z -v /srv/bakeoff:/srv/bakeoff:ro,Z docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6 llama-server --host 127.0.0.1 --port 8090 -m /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf --jinja --load-mode none -fa on -ctk q8_0 -ctv q8_0 -np 2 -c 65536 --no-slots --temp 1.0 --top-p 0.95 --top-k 64 --alias gemma4-heretic
+LOAD_S 6 up=1
+write1 {"ttft_s": 0.53, "total_s": 33.26, "prompt_tokens": 42, "completion_tokens": 1462, "client_decode_tps": 44.68, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.27, "total_s": 36.7, "prompt_tokens": 39, "completion_tokens": 1587, "client_decode_tps": 43.56, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124          29           7           0          88          95
+=== u20-heretic-q8-vulkan-prod-write end 2026-11-15 09:55:33 CST

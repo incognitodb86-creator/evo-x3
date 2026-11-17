@@ -1,0 +1,1 @@
+Archived 2026-11-15 by Max Architect (X3 Phase 4, Derrick t1784s6566): AlienPc-only PowerShell scripts and dummy_run/ carried over by the X3 mirror. Untracked; AlienPc copies unchanged. Restore: mv back to the same relative path.

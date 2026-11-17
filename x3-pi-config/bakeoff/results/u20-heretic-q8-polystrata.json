@@ -1,0 +1,202 @@
+{
+ "arm": "u20-heretic-q8-polystrata",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 10:07:30 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 19.805208683013916,
+   "total_s": 23.703721284866333,
+   "prompt_tokens": 18709,
+   "completion_tokens": 232,
+   "client_decode_tps": 59.509875609934646,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18709,
+    "prompt_ms": 19672.2,
+    "prompt_per_token_ms": 1.051,
+    "prompt_per_second": 951.0,
+    "predicted_n": 232,
+    "predicted_ms": 3961.6,
+    "predicted_per_token_ms": 17.003,
+    "predicted_per_second": 58.8,
+    "draft_n": 202,
+    "draft_n_accepted": 165
+   },
+   "content": "The maintenance window is Tuesday 03:40 and the on-call codename is TANGERINE-4471.",
+   "reasoning_chars": 632,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.5644581317901611,
+   "total_s": 16.892314195632935,
+   "prompt_tokens": 35,
+   "completion_tokens": 900,
+   "client_decode_tps": 55.12052510023072,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 35,
+    "prompt_ms": 271.3,
+    "prompt_per_token_ms": 7.751,
+    "prompt_per_second": 129.0,
+    "predicted_n": 900,
+    "predicted_ms": 16381.5,
+    "predicted_per_token_ms": 18.202,
+    "predicted_per_second": 54.9,
+    "draft_n": 866,
+    "draft_n_accepted": 543
+   },
+   "content": "To understand how a heat pump works, you first have to unlearn one common assumption: that a heater\u2019s job is to *create* heat. \n\nTraditional heaters\u2014like electric space heaters or gas furnaces\u2014work by burning fuel or using electricity to generate warmth. A heat pump is different. Instead of creating heat, a heat pump acts like a delivery service. It finds heat that already exists somewhere else and moves it to where you want it.\n\nThink of your refrigerator. If you feel the back of a fridge, it\u2019s warm. That\u2019s because the fridge is pulling",
+   "reasoning_chars": 3105,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "write1": {
+   "ttft_s": 0.649559497833252,
+   "total_s": 47.75214624404907,
+   "prompt_tokens": 42,
+   "completion_tokens": 2984,
+   "client_decode_tps": 63.351085495102495,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 42,
+    "prompt_ms": 287.2,
+    "prompt_per_token_ms": 6.838,
+    "prompt_per_second": 146.2,
+    "predicted_n": 2984,
+    "predicted_ms": 47216.3,
+    "predicted_per_token_ms": 15.818,
+    "predicted_per_second": 63.2,
+    "draft_n": 2614,
+    "draft_n_accepted": 2055
+   },
+   "content": "Elias dragged his boots through the slurry of black sand and crushed cockles. The gale had retreated, leaving the shoreline a chaotic weave of eelgrass and splintered driftwood. His lungs still burned with the metallic tang of ozone.\n\nHe spotted it wedged in a crevice of basalt: a block of something opaque, tucked beneath a shroud of bladderwrack. He reached down, his knuckles raw from the spray, and pried it loose.\n\nIt was an envelope, heavy as a lead slug and coated in a thick, translucent wax that repelled the brine. The parchment was the color of bruised cream. There was no stamp, only a single name scrawled in violet ink that sat unnaturally atop the fibers: *Maren*.\n\nThe ink hadn't bled. It remained sharp, dark, and glistening, as if the nib had just left the page. Elias wiped his hands on his salt-stiffened trousers, but the chill of the parchment seeped into his marrow. He didn't look back at the lantern room\u2019s rhythmic pulse. He only stared at the violet name, wondering how a ghost could survive the Atlantic's black, unyielding weight.",
+   "reasoning_chars": 8393,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.523918628692627,
+   "total_s": 19.41944193840027,
+   "prompt_tokens": 39,
+   "completion_tokens": 1024,
+   "client_decode_tps": 54.19273037407312,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 39,
+    "prompt_ms": 235.1,
+    "prompt_per_token_ms": 6.028,
+    "prompt_per_second": 165.9,
+    "predicted_n": 1024,
+    "predicted_ms": 18944.3,
+    "predicted_per_token_ms": 18.482,
+    "predicted_per_second": 54.1,
+    "draft_n": 1011,
+    "draft_n_accepted": 618
+   },
+   "content": "Stop buying flimsy pans that warp by next season. Meet the ForgeMaster 12\u2014the last skillet you\u2019ll ever own. \n\nThis isn't just cookware; it\u2019s a heavyweight champion for your stovetop. Built from pre-seasoned, high-density iron, it delivers relentless, even heat that modern non-stick pans simply can\u2019t touch. Whether you\u2019re searing a thick ribeye, baking golden cornbread, or frying eggs over a flickering campfire, the ForgeMaster handles the heat without breaking a sweat.\n\nIt\u2019s rugged, indestructible, and grows better with every meal. But here\u2019s the twist: this pan is actually a culinary time machine. Every sear and ogni saut\u00e9 builds a microscopic, seasoned patina that doesn't just prevent sticking\u2014it absorbs the \"soul\" of your cooking. Your grandmother\u2019s Sunday gravy and your midnight grilled cheese are literally becoming part of the pan\u2019s DNA.\n\nDon't just cook. Build a legacy. \n\n**The ForgeMaster: Indestructible iron with a memory.**",
+   "reasoning_chars": 3103,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.5920557975769043,
+     "total_s": 2.3363535404205322,
+     "prompt_tokens": 143,
+     "completion_tokens": 126,
+     "client_decode_tps": 72.2353741022387,
+     "timings": {
+      "cache_n": 0,
+      "prompt_n": 143,
+      "prompt_ms": 304.6,
+      "prompt_per_token_ms": 2.13,
+      "prompt_per_second": 469.5,
+      "predicted_n": 126,
+      "predicted_ms": 1793.1,
+      "predicted_per_token_ms": 14.119,
+      "predicted_per_second": 70.8,
+      "draft_n": 105,
+      "draft_n_accepted": 90
+     },
+     "content": "",
+     "reasoning_chars": 373,
+     "tool_calls": [
+      {
+       "id": "call_2b6cf96ced4b48179efc0038",
+       "name": "lookup_user",
+       "arguments": "{\"email\": \"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.6041991710662842,
+     "total_s": 0.7985031604766846,
+     "prompt_tokens": 190,
+     "completion_tokens": 26,
+     "client_decode_tps": 133.81094273408837,
+     "timings": {
+      "cache_n": 142,
+      "prompt_n": 48,
+      "prompt_ms": 217.5,
+      "prompt_per_token_ms": 4.531,
+      "prompt_per_second": 220.7,
+      "predicted_n": 26,
+      "predicted_ms": 343.0,
+      "predicted_per_token_ms": 12.704,
+      "predicted_per_second": 78.7,
+      "draft_n": 21,
+      "draft_n_accepted": 19
+     },
+     "content": "",
+     "reasoning_chars": 0,
+     "tool_calls": [
+      {
+       "id": "call_1eaed677652d48e8b84aee1e",
+       "name": "get_orders",
+       "arguments": "{\"user_id\": \"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.5476648807525635,
+     "total_s": 0.7444159984588623,
+     "prompt_tokens": 246,
+     "completion_tokens": 18,
+     "client_decode_tps": 91.4861384770865,
+     "timings": {
+      "cache_n": 189,
+      "prompt_n": 57,
+      "prompt_ms": 229.7,
+      "prompt_per_token_ms": 4.03,
+      "prompt_per_second": 248.1,
+      "predicted_n": 18,
+      "predicted_ms": 295.1,
+      "predicted_per_token_ms": 15.532,
+      "predicted_per_second": 64.4,
+      "draft_n": 18,
+      "draft_n_accepted": 12
+     },
+     "content": "Dana (dana@example.com) has 3 orders.",
+     "reasoning_chars": 0,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

@@ -1,0 +1,639 @@
+{
+ "arm": "u6-27b-gufo-dflash2",
+ "model": "qwen27b",
+ "effort": "low",
+ "started": "2026-11-15 09:34:21 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 36.10768437385559,
+   "total_s": 38.47524642944336,
+   "prompt_tokens": 18253,
+   "completion_tokens": 97,
+   "client_decode_tps": 40.970415018718015,
+   "timings": {
+    "prompt_n": 18253,
+    "prompt_ms": 36090.479336,
+    "prompt_per_token_ms": 1.977235486550156,
+    "prompt_per_second": 505.7566520540159,
+    "predicted_n": 97,
+    "predicted_ms": 2360.9504600000005,
+    "predicted_per_token_ms": 24.33969546391753,
+    "predicted_per_second": 41.085148394007376,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 37.621351000000004,
+    "cache_disk_enqueue_ms": 0.00471,
+    "draft_rounds": 18,
+    "draft_n": 106,
+    "draft_n_accepted": 79,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 18253,
+     "captures": 6,
+     "captured_capacity_bytes": 2688155648,
+     "borrowed_capacity_bytes": 1191182336,
+     "copied_payload_bytes": 1483072832,
+     "captured_checkpoint_ids": [
+      2,
+      515,
+      1028,
+      1541,
+      2054,
+      2279
+     ],
+     "global_spill": {
+      "idle_bytes": 0,
+      "foreground_bytes": 0,
+      "idle_copy_ms": 0,
+      "foreground_copy_ms": 0,
+      "stream_wait_ms": 0,
+      "residual_wait_ms": 0.046752,
+      "reassignments": 1,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 5190381319,
+     "global_ram_bytes": 5190381319,
+     "global_peak_ledger_bytes": 5190421016,
+     "global_peak_ram_bytes": 5190421016,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1604714496,
+       "reserved_bytes": 0,
+       "peak_bytes": 2280587264
+      },
+      "backing_assigned": {
+       "bytes": 1191182336,
+       "reserved_bytes": 1191182336,
+       "peak_bytes": 1191182336
+      },
+      "backing_materialized": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      },
+      "private_state": {
+       "bytes": 1484390400,
+       "reserved_bytes": 0,
+       "peak_bytes": 1484390400
+      },
+      "private_tail": {
+       "bytes": 12582912,
+       "reserved_bytes": 0,
+       "peak_bytes": 12582912
+      },
+      "metadata": {
+       "bytes": 897511175,
+       "reserved_bytes": 0,
+       "peak_bytes": 897550872
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 14,
+    "lookup_n_accepted": 10
+   },
+   "content": "The on-call codename is **TANGERINE-4471** and the maintenance window is **Tuesday 03:40**.",
+   "reasoning_chars": 223,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "longdecode": {
+   "ttft_s": 4.4825921058654785,
+   "total_s": 37.50007390975952,
+   "prompt_tokens": 18244,
+   "completion_tokens": 900,
+   "client_decode_tps": 27.2582871505923,
+   "timings": {
+    "prompt_n": 1860,
+    "prompt_ms": 4422.821614,
+    "prompt_per_token_ms": 2.377861082795699,
+    "prompt_per_second": 420.54601390939115,
+    "predicted_n": 900,
+    "predicted_ms": 33009.050364999996,
+    "predicted_per_token_ms": 36.67672262777777,
+    "predicted_per_second": 27.265249682986454,
+    "cache_n": 16384,
+    "cache_restore_ms": 15.663387,
+    "cache_snapshot_ms": 10.830892,
+    "cache_disk_enqueue_ms": 0.00208,
+    "draft_rounds": 272,
+    "draft_n": 1308,
+    "draft_n_accepted": 627,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "ram",
+     "selection_reason": 1,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 16384,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 16384,
+     "restored_bytes": 1319293152,
+     "prefilled_tokens": 1860,
+     "captures": 2,
+     "captured_capacity_bytes": 622723072,
+     "borrowed_capacity_bytes": 117440512,
+     "copied_payload_bytes": 499687872,
+     "captured_checkpoint_ids": [
+      2280,
+      2505
+     ],
+     "global_spill": {
+      "idle_bytes": 322437120,
+      "foreground_bytes": 868745216,
+      "idle_copy_ms": 16.003635,
+      "foreground_copy_ms": 22.000081,
+      "stream_wait_ms": 0.472612,
+      "residual_wait_ms": 22.388708,
+      "reassignments": 2,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 5861560345,
+     "global_ram_bytes": 5861560345,
+     "global_peak_ledger_bytes": 5861596870,
+     "global_peak_ram_bytes": 5861596870,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1652752384,
+       "reserved_bytes": 0,
+       "peak_bytes": 2280587264
+      },
+      "backing_assigned": {
+       "bytes": 117440512,
+       "reserved_bytes": 117440512,
+       "peak_bytes": 1191182336
+      },
+      "backing_materialized": {
+       "bytes": 1191182336,
+       "reserved_bytes": 0,
+       "peak_bytes": 1191182336
+      },
+      "private_state": {
+       "bytes": 1979187200,
+       "reserved_bytes": 0,
+       "peak_bytes": 1979187200
+      },
+      "private_tail": {
+       "bytes": 23068672,
+       "reserved_bytes": 0,
+       "peak_bytes": 23068672
+      },
+      "metadata": {
+       "bytes": 897929241,
+       "reserved_bytes": 0,
+       "peak_bytes": 897965766
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    }
+   },
+   "content": "PolyStrata is a local inference engine for Qwen3.8-Flash-Next, a large language model with a mixture-of-experts architecture. It runs on a single GPU (NVIDIA RTX 20\u201350 series or supported AMD cards) with 12 GB or more of VRAM, and requires 64 GB of system RAM for the full models. The model's experts are split between the GPU and the CPU: the most frequently used experts are cached in VRAM, while the rest are computed on the CPU or streamed over PCIe. An expert profile ranks all 24,576 experts by usage so the cache adapts to the conversation.\n\nThree quantized model sizes are offered: Q2_0 (66 GB download, ~34 GB of experts in RAM, fastest), IQ2_XS (68 GB, ~36 GB, slightly better quality at close speed), and IQ3_XXS (76 GB, ~43 GB, best quality but slower due to more CPU work). A pruned \"Coder\" variant keeps only 256 of each layer's 512 experts, runs on 32 GB of RAM, and retains 91.3% of the full model's SWE-bench Verified score. A fine-tune called Swift 1.5 produces answers with roughly 63% fewer thinking tokens at under 1% accuracy loss. An experimental 4-bit quantization (Unsloth UD-Q4_K_XL, 111 GB) runs at 7\u20138.5 tokens/s on a 64 GB PC by reading most experts from the SSD.\n\nOn the reference machine (RTX 5070 12 GB, Ryzen 5 7600, 64 GB DDR5), Q2_0 processes a 4K-token prompt at about 1,299 tokens/s and generates output at roughly 93 tokens/s; at 128K context, prompt speed drops to about 2,100 tokens/s and output to 74 tokens/s. Engine 0.1.36 improved prompt speed by 16\u201322% with fused int8 tensor-core kernels and output speed by 5\u201318% with thread-block-cluster decode kernels on RTX 50 series cards. Time to first token is about 4 seconds at 4K, 25 seconds at 32K, and under 2 minutes at 128K.\n\nSeveral memory-management features extend what is possible on limited hardware. KV streaming (engine 0.1.5) keeps the context's KV cache in RAM and streams only the portion attention needs into VRAM, freeing space for more experts; at 262K context this raised Q2_0 output from 50.9 to 62.6 tokens/s. A 4-bit KV cache option halves KV memory at a small quality cost. A hybrid K8V4 format keeps keys at 8 bits and values at 4 bits, saving 23% of KV memory. Low-RAM mode (engine 0.1.26) maps experts from a file on disk instead of copying them all into RAM, reducing committed memory from 36 GB to about 13 GB on the Coder model. A resident variant (0.1.30) copies only the experts the GPU does not hold into pinned RAM, avoiding SSD reads during",
+   "reasoning_chars": 572,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.3500051498413086,
+   "total_s": 31.82750368118286,
+   "prompt_tokens": 59,
+   "completion_tokens": 868,
+   "client_decode_tps": 27.575253450834055,
+   "timings": {
+    "prompt_n": 59,
+    "prompt_ms": 338.434906,
+    "prompt_per_token_ms": 5.736184847457627,
+    "prompt_per_second": 174.3318994406564,
+    "predicted_n": 868,
+    "predicted_ms": 31467.822881000015,
+    "predicted_per_token_ms": 36.25325216705071,
+    "predicted_per_second": 27.583732223308353,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 13.945357999999999,
+    "cache_disk_enqueue_ms": 0.00272,
+    "draft_rounds": 296,
+    "draft_n": 1374,
+    "draft_n_accepted": 572,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 59,
+     "captures": 2,
+     "captured_capacity_bytes": 503185408,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 498508224,
+     "captured_checkpoint_ids": [
+      2507,
+      2508
+     ],
+     "global_spill": {
+      "idle_bytes": 398458880,
+      "foreground_bytes": 910163968,
+      "idle_copy_ms": 19.278089,
+      "foreground_copy_ms": 23.103849,
+      "stream_wait_ms": 0.521643,
+      "residual_wait_ms": 23.990163,
+      "reassignments": 3,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 5861309363,
+     "global_ram_bytes": 5861309363,
+     "global_peak_ledger_bytes": 5861596870,
+     "global_peak_ram_bytes": 5861596870,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1149566976,
+       "reserved_bytes": 0,
+       "peak_bytes": 2280587264
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 1191182336
+      },
+      "backing_materialized": {
+       "bytes": 1308622848,
+       "reserved_bytes": 0,
+       "peak_bytes": 1308622848
+      },
+      "private_state": {
+       "bytes": 2473984000,
+       "reserved_bytes": 0,
+       "peak_bytes": 2473984000
+      },
+      "private_tail": {
+       "bytes": 31457280,
+       "reserved_bytes": 0,
+       "peak_bytes": 31457280
+      },
+      "metadata": {
+       "bytes": 897678259,
+       "reserved_bytes": 0,
+       "peak_bytes": 897965766
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    }
+   },
+   "content": "# How a Heat Pump Works\n\nA heat pump sounds like a contradiction. How can you \"pump\" heat out of the cold air outside on a winter morning? The answer is that heat is always everywhere \u2014 even in freezing air, molecules are still moving, and that movement *is* heat. A heat pump doesn't create warmth. It moves existing heat from one place to another, kind of like a conveyor belt for thermal energy.\n\n**The basic cycle**\n\nInside a heat pump, a fluid called refrigerant flows through a closed loop of pipes. This fluid has a special property: it boils at a very low temperature. That means it can turn from liquid to gas even when it's sitting in freezing air.\n\nHere's the journey, step by step:\n\n**1. Absorbing heat (the evaporator).** The refrigerant enters the outdoor coil as a cold, low-pressure liquid. Because its boiling point is so low, it quickly flashes into a gas as it sits in the outside air. To boil, it needs energy \u2014 and it pulls that energy from the surrounding air. The air loses a tiny bit of heat. The refrigerant, now a gas, is slightly warmer than it was before.\n\n**2. Squeezing it (the compressor).** A motor-driven compressor then squeezes that low-pressure gas into a smaller space. When you compress a gas, it gets hot \u2014 the same reason the back of a car tire gets warm after a long drive. The refrigerant is now a hot, high-pressure gas.\n\n**3. Releasing heat (the condenser).** This hot gas flows through the indoor coil. It's now hotter than the air inside your house, so it gives up its heat to the room. As it loses that heat, it condenses back into a liquid. Your living room gets warmer.\n\n**4. Letting it cool (the expansion valve).** The liquid then passes through a tiny valve that drops its pressure suddenly. When pressure drops, the liquid gets very cold again. It's now ready to go back outside and repeat the cycle.\n\nThat's it. The same fluid keeps looping, endlessly siphoning heat from the outdoors and dumping it indoors.\n\n**Why it works in cold weather**\n\nPeople often ask: \"If it's 10 degrees outside, where is the heat coming from?\" The answer is that 10-degree air still contains far more thermal energy than you'd expect. The heat pump doesn't need the air to be warm \u2014 it just needs the air to be warmer than the refrigerant, which it always is, because the refrigerant is engineered to be extremely cold before it hits the outdoor coil.\n\n**Flipping it for summer**\n\nThe same machine can cool your house in summer. A reversing valve simply swaps which coil is the evaporator and which is the condenser. Now the refrigerant absorbs heat from your indoor air and dumps it outside. Same cycle, opposite direction.\n\n**Why it's efficient**\n\nAn electric resistance heater converts 1 unit of electricity into 1 unit of heat. A heat pump uses that same electricity to run the compressor and fan, but it moves 3 to 5 units of heat from the outside air for every 1 unit of electricity it consumes. It's not creating heat \u2014 it's relocating it \u2014 and that's what makes it so much more efficient than a conventional furnace or baseboard heater.",
+   "reasoning_chars": 682,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 1.0859272480010986,
+     "total_s": 2.5927164554595947,
+     "prompt_tokens": 388,
+     "completion_tokens": 64,
+     "client_decode_tps": 42.474421560231974,
+     "timings": {
+      "prompt_n": 388,
+      "prompt_ms": 1071.864099,
+      "prompt_per_token_ms": 2.7625363376288656,
+      "prompt_per_second": 361.98618869872234,
+      "predicted_n": 64,
+      "predicted_ms": 1501.4231249999998,
+      "predicted_per_token_ms": 23.459736328124997,
+      "predicted_per_second": 42.626225035664085,
+      "cache_n": 0,
+      "cache_restore_ms": 0,
+      "cache_snapshot_ms": 14.048194,
+      "cache_disk_enqueue_ms": 0.00209,
+      "draft_rounds": 12,
+      "draft_n": 75,
+      "draft_n_accepted": 52,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "none",
+       "selection_reason": 6,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 0,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 0,
+       "restored_bytes": 0,
+       "prefilled_tokens": 388,
+       "captures": 2,
+       "captured_capacity_bytes": 530448384,
+       "borrowed_capacity_bytes": 16777216,
+       "copied_payload_bytes": 508076480,
+       "captured_checkpoint_ids": [
+        2510,
+        2543
+       ],
+       "global_spill": {
+        "idle_bytes": 398458880,
+        "foreground_bytes": 910163968,
+        "idle_copy_ms": 19.278089,
+        "foreground_copy_ms": 23.103849,
+        "stream_wait_ms": 0.521643,
+        "residual_wait_ms": 24.427428,
+        "reassignments": 4,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 6129708593,
+       "global_ram_bytes": 6129708593,
+       "global_peak_ledger_bytes": 6129730282,
+       "global_peak_ram_bytes": 6129730282,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 887422976,
+         "reserved_bytes": 0,
+         "peak_bytes": 2280587264
+        },
+        "backing_assigned": {
+         "bytes": 16777216,
+         "reserved_bytes": 16777216,
+         "peak_bytes": 1191182336
+        },
+        "backing_materialized": {
+         "bytes": 1308622848,
+         "reserved_bytes": 0,
+         "peak_bytes": 1308622848
+        },
+        "private_state": {
+         "bytes": 2968780800,
+         "reserved_bytes": 0,
+         "peak_bytes": 2968780800
+        },
+        "private_tail": {
+         "bytes": 50331648,
+         "reserved_bytes": 0,
+         "peak_bytes": 50331648
+        },
+        "metadata": {
+         "bytes": 897773105,
+         "reserved_bytes": 0,
+         "peak_bytes": 897965766
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 148,
+     "tool_calls": [
+      {
+       "id": "call_mmwf87n1szarrwydqci6",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.3625009059906006,
+     "total_s": 1.5535671710968018,
+     "prompt_tokens": 452,
+     "completion_tokens": 53,
+     "client_decode_tps": 44.49794402939812,
+     "timings": {
+      "prompt_n": 69,
+      "prompt_ms": 347.877999,
+      "prompt_per_token_ms": 5.041710130434782,
+      "prompt_per_second": 198.3453975196632,
+      "predicted_n": 53,
+      "predicted_ms": 1183.958856,
+      "predicted_per_token_ms": 22.33884633962264,
+      "predicted_per_second": 44.76506909966473,
+      "cache_n": 383,
+      "cache_restore_ms": 4.718683,
+      "cache_snapshot_ms": 13.145183,
+      "cache_disk_enqueue_ms": 0.00215,
+      "draft_rounds": 9,
+      "draft_n": 57,
+      "draft_n_accepted": 44,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 383,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 383,
+       "restored_bytes": 270651616,
+       "prefilled_tokens": 69,
+       "captures": 2,
+       "captured_capacity_bytes": 522059776,
+       "borrowed_capacity_bytes": 0,
+       "copied_payload_bytes": 516465088,
+       "captured_checkpoint_ids": [
+        2544,
+        2545
+       ],
+       "global_spill": {
+        "idle_bytes": 415236096,
+        "foreground_bytes": 910163968,
+        "idle_copy_ms": 21.709052,
+        "foreground_copy_ms": 23.103849,
+        "stream_wait_ms": 0.532544,
+        "residual_wait_ms": 24.811072,
+        "reassignments": 5,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 6666395547,
+       "global_ram_bytes": 6666395547,
+       "global_peak_ledger_bytes": 6666417024,
+       "global_peak_ram_bytes": 6666417024,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 901971968,
+         "reserved_bytes": 0,
+         "peak_bytes": 2280587264
+        },
+        "backing_assigned": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 1191182336
+        },
+        "backing_materialized": {
+         "bytes": 1325400064,
+         "reserved_bytes": 0,
+         "peak_bytes": 1325400064
+        },
+        "private_state": {
+         "bytes": 3463577600,
+         "reserved_bytes": 0,
+         "peak_bytes": 3463577600
+        },
+        "private_tail": {
+         "bytes": 77594624,
+         "reserved_bytes": 0,
+         "peak_bytes": 77594624
+        },
+        "metadata": {
+         "bytes": 897851291,
+         "reserved_bytes": 0,
+         "peak_bytes": 897965766
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 60,
+     "tool_calls": [
+      {
+       "id": "call_do6g79yswnybl1z8xyp7",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.501939058303833,
+     "total_s": 1.3255562782287598,
+     "prompt_tokens": 525,
+     "completion_tokens": 32,
+     "client_decode_tps": 38.85300018729188,
+     "timings": {
+      "prompt_n": 78,
+      "prompt_ms": 487.755542,
+      "prompt_per_token_ms": 6.253276179487179,
+      "prompt_per_second": 159.91617374590487,
+      "predicted_n": 32,
+      "predicted_ms": 815.839068,
+      "predicted_per_token_ms": 25.494970875,
+      "predicted_per_second": 39.223421940857584,
+      "cache_n": 447,
+      "cache_restore_ms": 4.548017,
+      "cache_snapshot_ms": 13.02429,
+      "cache_disk_enqueue_ms": 0.0025599999999999998,
+      "draft_rounds": 7,
+      "draft_n": 41,
+      "draft_n_accepted": 25,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 447,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 447,
+       "restored_bytes": 274845920,
+       "prefilled_tokens": 78,
+       "captures": 2,
+       "captured_capacity_bytes": 515768320,
+       "borrowed_capacity_bytes": 16777216,
+       "copied_payload_bytes": 492478912,
+       "captured_checkpoint_ids": [
+        2546,
+        2579
+       ],
+       "global_spill": {
+        "idle_bytes": 415236096,
+        "foreground_bytes": 910163968,
+        "idle_copy_ms": 21.709052,
+        "foreground_copy_ms": 23.103849,
+        "stream_wait_ms": 0.532544,
+        "residual_wait_ms": 25.060571,
+        "reassignments": 6,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 7203103413,
+       "global_ram_bytes": 7203103413,
+       "global_peak_ledger_bytes": 7203125962,
+       "global_peak_ram_bytes": 7203125962,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 922812416,
+         "reserved_bytes": 0,
+         "peak_bytes": 2280587264
+        },
+        "backing_assigned": {
+         "bytes": 16777216,
+         "reserved_bytes": 16777216,
+         "peak_bytes": 1191182336
+        },
+        "backing_materialized": {
+         "bytes": 1325400064,
+         "reserved_bytes": 0,
+         "peak_bytes": 1325400064
+        },
+        "private_state": {
+         "bytes": 3958374400,
+         "reserved_bytes": 0,
+         "peak_bytes": 3958374400
+        },
+        "private_tail": {
+         "bytes": 81788928,
+         "reserved_bytes": 0,
+         "peak_bytes": 81788928
+        },
+        "metadata": {
+         "bytes": 897950389,
+         "reserved_bytes": 0,
+         "peak_bytes": 897972938
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders**: A1, A2, and A3.",
+     "reasoning_chars": 23,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

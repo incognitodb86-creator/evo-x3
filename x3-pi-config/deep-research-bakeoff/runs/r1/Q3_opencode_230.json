@@ -1,0 +1,92 @@
+{
+  "arm": "R1_kyuz0_3tier_cleanroom",
+  "question_id": "Q3_opencode_230",
+  "question": "What changed in OpenCode 2.3.0 and when was it released?",
+  "started_ct": "2026-11-15 23:53:48 CST",
+  "wall_s": 81.49,
+  "angles": [
+    "OpenCode 2.3.0 release notes changelog",
+    "OpenCode 2.3.0 release date"
+  ],
+  "pages_saved": [
+    {
+      "url": "https://opencode.ai/changelog",
+      "title": "OpenCode | Changelog and release notes for every version",
+      "file": "97dcee461a9e.md",
+      "chars": 14216
+    },
+    {
+      "url": "https://opencode.ai/changelog/v2.3.0",
+      "title": "Background Subagents by Default | OpenCode changelog",
+      "file": "18f4249d8a16.md",
+      "chars": 8346
+    },
+    {
+      "url": "https://github.com/anomalyco/opencode/releases/tag/v2.3.0",
+      "title": "Release v2.3.0 \u00b7 anomalyco/opencode \u00b7 GitHub",
+      "file": "ff91852e23b0.md",
+      "chars": 10913
+    },
+    {
+      "url": "https://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/",
+      "title": "OpenCode 2.3: Background Subagents and Quieter Transcripts | AI/TLDR",
+      "file": "9619128074c5.md",
+      "chars": 3663
+    },
+    {
+      "url": "https://openchamber.dev/changelog/",
+      "title": "OpenChamber Changelog \u2013 Release Notes",
+      "file": "38d678c8267d.md",
+      "chars": 198187
+    }
+  ],
+  "sources_urls": [
+    "https://opencode.ai/changelog",
+    "https://opencode.ai/changelog/v2.3.0",
+    "https://github.com/anomalyco/opencode/releases/tag/v2.3.0",
+    "https://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/",
+    "https://openchamber.dev/changelog/"
+  ],
+  "analyses": [
+    {
+      "url": "https://opencode.ai/changelog",
+      "title": "OpenCode | Changelog and release notes for every version",
+      "facts": "Based on the provided excerpts from the OpenCode changelog, here are the concrete facts regarding version 2.3.0:\n\n**Release Date:**\n*   **November 13, 2026**\n\n**Key Changes in v2.3.0:**\n*   **Background Subagents by Default:** Subagents now return immediately, continue in the background, and report back when idle. This allows users to keep working in the parent session while multiple subagents run concurrently. (#63382)\n*   **Quieter Transcripts by Default:** The TUI now summarizes each run of tool calls and thoughts into one collapsible activity row. Users can revert to seeing every step by setting `Verbosity` to `medium` or `high` in settings, or setting `session.verbosity` in the TUI config. (#63207)\n*   **Jump to an Earlier Prompt:** A new feature in the desktop app allows users to search prompts across the current session and jump directly to one via the command palette or the shortcut `Cmd+Alt+G` (`Ctrl+Alt+G` on Windows/Linux). (#63585)\n\n**Statistics:**\n*   **32** more improvements\n*   **34** more fixes\n\n**Source:**\nhttps://opencode.ai/changelog"
+    },
+    {
+      "url": "https://opencode.ai/changelog/v2.3.0",
+      "title": "Background Subagents by Default | OpenCode changelog",
+      "facts": "Based on the provided excerpts from the OpenCode changelog, here are the concrete facts regarding version 2.3.0:\n\n**Release Date:**\n*   **November 13, 2026**\n\n**Key Changes in v2.3.0:**\n\n**Core & TUI:**\n*   **Background Subagents by Default:** Subagents now return immediately, continue in the background, and report back when idle. Multiple subagents can run concurrently while the parent session continues working. (#63382)\n*   **Quieter Transcripts:** The TUI now summarizes each run of tool calls.\n*   **Core Code Mode:** Simplified structured results from file and skill tools (write/edit return confirmation strings, patch returns empty result, skill returns directory/content). (#63616, #63635, #63618, #63623)\n*   **Terminal:** Session IDs in messages can be opened directly; Activity tabs are clickable; Shell mode has its own prompt color.\n\n**Desktop:**\n*   **Recent Sessions Sidebar:** Added experimental sidebar with cross-server recency, local pins, and reordering. Limited to the last 7 days and 30 rows.\n*   **Customizable Sessions Sidebar:** Added experimental customizable sidebar.\n*   **Mermaid Diagrams:** Can now be maximized for zooming and panning. (#59250)\n*   **Keyboard Shortcuts:** `Alt+Enter` places a follow-up first in the queue; `Mod+Enter` steers the next queued prompt. Holding modifier keys shows tab shortcut numbers.\n*   **UI/UX:** Added free-limit panel; Session IDs are easier to find/copy; Terminal shell selection per server.\n\n**SDK & Extensions:**\n*   **SDK:** Event subscriptions can receive `experimental.mcp.event` events; Model capability schemas advertise supported freeform tool-input formats; Session throughput measured from first streamed token.\n*   **Extensions:** Added `experimental session.fork` hook; Promise-based tools can cooperatively stop via `ToolContext.signal`; `@opencode/plugin/effect` exports `Tool` for rejecting calls with `Tool.Error`. (#63698)\n\n**Notable Fixes:**\n*   Fixed case-only file renames in patches on case-insensitive filesystems.\n*   Fixed stale thinking retention after Claude Agent prompts/tools change.\n*   Fixed directly driven child sessions not resuming after restart.\n*   Fixed desktop main process freezing while probing login-shell environment.\n*   Fixed pairing QR-code contrast in light themes. (#63220)\n*   Fixed activity-tab navigation and click handling. (#601"
+    },
+    {
+      "url": "https://github.com/anomalyco/opencode/releases/tag/v2.3.0",
+      "title": "Release v2.3.0 \u00b7 anomalyco/opencode \u00b7 GitHub",
+      "facts": "Based on the provided excerpts from the GitHub release page, here are the concrete facts regarding OpenCode v2.3.0:\n\n**Release Date:**\n*   **November 13** (Year not explicitly stated in the excerpt, but listed as `13 Nov 08:55`).\n\n**Key Changes & Highlights:**\n*   **Background Subagents by Default:** Subagents now return immediately, continue in the background, and report back when idle. This allows concurrent execution while the parent session continues working. (`#63382`)\n*   **Quieter Transcripts by Default:** The TUI summarizes each run of tool calls and thoughts into one collapsible activity row. Users can revert to detailed views by setting `Verbosity` to `medium` or `high` in settings or `session.verbosity` in TUI config. (`#63207`)\n*   **Jump to an Error:** (Excerpt cut off, but implies a new navigation feature).\n\n**Bug Fixes:**\n*   Fixed case-only file renames in patches on case-insensitive filesystems.\n*   Fixed stale thinking being retained after Claude Agent prompts or tools change.\n*   Fixed directly driven child sessions not resuming after a restart.\n*   Fixed plugin replacement stopping when cleanup of an earlier plugin fails.\n*   Fixed MCP OAuth refreshes and localhost redirects when a server rewrites `127.0.0.1`.\n*   Fixed saved API keys being omitted from local-model discovery.\n*   **Local Model Discovery:** Now waits up to **15 seconds** per request (previously 1 second) for Ollama, LM Studio, and vLLM to list models. (`#63700`)\n*   **Code Mode:** Calling a namespace as if it were a tool now suggests up to three real tools under it. (`#63697`)\n*   Fixed retryable provider streams losing completed work when interrupted.\n*   Fixed GitHub Copilot requests using the wrong endpoint before models finish loading.\n*   Fixed exhausted request rate limits being treated as terminal.\n*   Fixed activity-tab navigation and click handling. (`#60168`)\n\n**SDK Improvements:**\n*   Event subscriptions can now receive `experimental.mcp.event` events.\n*   Model capability schemas now advertise supported freeform tool-input formats.\n*   Session throughput is now measured from the first streamed token.\n*   Session creation documentation clarified regarding the `parentID` field.\n\n**Extensions Improvements:**\n*   Promise-based tools can cooperatively stop through `ToolContext.signal`.\n*   Added the `experimental session.fork` hook.\n*   Promise plugin cleanup failures"
+    },
+    {
+      "url": "https://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/",
+      "title": "OpenCode 2.3: Background Subagents and Quieter Transcripts | AI/TLDR",
+      "facts": "Based on the provided excerpts from the source URL, here are the concrete facts regarding OpenCode 2.3.0:\n\n**Release Date:**\n*   **2026-11-13** (Source: `Anomaly \u00b7 2026-11-13`)\n\n**Key Changes:**\n1.  **Background Subagents (Default):** Subagents now run in the background by default. A subagent call returns immediately, runs independently, and reports back when idle. This allows users to start several subagents in parallel without leaving the parent session.\n2.  **Quieter Transcripts (TUI):** The Terminal User Interface (TUI) now defaults to **low verbosity**. Tool calls and thoughts are folded into a single **collapsible activity row**. Medium or high verbosity settings restore the full step-by-step view.\n3.  **Desktop App Feature:** A new **\"Jump to message\"** command was added to the desktop app (shortcut: `Cmd/Ctrl+Alt+G`).\n4.  **Experimental Flags:**\n    *   `mcp_events`: Adds MCP event subscriptions.\n    *   `shell_timeout_background`: Moves timed-out shell commands to the background.\n5.  **SDK/Plugin Updates:**\n    *   Cooperative cancellation via `ToolContext.signal`.\n    *   Experimental `session.fork` hook.\n    *   Shell commands now survive server handoffs.\n6.  **Configuration:** Client certificates for mutual TLS are set through `settings.tls`.\n\n**Source:**\nhttps://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/"
+    },
+    {
+      "url": "https://openchamber.dev/changelog/",
+      "title": "OpenChamber Changelog \u2013 Release Notes",
+      "facts": "Based on the provided excerpts, the only mention of OpenCode 2.3.0 is that it was bundled in OpenChamber version 2.7.1, which was released on **Nov 12, 2026**. The text does not contain any information about what changed in OpenCode 2.3.0 itself."
+    }
+  ],
+  "report": "# OpenCode 2.3.0 \u2014 Release Summary\n\n## Release Date\n\nOpenCode 2.3.0 was released on **November 13, 2026** [1](https://opencode.ai/changelog) [2](https://opencode.ai/changelog/v2.3.0) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0) [4](https://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/).\n\n---\n\n## Major New Features\n\n### 1. Background Subagents by Default\n\nSubagents now return immediately, continue running in the background, and report back when idle. This allows users to start multiple subagents concurrently while continuing to work in the parent session. ([#63382](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)) [1](https://opencode.ai/changelog) [2](https://opencode.ai/changelog/v2.3.0) [4](https://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/)\n\n### 2. Quieter Transcripts by Default\n\nThe TUI now defaults to **low verbosity**, summarizing each run of tool calls and thoughts into a single **collapsible activity row**. Users can revert to the full step-by-step view by setting `Verbosity` to `medium` or `high` in settings, or `session.verbosity` in the TUI config. ([#63207](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)) [1](https://opencode.ai/changelog) [2](https://opencode.ai/changelog/v2.3.0) [4](https://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/)\n\n### 3. Jump to an Earlier Prompt (Desktop)\n\nA new command in the desktop app allows users to search prompts across the current session and jump directly to one via the command palette or the shortcut `Cmd+Alt+G` (`Ctrl+Alt+G` on Windows/Linux). ([#63585](https://opencode.ai/changelog)) [1](https://opencode.ai/changelog) [4](https://ai-tldr.dev/releases/anomalyco-opencode-2-3-0/)\n\n---\n\n## Desktop App Changes\n\n| Change | Details |\n|--------|---------|\n| **Recent Sessions Sidebar** | Experimental sidebar with cross-server recency, local pins, and reordering (limited to last 7 days / 30 rows) [2](https://opencode.ai/changelog/v2.3.0) |\n| **Mermaid Diagrams** | Can now be maximized for zooming and panning ([#59250](https://opencode.ai/changelog/v2.3.0)) [2](https://opencode.ai/changelog/v2.3.0) |\n| **Keyboard Shortcuts** | `Alt+Enter` places a follow-up first in the queue; `Mod+Enter` steers the next queued prompt [2](https://opencode.ai/changelog/v2.3.0) |\n| **Free-Limit Panel** | Added UI panel for free-tier usage display [2](https://opencode.ai/changelog/v2.3.0) |\n\n---\n\n## Core & TUI Improvements\n\n- **Core Code Mode:** Simplified structured results from file and skill tools (write/edit return confirmation strings, patch returns empty result, skill returns directory/content). ([#63616](https://opencode.ai/changelog/v2.3.0), [#63635](https://opencode.ai/changelog/v2.3.0), [#63618](https://opencode.ai/changelog/v2.3.0), [#63623](https://opencode.ai/changelog/v2.3.0)) [2](https://opencode.ai/changelog/v2.3.0)\n- **Terminal:** Session IDs in messages can be opened directly; Activity tabs are clickable; Shell mode has its own prompt color. [2](https://opencode.ai/changelog/v2.3.0)\n- **Local Model Discovery:** Now waits up to **15 seconds** per request (previously 1 second) for Ollama, LM Studio, and vLLM to list models. ([#63700](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)\n- **Code Mode Suggestions:** Calling a namespace as if it were a tool now suggests up to three real tools under it. ([#63697](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)\n\n---\n\n## SDK & Extensions\n\n- Event subscriptions can receive `experimental.mcp.event` events [2](https://opencode.ai/changelog/v2.3.0) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)\n- Model capability schemas advertise supported freeform tool-input formats [2](https://opencode.ai/changelog/v2.3.0) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)\n- Session throughput measured from first streamed token [2](https://opencode.ai/changelog/v2.3.0) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)\n- Added `experimental session.fork` hook [2](https://opencode.ai/changelog/v2.3.0) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)\n- Promise-based tools can cooperatively stop via `ToolContext.signal` [2](https://opencode.ai/changelog/v2.3.0) [3](https://github.com/anomalyco/opencode/releases/tag/v2.3.0)\n- `@opencode/plugin/effect` exports `Tool` for rejecting calls with `Tool.Error` ([#63698](",
+  "metrics": {
+    "prompt_tokens": 27771,
+    "completion_tokens": 4615,
+    "tool_calls": {
+      "search_web": 5,
+      "fetch_page": 8,
+      "analyze_page": 5
+    }
+  },
+  "quotas": {
+    "search_web": 4,
+    "fetch_page": 6,
+    "analyze_page": 6
+  }
+}

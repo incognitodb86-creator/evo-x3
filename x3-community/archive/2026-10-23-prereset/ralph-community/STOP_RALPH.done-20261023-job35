@@ -1,0 +1,1 @@
+Derrick 2026-10-23 10:29 AM CT: 'Raise the job limit to 35, keep 120 GPU min' - graceful stop after the current pass for relaunch with -JobMax 35 (Max)

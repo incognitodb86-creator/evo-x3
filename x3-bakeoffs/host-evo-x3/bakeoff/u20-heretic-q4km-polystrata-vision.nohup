@@ -1,0 +1,6 @@
+=== u20-heretic-q4km-polystrata-vision start 2026-11-15 11:09:01 CST
+LOAD_S 4 up=1
+VISION {"elapsed_s": 2.998, "ttft_s": 0.6295, "prompt_tokens": 163, "completion_tokens": 56, "prompt_per_second": 258.9, "predicted_per_second": 77.1, "checks": {"yellow_or_gold_circle": true, "red_square": true, "green_triangle": true, "text_x3_bakeoff": true}, "vision_works": true, "finish": "stop"}
+TEXT: This image features a blue background with the text "X3-BAKEOFF" written in white at the top. It contains three distinct geometric shapes: a large yellow circle on the left, a red square on the right, and a green triangle at the bottom.
+=== u20-heretic-q4km-polystrata-vision end 2026-11-15 11:09:08 CST
+POLY_VISION_DONE

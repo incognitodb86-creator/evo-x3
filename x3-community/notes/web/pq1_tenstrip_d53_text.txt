@@ -1,0 +1,87 @@
+Hello, author. First of all, thank you for your hard work. I’d like to ask if there is a way to reduce the "oiliness" (greasiness) when using TURBO-hybrid_beta5? I am currently using the res_multistep/simple setting. Also, the motion/action seems a bit slow.
+
+ See translation EllipsesMark 26 days ago <div
+
+---- block ----
+
+Hello, author. First of all, thank you for your hard work. I’d like to ask if there is a way to reduce the "oiliness" (greasiness) when using TURBO-hybrid_beta5? I am currently using the res_multistep/simple setting. Also, the motion/action seems a bit slow.
+
+ 
+ Use his full fusion turbo lora at 0.7 strength, and add cinematic lora with realism people lora. cine lora @ 0.45 and realism @ 0.7
+
+ See translation svippixel 26 days ago <div
+
+---- block ----
+
+Hello, author. First of all, thank you for your hard work. I’d like to ask if there is a way to reduce the "oiliness" (greasiness) when using TURBO-hybrid_beta5? I am currently using the res_multistep/simple setting. Also, the motion/action seems a bit slow.
+
+ 
+ Use his full fusion turbo lora at 0.7 strength, and add cinematic lora with realism people lora. cine lora @ 0.45 and realism @ 0.7
+
+ 
+ Which Turbo LoRA is it?
+
+ See translation EllipsesMark 26 days ago <div
+
+---- block ----
+
+Full... Fusion
+
+ EllipsesMark 26 days ago <div
+
+---- block ----
+
+Which Turbo LoRA is it?
+
+ 
+ Sorry, I have to remember that not everyone lives on HF like I do. 
+
+ https://huggingface.co/TenStrip/MinimaxH3-Turbo_Shenanigans/tree/main 
+
+ See translation svippixel 26 days ago <div
+
+---- block ----
+
+Which Turbo LoRA is it?
+
+ 
+ Sorry, I have to remember that not everyone lives on HF like I do. 
+
+ https://huggingface.co/TenStrip/MinimaxH3-Turbo_Shenanigans/tree/main 
+
+ 
+ Haha, thank you very much.
+
+ See translation svippixel changed discussion status to closed 26 days ago TenStrip Owner 26 days ago <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www
+
+---- block ----
+
+That turbo lora linked is already what is in the TURBO model.
+
+ See translation EllipsesMark 26 days ago <div
+
+---- block ----
+
+That turbo lora linked is already what is in the TURBO model.
+
+ 
+ Is it?.... and also... you asked the question... I answered. Here's a tip... dont use the turbo model. How do you get rid of greasy? I told you how. If you find another way. Please let me know. Thanks. 
+
+ See translation gibagomes 22 days ago <div
+
+---- block ----
+
+Hello, author. First of all, thank you for your hard work. I’d like to ask if there is a way to reduce the "oiliness" (greasiness) when using TURBO-hybrid_beta5? I am currently using the res_multistep/simple setting. Also, the motion/action seems a bit slow.
+
+ 
+ Use his full fusion turbo lora at 0.7 strength, and add cinematic lora with realism people lora. cine lora @ 0.45 and realism @ 0.7
+
+ 
+ Which Turbo LoRA is it?
+
+ 
+ can you link both, pls? i think i found the realism one, but cant find the cinematic
+
+ See translation Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <button class="rounded-full border border-gray-100 pl-2 py-1 pr-2.5 flex items-center text-sm text-gray-50

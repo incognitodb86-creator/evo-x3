@@ -1,0 +1,92 @@
+{
+  "arm": "R1_kyuz0_3tier_cleanroom",
+  "question_id": "Q2_flash_next_sampling",
+  "question": "What are Qwen's recommended thinking and non-thinking sampling settings for Qwen3.8-Flash-Next?",
+  "started_ct": "2026-11-15 23:52:27 CST",
+  "wall_s": 54.63,
+  "angles": [
+    "Qwen3.8-Flash-Next recommended sampling settings",
+    "Qwen3.8-Flash-Next thinking mode temperature top_p"
+  ],
+  "pages_saved": [
+    {
+      "url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+      "title": "Qwen/Qwen3.8-Flash-Next \u00b7 Hugging Face",
+      "file": "eb79656c925c.md",
+      "chars": 170953
+    },
+    {
+      "url": "https://unsloth.ai/docs/models/qwen3.8-next",
+      "title": "Qwen3.8-Flash-Next: How to Run Locally | Unsloth Documentation",
+      "file": "5ef0a4f8e139.md",
+      "chars": 15056
+    },
+    {
+      "url": "https://dev.to/seppegadeyne/run-qwen38-flash-next-locally-with-exl3-and-tabbyapi-on-40-gb-of-ram-3m8d",
+      "title": "Run Qwen3.8-Flash-Next Locally with EXL3 and TabbyAPI on 40+ GB of RAM - DEV Community",
+      "file": "6bb1ed4a2d19.md",
+      "chars": 19451
+    },
+    {
+      "url": "https://qwen.ai/blog?id=qwen3.8-flash-next",
+      "title": "Qwen",
+      "file": "b90ce025dc5c.md",
+      "chars": 4
+    },
+    {
+      "url": "https://huggingface.co/spaces/victor/Qwen3.8-Flash-Next-free-endpoint",
+      "title": "Qwen3.8-Flash-Next Free Endpoint - a Hugging Face Space by victor",
+      "file": "3ea48713bdd2.md",
+      "chars": 169
+    }
+  ],
+  "sources_urls": [
+    "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+    "https://unsloth.ai/docs/models/qwen3.8-next",
+    "https://dev.to/seppegadeyne/run-qwen38-flash-next-locally-with-exl3-and-tabbyapi-on-40-gb-of-ram-3m8d",
+    "https://qwen.ai/blog?id=qwen3.8-flash-next",
+    "https://huggingface.co/spaces/victor/Qwen3.8-Flash-Next-free-endpoint"
+  ],
+  "analyses": [
+    {
+      "url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+      "title": "Qwen/Qwen3.8-Flash-Next \u00b7 Hugging Face",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://unsloth.ai/docs/models/qwen3.8-next",
+      "title": "Qwen3.8-Flash-Next: How to Run Locally | Unsloth Documentation",
+      "facts": "Based on the provided excerpts from the Unsloth documentation, here are the recommended sampling settings for **Qwen3.8-Flash-Next**:\n\n### **Thinking Mode**\n*   **temperature:** 1.0\n*   **top_p:** 0.95\n*   **top_k:** 20\n*   **min_p:** 0.0\n*   **presence_penalty:** 0.0\n*   **repetition_penalty:** 1.0\n\n### **Instruct (Non-Thinking) Mode**\n*   **temperature:** 0.7\n*   **top_p:** 0.80\n*   **top_k:** 20\n*   **min_p:** 0.0\n*   **presence_penalty:** 1.5\n*   **repetition_penalty:** 1.0\n\n### **Additional Notes**\n*   **Context Length:** Up to 262,144 tokens.\n*   **Reasoning Effort:** The model supports `reasoning_effort` to control reasoning depth and cost. The default is `xhigh`, but it can be adjusted to `medium`, `low`, or `none`.\n*   **Preserve Thinking:** This feature leaves the thinking trace from the previous conversation to potentially increase accuracy in continued conversations."
+    },
+    {
+      "url": "https://dev.to/seppegadeyne/run-qwen38-flash-next-locally-with-exl3-and-tabbyapi-on-40-gb-of-ram-3m8d",
+      "title": "Run Qwen3.8-Flash-Next Locally with EXL3 and TabbyAPI on 40+ GB of RAM - DEV Community",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://qwen.ai/blog?id=qwen3.8-flash-next",
+      "title": "Qwen",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://huggingface.co/spaces/victor/Qwen3.8-Flash-Next-free-endpoint",
+      "title": "Qwen3.8-Flash-Next Free Endpoint - a Hugging Face Space by victor",
+      "facts": "NO_RELEVANT_FACTS"
+    }
+  ],
+  "report": "# Qwen3.8-Flash-Next: Recommended Sampling Settings\n\nBased on the available verified sources, the recommended sampling settings for **Qwen3.8-Flash-Next** are documented in the Unsloth documentation as follows:\n\n## Thinking Mode\n\n| Parameter | Value |\n|-----------|-------|\n| `temperature` | 1.0 |\n| `top_p` | 0.95 |\n| `top_k` | 20 |\n| `min_p` | 0.0 |\n| `presence_penalty` | 0.0 |\n| `repetition_penalty` | 1.0 |\n\n## Instruct (Non-Thinking) Mode\n\n| Parameter | Value |\n|-----------|-------|\n| `temperature` | 0.7 |\n| `top_p` | 0.80 |\n| `top_k` | 20 |\n| `min_p` | 0.0 |\n| `presence_penalty` | 1.5 |\n| `repetition_penalty` | 1.0 |\n\n## Additional Notes\n\n- **Context Length:** Up to 262,144 tokens.\n- **Reasoning Effort:** The model supports a `reasoning_effort` parameter to control reasoning depth and cost. The default is `xhigh`, but it can be adjusted to `medium`, `low`, or `none`.\n- **Preserve Thinking:** This feature retains the thinking trace from the previous conversation to potentially increase accuracy in continued conversations.\n\n> \u26a0\ufe0f **Caveat:** These settings are sourced from the [Unsloth documentation](https://unsloth.ai/docs/models/qwen3.8-next). The official Qwen model page on Hugging Face and the Qwen blog did not return relevant sampling parameter details in the verified analysis, so these values may reflect community-verified recommendations rather than first-party Qwen documentation.\n\n## Sources\n\n- [Qwen3.8-Flash-Next: How to Run Locally | Unsloth Documentation](https://unsloth.ai/docs/models/qwen3.8-next)",
+  "metrics": {
+    "prompt_tokens": 29698,
+    "completion_tokens": 2337,
+    "tool_calls": {
+      "search_web": 5,
+      "fetch_page": 8,
+      "analyze_page": 5
+    }
+  },
+  "quotas": {
+    "search_web": 4,
+    "fetch_page": 6,
+    "analyze_page": 6
+  }
+}

@@ -1,0 +1,7 @@
+
+
+<think>
+The user wants a concise two-sentence explanation of why unified memory limits matter specifically on AMD Strix Halo APUs. Let me think about what makes Strix Halo special and why its unified memory architecture creates meaningful constraints.
+
+Strix Halo (Ryzen AI Max series) is AMD's high-end APU that integrates a large iGPU (up to 40 CU RDNA 3.5) with up to 128GB of unified LPDDR5x memory. The key issue: unlike discrete GPUs with dedicated VRAM, the iGPU and CPU share the same physical RAM pool. So the
+

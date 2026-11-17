@@ -1,0 +1,39 @@
+{
+  "slot": "gemma4-heretic",
+  "at_ct": "2026-11-15 20:59:39 CST",
+  "http_status": 200,
+  "wall_s": 2.144,
+  "coherent_pass": true,
+  "content": "Unified memory allocation limits matter because the CPU and high-performance GPU share a single pool of system RAM, meaning they must compete for the same capacity. If the GPU is allocated too much memory for textures or shaders, the CPU may run out of space for system tasks, leading to performance bottlenecks or application crashes. Conversely, insufficient allocation to the GPU can severely throttle graphics performance, preventing the APU from utilizing its full processing potential.",
+  "reasoning_chars": 0,
+  "usage": {
+    "completion_tokens": 87,
+    "prompt_tokens": 32,
+    "total_tokens": 119,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 32,
+    "prompt_ms": 155.433,
+    "prompt_per_token_ms": 4.85728125,
+    "prompt_per_second": 205.8764869750954,
+    "predicted_n": 87,
+    "predicted_ms": 1834.782,
+    "predicted_per_token_ms": 21.33467441860465,
+    "predicted_per_second": 46.872053464662294
+  },
+  "finish_reason": "stop",
+  "journal_tail": [
+    "2026-11-15T20:59:36-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.30.286.569 I slot get_availabl: id  1 | task -1 | selected slot by LRU, n_tokens = 0, t_last = -1",
+    "2026-11-15T20:59:36-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.30.286.632 I slot launch_slot_: id  1 | task 39 | processing task, is_child = 0",
+    "2026-11-15T20:59:39-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.32.427.827 I slot print_timing: id  1 | task 39 | prompt eval time =     155.43 ms /    32 tokens (    4.86 ms per token,   205.88 tokens per second)",
+    "2026-11-15T20:59:39-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.32.427.831 I slot print_timing: id  1 | task 39 |        eval time =    1834.78 ms /    87 tokens (   21.33 ms per token,    46.87 tokens per second)",
+    "2026-11-15T20:59:39-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.32.427.832 I slot print_timing: id  1 | task 39 |       total time =    1990.21 ms /   119 tokens",
+    "2026-11-15T20:59:39-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.32.427.833 I slot print_timing: id  1 | task 39 |    graphs reused =        110",
+    "2026-11-15T20:59:39-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.32.427.833 I slot print_timing: id  1 | task 39 |   graph reallocs =          0    /     0        (same size) / (changed size)",
+    "2026-11-15T20:59:39-06:00 evo-X3 llama-swap-gemma4-heretic[133849]: 0.32.427.847 I slot      release: id  1 | task 39 | stop processing: n_tokens = 118, truncated = 0"
+  ]
+}

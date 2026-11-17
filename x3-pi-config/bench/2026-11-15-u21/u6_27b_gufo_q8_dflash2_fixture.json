@@ -1,0 +1,309 @@
+{
+  "arm": "u21-qwen27b-q8-gufo-dflash2",
+  "model": "qwen27b",
+  "quant": "Qwen3.8-27B-UD-Q8_K_XL + DFlash2-Q4_K_M",
+  "started_ct": "2026-11-15 21:44:43 CST",
+  "tasks": {
+    "long": {
+      "ttft_s": 47.339,
+      "total_s": 50.558,
+      "prompt_tokens": 18253,
+      "completion_tokens": 97,
+      "client_decode_tps": 30.13,
+      "timings": {
+        "prompt_n": 18253,
+        "prompt_ms": 47315.043834,
+        "prompt_per_token_ms": 2.592179029967676,
+        "prompt_per_second": 385.7758235211361,
+        "predicted_n": 97,
+        "predicted_ms": 3217.1881639999997,
+        "predicted_per_token_ms": 33.16688828865979,
+        "predicted_per_second": 30.150552300738855,
+        "cache_n": 0,
+        "cache_restore_ms": 0,
+        "cache_snapshot_ms": 15.19908,
+        "cache_disk_enqueue_ms": 0.00081,
+        "draft_rounds": 18,
+        "draft_n": 126,
+        "draft_n_accepted": 79,
+        "component_cache": {
+          "schema": "component-cache-v1",
+          "reuse": "none",
+          "selection_reason": 6,
+          "deepest_live_tokens": 0,
+          "deepest_ram_tokens": 0,
+          "deepest_disk_tokens": 0,
+          "selected_tokens": 0,
+          "restored_bytes": 0,
+          "prefilled_tokens": 18253,
+          "captures": 1,
+          "captured_capacity_bytes": 1444872192,
+          "borrowed_capacity_bytes": 1191182336,
+          "copied_payload_bytes": 250269920,
+          "captured_checkpoint_ids": [
+            2752
+          ],
+          "global_spill": {
+            "idle_bytes": 1409286144,
+            "foreground_bytes": 0,
+            "idle_copy_ms": 56.260957,
+            "foreground_copy_ms": 0,
+            "stream_wait_ms": 0.432902,
+            "residual_wait_ms": 1.616898,
+            "reassignments": 15,
+            "idle_failures": 0
+          },
+          "global_ledger_bytes": 2771323200,
+          "global_ram_bytes": 2771323200,
+          "global_peak_ledger_bytes": 2771806712,
+          "global_peak_ram_bytes": 2771806712,
+          "global_persistence_pinned_bytes": 0,
+          "global_peak_persistence_pinned_bytes": 0,
+          "global_categories": {
+            "backing_free": {
+              "bytes": 173408256,
+              "reserved_bytes": 0,
+              "peak_bytes": 1899233280
+            },
+            "backing_assigned": {
+              "bytes": 1191182336,
+              "reserved_bytes": 1191182336,
+              "peak_bytes": 1325400064
+            },
+            "backing_materialized": {
+              "bytes": 16777216,
+              "reserved_bytes": 0,
+              "peak_bytes": 1342177280
+            },
+            "private_state": {
+              "bytes": 494796800,
+              "reserved_bytes": 0,
+              "peak_bytes": 1236992000
+            },
+            "private_tail": {
+              "bytes": 23068672,
+              "reserved_bytes": 0,
+              "peak_bytes": 54525952
+            },
+            "metadata": {
+              "bytes": 872089920,
+              "reserved_bytes": 0,
+              "peak_bytes": 872573432
+            },
+            "transfer_staging": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 0
+            }
+          }
+        },
+        "lookup_n": 14,
+        "lookup_n_accepted": 7
+      },
+      "finish": "stop",
+      "reasoning_chars": 223,
+      "content": "The on-call codename is **TANGERINE-4471** and the maintenance window is **Tuesday 03:40**.",
+      "pass": true
+    },
+    "longdecode": {
+      "ttft_s": 47.402,
+      "total_s": 102.627,
+      "prompt_tokens": 18244,
+      "completion_tokens": 900,
+      "client_decode_tps": 16.3,
+      "timings": {
+        "prompt_n": 18244,
+        "prompt_ms": 47348.239178,
+        "prompt_per_token_ms": 2.595277306402105,
+        "prompt_per_second": 385.31527923169176,
+        "predicted_n": 900,
+        "predicted_ms": 55218.71756699997,
+        "predicted_per_token_ms": 61.354130629999965,
+        "predicted_per_second": 16.298821118182968,
+        "cache_n": 0,
+        "cache_restore_ms": 0,
+        "cache_snapshot_ms": 18.311198,
+        "cache_disk_enqueue_ms": 0.0018800000000000002,
+        "draft_rounds": 313,
+        "draft_n": 1888,
+        "draft_n_accepted": 585,
+        "component_cache": {
+          "schema": "component-cache-v1",
+          "reuse": "none",
+          "selection_reason": 6,
+          "deepest_live_tokens": 0,
+          "deepest_ram_tokens": 0,
+          "deepest_disk_tokens": 0,
+          "selected_tokens": 0,
+          "restored_bytes": 0,
+          "prefilled_tokens": 18244,
+          "captures": 2,
+          "captured_capacity_bytes": 1696464896,
+          "borrowed_capacity_bytes": 1191182336,
+          "copied_payload_bytes": 499687872,
+          "captured_checkpoint_ids": [
+            5027,
+            7300
+          ],
+          "global_spill": {
+            "idle_bytes": 1739063296,
+            "foreground_bytes": 861405184,
+            "idle_copy_ms": 72.117729,
+            "foreground_copy_ms": 21.930623,
+            "stream_wait_ms": 0.860449,
+            "residual_wait_ms": 24.061794,
+            "reassignments": 16,
+            "idle_failures": 0
+          },
+          "global_ledger_bytes": 2772284904,
+          "global_ram_bytes": 2772284904,
+          "global_peak_ledger_bytes": 2772511880,
+          "global_peak_ram_bytes": 2772511880,
+          "global_persistence_pinned_bytes": 0,
+          "global_peak_persistence_pinned_bytes": 0,
+          "global_categories": {
+            "backing_free": {
+              "bytes": 202768384,
+              "reserved_bytes": 0,
+              "peak_bytes": 1899233280
+            },
+            "backing_assigned": {
+              "bytes": 1191182336,
+              "reserved_bytes": 1191182336,
+              "peak_bytes": 1325400064
+            },
+            "backing_materialized": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 1342177280
+            },
+            "private_state": {
+              "bytes": 494796800,
+              "reserved_bytes": 0,
+              "peak_bytes": 1236992000
+            },
+            "private_tail": {
+              "bytes": 10485760,
+              "reserved_bytes": 0,
+              "peak_bytes": 54525952
+            },
+            "metadata": {
+              "bytes": 873051624,
+              "reserved_bytes": 0,
+              "peak_bytes": 873278600
+            },
+            "transfer_staging": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 0
+            }
+          }
+        }
+      },
+      "finish": "length",
+      "reasoning_chars": 297,
+      "content": "PolyStrata is a local inference engine for running large mixture-of-experts language models on consumer hardware. It serves Qwen3.8-Flash-Next in three quantized sizes\u2014Q2_0, IQ2_XS, and IQ3_XXS\u2014plus a code-specialized pruned variant called the Coder and a fine-tuned variant called Swift 1.5 that produces shorter answers. The engine runs on Windows or Linux with an NVIDIA RTX 20-series or newer GPU (12 GB VRAM recommended) or supported AMD Radeon cards, and needs 64 GB of system RAM for the full models or 32 GB for the Coder.\n\nThe core idea is that the model's experts are split between GPU and CPU. The GPU holds a cache of the most frequently used experts, while the rest live in pinned system RAM or on disk. A routing profile ranks all 24,576 experts by usage frequency, and an adaptive tier continuously swaps experts in and out of VRAM as the conversation changes. On a reference rig (RTX 5070 12 GB, Ryzen 5 7600, 64 GB DDR5), Q2_0 processes a 4K-token prompt at roughly 1,300 tokens per second and generates output at about 93 tokens per second; at 128K context, prompt speed drops to around 2,100 tokens per second and output to about 74 tokens per second. The Coder model is faster on prompts because it has half the experts. A 24 GB RTX 3090 substantially improves output speed because it can hold far more experts in VRAM, reducing the CPU's share of the work.\n\nThe engine supports several memory-management strategies. KV streaming keeps the attention cache in RAM and streams only the portion the attention layer reads into VRAM, which lets more experts fit on the GPU at long contexts. A 4-bit KV cache option halves memory at the cost of some accuracy on long documents. A hybrid K8V4 format keeps keys at 8 bits and stores values as rotated 4-bit, cutting KV memory by 23 percent. For machines with limited RAM, a low-RAM mode maps experts from a file on disk so the OS file cache can evict pages under pressure; a resident variant copies only the experts the GPU does not hold into RAM, avoiding SSD reads during steady use. A RAM budget option lets you specify exactly how many gigabytes of experts to pin in RAM, with the rest read from files.\n\nSpeculative decoding via a multi-token-prediction draft layer is a major speed feature. The draft layer proposes several tokens that the full model verifies in one pass. A draft vocabulary subset can be tuned per language: the default includes all CJK tokens for 15\u201338 percent faster answers in those languages, while an English-only subset saves VRAM. Coupled drafts with Gumbel-max sampling improve acceptance rates for non-greedy decoding. The engine also supports a lookup-chain drafter that reuses suffix matches from the prompt cache.\n\nThe server exposes an OpenAI-compatible API at port 8080, a web interface with chat, monitoring, and request-tracking tabs, and an MCP server for integration with AI assistants. Images and vision are supported through a separate vision encoder. The engine includes extensive opt-in switches for tuning: PCIe fraction controls how many missed experts are copied to the GPU versus computed on the CPU; pool affinity and worker count tune CPU thread usage on hybrid processors; adaptive swap parameters control how aggressively the VRAM cache follows the conversation; and various environment variables enable or disable specific kernel paths for reproducibility or performance testing.\n\nSetup is designed to be nearly automatic: a batch file on Windows or a shell script on Linux asks four questions (model, size, context length, images), downloads and prepares everything, and starts the server. A calibration mode measures optimal settings for the specific PC. The document also covers practical concerns",
+      "pass": true
+    },
+    "decode": {
+      "ttft_s": 0.434,
+      "total_s": 43.66,
+      "prompt_tokens": 59,
+      "completion_tokens": 877,
+      "client_decode_tps": 20.29,
+      "timings": {
+        "prompt_n": 59,
+        "prompt_ms": 395.547662,
+        "prompt_per_token_ms": 6.704197661016949,
+        "prompt_per_second": 149.16027995635073,
+        "predicted_n": 877,
+        "predicted_ms": 43223.454344000005,
+        "predicted_per_token_ms": 49.28558077993159,
+        "predicted_per_second": 20.289910034035476,
+        "cache_n": 0,
+        "cache_restore_ms": 0,
+        "cache_snapshot_ms": 7.574599,
+        "cache_disk_enqueue_ms": 0.00051,
+        "draft_rounds": 272,
+        "draft_n": 1754,
+        "draft_n_accepted": 605,
+        "component_cache": {
+          "schema": "component-cache-v1",
+          "reuse": "none",
+          "selection_reason": 6,
+          "deepest_live_tokens": 0,
+          "deepest_ram_tokens": 0,
+          "deepest_disk_tokens": 0,
+          "selected_tokens": 0,
+          "restored_bytes": 0,
+          "prefilled_tokens": 59,
+          "captures": 1,
+          "captured_capacity_bytes": 251592704,
+          "borrowed_capacity_bytes": 0,
+          "copied_payload_bytes": 249090272,
+          "captured_checkpoint_ids": [
+            7302
+          ],
+          "global_spill": {
+            "idle_bytes": 1781530624,
+            "foreground_bytes": 2010120192,
+            "idle_copy_ms": 73.963537,
+            "foreground_copy_ms": 50.694855,
+            "stream_wait_ms": 1.286885,
+            "residual_wait_ms": 53.286859,
+            "reassignments": 17,
+            "idle_failures": 0
+          },
+          "global_ledger_bytes": 2770930376,
+          "global_ram_bytes": 2770930376,
+          "global_peak_ledger_bytes": 2772511880,
+          "global_peak_ram_bytes": 2772511880,
+          "global_persistence_pinned_bytes": 0,
+          "global_peak_persistence_pinned_bytes": 0,
+          "global_categories": {
+            "backing_free": {
+              "bytes": 204865536,
+              "reserved_bytes": 0,
+              "peak_bytes": 1899233280
+            },
+            "backing_assigned": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 1325400064
+            },
+            "backing_materialized": {
+              "bytes": 1191182336,
+              "reserved_bytes": 0,
+              "peak_bytes": 1342177280
+            },
+            "private_state": {
+              "bytes": 494796800,
+              "reserved_bytes": 0,
+              "peak_bytes": 1236992000
+            },
+            "private_tail": {
+              "bytes": 8388608,
+              "reserved_bytes": 0,
+              "peak_bytes": 54525952
+            },
+            "metadata": {
+              "bytes": 871697096,
+              "reserved_bytes": 0,
+              "peak_bytes": 873278600
+            },
+            "transfer_staging": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 0
+            }
+          }
+        }
+      },
+      "finish": "stop",
+      "reasoning_chars": 664,
+      "content": "# How a Heat Pump Works\n\nA heat pump is one of the most efficient ways to heat or cool a building, but the name is a little misleading. It doesn't \"pump heat\" in the way a water pump moves water. What it actually does is move heat from one place to another, using a small amount of electricity to make that happen.\n\nThe best way to understand a heat pump is to think about a refrigerator. A refrigerator works by pulling heat out of the cold box inside and dumping it into the warmer kitchen air. The back of your fridge gets warm because of this. A heat pump does essentially the same thing, but in reverse: it pulls heat from the outside air (or the ground, or water) and dumps it inside your home. In cooling mode, it flips the process and pulls heat from inside your home and dumps it outside \u2014 which is exactly what an air conditioner does.\n\nSo a heat pump and an air conditioner are basically the same machine. The difference is that a heat pump has a reversing valve that lets it switch direction, so it can heat in winter and cool in summer.\n\nNow, how does it actually move heat? The system uses a refrigerant \u2014 a fluid that changes between liquid and gas at relatively low temperatures. The cycle has four main stages:\n\n**1. Absorption.** The refrigerant flows through a coil on the outdoor unit. Even on a cold day, the outside air contains some heat \u2014 just far less than the air inside your home. The refrigerant is at a temperature low enough that it absorbs heat from the outside air, causing it to evaporate from a liquid into a gas. This is the evaporator coil.\n\n**2. Compression.** The gaseous refrigerant then flows to a compressor, which squeezes it down. When you compress a gas, its temperature shoots up \u2014 this is the same principle that makes the pump handle on a bicycle get warm. The refrigerant is now a hot, high-pressure gas.\n\n**3. Release.** This hot gas flows through a coil inside your home (the indoor unit). Because the refrigerant is now hotter than your indoor air, it releases its heat into your living space, warming it up. As it gives off heat, the refrigerant condenses back into a liquid.\n\n**4. Expansion.** The liquid refrigerant then passes through an expansion valve, which suddenly drops its pressure. This causes the temperature to plummet, and the refrigerant is now cold again, ready to go back outside and absorb more heat. The cycle repeats.\n\nThe reason this is so efficient is that the electricity is only used to run the compressor and the fans \u2014 not to generate heat directly. The actual heat energy is being pulled from the outside air. A typical heat pump can deliver three to four units of heat energy for every one unit of electricity it uses. An electric resistance heater, by contrast, delivers exactly one unit of heat for every one unit of electricity.\n\nOne thing that surprises people: heat pumps can still work on very cold days, even below freezing. The outside air is cold, but it still contains more heat energy than the refrigerant inside the system, so heat still flows in the right direction. It just takes a bit more work, so efficiency drops a little. On extremely cold days, some systems use a backup electric heater to make up the difference.\n\nThe whole process is elegant in its simplicity: no combustion, no flammable fuel, just a fluid cycling between states while a compressor does the heavy lifting.",
+      "pass": true
+    }
+  },
+  "finished_ct": "2026-11-15 21:48:00 CST"
+}

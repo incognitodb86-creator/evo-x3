@@ -1,0 +1,264 @@
+"""EVO-X3 remote mode for run_queue.py (consolidation plan P1b, Max Architect 2026-11-16).
+
+AlienPc keeps ComfyUI; the X3 queues over the tailnet through AlienPc's Tailscale Serve :8446
+(-> llama-swap 127.0.0.1:8080/upstream/comfyui_auto). enable() rebinds the Windows-only pieces of
+comm.py / run_graph_job.py / run_queue.py, so run_queue's batch logic (guards, waves, retry, STOP,
+timeouts, /interrupt + /queue delete, DONE/FAILED lines) is reused unchanged:
+  comm.BASE / rgj.COMFY      -> COMFY_API (default https://alienpc.tailf242b2.ts.net:8446)
+  comm.submit                -> uploads every LoadImage/LoadAudio/LoadVideo input first (POST /upload/image,
+                                subfolder kept, overwrite=true); a missing local input fails the clip, nothing posted
+  comm.fetch                 -> /history then GET /view?type=output into <run>/<tag>/ (no hard-link to ComfyUI\\output)
+  comm.running               -> {"error": ...}: llama-swap admin routes are not exposed through :8446, so
+                                comfy_loaded() is None (unknown) and the JOB/pending timeouts decide stalls
+  free_comfy / mark_collected / LLM unload -> no-op: AlienPc llama-swap TTL + comfy_graceful_stop.ps1 own the process
+  gpu_lock.ps1               -> ~/AI/locks/gpu-render.lock (fcntl flock + PID line; single submitter on the X3)
+  detach (WMI)               -> systemd-run --user --unit render-batch-<run>
+  RTX upscale post-pass      -> deferred (decision D5: AlienPc ComfyUI step, not wired yet); logged, rc unaffected
+No secrets: :8446 has no key (scoped by the Tailscale grant), so nothing is read or sent.
+"""
+import fcntl, json, mimetypes, os, re, shlex, subprocess, sys, time, urllib.parse, urllib.request, uuid
+
+API = os.environ.get("COMFY_API", "https://alienpc.tailf242b2.ts.net:8446").rstrip("/")
+HOME = os.path.expanduser("~")
+LOCK = os.path.join(HOME, "AI", "locks", "gpu-render.lock")
+INPUT_ROOTS = [p for p in os.environ.get("RQ_INPUT_ROOTS", "").split(os.pathsep) if p] + [
+    os.path.join(HOME, "AI", "comfy-alienpc", "input")]
+LOAD_KEYS = {"image", "audio", "video", "file"}
+MEDIA_RE = re.compile(r"\.(png|jpe?g|webp|bmp|gif|wav|mp3|flac|ogg|m4a|aac|mp4|webm|mov|mkv)$", re.I)
+_lock_fh = None
+
+
+def input_files(g):
+    """[(node_id, class_type, key, value)] for every Load* node input that names a ComfyUI input file."""
+    g = g.get("prompt", g) if isinstance(g, dict) else {}
+    out = []
+    for nid, n in g.items():
+        ct = str(n.get("class_type", ""))
+        if "load" not in ct.lower():
+            continue
+        for k, v in (n.get("inputs") or {}).items():
+            if k in LOAD_KEYS and isinstance(v, str) and MEDIA_RE.search(v.split(" [")[0]):
+                out.append((nid, ct, k, v.split(" [")[0]))
+    return out
+
+
+def resolve(name, run_dir=None):
+    roots = ([run_dir] if run_dir else []) + INPUT_ROOTS
+    for r in roots:
+        for cand in (os.path.join(r, name), os.path.join(r, os.path.basename(name))):
+            if os.path.isfile(cand):
+                return cand
+    return None
+
+
+def upload_plan(g, run_dir=None):
+    """[{name, subfolder, local, bytes, kind}] or raises FileNotFoundError naming every missing input."""
+    plan, missing, seen = [], [], set()
+    for _nid, ct, k, name in input_files(g):
+        if name in seen:
+            continue
+        seen.add(name)
+        loc = resolve(name, run_dir)
+        if not loc:
+            missing.append(name); continue
+        sub = os.path.dirname(name).replace("\\", "/")
+        plan.append({"name": name, "subfolder": sub, "local": loc, "bytes": os.path.getsize(loc),
+                     "kind": "audio" if k == "audio" or "audio" in ct.lower() else k})
+    if missing:
+        raise FileNotFoundError("missing local input(s): " + ", ".join(missing))
+    return plan
+
+
+def _multipart(fields, fname, data):
+    b = uuid.uuid4().hex
+    parts = []
+    for k, v in fields.items():
+        parts.append(f'--{b}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode())
+    ctype = mimetypes.guess_type(fname)[0] or "application/octet-stream"
+    parts.append(f'--{b}\r\nContent-Disposition: form-data; name="image"; filename="{os.path.basename(fname)}"\r\n'
+                 f'Content-Type: {ctype}\r\n\r\n'.encode() + data + b"\r\n")
+    parts.append(f"--{b}--\r\n".encode())
+    return b"".join(parts), "multipart/form-data; boundary=" + b
+
+
+def upload(item, timeout=300):
+    """POST /upload/image (ComfyUI saves any bytes there, audio included; LoadAudio's widget uses the same route)."""
+    with open(item["local"], "rb") as f:
+        body, ct = _multipart({"subfolder": item["subfolder"], "type": "input", "overwrite": "true"}, item["local"], f.read())
+    r = urllib.request.Request(API + "/upload/image", data=body, headers={"Content-Type": ct}, method="POST")
+    return json.loads(urllib.request.urlopen(r, timeout=timeout).read())
+
+
+def download(subfolder, filename, dst, timeout=900):
+    q = urllib.parse.urlencode({"filename": filename, "subfolder": subfolder or "", "type": "output"})
+    tmp = dst + ".part"
+    with urllib.request.urlopen(API + "/view?" + q, timeout=timeout) as r, open(tmp, "wb") as f:
+        while True:
+            chunk = r.read(1 << 20)
+            if not chunk: break
+            f.write(chunk)
+    os.replace(tmp, dst)
+    return os.path.getsize(dst)
+
+
+def lock_acquire(note):
+    """0 = acquired, 1 = held by a live PID (GPU busy), 9 = lock error. Same contract as gpu_lock.ps1 -Acquire."""
+    global _lock_fh
+    try:
+        os.makedirs(os.path.dirname(LOCK), exist_ok=True)
+        fh = open(LOCK, "a+")
+        try:
+            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            fh.close(); return 1, "held"
+        fh.seek(0); fh.truncate(); fh.write("%d %s %s\n" % (os.getpid(), time.strftime("%Y-%m-%dT%H:%M:%S"), note)); fh.flush()
+        _lock_fh = fh
+        return 0, "acquired " + LOCK
+    except Exception as e:
+        return 9, "lock error %s" % str(e)[:120]
+
+
+def lock_release():
+    global _lock_fh
+    if _lock_fh:
+        try:
+            _lock_fh.seek(0); _lock_fh.truncate(); fcntl.flock(_lock_fh, fcntl.LOCK_UN); _lock_fh.close()
+        finally:
+            _lock_fh = None
+        return 0, "released"
+    return 0, "not held"
+
+
+def remote_idle(timeout=20):
+    """Check /system_stats (in AlienPc llama-swap ignorePaths) before /queue so an unloaded ComfyUI
+    (409) is treated as idle without waking comfyui_auto. Returns True when loaded and /queue is empty,
+    None when unloaded (409), or False when busy/unreachable."""
+    try:
+        with urllib.request.urlopen(API + "/system_stats", timeout=timeout) as resp:
+            if getattr(resp, "status", 200) != 200:
+                return False
+    except urllib.error.HTTPError as e:
+        return None if e.code == 409 else False
+    except Exception:
+        return False
+    try:
+        q = json.loads(urllib.request.urlopen(API + "/queue", timeout=timeout).read())
+        return not (q.get("queue_running") or q.get("queue_pending"))
+    except urllib.error.HTTPError as e:
+        return None if e.code == 409 else False
+    except Exception:
+        return False
+
+
+def enable(rq):
+    """Rebind run_queue (module rq) and its comm / run_graph_job imports for the X3."""
+    comm, rgj = rq.comm, rq.rgj
+    root = os.path.join(HOME, "AI", "community")
+    comm.W = root; comm.LOG = os.path.join(root, "community.log")
+    comm.BASE = API; rgj.COMFY = API
+    comm.C = os.path.join(HOME, "AI", "comfy-alienpc")   # local stub tree only: disk harvest finds nothing remote
+    comm.LS = "remote-llama-swap-admin-not-exposed"; rgj.LS = comm.LS
+    comm.GPU_LOCK_FILE = LOCK; comm.GPU_COLLECTED_FILE = LOCK + ".collected"
+    comm.running = lambda: {"error": "remote mode: llama-swap admin routes are not exposed through :8446"}
+    comm.free_comfy = lambda logfile=None: comm.log("COMFY free skipped (remote: AlienPc llama-swap ttl + graceful stop own the process)", logfile)
+    comm.mark_collected = lambda pid=None, path=None: None
+    rq.OUT_ROOT = os.path.join(comm.C, "output", "community")
+
+    def _post(u, t=120):
+        raise RuntimeError("remote mode: %s not exposed through :8446 (no-op)" % u.split("/api/")[-1][:60])
+    rgj.post = _post
+
+    orig_ps_run = rgj.ps_run
+    def ps_run(file, *args):
+        if file == rgj.GPU_LOCK_PS:
+            if "-Acquire" in args:
+                rc, msg = lock_acquire(" ".join(args[-2:]))
+                if rc == 0:
+                    idle = remote_idle()
+                    if idle is False:
+                        lock_release(); return 1, "AlienPc ComfyUI /queue busy or unreadable"
+                return rc, msg
+            if "-Release" in args:
+                return lock_release()
+        return orig_ps_run(file, *args)
+    rgj.ps_run = ps_run
+
+    orig_submit = comm.submit
+    def submit(g, tag, meta, outdir, logfile=None, out=None):
+        try:
+            plan = upload_plan(g, os.path.dirname(outdir))
+        except FileNotFoundError as e:
+            comm.log(f"JOB error {tag} {e}; nothing posted", logfile)
+            return comm.outcome(out, "node_error", note=str(e)[:300])
+        for it in plan:
+            try:
+                r = upload(it)
+                comm.log(f"UPLOAD {tag} {it['kind']} {it['name']} {it['bytes']}B -> {r.get('subfolder','')}/{r.get('name')}", logfile)
+            except Exception as e:
+                comm.log(f"JOB error {tag} upload {it['name']} failed: {str(e)[:200]}; nothing posted", logfile)
+                return comm.outcome(out, "node_error", note="upload failed: " + it["name"])
+        return orig_submit(g, tag, meta, outdir, logfile, out)
+    comm.submit = submit
+
+    def fetch(pid, tag, meta, outdir, t0, logfile=None, out=None):
+        h = comm.http(f"{API}/history/{pid}", timeout=comm.POLL_TIMEOUT)
+        if pid not in h: return comm.PENDING
+        st = h[pid].get("status", {}); outs = h[pid].get("outputs", {})
+        files = [(f.get("subfolder"), f.get("filename")) for o in outs.values() for k in ("images", "gifs", "videos") for f in o.get(k, [])]
+        dt = time.time() - t0
+        if st.get("status_str") == "success" and files:
+            sub, name = files[0]
+            os.makedirs(outdir, exist_ok=True)
+            dst = os.path.join(outdir, tag + os.path.splitext(name)[1])
+            n = download(sub, name, dst)
+            side = dict(meta, tag=tag, secs=round(dt, 1), comfy_output="alienpc:output/%s/%s" % (sub or "", name), file=dst,
+                        bytes=n, prompt_id=pid, finished=time.strftime('%Y-%m-%d %H:%M CT'))
+            json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
+            comm.log(f"JOB end {tag} ok secs={dt:.1f} file={dst} (downloaded {n}B via /view)", logfile); return side
+        msgs = [m for m in st.get("messages", []) if m[0] == "execution_error"]
+        comm.log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile)
+        return comm.outcome(out, "node_error", pid, note=json.dumps(msgs)[:300])
+    comm.fetch = fetch
+
+    def detach(argv, run_dir):
+        args = [a for a in argv if a != "--detach"]
+        out = os.path.join(run_dir, "_run_queue.out.log")
+        unit = "render-batch-" + re.sub(r"[^A-Za-z0-9_.-]", "_", os.path.basename(run_dir))[:80]
+        cmd = ["systemd-run", "--user", "--collect", "--unit", unit, "--working-directory", root,
+               "--property", "StandardOutput=append:" + out, "--property", "StandardError=append:" + out,
+               rq.PY, "-u", os.path.abspath(rq.__file__), *args]
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        if r.returncode:
+            print("detach FAILED rc=%s %s" % (r.returncode, (r.stdout + r.stderr).strip()[:300])); return 8
+        print("detached batch: systemd user unit %s; output %s; log %s" % (unit, out, os.path.join(run_dir, "_render_queue.log")))
+        return 0
+    rq.detach = detach
+
+    def upscale_done(run_dir, jobs, slog):
+        rq.qlog(run_dir, "UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size")
+        return 0, 0
+    rq.upscale_done = upscale_done
+
+
+def dry_report(rq, run_dir, jobs):
+    """Remote dry run: per clip, the graph checks and the upload list. Only GET /system_stats (an ignored path that
+    never wakes ComfyUI) is called, and only with --probe; nothing is uploaded or posted."""
+    comm = rq.comm
+    bad = 0
+    for j in jobs:
+        gp = os.path.join(run_dir, j["tag"], "request.api.json")
+        if not os.path.exists(gp):
+            print("  %s: FAIL no graph %s" % (j["tag"], gp)); bad += 1; continue
+        g = json.load(open(gp, encoding="utf-8"))
+        g = g.get("prompt", g)
+        ok, why = comm.guard_reason(g)
+        try:
+            plan = upload_plan(g, run_dir)
+            up = "; ".join("%s %s (%dB from %s)" % (p["kind"], p["name"], p["bytes"], p["local"]) for p in plan) or "none"
+        except FileNotFoundError as e:
+            up = "FAIL " + str(e); bad += 1
+        if not ok: bad += 1
+        print("  %s: guard %s; nodes %d; uploads: %s" % (j["tag"], "ok" if ok else "FAIL " + why, len(g), up))
+    print("remote: %s (POST /upload/image overwrite=true, POST /prompt, GET /history, GET /view into <run>/<tag>/)" % API)
+    print("lock: %s (flock); detach: systemd-run --user; upscale: deferred to AlienPc (D5)" % LOCK)
+    return bad

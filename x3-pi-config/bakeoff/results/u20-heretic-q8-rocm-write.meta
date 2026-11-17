@@ -1,0 +1,8 @@
+=== u20-heretic-q8-rocm-write start 2026-11-15 09:55:37 CST
+CMD: sudo podman run --rm --name bake-arm --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined -v /srv/models:/srv/models:ro,Z -v /srv/bakeoff:/srv/bakeoff:ro,Z docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:459730d6cdfdd43b10036414be6ab3c2c0fe634a22fa764c9f5d577ddc40306c llama-server --host 127.0.0.1 --port 8090 -m /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf --jinja --load-mode none -fa on -ngl 999 -b 4096 -ub 2048 -ctk q8_0 -ctv q8_0 -np 1 -c 32768 --no-slots --temp 1.0 --top-p 0.95 --top-k 64 --alias gemma4-heretic
+LOAD_S 3 up=1
+write1 {"ttft_s": 0.31, "total_s": 28.02, "prompt_tokens": 42, "completion_tokens": 1162, "client_decode_tps": 41.93, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.23, "total_s": 99.59, "prompt_tokens": 39, "completion_tokens": 4000, "client_decode_tps": 40.26, "finish": "length", "pass": false}
+               total        used        free      shared  buff/cache   available
+Mem:             124          30           2           1          93          93
+=== u20-heretic-q8-rocm-write end 2026-11-15 09:57:47 CST

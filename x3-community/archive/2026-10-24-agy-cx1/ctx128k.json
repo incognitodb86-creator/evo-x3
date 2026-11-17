@@ -1,0 +1,46 @@
+{
+ "label": "ctx128k",
+ "model": "coding_swift15_iq3s",
+ "rows": [
+  {
+   "target_prompt_tokens": 300,
+   "prompt_tokens": 820,
+   "completion_tokens": 300,
+   "ttft_s": 43.7,
+   "prefill_tok_s": 18.8,
+   "decode_tok_s": 110.0,
+   "total_s": 46.4,
+   "vram_used_mib_after": 15179
+  },
+  {
+   "target_prompt_tokens": 800,
+   "prompt_tokens": 2069,
+   "completion_tokens": 300,
+   "ttft_s": 1.11,
+   "prefill_tok_s": 1865.6,
+   "decode_tok_s": 116.0,
+   "total_s": 3.7,
+   "vram_used_mib_after": 15179
+  },
+  {
+   "target_prompt_tokens": 12500,
+   "prompt_tokens": 31658,
+   "completion_tokens": 300,
+   "ttft_s": 9.41,
+   "prefill_tok_s": 3365.7,
+   "decode_tok_s": 114.6,
+   "total_s": 12.0,
+   "vram_used_mib_after": 15179
+  },
+  {
+   "target_prompt_tokens": 35000,
+   "prompt_tokens": 88547,
+   "completion_tokens": 300,
+   "ttft_s": 26.72,
+   "prefill_tok_s": 3314.0,
+   "decode_tok_s": 111.9,
+   "total_s": 29.4,
+   "vram_used_mib_after": 15176
+  }
+ ]
+}

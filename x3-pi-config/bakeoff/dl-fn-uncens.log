@@ -1,0 +1,20 @@
+GATE_OK 206 len 17
+/home/derekboone/.venvs/hf/lib64/python3.14/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+DL_START Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf
+DL_DONE Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf
+DL_START Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00002-of-00003.gguf
+DL_DONE Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00002-of-00003.gguf
+DL_START Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00003-of-00003.gguf
+DL_DONE Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00003-of-00003.gguf
+DL_START mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf
+DL_DONE mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf
+DL_START Qwen3.8-Flash-Next-Uncensored-MTP-draft.gguf
+DL_DONE Qwen3.8-Flash-Next-Uncensored-MTP-draft.gguf
+======= size check =======
+SIZE_OK Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf 44766155936
+SIZE_OK Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00002-of-00003.gguf 44735995008
+SIZE_OK Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00003-of-00003.gguf 7971004256
+SIZE_OK mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf 907543296
+SIZE_OK Qwen3.8-Flash-Next-Uncensored-MTP-draft.gguf 4135893632
+FN_UNCENS_DL_OK 2026-11-15 13:21:26 CST

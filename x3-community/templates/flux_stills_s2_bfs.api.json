@@ -1,0 +1,358 @@
+{
+ "1": {
+  "_meta": {
+   "title": "unet"
+  },
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "FLUX-KLEIN-9B-FP8-NSFW.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "2": {
+  "_meta": {
+   "title": "lora"
+  },
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "lora_name": "bfs_head_v1_flux-klein_9b_step3750_rank64.safetensors",
+   "model": [
+    "1",
+    0
+   ],
+   "strength_model": 0.5
+  }
+ },
+ "3": {
+  "_meta": {
+   "title": "clip"
+  },
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+   "device": "default",
+   "type": "flux2"
+  }
+ },
+ "4": {
+  "_meta": {
+   "title": "vae"
+  },
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  }
+ },
+ "5": {
+  "_meta": {
+   "title": "positive"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "head_swap: start with Picture 1 as the base image, keeping its lighting, environment, and background. remove the head from Picture 1 completely and replace it with the head from Picture 2, strictly preserving the hair, eye color, nose structure of Picture 2. copy the direction of the eye, head rotation, micro expressions from Picture 1, high quality, sharp details, 4k.\n\nDescribe the expression in Picture 1 and copy it to the new image.\n"
+  }
+ },
+ "6": {
+  "_meta": {
+   "title": "negative"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "bad quality, noise, blurry, worst quality, low resolution, blur, distortion, unnatural blending, cartoon, illustration, painting"
+  }
+ },
+ "7": {
+  "_meta": {
+   "title": "picture1_body"
+  },
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/flux_s2/TAG_kv_00001_.png [output]"
+  }
+ },
+ "8": {
+  "_meta": {
+   "title": "picture2_head"
+  },
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/flux_s2/HEAD.png"
+  }
+ },
+ "9": {
+  "_meta": {
+   "title": "head_resize_1mp"
+  },
+  "class_type": "ResizeImageMaskNode",
+  "inputs": {
+   "input": [
+    "8",
+    0
+   ],
+   "resize_type": "scale total pixels",
+   "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos"
+  }
+ },
+ "10": {
+  "_meta": {
+   "title": "body_size"
+  },
+  "class_type": "GetImageSize",
+  "inputs": {
+   "image": [
+    "25",
+    0
+   ]
+  }
+ },
+ "11": {
+  "_meta": {
+   "title": "enc_body"
+  },
+  "class_type": "VAEEncode",
+  "inputs": {
+   "pixels": [
+    "25",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "12": {
+  "_meta": {
+   "title": "enc_head"
+  },
+  "class_type": "VAEEncode",
+  "inputs": {
+   "pixels": [
+    "9",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "13": {
+  "_meta": {
+   "title": "ref1_pos_body"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "5",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "14": {
+  "_meta": {
+   "title": "ref2_pos_head"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "13",
+    0
+   ],
+   "latent": [
+    "12",
+    0
+   ]
+  }
+ },
+ "15": {
+  "_meta": {
+   "title": "ref1_neg_body"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "6",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "16": {
+  "_meta": {
+   "title": "ref2_neg_head"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "15",
+    0
+   ],
+   "latent": [
+    "12",
+    0
+   ]
+  }
+ },
+ "17": {
+  "_meta": {
+   "title": "guider"
+  },
+  "class_type": "CFGGuider",
+  "inputs": {
+   "cfg": 1.0,
+   "model": [
+    "2",
+    0
+   ],
+   "negative": [
+    "16",
+    0
+   ],
+   "positive": [
+    "14",
+    0
+   ]
+  }
+ },
+ "18": {
+  "_meta": {
+   "title": "sampler"
+  },
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "lcm"
+  }
+ },
+ "19": {
+  "_meta": {
+   "title": "scheduler"
+  },
+  "class_type": "Flux2Scheduler",
+  "inputs": {
+   "height": [
+    "10",
+    1
+   ],
+   "steps": 4,
+   "width": [
+    "10",
+    0
+   ]
+  }
+ },
+ "20": {
+  "_meta": {
+   "title": "noise"
+  },
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 0
+  }
+ },
+ "21": {
+  "_meta": {
+   "title": "latent"
+  },
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "batch_size": 1,
+   "height": [
+    "10",
+    1
+   ],
+   "width": [
+    "10",
+    0
+   ]
+  }
+ },
+ "22": {
+  "_meta": {
+   "title": "sample"
+  },
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "guider": [
+    "17",
+    0
+   ],
+   "latent_image": [
+    "21",
+    0
+   ],
+   "noise": [
+    "20",
+    0
+   ],
+   "sampler": [
+    "18",
+    0
+   ],
+   "sigmas": [
+    "19",
+    0
+   ]
+  }
+ },
+ "23": {
+  "_meta": {
+   "title": "decode"
+  },
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "22",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "24": {
+  "_meta": {
+   "title": "save"
+  },
+  "class_type": "SaveImage",
+  "inputs": {
+   "filename_prefix": "community/flux_s2/TAG",
+   "images": [
+    "23",
+    0
+   ]
+  }
+ },
+ "25": {
+  "_meta": {
+   "title": "body_resize_1mp"
+  },
+  "class_type": "ResizeImageMaskNode",
+  "inputs": {
+   "input": [
+    "7",
+    0
+   ],
+   "resize_type": "scale total pixels",
+   "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos"
+  }
+ }
+}

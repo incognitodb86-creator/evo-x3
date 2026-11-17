@@ -1,0 +1,17 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+Queued `/home/evo/AI/community/runs/u55_walking_smoke` (`73` frames, `--position walking`, `plain` template) on AlienPc via `render_writer_pipeline.py --queue --yes-derrick`; waiting 60s for the remote render to complete before verifying `prompt_id` and `clip/clip.mp4` and committing/pushing both repos.
+The remote `u55_walking_smoke` render succeeded (`prompt_id=ff7b1294-20e1-4d35-adde-9f6cdc2f5b3e`, `clip/clip.mp4` = 1,765,844 bytes) and both repositories are committed and pushed; waiting on the final `pytest` + `loop-guard` verification run before writing `U55-RESULT.md`.
+U55 is complete. Full details, template sources, honest `beta6_int8` gap notes, per-type node diffs, modified/archived paths, verification output, and git push details are recorded in [U55-RESULT.md](file:///home/derekboone/evo-x3/records/U55-RESULT.md).
+
+### Summary of Completed Work
+- **8 known-good API templates** created in `/home/evo/AI/community/templates/` (`plain.api.json`, `oc_guide.api.json`, `oc_ref.api.json`, `named_parody.api.json`, `talk.api.json`, `two_person.api.json`, `long_continuation.api.json`, `ref2va_16x9.api.json`), leaving `b2.api.json` and `b2_refmod.api.json` untouched. Honest note: no AlienPc-completed `beta7_int8HQ` runs existed on disk for `two_person`, `long_continuation`, or `ref2va_16x9`, so those 3 came from completed `beta6_int8` runs.
+- **Minimal fill layer & RefMod resolver**: added [fill_request.py](file:///home/evo/AI/community/scripts/parody/fill_request.py) (`140` lines), moved OC RefMod resolution into [resolve.py](file:///home/evo/AI/community/scripts/parody/resolve.py), updated [render_writer_pipeline.py](file:///home/evo/AI/community/scripts/parody/render_writer_pipeline.py) to use `fill_request` with arbitrary free-text `--position` while keeping the 18+ safety checks, and archived `submit_parody_run.py` to [submit_parody_run.py.bak-20261116-u55](file:///home/evo/AI/community/scripts/parody/_archive/submit_parody_run.py.bak-20261116-u55).
+- **Real AlienPc queue smoke test (`--position walking`)**: ran `render_writer_pipeline.py /home/evo/AI/community/runs/u55_walking_smoke ... --position walking --frames 73 --queue --yes-derrick` -> `prompt_id=ff7b1294-20e1-4d35-adde-9f6cdc2f5b3e`, rendered [clip.mp4](file:///home/evo/AI/community/runs/u55_walking_smoke/clip/clip.mp4) (`1,765,844` bytes, `OBJECTIVE ok`).
+- **Tests run after final commits**:
+  - `pytest -q tests` -> `137 passed, 2 skipped in 6.52s`
+  - `pytest -q parody` -> `544 passed, 1 skipped in 11.84s` (including [test_u55_clip_types_e2e.py](file:///home/evo/AI/community/scripts/parody/test_u55_clip_types_e2e.py))
+  - `node .pi/extensions/loop-guard-test.mjs` -> `loop-guard unit tests OK 8`
+- **Git commits & pushes**:
+  - `/home/evo/AI/community` (`x3-linux`): commit `d06c559` pushed `c26fc7d..d06c559 HEAD -> x3-community` on `gitea`
+  - `/home/evo/AI/render` (`x3-linux`): commit `38cd9eb` pushed `b8714a6..38cd9eb HEAD -> x3-render` on `gitea`

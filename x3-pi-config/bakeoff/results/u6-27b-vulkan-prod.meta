@@ -1,0 +1,10 @@
+=== u6-27b-vulkan-prod start 2026-11-15 09:37:49 CST
+CMD: sudo podman run --rm --name bake-arm --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined -v /srv/models:/srv/models:ro,Z -v /srv/bakeoff:/srv/bakeoff:ro,Z docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6 llama-server --host 127.0.0.1 --port 8090 -m /srv/models/qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf --jinja --load-mode none -fa on -ctk q8_0 -ctv q8_0 -np 2 -c 262144 --no-slots --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --alias qwen27b
+LOAD_S 5 up=1
+long {"ttft_s": 51.37, "total_s": 62.76, "prompt_tokens": 18253, "completion_tokens": 132, "client_decode_tps": 11.59, "finish": "stop", "pass": true}
+longdecode {"ttft_s": 0.77, "total_s": 78.54, "prompt_tokens": 18244, "completion_tokens": 900, "client_decode_tps": 11.57, "finish": "length", "pass": true}
+decode {"ttft_s": 0.78, "total_s": 75.67, "prompt_tokens": 59, "completion_tokens": 900, "client_decode_tps": 12.02, "finish": "length", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+               total        used        free      shared  buff/cache   available
+Mem:             124          30          17           0          77          93
+=== u6-27b-vulkan-prod end 2026-11-15 09:41:47 CST

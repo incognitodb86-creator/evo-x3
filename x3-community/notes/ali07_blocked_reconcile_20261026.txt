@@ -1,0 +1,65 @@
+ali07_blocked_reconcile_20261026.txt - revive-and-validate of the shadowed BLOCKED lists
+input: 50 entries (live + revived) -> kept 41
+
+REWRITE  a | Comfy Registry has a node id for a face-consistency pack (58 | https://api.comfy.org/nodes/comfyui-face-consistency | 04y_reg_facecons.404.txt | URL set to the manifest URL that wrote 04y_reg_facecons.404.txt
+DROP     a | Comfy Registry has a node id for a face-consistency pack (58 | https://api.comfy.org/nodes/comfyui-faceconsistency | 04y_reg_facecons.404.txt | hand: the fetched slug is a guess (comfyui-faceconsistency); the 58-installs fig
+REWRITE  b | Comfy Desktop 0.15.1 is the latest desktop version | https://api.comfy.org/versions | 04y_comfy_versions.json | 04y_comfy_versions.json is a 200 body, not a refusal: kind -> no-answer
+REWRITE  b | comfyui-modelscope-download 0.1.8 is the latest version of t | https://api.comfy.org/nodes/comfyui-modelscope-download | 04y_reg_extender.404.txt | URL set to the manifest URL that wrote 04y_reg_extender.404.txt
+DROP     b | comfyui-modelscope-download 0.1.8 is the latest version of t | https://api.comfy.org/nodes/comfyui-minimax-h3-video-lab-ext | 04y_reg_extender.404.txt | hand: the 404 records the video-lab-extender slug, not comfyui-modelscope-downlo
+REWRITE  b | llama-swap 0.16.4 / pimono 0.4.10 / loopat 0.3.15 are the la | https://api.github.com/repos/manyfaces/llama-swap/releases/l | 04y_rel_llamaswap.404.txt | URL set to the manifest URL that wrote 04y_rel_llamaswap.404.txt
+REWRITE  b | ComfyUI registry shows ComfyUI itself at 117,300 installs | https://api.comfy.org/nodes/comfyui | 04y_reg_extender.404.txt | URL set to the manifest URL that wrote 04y_reg_extender.404.txt
+DROP     b | ComfyUI registry shows ComfyUI itself at 117,300 installs | https://api.comfy.org/nodes/comfyui-minimax-h3-video-lab-ext | 04y_reg_extender.404.txt | hand: the 404 records the video-lab-extender slug, so it says nothing about the 
+DROP     b | flyonlylow Qwen2.5-Omni-7B DPO B64 GGUF: 16,513 downloads, 5 | https://huggingface.co/api/models/flyonlylow/Qwen2.5-Omni-7B | 04x_flyonly_api.401.txt | orphan stamp: no manifest URL wrote 04x_flyonly_api.401.txt
+REWRITE  b | HauhauCS Qwen3.5-27B-Heretic-Iq3_Extra download counts | https://huggingface.co/api/models/HauhauCS/Qwen3.5-27B-Heret | 02v_hauhau_27b.401-10.txt | URL set to the manifest URL that wrote 02v_hauhau_27b.401-10.txt
+DROP     b | HauhauCS Qwen3.5-27B-Heretic-Iq3_Extra download counts | https://huggingface.co/api/models/HauhauCS/Qwen3.8-27B-Uncen | 02v_hauhau_27b.401-10.txt | hand: the 401 records Qwen3.8-27B-Uncensored-Vision, a different repo: no fetch 
+REWRITE  b | pyiqa / laion-aes / metric-skills numbers used in the qualit | https://huggingface.co/api/models/chaonornoi/Laion-Aes-Score | 04x_hf_arcface_api.401-2.txt | URL set to the manifest URL that wrote 04x_hf_arcface_api.401-2.txt
+DROP     b | pyiqa / laion-aes / metric-skills numbers used in the qualit | https://huggingface.co/api/models/mirceaganghf/arcface | 04x_hf_arcface_api.401-2.txt | hand: the 401 records mirceaganghf/arcface, unrelated to the laion-aes/pyiqa num
+DROP     b | HauhauCS Qwen3.8-27B GGUF page (the 27B the 0.1 pass called  | https://huggingface.co/api/models/HauhauCS/Qwen3.8-27B-Uncen | 02v_hauhau_27b.401-10.txt | hand: the 401 records Qwen3.8-27B-Uncensored-Vision, a different repo: no fetch 
+DROP     c | ComfyUI GitHub discussions 8568 / 12471 / 24165 about H3 qua | https://github.com/Comfy-Org/ComfyUI/discussions/8568 | 02x_comfyui_disc8568.401.txt | claim is about github.com, the stamp records a fetch of huggingface.co
+REWRITE  c | the MiniMax H3 model repo page discussion 28 HTML view | https://huggingface.co/MiniMaxAI/MiniMax-H3/discussions/28 | 02v_minimax_disc28_page.401.txt | URL set to the manifest URL that wrote 02v_minimax_disc28_page.401.txt
+REWRITE  c | prompt-relabeller model card page (the lightx2v PE card as a | https://huggingface.co/ByteDance-Seed/prompt-relabeller-9B | 04z_pe_api.json | URL set to the manifest URL that wrote 04z_pe_api.json
+REWRITE  c | prompt-relabeller model card page (the lightx2v PE card as a | https://huggingface.co/ByteDance-Seed/prompt-relabeller-9B | 04z_pe_api.json | 04z_pe_api.json is a 200 body, not a refusal: kind -> no-answer
+DROP     c | the Continuum continuation README as fetched from its repo r | https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Co | 03y_continuation_readme.404.txt | orphan stamp: no manifest URL wrote 03y_continuation_readme.404.txt
+
+KEPT:
+  a  04x_infinitereg.404-2.txt          Comfy Registry has comfyui-infinite-creation (the 0.1 pass cited
+  a  04y_reg_extender.404.txt           Comfy Registry has comfyui-minimax-h3-video-lab-extender
+  a  04y_reg_facecons.404.txt           Comfy Registry has a node id for a face-consistency node (comfyu
+  a  04y_reg_latentup.404.txt           Comfy Registry has minimax_h3_latent_upscaler (the 0.1 pass cite
+  a  04z_civ_antiburn.404.txt           a *Vagina* lora exists somewhere in the install (install-wide fi
+  a  04z_civ_antiburn.404.txt           the Civitai search finds h3_antiburn_universal_v1
+  a  04z_civ_face.404.txt               FaceRefine / FaceDetailer nodes are installed and a 512-dilate f
+  a  04z_civ_face.404.txt               the Civitai search finds a face-consistency node for MiniMax H3
+  a  04z_civ_vagina.404.txt             a Vagina Fix / PP Vagina Detailer pack is installed
+  a  04z_gh_facerepo.404.txt            FaceRefine appears in the installed custom-node sources
+  b  02v_minimax_disc28_page.401.txt    the MiniMax H3-1031-AIO-3dp7 model page (13 discussions incl. th
+  b  02x_comfyui_disc8568.401.txt       ComfyUI-Resources space discussion 8568 (the 0.1 pass cited it a
+  b  02x_comfyui_issue17706.404.txt     ComfyUI issue 17706 (the 0.1 pass cited 17706/18071/24551 as the
+  b  04w_cont_resolution.404.txt        832x468 is a usable Continuum canvas, and the canvas multiple ru
+  b  04w_extender_readme.404.txt        the Extender README at the Barapeh fork / master branch
+  b  04w_flyonly_api.401.txt            flyonlylow Qwen2.5-Omni-7B DPO B64 GGUF: download and like count
+  b  04x_comfy_changelog.404.txt        ComfyUI CHANGELOG documents the attention-backend key drop (spar
+  b  04x_comfy_changelog.404.txt        ComfyUI CHANGELOG documents the attention-backend key changes be
+  b  04x_cwb_dataset.401-2.txt          CodexBench: 376 downloads, 18 tasks, 6 domains
+  b  04x_cwb_dataset.401-2.txt          CodexBench dataset: downloads, task count, domains, scoring
+  b  04x_docs_prompt.404-2.txt          the official prompt guide page carries the 350-500 word rule
+  b  04x_docs_prompt.404-2.txt          official prompt guide page (the CFG 3.5 page the 0.1 pass cited)
+  b  04x_hf_arcface_api.401-2.txt       mirceaganghf arcface model card: 256-dim embeddings, 100 images,
+  b  04x_hf_space_api.401-2.txt         HF-Face Detection Package space files, model list and discussion
+  b  04x_hf_space_api.401-2.txt         HF-Face Detection Package space files, model list, 106-class sup
+  b  04x_infinitereg.404-2.txt          Infinite Creation registry node: 58 installs (and the comfyui-in
+  b  04x_tenmax_card.401.txt            TenStrip/10Eros model card and TenMax workflow card text
+  b  04x_tenstrip_repo.401-2.txt        TenStrip 10Eros card baseline: shift 10 video / 3 audio, 8-12 st
+  b  04x_tenstrip_repo.401-2.txt        TenStrip/10Eros-Concept-LoRAs-H3 model card download counts
+  b  04x_tenstrip_repo.401-2.txt        TenStrip 10Eros card baseline: shift 10 video / 3 audio, 8-12 st
+  b  04y_civ_3153751.404.txt            civitai item 3153751 has 3,660 downloads
+  b  04y_comfy_versions.json            Comfy Desktop 0.15.1 is the latest desktop version
+  b  04y_comfy_versions.json            the Comfy Desktop version number (the 0.1 pass said 0.15.1 is la
+  b  04y_gh_mps_utils.404.txt           Ludifred/ComfyUI-MPS-Utils has 5,620 downloads / 1,123 stars
+  b  04y_rel_llamaswap.404.txt          llama-swap 0.16.4 / pimono 0.4.10 / loopat 0.3.15 are the latest
+  b  04y_repo_fizgig.404.txt            Fizgig/ComfyUI_LayerDiffuse is the 390-star repo behind the face
+  b  04z_pe_bytedance_api.401.txt       ByteDance-Seed prompt-relabeller-9B card page (the lightx2v card
+  c  02v_minimax_disc28_page.401.txt    the MiniMax H3 model repo page discussion 28 HTML view
+  c  02x_comfyui_issue17706.404.txt     ComfyUI issues 17706 / 18071 / 24551 (the extra upstream bug rep
+  c  04x_comfy_changelog.404.txt        the ModelAttentionBackend schema on 0.38.0 (which keys the atten
+  c  04z_pe_api.json                    prompt-relabeller model card page (the lightx2v PE card as a web

@@ -1,0 +1,17 @@
+```
+Add self-verifying check for persona character-reference path
+
+Adds notes/u3b_folder_check.py, a self-verifying check script of 14 checks
+covering the character-reference path referenced by the talk persona.
+
+Measured result: 14/14 checks passed, 0 failures.
+
+Verified:
+- The character-reference folder path named in the talk persona exists on disk.
+- The older folder of the same kind is not named anywhere in the persona.
+- A scan for the two chat-tone words across the repo finds no hit outside the
+  persona file itself.
+
+Path: notes/u3b_folder_check.py
+```
+2026-10-29T19:53:49 talk rc=0 mode=print access=fullaccess gpu_wait=0 lock_taken=no

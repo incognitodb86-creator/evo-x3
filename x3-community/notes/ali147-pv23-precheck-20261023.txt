@@ -1,0 +1,129 @@
+PV2-3 PRE-REQUEST READ-ONLY CHECK for ali147_pool_dense_s51080000
+arm graph C:/AI/community/runs/ali147_pool_dense_s51080000/request.api.json
+  bytes 10517 sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+copy source C:/AI/community/runs/ali147_pool_ctrl_s51080000/submitted_graph.pretty.json bytes 10886 sha256 698854152284100e60b6ac87a795a7f083160a9556acb3fb868793b7f4373bb6
+
+== Part 1: graph_diff.txt (the TASKS gate 'shows only m_shift.model, m_vsa removed, filename_prefix')
+diff file lines 46, hunk headers 2
+  hunk @@ -140,31 +140,13 @@
+  hunk @@ -289,7 +271,7 @@
+removed 20 / added 2
+  + '    "m_attn",'
+  + '   "filename_prefix": "community/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000",'
+PASS exactly 2 hunks (the m_shift+m_vsa hunk is adjacent = one hunk, the prefix hunk is the 2nd)
+PASS 20 removed lines + 2 added lines, nothing else
+PASS the 2 added lines are exactly the m_attn link and the new filename_prefix
+PASS one removed line is the m_shift -> m_vsa link (replaced by m_attn)
+PASS one removed line is the control's filename_prefix
+removed m_vsa block header lines: ["\"m_vsa\": {"]
+PASS exactly one removed node block: m_vsa
+PASS the removed node's class is BlockSparseAttention (VSA off)
+PASS removed VSA setting line: "selection": "vsa",
+PASS removed VSA setting line: "selection.keep_percent": 10,
+PASS removed VSA setting line: "start_percent": 0.2,
+PASS removed VSA setting line: "end_percent": 1.0,
+PASS removed VSA setting line: "min_tokens": 12288,
+PASS removed VSA setting line: "extra_tokens": 256,
+PASS removed VSA setting line: "sink_conditioning": "exact_kv_and_rows",
+PASS removed VSA setting line: "dense_blocks": "",
+PASS removed VSA setting line: "verbose": false
+PASS no prompt / seed / steps / length / resolution / attention line is touched (one variable: VSA off)
+
+== Part 2: node-by-node fairness vs the RENDERED control graph (json.dumps(node, sort_keys=True))
+control nodes 25, arm nodes 24
+PASS arm node set == the rendered control's set minus m_vsa
+shared nodes 24; differing: ["m_shift", "save"]
+PASS differing nodes are exactly ['m_shift','save'] (22/24 byte-identical)
+PASS arm m_shift.inputs.model == ["m_attn", 0]
+PASS control m_shift.inputs.model == ['m_vsa', 0] (the VSA node the arm deletes)
+PASS m_attn byte-identical to the control, so the model chain becomes unet -> m_attn -> m_shift (dense)
+PASS c0/c1 byte-identical to the control: prompts are the CONTROL's (this is a settings arm, not a prompt arm)
+PASS c0 prompt sha256 == the control/RS-series value 7b4b22bb170f... (unchanged)
+PASS c1 prompt sha256 == the control value 6686d7057ead... (unchanged)
+PASS seed 51080000 == the control's
+PASS length 243 + extension 238 = 481 frames
+PASS 768x1344 @ 24 fps (the ffprobe gate of the check)
+PASS filename_prefix routes output to community/ali147_pool_dense_s51080000
+PASS comm.guard_ok passes on c0.prompt (adults-only guard, the harness's own call)
+PASS comm.guard_ok passes on c1.prompt (adults-only guard, the harness's own call)
+PASS every class in the arm also appears in the OK-RENDERED control graph (the strongest non-GPU evidence of listability: the harness static node-list check at 127.0.0.1:10004
+       is a GPU call and is off-limits to Forge). arm classes: ["BasicGuider", "BasicScheduler", "CLIPLoader", "CreateVideo", "KSamplerSelect", "LoadImage", "MiniMaxH3AppendContinuation", "MiniMaxH3GuidedContinuationWindow", "MiniMaxH3ImageToVideo", "MiniMaxH3LatentTailGuide", "MiniMaxH3ReferenceToVideo", "MiniMaxH3SigmaShift", "ModelAttentionBackend", "RandomNoise", "SamplerCustomAdvanced", "SaveVideo", "UNETLoader", "VAEDecode", "VAEDecodeAudio", "VAELoader"]
+       control-only class removed: ["BlockSparseAttention"]
+
+== Part 3: the live gates, parsed out of ralph.ps1 (a hardcoded copy of a regex proves nothing)
+PASS found the two live p7 id gates in ralph.ps1: 2
+PASS id ali147_pool_dense_s51080000 passes ^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$
+PASS id ali147_pool_dense_s51080000 passes ^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$
+id/kind gates found: ["^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+)$", "^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\\d+$"]
+ralph.ps1 graph-branch gates (live lines):
+  if(Test-Path -LiteralPath "$Jobs\$id.result.json"){ Log "P7 job $id refused: id already used"; continue }
+  # ali160: ALI-147 arms. graph = one prepared API graph runs\<id>\request.api.json; dip = CPU ffmpeg dip join. The harness runs them, never the model.
+  if(-not (Test-Path -LiteralPath "$run\request.api.json")){ JobResult $id @{ ok = $false; note = "refused: missing $run\request.api.json" }; continue }
+  if(Test-Path -LiteralPath "$run\$id.mp4"){ JobResult $id @{ ok = $false; note = "refused: $run\$id.mp4 already exists (arm already rendered)" }; continue }
+PASS graph gate (ralph.ps1:268) passes: C:/AI/community/runs/ali147_pool_dense_s51080000/request.api.json exists
+PASS graph gate (ralph.ps1:269) passes: no ali147_pool_dense_s51080000.mp4 (not already rendered)
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/p7/jobs/ali147_pool_dense_s51080000.result.json
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/p7/jobs/ali147_pool_dense_s51080000.out
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/p7/jobs/ali147_pool_dense_s51080000.err.out
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/runs/ali147_pool_dense_s51080000/status.log
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/runs/ali147_pool_dense_s51080000/objective.json
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/runs/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000.api.json
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/runs/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000.mp4.json
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/runs/ali147_pool_dense_s51080000/PROOF.md
+PASS absent, so the id is free (ralph.ps1:185 'id already used' gate clear): C:/AI/community/p7/jobs/ali147_pool_dense_s51080000.result.json.failed-20261022
+arm dir contents:
+        1241  graph_diff.txt
+       10517  request.api.json
+PASS arm dir holds only the two Forge-writable names this task allows
+p7/JOB_REQUEST.json present before writing: False (a Request file is CONSUMED at exit -> p7/jobs/request_iter<NN>.json)
+
+== budget (live ralph-community/logs/p7_budget.json; ralph.ps1:187-188)
+p7_budget.json {"used_min": 356.5, "jobs": 25, "cap_min": 390, "job_cap": 27, "updated": "2026-10-22T23:26:28"}
+PASS used_min 356.5 < cap_min 390
+PASS jobs 25 < job_cap 27
+NOTE: the live gates (ralph.ps1:187-188) test used_min >= cap_min and jobs >= job_cap only; the job's
+own 'minutes' is NOT part of the budget gate. ralph.ps1:270-271 clamps minutes to 30..180 and passes
+--timeout minutes*20 (per attempt) --max-redo 2. This arm requests minutes=120 = a 2400 s per-attempt cap:
+the control (VSA ON) rendered 481 frames in 809.7 s, and the whole point of this arm is VSA OFF, i.e.
+full dense attention, so a slowdown is expected; 60 min (a 1200 s cap, exactly the control's time + 47%)
+would risk a per-attempt timeout, so 120 min is requested for headroom. A longer render is not a failure
+(the FIX4 arm's minutes:180 request rendered 50.1 min); it is reported as the measured slowdown.
+
+== render-seconds baseline, quoted live from the control's own status.log
+  control status.log: 2026-10-22 15:55:32 CT JOB end ali147_pool_ctrl_s51080000 ok secs=809.7 file=C:\AI\community\runs\ali147_pool_ctrl_s51080000\ali147_pool_ctrl_s51080000.mp4 (recorded by ali147_record_ctrl.py; wall secs from JOB start)
+the compare table (this arm's render seconds vs 809.7 s) is produced in the NEXT iteration from
+runs/ali147_pool_dense_s51080000/status.log + objective.json, once the harness has run the job.
+
+== sbs / fixed-frame stills are Max's (the TASKS sbs rule)
+find runs -name 'sbs_*' = 2 file(s): ["ali147_pool_refsheet_b_s51080000/sbs_refsheet_refsheetb.mp4", "ali147_pool_refsheet_s51080000/sbs_fix1_refsheet.mp4"]
+expected at verify: sbs_ctrl_dense.mp4 (hstack CTRL|SETTINGS_DENSE) and the fixed-frame stills are
+Max/harness files: run_graph_job.py has NO hstack path and its contact sheet samples only the
++-1.5 s windows around 0:10-0:50 (frames 204-276, 444/456/468/480), never frame 0. Per the TASKS
+sbs rule: write 'sbs/stills pending Max' and tick on the objective checks, never block on it.
+
+== If ComfyUI OOMs (the TASKS escape hatch 'If ComfyUI OOMs: [!] PV2-3 dense OOM, no redo with other settings')
+OOM would show up as result.json ok=false / status.log 'CUDA out of memory' / err.out. That is a
+[!] + BLOCKED + STOP_RALPH at verify time, and no re-request with other settings. Not predictable
+without the GPU, so nothing to check here; the dense chain removes work (no BlockSparseAttention node),
+but it makes the attention itself dense over the full token count, which is the memory/driver risk.
+
+== Part 4: writing p7/JOB_REQUEST.json (one job; the accepted byte shape)
+PASS JOB_REQUEST.json is absent before writing
+PASS the accepted 481-frame request (request_iter10.json, ran ok) names its id once: ali147_pool_promptv2_seg3_s51080002
+PASS the bytes are the accepted request with only the id and minutes changed
+PASS one line, LF, exactly one trailing newline
+wrote C:/AI/community/p7/JOB_REQUEST.json bytes 115 sha256 c24820f489e112726ed5abe10a3c00d06f29605548eabe960e36bf7b6f04cd0a
+bytes b'{"jobs": [{"id": "ali147_pool_dense_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 120}]}\n'
+PASS file bytes == the intended bytes (the write tool drops the trailing newline, so this is a script write)
+PASS exactly one job, top key 'jobs' only
+PASS job key order matches the accepted request (id, kind, frames, frames_tol, minutes)
+PASS job = id ali147_pool_dense_s51080000, kind=graph, frames=481/0 (the c0+win1 sum), minutes=120
+PASS one job per request (PROMPT.md)
+
+
+NEXT ITERATION (verify): result.json ok + status.log 'JOB end ... ok secs=' + greps of
+'JOB error|CLIP_SKIP|clip_skip|error|SKIP|redo|STUCK|STATIC_FAIL|COMFY_DOWN|out of memory' = none,
+plain cmp request.api.json ali147_pool_dense_s51080000.api.json (no output = the graph that rendered is mine), ffprobe
+-count_packets 481 + 768x1344 + 24/1 + audio stream, certutil sha256 of the mp4 and contact sheet,
+render seconds vs the control's 809.7 s (the slowdown report), sbs/stills pending Max.
+The PV2-3 line keeps '- [ ]' through this request iteration (PROMPT.md: Forge may only REQUEST).

@@ -1,0 +1,12 @@
+=== u26-halogen-native-262k start 2026-11-15 17:17:38 CST
+LOAD_S 57 up=1
+long {"ttft_s": 9.81, "total_s": 11.01, "prompt_tokens": 18253, "completion_tokens": 102, "client_decode_tps": 85.27, "finish": "stop", "pass": true}
+code {"ttft_s": 0.25, "total_s": 2.71, "prompt_tokens": 141, "completion_tokens": 197, "client_decode_tps": 80.12, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.17, "total_s": 11.48, "prompt_tokens": 59, "completion_tokens": 724, "client_decode_tps": 64.01, "finish": "stop", "pass": true}
+=== u26-halogen-native-262k end 2026-11-15 17:19:03 CST
+{"copies": 7, "prompt_tokens": 127461, "completion_tokens": 228, "ttft_s": 70.66, "total_s": 73.95, "client_prefill_tps": 1804.0, "client_decode_tps": 69.1, "needle": false, "fixture_fact": false, "finish": "stop"}
+{"copies": 13, "prompt_tokens": 236617, "completion_tokens": 321, "ttft_s": 138.85, "total_s": 144.39, "client_prefill_tps": 1704.2, "client_decode_tps": 57.9, "needle": false, "fixture_fact": true, "finish": "stop"}
+{"pass": true, "elapsed_s": 25.7, "usage": {"prompt_tokens": 181, "completion_tokens": 1940, "total_tokens": 2121, "completion_tokens_details": {"reasoning_tokens": 1270}}, "finish": "stop", "err": ""}
+PEAK_GTT_MIB 17:23:07 27663 33957
+=== STEP1 DONE 17:23:10

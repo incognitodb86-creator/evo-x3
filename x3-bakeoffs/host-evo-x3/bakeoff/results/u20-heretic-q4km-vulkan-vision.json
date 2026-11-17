@@ -1,0 +1,40 @@
+{
+  "arm": "u20-heretic-q4km-vulkan-vision",
+  "model": "gemma4-heretic",
+  "http": 200,
+  "elapsed_s": 2.508,
+  "ttft_s": 1.4125260000000002,
+  "prompt_tokens": 162,
+  "completion_tokens": 69,
+  "prompt_per_second": 114.68815441273293,
+  "predicted_per_second": 62.56860693757033,
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 162,
+    "prompt_ms": 1412.526,
+    "prompt_per_token_ms": 8.719296296296296,
+    "prompt_per_second": 114.68815441273293,
+    "predicted_n": 69,
+    "predicted_ms": 1086.807,
+    "predicted_per_token_ms": 15.98245588235294,
+    "predicted_per_second": 62.56860693757033
+  },
+  "usage": {
+    "completion_tokens": 69,
+    "prompt_tokens": 162,
+    "total_tokens": 231,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "finish": "stop",
+  "content": "This image features a blue background with a white rectangular banner at the top containing the text \"X3-BAKEOFF\" in a black, pixelated font. Below the text, there are three distinct geometric shapes: a large yellow circle on the left, a red square on the right, and a green triangle at the bottom.",
+  "checks": {
+    "yellow_or_gold_circle": true,
+    "red_square": true,
+    "green_triangle": true,
+    "text_x3_bakeoff": true
+  },
+  "checks_passed": 4,
+  "vision_works": true
+}

@@ -1,0 +1,332 @@
+{
+  "arm": "R2_local_deep_research",
+  "question_id": "Q1_miniml_harness",
+  "question": "Which coding harness ranked first in miniml's local harness-bench, and with what pass rate and per-task time for its top cell?",
+  "started_ct": "2026-11-16 06:27:50 CST",
+  "wall_s": 31.55,
+  "error": null,
+  "report": "## Pi Ranked First in miniml's Local Harness-Bench\n\n**Pi** was the top-ranked coding harness in miniml's local harness-bench. According to the benchmark results, \"pi is the strongest harness on this benchmark \u2013 and also the fastest of the top three\" [17]. The accuracy gap between Pi/Qwen and Claude/OpenCode/Aider was described as \"a clear ~10-15 percentage points, big enough that I wouldn't want to call it noise\" [17].\n\n### Top Cell: Perfect Score\n\nThe single perfect cell on the entire benchmark matrix was **Qwen3.6-27B (UD-Q4_K_XL) + Pi**, which achieved a **16/16 pass rate (100%)** at approximately **207 seconds per task** [1][29]. This was the only combination across all 85 tested cells (spanning both a Q4 quantization sweep and a Q8 sweep) that cleared the full benchmark [1][29].\n\n### Benchmark Context\n\nminiml's harness-bench pairs local LLMs (served via llama.cpp's `llama-server`) with five agent harnesses \u2014 Aider, Claude Code, OpenCode, Pi, and Qwen CLI \u2014 on 16 software-engineering tasks spanning Python, PyTorch, JAX, C, C++, Rust, and SQL [11]. Each (model, harness, task) cell is sandboxed so the agent only sees a scratch `workspace/`, with grading performed by a hidden `test.sh` script [11].\n\n### Why Pi Performed Well\n\nPi is described as \"a minimal open-source harness with just four basic tools\" [2], and its minimalism appears to be an advantage in this context. One Reddit discussion on harness leaderboards noted that \"this is why mini swe tends to score so high, it is a minimal harness and it can just give\" the answer without being burdened by excessive instructions or context bloat [16]. This aligns with the broader finding from a Berkeley study that harness choice can shift pass rates by only a few percentage points while multiplying inference costs up to fivefold [2], suggesting that lean harnesses like Pi can achieve strong results without the overhead of more complex scaffolding.",
+  "sources_field": [
+    {
+      "id": "https://neuralnoise.com/2026/harness-bench-wip/",
+      "title": "[WIP] Benchmarking Local LLMs Against Coding Agent Harnesses",
+      "link": "https://neuralnoise.com/2026/harness-bench-wip/",
+      "snippet": "The single perfect cell on the matrix is Qwen3.6-27B (UD-Q4_K_XL) + pi \u2013 16/16 at ~207 s/task. It is the only combination across all 85 tested cells (Q4 sweep + Q8 sweep) that clears the full benchmark.",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "1"
+    },
+    {
+      "id": "https://venturebeat.com/orchestration/a-coding-agents-harness-can-triple-its-cost-without-making-it-more-accurate-study-finds",
+      "title": "A coding agent's harness can triple its cost without ... - VentureBeat",
+      "link": "https://venturebeat.com/orchestration/a-coding-agents-harness-can-triple-its-cost-without-making-it-more-accurate-study-finds",
+      "snippet": "The Berkeley team evaluated seven models across Claude Code, OpenAI\u2019s Codex CLI, and Pi, a minimal open-source harness with just four basic tools. They tested 30 tasks from each of two benchmarks, repeating each task three times, and found that harness choice shifted pass rates by only a few percentage points while multiplying inference costs up to fivefold.",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "2"
+    },
+    {
+      "id": "https://www.reddit.com/r/LocalLLaMA/comments/1tgecrq/i_built_a_coding_agent_that_gets_87_on_benchmarks/",
+      "title": "I built a coding agent that gets 87% on benchmarks with a 4B ...",
+      "link": "https://www.reddit.com/r/LocalLLaMA/comments/1tgecrq/i_built_a_coding_agent_that_gets_87_on_benchmarks/",
+      "snippet": "May 18, 2026 ... The result: 87/100 benchmark tasks pass with a Gemma 4 model that only activates 4B parameters per token. OpenCode scores ~75% with 14B models.",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "3"
+    },
+    {
+      "id": "https://github.com/NaC-L/harness-bench",
+      "title": "GitHub - NaC-L/harness-bench: Goal-aligned benchmark for coding-agent ...",
+      "link": "https://github.com/NaC-L/harness-bench",
+      "snippet": "Configure approvals and any real sandbox in the harness itself. python -m unittest discover -s tests python -m bench.validate_tasks python -m bench --config benchmark-reference.toml --results results/reference run --harness reference-a reference-b --trials 3 --jobs 12 python -m bench --results results/reference compare --baseline reference-a --candidate reference-b",
+      "engine": "brave",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "4"
+    },
+    {
+      "id": "https://composio.dev/content/best-ai-agent-harnesses",
+      "title": "8 Best AI Agent Harnesses in 2026: Performance, Cost, and Speed ...",
+      "link": "https://composio.dev/content/best-ai-agent-harnesses",
+      "snippet": "Aug 4, 2026 ... The results changed more than we expected. A lot of surprises. The highest observed pass rate was 88%, while the lowest was 68%. We also found\u00a0...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "5"
+    },
+    {
+      "id": "https://github.com/Shikhaar/HarnessBench",
+      "title": "GitHub - Shikhaar/HarnessBench: The independent benchmarking ...",
+      "link": "https://github.com/Shikhaar/HarnessBench",
+      "snippet": "The independent benchmarking framework to evaluate, compare, and rank AI coding agent harnesses holding the underlying LLM constant. - Shikhaar/HarnessBench",
+      "engine": "brave",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "6"
+    },
+    {
+      "id": "https://marmelab.com/blog/2026/09/24/the-state-of-ai-harness-engineering-2026.html",
+      "title": "The State Of AI Harness Engineering 2026 - Marmelab",
+      "link": "https://marmelab.com/blog/2026/09/24/the-state-of-ai-harness-engineering-2026.html",
+      "snippet": "Sep 24, 2026 ... One number summarizes the importance of this question. Someone ran the same model through 8 different harnesses on the same 25 tasks, with the\u00a0...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "7"
+    },
+    {
+      "id": "https://github.com/TheLime1/harness-bench",
+      "title": "GitHub - TheLime1/harness-bench: Benchmark leaderboard for AI coding ...",
+      "link": "https://github.com/TheLime1/harness-bench",
+      "snippet": "Harness-Bench stores one normalized result per harness/model/benchmark run. ... Terminal-Bench 2.1: real terminal tasks for autonomous coding and operations agents.",
+      "engine": "brave",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "8"
+    },
+    {
+      "id": "https://www.tensorlake.ai/blog/best-ai-coding-agents-2026",
+      "title": "Best AI Coding Agents in 2026: I Tested Claude Code, Codex ...",
+      "link": "https://www.tensorlake.ai/blog/best-ai-coding-agents-2026",
+      "snippet": "Aug 13, 2026 ... Same model, four harnesses, 14 days of real work plus a 30-task agentic benchmark. The wrapper around the model turned out to decide cost,\u00a0...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "9"
+    },
+    {
+      "id": "https://www.harness-bench.ai/",
+      "title": "Harness Bench: Measuring Harness Effects in Realistic Agent Workflows",
+      "link": "https://www.harness-bench.ai/",
+      "snippet": "Harness Bench A benchmark for measuring model-harness configuration effects across 300 sandboxed agent tasks in realistic workflows, scored by task-specific oracles without an LLM judge.",
+      "engine": "duckduckgo",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "10"
+    },
+    {
+      "id": "https://labs.miniml.ai/insights/harness-bench/",
+      "title": "Benchmarking Local LLMs Against Coding Agent Harnesses",
+      "link": "https://labs.miniml.ai/insights/harness-bench/",
+      "snippet": "We've been running a small benchmark, harness-bench, that pairs local LLMs (served via llama.cpp 's llama-server) with agent harnesses (Aider, Claude Code, OpenCode, Pi, Qwen CLI) on 16 software-engineering tasks across Python, PyTorch, JAX, C, C++, Rust, and SQL. Each (model, harness, task) cell is sandboxed: the agent only sees a scratch workspace/ and grading is done by a hidden test.sh ...",
+      "engine": "duckduckgo",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "11"
+    },
+    {
+      "id": "https://arxiv.org/html/2605.27922v1",
+      "title": "Harness-Bench: Measuring Harness Effects across Models in Realistic ...",
+      "link": "https://arxiv.org/html/2605.27922v1",
+      "snippet": "The benchmark contains 106 sandboxed offline tasks constructed from practical agent-use patterns and manually reviewed for realism, solvability, oracle-checkability, and integrity. Each run records final artifacts, execution traces, usage statistics, and validator outputs, enabling analysis beyond final completion.",
+      "engine": "brave",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "12"
+    },
+    {
+      "id": "https://www.harness-bench.ai/leaderboard.html",
+      "title": "Leaderboard - Harness Bench",
+      "link": "https://www.harness-bench.ai/leaderboard.html",
+      "snippet": "Harness Bench Leaderboard Seven native harnesses evaluated with ten model backends on 274 general tasks and with seven model backends on 26 multimodal tasks. Every configuration receives identical task inputs, budgets, and scoring rules while keeping its own prompting, tools, context management, and recovery behavior.",
+      "engine": "duckduckgo",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "13"
+    },
+    {
+      "id": "https://arxiv.org/html/2610.00917v1",
+      "title": "Finding the Right Fit:Model\u2013Harness Interactions across Agent Tasks",
+      "link": "https://arxiv.org/html/2610.00917v1",
+      "snippet": "Oct 1, 2026 ... On Terminal-Bench 4, GPT scores higher under PI than under DSH at less than a quarter of the cost per task. Matched trajectories suggest why fit\u00a0...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "14"
+    },
+    {
+      "id": "https://benchgen.com/blog/ai-agent-harness-benchmarking-guide-2026",
+      "title": "Harness Benchmarking: The Model + Harness Guide (2026)",
+      "link": "https://benchgen.com/blog/ai-agent-harness-benchmarking-guide-2026",
+      "snippet": "Quick answer: Harness benchmarking is the practice of evaluating an AI agent's scaffolding \u2014 memory, tools, context management, permissions, and orchestration \u2014 independently from the underlying model, usually by holding the model and task set fixed while swapping the harness. 2026 research (Harness-Bench, HAL, SkillsBench, the Artificial ...",
+      "engine": "duckduckgo",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "15"
+    },
+    {
+      "id": "https://www.reddit.com/r/LocalLLaMA/comments/1xpvfx8/harness_leaderboard_kimi_code_hermes_pi_claude/",
+      "title": "r/LocalLLaMA on Reddit: Harness Leaderboard - Kimi Code, Hermes, ...",
+      "link": "https://www.reddit.com/r/LocalLLaMA/comments/1xpvfx8/harness_leaderboard_kimi_code_hermes_pi_claude/",
+      "snippet": ") thus giving making the answer to be considered wrong or 2. reaching context limit before the answer was finished because of so many instructions. and this is why mini swe tends to score so high, it is a minimal harness and it can just give ...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "16"
+    },
+    {
+      "id": "https://neuralnoise.com/2026/harness-bench-wip/",
+      "title": "[WIP] Benchmarking Local LLMs Against Coding Agent Harnesses",
+      "link": "https://neuralnoise.com/2026/harness-bench-wip/",
+      "snippet": "pi is the strongest harness on this benchmark \u2013 and also the fastest of the top three. The accuracy gap between pi/qwen and claude/opencode/aider is a clear ~10-15 percentage points, big enough that I wouldn\u2019t want to call it noise.",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "17"
+    },
+    {
+      "id": "https://pub.towardsai.net/fryday-8-10-agent-harnesses-that-change-what-the-same-model-can-do-4b5a84771fc7?gi=bef0904ec30e",
+      "title": "Fryday #8: 10 Agent Harnesses That Change What the Same Model Can ...",
+      "link": "https://pub.towardsai.net/fryday-8-10-agent-harnesses-that-change-what-the-same-model-can-do-4b5a84771fc7?gi=bef0904ec30e",
+      "snippet": "GLM-5.2 moved from 23.2% to 52.4% Pass@1 depending on the harness, while Gemma 4 26B-A4B moved from 15.2% to 36.0%. More interestingly, the ranking correlation between the two harness leaderboards was -0.05: Codex moved from second to ninth, ...",
+      "engine": "brave",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "18"
+    },
+    {
+      "id": "https://pasqualepillitteri.it/en/news/30849/harness-leaderboard-coding-agent-harness-ranking",
+      "title": "Harness Leaderboard reveals a 24-point swing from the coding harness ...",
+      "link": "https://pasqualepillitteri.it/en/news/30849/harness-leaderboard-coding-agent-harness-ranking",
+      "snippet": "Averaged over the three models, mini-swe-agent is first at 51.4%, but Kimi Code, Hermes Agent, Pi and Claude Code all sit within its confidence interval, so the board marks them as tied for first.",
+      "engine": "brave",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "19"
+    },
+    {
+      "id": "https://kingy.ai/blog/opencode-review/",
+      "title": "OpenCode Review (2026): The Coding Harness Is the Product",
+      "link": "https://kingy.ai/blog/opencode-review/",
+      "snippet": "OpenCode was fast in that narrow slice, but it was not token-minimal. Nor can those figures be multiplied by a universal token price: cached input, output, reasoning tokens and provider markups differ. The GPT bundle mixes native and proxy telemetry, so a single cross-harness token chart would imply comparability the release does not provide. Execution itself can be an efficiency trade-off. To Run or Not to Run analyzed 7,745 agent traces and 3,000 repair attempts across 200 SWE-bench instances.",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "20"
+    },
+    {
+      "id": "https://cobusgreyling.substack.com/p/agent-model-harness",
+      "title": "Agent = Model + Harness",
+      "link": "https://cobusgreyling.substack.com/p/agent-model-harness",
+      "snippet": "Jun 2, 2026 ... So the aim of Harness-Bench is to provide a reproducible foundation for diagnosing and improving reliable, efficient and auditable agent\u00a0...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "21"
+    },
+    {
+      "id": "https://huggingface.co/papers?q=Harness+Lab",
+      "title": "Daily Papers - Hugging Face",
+      "link": "https://huggingface.co/papers?q=Harness+Lab",
+      "snippet": "Oct 26, 2026 ... An optimizer, an LLM paired with a coding harness ... 1 \u00b7 Harness-Bench: Measuring Harness Effects across Models in Realistic Agent Workflows.",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "22"
+    },
+    {
+      "id": "https://blogs.oracle.com/developers/building-an-agent-harness-that-survives-production",
+      "title": "Building an agent harness that survives production - Oracle Blogs",
+      "link": "https://blogs.oracle.com/developers/building-an-agent-harness-that-survives-production",
+      "snippet": "Sep 3, 2026 ... ... code first (Coherence Collapse). Competence was not the missing ... harnesses (Harness-Bench). Each bundles several mechanisms per\u00a0...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "23"
+    },
+    {
+      "id": "https://github.com/TheLime1/harness-bench",
+      "title": "GitHub - TheLime1/harness-bench: Benchmark leaderboard for AI coding ...",
+      "link": "https://github.com/TheLime1/harness-bench",
+      "snippet": "A benchmark leaderboard for AI coding harnesses by model. Harness-Bench compares the tool wrapped around the model, not just the model itself. The same model can behave very differently in Codex CLI, OpenCode, Zed, Aider, OpenHands, Cline, Roo Code, Continue, and future harnesses. This repo tracks those differences with reproducible data files and a static GitHub Pages leaderboard. Status ...",
+      "engine": "duckduckgo",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "24"
+    },
+    {
+      "id": "https://arxiv.org/html/2610.00917v1",
+      "title": "Finding the Right Fit:Model\u2013Harness Interactions across Agent Tasks",
+      "link": "https://arxiv.org/html/2610.00917v1",
+      "snippet": "Oct 1, 2026 ... Harness-Bench evaluates model\u2013harness configurations on completion ... [1] Anthropic (2026) Claude Code. Note: https://github.com\u00a0...",
+      "engine": "google cse",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "25"
+    },
+    {
+      "id": "https://thelime1.github.io/harness-bench/",
+      "title": "Harness-Bench",
+      "link": "https://thelime1.github.io/harness-bench/",
+      "snippet": "Harness-Bench compares AI coding harnesses by model, benchmark, cost, and verification tier.",
+      "engine": "duckduckgo",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "26"
+    },
+    {
+      "id": "https://arxiv.org/html/2605.27922v2",
+      "title": "Harness-Bench: Evaluating Agent Harnesses across Models and Realistic ...",
+      "link": "https://arxiv.org/html/2605.27922v2",
+      "snippet": "In contrast, Harness-Bench centers on harness design and selection, considering common execution demands such as tool orchestration, state management, and recovery, while analyzing delivery, cost, and risk across models.",
+      "engine": "duckduckgo",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "27"
+    },
+    {
+      "id": "https://www.harness-bench.ai/leaderboard.html",
+      "title": "Leaderboard - Harness Bench",
+      "link": "https://www.harness-bench.ai/leaderboard.html",
+      "snippet": "Harness Bench results for 7 native harnesses and 10 model backends on 274 general and 26 multimodal tasks.",
+      "engine": "brave",
+      "category": "general",
+      "source_engine": "searxng",
+      "index": "28"
+    },
+    {
+      "title": "Benchmarking Local LLMs Against Coding Agent Harnesses",
+      "link": "https://labs.miniml.ai/insights/harness-bench/",
+      "snippet": "The single perfect cell on the matrix is Qwen3.6-27B (UD-Q4_K_XL) + pi \u2013 16/16 at ~207 s/task. It is the only combination across all 85 tested cells (Q4 sweep + Q8 sweep) that clears the full benchmar...",
+      "index": "29",
+      "source_engine": "fetch"
+    }
+  ],
+  "sources_urls": [
+    "https://arxiv.org/html/2605.27922v1",
+    "https://arxiv.org/html/2605.27922v2",
+    "https://arxiv.org/html/2610.00917v1",
+    "https://benchgen.com/blog/ai-agent-harness-benchmarking-guide-2026",
+    "https://blogs.oracle.com/developers/building-an-agent-harness-that-survives-production",
+    "https://cobusgreyling.substack.com/p/agent-model-harness",
+    "https://composio.dev/content/best-ai-agent-harnesses",
+    "https://github.com/NaC-L/harness-bench",
+    "https://github.com/Shikhaar/HarnessBench",
+    "https://github.com/TheLime1/harness-bench",
+    "https://github.com\\u00a0...",
+    "https://huggingface.co/papers?q=Harness+Lab",
+    "https://kingy.ai/blog/opencode-review/",
+    "https://labs.miniml.ai/insights/harness-bench/",
+    "https://labs.miniml.ai/insights/harness-bench\\n\\n[16",
+    "https://marmelab.com/blog/2026/09/24/the-state-of-ai-harness-engineering-2026.html",
+    "https://neuralnoise.com/2026/harness-bench-wip/",
+    "https://neuralnoise.com/2026/harness-bench-wip\\n\\n[2",
+    "https://pasqualepillitteri.it/en/news/30849/harness-leaderboard-coding-agent-harness-ranking",
+    "https://pub.towardsai.net/fryday-8-10-agent-harnesses-that-change-what-the-same-model-can-do-4b5a84771fc7?gi=bef0904ec30e",
+    "https://thelime1.github.io/harness-bench/",
+    "https://venturebeat.com/orchestration/a-coding-agents-harness-can-triple-its-cost-without-making-it-more-accurate-study-finds",
+    "https://venturebeat.com/orchestration/a-coding-agents-harness-can-triple-its-cost-without-making-it-more-accurate-study-finds\\n\\n[11,",
+    "https://www.harness-bench.ai/",
+    "https://www.harness-bench.ai/leaderboard.html",
+    "https://www.reddit.com/r/LocalLLaMA/comments/1tgecrq/i_built_a_coding_agent_that_gets_87_on_benchmarks/",
+    "https://www.reddit.com/r/LocalLLaMA/comments/1xpvfx8/harness_leaderboard_kimi_code_hermes_pi_claude/",
+    "https://www.reddit.com/r/LocalLLaMA/comments/1xpvfx8/harness_leaderboard_kimi_code_hermes_pi_claude\\n\\n\\n",
+    "https://www.tensorlake.ai/blog/best-ai-coding-agents-2026"
+  ],
+  "iterations": 3,
+  "questions_generated": {},
+  "findings_count": 1
+}

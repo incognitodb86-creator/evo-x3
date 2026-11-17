@@ -1,0 +1,78 @@
+{
+ "files": [
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/Qwen2.5-Omni-7B-GGUF/Qwen2.5-Omni-7B-Q4_K_M.gguf",
+   "repo": "ggml",
+   "repo_path": "Qwen2.5-Omni-7B-Q4_K_M.gguf",
+   "hf_api_size": 4683072384,
+   "local_size": 4683072384,
+   "size_ok": true,
+   "sha256": "09883dff531dc56923a041c9c99c7c779e26ffde32caa83adeeb7502ec3b50fe"
+  },
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/Qwen2.5-Omni-7B-GGUF/mmproj-Qwen2.5-Omni-7B-Q8_0.gguf",
+   "repo": "ggml",
+   "repo_path": "mmproj-Qwen2.5-Omni-7B-Q8_0.gguf",
+   "hf_api_size": 1548488480,
+   "local_size": 1548488480,
+   "size_ok": true,
+   "sha256": "4a7bc5478a2ec8c5d186d63532eb22e75b79ba75ec3c0ce821676157318ef4ad"
+  },
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf",
+   "repo": "pt_gguf",
+   "repo_path": "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf",
+   "hf_api_size": 343173408,
+   "local_size": 343173408,
+   "size_ok": true,
+   "sha256": "c43ebb841da384807a93370fe2f6da70dd4e8a6042c404ee6d8e7a2a2fa51dea"
+  },
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni/lightx2v-safetensors/adapter_model.safetensors",
+   "repo": "lx",
+   "repo_path": "adapter_model.safetensors",
+   "hf_api_size": 1291899160,
+   "local_size": 1291899160,
+   "size_ok": true,
+   "sha256": "25e325683814eccdfa8597d509e966f552722aeeecce31b38f6fc0089784345b"
+  },
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni/lightx2v-safetensors/adapter_config.json",
+   "repo": "lx",
+   "repo_path": "adapter_config.json",
+   "hf_api_size": 6612,
+   "local_size": 6612,
+   "size_ok": true,
+   "sha256": "147a923546f3c089a93837ca9936652e569e2b88c8abfc85259cd69560890949"
+  },
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni/lightx2v-safetensors/README.md",
+   "repo": "lx",
+   "repo_path": "README.md",
+   "hf_api_size": 10540,
+   "local_size": 10540,
+   "size_ok": true,
+   "sha256": "955026f55aa97812ecfc7f101c3cb0c4cd32e5da2361fb9373daa65be7c308d4"
+  },
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni/lightx2v-safetensors/requirements.txt",
+   "repo": "lx",
+   "repo_path": "requirements.txt",
+   "hf_api_size": 184,
+   "local_size": 184,
+   "size_ok": true,
+   "sha256": "ab7f9e99c207fd9b391c84437d9e99f07a15ecfdeb100ca192e114783122a412"
+  },
+  {
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models/LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni/lightx2v-safetensors/system_prompt.py",
+   "repo": "lx",
+   "repo_path": "system_prompt.py",
+   "hf_api_size": 22163,
+   "local_size": 22163,
+   "size_ok": true,
+   "sha256": "b06e6fd7b36c00a8d226cee2bbe9c7f335764b38d46b7911bd01b10282418351"
+  }
+ ],
+ "total_bytes": 7866672931,
+ "fails": 0
+}

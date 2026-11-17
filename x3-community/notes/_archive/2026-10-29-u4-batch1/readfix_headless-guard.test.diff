@@ -1,0 +1,23 @@
+--- ../headless-guard.test.mjs	2026-10-23 13:13:01.535412007 -0500
++++ t.mjs	2026-10-23 13:45:47.053395640 -0500
+@@ -555,3 +555,20 @@
+ 		if (prev === undefined) delete process.env.PI_GUARD_RENDER_RUNNING; else process.env.PI_GUARD_RENDER_RUNNING = prev;
+ 	}
+ });
++
++test("readfix: python -c multi-line / ';' and 2>/dev/null are Forge-only and shape-checked", () => {
++	const nf = (cmd) => ext.evaluateToolCall("bash", { command: cmd }, { headless: true, cwd: "C:\\Apps\\finance-app-rebuild" });
++	assert.equal(sh("python -c \"import json\np=r'C:/AI/community/runs/x/request.api.json'\nprint(len(json.load(open(p))))\""), null);
++	assert.equal(sh("python -c \"import os; print(os.listdir('C:/Users/derek'))\""), null);
++	assert.equal(sh("python -c 'import sys; print(sys.version)' 2>/dev/null"), null);
++	assert.equal(sh("find C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI -maxdepth 3 -iname \"*h3*\" 2>/dev/null"), null);
++	assert.equal(sh("python -c \"print(1)\"; git status")?.id, "python-c-shape");
++	assert.equal(sh("python -c \"print(1)\"\nnpm publish")?.id, "python-c-shape");
++	assert.ok(sh("python -c \"print(1)\" > C:/AI/director/x.txt"));
++	assert.equal(sh("python -c \"print($(whoami))\"")?.id, "python-c-shape");
++	assert.equal(sh("python -c print(1)")?.id, "python-c-shape");
++	assert.equal(sh("find . -name x; cat y 2>/dev/null")?.id, "python-c-shape");
++	assert.equal(sh("python -c \"print(1)\"\ngit push origin main")?.id, "git-push");
++	assert.equal(nf("python -c \"import os; print(1)\"")?.id, "forge-only-relax");
++	assert.equal(nf("find . -name x 2>/dev/null")?.id, "forge-only-relax");
++});

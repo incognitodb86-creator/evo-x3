@@ -1,0 +1,42 @@
+{
+  "arm": "u20-heretic-q4km-polystrata-vision",
+  "model": "gemma-4-26b-a4b-ud-q4_k_m",
+  "http": 200,
+  "elapsed_s": 2.998,
+  "ttft_s": 0.6295,
+  "prompt_tokens": 163,
+  "completion_tokens": 56,
+  "prompt_per_second": 258.9,
+  "predicted_per_second": 77.1,
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 163,
+    "prompt_ms": 629.5,
+    "prompt_per_token_ms": 3.862,
+    "prompt_per_second": 258.9,
+    "predicted_n": 56,
+    "predicted_ms": 739.2,
+    "predicted_per_token_ms": 12.968,
+    "predicted_per_second": 77.1,
+    "draft_n": 49,
+    "draft_n_accepted": 38
+  },
+  "usage": {
+    "prompt_tokens": 163,
+    "completion_tokens": 56,
+    "total_tokens": 219,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "finish": "stop",
+  "content": "This image features a blue background with the text \"X3-BAKEOFF\" written in white at the top. It contains three distinct geometric shapes: a large yellow circle on the left, a red square on the right, and a green triangle at the bottom.",
+  "checks": {
+    "yellow_or_gold_circle": true,
+    "red_square": true,
+    "green_triangle": true,
+    "text_x3_bakeoff": true
+  },
+  "checks_passed": 4,
+  "vision_works": true
+}

@@ -1,0 +1,296 @@
+{
+ "arm": "u26-huihui-hgn",
+ "model": "flash-next",
+ "effort": "low",
+ "started": "2026-11-15 18:17:11 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 9.859997510910034,
+   "total_s": 11.046540975570679,
+   "prompt_tokens": 18253,
+   "completion_tokens": 96,
+   "client_decode_tps": 80.90727635287791,
+   "timings": {
+    "prompt_n": 18253,
+    "predicted_n": 96,
+    "prompt_ms": 9819.3,
+    "predicted_ms": 1183.7,
+    "prompt_per_second": 1858.89,
+    "predicted_per_second": 81.102,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "draft_n": 98,
+    "draft_n_accepted": 76,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 20,
+     "head": {
+      "rounds": 20,
+      "drafted": 98,
+      "accepted": 76
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 247,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "code": {
+   "ttft_s": 0.26130175590515137,
+   "total_s": 3.679062843322754,
+   "prompt_tokens": 141,
+   "completion_tokens": 282,
+   "client_decode_tps": 82.51015585559084,
+   "timings": {
+    "prompt_n": 141,
+    "predicted_n": 282,
+    "prompt_ms": 253.2,
+    "predicted_ms": 3417.0,
+    "prompt_per_second": 556.872,
+    "predicted_per_second": 82.529,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 28,
+    "draft_n": 275,
+    "draft_n_accepted": 210,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 47,
+     "head": {
+      "rounds": 47,
+      "drafted": 275,
+      "accepted": 210
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 665,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.43038153648376465,
+     "total_s": 1.2086818218231201,
+     "prompt_tokens": 388,
+     "completion_tokens": 72,
+     "client_decode_tps": 92.50928125846244,
+     "timings": {
+      "prompt_n": 388,
+      "predicted_n": 72,
+      "prompt_ms": 419.1,
+      "predicted_ms": 777.6,
+      "prompt_per_second": 925.793,
+      "predicted_per_second": 92.593,
+      "cache_n": 0,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 29,
+      "draft_n": 75,
+      "draft_n_accepted": 59,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 13,
+       "head": {
+        "rounds": 13,
+        "drafted": 75,
+        "accepted": 59
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 177,
+     "tool_calls": [
+      {
+       "id": "call_ccdf38d633ad4aa0b42ea94d",
+       "name": "lookup_user",
+       "arguments": "{\"email\": \"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.27389001846313477,
+     "total_s": 0.8852424621582031,
+     "prompt_tokens": 452,
+     "completion_tokens": 53,
+     "client_decode_tps": 86.69303696516415,
+     "timings": {
+      "prompt_n": 132,
+      "predicted_n": 53,
+      "prompt_ms": 257.5,
+      "predicted_ms": 611.0,
+      "prompt_per_second": 512.621,
+      "predicted_per_second": 86.743,
+      "cache_n": 320,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 387,
+      "draft_n": 49,
+      "draft_n_accepted": 41,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 12,
+       "head": {
+        "rounds": 12,
+        "drafted": 49,
+        "accepted": 41
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 77,
+     "tool_calls": [
+      {
+       "id": "call_924fb262b2ef411bbb57cf2f",
+       "name": "get_orders",
+       "arguments": "{\"user_id\": \"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.24690580368041992,
+     "total_s": 0.8631398677825928,
+     "prompt_tokens": 525,
+     "completion_tokens": 52,
+     "client_decode_tps": 84.38352085544284,
+     "timings": {
+      "prompt_n": 141,
+      "predicted_n": 52,
+      "prompt_ms": 231.4,
+      "predicted_ms": 615.6,
+      "prompt_per_second": 609.334,
+      "predicted_per_second": 84.47,
+      "cache_n": 384,
+      "disk_restore_n": 0,
+      "disk_restore_ms": 0.0,
+      "prefix_n": 451,
+      "draft_n": 54,
+      "draft_n_accepted": 41,
+      "speculation": {
+       "drafter": "mtp",
+       "rounds": 11,
+       "head": {
+        "rounds": 11,
+        "drafted": 54,
+        "accepted": 41
+       },
+       "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       },
+       "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (IDs: A1, A2, A3).",
+     "reasoning_chars": 96,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  },
+  "decode": {
+   "ttft_s": 0.16822171211242676,
+   "total_s": 10.048551559448242,
+   "prompt_tokens": 59,
+   "completion_tokens": 604,
+   "client_decode_tps": 61.13156233978016,
+   "timings": {
+    "prompt_n": 59,
+    "predicted_n": 604,
+    "prompt_ms": 161.2,
+    "predicted_ms": 9879.7,
+    "prompt_per_second": 366.005,
+    "predicted_per_second": 61.135,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "prefix_n": 33,
+    "draft_n": 521,
+    "draft_n_accepted": 331,
+    "speculation": {
+     "drafter": "mtp",
+     "rounds": 246,
+     "head": {
+      "rounds": 246,
+      "drafted": 521,
+      "accepted": 331
+     },
+     "lookup": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     },
+     "grammar": {
+      "rounds": 0,
+      "drafted": 0,
+      "accepted": 0
+     }
+    }
+   },
+   "content": "A heat pump is a device that moves heat from one place to another, using a small amount of energy to do so. Think of it like a refrigerator, but instead of just keeping things cold, it can either cool your home or warm it up, depending on the season.\n\nAt its core, a heat pump works by circulating a special fluid called a refrigerant through a closed loop of pipes. The refrigerant has a unique property: it can easily switch between being a liquid and a gas, and it absorbs or releases heat as it changes state. This process is powered by a compressor, which is essentially a pump that squeezes the refrigerant gas, raising its pressure and temperature.\n\nHere\u2019s how it works in cooling mode. The refrigerant starts as a cold, low-pressure liquid inside a coil of pipes called the evaporator, which is located inside your home. As warm indoor air is blown over this coil, the refrigerant absorbs the heat from the air and evaporates into a gas. This cools the air, which is then circulated back into your living space. The now-warm gas travels to an outdoor unit called the condenser. There, the compressor squeezes the gas, making it even hotter. The hot gas releases its heat to the outside air as it condenses back into a liquid. The liquid then flows back to the indoor evaporator to repeat the cycle.\n\nIn heating mode, the process is reversed. A small valve called a reversing valve flips the direction of the refrigerant flow. Now, the outdoor coil acts as the evaporator. The cold refrigerant absorbs heat from the outside air\u2014even when it feels cold to us, there is still thermal energy in the air\u2014and evaporates into a gas. The compressor then squeezes this gas, heating it up significantly. The hot gas travels to the indoor coil (now acting as the condenser), where it releases its heat into your home before condensing back into a liquid and returning outside.\n\nThe key to understanding heat pumps is recognizing that they don\u2019t generate heat by burning fuel or using an electric heater. Instead, they move existing heat from one place to another. This is why they are so energy-efficient. For every unit of electricity used to power the compressor, a heat pump can typically move two to four units of heat energy into or out of your home. This means you get more heating or cooling for your money compared to traditional systems that simply create heat by burning electricity or gas.\n\nBecause heat pumps can both heat and cool, they are a versatile and efficient solution for year-round climate control. They are especially effective in moderate climates, though modern cold-climate heat pumps can work efficiently even in very cold temperatures. By moving heat rather than creating it, heat pumps offer a smart way to reduce energy consumption and lower utility bills while keeping your home comfortable.",
+   "reasoning_chars": 115,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

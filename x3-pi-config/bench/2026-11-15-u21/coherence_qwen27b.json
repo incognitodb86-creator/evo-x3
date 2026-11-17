@@ -1,0 +1,243 @@
+{
+  "slot": "qwen27b",
+  "at_ct": "2026-11-15 21:16:01 CST",
+  "http_status": 200,
+  "wall_s": 30.28,
+  "coherent_pass": true,
+  "content": "On AMD Strix Halo APUs, the GPU can only access a configurable slice of the total LPDDR5X pool (up to ~96 GB on the top SKU), so a low allocation directly caps the size of AI models, textures, or frame buffers the GPU can hold. Because the CPU and GPU draw from the same physical memory, a large GPU carve-out starves the OS and CPU of available RAM, risking system-wide slowdowns or out-of-memory failures. Finally, the shared memory bandwidth is fixed regardless of how the pool is divided, so allocating more memory to the GPU increases capacity without increasing throughput, which can create a bandwidth bottleneck that limits real-world performance.",
+  "reasoning_chars": 2062,
+  "usage": {
+    "prompt_tokens": 60,
+    "completion_tokens": 609,
+    "total_tokens": 669,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 470
+    },
+    "cached_tokens": 0,
+    "prompt_tokens_per_second": 150.68731763020293,
+    "completion_tokens_per_second": 20.388414889909647,
+    "draft_tokens": 1193,
+    "draft_tokens_accepted": 420,
+    "gufo": {
+      "component_cache": {
+        "schema": "component-cache-v1",
+        "reuse": "none",
+        "selection_reason": 6,
+        "deepest_live_tokens": 0,
+        "deepest_ram_tokens": 0,
+        "deepest_disk_tokens": 0,
+        "selected_tokens": 0,
+        "restored_bytes": 0,
+        "prefilled_tokens": 60,
+        "captures": 1,
+        "captured_capacity_bytes": 251592704,
+        "borrowed_capacity_bytes": 0,
+        "copied_payload_bytes": 249155808,
+        "captured_checkpoint_ids": [
+          2533
+        ],
+        "global_spill": {
+          "idle_bytes": 1325400064,
+          "foreground_bytes": 0,
+          "idle_copy_ms": 52.702549,
+          "foreground_copy_ms": 0,
+          "stream_wait_ms": 0.404302,
+          "residual_wait_ms": 0.114363,
+          "reassignments": 2,
+          "idle_failures": 0
+        },
+        "global_ledger_bytes": 2769878568,
+        "global_ram_bytes": 2769878568,
+        "global_peak_ledger_bytes": 2770051024,
+        "global_peak_ram_bytes": 2770051024,
+        "global_persistence_pinned_bytes": 0,
+        "global_peak_persistence_pinned_bytes": 0,
+        "global_categories": {
+          "backing_free": {
+            "bytes": 66453504,
+            "reserved_bytes": 0,
+            "peak_bytes": 1899233280
+          },
+          "backing_assigned": {
+            "bytes": 0,
+            "reserved_bytes": 0,
+            "peak_bytes": 1325400064
+          },
+          "backing_materialized": {
+            "bytes": 1325400064,
+            "reserved_bytes": 0,
+            "peak_bytes": 1325400064
+          },
+          "private_state": {
+            "bytes": 494796800,
+            "reserved_bytes": 0,
+            "peak_bytes": 494796800
+          },
+          "private_tail": {
+            "bytes": 12582912,
+            "reserved_bytes": 0,
+            "peak_bytes": 16777216
+          },
+          "metadata": {
+            "bytes": 870645288,
+            "reserved_bytes": 0,
+            "peak_bytes": 870817744
+          },
+          "transfer_staging": {
+            "bytes": 0,
+            "reserved_bytes": 0,
+            "peak_bytes": 0
+          }
+        }
+      },
+      "cache_hit": false,
+      "cache_miss_reason": "no_compatible_boundary",
+      "cache_common_prefix_tokens": 9,
+      "cache_checkpoint_tokens": 0,
+      "cache_restore_bytes": 0,
+      "cache_snapshot_bytes": 249155808,
+      "cache_disk_queued_bytes": 0,
+      "cache_shared_bytes": 0,
+      "cache_restore_ms": 0,
+      "cache_snapshot_ms": 6.492323,
+      "cache_disk_enqueue_ms": 0.00066,
+      "cache_disk_hit": false,
+      "draft_rounds": 189,
+      "prefill_tokens": 60,
+      "prefill_chunks": 2,
+      "active_decode_prefill_chunks": 0,
+      "max_prefill_chunk_tokens": 55,
+      "max_prefill_layer_groups": 1,
+      "prefill_yield_rounds": 0,
+      "queue_depth_at_submit": 1,
+      "client_queue_depth_at_submit": 1,
+      "resident_requests_at_admission": 1,
+      "requested_logical_concurrency": 2,
+      "physical_execution_width": 1,
+      "queue_ms": 0.959435,
+      "shared_prefix_wait_ms": 0,
+      "prefill_ms": 398.175513,
+      "decode_ms": 29869.904222000005,
+      "ttft_ms": 404.78009,
+      "mean_inter_token_ms": 48.86845802467098,
+      "max_inter_token_ms": 160.661063,
+      "execution_plan": "serial-fallback"
+    }
+  },
+  "timings": {
+    "prompt_n": 60,
+    "prompt_ms": 398.175513,
+    "prompt_per_token_ms": 6.63625855,
+    "prompt_per_second": 150.68731763020293,
+    "predicted_n": 609,
+    "predicted_ms": 29869.904222000005,
+    "predicted_per_token_ms": 49.04746177668309,
+    "predicted_per_second": 20.38841488990965,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 6.492323,
+    "cache_disk_enqueue_ms": 0.00066,
+    "draft_rounds": 189,
+    "draft_n": 1193,
+    "draft_n_accepted": 420,
+    "component_cache": {
+      "schema": "component-cache-v1",
+      "reuse": "none",
+      "selection_reason": 6,
+      "deepest_live_tokens": 0,
+      "deepest_ram_tokens": 0,
+      "deepest_disk_tokens": 0,
+      "selected_tokens": 0,
+      "restored_bytes": 0,
+      "prefilled_tokens": 60,
+      "captures": 1,
+      "captured_capacity_bytes": 251592704,
+      "borrowed_capacity_bytes": 0,
+      "copied_payload_bytes": 249155808,
+      "captured_checkpoint_ids": [
+        2533
+      ],
+      "global_spill": {
+        "idle_bytes": 1325400064,
+        "foreground_bytes": 0,
+        "idle_copy_ms": 52.702549,
+        "foreground_copy_ms": 0,
+        "stream_wait_ms": 0.404302,
+        "residual_wait_ms": 0.114363,
+        "reassignments": 2,
+        "idle_failures": 0
+      },
+      "global_ledger_bytes": 2769878568,
+      "global_ram_bytes": 2769878568,
+      "global_peak_ledger_bytes": 2770051024,
+      "global_peak_ram_bytes": 2770051024,
+      "global_persistence_pinned_bytes": 0,
+      "global_peak_persistence_pinned_bytes": 0,
+      "global_categories": {
+        "backing_free": {
+          "bytes": 66453504,
+          "reserved_bytes": 0,
+          "peak_bytes": 1899233280
+        },
+        "backing_assigned": {
+          "bytes": 0,
+          "reserved_bytes": 0,
+          "peak_bytes": 1325400064
+        },
+        "backing_materialized": {
+          "bytes": 1325400064,
+          "reserved_bytes": 0,
+          "peak_bytes": 1325400064
+        },
+        "private_state": {
+          "bytes": 494796800,
+          "reserved_bytes": 0,
+          "peak_bytes": 494796800
+        },
+        "private_tail": {
+          "bytes": 12582912,
+          "reserved_bytes": 0,
+          "peak_bytes": 16777216
+        },
+        "metadata": {
+          "bytes": 870645288,
+          "reserved_bytes": 0,
+          "peak_bytes": 870817744
+        },
+        "transfer_staging": {
+          "bytes": 0,
+          "reserved_bytes": 0,
+          "peak_bytes": 0
+        }
+      }
+    }
+  },
+  "finish_reason": "stop",
+  "journal_tail": [
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [http] request=r4 event=received method=POST path=/v1/chat/completions body_bytes=251",
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0",
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [progress] request=2 phase=prefill tokens=55/60 percentage=91.7 chunk_tps=242.9 avg_tps=242.9",
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=1 tokens=20329 purpose=0 rank=0 unique_bytes_freed=157972 ledger_bytes=2769893052",
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=55 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=2769868516",
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [progress] request=2 phase=prefill tokens=60/60 percentage=100.0 chunk_tps=29.1 avg_tps=150.7",
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [cache] schema=component-cache-v1 event=capture_refused reason=byte_capacity tokens=60",
+    "2026-11-15T21:15:31-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:31 [INFO] [cache] schema=component-cache-v1 event=snapshot_skipped reason=1 tokens=60 bytes=249483488",
+    "2026-11-15T21:15:33-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:33 [INFO] [progress] request=2 phase=decode tokens=54/1500 percentage=3.6 chunk_tps=28.6 avg_tps=28.6 draft_accepted=41 draft_proposed=84 acceptance_percentage=48.8",
+    "2026-11-15T21:15:35-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:35 [INFO] [progress] request=2 phase=decode tokens=100/1500 percentage=6.7 chunk_tps=22.4 avg_tps=25.4 draft_accepted=74 draft_proposed=175 acceptance_percentage=42.3",
+    "2026-11-15T21:15:39-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:39 [INFO] [progress] request=2 phase=decode tokens=152/1500 percentage=10.1 chunk_tps=14.5 avg_tps=20.2 draft_accepted=103 draft_proposed=296 acceptance_percentage=34.8",
+    "2026-11-15T21:15:41-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:41 [INFO] [progress] request=2 phase=decode tokens=200/1500 percentage=13.3 chunk_tps=21.5 avg_tps=20.5 draft_accepted=137 draft_proposed=393 acceptance_percentage=34.9",
+    "2026-11-15T21:15:44-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:44 [INFO] [progress] request=2 phase=decode tokens=250/1500 percentage=16.7 chunk_tps=16.7 avg_tps=19.6 draft_accepted=168 draft_proposed=508 acceptance_percentage=33.1",
+    "2026-11-15T21:15:47-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:47 [INFO] [progress] request=2 phase=decode tokens=302/1500 percentage=20.1 chunk_tps=17.5 avg_tps=19.2 draft_accepted=201 draft_proposed=610 acceptance_percentage=33.0",
+    "2026-11-15T21:15:50-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:50 [INFO] [progress] request=2 phase=decode tokens=350/1500 percentage=23.3 chunk_tps=20.0 avg_tps=19.3 draft_accepted=234 draft_proposed=715 acceptance_percentage=32.7",
+    "2026-11-15T21:15:53-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:53 [INFO] [progress] request=2 phase=decode tokens=400/1500 percentage=26.7 chunk_tps=15.8 avg_tps=18.8 draft_accepted=264 draft_proposed=832 acceptance_percentage=31.7",
+    "2026-11-15T21:15:55-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:55 [INFO] [progress] request=2 phase=decode tokens=450/1500 percentage=30.0 chunk_tps=19.6 avg_tps=18.9 draft_accepted=298 draft_proposed=939 acceptance_percentage=31.7",
+    "2026-11-15T21:15:58-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:58 [INFO] [progress] request=2 phase=decode tokens=506/1500 percentage=33.7 chunk_tps=25.3 avg_tps=19.4 draft_accepted=340 draft_proposed=1025 acceptance_percentage=33.2",
+    "2026-11-15T21:15:59-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:59 [INFO] [progress] request=2 phase=decode tokens=553/1500 percentage=36.9 chunk_tps=42.2 avg_tps=20.4 draft_accepted=380 draft_proposed=1074 acceptance_percentage=35.4",
+    "2026-11-15T21:16:01-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:16:01 [INFO] [progress] request=2 phase=decode tokens=602/1500 percentage=40.1 chunk_tps=23.6 avg_tps=20.6 draft_accepted=416 draft_proposed=1165 acceptance_percentage=35.7",
+    "2026-11-15T21:16:01-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:16:01 [INFO] [progress] request=2 phase=decode tokens=609/1500 percentage=40.6 chunk_tps=11.0 avg_tps=20.4 draft_accepted=420 draft_proposed=1193 acceptance_percentage=35.2",
+    "2026-11-15T21:16:01-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:16:01 [INFO] [http] request=r4 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=30277.2 outcome=completed prompt_tokens=60 prefill_tokens=60 generated_tokens=609 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.0 shared_prefix_wait_ms=0.0 ttft_ms=404.8 prefill_tps=150.7 decode_tps=20.4 batch_width=1 plan=serial-fallback draft_accepted=420 draft_proposed=1193 draft_rounds=189 cache_schema=component-cache-v1 cache_reuse=none cache_captures=1 cache_captured_capacity_bytes=251592704 cache_global_ledger_bytes=2769878568 acceptance_pct=35.2 cache_snapshot_bytes=249155808 cache_miss_reason=no_compatible_boundary common_prefix_tokens=9 nearest_checkpoint_tokens=0 rss_mib=3979 host_available_mib=48873"
+  ]
+}

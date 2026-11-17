@@ -1,0 +1,180 @@
+{
+  "base_id": "ali147_pool_hc_r3b_s51130003",
+  "base_sha": "ce01686e03909d04be500bb8a186230011c71d12668d2a0fb4686f60809df9f7",
+  "baseline_prompts": {
+    "c0": {
+      "amplitude": true,
+      "beats": 0,
+      "camera_moves": [],
+      "main_field": "detailed_description",
+      "main_words": 435,
+      "picture1_first_frame": true,
+      "sections": [
+        "subject_definitions",
+        "summary",
+        "retention_analysis",
+        "detailed_description",
+        "overall_soundscape",
+        "non_diegetic_music"
+      ],
+      "speed": false,
+      "video1": false,
+      "words": 1107
+    },
+    "c1": {
+      "amplitude": true,
+      "beats": 0,
+      "camera_moves": [],
+      "main_field": "integrated_multimodal_description",
+      "main_words": 498,
+      "picture1_first_frame": true,
+      "sections": [
+        "subject_definitions",
+        "integrated_multimodal_description",
+        "overall_soundscape",
+        "non_diegetic_music"
+      ],
+      "speed": true,
+      "video1": false,
+      "words": 1016
+    }
+  },
+  "budget": {
+    "cap_min": 615,
+    "est_min": 15,
+    "headroom_jobs": 6,
+    "headroom_min": 127.1,
+    "job_cap": 45,
+    "jobs": 38,
+    "path": "C:/Users/derek/5slock/ralph-community/logs/p7_budget.json",
+    "used_min": 472.9
+  },
+  "canvas": [
+    1344,
+    768
+  ],
+  "diff_paths": [
+    "c0.prompt",
+    "c1.prompt",
+    "save.filename_prefix"
+  ],
+  "fps": 24,
+  "frames": 243,
+  "frames_grid_ok": true,
+  "gate": {
+    "checked": 2,
+    "comm_key_scope": 2,
+    "failed": [],
+    "key_scope_source": "C:/AI/community/scripts/comm.py:154-157 reads input key prompt only (fix_plan 1.2)",
+    "prose_strings": 2
+  },
+  "gpu_contact": "none: no socket, no queue, no GPU command in this builder (NO_GPU check)",
+  "graph_bytes": 19441,
+  "graph_sha": "670e5c904d2a78c2a16f1b519c02046a014e6b5d9cb89998de53d0f75db6659a",
+  "idfree": {
+    "comfy_out": false,
+    "p7_result": false,
+    "runs_mp4": false
+  },
+  "inputs": [
+    {
+      "bytes": 414238,
+      "image": "community/hc/HC3_lesbian_beach.jpg",
+      "node": "img",
+      "sha16": "4646d75b65e685c5"
+    },
+    {
+      "bytes": 309348,
+      "image": "community/hc/HC3_w1_face.png",
+      "node": "img2",
+      "sha16": "55fd7aa3f5ed10b0"
+    },
+    {
+      "bytes": 314998,
+      "image": "community/hc/HC3_w2_face.png",
+      "node": "img3",
+      "sha16": "0be4b0931cb66b75"
+    }
+  ],
+  "item": "2.1b",
+  "mission": "ALI-163",
+  "new_id": "ali147_pool_hc_r3i_s51130003",
+  "node_count": 27,
+  "picks_note": "the pick is Derrick's alone; nothing here ranks a clip",
+  "picks_recorded": 0,
+  "prompts": {
+    "c0": {
+      "amplitude": true,
+      "beats": 4,
+      "camera_moves": [
+        "Arc Shot",
+        "Static Shot"
+      ],
+      "main_field": "detailed_description",
+      "main_words": 485,
+      "picture1_first_frame": true,
+      "sections": [
+        "subject_definitions",
+        "summary",
+        "retention_analysis",
+        "detailed_description",
+        "overall_soundscape",
+        "non_diegetic_music"
+      ],
+      "speed": true,
+      "video1": false,
+      "words": 1050
+    },
+    "c1": {
+      "amplitude": true,
+      "beats": 5,
+      "camera_moves": [
+        "Pedestal Down",
+        "Push In"
+      ],
+      "main_field": "integrated_multimodal_description",
+      "main_words": 459,
+      "picture1_first_frame": true,
+      "sections": [
+        "subject_definitions",
+        "summary",
+        "retention_analysis",
+        "integrated_multimodal_description",
+        "overall_soundscape",
+        "non_diegetic_music"
+      ],
+      "speed": true,
+      "video1": true,
+      "words": 1145
+    }
+  },
+  "request": {
+    "bytes": 889,
+    "frames": 243,
+    "frames_tol": 33,
+    "id": "ali147_pool_hc_r3i_s51130003",
+    "jobs": 1,
+    "minutes": 60,
+    "sha16": "61565fcabe6e4346"
+  },
+  "restage_of_request_sha": "5a3fe22a5d56bc686bdf83b5974b036d7c89fed4682d075743f3ff076a5d4ce0",
+  "restage_reason": "the 3.1 prompt audit rewrote the prompt text, so the staged request of 2.1b carried a graph sha that no longer matches the words it quotes",
+  "sampler": "euler",
+  "seed": 51130003,
+  "shift": [
+    10.0,
+    3.0
+  ],
+  "static": {
+    "defects": [],
+    "h3_nodes": 3,
+    "nonvacuity_line": "c1.audio_vae: not an input of MiniMaxH3ImageToVideo",
+    "nonvacuity_seen": true,
+    "schema_classes": 5,
+    "source": "schema parsed from comfy_extras/nodes_minimax_h3.py; clone of run_graph_job.static_check published in notes/ali163_hc_r4g2_build.py check 11"
+  },
+  "steps": [
+    10,
+    10
+  ]
+}

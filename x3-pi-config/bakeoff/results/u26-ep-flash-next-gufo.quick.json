@@ -1,0 +1,433 @@
+{
+ "arm": "u26-ep-flash-next-gufo",
+ "model": "flash-next-gufo",
+ "effort": "low",
+ "started": "2026-11-15 18:23:51 CST",
+ "tasks": {
+  "code": {
+   "ttft_s": 23.71309518814087,
+   "total_s": 27.027642250061035,
+   "prompt_tokens": 141,
+   "completion_tokens": 203,
+   "client_decode_tps": 61.24517051883376,
+   "timings": {
+    "prompt_n": 141,
+    "prompt_ms": 305.743948,
+    "prompt_per_token_ms": 2.168396794326241,
+    "prompt_per_second": 461.17020769287643,
+    "predicted_n": 203,
+    "predicted_ms": 3312.1431769999995,
+    "predicted_per_token_ms": 16.315976241379307,
+    "predicted_per_second": 61.2896209951494,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 5.348916,
+    "cache_disk_enqueue_ms": 0.0014399999999999999,
+    "draft_rounds": 41,
+    "draft_n": 243,
+    "draft_n_accepted": 162,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 141,
+     "captures": 2,
+     "captured_capacity_bytes": 277348352,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 273436052,
+     "captured_checkpoint_ids": [
+      2,
+      3
+     ],
+     "global_spill": {
+      "idle_bytes": 0,
+      "foreground_bytes": 0,
+      "idle_copy_ms": 0,
+      "foreground_copy_ms": 0,
+      "stream_wait_ms": 0,
+      "residual_wait_ms": 2.27959,
+      "reassignments": 1,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 1929026735,
+     "global_ram_bytes": 1929026735,
+     "global_peak_ledger_bytes": 1929045420,
+     "global_peak_ram_bytes": 1929045420,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1621884928,
+       "reserved_bytes": 0,
+       "peak_bytes": 1899233280
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      },
+      "backing_materialized": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      },
+      "private_state": {
+       "bytes": 266993664,
+       "reserved_bytes": 0,
+       "peak_bytes": 266993664
+      },
+      "private_tail": {
+       "bytes": 10354688,
+       "reserved_bytes": 0,
+       "peak_bytes": 10354688
+      },
+      "metadata": {
+       "bytes": 29793455,
+       "reserved_bytes": 0,
+       "peak_bytes": 29812140
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 43,
+    "lookup_n_accepted": 40
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 420,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.5130374431610107,
+     "total_s": 1.6971831321716309,
+     "prompt_tokens": 388,
+     "completion_tokens": 79,
+     "client_decode_tps": 66.71476384464673,
+     "timings": {
+      "prompt_n": 388,
+      "prompt_ms": 501.086612,
+      "prompt_per_token_ms": 1.2914603402061855,
+      "prompt_per_second": 774.3172352008479,
+      "predicted_n": 79,
+      "predicted_ms": 1180.1724140000001,
+      "predicted_per_token_ms": 14.938891316455697,
+      "predicted_per_second": 66.93937179250149,
+      "cache_n": 0,
+      "cache_restore_ms": 0,
+      "cache_snapshot_ms": 5.276232,
+      "cache_disk_enqueue_ms": 0.00105,
+      "draft_rounds": 15,
+      "draft_n": 81,
+      "draft_n_accepted": 64,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "none",
+       "selection_reason": 6,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 0,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 0,
+       "restored_bytes": 0,
+       "prefilled_tokens": 388,
+       "captures": 2,
+       "captured_capacity_bytes": 282525696,
+       "borrowed_capacity_bytes": 6815744,
+       "copied_payload_bytes": 272877888,
+       "captured_checkpoint_ids": [
+        5,
+        33
+       ],
+       "global_spill": {
+        "idle_bytes": 0,
+        "foreground_bytes": 0,
+        "idle_copy_ms": 0,
+        "foreground_copy_ms": 0,
+        "stream_wait_ms": 0,
+        "residual_wait_ms": 4.135152,
+        "reassignments": 2,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 1929116425,
+       "global_ram_bytes": 1929116425,
+       "global_peak_ledger_bytes": 1929135922,
+       "global_peak_ram_bytes": 1929135922,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 1339359232,
+         "reserved_bytes": 0,
+         "peak_bytes": 1899233280
+        },
+        "backing_assigned": {
+         "bytes": 6815744,
+         "reserved_bytes": 6815744,
+         "peak_bytes": 6881280
+        },
+        "backing_materialized": {
+         "bytes": 65536,
+         "reserved_bytes": 0,
+         "peak_bytes": 65536
+        },
+        "private_state": {
+         "bytes": 533987328,
+         "reserved_bytes": 0,
+         "peak_bytes": 533987328
+        },
+        "private_tail": {
+         "bytes": 19005440,
+         "reserved_bytes": 0,
+         "peak_bytes": 19005440
+        },
+        "metadata": {
+         "bytes": 29883145,
+         "reserved_bytes": 0,
+         "peak_bytes": 29902642
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 219,
+     "tool_calls": [
+      {
+       "id": "call_40vxyxyxv6q8w8pkabcg",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.2136690616607666,
+     "total_s": 0.9933388233184814,
+     "prompt_tokens": 452,
+     "completion_tokens": 49,
+     "client_decode_tps": 62.847121191178935,
+     "timings": {
+      "prompt_n": 72,
+      "prompt_ms": 202.72098,
+      "prompt_per_token_ms": 2.8155691666666667,
+      "prompt_per_second": 355.1679752140109,
+      "predicted_n": 49,
+      "predicted_ms": 777.278276,
+      "predicted_per_token_ms": 15.862821959183673,
+      "predicted_per_second": 63.040485644551836,
+      "cache_n": 380,
+      "cache_restore_ms": 1.863053,
+      "cache_snapshot_ms": 4.038199,
+      "cache_disk_enqueue_ms": 0.00105,
+      "draft_rounds": 9,
+      "draft_n": 53,
+      "draft_n_accepted": 40,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 380,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 380,
+       "restored_bytes": 143148688,
+       "prefilled_tokens": 72,
+       "captures": 2,
+       "captured_capacity_bytes": 279052288,
+       "borrowed_capacity_bytes": 0,
+       "copied_payload_bytes": 276285248,
+       "captured_checkpoint_ids": [
+        34,
+        35
+       ],
+       "global_spill": {
+        "idle_bytes": 6815744,
+        "foreground_bytes": 0,
+        "idle_copy_ms": 0.891219,
+        "foreground_copy_ms": 0,
+        "stream_wait_ms": 0.0048,
+        "residual_wait_ms": 5.949672,
+        "reassignments": 3,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 1929188051,
+       "global_ram_bytes": 1929188051,
+       "global_peak_ledger_bytes": 1929207412,
+       "global_peak_ram_bytes": 1929207412,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 1060306944,
+         "reserved_bytes": 0,
+         "peak_bytes": 1899233280
+        },
+        "backing_assigned": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 6881280
+        },
+        "backing_materialized": {
+         "bytes": 6881280,
+         "reserved_bytes": 0,
+         "peak_bytes": 6881280
+        },
+        "private_state": {
+         "bytes": 800980992,
+         "reserved_bytes": 0,
+         "peak_bytes": 800980992
+        },
+        "private_tail": {
+         "bytes": 31064064,
+         "reserved_bytes": 0,
+         "peak_bytes": 31064064
+        },
+        "metadata": {
+         "bytes": 29954771,
+         "reserved_bytes": 0,
+         "peak_bytes": 29974132
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 46,
+     "tool_calls": [
+      {
+       "id": "call_ei53kfe8ztadj6h18z4n",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.22733664512634277,
+     "total_s": 0.7926993370056152,
+     "prompt_tokens": 525,
+     "completion_tokens": 32,
+     "client_decode_tps": 56.60083422489661,
+     "timings": {
+      "prompt_n": 81,
+      "prompt_ms": 217.349896,
+      "prompt_per_token_ms": 2.683332049382716,
+      "prompt_per_second": 372.6709857730965,
+      "predicted_n": 32,
+      "predicted_ms": 562.774255,
+      "predicted_per_token_ms": 17.58669546875,
+      "predicted_per_second": 56.861165406367064,
+      "cache_n": 444,
+      "cache_restore_ms": 1.889883,
+      "cache_snapshot_ms": 4.142543,
+      "cache_disk_enqueue_ms": 0.0006900000000000001,
+      "draft_rounds": 7,
+      "draft_n": 43,
+      "draft_n_accepted": 25,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 444,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 444,
+       "restored_bytes": 144852880,
+       "prefilled_tokens": 81,
+       "captures": 2,
+       "captured_capacity_bytes": 277413888,
+       "borrowed_capacity_bytes": 6815744,
+       "copied_payload_bytes": 266620308,
+       "captured_checkpoint_ids": [
+        36,
+        64
+       ],
+       "global_spill": {
+        "idle_bytes": 6815744,
+        "foreground_bytes": 0,
+        "idle_copy_ms": 0.891219,
+        "foreground_copy_ms": 0,
+        "stream_wait_ms": 0.0048,
+        "residual_wait_ms": 7.374575,
+        "reassignments": 4,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 1929277133,
+       "global_ram_bytes": 1929277133,
+       "global_peak_ledger_bytes": 1929297374,
+       "global_peak_ram_bytes": 1929297374,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 782893056,
+         "reserved_bytes": 0,
+         "peak_bytes": 1899233280
+        },
+        "backing_assigned": {
+         "bytes": 6815744,
+         "reserved_bytes": 6815744,
+         "peak_bytes": 6881280
+        },
+        "backing_materialized": {
+         "bytes": 6946816,
+         "reserved_bytes": 0,
+         "peak_bytes": 6946816
+        },
+        "private_state": {
+         "bytes": 1067974656,
+         "reserved_bytes": 0,
+         "peak_bytes": 1067974656
+        },
+        "private_tail": {
+         "bytes": 34603008,
+         "reserved_bytes": 0,
+         "peak_bytes": 34603008
+        },
+        "metadata": {
+         "bytes": 30043853,
+         "reserved_bytes": 0,
+         "peak_bytes": 30064094
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (A1, A2, A3).",
+     "reasoning_chars": 19,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

@@ -1,0 +1,36 @@
+Failed to import MCPRetriever: No module named 'langchain_mcp_adapters'
+INFO:     [06:34:03] 🌐 Browsing the web to learn more about the task: Which coding harness ranked first in miniml's local harness-bench, and with what pass rate and per-task time for its top cell?...
+INFO:     [06:34:04] 🤔 Planning the research strategy and subtasks...
+Content too short or empty for https://www.harness-arena.ai/leaderboard, treating as fetch failure
+[2026-11-16 06:35:05 CST] R3 Q1_miniml_harness: wall=69.48s sources=9 report_chars=11345 err=None
+INFO:     [06:35:16] 🌐 Browsing the web to learn more about the task: What are Qwen's recommended thinking and non-thinking sampling settings for Qwen3.8-Flash-Next?...
+INFO:     [06:35:17] 🤔 Planning the research strategy and subtasks...
+No context to combine for sub-query: What are Qwen's recommended thinking and non-thinking sampling settings for Qwen3.8-Flash-Next?
+No combined context found for sub-query: What are Qwen's recommended thinking and non-thinking sampling settings for Qwen3.8-Flash-Next?
+Got HTTP 521 for https://blog.csdn.net/gitblog_00573/article/details/162899056, skipping
+HTTP_521 for https://blog.csdn.net/gitblog_00573/article/details/162899056, treating as fetch failure
+[2026-11-16 06:36:18 CST] R3 Q2_flash_next_sampling: wall=72.82s sources=11 report_chars=12128 err=None
+INFO:     [06:36:28] 🌐 Browsing the web to learn more about the task: What changed in OpenCode 2.3.0 and when was it released?...
+INFO:     [06:36:29] 🤔 Planning the research strategy and subtasks...
+Request failed for https://opencode.ai/changelog (attempt 1): HTTPSConnectionPool(host='opencode.ai', port=443): Read timed out. (read timeout=10)
+No context to combine for sub-query: OpenCode v2.3.0 release date November 2026 changes
+No combined context found for sub-query: OpenCode v2.3.0 release date November 2026 changes
+[2026-11-16 06:37:43 CST] R3 Q3_opencode_230: wall=85.19s sources=8 report_chars=13095 err=None
+INFO:     [06:38:01] 🌐 Browsing the web to learn more about the task: Can Codex CLI use a llama.cpp server, and what config does it need?...
+INFO:     [06:38:02] 🤔 Planning the research strategy and subtasks...
+Content too short or empty for https://www.reddit.com/r/LocalLLaMA/comments/1o1c7ay/m2_max_96gb_llamacpp_with_codex_and_gptoss_120b/, treating as fetch failure
+Got HTTP 403 for https://medium.com/@luongnv89/how-to-run-claude-code-codex-with-local-models-via-llamacpp-ollama-lmstudio-and-vllm-2026-7d00ba7e63a4, retrying once with a transparent GPT Researcher identity
+Got HTTP 403 for https://medium.com/@luongnv89/how-to-run-claude-code-codex-with-local-models-via-llamacpp-ollama-lmstudio-and-vllm-2026-7d00ba7e63a4, skipping
+HTTP_403 for https://medium.com/@luongnv89/how-to-run-claude-code-codex-with-local-models-via-llamacpp-ollama-lmstudio-and-vllm-2026-7d00ba7e63a4, treating as fetch failure
+No context to combine for sub-query: Can Codex CLI use a llama.cpp server, and what config does it need?
+No combined context found for sub-query: Can Codex CLI use a llama.cpp server, and what config does it need?
+[2026-11-16 06:39:09 CST] R3 Q4_codex_llamacpp: wall=86.02s sources=13 report_chars=13137 err=None
+INFO:     [06:39:25] 🌐 Browsing the web to learn more about the task: Compare local-deep-research and GPT-Researcher: license, latest version, SearXNG support....
+INFO:     [06:39:26] 🤔 Planning the research strategy and subtasks...
+Content too short or empty for https://www.reddit.com/r/LocalDeepResearch/, treating as fetch failure
+No context to combine for sub-query: local-deep-researcher vs GPT-Researcher license latest version comparison
+No combined context found for sub-query: local-deep-researcher vs GPT-Researcher license latest version comparison
+Got HTTP 403 for https://faun.dev/toolbox/gpt-researcher-vs-local-deep-research/, retrying once with a transparent GPT Researcher identity
+Got HTTP 403 for https://faun.dev/toolbox/gpt-researcher-vs-local-deep-research/, skipping
+HTTP_403 for https://faun.dev/toolbox/gpt-researcher-vs-local-deep-research/, treating as fetch failure
+[2026-11-16 06:40:35 CST] R3 Q5_ldr_vs_gptr: wall=86.15s sources=13 report_chars=14938 err=None

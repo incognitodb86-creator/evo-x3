@@ -1,0 +1,21 @@
+# Podman Quadlet: kyuz0 rocm-10.0-strix-llama Bake-off Arm (U6 4th Arm — NOT a default)
+# Plan rev 8 (t327u): recorded 4th U6 bake-off arm. Do NOT run the pwilkin installer directly.
+# Replace PIN_DIGEST_AT_BUILD_TIME with verified sha256 digest from live pull on Fedora.
+
+[Unit]
+Description=EVO-X3 kyuz0 rocm-10.0-strix-llama Bake-off Arm (127.0.0.1:8081)
+After=network-online.target
+
+[Container]
+Image=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0-strix-llama@sha256:PIN_DIGEST_AT_BUILD_TIME
+ContainerName=evo-strix-llama-bakeoff
+Network=host
+AddDevice=/dev/kfd
+AddDevice=/dev/dri
+GroupAdd=keep-groups
+Volume=/srv/models:/srv/models:ro,Z
+Exec=llama-server --host 127.0.0.1 --port 8081 -m /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL.gguf --jinja --no-mmap -fa 1 -ctk q8_0 -ctv q8_0 -np 2 -c 131072 --no-slots
+
+[Service]
+Restart=no
+TimeoutStartSec=300

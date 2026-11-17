@@ -1,0 +1,43 @@
+PASS p0 chars 4358 (got 4358)
+PASS p0 sha256 == SHA256SUMS v2_seg3_c0_r2v
+PASS p1 chars 2903 (got 2903)
+PASS p1 sha256 == SHA256SUMS v2_seg3_c1_t2va
+source c0.prompt chars 3354 sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+source c1.prompt chars 2269 sha256 dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89
+source filename_prefix 'community/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3'
+wrote C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/request.api.json bytes 12569 sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2
+PASS source seg3 api.json sha256 c5b6726c (10910 B)
+PASS file is canonical json.dumps(indent=1, ensure_ascii=True)
+PASS pure CRLF, no trailing newline (accepted arm request shape)
+PASS reparse == built graph
+PASS prompts verbatim in the graph
+PASS filename_prefix = community/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002
+PASS seed stays 51080002 (base seg3 seed)
+PASS node key set unchanged (25 nodes)
+PASS differing nodes exactly ['c0','c1','save'] (got ["c0", "c1", "save"])
+PASS changed inputs exactly prompt/prompt/filename_prefix (got {"c0": ["prompt"], "c1": ["prompt"], "save": ["filename_prefix"]})
+PASS same line count (349 vs 349)
+differing line indices [100, 183, 343]
+PASS exactly 3 changed lines
+target c0.prompt source-line hits [100]
+PASS line 100 = c0.prompt new value only
+target c1.prompt source-line hits [183]
+PASS line 183 = c1.prompt new value only
+target save.filename_prefix source-line hits [343]
+PASS line 343 = save.filename_prefix new value only
+PASS checkpoint unchanged
+PASS m_attn attention 'comfy kitchen attention' unchanged (NOT vsa)
+PASS VSA patch node identical (selection vsa, keep_percent 10)
+PASS s0_sched steps 10 / simple / denoise 1.0
+PASS s1_sched steps 10 / simple / denoise 1.0
+PASS sigma shift 10/3
+PASS sampler euler
+PASS 768x1344 on c0/c1
+PASS CreateVideo fps 24
+PASS c0 length 243 + win1 extension 238 = 481
+PASS c1.length = ['win1', 1] (238)
+PASS win1.overlap_frames unchanged (22)
+PASS c0 ref_image_size match (unchanged)
+PASS c0 ref_images.ref_image_1 = ['img', 0] (unchanged)
+PASS LoadImage string unchanged
+PASS only c0/c1 carry prompt strings

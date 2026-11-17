@@ -1,0 +1,240 @@
+{
+  "slot": "flash-next-gufo",
+  "at_ct": "2026-11-15 20:53:17 CST",
+  "http_status": 200,
+  "wall_s": 12.496,
+  "coherent_pass": true,
+  "content": "1. Strix Halo's unified memory architecture means the CPU and GPU draw from the same physical LPDDR5X pool, so the BIOS-level allocation limit determines a hard ceiling on how much memory the GPU can address for workloads like loading large language models, and exceeding it causes allocation failures or system instability.\n\n2. Because the partition is largely fixed at boot, setting the GPU allocation too high starves the CPU side of memory needed for the OS, drivers, and data preprocessing, while setting it too low prevents the GPU from holding models or tensors that exceed the limit\u2014forcing users to manually tune this tradeoff for their specific workload.\n\n3. The limit also interacts with shared memory bandwidth: even when enough memory is allocated, the GPU and CPU compete for the same LPDDR5X bus, so the allocation ceiling effectively governs not just capacity but also the practical throughput available to each subsystem under load.",
+  "reasoning_chars": 1416,
+  "usage": {
+    "prompt_tokens": 60,
+    "completion_tokens": 501,
+    "total_tokens": 561,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 315
+    },
+    "cached_tokens": 0,
+    "prompt_tokens_per_second": 307.24484889928766,
+    "completion_tokens_per_second": 40.7650395874511,
+    "draft_tokens": 730,
+    "draft_tokens_accepted": 290,
+    "gufo": {
+      "component_cache": {
+        "schema": "component-cache-v1",
+        "reuse": "none",
+        "selection_reason": 6,
+        "deepest_live_tokens": 0,
+        "deepest_ram_tokens": 0,
+        "deepest_disk_tokens": 0,
+        "selected_tokens": 0,
+        "restored_bytes": 0,
+        "prefilled_tokens": 60,
+        "captures": 2,
+        "captured_capacity_bytes": 270532608,
+        "borrowed_capacity_bytes": 0,
+        "copied_payload_bytes": 269042432,
+        "captured_checkpoint_ids": [
+          2,
+          3
+        ],
+        "global_spill": {
+          "idle_bytes": 0,
+          "foreground_bytes": 0,
+          "idle_copy_ms": 0,
+          "foreground_copy_ms": 0,
+          "stream_wait_ms": 0,
+          "residual_wait_ms": 1.947594,
+          "reassignments": 1,
+          "idle_failures": 0
+        },
+        "global_ledger_bytes": 1929027487,
+        "global_ram_bytes": 1929027487,
+        "global_peak_ledger_bytes": 1929043764,
+        "global_peak_ram_bytes": 1929043764,
+        "global_persistence_pinned_bytes": 0,
+        "global_peak_persistence_pinned_bytes": 0,
+        "global_categories": {
+          "backing_free": {
+            "bytes": 1628700672,
+            "reserved_bytes": 0,
+            "peak_bytes": 1899233280
+          },
+          "backing_assigned": {
+            "bytes": 0,
+            "reserved_bytes": 0,
+            "peak_bytes": 0
+          },
+          "backing_materialized": {
+            "bytes": 0,
+            "reserved_bytes": 0,
+            "peak_bytes": 0
+          },
+          "private_state": {
+            "bytes": 266993664,
+            "reserved_bytes": 0,
+            "peak_bytes": 266993664
+          },
+          "private_tail": {
+            "bytes": 3538944,
+            "reserved_bytes": 0,
+            "peak_bytes": 3538944
+          },
+          "metadata": {
+            "bytes": 29794207,
+            "reserved_bytes": 0,
+            "peak_bytes": 29810484
+          },
+          "transfer_staging": {
+            "bytes": 0,
+            "reserved_bytes": 0,
+            "peak_bytes": 0
+          }
+        }
+      },
+      "cache_hit": false,
+      "cache_miss_reason": "no_checkpoint",
+      "cache_common_prefix_tokens": 0,
+      "cache_checkpoint_tokens": 0,
+      "cache_restore_bytes": 0,
+      "cache_snapshot_bytes": 269042432,
+      "cache_disk_queued_bytes": 0,
+      "cache_shared_bytes": 0,
+      "cache_restore_ms": 0,
+      "cache_snapshot_ms": 6.658543999999999,
+      "cache_disk_enqueue_ms": 0.00201,
+      "cache_disk_hit": false,
+      "draft_rounds": 163,
+      "prefill_tokens": 60,
+      "prefill_chunks": 1,
+      "active_decode_prefill_chunks": 0,
+      "max_prefill_chunk_tokens": 60,
+      "max_prefill_layer_groups": 1,
+      "prefill_yield_rounds": 0,
+      "queue_depth_at_submit": 1,
+      "client_queue_depth_at_submit": 1,
+      "resident_requests_at_admission": 1,
+      "requested_logical_concurrency": 1,
+      "physical_execution_width": 1,
+      "queue_ms": 2.331518,
+      "shared_prefix_wait_ms": 0,
+      "prefill_ms": 195.28399,
+      "decode_ms": 12289.942683000001,
+      "ttft_ms": 197.719762,
+      "mean_inter_token_ms": 24.585010293999993,
+      "max_inter_token_ms": 114.886641,
+      "execution_plan": "serial-c1"
+    }
+  },
+  "timings": {
+    "prompt_n": 60,
+    "prompt_ms": 195.28399,
+    "prompt_per_token_ms": 3.2547331666666666,
+    "prompt_per_second": 307.24484889928766,
+    "predicted_n": 501,
+    "predicted_ms": 12289.942683000001,
+    "predicted_per_token_ms": 24.530823718562875,
+    "predicted_per_second": 40.7650395874511,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 6.658543999999999,
+    "cache_disk_enqueue_ms": 0.00201,
+    "draft_rounds": 163,
+    "draft_n": 730,
+    "draft_n_accepted": 290,
+    "component_cache": {
+      "schema": "component-cache-v1",
+      "reuse": "none",
+      "selection_reason": 6,
+      "deepest_live_tokens": 0,
+      "deepest_ram_tokens": 0,
+      "deepest_disk_tokens": 0,
+      "selected_tokens": 0,
+      "restored_bytes": 0,
+      "prefilled_tokens": 60,
+      "captures": 2,
+      "captured_capacity_bytes": 270532608,
+      "borrowed_capacity_bytes": 0,
+      "copied_payload_bytes": 269042432,
+      "captured_checkpoint_ids": [
+        2,
+        3
+      ],
+      "global_spill": {
+        "idle_bytes": 0,
+        "foreground_bytes": 0,
+        "idle_copy_ms": 0,
+        "foreground_copy_ms": 0,
+        "stream_wait_ms": 0,
+        "residual_wait_ms": 1.947594,
+        "reassignments": 1,
+        "idle_failures": 0
+      },
+      "global_ledger_bytes": 1929027487,
+      "global_ram_bytes": 1929027487,
+      "global_peak_ledger_bytes": 1929043764,
+      "global_peak_ram_bytes": 1929043764,
+      "global_persistence_pinned_bytes": 0,
+      "global_peak_persistence_pinned_bytes": 0,
+      "global_categories": {
+        "backing_free": {
+          "bytes": 1628700672,
+          "reserved_bytes": 0,
+          "peak_bytes": 1899233280
+        },
+        "backing_assigned": {
+          "bytes": 0,
+          "reserved_bytes": 0,
+          "peak_bytes": 0
+        },
+        "backing_materialized": {
+          "bytes": 0,
+          "reserved_bytes": 0,
+          "peak_bytes": 0
+        },
+        "private_state": {
+          "bytes": 266993664,
+          "reserved_bytes": 0,
+          "peak_bytes": 266993664
+        },
+        "private_tail": {
+          "bytes": 3538944,
+          "reserved_bytes": 0,
+          "peak_bytes": 3538944
+        },
+        "metadata": {
+          "bytes": 29794207,
+          "reserved_bytes": 0,
+          "peak_bytes": 29810484
+        },
+        "transfer_staging": {
+          "bytes": 0,
+          "reserved_bytes": 0,
+          "peak_bytes": 0
+        }
+      }
+    }
+  },
+  "finish_reason": "stop",
+  "journal_tail": [
+    "2026-11-15T20:53:04-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:04 [INFO] [http] request=r4 event=received method=POST path=/v1/chat/completions body_bytes=259",
+    "2026-11-15T20:53:04-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:04 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0",
+    "2026-11-15T20:53:04-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:04 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=52 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=1928987217",
+    "2026-11-15T20:53:04-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:04 [INFO] [progress] request=1 phase=prefill tokens=60/60 percentage=100.0 chunk_tps=307.2 avg_tps=307.2",
+    "2026-11-15T20:53:05-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:05 [INFO] [progress] request=1 phase=decode tokens=50/1500 percentage=3.3 chunk_tps=49.3 avg_tps=49.3 draft_accepted=37 draft_proposed=79 acceptance_percentage=46.8",
+    "2026-11-15T20:53:06-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:06 [INFO] [progress] request=1 phase=decode tokens=100/1500 percentage=6.7 chunk_tps=45.3 avg_tps=47.2 draft_accepted=69 draft_proposed=144 acceptance_percentage=47.9",
+    "2026-11-15T20:53:07-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:07 [INFO] [progress] request=1 phase=decode tokens=153/1500 percentage=10.2 chunk_tps=48.7 avg_tps=47.7 draft_accepted=106 draft_proposed=224 acceptance_percentage=47.3",
+    "2026-11-15T20:53:09-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:09 [INFO] [progress] request=1 phase=decode tokens=202/1500 percentage=13.5 chunk_tps=46.9 avg_tps=47.5 draft_accepted=138 draft_proposed=290 acceptance_percentage=47.6",
+    "2026-11-15T20:53:10-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:10 [INFO] [progress] request=1 phase=decode tokens=250/1500 percentage=16.7 chunk_tps=31.7 avg_tps=43.4 draft_accepted=157 draft_proposed=364 acceptance_percentage=43.1",
+    "2026-11-15T20:53:11-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:11 [INFO] [progress] request=1 phase=decode tokens=307/1500 percentage=20.5 chunk_tps=50.7 avg_tps=44.6 draft_accepted=195 draft_proposed=434 acceptance_percentage=44.9",
+    "2026-11-15T20:53:12-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:12 [INFO] [progress] request=1 phase=decode tokens=350/1500 percentage=23.3 chunk_tps=41.7 avg_tps=44.2 draft_accepted=224 draft_proposed=514 acceptance_percentage=43.6",
+    "2026-11-15T20:53:14-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:14 [INFO] [progress] request=1 phase=decode tokens=400/1500 percentage=26.7 chunk_tps=31.1 avg_tps=42.0 draft_accepted=236 draft_proposed=562 acceptance_percentage=42.0",
+    "2026-11-15T20:53:15-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:15 [INFO] [progress] request=1 phase=decode tokens=450/1500 percentage=30.0 chunk_tps=35.5 avg_tps=41.2 draft_accepted=261 draft_proposed=643 acceptance_percentage=40.6",
+    "2026-11-15T20:53:17-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:17 [INFO] [progress] request=1 phase=decode tokens=500/1500 percentage=33.3 chunk_tps=38.1 avg_tps=40.8 draft_accepted=290 draft_proposed=729 acceptance_percentage=39.8",
+    "2026-11-15T20:53:17-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:17 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=60 purpose=0 rank=0 unique_bytes_freed=0 ledger_bytes=1929020572",
+    "2026-11-15T20:53:17-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:17 [INFO] [progress] request=1 phase=decode tokens=501/1500 percentage=33.4 chunk_tps=22.9 avg_tps=40.8 draft_accepted=290 draft_proposed=730 acceptance_percentage=39.7",
+    "2026-11-15T20:53:17-06:00 evo-X3 llama-swap-flash-next-gufo[132396]: 2026-11-16 02:53:17 [INFO] [http] request=r4 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=12493.0 outcome=completed prompt_tokens=60 prefill_tokens=60 generated_tokens=501 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=2.3 shared_prefix_wait_ms=0.0 ttft_ms=197.7 prefill_tps=307.2 decode_tps=40.8 batch_width=1 plan=serial-c1 draft_accepted=290 draft_proposed=730 draft_rounds=163 cache_schema=component-cache-v1 cache_reuse=none cache_captures=2 cache_captured_capacity_bytes=270532608 cache_global_ledger_bytes=1929027487 acceptance_pct=39.7 ngram_rows=16016 ngram_dedup_rows=72 ngram_cache_hits=3720 ngram_disk_reads=12224 cache_snapshot_bytes=269042432 cache_miss_reason=no_checkpoint common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2365 host_available_mib=30021"
+  ]
+}

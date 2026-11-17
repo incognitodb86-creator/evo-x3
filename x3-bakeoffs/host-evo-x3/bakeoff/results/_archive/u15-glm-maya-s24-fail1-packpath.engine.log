@@ -1,0 +1,20 @@
+Maya glm: glm-maya-s24, mtp, 32768 tokens
+17:53:25 [maya] this server's lines go to /dev/stderr too
+17:53:25 [maya] sampling defaults from the config: temperature=1.0, top_p=0.95, top_k=64, min_p=0.0
+loading the model (the first start takes a minute or two) ...
+[maya] sampling defaults from the config: temperature=1.0, top_p=0.95, top_k=64, min_p=0.0
+loading the model (the first start takes a minute or two) ...
+17:53:25 [maya] starting the engine: reading the model's weights ...
+[maya] starting the engine: reading the model's weights ...
+glm settings from the environment: MAYA_GLM_MTP_ADAPT=1, MAYA_GLM_MTP_DECODE=1, MAYA_GLM_MTP_DRAFT=3, MAYA_GLM_PREFILL_MB=6144, MAYA_GLM_PREFILL_SUB=1024, MAYA_GLM_RAM_HEADROOM_GB=16, MAYA_GLM_RESERVE_MB=1024, MAYA_GLM_SPLIT=0
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  cannot open /srv/bakeoff/glm/Maya-S24-pack/../GLM-5.3-Flash-Maya-S24-IQ2_XXS_S-00001-of-00003.gguf
+Traceback (most recent call last):
+  File "/opt/maya/serve/server.py", line 7456, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/opt/maya/serve/server.py", line 7251, in main
+    engine = StrataEngine(cfg["exe"], engine_args(cfg), cwd=cfg.get("cwd"), log=cfg.get("log"), env=engine_env)
+  File "/opt/maya/serve/server.py", line 947, in __init__
+    raise RuntimeError("the engine exited before it was ready" + (f" (see {log})" if log else ""))
+RuntimeError: the engine exited before it was ready (see /dev/stderr)

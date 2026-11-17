@@ -1,0 +1,13 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+Completed all steps in [U45-pathfix-merge-brief-20261116.md](file:///home/derekboone/evo-x3/records/U45-pathfix-merge-brief-20261116.md) and wrote [U45-RESULT.md](file:///home/derekboone/evo-x3/records/U45-RESULT.md).
+
+### Summary
+- **Step-1 commit (`1b1a88d4c237571bb11258d8d9d1ff69b8bda4db`):** Updated all 11 specified test/helper paths to portable `__file__`-derived / `~/...` expressions across `derekboone` and `evo`, staged only those 11 paths explicitly, and committed locally (`X3: commit linuxize path fixes for parody tests`) without pushing alone.
+- **Snapshot & Stash (`pre-u45`):** Recorded the 28 remaining dirty/untracked paths and SHA-256 digests in [U45-pre-stash-list.txt](file:///home/derekboone/evo-x3/records/U45-pre-stash-list.txt) and [U45-pre-stash-sha256.txt](file:///home/derekboone/evo-x3/records/U45-pre-stash-sha256.txt), then stashed cleanly.
+- **`scripts/tests` Baseline ([U45-tests-baseline.txt](file:///home/derekboone/evo-x3/records/U45-tests-baseline.txt)):** `2` collection errors unfiltered (`test_free_comfy_args.py`, `test_phase1_still.py`); `116 passed, 2 skipped, 8 failed` when ignoring those 2 uncollectable files.
+- **Merge & Gates (`10de4d01e0a7cea250a38504632ba72e235d9dbc`):**
+  - Reused the proven U43 resolutions for all 6 conflicted files (`resolve.py`, `submit_parody_run.py`, `test_u37_builder_fixes.py`, `remote_comfy.py`, `test_remote_comfy.py`, `skills/h3-parody-identity/SKILL.md`).
+  - **Gate A (`scripts/parody`):** `574 passed, 5 skipped, 0 failed, 0 errors, 0 collection errors`.
+  - **Gate B (`scripts/tests`):** Same `2` collection errors unfiltered; `118 passed, 2 skipped, 6 failed` when ignoring those 2 files (strictly better than the `116 passed, 8 failed` baseline, `0` new failures).
+  - **Gate C (U41 `guide`-mode byte-identical check):** `build_parody_request` `True` (`6727` bytes), `build_writer_request` `True` (`8920` bytes).
+- **Push & Stash Restore:** Committed the merge (`10de4d0`), pushed normally via `git push gitea HEAD:x3-community` (`4f17934..10de4d0`, no force), restored `pre-u45`, verified `28 / 28` SHA-256 checksums match [U45-pre-stash-sha256.txt](file:///home/derekboone/evo-x3/records/U45-pre-stash-sha256.txt), and dropped `stash@{0}`.

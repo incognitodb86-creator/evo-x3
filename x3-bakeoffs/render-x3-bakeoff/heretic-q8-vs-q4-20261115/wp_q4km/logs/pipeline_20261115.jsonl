@@ -1,0 +1,22 @@
+{"ts": "2026-11-15 14:42:45 CT", "event": "still_read_cleaned", "run": "q4km_ask1", "changed": ["floor: unseen -> the floor", "skin: glistening, wet -> damp skin with a soft natural sheen and visible pores, wet"]}
+{"ts": "2026-11-15 14:43:35 CT", "event": "clip_not_ready", "run": "q4km_ask1", "reason": "NOT_READY submitted=False missing file(s) in run dir: writer_output.txt, still_read.json"}
+{"ts": "2026-11-15 14:43:35 CT", "event": "clip_done", "run": "q4km_ask1", "status": "NOT_READY", "seconds": 50.6, "pick": "rewrite_builder", "warnings": []}
+{"ts": "2026-11-15 14:44:46 CT", "event": "clip_not_ready", "run": "q4km_ask1", "reason": "NOT_READY submitted=False missing file(s) in run dir: writer_output.txt, still_read.json"}
+{"ts": "2026-11-15 14:44:46 CT", "event": "clip_done", "run": "q4km_ask1", "status": "NOT_READY", "seconds": 41.6, "pick": "rewrite_builder", "warnings": []}
+{"ts": "2026-11-15 14:45:00 CT", "event": "still_read_cleaned", "run": "q4km_ask1", "changed": ["floor: unseen -> the floor", "skin: glistening, wet -> damp skin with a soft natural sheen and visible pores, wet"]}
+{"ts": "2026-11-15 14:45:43 CT", "event": "clip_done", "run": "q4km_ask1", "status": "READY", "seconds": 43.2, "pick": "rewrite", "warnings": []}
+{"ts": "2026-11-15 14:46:17 CT", "event": "still_read_cleaned", "run": "q4km_ask2", "changed": ["skin: glistening, wet, oily -> damp skin with a soft natural sheen and visible pores"]}
+{"ts": "2026-11-15 14:46:54 CT", "event": "clip_done", "run": "q4km_ask2", "status": "READY", "seconds": 36.9, "pick": "cand_2", "warnings": []}
+{"ts": "2026-11-15 14:47:25 CT", "event": "still_read_cleaned", "run": "q4km_ask3", "changed": ["skin: glistening, sun-kissed -> damp skin with a soft natural sheen and visible pores, sun-k"]}
+{"ts": "2026-11-15 14:48:07 CT", "event": "clip_not_ready", "run": "q4km_ask3", "reason": "NOT_READY submitted=False missing file(s) in run dir: writer_output.txt, still_read.json"}
+{"ts": "2026-11-15 14:48:07 CT", "event": "clip_done", "run": "q4km_ask3", "status": "NOT_READY", "seconds": 42.4, "pick": "rewrite_builder", "warnings": []}
+{"ts": "2026-11-15 14:49:03 CT", "event": "clip_not_ready", "run": "q4km_ask3", "reason": "NOT_READY submitted=False missing file(s) in run dir: writer_output.txt, still_read.json"}
+{"ts": "2026-11-15 14:49:03 CT", "event": "clip_done", "run": "q4km_ask3", "status": "NOT_READY", "seconds": 41.6, "pick": "rewrite_builder", "warnings": []}
+{"ts": "2026-11-15 14:49:07 CT", "event": "mode_fallback", "run": "q4km_ask3", "position": "blowint", "chosen": "blowjob"}
+{"ts": "2026-11-15 14:49:07 CT", "event": "mode_fallback", "warn": "mode_fallback", "why": "unknown --position 'blowint'; act named in the ask", "chosen": "blowjob", "run": "q4km_ask3"}
+{"ts": "2026-11-15 14:49:49 CT", "event": "clip_not_ready", "run": "q4km_ask3", "reason": "NOT_READY submitted=False missing file(s) in run dir: writer_output.txt, still_read.json"}
+{"ts": "2026-11-15 14:49:49 CT", "event": "clip_done", "run": "q4km_ask3", "status": "NOT_READY", "seconds": 41.6, "pick": "rewrite_builder", "warnings": ["mode_fallback"]}
+{"ts": "2026-11-15 14:50:35 CT", "event": "clip_not_ready", "run": "q4km_ask3", "reason": "NOT_READY submitted=False missing file(s) in run dir: writer_output.txt, still_read.json"}
+{"ts": "2026-11-15 14:50:35 CT", "event": "clip_done", "run": "q4km_ask3", "status": "NOT_READY", "seconds": 43.4, "pick": "rewrite_builder", "warnings": []}
+{"ts": "2026-11-15 14:51:09 CT", "event": "still_read_cleaned", "run": "q4km_ask3", "changed": ["skin: glistening, sun-kissed -> damp skin with a soft natural sheen and visible pores, sun-k"]}
+{"ts": "2026-11-15 14:51:42 CT", "event": "clip_done", "run": "q4km_ask3", "status": "READY", "seconds": 33.1, "pick": "cand_3", "warnings": []}

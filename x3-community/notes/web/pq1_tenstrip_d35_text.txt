@@ -1,0 +1,37 @@
+I only need two types of sound.
+Sound for blowjobs.
+And sound for vaginal/anal sex.
+Audio: blowjob, deep throat - does not work, makes gurgling sounds.
+Audio: vaginal sex, vaginal - does not work, makes gurgling sounds.
+Audio: anal sex, anal - does not work, makes gurgling sounds.
+
+ See translation TenStrip Owner Sep 7 <div
+
+---- block ----
+
+No versions so far will sound good like the LTX models. Audio is a massive issue in H3, probably it's biggest weakness. No one should ever do integrated/folded audio for multimodal if they don't have to. beta5 without turbo will actually do the right sounds sometimes. Sex sound is "soft flesh thudding and skin of the bodies clapping together" and other stuff is usually "soft wet sliding sounds". I might have to turn to making audio refmods to fix the sound with small reference packages for it. 
+
+ See translation ❤️ 7 7 + LordAnuar Sep 7 <div
+
+---- block ----
+
+Ok, thanks, I'll wait for version beta5.
+
+ See translation dozaler Sep 9 <div
+
+---- block ----
+
+What is the recommended audio sampling shift for beta 5?
+
+ See translation TenStrip Owner Sep 13 <div
+
+---- block ----
+
+What is the recommended audio sampling shift for beta 5?
+
+ 
+ Just default 3 or maybe up to 5-9. The best low step audio comes from the LCM/simple sampling with 6-9 steps. The best overall audio is gonna be the non-turbo model run at 20-25 steps normally, or with ACC or something that can do better low step audio.
+
+ See translation 👍 1 1 + Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <path fill-rule="evenodd" clip-rule="evenodd" d="M6 22.5h20a2 2 0 0 0

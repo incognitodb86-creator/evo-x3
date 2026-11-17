@@ -1,0 +1,21 @@
+# Podman Quadlet: kyuz0 Vulkan RADV Fallback (U6 fallback / U20 llama.cpp arm)
+# Plan N10: Vulkan RADV fallback serves Qwen3.8-27B on 127.0.0.1:8081 (-fa 1 --load-mode none).
+# Replace PIN_DIGEST_AT_BUILD_TIME with verified sha256 digest from live pull on Fedora.
+
+[Unit]
+Description=EVO-X3 kyuz0 Vulkan RADV Fallback Engine (127.0.0.1:8081)
+After=network-online.target
+
+[Container]
+Image=docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv@sha256:PIN_DIGEST_AT_BUILD_TIME
+ContainerName=evo-vulkan-fallback
+Network=host
+AddDevice=/dev/dri
+GroupAdd=keep-groups
+Volume=/srv/models:/srv/models:ro,Z
+Exec=llama-server --host 127.0.0.1 --port 8081 -m /srv/models/qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf --jinja --no-mmap -fa 1 --load-mode none -ctk q8_0 -ctv q8_0 -np 2 -c 65536 --no-slots
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStartSec=300

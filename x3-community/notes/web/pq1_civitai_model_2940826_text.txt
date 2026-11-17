@@ -1,0 +1,27 @@
+[civitai model 2940826] MiniMax H3 Camera Shots - 11 Tested Prompt Moves | type Workflows | nsfw False | tags tool, minimax h3, workflow, reference to video, camera prompts, comfyui
+
+---- block ----
+
+Eleven MiniMax H3 camera instructions, tested with the same reference subject. Four prompt-to-result comparisons show what changed, and the orbit miss stays in so you can see the limit.
+
+ 
+
+ 
+
+ The download is one ComfyUI reference-to-video workflow. Load one or two images of the same person, write the scene and camera move in one prompt, and begin with a short test.
+
+ Get the setup notes and Stable Yogi community resource. 
+
+ What the video tests Eleven named camera moves using one reference setup
+
+ Pan Right, Pull Out, Push In, and Truck Right shown prompt first and result second
+
+ Two orbit seeds that produced partial arcs instead of a full orbit
+
+ Use the workflow Load one or two reference images of the same person.
+
+ Write the subject, scene, action, lighting, and camera direction in one prompt.
+
+ Run a short test before spending time on a longer clip.
+
+ MiniMax H3 model by MiniMax. ComfyUI packaging by Comfy-Org.

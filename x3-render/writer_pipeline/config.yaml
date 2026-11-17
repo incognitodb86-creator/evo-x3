@@ -1,0 +1,50 @@
+# Render writer pipeline config (Max Architect 3, 2026-11-13, Derrick t1409u). Read by
+# /home/evo/AI/community/scripts/parody/render_writer_pipeline.py. Sampler frozen once at setup by the A/B (results in
+# acceptance\sampler_ab.json); never re-tuned automatically.
+version: wp-2026-11-13.1
+endpoint: http://127.0.0.1:8080/v1      # EVO-X3 llama-swap (loopback; key read in-process from pi models.json x3-local). AlienPc used the :8085 GPU-lock gate
+model_alias: flash-next-uncensored  # EVO-X3: Gemma 4 26B A4B Heretic Q8_0 llama.cpp Vulkan (AlienPc: gemma4_heretic_poly_think). same served model as Render's pi chat (no llama-swap swap between Render and the pipeline)
+thinking: false                         # chat_template_kwargs.enable_thinking (Gemma thinking is on/off only)
+timeout_s: 900
+retry_backoff_s: [10, 30, 90]
+writer_prompt: writer_prompt.md          # relative to /home/evo/AI/render/writer_pipeline
+writer_prompt_sha256: 7a9479b545df5475968202967808f305e3a86670702e514d49207659f360508c
+persona: current                        # pinned
+n_candidates: 1
+min_ready_score: 60  # reported only; never blocks READY (Max Architect 2026-11-16 (Derrick t2036u))
+tie_points: 3
+sampler_arm: A                          # FROZEN: setup A/B 2026-11-13, A won (lint pass 7/10 vs 5/10); Derrick approved t1430s5336 11:06 AM CT
+samplers:
+  A:   # current production (PolyStrata server default)
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 64
+    min_p: 0.10
+beat_card_sampler:
+  temperature: 0.7
+beat_card_max_tokens: 1400
+prose_max_tokens: 1100
+judge_sampler:   # temp 0 is not sendable to PolyStrata (temperature <= 0 falls back to the server default 1.0): top_k 1 = greedy
+  temperature: 0.01
+  top_k: 1
+judge_seed: 1234567
+blacklist_cap: 20
+log_retention_days: 14
+log_cap_mb: 50
+scene_archive_days: 30
+lint:
+  speech_words_max: 25
+  blacklist_ratio: 0.8
+  words_min: 90
+  words_max: 190
+  pen_phase_no_sound: 5
+  opening_ratio: 0.85
+  filler_lines: ["hold still", "stay still", "please", "good girl", "take it", "yes right there", "oh yes", "fuck me harder", "take it all"]
+  tempo_range: {oral: [0.5, 1.5], sex: [0.5, 2.5], partner: [0.5, 2.5], edge: [0.2, 1.0], solo: [0.3, 2.5], strip: [0.2, 1.0]}
+position_kinds:   # a new builder act needs one line here (spec "Max, only on change")
+  talk: [talk]
+  oral: [blowjob, mmf_double_blowjob, ff_cunnilingus]
+  partner: [titjob, finish, handjob]        # partner present, no penetration join (no contact keyword, no clearance)
+  solo: [female_solo, male_solo, tease, dance]
+  sex: [missionary, doggy, cowgirl, reverse_cowgirl, spooning, prone_bone, ff_scissoring, mf_anal, bondage, threesome, mmf, ffm, standing_mf, airplane, piledriver]
+shots_default: single  # B1 long-scene spec

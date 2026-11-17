@@ -1,0 +1,4 @@
+2026-11-15 19:42:13 [INFO] [gpu] event=queue_budget kind=llm observed=0 budget=8 expected_max=3 cap=2
+2026-11-15 19:42:13 [INFO] [loader] event=load_started kind=text artifact=/srv/uncens/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf rss_mib=124 host_available_mib=124083
+Error loading model '/srv/uncens/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf': No text provider found for model architecture
+2026-11-15 19:42:13 [ERROR] [loader] event=load_failed kind=text rss_mib=125 host_available_mib=124072

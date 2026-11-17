@@ -1,0 +1,92 @@
+{
+  "arm": "R1_kyuz0_3tier_cleanroom",
+  "question_id": "Q5_ldr_vs_gptr",
+  "question": "Compare local-deep-research and GPT-Researcher: license, latest version, SearXNG support.",
+  "started_ct": "2026-11-15 23:56:23 CST",
+  "wall_s": 51.05,
+  "angles": [
+    "local-deep-research GitHub license latest version SearXNG support",
+    "GPT-Researcher GitHub license latest version SearXNG support"
+  ],
+  "pages_saved": [
+    {
+      "url": "https://github.com/LearningCircuit/local-deep-research",
+      "title": "GitHub - LearningCircuit/local-deep-research: ~95% on SimpleQA (e.g. Qwen3.6-27B on a 3090). Supports all local and cloud LLMs (llama.cpp, Ollama, Google, ...). 10+ search engines - arXiv, PubMed, your private documents. Everything Local & Encrypted. \u00b7 GitHub",
+      "file": "01c580dcfe10.md",
+      "chars": 38457
+    },
+    {
+      "url": "https://pypi.org/project/local-deep-research/",
+      "title": "Client Challenge",
+      "file": "20c731e05b36.md",
+      "chars": 226
+    },
+    {
+      "url": "https://github.com/LearningCircuit/local-deep-research/blob/main/docs/SearXNG-Setup.md",
+      "title": "local-deep-research/docs/SearXNG-Setup.md at main \u00b7 LearningCircuit/local-deep-research \u00b7 GitHub",
+      "file": "3c831d94bbe5.md",
+      "chars": 18598
+    },
+    {
+      "url": "https://github.com/assafelovic/gpt-researcher/blob/main/LICENSE",
+      "title": "gpt-researcher/LICENSE at main \u00b7 assafelovic/gpt-researcher \u00b7 GitHub",
+      "file": "8ecabbd6c538.md",
+      "chars": 13955
+    },
+    {
+      "url": "https://docs.gptr.dev/docs/gpt-researcher/search-engines",
+      "title": "Search Engines | GPT Researcher",
+      "file": "8d950b137847.md",
+      "chars": 4986
+    }
+  ],
+  "sources_urls": [
+    "https://github.com/LearningCircuit/local-deep-research",
+    "https://pypi.org/project/local-deep-research/",
+    "https://github.com/LearningCircuit/local-deep-research/blob/main/docs/SearXNG-Setup.md",
+    "https://github.com/assafelovic/gpt-researcher/blob/main/LICENSE",
+    "https://docs.gptr.dev/docs/gpt-researcher/search-engines"
+  ],
+  "analyses": [
+    {
+      "url": "https://github.com/LearningCircuit/local-deep-research",
+      "title": "GitHub - LearningCircuit/local-deep-research: ~95% on SimpleQA (e.g. Qwen3.6-27B on a 3090). Supports all local and cloud LLMs (llama.cpp, Ollama, Google, ...). 10+ search engines - arXiv, PubMed, your private documents. Everything Local & Encrypted. \u00b7 GitHub",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://pypi.org/project/local-deep-research/",
+      "title": "Client Challenge",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://github.com/LearningCircuit/local-deep-research/blob/main/docs/SearXNG-Setup.md",
+      "title": "local-deep-research/docs/SearXNG-Setup.md at main \u00b7 LearningCircuit/local-deep-research \u00b7 GitHub",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://github.com/assafelovic/gpt-researcher/blob/main/LICENSE",
+      "title": "gpt-researcher/LICENSE at main \u00b7 assafelovic/gpt-researcher \u00b7 GitHub",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://docs.gptr.dev/docs/gpt-researcher/search-engines",
+      "title": "Search Engines | GPT Researcher",
+      "facts": "NO_RELEVANT_FACTS"
+    }
+  ],
+  "report": "# Comparison: local-deep-research vs. GPT-Researcher\n\n## \u26a0\ufe0f Insufficient Verified Data\n\nI must be transparent: **all five source pages analyzed returned `NO_RELEVANT_FACTS`**, meaning the Page-Analyzer subagents were unable to extract usable, verified facts from the fetched pages. This can occur due to:\n\n- JavaScript-rendered content not captured by the fetcher\n- Client-side challenges (e.g., the PyPI page returned a \"Client Challenge\")\n- Pages requiring authentication or dynamic loading\n\n---\n\n## What I Can Report (from page titles/metadata only)\n\n| Dimension | local-deep-research | GPT-Researcher |\n|-----------|-------------------|----------------|\n| **License** | *Not verified* | *Not verified* (LICENSE file exists on GitHub but content was not extracted) |\n| **Latest Version** | *Not verified* (PyPI page blocked by client challenge) | *Not verified* |\n| **SearXNG Support** | A dedicated setup guide exists at `docs/SearXNG-Setup.md` on the repo, strongly implying support \u2014 but the page content was not extracted | A \"Search Engines\" documentation page exists at `docs.gptr.dev`, but content was not extracted |\n\n---\n\n## What I Cannot Do\n\nI will **not** fabricate version numbers, license types, or feature claims without verified source content. Presenting unverified information as cited fact would violate the integrity of this report.\n\n---\n\n## Recommendation\n\nTo obtain a fully verified comparison, the following steps would help:\n\n1. **License** \u2014 Fetch the raw `LICENSE` files directly (e.g., `https://raw.githubusercontent.com/LearningCircuit/local-deep-research/main/LICENSE` and `https://raw.githubusercontent.com/assafelovic/gpt-researcher/main/LICENSE`).\n2. **Version** \u2014 Query the PyPI JSON API (`https://pypi.org/pypi/local-deep-research/json`) which avoids client challenges.\n3. **SearXNG** \u2014 Fetch the raw markdown of the SearXNG setup doc and the GPT-Researcher search-engines doc via their raw URLs.\n\n---\n\n## Sources\n\n- [local-deep-research GitHub](https://github.com/LearningCircuit/local-deep-research)\n- [local-deep-research PyPI](https://pypi.org/project/local-deep-research/)\n- [local-deep-research SearXNG Setup Doc](https://github.com/LearningCircuit/local-deep-research/blob/main/docs/SearXNG-Setup.md)\n- [GPT-Researcher LICENSE](https://github.com/assafelovic/gpt-researcher/blob/main/LICENSE)\n- [GPT-Researcher Search Engines Docs](https://docs.gptr.dev/docs/gpt-researcher/search-engines)\n\n> **Note:** None of the above pages yielded extractable factual content during this research session.",
+  "metrics": {
+    "prompt_tokens": 26210,
+    "completion_tokens": 1960,
+    "tool_calls": {
+      "search_web": 5,
+      "fetch_page": 9,
+      "analyze_page": 5
+    }
+  },
+  "quotas": {
+    "search_web": 4,
+    "fetch_page": 6,
+    "analyze_page": 6
+  }
+}

@@ -1,0 +1,79 @@
+{
+ "card_title": "two women in pink bikinis in an outdoor plaza, one kneeling, one standing with hands on her head",
+ "naming_source": "No naming sentence. Nothing in this card is a naming source: every label is the model's own caption word plus the figure's position in frame ('the kneeling woman', 'the standing woman'). gate.naming_allowed is empty and no species, role, relationship, age, object name, room, lighting claim or action verb is added to the picture.",
+ "facts_extra": {
+  "naming_allowed": [],
+  "_pronoun_note": "Two women in one frame share she/her. The gate's per-figure alias lists (ck_top_pronoun counts mentions per alias list) are therefore position-anchored and carry no shared pronoun: a shared 'she' makes the per-figure mention count ambiguous and would let one figure answer for the other. Every prompt for this scene names the figure by position.",
+  "_registry_note": "notes/scenes/GI072.facts.json did not exist before this pass (measured 2026-10-25 21:42 CT: only GI046 and GI063 had facts.json, and the card gate registry is keyed on facts.json, so GI072 was outside it). Writing this file adds GI072 to the registry as a third scene. That is a measured scope change, not a judgement.",
+  "consent": {
+   "status": "NOT_RESOLVABLE_FROM_THE_FRAME",
+   "card_words": "hands placed on the kneeling figure's head, looking downward; kneeling on both knees, upper body leaning forward, head tilted back slightly; clear, cylindrical object with black base inserted into the standing figure's crotch area, extending toward the kneeling figure's mouth",
+   "shipped_words": "none measured: no prompt set for this scene cites a card with a facts.json (see _registry_note)",
+   "_note": "The captions state a pose and an object and state no emotion, no eagerness, no refusal, no spoken word. The gate bans eagerness and power-language, and requires the prompt to say the card gives no consent evidence. The question goes to notes/needs_derrick.md. This is NOT resolved by this pass."
+  }
+ },
+ "figures": [
+  {
+   "kind": "human",
+   "noun": "the kneeling woman",
+   "species": "human, light-skinned",
+   "build": "slim, athletic",
+   "skin": "light",
+   "hair": "long, wavy blonde",
+   "wardrobe": "shiny pink bikini (top and bottom), clear strappy high-heeled sandals with embellishments",
+   "pose": "kneeling on both knees, upper body leaning forward, head tilted back slightly",
+   "position": "lower left-center of frame, on paved ground",
+   "head_in_frame": true,
+   "visible": ["human, light-skinned", "slim, athletic", "long, wavy blonde", "shiny pink bikini (top and bottom)", "clear strappy high-heeled sandals with embellishments", "kneeling on both knees", "upper body leaning forward", "head tilted back slightly", "lower left-center of frame"],
+   "not_visible": ["genitals", "areola", "nipple", "erection", "the face in detail (head tilted back)", "any expression word (no caption states one)"]
+  },
+  {
+   "kind": "human",
+   "noun": "the standing woman",
+   "species": "human, medium to dark skin tone",
+   "build": "slim, toned",
+   "skin": "medium to dark",
+   "hair": "long, dark brown/black, pulled back in a high ponytail",
+   "wardrobe": "shiny pink bikini (top and bottom), shiny pink thigh-high boots with block heels",
+   "pose": "standing upright, hands placed on the kneeling figure's head, looking downward",
+   "position": "right side of frame, slightly behind and above the kneeling figure",
+   "head_in_frame": true,
+   "visible": ["human, medium to dark skin tone", "slim, toned", "pulled back in a high ponytail", "shiny pink thigh-high boots with block heels", "standing upright", "hands placed on the kneeling figure\u2019s head", "looking downward", "right side of frame, slightly behind and above the kneeling figure"],
+   "not_visible": ["genitals", "areola", "nipple", "erection", "the face in detail (looking downward)", "feet in detail (inside the boots)"]
+  }
+ ],
+ "room": ["outdoor urban plaza", "paved ground", "brick and white buildings", "green trees", "steps and benches", "blurred pedestrians"],
+ "props": ["clear, cylindrical object with black base", "extending toward the kneeling figure\u2019s mouth", "neon pink vertical light strip"],
+ "room_banned": ["indoor", "living room", "bedroom", "bathroom", "studio", "couch", "sofa", "rug", "carpet", "wood floor", "marble", "neon sign", "fireplace", "pool", "gym", "locker room", "dungeon", "cellar", "balcony"],
+ "light": ["natural daylight, overcast sky", "soft, diffused illumination with wet-skin highlights", "pink neon glow from the vertical light strip"],
+ "light_banned": ["golden hour", "sunset", "candlelight", "firelight", "moonlight", "string lights", "fireplace", "camera flash", "neon sign"],
+ "camera": ["lower left-center of frame", "right side of frame, slightly behind and above the kneeling figure"],
+ "prompt_delta": {
+  "measured_facts": [
+   "no graph is built for GI072 (notes/hc15_anchor_carry_ali163_hc15_gi0*.json covers gi046 and gi063 only), so no prompt has been measured against this card: the card is the first record for this scene, and a prompt writer starts from it",
+   "the scene had no facts.json before this pass, so nothing of the old gate carries over: the card-gate registry row in notes/top_card_vl_build.py TOP_SCENES is what brings GI072 under ck_top_card / ck_top_facts for the first time",
+   "notes/hc15_anchor_carry_build.py --top-check prints sections for the built graphs only (gi046, gi063), so ck_top_card / ck_top_facts did not run for GI072 this pass; the card-shape gate in notes/top_card_vl_build.py --cards measures 0 faults and 32 evidence rows, each quoted verbatim from the card (VERDICT TOP_CARD_VL CARDS CLEAN)"
+  ],
+  "owner_of_the_fix": "a prompt writer, when a GI072 graph is built; there is no shipped GI072 prose to delta against"
+ },
+ "core_tokens": ["long, wavy blonde", "shiny pink bikini (top and bottom)", "kneeling on both knees", "pulled back in a high ponytail", "shiny pink thigh-high boots with block heels", "standing upright", "hands placed on the kneeling figure\u2019s head", "outdoor urban plaza", "paved ground", "natural daylight, overcast sky"],
+ "aliases": {
+  "1": ["the kneeling woman", "kneeling woman", "kneeling", "kneels", "blonde", "lower left-center", "<subject 1>"],
+  "2": ["the standing woman", "standing woman", "standing upright", "ponytail", "right side of frame", "<subject 2>"]
+ },
+ "banned": {
+  "1": ["dark-haired", "brunette", "black hair", "brown hair", "short hair", "straight hair", "ponytail", "muscular", "tall", "standing", "stands up", "sits", "seated", "boots", "thigh-high boots", "man", "he", "his", "him", "boy"],
+  "2": ["blonde", "blond", "fair-skinned", "pale", "light-skinned", "short hair", "bald", "curly hair", "kneeling", "kneels", "sits", "seated", "lying", "sandals", "heels", "man", "he", "his", "him", "boy", "tattoo", "tattooed", "glasses", "hat", "cap", "necklace", "jewelry"],
+  "any": ["the only person", "alone in the room", "standing alone", "the only bodies", "the only figure", "the only subject", "she is alone", "one person", "single figure", "strap-on", "strapon", "dildo", "vibrator", "dominance", "dominant", "submissive", "submission", "master", "mistress", "slave", "servant", "boss", "office", "suit", "uniform", "muzzle", "gag", "blindfold", "collar", "leash", "whip", "wedding", "ring", "marriage", "coach", "referee"]
+ },
+ "head_allow": [],
+ "open_beat": {"1": ["kneeling on both knees", "upper body leaning forward"], "2": ["standing upright", "hands placed on the kneeling figure\u2019s head"]},
+ "open_beat_ban": {"1": ["stands up", "standing", "sits", "seated", "lies", "lying", "walks", "steps back", "turns away"], "2": ["kneels", "kneeling", "sits", "seated", "lies", "lying", "walks away", "turns away", "bends over"]},
+ "consent_gate": {
+  "ban": ["consenting and eager", "enthusiastic", "she loves", "loves it", "begging for", "willingly", "she wants this", "she is eager", "she begs for", "orgasm", "commands her", "orders her", "tells her to", "obedient", "obeys", "her master", "her boss", "her coach", "denied", "keeps her there"],
+  "require": ["the card gives no consent evidence for either figure", "notes/needs_derrick.md"],
+  "_note": "A standing hand on a kneeling head and an object at her mouth describe a pose, not an agreement. The captions state no emotion and no word. The gate bans eagerness claims and every power-relation word (no caption states a role), and requires the prompt to say the card gives no consent evidence and to name the row that carries the question."
+ },
+ "solo_phrases": ["the only person", "alone in the room", "standing alone", "the only bodies", "the only figure", "the only subject", "she is alone", "one person", "single figure"],
+ "card_extra": "caption_conflict: ask A (full inventory) lists 'Steps and benches visible on the right' and a 'Neon pink vertical light strip mounted on the building to the far right'; ask B (identity-scope) says 'No handheld props; background includes distant benches and architectural elements' and does not list the light strip. Both rows are quoted with their ask. A prompt may use the A rows and names the ask; it must not present the light strip as agreed by both asks."
+}

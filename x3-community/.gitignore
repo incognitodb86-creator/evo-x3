@@ -1,0 +1,85 @@
+# forgesafe 2026-10-20: git checkpoints for Forge/Ralph (local only, never pushed). Media, models, run outputs and logs stay out.
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.wav
+*.safetensors
+*.gguf
+runs/
+p4/*.mp4
+tmpx/
+__pycache__/
+*.pyc
+*.log
+logs/
+sessions/
+*.out
+*.err
+tools/
+# 0.8 2026-10-25: the index recorded this unzipped tree as a gitlink with no .gitmodules and the inner
+# repo has no remote, so no clone can restore it and every write inside it is a permanent " M" row. The
+# tracked incoming/gmd-dl-ext-2.5.6.zip IS this tree (measured: 230 files byte-identical), so the unpacked
+# copy Chrome loads is a work copy, not a durable artifact. Its 2026-10-24 code changes are recorded in
+# notes/gmd_ext_20261024/ (diff + status + new test + per-file tree manifest) and re-checked by notes/ali08_git_clean_check.py.
+incoming/gmd-dl-ext-2.5.6/
+
+# backup files (audit fix 2026-10-29)
+*.bak-*
+
+# DF-10 2026-10-30: large/media or secret-suspect, kept out of git
+notes/objinfo_T4_live2.json
+qnap_in/Tailscale_1.104.4-1_x86_64.qpkg
+review/terrace-v2-sheets.zip
+staging-flux-edit/dw-ll_ucoco_384.onnx
+staging-flux-edit/yolox_l.onnx
+briefs/argon_audit_20261025/context/box/packs/fleet/brain-files-carry-no-secrets-or-contact-info.md
+
+# Gitea prep 2026-10-31 01:40 CT (Max Architect 2): models, outputs, caches, logs, credentials, Sydney/persona/pi memory
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.zip
+*.qpkg
+*.gif
+*.webm
+*.mov
+output/
+outputs/
+.pytest_cache/
+.cache/
+*.cache
+render/
+staging-flux-edit/
+qnap_in/
+incoming/
+review/
+judge/
+p4/
+p7/
+*.key
+*.pem
+*.pfx
+*.p12
+.env
+.env.*
+*secret*
+*credential*
+*token*.json
+*cookie*
+# Sydney / persona / pi memory and sessions: never in git
+talk/
+*sydney*
+*talk-persona*
+*persona*.md.bak*
+**/sessions/
+**/memory/
+notes/web/01r_pi_sessions.html
+
+# Render cleanup 2026-11-13 (Max Architect 3, Derrick t1355): archived backups and test scratch stay out of git
+scripts/parody/_archive/
+skills/*/_archive/
+scripts/parody/dummy_run/

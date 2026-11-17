@@ -1,0 +1,144 @@
+PRE-PREQUEST READ-ONLY CHECK for ali147_pool_promptv2_seg3_s51080002
+arm graph C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/request.api.json bytes 12569 sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2
+
+== adults-only guard (the harness's own call: run_graph_job.py -> comm.guard_ok; a hit = exit 3 CLIP_SKIP)
+PASS guard_ok on c0.prompt (4358 chars, sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b)
+  note: contains the word 'pussy' x1 (adult anatomy; not a guard term)
+PASS guard_ok on c1.prompt (2903 chars, sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383)
+  note: contains the word 'pussy' x1 (adult anatomy; not a guard term)
+  note: contains the word 'nude' x1 (adult anatomy; not a guard term)
+PASS guard_ok on file v2_seg3_c0_r2v.txt
+PASS guard_ok on file v2_seg3_c1_t2va.txt
+prompt-bearing nodes: ["c0", "c1"]
+
+== job id gates parsed out of the LIVE ralph.ps1 (a hardcoded copy of a regex proves nothing)
+ralph.ps1 lines with -notmatch: 7, patterns found: 6
+  pattern \\__manager\\
+  pattern _work\\
+  pattern ^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$
+  pattern ^p[67]_[a-z0-9_]+$
+  pattern ^[a-z0-9_]+$
+  pattern ^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$
+PASS found the p7 id pattern(s) in ralph.ps1: 2
+PASS id ali147_pool_promptv2_seg3_s51080002 matches ^(p7_[a-z0-9_]{3,48}|ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+)$
+PASS id ali147_pool_promptv2_seg3_s51080002 matches ^ali147_pool_[a-z0-9]+(_[a-z0-9]+)?_s\d+$
+
+== id-free gates (ralph.ps1: 'id already used' / 'outputs exist')
+PASS absent (id free): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.result.json
+PASS absent (id free): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.out
+PASS absent (id free): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.err.out
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/status.log
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/objective.json
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.mp4
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.api.json
+PASS absent (no prior render): C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002.mp4.json
+PASS absent (no prior render): C:/AI/community/p7/jobs/ali147_pool_promptv2_seg3_s51080002.result.json.failed-20261022
+arm dir contents (only request.api.json / graph_diff.txt / fairness.txt / PROOF.md may exist - Forge-writable):
+       10056  PROOF.md
+       11843  fairness.txt
+       13806  graph_diff.txt
+       12569  request.api.json
+PASS arm dir holds only Forge-writable names
+p7/JOB_REQUEST.json present now: False (a Request file is CONSUMED at exit -> p7/jobs/request_iter<NN>.json)
+REQUIRED STATE FOR A RE-ISSUE: False above = the request was consumed and NOT run; the id is still free
+
+== why there is no render: the harness skips a request when the iteration status is not ok
+ralph.ps1:339-341 (live lines):
+  else { Move-Item -LiteralPath $Req -Destination "$Jobs\request_iter$n.skipped.json" -Force; Log "iter ${n}: JOB_REQUEST skipped (iteration status=$status)" }
+ralph.log lines naming JOB_REQUEST / iter 09 / iter 10 / TIMEOUT (last 12):
+  TIMEOUT after 20 min
+  2026-10-22T21:19:27 iter 02 summary: status=fail exit=TIMEOUT ticks=+0 wall=20.1m denies=11 checkfails=0 scope=0 open=8
+  TIMEOUT after 20 min
+  2026-10-22T21:42:48 iter 04 summary: status=fail exit=TIMEOUT ticks=+0 wall=20.1m denies=3 checkfails=0 scope=0 open=7
+  TIMEOUT after 20 min
+  2026-10-22T22:02:59 iter 05 summary: status=fail exit=TIMEOUT ticks=+1 wall=20.1m denies=8 checkfails=0 scope=0 open=6
+  2026-10-22T22:45:08 iter 09 start
+  TIMEOUT after 20 min
+  2026-10-22T23:05:08 iter 09 exit 1
+  2026-10-22T23:05:11 iter 09 summary: status=fail exit=TIMEOUT ticks=+0 wall=20.1m denies=5 checkfails=0 scope=0 open=4
+  2026-10-22T23:05:11 iter 09: JOB_REQUEST skipped (iteration status=fail)
+  2026-10-22T23:05:17 iter 10 start
+PASS ralph.log contains the 'JOB_REQUEST skipped' line (the request was never submitted; no GPU was spent)
+  archived request_iter01.json bytes 116 sha256 18c015eaa0d42c9a3bc44438175fc03cd83f976bd5d13ae02b524210b0987ed8
+  archived request_iter02.json bytes 119 sha256 ecbf672e43c1ce0dbf9fc73c84b1b40a8e1867a77ca87d9353e205b0b97bc4db
+  archived request_iter03.json bytes 116 sha256 18c015eaa0d42c9a3bc44438175fc03cd83f976bd5d13ae02b524210b0987ed8
+  archived request_iter04.json bytes 116 sha256 18c015eaa0d42c9a3bc44438175fc03cd83f976bd5d13ae02b524210b0987ed8
+  archived request_iter05.json bytes 184 sha256 82d9352fc51e4cffb1babd8654bfe3d51aa9c020a520eeae1b349c35377a2ab9
+  archived request_iter06.json bytes 63 sha256 174f324950188c13c671676f151040c4968ad1144e3a78ce98fa1b45cd2d7a95
+  archived request_iter07.json bytes 117 sha256 f37aa53f8127872c21e439a88fd3f06f9d3576dcc75ae03eb945468217e64380
+  archived request_iter08.json bytes 277 sha256 e823b5910becf97f9ad64a26e14ef373012faef4e6e8b4245222b340f9bd00cd
+  archived request_iter09.json bytes 193 sha256 db6cf54460228c42dd5187e14fe1a6556154a221ae91c90c3cc434b4aacc74ea
+  archived request_iter09.skipped.json bytes 122 sha256 4766e4c9b0c64b3bafc9a2170d777ea559212b6852d10e5381b81bbafc61003e
+    content: b'{"jobs": [{"id": "ali147_pool_promptv2_seg3_s51080002", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}\n'
+PASS that archive is this arm's one-job request
+PASS LF + trailing newline (the accepted shape)
+PASS shape = one compact line json.dumps(j) + trailing newline, byte-exact (the accepted model shape: request_iter07.json is 117 B of the same shape with a shorter id)
+PASS 122 B, the request recorded on the PV2-2 TASKS line (sha256 4766e4c9b0c64b3bafc9a2170d777ea559212b6852d10e5381b81bbafc61003e)
+PASS sha256 matches the PV2-2 TASKS line
+    copy source for the re-issue: notes/ali147-pv22-request-payload-20261022.json (byte copy, keeps the trailing newline)
+kind=graph gates in the live ralph.ps1 (graph branch):
+  # ali160: ALI-147 arms. graph = one prepared API graph runs\<id>\request.api.json; dip = CPU ffmpeg dip join. The harness runs them, never the model.
+  if(-not (Test-Path -LiteralPath "$run\request.api.json")){ JobResult $id @{ ok = $false; note = "refused: missing $run\request.api.json" }; continue }
+  if(Test-Path -LiteralPath "$run\$id.mp4"){ JobResult $id @{ ok = $false; note = "refused: $run\$id.mp4 already exists (arm already rendered)" }; continue }
+PASS graph gate 1 passes: ali147_pool_promptv2_seg3_s51080002\request.api.json exists
+PASS graph gate 2 passes: no ali147_pool_promptv2_seg3_s51080002\ali147_pool_promptv2_seg3_s51080002.mp4
+
+== budget (live ralph-community/logs/p7_budget.json)
+p7_budget.json {"used_min": 342, "jobs": 24, "cap_min": 390, "job_cap": 27, "updated": "2026-10-22T22:36:32"}
+PASS used_min 342 < cap_min 390
+PASS jobs 24 < job_cap 27
+this job requests minutes=60 as a PRE-JOB gate only (ralph.ps1 clamps 30..180); the base run's own seg3 render time is read from its sidecar on the next lines.
+base seg3 sidecar keys ["antiburn", "arm", "beat", "chunk_secs", "comfy_output", "file", "finished", "h", "id", "image", "image_note", "mode", "prompt_id", "prompts", "run", "secs", "seed", "steps", "tag", "w"]
+  sidecar secs -> 816.0
+  sidecar seed -> 51080002
+  sidecar steps -> 10
+  sidecar w -> 768
+  sidecar h -> 1344
+  sidecar chunk_secs -> 10
+  sidecar antiburn -> null
+  sidecar mode -> "r2v"
+  sidecar image_note -> "adult woman with long straight blonde hair worn loose past her shoulders, blue eyes, slim and toned with lightly tanned skin, wearing a wet, sheer champagne-beige scoop-neck bikini top and matching s
+  sidecar comfy_output -> "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\p7_r2_c3_pmot_full_pool\\p7_r2_c3_pmot_full_pool_seg3_00001_.mp4"
+  sidecar file -> "C:\\AI\\community\\runs\\p7_r2_c3_pmot_full_pool\\p7_r2_c3_pmot_full_pool_seg3.mp4"
+  sidecar prompt_id -> "ca1c92dd-2371-4bf7-bf5f-ad224c5d4378"
+  sidecar run -> "p7_r2_c3_pmot_full_pool"
+  sidecar id -> "p7_r2_c3_pmot_full_pool_seg3"
+  sidecar tag -> "p7_r2_c3_pmot_full_pool_seg3"
+  sidecar arm -> "long_r2v"
+  sidecar beat -> "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor. Slow, smooth, continuous movement with nat
+  -> the base run's own seg3 render time is the control baseline for this arm (same graph, same seed).
+
+== class_type / input-key parity with the already-rendered base seg3 graph (no new node on this arm)
+PASS same 25 node keys as the base seg3 graph the harness already rendered
+PASS every class_type and input key set identical to the rendered source: []
+classes used: ["BasicGuider", "BasicScheduler", "BlockSparseAttention", "CLIPLoader", "CreateVideo", "KSamplerSelect", "LoadImage", "MiniMaxH3AppendContinuation", "MiniMaxH3GuidedContinuationWindow", "MiniMaxH3ImageToVideo", "MiniMaxH3LatentTailGuide", "MiniMaxH3ReferenceToVideo", "MiniMaxH3SigmaShift", "ModelAttentionBackend", "RandomNoise", "SamplerCustomAdvanced", "SaveVideo", "UNETLoader", "VAEDecode", "VAEDecodeAudio", "VAELoader"]
+(MiniMaxH3* built-ins are NOT in specs/extender_object_info.json - Extender nodes only - their proof of listability is class_type in ok-rendered graphs.)
+
+== LoadImage strings resolve inside ComfyUI\input
+PASS img image 'community/POOL_768x1344.png' resolves inside ComfyUI\input
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input\community\POOL_768x1344.png bytes 1354030 sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075
+  MEASURED sha256 <9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075> len 64
+  AGENTS.md POOL literal is 63 chars (9cf9ff95f2d6f2fb3882219a8d98995b673e78a8001d7a41af1755cc918d075) - comparing the 63-char prefix, never exact equality
+PASS POOL still hash is a full 64-char sha256 (PV2-0 lesson: assert len==64)
+  POOL hash values recorded in existing Forge notes/PROOF/fairness files: ["9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075"]
+PASS POOL still sha256 == the single value recorded across existing notes/PROOF/fairness files (data-to-data compare; the AGENTS.md literal is a 63-char truncation, so string equality against it is a FALSE fail)
+  (an absolute path outside input is invalid: nodes.py -> folder_paths.get_annotated_filepath requires is_within_directory)
+
+== settings held equal to the base seg3 graph
+PASS seed 51080002 in both (base seg3 seed)
+PASS c0.length 243 + win1.extension_frames 238 = 481
+PASS fps 24
+PASS VSA node identical
+PASS m_attn attention is 'comfy kitchen attention' (NOT 'vsa' - a hardcoded enum would be a FALSE fail)
+PASS filename_prefix routes output into community/ali147_pool_promptv2_seg3_s51080002
+PASS differing nodes exactly ['c0','c1','save'] (got ["c0", "c1", "save"])
+
+== sbs / fixed-frame stills (Max's, per the TASKS sbs rule)
+find runs -name 'sbs_*' = 2 file(s): ["C:/AI/community/runs\\ali147_pool_refsheet_b_s51080000\\sbs_refsheet_refsheetb.mp4", "C:/AI/community/runs\\ali147_pool_refsheet_s51080000\\sbs_fix1_refsheet.mp4"]
+expected at verify: sbs_base_seg3_promptv2.mp4 (base stitched 962-1442 | new 0-480) and full-res stills at
+new frames 200, 243, 300, 400, 480 = Max/harness files (run_graph_job.py has NO hstack path and its contact
+sheet samples only the +-1.5 s windows, so frames 200/300/400/480 are never covered by it).
+
+NOTE: the render itself (status.log JOB end ok, ffprobe 481/768x1344/24/audio, sha256, contact sheet, render secs)
+is verified in the NEXT iteration, per PROMPT.md: Forge may only REQUEST; the harness runs scripts/run_graph_job.py
+after this iteration exits. This line keeps '- [ ]'.

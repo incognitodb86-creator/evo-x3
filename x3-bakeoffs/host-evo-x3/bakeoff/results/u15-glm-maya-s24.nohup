@@ -1,0 +1,10 @@
+GLM_PREPARE_START 2026-11-15 11:53:54 CST
+GLM_PREPARE_END 2026-11-15 11:53:54 CST
+=== u15-glm-maya-s24 start 2026-11-15 11:53:54 CST
+LOAD_S 33 up=1
+long {"ttft_s": 62.31, "total_s": 63.43, "prompt_tokens": 17100, "completion_tokens": 35, "client_decode_tps": 31.38, "finish": "stop", "pass": true}
+code {"ttft_s": 1.43, "total_s": 3.56, "prompt_tokens": 106, "completion_tokens": 80, "client_decode_tps": 37.51, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.99, "total_s": 29.08, "prompt_tokens": 29, "completion_tokens": 648, "client_decode_tps": 23.07, "finish": "stop", "pass": true}
+=== u15-glm-maya-s24 end 2026-11-15 11:56:09 CST
+GLM_ARM_DONE 2026-11-15 11:56:13 CST

@@ -1,0 +1,34 @@
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/model.hgn
+  out=model.hgn
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/qwen38-flash-next-ngram.hgn
+  out=qwen38-flash-next-ngram.hgn
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/qwen38-flash-next-vision.hgn
+  out=qwen38-flash-next-vision.hgn
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/LICENSE
+  out=LICENSE
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/README.md
+  out=README.md
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/config.json
+  out=config.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/conversion-manifest.json
+  out=conversion-manifest.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/preprocessor_config.json
+  out=preprocessor_config.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/video_preprocessor_config.json
+  out=video_preprocessor_config.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/sha256.txt
+  out=sha256.txt
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/tokenizer/chat_template.jinja
+  out=tokenizer/chat_template.jinja
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/tokenizer/config.json
+  out=tokenizer/config.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/tokenizer/generation_config.json
+  out=tokenizer/generation_config.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/tokenizer/merges.txt
+  out=tokenizer/merges.txt
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/tokenizer/tokenizer.json
+  out=tokenizer/tokenizer.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/tokenizer/tokenizer_config.json
+  out=tokenizer/tokenizer_config.json
+https://huggingface.co/johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-HGN/resolve/e3c04876bfca686eb0c1101c651d60d7baff7379/tokenizer/vocab.json
+  out=tokenizer/vocab.json

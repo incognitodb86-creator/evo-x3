@@ -1,0 +1,1249 @@
+{
+  "benchmark": "U21-B5-RULER-Subset",
+  "started_ct": "2026-11-15 22:58:50 CST",
+  "seed": 42,
+  "tokenizer_path": "/srv/models/flash-next-halogen/tokenizer/tokenizer.json",
+  "tokenizer_sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+  "lengths": [
+    32768,
+    131072
+  ],
+  "models": {
+    "flash-next": {
+      "by_length": {
+        "32768": {
+          "tasks": [
+            {
+              "task_id": "niah_multikey_2",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 153,
+              "wall_s": 49.65,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 32808,
+                "predicted_n": 153,
+                "prompt_ms": 18518.4,
+                "predicted_ms": 1785.6,
+                "prompt_per_second": 1771.643,
+                "predicted_per_second": 85.685,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "draft_n": 138,
+                "draft_n_accepted": 118,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 34,
+                  "head": {
+                    "rounds": 34,
+                    "drafted": 138,
+                    "accepted": 118
+                  },
+                  "lookup": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "262486",
+                "376431"
+              ],
+              "passed": true,
+              "answer_excerpt": "The magic calibration codes are:\n\n- **TARGET_ALPHA**: 262486\n- **TARGET_BRAVO**: 376431"
+            },
+            {
+              "task_id": "vt_multihop",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 526,
+              "wall_s": 23.02,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 32808,
+                "predicted_n": 526,
+                "prompt_ms": 17230.0,
+                "predicted_ms": 5736.6,
+                "prompt_per_second": 1904.121,
+                "predicted_per_second": 91.692,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "prefix_n": 1320,
+                "draft_n": 501,
+                "draft_n_accepted": 429,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 96,
+                  "head": {
+                    "rounds": 96,
+                    "drafted": 501,
+                    "accepted": 429
+                  },
+                  "lookup": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "VAR_ORION",
+                "VAR_LYRA",
+                "VAR_CYGNUS",
+                "VAR_DRACO",
+                "VAR_VEGA"
+              ],
+              "passed": true,
+              "answer_excerpt": "Here are all variables assigned (directly or transitively) the value **81473**:\n\n1. **VAR_ORION** = 81473 (direct assignment)\n2. **VAR_LYRA** = VAR_ORION \u2192 81473\n3. **VAR_CYGNUS** = VAR_LYRA \u2192 81473\n4. **VAR_DRACO** = VAR_CYGNUS \u2192 81473\n5. **VAR_VEGA** = VAR_DRACO \u2192 81473\n\nThe chain of transitive assignments is:\n\n```\nVAR_ORION = 81473\nVAR_LYRA = VAR_ORION\nVAR_CYGNUS = VAR_LYRA\nVAR_DRACO = VAR_CYGN"
+            },
+            {
+              "task_id": "fwe_aggregation",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 871,
+              "wall_s": 27.32,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 32808,
+                "predicted_n": 871,
+                "prompt_ms": 17275.5,
+                "predicted_ms": 9991.8,
+                "prompt_per_second": 1899.106,
+                "predicted_per_second": 87.171,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "prefix_n": 1658,
+                "draft_n": 816,
+                "draft_n_accepted": 685,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 161,
+                  "head": {
+                    "rounds": 158,
+                    "drafted": 795,
+                    "accepted": 676
+                  },
+                  "lookup": {
+                    "rounds": 3,
+                    "drafted": 21,
+                    "accepted": 9
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "KESTREL7",
+                "9"
+              ],
+              "passed": false,
+              "answer_excerpt": "Looking through the document, I'll count each beacon tag:\n\n**KESTREL7:**\n1. After \"which can\" (A Scandal in Bohemia)\n2. After \"Twice burglars in my pay r\" (A Scandal in Bohemia)\n3. After \"I don't think I ever drove faster,\" (A Scandal in Bohemia)\n4. After \"or the grace\" (A Scandal in Bohemia)\n5. After \"but after thinking\" (The Red-Headed League)\n6. After \"I beg that you won't speak\" (The Red-Heade"
+            },
+            {
+              "task_id": "qa_multifact",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 194,
+              "wall_s": 19.62,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 32808,
+                "predicted_n": 194,
+                "prompt_ms": 17308.2,
+                "predicted_ms": 2255.3,
+                "prompt_per_second": 1895.518,
+                "predicted_per_second": 86.02,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "prefix_n": 3296,
+                "draft_n": 195,
+                "draft_n_accepted": 155,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 39,
+                  "head": {
+                    "rounds": 38,
+                    "drafted": 188,
+                    "accepted": 154
+                  },
+                  "lookup": {
+                    "rounds": 1,
+                    "drafted": 7,
+                    "accepted": 1
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "Maren Lindqvist",
+                "7814-COBALT",
+                "19:40 UTC"
+              ],
+              "passed": true,
+              "answer_excerpt": "Here are the answers from the DISPATCH NOTE entries:\n\n1. **Lead hydrologist for Station Borealis:** Maren Lindqvist\n\n2. **Emergency bulkhead override code:** 7814-COBALT\n\n3. **Supply icebreaker departure from Pier 4:** 19:40 UTC"
+            }
+          ],
+          "passed": 3,
+          "total": 4,
+          "accuracy": 0.75
+        },
+        "131072": {
+          "tasks": [
+            {
+              "task_id": "niah_multikey_2",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 175,
+              "wall_s": 74.72,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "predicted_n": 175,
+                "prompt_ms": 72474.7,
+                "predicted_ms": 2108.8,
+                "prompt_per_second": 1809.073,
+                "predicted_per_second": 82.986,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "prefix_n": 4925,
+                "draft_n": 157,
+                "draft_n_accepted": 134,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 41,
+                  "head": {
+                    "rounds": 41,
+                    "drafted": 157,
+                    "accepted": 134
+                  },
+                  "lookup": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "946266",
+                "946893"
+              ],
+              "passed": true,
+              "answer_excerpt": "The magic calibration codes are:\n\n- **TARGET_ALPHA**: 946266\n- **TARGET_BRAVO**: 946893"
+            },
+            {
+              "task_id": "vt_multihop",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 457,
+              "wall_s": 77.76,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "predicted_n": 457,
+                "prompt_ms": 72610.0,
+                "predicted_ms": 5008.6,
+                "prompt_per_second": 1805.702,
+                "predicted_per_second": 91.243,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "prefix_n": 5252,
+                "draft_n": 431,
+                "draft_n_accepted": 374,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 82,
+                  "head": {
+                    "rounds": 82,
+                    "drafted": 431,
+                    "accepted": 374
+                  },
+                  "lookup": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "VAR_ORION",
+                "VAR_LYRA",
+                "VAR_CYGNUS",
+                "VAR_DRACO",
+                "VAR_VEGA"
+              ],
+              "passed": true,
+              "answer_excerpt": "Here are all variables that are assigned (directly or transitively) the value **18268**:\n\n1. **VAR_ORION** \u2014 directly assigned `18268`\n2. **VAR_LYRA** \u2014 assigned `VAR_ORION` \u2192 18268\n3. **VAR_CYGNUS** \u2014 assigned `VAR_LYRA` \u2192 18268\n4. **VAR_DRACO** \u2014 assigned `VAR_CYGNUS` \u2192 18268\n5. **VAR_VEGA** \u2014 assigned `VAR_DRACO` \u2192 18268"
+            },
+            {
+              "task_id": "fwe_aggregation",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 879,
+              "wall_s": 83.36,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "predicted_n": 879,
+                "prompt_ms": 72610.1,
+                "predicted_ms": 10597.6,
+                "prompt_per_second": 1805.699,
+                "predicted_per_second": 82.943,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "prefix_n": 6573,
+                "draft_n": 799,
+                "draft_n_accepted": 674,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 179,
+                  "head": {
+                    "rounds": 179,
+                    "drafted": 799,
+                    "accepted": 674
+                  },
+                  "lookup": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "KESTREL7",
+                "9"
+              ],
+              "passed": true,
+              "answer_excerpt": "Looking through the document, I need to count each beacon tag marker:\n\n**KESTREL7** appearances:\n1. After \"It is most unlikely\" (Scandal in Bohemia)\n2. After \"From Hatherley Farmhouse to the Boscombe Pool\" (Boscombe Valley)\n3. After \"And one who was at home in the district\" (Boscombe Valley)\n4. After \"I have said that though the floor and ceiling were of iron\" (Engineer's Thumb)\n5. After \"Yesterda"
+            },
+            {
+              "task_id": "qa_multifact",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 252,
+              "wall_s": 76.02,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "predicted_n": 252,
+                "prompt_ms": 72605.2,
+                "predicted_ms": 3269.6,
+                "prompt_per_second": 1805.821,
+                "predicted_per_second": 77.074,
+                "cache_n": 0,
+                "disk_restore_n": 0,
+                "disk_restore_ms": 0.0,
+                "prefix_n": 13127,
+                "draft_n": 251,
+                "draft_n_accepted": 190,
+                "speculation": {
+                  "drafter": "mtp",
+                  "rounds": 62,
+                  "head": {
+                    "rounds": 61,
+                    "drafted": 244,
+                    "accepted": 189
+                  },
+                  "lookup": {
+                    "rounds": 1,
+                    "drafted": 7,
+                    "accepted": 1
+                  },
+                  "grammar": {
+                    "rounds": 0,
+                    "drafted": 0,
+                    "accepted": 0
+                  }
+                }
+              },
+              "expected": [
+                "Maren Lindqvist",
+                "7814-COBALT",
+                "19:40 UTC"
+              ],
+              "passed": true,
+              "answer_excerpt": "Based on the DISPATCH NOTE entries embedded in the text:\n\n1. **Lead hydrologist for Station Borealis:** Maren Lindqvist\n\n2. **Emergency bulkhead override code:** 7814-COBALT\n\n3. **Supply icebreaker departure from Pier 4:** 19:40 UTC"
+            }
+          ],
+          "passed": 4,
+          "total": 4,
+          "accuracy": 1.0
+        }
+      }
+    },
+    "qwen27b": {
+      "by_length": {
+        "32768": {
+          "tasks": [
+            {
+              "task_id": "niah_multikey_2",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 192,
+              "wall_s": 109.51,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 32808,
+                "prompt_ms": 88095.348669,
+                "prompt_per_token_ms": 2.685178879206291,
+                "prompt_per_second": 372.41466769453694,
+                "predicted_n": 192,
+                "predicted_ms": 8115.065794000001,
+                "predicted_per_token_ms": 42.26596767708334,
+                "predicted_per_second": 23.659697268500047,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 42,
+                "draft_n": 287,
+                "draft_n_accepted": 150,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 32808,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.051432,
+                    "reassignments": 1,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2768213712,
+                  "global_ram_bytes": 2768213712,
+                  "global_peak_ledger_bytes": 2768213712,
+                  "global_peak_ram_bytes": 2768213712,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 868980432,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 868980432
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                },
+                "lookup_n": 7,
+                "lookup_n_accepted": 1
+              },
+              "expected": [
+                "262486",
+                "376431"
+              ],
+              "passed": true,
+              "answer_excerpt": "Based on the text provided:\n\n- **TARGET_ALPHA**: 262486\n- **TARGET_BRAVO**: 376431"
+            },
+            {
+              "task_id": "vt_multihop",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 580,
+              "wall_s": 104.78,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 32808,
+                "prompt_ms": 88479.722418,
+                "prompt_per_token_ms": 2.6968947335406,
+                "prompt_per_second": 370.7968233106217,
+                "predicted_n": 580,
+                "predicted_ms": 16274.339768999991,
+                "predicted_per_token_ms": 28.059206498275845,
+                "predicted_per_second": 35.63892656983892,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 84,
+                "draft_n": 588,
+                "draft_n_accepted": 496,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 32808,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.106224,
+                    "reassignments": 2,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2768616960,
+                  "global_ram_bytes": 2768616960,
+                  "global_peak_ledger_bytes": 2768749128,
+                  "global_peak_ram_bytes": 2768749128,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 869383680,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 869515848
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                }
+              },
+              "expected": [
+                "VAR_ORION",
+                "VAR_LYRA",
+                "VAR_CYGNUS",
+                "VAR_DRACO",
+                "VAR_VEGA"
+              ],
+              "passed": false,
+              "answer_excerpt": "The variables assigned (directly or transitively) the value **81473** are:\n\n1. **VAR_ORION** \u2014 directly assigned `81473`\n2. **VAR_LYRA** \u2014 assigned `VAR_ORION` \u2192 `81473`\n3. **VAR_CYGNUS** \u2014 assigned `VAR_LYRA` \u2192 `81473`\n4. **VAR_DRACO** \u2014 assigned `VAR_CYGNUS` \u2192 `81473`\n5. **VAR_VEGA** \u2014 assigned `VAR_DRACO` \u2192 `81473`\n\nThe other two variables (`VAR_DECOY_1` = 51335 and `VAR_DECOY_2` = `VAR_DECOY_1"
+            },
+            {
+              "task_id": "fwe_aggregation",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 1500,
+              "wall_s": 141.95,
+              "finish_reason": "length",
+              "timings": {
+                "prompt_n": 32808,
+                "prompt_ms": 88404.47197500002,
+                "prompt_per_token_ms": 2.694601072147038,
+                "prompt_per_second": 371.1124479005746,
+                "predicted_n": 1500,
+                "predicted_ms": 53503.46505499999,
+                "predicted_per_token_ms": 35.66897670333333,
+                "predicted_per_second": 28.035567387234526,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 275,
+                "draft_n": 1906,
+                "draft_n_accepted": 1223,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 32808,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.210319,
+                    "reassignments": 3,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2768620836,
+                  "global_ram_bytes": 2768620836,
+                  "global_peak_ledger_bytes": 2768754556,
+                  "global_peak_ram_bytes": 2768754556,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 869387556,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 869521276
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                },
+                "lookup_n": 64,
+                "lookup_n_accepted": 37
+              },
+              "expected": [
+                "KESTREL7",
+                "9"
+              ],
+              "passed": true,
+              "answer_excerpt": "Let me count all the beacon tags in the document.\n\nLet me go through the text systematically:\n\n1. [BEACON TAG: KESTREL7] - appears after \"can\" in the first section (A Scandal in Bohemia)\n2. [BEACON TAG: KESTREL7] - appears after \"r\" in the first section\n3. [BEACON TAG: KESTREL7] - appears after \"faster,\" in the first section\n4. [BEACON TAG: KESTREL7] - appears after \"grace\" in the first section\n5."
+            },
+            {
+              "task_id": "qa_multifact",
+              "local_tokens": 32768,
+              "server_prompt_tokens": 32808,
+              "completion_tokens": 189,
+              "wall_s": 94.8,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 32808,
+                "prompt_ms": 88553.85986499999,
+                "prompt_per_token_ms": 2.6991544704035597,
+                "prompt_per_second": 370.48639155894125,
+                "predicted_n": 189,
+                "predicted_ms": 6208.780943000001,
+                "predicted_per_token_ms": 32.85069282010582,
+                "predicted_per_second": 30.440758296213573,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 32,
+                "draft_n": 224,
+                "draft_n_accepted": 157,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 32808,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.291812,
+                    "reassignments": 4,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2768619272,
+                  "global_ram_bytes": 2768619272,
+                  "global_peak_ledger_bytes": 2768756668,
+                  "global_peak_ram_bytes": 2768756668,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 869385992,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 869523388
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                }
+              },
+              "expected": [
+                "Maren Lindqvist",
+                "7814-COBALT",
+                "19:40 UTC"
+              ],
+              "passed": true,
+              "answer_excerpt": "Based on the DISPATCH NOTE entries embedded in the text:\n\n1. **Lead hydrologist for Station Borealis:** Maren Lindqvist\n2. **Emergency bulkhead override code:** 7814-COBALT\n3. **Supply icebreaker departure from Pier 4:** 19:40 UTC"
+            }
+          ],
+          "passed": 3,
+          "total": 4,
+          "accuracy": 0.75
+        },
+        "131072": {
+          "tasks": [
+            {
+              "task_id": "niah_multikey_2",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 175,
+              "wall_s": 464.88,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "prompt_ms": 455056.803922,
+                "prompt_per_token_ms": 3.47074870280371,
+                "prompt_per_second": 288.12227148343777,
+                "predicted_n": 175,
+                "predicted_ms": 9767.926852000002,
+                "predicted_per_token_ms": 55.81672486857144,
+                "predicted_per_second": 17.915777078548494,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 33,
+                "draft_n": 231,
+                "draft_n_accepted": 142,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 131112,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.386665,
+                    "reassignments": 5,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2769787072,
+                  "global_ram_bytes": 2769787072,
+                  "global_peak_ledger_bytes": 2769919228,
+                  "global_peak_ram_bytes": 2769919228,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 870553792,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 870685948
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                },
+                "lookup_n": 7,
+                "lookup_n_accepted": 0
+              },
+              "expected": [
+                "946266",
+                "946893"
+              ],
+              "passed": true,
+              "answer_excerpt": "Based on the text provided:\n\n- **TARGET_ALPHA**: 946266\n- **TARGET_BRAVO**: 946893"
+            },
+            {
+              "task_id": "vt_multihop",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 582,
+              "wall_s": 481.28,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "prompt_ms": 455741.325689,
+                "prompt_per_token_ms": 3.475969596139179,
+                "prompt_per_second": 287.68951290906506,
+                "predicted_n": 582,
+                "predicted_ms": 25461.925877000005,
+                "predicted_per_token_ms": 43.74901353436427,
+                "predicted_per_second": 22.85765824672854,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 86,
+                "draft_n": 602,
+                "draft_n_accepted": 496,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 131112,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.442557,
+                    "reassignments": 6,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2770960468,
+                  "global_ram_bytes": 2770960468,
+                  "global_peak_ledger_bytes": 2771485784,
+                  "global_peak_ram_bytes": 2771485784,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 871727188,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 872252504
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                }
+              },
+              "expected": [
+                "VAR_ORION",
+                "VAR_LYRA",
+                "VAR_CYGNUS",
+                "VAR_DRACO",
+                "VAR_VEGA"
+              ],
+              "passed": true,
+              "answer_excerpt": "Here are all the variables assigned (directly or transitively) the value **18268**:\n\n1. **VAR_ORION** \u2014 directly assigned `18268`\n2. **VAR_LYRA** \u2014 assigned `VAR_ORION` \u2192 18268\n3. **VAR_CYGNUS** \u2014 assigned `VAR_LYRA` \u2192 18268\n4. **VAR_DRACO** \u2014 assigned `VAR_CYGNUS` \u2192 18268\n5. **VAR_VEGA** \u2014 assigned `VAR_DRACO` \u2192 18268\n\nThe other two variables do **not** resolve to 18268:\n- `VAR_DECOY_1` = 14551\n-"
+            },
+            {
+              "task_id": "fwe_aggregation",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 1404,
+              "wall_s": 529.98,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "prompt_ms": 455499.09275400004,
+                "prompt_per_token_ms": 3.474122069330039,
+                "prompt_per_second": 287.8425052556784,
+                "predicted_n": 1404,
+                "predicted_ms": 74404.38564200002,
+                "predicted_per_token_ms": 52.994576668091185,
+                "predicted_per_second": 18.86985542432146,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 251,
+                "draft_n": 1756,
+                "draft_n_accepted": 1153,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 131112,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.570993,
+                    "reassignments": 7,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2770960100,
+                  "global_ram_bytes": 2770960100,
+                  "global_peak_ledger_bytes": 2771487044,
+                  "global_peak_ram_bytes": 2771487044,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 871726820,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 872253764
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                },
+                "lookup_n": 70,
+                "lookup_n_accepted": 27
+              },
+              "expected": [
+                "KESTREL7",
+                "9"
+              ],
+              "passed": true,
+              "answer_excerpt": "## Counting Beacon Tags\n\nAfter carefully scanning the entire document, here are the counts:\n\n| Beacon Tag | Count |\n|------------|-------|\n| **KESTREL7** | **9** |\n| FALCON3 | 5 |\n| MERLIN9 | 2 |\n\n**KESTREL7** appears most frequently, with **9 occurrences** throughout the document."
+            },
+            {
+              "task_id": "qa_multifact",
+              "local_tokens": 131072,
+              "server_prompt_tokens": 131112,
+              "completion_tokens": 176,
+              "wall_s": 465.5,
+              "finish_reason": "stop",
+              "timings": {
+                "prompt_n": 131112,
+                "prompt_ms": 455945.569468,
+                "prompt_per_token_ms": 3.4775273771126973,
+                "prompt_per_second": 287.56064052334636,
+                "predicted_n": 176,
+                "predicted_ms": 9472.911084999998,
+                "predicted_per_token_ms": 53.82335843749999,
+                "predicted_per_second": 18.579293991124803,
+                "cache_n": 0,
+                "cache_restore_ms": 0,
+                "cache_snapshot_ms": 0,
+                "cache_disk_enqueue_ms": 0,
+                "draft_rounds": 32,
+                "draft_n": 224,
+                "draft_n_accepted": 144,
+                "component_cache": {
+                  "schema": "component-cache-v1",
+                  "reuse": "none",
+                  "selection_reason": 4,
+                  "deepest_live_tokens": 0,
+                  "deepest_ram_tokens": 0,
+                  "deepest_disk_tokens": 0,
+                  "selected_tokens": 0,
+                  "restored_bytes": 0,
+                  "prefilled_tokens": 131112,
+                  "captures": 0,
+                  "captured_capacity_bytes": 0,
+                  "borrowed_capacity_bytes": 0,
+                  "copied_payload_bytes": 0,
+                  "captured_checkpoint_ids": [],
+                  "global_spill": {
+                    "idle_bytes": 0,
+                    "foreground_bytes": 0,
+                    "idle_copy_ms": 0,
+                    "foreground_copy_ms": 0,
+                    "stream_wait_ms": 0,
+                    "residual_wait_ms": 0.682708,
+                    "reassignments": 8,
+                    "idle_failures": 0
+                  },
+                  "global_ledger_bytes": 2770958476,
+                  "global_ram_bytes": 2770958476,
+                  "global_peak_ledger_bytes": 2771488708,
+                  "global_peak_ram_bytes": 2771488708,
+                  "global_persistence_pinned_bytes": 0,
+                  "global_peak_persistence_pinned_bytes": 0,
+                  "global_categories": {
+                    "backing_free": {
+                      "bytes": 1899233280,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 1899233280
+                    },
+                    "backing_assigned": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "backing_materialized": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_state": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "private_tail": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    },
+                    "metadata": {
+                      "bytes": 871725196,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 872255428
+                    },
+                    "transfer_staging": {
+                      "bytes": 0,
+                      "reserved_bytes": 0,
+                      "peak_bytes": 0
+                    }
+                  }
+                }
+              },
+              "expected": [
+                "Maren Lindqvist",
+                "7814-COBALT",
+                "19:40 UTC"
+              ],
+              "passed": true,
+              "answer_excerpt": "Based on the DISPATCH NOTE entries in the text:\n\n1. **Lead hydrologist for Station Borealis:** Maren Lindqvist\n2. **Emergency bulkhead override code:** 7814-COBALT\n3. **Supply icebreaker departure from Pier 4:** 19:40 UTC"
+            }
+          ],
+          "passed": 4,
+          "total": 4,
+          "accuracy": 1.0
+        }
+      }
+    }
+  },
+  "finished_ct": "2026-11-15 23:46:03 CST"
+}

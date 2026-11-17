@@ -1,0 +1,8 @@
+start=2026-11-16 11:14:14 America/Chicago
+model=gemini-4-hydrogen-high
+cwd=/home/derekboone/evo-x3
+brief=/home/derekboone/evo-x3/records/U42-pixlstash-tagging-brief-20261116.md
+pid_wrapper=104941
+host=evo-X3
+exit_code=0
+end=2026-11-16 11:35:29 America/Chicago

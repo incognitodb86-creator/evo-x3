@@ -1,0 +1,239 @@
+--- a/headless-guard.test.mjs
++++ b/headless-guard.test.mjs
+@@ -306,71 +306,149 @@
+ const ps = (cmd) => ext.evaluateToolCall("powershell", { command: cmd }, H);
+ const sh = (cmd) => ext.evaluateToolCall("bash", { command: cmd }, H);
+ 
+-test("K4 allowlist: the JSON next to the guard loads and lists both shell tools", () => {
++// community 2026-10-23 (Derrick 11:49 AM CT "Yes, switch Forge to the community permissions (1, 2, 4, 5)"):
++// mode "denylist" replaces the per-command allowlist; hazards + argument rules for git/curl/copy-item/ffmpeg/certutil/find/powershell.
++test("community: the JSON loads in denylist mode with the web domains", () => {
+ 	const al = ext.loadAllowlist();
+ 	assert.deepEqual(al.tools, ["bash", "powershell"]);
+-	assert.ok(al.commands.powershell.includes("get-childitem"));
+-	assert.ok(!al.commands.powershell.includes("remove-item"));
++	assert.equal(al.mode, "denylist");
++	for (const d of ["github.com", "huggingface.co", "docs.comfy.org", "civitai.com", "reddit.com"]) assert.ok(al.web.domains.includes(d), d);
++	assert.ok(al.git.denySubcommands.includes("push") && al.git.denySubcommands.includes("reset"));
+ });
+ 
+-test("K4 allowlist: allowed commands pass (headless)", () => {
++test("community commands: ordinary commands are allowed (allowed case)", () => {
+ 	assert.equal(ps("Get-ChildItem C:\\AI\\community\\notes | Select-Object -First 3"), null);
+-	assert.equal(ps("gc C:\\AI\\community\\notes\\a.txt | sls 'x'; Test-Path C:\\AI\\community"), null);
+-	assert.equal(ps("if (Test-Path a) { Get-Content a } else { Write-Output no }"), null);
+-	assert.equal(ps("$x = Get-Content a.txt; $x.Length"), null);
+-	assert.equal(ps("git -C C:/AI/community status; git -C C:/AI/community log -3 --oneline"), null);
+-	assert.equal(ps("& 'C:\\ffmpeg\\bin\\ffprobe.exe' -v error -show_streams x.mp4"), null);
+-	assert.equal(ps("python -m py_compile C:/AI/community/scripts/p6.py"), null);
++	assert.equal(ps("Move-Item C:\\AI\\community\\notes\\a.txt C:\\AI\\community\\notes\\old\\a.txt"), null);
++	assert.equal(ps("Remove-Item C:\\AI\\community\\notes\\scratch.txt"), null);
++	assert.equal(ps("python C:\\AI\\community\\notes\\check.py; node -e 1"), null);
++	assert.equal(sh("node -e 1 && ls C:/AI/ComfyUI/custom_nodes | head -5"), null);
+ 	assert.equal(sh("python - <<'PY'\nimport json\nprint(json.dumps({'a': 1}))\nPY"), null);
+-	assert.equal(sh("cd C:/AI/community/notes && python ali147_check.py"), null);
+ 	assert.equal(sh("certutil.exe -hashfile \"C:\\AI\\community\\runs\\a.mp4\" SHA256"), null);
+-	assert.equal(sh("ls -la C:/AI/community/runs 2>&1 | head -5"), null);
++	assert.equal(ps("& 'C:\\ffmpeg\\bin\\ffprobe.exe' -v error -show_streams x.mp4"), null);
+ });
+ 
+-test("K4 allowlist: unknown commands are blocked with a clear reason", () => {
+-	const v = ps("Remove-Item C:\\AI\\community\\notes\\nonexistent_k4_test.txt");
+-	assert.equal(v?.id, "not-allowlisted");
+-	assert.match(ext.blockMessage(v), /`remove-item` is not on the Forge powershell command allowlist/);
+-	assert.equal(ps("Stop-Process -Name node")?.id, "not-allowlisted");
+-	assert.equal(sh("node -e 1")?.id, "not-allowlisted");
+-	assert.equal(ps("python C:\\Temp\\x.py")?.id, "python-script-path");
+-	assert.equal(ps("python -m pip install x")?.id, "python-module");
+-	assert.equal(ps("git commit -m x")?.id, "git-subcommand");
+-	assert.equal(ps("git -C C:/AI/community reset --hard")?.id, "git-subcommand");
+-});
+-
+-test("K4 allowlist: a bad segment anywhere in a chain / pipe / block is blocked", () => {
+-	assert.equal(ps("Get-Content x.txt; Remove-Item y.txt")?.id, "not-allowlisted");
+-	assert.equal(ps("Get-ChildItem | ForEach-Object { Remove-Item $_ }")?.id, "not-allowlisted");
+-	assert.equal(ps("Write-Output \"$(Remove-Item x)\"")?.id, "not-allowlisted");
+-	assert.equal(ps("$h = @{ a = (Remove-Item x) }")?.id, "not-allowlisted");
+-	assert.equal(sh("ls C:/AI && rm x")?.id, "not-allowlisted");
+-	assert.equal(sh("echo $(rm -f x)")?.id, "not-allowlisted");
+-	assert.equal(sh("python - <<'EOF'\nprint(1)\nEOF\nrm x")?.id, "not-allowlisted");
+-	assert.equal(sh("powershell -NoProfile -Command \"Remove-Item C:/AI/x\"")?.id, "not-allowlisted");
+-});
+-
+-test("K4 allowlist: iex, Start-Process, -EncodedCommand, & $var, downloads are blocked", () => {
+-	assert.equal(ps("iex 'Get-Date'")?.id, "not-allowlisted");
+-	assert.equal(ps("Invoke-Expression (Get-Content a.ps1 -Raw)")?.id, "not-allowlisted");
+-	assert.equal(ps("Get-Date; Start-Process notepad")?.id, "not-allowlisted");
++test("community commands: hazards are blocked (blocked case)", () => {
++	assert.equal(ps("Remove-Item -Recurse -Force C:\\AI\\community\\x")?.id, "remove-item-recurse");
++	assert.equal(sh("rm -rf C:/AI/community/x")?.id, "recursive-rm");
++	assert.equal(ps("iex 'Get-Date'")?.id, "hazard-command");
++	assert.equal(ps("Invoke-Expression (Get-Content a.ps1 -Raw)")?.id, "hazard-command");
++	assert.equal(ps("Get-Date; Start-Process notepad")?.id, "hazard-command");
++	assert.equal(ps("Stop-Process -Name node")?.id, "hazard-command");
++	assert.equal(sh("bash -c 'git reset --hard'")?.id, "git-reset");
++	assert.equal(sh("cmd /c dir")?.id, "hazard-command");
+ 	assert.equal(ps("powershell -EncodedCommand ZQBjAGgAbwA=")?.id, "encoded-command");
+-	assert.equal(sh("pwsh -enc ZQBjAGgAbwA=")?.id, "encoded-command");
+ 	assert.equal(ps("& $py -c 'print(1)'")?.id, "call-variable");
+ 	assert.equal(ps("[System.Diagnostics.Process]::Start('cmd')")?.id, "dotnet-exec");
+-	for (const c of ["Invoke-WebRequest https://example.com -OutFile x", "iwr https://example.com", "curl.exe https://example.com", "irm https://example.com"]) {
+-		assert.equal(ps(c)?.id, "not-allowlisted", c);
+-	}
+-	assert.equal(sh("wget https://example.com")?.id, "not-allowlisted");
++	assert.equal(ps("Get-Content D:\\Apps\\finance-app\\.env.local")?.id, "finance-paths");
++	assert.equal(ps("Get-ChildItem C:\\Apps\\x")?.id, "finance-paths");
++	assert.equal(sh("curl -s http://127.0.0.1:3100/api")?.id, "finance-paths");
++	assert.equal(ps("python -m pip install requests")?.id, "package-install");
++	assert.equal(sh("npm install left-pad")?.id, "package-install");
++	assert.equal(ps("Set-Content C:\\Users\\derek\\5slock\\approved_characters\\POOL\\x.txt x")?.id, "approved-write");
++	assert.equal(ps("Rename-Item C:\\Users\\derek\\5slock\\approved_characters\\POOL\\a.jpg b.jpg")?.id, "approved-write");
++	assert.equal(ps("python -u C:\\AI\\community\\scripts\\p6.py")?.id, "gpu-endpoints");
++	assert.equal(ps("python -c \"import batch_queue\"")?.id, "gpu-imports");
++	assert.equal(sh("curl -s http://127.0.0.1:8080/upstream/coding_swift15_iq3s/v1/models")?.id, "gpu-endpoints");
++	assert.equal(sh("powershell -NoProfile -Command \"Remove-Item -Recurse C:/AI/x\"")?.id, "remove-item-recurse");
++});
++
++test("community web: curl GET to the docs domains (allowed) vs POST / upload / other domains (blocked)", () => {
++	// allowed
++	assert.equal(ps("curl.exe -sL https://github.com/Comfy-Org/ComfyUI/blob/master/README.md"), null);
++	assert.equal(sh("curl -sSL --max-time 30 https://huggingface.co/api/models?search=wan2.2"), null);
++	assert.equal(sh("curl -s https://raw.githubusercontent.com/kijai/ComfyUI-WanVideoWrapper/main/readme.md"), null);
++	assert.equal(sh("curl -sI https://docs.comfy.org/tutorials/video/wan/wan2_2"), null);
++	assert.equal(sh("curl -s https://www.reddit.com/r/comfyui/top.json?t=week"), null);
++	assert.equal(sh("curl -sL -o C:/AI/community/notes/web/civitai.html https://civitai.com/articles/1"), null);
++	// blocked
++	assert.equal(sh("curl -s -X POST https://github.com/x")?.id, "curl-method");
++	assert.equal(sh("curl -s -d a=1 https://github.com/x")?.id, "curl-arg");
++	assert.equal(sh("curl -s --data-binary @C:/AI/community/notes/progress.md https://github.com/x")?.id, "curl-arg");
++	assert.equal(sh("curl -F f=@x.png https://huggingface.co/x")?.id, "curl-arg");
++	assert.equal(sh("curl -T x.png https://huggingface.co/x")?.id, "curl-arg");
++	assert.equal(sh("curl -H 'Authorization: Bearer x' https://huggingface.co/x")?.id, "curl-arg");
++	assert.equal(sh("curl -s https://example.com/")?.id, "curl-domain");
++	assert.equal(sh("curl -s https://github.com.evil.io/")?.id, "curl-domain");
++	assert.equal(sh("curl -s https://user@github.com/")?.id, "curl-url");
++	assert.equal(sh("curl -s file:///C:/Users/derek/.pi/agent/auth.json")?.id, "curl-url");
++	assert.equal(sh("curl -sL -o C:/Users/derek/x.ps1 https://github.com/x")?.id, "curl-arg");
++	assert.equal(ps("curl https://github.com/x")?.id, "hazard-command", "bare curl in PowerShell 5 is Invoke-WebRequest");
++	assert.equal(ps("Invoke-WebRequest https://github.com -Method Post")?.id, "hazard-command");
++	assert.equal(sh("wget https://github.com/x")?.id, "hazard-command");
+ 	assert.equal(sh("certutil -urlcache -f http://x y")?.id, "certutil");
+ });
+ 
+-test("K4 allowlist: existing deny rules still run first and win; ralph.ps1 edits stay blocked", () => {
++test("community git: commit with a real message (allowed) vs push / reset / weak commit (blocked)", () => {
++	// allowed
++	assert.equal(ps("git -C C:/AI/community status; git -C C:/AI/community log -3 --oneline"), null);
++	assert.equal(ps("git -C C:/AI/community add scripts/p6_graph.py; git -C C:/AI/community commit -m \"R3: fix p6 sheet path after tests pass\""), null);
++	assert.equal(sh("git add scripts/tests/test_p6.py && git commit -m 'R3: add p6 path test (pytest green)'"), null);
++	// blocked
+ 	assert.equal(sh("git push")?.id, "git-push");
+-	assert.equal(ps("python -u C:\\AI\\community\\scripts\\p6.py")?.id, "gpu-endpoints");
+-	assert.equal(ps("python -c \"import batch_queue\"")?.id, "gpu-imports");
+-	assert.equal(ps("Remove-Item -Recurse C:\\x")?.id, "remove-item-recurse");
+-	// Set-Content is allowlisted, but protected-paths.ts still blocks the loop harness (ralph.ps1) for shell and edit/write.
++	assert.equal(ps("git -C C:/AI/community push origin main")?.id, "git-push");
++	assert.equal(ps("git -C C:/AI/community reset --hard")?.id, "git-reset");
++	assert.equal(ps("git reset HEAD~1")?.id, "git-reset");
++	assert.equal(ps("git -C C:/AI/community checkout -- scripts/p6.py")?.id, "git-subcommand");
++	assert.equal(ps("git clean -fdx")?.id, "git-subcommand");
++	assert.equal(ps("git commit -m x")?.id, "git-commit");
++	assert.equal(ps("git commit -m wip")?.id, "git-commit");
++	assert.equal(ps("git commit")?.id, "git-commit");
++	assert.equal(ps("git commit --amend -m \"R3: fix p6 sheet path again\"")?.id, "git-commit");
++	assert.equal(ps("git commit --no-verify -m \"R3: fix p6 sheet path again\"")?.id, "git-commit");
++});
++
++test("community .env: .env* edits blocked; reading other files and editing non-env files allowed", () => {
++	assert.equal(ps("Set-Content C:\\AI\\community\\notes\\progress2.md 'x'"), null);
++	assert.equal(ps("Add-Content C:\\AI\\community\\.env 'X=1'")?.id, "env-file-edit");
++	assert.equal(sh("echo X=1 >> C:/AI/director/.env.local")?.id, "env-file-edit");
++	assert.ok(["env-file-edit", "secret-path"].includes(ext.evaluateToolCall("edit", { path: "C:\\AI\\community\\.env", edits: [] }, H)?.id), "edit of .env is blocked");
++	assert.equal(ext.evaluateToolCall("write", { path: "C:\\AI\\community\\notes\\a.md", content: "x" }, H), null);
++});
++
++test("community scope: loop repo commits, secrets and finance (Forge) vs Household's C:/Apps session (unchanged allowlist)", () => {
++	assert.equal(ps("git -C C:/Users/derek/5slock/ralph-community commit -m \"R3: tick the sheet task now\"")?.id, "git-loop-repo");
++	assert.equal(ps("git -C C:\\Users\\derek\\5slock\\ralph-community add TASKS.md")?.id, "git-loop-repo");
++	assert.equal(ps("git add C:/AI/community/.env")?.id, "env-file-edit");
++	assert.equal(ext.evaluateToolCall("read", { path: "C:\\AI\\community\\.env" }, H)?.id, "secret-path");
++	assert.equal(ext.evaluateToolCall("read", { path: "C:/Users/derek/.pi/agent/auth.json" }, H)?.id, "secret-path");
++	assert.equal(ext.evaluateToolCall("read", { path: "D:/Apps/finance-app/src/a.ts" }, H)?.id, "finance-paths");
++	assert.equal(ext.evaluateToolCall("read", { path: "C:/AI/ComfyUI/custom_nodes/x/nodes.py" }, H), null);
++	assert.equal(ext.evaluateToolCall("read", { path: "C:/AI/director/config/llama-swap.yaml" }, H), null, "reads widen");
++	assert.equal(ext.evaluateToolCall("edit", { path: "C:/AI/director/config/llama-swap.yaml", edits: [] }, H)?.id, "forge-write-scope", "writes do not");
++	assert.equal(ext.evaluateToolCall("write", { path: "C:/AI/strata-0.2.2/x.json", content: "x" }, H)?.id, "forge-write-scope");
++	assert.equal(ext.evaluateToolCall("write", { path: "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/x/nodes.py", content: "x" }, H)?.id, "forge-write-scope");
++	assert.equal(ext.evaluateToolCall("write", { path: "C:/AI/community/notes/x.md", content: "x" }, H), null);
++	assert.equal(ext.evaluateToolCall("read", { path: "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/x/nodes.py" }, H), null);
++	const HH = { headless: true, cwd: "C:\\Apps\\finance-app-rebuild" };
++	assert.equal(ext.evaluateToolCall("powershell", { command: "Get-ChildItem C:\\Apps\\finance-app-rebuild\\src" }, HH), null, "Household session is not finance-blocked");
++	assert.equal(ext.evaluateToolCall("powershell", { command: "Start-Process notepad" }, HH)?.id, "not-allowlisted", "Household session keeps the K4 allowlist");
++	assert.equal(ext.evaluateToolCall("read", { path: "C:/Apps/finance-app-rebuild/src/a.ts" }, HH), null);
++});
++
++test("trial 12:14 PM CT: infinite-creation + Continuum installs/clones (allowed) vs other installs (blocked)", () => {
++	const ic = "C:\\AI\\community\\tools\\infinite-creation";
++	const cn = "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\custom_nodes";
++	assert.equal(ps(`git clone https://github.com/SwotAtmk/infinite-creation ${ic}`), null);
++	assert.equal(ps(`git clone --depth 1 https://github.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum ${cn}\\ComfyUI-H3-Continuum`), null);
++	assert.equal(ps(`Set-Location ${ic}; pnpm install`), null);
++	assert.equal(ps(`pnpm -C ${ic} install`), null);
++	assert.equal(ps(`pnpm -C ${ic} run install:skills`), null);
++	assert.equal(ps("npm install -g pnpm@9"), null);
++	assert.equal(ps(`& 'C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\python_embeded\\python.exe' -m pip install -r ${cn}\\ComfyUI-H3-Continuum\\requirements.txt`), null);
++	assert.equal(ps("pnpm install")?.id, "package-install", "pnpm only inside the infinite-creation folder");
++	assert.equal(ps(`Set-Location C:\\AI\\community; pnpm install`)?.id, "package-install");
++	assert.equal(ps("python -m pip install torch")?.id, "package-install");
++	assert.equal(ps("npm install -g left-pad")?.id, "package-install");
++	assert.equal(ps("pnpm -C C:\\AI\\community install")?.id, "package-install");
++	assert.equal(ps("npm -g install left-pad")?.id, "package-install");
++	assert.equal(ps("winget install OpenJS.NodeJS")?.id, "package-install");
++	assert.equal(ps(`git clone https://example.com/x.git ${ic}`)?.id, "git-clone");
++	assert.equal(ps("git clone https://github.com/SwotAtmk/infinite-creation C:\\Temp\\ic")?.id, "git-clone");
++	assert.equal(ps("git clone https://github.com/SwotAtmk/infinite-creation")?.id, "git-clone");
++	assert.equal(ps("git -C C:/AI/community remote add evil https://example.com/x")?.id, "git-remote");
++});
++
++test("community: protected-paths still blocks the loop harness (ralph.ps1)", () => {
+ 	const ralph = "C:\\Users\\derek\\5slock\\ralph-community\\ralph.ps1";
+ 	assert.equal(ps(`Set-Content -Path ${ralph} -Value x`), null);
+ 	assert.ok(pp.evaluate("powershell", { command: `Set-Content -Path ${ralph} -Value x` }, H.cwd), "protected-paths blocks the ralph.ps1 shell write");
+@@ -378,15 +456,15 @@
+ 	assert.ok(pp.evaluate("write", { path: ralph, content: "x" }, H.cwd), "protected-paths blocks the ralph.ps1 write");
+ });
+ 
+-test("K4 handlers: headless tool_call enforces the allowlist; UI runs are unchanged", async () => {
++test("community handlers: headless tool_call enforces hazards; UI runs are unchanged", async () => {
+ 	const pi = fakePi();
+ 	ext.default(pi);
+ 	const headless = { hasUI: false, cwd: "C:\\Users\\derek\\5slock" };
+-	const deny = await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Remove-Item C:\\AI\\community\\notes\\nonexistent_k4_test.txt" } }, headless);
++	const deny = await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Start-Process notepad" } }, headless);
+ 	assert.equal(deny.block, true);
+-	assert.match(deny.reason, /\[not-allowlisted\]/);
+-	assert.equal(await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Get-ChildItem C:\\AI\\community\\notes | Select-Object -First 3" } }, headless), undefined);
+-	assert.equal(await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Remove-Item C:\\AI\\x.txt" } }, { hasUI: true }), undefined);
++	assert.match(deny.reason, /\[hazard-command\]/);
++	assert.equal(await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Move-Item C:\\AI\\community\\notes\\a.txt C:\\AI\\community\\notes\\b.txt" } }, headless), undefined);
++	assert.equal(await pi.handlers.tool_call[0]({ toolName: "powershell", input: { command: "Start-Process notepad" } }, { hasUI: true }), undefined);
+ });
+ 
+ // ALI-163 (2026-10-23): Copy-Item scoped to approved still -> hc input folder; ffmpeg/ffprobe local files only
+@@ -414,7 +492,7 @@
+ 	assert.equal(ps(`Copy-Item -Path '${out}\\a.mp4' -Destination '${inp}\\a.mp4'`)?.id, "copy-item");
+ 	assert.equal(ps(`Copy-Item -Path '${out}\\$x.png' -Destination '${inp}'`)?.id, "copy-item");
+ 	assert.equal(ps(`Copy-Item -Exclude x -Path '${out}\\a.png' -Destination '${inp}'`)?.id, "copy-item");
+-	assert.equal(ps(`Move-Item '${src}' '${hc}'`)?.id, "not-allowlisted");
++	assert.equal(ps(`Move-Item '${src}' '${hc}'`)?.id, "approved-write", "nothing is moved out of approved_characters");
+ 	assert.equal(sh(`cp '${src}' '${hc}'`), null, "bash cp is unchanged by this patch (pi-permissions still denies absolute targets)");
+ });
+ test("ALI-163 hc: ffmpeg/ffprobe local files only", () => {
+@@ -429,5 +507,6 @@
+ 	assert.equal(ps(`${ff} -listen 1 -i a.mp4 b.mp4`)?.id, "ffmpeg-arg");
+ 	assert.equal(ps("& 'C:\\ffmpeg\\bin\\ffprobe.exe' -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 x.mp4"), null);
+ 	assert.equal(ps("& 'C:\\ffmpeg\\bin\\ffprobe.exe' http://example.com/x.mp4")?.id, "ffmpeg-arg");
+-	assert.equal(sh("ffmpeg -i a.mp4 b.mp4")?.id, "not-allowlisted");
++	assert.equal(sh("ffmpeg -i a.mp4 b.mp4"), null, "denylist mode: bash ffmpeg runs, with the same local-file rules");
++	assert.equal(sh("ffmpeg -i https://example.com/x.mp4 b.mp4")?.id, "ffmpeg-arg");
+ });

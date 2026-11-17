@@ -1,0 +1,66 @@
+{
+  "schema": "u21-writer-prompts-v1",
+  "created": "2026-11-15",
+  "purpose": "B4 blind creative writing benchmark prompt set (10 prompts, no secrets, no Imagine prompts)",
+  "samplers": {
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "top_k": 64,
+    "min_p": 0.05,
+    "max_tokens": 500,
+    "enable_thinking": false
+  },
+  "seeds": [101, 202, 303],
+  "prompts": [
+    {
+      "id": "W01_noir_dock",
+      "genre": "noir",
+      "prompt": "Write a 220-word third-person noir opening set on a rain-slicked riverfront loading dock at 2:00 AM. A private investigator discovers a soaked leather ledger wedged beneath a rusted bollard. Focus on concrete physical details, light on wet concrete, and terse rhythm. End on a quiet threat."
+    },
+    {
+      "id": "W02_tension_kitchen",
+      "genre": "dialogue_drama",
+      "prompt": "Write a 220-word scene driven mostly by dialogue between two estranged siblings clearing out their late father's cluttered workshop. One finds an unmailed letter tucked inside a plane iron; neither mentions the money directly, yet every line circles it. No exposition dump."
+    },
+    {
+      "id": "W03_storm_brig",
+      "genre": "historical_maritime",
+      "prompt": "Write a 220-word historical scene aboard an 1840s merchant brig rounding Cape Horn in freezing sleet. A young second mate must climb the slick ratlines to free a fouled topsail gasket before the spar snaps. Emphasize wind weight, wet hemp, numb fingers, and salt sting."
+    },
+    {
+      "id": "W04_derelict_airlock",
+      "genre": "hard_scifi",
+      "prompt": "Write a 220-word hard science-fiction scene as a salvage engineer cycles open the inner hatch of an abandoned orbital relay station. Zero-gravity dust floats across a single amber suit lamp. Show the moment she realizes the station's life-support scrubbers were shut down from the inside."
+    },
+    {
+      "id": "W05_bakery_dawn",
+      "genre": "sensory_slice_of_life",
+      "prompt": "Write a 200-word sensory vignette of a stone-hearth neighborhood bakery opening an hour before sunrise in winter. Capture the contrast between the frozen alley outside and the steam, yeast, blistered crust, and cast-iron peel inside, through the hands of an elderly baker."
+    },
+    {
+      "id": "W06_courtroom_goat",
+      "genre": "dry_comedy",
+      "prompt": "Write a 220-word comedic scene in a small-town municipal court where a retired postman is defending himself against a citation for letting his prize pygmy goat wander into a county commissioner's tulip bed. Keep the judge deadpan and the dialogue crisp."
+    },
+    {
+      "id": "W07_gothic_conservatory",
+      "genre": "gothic",
+      "prompt": "Write a 220-word gothic scene as a newly hired archivist enters a neglected glass conservatory attached to a cliffside estate during a coastal fog. Overgrown night-blooming vines press against cracked panes, and someone has recently pruned only the thorns along the center aisle."
+    },
+    {
+      "id": "W08_safehouse_debrief",
+      "genre": "crime_thriller",
+      "prompt": "Write a 220-word scene inside a cramped motel room twenty minutes after a botched art courier handoff. Two partners lay the soaked canvas frame across the Formica table while sirens pass two blocks away. Establish distrust through small physical gestures rather than inner monologue."
+    },
+    {
+      "id": "W09_timberline_dawn",
+      "genre": "wilderness_survival",
+      "prompt": "Write a 200-word wilderness scene of a backcountry surveyor waking above timberline after an unexpected October squall collapsed half his bivy. He has to coax a spark from damp tinder with stiff hands while tracking an elk herd moving below the ridge."
+    },
+    {
+      "id": "W10_late_diner",
+      "genre": "psychological_thriller",
+      "prompt": "Write a 220-word psychological thriller scene in a fluorescent highway diner at midnight. A waitress notices that the quiet customer in booth four has ordered the exact same pie-and-coffee combination left untouched by a missing state trooper three weeks ago. Build dread through mundane diner detail."
+    }
+  ]
+}

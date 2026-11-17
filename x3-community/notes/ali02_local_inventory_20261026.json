@@ -1,0 +1,299 @@
+{
+  "generated_utc": "2026-10-24T07:37:07Z",
+  "probe": "notes/ali02_node_inventory_probe.py",
+  "method": "os.scandir + os.walk NAME listings and stat only; no file under ComfyUI/custom_nodes is opened, and no node type is inferred from local source",
+  "roots_scanned": {
+    "models": {
+      "files": 194,
+      "dirs": 109
+    },
+    "input": {
+      "files": 2941,
+      "dirs": 6
+    },
+    "output": {
+      "files": 3510,
+      "dirs": 85
+    },
+    "custom_nodes": {
+      "files": 7810,
+      "dirs": 1750
+    },
+    "user/default": {
+      "files": 41,
+      "dirs": 4
+    },
+    "C:/Users/derek/5slock/approved_characters": {
+      "files": 615,
+      "dirs": 57
+    },
+    "C:\\AI\\community/runs": {
+      "files": 938,
+      "dirs": 66
+    }
+  },
+  "files_scanned_total": 16049,
+  "packs": {
+    "count": 47,
+    "names": [
+      "10S-Comfy-nodes",
+      "CRT-Nodes",
+      "ComfyMath",
+      "ComfyUI-AdvancedLivePortrait",
+      "ComfyUI-Crystools",
+      "ComfyUI-Custom-Scripts",
+      "ComfyUI-Easy-Use",
+      "ComfyUI-Frame-Interpolation",
+      "ComfyUI-GGUF",
+      "ComfyUI-H3-Continuum",
+      "ComfyUI-H3-Latent-Upscaler-Mamad8",
+      "ComfyUI-IPAdapter_plus",
+      "ComfyUI-Impact-Pack",
+      "ComfyUI-Impact-Subpack",
+      "ComfyUI-Inspire-Pack",
+      "ComfyUI-KJNodes",
+      "ComfyUI-LTXVideo",
+      "ComfyUI-Manager",
+      "ComfyUI-MiniMaxH3_LatentUpscaler",
+      "ComfyUI-PromptRelay",
+      "ComfyUI-PuLID-Flux",
+      "ComfyUI-PuLID-Flux2",
+      "ComfyUI-SAM",
+      "ComfyUI-VideoHelperSuite",
+      "ComfyUI-WanVideoWrapper",
+      "ComfyUI_Comfyroll_CustomNodes",
+      "ComfyUI_FaceAnalysis",
+      "ComfyUI_LayerStyle",
+      "ComfyUI_MiniMax_H3_Extender",
+      "ComfyUI_PuLID_Flux_ll",
+      "ComfyUI_UltimateSDUpscale",
+      "ComfyUI_essentials",
+      "LTX_Director",
+      "MiniMax-H3-Prompt-Rewriter-ComfyUI",
+      "Nvidia_RTX_Nodes_ComfyUI",
+      "RES4LYF",
+      "__pycache__",
+      "cg-use-everywhere",
+      "comfy_sync_wrapper",
+      "comfyui-minimax-h3-continuation",
+      "comfyui-reactor-node",
+      "comfyui-storyboard",
+      "comfyui-various",
+      "comfyui_controlnet_aux",
+      "rgthree-comfy",
+      "seedvr2_videoupscaler",
+      "was-node-suite-comfyui"
+    ]
+  },
+  "pack_hits": {
+    "facerefine_pack": [],
+    "facedetailer_provider_pack": [
+      "ComfyUI-Impact-Pack",
+      "ComfyUI-Impact-Subpack"
+    ],
+    "h3_family_pack": [
+      "ComfyUI-H3-Continuum",
+      "ComfyUI-H3-Latent-Upscaler-Mamad8",
+      "ComfyUI-MiniMaxH3_LatentUpscaler",
+      "ComfyUI_MiniMax_H3_Extender",
+      "ComfyUI_UltimateSDUpscale",
+      "MiniMax-H3-Prompt-Rewriter-ComfyUI",
+      "comfyui-minimax-h3-continuation",
+      "seedvr2_videoupscaler"
+    ]
+  },
+  "pack_controls": {
+    "facerefine_pack": [
+      "ComfyUI-Impact-Pack",
+      "ComfyUI-Impact-Subpack"
+    ],
+    "facedetailer_provider_pack": [
+      "ComfyUI-Impact-Pack",
+      "ComfyUI-Impact-Subpack"
+    ],
+    "h3_family_pack": [
+      "ComfyUI-Impact-Pack",
+      "ComfyUI-Impact-Subpack"
+    ]
+  },
+  "name_term_hits": {
+    "vagina": [],
+    "vulva": [],
+    "clit": [],
+    "testicl": [],
+    "dick": [],
+    "cock": [],
+    "penis": [
+      "models/PenisV2_minimax-h3_epoch60.safetensors",
+      "models/saliva_juice_fluid_on_penis_v0.0.0.metadata.json",
+      "models/saliva_juice_fluid_on_penis_v0.0.0.safetensors"
+    ],
+    "semen": []
+  },
+  "name_term_expect_absent": [
+    "vagina",
+    "vulva",
+    "clit",
+    "testicl",
+    "dick",
+    "cock",
+    "semen"
+  ],
+  "loras_inventory": [
+    {
+      "name": "HMNSFW-AIO-V2.5.safetensors",
+      "bytes": 86040232,
+      "date": "2026-10-19"
+    },
+    {
+      "name": "Kutan Megamalamar Transformation.metadata.json",
+      "bytes": 787,
+      "date": "2026-06-02"
+    },
+    {
+      "name": "Kutan Megamalamar Transformation.safetensors",
+      "bytes": 183606168,
+      "date": "2026-05-24"
+    },
+    {
+      "name": "MM-H3 - Blowjob v3.safetensors",
+      "bytes": 310191544,
+      "date": "2026-10-20"
+    },
+    {
+      "name": "MS_real_and_Details_klein.metadata.json",
+      "bytes": 766,
+      "date": "2026-06-02"
+    },
+    {
+      "name": "MS_real_and_Details_klein.safetensors",
+      "bytes": 497094856,
+      "date": "2026-05-30"
+    },
+    {
+      "name": "Mesh_dress_experimental.safetensors",
+      "bytes": 158615128,
+      "date": "2026-06-11"
+    },
+    {
+      "name": "MysticXXX_MMH3-V4.safetensors",
+      "bytes": 155095800,
+      "date": "2026-10-19"
+    },
+    {
+      "name": "Mystic_XXX_RuinedFocus.metadata.json",
+      "bytes": 757,
+      "date": "2026-06-02"
+    },
+    {
+      "name": "Mystic_XXX_RuinedFocus.safetensors",
+      "bytes": 153807416,
+      "date": "2026-05-30"
+    },
+    {
+      "name": "NSFW_MASTER_FLUX.metadata.json",
+      "bytes": 783,
+      "date": "2026-06-18"
+    },
+    {
+      "name": "NSFW_MASTER_FLUX.safetensors",
+      "bytes": 171969344,
+      "date": "2026-05-30"
+    },
+    {
+      "name": "PenisV2_minimax-h3_epoch60.safetensors",
+      "bytes": 77580008,
+      "date": "2026-10-20"
+    },
+    {
+      "name": "SexGod_DoggyStyle_Thrust.safetensors",
+      "bytes": 85429156,
+      "date": "2026-04-24"
+    },
+    {
+      "name": "ZI_Hands_v2.1.safetensors",
+      "bytes": 170127808,
+      "date": "2026-10-01"
+    },
+    {
+      "name": "aidmaNSFWunlock_v2.metadata.json",
+      "bytes": 744,
+      "date": "2026-06-02"
+    },
+    {
+      "name": "aidmaNSFWunlock_v2.safetensors",
+      "bytes": 19268648,
+      "date": "2026-05-30"
+    },
+    {
+      "name": "bfs_head_v1_flux-klein_9b_step3750_rank64.safetensors",
+      "bytes": 331379568,
+      "date": "2026-10-17"
+    },
+    {
+      "name": "clothes_remover_v0.safetensors",
+      "bytes": 343806384,
+      "date": "2026-10-02"
+    },
+    {
+      "name": "h3_antiburn_universal_v1.safetensors",
+      "bytes": 310168728,
+      "date": "2026-10-20"
+    },
+    {
+      "name": "hm_nsfw_mis_doggy_only_v16_r32_384_minimax-h3_epoch170.safetensors",
+      "bytes": 310168344,
+      "date": "2026-10-19"
+    },
+    {
+      "name": "klein_snofs_v1_1.safetensors",
+      "bytes": 1090563760,
+      "date": "2026-10-17"
+    },
+    {
+      "name": "klein_snofs_v1_4.safetensors",
+      "bytes": 1090563760,
+      "date": "2026-10-17"
+    },
+    {
+      "name": "put_loras_here",
+      "bytes": 0,
+      "date": "2026-05-30"
+    },
+    {
+      "name": "refcontrol_pose.safetensors",
+      "bytes": 343806464,
+      "date": "2026-10-01"
+    },
+    {
+      "name": "saliva_juice_fluid_on_penis_v0.0.0.metadata.json",
+      "bytes": 793,
+      "date": "2026-06-02"
+    },
+    {
+      "name": "saliva_juice_fluid_on_penis_v0.0.0.safetensors",
+      "bytes": 183623419,
+      "date": "2026-05-24"
+    },
+    {
+      "name": "submissive_blowjob_SDXL-000019.metadata.json",
+      "bytes": 781,
+      "date": "2026-06-02"
+    },
+    {
+      "name": "submissive_blowjob_SDXL-000019.safetensors",
+      "bytes": 228455140,
+      "date": "2026-05-24"
+    }
+  ],
+  "presence_files": {
+    "h3_antiburn_universal_v1.safetensors": true,
+    "refcontrol_pose.safetensors": true,
+    "ZI_Hands_v2.1.safetensors": true,
+    "VaginaFix.safetensors": false
+  },
+  "runs": {
+    "ali147_pool_hc_r4a_1min_v2b": false,
+    "ali147_pool_hc_r3b_s51130003": true
+  }
+}

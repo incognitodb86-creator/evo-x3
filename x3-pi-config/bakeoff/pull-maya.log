@@ -1,0 +1,14 @@
+Trying to pull docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0-maya...
+time="2026-11-15T09:38:35-06:00" level=warning msg="Failed, retrying in 1s ... (1/3). Error: initializing source docker://kyuz0/amd-strix-halo-toolboxes:rocm-10.0-maya: Get \"https://registry-1.docker.io/v2/kyuz0/amd-strix-halo-toolboxes/manifests/rocm-10.0-maya\": net/http: TLS handshake timeout"
+Getting image source signatures
+Copying blob sha256:4724ce27c08d7164e96ad6c37c1ce2399594c76cf01c4bc33523e4242c65d64e
+Copying blob sha256:d5db0af7c3378110058cc45f54fd954aa27fcf44a289b3450b506e7c5029be1b
+Copying blob sha256:935509e80d6e652eb1dae9f534c7cbb470b5208c38e94b6dd5e19ad875dd7032
+Copying blob sha256:d19ccae1a0b8613b837b990d1971884e31b8bceffa06367bb40c9d8e1cbf7ce0
+Copying blob sha256:a881557f726e0aedcd51fb5b6e721f2b3469643a2a19c5756837a391b5927d2e
+Copying blob sha256:9ccb72537765c5c9cc991e470885a9f1cc8b5c742e4291637b2296e8f011fb3b
+Copying blob sha256:85f06f2d6f9527800ed31c029e98f3897250b0e95020212720349ab32de80c24
+Copying blob sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1
+Copying config sha256:364d9a3578ecd023f863e6c5704cbb646fd1eac5f8c6859592121f4a2ff39e8d
+Writing manifest to image destination
+364d9a3578ecd023f863e6c5704cbb646fd1eac5f8c6859592121f4a2ff39e8d

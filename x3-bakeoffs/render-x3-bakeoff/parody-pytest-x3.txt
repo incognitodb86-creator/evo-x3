@@ -1,0 +1,193 @@
+
+==================================== ERRORS ====================================
+_______ ERROR collecting AI/community/notes/ali163_hc_r3_harness_test.py _______
+ImportError while importing test module '/home/evo/AI/community/notes/ali163_hc_r3_harness_test.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AI/community/notes/ali163_hc_r3_harness_test.py:6: in <module>
+    import run_graph_job as R, comm
+E   ModuleNotFoundError: No module named 'run_graph_job'
+_____ ERROR collecting AI/community/scripts/tests/test_free_comfy_args.py ______
+AI/community/scripts/tests/test_free_comfy_args.py:23: in <module>
+    REPO_ROOT = next(d for d in CANDIDATES if os.path.isfile(os.path.join(d, "run_queue.py")))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration
+_______ ERROR collecting AI/community/scripts/tests/test_phase1_still.py _______
+AI/community/scripts/tests/test_phase1_still.py:16: in <module>
+    TPL = json.load(open(mbr.TEMPLATE, encoding="utf-8"))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\AI\\community/templates/flux_stills_s2_bfs.api.json'
+_ ERROR collecting AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_guard.py _
+ImportError while importing test module '/home/evo/AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_guard.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_guard.py:10: in <module>
+    import flux_edit_guard as G
+E   ModuleNotFoundError: No module named 'flux_edit_guard'
+_ ERROR collecting AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_pick.py _
+ImportError while importing test module '/home/evo/AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_pick.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_pick.py:8: in <module>
+    import flux_edit_guard as G
+E   ModuleNotFoundError: No module named 'flux_edit_guard'
+_ ERROR collecting AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_run.py _
+ImportError while importing test module '/home/evo/AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_run.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_run.py:11: in <module>
+    import flux_edit_guard as G
+E   ModuleNotFoundError: No module named 'flux_edit_guard'
+_ ERROR collecting AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_score.py _
+ImportError while importing test module '/home/evo/AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_score.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_score.py:12: in <module>
+    import flux_edit_guard as G
+E   ModuleNotFoundError: No module named 'flux_edit_guard'
+_ ERROR collecting AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_workflow.py _
+ImportError while importing test module '/home/evo/AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_workflow.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_workflow.py:7: in <module>
+    import flux_edit_guard as G
+E   ModuleNotFoundError: No module named 'flux_edit_guard'
+_ ERROR collecting AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_pins_record.py _
+ImportError while importing test module '/home/evo/AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_pins_record.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_pins_record.py:8: in <module>
+    import pins_record as PR
+E   ModuleNotFoundError: No module named 'pins_record'
+_ ERROR collecting AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/_pristine/render/writer_pipeline/acceptance/test_t3_plan.py _
+import file mismatch:
+imported module 'test_t3_plan' has this __file__ attribute:
+  /home/evo/AI/render/writer_pipeline/acceptance/test_t3_plan.py
+which is not the same as the test file we want to collect:
+  /home/evo/AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/_pristine/render/writer_pipeline/acceptance/test_t3_plan.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/_pristine/render/writer_pipeline/acceptance/test_wp_accept_flatten.py _
+import file mismatch:
+imported module 'test_wp_accept_flatten' has this __file__ attribute:
+  /home/evo/AI/render/writer_pipeline/acceptance/test_wp_accept_flatten.py
+which is not the same as the test file we want to collect:
+  /home/evo/AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/_pristine/render/writer_pipeline/acceptance/test_wp_accept_flatten.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q4km/acceptance/test_t3_plan.py _
+import file mismatch:
+imported module 'test_t3_plan' has this __file__ attribute:
+  /home/evo/AI/render/writer_pipeline/acceptance/test_t3_plan.py
+which is not the same as the test file we want to collect:
+  /home/evo/AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q4km/acceptance/test_t3_plan.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q4km/acceptance/test_wp_accept_flatten.py _
+import file mismatch:
+imported module 'test_wp_accept_flatten' has this __file__ attribute:
+  /home/evo/AI/render/writer_pipeline/acceptance/test_wp_accept_flatten.py
+which is not the same as the test file we want to collect:
+  /home/evo/AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q4km/acceptance/test_wp_accept_flatten.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q8/acceptance/test_t3_plan.py _
+import file mismatch:
+imported module 'test_t3_plan' has this __file__ attribute:
+  /home/evo/AI/render/writer_pipeline/acceptance/test_t3_plan.py
+which is not the same as the test file we want to collect:
+  /home/evo/AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q8/acceptance/test_t3_plan.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q8/acceptance/test_wp_accept_flatten.py _
+import file mismatch:
+imported module 'test_wp_accept_flatten' has this __file__ attribute:
+  /home/evo/AI/render/writer_pipeline/acceptance/test_wp_accept_flatten.py
+which is not the same as the test file we want to collect:
+  /home/evo/AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q8/acceptance/test_wp_accept_flatten.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______ ERROR collecting rocm/install/libexec/rocprofiler-compute/tests ________
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+AI/render/x3/.venv/lib64/python3.14/site-packages/_pytest/assertion/rewrite.py:185: in exec_module
+    exec(co, module.__dict__)
+rocm/install/libexec/rocprofiler-compute/tests/conftest.py:16: in <module>
+    from common import ROOT
+E   ModuleNotFoundError: No module named 'common'
+_ ERROR collecting rocm/install/share/amd_smi/tests/python_unittest/cli_unit_test.py _
+ImportError while importing test module '/home/evo/rocm/install/share/amd_smi/tests/python_unittest/cli_unit_test.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+rocm/install/share/amd_smi/tests/python_unittest/__init__.py:5: in <module>
+    from _version import __version__
+E   ModuleNotFoundError: No module named '_version'
+_ ERROR collecting rocm/install/share/amd_smi/tests/python_unittest/integration_test.py _
+ImportError while importing test module '/home/evo/rocm/install/share/amd_smi/tests/python_unittest/integration_test.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+rocm/install/share/amd_smi/tests/python_unittest/__init__.py:5: in <module>
+    from _version import __version__
+E   ModuleNotFoundError: No module named '_version'
+_ ERROR collecting rocm/install/share/amd_smi/tests/python_unittest/partition_metric_unit_test.py _
+ImportError while importing test module '/home/evo/rocm/install/share/amd_smi/tests/python_unittest/partition_metric_unit_test.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib64/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+rocm/install/share/amd_smi/tests/python_unittest/__init__.py:5: in <module>
+    from _version import __version__
+E   ModuleNotFoundError: No module named '_version'
+=========================== short test summary info ============================
+ERROR AI/community/notes/ali163_hc_r3_harness_test.py
+ERROR AI/community/scripts/tests/test_free_comfy_args.py - StopIteration
+ERROR AI/community/scripts/tests/test_phase1_still.py - FileNotFoundError: [E...
+ERROR AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_guard.py
+ERROR AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_pick.py
+ERROR AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_run.py
+ERROR AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_score.py
+ERROR AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_flux_edit_workflow.py
+ERROR AI/community/staging-flux-edit/flux-edit-2026-10-29/flux-edit/scripts/tests/test_pins_record.py
+ERROR AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/_pristine/render/writer_pipeline/acceptance/test_t3_plan.py
+ERROR AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/_pristine/render/writer_pipeline/acceptance/test_wp_accept_flatten.py
+ERROR AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q4km/acceptance/test_t3_plan.py
+ERROR AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q4km/acceptance/test_wp_accept_flatten.py
+ERROR AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q8/acceptance/test_t3_plan.py
+ERROR AI/render/x3/bakeoff/heretic-q8-vs-q4-20261115/wp_q8/acceptance/test_wp_accept_flatten.py
+ERROR rocm/install/libexec/rocprofiler-compute/tests - ModuleNotFoundError: N...
+ERROR rocm/install/share/amd_smi/tests/python_unittest/cli_unit_test.py
+ERROR rocm/install/share/amd_smi/tests/python_unittest/integration_test.py
+ERROR rocm/install/share/amd_smi/tests/python_unittest/partition_metric_unit_test.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 19 errors during collection !!!!!!!!!!!!!!!!!!!
+19 errors in 5.29s

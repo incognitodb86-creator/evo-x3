@@ -1,0 +1,57 @@
+2026-11-15 16:18:39 [INFO] [gpu] event=queue_budget kind=llm observed=0 budget=8 expected_max=3 cap=2
+2026-11-15 16:18:39 [INFO] [loader] event=load_started kind=text artifact=/srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf rss_mib=124 host_available_mib=125600
+2026-11-15 16:19:03 [INFO] [loader] event=load_phase phase=sessions rss_mib=533 host_available_mib=41012
+2026-11-15 16:19:03 [INFO] [cache] schema=component-cache-v1 event=configured sessions=1 snapshot_entries=128 capacity_bytes=20660326400 staging_capacity_bytes=0 automatic_bytes=20660326400 max_bytes=37025685504 disk_capacity_bytes=0 slot_pinned_bytes=0 ram_cache=on disk_backing_bytes=0
+2026-11-15 16:19:03 [INFO] [loader] event=structured_output_prepared vocabulary_tokens=248320 prepare_ms=33.6 rss_delta_kib=26828 rss_mib=2734 host_available_mib=37197
+2026-11-15 16:19:03 [INFO] [sampling] event=defaults thinking=on temperature=1 top_k=20 top_p=0.95 min_p=0 min_keep=0 seed=-1 repeat_penalty=1 repeat_last_n=64 frequency_penalty=0 presence_penalty=0
+2026-11-15 16:19:03 [INFO] [loader] event=load_completed kind=text elapsed_ms=24224 monotonic_us=118713125 model=flash-next sessions=1 context_tokens=32768 speculative=mtp draft_limit=7 disk_cache=off rss_mib=2705 host_available_mib=37197 gpu_device_used_mib=86461 gpu_device_total_mib=122880
+2026-11-15 16:19:03 [INFO] [server] event=listening monotonic_us=118713433 address=http://127.0.0.1:8090 max_connections=16 max_body_bytes=8388608
+2026-11-15 16:19:03 [INFO] [http] request=r2 event=received method=POST path=/v1/chat/completions body_bytes=58108
+2026-11-15 16:19:03 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0
+2026-11-15 16:19:06 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=4096 purpose=1 rank=3 unique_bytes_freed=0 ledger_bytes=2558098502
+2026-11-15 16:19:06 [INFO] [progress] request=1 phase=prefill tokens=4224/18253 percentage=23.1 chunk_tps=1612.3 avg_tps=1612.3
+2026-11-15 16:19:09 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=8192 purpose=1 rank=3 unique_bytes_freed=0 ledger_bytes=2692124432
+2026-11-15 16:19:09 [INFO] [progress] request=1 phase=prefill tokens=8448/18253 percentage=46.3 chunk_tps=1750.2 avg_tps=1678.4
+2026-11-15 16:19:11 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=12288 purpose=1 rank=3 unique_bytes_freed=0 ledger_bytes=2959802394
+2026-11-15 16:19:11 [INFO] [progress] request=1 phase=prefill tokens=12672/18253 percentage=69.4 chunk_tps=1708.5 avg_tps=1688.3
+2026-11-15 16:19:14 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=16384 purpose=1 rank=3 unique_bytes_freed=0 ledger_bytes=3227504484
+2026-11-15 16:19:14 [INFO] [progress] request=1 phase=prefill tokens=16896/18253 percentage=92.6 chunk_tps=1642.1 avg_tps=1676.5
+2026-11-15 16:19:15 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=18248 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=3495035654
+2026-11-15 16:19:15 [INFO] [progress] request=1 phase=prefill tokens=18253/18253 percentage=100.0 chunk_tps=1390.6 avg_tps=1651.3
+2026-11-15 16:19:15 [INFO] [progress] request=1 phase=decode tokens=54/1200 percentage=4.5 chunk_tps=68.0 avg_tps=68.0 draft_accepted=45 draft_proposed=53 acceptance_percentage=84.9
+2026-11-15 16:19:16 [INFO] [progress] request=1 phase=decode tokens=103/1200 percentage=8.6 chunk_tps=57.8 avg_tps=62.7 draft_accepted=83 draft_proposed=111 acceptance_percentage=74.8
+2026-11-15 16:19:16 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=18253 purpose=0 rank=0 unique_bytes_freed=0 ledger_bytes=3495175964
+2026-11-15 16:19:16 [INFO] [http] request=r2 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=12725.3 outcome=completed prompt_tokens=18253 prefill_tokens=18253 generated_tokens=103 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=11.8 shared_prefix_wait_ms=0.0 ttft_ms=11066.0 prefill_tps=1651.3 decode_tps=62.7 batch_width=1 plan=serial-c1 draft_accepted=83 draft_proposed=111 draft_rounds=20 cache_schema=component-cache-v1 cache_reuse=none cache_captures=6 cache_captured_capacity_bytes=1315045376 cache_global_ledger_bytes=3495325066 acceptance_pct=74.8 lookup_accepted=18 lookup_proposed=25 ngram_rows=294144 ngram_dedup_rows=78114 ngram_cache_hits=33429 ngram_disk_reads=182601 cache_snapshot_bytes=1304380948 cache_miss_reason=no_checkpoint common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=3658 host_available_mib=35906
+2026-11-15 16:19:16 [INFO] [http] request=r3 event=received method=POST path=/v1/chat/completions body_bytes=267
+2026-11-15 16:19:16 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0
+2026-11-15 16:19:16 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=52 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=3495034082
+2026-11-15 16:19:16 [INFO] [progress] request=2 phase=prefill tokens=59/59 percentage=100.0 chunk_tps=315.5 avg_tps=315.5
+2026-11-15 16:19:17 [INFO] [progress] request=2 phase=decode tokens=50/900 percentage=5.6 chunk_tps=47.4 avg_tps=47.4 draft_accepted=34 draft_proposed=50 acceptance_percentage=68.0
+2026-11-15 16:19:18 [INFO] [progress] request=2 phase=decode tokens=104/900 percentage=11.6 chunk_tps=56.0 avg_tps=51.5 draft_accepted=74 draft_proposed=103 acceptance_percentage=71.8
+2026-11-15 16:19:20 [INFO] [progress] request=2 phase=decode tokens=151/900 percentage=16.8 chunk_tps=36.0 avg_tps=45.4 draft_accepted=99 draft_proposed=157 acceptance_percentage=63.1
+2026-11-15 16:19:21 [INFO] [progress] request=2 phase=decode tokens=200/900 percentage=22.2 chunk_tps=41.8 avg_tps=44.5 draft_accepted=130 draft_proposed=213 acceptance_percentage=61.0
+2026-11-15 16:19:22 [INFO] [progress] request=2 phase=decode tokens=251/900 percentage=27.9 chunk_tps=37.9 avg_tps=43.0 draft_accepted=160 draft_proposed=269 acceptance_percentage=59.5
+2026-11-15 16:19:23 [INFO] [progress] request=2 phase=decode tokens=300/900 percentage=33.3 chunk_tps=43.3 avg_tps=43.0 draft_accepted=190 draft_proposed=315 acceptance_percentage=60.3
+2026-11-15 16:19:24 [INFO] [progress] request=2 phase=decode tokens=350/900 percentage=38.9 chunk_tps=45.4 avg_tps=43.3 draft_accepted=222 draft_proposed=366 acceptance_percentage=60.7
+2026-11-15 16:19:26 [INFO] [progress] request=2 phase=decode tokens=402/900 percentage=44.7 chunk_tps=46.8 avg_tps=43.8 draft_accepted=255 draft_proposed=415 acceptance_percentage=61.4
+2026-11-15 16:19:27 [INFO] [progress] request=2 phase=decode tokens=450/900 percentage=50.0 chunk_tps=44.1 avg_tps=43.8 draft_accepted=285 draft_proposed=465 acceptance_percentage=61.3
+2026-11-15 16:19:28 [INFO] [progress] request=2 phase=decode tokens=504/900 percentage=56.0 chunk_tps=49.1 avg_tps=44.3 draft_accepted=322 draft_proposed=519 acceptance_percentage=62.0
+2026-11-15 16:19:29 [INFO] [progress] request=2 phase=decode tokens=555/900 percentage=61.7 chunk_tps=45.1 avg_tps=44.4 draft_accepted=356 draft_proposed=578 acceptance_percentage=61.6
+2026-11-15 16:19:30 [INFO] [progress] request=2 phase=decode tokens=600/900 percentage=66.7 chunk_tps=37.2 avg_tps=43.8 draft_accepted=381 draft_proposed=621 acceptance_percentage=61.4
+2026-11-15 16:19:31 [INFO] [progress] request=2 phase=decode tokens=650/900 percentage=72.2 chunk_tps=37.9 avg_tps=43.2 draft_accepted=411 draft_proposed=688 acceptance_percentage=59.7
+2026-11-15 16:19:33 [INFO] [progress] request=2 phase=decode tokens=704/900 percentage=78.2 chunk_tps=43.7 avg_tps=43.3 draft_accepted=445 draft_proposed=742 acceptance_percentage=60.0
+2026-11-15 16:19:34 [INFO] [progress] request=2 phase=decode tokens=750/900 percentage=83.3 chunk_tps=38.7 avg_tps=43.0 draft_accepted=470 draft_proposed=788 acceptance_percentage=59.6
+2026-11-15 16:19:35 [INFO] [progress] request=2 phase=decode tokens=800/900 percentage=88.9 chunk_tps=37.4 avg_tps=42.6 draft_accepted=498 draft_proposed=838 acceptance_percentage=59.4
+2026-11-15 16:19:37 [INFO] [progress] request=2 phase=decode tokens=851/900 percentage=94.6 chunk_tps=35.5 avg_tps=42.1 draft_accepted=530 draft_proposed=895 acceptance_percentage=59.2
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=59 purpose=0 rank=0 unique_bytes_freed=0 ledger_bytes=3495067424
+2026-11-15 16:19:37 [INFO] [progress] request=2 phase=decode tokens=853/900 percentage=94.8 chunk_tps=32.1 avg_tps=42.0 draft_accepted=531 draft_proposed=897 acceptance_percentage=59.2
+2026-11-15 16:19:37 [INFO] [http] request=r3 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=20512.8 outcome=completed prompt_tokens=59 prefill_tokens=59 generated_tokens=853 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=30.3 shared_prefix_wait_ms=0.0 ttft_ms=217.5 prefill_tps=315.5 decode_tps=42.0 batch_width=1 plan=serial-c1 draft_accepted=531 draft_proposed=897 draft_rounds=322 cache_schema=component-cache-v1 cache_reuse=none cache_captures=2 cache_captured_capacity_bytes=270532608 cache_global_ledger_bytes=3495077150 acceptance_pct=59.2 ngram_rows=20448 ngram_dedup_rows=40 ngram_cache_hits=5104 ngram_disk_reads=15304 cache_snapshot_bytes=269015804 cache_miss_reason=no_compatible_boundary common_prefix_tokens=28 nearest_checkpoint_tokens=0 rss_mib=3674 host_available_mib=35979
+2026-11-15 16:19:37 [INFO] [server] event=shutdown_requested signal=15
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=4096 purpose=1 rank=1 unique_bytes_freed=57130 ledger_bytes=3494997350
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=8192 purpose=1 rank=1 unique_bytes_freed=81258 ledger_bytes=3494916092
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=12288 purpose=1 rank=1 unique_bytes_freed=105386 ledger_bytes=3494810706
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=16384 purpose=1 rank=1 unique_bytes_freed=129514 ledger_bytes=3494681192
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=18248 purpose=2 rank=3 unique_bytes_freed=140250 ledger_bytes=3494540942
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=18253 purpose=0 rank=3 unique_bytes_freed=1365138 ledger_bytes=3493175804
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=52 purpose=2 rank=3 unique_bytes_freed=33258 ledger_bytes=3493142546
+2026-11-15 16:19:37 [INFO] [cache] schema=component-cache-v1 event=retention action=2 reason=9 tokens=59 purpose=0 rank=3 unique_bytes_freed=33310 ledger_bytes=3493109236

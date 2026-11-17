@@ -1,0 +1,46 @@
+{
+ "label": "ctx96k",
+ "model": "coding_swift15_iq3s",
+ "rows": [
+  {
+   "target_prompt_tokens": 300,
+   "prompt_tokens": 820,
+   "completion_tokens": 300,
+   "ttft_s": 0.84,
+   "prefill_tok_s": 972.7,
+   "decode_tok_s": 124.2,
+   "total_s": 3.2,
+   "vram_used_mib_after": 15293
+  },
+  {
+   "target_prompt_tokens": 800,
+   "prompt_tokens": 2069,
+   "completion_tokens": 300,
+   "ttft_s": 1.08,
+   "prefill_tok_s": 1919.3,
+   "decode_tok_s": 118.9,
+   "total_s": 3.6,
+   "vram_used_mib_after": 15293
+  },
+  {
+   "target_prompt_tokens": 12500,
+   "prompt_tokens": 31658,
+   "completion_tokens": 300,
+   "ttft_s": 9.42,
+   "prefill_tok_s": 3360.0,
+   "decode_tok_s": 115.3,
+   "total_s": 12.0,
+   "vram_used_mib_after": 15293
+  },
+  {
+   "target_prompt_tokens": 35000,
+   "prompt_tokens": 88547,
+   "completion_tokens": 300,
+   "ttft_s": 26.78,
+   "prefill_tok_s": 3306.3,
+   "decode_tok_s": 121.1,
+   "total_s": 29.2,
+   "vram_used_mib_after": 15293
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+=== u20-heretic-q4km-vulkan-vision start 2026-11-15 10:56:02 CST
+LOAD_S 4 up=1
+VISION {"elapsed_s": 2.508, "ttft_s": 1.4125260000000002, "prompt_tokens": 162, "completion_tokens": 69, "prompt_per_second": 114.68815441273293, "predicted_per_second": 62.56860693757033, "checks": {"yellow_or_gold_circle": true, "red_square": true, "green_triangle": true, "text_x3_bakeoff": true}, "vision_works": true, "finish": "stop"}
+TEXT: This image features a blue background with a white rectangular banner at the top containing the text "X3-BAKEOFF" in a black, pixelated font. Below the text, there are three distinct geometric shapes: a large yellow circle on the left, a red square on the right, and a green triangle at the bottom.
+=== u20-heretic-q4km-vulkan-vision end 2026-11-15 10:56:09 CST
+VISION_VULKAN_R2_DONE

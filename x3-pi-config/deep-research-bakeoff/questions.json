@@ -1,0 +1,48 @@
+[
+  {
+    "id": "Q1_miniml_harness",
+    "question": "Which coding harness ranked first in miniml's local harness-bench, and with what pass rate and per-task time for its top cell?",
+    "ground_truth": {
+      "winner": "pi",
+      "pass_rate": "76.9%",
+      "top_cell": "Qwen3.6-27B + pi (16/16, ~207 s per task)"
+    },
+    "rubric_terms": ["pi", "76.9", "207", "qwen3.6-27b", "16/16"]
+  },
+  {
+    "id": "Q2_flash_next_sampling",
+    "question": "What are Qwen's recommended thinking and non-thinking sampling settings for Qwen3.8-Flash-Next?",
+    "ground_truth": {
+      "thinking": "temperature=1.0, top_p=0.95, top_k=20, min_p=0, presence_penalty=0",
+      "non_thinking": "temperature=0.7, top_p=0.8, top_k=20, min_p=0, presence_penalty=1.5"
+    },
+    "rubric_terms": ["1.0", "0.95", "20", "0.7", "0.8", "1.5"]
+  },
+  {
+    "id": "Q3_opencode_230",
+    "question": "What changed in OpenCode 2.3.0 and when was it released?",
+    "ground_truth": {
+      "release_date": "2026-11-13",
+      "key_change": "background subagents by default (subagents return immediately and continue in the background)"
+    },
+    "rubric_terms": ["2026-11-13", "nov", "13", "background", "subagent"]
+  },
+  {
+    "id": "Q4_codex_llamacpp",
+    "question": "Can Codex CLI use a llama.cpp server, and what config does it need?",
+    "ground_truth": {
+      "supported": "yes",
+      "config": "wire_api = \"responses\" (or Responses API /v1/responses; Chat Completions API was dropped)"
+    },
+    "rubric_terms": ["yes", "responses", "wire_api", "base_url"]
+  },
+  {
+    "id": "Q5_ldr_vs_gptr",
+    "question": "Compare local-deep-research and GPT-Researcher: license, latest version, SearXNG support.",
+    "ground_truth": {
+      "local_deep_research": "MIT license, v2.0.0 / v2.0.1 (Nov 2026), SearXNG supported",
+      "gpt_researcher": "Apache-2.0 license, v3.8.0 (or PyPI 0.17.0) Nov 2026, SearXNG supported"
+    },
+    "rubric_terms": ["mit", "apache", "2.0", "3.8", "0.17", "searxng"]
+  }
+]

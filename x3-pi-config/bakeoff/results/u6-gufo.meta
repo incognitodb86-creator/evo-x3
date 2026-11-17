@@ -1,0 +1,10 @@
+=== u6-gufo start 2026-11-15 09:23:30 CST
+CMD: sudo podman run --rm --name bake-gufo --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined --ulimit memlock=-1:-1 -v /srv/models:/srv/models:ro,Z ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133 gufo serve llm --host 127.0.0.1 --port 8090 --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf --mtp-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf --speculative mtp --context 32768 --sessions 1 --served-model-name flash-next --reasoning-effort low --log-progress
+LOAD_S 23 up=1
+long {"ttft_s": 11.26, "total_s": 12.84, "prompt_tokens": 18253, "completion_tokens": 103, "client_decode_tps": 65.11, "finish": "stop", "pass": true}
+code {"ttft_s": 0.33, "total_s": 3.42, "prompt_tokens": 141, "completion_tokens": 203, "client_decode_tps": 65.67, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.2, "total_s": 17.38, "prompt_tokens": 59, "completion_tokens": 861, "client_decode_tps": 50.12, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124          90           0           0          34          33
+=== u6-gufo end 2026-11-15 09:24:30 CST
