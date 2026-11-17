@@ -39,6 +39,13 @@
   ],
   "skills": [
     "/home/evo/AI/community/skills",
+    "-/home/evo/AI/community/skills/alienpc-hardcore-i2v-director",
+    "-/home/evo/AI/community/skills/alienpc-stills-pose-edit-prompting",
+    "-/home/evo/AI/community/skills/comfy-render",
+    "-/home/evo/AI/community/skills/h3-hc-render",
+    "-/home/evo/AI/community/skills/h3-max-ref2va-prompt",
+    "-/home/evo/AI/community/skills/image-render",
+    "-/home/evo/AI/community/skills/video-render",
     "/home/evo/AI/community/agent-shared/skills",
     "/home/evo/AI/fleet-brain/20_skills/current",
     "-/home/evo/AI/fleet-brain/20_skills/current/fantasy-news-scout",

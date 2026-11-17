@@ -82,6 +82,9 @@ bash apply-on-x3.sh evo --with-forge
   `medium` (`RALPH_THINKING=` to change; pass limit 30 min). Subagents stay at low (llama-swap forces it on `-sub`).
 - `maxTokens` 65536 for `flash-next*`, pi's `grep`/`find`/`ls` tools (root-apply installs ripgrep and fd-find), and a
   Code section in `AGENTS.md` with the test gate, lint and prompt-gate commands.
+- The Forge pane no longer loads the 7 render/stills operating skills (`h3-hc-render`, `video-render`, `image-render`,
+  `comfy-render`, `h3-max-ref2va-prompt`, `alienpc-*`); `h3-prompting` and `h3-parody-identity` stay for writer and
+  identity code, and AGENTS.md tells Forge to read the others as files when it changes that code.
 - Ralph backpressure also runs `lint_changed.py`: ruff syntax and undefined-name rules on the files a pass changed,
   failing only on findings that were not already there. (Existing finding for a future item: `build_request.py`
   line 4334 raises the undefined `BuilderError`.)
