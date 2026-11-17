@@ -19,6 +19,8 @@ R="$HOME/AI/render"; S="$HOME/AI/community/skills"
 cd "$R"
 export PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/panes/render}"
 export PATH="$R/x3/.venv/bin:$HOME/.local/bin:$PATH"
+# PixlStash read token for still lookups (AGENTS.md uses $PIXL_KEY; Max 2026-11-16, Derrick t2190u)
+[ -r "$HOME/.config/pixlstash/render-read.token" ] && export PIXL_KEY="$(tr -d '[:space:]' < "$HOME/.config/pixlstash/render-read.token")"
 exec pi --approve \
   --no-extensions \
   -e "$R/.pi/npm/node_modules/pi-permission-system/index.ts" \
