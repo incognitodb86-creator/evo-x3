@@ -8,29 +8,11 @@ import pytest
 
 import build_request as br
 import render_writer_pipeline as p
-import submit_parody_run as spr
 import test_writer_pipeline as twp
 import wp_lint
 
 
 # ---- 1. Hard fail when --still is missing or nonexistent absolute path ----------------------------------------------
-def test_writer_run_cli_missing_still_fails_hard(tmp_path, capsys):
-    rd = tmp_path / "r1"
-    rd.mkdir()
-    rc = spr._writer_run_cli([str(rd), "--ask", "she has sex with him", "--position", "doggy"])
-    out = capsys.readouterr().out
-    assert rc == 3 and "NOT_READY" in out and "start still missing" in out
-
-
-def test_writer_run_cli_nonexistent_absolute_still_fails_hard(tmp_path, capsys):
-    rd = tmp_path / "r2"
-    rd.mkdir()
-    missing = tmp_path / "nope.jpg"
-    rc = spr._writer_run_cli([str(rd), "--ask", "she has sex with him", "--position", "doggy", "--still", str(missing)])
-    out = capsys.readouterr().out
-    assert rc == 3 and "NOT_READY" in out and "start still not found" in out
-
-
 def test_pipeline_continue_without_still_does_not_auto_pick(tmp_path, monkeypatch):
     monkeypatch.setattr(p, "PIPE_DIR", tmp_path / "home")
     (tmp_path / "home").mkdir()
@@ -57,17 +39,6 @@ def test_pipeline_nonexistent_absolute_still_fails_hard(tmp_path, monkeypatch):
 
 
 # ---- 2. Enforce absolute run paths -----------------------------------------------------------------------------------
-def test_writer_run_cli_rejects_relative_run_dir(capsys):
-    rc = spr._writer_run_cli(["rel_run_dir", "--ask", "she has sex with him", "--position", "doggy", "--still", "community/x.jpg"])
-    out = capsys.readouterr().out
-    assert rc == 3 and "NOT_READY" in out and "absolute path" in out
-
-
-def test_parody_job_rejects_relative_run_dir_override():
-    with pytest.raises(ValueError, match="absolute path"):
-        spr.submit_parody_job(name="Testa Char", description="Adult woman, dark hair.", run_dir_override=Path("rel_run"), dry_run=True)
-
-
 def test_pipeline_cli_rejects_relative_run_dir(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(p, "PIPE_DIR", tmp_path / "home")
     (tmp_path / "home").mkdir()
@@ -155,7 +126,7 @@ def test_wp_lint_catches_enters_her_mouth_oral_silence_and_deep_in_her_oral_cont
 
 def test_pixlstash_lookup_uses_merged_vault_only_and_skips_if_token_absent(tmp_path, monkeypatch):
     import sqlite3
-    import submit_parody_run as spr
+    import resolve as spr
 
     assert len(spr._PIXLSTASH_VAULTS) == 1
     assert spr._PIXLSTASH_VAULTS[0].as_posix().endswith("5slock/libraries/vault.db")

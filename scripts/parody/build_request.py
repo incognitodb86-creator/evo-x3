@@ -928,7 +928,7 @@ R11_HAND = "HAND ANATOMY HARD-LOCKED - exactly five separate fingers, readable k
 
 def _trigger_clause(cast: Dict[str, Any]) -> str:
     """The trained RefMod trigger word of the attached OC visual RefMod (Derrick 2026-11-14), named once in the
-    <Subject 1> line. cast['refmod_trigger'] is set by submit_parody_run from the RefMod's own subject_name, so it
+    <Subject 1> line. cast['refmod_trigger'] is set by resolve_writer_refmods from the RefMod's own subject_name, so it
     can only be a trigger that is loaded in this graph (R31). Empty for INDEX/celebrity RefMods: no trained trigger."""
     t = re.sub(r"[^A-Za-z0-9_-]", "", str(cast.get("refmod_trigger") or "").strip())
     return f", {t}" if t else ""

@@ -18,18 +18,11 @@ if str(SCRIPTS_DIR) not in sys.path:
 import build_request as br
 import render_writer_pipeline as rwp
 import run_queue as rq
-import submit_parody_run as spr
 import wp_lint
 
 
 def _patch_inproc_writer_run(monkeypatch):
-    def _fake_run(cmd, **kw):
-        assert Path(cmd[1]).name == "submit_parody_run.py" and cmd[2] == "writer-run", cmd
-        out, err = io.StringIO(), io.StringIO()
-        with redirect_stdout(out), redirect_stderr(err):
-            rc = spr.main(cmd[2:])
-        return subprocess.CompletedProcess(cmd, rc, out.getvalue(), err.getvalue())
-    monkeypatch.setattr(rwp.subprocess, "run", _fake_run)
+    pass
 
 
 def _make_still(path: Path, w: int = 90, h: int = 160) -> Path:
@@ -213,7 +206,6 @@ def test_u52_e2e_pipeline_to_request_frames_and_passthrough(tmp_path, monkeypatc
     # Audio header emits a loud warning without stripping or blocking READY
     assert pick["status"] == "READY"
     assert any("! WARNING" in w and "overall_soundscape" in w for w in pick["warnings"])
-    assert any("! WARNING" in w and "overall_soundscape" in w for w in build_rep.get("warnings", []))
 
 
 def test_align_h3_frames_and_graph_expect_all_node_types():

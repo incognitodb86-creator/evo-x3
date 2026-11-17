@@ -6,7 +6,7 @@ description: >-
   autonomous chat execution from /home/derekboone/AI/render or writer-run builds.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). After Derrick's yes, run the writer pipeline (or `submit_parody_run.py`) with `--queue --yes-derrick` so it writes and queues in one pass (queue-remote.sh; adults guard and pytest gate stay).
+> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). After Derrick's yes, run `render_writer_pipeline.py` with `--queue --yes-derrick` so it writes and queues in one pass (queue-remote.sh; adults guard and pytest gate stay).
 # H3 parody / identity lane (INDEX + RefMod)
 
 Internals, CLI, VRAM: `references/h3-parody-identity-reference.md` (brain: `10_packs/max/h3-parody-identity-reference.md`). Read only when changing pipeline.
@@ -14,9 +14,9 @@ Internals, CLI, VRAM: `references/h3-parody-identity-reference.md` (brain: `10_p
 ## Locked baseline (Derrick, Nov 5–6, 2026; synced 2026-11-13)
 
 - `templates/b2_refmod.api.json`, 1-pass, `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, 8 steps `euler`/`simple`, shift 12.0/3.0, RefModsLoader → RefModApply `retention 1.0`, plus `run_queue.py` default NVIDIA `RTX VSR ULTRA 2x @ 24fps` (`1536x2688` / `2688x1536`, keeps `<tag>_raw.mp4`; `--no-upscale` opt-out; on X3 remote mode, 2x upscale post-pass is deferred to AlienPc). **All adult RefMods (OC, INDEX, PixlStash-tagged in `~/AI/5slock/libraries/vault.db`; on the X3, PixlStash tags resolve on AlienPc only so pass `--character`/`--names`) and all voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed; 2-pass is retired and 18+ (`guard_ok` / youth lint) is the only content rule.** New nodes/dials need Derrick's yes.
-- INDEX + RefMod + voice refs resolve automatically in `submit_parody_run.py` (`FCSydny` attaches `minimaxh3_oc_poolclub_v1_refmod_audio` and `minimaxh3_oc_poolclub_v1_refmod_visual`); report errors if a requested name has no local weights instead of downloading anything.
+- INDEX + RefMod + voice refs resolve automatically in `resolve.py` + `fill_request.py` (`FCSydny` attaches `minimaxh3_oc_poolclub_v1_refmod_audio` and `minimaxh3_oc_poolclub_v1_refmod_visual`); report errors if a requested name has no local weights instead of downloading anything.
 - Never open any `sydney` path (`~/AI/sydney/`). Never use minor-coded words (`underage`, `minor`, `child`, `children`) — `guard_ok` blocks the submit (`18+` only content rule).
-- Writer-run lane (`~/AI/render`, Gemma 4 26B A4B Heretic arm A: `--provider x3-local --model gemma4-heretic` Q8_0 llama.cpp Vulkan + BF16 mmproj on the EVO-X3; `--provider llama-swap --model gemma4_heretic_poly` on AlienPc): use `render_writer_pipeline.py` (flags `--ask --position --still --still-read --character FCSydny --frames --shots --shot-count --scene --continue --partner2-still`) or `submit_parody_run.py writer-run` (`--ask --position --still --character --frames --shots --continued --partner2-still --s3-look --s3-in-frame --partner-type --partner-type2`), after Derrick's yes, run with `--queue --yes-derrick` (write and queue in one pass; no dry run first).
+- Writer-run lane (`~/AI/render`, Gemma 4 26B A4B Heretic arm A: `--provider x3-local --model gemma4-heretic` Q8_0 llama.cpp Vulkan + BF16 mmproj on the EVO-X3; `--provider llama-swap --model gemma4_heretic_poly` on AlienPc): use `render_writer_pipeline.py` (flags `--ask --position --still --still-read --character FCSydny --frames --shots --shot-count --scene --continue --partner2-still --template`) or `fill_request.py` when `writer_output.txt` is already written; after Derrick's yes, run `render_writer_pipeline.py` with `--queue --yes-derrick` (write and queue in one pass; no dry run first).
 - On the EVO-X3, always stop dry at `READY`, paste `prompt.txt` to Derrick, and queue only after his explicit yes via `bash ~/AI/render/x3/queue-remote.sh <run_dir> --yes-derrick`. Ask first for batches or downloads.
 
 ## Writing the arguments (Reference §0.5, §0.7)
@@ -37,7 +37,7 @@ Name mapping: prefer pairing `INDEX` character + actor (`--name "<Actor>" --char
 
 ## Write and queue in one pass after Derrick's yes (X3 recipe)
 
-1. After Derrick's yes (and after confirming AlienPc's GPU/lease is free), write and queue in one pass with the ONE writer command (`render_writer_pipeline.py`, which calls `submit_parody_run.py writer-run` with `--character`/`--actor`/`--names`) and `--queue --yes-derrick`:
+1. After Derrick's yes (and after confirming AlienPc's GPU/lease is free), write and queue in one pass with the ONE writer command (`render_writer_pipeline.py`, which calls `fill_request.py` with a saved template in `templates/` and queues via `run_queue.py`) and `--queue --yes-derrick`:
 ```bash
 ~/AI/render/x3/.venv/bin/python ~/AI/community/scripts/parody/render_writer_pipeline.py <run_dir> \
   --ask "<ask>" --position <act> --still <still_path> \

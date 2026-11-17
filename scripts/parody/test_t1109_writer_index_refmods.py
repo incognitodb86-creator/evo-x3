@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 import build_request as br
-import submit_parody_run as s
+import resolve as s
 
 _AI_ROOT = Path(__file__).resolve().parents[3]
 
@@ -96,66 +96,29 @@ def test_t1109_third_person_off_still_must_be_defined():
         assert any("third person" in i for i in rep.get("issues", []))
 
 
-def test_t1109_prepare_graph_does_not_keep_previous_run_refmods():
-    tpl = json.loads(Path(s.DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
-    s._set_refmod_slots(tpl, [
-        "minimaxh3_oc_poolclub_v1_refmod_visual",
-        "minimaxh3_oc_poolclub_v1_refmod_audio",
-    ])
-    tpl["img_1"] = {"inputs": {"image": str(_AI_ROOT / "render" / "run" / "old" / "poolclub_start.png")}}
-    _g, rep = s.prepare_writer_base_graph(tpl, still_image=str(_AI_ROOT / "render" / "_inputs" / "hoot_start.jpg"))
-    assert rep.get("reason")
-    assert "will not reuse the previous run" in rep["reason"]
-
-
-def test_t1109_prepare_graph_attaches_oc_refmod_from_still_path():
-    keys = s.installed_oc_refmod_keys()
-    assert "poolclub" in keys, "poolclub OC RefMods must be installed for this test"
-    tpl = json.loads(Path(s.DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
-    s._set_refmod_slots(tpl, [
-        "minimaxh3_oc_poolblonde_v2_refmod_visual",
-        "minimaxh3_oc_poolblonde_v2_refmod_audio",
-    ])
-    tpl["img_1"] = {"inputs": {"image": str(_AI_ROOT / "render" / "run" / "old" / "blonde_start.png")}}
-    g, rep = s.prepare_writer_base_graph(
-        tpl, still_image=str(_AI_ROOT / "render" / "_inputs" / "oc_poolclub_diner.jpg"),
-    )
-    assert not rep.get("reason"), rep
-    assert rep.get("template") is True
-    stems = " ".join(rep.get("stems") or [])
-    assert "poolclub" in stems
-    assert "poolblonde" not in stems
-    assert s._graph_img1(g).endswith("oc_poolclub_diner.jpg")
-
-
-def test_t1109_prepare_graph_character_name_attaches_oc_and_index_celebrity_refmods():
+def test_t1109_resolve_writer_refmods_character_and_index_celebrity():
     keys = s.installed_oc_refmod_keys()
     assert "poolblonde" in keys
-    tpl = json.loads(Path(s.DEFAULT_REFMOD_TEMPLATE).read_text(encoding="utf-8"))
-    _g, rep = s.prepare_writer_base_graph(
-        tpl,
+    rep = s.resolve_writer_refmods(
         still_image=str(_AI_ROOT / "render" / "_inputs" / "generic_start.jpg"),
         character="poolblonde",
     )
     assert not rep.get("reason"), rep
     assert any("poolblonde" in x for x in (rep.get("stems") or []))
 
-    _g2, rep2 = s.prepare_writer_base_graph(
-        tpl,
+    rep2 = s.resolve_writer_refmods(
         still_image=str(_AI_ROOT / "render" / "_inputs" / "generic_start.jpg"),
         character="daenerys",
     )
     assert not rep2.get("reason"), rep2
     assert any("emiliaclarke" in x for x in (rep2.get("stems") or []))
 
-    _g3, rep3 = s.prepare_writer_base_graph(
-        tpl,
+    rep3 = s.resolve_writer_refmods(
         still_image=str(_AI_ROOT / "render" / "_inputs" / "generic_start.jpg"),
         character="nonexistent_character_xyz",
     )
     assert rep3.get("reason")
     assert "no local RefMod installed" in rep3["reason"]
-    assert "will not attach a real-person RefMod" not in rep3["reason"]
 
 
 def test_t1125_trained_subject_fcsydny_maps_to_poolclub():

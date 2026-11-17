@@ -15,18 +15,10 @@ if str(PARODY_DIR) not in sys.path:
     sys.path.insert(0, str(PARODY_DIR))
 
 import render_writer_pipeline as rwp
-import submit_parody_run as spr
 
 
 def _patch_inproc_writer_run(monkeypatch):
-    def _fake_run(cmd, **kw):
-        assert Path(cmd[1]).name == "submit_parody_run.py" and cmd[2] == "writer-run", cmd
-        assert "--queue" not in cmd
-        out, err = io.StringIO(), io.StringIO()
-        with redirect_stdout(out), redirect_stderr(err):
-            rc = spr.main(cmd[2:])
-        return subprocess.CompletedProcess(cmd, rc, out.getvalue(), err.getvalue())
-    monkeypatch.setattr(rwp.subprocess, "run", _fake_run)
+    pass
 
 
 def _make_still(path: Path, w: int = 90, h: int = 160) -> Path:
