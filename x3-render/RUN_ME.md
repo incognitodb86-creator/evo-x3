@@ -4,7 +4,7 @@ Last Updated: 2026-11-16
 Quickstart for running the H3 writer pipeline on EVO-X3 Linux (`/home/evo/AI/render`).
 
 ## 0. EVO-X3 Launch & Queue
-- **User & launcher**: Render pi panes run as user `evo` (uid 1001, `/home/evo/AI/render`), launched via `/home/evo/AI/render/x3/render-pi.sh` (loads `x3-local/flash-next-uncensored`, `--thinking low`, `h3-parody-identity` + `h3-prompting` skills, `/home/evo/AI/render/OPERATOR.md`):
+- **User & launcher**: Render pi panes run as user `evo` (uid 1001, `/home/evo/AI/render`), launched via `/home/evo/AI/render/x3/render-pi.sh` (loads `x3-local/flash-next-uncensored`, `--thinking medium`, `h3-parody-identity` + `h3-prompting` skills, `/home/evo/AI/render/OPERATOR.md`):
   ```bash
   sudo -n -u evo env XDG_RUNTIME_DIR=/run/user/1001 HOME=/home/evo PATH=/home/evo/.local/bin:/usr/bin bash /home/evo/AI/render/x3/render-pi.sh
   ```

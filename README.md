@@ -66,3 +66,24 @@ uncommitted edits, so you can check nothing of yours is lost before installing.
 
 Not changed by this bundle: the Sydney pane still runs `gemma4-heretic`, so using Sydney while Render or Forge is busy
 swaps the exclusive `main` group.
+
+### Step 4. Forge coding setup (as `evo`; after Step 2 and the restart)
+
+```bash
+bash apply-on-x3.sh evo --with-forge
+```
+
+- Forge, its subagents and Ralph all use `flash-next-uncensored` (subagents `flash-next-uncensored-sub`), the same
+  resident model as Render, so switching between panes no longer swaps Halogen checkpoints (~25 s each).
+- pi 1.5.2 sends no `reasoning_effort` for this model, so every `--thinking` level used to run at Halogen's default
+  `medium` (checked with `x3-pi-config/scripts/probe-pi-thinking.sh`). `models.json` now maps pi levels to real effort:
+  `off` uses the model card's non-thinking sampling, `minimal`/`low` = low, `medium` = medium, `high`/`xhigh` = xhigh.
+  Forge runs `--thinking high` (xhigh, the model's own default), Render `medium` (what it effectively had), Ralph passes
+  `medium` (`RALPH_THINKING=` to change; pass limit 30 min). Subagents stay at low (llama-swap forces it on `-sub`).
+- `maxTokens` 65536 for `flash-next*`, pi's `grep`/`find`/`ls` tools (root-apply installs ripgrep and fd-find), and a
+  Code section in `AGENTS.md` with the test gate, lint and prompt-gate commands.
+- Ralph backpressure also runs `lint_changed.py`: ruff syntax and undefined-name rules on the files a pass changed,
+  failing only on findings that were not already there. (Existing finding for a future item: `build_request.py`
+  line 4334 raises the undefined `BuilderError`.)
+
+Restart the Forge and Render herdr panes afterwards. `evo-rollback` restores everything.

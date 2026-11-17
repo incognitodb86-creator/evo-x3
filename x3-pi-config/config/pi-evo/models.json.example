@@ -66,7 +66,7 @@
             "text"
           ],
           "contextWindow": 262144,
-          "maxTokens": 32768,
+          "maxTokens": 65536,
           "samplingParams": {
             "temperature": 1.0,
             "top_p": 0.95,
@@ -76,6 +76,28 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
           }
         },
         {
@@ -107,7 +129,7 @@
             "image"
           ],
           "contextWindow": 262144,
-          "maxTokens": 32768,
+          "maxTokens": 65536,
           "samplingParams": {
             "temperature": 1.0,
             "top_p": 0.95,
@@ -117,6 +139,28 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
           }
         },
         {

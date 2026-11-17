@@ -2,7 +2,7 @@
 # Plain capped Ralph loop for Forge on the EVO-X3 (bash port of the AlienPc Windows Ralph runner + U53 safety checks).
 # Runs pi --print on PROMPT.md, one fix_plan item per pass, stops at PLAN_COMPLETE, NO_PROGRESS or the -Max cap.
 # Max Architect 2026-11-15, X3 Phase 2 (Derrick t1784s6566 "port ralph-loop to Linux"); U53 B3+I2 2026-11-16. Forge owns this file.
-# Usage: ralph.sh [-Max 10] [-Model x3-local/flash-next] [-PassLimitSec 3600] [-IterationTimeoutSec 7200]
+# Usage: ralph.sh [-Max 10] [-Model x3-local/flash-next-uncensored] [-PassLimitSec 3600] [-IterationTimeoutSec 7200]
 #                 [-GpuWaits 30] [-GpuWaitSec 120] [-GpuLockPath <lock>] [-LockPollSec 2]
 #                 [-MemoryRoot <dir>] [-WorkDir <pi cwd>] [-TargetRepo <repo|none>] [-PiCwd <work|target|dir>]
 #                 [-WorktreeRoot <dir>] [-NoWorktree] [-MaxDiffFiles 10] [-StaleHours 12] [-ClearStale]
@@ -10,7 +10,7 @@
 # Start detached: nohup setsid bash ralph.sh -Max N >/dev/null 2>&1 &
 # Exit codes: 0 done/capped, 4 another copy running, 5 bad args.
 set -uo pipefail
-Max=10; Model='x3-local/flash-next'; GpuWaits=30; GpuWaitSec=120
+Max=10; Model='x3-local/flash-next-uncensored'; GpuWaits=30; GpuWaitSec=120
 GpuLockPath="$HOME/AI/locks/gpu-render.lock"; IterationTimeoutSec=7200; CommandOverride=''; LogPath=''
 PassLimitSec=3600; LockPollSec=2; MemoryRoot="$HOME/AI/fleet-brain/25_memory/shared"; WorkDir="$HOME/AI/forge"
 TargetRepo='auto'; PiCwd='work'; WorktreeRoot="$HOME/AI/_worktrees"; NoWorktree=0
@@ -461,6 +461,10 @@ PY
   fi
 
   if [ -z "$failReason" ] && [ -n "$BackpressureCmd" ]; then
+    # Commit the target worktree was at before this pass, so a backpressure command can lint only what changed.
+    if [ -n "${wtTargetDir:-}" ]; then
+      RALPH_PASS_BASE="${PRE_HEAD[$(realpath "$wtTargetDir" 2>/dev/null || echo "$wtTargetDir")]:-}"; export RALPH_PASS_BASE
+    fi
     if ! bash -c "cd \"$RunWorkDir\" && $BackpressureCmd" >>"$idx" 2>&1; then
       failReason="BackpressureCmd failed: $BackpressureCmd"
     fi
