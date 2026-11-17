@@ -34,7 +34,7 @@
   "unet": {
     "class_type": "UNETLoader",
     "inputs": {
-      "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+      "unet_name": "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors",
       "weight_dtype": "default"
     }
   },
@@ -57,9 +57,9 @@
       ],
       "selection": "vsa",
       "selection.keep_percent": 10,
-      "start_percent": 0.2,
+      "start_percent": 0.0,
       "end_percent": 1.0,
-      "dense_blocks": "",
+      "dense_blocks": "0,1",
       "min_tokens": 12288,
       "extra_tokens": 256,
       "sink_conditioning": "exact_kv_and_rows",
@@ -73,7 +73,7 @@
         "m_vsa",
         0
       ],
-      "shift_video": 10.0,
+      "shift_video": 12.0,
       "shift_audio": 3.0
     }
   },
