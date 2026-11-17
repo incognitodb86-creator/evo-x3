@@ -40,6 +40,7 @@ OVERLAY_RE = [  # (overlay, pattern) - first-match order does not matter; every 
 ]
 TRANSITION_RE = re.compile(r"(?i)position change|\bswitch(?:es)? to\b|turns her over|\bfrom (?:missionary|doggy|cowgirl|spooning)\b[^.]{0,30}\bto\b|rolls her (?:over|onto)")
 STRIP_RE = re.compile(r"(?i)\bstrip\w*|\bundress\w*|slow reveal|\bpeels?\b")
+INTERACTION_RE = re.compile(r"(?i)\b(?:walk\w*|stroll\w*|sit(?:s|ting)?|kiss\w*|flirt\w*|rac(?:e|es|ed|ing)|cuddl\w*|embrac\w*|hug\w*|danc\w*)\b")
 SEX_WORDS_RE = re.compile(r"(?i)\b(?:sex|fucks?|takes her|thrusts?|rides?|riding|penetrat\w*|inside her)\b")
 # mode-block labels in writer_prompt.md MODES (only the blocks for this clip are kept)
 BLOCK_FOR = {"cinematic": "Cinematic", "gonzo": "Gonzo", "pov": "Gonzo", "edge": "Teasing and edging",
@@ -66,6 +67,11 @@ def resolve_act(position: str, ask: str, still_read: Optional[Dict[str, Any]]) -
     if re.search(r"(?i)\bsensual\b", (position or "") + " " + (ask or "")) and not SEX_WORDS_RE.search(ask or ""):
         warnings.append({"warn": "mode_fallback", "why": "unknown sensual ask; routed to tease", "chosen": "tease"})
         return {"act_id": "tease", "warnings": warnings}
+    # U56 (F1): a free-text non-sex position (walk, sit, kiss, flirt, race, cuddle, dance...) keeps its ask action and never becomes a sex act
+    if (position or "").strip() and INTERACTION_RE.search(position) and not SEX_WORDS_RE.search((position or "") + " " + (ask or "")):
+        act = "dance" if re.search(r"(?i)\bdanc", position) and br.get_act("dance") else "talk"
+        warnings.append({"warn": "mode_fallback", "why": f"free-text non-sex position {position!r}; the ask's action is the beat", "chosen": act})
+        return {"act_id": act, "warnings": warnings}
     idx = _alias_index()
     a = (ask or "").lower()
     hits = sorted(((len(k), v) for k, v in idx.items() if re.search(r"(?<![\w-])" + re.escape(k) + r"(?![\w-])", a)), reverse=True)

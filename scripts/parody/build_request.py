@@ -2911,8 +2911,8 @@ def lint_final_prompt(full: str) -> List[str]:
         errs.append("double article 'the the'")
     dd_m = re.search(r"(?is)\bdetailed_description:\s*\n(.*)\Z", full)
     dd_part = dd_m.group(1) if dd_m else full
-    if re.search(r"<Subject\s+\d+>", dd_part):
-        errs.append("<Subject N> tag in detailed_description")
+    if re.search(r"(?<![(\w<,/])S[123](?![\w)>,/])", re.sub(r"(?is)<d>.*?</d>", " ", dd_part)):
+        errs.append("bare S1/S2 label without parentheses")
     if re.search(r"(?i)previous clip's end pose", full):
         errs.append("placeholder \"previous clip's end pose\" in prompt")
     if re.search(r"(?i)\bsays\s*,\s*\(S\b|\bsays\s*,\s*\(S\d\)", full):

@@ -56,6 +56,8 @@ def strip_think(text: str) -> str:
     if "</think>" in t:
         t = t.split("</think>")[-1]
     t = re.sub(r"(?s)<\|channel\>thought.*?<channel\|>", "", t)
+    if "<think>" in t:  # U56: an unclosed block (cut by max_tokens) is dropped from its opening tag
+        t = t.split("<think>")[0]
     return t.strip()
 
 

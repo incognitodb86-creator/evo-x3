@@ -1,7 +1,7 @@
-"""Compile /home/derekboone/AI/render/writer_pipeline/writer_prompt.md from the craft sections of /home/derekboone/AI/render/AGENTS.md
+"""Compile ~/AI/render/writer_pipeline/writer_prompt.md from the craft sections of ~/AI/render/AGENTS.md
 (Max Architect 3, 2026-11-13, spec section 4). The output is not named AGENTS.md, carries no agent steps, commands or
 tool rules, and passes writer_sys.assert_writer_system_prompt. Run once after every AGENTS.md craft change:
-  python3 /home/derekboone/AI/community/scripts/parody/wp_compile_prompt.py
+  python3 ~/AI/community/scripts/parody/wp_compile_prompt.py
 """
 from __future__ import annotations
 
@@ -24,9 +24,9 @@ DROP_LINE = re.compile(r"^- (?:Do not pin the still or edit RefMods|More detail:
 HEAD = ("WRITER PROMPT\n"
         "Compiled from the craft sections of the Render instruction file by wp_compile_prompt.py; source sha256 {sha}.\n"
         "You write the detailed_description paragraph of one MiniMax-H3 prompt for one adult clip whose length the beat card gives "
-        "(2.3 to 10.1 seconds) and that opens on the start still. Every person is a fictional adult, 18 or older. The pipeline fills the other headers.\n")
+        "(2.3 to 10.1 seconds) and that opens on the start still. Every person is an adult, 18 or older. The pipeline fills the other headers.\n")
 OUTPUT = ("OUTPUT\n"
-          "- One plain paragraph that starts with [Shot 1] and its camera sentence. No header, no Markdown, no notes.\n"
+          "- One plain paragraph that starts with [Shot 1] and its camera sentence. No header (never integrated_multimodal_description, overall_soundscape or non_diegetic_music), no Markdown, no notes.\n"
           "- Dialogue form: (S1) says in a <short voice> voice, <d>[English] spoken words only</d>. (S2) and (S3) the same way.\n"
           "- Close a sex clip with one to three plain sound sentences tied to the action that makes them.\n")
 
