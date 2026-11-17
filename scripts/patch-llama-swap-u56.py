@@ -6,7 +6,8 @@ Changes only:
     and adds useModelName + filters.setParamsByID "flash-next-uncensored-sub" (reasoning_effort: low), matching flash-next-sub.
   - joycaption, ref2va-27b: ttl -> 300 so ~26 GiB of GTT is released after 5 idle minutes.
 
-Usage: patch-llama-swap-u56.py <in.yaml> <out.yaml>
+Usage: patch-llama-swap-u56.py [--no-vision] <in.yaml> <out.yaml>
+  --no-vision  skip HALOGEN_VISION_TOWER (use when the vision sidecar file is missing on disk).
 Exit 0 = wrote out.yaml (possibly unchanged), 2 = refused (structure not as expected; edit by hand).
 """
 import re
@@ -58,10 +59,13 @@ def set_scalar(lines, s, e, key, value):
 
 
 def main():
-    if len(sys.argv) != 3:
+    args = sys.argv[1:]
+    no_vision = "--no-vision" in args
+    args = [a for a in args if a != "--no-vision"]
+    if len(args) != 2:
         print(__doc__)
         return 2
-    lines = open(sys.argv[1], encoding="utf-8").read().splitlines(keepends=True)
+    lines = open(args[0], encoding="utf-8").read().splitlines(keepends=True)
     changes = []
 
     b = find_block(lines, "flash-next-uncensored")
@@ -72,9 +76,13 @@ def main():
     changes.append("flash-next-uncensored.concurrencyLimit=4")
     s, e = find_block(lines, "flash-next-uncensored")
     body = "".join(lines[s:e])
-    if "HALOGEN_VISION_TOWER=" not in body:
+    if no_vision:
+        changes.append("vision: skipped (--no-vision)")
+    elif "HALOGEN_VISION_TOWER=" not in body:
         ck_idx = next((i for i in range(s + 1, e) if "HALOGEN_CHECKPOINT=" in lines[i]), None)
-        if ck_idx is not None:
+        if ck_idx is None:
+            changes.append("vision: SKIPPED, no HALOGEN_CHECKPOINT= line to anchor on (add HALOGEN_VISION_TOWER by hand)")
+        else:
             indent = re.match(r"^(\s*)", lines[ck_idx]).group(1)
             lines.insert(ck_idx + 1, f"{indent}-e HALOGEN_VISION_TOWER=/models/qwen38-flash-next-vision.hgn\n")
             changes.append("flash-next-uncensored.HALOGEN_VISION_TOWER=/models/qwen38-flash-next-vision.hgn")
@@ -105,7 +113,7 @@ def main():
         lines = set_scalar(lines, b[0], b[1], "ttl", 300)
         changes.append(f"{name}.ttl=300")
 
-    open(sys.argv[2], "w", encoding="utf-8", newline="\n").write("".join(lines))
+    open(args[1], "w", encoding="utf-8", newline="\n").write("".join(lines))
     print("PATCHED: " + "; ".join(changes))
     return 0
 
