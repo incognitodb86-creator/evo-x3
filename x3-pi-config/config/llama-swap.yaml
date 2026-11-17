@@ -55,6 +55,8 @@ routing:
           exclusive: false
           members:
             - "embed-small"
+            - "joycaption"
+            - "ref2va-27b"
 
 models:
   "flash-next":
@@ -101,20 +103,28 @@ models:
     # 339f5c50..., vision b6ca6716... in /srv/models/flash-next-uncensored-hgn (110.7 GiB). Same engine/flags as flash-next.
     # U26 bench (cold, effort low): load 25 s; 18k prefill 1,859 / decode 81 long, 61 prose; 127k 1,790 / 71; 237k 1,688 / 69,
     # needle found at both; tools 3/3; Forge coding task pass; write1/write2 pass; refusal probes comply 3/3 (stock refuses
-    # explicit_adult). 88.9 GiB engine total, same as stock. Vision sidecar present but not loaded (text-only slot).
+    # explicit_adult). 88.9 GiB engine total (+0.84 GiB vision sidecar loaded so Render pi chat can inspect start stills with zero GPU swaps).
     cmd: |
       podman run --rm --name llama-swap-flash-next-uncensored
         -p 127.0.0.1:8081:8731
         --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
         -e HALOGEN_MODEL_ID=flash-next-uncensored -e HALOGEN_CTX=262144
         -e HALOGEN_CHECKPOINT=/models/model.hgn
+        -e HALOGEN_VISION_TOWER=/models/qwen38-flash-next-vision.hgn
         -e HALOGEN_REASONING_EFFORT=medium
         -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
         -v /srv/models/flash-next-uncensored-hgn:/models:ro
         ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
     proxy: "http://127.0.0.1:8081"
     ttl: 3600
-    concurrencyLimit: 1
+    # Raised 1->4: Halogen engine already allocates 4 shared slots (524,288 KV positions); concurrencyLimit: 1
+    # caused immediate HTTP 429 aborts whenever Render, Forge, and ralph.sh shared flash-next-uncensored.
+    concurrencyLimit: 4
+    useModelName: "flash-next-uncensored"
+    filters:
+      setParamsByID:
+        "flash-next-uncensored-sub":
+          reasoning_effort: low
     checkEndpoint: "/health"
 
   "gemma4-heretic":
@@ -146,16 +156,15 @@ models:
         --mmproj /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-unsloth-mmproj-BF16.gguf
         --jinja --load-mode none -fa on
         --reasoning-format deepseek
-        -np 2 -c 524288
+        -np 4 -c 524288
         -b 2048 -ub 2048
         --image-min-tokens 560 --image-max-tokens 1120
         --temp 1.0 --top-p 0.95 --top-k 64
         --alias gemma4-heretic
     proxy: "http://127.0.0.1:8081"
     ttl: 3600
-    # U27 2026-11-15 ~7:08 PM CT: tried -np 4 -c 1048576 / concurrencyLimit 4 (Phase 1); llama-server aborted twice in
-    # server_slot::prompt_save (GGML_ASSERT tensor not allocated, kyuz0 build 12405) on a Render subagent run. Rolled back to -np 2.
-    concurrencyLimit: 2
+    # U47 2026-11-16: -np 4 -c 524288 (4 x 131K slots, f16 KV) + concurrencyLimit 4 verified stable (avoids U27 -c 1048576 assert).
+    concurrencyLimit: 4
     # U31 2026-11-15 (Derrick t1819u): alias on the SAME slot, not a new exclusive-group member.
     # Render subagents use gemma4-heretic-sub (maxTokens 4096, thinking off in models.json).
     # U34 2026-11-16 (plan U33 G3): gemma4-heretic-sub forces thinking OFF server-side (Gemma 4: only
@@ -219,4 +228,50 @@ models:
         --alias embed-small
     proxy: "http://127.0.0.1:8083"
     ttl: 86400
+    checkEndpoint: "/health"
+
+  "joycaption":
+    # U47 2026-11-16: JoyCaption Beta One Q8_0 + F16 mmproj in non-exclusive "small" group.
+    # MIRROR NOTE: this block was reconstructed from the U47 brief/log (the live block was never committed).
+    # Port, flags and file names are unverified; diff against live /etc/evo-x3/llama-swap.yaml before relying on it.
+    # Live changes are applied by scripts/patch-llama-swap-u56.py, which only edits ttl and never copies this block.
+    # ttl: 300 frees ~7 GiB GTT after 5 min idle so Halogen keeps its page-cache headroom.
+    cmd: |
+      podman run --rm --name llama-swap-joycaption
+        --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+        llama-server --host 127.0.0.1 --port 8084
+        -m /srv/models/joycaption/Llama-Joycaption-Beta-One-Hf-Llava-Q8_0.gguf
+        --mmproj /srv/models/joycaption/llama-joycaption-beta-one-llava-mmproj-model-f16.gguf
+        --jinja --load-mode none -fa on -ngl 999
+        -np 1 -c 4096
+        --temp 0.6 --top-p 0.9
+        --alias joycaption
+    proxy: "http://127.0.0.1:8084"
+    ttl: 300
+    concurrencyLimit: 1
+    checkEndpoint: "/health"
+
+  "ref2va-27b":
+    # U48 2026-11-16: LightX2V MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA Q4_K_M + F16 mmproj (port 8085).
+    # Non-exclusive "small" group; ttl: 300 releases ~19.14 GiB GTT after 5 min idle (cold load is ~13.8 s).
+    cmd: |
+      podman run --rm --name llama-swap-ref2va-27b
+        --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+        llama-server --host 127.0.0.1 --port 8085
+        -m /srv/models/ref2va-27b/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-Q4_K_M.gguf
+        --mmproj /srv/models/ref2va-27b/mmproj-MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-F16.gguf
+        --jinja --load-mode none -fa on -ngl 999
+        -np 1 -c 32768 -n 4096
+        --temp 0
+        --chat-template-kwargs '{"enable_thinking":false}'
+        --alias ref2va-27b
+    proxy: "http://127.0.0.1:8085"
+    ttl: 300
+    concurrencyLimit: 1
     checkEndpoint: "/health"

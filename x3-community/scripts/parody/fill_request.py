@@ -23,12 +23,14 @@ def pick_template(has_still: bool, still_mode: str = "guide", has_identity: bool
                   character: Optional[str] = None, partner2_still: Optional[str] = None,
                   position: str = "", width: int = 768, height: int = 1344) -> str:
     if partner2_still: return "two_person"
-    if (width, height) == (1344, 768) and not has_identity: return "ref2va_16x9"
+    mode = br.normalize_still_mode(still_mode)
+    if (width, height) == (1344, 768) and not has_identity and mode == "ref": return "oc_ref"
     pos = (position or "").strip().lower()
     if has_identity:
         if not has_still: return "named_parody"
-        if br.normalize_still_mode(still_mode) == "ref": return "oc_ref"
+        if mode == "ref": return "oc_ref"
         return "talk" if pos == "talk" and not (character and str(character).upper().startswith("FC")) else "oc_guide"
+    if mode == "ref" and has_still: return "oc_ref"
     return "talk" if pos == "talk" else "plain"
 
 

@@ -21,9 +21,7 @@ Untested wording tips (not locked craft):
 
 **R26 - Sound-word vocabulary.** Use only the real-sound nouns R7 names, each one bound to the action producing it.
 This rule is vocabulary only - the shape and placement of audio is R7 and is not repeated here. Never in the paste:
-score and foley terminology, onomatopoeia words, dialogue lines (dialogue is off by default on every lane; the speech
-arm, its exact form and its token status are **R37** of
-`/home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md`, and visible on-screen text is **R38** there).
+score and foley terminology, onomatopoeia words, or labeled `overall_soundscape:` / `non_diegetic_music:` headers (spoken dialogue uses `<d>[English] ...</d>` per R7 and `/home/evo/AI/community/skills/h3-max-ref2va-prompt/SKILL.md` R37, and visible on-screen text is R38 there).
 
 **R27 - Contradiction phrases must be absent** (they cancelled the body reference in measurement):
 `body proportions` inside crop sentences, `are new and are not taken from`,
@@ -41,7 +39,7 @@ clip, no hedged alternatives. One primary action per short window; when a scene 
 used unless Derek supplies new refs, seeds are unique per cell, and the summary says cell N of M and what that cell
 must not do.
 
-**R29a - Long-run sex pacing (fictional adult OC / Cond stills only; no real-person likeness, name or voice).** One position and one PRIMARY MOTION per window. Across native joins, open from the prior end state: same join, same wardrobe, same camera hold, tempo unchanged unless this beat writes a pull-out and reseat (R19). A position change gets its own get-into-position phase (R16); do not jump from one act to another in one window. A ~60s ask is 3–4 position chapters, not 8 different acts. Camera: one hold that keeps both the join and the face readable; height stays in the R23 sentence.
+**R29a - Long-run sex pacing (all adult 18+ OC, INDEX parody, and RefMod lanes).** One position and one PRIMARY MOTION per window. Across native joins, open from the prior end state: same join, same wardrobe, same camera hold, tempo unchanged unless this beat writes a pull-out and reseat (R19). A position change gets its own get-into-position phase (R16); do not jump from one act to another in one window. A ~60s ask is 3–4 position chapters, not 8 different acts. Camera: one hold that keeps both the join and the face readable; height stays in the R23 sentence.
 
 **R30 - Write to a file, then gate.** Before queueing: re-check every section above, the R10 line on continued
 clips, the response dial Derek named (R21), the absence list (R27), the adults-only tests, and

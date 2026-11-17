@@ -25,7 +25,7 @@
     "npm:pi-workspace-history@0.5.2"
   ],
   "defaultProvider": "x3-local",
-  "defaultModel": "flash-next",
+  "defaultModel": "flash-next-uncensored",
   "defaultThinkingLevel": "medium",
   "thinkingBudgets": {
     "minimal": 512,
@@ -59,8 +59,8 @@
   ],
   "compaction": {
     "enabled": true,
-    "reserveTokens": 24576,
-    "keepRecentTokens": 16384
+    "reserveTokens": 131072,
+    "keepRecentTokens": 32768
   },
   "images": {
     "blockImages": false,
@@ -71,6 +71,6 @@
     "enabled": true
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-sub"
+    "defaultModel": "x3-local/flash-next-uncensored"
   }
 }

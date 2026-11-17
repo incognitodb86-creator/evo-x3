@@ -15,7 +15,8 @@ After=network-online.target
 [Container]
 Image=mcr.microsoft.com/playwright/mcp@sha256:PIN_DIGEST_AT_BUILD_TIME
 ContainerName=evo-playwright-mcp
-Network=evo-mcp-egress.network
+# Plain network name: created by playwright-egress-firewall.sh (ExecStartPre). "<name>.network" would require a Quadlet .network unit.
+Network=evo-mcp-egress
 PublishPort=127.0.0.1:8931:8931
 ReadOnly=true
 DropCapability=ALL
@@ -26,6 +27,7 @@ PodmanArgs=--cpus=2.0 --tmpfs=/tmp:rw,noexec,nosuid,size=1g --tmpfs=/home/node/.
 Exec=--host 0.0.0.0 --port 8931 --isolated --allowed-hosts EVO_SERVE_NAME_AT_BUILD_TIME
 
 [Service]
+ExecStartPre=/opt/evo-x3/stage/config/playwright/playwright-egress-firewall.sh
 Restart=always
 RestartSec=5
 TimeoutStartSec=120

@@ -1,0 +1,8 @@
+apply-on-x3.sh text eol=lf
+x3-forge/ralph-community/*.sh text eol=lf
+x3-forge/ralph-community/*.md text eol=lf
+x3-forge/.pi/*.json text eol=lf
+x3-community/scripts/parody/*.py text eol=lf
+x3-community/scripts/parody/*.json text eol=lf
+x3-pi-config/config/** text eol=lf
+x3-pi-config/stage-src/config/** text eol=lf
