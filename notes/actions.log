@@ -4530,3 +4530,13 @@ eeds_derrick.md (backup needs_derrick.md.bak-20261107-chatreview); no .pi config
 2026-11-16T21:29:03-06:00 run_queue clip_11: DONE pos=1 tag=clip ok 1344x768 243f audio yes wall=?s bytes=4091324 retry=False
 2026-11-16T21:29:03-06:00 run_queue clip_11: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
 2026-11-16T21:29:03-06:00 run_queue clip_11: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-17T15:18:05-06:00 run_queue beta7-tpl-test-ref2va16x9-20261117: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-17T15:18:05-06:00 run_queue beta7-tpl-test-ref2va16x9-20261117: START pos=1 tag=clip arm=oc_writer scene=sitting at cafe seed=51083601
+2026-11-17T15:20:26-06:00 run_queue beta7-tpl-test-ref2va16x9-20261117: DONE pos=1 tag=clip ok 1344x768 124f audio yes wall=?s bytes=1648506 retry=False
+2026-11-17T15:20:26-06:00 run_queue beta7-tpl-test-ref2va16x9-20261117: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-17T15:20:26-06:00 run_queue beta7-tpl-test-ref2va16x9-20261117: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-17T15:22:21-06:00 run_queue ckattn-ab-clip10-20261117: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-17T15:22:21-06:00 run_queue ckattn-ab-clip10-20261117: START pos=1 tag=clip arm=oc_writer scene=sitting at cafe seed=51083601
+2026-11-17T15:25:52-06:00 run_queue ckattn-ab-clip10-20261117: DONE pos=1 tag=clip ok 1344x768 192f audio yes wall=?s bytes=2663415 retry=False
+2026-11-17T15:25:52-06:00 run_queue ckattn-ab-clip10-20261117: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-17T15:25:52-06:00 run_queue ckattn-ab-clip10-20261117: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
