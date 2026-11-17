@@ -1,0 +1,18 @@
+{
+  "run_dir": "/home/evo/AI/community/runs/test_batch_11b",
+  "approval": "Derrick test batch 2026-11-16 (test_batch_11b)",
+  "clips": [
+    {"ask": "a woman in a sundress walks barefoot along a beach at sunset, laughing.",
+     "position": "walking along the shore",
+     "still": "flow-export-2026-10-09/ex/39_Aug 21, 03_25 PM_part02of02/Woman_dancing_on_coastal_shoreline_20261009143458_7.jpg"},
+    {"ask": "FCSydny looks into the camera and says \"Okay, Derrick, this pipeline better work this time.\"",
+     "position": "looking into camera",
+     "still": "flow-export-2026-10-09/ex/02_Sep 25, 12_34 PM/Cybernetic_fashion_lookbook_edit…_20261009141159.jpg",
+     "character": "FCSydny", "template": "talk", "aspect": "1:1"},
+    {"ask": "FCSydny and FCMegan race each other down a beach boardwalk at golden hour.",
+     "position": "racing on boardwalk",
+     "still": "flow-export-2026-10-09/ex/12_Sep 24, 01_40 PM_part01of02/Model_wearing_knit_dress_on_20261009131724_3.jpg",
+     "names": ["FCSydny", "FCMegan"], "template": "ref2va_16x9", "size": "1344x768",
+     "extra": ["--shots", "multi"]}
+  ]
+}
