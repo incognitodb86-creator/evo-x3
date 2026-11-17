@@ -61,7 +61,7 @@ MODE_RULES: Dict[str, Dict[str, Any]] = {
     # partner present but no penetration join (titjob, finish): motion and tempo yes, join keyword no
     "partner": {"primary": True, "contact": False, "banned_contact": None, "clearance": False, "dev": "primary", "min_lines": 0},
     "solo": {"primary": True, "contact": False, "banned_contact": None, "clearance": False, "dev": "primary", "min_lines": 0},
-    "talk": {"primary": False, "contact": False, "banned_contact": None, "clearance": False, "dev": "lines", "min_lines": 3},
+    "talk": {"primary": False, "contact": False, "banned_contact": None, "clearance": False, "dev": "lines", "min_lines": 2},
     # strip (--position tease): PRIMARY MOTION is the removal with a tempo word, 1-3 removals, no contact
     "strip": {"primary": True, "contact": False, "banned_contact": None, "clearance": False, "dev": "primary", "min_lines": 0,
               "removals": (1, 3)},
@@ -257,6 +257,8 @@ def mode_rules(kind: str) -> Dict[str, Any]:
     return MODE_RULES.get(kind) or MODE_RULES["sex"]
 # U52: Only 18+ safety codes stay hard; all other craft/format rules are advisory warnings/notes.
 SAFETY_HARD = frozenset({"youth_hint", "scale_adult"})
+# U56 (Derrick): the cowgirl check and the stock-talk check are hard stops too (pipeline maps them to NOT_READY).
+HARD_STOP = SAFETY_HARD | frozenset({"cowgirl_check", "stock_talk"})
 HARD_WEIGHT = 20
 SOFT_WEIGHT = 5
 
@@ -514,8 +516,48 @@ def _join_inherited_clear(slots: Dict[str, Any], scene: Optional[Dict[str, Any]]
 
 def _fix(code: str, note: str, hard: Optional[bool] = None, pen: Optional[int] = None) -> Dict[str, Any]:
     if hard is None:
-        hard = code in SAFETY_HARD
+        hard = code in HARD_STOP
     return {"code": code, "note": note, "hard": hard, "penalty": HARD_WEIGHT if hard else (SOFT_WEIGHT if pen is None else pen)}
+
+
+# U56: beat-sheet timestamps are a planning artifact and never ship; final-text glue (F8). Hard in the lint result, advisory for READY.
+BEAT_SHEET_TS_RE = re.compile(r"\[\s*\d+(?:\.\d+)?\s*s?\s*[-\u2013\u2014]\s*\d+(?:\.\d+)?\s*s\s*\]|"
+                              r"\b\d{1,2}:\d{2}(?:\.\d+)?\s*[-\u2013\u2014]\s*\d{1,2}:\d{2}(?:\.\d+)?\b", re.I)
+BARE_LABEL_RE = re.compile(r"(?<![(\w<,/])S[123](?![\w)>,/])")
+RIDE_ACTS = ("cowgirl", "reverse_cowgirl")
+
+
+def final_text_checks(full: str, plain: str) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    m = BEAT_SHEET_TS_RE.search(full or "")
+    if m:
+        out.append(_fix("beat_sheet_timestamp", f"beat-sheet timestamp '{m.group(0)}' in the writer output; the beat sheet is a planning artifact, "
+                        "order comes from phase words", hard=True))
+    if BARE_LABEL_RE.search(plain or ""):
+        out.append(_fix("bare_label", "write the speaker label with parentheses, (S1) or (S2), never a bare S1 or S2", hard=True))
+    if re.search(r"(?i)\bthe\s+the\b", full or ""):
+        out.append(_fix("double_article", "double article 'the the'", hard=True))
+    if re.search(r"(?i)previous clip's end pose", full or ""):
+        out.append(_fix("end_pose_placeholder", "placeholder \"previous clip's end pose\" in the text; write the actual pose", hard=True))
+    if re.search(r"(?i)\bsays\s*,\s*\(S\b|\bsays\s*,\s*\(S\d\)", full or ""):
+        out.append(_fix("says_glue", "malformed 'says, (S' speech glue", hard=True))
+    return out
+
+
+def stop_checks(dd: str, plain: str, ctx: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """U56 hard stops: the cowgirl check and the stock-talk check (the pipeline blocks READY on both)."""
+    out: List[Dict[str, Any]] = []
+    cfg = ctx.get("cfg") or {}
+    if (ctx.get("act_id") or "") in RIDE_ACTS and ctx.get("kind", "sex") != "talk":
+        if not (RISE_RE.search(plain) and SINK_RE.search(plain) and HIS_LIFT_RE.search(plain) and MEET_RE.search(plain)):
+            out.append(_fix("cowgirl_check", "cowgirl: show her rise and sink AND his hips lifting to meet each sink"))
+    fillers = [norm(f) for f in (cfg.get("filler_lines") or [])]
+    ask_n = norm(ctx.get("ask") or "")
+    for l in spoken_lines(dd):
+        if any(f and re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", l) for f in fillers) and l not in ask_n:
+            out.append(_fix("stock_talk", f"line '{l}' is stock talk; write a line about the still"))
+            break
+    return out
 
 
 def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any]:
@@ -593,6 +635,8 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
                                               "an adult woman's proportions at miniature scale')"))
         if not SCALE_ANCHOR_RE.search(plain):
             issues.append(_fix("scale_anchor", "fix one measurable scale anchor (e.g. 'no taller than his forearm') and keep it", False, 5))
+    issues += final_text_checks(full, plain)
+    issues += stop_checks(dd, plain, ctx)
     if minimal:
         _lines = spoken_lines(dd)
         _words = sum(len(l.split()) for l in _lines)
@@ -779,7 +823,7 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
             if len(counted) < 2 or len(all_spoken) < rules["min_lines"]:
                 issues.append(_fix("talk_lines", "BTS interview needs at least 2 answers from (S1) and 3 to 5 total spoken lines including interviewer questions"))
         elif len(counted) < rules["min_lines"]:
-            issues.append(_fix("talk_lines", f"note: talk-only suggests 3-5 short lines (1-2 per speaker is fine in 10-15s); it has {len(counted)}", False))
+            issues.append(_fix("talk_lines", f"note: talk-only is 2-3 short lines for one speaker, 1-2 per speaker with two; it has {len(counted)}", False))
     if kind == "talk" and re.search(r"\(S2\)|<Subject 2>", dd) and not re.search(
             r"(?i)(?:subject_definitions:)?[^\n]*<(?:Subject 2)>|\(S2\) is ", full):
         issues.append(_fix("talk_s2_defined", "(S2) is named in the talk; define them in subject_definitions (look or clothes, BTS interviewer included)"))

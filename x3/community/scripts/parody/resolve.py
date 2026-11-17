@@ -745,6 +745,18 @@ def _name_matches_field(name: str, field: str) -> bool:
     return n in f.split() and len(n) >= 4
 
 
+def is_oc_name(name: Optional[str]) -> bool:
+    """True for an OC (FCSydny, FCMegan, an installed oc_* key or trained OC subject), never a named INDEX parody."""
+    n = (name or "").strip()
+    if not n:
+        return False
+    return bool(re.match(r"(?i)^fc[a-z0-9_]{3,}$", n)) or _norm_ident(n) in installed_oc_refmod_keys() or _norm_ident(n) in trained_oc_subject_keys()
+
+
+def _is_voice_refmod(stem: str) -> bool:
+    return "_refmod_audio" in _mod_stem(str(stem)).lower()
+
+
 def index_named_identity(name: Optional[str]) -> bool:
     """True when the name is a character INDEX or aliases entry, not an installed OC key."""
     if not (name or "").strip():
@@ -802,6 +814,8 @@ def resolve_writer_refmods(
         seen: set = set()
         for n in targets:
             for s in _stems_for_character_name(str(n)):
+                if _is_voice_refmod(s) and not is_oc_name(str(n)):  # U56: named parodies carry no voice ref
+                    continue
                 if _is_writer_lane_refmod(s) and s not in seen:
                     seen.add(s)
                     found.append(s)
@@ -817,6 +831,8 @@ def resolve_writer_refmods(
             }
             resolved = resolve_identities(req, index_dir=INDEX_DIR, refmods_dir=REFMODS_DIR, aliases_path=ALIASES_PATH)
             loaded = [_mod_stem(x) for x in (resolved.get("loaded_refmods") or [])]
+            if not any(is_oc_name(str(n)) for n in tlist):  # U56: named parodies carry no voice ref
+                loaded = [x for x in loaded if not _is_voice_refmod(x)]
             out["index"] = {
                 "index_status": resolved.get("index_status"),
                 "index_flag": resolved.get("index_flag"),
