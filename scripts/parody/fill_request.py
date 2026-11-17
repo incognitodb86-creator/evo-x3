@@ -32,6 +32,17 @@ def pick_template(has_still: bool, still_mode: str = "guide", has_identity: bool
     return "talk" if pos == "talk" else "plain"
 
 
+PIXL_LIBRARIES = Path("/home/evo/AI/5slock/libraries")
+
+
+def pixl_abs(still):
+    """A PixlStash API file_path is relative to 5slock/libraries; turn it into a full path when that file exists."""
+    if isinstance(still, str) and still.strip() and not Path(still.strip()).is_absolute() and not Path(still.strip()).is_file():
+        p = PIXL_LIBRARIES / still.strip()
+        if p.is_file(): return str(p)
+    return still
+
+
 def _stage_still(still: Optional[str]) -> Optional[str]:
     if not (isinstance(still, str) and still.strip()): return None
     s, comfy_in = still.strip(), br.COMFY_INPUT_COMMUNITY.parent
@@ -55,6 +66,7 @@ def fill_request(
     continuation_prompt: Optional[str] = None, dry_run: bool = True,
 ) -> Dict[str, Any]:
     run_dir = Path(run_dir); run_dir.mkdir(parents=True, exist_ok=True)
+    still_image, partner2_still = pixl_abs(still_image), pixl_abs(partner2_still)
     rep: Dict[str, Any] = {"hook": "fill_request", "ask": ask, "position": position, "seed": seed, "frames": frames, "status": "NOT_READY", "submitted": False}
 
     def _fail(reason: str) -> Dict[str, Any]:
