@@ -105,13 +105,13 @@
         0
       ],
       "shift_audio": 3.0,
-      "shift_video": 10.0
+      "shift_video": 12.0
     }
   },
   "m_vsa": {
     "class_type": "BlockSparseAttention",
     "inputs": {
-      "dense_blocks": "",
+      "dense_blocks": "0,1",
       "end_percent": 1.0,
       "extra_tokens": 256,
       "min_tokens": 12288,
@@ -122,7 +122,7 @@
       "selection": "vsa",
       "selection.keep_percent": 10,
       "sink_conditioning": "exact_kv_and_rows",
-      "start_percent": 0.2,
+      "start_percent": 0.0,
       "verbose": false
     }
   },
@@ -211,7 +211,7 @@
   "unet": {
     "class_type": "UNETLoader",
     "inputs": {
-      "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+      "unet_name": "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors",
       "weight_dtype": "default"
     }
   },
