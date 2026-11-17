@@ -1,0 +1,688 @@
+{
+ "approved_images": 484,
+ "approved_root": "C:\\Users\\derek\\5slock\\approved_characters",
+ "approved_roots": 52,
+ "canvas": [
+  1344,
+  768
+ ],
+ "comm": "C:\\AI\\community\\scripts\\comm.py",
+ "dupe_resolution": [
+  {
+   "dropped": "ali147_pool_hc_r3b_s51130003",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali147_pool_hc_r3i_s51130003",
+   "seed": 51130003
+  },
+  {
+   "dropped": "ali147_pool_hc_r3r_s51130003",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali147_pool_hc_r3b_s51130003",
+   "seed": 51130003
+  },
+  {
+   "dropped": "ali163_hc15_bd002_s51150001",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_bd002_s51150011",
+   "seed": 51150001
+  },
+  {
+   "dropped": "ali163_hc15_bd002_s51150011",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_bd002_s51150021",
+   "seed": 51150001
+  },
+  {
+   "dropped": "ali163_hc15_gi046_s51150004",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_gi046_s51150014",
+   "seed": 51150004
+  },
+  {
+   "dropped": "ali163_hc15_gi063_s51150005",
+   "reason": "superseded by a newer render of the same seed",
+   "retained": "ali163_hc15_gi063_s51150015",
+   "seed": 51150005
+  }
+ ],
+ "excluded": [
+  {
+   "id": "ali147_pool_hc_r3b_s51130003",
+   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3i_s51130003)"
+  },
+  {
+   "id": "ali147_pool_hc_r3r_s51130003",
+   "reason": "DUPE_SEED seed 51130003 (retained ali147_pool_hc_r3i_s51130003)"
+  },
+  {
+   "id": "ali163_hc15_bd002_s51150001",
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)"
+  },
+  {
+   "id": "ali163_hc15_bd002_s51150011",
+   "reason": "DUPE_SEED seed 51150001 (retained ali163_hc15_bd002_s51150021)"
+  },
+  {
+   "id": "ali163_hc15_gi046_s51150004",
+   "reason": "DUPE_SEED seed 51150004 (retained ali163_hc15_gi046_s51150014)"
+  },
+  {
+   "id": "ali163_hc15_gi063_s51150005",
+   "reason": "DUPE_SEED seed 51150005 (retained ali163_hc15_gi063_s51150015)"
+  },
+  {
+   "id": "ali173_cont_hc1_s51140001",
+   "reason": "NOT_16x9 1024x576"
+  },
+  {
+   "id": "ali147_canary",
+   "reason": "NOT_16x9 384x672"
+  },
+  {
+   "id": "ali147_pool_ctrl_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_dense_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_fix1_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_fix4_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_fix5_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_promptv2_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_promptv2_seg3_s51080002",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_refsheet_b_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_refsheet_s51080000",
+   "reason": "NOT_16x9 768x1344"
+  },
+  {
+   "id": "ali147_pool_hc_r4_s51130004",
+   "reason": "no approved start still in the graph (LoadImage slots: community/hc/HC4_w1_face.png)"
+  },
+  {
+   "id": "ali147_pool_hc_r5_s51130005",
+   "reason": "no approved start still in the graph (LoadImage slots: community/hc/HC5_w1_face.png)"
+  },
+  {
+   "id": "ali147_pool_hc_r6_s51130006",
+   "reason": "no approved start still in the graph (LoadImage slots: community/hc/HC6_w1_face.png,community/hc/HC6_w2_face.png)"
+  },
+  {
+   "id": "ali147_pool_hc_r1_s51130001",
+   "reason": "unapproved full-frame reference: community/hc/HC1_w1_blonde_00001_.png,community/hc/HC1_w2_darkhair_00001_.png"
+  },
+  {
+   "id": "ali147_pool_hc_r2_s51130002",
+   "reason": "unapproved full-frame reference: community/hc/HC2_w1_blonde_00001_.png,community/hc/HC2_w2_darkhair_00001_.png"
+  }
+ ],
+ "findings": [],
+ "fps": "24/1",
+ "method": "https://trac.ffmpeg.org/wiki/Concatenate",
+ "method_body": "notes/web/07ff_trac_concat.html",
+ "min_words": 6,
+ "mode": "copy",
+ "order_rule": "per seed the newest mtime is retained (tie -> the last id in sorted order); the scene is ordered by (seed, id)",
+ "out": {
+  "ach": 2,
+  "acodec": "aac",
+  "asr": 32000,
+  "bytes": 67174859,
+  "fmt_dur": 173.948719,
+  "fps": "24/1",
+  "h": 768,
+  "mtime": 1792963757,
+  "path": "C:/AI/community/review/hc169/review_cut.mp4",
+  "sha256": "e08ba9814038732942132b15a2a61a757a88ee08e4675d7462a83343948de176",
+  "vcodec": "h264",
+  "vdur": 173.917,
+  "vpackets": 4174,
+  "w": 1344
+ },
+ "problems": 0,
+ "rc": 0,
+ "scene": [
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD004.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 5487624,
+   "crops": [],
+   "fmt_dur": 20.041688,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_c1_s51100001/ali147_pool_hc_c1_s51100001.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali147_pool_hc_c1_s51100001",
+   "mtime": 1792766918,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali147_pool_hc_c1_s51100001/ali147_pool_hc_c1_s51100001_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51100001,
+   "sha256": "4fafb9f7de06728f1c71615ffb036d75dccde446bd38c9dcb8cb506a6abc222c",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD004.jpg",
+     "input": "community/hc/HC1_Two_women_in_studio_editorial.jpg",
+     "sha256": "dd9ed0cb69e47deb6e50e640b14ec2f52e8d0cab2fd82da0ef1462a2841b14d1"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 20.042,
+   "vpackets": 481,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD007.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 6509571,
+   "crops": [],
+   "fmt_dur": 20.041688,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_c2_s51100002/ali147_pool_hc_c2_s51100002.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali147_pool_hc_c2_s51100002",
+   "mtime": 1792767962,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali147_pool_hc_c2_s51100002/ali147_pool_hc_c2_s51100002_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51100002,
+   "sha256": "a9f68cc6881a7bc35c8d060fa096d797af077a36eea101d4942437c5f08dc234",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD007.jpg",
+     "input": "community/hc/HC2_Two_women_in_passionate_embrace.jpg",
+     "sha256": "530f056f4eb25dcc877035ab9c46e0e0d0500d90bd88c0b3f95d8d58fe1ca52f"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 20.042,
+   "vpackets": 481,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19b/GI173.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 3250307,
+   "crops": [
+    "community/hc/HC3_w1_face.png",
+    "community/hc/HC3_w2_face.png"
+   ],
+   "fmt_dur": 10.125,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali147_pool_hc_r3i_s51130003/ali147_pool_hc_r3i_s51130003.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 124,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali147_pool_hc_r3i_s51130003",
+   "mtime": 1792862813,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali147_pool_hc_r3i_s51130003/ali147_pool_hc_r3i_s51130003_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51130003,
+   "sha256": "47ca711455fd04de4d68d7ad1c07d7e827efcd88cb5f62b759d44de8dad9fc91",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19b/GI173.jpg",
+     "input": "community/hc/HC3_lesbian_beach.jpg",
+     "sha256": "4646d75b65e685c51ad02d74c24b6099b4c21e69837bf3fd18bba0b1b763309c"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 10.125,
+   "vpackets": 243,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 6297740,
+   "crops": [
+    "community/hc/BD002_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd002_s51150021/ali163_hc15_bd002_s51150021.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_bd002_s51150021",
+   "mtime": 1792897870,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_bd002_s51150021/ali163_hc15_bd002_s51150021_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150001,
+   "sha256": "b8d0b7b8e8b9bbe49782403227a06eeb4d0072743c4e6d07268fd20d8b285f25",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD002.jpg",
+     "input": "community/hc/BD002.jpg",
+     "sha256": "8209bfb95593553c0d430da1659dd3435603adf99b84fec31692d030855b7cb6"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD006.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 5428691,
+   "crops": [
+    "community/hc/BD006_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 3,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd006_s51150002/ali163_hc15_bd006_s51150002.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 124,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_bd006_s51150002",
+   "mtime": 1792879986,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_bd006_s51150002/ali163_hc15_bd006_s51150002_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150002,
+   "sha256": "1d6d4757e91d555fa69a94ac7f824d7526064a31376198854d86f0708d24aab2",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD006.jpg",
+     "input": "community/hc/BD006.jpg",
+     "sha256": "15b9d267c3c52323fb7ed1625f709e97c1f4cddc5e3dd046f17f78497b237bd4"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD013.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 6377641,
+   "crops": [
+    "community/hc/BD013_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 3,
+   "graph": "C:/AI/community/runs/ali163_hc15_bd013_s51150003/ali163_hc15_bd013_s51150003.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 124,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_bd013_s51150003",
+   "mtime": 1792880803,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_bd013_s51150003/ali163_hc15_bd013_s51150003_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150003,
+   "sha256": "510143ecd6fdd5c516f85f194ba986bdee5755226f0870c4b5b0616079044d1e",
+   "stills": [
+    {
+     "approved": "FLOW_BLONDE_DARK_PAIRS_2026-10-19/BD013.jpg",
+     "input": "community/hc/BD013.jpg",
+     "sha256": "fbb90d143e586ad68a7e36505c5e70eccdc669a380a6061f2ad28a4edd7153ce"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI046.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 4896690,
+   "crops": [
+    "community/hc/GI046_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150014/ali163_hc15_gi046_s51150014.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi046_s51150014",
+   "mtime": 1792900924,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi046_s51150014/ali163_hc15_gi046_s51150014_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150004,
+   "sha256": "ac6a89aaf66e8e730f22853c2a6958dcda2dd07f57ebfefbe1df0d6ce9c4753d",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI046.jpg",
+     "input": "community/hc/GI046.jpg",
+     "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI063.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 4757839,
+   "crops": [
+    "community/hc/GI063_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi063_s51150015/ali163_hc15_gi063_s51150015.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi063_s51150015",
+   "mtime": 1792901551,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi063_s51150015/ali163_hc15_gi063_s51150015_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150005,
+   "sha256": "6151ef8bcdeb1e025a3cdea8416135f3fd23fea17bbc46f88c615b240eb6caa5",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI063.jpg",
+     "input": "community/hc/GI063.jpg",
+     "sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI072.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 5858419,
+   "crops": [
+    "community/hc/GI072_w1_face.png",
+    "community/hc/GI072_w2_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 3,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi072_s51150006/ali163_hc15_gi072_s51150006.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 124,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi072_s51150006",
+   "mtime": 1792883292,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi072_s51150006/ali163_hc15_gi072_s51150006_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150006,
+   "sha256": "8c3b24320a29ed2133fe9989c37d52d196ac3622490a17184bc97d7897e8823b",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI072.jpg",
+     "input": "community/hc/GI072.jpg",
+     "sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI046.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 8087674,
+   "crops": [
+    "community/hc/GI046_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150031/ali163_hc15_gi046_s51150031.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi046_s51150031",
+   "mtime": 1792919092,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi046_s51150031/ali163_hc15_gi046_s51150031_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150031,
+   "sha256": "ade76d01fabd94e5d60f40f4be0cf3b5c9d1488bf274b54afa46861b51e9e7e4",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI046.jpg",
+     "input": "community/hc/GI046.jpg",
+     "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19/GI046.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 9395988,
+   "crops": [
+    "community/hc/GI046_w1_face.png"
+   ],
+   "fmt_dur": 15.083333,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/ali163_hc15_gi046_s51150032/ali163_hc15_gi046_s51150032.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 243,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "ali163_hc15_gi046_s51150032",
+   "mtime": 1792931467,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/ali163_hc15_gi046_s51150032/ali163_hc15_gi046_s51150032_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51150032,
+   "sha256": "6cf9a239bb2d6b83f48261ab65c852472e3923943b3c914732a6be27baa22ba2",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19/GI046.jpg",
+     "input": "community/hc/GI046.jpg",
+     "sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 15.083,
+   "vpackets": 362,
+   "w": 1344
+  },
+  {
+   "ach": 2,
+   "acodec": "aac",
+   "approved": [
+    "GROK_IMAGINE_2026-10-19b/GI173.jpg"
+   ],
+   "asr": 32000,
+   "bytes": 1225802,
+   "crops": [
+    "community/hc/HC3_w1_face.png",
+    "community/hc/HC3_w2_face.png"
+   ],
+   "fmt_dur": 3.041688,
+   "fps": "24/1",
+   "gate_refusals": [],
+   "gate_strings": 2,
+   "graph": "C:/AI/community/runs/agy_baseline13_s51240001/agy_baseline13_s51240001.api.json",
+   "graph_canvas": [
+    1344,
+    null
+   ],
+   "graph_frames": 39,
+   "graph_src": "p7/graphs",
+   "h": 768,
+   "id": "agy_baseline13_s51240001",
+   "mtime": 1792848965,
+   "path": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output/community/agy_baseline13_s51240001/agy_baseline13_s51240001_00001_.mp4",
+   "ref_violations": [],
+   "seed": 51240001,
+   "sha256": "0091daf75ce70caf13731d3db5b7a89ef5698dbf0b66ec0c590598b0988188fb",
+   "stills": [
+    {
+     "approved": "GROK_IMAGINE_2026-10-19b/GI173.jpg",
+     "input": "community/hc/HC3_lesbian_beach.jpg",
+     "sha256": "4646d75b65e685c51ad02d74c24b6099b4c21e69837bf3fd18bba0b1b763309c"
+    }
+   ],
+   "vcodec": "h264",
+   "vdur": 3.042,
+   "vpackets": 73,
+   "w": 1344
+  }
+ ],
+ "sheet": {
+  "ach": null,
+  "acodec": null,
+  "asr": null,
+  "bytes": 1988324,
+  "fmt_dur": 0.0,
+  "fps": "25/1",
+  "h": 768,
+  "mtime": 1792963759,
+  "path": "C:/AI/community/review/hc169/contact_sheet.png",
+  "sha256": "52d784c9bfa6b0d23a8e0a433c786991b74040e32159ed3e429796c542776361",
+  "vcodec": "png",
+  "vdur": 0.0,
+  "vpackets": 1,
+  "w": 1792
+ },
+ "sheet_extent": [
+  1792,
+  768
+ ],
+ "sheet_note": "xstack inputs=12 layout=0_0|448_0|896_0|1344_0|0_256|448_256|896_256|1344_256|0_512|448_512|896_512|1344_512",
+ "sum_vdur": 173.915,
+ "sum_vpackets": 4174,
+ "table": "C:\\AI\\community\\review\\hc169\\review_table.md",
+ "writes": [
+  "C:\\AI\\community\\review\\hc169\\review_cut.mp4",
+  "C:\\AI\\community\\review\\hc169\\contact_sheet.png",
+  "C:\\AI\\community\\review\\hc169\\review_table.md",
+  "C:\\AI\\community\\notes\\ali27_review_loop_manifest.json",
+  "C:\\AI\\community\\notes\\ali27_window_plan.json",
+  "C:\\AI\\community\\review\\hc169\\concat_list.txt"
+ ]
+}

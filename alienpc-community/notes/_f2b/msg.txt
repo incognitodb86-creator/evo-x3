@@ -1,0 +1,30 @@
+forge F2b records: phase 2b measured BLOCKED on F2a's OBJECTIVE gate, nothing moved
+
+Item: fix_plan.md FORGE F2b (retire the per-face copies). Its stated dependency - F2a's two `OBJECTIVE ok`
+lines - does not exist (F2a is PARTIAL, its 2 GPU cells await Derrick's GO, needs_derrick.md 13:00 CT Ask 1),
+and F2a's own rule says F2b archives only after those two oks. GPU gate measured open (no gpu-render.lock,
+comfy_ctl.py status 18:37:16 CT guard=(0, ['IDLE'])), so the GO is the only thing between F2b and its proof.
+
+Measured clause states (read-only, no write to any template):
+- clause 1: already built by the agy lane, in the wrong phase. `git show --name-status 25e403c` (U7 12:00:59)
+  deletes 23 `templates/faces/FC_*.api.json`; they are at C:\AI\_archive\2026-11-05-cleanup\7\faces (23), not
+  phase 2. The item's and v2's "24" is the on-disk count: `git ls-tree 25e403c^ | grep -c` = 23, and
+  `templates\faces\README.md` states "24 on disk, 23 in git" (`.gitignore` `*sydney*`).
+- clause 2: met. FC_SYDNEY.api.json 21171 B, mtime 2026-11-03 19:01:34 - predates the cleanup, untouched.
+- clause 3: met, 0 real violations. The rg returns 7 files: 4 records/history, 2 that name the phase-7 archive
+  path on purpose (the F2a node-set fixture + its evidence generator), 1 (make_b2_lora_template.py) whose DST
+  is a template that still exists. 0 hits in .pi\agent\skills and C:\AI\render.
+- clause 4: not met, no F2b commit (agy's 25e403c is already on gitea/master).
+- the b2.README.md `--lora/--strength` section is not built (rg 0 hits; last commit bb1290f, 2026-10-30).
+
+Not self-resolved, carded: v2 (notes\2026-11-05-forge-cleanup-v2.md:22-23,28, Max's 11:12 audit) says "F2b must
+not move b2_fc_sydney_lora*" / "Every FC_SYDNEY and b2_fc_sydney_lora* file stays"; this item's Do moves those 3
+files + their READMEs; faces\README.md is the per-face builder doc for the live make_b2_lora_template.py.
+Narrowing approved work is Derrick's call (his 12:0x CT block-retirement card is unanswered), so nothing moved.
+
+No GPU, no render, no lock, no model load, no successful HTTP, no process touched, no config write, nothing
+deleted, no `.bak`, no dated copy, no `git add -A`, no force-push, no GitHub. Sydney untouched.
+
+Pushes: HTTP 502 from qnap.tailf242b2.ts.net on `git push gitea master` (this repo, 17 ahead) and on
+fleet-brain `git push origin master` (3 ahead). DNS/TLS/proxy answer, so the tailnet is up and Gitea on the QNAP
+is unhealthy - a Household service fact, not a fleet fix. These commits push themselves at 200.

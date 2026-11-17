@@ -1,0 +1,247 @@
+== A. harness result gate
+  result.json ok = True
+  result.json rc = 0
+  result.json note = 'run_graph_job rc=0 (ok)'
+  result.json id = 'ali147_pool_fix4_s51080000'
+  result.json kind = 'graph'
+  result.json started = '2026-10-22T20:08:29'
+  result.json finished = '2026-10-22T20:59:15'
+  result.json wall_min = 50.8
+  result.json budget_used_min = 327.1
+  result.json budget_cap_min = 390
+PASS result.json ok is True (FIX4_PROOF gate)
+PASS result.json rc == 0 (got 0)
+PASS result.json id/kind match the arm
+PASS p7\jobs\ali147_pool_fix4_s51080000.out is non-empty (610 bytes)
+PASS p7\jobs\<id>.out is byte-identical to runs\<id>\status.log (same job log, copied)
+
+== B. status.log verbatim + error greps
+  | 2026-10-22 20:08:29 CT UNLOAD LLM coding_swift15_iq3s_esp
+  | 2026-10-22 20:09:08 CT JOB start ali147_pool_fix4_s51080000 prompt_id=40a1e10d-f9e8-46b4-a774-c797c03af5ba
+  | 2026-10-22 20:59:13 CT JOB end ali147_pool_fix4_s51080000 ok secs=3004.9 file=C:\AI\community\runs\ali147_pool_fix4_s51080000\ali147_pool_fix4_s51080000.mp4
+  | 2026-10-22 20:59:15 CT OBJECTIVE ok ali147_pool_fix4_s51080000 frames=1433 audio=True dur=59.709 bytes=65791775 contact=C:\AI\community\runs\ali147_pool_fix4_s51080000\ali147_pool_fix4_s51080000_stills_contact.png
+  | 2026-10-22 20:59:15 CT UNLOAD comfyui_auto (POST /api/models/unload)
+PASS status.log: no 'JOB error' (hits 0)
+PASS status.log: no 'CLIP_SKIP' (hits 0)
+PASS status.log: no 'clip_skip' (hits 0)
+PASS status.log: no 'node_errors' (hits 0)
+PASS status.log: no 'Traceback' (hits 0)
+PASS status.log: no 'STUCK' (hits 0)
+PASS status.log: no 'redo' (hits 0)
+PASS status.log: no 'error' (hits 0)
+PASS status.log: no 'ERROR' (hits 0)
+PASS status.log: no 'FAIL' (hits 0)
+PASS exactly one JOB start line for the arm
+PASS exactly one JOB end ... ok line for the arm
+PASS exactly one OBJECTIVE ok line for the arm
+  JOB start line: 2026-10-22 20:09:08 CT JOB start ali147_pool_fix4_s51080000 prompt_id=40a1e10d-f9e8-46b4-a774-c797c03af5ba
+  JOB end   line: 2026-10-22 20:59:13 CT JOB end ali147_pool_fix4_s51080000 ok secs=3004.9 file=C:\AI\community\runs\ali147_pool_fix4_s51080000\ali147_pool_fix4_s51080000.mp4
+  OBJECTIVE line: 2026-10-22 20:59:15 CT OBJECTIVE ok ali147_pool_fix4_s51080000 frames=1433 audio=True dur=59.709 bytes=65791775 contact=C:\AI\community\runs\ali147_pool_fix4_s51080000\ali147_pool_fix4_s51080000_stills_contact.png
+PASS result.json started matches status.log UNLOAD line (20:08:29 CT)
+PASS result.json finished matches status.log last line (20:59:15 CT)
+
+== C. objective.json
+  top-level keys ['attempts', 'contact_sheet', 'file', 'ok', 'tag']
+  attempts: 1
+PASS one attempt only: no redo, no STUCK (got 1)
+  attempts[0].frames = 1433
+  attempts[0].w = 768
+  attempts[0].h = 1344
+  attempts[0].fps = '24/1'
+  attempts[0].audio = True
+  attempts[0].duration = 59.709
+  attempts[0].bytes = 65791775
+  attempts[0].secs = 3004.9
+  attempts[0].blackfreeze = []
+  attempts[0].file = 'C:\\AI\\community\\runs\\ali147_pool_fix4_s51080000\\ali147_pool_fix4_s51080000.mp4'
+  top-level ok=True contact_sheet='C:\\AI\\community\\runs\\ali147_pool_fix4_s51080000\\ali147_pool_fix4_s51080000_stills_contact.png'
+PASS objective.json ok is True
+PASS objective frames == 1433 (got 1433)
+PASS |1433 - 1443| = 10 <= frames_tol 24
+PASS resolution 768x1344 (got 768x1344)
+PASS fps 24/1 (got '24/1')
+PASS audio present
+PASS blackfreeze [] (no black/frozen frames detected by the harness blackdetect+freezedetect)
+PASS objective bytes == os.path.getsize(mp4) (65791775)
+PASS render secs recorded (3004.9 s = 50.1 min) - over the 180 min job cap: see the NOTE line
+  NOTE the requested job budget was minutes=180; the render took 3004.9 s = 50.1 min of JOB time, wall_min 50.8; the budget gate is checked BEFORE the job (used_min 276.3 -> 327.1 of cap 390, jobs 22 -> 23 of 27)
+
+== D. independent ffprobe recount (read-only, this iteration)
+  video: rc=0 out='768,1344,24/1,24/1,1433' err=''
+PASS ffprobe -count_packets video packets = 1433 (independent recount of the 1433)
+PASS ffprobe width/height 768x1344
+PASS ffprobe r_frame_rate 24/1
+  streams: rc=0 out='0,h264,video,59.708333,1433\n1,aac,audio,32000,2,59.709000,1867'
+PASS exactly one audio stream (['1,aac,audio,32000,2,59.709000,1867'])
+  format: 59.709000,65791775
+  blackdetect events: []
+  (read-only full decode, rc=0, stderr lines=46)
+PASS own blackdetect probe (d=0.2 pix_th=0.10): no black-frame intervals; the gate is objective.json blackfreeze []
+  harness filter chain (run_graph_job.py:43) = 'blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2'
+  harness-chain events: [] (rc=0)
+PASS re-running the harness's own blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2 chain on the mp4 gives 0 events = objective.json blackfreeze [] is reproducible
+  stricter freezedetect (n=0.005 d=0.5) events: [] (rc=0)
+PASS own stricter freezedetect probe: no frozen-frame intervals of 0.5 s or longer
+
+== E. provenance: the graph that rendered
+  request.api.json bytes 41921 sha256 7530cf228c73bae7631b3a97b1c8770e56797318d1782925907b4738956dbf57
+  ali147_pool_fix4_s51080000.api.json bytes 41919 sha256 46ea6ce34f74c8371dd6691481151a154b5777bfb1062952f903d1cd6e8955f5
+PASS ali147_pool_fix4_s51080000.api.json is a byte-exact prefix of request.api.json (tail = b'\r\n')
+PASS parsed graphs are identical (13 nodes), so the submitted graph is the one Forge wrote
+
+== F. Extender commit (read-only git rev-parse in the installed custom_nodes folder)
+  git -C C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/ComfyUI_MiniMax_H3_Extender rev-parse HEAD -> rc=0 0861230cc38cbfbdb8d7b97dd9473f536a253c0b
+PASS Extender HEAD starts with 0861230 (spec pins 0861230 / v3.0.13)
+  __init__.py version strings: ['3.0.13']
+
+== G. graph settings (held-equal items) + clips + seams
+PASS exactly one MiniMaxH3Extender
+PASS extender context_length == '22' (got '22')
+PASS extender denoise == 1.0 (got 1.0)
+PASS extender generation_mode == 'ref2va' (got 'ref2va')
+PASS extender height == 1344 (got 1344)
+PASS extender motion_context == True (got True)
+PASS extender ref_image_size == 'match' (got 'match')
+PASS extender refine_enabled == False (got False)
+PASS extender resolution_mode == 'manual' (got 'manual')
+PASS extender run_mode == 'full_batch' (got 'full_batch')
+PASS extender sampler_name == 'euler' (got 'euler')
+PASS extender scheduler == 'simple' (got 'simple')
+PASS extender steps == 10 (got 10)
+PASS extender width == 768 (got 768)
+  clips_json top-level keys: ["clips", "version"]
+  clip_1 non-prompt fields: {"color_adjustment": {"saturation": 100.0, "contrast": 100.0, "brightness": 100.0}, "duration": 10.125, "first_frame": null, "first_source": "manual", "guides": [], "id": "clip_1", "last_frame": null, "local_refs": {"version": 1, "images": [], "videos": [], "audios": []}, "loras": [], "name": "seg1_c0", "seed": 51080000, "seed_mode": "fixed", "validated": false}
+PASS 6 clips
+PASS clip_1 duration 10.125 -> 243 frames (expected 243)
+PASS clip_1 243 on the 5+17k grid
+PASS clip_1 validated false
+PASS clip_1 seed 51080000 fixed (got 51080000 'fixed')
+PASS clip_1 prompt sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889 (expected 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889)
+  clip_1 seg1_c0 raw=243 overlap_in=0 kept=243 output frames 0..242
+PASS clip_2 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_2 260 on the 5+17k grid
+PASS clip_2 validated false
+PASS clip_2 seed 51080000 fixed (got 51080000 'fixed')
+PASS clip_2 prompt sha256 49c94ba7759859e26af01dff17230b80a834fa4b1ff57bcaac332cf40c655045 (expected 49c94ba7759859e26af01dff17230b80a834fa4b1ff57bcaac332cf40c655045)
+  clip_2 seg1_c1 raw=260 overlap_in=22 kept=238 output frames 243..480
+PASS clip_3 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_3 260 on the 5+17k grid
+PASS clip_3 validated false
+PASS clip_3 seed 51080000 fixed (got 51080000 'fixed')
+PASS clip_3 prompt sha256 1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815 (expected 1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815)
+  clip_3 seg2_c0 raw=260 overlap_in=22 kept=238 output frames 481..718
+PASS clip_4 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_4 260 on the 5+17k grid
+PASS clip_4 validated false
+PASS clip_4 seed 51080000 fixed (got 51080000 'fixed')
+PASS clip_4 prompt sha256 dcf5579f6cd2a04bce2d78da4aa19b35c89129b2feb07e50d202c713e1e08a11 (expected dcf5579f6cd2a04bce2d78da4aa19b35c89129b2feb07e50d202c713e1e08a11)
+  clip_4 seg2_c1 raw=260 overlap_in=22 kept=238 output frames 719..956
+PASS clip_5 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_5 260 on the 5+17k grid
+PASS clip_5 validated false
+PASS clip_5 seed 51080000 fixed (got 51080000 'fixed')
+PASS clip_5 prompt sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76 (expected 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76)
+  clip_5 seg3_c0 raw=260 overlap_in=22 kept=238 output frames 957..1194
+PASS clip_6 duration 10.833333 -> 260 frames (expected 260)
+PASS clip_6 260 on the 5+17k grid
+PASS clip_6 validated false
+PASS clip_6 seed 51080000 fixed (got 51080000 'fixed')
+PASS clip_6 prompt sha256 d7d29ad985a7a43232f65879ea2c1c75317b6b0c803d95ede9bd26a1e78bc0e3 (expected d7d29ad985a7a43232f65879ea2c1c75317b6b0c803d95ede9bd26a1e78bc0e3)
+  clip_6 seg3_c1 raw=260 overlap_in=22 kept=238 output frames 1195..1432
+  raw 1543 frames - 5 seams x22 overlap = 1433 kept = 59.708 s at 24 fps
+PASS computed kept frames 1433 == 1433 == ffprobe recount
+  clip seams (index of the first frame of each new clip's kept content): [243, 481, 719, 957, 1195]
+PASS 5 clip seams inside the rendered minute: [243, 481, 719, 957, 1195]
+PASS the rendered frame count == the graph's computed count (the Extender split the minute exactly as instructed, no re-lengthening)
+PASS rendered frame count == the graph's computed count (no Extender re-lengthening)
+
+== H. prompt provenance vs the base run's own graph text (no text edits)
+  seg1 c0 base text len=3295 sha256=7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+PASS clip_1 == seg1 c0 prompt VERBATIM, byte-for-byte in the graph (no CR/LF normalisation needed: both are graph strings)
+  seg1 c1 base text len=2303 sha256=6686d7057ead8ac945bff9263858afee0d3881b119502d7d13ab63f69d86f013
+PASS clip_2 CONTAINS the seg1 c1 prompt verbatim as a suffix (base text len 2303, clip text len 2569, prefix block 266 chars) = the segment's own subject_definitions block + the base text, unchanged
+  seg2 c0 base text len=3545 sha256=1f37321ff13763cd836f5eaa282f93dfc20d98f49be77609a632d51e865c6815
+PASS clip_3 == seg2 c0 prompt VERBATIM, byte-for-byte in the graph (no CR/LF normalisation needed: both are graph strings)
+  seg2 c1 base text len=2266 sha256=d7a4b4d4b49c663dab032a68e12afa7856a69c991d6138b17d6d83558c5794ef
+PASS clip_4 CONTAINS the seg2 c1 prompt verbatim as a suffix (base text len 2266, clip text len 2602, prefix block 336 chars) = the segment's own subject_definitions block + the base text, unchanged
+  seg3 c0 base text len=3354 sha256=8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+PASS clip_5 == seg3 c0 prompt VERBATIM, byte-for-byte in the graph (no CR/LF normalisation needed: both are graph strings)
+  seg3 c1 base text len=2269 sha256=dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89
+PASS clip_6 CONTAINS the seg3 c1 prompt verbatim as a suffix (base text len 2269, clip text len 2579, prefix block 310 chars) = the segment's own subject_definitions block + the base text, unchanged
+
+== I. fairness vs the base graphs (node-level, model chain + sampler settings)
+PASS node unet (UNETLoader) byte-identical to the base seg1 graph node
+PASS node m_attn (ModelAttentionBackend) byte-identical to the base seg1 graph node
+PASS node m_vsa (BlockSparseAttention) byte-identical to the base seg1 graph node
+PASS node m_shift (MiniMaxH3SigmaShift) byte-identical to the base seg1 graph node
+PASS node clip (CLIPLoader) byte-identical to the base seg1 graph node
+PASS node vvae (VAELoader) byte-identical to the base seg1 graph node
+PASS node avae (VAELoader) byte-identical to the base seg1 graph node
+PASS node img (LoadImage) byte-identical to the base seg1 graph node
+PASS the Extender consumes the SAME model chain / clip / video VAE / audio VAE as the base run
+PASS sigma shift 10 / 3 (base m_shift, same node)
+PASS VSA patch upstream of the model input (same node, keep_percent 10)
+PASS steps held: Extender 10 == base BasicScheduler steps
+PASS sampler held: 'euler' == base ksel
+PASS scheduler held: 'simple'
+PASS denoise held: Extender 1.0 == base BasicScheduler denoise
+PASS resolution held 768x1344 (base c0)
+  extender input names: ["audio_context_length", "audio_vae", "clip", "clips_json", "context_length", "denoise", "generation_mode", "height", "megapixels", "model", "motion_context", "prompt_pack", "ref_image_size", "ref_pack", "refine_denoise", "refine_enabled", "refine_scale", "refine_steps", "refs_json", "resolution_mode", "run_mode", "sampler_name", "scheduler", "steps", "vae", "width"]
+  extender inert/default inputs: megapixels=0.4 audio_context_length=0 refine_denoise=0.3 refine_scale=1.5 refine_steps=4 refs_json='{"version":2,"refs":[null,null,null,null,null,null,null,null,null]}'
+PASS megapixels 0.4 is inert under resolution_mode manual; 768x1344 = 1.03 Mpx is the requested size
+PASS refine_denoise/refine_scale/refine_steps are inert (refine_enabled False)
+  base seed sources: {"seg1": {"noise": ["RandomNoise", 51080000]}, "seg2": {"noise": ["RandomNoise", 51080001]}, "seg3": {"noise": ["RandomNoise", 51080002]}}
+  arm graph ids: ["avae", "clip", "dec", "ext", "img", "m_attn", "m_shift", "m_vsa", "ppack", "rpack", "save", "unet", "vvae"]
+PASS the arm graph has no RandomNoise node: the seed lives per clip in clips_json (51080000 fixed, section G) - the base restarts sampling noise per segment with a different noise_seed
+PASS fps held 24 (base CreateVideo fps 24, Extender FinalDecode fps 24.0)
+PASS ref_image_size held 'match' (base c0)
+PASS the reference still is the SAME file string as the base graph: 'community/POOL_768x1344.png'
+PASS still sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075 (expected 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075), 1354030 bytes
+  base noise seeds {'seg1': 51080000, 'seg2': 51080001, 'seg3': 51080002}
+PASS the seed held across clips is the BASE SEG1 seed 51080000
+  DOCUMENTED DIFFERENCE (not a fairness failure): FIX4 is ONE generation, so all 6 clips are seed_mode fixed at 51080000,
+  while the base pipeline re-started per segment at 51080000 / 51080001 / 51080002 (one seed per segment). Recorded in fairness.txt.
+PASS the base run's own chunk overlap is 22 frames (win1 overlap_frames) = the Extender context_length '22'
+  base per-chunk lengths: c0 length=243 + win1 extension_frames=238 (window 260, overlap_frames 22 -> 238 new frames per chunk; 243 + 5 x 238 = 1443 over 3 separate segments)
+
+== J. outputs: hashes, sizes, contact sheet
+  ali147_pool_fix4_s51080000.mp4                               65791775 bytes sha256 2cd0ed70067cfbe3182a43abefb20d1a4556b789b963f54adb0b53b49c0a299f
+  ali147_pool_fix4_s51080000_stills_contact.png                 5463574 bytes sha256 f2d1f7971cd30622ed638479ca0a2b6f127a7821dddf94f26941ca530107d1de
+  request.api.json                                                41921 bytes sha256 7530cf228c73bae7631b3a97b1c8770e56797318d1782925907b4738956dbf57
+  ali147_pool_fix4_s51080000.api.json                             41919 bytes sha256 46ea6ce34f74c8371dd6691481151a154b5777bfb1062952f903d1cd6e8955f5
+  ali147_pool_fix4_s51080000.mp4.json                               510 bytes sha256 bd80c74a3042af95e150c30591e51d7cfa5c593bba4770af4eda6d0b8c3534a3
+  status.log                                                        610 bytes sha256 1932e909d93c4bfc081f0e5b61bb174d97504862f4677d05933ab4e85701e080
+  objective.json                                                    621 bytes sha256 baefef124b1dce19ffb3ffd25cc5fafa8e7282374c90f4eb3ef811591a984d67
+PASS mp4 bytes match objective.json/status.log (65791775)
+  contact sheet PIL (1816, 2256) mode=RGB format=PNG
+PASS contact sheet is a readable image
+  mp4 sidecar keys ['attempt', 'comfy_output', 'file', 'finished', 'label', 'plan', 'prompt_id', 'run', 'secs', 'tag']
+    attempt = 0
+    comfy_output = 'C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali147_pool_fix4_s51080000\\ali147_pool_fix4_s51080000_00001_.mp4'
+    file = 'C:\\AI\\community\\runs\\ali147_pool_fix4_s51080000\\ali147_pool_fix4_s51080000.mp4'
+    finished = '2026-10-22 20:59 CT'
+    label = 'METHOD_ONLY'
+    plan = 'ALI-147'
+    prompt_id = '40a1e10d-f9e8-46b4-a774-c797c03af5ba'
+    run = 'ali147_pool_fix4_s51080000'
+    secs = 3004.9
+    tag = 'ali147_pool_fix4_s51080000'
+  dir listing runs\ali147_pool_fix4_s51080000
+    f  PROOF.md
+    f  ali147_pool_fix4_s51080000.api.json
+    f  ali147_pool_fix4_s51080000.mp4
+    f  ali147_pool_fix4_s51080000.mp4.json
+    f  ali147_pool_fix4_s51080000_stills_contact.png
+    d  failed-20261022
+    f  fairness.txt
+    f  graph_diff.txt
+    f  objective.json
+    f  request.api.json
+    f  request.api.json.bak-20261022-fix4graph
+    f  status.log
+
+== K. sbs/stills (Max's, per TASKS sbs rule)
+  find runs -name sbs_*.mp4 -> []
+  -> no FIX4 side-by-side; sbs_* and fixed-frame stills are Max/harness files, never Forge files (AGENTS.md).
+
+ALL CHECKS PASS

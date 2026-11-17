@@ -1,0 +1,139 @@
+[source file pq1_tenstrip_d63.html - HTML from TenStrip/10Eros-Max discussion]
+
+=====
+
+Just wondering if its maybe a Lora that's embedded in to it that's messing up the likeness. Using beta6. Anyone here know if the other versions are better at retaining the image before I bother to try them? I've tried every scheduler and settings possible but it just doesn't match the person in the image well. As soon as I switch back to the FL2VA model, the problem is fixed and this is with the same prompts. Even though FL2VA isn't meant for Ref2va, it still nails it when it comes to keeping the likeness of the characters. Its too bad because this model really is better at following the prompts then both Ref2va and FL2va models. I find it also has better audio most of the time. 
+
+ See translation EllipsesMark 11 days ago <div
+
+=====
+
+Whats your prompt? Are you using the i2v prompt? Because im actually having the reverse effect. Its wickedly amazing at i2v but struggles with ref2v but im getting close. 
+
+ See translation Portland01 11 days ago • edited 11 days ago <div
+
+=====
+
+I'm using the Ref2Va workflow but am not using any videos, just images. I find the other workflow always starts off with the picture before cutting to the scene which is annoying. The only way around it that I could find was to just stick to the ref2va workflow. I also use a few ref images at the same time which is only possble with this workflow. I am using the proper prompt format for this workflow that is recommended by the minimax team. Its strange that FL2va works really well for ref2v even though its not meant for it. It just looks better and sounds better then the ref2va model. I really like beta 6. Maybe I should try it with the other workflow. it would suck only being able to use one image though. 
+
+ I also find beta 6 doesn't use my audio voice reference very well either. I can't seem to get it to match. FL2va model has no problems with this using the exact same prompt.
+
+ See translation EllipsesMark 11 days ago <div class="break-words rounded-b-lg bg-white px-3.5 bo
+
+=====
+
+yeah no... you've got to use the image to video workflow and ensure the prompt is set up for i2v the beginning should be the standard - the target video at 00:00 blah blah. I've gotten amazing results with that. 
+
+ but also... what's the prompt? if you don't want to share the actual prompt you're using, come up with a fake one and post the structure here. I can take a look at it. 
+
+ See translation Portland01 11 days ago • edited 11 days ago <div
+
+=====
+
+Here is one prompt that I am messing with right now. there are several more in similar format using the default ref2v workflow. I just recently changed overall_soundscape: by what i read on the main page here hoping it would fix the audio ref. it does somewhat match sometimes but still not as good as the original model.
+
+ subject_definitions:
+
+ is the red haired women fully_preserved in .
+ is the blonde haired women fully_preserved in .
+ is the voice-timbre reference for (S1).
+
+ summary:
+
+ [reference generation + audio reference] The target video uses as the voice-timbre reference for .
+
+ retention_analysis:
+
+ (appears in [Shot 1]): fully_preserved - her face, hair, clothes, bone structure are exactly as in 
+ (appears in [Shot 1]): fully_preserved - her face, hair, clothes, bone structure are exactly as in 
+ : reference - its vocal timbre guides the dialogue delivery of without copying the original signal.
+
+ detailed_description:
+
+ [Shot 1] none of your business... 
+
+ overall_soundscape:
+
+ (S1) speaking in the timbre of .
+
+ non_diegetic_music:
+
+ N/A 
+
+ thanks by the way, for trying to help.
+
+ See translation EllipsesMark 11 days ago <button class="text-gray-500 focus:text-gray-900 dark:focus:text-gray-400 " aria-expanded="false" typ
+
+=====
+
+yup! That's reference to video, that's not i2v. Are you trying to do image to video or ref2vid? Your post is about the model being terrible at image to video. but to dissect what you have going on, you're summary needs to be a summary of the video clip, no assignments. and of course as you said it's none of my business... but if you want help I'll need to see how you have the detailed_description structured. 
+
+ See translation Portland01 11 days ago • edited 11 days ago <div
+
+=====
+
+not sure why the description would really matter if this whole structure is no good anyway for this model but a quick example would be 
+
+ [Shot 1] turns to and says in a serious tone, [English] stop asking me for a detailed description. that's private.. [Shot 2] At 00:02.200, the camera cuts to a medium close-up of as she leans back, her face contorted in irritation, (S1) responds angrily, using the voice from : [English] If you want my help, I need more details dammit!. 
+
+ for some reason, hugging face is removing the from my paragraph. When I go to edit it, it shows up but disappears after i post it. weird.
+
+ See translation EllipsesMark 11 days ago <div
+
+=====
+
+don't forget the tags for dialogue. cuts to and "as" are fighting each other. cuts to and then shows her lean back is the correct way. 
+
+ what sampler/scheduler are you using? 
+
+ See translation Portland01 11 days ago <div
+
+=====
+
+This was just one quick example. I've made many other attempts with no dialogue but it still fails. Actually, come think of it, it seems to work ok with this format if I just use one image. Once I add another image of another person, that's were it is failing big time. Image 1 still looks decent enough(not as good as fl2va model) but image 2 is totally messed up. So I guess your right. I just need to stick to one image. Curious as to why tenstrip shows how to use an audio reference for his model when it was only meant for the image 2 video workflow.
+
+ As for the sampler/scheduler, I tried every single one suggested on the main page. As usual, Er_sde works the best and always does for every workflow prompt I've ever used. I constantly switch them around but always end up back to Er for better prompt adherence. Oh, and I switch around between simple and beta. they both produce similar results. I find ddim_uniform gives the clearest audio but it messes up the image contrast for some reason.
+
+ See translation EllipsesMark 11 days ago <
+
+=====
+
+I just fixed my reference to video with my prompt. It was my summary that was jacking it all up, then on top of that it was how my detailed description was structured. So I'm getting good results with both now, i2v and ref2v. just needed to look at my prompt. lol I have prompts that I have saved and try to reuse instead of typing the whole scene out again, in this case, it just needed some tuning. 
+
+ See translation Portland01 11 days ago <div
+
+=====
+
+are you able to use a second image of another character and keep there likeness?
+
+ See translation EllipsesMark 11 days ago <div
+
+=====
+
+Indeed I am. I actually was able to get 4 characters in one video. I'm going to keep pushing the envelope to see how far I can take it before it breaks.
+
+ See translation TenStrip Owner 11 days ago <div
+
+=====
+
+Something about the Loras or Reference deltas always makes my merges just not work on the FL node. But honestly the reference node does the same thing with much more control. If you want to use the reference node like the FL node, you can maybe try this string on one not-resized image input and just add a natural language i2v style prompt after it, or add a timestamp of when to reference the picture too: 
+
+ is the correct scene identity. All lighting, lighting hue, color palette, visual output style, camera angle, camera focal length, camera orbit, camera framing, background, background objects, and characters fully preserved from . 
+
+ See translation 👍 1 1 + EllipsesMark 11 days ago <div
+
+=====
+
+Oh sheeett!! That's another thing I've been failing to mention this entire time too. Sorry ya'll. when my images are loaded I use pixaroma images, and I select the output to match what it will be when it hits my generation. so I crop my images to 9:16 if my output is going to be 9:16. 16:9 for 16:9 and so on. I do that for i2v. on my references I select max rather than match. 
+
+ See translation 👍 1 1 + Portland01 10 days ago <div
+
+=====
+
+What is the FL node? I tried your suggestion Tenstrip with that prompt and it made no difference. Also made sure the aspect ratio was the same for the images and the video output but still nada. I just tried your model on a really good extension workflow for the first time and it is the only one that fails at keeping the likeness or using the audio reference for the characters. 
+
+ I'm thinking maybe yours needs some kind of different prompting in order to get working properly. I also just tried the Dasiwa model which is probably very similar to yours and his has no issues keeping the likeness for extending or using multiple characters as a reference. the audio reference has no issues with his either so I really don't know where I'm messing up with your model here. Yours has way better audio then his and his tends to produce a distorted image a lot of the time.
+
+ The default models, Dasiwa and couple of other hybrid models I tried all work fine with my prompts. EllipsesMark claims your works great with no problems. So obviously it is something on my end screwing things up. I read a post of yours recently were you stated the default prompting doesn't work well with your model and that you were looking at posting a proper way to prompt for it. Will you be posting this info on your main page when you find a solution? Thanks.
+
+ See translation dartagnan69 9 days ago • edited 9 days ago <div

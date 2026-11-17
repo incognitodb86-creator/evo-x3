@@ -1,0 +1,7 @@
+[
+ {"_note": "ALI-157 one-seed Kitchen A/B. Arm A = current default (comfy kitchen attention). Fill image/beat from an approved POOL shot before running; queue time needs Derrick's yes.",
+  "id": "ab_kitchen", "arm": "short", "mode": "i2v", "secs": 10, "seed": 51016105, "steps": 10, "attention": "comfy kitchen attention",
+  "image": "FILL_FROM_APPROVED_POOL", "beat": "FILL_SAME_BEAT"},
+ {"id": "ab_pytorch", "arm": "short", "mode": "i2v", "secs": 10, "seed": 51016105, "steps": 10, "attention": "pytorch attention",
+  "image": "FILL_FROM_APPROVED_POOL", "beat": "FILL_SAME_BEAT"}
+]

@@ -1,0 +1,15 @@
+--- orig/ralph.ps1	2026-10-23 09:09:44.303442370 -0500
++++ new/ralph.ps1	2026-10-23 09:11:09.766845794 -0500
+@@ -30,10 +30,11 @@
+ #  - A10 stall stop: 3 iterations in a row with no ticked task and no changed file -> STOP_RALPH (replaces the 2x TASKS.md-unchanged rule).
+ #  - job kinds 'graph' (scripts\run_graph_job.py: one prepared API graph, objective checks, max 2 objective redos) and 'dip' (scripts\dip_join.py, CPU)
+ #    for ALI-147 ids ali147_pool_<arm>_s<seed>. Redo rule (max-DECISIONS 3:46 PM): objective failures only; the judge never triggers redos.
++# batch 2026-10-23 (ALI-163, Derrick "6 clips, 120 GPU min"; backup ralph.ps1.bak-20261023-batch): default caps 495 min / 32 jobs = 375.3/26 used + 120/6.
+ # breaker 2026-10-23 (ALI-161, Derrick 12:47 AM CT "Yes, change the loop script"; backup logs\ralph.ps1.bak-20261023-breaker):
+ #  - circuit breaker: 2 iterations in a row ending TIMEOUT, or FAIL with the same exit reason -> BREAKER log + STOP_RALPH, clean exit.
+ #  - a JOB_REQUEST left by a timed-out/failed pass is kept (RunJobs, all normal guards) when its ids are in TASKS.md and the pass ticked/REQUESTED a line.
+-param([int]$Max=10,[int]$TimeoutMin=20,[int]$GuardWaitMin=180,[int]$GuardPollSec=120,[int]$GpuCapMin=360,[int]$JobMax=16,[int]$UtilMax=30)
++param([int]$Max=10,[int]$TimeoutMin=20,[int]$GuardWaitMin=180,[int]$GuardPollSec=120,[int]$GpuCapMin=495,[int]$JobMax=32,[int]$UtilMax=30)
+ $R='C:\Users\derek\5slock'; $K='C:\Users\derek\5slock\ralph-community'; $L="$K\logs"; $C='C:\AI\community'
+ $Guard='C:\AI\director\scripts\gpu_guard.ps1'; $WF='C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\user'; $Snap="$K\wfsnap"; $Sess="$K\sessions"; $Agents="$R\AGENTS.md"
+ Set-Location $R; New-Item -ItemType Directory -Force $L, $Sess | Out-Null

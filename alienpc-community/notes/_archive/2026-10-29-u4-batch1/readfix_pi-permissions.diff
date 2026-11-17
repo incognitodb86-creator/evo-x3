@@ -1,0 +1,69 @@
+--- /dev/fd/63	2026-10-23 13:48:39.020003575 -0500
++++ /dev/fd/62	2026-10-23 13:48:39.020003575 -0500
+@@ -283,7 +283,12 @@
+     // bakeoff (ALI-173, 2026-10-23 1:07 PM CT, Derrick "Yes, add 120 GPU min and 10 jobs for the bakeoff and let Forge restart and call ComfyUI itself"):
+     // the restart helper is Max's (it holds the render-running refusal), so it stays out of the scriptfix allow above.
+     "edit:C:/AI/community/scripts/comfy_ctl.py": "deny",
+-    "write:C:/AI/community/scripts/comfy_ctl.py": "deny"
++    "write:C:/AI/community/scripts/comfy_ctl.py": "deny",
++    "edit:C:/AI/community/scripts/face_crop.py": "deny", // readfix R4G2: Forge runs the crop script, never edits it
++    "write:C:/AI/community/scripts/face_crop.py": "deny",
++    // readfix B: the Civitai still folders are read-only for file tools
++    "edit:C:/Users/derek/Civitai_RightFlow_Flow_*": "deny",
++    "write:C:/Users/derek/Civitai_RightFlow_Flow_*": "deny"
+   },
+ 
+   "mcp": {
+@@ -556,6 +561,39 @@
+     "git grep -n \"/api\" -- public/sw.js": "allow",
+     // U1b (2026-10-18 7:29 PM CT): typecheck script = tsc --noEmit, same command as lint; under Derrick's 4:03 PM CT check approval.
+     "npm run typecheck": "allow",
++    // readfix C-small (ALI-163, 2026-10-23, Derrick 11:09 AM CT "Yes don't be so restrictive to forge wtf"): python -c may span lines / use ';' inside its
++    // quotes, and plain read commands may end in 2>/dev/null or 2>$null. The headless guard checks the shape (one quoted -c argument, nothing after it but
++    // the stderr redirect; Forge sessions only). Re-denies right after, and the forgesafe floors below, still win.
++    "python -c *": "allow",
++    "python3 -c *": "allow",
++    "find * 2>/dev/null": "allow",
++    "grep * 2>/dev/null": "allow",
++    "rg * 2>/dev/null": "allow",
++    "ls * 2>/dev/null": "allow",
++    "cat * 2>/dev/null": "allow",
++    "head * 2>/dev/null": "allow",
++    "tail * 2>/dev/null": "allow",
++    "wc * 2>/dev/null": "allow",
++    "find * 2>$null": "allow",
++    "grep * 2>$null": "allow",
++    "ls * 2>$null": "allow",
++    // re-denies after the allows above; doubled "**" keeps each key unique (a repeated JSON key would stay at its first position and lose to the allows)
++    "**pi-permissions**": "deny",
++    "**$(**": "deny",
++    "**`**": "deny",
++    "**<<**": "deny",
++    "**\r**": "deny",
++    "**&&**": "deny",
++    "**||**": "deny",
++    "** rm **": "deny",
++    "** del **": "deny",
++    "**Remove-Item**": "deny",
++    "** -delete**": "deny",
++    "**git push**": "deny",
++    "**curl **": "deny",
++    "**wget **": "deny",
++    "**llama-server**": "deny",
++    "**:8091**": "deny",
+     // --- forgesafe 2026-10-20 (Derek-approved "safe, no-GPU" fixes): interpreter / HTTP calls to the local GPU services.
+     // Last match wins, so these deny floors sit at the very end of the bash block. Ports: llama-swap 8080, Strata/ComfyUI 10001-10005, old ComfyUI 8188/8189.
+     // The headless guard (gpu-endpoints rule) is the main backstop and also covers the powershell tool; these cover bash.
+@@ -615,6 +653,12 @@
+     "external_directory:C:/AI/*": "allow",
+     "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes": "allow",
+     "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/custom_nodes/*": "allow",
++    // readfix A/B (ALI-163, 2026-10-23 1:45 PM CT, Derrick 11:09 AM CT "Yes don't be so restrictive to forge wtf"): file tools may READ the whole ComfyUI
++    // install and the Civitai RightFlow still folders. edit/write stay denied in tools above (HardcoreNSFW-TestRuntime/*); crops go through scripts/face_crop.py.
++    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI": "allow",
++    "external_directory:C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/*": "allow",
++    "external_directory:C:/Users/derek/Civitai_RightFlow_Flow_*": "allow",
++    "external_directory:C:/Users/derek/Civitai_RightFlow_Flow_*/*": "allow",
+     "external_directory:*/.env*": "deny",
+     "external_directory:*.key": "deny",
+     "external_directory:*.pem": "deny",

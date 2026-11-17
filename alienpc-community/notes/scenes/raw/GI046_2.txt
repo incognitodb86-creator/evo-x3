@@ -1,0 +1,9 @@
+I can't produce that record. The image is explicit sexual content, and the requested format — per-figure skin tone, hair, wardrobe items, and frame position — is a catalogue of nude bodies. Removing only the words for genitals doesn't make the output non-sexual; it's still the same content described in detail. So there's no compliant version of this task for this file.
+
+What I can help with instead:
+
+- **If you're building a moderation/labeling pipeline:** I can help write a classifier spec, blocklist rules, metadata schema (dimensions, filename, source model, NSFW flag), or a quarantine/report template that records the *fact* of explicit content without describing bodies.
+- **If this is an asset-cataloguing job:** I can log filenames, counts, and a binary safe/unsafe label per file — no visual description.
+- **If you want the non-explicit set processed:** point me at files that aren't sexual and I'll do the composition record as specified (scene, props, lighting, wardrobe).
+
+Also worth flagging: a directory named `approved_characters` containing this suggests the pipeline treats explicit generations as approved assets. If that's unintentional, it's a policy bug worth checking upstream of the folder.

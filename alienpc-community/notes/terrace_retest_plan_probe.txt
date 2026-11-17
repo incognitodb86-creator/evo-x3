@@ -1,0 +1,548 @@
+PROBE: terrace retest plan vs disk - 2026-10-29T20:30:51
+
+### 1. Files the draft names
+  B2 graph of record: EXISTS bytes=20072 sha256=8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e
+  B2 default copy: EXISTS bytes=20072 sha256=8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e
+  stock simple_v2 (UI, on-disk copy): EXISTS bytes=76320 sha256=a315ac74a24a14d46ee5f7569d36993f71019bad0a9077bddcec9aae0c10949a
+  stock as shipped, flat API: EXISTS bytes=9784 sha256=64a6b4d35b114bb9ce241792942adec887a2275d7ab019a0d9129b876a826287
+  T4 submitted graph: EXISTS bytes=23857 sha256=8e8ea70e6b1cb1405e20658384c565d5f5e787d95683580b8417b7661c1daa6e
+  start image: EXISTS bytes=1352963 sha256=b891c85fdf057b5ed915d8fea369f4d9139fabd644404d7116745af80f1c3777
+  start image real pixels: 768x1344  ratio=0.571429 (9:16=0.562500)
+
+### 2. Stock UI graph structure (stock_simple_v2.json)
+  top-level nodes=35 links=50 definitions=1
+  ui node    3 type=VAELoader                        widgets=["minimax_h3_video_vae_int8_convrot.safetensors"]
+  ui node    4 type=VAELoader                        widgets=["minimax_h3_audio_vae_fp32.safetensors"]
+  ui node   36 type=LoraLoaderModelOnly              widgets=["Minimax_H3\\minimax_h3_fl2v_lightx2v_turbo_4step_v0.1_comfy.safetensors", 1]
+  ui node   15 type=CLIPLoader                       widgets=["qwen3vl_32b_minimax_h3_int4_convrot.safetensors", "minimax", "default"]
+  ui node   40 type=SaveVideo                        widgets=["video/ErosMaxH3_b4_TURBO_w4a8Exp_2Pass", "mp4", "auto", "auto"]
+  ui node   74 type=PrimitiveString                  widgets=["video/Preview_ErosMaxH3_b7_TURBO"]
+  ui node   73 type=PrimitiveString                  widgets=["video/ErosMaxH3_b7_TURBO_2Pass"]
+  ui node   23 type=PrimitiveFloat                   widgets=[1]
+  ui node   28 type=MarkdownNote                     widgets=<1305 chars> ["**Resolution Selector reference — multiple = 32, before RTX.**\n\nThis selector treats 1 MP as 1024 × 1024 pixels. Dimensions are rounded to multiples of 32.\n\n| MP | 1:1 — Square | 3:2 — Photo | 4:3 — Standard | 16:9 — Widescreen |\n|---:|:---:|:---:|:---:|:---:|\n| 0.2 | 448 × 448 | 576 × 384 |...
+  ui node   17 type=PrimitiveFloat                   widgets=[15]
+  ui node   38 type=MiniMaxH3SigmaShift              widgets=[12, 3]
+  ui node   24 type=BasicScheduler                   widgets=["sgm_uniform", 8, 1]
+  ui node   18 type=KSamplerSelect                   widgets=["er_sde"]
+  ui node    9 type=LoadImage                        widgets=["example.png", "image"]
+  ui node   20 type=ResolutionSelector               widgets=["4:3 (Standard)", 0.3, 32]
+  ui node   30 type=UNETLoader                       widgets=["10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors", "default"]
+  ui node   94 type=PrimitiveBoolean                 widgets=[false]
+  ui node   59 type=Seed (rgthree)                   widgets=[-1, "", "", ""]
+  ui node    2 type=PrimitiveStringMultiline         widgets=["<Prompt>"]
+  ui node  100 type=BlockSparseAttention             widgets=["vsa", 10, 0, 1, "0,1", 12288, 256, "exact_kv_and_rows", false]
+  ui node  102 type=BasicScheduler                   widgets=["beta", 3, 0.4]
+  ui node   39 type=RTXVideoSuperResolution          widgets=["scale by multiplier", 1.2, "ULTRA", 1, "10-bit RGB (RGB10A2)"]
+  ui node  154 type=MarkdownNote                     widgets=<3127 chars> ["## ErosMax H3 - Simple two-pass workflow\n\n### Generate a video\n1. Select your H3 Turbo checkpoint, text encoder and video/audio VAEs. The model column retains the full workflow's loaders and model settings. Leave the Turbo LoRA bypassed when Turbo is already included in the checkpoint.\n2. Writ...
+  ui node  174 type=PrimitiveFloat                   widgets=[0.005]
+  ui node  181 type=MiniMaxH3AddGuide                widgets=[0]
+  ui node  182 type=MiniMaxH3AddGuide                widgets=[0]
+  ui node  185 type=MarkdownNote                     widgets=["<--- Automatic initial image conditioning. Ignore this panel, it's auto managed"]
+  subgraph instance nodes: [(151, 'ded97798-c8bc-4395-84c9-cb1ee9179c64'), (152, 'f115c91c-f8dd-4428-a3d5-82c6dc385244'), (178, '1bd30d45-3335-42de-be2f-d52e19c174cf')]
+  --- subgraph definition id=ded97798-c8bc-4395-84c9-cb1ee9179c64 name=Starting-image two-pass generation nodes=14 version=1
+      ui node   32 type=BasicGuider                        widgets=null
+      ui node   10 type=LTXVConcatAVLatent                 widgets=null
+      ui node   21 type=SamplerCustomAdvanced              widgets=null
+      ui node   25 type=VAEDecode                          widgets=null
+      ui node   14 type=VAEDecodeAudio                     widgets=null
+      ui node   29 type=BasicGuider                        widgets=null
+      ui node   16 type=SamplerCustomAdvanced              widgets=null
+      ui node   19 type=ComfyMathExpression                widgets=["max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17"]
+      ui node   35 type=LTXVSeparateAVLatent               widgets=null
+      ui node   86 type=HaltExecution                      widgets=[true, false, false, false, "➡️ EXECUTION CONTINUING! Time: 22:03:20.550793"]
+      ui node   95 type=ComfySwitchNode                    widgets=[false]
+      ui node   26 type=MinimaxH3LatentUpscaler3D          widgets=["minimax_h3_latent_upscaler_3d_fp16.safetensors", "megapixels", 1, 32, true, true, "cuda", "fp16"]
+      ui node   11 type=MiniMaxH3ReferenceToVideo          widgets=["", 1344, 768, 124, "match"]
+      ui node   31 type=RandomNoise                        widgets=[861781773298997, "randomize"]
+  --- subgraph definition id=f115c91c-f8dd-4428-a3d5-82c6dc385244 name=Encode 24 FPS video nodes=3 version=1
+      ui node   75 type=ComfySwitchNode                    widgets=[false]
+      ui node  135 type=LokkenVideoPostProcessing          widgets=[false, "lanczos", 2, false, 24, 2, false, true, 0.005, 0.25, true, 18, "custom", 4, "slow", "auto"]
+      ui node  176 type=ComfyMathExpression                widgets=["a > 0"]
+  --- subgraph definition id=1bd30d45-3335-42de-be2f-d52e19c174cf name=Output saving quality — encoder preset nodes=2 version=1
+      ui node  179 type=CustomCombo                        widgets=["slow", -1, "ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", ""]
+      ui node  180 type=Any Switch (rgthree)               widgets=null
+  --- every ComfyMathExpression / maths node in the file (frame-count chain) ---
+      sub[Starting-image two-pass generation] ui node 19: ["max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17"]
+      sub[Encode 24 FPS video] ui node 176: ["a > 0"]
+  formula at duration 5.0 s -> frames 124
+  formula at duration 10.0 s -> frames 243
+  formula at duration 15.0 s -> frames 362
+  formula at duration 12.5 s -> frames 311
+  reachable frame counts <= 400 via that formula: [5, 22, 39, 56, 73, 90, 107, 124, 141, 158, 175, 192, 209, 226, 243, 260, 277, 294, 311, 328, 345, 362, 379, 396]
+  121 frames reachable? False   124? True   243? True
+  --- ResolutionSelector widget option lists (searched in installed node source) ---
+      node source candidate: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\custom_nodes\ComfyUI-DaSiWa-Nodes\nodes\nodes_rtx_upscaler_refiner.py (55509 B)
+      node source candidate: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\custom_nodes\ComfyUI-DaSiWa-Nodes\nodes\nodes_scaling.py (23461 B)
+      node source candidate: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\custom_nodes\ComfyUI-H3-Continuum\v3\resolution.py (8214 B)
+      node source candidate: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\custom_nodes\Comfyui_Minimax_h3_latent_Upscaler\nodes\minimax_h3_latent_upscaler_3d.py (25845 B)
+
+====================================================================================================
+### B2 graph of record: C:\AI\community\runs\terrace_dom_q5guide_20261028_s51083007\request.api.json
+  nodes=26 sha256=8d1d1a41e9915f2a3ef3f1350b65a4bf563f9607af7e3ed9538e4c9abae4695e bytes=20072
+  [ag0] MiniMaxH3AddGuide
+       .frame_idx = 0
+       positive <- [c0]:0
+       vae <- [vvae]:0
+       latent <- [c0]:1
+       image <- [img]:0
+  [ag1] MiniMaxH3AddGuide
+       .frame_idx = 0
+       positive <- [c0]:0
+       vae <- [vvae]:0
+       latent <- [s1_cat]:0
+       image <- [img]:0
+  [avae] VAELoader
+       .vae_name = minimax_h3_audio_vae_fp32.safetensors
+  [c0] MiniMaxH3ReferenceToVideo
+       .prompt = <13159 chars> subject_definitions:\n<Picture 1> is the composition and identity anchor for [Shot 1]: two adult women (18+) s...
+       .width = 384
+       .height = 672
+       .length = 243
+       .ref_image_size = max
+       clip <- [clip]:0
+       vae <- [vvae]:0
+       audio_vae <- [avae]:0
+       ref_images.ref_image_1 <- [img]:0
+  [clip] CLIPLoader
+       .clip_name = qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors
+       .type = minimax
+       .device = default
+  [dec_a] VAEDecodeAudio
+       samples <- [s0_sep]:1
+       vae <- [avae]:0
+  [dec_v] VAEDecode
+       samples <- [s1_samp]:0
+       vae <- [vvae]:0
+  [img] LoadImage
+       .image = community/TERRACE2_768x1344.png
+  [ksel] KSamplerSelect
+       .sampler_name = euler
+  [lsu3] MinimaxH3LatentUpscaler3D
+       .model_name = minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors
+       .mode = scale by multiplier
+       .mode.scale = 2.0
+       .align = 32
+       .enable_temporal_chunking = true
+       .force_unload = true
+       .device = cuda
+       .precision = fp16
+       latent <- [s0_sep]:0
+  [m_attn] ModelAttentionBackend
+       .attention = comfy kitchen attention
+       model <- [unet]:0
+  [m_shift] MiniMaxH3SigmaShift
+       .shift_video = 12.0
+       .shift_audio = 3.0
+       model <- [m_vsa]:0
+  [m_vsa] BlockSparseAttention
+       .selection = vsa
+       .selection.keep_percent = 10
+       .start_percent = 0.0
+       .end_percent = 1.0
+       .dense_blocks = 0,1
+       .min_tokens = 12288
+       .extra_tokens = 256
+       .sink_conditioning = exact_kv_and_rows
+       .verbose = false
+       model <- [m_attn]:0
+  [mkvid] CreateVideo
+       .fps = 24
+       images <- [dec_v]:0
+       audio <- [dec_a]:0
+  [noise] RandomNoise
+       .noise_seed = 51083002
+  [p2sched] BasicScheduler
+       .scheduler = beta
+       .steps = 3
+       .denoise = 0.4
+       model <- [m_shift]:0
+  [s0_guide] BasicGuider
+       model <- [m_shift]:0
+       conditioning <- [ag0]:0
+  [s0_samp] SamplerCustomAdvanced
+       noise <- [noise]:0
+       guider <- [s0_guide]:0
+       sampler <- [ksel]:0
+       sigmas <- [s0_sched]:0
+       latent_image <- [c0]:1
+  [s0_sched] BasicScheduler
+       .scheduler = simple
+       .steps = 8
+       .denoise = 1.0
+       model <- [m_shift]:0
+  [s0_sep] LTXVSeparateAVLatent
+       av_latent <- [s0_samp]:0
+  [s1_cat] LTXVConcatAVLatent
+       video_latent <- [lsu3]:0
+       audio_latent <- [s0_sep]:1
+  [s1_guide] BasicGuider
+       model <- [m_shift]:0
+       conditioning <- [ag1]:0
+  [s1_samp] SamplerCustomAdvanced
+       noise <- [noise]:0
+       guider <- [s1_guide]:0
+       sampler <- [ksel]:0
+       sigmas <- [p2sched]:0
+       latent_image <- [s1_cat]:0
+  [save] SaveVideo
+       .filename_prefix = community/terrace_dom_q5guide_20261028_s51083007/terrace_dom_q5guide_20261028_s51083007
+       .format = auto
+       .codec = auto
+       video <- [mkvid]:0
+  [unet] UNETLoader
+       .unet_name = 10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors
+       .weight_dtype = default
+  [vvae] VAELoader
+       .vae_name = minimax_h3_video_vae_int8_convrot.safetensors
+
+====================================================================================================
+### stock simple_v2 as shipped, flat API: C:\AI\community\runs\terrace_dom_q5stockv2_20261028_s51083011\_ui2api\api_stock.json
+  nodes=40 sha256=64a6b4d35b114bb9ce241792942adec887a2275d7ab019a0d9129b876a826287 bytes=9784
+  [1] SaveVideo
+       .format = mp4
+       .format.codec = auto
+       filename_prefix <- [38]:0
+       video <- [2]:0
+  [2] LokkenVideoPostProcessing
+       .batching_mode = custom
+       .compress = true
+       .crf = 18
+       .custom_batch_size = 4
+       .dual_pass_rife = false
+       .encoder_preset = medium
+       .h264_profile = auto
+       .interpolate = false
+       .interpolate_by = 2
+       .original_fps = 24
+       .saturation_mix = 0.25
+       .upscale = false
+       .upscale_by = 2
+       .upscale_method = lanczos
+       audio_pass <- [34]:0
+       grain <- [36]:2
+       grain_intensity <- [37]:0
+       images <- [3]:0
+  [3] RTXVideoSuperResolution
+       .quality = ULTRA
+       .resize_type = scale by multiplier
+       .resize_type.scale = 1.2
+       images <- [4]:0
+  [4] VAEDecode
+       samples <- [5]:0
+       vae <- [17]:0
+  [5] ComfySwitchNode
+       on_false <- [6]:0
+       on_true <- [27]:0
+       switch <- [33]:0
+  [6] SamplerCustomAdvanced
+       guider <- [9]:0
+       latent_image <- [25]:0
+       noise <- [7]:0
+       sampler <- [23]:0
+       sigmas <- [24]:0
+  [7] RandomNoise
+       noise_seed <- [8]:0
+  [8] Seed (rgthree)
+       .seed = -1
+  [9] BasicGuider
+       conditioning <- [15]:0
+       model <- [10]:0
+  [10] ModelAttentionBackend
+       .attention = comfy kitchen attention
+       model <- [11]:0
+  [11] BlockSparseAttention
+       .dense_blocks = 0,1
+       .end_percent = 1
+       .extra_tokens = 256
+       .min_tokens = 12288
+       .selection = vsa
+       .selection.keep_percent = 10
+       .sink_conditioning = exact_kv_and_rows
+       .start_percent = 0
+       .verbose = false
+       model <- [12]:0
+  [12] MiniMaxH3SigmaShift
+       .shift_audio = 3
+       .shift_video = 12
+       model <- [13]:0
+  [13] H3PowerLoraStack
+       .adaln_port = auto
+       .quantized_layers = auto
+       model <- [14]:0
+  [14] UNETLoader
+       .unet_name = 10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors
+       .weight_dtype = default
+  [15] MiniMaxH3ReferenceToVideo
+       .ref_image_size = match
+       audio_vae <- [18]:0
+       clip <- [16]:0
+       height <- [20]:1
+       length <- [21]:1
+       prompt <- [19]:0
+       vae <- [17]:0
+       width <- [20]:0
+  [16] CLIPLoader
+       .clip_name = qwen3vl_32b_minimax_h3_int4_convrot.safetensors
+       .device = default
+       .type = minimax
+  [17] VAELoader
+       .vae_name = minimax_h3_video_vae_int8_convrot.safetensors
+  [18] VAELoader
+       .vae_name = minimax_h3_audio_vae_fp32.safetensors
+  [19] PrimitiveStringMultiline
+       .value = <Prompt>
+  [20] ResolutionSelector
+       .aspect_ratio = 4:3 (Standard)
+       .megapixels = 0.3
+       .multiple = 32
+  [21] ComfyMathExpression
+       .expression = max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17
+       values.a <- [22]:0
+  [22] PrimitiveFloat
+       .value = 15
+  [23] KSamplerSelect
+       .sampler_name = er_sde
+  [24] BasicScheduler
+       .denoise = 0.4
+       .scheduler = beta
+       .steps = 3
+       model <- [10]:0
+  [25] LTXVConcatAVLatent
+       audio_latent <- [27]:1
+       video_latent <- [26]:0
+  [26] MinimaxH3LatentUpscaler3D
+       .align = 32
+       .device = cuda
+       .enable_temporal_chunking = true
+       .force_unload = true
+       .mode = megapixels
+       .model_name = minimax_h3_latent_upscaler_3d_fp16.safetensors
+       .precision = fp16
+       latent <- [27]:0
+       mode.megapixels <- [32]:0
+  [27] LTXVSeparateAVLatent
+       av_latent <- [28]:1
+  [28] SamplerCustomAdvanced
+       guider <- [29]:0
+       latent_image <- [15]:1
+       noise <- [7]:0
+       sampler <- [23]:0
+       sigmas <- [31]:0
+  [29] BasicGuider
+       conditioning <- [15]:0
+       model <- [30]:0
+  [30] ModelPreviewOverrideKJ
+       .jpeg_quality = 80
+       .max_resolution = 1024
+       .preview_fps = 12
+       .suppress_default_preview = true
+       model <- [10]:0
+       preview_frames <- [21]:1
+  [31] BasicScheduler
+       .denoise = 1
+       .scheduler = sgm_uniform
+       .steps = 8
+       model <- [10]:0
+  [32] PrimitiveFloat
+       .value = 1
+  [33] PrimitiveBoolean
+       .value = false
+  [34] VAEDecodeAudio
+       samples <- [35]:0
+       vae <- [18]:0
+  [35] HaltExecution
+       .alert_on_trigger = false
+       .clear_queue = false
+       .disable = true
+       .method = false
+       input <- [27]:1
+       run_after <- [3]:0
+  [36] ComfyMathExpression
+       .expression = a > 0
+       values.a <- [37]:0
+  [37] PrimitiveFloat
+       .value = 0.005
+  [38] ComfySwitchNode
+       on_false <- [39]:0
+       on_true <- [40]:0
+       switch <- [33]:0
+  [39] PrimitiveString
+       .value = video/ErosMaxH3_b7_TURBO_2Pass
+  [40] PrimitiveString
+       .value = video/Preview_ErosMaxH3_b7_TURBO
+
+====================================================================================================
+### 5. Draft claims checked against B2's real widgets
+  B2 c0[c0] length=243 width=384 height=672 fps=None ref_image_size=max prompt_chars=13128
+  B2 prompt sha256=fcad1c379bf097f3744690ee8b4f6a1052125fce82a58c33804af726cdf3e69d
+  B2 prompt contains 'Picture 1': True
+  B2 prompt contains 'picture 1': True
+  B2 prompt contains 'correct scene identity': False
+  B2 prompt contains '#74': False
+  B2 prompt contains 'scene identity': False
+  B2 reference-image sockets: {'ref_image_size': 'max', 'ref_images.ref_image_1': ['img', 0]}
+    B2 [unet] UNETLoader: {"unet_name": "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors", "weight_dtype": "default"}
+    B2 [clip] CLIPLoader: {"clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors", "type": "minimax", "device": "default"}
+    B2 [vvae] VAELoader: {"vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"}
+    B2 [avae] VAELoader: {"vae_name": "minimax_h3_audio_vae_fp32.safetensors"}
+    B2 [ksel] KSamplerSelect: {"sampler_name": "euler"}
+    B2 [s0_sched] BasicScheduler: {"scheduler": "simple", "steps": 8, "denoise": 1.0}
+    B2 [p2sched] BasicScheduler: {"scheduler": "beta", "steps": 3, "denoise": 0.4}
+    B2 [m_shift] MiniMaxH3SigmaShift: {"shift_video": 12.0, "shift_audio": 3.0}
+    B2 [m_vsa] BlockSparseAttention: {"selection": "vsa", "selection.keep_percent": 10, "start_percent": 0.0, "end_percent": 1.0, "dense_blocks": "0,1", "min_tokens": 12288, "extra_tokens": 256, "sink_conditioning": "exact_kv_and_rows", "verbose": false}
+    B2 [lsu3] MinimaxH3LatentUpscaler3D: {"model_name": "minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors", "mode": "scale by multiplier", "mode.scale": 2.0, "align": 32, "enable_temporal_chunking": true, "force_unload": true, "device": "cuda", "precision": "fp16"}
+    B2 [ag0] MiniMaxH3AddGuide: {"frame_idx": 0}
+    B2 [ag1] MiniMaxH3AddGuide: {"frame_idx": 0}
+    B2 [img] LoadImage: {"image": "community/TERRACE2_768x1344.png"}
+    B2 [save] SaveVideo: {"filename_prefix": "community/terrace_dom_q5guide_20261028_s51083007/terrace_dom_q5guide_20261028_s51083007", "format": "auto", "codec": "auto"}
+    B2 [mkvid] CreateVideo: {"fps": 24}
+    B2 [dec_v] VAEDecode: {}
+    B2 [dec_a] VAEDecodeAudio: {}
+    B2 [noise] RandomNoise.<b>noise_seed</b> = 51083002
+
+### 6. Stock as shipped: the same widget set
+    STOCK [14] UNETLoader: {"unet_name": "10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors", "weight_dtype": "default"}
+    STOCK [16] CLIPLoader: {"clip_name": "qwen3vl_32b_minimax_h3_int4_convrot.safetensors", "device": "default", "type": "minimax"}
+    STOCK [17] VAELoader: {"vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"}
+    STOCK [18] VAELoader: {"vae_name": "minimax_h3_audio_vae_fp32.safetensors"}
+    STOCK [23] KSamplerSelect: {"sampler_name": "er_sde"}
+    STOCK [24] BasicScheduler: {"denoise": 0.4, "scheduler": "beta", "steps": 3}
+    STOCK [31] BasicScheduler: {"denoise": 1, "scheduler": "sgm_uniform", "steps": 8}
+    STOCK [12] MiniMaxH3SigmaShift: {"shift_audio": 3, "shift_video": 12}
+    STOCK [11] BlockSparseAttention: {"dense_blocks": "0,1", "end_percent": 1, "extra_tokens": 256, "min_tokens": 12288, "selection": "vsa", "selection.keep_percent": 10, "sink_conditioning": "exact_kv_and_rows", "start_percent": 0, "verbose": false}
+    STOCK [26] MinimaxH3LatentUpscaler3D: {"align": 32, "device": "cuda", "enable_temporal_chunking": true, "force_unload": true, "mode": "megapixels", "model_name": "minimax_h3_latent_upscaler_3d_fp16.safetensors", "precision": "fp16"}
+    STOCK [1] SaveVideo: {"format": "mp4", "format.codec": "auto"}
+    STOCK [3] RTXVideoSuperResolution: {"quality": "ULTRA", "resize_type": "scale by multiplier", "resize_type.scale": 1.2}
+    STOCK [2] LokkenVideoPostProcessing: {"batching_mode": "custom", "compress": true, "crf": 18, "custom_batch_size": 4, "dual_pass_rife": false, "encoder_preset": "medium", "h264_profile": "auto", "interpolate": false, "interpolate_by": 2, "original_fps": 24, "saturation_mix": 0.25, "upscale": false, "upscale_by": 2, "upscale_method": "lanczos"}
+    STOCK [20] ResolutionSelector: {"aspect_ratio": "4:3 (Standard)", "megapixels": 0.3, "multiple": 32}
+    STOCK [15] MiniMaxH3ReferenceToVideo: {"ref_image_size": "match"}
+    STOCK [22] PrimitiveFloat: {"value": 15}
+    STOCK [32] PrimitiveFloat: {"value": 1}
+    STOCK [37] PrimitiveFloat: {"value": 0.005}
+    STOCK [8] Seed (rgthree): {"seed": -1}
+    STOCK [19] PrimitiveStringMultiline: {"value": "<Prompt>"}
+    STOCK c0[15] prompt = ["19", 0] sha256=3119e2dc02b76c52
+
+====================================================================================================
+### 7. Model files on disk (S3 upscaler swap, beta5 claim)
+      diffusion_models\10Eros_Max_h3_8stepTURBO_beta7_activation_learned_HQ.safetensors  18,691,644,302 B
+      diffusion_models\10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors  22,893,150,024 B
+      h3_latent_upscalers\h3_clean_latent_upscaler_film_epoch200.safetensors  59,022,848 B
+      h3_latent_upscalers\h3_clean_latent_upscaler_v1_mamad8.safetensors  59,022,848 B
+      latent_upscale_models\minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors  690,592,992 B
+      latent_upscale_models\minimax_h3_latent_upscaler_3d_fp16.safetensors  690,592,672 B
+      vae\minimax_h3_audio_vae_fp32.safetensors  605,254,808 B
+      vae\minimax_h3_video_vae_int8_convrot.safetensors  2,811,065,184 B
+
+### 8. Instruments named in the draft
+  judge dir: 14 entries -> [".gitignore", ".venv", "README.md", "__pycache__", "check_note_table.py", "check_swift_conformance.py", "models", "out", "patch_novelty.py", "pose_sanity.py", "prechecks.py", "summarize_swift_run.py", "vlm_judge.py", "vlm_variants.py"]
+  scripts dir: 48 entries -> <983 chars> [".pytest_cache", "__pycache__", "_probe_apis_2026-10-29.py", "capa_apply_context_fix.py", "capa_ctx_scan.py", "check_markers.py", "check_web_saves.py", "civitai_lora_survey.py", "comfy_ctl.py", "comm.py", "describe_workflow.py", "dump_nodes.py", "finalize_encode.py", "gpu_window.ps1", "h3_lora_catalog_survey_2026-10-29b.py", "h3_lora_social_sweep.py", "h3_lora_social_sweep2.py", "h3_lora_social_sweep3.py", "lora_alias_copy_2026-10-29.py", "lora_header_probe.py", "max_event.ps1", "mmh3_pack_api.py", "objinfo_has.py", "p6_review.py", "pi_qnap.py", "pi_status.py", "post_graph_build.py", "probe_full.py", "probe_nodes.py", "probe_obj.py", "probe_sharpen.py", "probe_spec.py", "probe_submit.py", "prompt_stats.py", "q5_get_ckpt.py", "q5_preflight.py", "q5_price_install.py", "q5_review_pack.py", "review_pack.py", "run_graph_job.py", "stage_smoke.py", "t4_bridge.py", "tests", "verify_2026-10-29_l...
+  locks dir: 1 entries -> ["_removed"]
+  60_reviews: NOT A DIR (C:\AI\community\60_reviews)
+  reviews dir: 1 entries -> ["hc169"]
+    script: gpu_window.ps1 (2345 B)
+
+### 9. Prompt provenance files
+  terrace_dom_q5guide_20261028_s51083007\prompt_seg0.txt: 13159 B, 13128 chars, sha256=fcad1c379bf097f3 contains 'Picture 1': True
+  terrace_dom_q5biglock_20261028_s51083009\prompt_seg0.txt: 13159 B, 13128 chars, sha256=fcad1c379bf097f3 contains 'Picture 1': True
+  terrace_dom_q5biglock_20261028_s51083009\prompt_lock_block.txt: 513 B, 510 chars, sha256=d846a11fe21e71e8 contains 'Picture 1': False
+  terrace_dom_q5biglock_20261028_s51083009\prompt_full.txt: 13676 B, 13640 chars, sha256=7fa8fcbcadaeb020 contains 'Picture 1': True
+  notes/2026-10-28-consistency-lock-block.txt: 510 chars sha=d846a11fe21e71e8 contains 'Picture 1': False
+
+DONE (read-only, no submit, no GPU)
+
+====================================================================================================
+### PROBE 2 (2026-10-29 ~20:40 CT)
+
+  object_info snapshot: C:\AI\community\runs\ckattn_20261025_object_info_full.json (5,752,585 B), 2639 node types - this is the Oct 25 capture of the live server
+  KSamplerSelect.sampler_name: ["COMBO", {"multiselect": false, "options": ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ancestral_cfg_pp", "heun", "heunpp2", "exp_heun_2_x0", "exp_heun_2_x0_sde", "dpm_2", "dpm_2_ancestral", "lms", "dpm_fast", "dpm_adaptive", "dpmpp_2s_ancestral", "dpmpp_2s_ancestral_cfg_pp", "dpmpp_sde", "dpmpp_sde_gpu", "dpmpp_2m", "dpmpp_2m_cfg_pp", "dpmpp_2m_sde", "dpmpp_2m_sde_gpu", "dpmpp_2m_sde_heun", "dpmpp_2m_sde_heun_gpu", "dpmpp_3m_sde", "dpmpp_3m_sde_gpu", "ddpm", "lcm", "ipndm", "ipndm_v", "deis", "cfgpp_ud10_ab", "res_multistep", "res_multistep_cfg_pp", "res_multistep_ancestral", "res_multistep_ancestral_cfg_pp", "gradient_estimation", "gradient_estimation_cfg_pp", "er_sde", "seeds_2", "seeds_3", "sa_solver", "sa_solver_pece", "ddim", "uni_pc", "uni_pc_bh2"]}]
+  BasicScheduler.scheduler: ["COMBO", {"multiselect": false, "options": ["simple", "sgm_uniform", "karras", "exponential", "ddim_uniform", "beta", "normal", "linear_quadratic", "kl_optimal"]}]
+  BasicScheduler.denoise: ["FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}]
+  MiniMaxH3ReferenceToVideo.ref_image_size: ["COMBO", {"tooltip": "Reference image sizing. 'match' scales each ref (down only, keeping aspect) to the generation's pixel area; 'max' uses the reference pipeline's 2048px short edge for best identity fidelity. Reference tokens ride through every sampling step, so 'max' can be several times slower.", "default": "match", "multiselect": false, "options": ["match", "max"]}]
+  ResolutionSelector.aspect_ratio: ["COMBO", {"tooltip": "The aspect ratio for the output dimensions.", "default": "1:1 (Square)", "multiselect": false, "options": ["1:1 (Square)", "2:3 (Portrait Photo)", "3:2 (Photo)", "3:4 (Portrait Standard)", "4:3 (Standard)", "9:16 (Portrait Widescreen)", "16:9 (Widescreen)", "21:9 (Ultrawide)"]}]
+  ResolutionSelector.megapixels: ["FLOAT", {"tooltip": "Target total megapixels. 1.0 MP ≈ 1024x1024 for square.", "default": 1.0, "min": 0.1, "max": 16.0, "step": 0.1}]
+  RTXVideoSuperResolution.quality: ["COMBO", {"default": "ULTRA", "multiselect": false, "options": ["LOW", "MEDIUM", "HIGH", "ULTRA"]}]
+  MinimaxH3LatentUpscaler3D.model_name: node NOT in snapshot
+  node MiniMaxH3AddGuide: required=['positive', 'latent', 'frame_idx'] optional=['vae', 'audio_vae', 'image', 'audio']
+  node LokkenVideoPostProcessing: NOT in the Oct 25 snapshot
+  node MiniMaxH3ReferenceToVideo: required=['clip', 'prompt', 'width', 'height', 'length', 'ref_image_size'] optional=['vae', 'audio_vae', 'ref_images', 'ref_videos', 'ref_video_audios', 'ref_audios']
+  node ResolutionSelector: required=['aspect_ratio', 'megapixels', 'multiple'] optional=['preview']
+  node MinimaxH3LatentUpscaler3D: NOT in the Oct 25 snapshot
+  node LoraLoaderModelOnly: required=['model', 'lora_name', 'strength_model'] optional=[]
+
+  --- ResolutionSelector + LatentUpscaler3D geometry, computed from the installed node source ---
+    selector 9:16 (Portrait Widescreen) @ 0.3 MP / multiple 32 -> pass-1 416x736 (0.292 MP-in-node-units, latent 52x92)
+    selector 9:16 (Portrait Widescreen) @ 0.25 MP / multiple 32 -> pass-1 384x672 (0.246 MP-in-node-units, latent 48x84)
+    selector 9:16 (Portrait Widescreen) @ 0.2 MP / multiple 32 -> pass-1 352x608 (0.204 MP-in-node-units, latent 44x76)
+    selector 9:16 (Portrait Widescreen) @ 0.15 MP / multiple 32 -> pass-1 288x544 (0.149 MP-in-node-units, latent 36x68)
+    selector 3:4 (Portrait Standard) @ 0.3 MP / multiple 32 -> pass-1 480x640 (0.293 MP-in-node-units, latent 60x80)
+    selector 3:4 (Portrait Standard) @ 0.25 MP / multiple 32 -> pass-1 448x576 (0.246 MP-in-node-units, latent 56x72)
+    selector 3:4 (Portrait Standard) @ 0.2 MP / multiple 32 -> pass-1 384x544 (0.199 MP-in-node-units, latent 48x68)
+    selector 3:4 (Portrait Standard) @ 0.15 MP / multiple 32 -> pass-1 352x448 (0.150 MP-in-node-units, latent 44x56)
+    selector 2:3 (Portrait Photo) @ 0.3 MP / multiple 32 -> pass-1 448x672 (0.287 MP-in-node-units, latent 56x84)
+    selector 2:3 (Portrait Photo) @ 0.25 MP / multiple 32 -> pass-1 416x640 (0.254 MP-in-node-units, latent 52x80)
+    selector 2:3 (Portrait Photo) @ 0.2 MP / multiple 32 -> pass-1 384x576 (0.211 MP-in-node-units, latent 48x72)
+    selector 2:3 (Portrait Photo) @ 0.15 MP / multiple 32 -> pass-1 320x480 (0.146 MP-in-node-units, latent 40x60)
+    selector 4:3 (Standard) @ 0.3 MP / multiple 32 -> pass-1 640x480 (0.293 MP-in-node-units, latent 80x60)
+    selector 4:3 (Standard) @ 0.25 MP / multiple 32 -> pass-1 576x448 (0.246 MP-in-node-units, latent 72x56)
+    selector 4:3 (Standard) @ 0.2 MP / multiple 32 -> pass-1 544x384 (0.199 MP-in-node-units, latent 68x48)
+    selector 4:3 (Standard) @ 0.15 MP / multiple 32 -> pass-1 448x352 (0.150 MP-in-node-units, latent 56x44)
+    B2 pass 1 = 384x672 (latent 48x84) x2.0 -> 768x1344 exactly
+    pass1 416x736 -> upscaler megapixels 1.0: 768x1376 (NOT 768x1344) scale=1.8506
+    pass1 416x736 -> upscaler megapixels 0.98: 768x1344 (= 768x1344) scale=1.832
+    pass1 416x736 -> upscaler megapixels 0.9: 736x1280 (NOT 768x1344) scale=1.7556
+    pass1 288x512 -> upscaler megapixels 1.0: 768x1376 (NOT 768x1344) scale=2.6667
+    pass1 288x512 -> upscaler megapixels 0.98: 768x1344 (= 768x1344) scale=2.6399
+    pass1 288x512 -> upscaler megapixels 0.9: 736x1280 (NOT 768x1344) scale=2.5298
+    pass1 384x704 -> upscaler megapixels 1.0: 768x1376 (NOT 768x1344) scale=1.9695
+    pass1 384x704 -> upscaler megapixels 0.98: 736x1376 (NOT 768x1344) scale=1.9497
+    pass1 384x704 -> upscaler megapixels 0.9: 704x1312 (NOT 768x1344) scale=1.8684
+    pass1 384x672 -> upscaler megapixels 1.0: 768x1344 (= 768x1344) scale=2.0158
+    pass1 384x672 -> upscaler megapixels 0.98: 768x1344 (= 768x1344) scale=1.9956
+    pass1 384x672 -> upscaler megapixels 0.9: 736x1280 (NOT 768x1344) scale=1.9124
+    pass1 448x768 -> upscaler megapixels 1.0: 768x1344 (= 768x1344) scale=1.7457
+    pass1 448x768 -> upscaler megapixels 0.98: 768x1312 (NOT 768x1344) scale=1.7282
+    pass1 448x768 -> upscaler megapixels 0.9: 736x1280 (NOT 768x1344) scale=1.6562
+
+  --- frame counts ---
+    stock duration widget 5.0 s -> 124 frames (5.167 s)
+    stock duration widget 10.0 s -> 243 frames (10.125 s)
+    stock duration widget 15.0 s -> 362 frames (15.083 s)
+    121 frames: not reachable from the stock duration widget (all outputs are 5 mod 17)
+    124 is reachable in BOTH arms: stock duration 5.0 s -> 124; B2 c0.length = 124 (direct widget)
+
+  --- proposed new fixed seeds ---
+    seed 51083012: run dirs 0, graphs mentioning it 0
+    seed 51083013: run dirs 0, graphs mentioning it 0
+    seed 51083002: run dirs 1, graphs mentioning it 19
+
+  --- GPU lock path used by the harness ---
+    gpu_window.ps1:4: Why this file exists: gpu_lock.ps1 -Acquire prints "ACQUIRED pid <n>", so the driver pid has to be parsed out of
+    gpu_window.ps1:23: $LockPs  = "C:\AI\director\scripts\gpu_lock.ps1"
+    gpu_window.ps1:29: Write-Output "gpu_lock -Acquire -> $acq"
+    run_graph_job.py:15: queueing, and C:/AI/director/scripts/gpu_lock.ps1 -Acquire/-Release holds C:/AI/locks/gpu-render.lock under this
+    run_graph_job.py:33: # Address the documented route; llama-swap proxies it to comfyui_auto and blocks on readiness.
+    run_graph_job.py:35: GPU_LOCK_PS = r"C:\AI\director\scripts\gpu_lock.ps1"; GPU_GUARD_PS = r"C:\AI\director\scripts\gpu_guard.ps1"
+    run_graph_job.py:37: # RENDER-TIMEOUT (2026-10-26): the box's published GPU-window mechanism (C:/AI/director/scripts/gpu_lock.ps1 +
+    run_graph_job.py:48: def gpu_lock(log, note):
+    run_graph_job.py:50: log(f"gpu_lock acquire rc={rc} {out[:140]}"); return rc == 0
+    run_graph_job.py:52: rc, out = ps_run(GPU_LOCK_PS, "-Release", "-Owner", str(os.getpid())); log(f"gpu_lock release rc={rc} {out[:140]}")
+    run_graph_job.py:81: # as usual" and llama-swap blocks up to healthCheckTimeout (1200 in the live config). So the
+    run_graph_job.py:129: # C:/AI/locks/gpu-render.lock, and gpu_guard.ps1:6,126-128 counts a live PID in that file as BUSY, so an early
+    run_graph_job.py:133: if not gpu_lock(log, f"run_graph_job {a.tag}"): log(f"GPU_BUSY {a.tag} gpu-render.lock held by a live PID - nothing queued"); return 7
+    run_graph_job.py:189: gpu_unlock(log)   # RENDER-TIMEOUT: release C:/AI/locks/gpu-render.lock so the gate opens for the next job
+
+  --- run_graph_job.py: the frames gate and the guard gate (line numbers) ---
+    run_graph_job.py:3: python -u run_graph_job.py <arm_dir> <tag> [--frames N] [--frames-tol T] [--timeout S] [--max-redo 2]
+    run_graph_job.py:6: JOB error (incl. node_errors at submit), ffprobe frame count / missing audio / 0-byte, black or frozen frames. No judge here.
+    run_graph_job.py:88: def static_check(g):
+    run_graph_job.py:101: return {"frames": int(v[0]["nb_read_packets"]) if v else 0, "w": v[0].get("width") if v else None, "h": v[0].get("height") if v else None,
+    run_graph_job.py:117: r = subprocess.run(["ffmpeg", "-hide_banner", "-y", "-i", f, "-vf", vf, "-vsync", "vfr", "-frames:v", "1", out], capture_output=True, text=True)
+    run_graph_job.py:120: ap = argparse.ArgumentParser(); ap.add_argument("arm_dir"); ap.add_argument("tag"); ap.add_argument("--frames", type=int, default=0)
+    run_graph_job.py:121: ap.add_argument("--frames-tol", type=int, default=0); ap.add_argument("--timeout", type=int, default=3600); ap.add_argument("--max-redo", type=int, default=2); a = ap.par
+    run_graph_job.py:127: if not comm.guard_ok(s): log(f"CLIP_SKIP {a.tag} adults-only guard"); return 3
+    run_graph_job.py:136: bad = static_check(g0)
+    run_graph_job.py:168: img = a.frames == 0 and os.path.splitext(s["file"])[1].lower() in IMG_EXT  # image gate only for frames-0 requests
+    run_graph_job.py:173: elif p["frames"] != 1: why.append(f"image packet count {p['frames']} != 1")
+    run_graph_job.py:176: if a.frames and abs(p["frames"] - a.frames) > a.frames_tol: why.append(f"frames {p['frames']} != {a.frames}+-{a.frames_tol}")
+    run_graph_job.py:182: res.update(ok=True, file=s["file"], contact_sheet=cs, image=img); log(f"OBJECTIVE ok {tag} image={img} frames={p['frames']} size={p['w']}x{p['h']} audio={p['audio']} dur=

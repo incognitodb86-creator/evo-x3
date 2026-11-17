@@ -1,0 +1,9 @@
+https://alienpc.tailf242b2.ts.net:8444 (tailnet only)
+|-- / proxy http://127.0.0.1:7889
+
+https://alienpc.tailf242b2.ts.net:8445 (tailnet only)
+|-- / proxy http://127.0.0.1:9537
+
+https://alienpc.tailf242b2.ts.net:8446 (tailnet only)
+|-- / proxy http://127.0.0.1:8080/upstream/comfyui_auto
+

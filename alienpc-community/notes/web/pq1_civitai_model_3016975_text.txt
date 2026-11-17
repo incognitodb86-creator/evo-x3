@@ -1,0 +1,37 @@
+[civitai model 3016975] MiniMax H3 Prompt Generator (Portable) | type Other | nsfw False | tags minimax, tool, image to video captioner, utility, portable, local, prompt-generator, hailuo, h3
+
+---- block ----
+
+MiniMax H3 Prompt Generator (Portable) 
+
+ A local desktop tool that generates properly formatted prompts for MiniMax Hailuo 3.0 (H3) video. Supports Reference-to-video + audio (RF2VA), Text-only, First frame, and First+Last frame modes. Runs completely offline after setup using your own Qwen GGUF model.
+
+ Features Dark UI with image drag-and-drop
+
+ Live token streaming and cancel button
+
+ Strict H3 template output
+
+ Fully portable — no ComfyUI or system Python required
+
+ Auto-opens the browser
+
+ Requirements Windows
+
+ NVIDIA GPU with a recent driver (CUDA 13.x compatible recommended)
+
+ A Qwen3.8-VL GGUF + matching mmproj file
+
+ Setup Download and unzip the package.
+
+ Put your GGUF and mmproj files inside the models folder (or set the paths in the UI).
+
+ Double-click run.bat.
+
+ The browser opens automatically to http://localhost:7860 .
+
+ Notes First load can take a minute while the model loads into VRAM.
+
+ The tool does not include the model — you supply your own.
+
+ GPU offload works if the CUDA wheel and runtime are present.

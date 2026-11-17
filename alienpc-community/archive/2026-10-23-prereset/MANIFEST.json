@@ -1,0 +1,563 @@
+{
+ "bytes": 1622608,
+ "created": "2026-10-23 20:10:38",
+ "entries": {
+  "5slock/AGENTS.md": {
+   "bytes": 10628,
+   "mode": "copy2",
+   "sha256": "658255c276573b775be382d479336432fd399e8e159ba539055b76b4b5770fdd",
+   "source": "C:/Users/derek/5slock/AGENTS.md",
+   "src_mtime": "2026-10-23 19:03:15"
+  },
+  "5slock/AGENTS.md.bak-20261022-ali160": {
+   "bytes": 2255,
+   "mode": "copy2",
+   "sha256": "b8dbfe8c208523c09b1a534ce28e5cefb6b59e264b845be8d15ea26b796bc3fe",
+   "source": "C:/Users/derek/5slock/AGENTS.md.bak-20261022-ali160",
+   "src_mtime": "2026-10-20 16:06:18"
+  },
+  "5slock/AGENTS.md.bak-20261022-narrow": {
+   "bytes": 7325,
+   "mode": "copy2",
+   "sha256": "3d3581ab8cf08c69fa318bc2d9c689bb494c712499d07742afd7ff4a8af5c473",
+   "source": "C:/Users/derek/5slock/AGENTS.md.bak-20261022-narrow",
+   "src_mtime": "2026-10-22 18:00:49"
+  },
+  "5slock/AGENTS.md.bak-20261022-scripts": {
+   "bytes": 4158,
+   "mode": "copy2",
+   "sha256": "b073c96043252de17e26b65daf07c2d37c8e57c8f925a9fdceac578893697fc8",
+   "source": "C:/Users/derek/5slock/AGENTS.md.bak-20261022-scripts",
+   "src_mtime": "2026-10-22 16:57:51"
+  },
+  "5slock/AGENTS.md.bak-20261022-timeout": {
+   "bytes": 20341,
+   "mode": "copy2",
+   "sha256": "5dfd4be61d60f1f29c7f9a445076f5b24b7951d836dabc339e17f2c89ca2e417",
+   "source": "C:/Users/derek/5slock/AGENTS.md.bak-20261022-timeout",
+   "src_mtime": "2026-10-22 22:20:33"
+  },
+  "5slock/AGENTS.md.bak-20261023-batch": {
+   "bytes": 22368,
+   "mode": "copy2",
+   "sha256": "c3bf928624cc1d2cd6f26beedadb3f9cffed7838808f25b9e257eda5abe4cb86",
+   "source": "C:/Users/derek/5slock/AGENTS.md.bak-20261023-batch",
+   "src_mtime": "2026-10-23 01:02:45"
+  },
+  "5slock/AGENTS.md.bak-20261023-unlock": {
+   "bytes": 10263,
+   "mode": "copy2",
+   "sha256": "fe7c8b7ffe503b164217405a418358393976d6d9c135f06389cad868a2e9f01c",
+   "source": "C:/Users/derek/5slock/AGENTS.md.bak-20261023-unlock",
+   "src_mtime": "2026-10-23 18:59:13"
+  },
+  "PROMPT.md": {
+   "bytes": 12095,
+   "mode": "deployed",
+   "sha256": "8cf5ef6b009b53dcba1bf401b6a90560f29ec4a9e3329c6d7904592d81b92e8f",
+   "source": "(copied into the archive by Max during the 2026-10-23 deploy; the live file was overwritten, so dest-hash-only)"
+  },
+  "RESET_BRIEF_20261023.md": {
+   "bytes": 8208,
+   "mode": "deployed",
+   "sha256": "db0888402c7f96a15557b7e8d01678c4064f64192bfd315f1379fd9ef348fadf",
+   "source": "(copied into the archive by Max during the 2026-10-23 deploy; the live file was overwritten, so dest-hash-only)"
+  },
+  "TASKS.md": {
+   "bytes": 131212,
+   "mode": "deployed",
+   "sha256": "99cc1654e19dde7d9cb48f00bd4224d1ed4a24cababd268d4535c4e23a1e13b4",
+   "source": "(copied into the archive by Max during the 2026-10-23 deploy; the live file was overwritten, so dest-hash-only)"
+  },
+  "launch_reset_20261023.ps1": {
+   "bytes": 1063,
+   "mode": "deployed",
+   "sha256": "81a1bee403c5f471fdc769d6a93b43729e44159bc20dc4dfb7035167e552893f",
+   "source": "(copied into the archive by Max during the 2026-10-23 deploy; the live file was overwritten, so dest-hash-only)"
+  },
+  "pi-extensions/headless-guard-allowlist.json": {
+   "bytes": 8792,
+   "mode": "copy2",
+   "sha256": "735d78289aa6c35dd54996d4d1841cc76ff9bfb5cad8f9989ba1a9af812b4806",
+   "source": "C:/AI/director/.pi/extensions/headless-guard-allowlist.json",
+   "src_mtime": "2026-10-23 18:56:04"
+  },
+  "pi-extensions/headless-guard-and-truncate.ts": {
+   "bytes": 67476,
+   "mode": "copy2",
+   "sha256": "0ba4b91f31d7d7217a92c6287c0840064abc3acf6f1e5fa7da6dad82ad35e4b7",
+   "source": "C:/AI/director/.pi/extensions/headless-guard-and-truncate.ts",
+   "src_mtime": "2026-10-23 19:01:00"
+  },
+  "pi-extensions/protected-paths.ts": {
+   "bytes": 10242,
+   "mode": "copy2",
+   "sha256": "560a60f9880f8beafbee9e2b8892412fb58ed1d814e8830ef91a05931ca30bef",
+   "source": "C:/AI/director/.pi/extensions/protected-paths.ts",
+   "src_mtime": "2026-10-23 18:56:04"
+  },
+  "ralph-community/.TASKStmp.md": {
+   "bytes": 4804,
+   "mode": "copy2",
+   "sha256": "7a17e848762a03859ff60e496e724e1fb8eda01c2bbe654f36724f4267ec2c3e",
+   "source": "C:/Users/derek/5slock/ralph-community/.TASKStmp.md",
+   "src_mtime": "2026-10-20 11:24:54"
+  },
+  "ralph-community/.c2scratch.md": {
+   "bytes": 4804,
+   "mode": "copy2",
+   "sha256": "7a17e848762a03859ff60e496e724e1fb8eda01c2bbe654f36724f4267ec2c3e",
+   "source": "C:/Users/derek/5slock/ralph-community/.c2scratch.md",
+   "src_mtime": "2026-10-20 12:08:19"
+  },
+  "ralph-community/PROMPT.md.bak-20261020-forgefix": {
+   "bytes": 1519,
+   "mode": "copy2",
+   "sha256": "acc2c4947639cfce435d4d256342d9e9a6a32e6e59071ac167923feadcfdab2d",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261020-forgefix",
+   "src_mtime": "2026-10-20 11:05:45"
+  },
+  "ralph-community/PROMPT.md.bak-20261020-forgesafe": {
+   "bytes": 1615,
+   "mode": "copy2",
+   "sha256": "635ddc85c97230ea901cb69b8e4ed23ce4191d423a483ef35ce042d29ecf2878",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261020-forgesafe",
+   "src_mtime": "2026-10-20 12:35:08"
+  },
+  "ralph-community/PROMPT.md.bak-20261020-p6opt": {
+   "bytes": 1769,
+   "mode": "copy2",
+   "sha256": "45e798f534f5bf80cafa4bbd1f5db4f46866949028ec422a0c9dbaccef90d460",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261020-p6opt",
+   "src_mtime": "2026-10-20 16:06:17"
+  },
+  "ralph-community/PROMPT.md.bak-20261021-falsestop": {
+   "bytes": 2161,
+   "mode": "copy2",
+   "sha256": "8676222682091a02879762cdcf28d4ef8f3fe1dc60a45caebc2b730e47b0d7ad",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261021-falsestop",
+   "src_mtime": "2026-10-20 20:02:35"
+  },
+  "ralph-community/PROMPT.md.bak-20261022-ali160": {
+   "bytes": 2381,
+   "mode": "copy2",
+   "sha256": "95e41fb0e36e5211f66baa2558c9cb5ffb804b82dd57ca47e1a4a20c8ec68a8d",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261022-ali160",
+   "src_mtime": "2026-10-21 05:34:03"
+  },
+  "ralph-community/PROMPT.md.bak-20261022-narrow": {
+   "bytes": 3228,
+   "mode": "copy2",
+   "sha256": "8af75ea9eed26d2a023413ebfff2e06106022c176c47835313902c15b14cf4d1",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261022-narrow",
+   "src_mtime": "2026-10-22 17:20:22"
+  },
+  "ralph-community/PROMPT.md.bak-20261022-scripts": {
+   "bytes": 2349,
+   "mode": "copy2",
+   "sha256": "a532d75680a899d4fcb1f4e811070ff13fb8446feeeb4c76f29ca6ab2ef4e502",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261022-scripts",
+   "src_mtime": "2026-10-22 15:52:38"
+  },
+  "ralph-community/PROMPT.md.bak-20261023-batch": {
+   "bytes": 4000,
+   "mode": "copy2",
+   "sha256": "c136d2c9c3407c98d443bdbdb254109e60b9392e3d6172c27dac623994d4ca0b",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261023-batch",
+   "src_mtime": "2026-10-22 23:12:37"
+  },
+  "ralph-community/PROMPT.md.bak-20261023-redo": {
+   "bytes": 5824,
+   "mode": "copy2",
+   "sha256": "5e4e464cf891eb9fde009d60ee14af5e93e3bda1b3c4478b533a471f0504b71c",
+   "source": "C:/Users/derek/5slock/ralph-community/PROMPT.md.bak-20261023-redo",
+   "src_mtime": "2026-10-23 09:11:25"
+  },
+  "ralph-community/STOP_RALPH.done-20261022": {
+   "bytes": 1216,
+   "mode": "copy2",
+   "sha256": "4ce6142ea9578b8cd064bab190cb5b9024069f529371521a70193cdb1d5dc073",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261022",
+   "src_mtime": "2026-10-22 16:35:57"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-audit": {
+   "bytes": 128,
+   "mode": "copy2",
+   "sha256": "92c3092928da07b86e2ea394fc2d5e261cd0dcdcd4ded516d9dae93d77503153",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-audit",
+   "src_mtime": "2026-10-23 11:31:48"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-bakeoff": {
+   "bytes": 140,
+   "mode": "copy2",
+   "sha256": "df7d0f2a28ca27361ac55243c435ac36639fe4668f70bb98584a2a51d5c7babb",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-bakeoff",
+   "src_mtime": "2026-10-23 13:08:39"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-batch": {
+   "bytes": 3777,
+   "mode": "copy2",
+   "sha256": "53804babc0a4c1ee2f6b63c2b9300121e7da6358761d846103f082542b087ca8",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-batch",
+   "src_mtime": "2026-10-23 01:27:32"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-c2": {
+   "bytes": 95,
+   "mode": "copy2",
+   "sha256": "8907ade62e790687ea176946dd8fe52a605b8caeae03b8858507103f20abfb3b",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-c2",
+   "src_mtime": "2026-10-23 09:56:32"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-community": {
+   "bytes": 137,
+   "mode": "copy2",
+   "sha256": "bd90b241d69582c24d3714aa5c496c3c6f1930528ce27bb108d327fc93f7646f",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-community",
+   "src_mtime": "2026-10-23 12:05:44"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-direct": {
+   "bytes": 489,
+   "mode": "copy2",
+   "sha256": "00d36ef79c6a50a0a7bfe55442cb6c0750d5b30b7667988d7e733ec3f51f143d",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-direct",
+   "src_mtime": "2026-10-23 12:50:22"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-job35": {
+   "bytes": 153,
+   "mode": "copy2",
+   "sha256": "d1156a83688fd0b33276e5f989c4a2ca877770479560913692ed9da177200ad9",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-job35",
+   "src_mtime": "2026-10-23 10:30:46"
+  },
+  "ralph-community/STOP_RALPH.done-20261023-p7": {
+   "bytes": 171,
+   "mode": "copy2",
+   "sha256": "5cee53063a37da6ecc4e22557e046d3065520b57fa3cc7967584e10c4330d0ef",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done-20261023-p7",
+   "src_mtime": "2026-10-23 10:58:23"
+  },
+  "ralph-community/STOP_RALPH.done2-20261022": {
+   "bytes": 996,
+   "mode": "copy2",
+   "sha256": "e6316b5fcca354219bceaa14c042cedad9eb18187dc487ce02e1b8638c7a6c21",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done2-20261022",
+   "src_mtime": "2026-10-22 16:42:10"
+  },
+  "ralph-community/STOP_RALPH.done3-20261022": {
+   "bytes": 1358,
+   "mode": "copy2",
+   "sha256": "5f2162dde2cb9f1e2e1e284a7fcdb6a9826f7b134df516f2a5fae4278f435ad5",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done3-20261022",
+   "src_mtime": "2026-10-22 16:57:15"
+  },
+  "ralph-community/STOP_RALPH.done4-20261022": {
+   "bytes": 3104,
+   "mode": "copy2",
+   "sha256": "6a534a5f1f3ad52c5f81f6f7bf0c190a3133acca141b7c5f2290288b95513021",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done4-20261022",
+   "src_mtime": "2026-10-22 17:41:24"
+  },
+  "ralph-community/STOP_RALPH.done5-20261022": {
+   "bytes": 190,
+   "mode": "copy2",
+   "sha256": "0e10d9f4fc9a51f958d4108b6828f58b50bb762ac2eec9dc941ef42709cbfe9d",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done5-20261022",
+   "src_mtime": "2026-10-22 18:01:23"
+  },
+  "ralph-community/STOP_RALPH.done6-20261022": {
+   "bytes": 2395,
+   "mode": "copy2",
+   "sha256": "59b1bdfa6ac5e96245b50b918efcdfca403fb502a08dea89506e4cf816eab48f",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done6-20261022",
+   "src_mtime": "2026-10-22 18:25:47"
+  },
+  "ralph-community/STOP_RALPH.done7-20261022": {
+   "bytes": 3059,
+   "mode": "copy2",
+   "sha256": "4a4364fbfe6998f455aebdda084c40aac005a76e7b4fa517066418a36b5517d8",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done7-20261022",
+   "src_mtime": "2026-10-22 18:49:20"
+  },
+  "ralph-community/STOP_RALPH.done8-20261022": {
+   "bytes": 161,
+   "mode": "copy2",
+   "sha256": "ea374d809ff479884b6f7df38c8f532f33bc418f4dec7657bc235a7a53fc0c6b",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done8-20261022",
+   "src_mtime": "2026-10-22 19:35:18"
+  },
+  "ralph-community/STOP_RALPH.done9-20261022": {
+   "bytes": 1850,
+   "mode": "copy2",
+   "sha256": "c5c51c2b9449e041bb4ac2e9db5e646a3bc0e860bb62e0afce4508739331c9e7",
+   "source": "C:/Users/derek/5slock/ralph-community/STOP_RALPH.done9-20261022",
+   "src_mtime": "2026-10-22 20:03:20"
+  },
+  "ralph-community/TASKS.md.bak-20261020-forgefix": {
+   "bytes": 4804,
+   "mode": "copy2",
+   "sha256": "7a17e848762a03859ff60e496e724e1fb8eda01c2bbe654f36724f4267ec2c3e",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261020-forgefix",
+   "src_mtime": "2026-10-20 11:24:57"
+  },
+  "ralph-community/TASKS.md.bak-20261020-p6opt": {
+   "bytes": 16208,
+   "mode": "copy2",
+   "sha256": "06e8d855add618f06766ea22ef92e58143edb0a288da50bf0753412566b4c686",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261020-p6opt",
+   "src_mtime": "2026-10-20 14:15:58"
+  },
+  "ralph-community/TASKS.md.bak-20261020-ralph": {
+   "bytes": 4232,
+   "mode": "copy2",
+   "sha256": "90ad3c3cb7a21b725b8ffd59039c78dbeb5020b18b27e332ad278d6dbe3ae4e5",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261020-ralph",
+   "src_mtime": "2026-10-20 11:24:37"
+  },
+  "ralph-community/TASKS.md.bak-20261020-ralph-c2": {
+   "bytes": 4804,
+   "mode": "copy2",
+   "sha256": "7a17e848762a03859ff60e496e724e1fb8eda01c2bbe654f36724f4267ec2c3e",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261020-ralph-c2",
+   "src_mtime": "2026-10-20 13:59:56"
+  },
+  "ralph-community/TASKS.md.bak-20261021-pool": {
+   "bytes": 46062,
+   "mode": "copy2",
+   "sha256": "5d61b55ab40fc279d78b76121ed52354e3de2c416131854cec6998022c71bd1d",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261021-pool",
+   "src_mtime": "2026-10-21 10:02:23"
+  },
+  "ralph-community/TASKS.md.bak-20261022-ali160": {
+   "bytes": 37405,
+   "mode": "copy2",
+   "sha256": "251ea6aeb813d65f9f0a3703bf7af09e45d633064ea8c0f870da9cc05c195b10",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-ali160",
+   "src_mtime": "2026-10-22 18:54:14"
+  },
+  "ralph-community/TASKS.md.bak-20261022-dipfix": {
+   "bytes": 16212,
+   "mode": "copy2",
+   "sha256": "971ae08164c613a2a3599e46b1b2629d20e1803c9a8c3c84077614d4292775ed",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-dipfix",
+   "src_mtime": "2026-10-22 16:35:51"
+  },
+  "ralph-community/TASKS.md.bak-20261022-dipfix2": {
+   "bytes": 17398,
+   "mode": "copy2",
+   "sha256": "7b348ea341edb442a762962dc8c44c1954814ebd8f378830b93f28371b3a3961",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-dipfix2",
+   "src_mtime": "2026-10-22 16:42:05"
+  },
+  "ralph-community/TASKS.md.bak-20261022-fix4req": {
+   "bytes": 53220,
+   "mode": "copy2",
+   "sha256": "70839f8c3fa06ca0cd0bce1c34c99d341a109a873aec8331cfac5aee66e2bfd7",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-fix4req",
+   "src_mtime": "2026-10-22 20:03:13"
+  },
+  "ralph-community/TASKS.md.bak-20261022-narrow": {
+   "bytes": 28407,
+   "mode": "copy2",
+   "sha256": "4de2b5f706df06fb6c2132e35f8a08ded08a1fd530fab890a5ec9e9183a59d68",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-narrow",
+   "src_mtime": "2026-10-22 18:02:08"
+  },
+  "ralph-community/TASKS.md.bak-20261022-pv2": {
+   "bytes": 24728,
+   "mode": "copy2",
+   "sha256": "8ca73b5a9325381910b2cc8ef4e00257ba445e900b50f226d01443c3408d5055",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-pv2",
+   "src_mtime": "2026-10-22 17:59:39"
+  },
+  "ralph-community/TASKS.md.bak-20261022-refsheet": {
+   "bytes": 10634,
+   "mode": "copy2",
+   "sha256": "ecaa4847e5e2838e0f92698e510e14587d541569a2db4d1fa5f9e97bcd0f3470",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-refsheet",
+   "src_mtime": "2026-10-22 16:17:56"
+  },
+  "ralph-community/TASKS.md.bak-20261022-refsheet2": {
+   "bytes": 14263,
+   "mode": "copy2",
+   "sha256": "b7342b4d9ad0fdbefe63b54f1bc95e16b5faa3da0479db7ad40c560c52a5e156",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-refsheet2",
+   "src_mtime": "2026-10-22 16:27:52"
+  },
+  "ralph-community/TASKS.md.bak-20261022-rs4": {
+   "bytes": 32293,
+   "mode": "copy2",
+   "sha256": "8d1c5fc7abe850edd407c15c11610b0707c38b04ed4754db3151985de3cbc760",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-rs4",
+   "src_mtime": "2026-10-22 18:25:37"
+  },
+  "ralph-community/TASKS.md.bak-20261022-rs6": {
+   "bytes": 39543,
+   "mode": "copy2",
+   "sha256": "1a5c72f41f0924bfaedf2746a9637f71f1878dc86d8224fd4388a3c0902cc77c",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-rs6",
+   "src_mtime": "2026-10-22 18:49:09"
+  },
+  "ralph-community/TASKS.md.bak-20261022-rs7scope": {
+   "bytes": 43964,
+   "mode": "copy2",
+   "sha256": "ca6b2c1318616ed17b8bcd9ca3c235f578dbcda08341e49593b64dc7ff3e4506",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-rs7scope",
+   "src_mtime": "2026-10-22 19:14:40"
+  },
+  "ralph-community/TASKS.md.bak-20261022-rsfirst": {
+   "bytes": 27108,
+   "mode": "copy2",
+   "sha256": "5cedf96a8d641c8a07a46850ca1efd86bb49e3c1fd06674a72003112ef499e23",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-rsfirst",
+   "src_mtime": "2026-10-22 17:41:06"
+  },
+  "ralph-community/TASKS.md.bak-20261022-scripts": {
+   "bytes": 18247,
+   "mode": "copy2",
+   "sha256": "325248565ad96d36e8838f06101e58b8ce7bf273c5939fd163d75ed595bba8cd",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261022-scripts",
+   "src_mtime": "2026-10-22 16:57:09"
+  },
+  "ralph-community/TASKS.md.bak-20261023-ali160": {
+   "bytes": 120807,
+   "mode": "copy2",
+   "sha256": "2c58bcd74558d84c1043742fd13344c338a1785b16b84c5fe9b4991410f86644",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261023-ali160",
+   "src_mtime": "2026-10-23 01:27:17"
+  },
+  "ralph-community/TASKS.md.bak-20261023-batch": {
+   "bytes": 128459,
+   "mode": "copy2",
+   "sha256": "4a224f5803ebebadfab263751a4535eda92b8e8dd49191e204a96d918cd96363",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261023-batch",
+   "src_mtime": "2026-10-23 07:14:41"
+  },
+  "ralph-community/TASKS.md.bak-20261023-k4": {
+   "bytes": 127419,
+   "mode": "copy2",
+   "sha256": "c1021d6ffad4046fcb306c074c9401b4af301f1764acade48ff48943794074d0",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261023-k4",
+   "src_mtime": "2026-10-23 06:48:37"
+  },
+  "ralph-community/TASKS.md.bak-20261023-redo": {
+   "bytes": 9016,
+   "mode": "copy2",
+   "sha256": "9f33107c1b2bb9478cd62ab40f298f578d2d7c62884bb1a2638bf529fca7e8e4",
+   "source": "C:/Users/derek/5slock/ralph-community/TASKS.md.bak-20261023-redo",
+   "src_mtime": "2026-10-23 09:51:14"
+  },
+  "ralph-community/_logs/PROMPT.md.bak-20261022-selfheal": {
+   "bytes": 3496,
+   "mode": "copy2",
+   "sha256": "b80bba87af4d54371f1e792dfe737957da7657152e5845d1eeaeb29f583c4227",
+   "source": "C:/Users/derek/5slock/ralph-community/logs/PROMPT.md.bak-20261022-selfheal",
+   "src_mtime": "2026-10-22 18:02:15"
+  },
+  "ralph-community/_logs/ralph.ps1.bak-20261023-breaker": {
+   "bytes": 32379,
+   "mode": "copy2",
+   "sha256": "165e99272a4c2e939fa97ab3ace0e7bda1233184b633e398d772f3d44dc1ae0b",
+   "source": "C:/Users/derek/5slock/ralph-community/logs/ralph.ps1.bak-20261023-breaker",
+   "src_mtime": "2026-10-22 18:51:34"
+  },
+  "ralph-community/ralph.ps1.bak-20261020-forgesafe": {
+   "bytes": 2047,
+   "mode": "copy2",
+   "sha256": "6e479fb6285aaadb028fbcfe5af5473dfdcdff0f68379dfdf1fa65bbe56defe0",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261020-forgesafe",
+   "src_mtime": "2026-10-20 11:05:45"
+  },
+  "ralph-community/ralph.ps1.bak-20261020-p6opt": {
+   "bytes": 10217,
+   "mode": "copy2",
+   "sha256": "e31df039535c3fc6d7c9dcf32f05de0747906a31a99676cd76e2a4f2d12a94da",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261020-p6opt",
+   "src_mtime": "2026-10-20 16:08:22"
+  },
+  "ralph-community/ralph.ps1.bak-20261020-p7lock": {
+   "bytes": 22633,
+   "mode": "copy2",
+   "sha256": "3a57445c2cb322cc6eeb7db1d6a9e09593885e4cf4cebeb20cf0822bfe6b2584",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261020-p7lock",
+   "src_mtime": "2026-10-20 20:02:36"
+  },
+  "ralph-community/ralph.ps1.bak-20261021-falsestop": {
+   "bytes": 24166,
+   "mode": "copy2",
+   "sha256": "66f50af1048106024e57a7e358354436a4d90ef63f05e419a9185e04caba7c4b",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261021-falsestop",
+   "src_mtime": "2026-10-20 20:18:25"
+  },
+  "ralph-community/ralph.ps1.bak-20261021-judge": {
+   "bytes": 27757,
+   "mode": "copy2",
+   "sha256": "c2afa14775146331665ebe85ba7cf6ce8db7d4aa45cea3669c5ab0b36d14d8a2",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261021-judge",
+   "src_mtime": "2026-10-21 14:37:59"
+  },
+  "ralph-community/ralph.ps1.bak-20261021-pool": {
+   "bytes": 25779,
+   "mode": "copy2",
+   "sha256": "6fbc181a4076992f2eaa16d28e5d5bf9dbcad5aeddded226a7b9385ad1458d0d",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261021-pool",
+   "src_mtime": "2026-10-21 05:33:06"
+  },
+  "ralph-community/ralph.ps1.bak-20261022-ali160": {
+   "bytes": 29025,
+   "mode": "copy2",
+   "sha256": "6807076fa531395021c66526b81ead75705d7b7b83ed37049487490b6033f4d7",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261022-ali160",
+   "src_mtime": "2026-10-21 14:37:59"
+  },
+  "ralph-community/ralph.ps1.bak-20261022-idregex": {
+   "bytes": 32353,
+   "mode": "copy2",
+   "sha256": "5ea4483eb007564995124672fc7fd0ed1ca6c124fe50eac32090a31ae918c63b",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261022-idregex",
+   "src_mtime": "2026-10-22 18:02:15"
+  },
+  "ralph-community/ralph.ps1.bak-20261022-narrow": {
+   "bytes": 33166,
+   "mode": "copy2",
+   "sha256": "94d771e988c3e9db5593990a7dff144e3892be6a0958d63d8f250610759ba077",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261022-narrow",
+   "src_mtime": "2026-10-22 17:20:22"
+  },
+  "ralph-community/ralph.ps1.bak-20261022-scripts": {
+   "bytes": 32338,
+   "mode": "copy2",
+   "sha256": "fa4970312f990e6686448eb7bb4a2c1e1c126f7a2abe1a5c5d16d677f18d3bff",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261022-scripts",
+   "src_mtime": "2026-10-22 15:51:01"
+  },
+  "ralph-community/ralph.ps1.bak-20261023-batch": {
+   "bytes": 34166,
+   "mode": "copy2",
+   "sha256": "579530c039faf2b2ea0b1cdf4a6c9dc815ba67bd557b7c99e87878ed7a7c4dab",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261023-batch",
+   "src_mtime": "2026-10-23 00:50:15"
+  },
+  "ralph-community/ralph.ps1.bak-20261023-denycount": {
+   "bytes": 40628,
+   "mode": "copy2",
+   "sha256": "6c4b5abc8570739c3a23245123c2fbcafacedd0c919a920a89d2e6297cc71dfd",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261023-denycount",
+   "src_mtime": "2026-10-23 19:02:26"
+  },
+  "ralph-community/ralph.ps1.bak-20261023-job35": {
+   "bytes": 34322,
+   "mode": "copy2",
+   "sha256": "070a9d8246aebebe20397e0983fd488035a1c1611da1f50ea8d98a790c4b1925",
+   "source": "C:/Users/derek/5slock/ralph-community/ralph.ps1.bak-20261023-job35",
+   "src_mtime": "2026-10-23 09:11:29"
+  },
+  "ralph.ps1": {
+   "bytes": 42604,
+   "mode": "deployed",
+   "sha256": "e9a4a91c2776e0f46e536709427d4896fe7d0e5ceaff1ba1376000126841fbd0",
+   "source": "(copied into the archive by Max during the 2026-10-23 deploy; the live file was overwritten, so dest-hash-only)"
+  }
+ },
+ "files": 80,
+ "updated": "2026-10-23 20:10:54"
+}

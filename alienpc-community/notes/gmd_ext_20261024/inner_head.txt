@@ -1,0 +1,4 @@
+eaa2b819f189021bc224afd7b7e11c7e8d2ccd52
+Grok Bot <grokbot@localhost>
+Mon Oct 19 20:28:20 2026 -0500
+fix(skip-on-disk): match skip list on all ids naming the same media (id, assetId/mediaId, URL-path UUID, baked filename UUID) for images and videos; never on sourceAssetId/userId/conversation ids

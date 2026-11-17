@@ -1,0 +1,272 @@
+[
+    {
+        "name":  "10S-Comfy-nodes",
+        "remote":  "https://github.com/TenStrip/10S-Comfy-nodes.git",
+        "commit":  "c412da5207357b293c98c7de3122d1107d5d10be",
+        "disabled":  false
+    },
+    {
+        "name":  "cg-use-everywhere",
+        "remote":  "https://github.com/chrisgoringe/cg-use-everywhere",
+        "commit":  "632ed7bb51bb18ceb03ccaefe1f34be8bd416500",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyMath",
+        "remote":  "https://github.com/evanspearman/ComfyMath.git",
+        "commit":  "c01177221c31b8e5fbc062778fc8254aeb541638",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-AdvancedLivePortrait",
+        "remote":  "https://github.com/PowerHouseMan/ComfyUI-AdvancedLivePortrait.git",
+        "commit":  "3bba732915e22f18af0d221b9c5c282990181f1b",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-Crystools",
+        "remote":  "https://github.com/crystian/ComfyUI-Crystools.git",
+        "commit":  "2f18256c5b5063937106f29a8e0a7db3ae3869b7",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-Custom-Scripts",
+        "remote":  "https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git",
+        "commit":  "609f3afaa74b2f88ef9ce8d939626065e3247469",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-Easy-Use",
+        "remote":  "https://github.com/yolain/ComfyUI-Easy-Use.git",
+        "commit":  "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-Frame-Interpolation",
+        "remote":  "https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git",
+        "commit":  "26545cc2dd95bc3d27f056016300673bdeee78f5",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-GGUF",
+        "remote":  "https://github.com/city96/ComfyUI-GGUF.git",
+        "commit":  "6ea2651e7df66d7585f6ffee804b20e92fb38b8a",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-H3-Continuum",
+        "remote":  "https://github.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum",
+        "commit":  "308653cff108061a94381cef446fef985384b214",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-H3-Latent-Upscaler-Mamad8",
+        "remote":  "https://github.com/mamad8c/ComfyUI-H3-Latent-Upscaler-Mamad8.git",
+        "commit":  "e98237773011523528353a8beb4863e65b099a38",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-H3-Multishot",
+        "remote":  "https://github.com/jlucasmcrell/ComfyUI-H3-Multishot",
+        "commit":  "d7d197709fc93c1afb125e3db1dfd4ac0ae28c60",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-Impact-Pack",
+        "remote":  "https://github.com/ltdrdata/ComfyUI-Impact-Pack.git",
+        "commit":  "429d0159ad429e64d2b3916e6e7be9c22d025c3c",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-Impact-Subpack",
+        "remote":  "https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git",
+        "commit":  "50c7b71a6a224734cc9b21963c6d1926816a97f1",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-Inspire-Pack",
+        "remote":  "https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git",
+        "commit":  "d23db9aa544de9a6d4c609cb7005fa9e0d42031d",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-IPAdapter_plus",
+        "remote":  "https://github.com/cubiq/ComfyUI_IPAdapter_plus",
+        "commit":  "a0f451a5113cf9becb0847b92884cb10cbdec0ef",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-KJNodes",
+        "remote":  "https://github.com/kijai/ComfyUI-KJNodes.git",
+        "commit":  "bc8e4ce4254bcd0050383386ee2f9d753dbf1fa5",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-LTXVideo.disabled",
+        "remote":  "https://github.com/Lightricks/ComfyUI-LTXVideo.git",
+        "commit":  "4f45fd6c222eb06eb3e46605da62e7c889e4be5c",
+        "disabled":  true
+    },
+    {
+        "name":  "ComfyUI-Manager",
+        "remote":  "https://github.com/ltdrdata/ComfyUI-Manager.git",
+        "commit":  "d6f480c911d0b98b4a9f4871f263d90a15f0d9d2",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-MiniMaxH3_LatentUpscaler",
+        "remote":  "https://github.com/Tr1dae/ComfyUI-MiniMaxH3_LatentUpscaler.git",
+        "commit":  "895e3c471164423f0ea0e8eaf45eb701efe641ae",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-PromptRelay",
+        "remote":  "https://github.com/kijai/ComfyUI-PromptRelay.git",
+        "commit":  "ca5d4e3edb6abd9c2a4c68a3a6798eec1980f450",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-PuLID-Flux",
+        "remote":  "https://github.com/balazik/ComfyUI-PuLID-Flux.git",
+        "commit":  "a80912fc3435c358607bf4b43a58dbcbebdb09ff",
+        "disabled":  false
+    },
+    {
+        "name":  "comfyui-reactor-node",
+        "remote":  "https://codeberg.org/Gourieff/comfyui-reactor-node.git",
+        "commit":  "2add1139d491fefff2d3a60e52b6b2b6d5d09e5d",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-SAM",
+        "remote":  "https://github.com/storyicon/comfyui_segment_anything",
+        "commit":  "ab6395596399d5048639cdab7e44ec9fae857a93",
+        "disabled":  false
+    },
+    {
+        "name":  "comfyui-various",
+        "remote":  "https://github.com/jamesWalker55/comfyui-various.git",
+        "commit":  "5bd85aaf7616878471469c4ec7e11bbd0cef3bf2",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-VideoHelperSuite",
+        "remote":  "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git",
+        "commit":  "4ee72c065db22c9d96c2427954dc69e7b908444b",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI-WanVideoWrapper",
+        "remote":  "https://github.com/kijai/ComfyUI-WanVideoWrapper.git",
+        "commit":  "088128b224242e110d3906c6750e9a3a348a659b",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI_Comfyroll_CustomNodes",
+        "remote":  "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git",
+        "commit":  "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "disabled":  false
+    },
+    {
+        "name":  "comfyui_controlnet_aux",
+        "remote":  "https://github.com/Fannovel16/comfyui_controlnet_aux",
+        "commit":  "e8b689a513c3e6b63edc44066560ca5919c0576e",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI_essentials",
+        "remote":  "https://github.com/cubiq/ComfyUI_essentials.git",
+        "commit":  "9d9f4bedfc9f0321c19faf71855e228c93bd0dc9",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI_LayerStyle",
+        "remote":  "https://github.com/chflame163/ComfyUI_LayerStyle.git",
+        "commit":  "d94bef1ee5ed3656f5ff1bb2830a4ffd94f40935",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI_MiniMax_H3_Extender",
+        "remote":  "https://github.com/tritant/ComfyUI_MiniMax_H3_Extender.git",
+        "commit":  "5183ad4e1449cf1eaa835bc5fdff08cab7cc57d9",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI_PuLID_Flux_ll",
+        "remote":  "https://github.com/lldacing/ComfyUI_PuLID_Flux_ll.git",
+        "commit":  "7c7362b806c2c0f4bde8742ada9e7cb05b44d249",
+        "disabled":  false
+    },
+    {
+        "name":  "ComfyUI_UltimateSDUpscale",
+        "remote":  "https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git",
+        "commit":  "bebd5696fddd61cb0d08949a222c508898ab5577",
+        "disabled":  false
+    },
+    {
+        "name":  "comfy_sync_wrapper",
+        "remote":  "https://github.com/comfyanonymous/ComfyUI.git",
+        "commit":  "6b747c0428c343e1417219641db93a4fb7cb69ae",
+        "disabled":  false
+    },
+    {
+        "name":  "CRT-Nodes",
+        "remote":  "https://github.com/PGCRT/CRT-Nodes",
+        "commit":  "24c9eb1e265bc8a7bf198c9358d3664f5e85b095",
+        "disabled":  false
+    },
+    {
+        "name":  "H3-LongVideos",
+        "remote":  "https://huggingface.co/Smite79/MiniMax-H3-Longvideos",
+        "commit":  "1917fcc6011b704779a5551dcc79f4aab88075bb",
+        "disabled":  false
+    },
+    {
+        "name":  "LTX_Director",
+        "remote":  "https://github.com/WhatDreamsCost/WhatDreamsCost-ComfyUI.git",
+        "commit":  "fe09f73756df202d08341c66b4dc5fc8d2acca22",
+        "disabled":  false
+    },
+    {
+        "name":  "MiniMax-H3-Prompt-Rewriter-ComfyUI",
+        "remote":  "https://github.com/pytraveler/MiniMax-H3-Prompt-Rewriter-ComfyUI.git",
+        "commit":  "cf951b1c0cc171d1aadb27ae5aac77f893b78f64",
+        "disabled":  false
+    },
+    {
+        "name":  "Nvidia_RTX_Nodes_ComfyUI",
+        "remote":  "https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI",
+        "commit":  "892515e3eb9a4920a131a502a047e47adca9eb0d",
+        "disabled":  false
+    },
+    {
+        "name":  "RES4LYF",
+        "remote":  "https://github.com/ClownsharkBatwing/RES4LYF.git",
+        "commit":  "419de2d7c78f415dde9aa352a7231820ebfc17a4",
+        "disabled":  false
+    },
+    {
+        "name":  "rgthree-comfy",
+        "remote":  "https://github.com/rgthree/rgthree-comfy.git",
+        "commit":  "738105af5fb14e96fbecaf406dc356e284797e8c",
+        "disabled":  false
+    },
+    {
+        "name":  "seedvr2_videoupscaler",
+        "remote":  "https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler.git",
+        "commit":  "4490bd1f482e026674543386bb2a4d176da245b9",
+        "disabled":  false
+    },
+    {
+        "name":  "was-node-suite-comfyui",
+        "remote":  "https://github.com/WASasquatch/was-node-suite-comfyui.git",
+        "commit":  "ea935d1044ae5a26efa54ebeb18fe9020af49a45",
+        "disabled":  false
+    },
+    {
+        "name":  "__pycache__",
+        "remote":  "https://github.com/comfyanonymous/ComfyUI.git",
+        "commit":  "6b747c0428c343e1417219641db93a4fb7cb69ae",
+        "disabled":  false
+    }
+]

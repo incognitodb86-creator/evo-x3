@@ -1,0 +1,5 @@
+Task 1 of 4 (small; no render, no GPU, no git, no commit).
+The start frame for a MiniMax-H3 I2V clip is C:/Users/derek/5slock/approved_characters/POOL/COND_POOL_BIKINI_PORTRAIT.jpg and the character card for that approved fictional adult is C:/Users/derek/5slock/approved_characters/POOL/CHARACTER.md.
+First, find out what is in that frame using only tools your permissions allow, and in one short line say which tool you used and what you were not allowed to read.
+Then write the render prompt for a 243-frame, 768x1344, 24 fps clip in which she walks from the pool edge to a deck chair and sits down. Follow the prompt rules in C:/AI/community/skills/h3-prompting/SKILL.md.
+Output only the prompt text. No heading, no commentary, no chat tone in it. Adults only, invented adults.

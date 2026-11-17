@@ -1,0 +1,50 @@
+ 69 | nc6 | ComfyUI-Ref2VA-VSA Support
+ 68 | nc6 | Low fps result when continuing a video using beta 6
+ 67 | nc1 | Beta6 non-turbo?
+ 66 | nc3 | Difference in sizes beta6 on HF and CIV.RED
+ 65 | nc7 | TenStrip ? Would You Consider Creating an Official Discord / Community?
+ 64 | nc5 | Request for a Non-Turbo Beta 6/7 ? Better Physics vs. Visual Quality Trade-off
+ 63 | nc16 | Terrible at Image to Video
+ 62 | nc4 | What is the function of "Eros_beta6mix_Lora"  ?
+ 61 | nc12 | Beta 6 performs worse than Beta 5 for me ? Could it be my ComfyUI workflow?
+ 60 | nc14 | Man Beta 6 Turbo is amazing on 4-step with my cooked Lora
+ 59 | nc6 | I tried out beta 5 and beta 6, but beta 4 still suits me best.
+ 58 | nc7 | beta6 w4a8 please?
+ 57 | nc3 | Anyone find anything for the shiny oily skin on beta6?
+ 56 | nc2 | beta6 int8 convrot
+ 55 | nc2 | VSA cant work, to_gate_compress layers missing.
+ 54 | nc3 | ? please upload your best workflow for beta6, here and on civitai
+ 53 | nc9 | How to remove grease
+ 52 | nc4 | H3 Babbling Solution
+ 51 | nc1 | 10Eros-Max Fastvideo
+ 50 | nc3 | What's the correct prompt format for each version?
+ 49 | nc2 | Are there optimized system prompt for h3 prompt writter/Ai chatbot meant for 1
+ 48 | nc6 | Where is int8 convrot for beta 5?
+ 47 | nc4 | Question about 4-6, 6-8 steps
+ 46 | nc3 | Loras Used for Beta5?
+ 45 | nc29 | Beta 5 ignores my prompts
+ 44 | nc1 | Add non-Turbo beta5 policy-close W4A8 quant
+ 43 | nc1 | OOM with some versions but not all
+ 42 | nc1 | change typo (multires) in README.md
+ 41 | nc1 | Add Non-Turbo optimized w4a8 version
+ 40 | nc13 | Pros and cons of beta5
+ 39 | nc3 | beta 5 is MUCH better
+ 38 | nc2 | beta3 still works best for anime ilustration projects
+ 37 | nc2 | Can we use other turbo loras with the non-turbo version?
+ 36 | nc2 | Thanks for the non TURBO versions.
+ 35 | nc5 | What should I add to the "audio" to make it sound good?
+ 34 | nc1 | Hybrid can't do female pov, ref2va can - can we expect any ref2va updates?
+ 33 | nc1 | Noticed you didn't make workflows for H3, which ones do you recommend?
+ 32 | nc2 | Is it possible for you to release non-turbo version of the models?
+ 31 | nc3 | The voice acting in beta4 is terrible
+ 30 | nc1 | Thanks for your work. Do you have any plan to make non pruned version for both
+ 29 | nc6 | Beta4 has better quality, but worst sound quality than Beta3
+ 28 | nc4 | beta3 better
+ 27 | nc3 | not work your int8_convrot in WANGP PLZ FIX
+ 26 | nc4 | You mentioned beta4 in read.md but nothings here.
+ 25 | nc4 | Audio reference doesn't seem to work
+ 24 | nc2 | Any chance to get hybrid_beta3 without TURBO?
+ 23 | nc2 | Pre hybrid turbo version released?
+ 22 | nc4 | H3 AdaLN LoRA Fix
+ 21 | nc3 | tentative suggestion
+ 20 | nc3 | Custom Sigmas

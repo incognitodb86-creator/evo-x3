@@ -1,0 +1,11 @@
+{
+    "memoryMode":  "policy-only",
+    "llmModelOverride":  "alienpc/qwen3.8-flash-next-iq3_xxs",
+    "llmThinkingOverride":  "off",
+    "reviewEnabled":  true,
+    "reviewTransport":  "direct",
+    "sessionRetentionDays":  0,
+    "quickCheckOnOpen":  true,
+    "policyIncludePath":  "C:/AI/director/docs/forge-lessons.md",
+    "policyPath":  "C:/AI/director/docs/forge-lessons.md"
+}

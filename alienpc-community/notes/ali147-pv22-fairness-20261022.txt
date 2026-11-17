@@ -1,0 +1,152 @@
+ALI-147 PV2-2 fairness.txt - arm ali147_pool_promptv2_seg3_s51080002
+This file is written by Forge (notes/ali147_pv22_fairness.py) before the render. It is a measured
+comparison, not an assertion: every line below is produced by comparing the two graph files on disk.
+METHOD_ONLY. KEEP is Derrick's only. No vision judge, no by-eye claim in this file.
+
+== graph provenance
+copy source (control) : C:/AI/community/runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3.api.json
+  bytes 10910 sha256 c5b6726c1d5870f597ba51fcf65499d489be9a1755ebf1905ab8fac5960e8fec
+arm graph (request)   : C:/AI/community/runs/ali147_pool_promptv2_seg3_s51080002/request.api.json
+  bytes 12569 sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2
+format of both        : json.dumps(indent=1, ensure_ascii=True), CRLF, no trailing newline
+  source CRLF 348 / arm CRLF 348 ; source trailing-newline False / arm False
+control for this arm  : the BASE minute (runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3.mp4,
+  the base run's own segment 3, rendered from the copy source graph with the same seed). No new control render.
+
+== node-by-node compare (json.dumps(node, sort_keys=True))
+node       class_type                         result     changed inputs
+app1       MiniMaxH3AppendContinuation        IDENTICAL  -
+avae       VAELoader                          IDENTICAL  -
+c0         MiniMaxH3ReferenceToVideo          DIFFERS    ["prompt"]
+c1         MiniMaxH3ImageToVideo              DIFFERS    ["prompt"]
+clip       CLIPLoader                         IDENTICAL  -
+dec_a      VAEDecodeAudio                     IDENTICAL  -
+dec_v      VAEDecode                          IDENTICAL  -
+img        LoadImage                          IDENTICAL  -
+ksel       KSamplerSelect                     IDENTICAL  -
+m_attn     ModelAttentionBackend              IDENTICAL  -
+m_shift    MiniMaxH3SigmaShift                IDENTICAL  -
+m_vsa      BlockSparseAttention               IDENTICAL  -
+mkvid      CreateVideo                        IDENTICAL  -
+noise      RandomNoise                        IDENTICAL  -
+s0_guide   BasicGuider                        IDENTICAL  -
+s0_samp    SamplerCustomAdvanced              IDENTICAL  -
+s0_sched   BasicScheduler                     IDENTICAL  -
+s1_guide   BasicGuider                        IDENTICAL  -
+s1_samp    SamplerCustomAdvanced              IDENTICAL  -
+s1_sched   BasicScheduler                     IDENTICAL  -
+save       SaveVideo                          DIFFERS    ["filename_prefix"]
+tail1      MiniMaxH3LatentTailGuide           IDENTICAL  -
+unet       UNETLoader                         IDENTICAL  -
+vvae       VAELoader                          IDENTICAL  -
+win1       MiniMaxH3GuidedContinuationWindow  IDENTICAL  -
+nodes total 25, identical 22, differing ["c0", "c1", "save"]
+
+== the three intended differences (all of them)
+1. c0.inputs.prompt  = specs/prompt_v2/v2_seg3_c0_r2v.txt verbatim
+2. c1.inputs.prompt  = specs/prompt_v2/v2_seg3_c1_t2va.txt verbatim
+3. save.inputs.filename_prefix = community/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002
+Nothing else. Node key set identical (25 nodes); input key sets on c0/c1/save unchanged.
+
+== held-equal settings (read from BOTH graphs, values shown from the arm; identical in the source)
+checkpoint (UNETLoader.unet_name)          equal=True  value="10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors"
+weight_dtype                               equal=True  value="default"
+attention backend (m_attn.attention)       equal=True  value="comfy kitchen attention"
+VSA selection (m_vsa.selection)            equal=True  value="vsa"
+VSA keep_percent                           equal=True  value=10
+VSA start/end percent                      equal=True  value=[0.2, 1.0]
+VSA min_tokens/extra_tokens                equal=True  value=[12288, 256]
+VSA dense_blocks/sink_conditioning         equal=True  value=["", "exact_kv_and_rows"]
+VSA wiring (m_vsa.model -> m_attn)         equal=True  value=["m_attn", 0]
+sigma shift video/audio (10/3)             equal=True  value=[10.0, 3.0]
+seed (noise.noise_seed)                    equal=True  value=51080002
+steps (s0/s1)                              equal=True  value=[10, 10]
+scheduler (s0/s1)                          equal=True  value=["simple", "simple"]
+denoise (s0/s1)                            equal=True  value=[1.0, 1.0]
+sampler (ksel)                             equal=True  value="euler"
+CLIP (clip_name/type/device)               equal=True  value=["qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors", "minimax", "default"]
+video VAE                                  equal=True  value="minimax_h3_video_vae_int8_convrot.safetensors"
+audio VAE                                  equal=True  value="minimax_h3_audio_vae_fp32.safetensors"
+width/height c0                            equal=True  value=[768, 1344]
+width/height c1                            equal=True  value=[768, 1344]
+c0.length (chunk 1 frames)                 equal=True  value=243
+win1.extension_frames (chunk 2 frames)     equal=True  value=238
+win1.overlap_frames (context)              equal=True  value=22
+c1.length (link)                           equal=True  value=["win1", 1]
+append/tail token wiring                   equal=True  value=[["win1", 2], ["win1", 3], ["win1", 4], ["win1", 5]]
+c0 class_type                              equal=True  value="MiniMaxH3ReferenceToVideo"
+c1 class_type                              equal=True  value="MiniMaxH3ImageToVideo"
+c0 ref_images.ref_image_1 (link)           equal=True  value=["img", 0]
+c0 ref_image_size                          equal=True  value="match"
+c0 vae/audio_vae wiring                    equal=True  value=[["vvae", 0], ["avae", 0]]
+c1 vae wiring                              equal=True  value=["vvae", 0]
+CreateVideo fps                            equal=True  value=24
+save format/codec                          equal=True  value=["auto", "auto"]
+LoadImage string                           equal=True  value="community/POOL_768x1344.png"
+guiders/samplers wiring                    equal=True  value=[{"model": ["m_shift", 0], "conditioning": ["c0", 0]}, ["m_shift", 0]]
+
+== prompts (PROMPT_V2 seg3) and their hashes
+SHA256SUMS.txt parsed entries: 8
+file specs/prompt_v2/v2_seg3_c0_r2v.txt
+  file bytes 4358 sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b  (SHA256SUMS entry ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b) match=True
+  CRLF 0 trailing-newline False ascii-only True
+  graph c0.prompt chars 4358 sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b  verbatim-equal-to-file=True
+  source (base seg3) c0.prompt chars 3354 sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+  delta chars +1004
+  base sidecar p7_r2_c3_pmot_full_pool_seg3_c0_long_r2v.txt bytes 3373 crlf 18 -> EOL-folded+rstrip chars 3354 sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76  == source graph prompt: True
+file specs/prompt_v2/v2_seg3_c1_t2va.txt
+  file bytes 2903 sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383  (SHA256SUMS entry 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383) match=True
+  CRLF 0 trailing-newline False ascii-only True
+  graph c1.prompt chars 2903 sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383  verbatim-equal-to-file=True
+  source (base seg3) c1.prompt chars 2269 sha256 dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89
+  delta chars +634
+  base sidecar p7_r2_c3_pmot_full_pool_seg3_c1_long_cont.txt bytes 2275 crlf 5 -> EOL-folded+rstrip chars 2269 sha256 dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89  == source graph prompt: True
+prompt-bearing nodes in the arm graph: ["c0", "c1"]
+
+== reference still
+LoadImage string (graph): community/POOL_768x1344.png
+resolves inside ComfyUI\input: C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input\community\POOL_768x1344.png bytes 1354030 sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075
+expected sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075 match=True
+PIL size (768, 1344) mode RGB format PNG
+source graph LoadImage string is the same file: True
+
+== frame budget and the comparison frames
+c0.length 243 + win1.extension_frames 238 = 481 frames at fps 24 = 20.04 s (the request states frames 481, frames_tol 0).
+The base run's own segment 3 (the control) is 481 frames; the base stitched minute frames 962-1442 are
+the same segment. PV2-2 asks for sbs_base_seg3_promptv2.mp4 (base 962-1442 | new 0-480) and full-res
+stills at new frames 200, 243, 300, 400, 480: hstack side-by-sides and fixed-frame stills are Max/harness
+files (run_graph_job.py has no hstack path); the harness contact sheet covers the +-1.5 s windows only.
+
+== graph_diff summary (see graph_diff.txt, produced by git diff --no-index source vs arm)
+graph_diff.txt bytes 13806 sha256 1d9cd4dee53e5b6c792a44150ffd50edf793934bd20f1639178140f064b091b7 hunks 3 removed 3 added 3
+  hunk @@ -98,7 +98,7 @@
+  hunk @@ -181,7 +181,7 @@
+  hunk @@ -341,7 +341,7 @@
+  -line len 3388 starts '-   "prompt": "subject_definitions:\\n<Subject 1> is the adul'
+  -line len 2290 starts '-   "prompt": "integrated_multimodal_description: [Shot 1] L'
+  -line len 88 starts '-   "filename_prefix": "community/p7_r2_c3_pmot_full_pool/p7'
+  +line len 4394 starts '+   "prompt": "subject_definitions:\\n<Subject 1> is the adul'
+  +line key='prompt' chars=4358 sha256=ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b
+  +line len 2924 starts '+   "prompt": "integrated_multimodal_description: [Shot 1] L'
+  +line key='prompt' chars=2903 sha256=2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383
+  +line len 107 starts '+   "filename_prefix": "community/ali147_pool_promptv2_seg3_'
+  +line key='filename_prefix' chars=81 sha256=4513b54897d9e2082b95b6993ca80400228b5fb9297f23ae6de8642195889d0b
+every added line is one of the three intended new values: [true, true, true]
+mapped to: ["c0.prompt = v2_seg3_c0_r2v.txt", "c1.prompt = v2_seg3_c1_t2va.txt", "save.filename_prefix = community/ali147_pool_promptv2_seg3_s51080002/ali147_pool_promptv2_seg3_s51080002"]
+set of added lines == set of the three intended values: True
+
+== control media, measured read-only (ffprobe -count_packets + certutil) - the comparison target
+base seg3 clip : runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_seg3.mp4
+  481 packets h264 768x1344 24/1 fps + aac 32000 Hz stereo, format duration 20.041688 s, bytes 5624126
+  sha256 fc28701abc585f3ae052b9316df22ba4edf7f31a2f3c685d2bbd758d2191d053
+  sidecar secs 816.0 (the control's own render time = the render-time baseline), seed 51080002, steps 10, mode r2v, w/h 768/1344
+base stitched  : runs/p7_r2_c3_pmot_full_pool/p7_r2_c3_pmot_full_pool_stitched.mp4
+  1443 packets h264 768x1344 24/1 fps, format duration 60.157063 s, bytes 16311891
+  sha256 ae93a7477aefc5ef698de0ac71d45e13f29731732ce3a0c832ac8360acda581d
+  the sbs window frames 962-1442 = 481 frames = exactly the segment-3 window of the stitched minute (1443 = 481*3 - 60 context frames).
+this arm asks for frames 481 / frames_tol 0 / minutes 60: minutes is a PRE-JOB gate only (ralph.ps1 clamps 30..180); expected duration 481/24 = 20.0417 s.
+
+== known differences that are NOT in the graph
+- seed 51080002 is the base run's own segment-3 seed (base seg1/2/3 used 51080000/51080001/51080002),
+  so this arm is a same-seed comparison against the base minute's segment 3. Node 'noise' is IDENTICAL.
+- render time, frames, hashes, contact sheet: PENDING, the render is run by the harness after this iteration.

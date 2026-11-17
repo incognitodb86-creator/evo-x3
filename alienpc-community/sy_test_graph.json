@@ -1,0 +1,213 @@
+{
+ "graph": {
+  "1": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "community/D15_768x1344.png"
+   }
+  },
+  "2": {
+   "class_type": "UNETLoader",
+   "inputs": {
+    "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+    "weight_dtype": "default"
+   }
+  },
+  "3": {
+   "class_type": "CLIPLoader",
+   "inputs": {
+    "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+    "type": "minimax",
+    "device": "default"
+   }
+  },
+  "4": {
+   "class_type": "VAELoader",
+   "inputs": {
+    "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+   }
+  },
+  "5": {
+   "class_type": "VAELoader",
+   "inputs": {
+    "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+   }
+  },
+  "7": {
+   "class_type": "RandomNoise",
+   "inputs": {
+    "noise_seed": 1
+   }
+  },
+  "8": {
+   "class_type": "KSamplerSelect",
+   "inputs": {
+    "sampler_name": "euler"
+   }
+  },
+  "12": {
+   "class_type": "VAELoader",
+   "inputs": {
+    "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+   }
+  },
+  "2s": {
+   "class_type": "MiniMaxH3SigmaShift",
+   "inputs": {
+    "model": [
+     "2",
+     0
+    ],
+    "shift_video": 10.0,
+    "shift_audio": 3.0
+   }
+  },
+  "6": {
+   "class_type": "MiniMaxH3ReferenceToVideo",
+   "inputs": {
+    "clip": [
+     "3",
+     0
+    ],
+    "vae": [
+     "4",
+     0
+    ],
+    "audio_vae": [
+     "5",
+     0
+    ],
+    "prompt": "test prompt adult woman",
+    "width": 768,
+    "height": 1344,
+    "length": 124,
+    "ref_image_size": "match",
+    "ref_images.ref_image_1": [
+     "1",
+     0
+    ]
+   }
+  },
+  "9": {
+   "class_type": "BasicScheduler",
+   "inputs": {
+    "model": [
+     "2s",
+     0
+    ],
+    "scheduler": "simple",
+    "steps": 10,
+    "denoise": 1.0
+   }
+  },
+  "11": {
+   "class_type": "SamplerCustomAdvanced",
+   "inputs": {
+    "noise": [
+     "7",
+     0
+    ],
+    "guider": [
+     "10",
+     0
+    ],
+    "sampler": [
+     "8",
+     0
+    ],
+    "sigmas": [
+     "9",
+     0
+    ],
+    "latent_image": [
+     "6",
+     1
+    ]
+   }
+  },
+  "6g": {
+   "class_type": "MiniMaxH3AddGuide",
+   "inputs": {
+    "positive": [
+     "6",
+     0
+    ],
+    "vae": [
+     "4",
+     0
+    ],
+    "latent": [
+     "6",
+     1
+    ],
+    "image": [
+     "1",
+     0
+    ],
+    "frame_idx": 0
+   }
+  },
+  "10": {
+   "class_type": "BasicGuider",
+   "inputs": {
+    "model": [
+     "2s",
+     0
+    ],
+    "conditioning": [
+     "6g",
+     0
+    ]
+   }
+  },
+  "13": {
+   "class_type": "VAEDecode",
+   "inputs": {
+    "samples": [
+     "11",
+     0
+    ],
+    "vae": [
+     "12",
+     0
+    ]
+   }
+  },
+  "14": {
+   "class_type": "CreateVideo",
+   "inputs": {
+    "images": [
+     "13",
+     0
+    ],
+    "fps": 24.0
+   }
+  },
+  "15": {
+   "class_type": "SaveVideo",
+   "inputs": {
+    "video": [
+     "14",
+     0
+    ],
+    "filename_prefix": "sytest",
+    "format": "auto",
+    "codec": "auto"
+   }
+  }
+ },
+ "eff": {
+  "preset": "production",
+  "steps": 10,
+  "shift": 10.0,
+  "audio_shift": 3.0,
+  "sampler": "euler",
+  "frames": 124,
+  "w": 768,
+  "h": 1344,
+  "gen_fps": 24,
+  "keep_audio": false,
+  "rife": 1,
+  "out_fps": 24
+ }
+}

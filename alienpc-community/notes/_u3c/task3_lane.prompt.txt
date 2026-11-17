@@ -1,0 +1,3 @@
+Task 3 of 4 (small; no render, no GPU, no git, do not commit).
+Write the commit message only, nothing else, for this change in this repo: you added notes/u3b_folder_check.py, a self-verifying check script of 14 checks, which proves that the character-reference folder path named in the talk persona exists on disk, that the older folder of the same kind is not named in the persona, and that a scan for the two chat-tone words finds no hit outside the persona file. All 14 checks passed. This repo's convention is a short imperative subject line under 72 characters, then a body that cites the measured evidence and the paths.
+Output: the commit message text only.

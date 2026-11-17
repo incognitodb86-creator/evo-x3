@@ -1,0 +1,169 @@
+{
+ "rep": {
+  "mode": "run",
+  "port": "10004",
+  "still": "community/hc/HC3_lesbian_beach.jpg",
+  "t_start": "2026-10-24 12:36:40",
+  "t_start_ct": "2026-10-24 12:36:40",
+  "omni_widgets": [
+   "model",
+   "quantization",
+   "resolution",
+   "task"
+  ],
+  "omni_model_rows": [
+   "Qwen2.5-Omni-7B (official, bf16) \u00b7 22.4 GB download \u00b7 ~9 GB as nf4 / ~13 GB as int8 / ~24 GB as bf16",
+   "Qwen2.5-Omni-7B GGUF Q4_K_M \u00b7 6.2 GB download \u00b7 ~9 GB with the adapter and a 12k context",
+   "Qwen2.5-Omni-7B GGUF Q8_0 \u00b7 9.7 GB download \u00b7 ~13 GB - closer to the bf16 rewrite on a card that has room",
+   "on disk: Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB] (wrong size for the adapter)"
+  ],
+  "adapter_rows": [
+   "lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-F16.gguf \u00b7 3.48 GB download",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-Q8_0.gguf \u00b7 1.85 GB download \u2014 half the size, same rewrite behaviour",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-8B-F16.gguf \u00b7 1.3 GB download",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-8B-Q8_0.gguf \u00b7 0.69 GB download \u2014 half the size, same rewrite behaviour",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-F16.gguf \u00b7 0.65 GB download",
+   "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf \u00b7 0.34 GB download \u2014 half the size, same rewrite behaviour",
+   "on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]"
+  ],
+  "model": "Qwen2.5-Omni-7B GGUF Q4_K_M \u00b7 6.2 GB download \u00b7 ~9 GB with the adapter and a 12k context",
+  "model_row": "catalog row (resolves to the on-disk pair, proof notes/pw1c_objective.json)",
+  "adapter": "on disk: MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]",
+  "adapter_row": "on-disk scan row",
+  "prompt_id": "8581a1ee-351e-4da5-8361-202a75ce6df1",
+  "queue_end": "(0, 0)",
+  "t_end": "2026-10-24 12:37:01",
+  "gpu_min": 0.3,
+  "console_exception": "stamp [2026-10-24 12:36:0\n[2026-10-24 12:36:06.533] !!! Exception during processing !!! Ref2AV describes how a target video reuses reference assets, so it needs at least one. Connect a picture, a clip or a sound -- or pick T2AV, which is the task written from text alone.\n[2026-10-24 12:36:06.535] Traceback (most recent call last):\n  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 547, in execute\n    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 352, in get_output_data\n    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 326, in _async_map_node_over_list\n    await process_inputs(input_dict, i)\n  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\execution.py\", line 314, in process_inputs\n    result = f(**inputs)\n             ^^^^^^^^^^^\n  File \"C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\comfy_api\\internal\\__init__.py\", line 149, in wrapped_fu",
+  "preview_nodes": {
+   "902": [
+    490,
+    "<Subject 1> is the woman on the left in <Picture 1>, featuring long blonde hair, a red and black plaid bikini top, and b"
+   ],
+   "907": [
+    3,
+    "N/A"
+   ],
+   "900": [
+    3125,
+    "subject_definitions:\n<Subject 1> is the woman on the left in <Picture 1>, featuring long blonde hair, a red and black pl"
+   ],
+   "901": [
+    0,
+    ""
+   ],
+   "903": [
+    295,
+    "[reference generation] The target video features <Subject 1> and <Subject 2> sitting close together on the sand of <Subj"
+   ],
+   "905": [
+    1444,
+    "The target video is in a realistic, cinematic style with warm golden hour lighting and a shallow depth of field.\n\n[Shot "
+   ],
+   "906": [
+    154,
+    "The soundscape features the continuous, soothing sound of shallow surf washing over the sand, accompanied by the soft, n"
+   ],
+   "904": [
+    617,
+    "<Subject 1> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wea"
+   ]
+  },
+  "writer_outputs_raw": {},
+  "status": {
+   "status_str": "success",
+   "completed": true,
+   "messages": [
+    [
+     "execution_start",
+     {
+      "prompt_id": "8581a1ee-351e-4da5-8361-202a75ce6df1",
+      "timestamp": 1792863401070
+     }
+    ],
+    [
+     "execution_cached",
+     {
+      "nodes": [
+       "12"
+      ],
+      "prompt_id": "8581a1ee-351e-4da5-8361-202a75ce6df1",
+      "timestamp": 1792863401111
+     }
+    ],
+    [
+     "execution_success",
+     {
+      "prompt_id": "8581a1ee-351e-4da5-8361-202a75ce6df1",
+      "timestamp": 1792863418756
+     }
+    ]
+   ]
+  },
+  "fields_found": {
+   "subject_definitions": true,
+   "summary": true,
+   "retention_analysis": true,
+   "detailed_description": true,
+   "overall_soundscape": true,
+   "non_diegetic_music": true
+  },
+  "n_fields": 6,
+  "prompt_len": 3125,
+  "grid_243": false,
+  "media_files": [],
+  "checks": [
+   {
+    "name": "1 subject_definitions",
+    "ok": true
+   },
+   {
+    "name": "2 summary",
+    "ok": true
+   },
+   {
+    "name": "3 retention_analysis",
+    "ok": true
+   },
+   {
+    "name": "4 detailed_description",
+    "ok": true
+   },
+   {
+    "name": "5 overall_soundscape",
+    "ok": true
+   },
+   {
+    "name": "6 non_diegetic_music",
+    "ok": true
+   },
+   {
+    "name": "7 rewritten_prompt >= 600 chars",
+    "ok": true
+   },
+   {
+    "name": "8 the 10.0 s answer quotes the 243-frame grid",
+    "ok": false
+   },
+   {
+    "name": "9 no media file written under ComfyUI/output/community",
+    "ok": true
+   },
+   {
+    "name": "10 writer status completed without error",
+    "ok": true
+   }
+  ]
+ },
+ "outputs": {
+  "rewritten_prompt": "subject_definitions:\n<Subject 1> is the woman on the left in <Picture 1>, featuring long blonde hair, a red and black plaid bikini top, and black bikini bottoms with a red floral pattern.\n<Subject 2> is the woman on the right in <Picture 1>, featuring long blonde hair, a pink bikini top with black trim, and black bikini bottoms with a pink geometric pattern.\n<Subject 3> is the beach scene in <Picture 1>, featuring a sandy beach, shallow surf, and a distant coastal landscape under warm golden hour lighting.\n\nsummary:\n[reference generation] The target video features <Subject 1> and <Subject 2> sitting close together on the sand of <Subject 3>. The camera slowly drifts in on them as they relax in the shallow surf at golden hour, with warm rim light highlighting their wet skin and the spray backlit by the sun.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the red and black plaid bikini top and black bikini bottoms with a red floral pattern.\n<Subject 2> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the pink bikini top with black trim and black bikini bottoms with a pink geometric pattern.\n<Subject 3> (appears in [Shot 1]): fully_preserved - the target video takes place on the same sandy beach with shallow surf and a distant coastal landscape under warm golden hour lighting.\n\ndetailed_description:\nThe target video is in a realistic, cinematic style with warm golden hour lighting and a shallow depth of field.\n\n[Shot 1] The shot opens on a low-angle, handheld camera positioned near the sand of <Subject 3>, a serene beach scene featuring a sandy beach, shallow surf, and a distant coastal landscape. In the center of the frame, <Subject 1> and <Subject 2> sit close together on the wet sand. <Subject 1>, on the left, wears a red and black plaid bikini top and black bikini bottoms with a red floral pattern. <Subject 2>, on the right, wears a pink bikini top with black trim and black bikini bottoms with a pink geometric pattern. The camera slowly drifts in on them, maintaining a low and intimate viewpoint. The warm golden hour light casts a soft rim light on their wet skin, highlighting the glistening texture of their hair and bodies. The shallow surf washes gently around their legs, with small sprays of water backlit by the sun. The women relax in the shallow water, their bodies leaning slightly toward one another in a quiet, unhurried moment. <Subject 1> rests her arm on the sand, while <Subject 2> leans forward, her gaze directed downward. The camera continues its slow, steady push-in, enhancing the intimate atmosphere. The audible soundscape consists entirely of the rhythmic, soothing sound of the surf washing over the sand and the soft, natural breathing of the two women, creating a peaceful and relaxing environment.\n\noverall_soundscape:\nThe soundscape features the continuous, soothing sound of shallow surf washing over the sand, accompanied by the soft, natural breathing of the two women.\n\nnon_diegetic_music:\nN/A",
+  "integrated_multimodal_description": "",
+  "subject_definitions": "<Subject 1> is the woman on the left in <Picture 1>, featuring long blonde hair, a red and black plaid bikini top, and black bikini bottoms with a red floral pattern.\n<Subject 2> is the woman on the right in <Picture 1>, featuring long blonde hair, a pink bikini top with black trim, and black bikini bottoms with a pink geometric pattern.\n<Subject 3> is the beach scene in <Picture 1>, featuring a sandy beach, shallow surf, and a distant coastal landscape under warm golden hour lighting.",
+  "summary": "[reference generation] The target video features <Subject 1> and <Subject 2> sitting close together on the sand of <Subject 3>. The camera slowly drifts in on them as they relax in the shallow surf at golden hour, with warm rim light highlighting their wet skin and the spray backlit by the sun.",
+  "retention_analysis": "<Subject 1> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the red and black plaid bikini top and black bikini bottoms with a red floral pattern.\n<Subject 2> (appears in [Shot 1]): fully_preserved - the target video features the same woman with long blonde hair, wearing the pink bikini top with black trim and black bikini bottoms with a pink geometric pattern.\n<Subject 3> (appears in [Shot 1]): fully_preserved - the target video takes place on the same sandy beach with shallow surf and a distant coastal landscape under warm golden hour lighting.",
+  "detailed_description": "The target video is in a realistic, cinematic style with warm golden hour lighting and a shallow depth of field.\n\n[Shot 1] The shot opens on a low-angle, handheld camera positioned near the sand of <Subject 3>, a serene beach scene featuring a sandy beach, shallow surf, and a distant coastal landscape. In the center of the frame, <Subject 1> and <Subject 2> sit close together on the wet sand. <Subject 1>, on the left, wears a red and black plaid bikini top and black bikini bottoms with a red floral pattern. <Subject 2>, on the right, wears a pink bikini top with black trim and black bikini bottoms with a pink geometric pattern. The camera slowly drifts in on them, maintaining a low and intimate viewpoint. The warm golden hour light casts a soft rim light on their wet skin, highlighting the glistening texture of their hair and bodies. The shallow surf washes gently around their legs, with small sprays of water backlit by the sun. The women relax in the shallow water, their bodies leaning slightly toward one another in a quiet, unhurried moment. <Subject 1> rests her arm on the sand, while <Subject 2> leans forward, her gaze directed downward. The camera continues its slow, steady push-in, enhancing the intimate atmosphere. The audible soundscape consists entirely of the rhythmic, soothing sound of the surf washing over the sand and the soft, natural breathing of the two women, creating a peaceful and relaxing environment.",
+  "overall_soundscape": "The soundscape features the continuous, soothing sound of shallow surf washing over the sand, accompanied by the soft, natural breathing of the two women.",
+  "non_diegetic_music": "N/A"
+ }
+}

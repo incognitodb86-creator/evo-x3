@@ -1,0 +1,40 @@
+ALI-147 graph provenance (request.api.json vs harness <id>.api.json)
+
+CTRL ali147_pool_ctrl_s51080000
+  C:\AI\community\runs\ali147_pool_ctrl_s51080000\request.api.json ABSENT
+  C:\AI\community\runs\ali147_pool_ctrl_s51080000\ali147_pool_ctrl_s51080000.api.json size=10886 sha256=21e47217d3d6ceda46b60ebab0a298db9016868cd27c1565c389d624ed72192a
+
+FIX1 ali147_pool_fix1_s51080000
+  C:\AI\community\runs\ali147_pool_fix1_s51080000\request.api.json size=11025 sha256=4d27cff7f055c37ce32986a46082adccd5aa99962fa7e7d39a36866dd03e3d49
+  C:\AI\community\runs\ali147_pool_fix1_s51080000\ali147_pool_fix1_s51080000.api.json size=11025 sha256=4d27cff7f055c37ce32986a46082adccd5aa99962fa7e7d39a36866dd03e3d49
+  byte-equal=True
+  CRLF in request=True CRLF in captured=True
+
+FIX5 ali147_pool_fix5_s51080000
+  C:\AI\community\runs\ali147_pool_fix5_s51080000\request.api.json size=10884 sha256=0f268e9073fcf277a5c10e35c0416b159454c02d0c594c89bc4d77eb9e027ded
+  C:\AI\community\runs\ali147_pool_fix5_s51080000\ali147_pool_fix5_s51080000.api.json size=10884 sha256=0f268e9073fcf277a5c10e35c0416b159454c02d0c594c89bc4d77eb9e027ded
+  byte-equal=True
+  CRLF in request=True CRLF in captured=True
+
+DIP ali147_pool_dip_s51080000
+  C:\AI\community\runs\ali147_pool_dip_s51080000\request.api.json ABSENT
+  C:\AI\community\runs\ali147_pool_dip_s51080000\ali147_pool_dip_s51080000.api.json ABSENT
+
+FIX4 ali147_pool_fix4_s51080000
+  C:\AI\community\runs\ali147_pool_fix4_s51080000\request.api.json size=41921 sha256=7530cf228c73bae7631b3a97b1c8770e56797318d1782925907b4738956dbf57
+  C:\AI\community\runs\ali147_pool_fix4_s51080000\ali147_pool_fix4_s51080000.api.json size=41919 sha256=46ea6ce34f74c8371dd6691481151a154b5777bfb1062952f903d1cd6e8955f5
+  byte-equal=False
+  byte-prefix=True (larger file has a 2-byte tail)
+  CRLF in request=True CRLF in captured=True
+
+REFSHEET ali147_pool_refsheet_s51080000
+  C:\AI\community\runs\ali147_pool_refsheet_s51080000\request.api.json size=11424 sha256=97d1b140809c33c50d15b8fd4518d92b8d9cd3453012a83268d30c0b44fa27d3
+  C:\AI\community\runs\ali147_pool_refsheet_s51080000\ali147_pool_refsheet_s51080000.api.json size=11424 sha256=97d1b140809c33c50d15b8fd4518d92b8d9cd3453012a83268d30c0b44fa27d3
+  byte-equal=True
+  CRLF in request=True CRLF in captured=True
+
+REFSHEET_B ali147_pool_refsheet_b_s51080000
+  C:\AI\community\runs\ali147_pool_refsheet_b_s51080000\request.api.json size=12144 sha256=5236bd38a36cff777a573f105fab981257af1564868a848c8ec8d290ac9d4baa
+  C:\AI\community\runs\ali147_pool_refsheet_b_s51080000\ali147_pool_refsheet_b_s51080000.api.json size=12144 sha256=5236bd38a36cff777a573f105fab981257af1564868a848c8ec8d290ac9d4baa
+  byte-equal=True
+  CRLF in request=True CRLF in captured=True

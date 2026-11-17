@@ -1,0 +1,70 @@
+{
+ "tag": "opt4-final",
+ "config_proved_live_at": "strata.exe pid 26492 @21:16:59 (--pool-workers 13, no --pool-affinity, no --resident-budget-gib)",
+ "rows": 3,
+ "encoding": "utf-16",
+ "pp_tps_median_min_max_n": [
+  1739.0,
+  1659.7,
+  1739.9,
+  3
+ ],
+ "tg_tps_median_min_max_n": [
+  128.5,
+  116.8,
+  129.9,
+  3
+ ],
+ "wall_s_median_min_max_n": [
+  4.1,
+  4.1,
+  4.5,
+  3
+ ],
+ "compare": {
+  "pre_tuning_item_baseline_pp_tg_wall": [
+   617,
+   "83 (79.5-85.7)",
+   "7.0-8.0"
+  ],
+  "opt5_arena_medians": [
+   1720.5,
+   125.0,
+   4.16
+  ],
+  "opt4b_p_all_medians_same_config_2048": [
+   1684.8,
+   117.6,
+   3.31
+  ]
+ },
+ "runs": [
+  {
+   "run": 1,
+   "at": "2026-10-31T22:12:50",
+   "wall_s": 4.45,
+   "pp_tps": 1659.7,
+   "tg_tps": 116.8,
+   "prompt_tokens": 1905,
+   "completion_tokens": 256
+  },
+  {
+   "run": 2,
+   "at": "2026-10-31T22:12:54",
+   "wall_s": 4.08,
+   "pp_tps": 1739.9,
+   "tg_tps": 129.9,
+   "prompt_tokens": 1905,
+   "completion_tokens": 256
+  },
+  {
+   "run": 3,
+   "at": "2026-10-31T22:12:58",
+   "wall_s": 4.09,
+   "pp_tps": 1739.0,
+   "tg_tps": 128.5,
+   "prompt_tokens": 1904,
+   "completion_tokens": 256
+  }
+ ]
+}
