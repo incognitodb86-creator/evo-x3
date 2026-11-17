@@ -529,6 +529,23 @@ def harvest(run_dir, jobs, frames, size, slog, queue_ids=None):
     return todo, adopted, done
 
 
+
+PI_DROP = os.environ.get("PI_DROP", "/mnt/qnap/derek-homes/derek.boone86@gmail.com/pi-drop")
+
+
+def copy_to_pi_drop(run_dir, tag, src, slog):
+    """Copy a finished clip to Derrick's QNAP pi-drop so he can watch it from his PC. Never fails the job."""
+    try:
+        rel = os.path.relpath(os.path.abspath(run_dir), os.path.expanduser("~/AI/community/runs"))
+        name = (os.path.basename(os.path.abspath(run_dir)) if rel.startswith("..") else rel).replace(os.sep, "_")
+        if tag != "clip":
+            name += "_" + tag
+        dst = os.path.join(PI_DROP, name + ".mp4")
+        shutil.copyfile(src, dst)
+        slog("PI_DROP copied %s" % dst)
+    except Exception as e:  # QNAP down or not mounted: keep the local clip, just note it
+        slog("PI_DROP skip %s: %s" % (tag, e))
+
 def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     """After a job ends (or stalls/evicts): disk fallback, then the OBJECTIVE check and the DONE line."""
     tag, d = job["tag"], os.path.join(run_dir, job["tag"])
@@ -562,6 +579,7 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     if why:
         qlog(run_dir, "FAIL pos=%d tag=%s objective %s" % (job["pos"], tag, "; ".join(why))); return False
     slog("OBJECTIVE ok %s frames=%d size=%sx%s audio=True bytes=%d" % (t, p["frames"], p["w"], p["h"], p["bytes"]))
+    copy_to_pi_drop(run_dir, tag, s["file"], slog)
     rgj.contact_sheet(s["file"], os.path.join(d, tag + "_stills_contact.png"), p["duration"])
     outs = [os.path.join(OUT_ROOT, t, f) for f in os.listdir(os.path.join(OUT_ROOT, t))] if os.path.isdir(os.path.join(OUT_ROOT, t)) else []
     wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None
