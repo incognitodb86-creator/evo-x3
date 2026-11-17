@@ -22,6 +22,21 @@ F=$(jq -r '.build.total_frames // empty' "$RUN/build_report.json" 2>/dev/null ||
 [ -n "$F" ] || F=$(jq -r '(if has("prompt") then .prompt else . end).c0.inputs.length // empty' "$REQ")
 [ -n "$W" ] && [ -n "$H" ] && [ -n "$F" ] || { echo "refused: cannot read size/frames from $REQ" >&2; exit 3; }
 PY=${RQ_PY:-$HOME/AI/render/x3/.venv/bin/python}
+# Fast read-only preflight against AlienPc Tailscale Serve :8446:
+# Check /system_stats first (in AlienPc llama-swap ignorePaths -> 409 when unloaded, so preflight never wakes ComfyUI early);
+# only inspect /queue when ComfyUI is already loaded (200).
+COMFY_BASE_URL="${COMFY_API:-https://alienpc.tailf242b2.ts.net:8446}"
+if [ "$DRY" = 0 ]; then
+  st_code=$(curl -sS -o /dev/null -m 4 -w '%{http_code}' "$COMFY_BASE_URL/system_stats" 2>/dev/null || printf '000')
+  if [ "$st_code" = "200" ]; then
+    q_resp=$(curl -sS -m 4 -w '\n%{http_code}' "$COMFY_BASE_URL/queue" 2>/dev/null || printf '\n000')
+    q_code=$(printf '%s\n' "$q_resp" | tail -n 1)
+    if [ "$q_code" = "200" ]; then
+      q_busy=$(printf '%s\n' "$q_resp" | sed '$d' | jq -r '(.queue_running // []) | length' 2>/dev/null || echo 0)
+      [ "${q_busy:-0}" -gt 0 ] && echo "note: AlienPc ComfyUI currently has $q_busy running job(s); run_queue.py --remote will sequence safely." >&2
+    fi
+  fi
+fi
 # Max Architect 2026-11-16 (Derrick t2049u): works from nohup/ssh shells, and a busy GPU waits instead of failing rc 7.
 export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
 LOCK="$HOME/AI/locks/gpu-render.lock"

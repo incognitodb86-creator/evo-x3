@@ -5,11 +5,10 @@
 #   bash ~/AI/render/x3/render-pi.sh                           # interactive
 #   bash ~/AI/render/x3/render-pi.sh -p --no-session "<ask>"   # one-shot
 # Differences from AlienPc, on purpose:
-#   - model x3-local/gemma4-heretic (Derrick cutover mapping; Q8_0 llama.cpp Vulkan + mmproj vision, thinking medium as on AlienPc since 2026-11-15 r2)
-#     instead of llama-swap/gemma4_heretic_poly_think --thinking medium
-#   - no --remote / herdr-agent-state.ts / pi-mobile: herdr and the phone bridge are not on the X3 (phone cutover is gated)
-# Writing is dry-run only. Renders run on AlienPc ComfyUI; queue only after Derrick's yes (x3/queue-remote.sh).
-# NOT the production Render chat until Derrick OKs the picks; AlienPc stays production until cutover.
+#   - model x3-local/flash-next-uncensored (matches writer_pipeline/config.yaml + render/.pi/settings.json -> zero GPU swaps; vision tower enabled in llama-swap.yaml, plus joycaption fallback in small group)
+#   - loads lean OPERATOR.md (~55 lines) in system prompt while keeping full AGENTS.md intact for wp_compile_prompt.py / 77-rule gate
+#   - no --remote / herdr-agent-state.ts / pi-mobile: herdr and the phone bridge are managed separately
+# Writing is dry-run only until Derrick approves. Renders run on AlienPc ComfyUI (x3/queue-remote.sh --yes-derrick).
 #   - --no-extensions is kept on purpose: a bare `pi` in this folder would also load
 #     plannotator, pi-canvas, pi-say and the compound-engineering plugin from
 #     ~/AI/render/.pi/settings.json. Intended extensions are passed with -e:
@@ -32,7 +31,7 @@ exec pi --approve \
   --no-skills \
   --skill "$S/h3-parody-identity" --skill "$S/h3-prompting" \
   --no-context-files \
-  --append-system-prompt "$R/AGENTS.md" \
-  --model "${RENDER_MODEL:-x3-local/gemma4-heretic}" \
-  --thinking medium \
+  --append-system-prompt "${RENDER_PROMPT_FILE:-$R/OPERATOR.md}" \
+  --model "${RENDER_MODEL:-x3-local/flash-next-uncensored}" \
+  --thinking "${RENDER_THINKING:-low}" \
   "$@"
