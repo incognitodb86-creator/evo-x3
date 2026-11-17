@@ -11,7 +11,10 @@ Each folder corresponds to one X3 branch from Gitea:
 
 ## Applying on EVO-X3
 
-### 1. While U56 is open (as user `evo`; no llama-swap restart)
+Every file the installer overwrites is first copied to `<dir>/_archive/<name>.bak-20261117-u56bundle` (the first
+backup is kept on re-runs). `bash apply-on-x3.sh evo-rollback` restores all of them.
+
+### Step 1. Ralph loop fixes (as `evo`; no llama-swap restart)
 
 ```bash
 systemctl --user stop u42-pixlstash-tagger.service   # if running: it swaps gemma4-heretic into the exclusive main group
@@ -19,26 +22,41 @@ bash apply-on-x3.sh evo-preview                      # your live ralph.sh has un
 bash apply-on-x3.sh evo                              # installs ralph.sh, run-u56-pass.sh, fix_plan.u56-item0.md
 ```
 
-Then pick one:
+Then do Item 0 one of two ways:
 
-- **A. Loop does Item 0** (meets handoff §11.3): replace `0a`/`0b` in `~/AI/forge/ralph-community/fix_plan.md` with Item 0
-  from `fix_plan.u56-item0.md`, keep the Render/Forge panes idle, and run
-  `bash ~/AI/forge/ralph-community/run-u56-pass.sh 1`.
-  Stay on `flash-next-uncensored` (the default). Do not switch to `flash-next`: both are in the exclusive `main` group,
-  so it would swap Halogen checkpoints (~25 s) every time the pass and a pane alternate.
-- **B. Install only the Item 0 test fixes directly:** `bash apply-on-x3.sh evo --with-tests`, then tick Item 0 and start the loop at item 1.
-- **C. One-Shot Full U56 + Render Pipeline Install (Fastest — skips waiting on Ralph Loop A):**
-  `bash apply-on-x3.sh evo --with-render`
-  Backs up every touched file to `_archive/*.bak-20261117-u56bundle`, installs all U56 `community` parody scripts + skills + `render` (`OPERATOR.md`, `config.yaml`, `writer_prompt.md`, `render-pi.sh`, `queue-remote.sh`), updates `/home/evo/.pi/agent/models.json` (`input: ["text", "image"]` + `flash-next-uncensored-sub`), and runs both the 77-rule compiler check and the `pytest` suite automatically.
+- **B (recommended). Install the Item 0 fixes directly:** `bash apply-on-x3.sh evo --with-tests` (prints `2 passed`), then
+  tick `- [x] 0` in `~/AI/forge/ralph-community/fix_plan.md` and start the loop at item 1.
+- **A. Let one headless pass do Item 0** (handoff §11.3 proof): replace `0a`/`0b` in `fix_plan.md` with Item 0 from
+  `fix_plan.u56-item0.md`, keep the Render/Forge panes idle (live `flash-next-uncensored` is limited to 1 request until
+  Step 2), and run `bash ~/AI/forge/ralph-community/run-u56-pass.sh 1`. The pass commits on the loop branch
+  `ralph-<day>-<pid>-community` in `~/AI/_worktrees/`, not on live `x3-linux`. Bring it in before the next loop run, or
+  that run's gate starts from the old tests and fails again:
+  `git -C ~/AI/community merge --ff-only ralph-<day>-<pid>-community`
 
-### 2. After U56 closes and Derrick approves a llama-swap restart
+### Step 2. llama-swap (root; needs Derrick's yes for the restart)
 
 ```bash
-sudo bash apply-on-x3.sh root-preview   # prints the exact diff to /etc/evo-x3/llama-swap.yaml
-sudo bash apply-on-x3.sh root-apply     # patches flash-next-uncensored (limit 4 + HALOGEN_VISION_TOWER + -sub alias) and joycaption/ref2va ttl 300
+sudo bash apply-on-x3.sh root-preview   # exact diff to /etc/evo-x3/llama-swap.yaml
+sudo bash apply-on-x3.sh root-apply     # flash-next-uncensored: limit 4, HALOGEN_VISION_TOWER, -sub alias; joycaption/ref2va ttl 300
 sudo systemctl restart llama-swap       # when /running shows nothing in flight
 ```
 
-`root-apply` edits the live file in place and never copies the repo `llama-swap.yaml` (that mirror's `joycaption` block is
-reconstructed and unverified). After the restart, add `flash-next-uncensored-sub` to `~/.pi/agent/models.json` from
-`x3-pi-config/config/pi-evo/models.json.example` before pointing any `subagents.defaultModel` at it.
+`root-apply` edits the live file in place (it never copies the repo `llama-swap.yaml`, whose `joycaption` block is
+reconstructed), validates it with `llama-swap -validate`, skips the vision tower if its file is missing, and prints a
+health check to run after the restart. The vision tower on the Huihui checkpoint is untested (U26 ran it text-only), so
+run that health check and keep the printed restore command handy.
+
+### Step 3. Render pipeline (as `evo`; only after Step 2 and the restart)
+
+```bash
+bash apply-on-x3.sh evo --with-render
+```
+
+Refuses to run until root-apply has been done and llama-swap restarted after it. Installs the U56 parody scripts, skills
+and render files (`OPERATOR.md`, `config.yaml`, `writer_prompt.md`, `render-pi.sh`, `queue-remote.sh`), updates
+`~/.pi/agent/models.json` (`flash-next-uncensored` image input when the vision tower is on, plus
+`flash-next-uncensored-sub`) and the render pane's Gemma subagent pin, then runs the 77-rule gate and the parody tests.
+If verification fails it stops and tells you to run `evo-rollback`. Restart the Render herdr pane afterwards.
+
+Not changed by this bundle: the Sydney pane still runs `gemma4-heretic`, so using Sydney while Render or Forge is busy
+swaps the exclusive `main` group.
