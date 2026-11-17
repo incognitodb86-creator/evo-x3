@@ -1,0 +1,5 @@
+default {"wall_s": 1.2, "reasoning_chars": 126, "reasoning_tokens": 42, "completion_tokens": 45, "answer": "9"}
+effort_low {"wall_s": 0.8, "reasoning_chars": 58, "reasoning_tokens": 21, "completion_tokens": 24, "answer": "9"}
+effort_xhigh {"wall_s": 1.6, "reasoning_chars": 204, "reasoning_tokens": 58, "completion_tokens": 61, "answer": "9"}
+ctk_off {"wall_s": 0.3, "reasoning_chars": 0, "reasoning_tokens": 0, "completion_tokens": 2, "answer": "9"}
+ctk_effort_low {"wall_s": 0.7, "reasoning_chars": 58, "reasoning_tokens": 21, "completion_tokens": 24, "answer": "9"}

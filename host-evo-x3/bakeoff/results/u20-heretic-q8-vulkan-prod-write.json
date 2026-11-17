@@ -1,0 +1,54 @@
+{
+ "arm": "u20-heretic-q8-vulkan-prod-write",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 09:54:23 CST",
+ "tasks": {
+  "write1": {
+   "ttft_s": 0.5324714183807373,
+   "total_s": 33.256941080093384,
+   "prompt_tokens": 42,
+   "completion_tokens": 1462,
+   "client_decode_tps": 44.676048691188655,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 42,
+    "prompt_ms": 459.33,
+    "prompt_per_token_ms": 10.936428571428571,
+    "prompt_per_second": 91.43752857422768,
+    "predicted_n": 1462,
+    "predicted_ms": 32791.711,
+    "predicted_per_token_ms": 22.444702943189597,
+    "predicted_per_second": 44.55394230572476
+   },
+   "content": "Arthur\u2019s boots crunched over calcified barnacles. The storm had vomited a feast of debris: shredded jellyfish, blackened driftwood, a single, salt-stiffened boot. He spotted a glint nestled in a tangle of bladderwrack. It wasn't glass, but a heavy, amber-colored resin vessel, shaped like a teardrop.\n\nHe knelt, his joints grinding like shifting shale. He pried it from the grit. The resin was warm, unnervingly so, as if it had retained a feverish heat from some deep-sea vent. Inside, a sliver of vellum sat coiled, a dark, curled spine. There was no ink visible through the amber, only a shadow that looked less like writing and more like a bruise.\n\nArthur wiped the brine from his spectacles. He didn't use a knife; he used a thumbnail to crack the seal of dried salt. As the resin split, the scent hit him\u2014not ozone, but scorched cinnamon and old copper. He unrolled the vellum. The script didn't sit on the page; it bled into the fibers, violet and frantic, spelling words that made the lighthouse beam feel suddenly, terrifyingly dim.",
+   "reasoning_chars": 4853,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.26580357551574707,
+   "total_s": 36.70126962661743,
+   "prompt_tokens": 39,
+   "completion_tokens": 1587,
+   "client_decode_tps": 43.556462205648515,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 33,
+    "prompt_ms": 144.072,
+    "prompt_per_token_ms": 4.365818181818182,
+    "prompt_per_second": 229.05214059636847,
+    "predicted_n": 1587,
+    "predicted_ms": 36508.075,
+    "predicted_per_token_ms": 23.018962799495583,
+    "predicted_per_second": 43.44244389768565
+   },
+   "content": "Stop cooking with flimsy, disposable pans that die after a year. Meet the ForgeMaster 12-inch Skillet\u2014the last pan you\u2019ll ever buy.\n\nHeirloom-quality and ruggedly built, this isn\u2019t just cookware; it\u2019s a kitchen powerhouse. Its thick-walled construction delivers unmatched heat retention, turning every sear into a crusty masterpiece and every bake into a golden success. Whether you're crushing a ribeye or frying up midnight hash, the ForgeMaster delivers professional-grade results every single time.\n\nBut here\u2019s the kicker: the ForgeMaster is so efficient at holding thermal energy that it can keep a meal piping hot on your dining table for up to fifteen minutes without a single flame. It\u2019s not just a skillet; it\u2019s a thermal vault for your food.\n\nIndestructible. Versatile. Legendary. Grab the ForgeMaster and start building a culinary legacy that tastes better with every use.",
+   "reasoning_chars": 5763,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

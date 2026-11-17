@@ -1,0 +1,4 @@
+[
+  "test_wp_accept_flatten.py::test_apply_pick_to_row_keeps_prose_fields_when_writer_output_exists",
+  "test_wp_accept_flatten.py::test_apply_pick_to_row_youth_block_without_writer_output"
+]

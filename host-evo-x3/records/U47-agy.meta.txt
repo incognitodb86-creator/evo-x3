@@ -1,0 +1,6 @@
+start=2026-11-16 13:09:58 America/Chicago
+model=gemini-4-hydrogen-high
+cwd=/home/derekboone/evo-x3
+brief=/home/derekboone/evo-x3/records/U47-joycaption-x3-test-brief-20261116.md
+pid_wrapper=139735
+host=evo-X3

@@ -1,0 +1,7 @@
+code {"ttft_s": 13.57, "total_s": 15.04, "prompt_tokens": 141, "completion_tokens": 129, "client_decode_tps": 87.45, "finish": "stop", "pass": true}
+COLD_LOAD_PLUS_CODE_S 15
+long {"ttft_s": 9.47, "total_s": 10.72, "prompt_tokens": 18253, "completion_tokens": 104, "client_decode_tps": 83.19, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.18, "total_s": 11.59, "prompt_tokens": 59, "completion_tokens": 691, "client_decode_tps": 60.55, "finish": "stop", "pass": true}
+{"copies": 13, "prompt_tokens": 236642, "completion_tokens": 318, "ttft_s": 139.06, "total_s": 143.85, "client_prefill_tps": 1701.8, "client_decode_tps": 66.4, "needle": true, "fixture_fact": true, "finish": "stop"}
+{"pass": true, "elapsed_s": 24.9, "usage": {"prompt_tokens": 181, "completion_tokens": 2021, "total_tokens": 2202, "completion_tokens_details": {"reasoning_tokens": 1562}}, "finish": "stop", "err": ""}

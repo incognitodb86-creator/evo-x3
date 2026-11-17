@@ -1,0 +1,74 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 2 background task(s) to finish
+Downloading the Ref2VA 27B Q4_K_M weights and F16 mmproj into `/srv/models/ref2va-27b/`, and waiting for `U47-RESULT.md` before modifying `/etc/evo-x3/llama-swap.yaml`.
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (~2.6 GB / 15.4 GiB downloaded).
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (5.3 GiB / 15.41 GiB downloaded).
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (6.2 GiB / 15.41 GiB downloaded).
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (8.1 GiB / 15.41 GiB downloaded).
+
+Continuing to wait for `U47-RESULT.md` and the Ref2VA 27B Q4_K_M download.
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (11 GiB / 15.41 GiB downloaded).
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (12 GiB / 15.41 GiB downloaded).
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (13 GiB / 15.41 GiB downloaded).
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download continues (14 GiB / 15.41 GiB downloaded).
+Waiting for `U47-RESULT.md` while the Ref2VA 27B Q4_K_M download nears completion (14.45 GiB / 15.41 GiB downloaded).
+Waiting for the Ref2VA 27B Q4_K_M download to finish (~30s remaining) and for `U47-RESULT.md`.
+Step 1 is complete: both Ref2VA 27B GGUF files are downloaded to `/srv/models/ref2va-27b/`, verified against Hugging Face LFS SHA256 hashes (total 17.475 GB <= 19 GB), and recorded in `/srv/models/SHA256SUMS`. Waiting for `U47-RESULT.md` (polling every 2 minutes) before proceeding to Step 2.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-165` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-197` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-226` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-255` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-305` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-325` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-342` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+
+Waiting for `task-356` (2-minute poll for `U47-RESULT.md`).
+`U47-RESULT.md` is not present yet; waiting another 2 minutes before polling again.
+`llama-swap.yaml` is backed up to `llama-swap.yaml.bak-20261116-u48-pre`, updated with `ref2va-27b`, and validated (`config is valid: 7 model(s), 0 peer(s)`). Waiting ~60s for the active Render pi chat request on `gemma4-heretic` slot 1 (`task 18407`) to finish before restarting `llama-swap`.
+Render pi chat (`task 18407`) finished prompt processing (71,922 tokens) and is currently generating; waiting ~60s for it to complete before restarting `llama-swap`.
+Running the `ref2va-27b` smoke test with the synthetic PIL image and official Ref2VA system prompt (`task-412`); waiting for it to finish.
+U48 is complete (**PASS**). Results are recorded in [U48-RESULT.md](file:///home/derekboone/evo-x3/records/U48-RESULT.md).
+
+- **Model & Verification:** Downloaded `MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-Q4_K_M.gguf` (`16,547,400,384` B, SHA256 `ff75aa50...`) and `mmproj-MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-F16.gguf` (`927,607,328` B, SHA256 `32c75dff...`) into `/srv/models/ref2va-27b/` (`17.475 GB` total <= `19 GB`), verified against Hugging Face LFS SHA256 hashes, and updated [SHA256SUMS](file:///srv/models/SHA256SUMS).
+- **Runtime & `llama-swap`:** Verified `llama-server` build `12405` (`>= b10310`) in the existing `kyuz0/amd-strix-halo-toolboxes` image. After [U47-RESULT.md](file:///home/derekboone/evo-x3/records/U47-RESULT.md) appeared and active Render chat `task 18407` on `gemma4-heretic` finished, backed up [llama-swap.yaml](file:///etc/evo-x3/llama-swap.yaml) to `llama-swap.yaml.bak-20261116-u48-pre`, added `ref2va-27b` to the non-exclusive `small` group on loopback port `8085` (`-c 32768`, `-n 4096`, `--temp 0`, `-ngl 999`, `-fa on`, `enable_thinking:false`), validated (`config is valid: 7 model(s), 0 peer(s)`), and restarted `llama-swap.service` once at `2026-11-16 15:02:05 CST`.
+- **Co-residency & Tagger Recovery:** `gemma4-heretic` (`3.68 s`), `joycaption` (`5.56 s`), and `ref2va-27b` all report `ready` simultaneously. PixlStash tagger `done` count in `u42_state.db` rose from `2058` (`15:02:02 CST`) to `2086` (`15:04:48 CST`).
+- **Smoke Test & System Prompt:** Saved the official Ref2VA system prompt (`REF_PREFIX` + `VIDEO_PROMPT_WRITING_GUIDE_ref_en.md`) to `/home/evo/AI/render/rewriter/ref2va-system-prompt.md` (`0644`, `evo:evo`). Smoke test with a synthetic `640x360` PIL beach-at-sunset PNG and `"a woman walks along a beach at sunset"` returned all 6 Ref2VA sections (`322` words, `finish_reason=stop`, `reasoning_len=0`, load `13.79 s`, prompt `194.29 tok/s`, gen `8.55 tok/s`, GTT `+19.14 GiB`), saved to [U48-smoke-output.txt](file:///home/derekboone/evo-x3/records/U48-smoke-output.txt).

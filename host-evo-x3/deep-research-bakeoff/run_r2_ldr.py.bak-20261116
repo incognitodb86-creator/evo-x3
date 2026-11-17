@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Run U32 R2 arm: LearningCircuit local-deep-research against local llama-swap flash-next + localhost SearXNG."""
+import argparse
+import datetime
+import json
+import os
+import re
+import time
+from zoneinfo import ZoneInfo
+
+# Must be set before importing local_deep_research egress checks
+os.environ.setdefault("LDR_SEARCH_ALLOW_PRIVATE_ENGINE_URLS", "true")
+os.environ.setdefault("LDR_EGRESS_SCOPE", "unprotected")
+
+from local_deep_research.api import quick_summary
+
+CT = ZoneInfo("America/Chicago")
+
+
+def now_ct():
+    return datetime.datetime.now(CT).strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def extract_urls(obj):
+    text = json.dumps(obj) if not isinstance(obj, str) else obj
+    return sorted(set(re.findall(r"https?://[^\s\"'\]\)<>]+", text)))
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--questions-json", required=True)
+    ap.add_argument("--out-dir", required=True)
+    args = ap.parse_args()
+
+    key = os.environ.get("LLM_KEY_BOX") or os.environ.get("OPENAI_API_KEY")
+    if not key:
+        raise SystemExit("LLM_KEY_BOX / OPENAI_API_KEY not set")
+    os.makedirs(args.out_dir, exist_ok=True)
+    questions = json.load(open(args.questions_json))
+
+    overrides = {
+        "llm.provider": "openai_endpoint",
+        "llm.model": "flash-next",
+        "llm.openai_endpoint.url": "http://127.0.0.1:8080/v1",
+        "llm.openai_endpoint.api_key": key,
+        "llm.reasoning_effort": "low",
+        "llm.max_tokens": 4096,
+        "llm.temperature": 0.2,
+        "llm.allowed_local_hostnames": ["127.0.0.1", "localhost"],
+        "search.tool": "searxng",
+        "search.engine.web.searxng.default_params.instance_url": "http://127.0.0.1:8888",
+        "search.engine.web.searxng.default_params.result_format": "json",
+        "search.engine.web.searxng.default_params.include_full_content": True,
+        "search.iterations": 2,
+        "search.questions_per_iteration": 2,
+        "search.max_results": 15,
+        "search.max_filtered_results": 10,
+    }
+
+    for q in questions:
+        qid = q["id"]
+        t0 = time.monotonic()
+        err = None
+        res_data = {}
+        try:
+            res_data = quick_summary(
+                query=q["question"],
+                provider="openai_endpoint",
+                api_key=key,
+                temperature=0.2,
+                settings_override=overrides,
+            )
+        except Exception as e:
+            err = f"{type(e).__name__}: {e}"
+        wall_s = round(time.monotonic() - t0, 2)
+        summary = res_data.get("summary", "") if isinstance(res_data, dict) else ""
+        sources = res_data.get("sources") or []
+        urls = extract_urls(res_data)
+        out = {
+            "arm": "R2_local_deep_research",
+            "question_id": qid,
+            "question": q["question"],
+            "started_ct": now_ct(),
+            "wall_s": wall_s,
+            "error": err,
+            "report": summary,
+            "sources_field": sources,
+            "sources_urls": urls,
+            "iterations": res_data.get("iterations") if isinstance(res_data, dict) else None,
+            "questions_generated": res_data.get("questions") if isinstance(res_data, dict) else None,
+            "findings_count": len(res_data.get("findings") or []) if isinstance(res_data, dict) else 0,
+        }
+        with open(os.path.join(args.out_dir, f"{qid}.json"), "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=2, default=str)
+        print(f"[{now_ct()}] R2 {qid}: wall={wall_s}s sources={len(urls)} report_chars={len(summary)} err={err}", flush=True)
+
+
+if __name__ == "__main__":
+    main()

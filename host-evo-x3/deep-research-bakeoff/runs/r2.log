@@ -1,0 +1,5 @@
+[2026-11-16 06:27:50 CST] R2 Q1_miniml_harness: wall=31.55s sources=29 report_chars=1926 err=None
+[2026-11-16 06:28:50 CST] R2 Q2_flash_next_sampling: wall=59.97s sources=32 report_chars=2194 err=None
+[2026-11-16 06:29:36 CST] R2 Q3_opencode_230: wall=45.62s sources=35 report_chars=3282 err=None
+[2026-11-16 06:30:47 CST] R2 Q4_codex_llamacpp: wall=71.76s sources=48 report_chars=5068 err=None
+[2026-11-16 06:32:03 CST] R2 Q5_ldr_vs_gptr: wall=75.8s sources=54 report_chars=5239 err=None

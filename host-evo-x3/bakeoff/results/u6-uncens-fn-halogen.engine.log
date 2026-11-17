@@ -1,0 +1,107 @@
+halogen: oom_score_adj 0 -> 500: if the host runs out of memory, the kernel ends this server before the desktop session or the container runtime (HALOGEN_OOM_SCORE_ADJ=0 leaves it)
+halogen: halogen-flash-server 0.20.4, mode all
+halogen: /gguf/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf is a GGUF: it is repacked into RAM at startup, losslessly, on every start
+         (about 20 s from a cold NVMe disk on the reference machine, 9 s warm; HALOGEN_GGUF_CACHE=1 keeps
+         a copy beside it and a warm restart is then about 1 s; `convert` writes it as a standalone .hgn)
+         and served with the engine's own draft head. The quality sidecar does not apply to a GGUF trunk.
+halogen: draft head /models/qwen38-flash-next-mtp.hgn (1.5G)
+halogen: KV budget 4 slot(s) over one 65536-position pool (each request up to 32768) = 2.2 GiB (~28 KiB/position incl. block scratch + ~115 MiB/slot) + 3.1 GiB prompt cache in RAM, on top of roughly 72 GiB (an 8-bit GGUF trunk, file type 30, repacked into RAM) of weights and 11.0 GiB of working memory (HALOGEN_MAX_TOK 16384). Those last two are estimates for this pre-flight check; the engine prints its measured figures once loaded, including the large lookup table it reads from disk and never holds. MemAvailable now 121.1 GiB.
+halogen: GTT in use before this start: 0.0 GiB of 120.0 (120.0 free; this start puts about 9.7 GiB there)
+serve_api: request defaults HALOGEN_REASONING_EFFORT=low
+serve_api: chat template /models/tokenizer/chat_template.jinja sha256 c3cf9e34abf4f9e3, thinking control probe passed
+halogen: waiting for engine on 8730 (cold load can take minutes)
+flash_serve: GPU queue evictions counted from /sys/class/kfd/kfd/proc/25086/stats_*/evicted_ms
+kv pool: /gguf/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf is a GGUF; 68.2 GiB of resident weights once repacked (plus the head)
+kv pool: host RAM 124 GiB, less 68.2 resident weights and 20.0 reserved for the n-gram page cache and the OS = 36.3 GiB for the device
+kv pool: 65536 positions, ~12.6 GiB (10.8 GiB of it for everything but the pool, at max_tok 16384)
+checkpoint: /gguf/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf is a GGUF (qwen4exp, file_type 30, 3 shards, 1224 tensors): 1166 repacked into 66.75 GiB (a_log 36, aff 48, cat_bf16 12, copy 1, f32_bf16 353, gate_up 48, i64 3, q4cp 665), the lookup table read in place, the MTP head from /models/qwen38-flash-next-mtp.hgn
+checkpoint: repacking on 8 threads (HALOGEN_GGUF_THREADS)
+checkpoint: repacked 66.75 GiB in 4.4 s (16.28 GB/s of output)
+checkpoint: registered the 66.75 GiB arena in 0.2 s (Mapped|ReadOnly), device ptr == host ptr
+checkpoint: registered 1.5 GB in 1.1 s (1.4 GB/s, Mapped|ReadOnly), device ptr == host ptr
+checkpoint: GGUF ready in 5.7 s: 1198 tensors (1166 trunk, 1 table, 31 head)
+overlay: none (no /gguf/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf.overlay.hgn, HALOGEN_CK_OVERLAY unset): the bare checkpoint runs
+startup [   0.0 s] host memory: 5164 contiguous 2 MiB blocks of host memory free (10328 MiB)
+startup [   0.0 s] pinning weights (reads the checkpoint from disk when it is not already in the page cache; this is usually the slowest step)
+checkpoint: 68.17 GiB in 1197 tensor(s) already resident (the repacked arena and the head file), not registered again
+startup [   0.0 s] weights pinned: 5164 contiguous 2 MiB blocks free (10328 MiB), 0 compaction stalls during that step (0 failed)
+startup [   0.0 s] preparing weights
+startup [   0.5 s] preparing weights, layer 0 of 48
+startup [   0.5 s] preparing weights, layer 8 of 48
+startup [   0.6 s] preparing weights, layer 16 of 48
+startup [   0.6 s] preparing weights, layer 24 of 48
+startup [   0.6 s] preparing weights, layer 32 of 48
+startup [   0.6 s] preparing weights, layer 40 of 48
+affine trunk: 48 tensors staged to bf16 on the device (1.79 GiB); decode reads them at 16 bits a weight
+startup [   0.7 s] weights ready; reserving working memory
+startup [   1.0 s] reserving the KV pool, 65536 positions (about 1.8 GiB)
+startup [   1.4 s] KV pool reserved: 244 contiguous 2 MiB blocks free (488 MiB), 393 compaction stalls during that step (2 failed)
+startup [   1.4 s] model ready
+startup [   1.4 s] reserving 3 more serving slot(s)
+slots: 1 -> 4 POOLED, 112.0 MiB each of O(1) state; the KV is ONE pool of 65536 positions (1664.0 MiB) carved into per-request regions
+startup [   1.4 s] preparing the prompt cache
+flash_serve: prompt cache ON, resume-anywhere (28 entries, snapshot every request, chunk 32768, 111 MiB each at ctx 32768): a warm answer is NOT bitwise the cold one
+flash_serve: prompt cache keeps the KV in place (HALOGEN_CACHE_INPLACE=1): the entry is the O(1) state, the KV rows are never copied; a follow-up turn prefills only its new tokens
+startup [   1.4 s] memory: 68.2 GiB of weights locked in RAM, 1.8 GiB of KV pool, 13.0 GiB of working memory, 82.9 GiB in all
+startup [   1.4 s] memory: the model's 26.8 GiB lookup table is NOT held in RAM. It is read from disk through the file cache as each request needs it, which is why this server holds less than the checkpoint is large
+startup [   1.4 s] memory: 1.0 GiB of this machine's RAM is carved out for the iGPU in firmware. That is not free memory the OS can lend to the file cache above, and it does not appear anywhere in /proc/meminfo: the machine simply reports itself smaller
+startup [   1.4 s] host memory left for everything else: 254 contiguous 2 MiB blocks (37.7 GiB total, most of it not contiguous)
+startup [   1.4 s] free(1) and MemAvailable will report about 39.1 GiB instead: the kernel counts this server's locked weights as reclaimable file cache, and they cannot be reclaimed
+startup [   1.4 s] opening the socket
+halogen: NOTE this server now holds most of the machine, and 254 contiguous 2 MiB blocks remain. It runs best on a host of its own. If other large processes share this machine they will compete for what is left, and when it runs out BOTH they and this server can stall for minutes at a time at full CPU with no disk activity and no output, which is not a crash and needs no restart. Lowering HALOGEN_KV_POOL_POSITIONS gives some back.
+flash_serve: HALOGEN_TICK_ROWS=16 not taken (a layer whose experts are not HT or I4R): two forwards past 8 rows
+flash_serve: a waiting request of up to 1024 uncached tokens is admitted whole at a layer boundary of the prompt in flight, not after its piece (HALOGEN_ADMIT_NEST=1, HALOGEN_ADMIT_NEST_MAX)
+flash_serve: a decode tick is spliced into an admitted prompt's prefill every 500 ms while any stream decodes (HALOGEN_ADMIT_SPLICE_MS, HALOGEN_ADMIT_SPLICE_FOR=all)
+flash_serve: a prompt admitted beside active streams prefills in pieces of 16384 tokens with a decode tick between them (HALOGEN_ADMIT_CHUNK=0; 0 = the engine's own chunk, which keeps the admitted prompt bitwise its alone self; -1 = the whole prompt at once)
+flash_serve: listening on 127.0.0.1:8730, 4 slots over ONE 65536-position KV pool, each request up to 32768 (it reserves prompt + max_tokens), max_tok 16384, BATCHED greedy or sampled; MTP depth-2 (up to 7, confidence gate) selectable (drafter 1, speculates while alone)
+halogen: engine listening after 10s
+halogen: engine watchdog on, 180s of silence takes the container down
+serve_api: chat template /models/tokenizer/chat_template.jinja sha256 c3cf9e34abf4f9e3, thinking control probe passed
+serve_api: chat template cache check passed: the history is reusable in 6 of 6 turn shapes and the model's own reply in 4 (8 ms)
+INFO:     Started server process [128]
+INFO:     Waiting for application startup.
+flash_serve: grammar: vocabulary of 248077 tokens (248044 plain, longest 128 B) in 53 ms
+flash_serve: grammar drafter: 247587 merges in 32 ms
+serve_api: engine at 127.0.0.1:8730, listening on [::] and 0.0.0.0:8731
+serve_api: request defaults HALOGEN_REASONING_EFFORT=low (a field the request sends wins; temperature 0 in a request is greedy and takes no sampling default)
+serve_api: a sampled request that omits top_k / top_p gets top_k 20, top_p 0.95 (HALOGEN_TOP_K / HALOGEN_TOP_P where set, else the model's generation_config.json)
+serve_api: end-of-turn ids 248044, 248046 (the tokenizer's eos, plus what generation_config.json declares; a generation that emits one of these ends the turn)
+serve_api: version 0.20.4, engine version 0.20.4
+serve_api: warm start: one 15-token request, 10 tokens, 0.46 s, before listening (the first pass after a start does one-time work a client's first request would wait for)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://[::]:8731 (Press CTRL+C to quit)
+INFO:     10.88.0.1:45734 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 2 prefill 0/18253 tokens, 0.0 s
+flash_serve: req 2 prefill 16384/18253 tokens, 8.5 s
+serve_api: mtp 109 tok in 1.77s = 61.51 t/s | 22 rounds, commit 4.95/round | prompt 18253, prefill 9.81s = 1861 t/s | detok 16us/tok | pool 19712/65536 30% | think on
+INFO:     10.88.0.1:39806 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+serve_api: mtp 149 tok in 2.13s = 69.90 t/s | 30 rounds, commit 4.97/round | prompt 141, prefill 0.31s (141 new) | detok 17us/tok | pool 21248/65536 32% | think on
+INFO:     10.88.0.1:39822 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+serve_api: mtp 66 tok in 1.11s = 59.51 t/s | 15 rounds, commit 4.40/round | prompt 388, prefill 0.49s (388 new) | detok 25us/tok | pool 23040/65536 35% | think on
+INFO:     10.88.0.1:39828 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+serve_api: mtp 51 tok in 0.75s = 67.83 t/s | 11 rounds, commit 4.64/round | prompt 452 (320 cached, 70.8%), prefill 0.32s (132 new) | detok 21us/tok | pool 23040/65536 35% | think on
+INFO:     10.88.0.1:39836 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+serve_api: mtp 23 tok in 0.38s = 60.08 t/s | 5 rounds, commit 4.60/round | prompt 525 (384 cached, 73.1%), prefill 0.29s (141 new) | detok 28us/tok | pool 23040/65536 35% | think on
+INFO:     10.88.0.1:39838 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+prompt cache: at its 28-entry cap, forgot a reply-end entry of 25 tokens (region 0, the least recently used of its rank) to store this request's reply-end entry
+serve_api: mtp 208 tok in 4.67s = 44.59 t/s | 85 rounds, commit 2.13/round | prompt 59, prefill 0.61s (59 new) | detok 21us/tok | 26 tok with the head off | pool 24064/65536 37% | think on, closed at 1 by answer room
+INFO:     10.88.0.1:59334 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+prompt cache: at its 28-entry cap, forgot a reply-end entry of 18362 tokens (region 256, the least recently used of its rank) to store this request's reply-end entry
+serve_api: mtp 413 tok in 9.56s = 43.21 t/s | 221 rounds, commit 1.86/round | prompt 69, prefill 0.25s (69 new) | detok 20us/tok | pool 28160/65536 43% | think on
+INFO:     10.88.0.1:42568 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+prompt cache: at its 28-entry cap, forgot a reply-end entry of 290 tokens (region 19712, the least recently used of its rank) to store this request's reply-end entry
+serve_api: mtp 317 tok in 6.32s = 50.13 t/s | 141 rounds, commit 2.25/round | prompt 63, prefill 0.62s (63 new) | detok 19us/tok | pool 32256/65536 49% | think on
+prompt cache: at its 28-entry cap, forgot a reply-end entry of 548 tokens (region 21248, the least recently used of its rank) to store this request's reply-end entry
+serve_api: mtp 400 tok in 7.74s = 51.68 t/s | 136 rounds, commit 2.74/round | prompt 53, prefill 0.55s (53 new) | detok 17us/tok | 26 tok with the head off | pool 32768/65536 50% | think on, closed at 1 by answer room
+INFO:     10.88.0.1:42584 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+prompt cache: at its 28-entry cap, forgot a reply-end entry of 266 tokens (region 23040, the least recently used of its rank) to store this request's reply-end entry
+serve_api: mtp 175 tok in 4.16s = 42.09 t/s | 73 rounds, commit 2.03/round | prompt 72, prefill 0.25s (72 new) | detok 20us/tok | 26 tok with the head off | pool 33280/65536 51% | think on, closed at 1 by answer room
+INFO:     10.88.0.1:49670 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+halogen: stop requested; shutting down
+INFO:     Shutting down
+flash_serve: prompt cache 2 hits / 9 misses, 30 stores, 704 prompt tokens reused (0 hits copied their rows across regions, 0.00 s)
+flash_serve: shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [128]
+halogen: GTT in use after the engine exited: 0.0 GiB (0s after)

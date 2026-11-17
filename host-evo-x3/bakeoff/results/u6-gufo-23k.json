@@ -1,0 +1,641 @@
+{
+ "arm": "u6-gufo",
+ "model": "flash-next",
+ "effort": "low",
+ "started": "2026-11-15 09:22:25 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 14.732077360153198,
+   "total_s": 16.510273694992065,
+   "prompt_tokens": 23390,
+   "completion_tokens": 115,
+   "client_decode_tps": 64.67227366680002,
+   "timings": {
+    "prompt_n": 23390,
+    "prompt_ms": 14712.960576000001,
+    "prompt_per_token_ms": 0.6290278142796067,
+    "prompt_per_second": 1589.7548205324572,
+    "predicted_n": 115,
+    "predicted_ms": 1772.39834,
+    "predicted_per_token_ms": 15.41215947826087,
+    "predicted_per_second": 64.88383418368582,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 28.580015,
+    "cache_disk_enqueue_ms": 0.00431,
+    "draft_rounds": 22,
+    "draft_n": 136,
+    "draft_n_accepted": 93,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 23390,
+     "captures": 6,
+     "captured_capacity_bytes": 1456930816,
+     "borrowed_capacity_bytes": 638976000,
+     "copied_payload_bytes": 806905496,
+     "captured_checkpoint_ids": [
+      2,
+      484,
+      1211,
+      1938,
+      2665,
+      2750
+     ],
+     "global_spill": {
+      "idle_bytes": 0,
+      "foreground_bytes": 0,
+      "idle_copy_ms": 0,
+      "foreground_copy_ms": 0,
+      "stream_wait_ms": 0,
+      "residual_wait_ms": 2.794874,
+      "reassignments": 1,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3361797222,
+     "global_ram_bytes": 3361797222,
+     "global_peak_ledger_bytes": 3361834680,
+     "global_peak_ram_bytes": 3361834680,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1618018304,
+       "reserved_bytes": 0,
+       "peak_bytes": 2272788480
+      },
+      "backing_assigned": {
+       "bytes": 638976000,
+       "reserved_bytes": 638976000,
+       "peak_bytes": 639172608
+      },
+      "backing_materialized": {
+       "bytes": 5963776,
+       "reserved_bytes": 0,
+       "peak_bytes": 5963776
+      },
+      "private_state": {
+       "bytes": 800980992,
+       "reserved_bytes": 0,
+       "peak_bytes": 800980992
+      },
+      "private_tail": {
+       "bytes": 11010048,
+       "reserved_bytes": 0,
+       "peak_bytes": 11010048
+      },
+      "metadata": {
+       "bytes": 286848102,
+       "reserved_bytes": 0,
+       "peak_bytes": 286885560
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 22,
+    "lookup_n_accepted": 17
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the EVO-X3 maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 295,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "code": {
+   "ttft_s": 0.3374514579772949,
+   "total_s": 3.4473021030426025,
+   "prompt_tokens": 141,
+   "completion_tokens": 203,
+   "client_decode_tps": 65.27644673936967,
+   "timings": {
+    "prompt_n": 141,
+    "prompt_ms": 283.063634,
+    "prompt_per_token_ms": 2.007543503546099,
+    "prompt_per_second": 498.1212104413243,
+    "predicted_n": 203,
+    "predicted_ms": 3105.9242120000004,
+    "predicted_per_token_ms": 15.300119270935962,
+    "predicted_per_second": 65.35896761926526,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 5.98666,
+    "cache_disk_enqueue_ms": 0.0019399999999999999,
+    "draft_rounds": 41,
+    "draft_n": 241,
+    "draft_n_accepted": 162,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 141,
+     "captures": 2,
+     "captured_capacity_bytes": 277348352,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 273436052,
+     "captured_checkpoint_ids": [
+      2752,
+      2753
+     ],
+     "global_spill": {
+      "idle_bytes": 28835840,
+      "foreground_bytes": 610140160,
+      "idle_copy_ms": 2.738881,
+      "foreground_copy_ms": 46.730194,
+      "stream_wait_ms": 0.440767,
+      "residual_wait_ms": 55.421096,
+      "reassignments": 2,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3361455022,
+     "global_ram_bytes": 3361455022,
+     "global_peak_ledger_bytes": 3361834680,
+     "global_peak_ram_bytes": 3361834680,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1340669952,
+       "reserved_bytes": 0,
+       "peak_bytes": 2272788480
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 639172608
+      },
+      "backing_materialized": {
+       "bytes": 644939776,
+       "reserved_bytes": 0,
+       "peak_bytes": 644939776
+      },
+      "private_state": {
+       "bytes": 1067974656,
+       "reserved_bytes": 0,
+       "peak_bytes": 1067974656
+      },
+      "private_tail": {
+       "bytes": 21364736,
+       "reserved_bytes": 0,
+       "peak_bytes": 21364736
+      },
+      "metadata": {
+       "bytes": 286505902,
+       "reserved_bytes": 0,
+       "peak_bytes": 286885560
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 43,
+    "lookup_n_accepted": 40
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 420,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.4884946346282959,
+     "total_s": 1.7372798919677734,
+     "prompt_tokens": 388,
+     "completion_tokens": 76,
+     "client_decode_tps": 60.85914255739783,
+     "timings": {
+      "prompt_n": 388,
+      "prompt_ms": 479.973404,
+      "prompt_per_token_ms": 1.237044855670103,
+      "prompt_per_second": 808.3781242178993,
+      "predicted_n": 76,
+      "predicted_ms": 1246.302621,
+      "predicted_per_token_ms": 16.398718697368423,
+      "predicted_per_second": 60.98037404352053,
+      "cache_n": 0,
+      "cache_restore_ms": 0,
+      "cache_snapshot_ms": 6.1429860000000005,
+      "cache_disk_enqueue_ms": 0.00143,
+      "draft_rounds": 15,
+      "draft_n": 83,
+      "draft_n_accepted": 61,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "none",
+       "selection_reason": 6,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 0,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 0,
+       "restored_bytes": 0,
+       "prefilled_tokens": 388,
+       "captures": 2,
+       "captured_capacity_bytes": 282525696,
+       "borrowed_capacity_bytes": 6815744,
+       "copied_payload_bytes": 272877888,
+       "captured_checkpoint_ids": [
+        2755,
+        2783
+       ],
+       "global_spill": {
+        "idle_bytes": 28835840,
+        "foreground_bytes": 610140160,
+        "idle_copy_ms": 2.738881,
+        "foreground_copy_ms": 46.730194,
+        "stream_wait_ms": 0.440767,
+        "residual_wait_ms": 57.31821,
+        "reassignments": 3,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 3361544694,
+       "global_ram_bytes": 3361544694,
+       "global_peak_ledger_bytes": 3361834680,
+       "global_peak_ram_bytes": 3361834680,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 1058144256,
+         "reserved_bytes": 0,
+         "peak_bytes": 2272788480
+        },
+        "backing_assigned": {
+         "bytes": 6815744,
+         "reserved_bytes": 6815744,
+         "peak_bytes": 639172608
+        },
+        "backing_materialized": {
+         "bytes": 645005312,
+         "reserved_bytes": 0,
+         "peak_bytes": 645005312
+        },
+        "private_state": {
+         "bytes": 1334968320,
+         "reserved_bytes": 0,
+         "peak_bytes": 1334968320
+        },
+        "private_tail": {
+         "bytes": 30015488,
+         "reserved_bytes": 0,
+         "peak_bytes": 30015488
+        },
+        "metadata": {
+         "bytes": 286595574,
+         "reserved_bytes": 0,
+         "peak_bytes": 286885560
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 209,
+     "tool_calls": [
+      {
+       "id": "call_vmwchn545vy5tze0ngbz",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.20128679275512695,
+     "total_s": 1.03829026222229,
+     "prompt_tokens": 452,
+     "completion_tokens": 49,
+     "client_decode_tps": 58.54217071667986,
+     "timings": {
+      "prompt_n": 72,
+      "prompt_ms": 195.780693,
+      "prompt_per_token_ms": 2.719176291666667,
+      "prompt_per_second": 367.75842855965374,
+      "predicted_n": 49,
+      "predicted_ms": 832.265192,
+      "predicted_per_token_ms": 16.985003918367347,
+      "predicted_per_second": 58.87546478094209,
+      "cache_n": 380,
+      "cache_restore_ms": 1.833992,
+      "cache_snapshot_ms": 7.145678,
+      "cache_disk_enqueue_ms": 0.0014399999999999999,
+      "draft_rounds": 9,
+      "draft_n": 52,
+      "draft_n_accepted": 40,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 380,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 380,
+       "restored_bytes": 143148688,
+       "prefilled_tokens": 72,
+       "captures": 2,
+       "captured_capacity_bytes": 279052288,
+       "borrowed_capacity_bytes": 0,
+       "copied_payload_bytes": 276285248,
+       "captured_checkpoint_ids": [
+        2784,
+        2785
+       ],
+       "global_spill": {
+        "idle_bytes": 35651584,
+        "foreground_bytes": 610140160,
+        "idle_copy_ms": 3.793588,
+        "foreground_copy_ms": 46.730194,
+        "stream_wait_ms": 0.447037,
+        "residual_wait_ms": 59.070109,
+        "reassignments": 4,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 3495309770,
+       "global_ram_bytes": 3495309770,
+       "global_peak_ledger_bytes": 3495329132,
+       "global_peak_ram_bytes": 3495329132,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 912785408,
+         "reserved_bytes": 0,
+         "peak_bytes": 2272788480
+        },
+        "backing_assigned": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 639172608
+        },
+        "backing_materialized": {
+         "bytes": 651821056,
+         "reserved_bytes": 0,
+         "peak_bytes": 651821056
+        },
+        "private_state": {
+         "bytes": 1601961984,
+         "reserved_bytes": 0,
+         "peak_bytes": 1601961984
+        },
+        "private_tail": {
+         "bytes": 42074112,
+         "reserved_bytes": 0,
+         "peak_bytes": 42074112
+        },
+        "metadata": {
+         "bytes": 286667210,
+         "reserved_bytes": 0,
+         "peak_bytes": 286885560
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 46,
+     "tool_calls": [
+      {
+       "id": "call_xktwzyul9dqw84vx6gb9",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.21696019172668457,
+     "total_s": 0.8063139915466309,
+     "prompt_tokens": 525,
+     "completion_tokens": 32,
+     "client_decode_tps": 54.29675690523474,
+     "timings": {
+      "prompt_n": 81,
+      "prompt_ms": 211.603682,
+      "prompt_per_token_ms": 2.612391135802469,
+      "prompt_per_second": 382.7910707149226,
+      "predicted_n": 32,
+      "predicted_ms": 585.6133809999999,
+      "predicted_per_token_ms": 18.300418156249997,
+      "predicted_per_second": 54.64356013408786,
+      "cache_n": 444,
+      "cache_restore_ms": 1.883493,
+      "cache_snapshot_ms": 6.095613,
+      "cache_disk_enqueue_ms": 0.00168,
+      "draft_rounds": 7,
+      "draft_n": 43,
+      "draft_n_accepted": 25,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 444,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 444,
+       "restored_bytes": 144852880,
+       "prefilled_tokens": 81,
+       "captures": 2,
+       "captured_capacity_bytes": 277413888,
+       "borrowed_capacity_bytes": 6815744,
+       "copied_payload_bytes": 266620308,
+       "captured_checkpoint_ids": [
+        2786,
+        2814
+       ],
+       "global_spill": {
+        "idle_bytes": 35651584,
+        "foreground_bytes": 610140160,
+        "idle_copy_ms": 3.793588,
+        "foreground_copy_ms": 46.730194,
+        "stream_wait_ms": 0.447037,
+        "residual_wait_ms": 60.663892,
+        "reassignments": 5,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 3762785730,
+       "global_ram_bytes": 3762785730,
+       "global_peak_ledger_bytes": 3762805972,
+       "global_peak_ram_bytes": 3762805972,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 902758400,
+         "reserved_bytes": 0,
+         "peak_bytes": 2272788480
+        },
+        "backing_assigned": {
+         "bytes": 6815744,
+         "reserved_bytes": 6815744,
+         "peak_bytes": 639172608
+        },
+        "backing_materialized": {
+         "bytes": 651886592,
+         "reserved_bytes": 0,
+         "peak_bytes": 651886592
+        },
+        "private_state": {
+         "bytes": 1868955648,
+         "reserved_bytes": 0,
+         "peak_bytes": 1868955648
+        },
+        "private_tail": {
+         "bytes": 45613056,
+         "reserved_bytes": 0,
+         "peak_bytes": 45613056
+        },
+        "metadata": {
+         "bytes": 286756290,
+         "reserved_bytes": 0,
+         "peak_bytes": 286885560
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (A1, A2, A3).",
+     "reasoning_chars": 19,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  },
+  "decode": {
+   "ttft_s": 0.19681024551391602,
+   "total_s": 17.33641791343689,
+   "prompt_tokens": 59,
+   "completion_tokens": 872,
+   "client_decode_tps": 50.87631040889931,
+   "timings": {
+    "prompt_n": 59,
+    "prompt_ms": 193.594369,
+    "prompt_per_token_ms": 3.2812604915254235,
+    "prompt_per_second": 304.76093031404235,
+    "predicted_n": 872,
+    "predicted_ms": 17133.908187,
+    "predicted_per_token_ms": 19.648977278669726,
+    "predicted_per_second": 50.89323407613518,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 6.170317000000001,
+    "cache_disk_enqueue_ms": 0.00188,
+    "draft_rounds": 324,
+    "draft_n": 868,
+    "draft_n_accepted": 548,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 59,
+     "captures": 2,
+     "captured_capacity_bytes": 270532608,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 269015804,
+     "captured_checkpoint_ids": [
+      2816,
+      2817
+     ],
+     "global_spill": {
+      "idle_bytes": 42467328,
+      "foreground_bytes": 610140160,
+      "idle_copy_ms": 4.507191,
+      "foreground_copy_ms": 46.730194,
+      "stream_wait_ms": 0.453447,
+      "residual_wait_ms": 62.39239,
+      "reassignments": 6,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 4030237878,
+     "global_ram_bytes": 4030237878,
+     "global_peak_ledger_bytes": 4030251196,
+     "global_peak_ram_bytes": 4030251196,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 899612672,
+       "reserved_bytes": 0,
+       "peak_bytes": 2272788480
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 639172608
+      },
+      "backing_materialized": {
+       "bytes": 658702336,
+       "reserved_bytes": 0,
+       "peak_bytes": 658702336
+      },
+      "private_state": {
+       "bytes": 2135949312,
+       "reserved_bytes": 0,
+       "peak_bytes": 2135949312
+      },
+      "private_tail": {
+       "bytes": 49152000,
+       "reserved_bytes": 0,
+       "peak_bytes": 49152000
+      },
+      "metadata": {
+       "bytes": 286821558,
+       "reserved_bytes": 0,
+       "peak_bytes": 286885560
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    }
+   },
+   "content": "# How a Heat Pump Works\n\nHere's the big idea: a heat pump doesn't create heat. It moves heat from one place to another, the same way a water pump moves water. That's actually where it gets its name.\n\nThink about a refrigerator. The back of your fridge gets warm, right? That's because the fridge is taking heat from inside the box and dumping it out into your kitchen. A heat pump does the same thing, but it's reversible. In winter, it pulls heat from the cold air outside and pushes it into your house. In summer, it can reverse and pull heat from inside your house and dump it outside, acting like an air conditioner.\n\nBut how does it move heat from a cold place to a warm place? That seems backwards, doesn't it? Heat naturally wants to flow from hot to cold. To push it the other direction, you need energy\u2014and that's where the clever engineering comes in.\n\nThe whole system revolves around a special fluid called a **refrigerant**. This fluid has a unique property: it can exist as both a liquid and a gas at relatively low pressures and temperatures. By manipulating its pressure, you can control whether it absorbs heat or releases heat.\n\nHere's the cycle, step by step:\n\n**1. Evaporation (absorbing heat).** The refrigerant starts as a cold, low-pressure liquid inside a coil called the evaporator. Because it's so cold, it absorbs heat from the surrounding air\u2014even air that feels cold to us. As it absorbs heat, the liquid boils and turns into a gas. This is the same reason you feel cold when you step out of a swimming pool: the water evaporating off your skin is pulling heat away from you.\n\n**2. Compression (raising the temperature).** The cold gas now flows into a compressor, which is essentially a pump. The compressor squeezes the gas, which does two things: it raises the pressure, and\u2014this is the key\u2014it raises the temperature. When you compress a gas, its molecules move faster, which means it gets hotter. Now the gas is both high-pressure and high-temperature.\n\n**3. Condensation (releasing heat).** This hot, high-pressure gas flows through another coil called the condenser, which is located where you want the heat to go\u2014inside your house in winter. Because the gas is now hotter than the indoor air, it releases its heat into your home. As it loses heat, it condenses back into a liquid.\n\n**4. Expansion (cooling down again).** The liquid still has high pressure. It passes through an expansion valve, which is basically a tiny opening that suddenly drops the pressure. When pressure drops, the temperature drops too. Now the refrigerant is cold and low-pressure again, ready to start the cycle over.\n\nSo the refrigerant is acting like a heat sponge. It soaks up heat in one location (evaporator), carries it through the compressor, and then squeezes it out in another location (condenser).\n\nWhy is this efficient? Because you're not converting electricity directly into heat like an electric heater does. You're using electricity only to run the compressor, which moves existing heat. A typical heat pump can deliver three to four units of heat for every one unit of electricity it consumes. That's why they're so much cheaper to run than electric resistance heaters.\n\nThe main limitation is that as outdoor temperatures drop extremely low, there's less heat available to extract, and the system becomes less efficient. But modern heat pumps work well down to around -15\u00b0C (5\u00b0F) or even lower.",
+   "reasoning_chars": 595,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

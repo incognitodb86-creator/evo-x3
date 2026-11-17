@@ -1,0 +1,27 @@
+pending upload
+# U27 — X3 get-on-track, Phases 1–5 (Derrick t1784s6566, 5:43 PM CT Nov 15 2026)
+Max Architect. Plan: /workspace/maxops/x3-on-track-plan-20261115.md. All times CT. Backups: `*.bak-20261115-phase{1,2,4,5}` beside each file.
+
+## Phase 1 — subagents + slots: PARTIAL
+- DONE: `subagents.defaultModel` per project: Forge `x3-local/flash-next`, Render `x3-local/gemma4-heretic`; global stays heretic (Sydney, no project settings). pi-subagents 0.83.1 already honors project scope (agents.js `resolveSubagentDefaultModel`); no update. Test 17:56: Forge spawned 2 parallel workers, both ran `x3-local/flash-next`, flash-next container uptime unchanged, no swap in llama-swap journal.
+- HELD: flash-next `concurrencyLimit` 1→4, Heretic `-np 4 -c 1048576` + `concurrencyLimit` 4, Render-subagent test, Heretic memory. Needs a llama-swap restart; U6 (PID 70030) is waiting for a quiet window.
+
+## Phase 2 — Forge on Linux: DONE
+- `~/AI/community/agent-shared/AGENTS.md` (= `~/AI/forge/AGENTS.md`) rewritten for X3; ralph-loop SKILL.md starts `ralph.sh`; `~/AI/forge/ralph-community/{ralph.sh,PROMPT.md}`; `~/.pi/agent/pi-permissions.jsonc` Windows/MCP allow lines dropped (79), all non-Windows denies kept. Global `~/.pi/agent/AGENTS.md` (Max Architect 3 guardrail) untouched, no conflict. Commit community 82aabc4.
+- Tests: harness logic (plan complete, NO_PROGRESS, timeout kills tree, second-copy exit 4); real 4-item loop on flash-next 17:48–17:50 PLAN_COMPLETE, checks pass; grep finds no `C:\`/PowerShell/ralph.ps1 in X3 Forge files.
+- Found: pi project settings load only with `--approve` (project trust); ralph.sh now passes it (forge-pi.sh already did).
+
+## Phase 3 — swap guard: HELD / needs Derrick
+- pi-model-swap 0.1.2 only gates swaps made through its own `/swap` tool (claim files); it does not stop a normal Render/Open WebUI request from evicting Forge between turns. llama-swap already drains in-flight requests before a swap (processgroup.go `inflight.Wait()`), so nothing is killed mid-request; the cost is reload time. Not installed. Timed alternation test held (restart/load window, U6).
+
+## Phase 4 — cleanups: PARTIAL
+- DONE: sshd `00-x3-hardening.conf` PermitRootLogin no + PasswordAuthentication no (loopback test sshd accepted key first; old `01-permitrootlogin.conf` in `/etc/ssh/_archive/`); box access is Tailscale SSH, re-verified; password + root refused on :22. Open WebUI pinned `@sha256:59b912d4…` (same build, health 200). tuned 2.28 `accelerator-performance` active + verified (Halogen decode 63.3 → 63.2 t/s, no change). Empty-key guard installed (`evo-llama-swap` exits 78; `RestartPreventExitStatus=78` drop-in; copy test: empty/missing → 78, key → exec) — takes effect at next restart; verify-serve 401/200. README-X3 + models.json labels; render AGENTS/h3 skills X3 lines (render 0e87c95); `.ps1` + `dummy_run/` → `~/AI/community/_archive/alienpc-only/`; U24 [LB2] cite.
+- HELD: Halogen weights move to `/srv/models/flash-next-halogen` (slot reload; U6). Pack edits (max-briefing X3 block, MA2 label) drafted for Alfred: /workspace/maxops/x3-phase2/pack-drafts-for-alfred.md.
+
+## Phase 5 — memory + rollback: DONE
+- pi-memory 0.4.2: write in session 1, recall in session 2 (codeword returned), temp PI_MEMORY_DIR. qmd not installed (no memory_search).
+- pi-workspace-history 0.5.2 (pi.dev 2.9K/mo, covers shell edits, history outside repo, no git needed; picked over pi-rewind 817/mo git-only) in Forge project, `enabled: true`. Drill: write CHANGED → `/undo` → file back to `original`.
+
+## Flags
+- pi 1.5.2 available; Node 24.18.0 lacks Oct 2026 TLS fixes (Plannotator warning) — needs Derrick's yes to update.
+- Model-written timestamps in ralph progress lines were wrong (harness log times are right).

@@ -1,0 +1,300 @@
+STRATA_FN_SHA_START Sun Nov 15 11:14:50 CST 2026
+Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf: OK
+Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf: OK
+Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf: OK
+Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf: OK
+STRATA_FN_SHA_OK Sun Nov 15 11:15:49 CST 2026
+STRATA_FN_SETUP_START Sun Nov 15 11:15:49 CST 2026
+PolyStrata - Qwen3.8-Flash-Next, GLM 5.3 Flash and smaller MoE models on a normal PC (a GPU + system RAM + CPU)
+
+=== Step 1: checking your PC ===
+  Your AMD GPUs:
+    GPU 0: AMD Radeon 8060S (Ryzen AI Max, Strix Halo, gfx1151), unified memory: 1.0 GB BIOS carve-out + 118 GB shared with the RAM, 119 GB usable by the GPU - can be used
+  [ok] GPU: AMD Radeon 8060S (Ryzen AI Max, Strix Halo, gfx1151), unified memory: 1.0 GB BIOS carve-out + 118 GB shared with the RAM, 119 GB usable by the GPU, gfx1151 (AMD: docs/STRIX_HALO.md)
+  Strix Halo (gfx1151, Ryzen AI Max): the CPU and the GPU share one memory pool (124 GB seen by the OS + a 1.0 GB BIOS carve-out), so the model's experts live in that pool and the expert cache is sized from the memory the OS can give back, not from the carve-out.
+  The engine is compiled here for gfx1151 (experimental, measured on one machine): see docs/STRIX_HALO.md.
+  Recommended model: UD-IQ4_XS (the one docs/STRIX_HALO.md measures); the menus list the others.
+  [ok] RAM: 124 GB
+  [ok] CPU: AMD RYZEN AI MAX+ 395 w/ Radeon 8060S (AVX-512)
+
+=== Step 2: your choices ===
+  [ok] model: Qwen3.8-Flash-Next (Unsloth)
+
+  1) UD-IQ4_XS (recommended) ~4-bit i-quant (Unsloth Dynamic), between IQ3_S and UD-Q4_K_XL in quality; on a PC with less than ~80 GB of RAM part of its experts are read from the SSD; download 94 GB, keeps ~55 GB of its 60 GB of experts in RAM
+  2) UD-Q4_K_XL (recommended) 4-bit (Unsloth Dynamic): K-quant experts, between UD-IQ4_XS and UD-Q5_K_XL in quality; download 111 GB, keeps ~71 GB of its 77 GB of experts in RAM
+  3) UD-Q5_K_XL 5-bit (Unsloth Dynamic): Q5_K experts with Q8_0 downs, close to Q8_0 in quality; download 158 GB, keeps ~91 GB of its 98 GB of experts in RAM
+  4) UD-Q6_K_XL 6-bit (Unsloth Dynamic): Q6_K experts with Q8_0 downs; download 169 GB, keeps ~100 GB of its 109 GB of experts in RAM
+  5) Q8_0 8-bit, the reference quality (every expert Q8_0); for a 192 GB PC; download 188 GB, keeps ~100 GB of its 128 GB of experts in RAM   <- needs 136 GB RAM, you have 124
+  [ok] RAM budget: 71 GiB of UD-Q4_K_XL's experts in RAM, the rest read from the model files on the SSD
+  [ok] size: UD-Q4_K_XL
+  [ok] context: 32768 tokens
+  [ok] KV cache: 8-bit
+  [ok] images: off
+
+=== Step 3: Python packages ===
+  [ok] numpy, jinja2, regex, pyyaml, tqdm, requests, cmake, ninja, pillow, psutil already installed
+
+=== Step 4: the PolyStrata engine ===
+  [ok] llama.cpp 3cf0325 (gguf-py, ggml, mtmd)
+  [ok] engine already built for this PC
+  [ok] engine: /srv/bakeoff/src/PolyStrata/engine/strata
+
+=== Step 5: downloading Qwen3.8-Flash-Next (Unsloth) UD-Q4_K_XL ===
+  checking Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf (SHA-256, 0.0 GB) ...
+  checking Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf (SHA-256, 49.9 GB) ...
+  checking Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf (SHA-256, 49.4 GB) ...
+  checking Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf (SHA-256, 12.1 GB) ...
+  [ok] model files present
+
+=== Step 6: preparing the model for PolyStrata ===
+  > /srv/bakeoff/src/PolyStrata/.venv/bin/python /srv/bakeoff/src/PolyStrata/tools/iq_pack.py --gguf /srv/bakeoff/fn-q4kxl-strata/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf --out /srv/bakeoff/src/PolyStrata-data/packs/unsloth-ud-q4_k_xl --compat-bf16
+tokenizer/: vocab 248320, merges 247587, pre qwen35, specials {'tokenizer.ggml.eos_token_id': 248046, 'tokenizer.ggml.padding_token_id': 248044, 'tokenizer.ggml.bos_token_id': 248044}
+model shards: Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf, Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf, Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf, Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf
+1 layer(s) have their gate/up/down in different shards: native_experts.txt v4, per-role shard column for 11
+index.txt: 1079 tensors, 303 served natively, 0 in extra.bin, arena 1.38 GiB
+conversions.json: 460 tensors converted to the engine's form (264 exact, 196 rounded; max |err| 0.0144)
+narrowed to F16 by the loader: blk.1.ple_conv1d.weight (f32->f16 by the loader (index kind 3, round-to-nearest-even), index kind 3)
+compat-bf16: 195 tensors, 1.20 GiB; expert and PLE table bytes unchanged
+  [ok] model prepared: /srv/bakeoff/src/PolyStrata-data/packs/unsloth-ud-q4_k_xl
+  The MTP draft layer (speculative decoding, ~2x faster output) comes from the original Qwen checkpoint:
+  only its ~5 GB of MTP tensors are downloaded.
+  > /srv/bakeoff/src/PolyStrata/.venv/bin/python /srv/bakeoff/src/PolyStrata/tools/mtp_fetch.py fetch --out /srv/bakeoff/src/PolyStrata-data/mtp
+retry https://huggingface.co/Qwen/Qwen3.8-Flash-Next/resolve/de4b8e4d43b917e7706784d8bb445c9af86a3540/model-00049-of-00131.safetensors: <urlopen error _ssl.c:1067: The handshake operation timed out>
+mtp.fc_embedding.weight 100%
+mtp.fc_hidden.weight 100%
+mtp.hyper_connection_mixer.hc_norm.weight 100%
+mtp.hyper_connection_mixer.input_mix_weight_down.weight 100%
+mtp.hyper_connection_mixer.input_mix_weight_up.weight 100%
+mtp.layers.0.attn_hyper_connection.block_inject_weight.weight 100%
+mtp.layers.0.attn_hyper_connection.hc_norm.weight 100%
+mtp.layers.0.attn_hyper_connection.input_mix_weight_down.weight 100%
+mtp.layers.0.attn_hyper_connection.input_mix_weight_up.weight 100%
+mtp.layers.0.mlp.experts.down_proj 4%
+mtp.layers.0.mlp.experts.down_proj 8%
+mtp.layers.0.mlp.experts.down_proj 12%
+mtp.layers.0.mlp.experts.down_proj 16%
+mtp.layers.0.mlp.experts.down_proj 20%
+mtp.layers.0.mlp.experts.down_proj 24%
+mtp.layers.0.mlp.experts.down_proj 28%
+mtp.layers.0.mlp.experts.down_proj 32%
+mtp.layers.0.mlp.experts.down_proj 36%
+mtp.layers.0.mlp.experts.down_proj 40%
+mtp.layers.0.mlp.experts.down_proj 44%
+mtp.layers.0.mlp.experts.down_proj 48%
+mtp.layers.0.mlp.experts.down_proj 52%
+mtp.layers.0.mlp.experts.down_proj 56%
+mtp.layers.0.mlp.experts.down_proj 60%
+mtp.layers.0.mlp.experts.down_proj 64%
+mtp.layers.0.mlp.experts.down_proj 68%
+mtp.layers.0.mlp.experts.down_proj 72%
+mtp.layers.0.mlp.experts.down_proj 76%
+mtp.layers.0.mlp.experts.down_proj 80%
+mtp.layers.0.mlp.experts.down_proj 84%
+mtp.layers.0.mlp.experts.down_proj 88%
+mtp.layers.0.mlp.experts.down_proj 92%
+mtp.layers.0.mlp.experts.down_proj 96%
+mtp.layers.0.mlp.experts.down_proj 100%
+mtp.layers.0.mlp.experts.gate_up_proj 2%
+mtp.layers.0.mlp.experts.gate_up_proj 4%
+mtp.layers.0.mlp.experts.gate_up_proj 6%
+mtp.layers.0.mlp.experts.gate_up_proj 8%
+mtp.layers.0.mlp.experts.gate_up_proj 10%
+mtp.layers.0.mlp.experts.gate_up_proj 12%
+mtp.layers.0.mlp.experts.gate_up_proj 14%
+mtp.layers.0.mlp.experts.gate_up_proj 16%
+mtp.layers.0.mlp.experts.gate_up_proj 18%
+mtp.layers.0.mlp.experts.gate_up_proj 20%
+mtp.layers.0.mlp.experts.gate_up_proj 22%
+mtp.layers.0.mlp.experts.gate_up_proj 24%
+mtp.layers.0.mlp.experts.gate_up_proj 26%
+mtp.layers.0.mlp.experts.gate_up_proj 28%
+mtp.layers.0.mlp.experts.gate_up_proj 30%
+mtp.layers.0.mlp.experts.gate_up_proj 32%
+mtp.layers.0.mlp.experts.gate_up_proj 34%
+mtp.layers.0.mlp.experts.gate_up_proj 36%
+mtp.layers.0.mlp.experts.gate_up_proj 38%
+mtp.layers.0.mlp.experts.gate_up_proj 40%
+mtp.layers.0.mlp.experts.gate_up_proj 42%
+mtp.layers.0.mlp.experts.gate_up_proj 44%
+mtp.layers.0.mlp.experts.gate_up_proj 46%
+mtp.layers.0.mlp.experts.gate_up_proj 48%
+mtp.layers.0.mlp.experts.gate_up_proj 50%
+mtp.layers.0.mlp.experts.gate_up_proj 52%
+mtp.layers.0.mlp.experts.gate_up_proj 54%
+mtp.layers.0.mlp.experts.gate_up_proj 56%
+mtp.layers.0.mlp.experts.gate_up_proj 58%
+mtp.layers.0.mlp.experts.gate_up_proj 60%
+mtp.layers.0.mlp.experts.gate_up_proj 62%
+mtp.layers.0.mlp.experts.gate_up_proj 64%
+mtp.layers.0.mlp.experts.gate_up_proj 66%
+mtp.layers.0.mlp.experts.gate_up_proj 68%
+mtp.layers.0.mlp.experts.gate_up_proj 70%
+mtp.layers.0.mlp.experts.gate_up_proj 72%
+mtp.layers.0.mlp.experts.gate_up_proj 74%
+mtp.layers.0.mlp.experts.gate_up_proj 76%
+mtp.layers.0.mlp.experts.gate_up_proj 78%
+mtp.layers.0.mlp.experts.gate_up_proj 80%
+mtp.layers.0.mlp.experts.gate_up_proj 82%
+mtp.layers.0.mlp.experts.gate_up_proj 84%
+mtp.layers.0.mlp.experts.gate_up_proj 86%
+mtp.layers.0.mlp.experts.gate_up_proj 88%
+mtp.layers.0.mlp.experts.gate_up_proj 90%
+mtp.layers.0.mlp.experts.gate_up_proj 92%
+mtp.layers.0.mlp.experts.gate_up_proj 94%
+mtp.layers.0.mlp.experts.gate_up_proj 96%
+mtp.layers.0.mlp.experts.gate_up_proj 98%
+mtp.layers.0.mlp.experts.gate_up_proj 100%
+mtp.layers.0.mlp.gate.weight 100%
+mtp.layers.0.mlp.shared_expert.down_proj.weight 100%
+mtp.layers.0.mlp.shared_expert.gate_proj.weight 100%
+mtp.layers.0.mlp.shared_expert.up_proj.weight 100%
+mtp.layers.0.mlp.shared_expert_gate.weight 100%
+mtp.layers.0.mlp_hyper_connection.block_inject_weight.weight 100%
+mtp.layers.0.mlp_hyper_connection.hc_norm.weight 100%
+mtp.layers.0.mlp_hyper_connection.input_mix_weight_down.weight 100%
+mtp.layers.0.mlp_hyper_connection.input_mix_weight_up.weight 100%
+mtp.layers.0.self_attn.indexer.index_qk_proj.weight 100%
+mtp.layers.0.self_attn.indexer.k_layernorm.weight 100%
+mtp.layers.0.self_attn.indexer.q_layernorm.weight 100%
+mtp.layers.0.self_attn.k_norm.weight 100%
+mtp.layers.0.self_attn.k_proj.weight 100%
+mtp.layers.0.self_attn.o_proj.weight 100%
+mtp.layers.0.self_attn.q_norm.weight 100%
+mtp.layers.0.self_attn.q_proj.weight 100%
+mtp.layers.0.self_attn.v_proj.weight 100%
+mtp.pre_fc_norm_embedding.weight 100%
+mtp.pre_fc_norm_hidden.weight 100%
+# MTP block in the BF16 checkpoint
+
+31 tensors, 5.214 GB, in 28 shards.
+
+| tensor | dtype | shape | MB |
+|---|---|---|---:|
+| `mtp.fc_embedding.weight` | BF16 | 2560x2560 | 13.1 |
+| `mtp.fc_hidden.weight` | BF16 | 2560x2560 | 13.1 |
+| `mtp.hyper_connection_mixer.hc_norm.weight` | BF16 | 10240 | 0.0 |
+| `mtp.hyper_connection_mixer.input_mix_weight_down.weight` | BF16 | 320x10240 | 6.6 |
+| `mtp.hyper_connection_mixer.input_mix_weight_up.weight` | BF16 | 10240x320 | 6.6 |
+| `mtp.layers.0.attn_hyper_connection.block_inject_weight.weight` | BF16 | 4x10240 | 0.1 |
+| `mtp.layers.0.attn_hyper_connection.hc_norm.weight` | BF16 | 10240 | 0.0 |
+| `mtp.layers.0.attn_hyper_connection.input_mix_weight_down.weight` | BF16 | 320x10240 | 6.6 |
+| `mtp.layers.0.attn_hyper_connection.input_mix_weight_up.weight` | BF16 | 10240x320 | 6.6 |
+| `mtp.layers.0.mlp.experts.down_proj` | BF16 | 512x2560x640 | 1677.7 |
+| `mtp.layers.0.mlp.experts.gate_up_proj` | BF16 | 512x1280x2560 | 3355.4 |
+| `mtp.layers.0.mlp.gate.weight` | BF16 | 512x2560 | 2.6 |
+| `mtp.layers.0.mlp.shared_expert.down_proj.weight` | BF16 | 2560x640 | 3.3 |
+| `mtp.layers.0.mlp.shared_expert.gate_proj.weight` | BF16 | 640x2560 | 3.3 |
+| `mtp.layers.0.mlp.shared_expert.up_proj.weight` | BF16 | 640x2560 | 3.3 |
+| `mtp.layers.0.mlp.shared_expert_gate.weight` | BF16 | 1x2560 | 0.0 |
+| `mtp.layers.0.mlp_hyper_connection.block_inject_weight.weight` | BF16 | 4x10240 | 0.1 |
+| `mtp.layers.0.mlp_hyper_connection.hc_norm.weight` | BF16 | 10240 | 0.0 |
+| `mtp.layers.0.mlp_hyper_connection.input_mix_weight_down.weight` | BF16 | 320x10240 | 6.6 |
+| `mtp.layers.0.mlp_hyper_connection.input_mix_weight_up.weight` | BF16 | 10240x320 | 6.6 |
+| `mtp.layers.0.self_attn.indexer.index_qk_proj.weight` | BF16 | 640x2560 | 3.3 |
+| `mtp.layers.0.self_attn.indexer.k_layernorm.weight` | BF16 | 128 | 0.0 |
+| `mtp.layers.0.self_attn.indexer.q_layernorm.weight` | BF16 | 128 | 0.0 |
+| `mtp.layers.0.self_attn.k_norm.weight` | BF16 | 256 | 0.0 |
+| `mtp.layers.0.self_attn.k_proj.weight` | BF16 | 512x2560 | 2.6 |
+| `mtp.layers.0.self_attn.o_proj.weight` | BF16 | 2560x6144 | 31.5 |
+| `mtp.layers.0.self_attn.q_norm.weight` | BF16 | 256 | 0.0 |
+| `mtp.layers.0.self_attn.q_proj.weight` | BF16 | 12288x2560 | 62.9 |
+| `mtp.layers.0.self_attn.v_proj.weight` | BF16 | 512x2560 | 2.6 |
+| `mtp.pre_fc_norm_embedding.weight` | BF16 | 2560 | 0.0 |
+| `mtp.pre_fc_norm_hidden.weight` | BF16 | 10240 | 0.0 |
+
+  > /srv/bakeoff/src/PolyStrata/.venv/bin/python /srv/bakeoff/src/PolyStrata/tools/mtp_pack.py --src /srv/bakeoff/src/PolyStrata-data/mtp --experts q2_0 --out /srv/bakeoff/src/PolyStrata-data/mtp/mtp-q2_0.gguf
+mtp.fc_embedding.weight: BF16 13.1 MB
+mtp.fc_hidden.weight: BF16 13.1 MB
+mtp.hyper_connection_mixer.hc_norm.weight: F32 0.0 MB
+mtp.hyper_connection_mixer.input_mix_weight_down.weight: BF16 6.6 MB
+mtp.hyper_connection_mixer.input_mix_weight_up.weight: BF16 6.6 MB
+mtp.layers.0.attn_hyper_connection.block_inject_weight.weight: BF16 0.1 MB
+mtp.layers.0.attn_hyper_connection.hc_norm.weight: F32 0.0 MB
+mtp.layers.0.attn_hyper_connection.input_mix_weight_down.weight: BF16 6.6 MB
+mtp.layers.0.attn_hyper_connection.input_mix_weight_up.weight: BF16 6.6 MB
+mtp.layers.0.mlp.experts.down_proj: q2_0 235.9 MB
+mtp.layers.0.mlp.experts.gate_up_proj: q2_0 471.9 MB
+mtp.layers.0.mlp.gate.weight: BF16 2.6 MB
+mtp.layers.0.mlp.shared_expert.down_proj.weight: BF16 3.3 MB
+mtp.layers.0.mlp.shared_expert.gate_proj.weight: BF16 3.3 MB
+mtp.layers.0.mlp.shared_expert.up_proj.weight: BF16 3.3 MB
+mtp.layers.0.mlp.shared_expert_gate.weight: BF16 0.0 MB
+mtp.layers.0.mlp_hyper_connection.block_inject_weight.weight: BF16 0.1 MB
+mtp.layers.0.mlp_hyper_connection.hc_norm.weight: F32 0.0 MB
+mtp.layers.0.mlp_hyper_connection.input_mix_weight_down.weight: BF16 6.6 MB
+mtp.layers.0.mlp_hyper_connection.input_mix_weight_up.weight: BF16 6.6 MB
+mtp.layers.0.self_attn.indexer.index_qk_proj.weight: BF16 3.3 MB
+mtp.layers.0.self_attn.indexer.k_layernorm.weight: F32 0.0 MB
+mtp.layers.0.self_attn.indexer.q_layernorm.weight: F32 0.0 MB
+mtp.layers.0.self_attn.k_norm.weight: F32 0.0 MB
+mtp.layers.0.self_attn.k_proj.weight: BF16 2.6 MB
+mtp.layers.0.self_attn.o_proj.weight: BF16 31.5 MB
+mtp.layers.0.self_attn.q_norm.weight: F32 0.0 MB
+mtp.layers.0.self_attn.q_proj.weight: BF16 62.9 MB
+mtp.layers.0.self_attn.v_proj.weight: BF16 2.6 MB
+mtp.pre_fc_norm_embedding.weight: F32 0.0 MB
+mtp.pre_fc_norm_hidden.weight: F32 0.0 MB
+wrote /srv/bakeoff/src/PolyStrata-data/mtp/mtp-q2_0.gguf: 0.889 GB of tensor data
+  > /srv/bakeoff/src/PolyStrata/.venv/bin/python /srv/bakeoff/src/PolyStrata/tools/mtp_rt.py --gguf /srv/bakeoff/src/PolyStrata-data/mtp/mtp-q2_0.gguf --out /srv/bakeoff/src/PolyStrata-data/mtp/rt
+experts.bin 707788800 B, dense.bin 116099072 B, 29 tensors -> /srv/bakeoff/src/PolyStrata-data/mtp/rt
+  fc_embedding.weight q8_0 2560 2560 0 6963200
+  fc_hidden.weight q8_0 2560 2560 6963200 6963200
+  hyper_connection_mixer.hc_norm.weight f32 1 10240 13926400 40960
+  hyper_connection_mixer.input_mix_weight_down.weight bf16 320 10240 13967360 6553600
+  hyper_connection_mixer.input_mix_weight_up.weight bf16 10240 320 20520960 6553600
+  attn_hyper_connection.block_inject_weight.weight bf16 4 10240 27074560 81920
+  attn_hyper_connection.hc_norm.weight f32 1 10240 27156480 40960
+  attn_hyper_connection.input_mix_weight_down.weight bf16 320 10240 27197440 6553600
+  attn_hyper_connection.input_mix_weight_up.weight bf16 10240 320 33751040 6553600
+  mlp.gate.weight bf16 512 2560 40304640 2621440
+  mlp.shared_expert.down_proj.weight q8_0 2560 640 42926080 1740800
+  mlp.shared_expert.gate_proj.weight q8_0 640 2560 44666880 1740800
+  mlp.shared_expert.up_proj.weight q8_0 640 2560 46407680 1740800
+  mlp.shared_expert_gate.weight bf16 1 2560 48148480 5120
+  mlp_hyper_connection.block_inject_weight.weight bf16 4 10240 48153600 81920
+  mlp_hyper_connection.hc_norm.weight f32 1 10240 48235520 40960
+  mlp_hyper_connection.input_mix_weight_down.weight bf16 320 10240 48276480 6553600
+  mlp_hyper_connection.input_mix_weight_up.weight bf16 10240 320 54830080 6553600
+  self_attn.indexer.index_qk_proj.weight q8_0 640 2560 61383680 1740800
+  self_attn.indexer.k_layernorm.weight f32 1 128 63124480 512
+  self_attn.indexer.q_layernorm.weight f32 1 128 63124992 512
+  self_attn.k_norm.weight f32 1 256 63125504 1024
+  self_attn.k_proj.weight q8_0 512 2560 63126528 1392640
+  self_attn.o_proj.weight q8_0 2560 6144 64519168 16711680
+  self_attn.q_norm.weight f32 1 256 81230848 1024
+  self_attn.q_proj.weight q8_0 12288 2560 81231872 33423360
+  self_attn.v_proj.weight q8_0 512 2560 114655232 1392640
+  pre_fc_norm_embedding.weight f32 1 2560 116047872 10240
+  pre_fc_norm_hidden.weight f32 1 10240 116058112 40960
+  [ok] MTP draft layer: /srv/bakeoff/src/PolyStrata-data/mtp/rt
+
+=== Step 7: writing the start script ===
+  [ok] expert cache: 9169 slots (not auto): this GPU shares the RAM with the 71 GiB budget, so setup leaves 24 GB of the RAM for the OS and the desktop (#1715). --expert-cache N in the config's args sets it
+  [ok] hipBLASLt tuning table: gfx1151-hipblaslt-100401.txt (faster prompts)
+  tip: with 124 GB of RAM, --prefill auto:32768 in the config's args read prompts 21-35% faster in community benchmarks (#433 #440 #834); not set, nothing changes
+  tip: for several agents or clients at once, --conversation-cache-mib 8192 in the config's args keeps each one's conversation; without it they were measured re-reading ~90% of their prompts (#882 #440; docs/DETAILS.md, Multiple conversations)
+  [ok] start script: run-unsloth-ud-q4_k_xl.sh
+
+All set.
+  API (OpenAI):     http://127.0.0.1:8090/v1   (any API key; model name: anything)
+  API (Anthropic):  http://127.0.0.1:8090/v1/messages
+  Next time:        just run ./setup.sh (or run-unsloth-ud-q4_k_xl.sh) - it starts right away
+  Several requests at once (opt-in): --parallel 4 decodes up to 4 together instead of one after the other (each takes ~0.6 GB of VRAM from the expert cache; docs/BATCHING.md).
+SETUP_EXIT 0
+STRATA_FN_SETUP_END Sun Nov 15 11:32:34 CST 2026 exit 0
+-rwxr-xr-x. 1 derekboone derekboone  256 Nov 15 10:58 /srv/bakeoff/src/PolyStrata/run-gemma4-ud-q4_k_m.sh
+-rwxr-xr-x. 1 derekboone derekboone  258 Nov 15 11:32 /srv/bakeoff/src/PolyStrata/run-unsloth-ud-q4_k_xl.sh
+-rw-r--r--. 1 derekboone derekboone 1193 Nov 15 11:08 /srv/bakeoff/src/PolyStrata/strata-gemma4-heretic-q4km-vision.json
+-rw-r--r--. 1 derekboone derekboone  826 Nov 15 10:07 /srv/bakeoff/src/PolyStrata/strata-gemma4-heretic-q4km.json
+-rw-r--r--. 1 derekboone derekboone  821 Nov 15 10:05 /srv/bakeoff/src/PolyStrata/strata-gemma4-ud-q4_k_m.json
+-rw-r--r--. 1 derekboone derekboone 1015 Nov 15 11:32 /srv/bakeoff/src/PolyStrata/strata-unsloth-ud-q4_k_xl.json
+CFG=/srv/bakeoff/src/PolyStrata/strata-unsloth-ud-q4_k_xl.json
+MODEL=qwen3.8-flash-next-unsloth-ud-q4_k_xl
+=== u6-strata-fn-q4kxl start 2026-11-15 11:32:36 CST
+LOAD_S 40 up=1
+long {"ttft_s": 39.98, "total_s": 42.24, "prompt_tokens": 18253, "completion_tokens": 104, "client_decode_tps": 46.0, "finish": "stop", "pass": true}
+code {"ttft_s": 2.37, "total_s": 7.27, "prompt_tokens": 141, "completion_tokens": 188, "client_decode_tps": 38.43, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.93, "total_s": 23.35, "prompt_tokens": 59, "completion_tokens": 781, "client_decode_tps": 34.83, "finish": "stop", "pass": true}
+=== u6-strata-fn-q4kxl end 2026-11-15 11:34:40 CST
+STRATA_FN_ARM_DONE Sun Nov 15 11:34:45 CST 2026

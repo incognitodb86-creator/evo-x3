@@ -1,0 +1,12 @@
+=== u6-uncens-fn-halogen start 2026-11-15 13:40:56 CST
+CMD: sudo podman run --rm --name bake-arm -p 127.0.0.1:8790:8731 --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1 -e HALOGEN_REASONING_EFFORT=low -e HALOGEN_CTX=32768 -e HALOGEN_MAX_TOK=16384 -e HALOGEN_CHECKPOINT=/gguf/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf -e HALOGEN_MTP_HEAD=/models/qwen38-flash-next-mtp.hgn -e HALOGEN_TOKENIZER=/models/tokenizer -v /srv/bakeoff/fn-uncens-iq4xs:/gguf:ro -v /srv/bakeoff/halogen-models:/models:ro ghcr.io/peonist-ai/halogen-flash-server@sha256:70445bcf7acff8f1fe11396a97b866ed30dca31caf5fac62049127658080e07f
+LOAD_S 18 up=1
+long {"ttft_s": 9.86, "total_s": 11.63, "prompt_tokens": 18253, "completion_tokens": 109, "client_decode_tps": 61.44, "finish": "stop", "pass": true}
+code {"ttft_s": 0.32, "total_s": 2.45, "prompt_tokens": 141, "completion_tokens": 149, "client_decode_tps": 69.9, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.62, "total_s": 5.28, "prompt_tokens": 59, "completion_tokens": 208, "client_decode_tps": 44.58, "finish": "stop", "pass": true}
+write1 {"ttft_s": 0.26, "total_s": 9.82, "prompt_tokens": 69, "completion_tokens": 413, "client_decode_tps": 43.21, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.63, "total_s": 6.95, "prompt_tokens": 63, "completion_tokens": 317, "client_decode_tps": 50.13, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124          88           5           0          31          35
+=== u6-uncens-fn-halogen end 2026-11-15 13:41:54 CST

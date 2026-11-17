@@ -1,0 +1,206 @@
+{
+  "slot": "flash-next-gufo",
+  "started_ct": "2026-11-15 20:50:34 CST",
+  "rc": 0,
+  "pre_snapshot": {
+    "at_ct": "2026-11-15 20:49:54 CST",
+    "gtt_used_bytes": 17268736,
+    "free_bytes": "total        used        free      shared  buff/cache   available\nMem:     133607890944  3775229952 33783181312    16502784 97338695680 129832660992\nSwap:     8589930496   138297344  8451633152",
+    "sensors": "r8169_0_6100:00-mdio-0\nAdapter: MDIO adapter\ntemp1:        +62.0\u00b0C  (high = +120.0\u00b0C)\n\namdgpu-pci-6600\nAdapter: PCI adapter\nvddgfx:        0.00 V  \nvddnb:         0.00 V  \nedge:         +62.0\u00b0C  \nPPT:          38.15 W  (avg =  38.15 W)\n\nacpitz-acpi-0\nAdapter: ACPI interface\ntemp1:        +74.0\u00b0C  \n\nmt7925_phy0-pci-6300\nAdapter: PCI adapter\ntemp1:        +42.0\u00b0C  \n\nk10temp-pci-00c3\nAdapter: PCI adapter\nTctl:         +72.9\u00b0C  \n\nnvme-pci-6400\nAdapter: PCI adapter\nComposite:    +37.9\u00b0C  (low  = -273.1\u00b0C, high = +74.8\u00b0C)\n                       (crit = +79.8\u00b0C)\nSensor 2:     +69.8\u00b0C  (low  = -273.1\u00b0C, high = +65261.8\u00b0C)"
+  },
+  "post_snapshot": {
+    "at_ct": "2026-11-15 20:50:34 CST",
+    "gtt_used_bytes": 96050913280,
+    "free_bytes": "total        used        free      shared  buff/cache   available\nMem:     133607890944 102264668160  2066800640    54157312 30603591680 31343222784\nSwap:     8589930496   164302848  8425627648",
+    "sensors": "r8169_0_6100:00-mdio-0\nAdapter: MDIO adapter\ntemp1:        +60.5\u00b0C  (high = +120.0\u00b0C)\n\namdgpu-pci-6600\nAdapter: PCI adapter\nvddgfx:        0.00 V  \nvddnb:         0.00 V  \nedge:         +58.0\u00b0C  \nPPT:          18.95 W  (avg =  18.95 W)\n\nacpitz-acpi-0\nAdapter: ACPI interface\ntemp1:        +65.0\u00b0C  \n\nmt7925_phy0-pci-6300\nAdapter: PCI adapter\ntemp1:        +42.0\u00b0C  \n\nk10temp-pci-00c3\nAdapter: PCI adapter\nTctl:         +65.0\u00b0C  \n\nnvme-pci-6400\nAdapter: PCI adapter\nComposite:    +40.9\u00b0C  (low  = -273.1\u00b0C, high = +74.8\u00b0C)\n                       (crit = +79.8\u00b0C)\nSensor 2:     +69.8\u00b0C  (low  = -273.1\u00b0C, high = +65261.8\u00b0C)"
+  },
+  "fixture_stdout": {
+    "model": "flash-next-gufo",
+    "prompt_chars": 98462,
+    "usage": {
+      "prompt_tokens": 20291,
+      "completion_tokens": 64,
+      "total_tokens": 20355,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      },
+      "cached_tokens": 0,
+      "prompt_tokens_per_second": 1646.5399437267743,
+      "completion_tokens_per_second": 52.98834827618553,
+      "draft_tokens": 61,
+      "draft_tokens_accepted": 46,
+      "gufo": {
+        "component_cache": {
+          "schema": "component-cache-v1",
+          "reuse": "none",
+          "selection_reason": 6,
+          "deepest_live_tokens": 0,
+          "deepest_ram_tokens": 0,
+          "deepest_disk_tokens": 0,
+          "selected_tokens": 0,
+          "restored_bytes": 0,
+          "prefilled_tokens": 20291,
+          "captures": 3,
+          "captured_capacity_bytes": 967835648,
+          "borrowed_capacity_bytes": 554631168,
+          "copied_payload_bytes": 404523228,
+          "captured_checkpoint_ids": [
+            2,
+            484,
+            2384
+          ],
+          "global_spill": {
+            "idle_bytes": 0,
+            "foreground_bytes": 0,
+            "idle_copy_ms": 0,
+            "foreground_copy_ms": 0,
+            "stream_wait_ms": 0,
+            "residual_wait_ms": 1.985135,
+            "reassignments": 1,
+            "idle_failures": 0
+          },
+          "global_ledger_bytes": 1931039214,
+          "global_ram_bytes": 1931039214,
+          "global_peak_ledger_bytes": 1931074743,
+          "global_peak_ram_bytes": 1931074743,
+          "global_persistence_pinned_bytes": 0,
+          "global_peak_persistence_pinned_bytes": 0,
+          "global_categories": {
+            "backing_free": {
+              "bytes": 931397632,
+              "reserved_bytes": 0,
+              "peak_bytes": 1899233280
+            },
+            "backing_assigned": {
+              "bytes": 554631168,
+              "reserved_bytes": 554631168,
+              "peak_bytes": 558759936
+            },
+            "backing_materialized": {
+              "bytes": 5177344,
+              "reserved_bytes": 0,
+              "peak_bytes": 5177344
+            },
+            "private_state": {
+              "bytes": 400490496,
+              "reserved_bytes": 0,
+              "peak_bytes": 400490496
+            },
+            "private_tail": {
+              "bytes": 7536640,
+              "reserved_bytes": 0,
+              "peak_bytes": 7536640
+            },
+            "metadata": {
+              "bytes": 31805934,
+              "reserved_bytes": 0,
+              "peak_bytes": 31841463
+            },
+            "transfer_staging": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 0
+            }
+          }
+        },
+        "cache_hit": false,
+        "cache_miss_reason": "no_checkpoint",
+        "cache_common_prefix_tokens": 0,
+        "cache_checkpoint_tokens": 0,
+        "cache_restore_bytes": 0,
+        "cache_snapshot_bytes": 959154396,
+        "cache_disk_queued_bytes": 0,
+        "cache_shared_bytes": 0,
+        "cache_restore_ms": 0,
+        "cache_snapshot_ms": 19.908488,
+        "cache_disk_enqueue_ms": 0.002551,
+        "cache_disk_hit": false,
+        "draft_rounds": 18,
+        "prefill_tokens": 20291,
+        "prefill_chunks": 5,
+        "active_decode_prefill_chunks": 0,
+        "max_prefill_chunk_tokens": 4224,
+        "max_prefill_layer_groups": 1,
+        "prefill_yield_rounds": 0,
+        "queue_depth_at_submit": 1,
+        "client_queue_depth_at_submit": 1,
+        "resident_requests_at_admission": 1,
+        "requested_logical_concurrency": 1,
+        "physical_execution_width": 1,
+        "queue_ms": 4.250162,
+        "shared_prefix_wait_ms": 0,
+        "prefill_ms": 12323.418012000002,
+        "decode_ms": 1207.8127000000002,
+        "ttft_ms": 12328.115641,
+        "mean_inter_token_ms": 19.252600698412706,
+        "max_inter_token_ms": 146.295786,
+        "execution_plan": "serial-c1"
+      }
+    },
+    "client_wall_seconds": 36.825,
+    "note": "Record engine-logged TTFT, prefill tok/s, and decode tok/s from engine container logs."
+  },
+  "fixture_stderr": "",
+  "llama_swap_journal": [
+    "2026-11-15T20:49:54-06:00 evo-X3 llama-swap-flash-next[128322]: halogen: GTT in use after the engine exited: 0.0 GiB (0s after)",
+    "2026-11-15T20:49:54-06:00 evo-X3 podman[128219]: 2026-11-15 20:49:54.135832713 -0600 CST m=+652.203226194 container died a1b7f8ad49d4f083aeda8f889d2875d8c7e9aaac3f4ee73f78b9c88ab520cb8a (image=ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568, name=llama-swap-flash-next, ai.peonist.halogen.modes=all engine api bench sweep convert inspect verify ppl niah, io.buildah.version=1.42.1, org.opencontainers.image.source=https://github.com/peonist-ai/halogen-flash-server, org.opencontainers.image.vendor=Peonist, org.opencontainers.image.description=Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151), org.opencontainers.image.revision=53edaa795f66, org.opencontainers.image.licenses=LicenseRef-Peonist-EULA, org.opencontainers.image.documentation=https://github.com/peonist-ai/halogen-flash-server, org.opencontainers.image.version=0.20.5, org.opencontainers.image.title=halogen-flash-server)",
+    "2026-11-15T20:49:54-06:00 evo-X3 podman[128219]: 2026-11-15 20:49:54.249446914 -0600 CST m=+652.316840375 container remove a1b7f8ad49d4f083aeda8f889d2875d8c7e9aaac3f4ee73f78b9c88ab520cb8a (image=ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568, name=llama-swap-flash-next, org.opencontainers.image.description=Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151), org.opencontainers.image.licenses=LicenseRef-Peonist-EULA, org.opencontainers.image.revision=53edaa795f66, org.opencontainers.image.vendor=Peonist, org.opencontainers.image.version=0.20.5, org.opencontainers.image.documentation=https://github.com/peonist-ai/halogen-flash-server, org.opencontainers.image.source=https://github.com/peonist-ai/halogen-flash-server, org.opencontainers.image.title=halogen-flash-server, ai.peonist.halogen.modes=all engine api bench sweep convert inspect verify ppl niah, io.buildah.version=1.42.1)",
+    "2026-11-15T20:49:55-06:00 evo-X3 podman[132015]: 2026-11-15 20:49:55.366292994 -0600 CST m=+0.026074743 container create 2a48e0716264bfeb867f86095dda718acc7df52cac78ee7188da7681355ba15e (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-flash-next-gufo, org.opencontainers.image.created=2026-11-11T11:58:35Z, org.opencontainers.image.revision=unknown, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50)",
+    "2026-11-15T20:49:55-06:00 evo-X3 podman[132015]: 2026-11-15 20:49:55.411841037 -0600 CST m=+0.071622786 container init 2a48e0716264bfeb867f86095dda718acc7df52cac78ee7188da7681355ba15e (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-flash-next-gufo, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50, org.opencontainers.image.created=2026-11-11T11:58:35Z, org.opencontainers.image.revision=unknown, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0)",
+    "2026-11-15T20:49:55-06:00 evo-X3 podman[132015]: 2026-11-15 20:49:55.413209879 -0600 CST m=+0.072991628 container start 2a48e0716264bfeb867f86095dda718acc7df52cac78ee7188da7681355ba15e (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-flash-next-gufo, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50, org.opencontainers.image.created=2026-11-11T11:58:35Z, org.opencontainers.image.revision=unknown)",
+    "2026-11-15T20:49:55-06:00 evo-X3 podman[132015]: 2026-11-15 20:49:55.416496564 -0600 CST m=+0.076278313 container attach 2a48e0716264bfeb867f86095dda718acc7df52cac78ee7188da7681355ba15e (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-flash-next-gufo, org.opencontainers.image.revision=unknown, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50, org.opencontainers.image.created=2026-11-11T11:58:35Z)",
+    "2026-11-15T20:49:55-06:00 evo-X3 podman[132015]: 2026-11-15 20:49:55.352812331 -0600 CST m=+0.012594080 image pull 6004ce5cff20482a55ecf93c4686550316c4d5645b7f46de7179833eb4f2f525 ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133",
+    "2026-11-15T20:49:55-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:49:55 [INFO] [gpu] event=queue_budget kind=llm observed=0 budget=8 expected_max=3 cap=2",
+    "2026-11-15T20:49:55-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:49:55 [INFO] [loader] event=load_started kind=text artifact=/srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf rss_mib=137 host_available_mib=123786",
+    "2026-11-15T20:50:17-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:17 [INFO] [loader] event=load_phase phase=sessions rss_mib=369 host_available_mib=39903",
+    "2026-11-15T20:50:17-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:17 [INFO] [cache] schema=component-cache-v1 event=configured sessions=1 snapshot_entries=128 capacity_bytes=2147483648 staging_capacity_bytes=0 automatic_bytes=16940926976 max_bytes=29586886656 disk_capacity_bytes=0 slot_pinned_bytes=0 ram_cache=on disk_backing_bytes=0",
+    "2026-11-15T20:50:17-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:17 [INFO] [loader] event=structured_output_prepared vocabulary_tokens=248320 prepare_ms=30.7 rss_delta_kib=23092 rss_mib=2211 host_available_mib=30409",
+    "2026-11-15T20:50:17-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:17 [INFO] [sampling] event=defaults thinking=on temperature=1 top_k=20 top_p=0.95 min_p=0 min_keep=0 seed=-1 repeat_penalty=1 repeat_last_n=64 frequency_penalty=0 presence_penalty=0",
+    "2026-11-15T20:50:17-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:17 [INFO] [loader] event=load_completed kind=text elapsed_ms=22298 monotonic_us=36095141056 model=flash-next-gufo sessions=1 context_tokens=262144 speculative=mtp draft_limit=7 disk_cache=off rss_mib=2193 host_available_mib=30409 gpu_device_used_mib=92112 gpu_device_total_mib=122880",
+    "2026-11-15T20:50:17-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:17 [INFO] [server] event=listening monotonic_us=36095141417 address=http://127.0.0.1:8081 max_connections=16 max_body_bytes=8388608",
+    "2026-11-15T20:50:18-06:00 evo-X3 evo-llama-swap[99654]: [INFO] <flash-next-gufo> Health check passed on http://127.0.0.1:8081/health",
+    "2026-11-15T20:50:18-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:18 [INFO] [http] request=r2 event=received method=GET path=/v1/models body_bytes=0",
+    "2026-11-15T20:50:18-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:18 [INFO] [http] request=r2 event=completed method=GET path=/v1/models status=200 duration_ms=0.1 outcome=completed rss_mib=2193 host_available_mib=30130",
+    "2026-11-15T20:50:18-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:18 [INFO] [http] request=r3 event=received method=POST path=/v1/chat/completions body_bytes=98627",
+    "2026-11-15T20:50:18-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:18 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0",
+    "2026-11-15T20:50:21-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:21 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=4096 purpose=1 rank=3 unique_bytes_freed=0 ledger_bytes=1929325641",
+    "2026-11-15T20:50:21-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:21 [INFO] [progress] request=1 phase=prefill tokens=4224/20291 percentage=20.8 chunk_tps=1683.3 avg_tps=1683.3",
+    "2026-11-15T20:50:23-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:23 [INFO] [progress] request=1 phase=prefill tokens=8320/20291 percentage=41.0 chunk_tps=1689.9 avg_tps=1686.6",
+    "2026-11-15T20:50:26-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:26 [INFO] [progress] request=1 phase=prefill tokens=12416/20291 percentage=61.2 chunk_tps=1658.8 avg_tps=1677.3",
+    "2026-11-15T20:50:28-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:28 [INFO] [progress] request=1 phase=prefill tokens=16512/20291 percentage=81.4 chunk_tps=1624.4 avg_tps=1663.8",
+    "2026-11-15T20:50:30-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:30 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20284 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=1930721612",
+    "2026-11-15T20:50:30-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:30 [INFO] [progress] request=1 phase=prefill tokens=20291/20291 percentage=100.0 chunk_tps=1575.0 avg_tps=1646.5",
+    "2026-11-15T20:50:32-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:32 [INFO] [progress] request=1 phase=decode tokens=57/64 percentage=89.1 chunk_tps=50.8 avg_tps=50.8 draft_accepted=40 draft_proposed=55 acceptance_percentage=72.7",
+    "2026-11-15T20:50:32-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:32 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20291 purpose=0 rank=0 unique_bytes_freed=0 ledger_bytes=1930873963",
+    "2026-11-15T20:50:32-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:32 [INFO] [progress] request=1 phase=decode tokens=64/64 percentage=100.0 chunk_tps=81.9 avg_tps=53.0 draft_accepted=46 draft_proposed=61 acceptance_percentage=75.4",
+    "2026-11-15T20:50:32-06:00 evo-X3 llama-swap-flash-next-gufo[132055]: 2026-11-16 02:50:32 [INFO] [http] request=r3 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=13542.6 outcome=completed prompt_tokens=20291 prefill_tokens=20291 generated_tokens=64 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=4.3 shared_prefix_wait_ms=0.0 ttft_ms=12328.1 prefill_tps=1646.5 decode_tps=53.0 batch_width=1 plan=serial-c1 draft_accepted=46 draft_proposed=61 draft_rounds=18 cache_schema=component-cache-v1 cache_reuse=none cache_captures=3 cache_captured_capacity_bytes=967835648 cache_global_ledger_bytes=1931039214 acceptance_pct=75.4 lookup_accepted=1 lookup_proposed=8 ngram_rows=325920 ngram_dedup_rows=310440 ngram_cache_hits=8849 ngram_disk_reads=6631 cache_snapshot_bytes=959154396 cache_miss_reason=no_checkpoint common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2255 host_available_mib=29866"
+  ],
+  "container_logs_tail": [
+    "2026-11-16 02:49:55 [INFO] [gpu] event=queue_budget kind=llm observed=0 budget=8 expected_max=3 cap=2",
+    "2026-11-16 02:49:55 [INFO] [loader] event=load_started kind=text artifact=/srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf rss_mib=137 host_available_mib=123786",
+    "2026-11-16 02:50:17 [INFO] [loader] event=load_phase phase=sessions rss_mib=369 host_available_mib=39903",
+    "2026-11-16 02:50:17 [INFO] [cache] schema=component-cache-v1 event=configured sessions=1 snapshot_entries=128 capacity_bytes=2147483648 staging_capacity_bytes=0 automatic_bytes=16940926976 max_bytes=29586886656 disk_capacity_bytes=0 slot_pinned_bytes=0 ram_cache=on disk_backing_bytes=0",
+    "2026-11-16 02:50:17 [INFO] [loader] event=structured_output_prepared vocabulary_tokens=248320 prepare_ms=30.7 rss_delta_kib=23092 rss_mib=2211 host_available_mib=30409",
+    "2026-11-16 02:50:17 [INFO] [sampling] event=defaults thinking=on temperature=1 top_k=20 top_p=0.95 min_p=0 min_keep=0 seed=-1 repeat_penalty=1 repeat_last_n=64 frequency_penalty=0 presence_penalty=0",
+    "2026-11-16 02:50:17 [INFO] [loader] event=load_completed kind=text elapsed_ms=22298 monotonic_us=36095141056 model=flash-next-gufo sessions=1 context_tokens=262144 speculative=mtp draft_limit=7 disk_cache=off rss_mib=2193 host_available_mib=30409 gpu_device_used_mib=92112 gpu_device_total_mib=122880",
+    "2026-11-16 02:50:17 [INFO] [server] event=listening monotonic_us=36095141417 address=http://127.0.0.1:8081 max_connections=16 max_body_bytes=8388608",
+    "2026-11-16 02:50:18 [INFO] [http] request=r2 event=received method=GET path=/v1/models body_bytes=0",
+    "2026-11-16 02:50:18 [INFO] [http] request=r2 event=completed method=GET path=/v1/models status=200 duration_ms=0.1 outcome=completed rss_mib=2193 host_available_mib=30130",
+    "2026-11-16 02:50:18 [INFO] [http] request=r3 event=received method=POST path=/v1/chat/completions body_bytes=98627",
+    "2026-11-16 02:50:18 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0",
+    "2026-11-16 02:50:21 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=4096 purpose=1 rank=3 unique_bytes_freed=0 ledger_bytes=1929325641",
+    "2026-11-16 02:50:21 [INFO] [progress] request=1 phase=prefill tokens=4224/20291 percentage=20.8 chunk_tps=1683.3 avg_tps=1683.3",
+    "2026-11-16 02:50:23 [INFO] [progress] request=1 phase=prefill tokens=8320/20291 percentage=41.0 chunk_tps=1689.9 avg_tps=1686.6",
+    "2026-11-16 02:50:26 [INFO] [progress] request=1 phase=prefill tokens=12416/20291 percentage=61.2 chunk_tps=1658.8 avg_tps=1677.3",
+    "2026-11-16 02:50:28 [INFO] [progress] request=1 phase=prefill tokens=16512/20291 percentage=81.4 chunk_tps=1624.4 avg_tps=1663.8",
+    "2026-11-16 02:50:30 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20284 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=1930721612",
+    "2026-11-16 02:50:30 [INFO] [progress] request=1 phase=prefill tokens=20291/20291 percentage=100.0 chunk_tps=1575.0 avg_tps=1646.5",
+    "2026-11-16 02:50:32 [INFO] [progress] request=1 phase=decode tokens=57/64 percentage=89.1 chunk_tps=50.8 avg_tps=50.8 draft_accepted=40 draft_proposed=55 acceptance_percentage=72.7",
+    "2026-11-16 02:50:32 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20291 purpose=0 rank=0 unique_bytes_freed=0 ledger_bytes=1930873963",
+    "2026-11-16 02:50:32 [INFO] [progress] request=1 phase=decode tokens=64/64 percentage=100.0 chunk_tps=81.9 avg_tps=53.0 draft_accepted=46 draft_proposed=61 acceptance_percentage=75.4",
+    "2026-11-16 02:50:32 [INFO] [http] request=r3 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=13542.6 outcome=completed prompt_tokens=20291 prefill_tokens=20291 generated_tokens=64 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=4.3 shared_prefix_wait_ms=0.0 ttft_ms=12328.1 prefill_tps=1646.5 decode_tps=53.0 batch_width=1 plan=serial-c1 draft_accepted=46 draft_proposed=61 draft_rounds=18 cache_schema=component-cache-v1 cache_reuse=none cache_captures=3 cache_captured_capacity_bytes=967835648 cache_global_ledger_bytes=1931039214 acceptance_pct=75.4 lookup_accepted=1 lookup_proposed=8 ngram_rows=325920 ngram_dedup_rows=310440 ngram_cache_hits=8849 ngram_disk_reads=6631 cache_snapshot_bytes=959154396 cache_miss_reason=no_checkpoint common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2255 host_available_mib=29866"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "arm": "u20-heretic-q4km-vulkan-vision",
+  "model": "gemma4-heretic",
+  "http": 200,
+  "elapsed_s": 8.395,
+  "ttft_s": 1.9729079999999999,
+  "prompt_tokens": 164,
+  "completion_tokens": 400,
+  "prompt_per_second": 83.12602513649901,
+  "predicted_per_second": 62.2574747588069,
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 164,
+    "prompt_ms": 1972.908,
+    "prompt_per_token_ms": 12.029926829268293,
+    "prompt_per_second": 83.12602513649901,
+    "predicted_n": 400,
+    "predicted_ms": 6408.869,
+    "predicted_per_token_ms": 16.062328320802003,
+    "predicted_per_second": 62.2574747588069
+  },
+  "usage": {
+    "completion_tokens": 400,
+    "prompt_tokens": 164,
+    "total_tokens": 564,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "finish": "length",
+  "content": "This image features a blue background with the text \"X",
+  "checks": {
+    "yellow_or_gold_circle": false,
+    "red_square": false,
+    "green_triangle": false,
+    "text_x3_bakeoff": false
+  },
+  "checks_passed": 0,
+  "vision_works": false
+}

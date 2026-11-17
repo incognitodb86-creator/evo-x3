@@ -1,0 +1,54 @@
+{
+ "arm": "u20-heretic-q8-rocm-write",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 09:55:40 CST",
+ "tasks": {
+  "write1": {
+   "ttft_s": 0.3069641590118408,
+   "total_s": 28.021084308624268,
+   "prompt_tokens": 42,
+   "completion_tokens": 1162,
+   "client_decode_tps": 41.92808552921895,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 42,
+    "prompt_ms": 228.573,
+    "prompt_per_token_ms": 5.442214285714286,
+    "prompt_per_second": 183.748736727435,
+    "predicted_n": 1162,
+    "predicted_ms": 27788.165,
+    "predicted_per_token_ms": 23.934681309216195,
+    "predicted_per_second": 41.78037664595701
+   },
+   "content": "The tide had retreated, leaving a graveyard of shale and splintered driftwood. Elias picked his way through the tide pools, his boots crunching on crushed mollusk shells. The air tasted of brine and decaying kelp. \n\nNear a cluster of black basalt, something caught the bruised light of dawn. It wasn't the glint of glass, but a sliver of cream-colored vellum wedged deep within the ribs of a sun-bleached ray. He knelt, his knees protesting against the wet stone, and pried the object loose. \n\nIt was an envelope, thick and unnervingly heavy. The edges had begun to liquefy into a grey mush, yet the center remained taut. There was no wax seal, only a smear of dried indigo ink at the corner, shaped like a thumbprint. As he lifted it, the scent hit him\u2014not of the sea, but of parched cedar and dried cloves. He wiped a smear of grit from the surface. The handwriting was a frantic scrawl, the letters bleeding into the fibers like rising bruises. He shoved it into his oilskin pocket, the weight of the paper feeling disproportionate to its size, a small, damp stone against his thigh.",
+   "reasoning_chars": 3535,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.23329567909240723,
+   "total_s": 99.59187293052673,
+   "prompt_tokens": 39,
+   "completion_tokens": 4000,
+   "client_decode_tps": 40.25822541598699,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 33,
+    "prompt_ms": 139.082,
+    "prompt_per_token_ms": 4.2146060606060605,
+    "prompt_per_second": 237.2700996534419,
+    "predicted_n": 4000,
+    "predicted_ms": 99432.063,
+    "predicted_per_token_ms": 24.864231807951988,
+    "predicted_per_second": 40.218415261081326
+   },
+   "content": "",
+   "reasoning_chars": 14123,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": false
+  }
+ }
+}

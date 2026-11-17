@@ -1,0 +1,52 @@
+POLY_VISION_SETUP_START Sun Nov 15 10:58:47 CST 2026
+PolyStrata - Qwen3.8-Flash-Next, GLM 5.3 Flash and smaller MoE models on a normal PC (a GPU + system RAM + CPU)
+
+=== Step 1: checking your PC ===
+  Your AMD GPUs:
+    GPU 0: AMD Radeon 8060S (Ryzen AI Max, Strix Halo, gfx1151), unified memory: 1.0 GB BIOS carve-out + 118 GB shared with the RAM, 119 GB usable by the GPU - can be used
+  [ok] GPU: AMD Radeon 8060S (Ryzen AI Max, Strix Halo, gfx1151), unified memory: 1.0 GB BIOS carve-out + 118 GB shared with the RAM, 119 GB usable by the GPU, gfx1151 (AMD: docs/STRIX_HALO.md)
+  Strix Halo (gfx1151, Ryzen AI Max): the CPU and the GPU share one memory pool (124 GB seen by the OS + a 1.0 GB BIOS carve-out), so the model's experts live in that pool and the expert cache is sized from the memory the OS can give back, not from the carve-out.
+  The engine is compiled here for gfx1151 (experimental, measured on one machine): see docs/STRIX_HALO.md.
+  Recommended model: UD-IQ4_XS (the one docs/STRIX_HALO.md measures); the menus list the others.
+  [ok] RAM: 124 GB
+  [ok] CPU: AMD RYZEN AI MAX+ 395 w/ Radeon 8060S (AVX-512)
+
+=== Step 2: your choices ===
+  [ok] model: Gemma 4 26B-A4B
+  Images: the image encoder is a CUDA program: on the AMD card images are off (text answers).
+  [!]  not used with Gemma 4 26B-A4B (its engine has no such setting): --vision
+
+  UD-Q4_K_M: 4- and 5-bit experts (Unsloth Dynamic); the same draft model; download 17 GB. The file is read in place: about 14 of
+  its 14 GB of experts fit this card, the rest stay in RAM (the OS file cache).
+  [ok] size: UD-Q4_K_M
+  [ok] context: 32768 tokens
+  [ok] conversation cache: 40% of the RAM free once the model is loaded, up to 8192 MiB
+
+=== Step 3: Python packages ===
+  [ok] numpy, jinja2, regex, pyyaml, tqdm, requests, cmake, ninja, pillow, psutil already installed
+
+=== Step 4: the strata-poly engine ===
+  [ok] llama.cpp 3cf0325 (gguf-py, ggml)
+  [ok] strata-poly already built for this PC
+  [ok] engine: /srv/bakeoff/src/PolyStrata/engine-poly/strata-poly
+
+=== Step 5: downloading Gemma 4 26B-A4B UD-Q4_K_M ===
+  [!]  gemma-4-26B-A4B-it-UD-Q4_K_M.gguf is not the file setup offers (16,796,011,680 bytes, not 16,947,541,728): your own gemma4 GGUF, run as it is; setup's RAM and VRAM estimates are the offered file's
+  [ok] model file present
+
+=== Step 6: preparing the model for PolyStrata ===
+  [ok] draft model: /srv/bakeoff/polystrata-data/gemma4-UD-Q4_K_M/mtp-gemma-4-26B-A4B-it-Q8_0.gguf
+  [ok] model prepared: /srv/bakeoff/src/PolyStrata-data/packs/gemma4-ud-q4_k_m
+
+=== Step 7: writing the start script ===
+  Several requests at once (opt-in): --parallel 2 to 4 writes their answers together, each in a slot whose attention rows take VRAM from the expert cache as its conversation grows (docs/BATCHING.md).
+  [ok] AMD card: --kv-whole, the attention caches take their VRAM at load (ROCm keeps what the expert cache gives back, so a long prompt was refused VRAM later)
+  the earlier run config is kept as strata-gemma4-ud-q4_k_m.json.bak
+  [ok] start script: run-gemma4-ud-q4_k_m.sh
+
+All set.
+  API (OpenAI):     http://127.0.0.1:8093/v1   (any API key; model name: anything)
+  API (Anthropic):  http://127.0.0.1:8093/v1/messages
+  Next time:        just run ./setup.sh (or run-gemma4-ud-q4_k_m.sh) - it starts right away
+SETUP_EXIT 0
+POLY_VISION_SETUP_END Sun Nov 15 10:58:48 CST 2026 exit 0

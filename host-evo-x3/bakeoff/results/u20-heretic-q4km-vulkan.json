@@ -1,0 +1,188 @@
+{
+ "arm": "u20-heretic-q4km-vulkan",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 09:50:57 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 17.07573366165161,
+   "total_s": 17.770349264144897,
+   "prompt_tokens": 18709,
+   "completion_tokens": 43,
+   "client_decode_tps": 61.904742487289035,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18709,
+    "prompt_ms": 16939.873,
+    "prompt_per_token_ms": 0.9054397883371639,
+    "prompt_per_second": 1104.4356707987126,
+    "predicted_n": 43,
+    "predicted_ms": 795.791,
+    "predicted_per_token_ms": 18.947404761904764,
+    "predicted_per_second": 52.77767655075264
+   },
+   "content": "The on-call codename is TANGERINE-4471, and the EVO-X3 maintenance window is Tuesday 03:40 (FIXTURE NOTE).",
+   "reasoning_chars": 0,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 1.0226387977600098,
+   "total_s": 15.527476787567139,
+   "prompt_tokens": 35,
+   "completion_tokens": 900,
+   "client_decode_tps": 62.048262837023756,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 35,
+    "prompt_ms": 863.985,
+    "prompt_per_token_ms": 24.685285714285715,
+    "prompt_per_second": 40.50996255722032,
+    "predicted_n": 900,
+    "predicted_ms": 14554.44,
+    "predicted_per_token_ms": 16.189588431590657,
+    "predicted_per_second": 61.76809276069707
+   },
+   "content": "",
+   "reasoning_chars": 3436,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "write1": {
+   "ttft_s": 0.2070324420928955,
+   "total_s": 31.04585838317871,
+   "prompt_tokens": 42,
+   "completion_tokens": 1877,
+   "client_decode_tps": 60.8648332976684,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 36,
+    "prompt_ms": 132.311,
+    "prompt_per_token_ms": 3.6753055555555556,
+    "prompt_per_second": 272.0862211002864,
+    "predicted_n": 1877,
+    "predicted_ms": 30889.591,
+    "predicted_per_token_ms": 16.46566684434968,
+    "predicted_per_second": 60.732432488342106
+   },
+   "content": "The gale had stripped the cove bare, leaving only the jagged basalt ribs and the sharp stench of decaying kelp. Elias, his knuckles swollen from scrubbing the Fresnel lens, picked his way through the tide pools, searching for debris to clear from the gallery walkway. Something caught the flat, slate-colored light\u2014not the translucent flesh of a jellyfish, but a rigid, cream-colored rectangle wedged in a crevice of shale.\n\nHe pried it loose. It was a heavy envelope, bloated by the Atlantic, its edges frayed into a pulpy lace. The wax seal, once a defiant ochre, had bled into the paper, a dark stain spreading toward the corner. There was no postmark, only a frantic, slanted script that seemed to vibrate against the sodden vellum. As he pressed it against his oilskin apron, the cold moisture seeped through to his skin, invasive and biting. He did not unseal it. He simply stood, the retreating hiss of the undertow the only sound, holding the weight of a stranger\u2019s sudden urgency in his salt-crusted palm.",
+   "reasoning_chars": 6592,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.2067551612854004,
+   "total_s": 37.18302297592163,
+   "prompt_tokens": 39,
+   "completion_tokens": 2239,
+   "client_decode_tps": 60.55235242302474,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 33,
+    "prompt_ms": 126.972,
+    "prompt_per_token_ms": 3.8476363636363633,
+    "prompt_per_second": 259.89982043285136,
+    "predicted_n": 2239,
+    "predicted_ms": 37026.409,
+    "predicted_per_token_ms": 16.544418677390528,
+    "predicted_per_second": 60.4433446408481
+   },
+   "content": "Meet the Obsidian Series: the last skillet you\u2019ll ever buy. \n\nForged from single-pour, pre-seasoned iron, this beast holds heat like a furnace, turning every ribeye into a crusty, restaurant-grade masterpiece. It\u2019s rugged, indestructible, and grows more non-stick with every use as the natural, dark patina matures. From stovetop searing to campfire roasting, it is built to outlast your kitchen, your house, and perhaps even your grandchildren.\n\nBut here\u2019s the unexpected part: because of its incredible density and weight, it doubles as the most effective, heavy-duty garlic crusher in your pantry. One quick, decisive press with the base, and even the toughest cloves are reduced to a smooth paste.\n\nStop buying disposable cookware. Invest in a legend.",
+   "reasoning_chars": 8207,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.3735544681549072,
+     "total_s": 2.368931293487549,
+     "prompt_tokens": 143,
+     "completion_tokens": 129,
+     "client_decode_tps": 64.6494428331826,
+     "timings": {
+      "cache_n": 0,
+      "prompt_n": 143,
+      "prompt_ms": 291.579,
+      "prompt_per_token_ms": 2.039013986013986,
+      "prompt_per_second": 490.43312447055513,
+      "predicted_n": 129,
+      "predicted_ms": 2047.252,
+      "predicted_per_token_ms": 15.99415625,
+      "predicted_per_second": 62.52283548874296
+     },
+     "content": "",
+     "reasoning_chars": 372,
+     "tool_calls": [
+      {
+       "id": "EPlqtREesOpuc3wzbaJZIhMhogxDYWyw",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.2874624729156494,
+     "total_s": 0.5296750068664551,
+     "prompt_tokens": 190,
+     "completion_tokens": 26,
+     "client_decode_tps": 107.34374301736467,
+     "timings": {
+      "cache_n": 138,
+      "prompt_n": 52,
+      "prompt_ms": 121.585,
+      "prompt_per_token_ms": 2.3381730769230766,
+      "prompt_per_second": 427.68433606119174,
+      "predicted_n": 26,
+      "predicted_ms": 404.922,
+      "predicted_per_token_ms": 16.19688,
+      "predicted_per_second": 61.740285783434835
+     },
+     "content": "",
+     "reasoning_chars": 0,
+     "tool_calls": [
+      {
+       "id": "gN7yxTFOyw6xIE8mriczjBiPpoI05hoJ",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.2037220001220703,
+     "total_s": 0.42043542861938477,
+     "prompt_tokens": 246,
+     "completion_tokens": 18,
+     "client_decode_tps": 83.05899696576975,
+     "timings": {
+      "cache_n": 185,
+      "prompt_n": 61,
+      "prompt_ms": 131.482,
+      "prompt_per_token_ms": 2.1554426229508197,
+      "prompt_per_second": 463.94183234206963,
+      "predicted_n": 18,
+      "predicted_ms": 284.219,
+      "predicted_per_token_ms": 16.718764705882354,
+      "predicted_per_second": 59.81303150035712
+     },
+     "content": "Dana (dana@example.com) has 3 orders.",
+     "reasoning_chars": 0,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

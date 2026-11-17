@@ -1,0 +1,11 @@
+20261116-062524 services disabled: qemu-guest-agent vmtoolsd vgauthd iscsid.socket iscsiuio.socket multipathd ModemManager (rollback: systemctl enable --now <unit>)
+20261116-062524 grubby --remove-args=amdgpu.gttsize=122880 (rollback: grubby --update-kernel=ALL --args=amdgpu.gttsize=122880)
+20261116-062838 pi models.json (+flash-next-uncensored, card sampling incl presence 0), forge settings defaultThinkingLevel medium, forge-pi.sh --thinking medium; rollback: restore *.bak-20261116-062838-u34
+20261116-064238 llama-swap.yaml U34 (Gufo slot archived, setParamsByID subs); rollback: sudo cp /etc/evo-x3/llama-swap.yaml.bak-20261116-064238-u34-pre /etc/evo-x3/llama-swap.yaml && sudo systemctl restart llama-swap
+20261116-065140 SearXNG quadlet ~/.config/containers/systemd/searxng.container (127.0.0.1:8888); web-search.json -> 127.0.0.1; u32-searxng stopped (kept). Rollback: restore web-search.json.bak-20261116-065140-u34
+2026-11-16_07:25:37 fedora-first-boot.service/.timer added; BootOrder 0003,0000,0001. Rollback: systemctl disable --now fedora-first-boot.{service,timer}
+
+2026-11-16_08:34:00 U36 consolidation units (as evo): systemctl --user disable --now herdr-panes herdr-server pi-mobile-hub
+2026-11-16_08:34:00 U36 Tailscale Serve phone bridge: sudo tailscale serve --https=8444 off
+2026-11-16_08:34:00 U36 ffmpeg / RPM Fusion (P1b): sudo dnf swap -y ffmpeg ffmpeg-free && sudo dnf remove -y rpmfusion-free-release
+2026-11-16_08:34:00 U36 P1b queue backups: restore ~/AI/community/scripts/run_queue.py.bak-20261116-p1b and ~/AI/render/x3/queue-remote.sh.bak-20261116-p1b (plus U36 portable-path backups in ~/evo-x3/_archive/u36/)

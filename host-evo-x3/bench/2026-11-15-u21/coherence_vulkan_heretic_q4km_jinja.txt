@@ -1,0 +1,24 @@
+<|channel>thought
+
+*   Topic: Why unified memory limits matter on AMD Strix Halo APUs.
+*   Constraint: Exactly two clear sentences.
+*   Key concept: AMD Strix Halo (high-end APU with large GPU part), Unified Memory (CPU and GPU share the same pool), Memory Limits (capacity/bandwidth bottleneck).
+
+    *   *What is Strix Halo?* It's an APU (Accelerated Processing Unit) designed to have a very powerful integrated GPU (comparable to discrete GPUs).
+    *   *What is Unified Memory?* Unlike a PC with separate VRAM (GPU) and RAM (CPU), an APU uses one pool of memory for both.
+    *   *What are the limits?* The capacity of system RAM and the bandwidth of that RAM.
+    *   *Why do these limits matter?*
+        1.  The massive GPU needs huge amounts of high-speed memory to run modern games/AI.
+        2.  If the system RAM is small, the GPU can't use high-resolution textures or large AI models.
+        3.  If the bandwidth is low, the powerful GPU is "starved" and can't reach its full potential.
+
+    *   *Draft 1:* Because Strix Halo uses a single pool of system RAM for both the CPU and the powerful integrated GPU, any capacity or bandwidth bottleneck directly restricts the GPU's ability to run large-scale tasks like high-end gaming or AI inference. This means the GPU's massive performance potential is strictly tethered to the speed and size of the installed system memory.
+
+    *   *Draft 2:* Since the high-performance GPU and CPU share a single pool of system memory, any capacity or bandwidth constraints directly bottleneck the GPU's ability to handle large textures and complex AI models. Consequently, the GPU's potential is strictly limited by the speed and size of the available system RAM.
+
+    *   *Draft 3 (Refining for clarity and impact):* Because the powerful integrated GPU shares a single pool of memory with the CPU, any capacity or bandwidth limitations directly restrict the GPU's ability to process large textures and complex AI models. This means the GPU's performance is strictly tethered to the speed and size of the system's installed RAM.
+
+    *   Two sentences? Yes.
+    *   Clear? Yes.
+    *   Covers why limits matter? Yes
+

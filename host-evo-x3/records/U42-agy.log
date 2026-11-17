@@ -1,0 +1,21 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+Started the `u42-pixlstash-tagger.service` user unit as `evo`. Phase A (InsightFace face matching) has already assigned its first 200 faces via the official API; waiting 45 seconds for InsightFace completion and the first `gemma4-heretic` VLM tagging progress before verifying counts and writing `U42-RESULT.md`.
+Phase A (InsightFace official API face matching) is actively assigning faces (DB `face.character_id` count has risen from 3,719 to 5,690 with 0 errors). Waiting 45 seconds to observe Phase B (`gemma4-heretic` VLM) tagging counts and per-image rate before writing `U42-RESULT.md`.
+Phase A (InsightFace official API face matching) is continuing at ~1,500 faces/min (`face.character_id` count has risen from 3,719 to 7,190). Waiting 60 seconds for Phase A to finish and Phase B (`gemma4-heretic` VLM tagging) to record its first tagged images and timing.
+InsightFace matching continues cleanly (`face.character_id` count is now 8,990, up from 3,719). Waiting 90 seconds for Phase A to finish and Phase B (`gemma4-heretic` VLM tagging) to complete its initial images so we can record observed time/image, rate, and ETA in `U42-RESULT.md`.
+Phase A (InsightFace official API face matching) is still finding high-confidence matches (`>= 0.55`; `face.character_id` count is now 11,590, up from 3,719). Waiting 90 seconds to let Phase A finish and verify Phase B (`gemma4-heretic` VLM) tagging + timing before writing `U42-RESULT.md`.
+Updated `tag_runner.py` to interleave InsightFace (`combine=mean`, `>= 0.55`, bounded 300-face chunks) with `gemma4-heretic` VLM batches and restarted `u42-pixlstash-tagger.service` (PID 110346). Waiting 60 seconds to confirm the first `gemma4-heretic` VLM tagging progress and timing before writing `U42-RESULT.md`.
+Started the detached PixlStash tagging and InsightFace runner as `evo` (`u42-pixlstash-tagger.service`, `MainPID=110346`) and wrote [U42-RESULT.md](file:///home/derekboone/evo-x3/records/U42-RESULT.md).
+
+### Summary
+- **Pre-write backup:** `/home/evo/AI/5slock/_u42_vault.db.bak-pre-tag` (`1,016,172,544` bytes, mode `0600`, owner `evo`, created via Python `sqlite3` backup API).
+- **PixlStash `default_device`:** Left on `cpu` (official `accelerator.py` / `startup_checks.py` do not support `vulkan`, the venv has `torch 2.15.0+cu132` and CPU-only `onnxruntime 1.32.0`, and no >5 GB ROCm wheel was downloaded).
+- **VLM + Auth:** Official-API sidecar (`/home/evo/AI/pixlstash-tagging/tag_runner.py`) calls `gemma4-heretic` on GPU via `http://127.0.0.1:8080/v1/chat/completions`, reading `LLM_KEY_PI` in-process from `0600` `/home/evo/.config/evo-x3/llm.env` and PixlStash `tagger-write.token` in-process (`openai_compatible_captioner` plugin skipped to avoid plain-text key storage).
+- **GPU lock:** Leftover 0-byte unlocked `/home/derekboone/AI/locks/gpu-render.lock` was preserved and not treated as busy; runner checks for live PIDs, active `flock`, and live render processes between batches.
+- **Verified progress (`11:34:57 CST`):**
+  - Pictures: `32,964` (`pictures_done: 12`, `skipped: 0`, `failed: 0`)
+  - Faces: `116,876` (`character_id IS NOT NULL`: `3,719` → `15,690`, +`11,971` via InsightFace official API; `faces_processed`: `11,998`)
+  - Tags: `816,771` → `816,969` (+`198` via `POST /api/v1/pictures/{id}/tags`)
+  - Rate / ETA: `5.06 s/image` (`11.87 images/min`, ETA `1 day, 22:18:57`)
+- **Follow progress:** [U42-tagging-progress.log](file:///home/derekboone/evo-x3/records/U42-tagging-progress.log) and [U42-tagging-progress.json](file:///home/derekboone/evo-x3/records/U42-tagging-progress.json).

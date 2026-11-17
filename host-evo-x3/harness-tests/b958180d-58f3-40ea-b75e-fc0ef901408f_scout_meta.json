@@ -1,0 +1,116 @@
+{
+  "runId": "b958180d-58f3-40ea-b75e-fc0ef901408f",
+  "parentSessionId": "01a1e04c-ef44-70fb-8e23-15ab002f7e87",
+  "agent": "scout",
+  "task": "[prompt redacted]",
+  "exitCode": 0,
+  "model": "x3-local/gemma4-heretic:low",
+  "requestedModel": "x3-local/gemma4-heretic",
+  "usage": {
+    "input": 2758,
+    "output": 780,
+    "cacheRead": 7391,
+    "cacheWrite": 0,
+    "cost": 0,
+    "turns": 4
+  },
+  "acceptance": {
+    "status": "attested",
+    "evidenceStatus": "attested",
+    "explicit": false,
+    "effectiveAcceptance": {
+      "level": "attested",
+      "explicit": false,
+      "inferredReason": [
+        "default lightweight attestation"
+      ],
+      "criteria": [
+        {
+          "id": "criterion-1",
+          "must": "Return a concise result and residual risks when applicable",
+          "evidence": [
+            "manual-notes",
+            "residual-risks"
+          ],
+          "severity": "required"
+        }
+      ],
+      "evidence": [
+        "manual-notes",
+        "residual-risks"
+      ],
+      "verify": [],
+      "stopRules": []
+    },
+    "inferredReason": [
+      "default lightweight attestation"
+    ],
+    "criteria": [
+      {
+        "id": "criterion-1",
+        "must": "Return a concise result and residual risks when applicable",
+        "evidence": [
+          "manual-notes",
+          "residual-risks"
+        ],
+        "severity": "required"
+      }
+    ],
+    "runtimeChecks": [],
+    "verifyRuns": [],
+    "childReport": {
+      "criteriaSatisfied": [
+        {
+          "id": "criterion-1",
+          "status": "satisfied",
+          "evidence": "Read the file contents using the 'read' tool and verified it matches the reported content."
+        }
+      ],
+      "changedFiles": [],
+      "testsAddedOrUpdated": [],
+      "commandsRun": [
+        {
+          "command": "ls /home/derekboone/evo-x3/harness-tests/canary.txt",
+          "result": "passed",
+          "summary": "Verified file existence"
+        },
+        {
+          "command": "read /home/derekboone/evo-x3/harness-tests/canary.txt",
+          "result": "passed",
+          "summary": "Read file content"
+        }
+      ],
+      "validationOutput": [
+        "X3-HARNESS-CANARY-7731"
+      ],
+      "residualRisks": [],
+      "noStagedFiles": true,
+      "diffSummary": "Read canary.txt and recorded its contents.",
+      "reviewFindings": [],
+      "manualNotes": ""
+    }
+  },
+  "launchContractDigest": "a466a42ebf208bef38136dd27cbc322bf8cb29a52e23f7ed490b17e7ac228293",
+  "launchResolvedExtensions": {
+    "version": 1,
+    "source": "launch-resolved",
+    "disableAmbientExtensions": false,
+    "runtime": [
+      "sha256:d36f8f4943275f24"
+    ],
+    "configured": [],
+    "required": [],
+    "effective": [
+      "sha256:d36f8f4943275f24"
+    ],
+    "omitted": {
+      "runtime": 0,
+      "configured": 0,
+      "required": 0,
+      "effective": 0
+    }
+  },
+  "transcriptPath": "/tmp/pi-subagents-uid-1000/artifacts/b958180d-58f3-40ea-b75e-fc0ef901408f_scout_transcript.jsonl",
+  "skills": [],
+  "timestamp": 1794764525587
+}
