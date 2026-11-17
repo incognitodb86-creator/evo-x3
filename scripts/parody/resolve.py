@@ -187,21 +187,30 @@ def load_aliases(aliases_path: Optional[Path]) -> Dict[str, str]:
     return {}
 
 
+_REFMOD_SUBJECT_RE = re.compile(r"^minimaxh3_(?:oc_)?(.+?)_v\d+(?:_|$)")
+
+
 def find_refmods_for_name(norm_name: str, refmods_dir: Path) -> List[Path]:
-    """Find local .safetensors RefMod files matching normalized name (exact stem token first; substring only for >=6 chars)."""
+    """Find local .safetensors RefMod files matching a normalized name.
+
+    A file matches exactly when the name equals a leading run of its underscore tokens, so "testachar" keeps both
+    minimaxh3_testachar_v1_refmod and the variant minimaxh3_testachar_alt_v1_refmod (KD17 stacking), and
+    "gabrielleaplin" matches minimaxh3_gabrielle_aplin_v1_refmod, while a short name like "ava" never matches
+    "avaaddams". Substring matching is only a fallback for names of 6+ characters when nothing matched exactly.
+    """
     exact: List[Path] = []
     partial: List[Path] = []
     if not norm_name or not refmods_dir.is_dir():
         return exact
 
-    stem_re = re.compile(r"^minimaxh3_(?:oc_)?([a-z0-9]+?)_v\d+(?:_[a-z0-9]+)*_refmod")
     for f in sorted(refmods_dir.glob("*.safetensors")):
         fname_norm = _normalize_key(f.stem)
-        m = stem_re.match(f.stem.lower())
-        subject_token = m.group(1) if m else ""
-        if subject_token == norm_name or fname_norm == norm_name:
+        m = _REFMOD_SUBJECT_RE.match(f.stem.lower())
+        tokens = [_normalize_key(t) for t in m.group(1).split("_")] if m else []
+        prefixes = {"".join(tokens[:k]) for k in range(1, len(tokens) + 1)}
+        if norm_name in prefixes or fname_norm == norm_name:
             exact.append(f)
-        elif len(norm_name) >= 6 and norm_name in (subject_token or fname_norm):
+        elif len(norm_name) >= 6 and norm_name in ("".join(tokens) or fname_norm):
             partial.append(f)
     return exact if exact else partial
 
