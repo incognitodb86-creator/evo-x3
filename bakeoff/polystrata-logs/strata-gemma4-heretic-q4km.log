@@ -1,0 +1,12 @@
+[strata] 2026-11-15 10:09:34 engine started: /srv/bakeoff/src/PolyStrata/engine-poly/strata-poly --serve --model /srv/bakeoff/heretic-q4km-poly/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf --max-context 32768 --expert-profile /srv/bakeoff/src/PolyStrata-data/packs/gemma4-ud-q4_k_m/expert-profile.txt --draft-model /srv/bakeoff/polystrata-data/gemma4-UD-Q4_K_M/mtp-gemma-4-26B-A4B-it-Q8_0.gguf --conversation-cache-mib auto --kv-whole
+strata-poly: loaded in 10.4 s; 3840 of 3840 routed experts in VRAM (14.1 GiB), 22 CPU threads
+strata-poly: conversation cache sized from the free RAM: 8192 MiB for up to 4 parked conversations (--conversation-cache-mib N sets it, 0 turns it off)
+strata serve: prompt 18709 tokens = 0 reused + 18709 read in 20131 ms (929.4 tok/s), 44 generated in 646 ms (68.1 tok/s), drafts accepted 32 of 37
+strata-poly: conversation cache: parked 18708 tokens in 41.9 ms; parked=1 bytes=1641498624 evictions=0
+strata serve: prompt 35 tokens = 0 reused + 35 read in 242 ms (144.5 tok/s), 900 generated in 14273 ms (63.1 tok/s), drafts accepted 545 of 840
+strata serve: prompt 42 tokens = 0 reused + 42 read in 454 ms (92.5 tok/s), 1114 generated in 18281 ms (60.9 tok/s), drafts accepted 629 of 992
+strata serve: prompt 39 tokens = 0 reused + 39 read in 225 ms (173.2 tok/s), 2262 generated in 35831 ms (63.1 tok/s), drafts accepted 1417 of 2191
+strata serve: prompt 143 tokens = 0 reused + 143 read in 294 ms (485.7 tok/s), 134 generated in 1687 ms (79.4 tok/s), drafts accepted 93 of 109
+strata serve: prompt 190 tokens = 142 reused + 48 read in 196 ms (244.7 tok/s), 27 generated in 296 ms (91.3 tok/s), drafts accepted 19 of 20
+strata serve: prompt 246 tokens = 189 reused + 57 read in 205 ms (277.7 tok/s), 153 generated in 1995 ms (76.7 tok/s), drafts accepted 106 of 132
+strata-poly: 331 of 19404 prompt tokens were not read again (1.7%); 1 conversations parked in 1565 MiB, 0 pushed out; 88654 MiB of VRAM free at the end
