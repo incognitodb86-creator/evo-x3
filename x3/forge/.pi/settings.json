@@ -20,7 +20,8 @@
         "!ce-optimize",
         "!ce-prototype",
         "!lfg"
-      ]
+      ],
+      "extensions": []
     },
     "npm:pi-workspace-history@0.5.2"
   ],
@@ -28,30 +29,17 @@
   "defaultModel": "flash-next-uncensored",
   "defaultThinkingLevel": "medium",
   "thinkingBudgets": {
-    "minimal": 512,
-    "low": 1024,
-    "medium": 2048,
-    "high": 4096
+    "minimal": 1024,
+    "low": 2048,
+    "medium": 4096,
+    "high": 8192
   },
   "extensions": [
     "-builtin:llama.cpp",
     "/home/evo/AI/community/agent-shared/extensions"
   ],
   "skills": [
-    "/home/evo/AI/community/skills",
     "/home/evo/AI/community/agent-shared/skills",
-    "/home/evo/AI/fleet-brain/20_skills/current",
-    "-/home/evo/AI/fleet-brain/20_skills/current/fantasy-news-scout",
-    "-/home/evo/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
-    "-/home/evo/AI/fleet-brain/20_skills/current/household-money-tracker",
-    "-/home/evo/AI/fleet-brain/20_skills/current/tech-deals-watch",
-    "-/home/evo/AI/fleet-brain/20_skills/current/imagine-dump-ops",
-    "-/home/evo/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
-    "-/home/evo/AI/fleet-brain/20_skills/current/h3-hc-render",
-    "-/home/evo/AI/fleet-brain/20_skills/current/h3-max-ref2va-prompt",
-    "-/home/evo/AI/fleet-brain/20_skills/current/h3-parody-identity",
-    "-/home/evo/AI/fleet-brain/20_skills/current/h3-prompting",
-    "-/home/evo/AI/fleet-brain/20_skills/current/video-render",
     "-/home/evo/AI/community/agent-shared/skills/google-voice-texts"
   ],
   "prompts": [
@@ -71,6 +59,11 @@
     "enabled": true
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-uncensored"
-  }
+    "defaultModel": "x3-local/flash-next-uncensored-sub"
+  },
+  "defaultTools": [
+    "+grep",
+    "+find",
+    "+ls"
+  ]
 }
