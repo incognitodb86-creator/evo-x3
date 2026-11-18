@@ -14,8 +14,9 @@ Dynamic options (all optional; omitted = the locked 124f 768x1344 single clip as
                          for additional timed pins across single-shot or multi-beat continuation; never sydney paths)
   --beat-new-shot        1-based beat index (2+) that opens as an intentional C 'new shot' cut (new room or pose)
   --name2 ... --dialogue2  optional second subject (S2)
-  --wait [--qnap-put]    block until BATCH closed, copy/stitch clip.mp4, upload pi-drop/<run>.mp4, and print
-                         final_mp4 + qnap_path in the JSON - one call, no PowerShell polling loop
+  --wait [--qnap-put]    block until BATCH closed, copy/stitch clip.mp4, deliver it to the QNAP runs share
+                         (R:\runs\<run>\clip\clip.mp4), and print final_mp4 + qnap_path in the JSON - one call,
+                         no PowerShell polling loop
 
 Writer hook (dynsafe 2026-11-11, Derrick t903u; Python API only, no CLI flag): submit_writer_run() is Render's production
 path for a free-text OC writer prompt. Writer output (or a write() callable, gated with one retry) -> still read
@@ -210,12 +211,27 @@ def finalize_clip(
             "stitch_proof": [ln for ln in stitch_out.splitlines() if ln.startswith(("PROOF film", "STITCH"))]}
 
 
+# The QNAP folder Derek actually browses is the `renders` share, mounted on this box as R: (\\NAS4CBE37.local\renders),
+# one folder per run with the clip in a subfolder of the same name: <runs>/<run_id>/clip/clip.mp4. The old
+# --qnap-put target (pi_qnap.py's "/pi-drop") is a stray WebDAV-root folder, not a share, so clips landed there
+# where nobody sees them.
+
+
 def qnap_put(final_mp4: Path, run_name: str, python: str) -> Dict[str, Any]:
-    dest = f"pi-drop/{run_name}.mp4"
-    r = subprocess.run([python, str(PI_QNAP_PY), "put", str(final_mp4), dest],
-                       capture_output=True, text=True, timeout=3600)
-    return {"qnap_rc": r.returncode, "qnap_path": dest if r.returncode == 0 else None,
-            "qnap_log": (r.stdout + r.stderr).strip()[-300:]}
+    # Deliver the finished clip to the runs share the way a run dir is laid out on this box and the way Derek
+    # browses it (NAS > renders > runs): <runs>/<run_id>/clip/clip.mp4. pi_qnap.py's rclone remote does NOT expose
+    # the mounted shares, so write through the share path directly (like X3's run_queue PI_DROP). RQ_QNAP_RUNS
+    # overrides the mount. Only clip.mp4 is delivered - the rest of the run dir stays on the box.
+    runs_root = os.environ.get("RQ_QNAP_RUNS", r"R:\runs")   # read at call time; override for a different mount
+    dest = Path(runs_root) / run_name / "clip" / final_mp4.name
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(final_mp4, dest)
+        ok = dest.is_file() and dest.stat().st_size == final_mp4.stat().st_size
+        return {"qnap_rc": 0 if ok else 1, "qnap_path": str(dest) if ok else None,
+                "qnap_log": ("copied %d bytes" % dest.stat().st_size) if ok else "size mismatch after copy"}
+    except Exception as e:  # share not mounted / offline: keep the local clip, report it, never fail the job
+        return {"qnap_rc": 1, "qnap_path": None, "qnap_log": str(e)[:300]}
 
 
 def _resolve(name, character, actor, tone, frames, description):
@@ -1609,7 +1625,7 @@ def main(argv=None) -> int:
     parser.add_argument("--run-dir", help="Direct run directory override")
     parser.add_argument("--dry-run", action="store_true", help="Validate and prepare without submitting")
     parser.add_argument("--wait", action="store_true", help="Block until the batch closes and write <run_dir>/clip.mp4")
-    parser.add_argument("--qnap-put", action="store_true", help="With --wait: upload clip.mp4 to pi-drop/<run>.mp4")
+    parser.add_argument("--qnap-put", action="store_true", help="With --wait: deliver clip.mp4 to the QNAP runs share (R:\runs\\<run>\clip\\)")
     parser.add_argument("--wait-timeout", type=float, default=WAIT_TIMEOUT_SEC)
     # keep-comfy-part1 (2026-11-15): same flag as run_queue.py; only passed through when set.
     parser.add_argument("--keep-comfy-process", action="store_true",

@@ -4409,3 +4409,21 @@ eeds_derrick.md (backup needs_derrick.md.bak-20261107-chatreview); no .pi config
 2026-11-15T23:59:34-06:00 run_queue live-8ee347e: DONE pos=1 tag=clip ok 768x1344 566f audio yes wall=?s bytes=8107181 retry=False
 2026-11-16T00:00:00-06:00 run_queue live-8ee347e: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=566 audio=yes bytes=67449223 elapsed=23.7s raw=clip_raw.mp4
 2026-11-16T00:00:00-06:00 run_queue live-8ee347e: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-17 21:5x CT | START | Forge | install+setup rea-video (JuneYaooo) per Derek
+2026-11-17 21:5x CT | DONE | Forge | rea-video installed (repo forge/tools/rea-video, pip -e .[ocr], PATH + pi skill junction, prefs lang en); verified probe on R2_DarkRoast_S1 = AI/MiniMax. No VLM, no capsule-cinema. Record: forge/tools/rea-video/HANDOFF-forge.md
+2026-11-17T23:04:07-06:00 run_queue face_fuck_sydney_001: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-17T23:04:07-06:00 run_queue face_fuck_sydney_001: START pos=1 tag=clip arm=oc_writer scene=blowjob seed=51083601
+2026-11-17T23:09:32-06:00 run_queue face_fuck_sydney_001: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=4443320 retry=False
+2026-11-17T23:09:53-06:00 run_queue face_fuck_sydney_001: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=30642829 elapsed=19.6s raw=clip_raw.mp4
+2026-11-17T23:09:54-06:00 run_queue face_fuck_sydney_001: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-18T10:40:00-06:00 run_queue run_C01_wet_street_20261118: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-18T10:40:00-06:00 run_queue run_C01_wet_street_20261118: START pos=1 tag=clip arm=oc_writer scene=standing seed=51083601
+2026-11-18T10:45:25-06:00 run_queue run_C01_wet_street_20261118: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=4345347 retry=False
+2026-11-18T10:45:46-06:00 run_queue run_C01_wet_street_20261118: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=31892080 elapsed=19.4s raw=clip_raw.mp4
+2026-11-18T10:45:47-06:00 run_queue run_C01_wet_street_20261118: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-18T10:51:42-06:00 run_queue run_C01_wet_street_20261118: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-18T10:51:42-06:00 run_queue run_C01_wet_street_20261118: START pos=1 tag=clip arm=oc_writer scene=standing seed=51083601
+2026-11-18T10:56:58-06:00 run_queue run_C01_wet_street_20261118: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=4345347 retry=False
+2026-11-18T10:57:09-06:00 run_queue run_C01_wet_street_20261118: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=31892080 elapsed=9.3s raw=clip_raw.mp4
+2026-11-18T10:57:09-06:00 run_queue run_C01_wet_street_20261118: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-18 18:33:44 START forge: fix --qnap-put delivery target to R:\runs\<run>\clip\ (renders share), C01 delivered
