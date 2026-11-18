@@ -60,6 +60,12 @@ Also: every herdr and pi-mobile chat label ends in `-X3` or `-AlienPC`, and a de
 
 Superseded, kept for history: U9/R5 "AlienPC render-only" and audit item I10 (by D8 and D9); U34 "Flash-Next on Halogen stock" (by gate G0); the Oct 10 plan's model choice (its safety ideas are kept).
 
+Not in this plan: render-graph fixes (frame snapping, RefMod `max_frames`, template promotion) belong in the render repo's own fix list. Considered and rejected, so they aren't proposed again (section 8):
+- `amd_iommu=off`: no speed gain on this box, and it removes the NPU.
+- Porting the retired 1,233-line AlienPC guard/truncator: pi already truncates tool output.
+- Running the empyrealworks Swift file on stock gufo: it needs a build upstream declined.
+- Moving embeddings to Halogen's NPU sidecar now. embed-small has no live consumer yet, and the sidecar would tie embeddings to the G0 engine choice. PixlStash ranks pictures with its own built-in CLIP and SBERT embeddings, so NPU embeddings wouldn't improve still picking without building a second search index. Revisit when something actually needs embeddings, such as Open WebUI document search or memory search.
+
 ## 3. How it fits together
 
 ```
@@ -69,7 +75,9 @@ Phone browser --Tailscale :8443--> Open WebUI (X3, 127.0.0.1:3000, host network)
 Hermes runs, as user evo:
   ~/AI/bin/pi-job code   <repo> "<task>"   new worktree ~/AI/worktrees/<id> on a job branch, then pi -p on the X3
   ~/AI/bin/pi-job review <repo> "<what>"   same, read-only tools
-  ~/AI/bin/pi-job render "<ask>"           Render launcher one-shot (dry run; queueing still needs Derrick's yes)
+  ~/AI/bin/pi-job render "<ask>"           Render launcher one-shot (dry run: writes the prompt, queues nothing)
+  ~/AI/bin/pi-job render --still <path> "<ask>"   same, with a picture Derrick dropped in chat (P4.8)
+  ~/AI/bin/pi-job queue <run>              queue-remote.sh <run> --yes-derrick, only after Derrick says yes to that run in chat
   ~/AI/bin/pi-job status <id>
 pi model for code/review: alienpc/coding_swift15_iq3s_esp if the AlienPC is free, else x3-local/flash-next.
 While on the AlienPC, pi-job re-checks every 30 s. If a render started, it stops pi and resumes the
@@ -123,7 +131,7 @@ Phase 0 checks reuse existing fixtures; nothing new is built:
 |---|---|---|---|
 | P0.0 | Ask Max what the in-flight loop fix already changed. Snapshot live llama-swap.yaml, pi settings, herdr scripts and AGENTS.md files to Gitea. Pause the tagger during tests (`systemctl --user stop u42-pixlstash-tagger`; it resumes where it stopped). | Snapshot committed; tagger stopped. | — |
 | P0.1 **Y** | gufo 0.35.0 with `NeosQ/Qwen3.8-Flash-Next-Uncensored-UD-Q4_K_XL`: Unsloth's type table, its own MTP head and vision projector, and a card that says it was tested on gufo and Halogen. Flags from gufo's Flash-Next page (`--speculative mtp --mtp-model ...`) plus `--sessions 2 --context 131072 --preserve-thinking on`, as in the archived gufo slot. | C1-C5 pass. | Load fails, or C3 or C4 fail. |
-| P0.2 **Y** | Halogen 0.20.7 with the existing uncensored slot (huihui HGN; passed U26 on 0.20.5). 0.20.6 fixed replies computed from another conversation's context. | C1-C5. | — |
+| P0.2 **Y** | Halogen 0.20.7 with the existing uncensored slot (huihui HGN; passed U26 on 0.20.5). 0.20.6 fixed replies computed from another conversation's context. If the changelog ships a newer draft head, try it too: speculative decoding changes speed only, never the answers. | C1-C5. | — |
 | P0.3 **Y**, optional (OD1) | Uncensored Swift on the X3: Halogen 0.20.7 with `johnlockejrr/Swift-1.5-Flash-Next-Heretic-ReverseEngineer-HGN`, the only Swift HGN with a load report (no refusal or quality data; 119 GB). | C1-C5. | Skipped unless Derrick wants it. |
 | P0.4 **Y** | Memory: the leading candidate plus embed-small, JoyCaption and ref2va-27b loaded, one request each. | At least 8 GiB MemAvailable; no OOM. | Under 8 GiB: use the matrix rule in section 4. |
 | G0 | Pick what `flash-next` runs. Among candidates passing C1-C4, take the most C5 tasks passed; on a tie, gufo (Derrick's preference); then speed. If P0.3 wins, Swift serves Hermes and X3 coding. | — | Nothing passes: stop and decide with Derrick. |
@@ -136,15 +144,15 @@ Delete a losing candidate's files before downloading the next one, and keep at l
 
 | ID | Step | Pass |
 |---|---|---|
-| P1.1 | B4: commit the X3's live trees to Gitea with `/home/evo` paths and the `agent-shared/extensions` folder. Give `evo` its own Gitea token (I12). | A fresh clone starts Forge with all skills. |
-| P1.2 | B3: Ralph's GPU check uses an X3-only lock with `flock -n`. | A 2-item Ralph loop runs with no 1-hour waits. |
+| P1.1 | B4: commit the X3's live trees to Gitea with `/home/evo` paths and the `agent-shared/extensions` folder, and bring the Gitea branches (`x3-pi-config` and `main`) back into line with what is live. Give `evo` its own Gitea token (I12). | A fresh clone starts Forge with all skills, and the live config matches Gitea. |
+| P1.2 | B3: one lock method for the X3's `gpu-render.lock`. `queue-remote.sh`, `run_queue.py --remote` and Ralph all use `flock -n`; today they mix flock and PID files, which leaves a 0-byte file that Ralph reads as "GPU busy". | A 2-item Ralph loop runs with no 1-hour waits, and a dry-run queue doesn't block it afterwards. |
 | P1.3 | I2: before each Ralph loop, clear stale `fix_plan.md` items. Each pass runs a skill-load smoke test and a file-count cap from `git diff --stat`, and may not edit skills or AGENTS.md. One worktree per loop. | A planted stale item and a planted 30-file rewrite are both refused. |
 | P1.4 | I3: mark the 6 known failing tests xfail with reasons. | The suite is green, and a new failure fails it. |
 | P1.5 | I8: short Always / Ask / Never AGENTS.md files. Replace the `.bak` rule in `community/agent-shared/AGENTS.md` (line 16) with "commit to git; etckeeper for /etc". | No contradictions left between the files. |
 | P1.6 **Y** | I9: set the subagent model per pane (`flash-next-sub`; Render keeps `gemma4-heretic-sub`). Upgrade pi-subagents to 0.88.1 or later with explicit context inheritance. | A Forge subagent causes no model swap. |
 | P1.7 **Y** | B1: agy runs as `evo`, in a per-job worktree, with a time limit. | A test agy job cannot sudo and stops at its limit. |
 | P1.8 **Y** | B2 (OD2): Forge-X3 asks before vault reads, Gitea writes and outbound sends, using the installed pi-permission-system extension. pi itself never asks per tool call, and its `--approve` flag only trusts project settings (pi docs). Headless runs deny those tools. | A planted "read the vault" prompt asks first in Forge-X3 and is denied in Ralph. |
-| P1.9 | Loop limits: load `loop-guard.ts` (stops a third identical tool call) in every pane. Run every headless job (Ralph, pi-job) under `timeout`, because pi has no turn or time limit of its own. On timeout, write a `STUCK` status note. | A planted impossible task ends `STUCK` at its limit. |
+| P1.9 | Loop limits: load `loop-guard.ts` (stops a third identical tool call) in every pane. Run every headless job (Ralph, pi-job) under `timeout`, because pi has no turn or time limit of its own, and pass `--thinking` explicitly, because a new pi session otherwise starts at medium (pi docs). On timeout, write a `STUCK` status note. | A planted impossible task ends `STUCK` at its limit. |
 
 ### Phase 2: names and hygiene
 
@@ -166,8 +174,20 @@ Delete a losing candidate's files before downloading the next one, and keep at l
 |---|---|---|
 | P4.1 **Y** | Install Hermes Agent as `evo` with the official installer. Run `hermes gateway install` (systemd user service) and `loginctl enable-linger evo` (a sudo step; Max runs it after a yes). Provider: llama-swap as an OpenAI-compatible endpoint at `http://127.0.0.1:8080/v1`, model `flash-next`, key `LLM_KEY_HERMES` (already in llama-swap's key list). Pin `context_length`, because Hermes misreads llama.cpp context sizes (issue #155853). Vision: `flash-next` if C6 passed, otherwise `auxiliary.vision` set to `gemma4-heretic` (one swap per picture). If replies come back empty, set `chat_template_kwargs.enable_thinking: false` (Hermes docs). | Hermes answers and survives a reboot. |
 | P4.2 **Y** | API server: `API_SERVER_ENABLED=true`, an `API_SERVER_KEY`, bound to `127.0.0.1:8642`. In Open WebUI (Admin > Settings > Connections), add `http://127.0.0.1:8642/v1` with that key. Open WebUI uses host networking, so loopback works; its environment settings only apply on first launch, so add it in the UI. Name the model `Hermes-X3` and keep Open WebUI's own web search off for it. | The phone reaches Hermes-X3 on :8443, and port 8642 is not reachable from the tailnet. |
-| P4.3 | `~/AI/bin/pi-job` (one short script) plus one Hermes skill explaining when and how to call it. It detaches at once and prints a job ID, writes `~/AI/_runs/<id>/status` and `log`, and `pi-job status <id>` reads them. Hermes's own background tool can't push results into Open WebUI (Hermes docs: API-server completions are "never autonomous new model turns"), so the status file is the check. Optional: one ntfy line when a job ends, if Derrick gives `evo` a publish token for one topic. | Hermes starts a job and reports its status when asked. |
+| P4.3 | `~/AI/bin/pi-job` (one short script) plus one Hermes skill explaining when and how to call it. Roles: `code`, `review`, `render` (dry run), and `queue <run>`, which runs `queue-remote.sh <run> --yes-derrick` only after Derrick says yes to that run in the chat. It detaches at once and prints a job ID, writes `~/AI/_runs/<id>/status` and `log`, and `pi-job status <id>` reads them. Hermes's own background tool can't push results into Open WebUI (Hermes docs: API-server completions are "never autonomous new model turns"), so the status file is the check. Optional: one ntfy line when a job ends, if Derrick gives `evo` a publish token for one topic. | Hermes starts a job and reports its status when asked. |
 | P4.4 | Safety. Hermes's API-server toolsets: terminal, files, memory and skills; no web or browser (OD3). Hermes runs as `evo`, which has no sudo; apart from `llm.env` (the llama-swap caller keys, readable by `evo` per U36), `/etc/evo-x3` is root-only. Set `agent.max_turns`, which is unlimited by default. Keep `unattended_mode: deny` and set a short `approvals.timeout`, because Open WebUI's streaming requests still wait for approval on flagged commands. `command_allowlist` only pre-approves flagged commands and is not a fence. | A flagged command is refused quickly, and a runaway turn stops at `max_turns`. |
+
+### Phase 4b: PixlStash (finding stills, tagging, one media home)
+
+PixlStash already runs on the X3 with the 32,964-picture library (moved there per the Nov 16 location plan, option B). These steps use its official features, following the top-ranked option in the Nov 16 PixlStash study.
+
+| ID | Step | Pass |
+|---|---|---|
+| P4.5 **Y** | Finding stills. Give Render's builder an official PixlStash API client with a read-only token (a 0600 file Derrick types). It ranks candidates with PixlStash's own scores: semantic search (`/api/v1/pictures/search?query=`, CLIP plus SBERT on descriptions) inside the character, then smart score (which penalises defects such as bad hands) and face likeness of at least 0.55, the threshold the tagger already uses. It returns the top 6. Picking (OD8, decided): a small helper builds one labelled 2 x 3 contact sheet of the 6, and the resident vision model picks from it in one vision call, then reads only the winner in full to write `still_read.json`. Update the RUN_ME / AGENTS rule from "never browse library pictures" to "never browse library pictures, except this candidate sheet". Move the builder's character-name lookup from direct `vault.db` SQL to the same API; a one-line SQL filter is fine as a stopgap. | Five sample asks each produce a sheet and a sensible pick, and the chosen still reaches the run folder. |
+| P4.6 | Tagging. Choose the tagger with the pending U47 JoyCaption-vs-Gemma comparison (Derrick tags about 20 pictures); better descriptions also improve semantic search. Lock one "render-ready" set per character using PixlStash's sets and tag review queue. Within those sets only (hundreds of pictures, not all 32,964), add structured tags: `ar:` and `people:` computed from image size and PixlStash's face count (no model needed), and `shot:`, `pose:`, `facing:` from the vision model. Optionally pre-fill the `still_read.json` fields there too. | One tagger chosen; render-ready sets locked and tagged; searches can filter on `shot:` and `pose:`. |
+| P4.7 **Y** (OD7, decided) | One home for finished images and videos: the X3 PixlStash library. Finished renders land in one X3 folder, `~/AI/media/renders/`, which PixlStash's folder watch imports and P4.9 shares for viewing. X3-queued renders already download their outputs to the X3, so they are copied into it. AlienPC-local renders: a scheduled copy of ComfyUI's output folder to a QNAP drop folder, which the X3 moves into it. QNAP keeps the backup, and the database stays on the X3's local disk (the study's rule: never open `vault.db` over a network share). | A render from each machine shows up in PixlStash, searchable, within a few minutes. |
+| P4.8 | Picture dropped in chat. Derrick drops a picture into Open WebUI with his ask ("10 s video from this"). Hermes's API server saves base64 PNG, JPEG, GIF or WebP images (up to 10 per message) under `~/.hermes/cache/documents/native-inputs/` and adds `[Image attached at: <path>]` to the message. This is in Hermes's code (`gateway/session_api_media.py`) but not its docs. The skill passes that path to `pi-job render --still <path> "<ask>"`. pi-job copies the picture into the run folder and the PixlStash intake folder, so it also lands in the library (OD7). Render skips the search and reads the given still; RUN_ME already allows "any still path Derrick names". Fallback if a Hermes update drops the hint: upload the picture to PixlStash and ask for "my latest upload". | A dropped picture produces a `READY` prompt from that exact still and shows up in PixlStash. |
+| P4.9 **Y** | Viewing results in chat. Tailscale Serve shares `~/AI/media/renders/` read-only on a new tailnet-only port (for example `tailscale serve --bg --https=8448 /home/evo/AI/media/renders`; Serve can share a folder directly). The ACL limits that port to Derrick's devices, because the share has no login of its own. When a job finishes, Hermes replies with the file's address: Open WebUI shows pictures inline, and a video opens in the phone's player. To browse the whole library, publish PixlStash's own web UI the same way, behind its login. | A finished render's picture appears inline in the chat and its video plays from the link; a device outside the ACL is refused. |
 
 ### Phase 5: AlienPC Swift lane
 
@@ -216,6 +236,8 @@ Delete a losing candidate's files before downloading the next one, and keep at l
 | OD4 | eGPU model and first workload. | When bought. |
 | OD5 | AlienPC panes after U34's pre-staged change (P5.4). | **Decided (Derrick, 2026-11-18):** Forge-AlienPC back to local Swift; Render and Sydney stay on the X3's Gemma. |
 | OD6 | Hermes channel. The Hermes community mostly uses Telegram or Discord gateways, which also push job results. | Open WebUI (decided); a gateway is optional later. |
+| OD7 | Home for finished images and videos (P4.7). | **Decided (Derrick, 2026-11-18):** the X3 PixlStash library, with QNAP as backup and as the AlienPC drop point. |
+| OD8 | Picking stills (P4.5). | **Decided (Derrick, 2026-11-18):** the resident vision model picks from a 2 x 3 contact sheet of the top 6; the no-view rule is relaxed for candidate sheets only. |
 
 ## 8. Evidence (checked 2026-11-18)
 
@@ -242,6 +264,14 @@ Delete a losing candidate's files before downloading the next one, and keep at l
 | U34 pre-staged the AlienPC panes onto X3 models for the next logon | Verified | U34-rollout-done |
 | Swift is uncensored only with ESP (`experimental_speed_projection: true`) | Verified | `agy_audit_20261025_report.md` |
 | Community pattern: one strong model shared by all agents; llama-swap TTL unloading for specialists; Hermes with gufo and Flash-Next in use | Verified (Reddit, Sep-Oct 2026; gufo #715) | PullPush archive of r/StrixHalo, r/LocalLLM, r/hermesagent |
+| PixlStash has CLIP and SBERT semantic search, face groups and likeness, a smart score with a defect penalty, sets with a tag review queue, folder-watch import and an MCP server | Verified (official docs) | `pixlstash-integration-findings-20261116.md`; pixlstash.dev |
+| PixlStash library and server live on the X3 (location plan option B) | Verified | `pixlstash-location-plan-20261116.md`; U42, U44 |
+| A new pi session starts at medium thinking unless `--thinking` is passed; `qwen-chat-template` sends `enable_thinking: false` at off | Verified | pi `docs/settings.md`, `src/core/sdk.ts`, `ai/src/api/openai-completions.ts` |
+| Hermes's API server saves a base64 image from chat and tells the model `[Image attached at: <path>]`; it has no file-upload route | Verified in code (docs only partly) | NousResearch/hermes-agent `gateway/session_api_media.py`, `api_server.py`; `llms-full.txt` |
+| With `qwen-chat-template`, pi needs no `thinkingLevelMap` to turn thinking off (that map matters only for the plain `openai` format) | Verified | pi `ai/src/api/openai-completions.ts` |
+| `amd_iommu=off` speeds up this box | Wrong: U19 measured on and off as a wash, and the NPU device disappears when it is off | `bakeoff/RESULTS.md` U19 rows |
+| X3 Forge needs AlienPC's tool-output truncator | Not needed: pi's bash keeps the last 50 KB by itself, and the 1,233-line guard was retired in the Oct 23-25 "make pi stock" reset | `forge-opus-verify` notes; `archive/2026-10-23-prereset` |
+| Stock gufo 0.35.0 runs `empyrealworks` Swift abliterated | Wrong: its Q4_1 tensors need a gufo build upstream declined (#906) | HF card; gufo #906 |
 
 ## 9. Rollback
 
