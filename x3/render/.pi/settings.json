@@ -24,13 +24,20 @@
     }
   ],
   "defaultProvider": "x3-local",
-  "defaultModel": "flash-next-uncensored",
-  "defaultThinkingLevel": "off",
+  "defaultModel": "flash-next-uncensored-v2",
+  "defaultThinkingLevel": "low",
   "extensions": [
     "-builtin:llama.cpp"
   ],
   "skills": [
     "~/AI/community/skills",
+    "-~/AI/community/skills/alienpc-hardcore-i2v-director",
+    "-~/AI/community/skills/alienpc-stills-pose-edit-prompting",
+    "-~/AI/community/skills/comfy-render",
+    "-~/AI/community/skills/h3-hc-render",
+    "-~/AI/community/skills/h3-max-ref2va-prompt",
+    "-~/AI/community/skills/image-render",
+    "-~/AI/community/skills/video-render",
     "~/AI/community/agent-shared/skills",
     "~/AI/fleet-brain/20_skills/current",
     "-~/AI/fleet-brain/20_skills/current/fantasy-news-scout",
@@ -51,16 +58,62 @@
   ],
   "compaction": {
     "enabled": true,
-    "reserveTokens": 24576,
-    "keepRecentTokens": 16384
+    "reserveTokens": 32768,
+    "keepRecentTokens": 20000,
+    "modelOverrides": {
+      "x3-local/flash-next": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/qwen27b": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      }
+    }
   },
   "images": {
     "blockImages": false,
     "autoResize": true
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-uncensored",
-    "disableThinking": true,
-    "defaultThinking": "off"
+    "defaultModel": "x3-local/flash-next-uncensored-sub",
+    "disableThinking": false,
+    "defaultThinking": "low"
   }
 }
