@@ -1,0 +1,14 @@
+{
+  // Render writer lane only (pi session cwd C:/AI/render). Max Architect 3, 2026-11-13, Derrick t1355
+  // ("Yes, apply the revised 6 cleanup steps", step 1: lock writes). Project layer of pi-permission-system 0.8.0:
+  // it can only tighten the global ~/.pi/agent/pi-permissions.jsonc (global denies stay floors). Last match wins.
+  // Render's file tools may write/edit only inside run folders; everything else (templates, scripts, skills,
+  // AGENTS.md, llama-swap, stray relative paths under C:/AI/render) is denied. Forge/Sydney are unaffected
+  // (they run from other cwds).
+  "tools": {
+    "edit:*": "deny",
+    "write:*": "deny",
+    "edit:C:/AI/community/runs/*": "allow",
+    "write:C:/AI/community/runs/*": "allow"
+  }
+}
