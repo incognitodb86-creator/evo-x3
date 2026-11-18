@@ -1,0 +1,130 @@
+// P2.4 Tailscale ACL Draft (reference template for Derrick's Admin Console edit)
+// DO NOT paste blindly without downloading your current policy first!
+// Admin Console: https://login.tailscale.com/admin/acls
+//
+// Instructions (PLAN-v3.2.md P2.4):
+// 1. Download/copy your CURRENT Tailscale policy first (to preserve any Oct 30 NT-1 rules,
+//    tagOwners, groups, and any personal laptop / household devices not shown in live `tailscale status`).
+// 2. Replace the broad `"dst": ["*:*"]` allow-all rule with:
+//    a) Broad access to every device EXCEPT the 3 gated hosts on their gated ports
+//       (evo-x3-1:8443, alienpc:8446-8447, qnap:8447).
+//       Note: `evo-x3-1` also has `:8445` serving loopback :9537 (PixlStash). Confirm if you want
+//       `:8445` excluded here (`8443,8445` skipped) and added to the `evo-x3-1` narrow rule too.
+//    b) Explicit `: *` rules for all other devices/tags in your Machines list (since ACL rules cannot subtract).
+// 3. Add the 3 narrow rules below, updating `"group:derrick-devices"` (or IP/host aliases) to match
+//    all of your personal devices (e.g., phone + laptop + AlienPC + evo-x3-1).
+// 4. Keep the `"tests"` section so Tailscale refuses to save if a deny test fails or an allow test breaks.
+// 5. Click "Preview" / "Save" only after all ACL tests pass.
+
+{
+  "hosts": {
+    "evo-x3-1": "100.79.53.113",
+    "alienpc": "100.64.221.102",
+    "qnap": "100.79.137.20",
+    "pixel-9-pro-xl": "100.118.223.107",
+    "evo-x3-win": "100.113.160.70", // Windows install, offline; evo-x3-1 (100.79.53.113) is this Linux X3,
+    "alfred-box": "100.65.114.30",
+    "grok-box": "100.91.255.124",
+    "grokbot-1": "100.73.32.50",
+    "grokbot-2": "100.103.175.80"
+  },
+
+  // Preserve your existing tagOwners from the downloaded policy here!
+  // "tagOwners": { ... },
+
+  "acls": [
+    // 1. Preserve existing tailnet access on all non-gated ports for evo-x3-1, alienpc, qnap,
+    //    and full `:*` access to every other device/tag in your Machines list.
+    {
+      "action": "accept",
+      "src": ["*"],
+      "dst": [
+        // X3: skip 8443 (Open WebUI + P4.9 /renders). Keeps :22, :443 (llama-swap), :8444 (pi-mobile), etc.
+        // If restricting PixlStash :8445 too, change to: "evo-x3-1:1-8442,8444,8446-65535"
+        "evo-x3-1:1-8442,8444-65535",
+        // AlienPC: skip 8446-8447 (ComfyUI + P5.1 Swift fail-fast gate)
+        "alienpc:1-8445,8448-65535",
+        // QNAP: skip 8447 (ntfy-renders). Keeps SSH, Gitea, Kuma, SMB/backups.
+        "qnap:1-8446,8448-65535",
+        // All other existing devices keep full :* (add any household/laptop devices or tags from your policy)
+        "pixel-9-pro-xl:*",
+        "evo-x3-win:*",
+        "tag:box:*",
+        "grokbot-1:*",
+        "grokbot-2:*"
+        // Also keep any existing "tag:*" entries from your downloaded policy: "<tag>:*",
+      ]
+    },
+
+    // 2. Narrow rule: X3 :8443 (Open WebUI + /renders) for Derrick's devices only
+    //    (Add ":8445" if you also want PixlStash restricted to Derrick's devices.)
+    {
+      "action": "accept",
+      "src": [
+        "pixel-9-pro-xl",
+        "alienpc",
+        "evo-x3-1"
+        // Add your laptop host/IP here if applicable
+      ],
+      "dst": [
+        "evo-x3-1:8443"
+      ]
+    },
+
+    // 3. Narrow rule: AlienPC :8446-8447 (ComfyUI + fail-fast Swift gate) for evo-x3-1 and Derrick's devices only
+    {
+      "action": "accept",
+      "src": [
+        "evo-x3-1",
+        "pixel-9-pro-xl",
+        "alienpc"
+        // Add your laptop host/IP here if applicable
+      ],
+      "dst": [
+        "alienpc:8446-8447"
+      ]
+    },
+
+    // 4. Narrow rule: QNAP :8447 (ntfy-renders) for evo-x3-1, alienpc, and pixel-9-pro-xl only
+    {
+      "action": "accept",
+      "src": [
+        "evo-x3-1",
+        "alienpc",
+        "pixel-9-pro-xl"
+      ],
+      "dst": [
+        "qnap:8447"
+      ]
+    }
+  ],
+
+  // Required by P2.4: Tailscale validates these tests before saving any ACL edit.
+  "tests": [
+    {
+      "src": "pixel-9-pro-xl",
+      "accept": ["evo-x3-1:8443", "qnap:8447", "alienpc:8446"],
+      "deny": []
+    },
+    {
+      "src": "evo-x3-1",
+      "accept": ["alienpc:8446", "alienpc:8447", "qnap:8447"],
+      "deny": []
+    },
+    {
+      "src": "alienpc",
+      "accept": ["evo-x3-1:443", "qnap:8447"],
+      "deny": []
+    },
+    {
+      "src": "tag:box",
+      "accept": ["evo-x3-1:22", "evo-x3-1:443", "qnap:22"],
+      "deny": ["evo-x3-1:8443", "alienpc:8446", "alienpc:8447", "qnap:8447"]
+    },
+    {
+      "src": "tag:nas",
+      "accept": ["evo-x3-1:22"],
+      "deny": ["evo-x3-1:8443", "alienpc:8446", "alienpc:8447"]
+    }
+  ]
+}

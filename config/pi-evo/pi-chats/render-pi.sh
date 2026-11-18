@@ -22,7 +22,9 @@ export PATH="$R/x3/.venv/bin:$HOME/.local/bin:$PATH"
 # Owner-only stills token is loaded here on the live host; path and value omitted from this snapshot.
 [ -r "<owner-only token file>" ] && export PIXL_KEY="<redacted>"
 exec pi --approve \
+  --name "${RENDER_NAME:-Render-X3}" \
   --no-extensions \
+  --exclude-tools contact_supervisor \
   -e "$R/.pi/npm/node_modules/pi-permission-system/index.ts" \
   -e "$HOME/.pi/agent/npm/node_modules/cc-safety-net/dist/pi/index.js" \
   -e "$R/.pi/extensions/loop-guard.ts" \
@@ -34,6 +36,7 @@ exec pi --approve \
   --skill "$S/h3-parody-identity" --skill "$S/h3-prompting" \
   --no-context-files \
   --append-system-prompt "${RENDER_PROMPT_FILE:-$R/OPERATOR.md}" \
+  --append-system-prompt "You are Render-X3 on evo-x3." \
   --model "${RENDER_MODEL:-x3-local/flash-next-uncensored-v2}" \
   --thinking "${RENDER_THINKING:-low}" \
   "$@"
