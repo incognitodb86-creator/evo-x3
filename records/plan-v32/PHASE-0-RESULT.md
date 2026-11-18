@@ -1,88 +1,63 @@
-# PLAN-v3.2 Phase 0 Result (P0.0 Complete; Waiting on Derrick **Y** for P0.1–P0.4)
+# PLAN-v3.2 Phase 0 Result (P0.0 Complete; Derrick Y Recorded; P0.1–P0.4 Held While Render Busy)
 
-- **Date:** 2026-11-18 14:14 CST
-- **Branch / Base commit:** `evo-x3` branch `u58` (`50e84a8`)
-- **X3 Lease (`/home/derekboone/AI/locks/x3-lease.txt`):** `0` bytes (read-only checks + staged scripts/records only; no live restarts or config edits run)
-- **Status:** `P0.0` **PASS**; stopped at **`P0.1 Y`–`P0.4 Y`** awaiting Derrick's approval.
-
----
-
-## 1. P0.0 Snapshot, In-Flight State, and Readiness Checks
-
-### 1.1 Live `llama-swap` and Resident Model (`BRIEF.md` v2 cutover state)
-- `llama-swap.service`: `active (running)` since `2026-11-18 13:49:44 CST` (`Main PID: 1844542`).
-- Resident model in `/running` (`HTTP 200`): `flash-next-uncensored-v2` (`state: "ready"`, `ttl: 0`), served by `ghcr.io/peonist-ai/halogen-flash-server@sha256:773073448dc9ff4a8c6b6c278802e254fd5f1546764e27531aeb3b77cb13482e` (`0.20.7`), weights `/srv/models/flash-next-uncensored-v2-hgn` (`johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-v2-HGN`).
-- Halogen `127.0.0.1:8081/health`: `status: "ok"`, `version: {"api": "0.20.7", "engine": "0.20.7", "match": true}`, `vision.enabled: true`, `slots: 4`, `slot_ctx: 262144`, `kv_pool_positions: 524288`, `drafter_default: "mtp"`, `drafter_weights_loaded: true`, `chat_template.probe: "passed"`.
-- `verify-serve.sh` (`https://evo-x3-1.tailf242b2.ts.net/v1/models`):
-  - `no key: 401`
-  - `LLM_KEY_BOX: 200`
-- Live `/etc/evo-x3/llama-swap.yaml` and repo `config/llama-swap.yaml` match byte-for-byte (`sha256: b11edc691be44ef0137a144ef4b5cd9710ee771a3f9ddbb7d991fffb69840e85`).
-- Memory & GTT baseline (while `flash-next-uncensored-v2` is resident):
-  - `MemTotal: 130476452 kB`
-  - `MemFree: 5212504 kB`
-  - `MemAvailable: 23398000 kB` (~22.3 GiB)
-  - `Mlocked: 66001200 kB` (~62.9 GiB)
-  - `/sys/class/drm/card1/device/mem_info_gtt_total: 128849018880` (120.0 GiB)
-  - `/sys/class/drm/card1/device/mem_info_gtt_used: 29824745472` (~27.78 GiB)
-  - `/sys/class/drm/card1/device/mem_info_vram_total: 1073741824` (1.0 GiB)
-  - `/sys/class/drm/card1/device/mem_info_vram_used: 163053568` (~155.5 MiB)
-- Disk free (`/dev/mapper/fedora-root` mounted on `/`): `1.7T` size, `1.1T` used, `600G` available (`64%`).
-
-### 1.2 In-Flight Loop Steps, U58 Phases, Tagger, and Queued Render (`P0.0`)
-- **Tagger:** `u42-pixlstash-tagger.service` and `u42-pixlstash-tagger.timer` are both `inactive` (disabled since Nov 17).
-- **Render `c6c416c5` (`BRIEF.md`):** Completed cleanly on AlienPC ComfyUI before any Phase 0 work touched the X3:
-  - `/home/evo/AI/community/runs/sydney_hesitant_stand/_render_queue.log`: `2026-11-18T14:01:09-06:00 DONE pos=1 tag=clip ok 768x1344 192f audio yes ... bytes=2527471 retry=False`, `BATCH closed rc=0 ... comfyui_auto unloaded, lock released`.
-  - `/home/evo/AI/community/runs/sydney_hesitant_stand/_run_queue.out.log`: `2026-11-18 14:01:09 CT gpu_lock release rc=0 released`.
-- **Panes (`herdr pane list` as `evo`):**
-  - `w3:p1` (`render`, `/home/evo/AI/render`): `agent_status: "idle"` (`flash-next-uncensored-v2 • low`, footer `28.4%/262k`).
-  - `w4:p1` (`forge`, `/home/evo/AI/forge`): `agent_status: "idle"` (`(x3-local-coding) flash-next-uncensored-v2 • medium`, footer `0.0%/262k`).
-- **Loop steps & U58 status (from commits `32a46c0`, `4ab1d15`, `50e84a8`, `u58-chat-read-plan` `44bc639` and live file inspection):**
-  - **Completed on live X3:**
-    - `loop-guard.ts` and `auto-continue.ts` (including `EN_DEFER` and 400-char threshold) are present in `/home/evo/AI/render/.pi/extensions/` and `auto-continue.ts` + `loop-guard.ts` are present in `/home/evo/AI/forge/.pi/extensions/`.
-    - Render and Forge default models switched to `flash-next-uncensored-v2` (Render `--thinking low`, Forge `--thinking medium`, `thinkingBudgets` `{minimal: 1024, low: 2048, medium: 4096, high: 8192}` in `/home/evo/AI/forge/.pi/settings.json`).
-    - Live `/home/evo/.pi/agent/settings.json`, `/home/evo/AI/forge/.pi/settings.json`, `/home/evo/.pi/panes/forge/settings.json`, and `/home/evo/.pi/panes/render/settings.json` have `compaction.modelOverrides` (`reserveTokens: 32768`, `keepRecentTokens: 20000` for main models; `16384` / `20000` for `-sub`), and pane `settings.json` files set `sessionDir: "/home/evo/.pi/agent/sessions"`.
-  - **Still open / drift to handle in Phase 1 (P1.10 / U58):**
-    - Live `/home/evo/.pi/agent/models.json` (and `config/pi-evo/models.json.example`) still sets `contextWindow: 262144` on main resident-slot entries (`flash-next`, `flash-next-uncensored`, `flash-next-uncensored-v2`, `gemma4-heretic`, `gemma4-heretic-sub`) rather than `131072`.
-    - Tracked `config/pi-evo/forge-project-settings.json` still differs from live `/home/evo/AI/forge/.pi/settings.json` (`thinkingBudgets` `8192/16384` and `compaction.reserveTokens: 131072` vs live `modelOverrides`).
-    - U58's synthetic compaction gate test (confirming one compaction entry near ~98K on the 131K window) is not yet recorded as passed.
-    - No active background `agy` run on loopfix (`agy-hydrogen` tmux session has only the finished `21d6520f` v2 cutover process).
-
-### 1.3 Weights & Benchmark Fixtures Verified on Disk
-- **Resident Halogen v2 HGN:** `/srv/models/flash-next-uncensored-v2-hgn` (present, live).
-- **Huihui v2 GGUF (`P0.3` candidate):** `/srv/models/flash-next-uncensored-huihui-v2` was deleted per `BRIEF.md`, **but** the 4 sha256-verified shards of `huihui-ai/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba` (`104 GiB`, `sha_exit=0` in `sha256.check`) remain at `/srv/bakeoff/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba/` (`Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf` .. `00004`).
-- **Shared MTP GGUF (`P0.3`):** `/srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf` (`2.6G`).
-- **Existing C2/C3/C4/C6 fixtures in `~/evo-x3`:**
-  - C2: `u34/pool_test.py` (currently targets `"model": "flash-next"`, 2x200K + 2x32K; for 131K / gufo 2x131K planned session counts it needs parameterization).
-  - C3: `bakeoff/u26/refusal_key.py`.
-  - C4: `records/gufo-phase1-20261117/bench_auth.py` (`--tasks tool`) + a 2-request `tool_choice: "none"` check.
-  - C5: `deepu105/quant-bench` is **not** cloned on disk yet (existing coding fixtures are `bakeoff/u26/forge_task.py` and `bench_auth.py --tasks code`).
-  - C6: `bakeoff/bench/vision_bench.py` + `bakeoff/bench/vision-test.png`.
+- **Date:** 2026-11-18 14:30 CST
+- **Branch / Base commit:** `evo-x3` branch `u58` (`834356f`)
+- **X3 Lease (`/home/derekboone/AI/locks/x3-lease.txt`):** `0` bytes (no lease taken; read-only prep only)
+- **Status:** `P0.0` **PASS**; Derrick's `t2462s8784` **Y** approvals recorded; **HOLD active (2:23 PM / 2:26 PM CT)** while Render (`w3:p1`) is busy — zero benchmarks (`C1`–`C6`), zero `llama-swap` restarts, zero model loads/unloads, zero container pulls, and zero package installs executed.
 
 ---
 
-## 2. Phase 0 Deliverable Created
+## 1. Derrick Approvals Recorded (`t2462s8784`, 2:20 PM CT)
 
-- **`/home/derekboone/evo-x3/scripts/apply-llama-swap.sh`** (`0755`):
-  - Validates YAML syntax, checks for duplicate model/alias IDs across `models` and `filters.setParamsByID`, verifies `hooks.on_startup.preload` targets exist, and runs `/usr/local/bin/llama-swap -config <candidate> -validate` with `/etc/evo-x3/llm.env` sourced in a root subshell.
-  - Requires an active lease in `/home/derekboone/AI/locks/x3-lease.txt` for live apply.
-  - Backs up `/etc/evo-x3/llama-swap.yaml` to `/etc/evo-x3/_archive/llama-swap.yaml.bak-YYYYMMDD-HHMMSS`, installs candidate (`0644 root:root`), restarts `llama-swap.service`, and polls up to `180s` (`NRestarts == 0`, `http://127.0.0.1:8080/health == 200`, preloaded model(s) `state == "ready"` in `/running`, and `verify-serve.sh` returning `no key: 401` and `LLM_KEY_BOX: 200`).
-  - Auto-restores the backup and restarts `llama-swap` on any failure.
-  - **Checks run after final edit:**
-    - `bash -n /home/derekboone/evo-x3/scripts/apply-llama-swap.sh` -> exit `0`
-    - `/home/derekboone/evo-x3/scripts/apply-llama-swap.sh --validate-only /home/derekboone/evo-x3/config/llama-swap.yaml` -> exit `0`, `YAML and unique-alias check passed. Preload models: flash-next-uncensored-v2`, `config is valid: 7 model(s), 0 peer(s)`.
+| Gate | Answer | Notes |
+|---|---|---|
+| **Q1 (`P0.1 Y` & `P0.2 Y`)** | **YES** | Run C2–C6 on the live `flash-next-uncensored-v2` slot and clone `deepu105/quant-bench` for C5. |
+| **Q2 (`P0.3 Y`)** | **YES** | Run `P0.3` (`gufo 0.35.0` image pull, `907 MB` `mmproj-Qwen3.8-Flash-Next-BF16.gguf` download, temporary slot swap for C1–C6), then restore Halogen v2 HGN and verify it serves; take the X3 lease line for the swap and clear it after restore. |
+| **Q3 (`P0.4 Y`)** | **YES** | Run `P0.4` memory check and reserve **`2.5 GB`** for `P4.10` NPU models (no TTS). |
+| **AlienPc Forge SSH** | **NOT APPROVED** | Leave `forge_alienpc` as is. |
+
+### Active HOLD (2:23 PM CT & 2:26 PM CT)
+- Render (`w3:p1`) is actively working for Derrick (`herdr pane list` shows `w3:p1` `agent_status: "working"`, writing a 60s continuation batch).
+- Per HOLD: no benchmarks (`C1`–`C6`), no `P0.3` slot swap, no `llama-swap` restart, no `apply-llama-swap.sh` live run, and no model load/unload until Max confirms Render is idle. Zero requests were sent to `127.0.0.1:8080` or `127.0.0.1:8081`.
 
 ---
 
-## 3. Open Questions Requiring Derrick's **Y** (Stop Before P0.1–P0.4)
+## 2. Read-Only Prep Completed Under HOLD
 
-1. **`P0.1 Y` & `P0.2 Y` (Live Halogen 0.20.7 + Huihui v2 HGN checks, no restart):**
-   - `BRIEF.md` notes the v2 HGN cutover (`flash-next-uncensored-v2`) is already live and the v1 HGN folder is deleted, so `P0.1` and `P0.2` converge onto testing the live `flash-next-uncensored-v2` slot without restarting `llama-swap`.
-   - **Question:** May we run C2–C6 on the live `flash-next-uncensored-v2` slot now (`P0.1`/`P0.2`), and for **C5** (`deepu105/quant-bench`, 11 Aider polyglot tasks), should we clone `deepu105/quant-bench` onto the X3 (~small repo) to run those 11 tasks or substitute the existing `bakeoff/u26/forge_task.py` + `bench_auth.py` coding checks?
+1. **C5 (`deepu105/quant-bench`) cloned and prepped (zero LLM calls):**
+   - Cloned `https://github.com/deepu105/quant-bench` -> `/home/derekboone/evo-x3/bench/quant-bench`.
+   - Executed `python3 /home/derekboone/evo-x3/bench/quant-bench/quant_bench.py prep --agent --data /home/derekboone/.cache/quant-bench`:
+     - `math.jsonl` (3 problems), `lcb.jsonl` (`arc196_c`, `arc196_a`, `arc196_d`), `speed-corpus.jsonl` (172 statements), and `polyglot-benchmark` cloned to `/home/derekboone/.cache/quant-bench/polyglot-benchmark`.
+   - Wrote `/home/derekboone/evo-x3/records/plan-v32/quant-bench-c5.toml` (`sets = ["agent"]`, `runs = 1`, `host = "127.0.0.1"`, `port = 8081`, `ctx = 131072`, `served_name = "flash-next-uncensored-v2"`, `timeout_s = 300`, dummy `[engines.live]` `cmd = "sleep 86400"`).
+   - Verified `python3 /home/derekboone/evo-x3/bench/quant-bench/quant_bench.py run /home/derekboone/evo-x3/records/plan-v32/quant-bench-c5.toml --dry-run` -> `=== live/resident / sleep 86400` (exit `0`).
+   - **C5 compiler preflight (read-only check):** `cmake` (`4.3.0`) and `g++` (`16.2.1`) are installed and the 3 C++ tasks bundle `test/catch.hpp`. All 4 Rust tasks (`Cargo.toml`) and 4 Go tasks (`go.mod`) have zero external crate/module dependencies, **but** `cargo`/`rust` (`~40 MB` dnf) and `golang` (`~1.5 MB` dnf) are not currently installed on the host. No packages installed under HOLD; will note/confirm once HOLD lifts.
 
-2. **`P0.3 Y` (gufo 0.35.0 + Huihui v2 GGUF candidate test):**
-   - Even though `/srv/models/flash-next-uncensored-huihui-v2` was deleted, all 4 sha256-verified shards (`104 GiB`) of `huihui-ai/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba` are still on disk in `/srv/bakeoff/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba/`.
-   - **Question:** Do you want us to run `P0.3` (`gufo-runtime:0.35.0` image pull + `907 MB` `mmproj-Qwen3.8-Flash-Next-BF16.gguf` download + temporary resident-slot swap via `apply-llama-swap.sh` for C1–C6, then restore Halogen v2 HGN), or skip `P0.3` and proceed to `G0` with Halogen 0.20.7 + Huihui v2 HGN?
+2. **Staged C2 / C3 / C4 / C6 Benchmark Harness:**
+   - Wrote `/home/derekboone/evo-x3/records/plan-v32/run_c2_c4_c6.py` (`0755`):
+     - **C2:** concurrent `/v1/chat/completions` needle tests (`--c2-jobs`).
+     - **C3:** runs `/home/derekboone/evo-x3/bakeoff/u26/refusal_key.py` via `--key-stdin`.
+     - **C4:** 3-trial 3-step tool chain checking distinct non-empty `tool_call.id`s (gufo #780), plus 2 requests with `tool_choice: "none"` checking no tool calls and no leaked XML/JSON tool text (gufo #1232).
+     - **C6:** runs `/home/derekboone/evo-x3/bakeoff/bench/vision_bench.py` against `http://127.0.0.1:8081` with `vision-test.png`.
+   - Verified `python3 -m py_compile /home/derekboone/evo-x3/records/plan-v32/run_c2_c4_c6.py` -> exit `0`.
 
-3. **`P0.4 Y` (Memory co-residency check):**
-   - Live `MemAvailable` with `flash-next-uncensored-v2` alone is `~22.3 GiB`.
-   - **Question:** May we run `P0.4` on the `G0` winner (`embed-small` load + `MemAvailable` check, followed by one `joycaption` request only if `MemAvailable` meets the `>= 13.5 GiB` floor, plus `+2.5 GB` / `+6.5 GB` if Halogen NPU models in P4.10 are planned)?
+3. **Staged P0.3 Candidate `llama-swap.yaml` Files (Not Applied):**
+   - Verified GHCR `ghcr.io/gufo-org/toolboxes/gufo-runtime:0.35.0` digest via `skopeo inspect`:
+     - `sha256:99e9b5471b7a9b007c686c2aa795afaf966744d64e753cb009c89541f9e9c2b6` (`org.opencontainers.image.version: 0.35.0`, created `2026-11-17T08:40:40Z`).
+   - Verified Hugging Face `huihui-ai/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF` vision file:
+     - `mmproj-Qwen3.8-Flash-Next-BF16.gguf` (`907,543,008` bytes, `sha256: b1a82259702816a5330d7bd7607cd9676b11780e79ff7348c21103ff3ce49bd0`).
+   - Wrote `/home/derekboone/evo-x3/records/plan-v32/llama-swap.yaml.p03-gufo-v2` (with `--mtp-model ... --speculative mtp`) and `/home/derekboone/evo-x3/records/plan-v32/llama-swap.yaml.p03-gufo-v2-nospec` (`--speculative off`), updating only `flash-next-uncensored-v2`'s `cmd` and matching `useModelName: "flash-next-uncensored-v2"` via `--served-model-name flash-next-uncensored-v2`.
+   - Verified both with `/home/derekboone/evo-x3/scripts/apply-llama-swap.sh --validate-only` -> exit `0`, `YAML and unique-alias check passed. Preload models: flash-next-uncensored-v2`, `config is valid: 7 model(s), 0 peer(s)`.
+
+---
+
+## 3. P0.0 Snapshot Summary (Baseline Before HOLD)
+
+- `llama-swap.service`: `active (running)` since `2026-11-18 13:49:44 CST`, serving `flash-next-uncensored-v2` on Halogen `0.20.7` (`vision.enabled: true`, 4 slots, 524,288 KV pool, MTP drafter loaded).
+- `verify-serve.sh`: `no key: 401`, `LLM_KEY_BOX: 200`. Live `/etc/evo-x3/llama-swap.yaml` matches `config/llama-swap.yaml` (`sha256: b11edc691be44ef0137a144ef4b5cd9710ee771a3f9ddbb7d991fffb69840e85`).
+- `MemAvailable: 23398000 kB` (~22.3 GiB), `Mlocked: 66001200 kB`, GTT used `29824745472` (~27.78 GiB / 120 GiB), `/` free `600G`.
+- `u42-pixlstash-tagger.service` and `.timer`: `inactive`.
+- Earlier AlienPC render `c6c416c5` completed at `14:01:09-06:00` (`DONE pos=1 tag=clip ok ... bytes=2527471`, `gpu_lock release rc=0`).
+- Phase 1 read-only audit notes (ready for when Phase 1 runs):
+  - `B3` / `P1.2`: `remote_comfy.py` uses `fcntl.flock(..., LOCK_EX | LOCK_NB)`.
+  - `I3` / `P1.4`: `community/scripts/tests/test_p6_review.py` (6 ffmpeg `subprocess.Popen` errors when run alongside `parody/test_c2v_context.py`'s `sys.addaudithook`) was observed in `U56-render-writer-fixes/baseline-community.txt`.
+  - `P1.10`: `models.json` and `config/pi-evo/models.json.example` still use `contextWindow: 262144` on resident-slot entries instead of `131072`.

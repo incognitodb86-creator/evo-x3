@@ -1,0 +1,21 @@
+# quant-bench C5 configuration for PLAN-v3.2 Phase 0
+# Connects to the already-running resident engine on 127.0.0.1:8081 via a no-op dummy Server process
+# so llama-swap and the resident container are never restarted or stopped by quant_bench.py.
+
+results = "/home/derekboone/evo-x3/records/plan-v32/c5-results"
+data = "/home/derekboone/.cache/quant-bench"
+runs = 1
+sets = ["agent"]
+host = "127.0.0.1"
+port = 8081
+ctx = 131072
+served_name = "flash-next-uncensored-v2"
+
+[agent]
+timeout_s = 300
+
+[engines.live]
+cmd = "sleep 86400"
+
+[models.resident]
+path = "live"
