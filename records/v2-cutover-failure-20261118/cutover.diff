@@ -1,0 +1,52 @@
+49a50
+>             - "flash-next-uncensored-v2"
+150a152,184
+>   "flash-next-uncensored-v2":
+>     # 2026-11-18 Derrick 12:09 CT cutover: johnlockejrr/Huihui-Qwen3.8-Flash-Next-abliterated-v2-HGN (qwen-community-1.0),
+>     # sha256 verified in /srv/models/flash-next-uncensored-v2-hgn. Same engine image and flags as v1. v1 slot kept until v2 passes all checks.
+>     cmd: |
+>       podman run --rm --name llama-swap-flash-next-uncensored-v2
+>         -p 127.0.0.1:8081:8731
+>         --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
+>         -e HALOGEN_MODEL_ID=flash-next-uncensored-v2 -e HALOGEN_CTX=262144
+>         -e HALOGEN_KV_POOL_POSITIONS=524288 -e HALOGEN_KV_SLOTS=4
+>         -e HALOGEN_WEIGHTS_LOCK=1
+>         -e HALOGEN_CHECKPOINT=/models/model.hgn
+>         -e HALOGEN_VISION_TOWER=1
+>         -e HALOGEN_REASONING_EFFORT=medium -e HALOGEN_MAX_THINKING_TOKENS=8192
+>         -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
+>         -v /srv/models/flash-next-uncensored-v2-hgn:/models:ro
+>         ghcr.io/peonist-ai/halogen-flash-server@sha256:773073448dc9ff4a8c6b6c278802e254fd5f1546764e27531aeb3b77cb13482e
+>     proxy: "http://127.0.0.1:8081"
+>     ttl: 0  # Derrick t71u 2026-11-17: stay loaded; a cold start with ref2va resident is ~2.35 GiB short
+>     # 2026-11-17 5:00 PM CT (Derrick t2261s8122): restored 524288 pool / 4 slots (gemma gone, Sydney deleted, Gufo canceled).
+>     # 2026-11-17 (Derrick t61u/t62u): pool halved to 262144 (HALOGEN_KV_POOL_POSITIONS) and slots 4 -> 3
+>     # 2026-11-17 09:01 Max: MAX_TOK 16384 tried 08:58 then reverted (Derrick t70u); Sydney moved to flash-next-uncensored so gemma4-heretic no longer swaps this slot out.
+>     # (HALOGEN_KV_SLOTS=3, concurrencyLimit 3) so one request can still use the full 262K context, while
+>     # three at once share the pool. JoyCaption is no longer resident (t61u).
+>     concurrencyLimit: 4
+>     useModelName: "flash-next-uncensored-v2"
+>     filters:
+>       setParamsByID:
+>         "flash-next-uncensored-v2-sub":
+>           reasoning_effort: low
+>         "flash-next-uncensored-sub":
+>           reasoning_effort: low
+>     checkEndpoint: "/health"
+> 
+313c347
+<       - flash-next-uncensored
+---
+>       - flash-next-uncensored-v2
+319,322c353,358
+<       gemma4-heretic: flash-next-uncensored
+<       gemma4-heretic-sub: flash-next-uncensored
+<       flash-next: flash-next-uncensored
+<       flash-next-sub: flash-next-uncensored
+---
+>       gemma4-heretic: flash-next-uncensored-v2
+>       flash-next-uncensored: flash-next-uncensored-v2
+>       flash-next-uncensored-sub: flash-next-uncensored-v2
+>       gemma4-heretic-sub: flash-next-uncensored-v2
+>       flash-next: flash-next-uncensored-v2
+>       flash-next-sub: flash-next-uncensored-v2
