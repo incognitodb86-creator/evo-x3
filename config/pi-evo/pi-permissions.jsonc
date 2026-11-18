@@ -57,6 +57,10 @@
     "mcp_playwright_browser_file_upload": "deny",
     "mcp_playwright_browser_evaluate": "deny",
     "mcp_playwright_browser_run_code_unsafe": "deny",
+    // 2026-11-17 6:47 PM CT option1 (Derrick 6:44 PM): pi 1.5.2 names MCP tools mcp__<server>__<tool>; old mcp_playwright_* names above no longer match. Same intent: block these three.
+    "mcp__playwright__browser_file_upload": "deny",
+    "mcp__playwright__browser_evaluate": "deny",
+    "mcp__playwright__browser_run_code_unsafe": "deny",
     // 2026-10-28 Derek: "Yes, install both web tools for Pi". open-websearch 2.2.0 (stdio, duckduckgo+startpage only, its page-fetch tools disabled) and mcp-server-fetch 2026.10.24 (blocks private/loopback/file). Results are UNTRUSTED data; never put secrets in queries or URLs.
     // --- ALI-159 (Derrick 2026-10-22 2:41 PM CT, comfy-mcp trial): Comfy-Org comfy-mcp at :10004. Deny all, then allow only
     // read / validate / single run-wait / job status / outputs. Launch, stop, node install, model download, update stay denied. ---
@@ -225,7 +229,34 @@
     "write:/home/evo/AI/forge/ralph-community/*.sh": "deny",
     "edit:/home/evo/AI/forge/ralph-community/logs/*": "deny",
     "write:/home/evo/AI/forge/ralph-community/logs/*": "deny",
-    "ask_user_question": "deny"
+    "ask_user_question": "deny",
+    // P1.8 (B2 / OD2, Derrick 2026-11-18): Forge-X3 asks before vault reads, Gitea writes, and outbound sends.
+    // pi-permission-system automatically blocks "ask" rules in non-interactive headless runs (ralph.sh also denies them).
+    "mcp__vaultwarden": "ask",
+    "mcp__vaultwarden__*": "ask",
+    "mcp_vaultwarden_*": "ask",
+    "mcp__gitea__*create*": "ask",
+    "mcp__gitea__*update*": "ask",
+    "mcp__gitea__*delete*": "ask",
+    "mcp__gitea__*merge*": "ask",
+    "mcp__gitea__*fork*": "ask",
+    "mcp__gitea__*push*": "ask",
+    "mcp__gitea__*write*": "ask",
+    "mcp__gitea__*edit*": "ask",
+    "mcp__gitea__*add*": "ask",
+    "mcp__gitea__*remove*": "ask",
+    "mcp_gitea_*create*": "ask",
+    "mcp_gitea_*update*": "ask",
+    "mcp_gitea_*delete*": "ask",
+    "mcp_gitea_*merge*": "ask",
+    "mcp_gitea_*fork*": "ask",
+    "mcp_gitea_*push*": "ask",
+    "mcp__google-workspace__*send*": "ask",
+    "mcp__google-workspace__*create*": "ask",
+    "mcp__google-workspace__*post*": "ask",
+    "mcp__google_workspace__*send*": "ask",
+    "mcp__google_workspace__*create*": "ask",
+    "mcp__google_workspace__*post*": "ask"
   },
 
   "mcp": {
@@ -258,7 +289,18 @@
     "comfy_mcp:upload_file": "deny",
     "comfy_mcp_upload_file": "deny",
     "comfy_mcp:auth_login": "deny",
-    "comfy_mcp_auth_login": "deny"
+    "comfy_mcp_auth_login": "deny",
+    // P1.8 (B2 / OD2): vault reads, Gitea writes, outbound sends
+    "vaultwarden:*": "ask",
+    "vaultwarden_*": "ask",
+    "gitea:*create*": "ask",
+    "gitea:*update*": "ask",
+    "gitea:*delete*": "ask",
+    "gitea:*merge*": "ask",
+    "gitea:*fork*": "ask",
+    "gitea:*push*": "ask",
+    "google-workspace:*send*": "ask",
+    "google_workspace:*send*": "ask"
   },
 
   "bash": {
@@ -284,6 +326,11 @@
     "*homeassistant*": "ask", "*home-assistant*": "ask", "*:8123*": "ask", "*unlock*": "ask", "*disarm*": "ask", "*open_cover*": "ask", "*garage*": "ask",
     "*payment*": "ask", "*purchase*": "ask", "*checkout*": "ask", "*stripe*": "ask", "*paypal*": "ask",
     "*password*": "ask", "*passwd*": "ask", "*token*": "ask", "*api_key*": "ask", "*apikey*": "ask", "*secret*": "ask", "*credential*": "ask",
+    // P1.8 (B2 / OD2): ask before vault reads, Gitea writes (pushes/API writes), and outbound sends
+    "*vaultwarden*": "ask", "*bitwarden*": "ask", "bw *": "ask", "* bw *": "ask",
+    "git push*": "ask", "*git push*": "ask", "*git -C * push*": "ask",
+    "*ntfy*": "ask", "*sendmail*": "ask", "*msmtp*": "ask", "*mailx*": "ask",
+    "*curl *-d *@*": "ask", "*curl *--data*http*": "ask", "*curl *-F *": "ask", "*curl *--upload-file*": "ask", "*wget *--post*": "ask",
     "*.env": "deny", "*.env *": "deny", "*/.env*": "deny", "*\\.env*": "deny",
     "*auth.json*": "deny", "*rclone.conf*": "deny", "*.pem*": "deny", "*id_rsa*": "deny", "*id_ed25519*": "deny", "*/home/evo/AI/secrets*": "deny", "*/home/evo/AI/secrets*": "deny",
     "*Remove-Item*gpu-render.lock*": "deny", "*rm *gpu-render.lock*": "deny", "*del *gpu-render.lock*": "deny", "*Move-Item*gpu-render.lock*": "deny", "*Set-Content*gpu-render.lock*": "deny", "*Out-File*gpu-render.lock*": "deny", "*>*gpu-render.lock*": "deny",

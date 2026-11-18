@@ -13,7 +13,7 @@
             "text",
             "image"
           ],
-          "contextWindow": 262144,
+          "contextWindow": 131072,
           "maxTokens": 32768,
           "samplingParams": {
             "temperature": 1.0,
@@ -30,7 +30,7 @@
           "id": "gemma4-heretic-sub",
           "name": "X3 local Gemma 4 26B A4B Heretic Q8_0 subagent (maxTokens 4096, thinking off)",
           "reasoning": false,
-          "contextWindow": 262144,
+          "contextWindow": 131072,
           "maxTokens": 4096,
           "compat": {
             "thinkingFormat": "qwen-chat-template",
@@ -65,7 +65,7 @@
           "input": [
             "text"
           ],
-          "contextWindow": 262144,
+          "contextWindow": 131072,
           "maxTokens": 32768,
           "samplingParams": {
             "temperature": 1.0,
@@ -156,7 +156,7 @@
             "text",
             "image"
           ],
-          "contextWindow": 262144,
+          "contextWindow": 131072,
           "maxTokens": 32768,
           "samplingParams": {
             "temperature": 1.0,
@@ -247,7 +247,7 @@
             "text",
             "image"
           ],
-          "contextWindow": 262144,
+          "contextWindow": 131072,
           "maxTokens": 32768,
           "samplingParams": {
             "temperature": 1.0,
@@ -345,7 +345,7 @@
             "text",
             "image"
           ],
-          "contextWindow": 262144,
+          "contextWindow": 131072,
           "maxTokens": 32768,
           "samplingParams": {
             "temperature": 0.6,
@@ -391,7 +391,7 @@
             "text",
             "image"
           ],
-          "contextWindow": 262144,
+          "contextWindow": 131072,
           "maxTokens": 32768,
           "samplingParams": {
             "temperature": 0.6,

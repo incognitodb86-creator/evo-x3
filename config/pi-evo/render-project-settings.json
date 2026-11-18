@@ -58,15 +58,61 @@
   ],
   "compaction": {
     "enabled": true,
-    "reserveTokens": 24576,
-    "keepRecentTokens": 16384
+    "reserveTokens": 32768,
+    "keepRecentTokens": 20000,
+    "modelOverrides": {
+      "x3-local/flash-next": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/qwen27b": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      }
+    }
   },
   "images": {
     "blockImages": false,
     "autoResize": true
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-uncensored-v2",
+    "defaultModel": "x3-local/flash-next-uncensored-sub",
     "disableThinking": false,
     "defaultThinking": "low"
   }
