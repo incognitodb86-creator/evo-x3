@@ -17,5 +17,8 @@ timeout_s = 300
 [engines.live]
 cmd = "sleep 86400"
 
-[models.resident]
+[models.halogen-v2]
+path = "live"
+
+[models.gufo-v2]
 path = "live"

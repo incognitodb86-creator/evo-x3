@@ -1,0 +1,7 @@
+{
+  "arm": "flash-next-uncensored-v2",
+  "model": "flash-next-uncensored-v2",
+  "error": "<HTTPError 400: 'Bad Request'>",
+  "elapsed_s": 0.0022842884063720703,
+  "vision_works": false
+}

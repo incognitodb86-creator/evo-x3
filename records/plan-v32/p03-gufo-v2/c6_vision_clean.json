@@ -1,0 +1,134 @@
+{
+  "elapsed_s": 1.618,
+  "usage": {
+    "prompt_tokens": 297,
+    "completion_tokens": 66,
+    "total_tokens": 363,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "cached_tokens": 0,
+    "prompt_tokens_per_second": 656.5832821299698,
+    "completion_tokens_per_second": 57.24536103326489,
+    "draft_tokens": 91,
+    "draft_tokens_accepted": 49,
+    "gufo": {
+      "component_cache": {
+        "schema": "component-cache-v1",
+        "reuse": "none",
+        "selection_reason": 6,
+        "deepest_live_tokens": 0,
+        "deepest_ram_tokens": 0,
+        "deepest_disk_tokens": 0,
+        "selected_tokens": 0,
+        "restored_bytes": 0,
+        "prefilled_tokens": 297,
+        "captures": 2,
+        "captured_capacity_bytes": 277413888,
+        "borrowed_capacity_bytes": 6815744,
+        "copied_payload_bytes": 268004964,
+        "captured_checkpoint_ids": [
+          29847,
+          29875
+        ],
+        "global_spill": {
+          "idle_bytes": 553713664,
+          "foreground_bytes": 1208156160,
+          "idle_copy_ms": 34.628963,
+          "foreground_copy_ms": 73.466739,
+          "stream_wait_ms": 1.161803,
+          "residual_wait_ms": 114.425582,
+          "reassignments": 21,
+          "idle_failures": 0
+        },
+        "global_ledger_bytes": 1931724014,
+        "global_ram_bytes": 1931724014,
+        "global_peak_ledger_bytes": 1938178686,
+        "global_peak_ram_bytes": 1938178686,
+        "global_persistence_pinned_bytes": 0,
+        "global_peak_persistence_pinned_bytes": 0,
+        "global_categories": {
+          "backing_free": {
+            "bytes": 136708096,
+            "reserved_bytes": 0,
+            "peak_bytes": 1899233280
+          },
+          "backing_assigned": {
+            "bytes": 6815744,
+            "reserved_bytes": 6815744,
+            "peak_bytes": 1163984896
+          },
+          "backing_materialized": {
+            "bytes": 537788416,
+            "reserved_bytes": 0,
+            "peak_bytes": 1206190080
+          },
+          "private_state": {
+            "bytes": 1201471488,
+            "reserved_bytes": 0,
+            "peak_bytes": 1735458816
+          },
+          "private_tail": {
+            "bytes": 16449536,
+            "reserved_bytes": 0,
+            "peak_bytes": 46858240
+          },
+          "metadata": {
+            "bytes": 32490734,
+            "reserved_bytes": 0,
+            "peak_bytes": 38945406
+          },
+          "transfer_staging": {
+            "bytes": 0,
+            "reserved_bytes": 0,
+            "peak_bytes": 0
+          }
+        }
+      },
+      "cache_hit": false,
+      "cache_miss_reason": "no_compatible_boundary",
+      "cache_common_prefix_tokens": 261,
+      "cache_checkpoint_tokens": 0,
+      "cache_restore_bytes": 0,
+      "cache_snapshot_bytes": 274820708,
+      "cache_disk_queued_bytes": 0,
+      "cache_shared_bytes": 0,
+      "cache_restore_ms": 0,
+      "cache_snapshot_ms": 5.375514,
+      "cache_disk_enqueue_ms": 0.0011,
+      "cache_disk_hit": false,
+      "draft_rounds": 17,
+      "prefill_tokens": 297,
+      "prefill_chunks": 2,
+      "active_decode_prefill_chunks": 0,
+      "max_prefill_chunk_tokens": 288,
+      "max_prefill_layer_groups": 1,
+      "prefill_yield_rounds": 0,
+      "queue_depth_at_submit": 1,
+      "client_queue_depth_at_submit": 1,
+      "resident_requests_at_admission": 1,
+      "requested_logical_concurrency": 2,
+      "physical_execution_width": 1,
+      "queue_ms": 3.354677,
+      "shared_prefix_wait_ms": 0,
+      "prefill_ms": 452.341703,
+      "decode_ms": 1152.93185,
+      "ttft_ms": 458.963703,
+      "mean_inter_token_ms": 17.770258015384616,
+      "max_inter_token_ms": 81.161288,
+      "execution_plan": "serial-fallback"
+    }
+  },
+  "checks": {
+    "yellow_or_gold_circle": true,
+    "red_square": true,
+    "green_triangle": true,
+    "text_x3_bakeoff": false
+  },
+  "checks_passed": 3,
+  "vision_works": true,
+  "content": "The image features a blue background with three distinct shapes: a yellow circle in the upper left, a red square in the upper right, and a green triangle centered near the bottom. In the top-left corner, there is white text on a black rectangular banner that reads \u201cXB-BAKEOFF\u201d in bold, uppercase letters."
+}
