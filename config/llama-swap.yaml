@@ -55,8 +55,21 @@ routing:
           exclusive: false
           members:
             - "embed-small"
+            # 2026-11-17 (Derrick t61u/t62u): ref2va-27b is resident so it is not evicted when
+            # a flash-next-uncensored request arrives (non-persistent members were unloaded at 08:47:57 CT).
+            # Start order remains Halogen first, then this group. JoyCaption stays off the persistent list.
+            # - "ref2va-27b"  # removed 2026-11-17 5:00 PM CT (Derrick t2263u): not used; frees RAM for the 4-slot pool
+        # joycaption kept in a non-exclusive group (not ungrouped: that would swap the main model).
+        "ondemand-small":
+          swap: false
+          persistent: false
+          exclusive: false
+          members:
+            - "joycaption"
 
 models:
+  # 2026-11-17 08:3x (Derrick via parent): Halogen shared-host recipe (host-setup docs, issue #202): HALOGEN_WEIGHTS_LOCK=1 on both
+  # flash-next slots + vm.compact_unevictable_allowed=0 (/etc/sysctl.d/90-halogen-compaction.conf) + LimitMEMLOCK=infinity drop-in.
   "flash-next":
     # U26 2026-11-15 ~5:30 PM CT (Derrick t1774s6524 "Move Forge to Halogen native and test it at full context"):
     # official Peonist Halogen native v2 checkpoint (peonist-ai/halogen-qwen3.8-flash-next: qwen38-flash-next-v2.hgn
@@ -68,12 +81,14 @@ models:
     # Sampling defaults = Qwen card / old Gufo preset (1.0 / 0.95 / 20); requests that send their own win. Effort medium.
     # Loopback publish (-p 127.0.0.1) instead of --network=host: the image's API binds [::], host network would expose it.
     # Rollback: Gufo slot archived at ~/evo-x3/u34/flash-next-gufo-slot-archived-20261116.yaml (U34), or backup llama-swap.yaml.bak-20261115-172352-pre-u26-halogen.
+    # 2026-11-17 Derrick t2322: HALOGEN_MAX_THINKING_TOKENS=8192 = Strix Halo community reasoning cap (llama.cpp --reasoning-budget 8192); requests sending thinking_budget win.
     cmd: |
       podman run --rm --name llama-swap-flash-next
         -p 127.0.0.1:8081:8731
         --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
         -e HALOGEN_MODEL_ID=flash-next -e HALOGEN_CTX=262144
-        -e HALOGEN_REASONING_EFFORT=medium
+        -e HALOGEN_WEIGHTS_LOCK=1
+        -e HALOGEN_REASONING_EFFORT=medium -e HALOGEN_MAX_THINKING_TOKENS=8192
         -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
         -v /srv/models/flash-next-halogen:/models:ro
         ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
@@ -102,19 +117,35 @@ models:
     # U26 bench (cold, effort low): load 25 s; 18k prefill 1,859 / decode 81 long, 61 prose; 127k 1,790 / 71; 237k 1,688 / 69,
     # needle found at both; tools 3/3; Forge coding task pass; write1/write2 pass; refusal probes comply 3/3 (stock refuses
     # explicit_adult). 88.9 GiB engine total, same as stock. Vision sidecar present but not loaded (text-only slot).
+    # VISION re-enabled 08:3x with WEIGHTS_LOCK recipe (wedged 08:0x without it). HALOGEN_VISION_TOWER=1 loads qwen38-flash-next-vision.hgn (BF16 tower from the same
+    # source snapshot, sha b6ca6716..., per the pack README). Render + Forge use this slot.
+    # 2026-11-17 Derrick t2322: HALOGEN_MAX_THINKING_TOKENS=8192 = Strix Halo community reasoning cap (llama.cpp --reasoning-budget 8192); requests sending thinking_budget win.
     cmd: |
       podman run --rm --name llama-swap-flash-next-uncensored
         -p 127.0.0.1:8081:8731
         --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
         -e HALOGEN_MODEL_ID=flash-next-uncensored -e HALOGEN_CTX=262144
+        -e HALOGEN_KV_POOL_POSITIONS=524288 -e HALOGEN_KV_SLOTS=4
+        -e HALOGEN_WEIGHTS_LOCK=1
         -e HALOGEN_CHECKPOINT=/models/model.hgn
-        -e HALOGEN_REASONING_EFFORT=medium
+        -e HALOGEN_VISION_TOWER=1
+        -e HALOGEN_REASONING_EFFORT=medium -e HALOGEN_MAX_THINKING_TOKENS=8192
         -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
         -v /srv/models/flash-next-uncensored-hgn:/models:ro
         ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
     proxy: "http://127.0.0.1:8081"
-    ttl: 3600
-    concurrencyLimit: 1
+    ttl: 0  # Derrick t71u 2026-11-17: stay loaded; a cold start with ref2va resident is ~2.35 GiB short
+    # 2026-11-17 5:00 PM CT (Derrick t2261s8122): restored 524288 pool / 4 slots (gemma gone, Sydney deleted, Gufo canceled).
+    # 2026-11-17 (Derrick t61u/t62u): pool halved to 262144 (HALOGEN_KV_POOL_POSITIONS) and slots 4 -> 3
+    # 2026-11-17 09:01 Max: MAX_TOK 16384 tried 08:58 then reverted (Derrick t70u); Sydney moved to flash-next-uncensored so gemma4-heretic no longer swaps this slot out.
+    # (HALOGEN_KV_SLOTS=3, concurrencyLimit 3) so one request can still use the full 262K context, while
+    # three at once share the pool. JoyCaption is no longer resident (t61u).
+    concurrencyLimit: 4
+    useModelName: "flash-next-uncensored"
+    filters:
+      setParamsByID:
+        "flash-next-uncensored-sub":
+          reasoning_effort: low
     checkEndpoint: "/health"
 
   "gemma4-heretic":
@@ -146,7 +177,9 @@ models:
         --mmproj /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-unsloth-mmproj-BF16.gguf
         --jinja --load-mode none -fa on
         --reasoning-format deepseek
-        -np 2 -c 524288
+        # U44 2026-11-16: raised -np 2->3 and concurrencyLimit 2->3 for 3-way concurrent VLM tagging;
+        # -c 393216 = 3 x 131072 per slot (keeps total KV ~7.5 GiB instead of U27's 1M crash, fits 560-1120 img tokens + prompt).
+        -np 4 -c 524288
         -b 2048 -ub 2048
         --image-min-tokens 560 --image-max-tokens 1120
         --temp 1.0 --top-p 0.95 --top-k 64
@@ -155,7 +188,8 @@ models:
     ttl: 3600
     # U27 2026-11-15 ~7:08 PM CT: tried -np 4 -c 1048576 / concurrencyLimit 4 (Phase 1); llama-server aborted twice in
     # server_slot::prompt_save (GGML_ASSERT tensor not allocated, kyuz0 build 12405) on a Render subagent run. Rolled back to -np 2.
-    concurrencyLimit: 2
+    # U44 2026-11-16: concurrencyLimit 2->3 to match -np 3.
+    concurrencyLimit: 4  # Max 2026-11-16 (Derrick t1994u): 4th slot so Render and the 3-way tagger share Gemma; 4 x 131072 = 524288 (half the U27 1M crash config). Rollback: llama-swap.yaml.bak-20261116-gemma-np4-pre
     # U31 2026-11-15 (Derrick t1819u): alias on the SAME slot, not a new exclusive-group member.
     # Render subagents use gemma4-heretic-sub (maxTokens 4096, thinking off in models.json).
     # U34 2026-11-16 (plan U33 G3): gemma4-heretic-sub forces thinking OFF server-side (Gemma 4: only
@@ -220,3 +254,69 @@ models:
     proxy: "http://127.0.0.1:8083"
     ttl: 86400
     checkEndpoint: "/health"
+  "joycaption":
+    # Off by default as of 2026-11-17 (Derrick t61u): not in the small persistent group so Ref2VA can fit next to Halogen.
+    # Entry kept so it can still be loaded on demand.
+    # U47 2026-11-16 (Derrick t1985s7307): JoyCaption Beta One (Llama 3.1 8B + SigLIP2 LLaVA) Q8_0 + f16 mmproj
+    # from concedo/llama-joycaption-beta-one-hf-llava-mmproj-gguf (base: fancyfeast/llama-joycaption-beta-one-hf-llava).
+    # Non-exclusive "small" group on loopback port 8084 so gemma4-heretic stays resident on 8081.
+    # Settings from model card / AlienPc: ctx 4096, temp 0.6, top_p 0.9, -fa on, -ngl all.
+    cmd: |
+      podman run --rm --name llama-swap-joycaption
+        --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+        llama-server --host 127.0.0.1 --port 8084
+        -m /srv/models/joycaption/Llama-Joycaption-Beta-One-Hf-Llava-Q8_0.gguf
+        --mmproj /srv/models/joycaption/llama-joycaption-beta-one-llava-mmproj-model-f16.gguf
+        --jinja --load-mode none -fa on -ngl all
+        -np 1 -c 4096
+        --temp 0.6 --top-p 0.9
+        --alias joycaption
+    proxy: "http://127.0.0.1:8084"
+    ttl: 300
+    concurrencyLimit: 1
+    checkEndpoint: "/health"
+  # ref2va-27b disabled 2026-11-17 5:00 PM CT (Derrick t2263u): unused; block kept commented for rollback
+  # "ref2va-27b":
+  #   # U48 2026-11-16 (Derrick t1989s7329): LightX2V MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA Q4_K_M + F16 mmproj
+  #   # from pytraveler/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-GGUF (llama.cpp build 12405 >= b10310).
+  #   # Non-exclusive "small" group on loopback port 8085 so gemma4-heretic stays resident on 8081.
+  #   # Settings from plan / publisher validation: ctx 32768, thinking off, greedy (temp 0), output budget 4096, -ngl 999, -fa on.
+  #   cmd: |
+  #     podman run --rm --name llama-swap-ref2va-27b
+  #       --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups
+  #       --security-opt seccomp=unconfined
+  #       -v /srv/models:/srv/models:ro,Z
+  #       docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+  #       llama-server --host 127.0.0.1 --port 8085
+  #       -m /srv/models/ref2va-27b/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-Q4_K_M.gguf
+  #       --mmproj /srv/models/ref2va-27b/mmproj-MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-F16.gguf
+  #       --jinja --load-mode none -fa on -ngl 999
+  #       -np 1 -c 32768 -n 4096
+  #       --temp 0
+  #       --chat-template-kwargs '{"enable_thinking":false}'
+  #       --alias ref2va-27b
+  #   proxy: "http://127.0.0.1:8085"
+  #   ttl: 300
+  #   concurrencyLimit: 1
+  #   checkEndpoint: "/health"
+
+# 2026-11-17 09:45 CT (Derrick t76 approval): keep flash-next-uncensored from being swapped out.
+# hooks.on_startup.preload loads Halogen FIRST on every llama-swap start (before ref2va/embed can fill RAM);
+# profile halogen-only pins the old main-group names to the resident Halogen slot so a stray request
+# for gemma4-heretic / flash-next no longer evicts it. qwen27b left alone. Backup: llama-swap.yaml.bak-20261117-094500-pre-preload-pins
+hooks:
+  on_startup:
+    preload:
+      - flash-next-uncensored
+    profile: halogen-only
+profiles:
+  halogen-only:
+    description: all chat names resolve to the resident Halogen uncensored slot
+    pins:
+      gemma4-heretic: flash-next-uncensored
+      gemma4-heretic-sub: flash-next-uncensored
+      flash-next: flash-next-uncensored
+      flash-next-sub: flash-next-uncensored

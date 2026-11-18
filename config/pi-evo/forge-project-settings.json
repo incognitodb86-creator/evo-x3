@@ -1,0 +1,69 @@
+{
+  "packages": [
+    "npm:pi-permission-system@0.8.0",
+    "npm:pi-memory@0.4.2",
+    "npm:@plannotator/pi-extension@0.28.40",
+    "npm:pi-canvas@0.1.1",
+    "npm:pi-say@1.1.1",
+    {
+      "source": "git:github.com/EveryInc/compound-engineering-plugin@34492307",
+      "skills": [
+        "!ce-babysit-pr",
+        "!ce-resolve-pr-feedback",
+        "!ce-test-browser",
+        "!ce-proof",
+        "!ce-strategy",
+        "!ce-riffrec-feedback-analysis",
+        "!ce-ideate",
+        "!ce-pov",
+        "!ce-bakeoff",
+        "!ce-optimize",
+        "!ce-prototype",
+        "!lfg"
+      ],
+      "extensions": []
+    },
+    "npm:pi-workspace-history@0.5.2"
+  ],
+  "defaultProvider": "x3-local",
+  "defaultModel": "flash-next-uncensored",
+  "defaultThinkingLevel": "medium",
+  "thinkingBudgets": {
+    "minimal": 1024,
+    "low": 2048,
+    "medium": 8192,
+    "high": 16384
+  },
+  "extensions": [
+    "-builtin:llama.cpp",
+    "/home/evo/AI/community/agent-shared/extensions"
+  ],
+  "skills": [
+    "/home/evo/AI/community/agent-shared/skills",
+    "-/home/evo/AI/community/agent-shared/skills/google-voice-texts"
+  ],
+  "prompts": [
+    "/home/evo/AI/community/agent-shared/prompts"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 131072,
+    "keepRecentTokens": 32768
+  },
+  "images": {
+    "blockImages": false,
+    "autoResize": true
+  },
+  "httpIdleTimeoutMs": 1950000,
+  "workspaceHistory": {
+    "enabled": true
+  },
+  "subagents": {
+    "defaultModel": "x3-local/flash-next-uncensored-sub"
+  },
+  "defaultTools": [
+    "+grep",
+    "+find",
+    "+ls"
+  ]
+}

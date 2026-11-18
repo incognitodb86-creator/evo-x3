@@ -34,7 +34,7 @@ Environment=WEBUI_URL=https://evo-x3-1.tailf242b2.ts.net:8443
 # which can put the key on a process command line. The key stays in
 # EnvironmentFile=/etc/evo-x3/openwebui.env (root 0600) and is inherited
 # as an environment variable only.
-Exec=/usr/local/bin/python3 -m uvicorn open_webui.main:app --host 127.0.0.1 --port 3000 --forwarded-allow-ips * --workers 1 --ws-per-message-deflate true
+Exec=/usr/local/bin/python3 -m uvicorn open_webui.main:app --host 127.0.0.1 --port 3000 --forwarded-allow-ips 127.0.0.1 --workers 1 --ws-per-message-deflate true
 
 [Service]
 Restart=always

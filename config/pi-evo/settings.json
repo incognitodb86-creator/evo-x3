@@ -7,7 +7,7 @@
     "npm:pi-mobile@0.4.0"
   ],
   "defaultProvider": "x3-local",
-  "defaultModel": "gemma4-heretic",
+  "defaultModel": "flash-next-uncensored",
   "defaultThinkingLevel": "off",
   "enableInstallTelemetry": false,
   "enableAnalytics": false,
@@ -24,7 +24,7 @@
     }
   },
   "subagents": {
-    "defaultModel": "x3-local/gemma4-heretic"
+    "defaultModel": "x3-local/flash-next-sub"
   },
   "lastChangelogVersion": "1.5.2",
   "extensionChangelogVersions": {
