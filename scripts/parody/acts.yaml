@@ -491,6 +491,7 @@ acts:
   standing_mf:
     id: standing_mf
     aliases:
+      - "standing"
       - "standing sex"
       - "standing fuck"
       - "standing missionary"
