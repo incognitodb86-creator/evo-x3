@@ -49,7 +49,7 @@ K="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; cd "$K" || exit 5
 day=$(date +%Y%m%d)
 if [ -n "$LogPath" ]; then logDir="$(dirname "$(realpath -m "$LogPath")")"; idx="$(realpath -m "$LogPath")"
 elif [ -n "$CommandOverride" ]; then logDir="${TMPDIR:-/tmp}/ralph_override_$$"; idx="$logDir/ralph.log"
-else logDir="$K/logs"; idx="$logDir/ralph.log"; fi
+else logDir="$HOME/AI/_runs/ralph"; idx="$logDir/ralph.log"; fi
 mkdir -p "$K/logs" "$K/sessions" "$K/notes" "$K/_archive" "$logDir"
 run="$logDir/ralph-$day-$$.log"
 log() { local l; l="$(date +%Y-%m-%dT%H:%M:%S) $*"; printf '%s\n' "$l" >>"$idx"; printf '%s\n' "$l" >>"$run"; printf '%s\n' "$l"; }
