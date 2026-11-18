@@ -257,7 +257,19 @@ Small improvements, not fixes; each stays inside an existing script. Pick any on
 | L2 | **Poster image:** one ffmpeg frame grab per clip into `/srv/renders/<run_id>.jpg`, so Hermes's reply shows a picture above the video link instead of a blank player. | A few lines in P4.7 |
 | L3 | **Abandoned worktrees:** nightly, for worktrees in `~/AI/_worktrees` older than 7 days, save `git status` and `git diff` to the job's `_runs` folder, then `git worktree remove` and `prune`. P2.3 only cleans up merged branches today. | A few lines in the P2.3 timer |
 | L4 | **Contact sheet in chat:** copy P4.5's 2 x 3 sheet to `/srv/renders/sheets/`, show it in the dry-run reply, and add `pi-job render --pick N` so Derrick can choose another panel before rendering. | Small |
-| L5 | **`pi-job status` overview** with no job ID: the resident model and MemAvailable, whether the AlienPC is rendering, and the last 3 jobs with their result links. | Small |
+| L5 | **`pi-job status` overview** with no job ID: the resident model and MemAvailable, whether the AlienPC is rendering, and the last 3 jobs with their result links. For one-tap use from the phone, save "status" as an Open WebUI prompt; no Open WebUI Action button, which would need a new host endpoint and could bypass Hermes. | Small |
+| L6 | **STUCK bundle:** when a job ends `STUCK`, pi-job writes `~/AI/_runs/<id>/escalate.md` with the task, `git status` and diff, and the last 3 tool errors from the session, ready to paste into GrokBot (D3). | A few lines in P4.3 |
+| L7 | **Syntax check after edits:** a small pi extension runs `python3 -m py_compile`, `bash -n` or `jq empty` on the edited file and adds the error to the tool result only when something is broken, so the model fixes it on the next call instead of looping. Test first that pi's extension API can add to a tool result. Look at pi's own "text not found" message before adding a whitespace hint. | About 40 lines in `agent-shared/extensions` |
+| L8 | **Fast prompt edit:** `pi-job recompile <run_id>` reruns only the writer pipeline's linter and graph filler after Derrick changes a line of `prompt.txt`. It must pass the same READY / NOT_READY gate, and it sends a new code tied to the new prompt hash (P4.11). | Small |
+
+### For the render repo (handoff, not plan steps)
+
+Render-graph changes belong in the render repo's own fix list (section 2). These came from a Nov 18 review. Treat them as same-seed tests, because its benchmark numbers have no source and it got the `comfyui_auto` timer wrong (it's 300 s, not 900).
+- **NVIDIA sysmem fallback:** set "CUDA - Sysmem Fallback Policy" to "Prefer No Sysmem Fallback" for ComfyUI's `python.exe`, then compare step 1's time before and after.
+- **VSA check:** read the ComfyUI log of one `beta7_int8HQ` run for the "no `to_gate_compress` layers" line. Only if it appears, try `sol-attn` on the same seed.
+- **`--fast fp16_accumulation`:** a small numeric change. Compare frames on the same seed before keeping it. The current `comfyui_auto` command has no `--use-ck-attention`; check whether that was intended.
+- **Face-box crop:** if PixlStash's face table stores boxes, crop the chosen still to 9:16 or 16:9 around the face instead of center-cropping.
+- **Set-to-RefMod compiler:** rebuild a character's RefMod from its locked "render-ready" PixlStash set (P4.6). RefMods are already used today.
 
 ## 6. Risks
 
