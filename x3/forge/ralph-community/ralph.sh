@@ -2,23 +2,24 @@
 # Plain capped Ralph loop for Forge on the EVO-X3 (bash port of the AlienPc Windows Ralph runner + U53 safety checks).
 # Runs pi --print on PROMPT.md, one fix_plan item per pass, stops at PLAN_COMPLETE, NO_PROGRESS or the -Max cap.
 # Max Architect 2026-11-15, X3 Phase 2 (Derrick t1784s6566 "port ralph-loop to Linux"); U53 B3+I2 2026-11-16. Forge owns this file.
-# Usage: ralph.sh [-Max 10] [-Model x3-local/flash-next] [-PassLimitSec 3600] [-IterationTimeoutSec 7200]
+# Usage: ralph.sh [-Max 10] [-Model x3-local/flash-next-uncensored] [-Thinking low] [-PassLimitSec 3600] [-IterationTimeoutSec 7200]
 #                 [-GpuWaits 30] [-GpuWaitSec 120] [-GpuLockPath <lock>] [-LockPollSec 2]
-#                 [-MemoryRoot <dir>] [-WorkDir <pi cwd>] [-TargetRepo <repo|none>] [-WorktreeRoot <dir>]
-#                 [-NoWorktree] [-MaxDiffFiles 10] [-StaleHours 12] [-ClearStale] [-BackpressureCmd <cmd>]
-#                 [-CommandOverride <cmd>] [-LogPath <path>]
+#                 [-MemoryRoot <dir>] [-WorkDir <pi cwd>] [-TargetRepo <repo|none>] [-PiCwd <work|target|dir>]
+#                 [-WorktreeRoot <dir>] [-NoWorktree] [-MaxDiffFiles 10] [-StaleHours 12] [-ClearStale]
+#                 [-BackpressureCmd <cmd>] [-CommandOverride <cmd>] [-LogPath <path>]
 # Start detached: nohup setsid bash ralph.sh -Max N >/dev/null 2>&1 &
 # Exit codes: 0 done/capped, 4 another copy running, 5 bad args.
 set -uo pipefail
-Max=10; Model='x3-local/flash-next'; GpuWaits=30; GpuWaitSec=120
+Max=10; Model='x3-local/flash-next-uncensored'; Thinking='low'; GpuWaits=30; GpuWaitSec=120
 GpuLockPath="$HOME/AI/locks/gpu-render.lock"; IterationTimeoutSec=7200; CommandOverride=''; LogPath=''
 PassLimitSec=3600; LockPollSec=2; MemoryRoot="$HOME/AI/fleet-brain/25_memory/shared"; WorkDir="$HOME/AI/forge"
-TargetRepo='auto'; WorktreeRoot="$HOME/AI/_worktrees"; NoWorktree=0
-MaxDiffFiles=10; StaleHours=12; ClearStale=0; BackpressureCmd=''; PiCwd=''  # U56: -PiCwd target|<dir> runs pi there instead of in the work repo
+TargetRepo='auto'; PiCwd='work'; WorktreeRoot="$HOME/AI/_worktrees"; NoWorktree=0
+MaxDiffFiles=10; StaleHours=12; ClearStale=0; BackpressureCmd=''
 while [ $# -gt 0 ]; do
   case "$1" in
     -Max|--max) Max="$2"; shift 2;;
     -Model|--model) Model="$2"; shift 2;;
+    -Thinking|--thinking) Thinking="$2"; shift 2;;
     -GpuWaits) GpuWaits="$2"; shift 2;;
     -GpuWaitSec) GpuWaitSec="$2"; shift 2;;
     -GpuLockPath) GpuLockPath="$2"; shift 2;;
@@ -28,6 +29,7 @@ while [ $# -gt 0 ]; do
     -MemoryRoot|--memory-root) MemoryRoot="$2"; shift 2;;
     -WorkDir) WorkDir="$2"; shift 2;;
     -TargetRepo) TargetRepo="$2"; shift 2;;
+    -PiCwd|--pi-cwd) PiCwd="$2"; shift 2;;
     -WorktreeRoot) WorktreeRoot="$2"; shift 2;;
     -NoWorktree) NoWorktree=1; shift 1;;
     -MaxDiffFiles) MaxDiffFiles="$2"; shift 2;;
@@ -36,10 +38,13 @@ while [ $# -gt 0 ]; do
     -BackpressureCmd) BackpressureCmd="$2"; shift 2;;
     -CommandOverride) CommandOverride="$2"; shift 2;;
     -LogPath) LogPath="$2"; shift 2;;
-    -PiCwd) PiCwd="$2"; shift 2;;
     *) echo "unknown arg $1" >&2; exit 5;;
   esac
 done
+if [ "$Thinking" = "off" ]; then
+  echo "ralph.sh: -Thinking off broke tool calls on Flash-Next (32a46c0); use low or higher" >&2
+  exit 5
+fi
 K="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; cd "$K" || exit 5
 day=$(date +%Y%m%d)
 if [ -n "$LogPath" ]; then logDir="$(dirname "$(realpath -m "$LogPath")")"; idx="$(realpath -m "$LogPath")"
@@ -60,12 +65,32 @@ fi
 echo $$ >"$lock"
 
 loopPolicyDir=""
+CURRENT_PASS_PID=""
 wtWorkDir=""; wtWorkRepo=""; wtWorkStart=""
 wtTargetDir=""; wtTargetRepo=""; wtTargetStart=""
+PassCwd=""
+
+kill_tree() { # kill the pass's whole setsid process group (-PGID) so pi children cannot orphan to ppid 1
+  local p="${1:-}"
+  [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null || return 0
+  kill -TERM -- "-$p" 2>/dev/null || kill -TERM "$p" 2>/dev/null || true
+  sleep 2
+  kill -KILL -- "-$p" 2>/dev/null || kill -KILL "$p" 2>/dev/null || true
+}
+
 cleanup() {
+  trap - EXIT INT TERM
+  if [ -n "${CURRENT_PASS_PID:-}" ]; then
+    log "CLEANUP killing active pass process group PID $CURRENT_PASS_PID"
+    kill_tree "$CURRENT_PASS_PID"
+    wait "$CURRENT_PASS_PID" 2>/dev/null || true
+    CURRENT_PASS_PID=""
+  fi
   rm -f "$lock"
   [ -n "$loopPolicyDir" ] && rm -rf "$loopPolicyDir"
 }
+trap 'cleanup; exit 143' TERM
+trap 'cleanup; exit 130' INT
 trap cleanup EXIT
 stall=0; stopReason=''
 
@@ -92,9 +117,6 @@ in_tree() { # $1 child pid, $2 root pid
     cur="$(ps -o ppid= -p "$cur" 2>/dev/null | tr -d ' ')"; n=$((n+1))
   done
   return 1
-}
-kill_tree() { # kill the pass's whole process group (pass runs under setsid)
-  kill -TERM -- "-$1" 2>/dev/null; sleep 3; kill -KILL -- "-$1" 2>/dev/null
 }
 top_item() {
   local t; t="$(grep -m1 -E '^\s*- \[ \]' "$K/fix_plan.md" 2>/dev/null | sed -E 's/^\s+//')"
@@ -156,6 +178,45 @@ tool_rules = """
     "write:*/AGENTS.md": "deny",
     "edit:AGENTS.md": "deny",
     "write:AGENTS.md": "deny",
+    // P1.8 headless denies: vault reads, Gitea writes, outbound sends
+    "mcp__vaultwarden": "deny",
+    "mcp__vaultwarden__*": "deny",
+    "mcp_vaultwarden_*": "deny",
+    "mcp__gitea__*create*": "deny",
+    "mcp__gitea__*update*": "deny",
+    "mcp__gitea__*delete*": "deny",
+    "mcp__gitea__*merge*": "deny",
+    "mcp__gitea__*fork*": "deny",
+    "mcp__gitea__*push*": "deny",
+    "mcp__gitea__*write*": "deny",
+    "mcp__gitea__*edit*": "deny",
+    "mcp__gitea__*add*": "deny",
+    "mcp__gitea__*remove*": "deny",
+    "mcp_gitea_*create*": "deny",
+    "mcp_gitea_*update*": "deny",
+    "mcp_gitea_*delete*": "deny",
+    "mcp_gitea_*merge*": "deny",
+    "mcp_gitea_*fork*": "deny",
+    "mcp_gitea_*push*": "deny",
+    "mcp__google-workspace__*send*": "deny",
+    "mcp__google-workspace__*create*": "deny",
+    "mcp__google-workspace__*post*": "deny",
+    "mcp__google_workspace__*send*": "deny",
+    "mcp__google_workspace__*create*": "deny",
+    "mcp__google_workspace__*post*": "deny",
+"""
+mcp_rules = """
+    // P1.8 headless denies: vault reads, Gitea writes, outbound sends
+    "vaultwarden:*": "deny",
+    "vaultwarden_*": "deny",
+    "gitea:*create*": "deny",
+    "gitea:*update*": "deny",
+    "gitea:*delete*": "deny",
+    "gitea:*merge*": "deny",
+    "gitea:*fork*": "deny",
+    "gitea:*push*": "deny",
+    "google-workspace:*send*": "deny",
+    "google_workspace:*send*": "deny",
 """
 bash_rules = """
     // I2 loop guard: deny shell writes to skills/ and AGENTS.md from inside Ralph loops
@@ -173,6 +234,26 @@ bash_rules = """
     "*cp *AGENTS.md*": "deny",
     "*python*skills/*": "deny",
     "*python*AGENTS.md*": "deny",
+    // P1.8 headless denies: vault reads, Gitea writes, outbound sends
+    "*vaultwarden*": "deny",
+    "*bitwarden*": "deny",
+    "bw *": "deny",
+    "* bw *": "deny",
+    "git push*": "deny",
+    "*git push*": "deny",
+    "*git -C * push*": "deny",
+    "*qnap*": "deny",
+    "*QNAP*": "deny",
+    "*Qnap*": "deny",
+    "*ntfy*": "deny",
+    "*sendmail*": "deny",
+    "*msmtp*": "deny",
+    "*mailx*": "deny",
+    "*curl *-d *@*": "deny",
+    "*curl *--data*http*": "deny",
+    "*curl *-F *": "deny",
+    "*curl *--upload-file*": "deny",
+    "*wget *--post*": "deny",
 """
 
 def inject(doc: str, section: str, snippet: str) -> str:
@@ -206,11 +287,19 @@ def inject(doc: str, section: str, snippet: str) -> str:
             elif ch == "}":
                 depth -= 1
                 if depth == 0:
-                    return doc[:i] + snippet + "  " + doc[i:]
+                    # Ensure preceding token ends with comma or '{' before inserting snippet
+                    k = i - 1
+                    while k >= m.end() and doc[k] in " \t\r\n":
+                        k -= 1
+                    prefix = doc[:i]
+                    if k >= m.end() and doc[k] not in ",{":
+                        prefix = doc[:k+1] + "," + doc[k+1:i]
+                    return prefix + snippet + "  " + doc[i:]
         i += 1
     return doc
 
 text = inject(text, "tools", tool_rules)
+text = inject(text, "mcp", mcp_rules)
 text = inject(text, "bash", bash_rules)
 dst.write_text(text, encoding="utf-8")
 PY
@@ -269,6 +358,12 @@ setup_worktrees() {
       wtTargetDir="$loopDir/$(basename "$tRoot")"
       local tbr="${tag}-$(basename "$tRoot")"
       if git -C "$tRoot" worktree add -b "$tbr" "$wtTargetDir" HEAD >/dev/null 2>&1; then
+        for sub in npm git; do
+          if [ -e "$tRoot/.pi/$sub" ] && [ ! -e "$wtTargetDir/.pi/$sub" ]; then
+            mkdir -p "$wtTargetDir/.pi"
+            ln -s "$tRoot/.pi/$sub" "$wtTargetDir/.pi/$sub"
+          fi
+        done
         export RALPH_WORKTREE="$wtTargetDir"
         log "WORKTREE target repo=$tRoot branch=$tbr path=$wtTargetDir"
       else
@@ -281,6 +376,19 @@ setup_worktrees() {
   if [ -n "$wtWorkDir" ] && [ ! -e "$loopDir/community" ] && [ -d "$HOME/AI/community" ]; then
     ln -s "$HOME/AI/community" "$loopDir/community"
   fi
+}
+
+# -PiCwd: where pi runs each pass. work = WorkDir (or its loop worktree), target = TargetRepo (or its loop worktree), else a path.
+resolve_pass_cwd() {
+  local tgt=""
+  case "$TargetRepo" in auto) [ -d "$HOME/AI/community/.git" ] && tgt="$HOME/AI/community";; none) ;; *) tgt="$TargetRepo";; esac
+  case "$PiCwd" in
+    target) PassCwd="${wtTargetDir:-${tgt:-$RunWorkDir}}" ;;
+    work|"") PassCwd="$RunWorkDir" ;;
+    *) PassCwd="$PiCwd" ;;
+  esac
+  [ -d "$PassCwd" ] || { log "BAD_ARGS -PiCwd resolved to missing dir: $PassCwd"; exit 5; }
+  log "PI_CWD $PiCwd -> $PassCwd"
 }
 
 # Record git HEADs before a pass.
@@ -365,7 +473,7 @@ run_backpressure() {
     local forgeRoot="${wtWorkDir:-$HOME/AI/forge}"
     local smokeOut=""
     if ! smokeOut="$(python3 - "$settingsTarget" "$forgeRoot" "$commRoot" 2>&1 << "PY"
-import json, pathlib, re, sys
+import json, os, pathlib, re, sys
 
 settings_path = pathlib.Path(sys.argv[1])
 forge_root = pathlib.Path(sys.argv[2])
@@ -377,11 +485,11 @@ if not agents_md.exists() or not agents_md.read_text(encoding="utf-8").strip():
     raise SystemExit(f"AGENTS.md missing or empty at {agents_md}")
 
 def remap(p_str: str) -> pathlib.Path:
-    p_str = str(pathlib.Path(p_str).expanduser())  # U56: Render settings use ~/ skill roots
-    for prefix in ("/home/evo/AI/community", "/home/derekboone/AI/community"):
-        if p_str.startswith(prefix):
-            return pathlib.Path(str(comm_root) + p_str[len(prefix):])
-    return pathlib.Path(p_str)
+    expanded = os.path.expanduser(p_str)
+    for prefix in ("/home/evo/AI/community", "/home/derekboone/AI/community", os.path.expanduser("~/AI/community")):
+        if expanded.startswith(prefix):
+            return pathlib.Path(str(comm_root) + expanded[len(prefix):])
+    return pathlib.Path(expanded)
 
 for ext in cfg.get("extensions", []):
     if ext.startswith("-"):
@@ -425,6 +533,10 @@ PY
   fi
 
   if [ -z "$failReason" ] && [ -n "$BackpressureCmd" ]; then
+    # Commit the target worktree was at before this pass, so a backpressure command can lint only what changed.
+    if [ -n "${wtTargetDir:-}" ]; then
+      RALPH_PASS_BASE="${PRE_HEAD[$(realpath "$wtTargetDir" 2>/dev/null || echo "$wtTargetDir")]:-}"; export RALPH_PASS_BASE
+    fi
     if ! bash -c "cd \"$RunWorkDir\" && $BackpressureCmd" >>"$idx" 2>&1; then
       failReason="BackpressureCmd failed: $BackpressureCmd"
     fi
@@ -441,8 +553,7 @@ PY
 clear_stale_fix_plan
 build_loop_policy
 setup_worktrees
-PassCwd="$RunWorkDir"
-if [ "$PiCwd" = target ] && [ -n "$wtTargetDir" ]; then PassCwd="$wtTargetDir"; elif [ -n "$PiCwd" ] && [ "$PiCwd" != target ] && [ -d "$PiCwd" ]; then PassCwd="$PiCwd"; fi
+resolve_pass_cwd
 
 for ((i=1; i<=Max; i++)); do
   log "iter $i of $Max start"
@@ -466,13 +577,14 @@ for ((i=1; i<=Max; i++)); do
   echo "$(date +%Y-%m-%dT%H:%M:%S) iter=$i state=start cap=${passCap}s item=$topItem" >"$hb"
   # Shared fleet memory for this pass only (process scope; Sydney's sessions never see it).
   export PI_MEMORY_DIR="$MemoryRoot"; mkdir -p "$MemoryRoot"
-  log "iter $i : PI_MEMORY_DIR=$PI_MEMORY_DIR cwd=$PassCwd (process scope, this pass only)"
+  passDir="${PassCwd:-$RunWorkDir}"
+  log "iter $i : PI_MEMORY_DIR=$PI_MEMORY_DIR cwd=$passDir (process scope, this pass only)"
   if [ -n "$CommandOverride" ]; then
-    setsid bash -c "cd \"$PassCwd\" && $CommandOverride" >"$iterTmp" 2>&1 &
+    setsid bash -c 'cd "$1" && exec timeout --kill-after=10s "$3" bash -c "$2"' _ "$passDir" "$CommandOverride" "${passCap}s" >"$iterTmp" 2>&1 &
   else
-    setsid bash -c 'cd "$1" && exec pi --approve --print --model "$2" --no-session "@$3/PROMPT.md"' _ "$PassCwd" "$Model" "$K" >"$iterTmp" 2>&1 &
+    setsid bash -c 'cd "$1" && exec timeout --kill-after=10s "$5" pi --approve --print --model "$2" --thinking "$4" --no-session "@$3/PROMPT.md" "Follow PROMPT.md for the top unchecked - [ ] item in $3/fix_plan.md, then stop."' _ "$passDir" "$Model" "$K" "$Thinking" "${passCap}s" >"$iterTmp" 2>&1 &
   fi
-  pp=$!; start=$(date +%s); lockEnd=''; timedOut=0
+  pp=$!; CURRENT_PASS_PID="$pp"; start=$(date +%s); lockEnd=''; timedOut=0
   while kill -0 "$pp" 2>/dev/null; do
     sleep "$LockPollSec"
     if gpu_busy; then lp="$(lock_pid)"; if [ "$lp" -le 0 ] || ! in_tree "$lp" "$pp"; then lockEnd="$BUSY"; break; fi; fi
@@ -480,12 +592,13 @@ for ((i=1; i<=Max; i++)); do
   done
   if [ -n "$lockEnd" ]; then
     log "iter $i : GPU_LOCK_MIDPASS ($lockEnd) - GPU window opened outside this pass; ending the pass now (pi tree PID $pp)"
-    kill_tree "$pp"; wait "$pp" 2>/dev/null; piRc=125
+    kill_tree "$pp"; wait "$pp" 2>/dev/null; CURRENT_PASS_PID=""; piRc=125
   elif [ "$timedOut" = 1 ]; then
     log "iter $i : ITERATION_TIMEOUT after ${passCap}s - killing process tree PID $pp..."
-    kill_tree "$pp"; wait "$pp" 2>/dev/null; piRc=124
+    kill_tree "$pp"; wait "$pp" 2>/dev/null; CURRENT_PASS_PID=""; piRc=124
   else
-    wait "$pp"; piRc=$?
+    wait "$pp"; piRc=$?; CURRENT_PASS_PID=""
+    if [ "$piRc" -eq 124 ]; then timedOut=1; log "iter $i : ITERATION_TIMEOUT (timeout rc=124 after ${passCap}s)"; fi
   fi
   [ -f "$iterTmp" ] && mv -f "$iterTmp" "$iterLog"
   if [ "$piRc" -ne 0 ]; then log "iter $i : PI_NONZERO rc=$piRc - pass text in $iterLog"; else log "iter $i : pass complete rc=0"; fi
@@ -493,12 +606,34 @@ for ((i=1; i<=Max; i++)); do
   if ! run_backpressure "$i"; then
     revert_worktrees_to_pre
     cp -p "$fpSnapshot" "$K/fix_plan.md"
-    piRc=126
+    if [ "$timedOut" != 1 ]; then piRc=126; fi
     log "iter $i : reverted worktree and fix_plan.md after BACKPRESSURE_FAIL"
   fi
   rm -f "$fpSnapshot"
 
   sha="$(git -C "${wtWorkDir:-$K}" rev-parse --short HEAD 2>/dev/null)"
+  if [ "$timedOut" = 1 ]; then
+    stuckTs="$(date +%Y-%m-%dT%H:%M:%S)"
+    if [ "$(mtime "$prog")" -le "$progBefore" ]; then
+      echo "- $stuckTs [ralph.sh auto] STUCK iter $i rc=124 timeout=${passCap}s head=$sha item: $topItem" >>"$prog"
+    fi
+    cat >"$K/notes/STUCK.md" <<STUCKEOF
+# STUCK
+
+- timestamp: $stuckTs
+- iter: $i of $Max
+- status: STUCK
+- reason: timeout after ${passCap}s (rc=124)
+- item: $topItem
+- log: $iterLog
+STUCKEOF
+    cp -p "$K/notes/STUCK.md" "$logDir/STUCK.txt"
+    echo "$stuckTs iter=$i state=STUCK rc=124 head=$sha item=$topItem" >"$hb"
+    echo "iter=$i max=$Max status=STUCK done=true reason=timeout pi_rc=124" >"$logDir/DONE.txt"
+    log "iter $i : STUCK after ${passCap}s timeout - wrote $K/notes/STUCK.md and $logDir/STUCK.txt"
+    stopReason=stuck
+    break
+  fi
   if [ "$(mtime "$prog")" -le "$progBefore" ]; then echo "- $(date +%Y-%m-%dT%H:%M:%S) [ralph.sh auto] iter $i rc=$piRc head=$sha item: $topItem (model wrote no progress line)" >>"$prog"; log "iter $i : progress line written by harness"; fi
   echo "$(date +%Y-%m-%dT%H:%M:%S) iter=$i state=end rc=$piRc head=$sha item=$topItem" >"$hb"
   echo "iter=$i max=$Max pi_rc=$piRc gpu_wait=$gpuWait" >"$logDir/DONE.txt"
