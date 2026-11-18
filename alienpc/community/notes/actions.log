@@ -4427,3 +4427,4 @@ eeds_derrick.md (backup needs_derrick.md.bak-20261107-chatreview); no .pi config
 2026-11-18T10:57:09-06:00 run_queue run_C01_wet_street_20261118: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=31892080 elapsed=9.3s raw=clip_raw.mp4
 2026-11-18T10:57:09-06:00 run_queue run_C01_wet_street_20261118: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
 2026-11-18 18:33:44 START forge: fix --qnap-put delivery target to R:\runs\<run>\clip\ (renders share), C01 delivered
+2026-11-18 18:34:09 DONE forge: --qnap-put now delivers to R:\runs\<run>\clip\ (98fbc30, 49 tests pass); C01 run dir mirrored to renders share
