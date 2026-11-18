@@ -91,7 +91,7 @@ models:
         -e HALOGEN_REASONING_EFFORT=medium -e HALOGEN_MAX_THINKING_TOKENS=8192
         -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
         -v /srv/models/flash-next-halogen:/models:ro
-        ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+        ghcr.io/peonist-ai/halogen-flash-server@sha256:773073448dc9ff4a8c6b6c278802e254fd5f1546764e27531aeb3b77cb13482e
     proxy: "http://127.0.0.1:8081"
     ttl: 86400
     # U27 2026-11-15 (Derrick t1784s6566 Phase 1/4): concurrencyLimit 1->4 (Halogen has 4 slots, shared KV pool, no new memory);
@@ -132,7 +132,7 @@ models:
         -e HALOGEN_REASONING_EFFORT=medium -e HALOGEN_MAX_THINKING_TOKENS=8192
         -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
         -v /srv/models/flash-next-uncensored-hgn:/models:ro
-        ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+        ghcr.io/peonist-ai/halogen-flash-server@sha256:773073448dc9ff4a8c6b6c278802e254fd5f1546764e27531aeb3b77cb13482e
     proxy: "http://127.0.0.1:8081"
     ttl: 0  # Derrick t71u 2026-11-17: stay loaded; a cold start with ref2va resident is ~2.35 GiB short
     # 2026-11-17 5:00 PM CT (Derrick t2261s8122): restored 524288 pool / 4 slots (gemma gone, Sydney deleted, Gufo canceled).
