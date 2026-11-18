@@ -8,7 +8,7 @@
   ],
   "defaultProvider": "x3-local",
   "defaultModel": "flash-next-uncensored",
-  "defaultThinkingLevel": "off",
+  "defaultThinkingLevel": "low",
   "enableInstallTelemetry": false,
   "enableAnalytics": false,
   "extensions": [

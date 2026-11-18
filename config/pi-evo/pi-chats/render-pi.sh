@@ -35,5 +35,5 @@ exec pi --approve \
   --no-context-files \
   --append-system-prompt "${RENDER_PROMPT_FILE:-$R/OPERATOR.md}" \
   --model "${RENDER_MODEL:-x3-local/flash-next-uncensored}" \
-  --thinking "${RENDER_THINKING:-medium}" \
+  --thinking "${RENDER_THINKING:-low}" \
   "$@"

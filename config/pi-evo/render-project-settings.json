@@ -25,7 +25,7 @@
   ],
   "defaultProvider": "x3-local",
   "defaultModel": "flash-next-uncensored",
-  "defaultThinkingLevel": "off",
+  "defaultThinkingLevel": "low",
   "extensions": [
     "-builtin:llama.cpp"
   ],
@@ -67,7 +67,7 @@
   },
   "subagents": {
     "defaultModel": "x3-local/flash-next-uncensored",
-    "disableThinking": true,
-    "defaultThinking": "off"
+    "disableThinking": false,
+    "defaultThinking": "low"
   }
 }
