@@ -11,4 +11,4 @@ export PI_MEMORY_DIR="${PI_MEMORY_DIR:-$HOME/.pi/panes/forge/memory}"  # own mem
 export PATH="$HOME/AI/render/x3/.venv/bin:$HOME/.local/bin:$PATH"
 # 2026-11-17 Derrick t2296u/t2298u: thinking high -> medium (community agent-loop default).
 # 2026-11-17 Derrick t2322 (Strix Halo community settings): coding sampling temp 0.6 via provider x3-local-coding (same served slot flash-next-uncensored).
-exec pi --approve --model "${FORGE_MODEL:-x3-local-coding/flash-next-uncensored}" --thinking "${FORGE_THINKING:-medium}" "$@"
+exec pi --approve --model "${FORGE_MODEL:-x3-local-coding/flash-next-uncensored-v2}" --thinking "${FORGE_THINKING:-medium}" "$@"

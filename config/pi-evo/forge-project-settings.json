@@ -26,7 +26,7 @@
     "npm:pi-workspace-history@0.5.2"
   ],
   "defaultProvider": "x3-local",
-  "defaultModel": "flash-next-uncensored",
+  "defaultModel": "flash-next-uncensored-v2",
   "defaultThinkingLevel": "medium",
   "thinkingBudgets": {
     "minimal": 1024,
@@ -59,7 +59,7 @@
     "enabled": true
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-uncensored-sub"
+    "defaultModel": "x3-local/flash-next-uncensored-v2-sub"
   },
   "defaultTools": [
     "+grep",

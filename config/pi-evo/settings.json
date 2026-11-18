@@ -7,7 +7,7 @@
     "npm:pi-mobile@0.4.0"
   ],
   "defaultProvider": "x3-local",
-  "defaultModel": "flash-next-uncensored",
+  "defaultModel": "flash-next-uncensored-v2",
   "defaultThinkingLevel": "low",
   "enableInstallTelemetry": false,
   "enableAnalytics": false,

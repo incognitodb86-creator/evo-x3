@@ -34,6 +34,6 @@ exec pi --approve \
   --skill "$S/h3-parody-identity" --skill "$S/h3-prompting" \
   --no-context-files \
   --append-system-prompt "${RENDER_PROMPT_FILE:-$R/OPERATOR.md}" \
-  --model "${RENDER_MODEL:-x3-local/flash-next-uncensored}" \
+  --model "${RENDER_MODEL:-x3-local/flash-next-uncensored-v2}" \
   --thinking "${RENDER_THINKING:-low}" \
   "$@"
