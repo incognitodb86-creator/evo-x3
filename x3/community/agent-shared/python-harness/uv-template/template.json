@@ -1,0 +1,7 @@
+{
+  "project_name": "My Tool",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+  "package_name": "{{ cookiecutter.project_slug.replace('-', '_') }}",
+  "description": "EVO-X3 Python tool built on the H5 harness",
+  "python_version": "3.12"
+}
