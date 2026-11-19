@@ -1,0 +1,59 @@
+# Render writer pipeline config (Max Architect 3, 2026-11-13, Derrick t1409u). Read by
+# /home/evo/AI/community/scripts/parody/render_writer_pipeline.py. Sampler frozen once at setup by the A/B (results in
+# acceptance\sampler_ab.json); never re-tuned automatically.
+version: wp-2026-11-17.u56
+endpoint: http://127.0.0.1:8080/v1      # EVO-X3 llama-swap (loopback; key read in-process from pi models.json x3-local). AlienPc used the :8085 GPU-lock gate
+model_alias: flash-next-uncensored      # EVO-X3: Huihui Qwen3.8-Flash-Next abliterated HGN on Halogen 0.20.5 (same resident model as Render's pi chat -> zero GPU swaps)
+vision_model_alias: joycaption          # Non-exclusive 'small' group VLM fallback when still_read.json is omitted (never evicts flash-next-uncensored)
+thinking: false                         # chat_template_kwargs.enable_thinking (disabled on headless writer calls for speed and full answer budget)
+timeout_s: 900
+retry_backoff_s: [10, 30, 90]
+writer_prompt: writer_prompt.md          # relative to /home/evo/AI/render/writer_pipeline
+writer_prompt_sha256: a64f24e9a491304e17c7ec98d433a2b223b3eb7b6cd5870fa1c74ed3f0751ec6
+persona: current                        # pinned
+n_candidates: 1
+min_ready_score: 60  # reported only; never blocks READY (Max Architect 2026-11-16 (Derrick t2036u))
+tie_points: 3
+sampler_arm: Q                          # U56: Qwen3.8-Flash-Next sampling card (non-thinking prose + creative diversity); A kept for Gemma A/B rollback
+samplers:
+  Q:   # Qwen3.8-Flash-Next card preset (Halogen 0.20.5)
+    temperature: 0.85
+    top_p: 0.90
+    top_k: 20
+    min_p: 0.0
+    presence_penalty: 0.5
+  A:   # Legacy Gemma 4 Heretic preset (PolyStrata / Vulkan rollback)
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 64
+    min_p: 0.10
+beat_card_sampler:
+  temperature: 0.6
+  top_p: 0.85
+  top_k: 20
+beat_card_max_tokens: 1600
+prose_max_tokens: 1800
+judge_sampler:   # temp 0 is not sendable to PolyStrata (temperature <= 0 falls back to the server default 1.0): top_k 1 = greedy
+  temperature: 0.01
+  top_k: 1
+judge_seed: 1234567
+blacklist_cap: 20
+log_retention_days: 14
+log_cap_mb: 50
+scene_archive_days: 30
+lint:
+  speech_words_max: 25
+  blacklist_ratio: 0.8
+  words_min: 90
+  words_max: 190
+  pen_phase_no_sound: 5
+  opening_ratio: 0.85
+  filler_lines: ["hold still", "stay still", "take it", "yes right there", "oh yes", "fuck me harder", "take it all", "you feel so good", "so fucking good", "don't stop now"]
+  tempo_range: {oral: [0.5, 1.5], sex: [0.5, 2.5], partner: [0.5, 2.5], edge: [0.2, 1.0], solo: [0.3, 2.5], strip: [0.2, 1.0]}
+position_kinds:   # a new builder act needs one line here (spec "Max, only on change")
+  talk: [talk]
+  oral: [blowjob, mmf_double_blowjob, ff_cunnilingus]
+  partner: [titjob, finish, handjob]        # partner present, no penetration join (no contact keyword, no clearance)
+  solo: [female_solo, male_solo, tease, dance]
+  sex: [missionary, doggy, cowgirl, reverse_cowgirl, spooning, prone_bone, ff_scissoring, mf_anal, bondage, threesome, mmf, ffm, standing_mf, airplane, piledriver]
+shots_default: single  # B1 long-scene spec
