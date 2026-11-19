@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 # Copy live X3 setup (configs, units, launchers, Hermes/pi/herdr/PixlStash config) into ~/evo-x3/hosts/x3/live.
 # Read-only on live files. Secrets are replaced with <redacted-in-locked-keyfile>. Max Architect, Derrick t2613u.
+#
+# AlienPc snapshot (text-only docs for now; this script still snapshots X3 into hosts/x3/live only):
+# - Who runs it: Max Architect or AlienPc Forge (read-only on live files; run gitleaks before commit).
+# - Copy from AlienPc into hosts/alienpc/live/ (and hosts/alienpc/comfyui/ for ComfyUI config copies; see hosts/alienpc/live/README.md):
+#   * Global pi agent folder: C:\Users\derek\.pi\agent\{AGENTS.md,settings.json,pi-permissions.jsonc,web-search.json,extensions/} -> hosts/alienpc/live/pi-agent/
+#   * Forge loop + x3run/x3put: C:\Users\derek\forge\{README.md,x3run.ps1,x3put.ps1,.pi/bin/ps-ladder.cmd,ralph-community/{PROMPT.md,ralph.ps1,README.md,gitignore}} -> hosts/alienpc/live/forge/
+#   * ComfyUI config copies: comfy.settings.json, extra_model_paths.yaml, custom-nodes.tsv, pip-freeze.txt, launchers -> hosts/alienpc/comfyui/
+# - Skip auth.json, mcp*.json, models*.json, fix_plan.md, logs/runs/sessions, and C:\Users\derek\sydney\.
 set -uo pipefail
 R="${SNAPSHOT_OUT:-$HOME/evo-x3/hosts/x3/live}"
 rm -rf "$R"; mkdir -p "$R"/{containers,tailscale,ssh,agy,herdr,hermes/skills,pi-derekboone/agent,pi-evo/panes/forge,pi-evo/panes/render}
