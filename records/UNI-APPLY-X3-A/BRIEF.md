@@ -113,9 +113,10 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
 
 ### Group 3 — ST3 pair (`sync-renders` + `import_inbox.py`), L2 poster frame, and H3 units
 
-10. **ST3 pair + L2 (`sync-renders` + `import_inbox.py`, install together)** — Source on `mono`:
-    - `config/bin/sync-renders` (`79a706a`, `60ef314`, `a5a86ce`) -> `/usr/local/bin/sync-renders` | `root:root 0755` | sudo: **yes** | backup `/home/evo/AI/_archive/20261119/sync-renders`
+10. **ST3 pair + L2 + ST7 (`sync-renders` + `import_inbox.py`, install together)** — Source on `mono`:
+    - `config/bin/sync-renders` (`79a706a`, `60ef314`, `a5a86ce`, **`990ffd0` ST7**) -> `/usr/local/bin/sync-renders` | `root:root 0755` | sudo: **yes** | backup `/home/evo/AI/_archive/20261119/sync-renders`
     - `hosts/x3/pixlstash-tagging/import_inbox.py` (`79a706a`, `a5a86ce`) -> `/home/evo/AI/pixlstash-tagging/import_inbox.py` | `evo:evo 0755` | sudo: **no** | backup `/home/evo/AI/_archive/20261119/import_inbox.py`
+    - **ST7 coordination (`990ffd0`):** `config/bin/sync-renders` now also carries `ST7` (QNAP publish moved to the nightly 03:30 timer). Pull `sync-renders` from the **same `mono` tip** as `records/UNI-APPLY-X3-C-QNAP-NIGHTLY/BRIEF.md`; **default: install `X3-A`'s `sync-renders` + `import_inbox.py` together with `X3-C`'s nightly script/units in one window** (or run `X3-C` immediately after `X3-A`).
     - Pre-install syntax check (no-write AST parse):
       ```bash
       bash -n /home/derekboone/evo-x3/config/bin/sync-renders
