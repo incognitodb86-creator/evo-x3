@@ -8,7 +8,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
 - **Derrick's live yes in chat:** Card 1 (live apply), Card 26 (`ST1` default), and Card 12 (`P4.11` ntfy token for H3 timers) answered in chat (Max records id).
 - **X3 lease taken (written by Max — Card 28 answered, Derrick 2026-11-19 12:29 CT, side chat):** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-taken-x3-forge-uni-apply-x3-a.md` (mirrored to `records/status/`).
 - **No active render** on X3/AlienPc (required for R5 and `sync-renders`), and **not during the Hermes bakeoff window** (Plan C16).
-- **Max import + pre-cutover bridge complete** from `mono` tip `5ccba67` (or newer):
+- **Max import + pre-cutover bridge complete** from `mono` tip `3217c67 (or newer at Max import)`:
   - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
   - Until `MONO-S5` passes smoke: Max bridges `x3/render/` commits onto Gitea `x3-render` (never `x3-linux`) via `git format-patch --relative=x3/render/ <range>` + `git am`, and `x3/community/` commits onto Gitea `x3-community` via `git format-patch --relative=x3/community/ <range>` + `git am`, then pushes both part branches to Gitea. (After `MONO-S5`, live checkouts pull `mono` directly.)
   - Root-copy files (`config/`, `hosts/`) are read from the fetched `mono` checkout at `/home/derekboone/evo-x3` (or Max's staged path) and installed per the Install table below.
@@ -87,13 +87,13 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
    - Verify: `make -C /home/evo/AI/community/agent-shared/python-harness/sample-tool check-all` (ruff + ty + pytest 3 passed).
    - Rollback: restore `/home/evo/AI/_archive/20261119/community-AGENTS.md` and `git revert` on `x3-community` to `<pre-pull-HEAD>` (no force).
 
-8. **H4 (archive pruned Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9b796d9`; note: hermes worker is rebasing H4/H2 on the `eabc8c7` live copies — Max imports the rebased commit before launch).
+8. **H4 (archive pruned Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9ebe5a0`, rebased on live snapshot `eabc8c7`).
    - Install table: dest `/home/evo/.hermes/skills/pi-job/SKILL.md`, owner/mode `evo:evo 0644`, sudo: **no**, backup `/home/evo/AI/_archive/20261119/hermes/skills/`.
    - Copy `/home/evo/.hermes/skills/` to `/home/evo/AI/_archive/20261119/hermes/skills/` before changes.
    - Create `/home/evo/.hermes/skills-archived/` and move the skills listed for removal in `/home/derekboone/evo-x3/hosts/x3/hermes/SKILLS-PRUNE.md` into `/home/evo/.hermes/skills-archived/` (leaving **19** active skills — `pixlstash-image-library` kept; `h3-writer` remains reserved).
    - Install: `install -m 0644 /home/derekboone/evo-x3/hosts/x3/hermes/skills/pi-job/SKILL.md /home/evo/.hermes/skills/pi-job/SKILL.md`.
    - Verify: run `hermes skills list` — expected: **19** active skills (`pixlstash-image-library` and `pi-job` listed), 0 broken paths / frontmatter errors.
-   - **H2 comment copy (delta #14, `hosts/x3/hermes/config.yaml`, mono `8069885`, `6701567`):** `SKIPPED (held with H2)` — do **not** merge `config.yaml` until live SSRF proxy + H1a + Derrick yes; record as `SKIPPED (held with H2)` in `RESULT.md`.
+   - **H2 comment copy (delta #14, `hosts/x3/hermes/config.yaml`, mono `ef51f83`):** `SKIPPED (held with H2)` — do **not** merge `config.yaml` until live SSRF proxy + H1a + Derrick yes; record as `SKIPPED (held with H2)` in `RESULT.md`.
    - Re-snapshot: **Max closeout step** (record `snapshot: pending Max` in `RESULT.md`).
    - Rollback: move archived skills back from `/home/evo/.hermes/skills-archived/` and restore `/home/evo/AI/_archive/20261119/hermes/skills/`.
 

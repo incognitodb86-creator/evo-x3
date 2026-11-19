@@ -10,7 +10,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 3. **`UNI-APPLY-X3-A` completed first** (specifically ST3 `import_inbox.py` with `flock`).
 4. **X3 lease taken (written by Max — Card 28 answered, Derrick 2026-11-19 12:29 CT, side chat):** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-taken-x3-forge-uni-apply-x3-b-pijob.md` (mirrored to `records/status/`).
 5. **Approved render window available for the Pre-install `:8447/health` busy check**, no active render during the install step itself, and **not during the Hermes bakeoff window** (Plan C16).
-6. **Max import complete** from `mono` including the updated `u58-pijob` H1c routing commit (AlienPc Swift `ESP off` when idle, X3 Gufo when busy; render always wins) with clean `gitleaks`.
+6. **Max import complete** from `mono` tip `3217c67 (or newer at Max import)` (includes `b96560f` H1c card-21 routing) with clean `gitleaks`.
 
 - **If `MONO-S5` already passed:** `/home/evo/AI/render` and `/home/evo/AI/community` are symlinks into the `mono` clone; skip the part-branch bridge and run `git -C /home/evo/AI/evo-x3 pull --ff-only` instead. Everything else in this brief is unchanged.
 
@@ -29,7 +29,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 
 ## Access & Lease
 - **Doer:** X3 Forge (`/home/evo/AI/forge`, pi panes `w4:p1-p3`), running as `evo`. `sudo` is allowed **only** for installing/rolling back `/usr/local/bin/pi-job`.
-- **Source on `mono`:** `config/bin/pi-job` in `/home/derekboone/evo-x3` (`mono` SHAs: `07369ec` H1c, `48e7358` L1, `febc22c` L4, `c8056a8` L5, `27999a6` L6, `952d165` L8, `658dc18` L8 fix, `03340b1` H1c fix, `a5a86ce` ST3 fix, `dbc7156` H5 fix, `f353e3e` L4 fix, `9b86a78` L6 fix, `db00dde` L1 fix; latest `pi-job` commit `db00dde`, `mono` tip `5ccba67`).
+- **Source on `mono`:** `config/bin/pi-job` in `/home/derekboone/evo-x3` (`mono` SHAs: `07369ec` H1c, `48e7358` L1, `febc22c` L4, `c8056a8` L5, `27999a6` L6, `952d165` L8, `658dc18` L8 fix, `03340b1` H1c fix, `a5a86ce` ST3 fix, `dbc7156` H5 fix, `f353e3e` L4 fix, `9b86a78` L6 fix, `db00dde` L1 fix, **`b96560f` H1c card 21**; latest `pi-job` commit `b96560f`, `mono` tip `3217c67 (or newer at Max import)`).
 - **Backup root:** `/home/evo/AI/_archive/20261119/`.
 - **Lease take:** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-taken-x3-forge-uni-apply-x3-b-pijob.md` (mirrored to `records/status/`).
 - **Lease release:** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-released-x3-forge-uni-apply-x3-b-pijob.md` (mirrored to `records/status/`).
@@ -63,9 +63,10 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 
 ## Tests (coding/review path only; **if ANY post-install test fails, run Rollback immediately**)
 
-1. **H1c — AlienPc idle vs render-busy routing (Card 13 & Card 21, Derrick 2026-11-19 12:29 CT, side chat):**
-   - **Idle path:** With AlienPc idle (`:8447/health` returns `200`, no `gpu-render.lock`), run a `pi-job code` smoke task -> verify it runs on AlienPc `coding_swift15_iq3s` (ESP off) with **0 X3 llama-swap swaps**.
-   - **Busy / render-wins path:** With an approved AlienPc render running (`:8447/health` returns non-2xx), verify `pi-job code` stays on X3 Gufo (`flash-next-uncensored-v2`, confirming `/slots` via `/running` -> `/upstream/.../slots` with no secret printed) — or resumes on X3 on HTTP 503 — with **0 X3 llama-swap swaps**. X3 Gufo remains the writer/Hermes model.
+1. **H1c — AlienPc idle vs render-busy routing + `PI_JOB_FORCE_X3=1` (Card 13 & Card 21, `b96560f`):**
+   - **Idle path:** With AlienPc idle (`:8447/health` returns `200`, no `gpu-render.lock`), run a `pi-job code` smoke task -> verify job log shows route `alienpc` with `coding_swift15_iq3s` (ESP off) and **0 X3 llama-swap swaps**.
+   - **Busy / render-wins path:** With an approved AlienPc render running (`:8447/health` returns non-2xx), run a `pi-job code` smoke task -> verify job log shows route `x3` and **0 X3 llama-swap swaps** (503 during a run also resumes on `x3`). X3 Gufo remains the writer/Hermes model.
+   - **Forced-X3 check:** Run `PI_JOB_FORCE_X3=1 /usr/local/bin/pi-job code ...` -> verify job log shows route `x3` and **0 X3 llama-swap swaps**.
 
 2. **L5 — `pi-job status`:**
    - Run `/usr/local/bin/pi-job status` -> prints resident model, `MemAvailable`, AlienPc gate status, and last 3 jobs.
@@ -88,6 +89,6 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 - **Do not run `pi-job recompile`, `pi-job queue`, `pi-job render --pick`, or `pi-job render --still`** (legacy render path superseded by H9; also never use `recompile` on `long_continuation` until N1 is fixed).
 - No `llama-swap.yaml` edits by Forge. Never read or print `models.json`, llama-swap keys, or ntfy tokens.
 - No unauthorized renders. Stop on first failed check, run Rollback if `pi-job` was already installed, and record exact stdout/stderr (redacted of any secrets).
-- Cite `mono` SHAs (`db00dde` / `5ccba67`) in `RESULT.md`.
+- Cite `mono` SHAs (`b96560f` / `3217c67 (or newer at Max import)`) in `RESULT.md`.
 
-STOP CONDITION: when done or blocked, write `/home/derekboone/evo-x3/records/UNI-APPLY-X3-B-PIJOB/RESULT.md`, then stop. List Pre-install (incl. `:8447/health` HTTP code during approved render), Install, Tests 1-3 (`H1c`, `L5`, `H5+L6`), and `L1`/`L4`/`L8`/`ST3 render trigger` (`SKIPPED - legacy pi-job render path, superseded by H9; code ships inside pi-job but is not live-tested or relied on`) with `mono` SHAs, backup path, Gufo `/slots` + swap count, rollback status if triggered, and `snapshot: pending Max`.
+STOP CONDITION: when done or blocked, write `/home/derekboone/evo-x3/records/UNI-APPLY-X3-B-PIJOB/RESULT.md`, then stop. List Pre-install (incl. `:8447/health` HTTP code during approved render), Install, Tests 1-3 (`H1c` idle/busy/`PI_JOB_FORCE_X3=1`, `L5`, `H5+L6`), and `L1`/`L4`/`L8`/`ST3 render trigger` (`SKIPPED - legacy pi-job render path, superseded by H9; code ships inside pi-job but is not live-tested or relied on`) with `mono` SHAs, backup path, route logs + swap count, rollback status if triggered, and `snapshot: pending Max`.

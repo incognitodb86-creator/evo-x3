@@ -1,5 +1,7 @@
 # AlienPc live snapshot (agent instructions, pi config, Forge loop)
 
+> **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`).
+
 Snapshot taken 2026-11-19 ~10:50 AM CT (America/Chicago) by Max Architect, read-only, for Opus review on GitHub.
 These are COPIES. The live files stay on AlienPc; editing these copies changes nothing until Max imports and applies them.
 Secret scan: gitleaks `--no-git` on the staged copies found no leaks (2026-11-19 10:51 AM CT).
