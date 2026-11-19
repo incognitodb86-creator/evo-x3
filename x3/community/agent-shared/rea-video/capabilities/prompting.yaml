@@ -1,0 +1,40 @@
+# User prompting spec for minimax-h3-10eros-beta7 (RV1, U56 Decision #1)
+# Install on EVO-X3 alongside models/video.yaml under ~/.rea-video/capabilities/
+
+models:
+  minimax-h3-10eros-beta7:
+    basis: user
+    structure: >-
+      Header-free plain prose (U56 Decision #1). Never emit integrated_multimodal_description:,
+      overall_soundscape:, or non_diegetic_music:. Start with [Shot 1] and its camera sentence,
+      describe motion in phase order, and close with 1-3 plain diegetic sound sentences tied to
+      the action. Always pass through scripts/parody/beta7_convert.py before queueing.
+    language: English (pass --lang en to rea-video decompose; dialogue tagged <d>[English] ...</d>)
+    length: 124f (5.17s) to 243f (10.13s) standard on 16 GB VRAM; 362f (15.08s) hard 17k+5 max
+    multi_shot: >-
+      [Shot 1] has no timestamp. Additional cuts use [Shot N] At MM:SS.mmm with strictly monotonic
+      timestamps inside 0 < t < clip_seconds, or hard-cut separate clips via ffmpeg concat.
+    references: >-
+      1-indexed tags: <Picture 1..9>, <Video 1..3>, <Audio 1..3> (<= 15s total audio).
+      Strip audio from motion-only <Video N> clips (ffmpeg -an -c:v copy) so <Audio N> indices
+      do not shift. Omit <Picture N> for any subject supplied via ComfyUI-MiniMaxH3Mod RefMods
+      (mod_1..mod_8).
+    dialogue: >-
+      (S1) says in a <short voice> voice, <d>[English] spoken words only.</d>
+      Keep spoken lines short and natural; no non-diegetic background music.
+    negatives: >-
+      No Markdown, no code fences, no policy/governance disclaimers, no RIFE on final exports,
+      no external Turbo LoRA (Beta 7 is baked-TURBO), no er_sde / 6-step / SLA sparsity.
+    camera: >-
+      Open [Shot 1] with a concrete camera sentence (shot size, angle, static or smooth movement).
+    frame_mode: >-
+      Guide mode (--still-mode guide) pins frame 0 via AddGuide; omit <Picture N> in prose.
+      Ref mode (--still-mode ref) supplies <Picture 1> in ref_images.ref_image_1.
+    frames: 24 FPS 17k+5 grid (56f, 73f, 90f, 107f, 124f, 141f, 158f, 175f, 192f, 209f, 226f, 243f, ..., 362f)
+    rewriter: Local EVO-X3 llama-swap (flash-next-uncensored-v2 or W1-W3 winner) + beta7_convert.py
+    pitfalls:
+      - "Labeled overall_soundscape: or non_diegetic_music: headers degrade Beta 7 audio"
+      - Motion-only <Video N> with embedded audio shifts <Audio N> slot numbering in ComfyUI
+      - Including <Picture N> for a RefMod-bound subject causes identity conflict
+    sources:
+      - https://github.com/incognitodb86-creator/evo-x3/issues/1

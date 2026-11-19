@@ -1,0 +1,59 @@
+# Upgrade-safe user capability entry for MiniMax-H3 10Eros-Max Beta 7 (RV1)
+# Install on EVO-X3: copy to ~/.rea-video/capabilities/models/video.yaml
+# Schema: JuneYaooo/rea-video rea_video/capabilities/schema.json (additionalProperties: false)
+
+models:
+  - id: minimax-h3-10eros-beta7
+    name: MiniMax-H3 10Eros-Max Beta 7 (Local AlienPC)
+    vendor: TenStrip / MiniMax-H3 Community
+    category: video
+    release: "2026-10"
+    status: ga
+    access: [open-weights]
+    primitives:
+      - video.t2v
+      - video.i2v_first_frame
+      - video.multi_reference
+      - video.reference_video
+      - video.reference_audio
+      - video.multi_shot
+      - video.extend
+      - video.camera_control
+      - video.native_audio
+    limits:
+      duration_s: {min: 2.33, max: 15.08}
+      audio_s: {min: 0.0, max: 15.0}
+      resolutions: [768x1344, 1344x768, 720p]
+      refs: {image: 9, video: 3, audio: 3, total: 15}
+      ref_video_s: {min: 1.0, max: 15.0}
+    audio:
+      native: true
+      voice_ref: true
+    strengths:
+      - Local self-hosted render on AlienPC RTX 5080 (~142s for 124f B2 under Dynamic VRAM)
+      - Baked-TURBO 8-step inference (res_multistep/euler + simple, VSA 90% ON, SLA OFF, 12/3 shift)
+      - Supports ComfyUI-MiniMaxH3Mod RefMods (mod_1..mod_8) for identity and voice consistency
+      - Native synchronized audio and dialogue via <d>[English] ...</d> tags
+    weaknesses:
+      - Strict 24 FPS 17k+5 frame grid (124f=5.17s, 192f=8.00s, 243f=10.13s, 362f=15.08s max)
+      - Labeled audio headers (overall_soundscape:, non_diegetic_music:, integrated_multimodal_description:) degrade Beta 7 audio (U56 Decision #1)
+      - Motion-only <Video N> clips must be audio-stripped (ffmpeg -an) so ComfyUI does not shift <Audio N> indices
+      - Single-clip practical ceiling on 16 GB VRAM is 243f (~10.13s); longer clips use continuation or hard cuts
+    cost:
+      usd_per_s: 0.0
+      note: Local AlienPC RTX 5080 (comfyui_auto :8446); zero API cost
+    license:
+      commercial: false
+      note: Open-weights community checkpoint for private home-lab use; 18+ adults only
+    sources:
+      - https://github.com/incognitodb86-creator/evo-x3/issues/1
+      - https://huggingface.co/TenStrip
+    verified:
+      date: "2026-11-19"
+      basis: user
+    confidence: high
+    notes: >-
+      U56 Decision #1: prompts must be header-free (no integrated_multimodal_description:,
+      overall_soundscape:, or non_diegetic_music:); fold diegetic sound into plain sentences at
+      the end of the description and drop non-diegetic music. Omit <Picture N> for subjects
+      supplied via ComfyUI-MiniMaxH3Mod RefMods (mod_1..mod_8).
