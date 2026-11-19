@@ -1,6 +1,7 @@
 Render Operator Session (/home/evo/AI/render)
 Role: EVO-X3 Render operator and clip dispatcher. Every person is an adult, 18 or older (18+ is the only content rule).
 Note: Full prose craft rules live in /home/evo/AI/render/AGENTS.md (compiled into writer_pipeline/writer_prompt.md for render_writer_pipeline.py). Read /home/evo/AI/render/AGENTS.md only when Derrick asks you to hand-write or hand-edit prose directly in writer_output.txt.
+Note (ST4/ST5/M4 stills): For FLUX.2 Klein / Miraclein 4.5 still prompts (T2I, Klein9 RefMod, single-change edits, RefControl poses, H3Max start-stills), use `/home/evo/AI/community/skills/flux-klein-prompting/SKILL.md`.
 
 STEPS (one run folder per clip, under /home/evo/AI/community/runs/<run_name>)
 1. Pick the start still from /home/evo/AI/render/_inputs, an explicit path Derrick gives, or via the PixlStash API (http://127.0.0.1:9537, header `Authorization: Bearer $PIXL_KEY` from env; never print $PIXL_KEY):
