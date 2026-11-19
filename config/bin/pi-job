@@ -42,7 +42,9 @@ NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
 X3_RENDER_LOCK = HOME / "AI" / "locks" / "gpu-render.lock"
 ALIENPC_MODEL = os.environ.get("PI_JOB_ALIENPC_MODEL", "alienpc/coding_swift15_iq3s")
 ALIENPC_GATE_URL = os.environ.get("PI_JOB_ALIENPC_GATE_URL", "https://alienpc.tailf242b2.ts.net:8447/health")
-X3_GUFO_SLOTS_URL = os.environ.get("PI_JOB_X3_GUFO_SLOTS_URL", "http://127.0.0.1:8080/upstream/flash-next-uncensored-v2/slots")
+X3_LLAMASWAP_RUNNING_URL = os.environ.get("PI_JOB_X3_RUNNING_URL", "http://127.0.0.1:8080/running")
+X3_GUFO_MODEL = os.environ.get("PI_JOB_X3_GUFO_MODEL", "flash-next-uncensored-v2")
+X3_GUFO_SLOTS_URL = os.environ.get("PI_JOB_X3_GUFO_SLOTS_URL", f"http://127.0.0.1:8080/upstream/{X3_GUFO_MODEL}/slots")
 RESUME_PROMPT = "Continue from where you stopped and finish the task."
 # 2026-11-19 hermesflow (Derrick t2572u/t2572s9151): Hermes chat shows the still Render picked + the full prompt, the
 # user's in-chat yes queues it (`pi-job approve`), and the 2x upscaled video comes back as a renders-share link.
@@ -370,8 +372,30 @@ def _alienpc_gate_idle(timeout: float = 3.0) -> bool:
         return False
 
 
+def _x3_gufo_is_loaded(timeout: float = 2.0) -> bool:
+    """True only when X3_GUFO_MODEL is already reported in llama-swap /running (never triggers a model swap)."""
+    req = urllib.request.Request(X3_LLAMASWAP_RUNNING_URL, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if not (200 <= resp.status < 300):
+                return False
+            data = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        return False
+    items = data.get("running") if isinstance(data, dict) else data
+    if not isinstance(items, list):
+        return False
+    for entry in items:
+        name = entry.get("model") or entry.get("id") if isinstance(entry, dict) else entry
+        if str(name) == X3_GUFO_MODEL:
+            return True
+    return False
+
+
 def _x3_gufo_sessions_busy(timeout: float = 2.0) -> bool:
-    """True when X3 Gufo's 2 resident sessions are both actively processing."""
+    """True when X3 Gufo is already loaded and every slot returned by /slots is actively processing."""
+    if not _x3_gufo_is_loaded(timeout=timeout):
+        return False
     req = urllib.request.Request(X3_GUFO_SLOTS_URL, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -380,7 +404,7 @@ def _x3_gufo_sessions_busy(timeout: float = 2.0) -> bool:
             slots = json.loads(resp.read().decode("utf-8"))
     except Exception:
         return False
-    if not isinstance(slots, list) or len(slots) < 2:
+    if not isinstance(slots, list) or len(slots) == 0:
         return False
     return all(isinstance(s, dict) and bool(s.get("is_processing")) for s in slots)
 
