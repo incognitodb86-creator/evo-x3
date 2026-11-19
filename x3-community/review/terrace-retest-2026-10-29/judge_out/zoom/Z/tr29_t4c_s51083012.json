@@ -1,0 +1,53 @@
+{
+ "frames": [
+  29,
+  88
+ ],
+ "diffs": [
+  16.3,
+  13.24
+ ],
+ "per_frame": [
+  {
+   "frame": 29,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background architecture, railing, floor, and foliage unchanged. Lighting and perspective consistent."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, heads, hands, and genitals intact and proportionate. No melting, floating, or extra limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0001,
+    "anatomy_defect": 0.0
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 88,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background architecture, railing, foliage, and lighting remain identical between frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, torsos, and genitalia are intact and proportionally correct; no melting or floating parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0002,
+    "anatomy_defect": 0.0013
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "tr29_t4c_s51083012",
+ "model": "qwen3vl_judge",
+ "secs": 4.0
+}

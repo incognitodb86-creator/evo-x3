@@ -1,0 +1,76 @@
+{
+  "packages": [
+    "npm:pi-permission-system@0.8.0",
+    "npm:pi-memory@0.4.2",
+    "npm:@plannotator/pi-extension@0.28.40",
+    "npm:pi-canvas@0.1.1",
+    "npm:pi-say@1.1.1",
+    {
+      "source": "git:github.com/EveryInc/compound-engineering-plugin@34492307",
+      "skills": [
+        "!ce-babysit-pr",
+        "!ce-resolve-pr-feedback",
+        "!ce-test-browser",
+        "!ce-proof",
+        "!ce-strategy",
+        "!ce-riffrec-feedback-analysis",
+        "!ce-ideate",
+        "!ce-pov",
+        "!ce-bakeoff",
+        "!ce-optimize",
+        "!ce-prototype",
+        "!lfg"
+      ]
+    },
+    "npm:pi-workspace-history@0.5.2"
+  ],
+  "defaultProvider": "x3-local",
+  "defaultModel": "flash-next",
+  "defaultThinkingLevel": "medium",
+  "thinkingBudgets": {
+    "minimal": 512,
+    "low": 1024,
+    "medium": 2048,
+    "high": 4096
+  },
+  "extensions": [
+    "-builtin:llama.cpp",
+    "/home/derekboone/AI/community/agent-shared/extensions"
+  ],
+  "skills": [
+    "/home/derekboone/AI/community/skills",
+    "/home/derekboone/AI/community/agent-shared/skills",
+    "/home/derekboone/AI/fleet-brain/20_skills/current",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/fantasy-news-scout",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/household-money-tracker",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/tech-deals-watch",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/imagine-dump-ops",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-hc-render",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-max-ref2va-prompt",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-parody-identity",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/h3-prompting",
+    "-/home/derekboone/AI/fleet-brain/20_skills/current/video-render",
+    "-/home/derekboone/AI/community/agent-shared/skills/google-voice-texts"
+  ],
+  "prompts": [
+    "/home/derekboone/AI/community/agent-shared/prompts"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 24576,
+    "keepRecentTokens": 16384
+  },
+  "images": {
+    "blockImages": false,
+    "autoResize": true
+  },
+  "httpIdleTimeoutMs": 1950000,
+  "workspaceHistory": {
+    "enabled": true
+  },
+  "subagents": {
+    "defaultModel": "x3-local/flash-next-sub"
+  }
+}

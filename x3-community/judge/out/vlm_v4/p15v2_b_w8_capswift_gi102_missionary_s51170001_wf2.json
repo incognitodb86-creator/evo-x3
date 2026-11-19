@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_b_w8_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: bed, sheets, wall, and lighting unchanged across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical subjects: same woman (blonde hair, white bra) and man (dark curly hair, nude) in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE: same pose, framing, lighting, and composition without jump cut."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with pelvic contact and thrusting motion visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both frames show two distinct, anatomically correct adult bodies in a sexual position. There are no fusion defects: bodies are not merged or melting into each other, no shapeless flesh blobs, no extra"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0008,
+  "same_people": 0.0,
+  "start_kept": 0.4543,
+  "target_reached": 0.0004,
+  "anatomy_defect": 0.0007,
+  "anatomy_zoom": 0.0006
+ },
+ "flags": []
+}

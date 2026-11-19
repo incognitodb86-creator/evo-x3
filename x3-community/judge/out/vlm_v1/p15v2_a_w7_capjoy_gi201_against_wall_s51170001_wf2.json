@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w7_capjoy_gi201_against_wall_s51170001_wf2",
+ "secs": 3.6,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical rocky cave background, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc man appear in all frames, matching START IMAGE traits."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cuts."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows both characters standing against wall with described rear-entry pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, missing limbs, or malformed genitals visible in any frame."
+  }
+ },
+ "flags": []
+}

@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_b_w8_capswift_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.0,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The background, bed, and lighting remain consistent with the start image throughout all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain their appearance (blonde woman in bra, nude man) consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image's pose and composition exactly, showing the initial position."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Image 3 shows a rear-entry style position (man kneeling behind), not the required missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "yes",
+   "reason": "In Image 3, the man's legs and feet are severely malformed, fused, and anatomically impossible."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0129,
+  "same_people": 0.041,
+  "start_kept": 0.0511,
+  "target_reached": 0.2142,
+  "anatomy_defect": 0.6175
+ },
+ "flags": [
+  "target_reached",
+  "anatomy_defect"
+ ]
+}

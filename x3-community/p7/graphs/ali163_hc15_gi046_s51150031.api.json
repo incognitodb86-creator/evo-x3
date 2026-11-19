@@ -1,0 +1,394 @@
+{
+  "app1": {
+    "class_type": "MiniMaxH3AppendContinuation",
+    "inputs": {
+      "overlap_audio_tokens": [
+        "win1",
+        3
+      ],
+      "overlap_video_tokens": [
+        "win1",
+        2
+      ],
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ],
+      "sampled_window": [
+        "s1_samp",
+        0
+      ],
+      "transition_audio_tokens": [
+        "win1",
+        5
+      ],
+      "transition_video_tokens": [
+        "win1",
+        4
+      ]
+    }
+  },
+  "avae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "c0": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 768,
+      "length": 243,
+      "prompt": "subject_definitions:\n<Subject 1> is the blonde woman on all fours in the foreground of the 16:9 start photograph in <Picture 1>, a fictional adult aged 27 (canon declaration, card-silent): soft adult figure, natural breasts, narrow waist, wide hips, long bare legs, fair skin with visible pores and fine vellus hair, long wavy blonde hair falling past her shoulders, a small jewelled tiara on her head, a thin chain necklace at her throat, and the nude body the start photograph shows. Her face, hair, body, skin and figure all come from <Picture 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.\n<Subject 2> is the large green-skinned muscled orc in dark grey shorts kneeling on the rug directly behind <Subject 1> in <Picture 1>, a fictional adult aged 34 of a fictional humanoid orc species (canon declaration, card-silent): a big frame, deep green skin with a coarse grain, broad chest, thick arms and forearms, heavy hands, thick thighs, kneeling exactly where the photograph kneels him, his torso filling the middle of the frame and his head out of frame above the top edge. His body, skin, build, shorts and kneeling position all come from <Picture 1>, and the frame crops him at the neck.\n<Picture 1> is the approved 16:9 start photograph of <Subject 1> on all fours on the beige shag rug in a living room with <Subject 2> kneeling behind her, the beige/tan sofa out of focus in the top third of the frame and the dark hardwood floor under the rug. It is the first frame of this video and it defines both bodies, their skin, the room, the rug, the sofa, the floor, the light, the colour cast, the crop and the camera position.\n<Picture 2> is the face crop of <Subject 1>, the same blonde woman, a fictional adult aged 27 (canon declaration, card-silent), forehead, hair, jaw and shoulders filling the square. It is an identity reference for her face and hair only.\n\nsummary:\n[reference generation] The target video is the first 10.125 seconds of a single continuous 16:9 shot in the living room of <Picture 1>: <Subject 1>, the blonde woman on all fours on the rug, a fictional adult aged 27 (canon declaration, card-silent), and <Subject 2>, the large green-skinned muscled orc kneeling behind her in dark grey shorts, a fictional adult aged 34 (canon declaration, card-silent), take off their clothes and begin having sex on the rug, her hips presented to him, his hands on her waist, both of them consent. The shot uses <Picture 1> as the first frame and the scene, and <Picture 2> as her face and hair.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]) the blonde woman, a fictional adult aged 27 (canon declaration): fully_preserved - her face, wavy blonde hair, tiara, necklace, soft adult figure, skin tone, height, build and the nude state of <Picture 1>.\n<Subject 2> (appears in [Shot 1]) the orc, a fictional adult aged 34 of a fictional humanoid orc species (canon declaration): fully_preserved - his green-skinned skin, muscled frame, dark grey shorts, thick hands, kneeling position behind her, and the crop of <Picture 1> that keeps his head out of frame above the top edge.\n<Picture 1> ([Shot 1] first frame): fully_preserved - the living room, the beige shag rug, the beige/tan sofa in the top third, the dark hardwood floor, the warm diffuse light direction, the colour cast, the 16:9 framing, the camera height, and the two figures in their opening positions.\n\ndetailed_description:\nLive-action, cinematic realism, soft warm diffuse front-side light, muted palette, shallow depth of field held on the two bodies.\n[Shot 1] A single continuous 16:9 medium shot that keeps the framing, the living room, the beige shag rug, the beige/tan sofa in the top third, the dark hardwood floor, the light and the colour of <Picture 1> exactly, with <Picture 1> as the first frame. <Subject 1> is on all fours on the rug where the photograph places her, her head turned to the lens, her wavy blonde hair falling forward, the tiara and the chain necklace on her; <Subject 2> kneels behind her in dark grey shorts, his green-skinned muscled body filling the middle of the frame and his head out of frame above the top edge, the crop of <Picture 1>. Photorealistic skin and anatomy on both figures: her fair skin matte with visible pores, his deep green skin with a coarse grain, real adult body mass and joint definition, five separate fingers on each of her hands, natural adult proportions throughout. The camera starts as a Static Shot on the pair, then a Push In with small amplitude at slow speed closes the lens distance by a hand's width across the segment. At 00:00.000, the frame is the opening photograph: <Subject 1> on all fours on the beige shag rug, palms flat on the pile, knees wide, head turned to the lens, tiara and necklace in place, her bare breasts toward the pile; <Subject 2> kneeling behind her in dark grey shorts, both his hands grasped on her waist, the sofa, the hardwood floor and the warm diffuse light of the living room steady behind them, his head out of frame above the top edge. At 00:02.300, his hands slide forward under her ribs and lift her torso, her elbows bending, her hair sliding across one cheek, her hips staying low on the rug. At 00:04.400, her own hand reaches back and his dark grey shorts come down onto the hardwood floor, the garment she wears slides down her legs onto the rug, both bodies naked, the tiara and the necklace staying on her. At 00:06.600, his hips come in behind her and his cock slides between her thighs, his hands grasping her waist, her spine arching, her heels lifting, her toes curling into the rug. At 00:08.700, he rocks his pelvis against her backside, his cock rubbing wet along her vulva, her hips pushing back onto him in short beats, her fingers curling deeper into the shag pile, her face turned to the lens, the necklace swinging with each beat. The shot ends with <Subject 1> on all fours on the rug of <Picture 1>, <Subject 2> kneeling behind her with his hands on her waist, the sofa, the hardwood floor and the warm diffuse light steady behind them, his head out of frame above the top edge.\n\noverall_soundscape:\nThe room tone of the living room in <Picture 1>, a soft ventilation hum and a faint outside wash. Fabric friction as a garment stretches off legs, the soft slap of cloth landing on a rug, knees pressing into pile, palms sliding on skin. Her own quickened breathing, a long open-mouthed exhale, short rising moans, and his low chest-deep rumble of a voice answering her, consonants thick and slow.\n\nnon_diegetic_music:\nA low muted guitar figure over a slow finger-snare loop, low volume, tempo around 68 bpm, dynamics rising gently as his hands close on her waist and settling at the end of the segment.",
+      "ref_image_size": "max",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "img2",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 1344
+    }
+  },
+  "c1": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 768,
+      "length": [
+        "win1",
+        1
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is the blonde woman of <Picture 1> and <Video 1>, a fictional adult aged 27 (canon declaration, card-silent): soft adult figure, natural breasts, narrow waist, wide hips, long legs, fair skin with visible pores, long wavy blonde hair, the small jewelled tiara on her head and the thin chain necklace at her throat, naked and on all fours on the rug as her body became in <Video 1>. Her face, hair, body and figure come from <Picture 1> and from the body the viewer saw in <Video 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.\n<Subject 2> is the large green-skinned muscled orc of <Picture 1> and <Video 1>, a fictional adult aged 34 of a fictional humanoid orc species (canon declaration, card-silent): a big frame, deep green skin with a coarse grain, broad chest, thick arms, heavy hands, thick thighs, a thick humanoid penis, dark green and heavy, kneeling naked behind <Subject 1> as he became in <Video 1>, his dark grey shorts off his legs and lying on the hardwood floor behind him, his torso filling the middle of the frame and his head out of frame above the top edge.\n<Picture 1> is the approved 16:9 start photograph of the pair in the living room; it defines their bodies, skin, the rug, the sofa, the floor, the room, the light, the colour cast and the crop that keeps his head out of frame.\n<Video 1> is the first 10.125 seconds of this clip: the living room, the rug, their undressing, and her naked body on all fours with him kneeling behind her.\n<Picture 2> is the face crop of <Subject 1>, an identity reference for her face and hair.\n\nsummary:\n[video continuation + reference generation] This segment continues the same single continuous shot from <Video 1>: over the next 4.958 seconds <Subject 1>, naked and on all fours on the rug, a fictional adult aged 27 (canon declaration, card-silent), and <Subject 2>, the green-skinned muscled orc kneeling behind her, a fictional adult aged 34 (canon declaration, card-silent), have intercourse from behind, her body welcoming his, both of them consent. The same living room, rug, sofa, hardwood floor, warm diffuse light, colour, lens and camera height carry from <Video 1>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]) the blonde woman, a fictional adult aged 27 (canon declaration): fully_preserved - her face, wavy blonde hair, tiara, necklace, soft adult figure, skin tone (carried from <Picture 1> and <Video 1>) and the naked, on-all-fours state her body reached in <Video 1>.\n<Subject 2> (appears in [Shot 1]) the orc, a fictional adult aged 34 of a fictional humanoid orc species (canon declaration): fully_preserved - his green-skinned skin, muscled frame, thick hands, kneeling position behind her, and the crop of <Picture 1> that keeps his head out of frame above the top edge.\n<Video 1> (the first 10.125 seconds of this clip): fully_preserved - the living room, the beige shag rug, the sofa in the top third, the dark hardwood floor, the warm diffuse light direction, the colour cast, the framing, the camera height and their discarded garments on the rug and floor.\n<Picture 1> (scene anchor): partially_preserved - the room, rug, sofa, floor, light and colour carry; the two figures are naked and kneeling where they were nude and kneeling in the photograph.\n\nintegrated_multimodal_description:\nLive-action, cinematic realism, soft warm diffuse front-side light, muted realistic palette, shallow depth of field held on the meeting point of their bodies, carried forward from <Video 1>.\n[Shot 1] One continuous take that carries the lens position, the living room, the beige shag rug, the beige/tan sofa in the top third, the dark hardwood floor, the light and the colour of <Video 1> forward, the camera resuming as an Arc Shot with small amplitude at slow speed, curving a quarter of the way around the kneeling pair so the light travels from the left of frame toward the camera, then settling into a Push In with small amplitude at slow speed. <Subject 1> is naked on the rug of <Video 1>, on all fours, her palms flat on the pile, her knees wide, her wavy blonde hair falling forward, the tiara still on her head and the thin chain necklace at her throat; <Subject 2> is kneeling behind her as he became in <Video 1>, his green-skinned muscled body at her back, his dark grey shorts lying on the hardwood floor behind him, his head out of frame above the top edge, the crop of <Picture 1> kept. At 00:10.125, the frame continues <Video 1>: <Subject 1> on all fours on the rug, <Subject 2> kneeling behind her, his hands grasped on her hips, his cock at her vulva, her head turned to the lens, her mouth open. At 00:11.400, his hips come forward and his cock slides into her in one long stroke, her spine arching, her heels lifting, a gasp opening her mouth, her fingers pressing deep into the shag pile. At 00:12.600, his hands slide up her ribs to her breasts, cupping them, his thumbs working her nipples, and each stroke drives her forward an inch on the rug before his hands pull her back onto him. At 00:13.800, the strokes lengthen into a steady rhythm, her elbows bending so her chest lowers toward the rug, her hair spreading on the pile, her face turned sideways against the fabric, the wet shine of their meeting catching the warm diffuse light, her breathing breaking into fast open-mouthed moans. At 00:14.700, her thighs tremble, her toes curl into the rug, her hips stuttering back against his in short quick beats, her mouth open on a long rising cry, his hands holding her waist. The shot ends with <Subject 1> on all fours on the rug of <Picture 1>, her body seizing around his cock, <Subject 2> kneeling behind her with his hands on her waist, the living room, the sofa, the hardwood floor and the warm diffuse light of the opening photograph steady behind them, and his head out of frame above the top edge.\n\noverall_soundscape:\nThe same room tone as <Video 1>, the ventilation hum a little louder with the camera closer. Skin against skin, palms sliding on a rug, knees shifting in pile, the wet sound of intercourse, a heel dragging, garments settling on the floor. Her rising open-mouthed moans, short gasps on each stroke, a long broken cry at the end of the segment, and his chest-deep growls answering her, consonants thick and slow.\n\nnon_diegetic_music:\nThe muted guitar figure continues, a brushed snare entering, tempo around 68 bpm, dynamics swelling with their rhythm and easing at the end of the segment.",
+      "ref_image_size": "max",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "img2",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 1344
+    }
+  },
+  "clip": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "dec_a": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "app1",
+        0
+      ],
+      "vae": [
+        "avae",
+        0
+      ]
+    }
+  },
+  "dec_v": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "app1",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "img": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/GI046.jpg"
+    }
+  },
+  "img2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/GI046_w1_face.png"
+    }
+  },
+  "ksel": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "m_attn": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "comfy kitchen attention",
+      "model": [
+        "unet",
+        0
+      ]
+    }
+  },
+  "m_shift": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "m_vsa",
+        0
+      ],
+      "shift_audio": 3.0,
+      "shift_video": 10.0
+    }
+  },
+  "m_vsa": {
+    "class_type": "BlockSparseAttention",
+    "inputs": {
+      "dense_blocks": "",
+      "end_percent": 1.0,
+      "extra_tokens": 256,
+      "min_tokens": 12288,
+      "model": [
+        "m_attn",
+        0
+      ],
+      "selection": "vsa",
+      "selection.keep_percent": 10,
+      "sink_conditioning": "exact_kv_and_rows",
+      "start_percent": 0.2,
+      "verbose": false
+    }
+  },
+  "mkvid": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "dec_a",
+        0
+      ],
+      "fps": 24,
+      "images": [
+        "dec_v",
+        0
+      ]
+    }
+  },
+  "noise": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 51150031
+    }
+  },
+  "s0_guide": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "g0",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s0_samp": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s0_guide",
+        0
+      ],
+      "latent_image": [
+        "c0",
+        1
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s0_sched",
+        0
+      ]
+    }
+  },
+  "s0_sched": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8
+    }
+  },
+  "s1_guide": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "tail1",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s1_samp": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s1_guide",
+        0
+      ],
+      "latent_image": [
+        "win1",
+        0
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s1_sched",
+        0
+      ]
+    }
+  },
+  "s1_sched": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8
+    }
+  },
+  "save": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "community/ali163_hc15_gi046_s51150031/ali163_hc15_gi046_s51150031",
+      "format": "auto",
+      "video": [
+        "mkvid",
+        0
+      ]
+    }
+  },
+  "tail1": {
+    "class_type": "MiniMaxH3LatentTailGuide",
+    "inputs": {
+      "overlap_audio_tokens": [
+        "win1",
+        3
+      ],
+      "overlap_video_tokens": [
+        "win1",
+        2
+      ],
+      "positive": [
+        "c1",
+        0
+      ],
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ],
+      "target_av_latent": [
+        "win1",
+        0
+      ]
+    }
+  },
+  "unet": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "vvae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+    }
+  },
+  "win1": {
+    "class_type": "MiniMaxH3GuidedContinuationWindow",
+    "inputs": {
+      "extension_frames": 119,
+      "overlap_frames": 22,
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ]
+    }
+  },
+  "g0": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "c0",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "latent": [
+        "c0",
+        1
+      ],
+      "image": [
+        "img",
+        0
+      ],
+      "frame_idx": 0
+    }
+  }
+}

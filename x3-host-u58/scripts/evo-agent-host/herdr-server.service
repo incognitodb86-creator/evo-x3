@@ -1,0 +1,15 @@
+[Unit]
+Description=herdr server (headless terminal/agent host; consolidation P2, runs as evo)
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+WorkingDirectory=%h
+ExecStart=%h/.local/bin/herdr server
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

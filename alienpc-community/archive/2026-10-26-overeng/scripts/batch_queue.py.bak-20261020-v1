@@ -1,0 +1,72 @@
+# D12/D13/D18/D14/D15: small queue script. Shot list -> LLM prompts (Strata, from the official H3 guide) -> unload LLM ->
+# render one at a time on stock ComfyUI -> ffmpeg concat -> contact sheet + notes -> one rclone copy.
+# usage: python batch_queue.py shots.json RUN_NAME [--no-stitch] [--no-upload] [--dry-run]
+import sys, os, json, subprocess, datetime
+sys.path.insert(0, r"C:\AI\community\scripts"); from comm import *; import prompt_writer as pw
+FFD = r"C:\Users\derek\AppData\Local\Microsoft\Winget\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.0.1-full_build\bin"
+RCLONE = r"C:\Users\derek\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.75.1-windows-amd64\rclone.exe"
+def prompts_for(sh, PD, LF):
+    secs = sh.get("chunk_secs", sh.get("secs", 5)); beats = [sh["beat"]] + sh.get("chunks", [])
+    out = []
+    for i, b in enumerate(beats):
+        s = dict(sh, id=f"{sh['id']}_c{i}" if len(beats) > 1 else sh["id"], beat=b, prev_beat=beats[i-1] if i else None)
+        out.append(pw.write(s, sh["arm"], sh.get("secs", 5) if len(beats) == 1 else secs, PD, logfile=LF))
+    return out
+def graph_for(sh, prompts, prefix):
+    w, h = sh.get("w", 768), sh.get("h", 1344)
+    img = stage(sh["image"], w, h)
+    first = frames_for(sh.get("chunk_secs", sh.get("secs", 5)) if sh.get("chunks") else sh.get("secs", 5))
+    ext = frames_for(sh.get("chunk_secs", 5)) - 5 if sh.get("chunks") else 119   # 17k extension frames
+    ext = max(17, ext - ext % 17)
+    return build(sh["mode"], prompts, img, w, h, first, sh.get("steps", 10), sh["seed"], prefix,
+                 ext_frames=ext, antiburn=sh.get("antiburn"), loras=tuple(tuple(x) for x in sh.get("loras", [])))
+def stitch(files, out):
+    lst = out + ".txt"; open(lst, "w", encoding="utf-8").write("".join(f"file '{f}'\n" for f in files))
+    r = subprocess.run([os.path.join(FFD, "ffmpeg.exe"), "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", out], capture_output=True, text=True)
+    if r.returncode != 0 or not os.path.exists(out):  # fall back to re-encode if streams differ
+        r = subprocess.run([os.path.join(FFD, "ffmpeg.exe"), "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst,
+                            "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", out], capture_output=True, text=True)
+    return os.path.exists(out), r.stderr[-500:]
+def contact_sheet(files, out, notes_path, meta):
+    rows = []
+    for i, f in enumerate(files):
+        png = out + f".row{i}.png"
+        subprocess.run([os.path.join(FFD, "ffmpeg.exe"), "-v", "error", "-y", "-i", f, "-vf", "fps=1,scale=192:-2,tile=12x1:padding=4:color=black",
+                        "-frames:v", "1", png], capture_output=True)
+        if os.path.exists(png): rows.append(png)
+    if rows:
+        args = [os.path.join(FFD, "ffmpeg.exe"), "-v", "error", "-y"] + sum([["-i", r] for r in rows], []) + \
+               (["-filter_complex", f"vstack=inputs={len(rows)}"] if len(rows) > 1 else []) + ["-frames:v", "1", out]
+        subprocess.run(args, capture_output=True)
+    with open(notes_path, "w", encoding="utf-8") as fh:  # D14: notes only, no power to reject
+        fh.write(f"# Review notes: {meta['run']} ({meta['when']})\n\nContact sheet: {out} (1 frame per second, one row per clip).\n"
+                 "Notes are optional and do not block anything.\n\n")
+        for i, f in enumerate(files): fh.write(f"- Row {i+1}: `{os.path.basename(f)}` - notes: \n")
+    return os.path.exists(out)
+def upload(path, run, LF):
+    dest = f"gdrive:AlienPc/community/{run}"
+    r = subprocess.run([RCLONE, "copy", path, dest, "--retries", "1", "--low-level-retries", "1"], capture_output=True, text=True, timeout=900)
+    ok = r.returncode == 0; log(f"RCLONE copy {os.path.basename(path)} -> {dest} rc={r.returncode} {'' if ok else r.stderr.strip()[-300:]}", LF)
+    return ok
+if __name__ == "__main__":
+    shots = json.load(open(sys.argv[1], encoding="utf-8")); run_name = sys.argv[2]; flags = set(sys.argv[3:])
+    OUT = os.path.join(W, "runs", run_name); PD = os.path.join(OUT, "prompts"); LF = os.path.join(OUT, "run.log"); os.makedirs(PD, exist_ok=True)
+    log(f"BATCH START {run_name} shots={len(shots)} flags={sorted(flags)}", LF)
+    P = {sh["id"]: prompts_for(sh, PD, LF) for sh in shots}          # 1) all prompts while the LLM is loaded
+    if "--dry-run" in flags:
+        for sh in shots: json.dump(graph_for(sh, P[sh["id"]], f"community/{run_name}/{sh['id']}"), open(os.path.join(OUT, sh["id"] + ".dry.api.json"), "w"), indent=1)
+        log("BATCH DRY-RUN DONE (prompts + graphs written, nothing rendered)", LF); sys.exit(0)
+    ensure_comfy(LF)                                                   # 2) unload LLM, wake ComfyUI
+    done = []
+    for sh in shots:                                                   # 3) render one at a time
+        meta = {k: v for k, v in sh.items() if k not in ("chunks",)}; meta.update(run=run_name, prompts=[os.path.join(PD, x) for x in os.listdir(PD) if x.startswith(sh["id"]) and x.endswith(".txt")])
+        r = run(graph_for(sh, P[sh["id"]], f"community/{run_name}/{sh['id']}"), sh["id"], meta, OUT, LF)
+        if r: done.append(r)
+    files = [d["file"] for d in done]
+    json.dump(done, open(os.path.join(OUT, "results.json"), "w"), indent=1)
+    meta = {"run": run_name, "when": datetime.datetime.now().strftime("%Y-%m-%d %H:%M CT")}
+    contact_sheet(files, os.path.join(OUT, "contact_sheet.png"), os.path.join(OUT, "notes.md"), meta)
+    if files and "--no-stitch" not in flags:
+        ok, err = stitch(files, os.path.join(OUT, f"{run_name}_stitched.mp4")); log(f"STITCH ok={ok} {err}", LF)
+        if ok and "--no-upload" not in flags: upload(os.path.join(OUT, f"{run_name}_stitched.mp4"), run_name, LF)
+    log(f"BATCH DONE {run_name} rendered={len(done)}/{len(shots)} total_secs={sum(d['secs'] for d in done):.0f}", LF)

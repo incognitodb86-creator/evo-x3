@@ -1,0 +1,23 @@
+{
+ "jobs": [
+  {
+   "tag": "bjpov_b1_s51083020",
+   "guides": [
+    {
+     "image": "community/bj_pov_20261030/start_pov_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/bj_pov_20261030/start_pov_768x1344.png",
+    "community/bj_pov_20261030/face_a.png",
+    "community/bj_pov_20261030/face_b.png"
+   ],
+   "prompt_file": "bj_pov_prompt.txt",
+   "pose": "the act is oral, not a target pose: by the last frame the woman's mouth is on the man's shaft with deep oral contact and the motion is still running; judge anatomy and the contact, and treat the start-image comparison checks as not applicable (the start image is the man's own lap and contains no woman, and the clip's task is to bring her into frame)",
+   "arm": "b1_s51083020",
+   "judged_file": "C:\\AI\\community\\runs\\bj_pov_20261030\\b1_s51083020\\bj_pov_b1_s51083020.mp4",
+   "judged_size": "768x1344",
+   "instrument_caveat": "start-image comparison checks (same_scene, same_people, start_kept) are not applicable to this cell: the start image is a first-person lap shot with no woman in it and the clip must add her. Signal here = anatomy_defect, target_reached, and the precheck jump threshold."
+  }
+ ]
+}

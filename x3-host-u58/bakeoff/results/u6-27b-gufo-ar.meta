@@ -1,0 +1,10 @@
+=== u6-27b-gufo-ar start 2026-11-15 09:30:35 CST
+CMD: sudo podman run --rm --name bake-27b --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined --ulimit memlock=-1:-1 -v /srv/models:/srv/models:ro,Z -v /srv/bakeoff/dflash2:/srv/bakeoff/dflash2:ro,Z ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133 gufo serve llm --host 127.0.0.1 --port 8090 --model /srv/models/qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf --speculative off --context 32768 --sessions 1 --served-model-name qwen27b --reasoning-effort low --log-progress
+LOAD_S 7 up=1
+long {"ttft_s": 34.12, "total_s": 42.45, "prompt_tokens": 18253, "completion_tokens": 95, "client_decode_tps": 11.41, "finish": "stop", "pass": true}
+longdecode {"ttft_s": 4.2, "total_s": 82.86, "prompt_tokens": 18244, "completion_tokens": 900, "client_decode_tps": 11.44, "finish": "length", "pass": true}
+decode {"ttft_s": 0.34, "total_s": 73.26, "prompt_tokens": 59, "completion_tokens": 885, "client_decode_tps": 12.14, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+               total        used        free      shared  buff/cache   available
+Mem:             124          29          48           0          48          95
+=== u6-27b-gufo-ar end 2026-11-15 09:34:16 CST

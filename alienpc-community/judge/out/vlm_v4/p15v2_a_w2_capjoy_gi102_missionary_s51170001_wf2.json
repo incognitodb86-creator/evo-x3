@@ -1,0 +1,46 @@
+{
+ "tag": "p15v2_a_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 6.5,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, beige headboard, same lighting and room layout across all frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "Subject 2 is a man, not a woman as specified in START IMAGE and prompt."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows man on top, woman on back, but START IMAGE has woman on all fours, man kneeling behind."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows man on top, woman on back, bodies in contact, genital alignment visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "All body regions are anatomically correct and clearly defined. There are no fusion defects, missing or extra limbs, malformed genitals, or shapeless flesh blobs. The bodies are distinct and properly\u6bd4\u4f8b"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.1039,
+  "same_people": 0.8948,
+  "start_kept": 0.9941,
+  "target_reached": 0.0492,
+  "anatomy_defect": 0.0052,
+  "anatomy_zoom": 0.0009
+ },
+ "flags": [
+  "same_people",
+  "start_kept"
+ ]
+}

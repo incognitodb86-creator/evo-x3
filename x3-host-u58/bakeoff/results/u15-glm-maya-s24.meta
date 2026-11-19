@@ -1,0 +1,10 @@
+=== u15-glm-maya-s24 start 2026-11-15 11:53:54 CST
+CMD: sudo podman run --rm --name bake-arm --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined --ipc=host --ulimit memlock=-1:-1 -v /srv/bakeoff/glm:/srv/bakeoff/glm:Z docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:cf0d43fe54fae7a744942c49656e3c7b2be9890b4d6b3c60a5570f06874efb8c maya-serve --family glm --pack /srv/bakeoff/glm/Maya-S24/maya-pack --model-name glm-maya-s24 --context 32768 --mode mtp --host 127.0.0.1 --port 8090
+LOAD_S 33 up=1
+long {"ttft_s": 62.31, "total_s": 63.43, "prompt_tokens": 17100, "completion_tokens": 35, "client_decode_tps": 31.38, "finish": "stop", "pass": true}
+code {"ttft_s": 1.43, "total_s": 3.56, "prompt_tokens": 106, "completion_tokens": 80, "client_decode_tps": 37.51, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.99, "total_s": 29.08, "prompt_tokens": 29, "completion_tokens": 648, "client_decode_tps": 23.07, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124         101          16           0           7          22
+=== u15-glm-maya-s24 end 2026-11-15 11:56:09 CST

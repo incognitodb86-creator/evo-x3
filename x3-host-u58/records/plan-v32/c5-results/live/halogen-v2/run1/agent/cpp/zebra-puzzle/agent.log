@@ -1,0 +1,16 @@
+Both tests pass. Summary of the implementation:
+
+**`zebra_puzzle.h`** — added the declaration `Solution solve();`.
+
+**`zebra_puzzle.cpp`** — a real constraint-search solver (not a hardcoded answer):
+
+- Each of the 5 categories (colors, nationalities, drinks, pets, hobbies) is represented as an `std::array<int,5>` mapping *item → house index* (e.g. `colors[RED] == 2`).
+- A depth‑first search enumerates permutations one category at a time (`std::next_permutation`), so only 120 permutations exist per category instead of the 24 billion full combinations.
+- Constraints are checked incrementally as soon as the categories they involve are assigned (rules 6 → colors; 10, 15, 2 → nationalities; 9, 4, 5 → drinks; 8, 13, 14 → hobbies; 3, 7, 11, 12 → pets), which prunes the search immediately and makes it run in ~2 ms.
+- When a complete assignment satisfies all 15 rules, the water drinker and zebra owner are read from the assignment: the **Norwegian** drinks water and the **Japanese** owns the zebra.
+
+Build/test output:
+```
+[100%] Built target zebra-puzzle
+All tests passed (2 assertions in 2 test cases)
+```

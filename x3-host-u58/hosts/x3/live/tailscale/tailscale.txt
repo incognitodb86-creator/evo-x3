@@ -1,0 +1,18 @@
+1.102.5
+  long version: 1.102.5
+  go version: go1.26.10-X:nodwarf5
+
+# serve
+https://evo-x3-1.tailf242b2.ts.net (tailnet only)
+|-- / proxy http://127.0.0.1:8080
+
+https://evo-x3-1.tailf242b2.ts.net:8443 (tailnet only)
+|-- /         proxy http://127.0.0.1:3000
+|-- /renders/ path  /mnt/qnap/renders/runs
+
+https://evo-x3-1.tailf242b2.ts.net:8444 (tailnet only)
+|-- / proxy http://127.0.0.1:7878
+
+https://evo-x3-1.tailf242b2.ts.net:8445 (tailnet only)
+|-- / proxy http://127.0.0.1:9537
+

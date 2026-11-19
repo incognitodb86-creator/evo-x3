@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w7_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 10.5,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background shows identical bed, headboard, and lighting as START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and dark-haired man with matching body types and clothing appear in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or repositioning."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows man on top in missionary position, fully in contact with woman, meeting target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show anatomically correct, intact bodies with no fusion, missing limbs, or malformed features."
+  }
+ },
+ "flags": []
+}

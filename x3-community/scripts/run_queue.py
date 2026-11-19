@@ -91,6 +91,9 @@ QUEUE_TIMEOUT_STOPPING = 10  # short /queue timeout (s) after repeated timeouts 
 # venv that runs this queue, so the frame loop runs there as a child process (frame by frame, never the whole clip in RAM).
 UPSCALE_PY = os.environ.get("RQ_UPSCALE_PY", os.path.join(os.path.dirname(ROOT), "comfy-alienpc", ".venv", "Scripts", "python.exe"))
 UPSCALE_TIMEOUT = 1800
+# t2571u (Derrick 2026-11-19): X3 renders keep only the upscaled video. remote_upscale.enable sets this, so after a
+# verified UPSCALE ok the raw clip is deleted (a failed post-pass still keeps it). AlienPc's local runs are unchanged.
+DELETE_RAW_AFTER_UPSCALE = False
 _UPSCALE_SRC = r"""
 import json, subprocess, sys, time
 import torch, nvvfx
@@ -206,12 +209,36 @@ def upscale_done(run_dir, jobs, slog):
                               "frames": p1["frames"], "elapsed_s": round(el, 1), "child": info}
         meta_ok.update({"clip_sha256": hashlib.sha256(open(clip, "rb").read()).hexdigest(), "w": p1["w"], "h": p1["h"],
                         "bytes": p1["bytes"]})
+        if DELETE_RAW_AFTER_UPSCALE:   # t2571u: the 2x passed every check above, so the raw clip goes
+            os.remove(raw)
+            meta_ok["upscale"]["raw_clip"] = None
+            meta_ok["upscale"]["raw_deleted"] = "t2571u: only the upscaled clip is kept"
         json.dump(meta_ok, open(okp, "w", encoding="utf-8"), indent=1)
         n_ok += 1
+        copy_to_pi_drop(run_dir, tag, clip, slog)   # t2554: only the 2x clip goes to pi-drop
         qlog(run_dir, "UPSCALE ok pos=%d tag=%s %dx%d->%dx%d fps=%s frames=%d audio=%s bytes=%d elapsed=%.1fs raw=%s" % (
             j["pos"], tag, p0["w"], p0["h"], p1["w"], p1["h"], p1["fps"], p1["frames"], "yes" if p1["audio"] else "no",
-            p1["bytes"], el, os.path.basename(raw)))
+            p1["bytes"], el, "deleted" if DELETE_RAW_AFTER_UPSCALE else os.path.basename(raw)))
     return n_ok, n_fail
+
+
+def upscale_only(run_dir, jobs):
+    """--upscale-only (t2565u): the 2x post-pass alone on a finished run, with no render, under the same GPU lock."""
+    slog = lambda m: comm.log(m, os.path.join(run_dir, "status.log"))
+    lrc, lout = rgj.ps_run(rgj.GPU_LOCK_PS, "-Acquire", "-Owner", str(os.getpid()), "-Note", "upscale-only " + os.path.basename(run_dir))
+    slog("gpu_lock acquire rc=%d %s" % (lrc, lout[:140]))
+    if lrc != 0:
+        qlog(run_dir, "UPSCALE-ONLY not started: GPU lock rc=%d %s" % (lrc, lout[:140]))
+        return 7 if lrc == 1 else 8
+    n_ok = n_fail = 0
+    try:
+        if not rgj.wake(slog):
+            qlog(run_dir, "UPSCALE-ONLY FAIL ComfyUI down"); return 4
+        n_ok, n_fail = upscale_done(run_dir, jobs, slog)
+    finally:
+        rgj.gpu_unlock(slog)
+        qlog(run_dir, "UPSCALE-ONLY closed ok=%d fail=%d, lock released" % (n_ok, n_fail))
+    return 9 if n_fail else 0
 
 
 def qlog(run_dir, line):
@@ -579,7 +606,7 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     if why:
         qlog(run_dir, "FAIL pos=%d tag=%s objective %s" % (job["pos"], tag, "; ".join(why))); return False
     slog("OBJECTIVE ok %s frames=%d size=%sx%s audio=True bytes=%d" % (t, p["frames"], p["w"], p["h"], p["bytes"]))
-    copy_to_pi_drop(run_dir, tag, s["file"], slog)
+    # t2554 (Derrick 2026-11-19): pi-drop gets only the RTX-upscaled clip, copied in upscale_done after UPSCALE ok
     rgj.contact_sheet(s["file"], os.path.join(d, tag + "_stills_contact.png"), p["duration"])
     outs = [os.path.join(OUT_ROOT, t, f) for f in os.listdir(os.path.join(OUT_ROOT, t))] if os.path.isdir(os.path.join(OUT_ROOT, t)) else []
     wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None
@@ -762,19 +789,26 @@ def main():
                          "Default off: a normal run unloads comfyui_auto in finally as before.")
     ap.add_argument("--remote", action="store_true",
                     help="EVO-X3: queue on AlienPc ComfyUI over the tailnet (Serve :8446; scripts/remote_comfy.py). Implied on Linux.")
+    ap.add_argument("--upscale-only", action="store_true",
+                    help="t2565u: run only the RTX 2x post-pass on a finished run (no render), under the GPU lock")
     ap.add_argument("--probe", action="store_true", help="with --dry-run --remote: one GET /system_stats (ignored path, never wakes ComfyUI)")
     a = ap.parse_args()
     run_dir = os.path.abspath(a.run_dir)
     remote = a.remote or os.name != "nt"  # consolidation P1b 2026-11-16: the X3 has no local ComfyUI
     if remote:
         import remote_comfy
+        local_upscale_done = upscale_done
         remote_comfy.enable(sys.modules[__name__])
+        import remote_upscale  # t2564u: the 2x post-pass runs as one AlienPc ComfyUI job (was D5 "deferred")
+        remote_upscale.enable(sys.modules[__name__], local_upscale_done)
     if a.detach:
         return detach(sys.argv[1:], run_dir)
     q = json.load(open(a.queue or os.path.join(run_dir, "_render_order.json"), encoding="utf-8"))
     jobs = q["order"] if isinstance(q, dict) else q
     global _CELL_CONTRACT  # B2-10: the long-clip plan declares the cell contract in its order file
     _CELL_CONTRACT = bool(q.get("cell_contract")) if isinstance(q, dict) else False
+    if a.upscale_only and not a.dry_run:
+        return upscale_only(run_dir, jobs)
     done = done_tags(run_dir) if a.resume else set()
     todo = [j for j in jobs if j["tag"] not in done]
     size = tuple(int(x) for x in a.size.lower().split("x"))
@@ -794,7 +828,7 @@ def main():
         for j in todo:
             print("  pos %2d %s" % (j["pos"], j["tag"]))
         print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
-        print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "deferred to AlienPc (X3 remote, D5)" if remote else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
+        print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "RTX 2x as one AlienPc ComfyUI job (t2564u)" if remote else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
         print("comfy process: %s" % ("kept loaded at batch close (--keep-comfy-process: /free still runs, llama-swap unload skipped)"
                                      if a.keep_comfy_process else "unloaded at batch close (default)"))
         if remote:

@@ -1,0 +1,4 @@
+- 2026-11-18T15:35:58 [ralph.sh auto] iter 1 rc=0 head=44bc639 item: - [ ] smoke item 1 (model wrote no progress line)
+- 2026-11-18T15:36:02 [ralph.sh auto] iter 2 rc=0 head=44bc639 item: - [ ] smoke item 2 (model wrote no progress line)
+- 2026-11-18T15:36:06 [ralph.sh auto] iter 1 rc=0 head=44bc639 item: - [ ] post-dryrun item 1 (model wrote no progress line)
+- 2026-11-18T15:36:10 [ralph.sh auto] iter 2 rc=0 head=44bc639 item: - [ ] post-dryrun item 2 (model wrote no progress line)

@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bed, sheets, and background wall with consistent lighting and depth of field."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same blonde hair, fair skin, and white lingerie throughout all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing with no jump cut or pose change."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with full body contact and intimate motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, separate bodies with correct limbs, hands, and genitalia without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0019,
+  "same_people": 0.0251,
+  "start_kept": 0.0194,
+  "target_reached": 0.0618,
+  "anatomy_defect": 0.0605
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w2_capjoy_gi102_missionary_s51170001_wf2"
+}

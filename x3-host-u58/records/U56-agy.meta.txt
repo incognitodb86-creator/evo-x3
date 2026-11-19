@@ -1,0 +1,10 @@
+start=2026-11-17 10:27:30 America/Chicago
+model=claude-sonnet-5-5-medium
+cwd=/home/derekboone/evo-x3
+brief=/home/derekboone/evo-x3/records/U56-render-writer-fixes/U56-agy-brief-20261117.md
+lease_file=/home/derekboone/evo-x3/records/status/2026-11-17-1027-evo-x3-lease-taken-agy-u56-render-writer-fixes.md
+lease_line=holder=agy unit=U56 scope=render+community writer fixes taken=2026-11-17 10:27 CT
+pid_wrapper=1404045
+host=evo-X3
+exit_code=3
+end=2026-11-17 10:36:00 America/Chicago

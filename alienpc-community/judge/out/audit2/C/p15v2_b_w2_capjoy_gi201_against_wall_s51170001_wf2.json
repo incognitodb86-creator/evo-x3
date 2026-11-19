@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "no",
+   "reason": "Frames 4-8 show a textured stone wall, different from the dark cave background in the START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain identical features, outfits, and proportions across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing with no jump cut."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows both bodies in standing rear-entry pose against wall, in contact as intended."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, separate bodies with correct limbs, hands, and genitals without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.5681,
+  "same_people": 0.0,
+  "start_kept": 0.0131,
+  "target_reached": 0.0187,
+  "anatomy_defect": 0.0186
+ },
+ "finish": "stop",
+ "flags": [
+  "same_scene"
+ ],
+ "tag": "p15v2_b_w2_capjoy_gi201_against_wall_s51170001_wf2"
+}

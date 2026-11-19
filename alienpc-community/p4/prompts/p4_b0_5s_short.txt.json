@@ -1,0 +1,13 @@
+{
+ "shot": {
+  "id": "p4_b0_5s",
+  "image_note": "adult woman, dark hair slicked back, metallic geometric top, black photo studio, hard key light",
+  "beat": "She slowly lifts the metallic top off over her head, tosses it aside and turns her bare upper body toward the key light, holding eye contact.",
+  "prev_beat": null
+ },
+ "arm": "short",
+ "secs": 5,
+ "words": 95,
+ "model": "coding_sc117_strata",
+ "guide": "MiniMax-H3 VIDEO_PROMPT_WRITING_GUIDE_base_en.md"
+}

@@ -1,0 +1,11 @@
+All tests pass. Implementation summary:
+
+**dominoes.go** — implemented `MakeChain` with backtracking search:
+- Empty input returns an empty chain with `ok = true`.
+- Tries each domino (in both orientations) as the chain's starting stone, then recursively appends any unused domino whose half matches the current open end (trying normal and reversed orientation).
+- When all dominoes are used, the chain is valid only if the last open end matches the first stone's outer half (closed chain).
+- Returns `nil, false` if no arrangement works.
+
+```
+ok  	dominoes	0.002s
+```

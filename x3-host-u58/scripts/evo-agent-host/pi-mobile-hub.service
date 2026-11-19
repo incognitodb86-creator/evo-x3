@@ -1,0 +1,15 @@
+[Unit]
+Description=pi-mobile persistent hub (phone link) on 127.0.0.1:7878, Serve :8444 (consolidation P2, runs as evo)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/evo-x3/scripts
+ExecStart=/usr/bin/node %h/evo-x3/scripts/pi_mobile_hub.cjs
+Restart=always
+RestartSec=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

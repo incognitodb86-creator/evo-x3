@@ -1,0 +1,45 @@
+{
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, beige headboard, neutral wall, same lighting and depth of field across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and brown-haired man appear throughout, with identical body types, hair, skin tone, and sex characteristics."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, while frame 2 already shows her supine, indicating a pose transition."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman supine, man on top in missionary pose, bodies in contact with visible genital contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "All body regions are anatomically correct and clearly defined. There are no fusion defects, missing or extra limbs, malformed genitals, or shapeless flesh blobs. The bodies are in a natural, intimate,"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0003,
+  "same_people": 0.0,
+  "start_kept": 0.9753,
+  "target_reached": 0.0003,
+  "anatomy_defect": 0.0001,
+  "anatomy_zoom": 0.0012
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

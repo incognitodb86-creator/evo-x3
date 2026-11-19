@@ -1,0 +1,394 @@
+{
+  "app1": {
+    "class_type": "MiniMaxH3AppendContinuation",
+    "inputs": {
+      "overlap_audio_tokens": [
+        "win1",
+        3
+      ],
+      "overlap_video_tokens": [
+        "win1",
+        2
+      ],
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ],
+      "sampled_window": [
+        "s1_samp",
+        0
+      ],
+      "transition_audio_tokens": [
+        "win1",
+        5
+      ],
+      "transition_video_tokens": [
+        "win1",
+        4
+      ]
+    }
+  },
+  "avae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "c0": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 768,
+      "length": 243,
+      "prompt": "subject_definitions:\n<Subject 1> is the blonde woman bound to the table in the 16:9 start photograph in <Picture 1>, a fictional adult aged 26 (canon declaration, card-silent): long wavy blonde hair, blue eyes, light complexion, slim build, bare shoulders, narrow waist, long legs, fair skin with visible pores, the restraint hardware the photograph shows, wrists chained and ankles in shackles, and the anguished, distressed expression on her face. Her face, hair, body, skin, figure and the restraint hardware all come from <Picture 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.\n<Subject 2> is the robot of <Picture 1>, the machine figure at <Subject 1>'s body in the photograph: a robot figure, positioned, scaled and angled exactly as <Picture 1> shows it, acting on her body in the way the photograph shows it, and the start-image card records it as a robot figure whose appearance the caption left out, so this prompt keeps its body, its position, its scale and its angle exactly as <Picture 1> carries them. The robot is a fictional adult aged 30 of a fictional machine cast (canon declaration, card-silent), and the card record shows restraint and distress on the human figure of the frame.\n<Picture 1> is the approved 16:9 start photograph of <Subject 1> bound on the table with the robot at her body. It is the first frame of this video, and it defines her body, her hair, the restraint hardware, the table, the framing, the colour cast and the light. The start-image card names the table and the restraint hardware and leaves the room, the light and the camera as unresolvable rows, so the space around the table stays exactly as <Picture 1> frames it.\n<Picture 2> is the face crop of <Subject 1>, the same blonde woman, a fictional adult aged 26 (canon declaration, card-silent), forehead, hair, jaw and shoulders filling the square. It is an identity reference for her face and hair only.\n\nsummary:\n[reference generation] The target video is the first 10.125 seconds of a single continuous 16:9 shot at the table of <Picture 1>: <Subject 1>, the blonde woman bound at wrists and ankles, a fictional adult aged 26 (canon declaration, card-silent), and <Subject 2>, the robot of <Picture 1>, the machine at her body, a fictional adult aged 30 (canon declaration, card-silent), have sex at the table in the position the photograph shows. The scene is fiction, the card record shows restraint and distress, her face keeps the anguished, distressed look the start photograph frames, and notes/needs_derrick.md row 21 is the consent question Derrick answers. The shot uses <Picture 1> as the first frame and the scene, and <Picture 2> as her face and hair.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]) the blonde woman, a fictional adult aged 26 (canon declaration): fully_preserved - her face, wavy blonde hair, blue eyes, light complexion, slim build, the restraint hardware of <Picture 1>, and the anguished, distressed expression of <Picture 1>.\n<Subject 2> (appears in [Shot 1]) the robot, a fictional adult aged 30 of a fictional machine cast (canon declaration): fully_preserved - the machine's body, position, scale and angle exactly as <Picture 1> carries them, with the appearance detail the card leaves out kept out.\n<Picture 1> ([Shot 1] first frame): fully_preserved - the table, the restraint hardware, her body and pose, the framing, the colour cast, the camera height and the light of the photograph, with the room, the light and the camera rows of the card unresolvable, so the space around the table is the space of the photograph.\n\ndetailed_description:\nLive-action, cinematic realism, the light of <Picture 1> carried unchanged, muted palette, shallow depth of field held on the two bodies.\n[Shot 1] A single continuous 16:9 medium shot that keeps the framing, the table, the restraint hardware, the light, the colour cast and the crop of <Picture 1> exactly, with <Picture 1> as the first frame, and the space around the table staying as the photograph frames it because the start-image card leaves the room, the light and the camera unresolvable. <Subject 1>, the blonde woman with long wavy hair, a fictional adult aged 26 (canon declaration, card-silent), lies on the table where the opening photograph places her, her wrists chained at the corners of the table, her ankles in shackles, her face anguished and distressed, the light of the photograph on her light complexion and her slim build. Photorealistic skin and anatomy on her: fair skin matte with visible pores and fine vellus hair, narrow waist, long legs, natural adult body mass, five separate fingers on each of her hands, natural adult proportions throughout, a sheen of sweat between her shoulders and along her stomach. The camera starts as a Static Shot on the pair, then a Push In with small amplitude at slow speed closes the lens distance by a hand's width across the segment. At 00:00.000, the frame is the opening photograph: <Subject 1> bound on the table, wrists chained, ankles in shackles, her legs spread on the table top, an anguished, distressed expression on her face, and the machine of <Picture 1> at her body as the photograph frames it, the table, the light and the colour cast of <Picture 1> unchanged on her. At 00:02.400, her wrists pull back against the chains, the links taking the small weight of her arms, her head turning sideways on the table, her breath coming long and open, her shoulders rising. At 00:04.600, her legs opening around the machine, her heels drawing up on the table, her hair spreading on the table top, her stomach tightening as the machine moves against her. At 00:06.800, the machine's hips drive home and its cock slides into her in one long stroke, her spine arching off the table, her wrists pulling at the chains at the corners, her face anguished, eyes wet, crying out on a broken breath. At 00:08.900, her body takes the robot's strokes in a steady rhythm, her breasts shifting with each impact, sweat spreading across her light complexion, her face turned to the lens, her ankles straining in the shackles, anguished and distressed the way the start photograph framed it, and the card record shows restraint and distress in that face. The shot ends with the machine of <Picture 1> at her bound body on the table, her wrists chained and her ankles in shackles, her face anguished, the framing, the light and the colour cast of the opening photograph unchanged, and notes/needs_derrick.md row 21 carried as the open question of this clip.\n\noverall_soundscape:\nThe room tone of the space in <Picture 1>, a low ventilation wash and a faint hollow resonance off the table top. Chains taking small weights and settling, links ticking on the table edge, palms sliding on the table top, skin against skin, the wet sound of intercourse, her quickened breathing, a long exhale, short rising moans, a broken cry, and the low steady mechanical drone of the machine of <Picture 1> under all of it.\n\nnon_diegetic_music:\nA low sustained cello figure over a slow brushed-snare pulse, low volume, tempo around 64 bpm, dynamics rising as the strokes lengthen and easing at the end of the segment.",
+      "ref_image_size": "max",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "img2",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 1344
+    }
+  },
+  "c1": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 768,
+      "length": [
+        "win1",
+        1
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is the blonde woman of <Picture 1> and <Video 1>, a fictional adult aged 26 (canon declaration, card-silent): long wavy hair, blonde, blue eyes, light complexion, slim build, fair skin with visible pores, narrow waist, long legs, her wrists chained at the corners of the table and her ankles in shackles as <Video 1> left them, her face anguished and distressed as the start photograph frames her face. Her face, hair, body, skin, figure and the restraint hardware come from <Picture 1> and from the body the viewer saw in <Video 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.\n<Subject 2> is the robot of <Picture 1> and <Video 1>, the machine at her body, a fictional adult aged 30 of a fictional machine cast (canon declaration, card-silent): its body, position, scale and angle carried from <Picture 1> and <Video 1> exactly, inside her as <Video 1> left it, and the appearance detail the start-image card leaves out kept out of the prose, and the card record shows restraint and distress on her.\n<Picture 1> is the approved 16:9 start photograph of the pair at the table; it defines her body, her hair, the restraint hardware, the table, the machine's position, the framing, the colour cast and the light.\n<Video 1> is the first 10.125 seconds of this clip: the table, the chains, the shackles, the machine's body at her body, and her face anguished and distressed.\n<Picture 2> is the face crop of <Subject 1>, an identity reference for her face and hair.\n\nsummary:\n[video continuation + reference generation] This segment continues the same single continuous shot from <Video 1>: over the next 4.958 seconds <Subject 1>, bound at the wrists and ankles on the table, a fictional adult aged 26 (canon declaration, card-silent), and <Subject 2>, the robot of <Picture 1>, the machine inside her, a fictional adult aged 30 (canon declaration, card-silent), go on having sex at the table, the machine keeping the position, scale and angle the photograph gives it. The scene is fiction, the card record shows restraint and distress, her face stays anguished and distressed, and notes/needs_derrick.md row 21 is the consent question Derrick answers. The same table, framing, colour cast and light carry from <Video 1>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]) the blonde woman, a fictional adult aged 26 (canon declaration): fully_preserved - her face, wavy blonde hair, blue eyes, light complexion, slim build (carried from <Picture 1> and <Video 1>), the chains at her wrists, the shackles at her ankles and the anguished, distressed expression.\n<Subject 2> (appears in [Shot 1]) the robot, a fictional adult aged 30 of a fictional machine cast (canon declaration): fully_preserved - the machine's body, position, scale and angle from <Picture 1> and <Video 1>, and the appearance detail the card leaves out kept out.\n<Video 1> (the first 10.125 seconds of this clip): fully_preserved - the table, the restraint hardware, the framing, the colour cast, the camera height and the light of the photograph.\n<Picture 1> (scene anchor): partially_preserved - the table, the restraint hardware, the framing, the colour cast and the light carry, and the card's unresolvable room, light and camera rows stay unresolvable, so the space around the table is the space of the photograph.\n\nintegrated_multimodal_description:\nLive-action, cinematic realism, the light of <Picture 1> carried unchanged, muted realistic palette, shallow depth of field held on the meeting point of their bodies, carried forward from <Video 1>.\n[Shot 1] One continuous take that carries the lens position, the table, the restraint hardware, the framing, the colour cast and the light of <Video 1> forward, the camera resuming as an Arc Shot with small amplitude at slow speed, curving a quarter of the way around the table so the light of the photograph travels from the left of frame toward the camera, then settling into a Push In with small amplitude at slow speed on the two bodies. <Subject 1> lies on the table of <Video 1>, her wrists chained at the corners, her ankles in shackles, her legs open on the table top, her wavy blonde hair spreading under her head, her face anguished; <Subject 2> is the machine of <Video 1> at her body, its body, position, scale and angle exactly as <Picture 1> and <Video 1> carry them, inside her as <Video 1> left her. At 00:10.125, the frame continues <Video 1>: <Subject 1> bound on the table, wrists chained, ankles in shackles, an anguished, distressed expression on her face, the robot of <Video 1> at her body in the position the photograph gives it, its arms braced on the table edge beside her head. At 00:11.400, her spine arches off the table, her wrists pulling back against the chains, her heels drawing up on the table top, a broken cry tearing open her breath. At 00:12.600, her body takes the machine's strokes in a steady rhythm, her breasts shifting with each impact, her stomach tightening, sweat spreading across her light complexion, her hair sliding across the table top, the wet shine of their meeting catching the light of the photograph. At 00:13.800, her legs shake around the machine, her ankles straining in the shackles, her face turning to the lens, anguished, eyes wet, crying out in fast moans, and the card record shows restraint and distress in that face. At 00:14.700, her body seizes, her toes curling against the shackles, her hips stuttering up into the machine in short quick beats, a long rising cry in her throat, her wrists pulling the chains tight at the corners of the table. The shot ends with <Subject 1> bound on the table of <Picture 1>, her body settling, her face anguished and distressed the way the opening photograph framed it, the robot's body at her body in the position, scale and angle of the photograph, the framing, the light and the colour cast unchanged, and notes/needs_derrick.md row 21 carried as the open question of this clip.\n\noverall_soundscape:\nThe same room tone as <Video 1>, the low ventilation wash a little louder with the camera closer. Chains tightening at the table corners, links ticking on the table edge, palms sliding on the table top, skin against skin, the wet sound of intercourse, her quickened breathing, short gasps on each stroke, a long broken cry at the end of the segment, and the low steady mechanical drone of the machine of <Picture 1> under all of it.\n\nnon_diegetic_music:\nThe sustained cello figure continues, a brushed snare entering, tempo around 64 bpm, dynamics swelling with the rhythm and easing at the end of the segment.",
+      "ref_image_size": "max",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "img2",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 1344
+    }
+  },
+  "clip": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "dec_a": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "app1",
+        0
+      ],
+      "vae": [
+        "avae",
+        0
+      ]
+    }
+  },
+  "dec_v": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "app1",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "img": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/GI063.jpg"
+    }
+  },
+  "img2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/GI063_w1_face.png"
+    }
+  },
+  "ksel": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "m_attn": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "comfy kitchen attention",
+      "model": [
+        "unet",
+        0
+      ]
+    }
+  },
+  "m_shift": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "m_vsa",
+        0
+      ],
+      "shift_audio": 3.0,
+      "shift_video": 10.0
+    }
+  },
+  "m_vsa": {
+    "class_type": "BlockSparseAttention",
+    "inputs": {
+      "dense_blocks": "",
+      "end_percent": 1.0,
+      "extra_tokens": 256,
+      "min_tokens": 12288,
+      "model": [
+        "m_attn",
+        0
+      ],
+      "selection": "vsa",
+      "selection.keep_percent": 10,
+      "sink_conditioning": "exact_kv_and_rows",
+      "start_percent": 0.2,
+      "verbose": false
+    }
+  },
+  "mkvid": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "dec_a",
+        0
+      ],
+      "fps": 24,
+      "images": [
+        "dec_v",
+        0
+      ]
+    }
+  },
+  "noise": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 51150031
+    }
+  },
+  "s0_guide": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "g0",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s0_samp": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s0_guide",
+        0
+      ],
+      "latent_image": [
+        "c0",
+        1
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s0_sched",
+        0
+      ]
+    }
+  },
+  "s0_sched": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8
+    }
+  },
+  "s1_guide": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "tail1",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s1_samp": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s1_guide",
+        0
+      ],
+      "latent_image": [
+        "win1",
+        0
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s1_sched",
+        0
+      ]
+    }
+  },
+  "s1_sched": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8
+    }
+  },
+  "save": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "community/ali163_hc15_gi063_s51150031/ali163_hc15_gi063_s51150031",
+      "format": "auto",
+      "video": [
+        "mkvid",
+        0
+      ]
+    }
+  },
+  "tail1": {
+    "class_type": "MiniMaxH3LatentTailGuide",
+    "inputs": {
+      "overlap_audio_tokens": [
+        "win1",
+        3
+      ],
+      "overlap_video_tokens": [
+        "win1",
+        2
+      ],
+      "positive": [
+        "c1",
+        0
+      ],
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ],
+      "target_av_latent": [
+        "win1",
+        0
+      ]
+    }
+  },
+  "unet": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "vvae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+    }
+  },
+  "win1": {
+    "class_type": "MiniMaxH3GuidedContinuationWindow",
+    "inputs": {
+      "extension_frames": 119,
+      "overlap_frames": 22,
+      "previous_av_latent": [
+        "s0_samp",
+        0
+      ]
+    }
+  },
+  "g0": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "c0",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "latent": [
+        "c0",
+        1
+      ],
+      "image": [
+        "img",
+        0
+      ],
+      "frame_idx": 0
+    }
+  }
+}

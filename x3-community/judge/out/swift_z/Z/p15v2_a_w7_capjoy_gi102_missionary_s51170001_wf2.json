@@ -1,0 +1,53 @@
+{
+ "frames": [
+  24,
+  54
+ ],
+ "diffs": [
+  8.12,
+  8.79
+ ],
+ "per_frame": [
+  {
+   "frame": 24,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, including the bed, headboard, pillows, and lighting conditions, remains consistent between both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The anatomy of the characters appears normal in Image 2, with no visible malformations, extra limbs, or detached parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0834,
+    "anatomy_defect": 0.6277
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 54,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background elements, including the beige headboard, white bedding, and lighting conditions, remain consistent between both images."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "In Image 2, the man's anatomy is severely distorted; his torso appears unnaturally twisted, and the connection of limbs looks anatomically impossible."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.1075,
+    "anatomy_defect": 0.8683
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 26.9
+}

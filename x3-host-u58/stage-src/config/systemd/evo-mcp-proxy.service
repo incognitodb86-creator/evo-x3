@@ -1,0 +1,18 @@
+[Unit]
+Description=EVO-X3 U18 Playwright MCP Bearer Auth Proxy (127.0.0.1:8930 -> 127.0.0.1:8931)
+After=network-online.target
+
+[Service]
+Type=simple
+# Dedicated 0600 file holding MCP_KEY_* entries ONLY (distinct from LLM_KEY_*; unreadable by evosandbox)
+EnvironmentFile=/etc/evo-x3/mcp.env
+Environment=MCP_PROXY_LISTEN=127.0.0.1:8930
+Environment=MCP_UPSTREAM=http://127.0.0.1:8931
+ExecStart=/usr/bin/python3 /opt/evo-x3/stage/config/proxy/evo-mcp-proxy.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

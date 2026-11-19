@@ -1,0 +1,21 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+Started `u42-pixlstash-tagger.service` (PID `116492`) with `U44_VLM_CONCURRENCY=3` and `gemma4-heretic` reloaded at `-np 3 -c 393216` (`concurrencyLimit: 3`). Waiting 30 seconds for initial concurrency sanity check before collecting the 5-minute rate sample.
+Initial 30s check passed: all 3 `gemma4-heretic` slots (`id 0`, `id 1`, `id 2`) are processing concurrently with no errors, `faces_assigned_insightface` rose from `11971` to `13471` (+1500), and `pictures_done` rose from `134` to `139` (`pictures_failed` dropped `44` -> `39`). Waiting ~4.5 minutes to complete the 5-minute sample before writing `U44-RESULT.md`.
+Completed the U44 PixlStash tagging speedup and wrote [U44-RESULT.md](file:///home/derekboone/evo-x3/records/U44-RESULT.md).
+
+### Summary
+- **Backups created:**
+  - `/home/evo/AI/5slock/_u44_vault.db.bak-pre-speedup` (`1,037,094,912` bytes, `0600`, owner `evo`)
+  - `/home/evo/AI/pixlstash-tagging/_archive/tag_runner.py.bak-20261116-u44-pre-speedup`
+  - `/home/evo/AI/pixlstash-tagging/_archive/u42-pixlstash-tagger.service.bak-20261116-u44-pre-speedup`
+  - `/etc/evo-x3/llama-swap.yaml.bak-20261116-u44-pre-speedup`
+- **llama-swap (`gemma4-heretic` only):** Updated `-np 2 -c 524288` / `concurrencyLimit: 2` to `-np 3 -c 393216` (`3 × 131,072` per slot) / `concurrencyLimit: 3`, validated config, restarted `llama-swap.service`, and verified `/health`, `/slots`, and live `-np 3 -c 393216` args.
+- **Runner (`u42-pixlstash-tagger.service`, PID `116492`):**
+  - Moved Phase A InsightFace matching (`combine=mean`, `>= 0.55`, CPU) to a concurrent background thread (`run_phase_a_loop`) alongside `N=3` continuous VLM tagging (`U44_VLM_CONCURRENCY=3` / `--vlm-concurrency`).
+  - Added TOCTOU-safe face re-check immediately before writing any `person ...` tag, thread-local `httpx.Client` pools with transient retries, thumbnail fallback on `400`/`404`/`500`/`HTTPError`, and VLM/Phase A fields in [U42-tagging-progress.json](file:///home/derekboone/evo-x3/records/U42-tagging-progress.json) and [U42-tagging-progress.log](file:///home/derekboone/evo-x3/records/U42-tagging-progress.log).
+- **Verified ~5-minute sample (`11:43:02` → `11:48:39 CST`, still running at `11:49:18 CST`):**
+  - Both phases ran concurrently: `faces_assigned_insightface` rose `11,971 → 15,459` (`+3,488`, Phase A completed at `11:44:48`) while `pictures_done` rose `134 → 222` (`234` at `11:49:18`).
+  - `pictures_failed` dropped from `44` to `0`.
+  - VLM rate: `3.79 s/img` (`15.85 pic/min`, ETA `1 day, 10:28:12`) over the full 5.6-min window including Phase A overlap and failure retries (`3.72 s/img` / `16.15 pic/min` at `11:49:18`; `3.28 s/img` / `18.27 pic/min` steady-state post-Phase-A), vs `3.62 s/img` (`16.59 pic/min`, Phase A stalled) at pre-stop baseline.
+- `u42-pixlstash-tagger.service` remains running in the background; stale `/home/derekboone/AI/locks/gpu-render.lock` was left untouched; U42/U43 were not killed or modified.

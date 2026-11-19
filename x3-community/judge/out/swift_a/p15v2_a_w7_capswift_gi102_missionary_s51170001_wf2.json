@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_a_w7_capswift_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 25.3,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, headboard, and lighting are consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde woman and dark-haired man remain the same characters throughout the clip."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the pose, clothing, and composition of the start image perfectly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "The man is kneeling beside the woman, not on top of her facing her as required for missionary."
+  },
+  "anatomy_defect": {
+   "answer": "yes",
+   "reason": "In Image 3 and frames 1-8, the woman's leg draped over the man's shoulder is fused into his torso/neck area."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0044,
+  "same_people": 0.0154,
+  "start_kept": 0.0292,
+  "target_reached": 0.4133,
+  "anatomy_defect": 0.4578
+ },
+ "flags": [
+  "target_reached",
+  "anatomy_defect"
+ ]
+}

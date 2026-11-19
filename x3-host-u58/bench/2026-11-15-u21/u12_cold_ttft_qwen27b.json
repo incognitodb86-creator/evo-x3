@@ -1,0 +1,204 @@
+{
+  "slot": "qwen27b",
+  "started_ct": "2026-11-15 21:15:31 CST",
+  "rc": 0,
+  "pre_snapshot": {
+    "at_ct": "2026-11-15 21:14:19 CST",
+    "gtt_used_bytes": 17268736,
+    "free_bytes": "total        used        free      shared  buff/cache   available\nMem:     133607890944  3814006784 71051579392     9904128 60024942592 129793884160\nSwap:     8589930496   156946432  8432984064",
+    "sensors": "r8169_0_6100:00-mdio-0\nAdapter: MDIO adapter\ntemp1:        +61.0\u00b0C  (high = +120.0\u00b0C)\n\namdgpu-pci-6600\nAdapter: PCI adapter\nvddgfx:        0.00 V  \nvddnb:         0.00 V  \nedge:         +63.0\u00b0C  \nPPT:          61.95 W  (avg =  61.95 W)\n\nacpitz-acpi-0\nAdapter: ACPI interface\ntemp1:        +76.0\u00b0C  \n\nmt7925_phy0-pci-6300\nAdapter: PCI adapter\ntemp1:        +42.0\u00b0C  \n\nk10temp-pci-00c3\nAdapter: PCI adapter\nTctl:         +76.1\u00b0C  \n\nnvme-pci-6400\nAdapter: PCI adapter\nComposite:    +37.9\u00b0C  (low  = -273.1\u00b0C, high = +74.8\u00b0C)\n                       (crit = +79.8\u00b0C)\nSensor 2:     +69.8\u00b0C  (low  = -273.1\u00b0C, high = +65261.8\u00b0C)"
+  },
+  "post_snapshot": {
+    "at_ct": "2026-11-15 21:15:31 CST",
+    "gtt_used_bytes": 75373244416,
+    "free_bytes": "total        used        free      shared  buff/cache   available\nMem:     133607890944 82309984256  1047441408   846848000 52370403328 51297906688\nSwap:     8589930496   217853952  8372076544",
+    "sensors": "r8169_0_6100:00-mdio-0\nAdapter: MDIO adapter\ntemp1:        +60.5\u00b0C  (high = +120.0\u00b0C)\n\namdgpu-pci-6600\nAdapter: PCI adapter\nvddgfx:        0.00 V  \nvddnb:         0.00 V  \nedge:         +60.0\u00b0C  \nPPT:          19.06 W  (avg =  19.06 W)\n\nacpitz-acpi-0\nAdapter: ACPI interface\ntemp1:        +67.0\u00b0C  \n\nmt7925_phy0-pci-6300\nAdapter: PCI adapter\ntemp1:        +42.0\u00b0C  \n\nk10temp-pci-00c3\nAdapter: PCI adapter\nTctl:         +66.6\u00b0C  \n\nnvme-pci-6400\nAdapter: PCI adapter\nComposite:    +38.9\u00b0C  (low  = -273.1\u00b0C, high = +74.8\u00b0C)\n                       (crit = +79.8\u00b0C)\nSensor 2:     +69.8\u00b0C  (low  = -273.1\u00b0C, high = +65261.8\u00b0C)"
+  },
+  "fixture_stdout": {
+    "model": "qwen27b",
+    "prompt_chars": 98462,
+    "usage": {
+      "prompt_tokens": 20329,
+      "completion_tokens": 64,
+      "total_tokens": 20393,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      },
+      "cached_tokens": 0,
+      "prompt_tokens_per_second": 387.11073867969395,
+      "completion_tokens_per_second": 25.25544936002147,
+      "draft_tokens": 94,
+      "draft_tokens_accepted": 49,
+      "gufo": {
+        "component_cache": {
+          "schema": "component-cache-v1",
+          "reuse": "none",
+          "selection_reason": 6,
+          "deepest_live_tokens": 0,
+          "deepest_ram_tokens": 0,
+          "deepest_disk_tokens": 0,
+          "selected_tokens": 0,
+          "restored_bytes": 0,
+          "prefilled_tokens": 20329,
+          "captures": 2,
+          "captured_capacity_bytes": 1836974080,
+          "borrowed_capacity_bytes": 1325400064,
+          "copied_payload_bytes": 504537536,
+          "captured_checkpoint_ids": [
+            2,
+            2531
+          ],
+          "global_spill": {
+            "idle_bytes": 0,
+            "foreground_bytes": 0,
+            "idle_copy_ms": 0,
+            "foreground_copy_ms": 0,
+            "stream_wait_ms": 0,
+            "residual_wait_ms": 0.045661,
+            "reassignments": 1,
+            "idle_failures": 0
+          },
+          "global_ledger_bytes": 2769979776,
+          "global_ram_bytes": 2769979776,
+          "global_peak_ledger_bytes": 2770021544,
+          "global_peak_ram_bytes": 2770021544,
+          "global_persistence_pinned_bytes": 0,
+          "global_peak_persistence_pinned_bytes": 0,
+          "global_categories": {
+            "backing_free": {
+              "bytes": 62259200,
+              "reserved_bytes": 0,
+              "peak_bytes": 1899233280
+            },
+            "backing_assigned": {
+              "bytes": 1325400064,
+              "reserved_bytes": 1325400064,
+              "peak_bytes": 1325400064
+            },
+            "backing_materialized": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 0
+            },
+            "private_state": {
+              "bytes": 494796800,
+              "reserved_bytes": 0,
+              "peak_bytes": 494796800
+            },
+            "private_tail": {
+              "bytes": 16777216,
+              "reserved_bytes": 0,
+              "peak_bytes": 16777216
+            },
+            "metadata": {
+              "bytes": 870746496,
+              "reserved_bytes": 0,
+              "peak_bytes": 870788264
+            },
+            "transfer_staging": {
+              "bytes": 0,
+              "reserved_bytes": 0,
+              "peak_bytes": 0
+            }
+          }
+        },
+        "cache_hit": false,
+        "cache_miss_reason": "no_checkpoint",
+        "cache_common_prefix_tokens": 0,
+        "cache_checkpoint_tokens": 0,
+        "cache_restore_bytes": 0,
+        "cache_snapshot_bytes": 1829937600,
+        "cache_disk_queued_bytes": 0,
+        "cache_shared_bytes": 0,
+        "cache_restore_ms": 0,
+        "cache_snapshot_ms": 20.460466,
+        "cache_disk_enqueue_ms": 0.0019399999999999999,
+        "cache_disk_hit": false,
+        "draft_rounds": 14,
+        "prefill_tokens": 20329,
+        "prefill_chunks": 6,
+        "active_decode_prefill_chunks": 0,
+        "max_prefill_chunk_tokens": 4096,
+        "max_prefill_layer_groups": 1,
+        "prefill_yield_rounds": 0,
+        "queue_depth_at_submit": 1,
+        "client_queue_depth_at_submit": 1,
+        "resident_requests_at_admission": 1,
+        "requested_logical_concurrency": 2,
+        "physical_execution_width": 1,
+        "queue_ms": 1.212653,
+        "shared_prefix_wait_ms": 0,
+        "prefill_ms": 52514.68886999999,
+        "decode_ms": 2534.106564,
+        "ttft_ms": 52532.362353,
+        "mean_inter_token_ms": 40.29534265079365,
+        "max_inter_token_ms": 200.31481,
+        "execution_plan": "serial-fallback"
+      }
+    },
+    "client_wall_seconds": 69.347,
+    "note": "Record engine-logged TTFT, prefill tok/s, and decode tok/s from engine container logs."
+  },
+  "fixture_stderr": "",
+  "llama_swap_journal": [
+    "2026-11-15T21:14:19-06:00 evo-X3 podman[133826]: 2026-11-15 21:14:19.035111543 -0600 CST m=+912.473829382 container died 9b0a728ad05ff7d42c2e2b9f0747870fd2299a5206b85d624aff4d0c0737248b (image=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6, name=llama-swap-gemma4-heretic, org.opencontainers.image.version=44, io.buildah.version=1.43.5, org.opencontainers.image.licenses=MIT, org.opencontainers.image.title=fedora-minimal, org.opencontainers.image.url=https://fedoraproject.org/, org.opencontainers.image.vendor=Fedora Project)",
+    "2026-11-15T21:14:19-06:00 evo-X3 podman[133826]: 2026-11-15 21:14:19.063153963 -0600 CST m=+912.501871802 container remove 9b0a728ad05ff7d42c2e2b9f0747870fd2299a5206b85d624aff4d0c0737248b (image=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6, name=llama-swap-gemma4-heretic, io.buildah.version=1.43.5, org.opencontainers.image.licenses=MIT, org.opencontainers.image.title=fedora-minimal, org.opencontainers.image.url=https://fedoraproject.org/, org.opencontainers.image.vendor=Fedora Project, org.opencontainers.image.version=44)",
+    "2026-11-15T21:14:20-06:00 evo-X3 podman[136451]: 2026-11-15 21:14:20.176874851 -0600 CST m=+0.025809060 container create 1ad430d2e52bd1393c530790fd8a850bdb3e42c10185d40f57822c6fdfc6e6d6 (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-qwen27b, org.opencontainers.image.revision=unknown, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50, org.opencontainers.image.created=2026-11-11T11:58:35Z)",
+    "2026-11-15T21:14:20-06:00 evo-X3 podman[136451]: 2026-11-15 21:14:20.234849968 -0600 CST m=+0.083784187 container init 1ad430d2e52bd1393c530790fd8a850bdb3e42c10185d40f57822c6fdfc6e6d6 (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-qwen27b, org.opencontainers.image.revision=unknown, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50, org.opencontainers.image.created=2026-11-11T11:58:35Z)",
+    "2026-11-15T21:14:20-06:00 evo-X3 podman[136451]: 2026-11-15 21:14:20.236349502 -0600 CST m=+0.085283711 container start 1ad430d2e52bd1393c530790fd8a850bdb3e42c10185d40f57822c6fdfc6e6d6 (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-qwen27b, org.opencontainers.image.created=2026-11-11T11:58:35Z, org.opencontainers.image.revision=unknown, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50)",
+    "2026-11-15T21:14:20-06:00 evo-X3 podman[136451]: 2026-11-15 21:14:20.239004437 -0600 CST m=+0.087938656 container attach 1ad430d2e52bd1393c530790fd8a850bdb3e42c10185d40f57822c6fdfc6e6d6 (image=ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133, name=llama-swap-qwen27b, org.opencontainers.image.revision=unknown, org.opencontainers.image.source=https://github.com/gufo-org/toolboxes, org.opencontainers.image.version=0.34.0, org.gufo.engine.revision=2845939b2a7d61243d407c8816c6d42652512e50, org.opencontainers.image.created=2026-11-11T11:58:35Z)",
+    "2026-11-15T21:14:20-06:00 evo-X3 podman[136451]: 2026-11-15 21:14:20.163421516 -0600 CST m=+0.012355745 image pull 6004ce5cff20482a55ecf93c4686550316c4d5645b7f46de7179833eb4f2f525 ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133",
+    "2026-11-15T21:14:20-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:20 [INFO] [gpu] event=queue_budget kind=llm observed=0 budget=8 expected_max=3 cap=2",
+    "2026-11-15T21:14:20-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:20 [INFO] [loader] event=load_started kind=text artifact=/srv/models/qwen27b/Qwen3.8-27B-UD-Q8_K_XL.gguf rss_mib=137 host_available_mib=123768",
+    "2026-11-15T21:14:30-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:30 [INFO] [loader] event=load_phase phase=sessions rss_mib=1407 host_available_mib=90475",
+    "2026-11-15T21:14:33-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:33 [INFO] [cache] schema=component-cache-v1 event=configured sessions=2 snapshot_entries=128 capacity_bytes=2147483648 staging_capacity_bytes=0 automatic_bytes=27110907904 max_bytes=49926848512 disk_capacity_bytes=0 slot_pinned_bytes=838860800 ram_cache=on disk_backing_bytes=0",
+    "2026-11-15T21:14:33-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:33 [INFO] [loader] event=structured_output_prepared vocabulary_tokens=248320 prepare_ms=29.5 rss_delta_kib=6760 rss_mib=3900 host_available_mib=49058",
+    "2026-11-15T21:14:33-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:33 [INFO] [sampling] event=defaults thinking=on temperature=1 top_k=20 top_p=0.95 min_p=0 min_keep=0 seed=-1 repeat_penalty=1 repeat_last_n=64 frequency_penalty=0 presence_penalty=0",
+    "2026-11-15T21:14:33-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:33 [INFO] [loader] event=load_completed kind=text elapsed_ms=13612 monotonic_us=37551145551 model=qwen27b sessions=2 context_tokens=262144 speculative=dflash2 draft_limit=7 draft_policy=adaptive disk_cache=off rss_mib=3900 host_available_mib=49058 gpu_device_used_mib=74338 gpu_device_total_mib=122880",
+    "2026-11-15T21:14:33-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:33 [INFO] [server] event=listening monotonic_us=37551145766 address=http://127.0.0.1:8081 max_connections=16 max_body_bytes=8388608",
+    "2026-11-15T21:14:34-06:00 evo-X3 evo-llama-swap[99654]: [INFO] <qwen27b> Health check passed on http://127.0.0.1:8081/health",
+    "2026-11-15T21:14:34-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:34 [INFO] [http] request=r2 event=received method=GET path=/v1/models body_bytes=0",
+    "2026-11-15T21:14:34-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:34 [INFO] [http] request=r2 event=completed method=GET path=/v1/models status=200 duration_ms=0.1 outcome=completed rss_mib=3900 host_available_mib=49055",
+    "2026-11-15T21:14:34-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:34 [INFO] [http] request=r3 event=received method=POST path=/v1/chat/completions body_bytes=98619",
+    "2026-11-15T21:14:34-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:34 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0",
+    "2026-11-15T21:14:44-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:44 [INFO] [progress] request=1 phase=prefill tokens=4096/20329 percentage=20.1 chunk_tps=415.0 avg_tps=415.0",
+    "2026-11-15T21:14:54-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:14:54 [INFO] [progress] request=1 phase=prefill tokens=8192/20329 percentage=40.3 chunk_tps=398.5 avg_tps=406.6",
+    "2026-11-15T21:15:05-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:05 [INFO] [progress] request=1 phase=prefill tokens=12288/20329 percentage=60.4 chunk_tps=388.4 avg_tps=400.3",
+    "2026-11-15T21:15:15-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:15 [INFO] [progress] request=1 phase=prefill tokens=16384/20329 percentage=80.6 chunk_tps=378.7 avg_tps=394.7",
+    "2026-11-15T21:15:26-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:26 [INFO] [progress] request=1 phase=prefill tokens=20324/20329 percentage=100.0 chunk_tps=365.8 avg_tps=388.8",
+    "2026-11-15T21:15:26-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:26 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20324 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=2769653960",
+    "2026-11-15T21:15:26-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:26 [INFO] [progress] request=1 phase=prefill tokens=20329/20329 percentage=100.0 chunk_tps=21.3 avg_tps=387.1",
+    "2026-11-15T21:15:29-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:29 [INFO] [progress] request=1 phase=decode tokens=52/64 percentage=81.2 chunk_tps=23.7 avg_tps=23.7 draft_accepted=39 draft_proposed=84 acceptance_percentage=46.4",
+    "2026-11-15T21:15:29-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:29 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20329 purpose=0 rank=0 unique_bytes_freed=0 ledger_bytes=2769811972",
+    "2026-11-15T21:15:29-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:29 [INFO] [progress] request=1 phase=decode tokens=64/64 percentage=100.0 chunk_tps=35.3 avg_tps=25.3 draft_accepted=49 draft_proposed=94 acceptance_percentage=52.1",
+    "2026-11-15T21:15:29-06:00 evo-X3 llama-swap-qwen27b[136489]: 2026-11-16 03:15:29 [INFO] [http] request=r3 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=55073.0 outcome=completed prompt_tokens=20329 prefill_tokens=20329 generated_tokens=64 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.2 shared_prefix_wait_ms=0.0 ttft_ms=52532.4 prefill_tps=387.1 decode_tps=25.3 batch_width=1 plan=serial-fallback draft_accepted=49 draft_proposed=94 draft_rounds=14 cache_schema=component-cache-v1 cache_reuse=none cache_captures=2 cache_captured_capacity_bytes=1836974080 cache_global_ledger_bytes=2769979776 acceptance_pct=52.1 cache_snapshot_bytes=1829937600 cache_miss_reason=no_checkpoint common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=3975 host_available_mib=48912"
+  ],
+  "container_logs_tail": [
+    "2026-11-16 03:14:20 [INFO] [gpu] event=queue_budget kind=llm observed=0 budget=8 expected_max=3 cap=2",
+    "2026-11-16 03:14:20 [INFO] [loader] event=load_started kind=text artifact=/srv/models/qwen27b/Qwen3.8-27B-UD-Q8_K_XL.gguf rss_mib=137 host_available_mib=123768",
+    "2026-11-16 03:14:30 [INFO] [loader] event=load_phase phase=sessions rss_mib=1407 host_available_mib=90475",
+    "2026-11-16 03:14:33 [INFO] [cache] schema=component-cache-v1 event=configured sessions=2 snapshot_entries=128 capacity_bytes=2147483648 staging_capacity_bytes=0 automatic_bytes=27110907904 max_bytes=49926848512 disk_capacity_bytes=0 slot_pinned_bytes=838860800 ram_cache=on disk_backing_bytes=0",
+    "2026-11-16 03:14:33 [INFO] [loader] event=structured_output_prepared vocabulary_tokens=248320 prepare_ms=29.5 rss_delta_kib=6760 rss_mib=3900 host_available_mib=49058",
+    "2026-11-16 03:14:33 [INFO] [sampling] event=defaults thinking=on temperature=1 top_k=20 top_p=0.95 min_p=0 min_keep=0 seed=-1 repeat_penalty=1 repeat_last_n=64 frequency_penalty=0 presence_penalty=0",
+    "2026-11-16 03:14:33 [INFO] [loader] event=load_completed kind=text elapsed_ms=13612 monotonic_us=37551145551 model=qwen27b sessions=2 context_tokens=262144 speculative=dflash2 draft_limit=7 draft_policy=adaptive disk_cache=off rss_mib=3900 host_available_mib=49058 gpu_device_used_mib=74338 gpu_device_total_mib=122880",
+    "2026-11-16 03:14:33 [INFO] [server] event=listening monotonic_us=37551145766 address=http://127.0.0.1:8081 max_connections=16 max_body_bytes=8388608",
+    "2026-11-16 03:14:34 [INFO] [http] request=r2 event=received method=GET path=/v1/models body_bytes=0",
+    "2026-11-16 03:14:34 [INFO] [http] request=r2 event=completed method=GET path=/v1/models status=200 duration_ms=0.1 outcome=completed rss_mib=3900 host_available_mib=49055",
+    "2026-11-16 03:14:34 [INFO] [http] request=r3 event=received method=POST path=/v1/chat/completions body_bytes=98619",
+    "2026-11-16 03:14:34 [INFO] [cache] schema=component-cache-v1 event=acquire reuse=none selected_tokens=0 restored_bytes=0",
+    "2026-11-16 03:14:44 [INFO] [progress] request=1 phase=prefill tokens=4096/20329 percentage=20.1 chunk_tps=415.0 avg_tps=415.0",
+    "2026-11-16 03:14:54 [INFO] [progress] request=1 phase=prefill tokens=8192/20329 percentage=40.3 chunk_tps=398.5 avg_tps=406.6",
+    "2026-11-16 03:15:05 [INFO] [progress] request=1 phase=prefill tokens=12288/20329 percentage=60.4 chunk_tps=388.4 avg_tps=400.3",
+    "2026-11-16 03:15:15 [INFO] [progress] request=1 phase=prefill tokens=16384/20329 percentage=80.6 chunk_tps=378.7 avg_tps=394.7",
+    "2026-11-16 03:15:26 [INFO] [progress] request=1 phase=prefill tokens=20324/20329 percentage=100.0 chunk_tps=365.8 avg_tps=388.8",
+    "2026-11-16 03:15:26 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20324 purpose=2 rank=3 unique_bytes_freed=0 ledger_bytes=2769653960",
+    "2026-11-16 03:15:26 [INFO] [progress] request=1 phase=prefill tokens=20329/20329 percentage=100.0 chunk_tps=21.3 avg_tps=387.1",
+    "2026-11-16 03:15:29 [INFO] [progress] request=1 phase=decode tokens=52/64 percentage=81.2 chunk_tps=23.7 avg_tps=23.7 draft_accepted=39 draft_proposed=84 acceptance_percentage=46.4",
+    "2026-11-16 03:15:29 [INFO] [cache] schema=component-cache-v1 event=retention action=0 reason=0 tokens=20329 purpose=0 rank=0 unique_bytes_freed=0 ledger_bytes=2769811972",
+    "2026-11-16 03:15:29 [INFO] [progress] request=1 phase=decode tokens=64/64 percentage=100.0 chunk_tps=35.3 avg_tps=25.3 draft_accepted=49 draft_proposed=94 acceptance_percentage=52.1",
+    "2026-11-16 03:15:29 [INFO] [http] request=r3 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=55073.0 outcome=completed prompt_tokens=20329 prefill_tokens=20329 generated_tokens=64 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.2 shared_prefix_wait_ms=0.0 ttft_ms=52532.4 prefill_tps=387.1 decode_tps=25.3 batch_width=1 plan=serial-fallback draft_accepted=49 draft_proposed=94 draft_rounds=14 cache_schema=component-cache-v1 cache_reuse=none cache_captures=2 cache_captured_capacity_bytes=1836974080 cache_global_ledger_bytes=2769979776 acceptance_pct=52.1 cache_snapshot_bytes=1829937600 cache_miss_reason=no_checkpoint common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=3975 host_available_mib=48912"
+  ]
+}

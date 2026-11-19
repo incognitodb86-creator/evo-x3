@@ -1,0 +1,49 @@
+{
+  "model": "flash-next",
+  "temperature": 0,
+  "max_tokens": 128,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a precise coding assistant. When a tool fits the request, return ONLY a structured tool call with exact arguments."
+    },
+    {
+      "role": "user",
+      "content": "Check the service status of llama-swap on host evo-x3 and retrieve the last 25 log lines."
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "check_service_logs",
+        "description": "Inspect systemd unit status and tail logs on a named host.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string",
+              "description": "Target hostname"
+            },
+            "unit": {
+              "type": "string",
+              "description": "Systemd unit name"
+            },
+            "lines": {
+              "type": "integer",
+              "description": "Number of trailing log lines"
+            }
+          },
+          "required": ["host", "unit", "lines"],
+          "additionalProperties": false
+        }
+      }
+    }
+  ],
+  "tool_choice": {
+    "type": "function",
+    "function": {
+      "name": "check_service_logs"
+    }
+  }
+}

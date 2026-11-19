@@ -1,0 +1,92 @@
+{
+  "arm": "R1_kyuz0_3tier_cleanroom",
+  "question_id": "Q4_codex_llamacpp",
+  "question": "Can Codex CLI use a llama.cpp server, and what config does it need?",
+  "started_ct": "2026-11-15 23:55:32 CST",
+  "wall_s": 103.18,
+  "angles": [
+    "Codex CLI llama.cpp server configuration",
+    "OpenAI Codex CLI custom API endpoint llama.cpp"
+  ],
+  "pages_saved": [
+    {
+      "url": "https://unsloth.ai/docs/basics/codex",
+      "title": "How to Run Local LLMs with OpenAI Codex | Unsloth Documentation",
+      "file": "0291fd7d082d.md",
+      "chars": 14280
+    },
+    {
+      "url": "https://www.simplified.guide/codex/llama-cpp-model-use",
+      "title": "How to use llama.cpp models with Codex",
+      "file": "943e91e8b5fd.md",
+      "chars": 6754
+    },
+    {
+      "url": "https://github.com/ivanopcode/gpt-oss-local-codex-guide",
+      "title": "GitHub - ivanopcode/gpt-oss-local-codex-guide: Local setup guide for OpenAI gpt-oss models with Codex CLI, Ollama, LM Studio, and MLX on Apple Silicon \u00b7 GitHub",
+      "file": "31f9aa60960f.md",
+      "chars": 40850
+    },
+    {
+      "url": "https://github.com/Photowalk/codex-local-model-switching",
+      "title": "GitHub - Photowalk/codex-local-model-switching: Practical guide and templates for switching Codex CLI and Codex App between GPT and local models \u00b7 GitHub",
+      "file": "5172d8f74eab.md",
+      "chars": 15114
+    },
+    {
+      "url": "https://vdf.ai/blog/codex-local-llm-setup/",
+      "title": "Codex Local LLM Setup: Ollama, LM Studio and --oss (2026)",
+      "file": "eb6127b5096a.md",
+      "chars": 26350
+    }
+  ],
+  "sources_urls": [
+    "https://unsloth.ai/docs/basics/codex",
+    "https://www.simplified.guide/codex/llama-cpp-model-use",
+    "https://github.com/ivanopcode/gpt-oss-local-codex-guide",
+    "https://github.com/Photowalk/codex-local-model-switching",
+    "https://vdf.ai/blog/codex-local-llm-setup/"
+  ],
+  "analyses": [
+    {
+      "url": "https://unsloth.ai/docs/basics/codex",
+      "title": "How to Run Local LLMs with OpenAI Codex | Unsloth Documentation",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://www.simplified.guide/codex/llama-cpp-model-use",
+      "title": "How to use llama.cpp models with Codex",
+      "facts": "**YES**, Codex CLI can use a llama.cpp server.\n\n### Required Configuration\n\n1. **Start the llama.cpp server** with the GGUF model on the loopback interface:\n   ```bash\n   llama-server -m ~/Models/Qwen3-0.6B.gguf \\\n     --alias qwen3-0.6b \\\n     --host 127.0.0.1 --port 8080 --ctx-size 32768 --parallel 1 --jinja\n   ```\n\n2. **Create/edit the profile file** at `~/.codex/llamacpp.config.toml` (or `$CODEX_HOME/llamacpp.config.toml` if `CODEX_HOME` is set):\n   ```toml\n   model_provider = \"llamacpp\"\n   model = \"qwen3-0.6b\"\n\n   [model_providers.llamacpp]\n   name = \"llama.cpp\"\n   base_url = \"http://127.0.0.1:8080/v1\"\n   wire_api = \"responses\"\n   requires_openai_auth = false\n   ```\n\n3. **Run Codex** with the profile:\n   ```bash\n   codex --profile llamacpp \"Your prompt here\"\n   ```\n\n### Key Details\n- **`model`** value must match the `--alias` set at server startup.\n- **`base_url`** ends at `/v1` because Codex appends the Responses endpoint.\n- **`wire_api = \"responses\"`** is required.\n- **`requires_openai_auth = false`** \u2014 no API key or OpenAI account needed.\n- The `--jinja` flag enables the model's chat template for tool calls.\n- The server must stay running in a separate terminal while Codex runs.\n\n**Source:** https://www.simplified.guide/codex/llama-cpp-model-use"
+    },
+    {
+      "url": "https://github.com/ivanopcode/gpt-oss-local-codex-guide",
+      "title": "GitHub - ivanopcode/gpt-oss-local-codex-guide: Local setup guide for OpenAI gpt-oss models with Codex CLI, Ollama, LM Studio, and MLX on Apple Silicon \u00b7 GitHub",
+      "facts": "Based on the provided excerpts, **yes**, Codex CLI can use a llama.cpp server, but it requires an intermediary translation layer called **open-responses-server (ORS)** because Codex CLI expects the OpenAI \"Responses\" API format, which llama.cpp does not natively support.\n\n### Required Configuration\n\n#### 1. Architecture\nCodex CLI **never talks to llama-server directly**. The connection flow is:\n`Codex CLI` \u2192 `open-responses-server (Port 8081)` \u2192 `llama-server (Port 8080)`\n\n#### 2. Codex CLI Config (`~/.codex/config.toml`)\nYou must define a custom model provider pointing to the ORS instance:\n\n```toml\n[model_providers.llamacpp]\nname = \"llama.cpp\"\nbase_url = \"http://127.0.0.1:8081\"  # ORS port, NOT llama-server's 8080\napi_key = \"sk-local\"                # Required but not validated by ORS\nwire_api = \"responses\"              # Critical: Must be \"responses\"\n```\n\n#### 3. Profile Configuration\nYou must define profiles that reference the provider. Key parameters include:\n\n```toml\n[profiles.gpt-oss-local-med]\nmodel_provider = \"llamacpp\"\nmodel = \"gpt-oss-20b-mxfp4\"\nmodel_context_window = 131072       # Must match llama-server's --ctx-size\nmodel_reasoning_effort = \"medium\"   # \"low\" produces almost no reasoning\n```\n\n**Important Notes on `model_context_window`:**\n*   It **does not** control the actual context size (that is set by llama-server's `--ctx-size` flag).\n*   It **must match** the `--ctx-size` value llama-server was started with (or the model default if `--ctx-size 0`).\n*   It allows Codex CLI to correctly display context fill indicators and trigger auto-compaction.\n\n#### 4. Timeout Configuration for Local Models\nLocal models are slower than cloud models. The default Codex CLI idle timeout (300s) may be too short. Increase it in the provider block:\n\n```toml\n[model_providers.llamacpp]\nstream_idle_timeout_ms = 900000  # 15 minutes (default is 300000)\n```\n\n### Required Software Stack\n\n1.  **Patched open-responses-server:** You must use the `fix/codex-cli-compat` branch from `relux-works/open-responses-server`, which includes 9"
+    },
+    {
+      "url": "https://github.com/Photowalk/codex-local-model-switching",
+      "title": "GitHub - Photowalk/codex-local-model-switching: Practical guide and templates for switching Codex CLI and Codex App between GPT and local models \u00b7 GitHub",
+      "facts": "Yes, Codex CLI can use a llama.cpp server. Here are the concrete configuration requirements and notes extracted from the source:\n\n### 1. API Path Requirement\nRecent Codex versions use the **Responses API** path for custom providers. The `wire_api = \"chat\"` setting is **no longer supported** in current Codex CLI builds.\n\n### 2. llama.cpp Server Configuration\nllama.cpp must be run with specific flags to ensure compatibility with Codex, particularly for models like Qwen GGUFs that may otherwise throw errors like `\"System message must be at the beginning\"`.\n\n**Required llama.cpp flags:**\n```bash\n--jinja \\\n--chat-template chatml\n```\n*Note: Using `chatml` is a compatibility tradeoff. It works for Codex but may be less ideal if your normal chat UI expects the model's native thinking template.*\n\n### 3. Codex CLI Configuration (`~/.codex/config.toml`)\nYou need to define a custom model provider in your `~/.codex/config.toml` file.\n\n**Example Configuration:**\n```toml\n[model_providers.llama_cpp_qwen]\nname = \"llama.cpp Qwen\"\nbase_url = \"http://192.168.1.66:8080/v1\"\nrequires_openai_auth = false\n```\n\n### 4. Context Window Settings\nFor local models, you should explicitly set the context window and compaction limits in `config.toml` to match your model's capabilities (e.g., for a 128k model):\n```toml\nmodel_context_window = 131072\nmodel_auto_compact_token_limit = 120000\n```\n\n### 5. Switching Models\nOnce configured, you can switch between models using the `codex-model` CLI tool:\n```bash\ncodex-model use qwen\ncodex-model use gpt\ncodex-model current\ncodex-model list\n```\n*Note: After switching, you must restart the Codex app or open a new thread for changes to take effect.*\n\n### 6. Recommended Architecture\nThe source recommends using a **stable provider alias** and a **local router** or config switcher rather than pointing Codex directly at model-specific endpoints. This allows you to run multiple llama.cpp servers on different ports (e.g., `8080` for Codex-compatible `chatml` and `8081` for native thinking templates) and switch between them via configuration."
+    },
+    {
+      "url": "https://vdf.ai/blog/codex-local-llm-setup/",
+      "title": "Codex Local LLM Setup: Ollama, LM Studio and --oss (2026)",
+      "facts": "**YES**, Codex CLI can use a `llama.cpp` server (`llama-server`).\n\n### Requirements & Constraints\n- **API Protocol**: The server **must** speak OpenAI's **Responses API** (`wire_api = \"responses\"`). Codex no longer accepts Chat Completions providers.\n- **Model Capabilities**: The model needs reliable tool calling and at least **64K tokens** of context.\n- **Context Window**: `model_context_window` in the config must be kept at or below the server's `-c` value.\n- **Server Port**: `llama-server` listens on port `9931` by default in current builds, so an explicit port (e.g., `8080`) is recommended.\n\n### Configuration Steps\n\n**1. Start the `llama-server`**\n```bash\nllama-server -hf ggml-org/gpt-oss-20b-GGUF --alias gpt-oss-20b \\\n--host 127.0.0.1 --port 8080 -c 65536 --jinja\n```\n\n**2. Configure `~/.codex/config.toml`**\nAdd the following to your user-level configuration file (Codex ignores provider settings in project-level `.codex/config.toml`):\n\n```toml\nmodel = \"gpt-oss-20b\"\nmodel_provider = \"llamacpp\"\nmodel_context_window = 65536\n\n[model_providers.llamacpp]\nname = \"llama.cpp\"\nbase_url = \"http://127.0.0.1:8080/v1\"\nwire_api = \"responses\"\n```\n\n### Source\n- **URL**: https://vdf.ai/blog/codex-local-llm-setup/\n- **Verified against**: Codex CLI 0.166.0 (released Oct 29, 2026)"
+    }
+  ],
+  "report": "# Using Codex CLI with a llama.cpp Server\n\n**Yes**, Codex CLI can use a `llama.cpp` server (`llama-server`), but it requires specific configuration on both the server and client side. The critical constraint is that Codex CLI now requires the **OpenAI Responses API** protocol (`wire_api = \"responses\"`)\u2014the older Chat Completions protocol is no longer supported [1](https://www.simplified.guide/codex/llama-cpp-model-use) [2](https://vdf.ai/blog/codex-local-llm-setup/).\n\n---\n\n## 1. Start the llama.cpp Server\n\n```bash\nllama-server -m ~/Models/Qwen3-0.6B.gguf \\\n  --alias qwen3-0.6b \\\n  --host 127.0.0.1 --port 8080 \\\n  --ctx-size 32768 \\\n  --parallel 1 \\\n  --jinja\n```\n\n**Required flags:**\n\n| Flag | Purpose |\n|------|---------|\n| `--alias` | Sets the model name that must match the `model` field in Codex config [1](https://www.simplified.guide/codex/llama-cpp-model-use) |\n| `--jinja` | Enables the model's chat template, required for tool calls [1](https://www.simplified.guide/codex/llama-cpp-model-use) |\n| `--chat-template chatml` | Recommended for Codex compatibility; avoids `\"System message must be at the beginning\"` errors [3](https://github.com/Photowalk/codex-local-model-switching) |\n| `--ctx-size` | Must be \u2265 64K tokens for reliable tool calling [2](https://vdf.ai/blog/codex-local-llm-setup/) |\n| `--host` / `--port` | Explicit port recommended; `llama-server` defaults to port `9931` in current builds [2](https://vdf.ai/blog/codex-local-llm-setup/) |\n\n> **Note:** The server must remain running in a separate terminal while Codex is active [1](https://www.simplified.guide/codex/llama-cpp-model-use).\n\n---\n\n## 2. Configure Codex CLI\n\nEdit `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`):\n\n```toml\nmodel = \"qwen3-0.6b\"\nmodel_provider = \"llamacpp\"\nmodel_context_window = 32768\n\n[model_providers.llamacpp]\nname = \"llama.cpp\"\nbase_url = \"http://127.0.0.1:8080/v1\"\nwire_api = \"responses\"\nrequires_openai_auth = false\n```\n\n**Key fields explained:**\n\n| Field | Requirement |\n|-------|-------------|\n| `model` | Must exactly match the `--alias` from the server [1](https://www.simplified.guide/codex/llama-cpp-model-use) |\n| `base_url` | Ends at `/v1`; Codex appends the Responses endpoint path itself [1](https://www.simplified.guide/codex/llama-cpp-model-use) |\n| `wire_api` | **Must** be `\"responses\"`\u2014`\"chat\"` is no longer supported [3](https://github.com/Photowalk/codex-local-model-switching) [2](https://vdf.ai/blog/codex-local-llm-setup/) |\n| `requires_openai_auth` | Set to `false` to skip API key validation [1](https://www.simplified.guide/codex/llama-cpp-model-use) |\n| `model_context_window` | Must be \u2264 the server's `--ctx-size` value [2](https://vdf.ai/blog/codex-local-llm-setup/) |\n\n> **Important:** Codex ignores provider settings in project-level `.codex/config.toml`\u2014use the user-level file [2](https://vdf.ai/blog/codex-local-llm-setup/).\n\n---\n\n## 3. Run Codex\n\n```bash\ncodex --profile llamacpp \"Your prompt here\"\n```\n\nOr if configured as the default provider, simply:\n\n```bash\ncodex \"Your prompt here\"\n```\n\n---\n\n## 4. Optional: Intermediary Translation Layer\n\nSome setups use an intermediary called **open-responses-server (ORS)** between Codex and `llama-server`, particularly when the Responses API translation is not handled natively by the llama.cpp build in use [4](https://github.com/ivanopcode/gpt-oss-local-codex-guide):\n\n```\nCodex CLI \u2192 open-responses-server (port 8081) \u2192 llama-server (port 8080)\n```\n\nIn this architecture, `base_url` points to the ORS port, and an `api_key` placeholder (e.g., `\"sk-local\"`) is required even though ORS does not validate it [4](https://github.com/ivanopcode/gpt-oss-local-codex-guide).\n\n---\n\n## 5. Practical Tips\n\n- **Timeouts:** Local models are slower. Increase `stream_idle_timeout_ms` (default 300 000 ms) if you hit timeouts [4](https://github.com/ivanopcode/gpt-oss-local-codex-guide):\n  ```toml\n  [model_providers.llamacpp]\n  stream_idle_timeout_ms = 900000  # 15 minutes\n  ```\n- **Auto-compaction:** Set `model_auto_compact_token_limit` slightly below `model_context_window` to trigger context compaction before overflow [3](https://github.com/Photowalk/codex-local-model-switching):\n  ```toml\n  model_context_window = 131072\n  model_auto_compact_token_limit = 120000\n  ```\n- **Multiple models:** Run multiple `llama-server` instances on different ports and define separate provider blocks to switch between them [3](https://github.com/Photowalk/codex-local-model-switching).\n\n---\n\n",
+  "metrics": {
+    "prompt_tokens": 27721,
+    "completion_tokens": 5281,
+    "tool_calls": {
+      "search_web": 4,
+      "fetch_page": 8,
+      "analyze_page": 5
+    }
+  },
+  "quotas": {
+    "search_web": 4,
+    "fetch_page": 6,
+    "analyze_page": 6
+  }
+}

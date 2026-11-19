@@ -1,0 +1,17 @@
+A) sessions per directory
+    2  --home-derekboone-AI-forge--
+   16  --home-evo-AI-forge--
+   22  --home-evo-AI-render--
+    0  permission-forwarding
+B) first session timestamp per dir (UTC)
+  --home-derekboone-AI-forge--: 2026-11-15T23:54:47.240Z
+  --home-evo-AI-forge--: 2026-11-16T16:04:41.182Z
+  --home-evo-AI-render--: 2026-11-16T14:37:31.788Z
+C) max observed context (input+cacheRead) per model, compaction entries per dir
+  model=flash-next calls=59 max_ctx=76937
+  model=flash-next-uncensored calls=502 max_ctx=236139
+  model=gemma4-heretic calls=400 max_ctx=130645
+  model=qwen27b calls=4 max_ctx=28404
+  compaction entries: {'--home-evo-AI-render--': 4}
+D) assistant calls over the effective threshold (262144-131072=131072)
+  total assistant calls=965 over-threshold={'flash-next-uncensored': 78}

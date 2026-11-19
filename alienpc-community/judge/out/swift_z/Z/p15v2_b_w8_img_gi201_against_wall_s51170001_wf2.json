@@ -1,0 +1,53 @@
+{
+ "frames": [
+  263,
+  324
+ ],
+ "diffs": [
+  9.46,
+  9.53
+ ],
+ "per_frame": [
+  {
+   "frame": 263,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "Image 2 introduces a new glowing fire bowl on the left and changes the background rock texture, which is not present in Image 1."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The green figure's anatomy is malformed; his head merges into the elf's back, and a detached, floating phallus appears near her thigh."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.8917,
+    "anatomy_defect": 0.7856
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 324,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "Image 2 introduces a new glowing fire bowl in the bottom left corner, which is absent in Image 1."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The green figure's head in Image 2 is severely malformed, appearing as a distorted, flat mask fused into the background."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.86,
+    "anatomy_defect": 0.6994
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w8_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.5
+}

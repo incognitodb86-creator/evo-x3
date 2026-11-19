@@ -1,0 +1,15 @@
+{
+ "pass": true,
+ "elapsed_s": 25.7,
+ "usage": {
+  "prompt_tokens": 181,
+  "completion_tokens": 1940,
+  "total_tokens": 2121,
+  "completion_tokens_details": {
+   "reasoning_tokens": 1270
+  }
+ },
+ "finish": "stop",
+ "err": "",
+ "code": "import time\nfrom collections import OrderedDict\n\n\nclass TTLCache:\n    \"\"\"A thread-unsafe LRU cache with per-entry time-to-live.\"\"\"\n\n    def __init__(self, capacity: int, ttl: float, clock=time.monotonic):\n        if capacity < 1:\n            raise ValueError(\"capacity must be >= 1\")\n        if ttl <= 0:\n            raise ValueError(\"ttl must be > 0\")\n        self._capacity = capacity\n        self._ttl = ttl\n        self._clock = clock\n        # OrderedDict maintains LRU order: first item = LRU, last item = MRU\n        # Each value is (value, set_time)\n        self._store: OrderedDict = OrderedDict()\n\n    def _is_expired(self, set_time: float) -> bool:\n        return self._clock() - set_time >= self._ttl\n\n    def get(self, key, default=None):\n        if key not in self._store:\n            return default\n        value, set_time = self._store[key]\n        if self._is_expired(set_time):\n            return default\n        # Mark as most-recently-used\n        self._store.move_to_end(key)\n        return value\n\n    def set(self, key, value):\n        now = self._clock()\n        if key in self._store:\n            # Remove existing entry so re-insertion places it at the end (MRU)\n            del self._store[key]\n        self._store[key] = (value, now)\n        # Enforce capacity\n        if len(self._store) > self._capacity:\n            # First pass: drop all expired entries\n            expired_keys = [\n                k for k, (_, st) in self._store.items() if self._is_expired(st)\n            ]\n            for k in expired_keys:\n                del self._store[k]\n            # Second pass: evict LRU entries if still over capacity\n            while len(self._store) > self._capacity:\n                self._store.popitem(last=False)\n\n    def __len__(self):\n        now = self._clock()\n        return sum(\n            1 for (_, st) in self._store.values() if now - st < self._ttl\n        )\n\n    def delete(self, key) -> bool:\n        if key not in self._store:\n            return False\n        _, set_time = self._store[key]\n        if self._is_expired(set_time):\n            # Entry is dead; remove it but report no live entry was removed\n            del self._store[key]\n            return False\n        del self._store[key]\n        return True\n\n    def __contains__(self, key):\n        if key not in self._store:\n            return False\n        _, set_time = self._store[key]\n        return not self._is_expired(set_time)\n\n    def __repr__(self):\n        return (\n            f\"TTLCache(capacity={self._capacity}, ttl={self._ttl}, \"\n            f\"size={len(self)})\"\n        )\n"
+}

@@ -1,0 +1,2013 @@
+     1	"""Render writer autonomous pipeline (Max Architect 3, 2026-11-13; Derrick t1409u "lets do both", spec
+     2	/workspace/maxops/prompts/render-writer-pipeline-handoff-20261113.md sha256 08993e6e...).
+     3	
+     4	One clip, end to end, no human step:
+     5	  still read -> slots -> four-phase beat card (json_schema) -> N prose candidates -> linter -> one targeted rewrite ->
+     6	  rank (+ judge on a tie) -> fill_request dry run (fill_request.py, never --queue) -> blacklist,
+     7	  recent outputs and scene_state updates.
+     8	Failures degrade (fallback pick + warning, NOT_READY recorded, writer_down) and never block the next ask.
+     9	
+    10	Usage (Render's pi chat or Derrick):
+    11	  python3 /home/derekboone/AI/community/scripts/parody/render_writer_pipeline.py <run_dir>
+    12	      --ask "<ask>" --position <act> --still <still path> --character FCSydny [--scene <id> | --continue <prev_run_dir>]
+    13	  Batch: render_writer_pipeline.py --batch <asks.jsonl>
+    14	After Derrick's yes, pass --queue --yes-derrick to write and queue on AlienPc ComfyUI in one pass
+    15	(Max Architect 2026-11-16 (Derrick t2036u, t2039u)). --queue without --yes-derrick is refused. Without those flags the hook still dry-builds only.
+    16	"""
+    17	from __future__ import annotations
+    18	
+    19	import argparse
+    20	import datetime
+    21	import glob
+    22	import hashlib
+    23	import json
+    24	import os
+    25	import random
+    26	import re
+    27	import shutil
+    28	import subprocess
+    29	import sys
+    30	import time
+    31	import traceback
+    32	from pathlib import Path
+    33	from typing import Any, Dict, List, Optional, Tuple
+    34	
+    35	PARODY_DIR = Path(__file__).resolve().parent
+    36	if str(PARODY_DIR) not in sys.path:
+    37	    sys.path.insert(0, str(PARODY_DIR))
+    38	
+    39	import yaml  # noqa: E402
+    40	
+    41	import build_request as br  # noqa: E402
+    42	import fill_request as fr  # noqa: E402
+    43	import scene_addenda  # noqa: E402
+    44	import wp_router  # noqa: E402
+    45	from writer_sys import build_writer_system_prompt  # noqa: E402
+    46	import wp_lint  # noqa: E402
+    47	import wp_state  # noqa: E402
+    48	from wp_llm import Client, WriterDown  # noqa: E402
+    49	
+    50	_AI_ROOT = Path(__file__).resolve().parents[3]
+    51	PIPE_DIR = Path(os.environ.get("WP_HOME", str(_AI_ROOT / "render" / "writer_pipeline")))
+    52	CONFIG_PATH = PIPE_DIR / "config.yaml"
+    53	RUNS_ROOT = _AI_ROOT / "community" / "runs"
+    54	VERSION = "wp-2026-11-13.1"
+    55	
+    56	TONES = ("ashamed", "bratty", "reluctant", "eager", "silent")
+    57	TONE_WORDS = [
+    58	    ("ashamed", r"asham\w*|shame\w*|embarrass\w*|humiliat\w*"),
+    59	    ("bratty", r"bratt?y|brat\b|mouthy|sassy|defiant|cheeky"),
+    60	    ("reluctant", r"reluctan\w*|cnc|resist\w*|protest\w*|unwilling|struggl\w*"),
+    61	    ("eager", r"eager\w*|begs?|begging|desperate|needy|willing"),
+    62	    ("silent", r"silent|silently|quiet\w*|mute|gagged|no talking"),
+    63	]
+    64	MODE_TRIGGERS = [
+    65	    ("- Cinematic", r"cinematic|movie|film\b|high-end"),
+    66	    ("- Gonzo", r"gonzo|amateur|\bpov\b|\braw\b"),
+    67	    ("- Teasing and edging", r"\btease|\bedg(?:e|ing)\b|denial"),
+    68	    ("- Forced orgasm", r"forced orgasm|overstimulat"),
+    69	    ("- Strip and undress", r"\bstrip|undress|slow reveal"),
+    70	    ("- Superheroine defeat", r"superheroine|peril|defeated heroine"),
+    71	    ("- Toys", r"\btoy|vibrator|dildo|\bplug\b|\bwand\b"),
+    72	]
+    73	
+    74	
+    75	# ---------------------------------------------------------------------------------------------------------------------
+    76	def load_config(path: Path = CONFIG_PATH) -> Dict[str, Any]:
+    77	    cfg = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    78	    cfg["_path"] = str(path)
+    79	    return cfg
+    80	
+    81	
+    82	def seed_for(run_id: str, ask: str, k: int) -> int:
+    83	    s = int(hashlib.sha256(f"{run_id}{ask}{k}".encode("utf-8")).hexdigest()[:8], 16)
+    84	    return s or 1
+    85	
+    86	
+    87	def position_kind(position: str, cfg: Dict[str, Any]) -> str:
+    88	    kinds = cfg.get("position_kinds") or {}
+    89	    act = (br.get_act(position) or {}).get("id") or position
+    90	    for kind, acts in kinds.items():
+    91	        if act in (acts or []):
+    92	            return kind
+    93	    return "sex"
+    94	
+    95	
+    96	def acts_bodies(position: str) -> int:
+    97	    a = br.get_act(position) or {}
+    98	    return int(a.get("bodies") or 2)
+    99	
+   100	
+   101	# ---- slots ----------------------------------------------------------------------------------------------------------
+   102	def pick_tone(ask: str, rng: random.Random, last: Optional[str], overlays: Optional[List[str]] = None) -> str:
+   103	    """Reluctant/ashamed only when the ask or a cnc/defeat/forced overlay names it (PM acc4 #15)."""
+   104	    for tone, pat in TONE_WORDS:
+   105	        if re.search(r"(?i)\b(?:" + pat + r")", ask or ""):
+   106	            return tone
+   107	    overlays = overlays or []
+   108	    named = any(o in overlays for o in ("cnc", "defeat", "forced_orgasm"))
+   109	    choices = [t for t in TONES if t != last]
+   110	    if not named:
+   111	        choices = [t for t in choices if t not in ("ashamed", "reluctant")]
+   112	    if not choices:
+   113	        choices = ["eager", "bratty", "silent"]
+   114	    return rng.choice(choices)
+   115	
+   116	
+   117	def first_phrase(s: str) -> str:
+   118	    return re.split(r"[,;]", s or "")[0].strip()
+   119	
+   120	
+   121	
+   122	_SHEATHED_MOUTH_RE = re.compile(r"(?i)\b(?:fully\s+)?sheathed in her mouth\b")
+   123	_NO_CONTACT_RE = re.compile(r"(?i)^(?:no contact|none|null|-)\.?$")
+   124	
+   125	
+   126	def normalize_ending_state(es: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+   127	    """Clean inherited end state before a continued opener (PM acc4d #4): never 'sheathed' in the mouth."""
+   128	    out = dict(es or {})
+   129	    for k in ("pose", "contact"):
+   130	        v = out.get(k)
+   131	        if not v:
+   132	            continue
+   133	        s = str(v)
+   134	        s = _SHEATHED_MOUTH_RE.sub("inside her mouth", s)
+   135	        s = re.sub(r"(?i)\bsheathed\b(?=[^.;]{0,40}\b(?:mouth|throat|lips)\b)", "inside", s)
+   136	        if _NO_CONTACT_RE.match(s.strip()):
+   137	            s = ""
+   138	        out[k] = s
+   139	    return out
+   140	
+   141	
+   142	def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, run_id: str, last_tone: Optional[str],
+   143	               scene_prev: Optional[Dict[str, Any]] = None, overlays: Optional[List[str]] = None) -> Dict[str, Any]:
+   144	    f = br.still_facts(still_read)
+   145	    inv = br.garment_inventory(still_read)
+   146	    read = br._unwrap_still_read(still_read)
+   147	    rng = random.Random(seed_for(run_id, ask, 99))
+   148	    g0 = (read.get("garments") or [{}])[0] if read.get("garments") else {}
+   149	    garment = (f"{g0.get('name', '')} ({g0['look']})" if g0.get("look") else g0.get("name", "")) if g0 else ""
+   150	    gnoun = wp_lint._head_noun(g0.get("name", "")) if g0 else ""
+   151	    # join garments = the builder's W5 set (br._cast_items: key in _JOIN_KEYS or slot full-body), plus one-piece garments
+   152	    # the W5 slot map files as accessory but that still cover the join (bodysuit, teddy, leotard, catsuit, one-piece)
+   153	    try:
+   154	        items = br._cast_items(make_cast(still_read, position, ask)[0])
+   155	    except Exception:
+   156	        items = inv
+   157	    join = [g["name"] for g in items if g.get("key") in br._JOIN_KEYS or g.get("slot") in ("bottom", "full-body")
+   158	            or re.search(r"(?i)\b(?:bodysuit|teddy|leotard|catsuit|one-piece|swimsuit|bikini(?!\s+top))\b", g["name"])]
+   159	    is_male_solo = (position == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or "")
+   160	    focus_opts = ["his body", "the act", "the tone"] if is_male_solo else ["his body", "her body", "the act", "the tone"]  # acceptance-2 item 9
+   161	    if not f["props"]:
+   162	        focus_opts = [x for x in focus_opts if x != "still prop"]
+   163	    if not inv:
+   164	        focus_opts = [x for x in focus_opts if x != "garment state"]
+   165	    focus = rng.choice(focus_opts)
+   166	    focus_text = {
+   167	        "his body": "his body and how he feels" if is_male_solo else "his body and what he does to her (never his hands, grip or strength)",
+   168	        "her body": "her body and how it feels",
+   169	        "the act": "the act itself and what comes next",
+   170	        "the tone": "the tone slot, spoken aloud" if is_male_solo else "the tone slot, said straight to the partner",
+   171	        "garment state": f"the {g0.get('name', 'garment')} and where it is now",
+   172	        "still prop": (f["props"][0] if f["props"] else "his body"),
+   173	    }[focus]
+   174	    slots = {
+   175	        "surface": re.sub(r"(?i)^(?:the|a|an)\s+", "", f.get("surface") or ""),
+   176	        "garment": garment, "garment_noun": gnoun, "garments_all": [g["name"] for g in inv], "join_garments": join,
+   177	        "light": first_phrase(f.get("light") or ""), "place": re.sub(r"(?i)^(?:on|in|at|by|inside|near|against|beside|under)\s+(?:the|a|an)?\s*", "",
+   178	                          f.get("place") or f.get("setting") or ""), "ask": ask,
+   179	        "surface_height": surface_height(f.get("surface") or ""),
+   180	        "floor": f.get("floor") or "", "pose": f.get("pose") or "", "facing_camera": bool(read.get("facing_camera")),
+   181	        "framing": read.get("framing") or "", "hair": read.get("hair") or "", "skin": read.get("skin") or "",
+   182	        "build": read.get("build") or "", "props": f["props"], "restraints": f["restraints"],
+   183	        "tone": pick_tone(ask, rng, last_tone, overlays), "line_focus": focus, "line_focus_text": focus_text,
+   184	        "position": position, "kind": kind,
+   185	        "opening_lead": rng.choice(MALE_OPENING_LEADS if is_male_solo else OPENING_LEADS),
+   186	    }
+   187	    if is_male_solo:
+   188	        # setting-only still: never leak her hair, skin, clothes or pose onto the man
+   189	        for k in ("hair", "skin", "build", "garment", "garment_noun", "pose"):
+   190	            slots[k] = ""
+   191	        slots["facing_camera"] = False
+   192	        slots["garments_all"] = []
+   193	        slots["join_garments"] = []
+   194	    if scene_prev:
+   195	        es = normalize_ending_state(scene_prev.get("ending_state") or {})
+   196	        slots["inherited"] = {"pose": es.get("pose"), "garments": es.get("garments"), "contact": es.get("contact"),
+   197	                              "camera": es.get("camera"), "pov": es.get("pov"), "done_actions": scene_prev.get("done_actions") or []}
+   198	    return slots
+   199	
+   200	
+   201	# ---- prompt assembly ------------------------------------------------------------------------------------------------
+   202	def section_split(text: str) -> List[Tuple[str, List[str]]]:
+   203	    out: List[Tuple[str, List[str]]] = []
+   204	    for ln in text.splitlines():
+   205	        if re.match(r"^[A-Z][A-Z ,&/-]{3,}(?:\s*\(.*\))?$", ln.strip()) and not ln.startswith("-"):
+   206	            out.append((ln.strip(), []))
+   207	        elif out:
+   208	            out[-1][1].append(ln)
+   209	        else:
+   210	            out.append(("", [ln]))
+   211	    return out
+   212	
+   213	
+   214	def assemble_system(cfg: Dict[str, Any], ask: str, persona: str, blocks: Optional[List[str]] = None) -> Tuple[str, Dict[str, Any]]:
+   215	    """writer_prompt.md with the chosen persona and only the mode block(s) the ask names (spec section 4 item 10)."""
+   216	    wp = Path(cfg.get("writer_prompt") or "writer_prompt.md")
+   217	    if not wp.is_absolute():
+   218	        wp = PIPE_DIR / wp
+   219	    text, meta = build_writer_system_prompt([wp])  # refuses AGENTS.md names and agent-only markers
+   220	    text = text.split("=====\n", 1)[-1]
+   221	    parts = section_split(text)
+   222	    out = []
+   223	    modes_used = []
+   224	    for head, lines in parts:
+   225	        if head == "PERSONA" and persona and persona != "current":
+   226	            pfile = PIPE_DIR / "personas" / f"{persona}.md"
+   227	            lines = ["", pfile.read_text(encoding="utf-8").strip(), ""]
+   228	        if head.startswith("MODES"):
+   229	            keep = []
+   230	            cur_ok = False
+   231	            for ln in lines:
+   232	                if ln.startswith("- "):
+   233	                    cur_ok = False
+   234	                    for label, pat in MODE_TRIGGERS:
+   235	                        hit = (label[2:] in blocks) if blocks is not None else bool(re.search(r"(?i)" + pat, ask or ""))
+   236	                        if ln.startswith(label) and hit:
+   237	                            cur_ok = True
+   238	                            modes_used.append(label[2:])
+   239	                if cur_ok or not ln.strip():
+   240	                    keep.append(ln)
+   241	            if not modes_used:
+   242	                continue
+   243	            lines = keep
+   244	        out.append(((head + "\n") if head else "") + "\n".join(lines).strip("\n"))
+   245	    sysprompt = "\n\n".join(o for o in out if o.strip())
+   246	    meta = {"writer_prompt": str(wp), "writer_prompt_sha256": wp_state.sha256_file(wp), "persona": persona or "current",
+   247	            "modes": modes_used}
+   248	    return sysprompt, meta
+   249	
+   250	
+   251	BEAT_SCHEMA_SEX = {
+   252	    "type": "object",
+   253	    "required": ["summary", "camera", "partners", "anchor", "onset", "development", "result", "end_state"],
+   254	    "properties": {
+   255	        "clip_seconds": {"type": "number"},
+   256	        "look": {"type": "string"},
+   257	        "arousal_stage": {"type": "integer"},
+   258	        "summary": {"type": "string"},
+   259	        "camera": {"type": "string"},
+   260	        "partners": {"type": "array", "items": {"type": "object", "required": ["label", "sex", "age", "build", "attire", "enters_from"],
+   261	                                                 "properties": {"label": {"type": "string"}, "sex": {"type": "string"},
+   262	                                                                "age": {"type": "integer"}, "build": {"type": "string"},
+   263	                                                                "attire": {"type": "string"}, "enters_from": {"type": "string"},
+   264	                                                                "hair": {"type": "string"},
+   265	                                                                "species": {"type": "string"}, "scale_anchor": {"type": "string"},
+   266	                                                                "anatomy": {"type": "string"}, "matches_still": {"type": ["string", "boolean"]},
+   267	                                                                "still": {"type": "string"}}}},
+   268	        "anchor": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
+   269	        "onset": {"type": "object", "required": ["exit", "load", "height", "clearance", "entry", "sound"],
+   270	                  "properties": {k: {"type": "string"} for k in ("exit", "load", "height", "clearance", "entry", "sound")}},
+   271	        "development": {"type": "object", "required": ["primary_motion", "tempo_word", "contact_keyword", "follow_through", "sound", "line_topics"],
+   272	                        "properties": {"primary_motion": {"type": "string"}, "tempo_word": {"type": "string"},
+   273	                                       "contact_keyword": {"type": "string"},
+   274	                                       "follow_through": {"type": "array", "items": {"type": "string"}},
+   275	                                       "sound": {"type": "string"},
+   276	                                       "line_topics": {"type": "array", "items": {"type": "string"}}}},
+   277	        "result": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
+   278	        "end_state": {"type": "object", "required": ["pose", "garments", "contact", "camera", "pov"],
+   279	                      "properties": {"pose": {"type": "string"}, "garments": {"type": "object"}, "contact": {"type": "string"},
+   280	                                     "camera": {"type": "string"}, "pov": {"type": "boolean"}, "prop_hand": {"type": "string"}}},
+   281	    },
+   282	}
+   283	BEAT_SCHEMA_TALK = {
+   284	    "type": "object",
+   285	    "required": ["summary", "camera", "partners", "anchor", "onset", "development", "result", "end_state"],
+   286	    "properties": {
+   287	        "clip_seconds": {"type": "number"},
+   288	        "look": {"type": "string"},
+   289	        "summary": {"type": "string"}, "camera": {"type": "string"},
+   290	        "partners": BEAT_SCHEMA_SEX["properties"]["partners"],
+   291	        "anchor": BEAT_SCHEMA_SEX["properties"]["anchor"],
+   292	        "onset": {"type": "object", "required": ["action", "sound"], "properties": {"action": {"type": "string"}, "sound": {"type": "string"}}},
+   293	        "development": {"type": "object", "required": ["line_topics", "sound"],
+   294	                        "properties": {"line_topics": {"type": "array", "minItems": 3, "maxItems": 4,
+   295	                                                       "items": {"type": "string"}},
+   296	                                       "sound": {"type": "string"}}},
+   297	        "result": {"type": "object", "required": ["action", "sound"],
+   298	                   "properties": {"action": {"type": "string"}, "sound": {"type": "string"},
+   299	                                  "line_topics": {"type": "array", "items": {"type": "string"}}}},
+   300	        "end_state": BEAT_SCHEMA_SEX["properties"]["end_state"],
+   301	    },
+   302	}
+   303	
+   304	
+   305	def _schema_variant(base: Dict[str, Any], onset_req: List[str], dev_req: List[str]) -> Dict[str, Any]:
+   306	    v = json.loads(json.dumps(base))
+   307	    v["properties"]["onset"]["required"] = onset_req
+   308	    v["properties"]["development"]["required"] = dev_req
+   309	    return v
+   310	
+   311	
+   312	# no penetration join: the onset has no clearance/entry requirement and the development has no contact keyword
+   313	BEAT_SCHEMA_NOJOIN = _schema_variant(BEAT_SCHEMA_SEX, ["exit", "load", "height", "sound"],
+   314	                                     ["primary_motion", "tempo_word", "follow_through", "sound", "line_topics"])
+   315	
+   316	_SEX_BEAT = ("Plan this clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset (exit from the "
+   317	             "still pose into the position, what carries each body's weight, how the surface height lines up the hips, the one "
+   318	             "clearance move using the still's garment noun and the word aside, and the entry), development (the PRIMARY MOTION "
+   319	             "with one tempo word the builder reads, the contact keyword, one or two follow-through cues, one or two short lines), "
+   320	             "result (the end state with the motion still running). Each phase has one diegetic sound tied to its action. "
+   321	             "Stay within the brief's clip-length spoken-word budget.")
+   322	_PRIMARY_REQ = ("- One sentence that begins exactly 'As it builds, PRIMARY MOTION - ' followed by the motion, its intensity and one "
+   323	                "tempo word (per second, every second, cycle, strokes a second), then one follow-through cue.\n")
+   324	_CLEAR_REQ = ("- If a garment covers the join: one active clearance sentence BEFORE the entry, in this form: '(S2) pulls her "
+   325	              "<garment> aside to one side at her hip, where it stays.' (the still's garment noun; never 'bunched'). Only the garment "
+   326	              "over the join gets 'aside to one side at her hip'; a top is pushed up off her breasts.\n")
+   327	_JOIN_REQ = _CLEAR_REQ + ("- One literal contact sentence with one join keyword (inside her, inside her vagina, inside her mouth, buried in her, deep in her, hips flush, flush "
+   328	             "against) that holds through the motion. Never write sheathed.\n")
+   329	# One block per mode (keyed by config position_kinds). Lint rules for the same mode live in wp_lint.MODE_RULES.
+   330	MODES: Dict[str, Dict[str, Any]] = {
+   331	    "sex": {"schema": BEAT_SCHEMA_SEX, "beat_task": _SEX_BEAT, "prose_req": _JOIN_REQ + _PRIMARY_REQ,
+   332	            "onset_hint": "The onset: the exit from that pose (and the clearance with the word aside, and the entry).\n"},
+   333	    "oral": {"schema": BEAT_SCHEMA_SEX,
+   334	             "beat_task": _SEX_BEAT.replace("the contact keyword", "the contact keyword inside her mouth"),
+   335	             "prose_req": ("- The contact sentence, in these words: 'his shaft slides past her lips deep inside her mouth, and she keeps "
+   336	                           "her lips sealed around it' (never hips flush, never sheathed). Only (S2) speaks in this clip; "
+   337	                           "(S1)'s side is wet suction and breath through her nose.\n"
+   338	                           "- The PRIMARY MOTION sentence, in these words: 'PRIMARY MOTION - her head bobs along his shaft about one "
+   339	                           "stroke every second.' (you may add one follow-through clause after a semicolon).\n"
+   340	                           "- Write the act's landing words once, inside a real clause (e.g. 'and kneels in front of him on the "
+   341	                           "<surface>'); never a list of aliases.\n"),
+   342	             "onset_hint": "The onset: the exit from that pose down to the mouth's height (and the entry into her mouth).\n"},
+   343	    "partner": {"schema": BEAT_SCHEMA_NOJOIN,
+   344	                "beat_task": ("Plan this clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
+   345	                              "(exit from the still pose into the position and what carries each body's weight), development (the "
+   346	                              "PRIMARY MOTION with one tempo word, the body parts that touch, one or two follow-through cues, one or "
+   347	                                  "two short lines), result (the end state with the motion still running). No penetration. Each phase "
+   348	                                  "has one diegetic sound tied to its action. Stay within the brief's clip-length spoken-word budget."),
+   349	                    "prose_req": ("- One literal sentence naming the body parts that touch and how they move (no penetration).\n") + _PRIMARY_REQ,
+   350	                    "onset_hint": "The onset: the exit from that pose into the position.\n"},
+   351	    "solo": {"schema": BEAT_SCHEMA_NOJOIN,
+   352	             "beat_task": ("Plan this solo clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
+   353	                           "(the first move out of the still pose), development (the PRIMARY MOTION with one tempo word, one or two "
+   354	                           "follow-through cues, at most two short lines), result (the end state with the motion still running). "
+   355	                           "One person, no partner contact. Each phase has one diegetic sound. Stay within the brief's clip-length spoken-word budget."),
+   356	             "prose_req": _PRIMARY_REQ + "- The camera keeps her face and body in frame (she is alone). Foley is breath, fabric, wet "
+   357	                                         "skin or the toy's hum, never a slap.\n",
+   358	             "onset_hint": "The onset: the first move out of that pose (any garment move uses aside or a removal verb).\n"},
+   359	    "strip": {"schema": BEAT_SCHEMA_NOJOIN,
+   360	              "beat_task": ("Plan this strip clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
+   361	                            "(the first move toward the first garment), development (the PRIMARY MOTION is the removal itself with one "
+   362	                            "tempo word, one to three removal steps, each naming the still's garment noun, where it lands and that it "
+   363	                            "stays there, with a short hold between steps), result (the end state still moving). One person, no "
+   364	                            "contact. Each phase has one diegetic sound. Stay within the brief's clip-length spoken-word budget."),
+   365	              "prose_req": ("- One to three removal steps with a removal verb (slides down, pulls off, peels), each naming the garment "
+   366	                            "noun, where it lands (the floor at her feet, or a named surface) and that it stays there; no contact; "
+   367	                            "a garment that is off stays off.\n"
+   368	                            "- The PRIMARY MOTION in this form: 'PRIMARY MOTION - she peels the <garment> down past her hips about one "
+   369	                            "slow pull cycle every two seconds; it drops to the floor at her feet and stays there.'\n"
+   370	                            "- The camera keeps her face and body in frame (no join, she is alone).\n"),
+   371	              "onset_hint": "The onset: the first move out of that pose toward the first garment.\n"},
+   372	    "transition": {"schema": _schema_variant(BEAT_SCHEMA_SEX, ["exit", "load", "height", "sound"],
+   373	                                             ["follow_through", "sound", "lines"]),
+   374	                   "beat_task": ("Plan this position-change clip as a beat card in JSON. Four phases: anchor (the current pose "
+   375	                                 "exactly as shown or as the last clip ended), onset (the exit from that pose and who moves whom), "
+   376	                                 "development (the bodies landing in the new pose in the act's own words, contact held if it was "
+   377	                                 "held), result (the new pose landed with a slow first motion). Each phase has one diegetic sound. "
+   378	                                 "Stay within the brief's clip-length spoken-word budget."),
+   379	                   "prose_req": _CLEAR_REQ + ("- One sentence that lands the new pose in the act's own words (on her back, hands and knees, "
+   380	                                 "astride, on her side, face down); any motion stays slow.\n"),
+   381	                   "onset_hint": "The onset: the exit from that pose and who moves whom.\n"},
+   382	    "talk": {"schema": BEAT_SCHEMA_TALK,
+   383	             "beat_task": ("Plan this talk-only clip as a beat card in JSON. Four phases: anchor (the still pose exactly as shown), onset "
+   384	                           "(the one physical action that moves the story), development (two or three short spoken lines), result (the last "
+   385	                           "line and an end state that is still moving). Three to five lines in total, about five to eight words each, "
+   386	                           "within the brief's clip-length spoken-word budget. Each phase has one diegetic sound tied to its action. No sex, no contact."),
+   387	             "prose_req": ("- Three or four short spoken lines across the phases, within the brief's clip-length spoken-word budget; "
+   388	                           "no contact and no PRIMARY MOTION.\n"),
+   389	             "onset_hint": "The onset: the one physical action that moves the story.\n"},
+   390	}
+   391	
+   392	
+   393	def mode(kind: str) -> Dict[str, Any]:
+   394	    return MODES.get(kind) or MODES["sex"]
+   395	
+   396	
+   397	# Overlays ride on the base card (never new acts): one plan note + one prose note each.
+   398	OVERLAY_NOTES: Dict[str, str] = {
+   399	    "bts": ("BTS interview: the off-screen interviewer has no body, no <Subject 2> entry and no (Sn) label; "
+   400	            "script two short interviewer questions as 'An off-screen interviewer asks, <d>[English] ...</d>' "
+   401	            "(without (S2)), and (S1) answers on screen with two short spoken lines of her own (4 spoken lines total). Do not skip the beat card."),
+   402	    "cinematic": "Film look (never write the words cinematic or beautiful): one motivated camera job (held, a slow push-in, a locked medium or a low angle), light that separates the bodies, at most one line per speaker.",
+   403	    "gonzo": "Gonzo: closer framing (medium-close), light handheld energy, a faster tempo, lens looks written in the action prose.",
+   404	    "pov": "POV: the camera is the dominant's eye line, medium or medium-close, (S1) looks toward the lens, only his hands or forearms enter frame (named once). Write no camera sentence of your own; the builder's POV camera line is the only one.",
+   405	    "edge": "Edge: the denial is tempo or one full pull-out pause with entry kept full; one denial moment.",
+   406	    "forced_orgasm": "Forced orgasm: one or two overstimulation cues in the body, PRIMARY MOTION keeps going through the result, her lines are fragments of three words or fewer.",
+   407	    "defeat": "Superheroine defeat: an original adult heroine, one strength beat, one break moment, one costume move that stays, her voice drops; no named hero and no quoted line. Her lines and her face carry the tone slot from the first line to the last frame.",
+   408	    "cnc": "Consensual non-consent fantasy between adults: one protest beat inside the action and his override by grip or command; no safeword unless asked.",
+   409	    "taboo_role": "Role-play between adults: one role for the clip, at most one title per line, tied to something visible.",
+   410	    "spoof": "Spoof (tone overlay): satirical or parody genre flavour, cadence, and one visual nod; film look as light, lens and grain words. Tone only — never drops or blocks named characters or actors.",
+   411	    "vhs": "VHS camcorder look: soft analog camcorder video with slight colour bleed and tracking lines, handheld camcorder energy, never a phone or smartphone.",
+   412	    "states": "States / fantasy setup: keep every character an adult; any consent/roleplay agreement belongs in its own separate setup clip, never inside the sex clip.",
+   413	    "restraints": "Restraints: name the restraint, who set it and its limit once; it stays on to the last frame. Tie her wrists to the {surface} she lies on, or he holds them; name no other anchor.",
+   414	    "toy": "Toy: define it once (type, size, who controls it); solo, the toy is the PRIMARY MOTION with tempo; with a partner, penetration is the PRIMARY MOTION and the toy rides in the follow-through; insertion or removal is one move each with where it rests.",
+   415	    "threesome": "Three adults at most: define (S3) (look, clothes, entrance), give each hand an owner such as (S3)'s left hand, at most two lines per speaker.",
+   416	    "continued": "Continued clip: open from the previous end state; never restate a finished action or reset a garment.",
+   417	    "nonhuman": ("Non-human partner: (S2) is a creature (no RefMod); describe his look once in the card, keep it the same all clip, "
+   418	                 "never call him a man. Still nouns win on costume, place, roles, wardrobe, races and scale."),
+   419	    "consent_setup": ("Agreed roleplay (porn-style, Derrick t1457u): in the opening clip, before any sex, give one quick consent beat: "
+   420	                      "a short playful line from her (e.g. <d>Wake me up like that tonight.</d>) or a nod or wink before a sleep/hypnosis/sedative setup; "
+   421	                      "for an awake MDMA/party setup chosen together, show mutual awake eagerness (smiles, pulls him close, touch-seeking hands, or an eager line)."),
+   422	    "scale": ("Size play: fix one measurable scale anchor in the card (e.g. 'she is no taller than his forearm') and keep it all clip. "
+   423	              "A tiny or fairy woman is an adult woman at miniature scale: write her adult face, full adult breasts, wide adult hips "
+   424	              "and an adult woman's proportions. Oversized anatomy is named once, with a slow entry and a firm grip. A carry or "
+   425	              "held-in-air pose has a measurable hold (his hands locked under her thighs) and her weight on his arms. "
+   426	               "(S2)'s definition uses the partner type from the ask (a giant adult man, about twice her height; oversized)."),
+   427	}
+   428	
+   429	
+   430	def overlay_text(overlays: List[str], surface: Optional[str] = None) -> str:
+   431	    notes = [OVERLAY_NOTES[o].replace("{surface}", surface or "surface") for o in overlays if o in OVERLAY_NOTES]
+   432	    return ("\nOVERLAYS (apply to this clip):\n" + "\n".join("- " + n for n in notes) + "\n") if notes else ""
+   433	
+   434	
+   435	def _lines_to_topics(schema: Any) -> Any:
+   436	    """Dialogue is written per prose candidate (acceptance-1 fix b): the beat card carries line topics, never the words."""
+   437	    if isinstance(schema, dict):
+   438	        out = {}
+   439	        for k, v in schema.items():
+   440	            if k == "properties":
+   441	                out[k] = {("line_topics" if kk == "lines" else kk): ({"type": "array", "items": {"type": "string"},
+   442	                          **({"minItems": vv["minItems"]} if "minItems" in vv else {}), **({"maxItems": vv["maxItems"]} if "maxItems" in vv else {})}
+   443	                          if kk == "lines" else _lines_to_topics(vv)) for kk, vv in v.items()}
+   444	            elif k == "required":
+   445	                out[k] = ["line_topics" if r == "lines" else r for r in v]
+   446	            else:
+   447	                out[k] = _lines_to_topics(v)
+   448	        return out
+   449	    return schema
+   450	
+   451	
+   452	def schema_errors(obj: Any, schema: Dict[str, Any], path: str = "$") -> List[str]:
+   453	    errs: List[str] = []
+   454	    t = schema.get("type")
+   455	    types = {"object": dict, "array": list, "string": str, "integer": int, "number": (int, float), "boolean": bool}
+   456	    allowed = [t] if isinstance(t, str) else (list(t) if isinstance(t, list) else [])
+   457	    if allowed:
+   458	        ok = any(a in types and isinstance(obj, types[a]) and not (a in ("integer", "number") and isinstance(obj, bool))
+   459	                 for a in allowed)
+   460	        if not ok:
+   461	            return [f"{path}: expected {t}"]
+   462	    if isinstance(obj, dict) and (t == "object" or "object" in allowed):
+   463	        for k in schema.get("required", []):
+   464	            if k not in obj:
+   465	                errs.append(f"{path}.{k}: missing")
+   466	        for k, sub in (schema.get("properties") or {}).items():
+   467	            if k in obj:
+   468	                errs += schema_errors(obj[k], sub, f"{path}.{k}")
+   469	    if isinstance(obj, list) and (t == "array" or "array" in allowed):
+   470	        if len(obj) < schema.get("minItems", 0) or len(obj) > schema.get("maxItems", 10 ** 6):
+   471	            errs.append(f"{path}: {len(obj)} items")
+   472	        for i, it in enumerate(obj):
+   473	            errs += schema_errors(it, schema.get("items") or {}, f"{path}[{i}]")
+   474	    if isinstance(obj, str) and not obj.strip():
+   475	        leaf = path.rsplit(".", 1)[-1]
+   476	        if leaf not in ("contact", "hair", "species", "scale_anchor", "anatomy", "matches_still", "still", "prop_hand"):
+   477	            errs.append(f"{path}: empty")
+   478	    return errs
+   479	
+   480	
+   481	for _m in MODES.values():
+   482	    _m["schema"] = _lines_to_topics(_m["schema"])
+   483	    _m["beat_task"] += (" For talk, give line_topics only (who speaks and what the line is about, from the still or the line "
+   484	                        "focus), never the spoken words; the words are written fresh in the prose.")
+   485	
+   486	
+   487	def parse_json(text: str) -> Any:
+   488	    t = re.sub(r"```(?:json)?", "", text or "")
+   489	    a, b = t.find("{"), t.rfind("}")
+   490	    return json.loads(t[a:b + 1]) if a >= 0 and b > a else json.loads(t)
+   491	
+   492	
+   493	# builder-required words per act (consistency gate), written into the brief so the card and the prose carry them
+   494	ACT_NOTES = {
+   495	    "cowgirl": ("write this clause word for word inside the PRIMARY MOTION sentence: 'she rises and sinks on him, his hips "
+   496	                "lifting a few inches off the {surface} to meet her as she sinks'. Contact: 'his penis inside her vagina'."),
+   497	    "finish": ("(S1) kneels on the {surface} in front of him, weight on both knees, sitting back on her heels, face tilted up; "
+   498	               "(S2) stands with his hips level with her face; she is silent from the moment he is at her lips. Foley is breath "
+   499	               "and wet sounds, never a slap. Contact: his penis at her lips; the glans as he releases; the semen lands on her cheeks "
+   500	               "and lips and stays."),
+   501	    "titjob": ("(S1) kneels on the {surface}, sitting back on her heels, weight on both knees, and presses her breasts together "
+   502	               "around his shaft with both palms; (S2) stands, hips level with her chest; she is silent from the moment he is at "
+   503	               "her lips. Contact: his shaft pressed between her breasts (never 'sheathed')."),
+   504	    "mmf": ("(S3) kneels behind her between her knees; (S2) kneels in front of her head, his hips level with her face; she is "
+   505	            "silent while (S2) is in her mouth (her side is wet suction and breath through her nose). Contact: '(S2)'s penis is "
+   506	            "inside her mouth, her lips sealed around his shaft' (never sheathed, never hips flush for the mouth). (S3) has no "
+   507	            "spoken line; give (S3) a full look in the card (age 25 or older, build, hair, attire)."),
+   508	    "doggy": ("If the surface is a log or the place is sand: (S1) is on her knees in the sand, forearms on the log, not kneeling on top of the log. "
+   509	               "The end pose of the clip is knees in the sand, forearms on the log, so the next clip inherits that (never 'all fours on the log'). "
+   510	               "Never write 'seats himself'."),
+   511	    "handjob": "Contact: her fist wrapped around his shaft; this is not a titjob.",
+   512	    "ff_cunnilingus": ("(S1) sits on the {surface} edge, thighs apart; (S2) kneels between them, her mouth sealed over (S1)'s vulva, tongue on her clitoris. "
+   513	                        "Never use blowjob or 'in her mouth' wording."),
+   514	    "ff_scissoring": ("Both lie on their sides facing opposite ways, legs interlocked in an X. Contact sentence, word for word: "
+   515	                        "'vulva pressed to vulva'."),
+   516	    "ffm": ("Contact: '(S2)'s penis inside (S1)'s vagina' and '(S3)'s mouth on (S1)'s breast or vulva'. Name those anatomy nouns in the entry sentence."),
+   517	}
+   518	LINE_ANGLES = ["a command about what he does next", "a reaction to the pace", "a plea or a dare in the tone slot",
+   519	               "praise or teasing about his body", "a question to him that the action answers", "a short gasped fragment"]
+   520	CONTINUE_NOTE = ("CONTINUED: the 'At first' sentence is the inherited end state (pose, join, garments) word for word: "
+   521	                 "'At first, {state}.' There is no move out of the still and no re-entry; the motion is already running. If the previous "
+   522	                 "clip had no join, write the entry before the PRIMARY; the 'At first' sentence is a full clause with (S1) as its subject.")
+   523	# acceptance-2 e: openings rotate (not every clip 'At first, (S1) leans/sits/stands')
+   524	OPENING_LEADS = ["her hands", "her gaze toward the lens", "her hair", "the light on her skin", "her hips", "her garment",
+   525	                 "her breath", "her bare shoulders"]
+   526	MALE_OPENING_LEADS = ["his hands", "his gaze toward the side", "the light in the room", "his stance", "his shoulders", "his breath"]
+   527	SURFACE_HEIGHT = [("waist", r"sideboard|table|counter|desk|dresser|vanity|bar|kitchen island|washing machine|piano"),
+   528	                  ("low", r"bed|sofa|couch|log|sand|mattress|bench|chaise|futon|lounger|rug|blanket|towel"),
+   529	                  ("floor", r"floor|ground|carpet|grass|deck")]
+   530	
+   531	
+   532	def surface_height(surface: str) -> str:
+   533	    for h, pat in SURFACE_HEIGHT:
+   534	        if re.search(r"(?i)\b(?:" + pat + r")\b", surface or ""):
+   535	            return h
+   536	    return "low"
+   537	
+   538	
+   539	def shots_line(n: int, frames: int) -> str:
+   540	    """B1 (long-scene spec): cut clocks for an n-shot clip, evenly spaced on the R8 grid."""
+   541	    secs = frames / 24.0
+   542	    cuts = [round(secs * i / n, 3) for i in range(1, n)]
+   543	    clk = ", ".join(f"[Shot {i + 2}] At 00:{c:06.3f}" for i, c in enumerate(cuts))
+   544	    return (f"SHOTS: this clip has {n} shots. Write [Shot 1] as usual, then each cut in order as its own sentence group: {clk}, "
+   545	            "the camera cuts to <a new size or angle on the same action>. The action, tempo and screen sides never change at a cut.")
+   546	
+   547	
+   548	
+   549	def _known_identity_tokens() -> Tuple[Dict[str, str], List[Dict[str, Any]]]:
+   550	    import resolve as _res
+   551	    idx_dir = _AI_ROOT / "community" / "index" / "h3-known-characters"
+   552	    ali_path = PARODY_DIR / "aliases.json"
+   553	    rows = _res.load_index_files(idx_dir) if idx_dir.is_dir() else []
+   554	    aliases = _res.load_aliases(ali_path) if ali_path.is_file() else {}
+   555	    return aliases, rows
+   556	
+   557	
+   558	def resolve_named_identity(
+   559	    ask: str,
+   560	    character: Optional[str] = None,
+   561	    actor: Optional[str] = None,
+   562	    names: Optional[List[str]] = None,
+   563	) -> Optional[Dict[str, Any]]:
+   564	    """Fix 1: One path for named people. Detect/resolve any named character or celeb in the ask or flags."""
+   565	    import resolve as _res
+   566	
+   567	    char = (character or "").strip() or None
+   568	    act = (actor or "").strip() or None
+   569	    name_list = [str(n).strip() for n in (names or []) if str(n).strip()]
+   570	
+   571	    aliases, rows = _known_identity_tokens()
+   572	    ask_s = ask or ""
+   573	    if not (char or act or name_list) and ask_s:
+   574	        candidates_to_scan: List[str] = []
+   575	        for k in aliases:
+   576	            if len(k) >= 4:
+   577	                candidates_to_scan.append(k)
+   578	        for r in rows:
+   579	            for fld in (r.get("character"), r.get("actor")):
+   580	                v = (fld or "").strip()
+   581	                if len(v) >= 4:
+   582	                    candidates_to_scan.append(v)
+   583	        candidates_to_scan = sorted(set(candidates_to_scan), key=len, reverse=True)
+   584	        matched_from_ask: List[str] = []
+   585	        for cand in candidates_to_scan:
+   586	            if re.search(r"(?i)\b" + re.escape(cand) + r"\b", ask_s):
+   587	                if not any(cand.lower() in m.lower() for m in matched_from_ask):
+   588	                    matched_from_ask.append(cand)
+   589	        for oc_m in re.finditer(r"\bFC[A-Za-z0-9_]{3,}\b", ask_s):
+   590	            if oc_m.group(0) not in matched_from_ask:
+   591	                matched_from_ask.append(oc_m.group(0))
+   592	        name_list = matched_from_ask
+   593	
+   594	    if not (char or act or name_list):
+   595	        return None
+   596	
+   597	    targets: List[str] = []
+   598	    for item in ([char, act] + name_list):
+   599	        if item and item not in targets:
+   600	            targets.append(item)
+   601	
+   602	    idx_dir = _AI_ROOT / "community" / "index" / "h3-known-characters"
+   603	    ali_path = PARODY_DIR / "aliases.json"
+   604	    ref_dir = _AI_ROOT / "comfy-alienpc" / "models" / "refmods"
+   605	    req = {
+   606	        "names": targets,
+   607	        "character": char or (name_list[0] if name_list else ""),
+   608	        "actor": act or "",
+   609	        "tone": "",
+   610	        "length_s": 10,
+   611	        "description": "adult figure with eyes, hair, and outfit",
+   612	    }
+   613	    resolved = _res.resolve_identities(req, index_dir=idx_dir, refmods_dir=ref_dir, aliases_path=ali_path)
+   614	    matched_rows = resolved.get("matched_index_rows") or []
+   615	    res_char = char
+   616	    res_actor = act
+   617	    if matched_rows:
+   618	        r0 = matched_rows[0]
+   619	        res_char = res_char or r0.get("character")
+   620	        res_actor = res_actor or r0.get("actor")
+   621	    if not res_actor:
+   622	        for t in targets:
+   623	            norm_t = _res._normalize_key(t)
+   624	            if norm_t in aliases:
+   625	                res_actor = aliases[norm_t].title()
+   626	                if not res_char:
+   627	                    res_char = t
+   628	                break
+   629	    if not res_char and targets:
+   630	        res_char = targets[0]
+   631	
+   632	    picked = _res.resolve_writer_refmods(still_image=None, character=res_char, names=targets)
+   633	    all_names = list(dict.fromkeys([x for x in (res_char, res_actor, *targets) if x]))
+   634	    return {
+   635	        "character": res_char,
+   636	        "actor": res_actor,
+   637	        "names": all_names,
+   638	        "index_status": resolved.get("index_status") or "none",
+   639	        "index_flag": resolved.get("index_flag") or "index:none",
+   640	        "refmods": list(picked.get("stems") or []),
+   641	        "trigger": picked.get("trigger"),
+   642	        "reason": picked.get("reason"),
+   643	    }
+   644	
+   645	
+   646	
+   647	def _ask_quoted_lines(ask: str) -> List[str]:
+   648	    return [m.group(1).replace("[English]", "").strip() for m in br._D_RE.finditer(ask or "")
+   649	            if m.group(1).replace("[English]", "").strip()]
+   650	
+   651	
+   652	def brief_block(ask: str, position: str, kind: str, slots: Dict[str, Any], bodies: int) -> str:
+   653	    lines = [f"ASK: {ask}", f"POSITION: {position} ({kind})", "STILL FACTS (Picture 1):"]
+   654	    for k in ("place", "surface", "floor", "light", "pose", "framing", "garment", "hair", "skin", "build"):
+   655	        if slots.get(k):
+   656	            lines.append(f"- {k}: {slots[k]}")
+   657	    if slots.get("props"):
+   658	        lines.append("- props: " + ", ".join(slots["props"]))
+   659	    if slots.get("restraints"):
+   660	        lines.append("- restraints: " + ", ".join(slots["restraints"]))
+   661	    lines.append(f"- facing the camera: {'yes' if slots.get('facing_camera') else 'no'}")
+   662	    if slots.get("join_garments") and wp_lint.mode_rules(kind)["clearance"]:
+   663	        lines.append("- covers the join: " + ", ".join(slots["join_garments"]))
+   664	        if wp_lint._join_inherited_clear(slots, None):
+   665	            lines.append("CLEARANCE: the " + wp_lint.join_noun(slots) + " is already aside from the last clip; keep it there, no new clearance sentence.")
+   666	        else:
+   667	            jn = wp_lint.join_noun(slots)
+   668	            if re.search(r"(?i)\b(?:top|bra|halter)\b", jn):
+   669	                lines.append(f"CLEARANCE (before any entry or contact sentence): '(S2) pushes her {jn} up off her breasts, where it stays.' Only the garment over the join is pulled aside at her hip.")
+   670	            else:
+   671	                lines.append(f"CLEARANCE (before any entry or contact sentence): '(S2) pulls her {jn} aside to one side at her hip, where it stays.' A top is pushed up off her breasts, never aside at her hip.")
+   672	    act = br.get_act(position) or {}
+   673	    if partner_sex(ask, "") == "futa":
+   674	        lines.append("PARTNER: (S2) is a futa woman; refer to her as she/her, never he, his, him or the man (builder P2). "
+   675	                     "Contact: '(S2)'s penis is fully sheathed inside her vagina, hips flush.'")
+   676	    if ACT_NOTES.get(act.get("id")):
+   677	        lines.append(f"ACT RULE ({act.get('id')}): " + ACT_NOTES[act["id"]].format(surface=slots.get("surface") or "surface"))
+   678	    ask_l = ask or ""
+   679	    if re.search(r"(?i)\b(?:asleep|sleep(?:ing|s)?|wake her)\b", ask_l):
+   680	        lines.append("SLEEP: after the agreement line, she lies still, eyes closed, breathing slow; she wakes during PRIMARY MOTION.")
+   681	    if re.search(r"(?i)\btelekinesis\b|\bfloat", ask_l):
+   682	        lines.append("TELEKINESIS: (S1) floats on her back at his hip height, held in the air by his raised hand; nothing is under her.")
+   683	    if re.search(r"(?i)\btentacles?\b", ask_l):
+   684	        lines.append("TENTACLES: tentacles coil around her thighs and wrists and hold; one tentacle is fully inside her vagina and thrusts at the tempo.")
+   685	    if re.search(r"(?i)\bvhs\b|16mm|film grain|camcorder", ask_l):
+   686	        lines.append("VHS LOOK: write the film look as grain, colour bleed and tracking; never the words cinematic or beautiful.")
+   687	    if re.search(r"(?i)\b(?:vampire|costume|uniform|nurse|maid)\b", ask_l):
+   688	        lines.append("ROLE COSTUME: name the costume item from the still or the ask once and keep it on unless the ask removes it.")
+   689	    if re.search(r"(?i)\bgiant", ask_l):
+   690	        lines.append("SCALE: (S2) is a giant adult man, about twice her height; say that once in his definition and keep the anchor.")
+   691	    if re.search(r"(?i)\boversized|massive oversized", ask_l):
+   692	        lines.append("SCALE: name the oversized anatomy once with a measurable size, slow entry, and a firm grip.")
+   693	    lines.append("AUDIO (R7 / 10Eros-Max beta7): write 1-3 plain diegetic sound sentences at the end of detailed_description; never write overall_soundscape: or non_diegetic_music: headers.")
+   694	    lines.append("Never write 'seats himself'; land the pose in (S1)'s own words.")
+   695	    surf_noun = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
+   696	    if slots.get("surface_height") == "waist" and kind in ("sex", "transition") and act.get("id") in ("missionary", "mf_anal"):
+   697	        lines.append(f"HEIGHT: the {surf_noun} is waist-high, so (S1) lies back on it and (S2) stands at its edge "
+   698	                     "between her legs; he does not kneel on it. Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
+   699	    if slots.get("surface_height") == "waist" and act.get("id") == "standing_mf":
+   700	        lines.append(f"HEIGHT: the {surf_noun} is waist-high, so (S1) stands at its edge, bends forward at the hips and "
+   701	                     "lays her forearms and chest on it, weight on both feet; (S2) stands behind her. Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
+   702	    if act.get("id") == "standing_mf":  # #4
+   703	        lines.append(f"LANDING: land it as 'bent forward over the {surf_noun}, both feet planted'; never write "
+   704	                     "hands and knees, all fours or doggy.")
+   705	    if slots.get("surface_height") == "waist" and act.get("id") == "mmf":  # #6
+   706	        sf = surf_noun
+   707	        lines.append(f"HEIGHT: (S1) bends forward over the {sf}, feet planted; (S3) stands behind her; (S2) stands at the far side, "
+   708	                     "hips level with her face; she is silent while (S2) is in her mouth; (S2) holds her head and her head bobs "
+   709	                     "along his shaft." + " Write this pose in your own full sentence with (S1) as its subject; do not paste it.")
+   710	    if slots.get("place"):
+   711	        lines.append(f"PLACE & WARDROBE: keep the still for face, body, light and framing; if the ask specifies a different setting, wardrobe or lines, the ask beats the still (otherwise use {slots['place']}).")
+   712	    lines.append("LINES: line_topics never name the surface, the floor or the furniture, never his grip, his hands or his strength, "
+   713	                 "and never the word deep; each line is "
+   714	                 "spoken to the partner about the act, his body or hers, in the tone slot.")
+   715	    if slots.get("opening_lead") and not slots.get("inherited"):
+   716	        if (position == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or ""):
+   717	            lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's setting and {surf_noun} "
+   718	                         f"surface noun, and never starts with 'breathes heavily'; it may add a detail about {slots['opening_lead']}.")
+   719	        else:
+   720	            lines.append(f"OPENING: the 'At first' sentence has (S1) as its subject, keeps the still's pose and surface noun "
+   721	                         f"('(S1) leans against the {surf_noun}'), and never starts with 'breathes heavily'; "
+   722	                         f"it may add a detail about {slots['opening_lead']}.")
+   723	    lines.append("SUMMARY: summary is one plain sentence: who, where, the act; never the camera line, 'At first' or 'As it builds'.")
+   724	    if act.get("contact_verbs") or act.get("motion_verbs"):  # the act's own vocabulary from acts.yaml (routing data, no new rule)
+   725	        lines.append(f"ACT {act.get('id')}: contact words {', '.join(act.get('contact_verbs') or [])}; motion words "
+   726	                     f"{', '.join(act.get('motion_verbs') or [])}")
+   727	    clip_frames = int(slots.get("frames") or br.SINGLE_CLIP_MAX_FRAMES)
+   728	    clip_secs = float(slots.get("clip_seconds") or round(clip_frames / float(br.H3_FPS), 1))
+   729	    word_max = int(slots.get("speech_words_max") or max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5))))
+   730	    lines_max = int(slots.get("max_lines_per_speaker") or max(1, int(round((clip_frames / float(br.H3_FPS)) / 5.0))))
+   731	    lines += [f"TONE (the submissive's reaction tone for this clip): {slots['tone']}",
+   732	              f"LINE FOCUS (what the talk is about): {slots['line_focus_text']}",
+   733	              f"PEOPLE: (S1) is the woman in the still{'; (S2) is her partner, defined by you' if bodies >= 2 else ''}"
+   734	              f"{'; (S3) is a third adult, defined by you' if bodies >= 3 and kind != 'talk' else ''}. Everyone is an adult, 25 or older.",
+   735	              f"CLIP LENGTH: T = {clip_secs:.1f} s ({clip_frames} frames); spoken words total at most {word_max} "
+   736	              f"(at most {lines_max} short line(s) per speaker)."]
+   737	    _q_lines = _ask_quoted_lines(ask)
+   738	    if _q_lines:
+   739	        lines.append("QUOTED DIALOGUE (MANDATORY — keep EVERY line verbatim in <d>[English] ...</d>, do not drop or merge any): " +
+   740	                     " | ".join(f"<d>[English] {ql}</d>" for ql in _q_lines))
+   741	    if slots.get("identity"):
+   742	        ident = slots["identity"]
+   743	        ichar = ident.get("character") or ""
+   744	        iact = ident.get("actor") or ""
+   745	        iflag = ident.get("index_flag") or "index:none"
+   746	        if ichar and iact and ichar.lower() != iact.lower():
+   747	            lines.append(f"IDENTITY (parody): (S1) is {ichar} (played by {iact}, {iflag}). Name both {ichar} and {iact} in subject_definitions:, and match <Audio 1> to {iact}\x27s {ichar} voice.")
+   748	        elif ichar or iact:
+   749	            who = ichar or iact
+   750	            lines.append(f"IDENTITY (parody): (S1) is {who} ({iflag}). Name {who} in subject_definitions:, and match <Audio 1> to {who}\x27s voice.")
+   751	    if slots.get("inherited"):
+   752	        inh = slots["inherited"]
+   753	        def _nz(x):
+   754	            s = str(x or "").strip()
+   755	            return s if s and s.lower() not in ("none", "null", "-", "no contact", "no contact.") else ""
+   756	        state = "; ".join(filter(None, (_nz(inh.get("pose")), _nz(inh.get("contact")))))
+   757	        lines.append(CONTINUE_NOTE.format(state=state or "the previous clip's end pose"))
+   758	        done = [d for d in (inh.get("done_actions") or []) if _nz(d)]
+   759	        lines += ["CONTINUED CLIP: open from the previous clip's end state, already in progress:",
+   760	                  f"- pose: {inh.get('pose')}", f"- garments: {json.dumps(inh.get('garments'))}"]
+   761	        if _nz(inh.get("contact")):
+   762	            lines.append(f"- contact: {inh.get('contact')}")
+   763	        lines.append(f"- camera: {inh.get('camera')} (POV: {inh.get('pov')})")
+   764	        if done:
+   765	            lines.append("- already done (continue from these, the camera already saw them): " + "; ".join(done))
+   766	    return "\n".join(lines)
+   767	
+   768	
+   769	def beat_messages(sysprompt: str, brief: str, kind: str, overlays: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+   770	    task = mode(kind)["beat_task"] + overlay_text(overlays or [])
+   771	    return [{"role": "system", "content": sysprompt},
+   772	            {"role": "user", "content": brief + "\n\n" + task + "\nAnswer with the JSON object only."}]
+   773	
+   774	
+   775	def prose_messages(sysprompt: str, brief: str, card: Optional[Dict[str, Any]], kind: str,
+   776	                   overlays: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+   777	    plan = ("BEAT CARD (plan; seconds never appear in the prose):\n" + json.dumps(card, indent=1, ensure_ascii=False)) if card else \
+   778	        "BEAT CARD: none (plan the four phases yourself from the still facts)."
+   779	    req = mode(kind)["prose_req"] + overlay_text(overlays or [])
+   780	    task = ("Write ONLY the detailed_description paragraph for this clip. Required, in this order:\n"
+   781	            "- [Shot 1] and one camera sentence.\n"
+   782	            "- A sentence that begins 'At first, ' with the still's exact pose, on the still's surface.\n"
+   783	            "- " + mode(kind)["onset_hint"] + req +
+   784	            "- A sentence that begins 'By the end, ' with the end state, the motion still going.\n"
+   785	            "- One to three plain diegetic sound sentences at the end tied to the action (never write overall_soundscape: or non_diegetic_music: headers).\n" +
+   786	            ("Keep EVERY quoted <d>[English] ...</d> line from the ask verbatim in order (do not drop any); write any unquoted lines fresh from line_topics (one <d> pair per line, no quotes inside it). "
+   787	             if _ask_quoted_lines(brief) else
+   788	             "Write every spoken line fresh in this paragraph from the card's line_topics (one <d> pair per line, no quotes inside it). ") +
+   789	            "Dialogue format: (S2) says in a <short voice> voice, <d>[English] words</d>. Write every sentence in your own words; "
+   790	            "copy no example phrase from the instructions. Plain text, one paragraph, no header, no Markdown.")
+   791	    return [{"role": "system", "content": sysprompt},
+   792	            {"role": "user", "content": brief + "\n\n" + plan + "\n\n" + task}]
+   793	
+   794	
+   795	def clean_prose(text: str) -> str:
+   796	    t = re.sub(r"```\w*", "", text or "").strip()
+   797	    t = re.sub(r"(?im)^\s*detailed_description\s*:\s*", "", t)
+   798	    i = t.find("[Shot 1]")
+   799	    if i > 0:
+   800	        t = t[i:]
+   801	    # keep the paragraph only (drop any trailing notes / headers)
+   802	    t = re.split(r"\n\s*\n(?=[A-Za-z_ ]+:)", t)[0]
+   803	    t = " ".join(t.split())
+   804	    if not t.startswith("[Shot 1]"):
+   805	        t = "[Shot 1] " + t
+   806	    return t
+   807	
+   808	
+   809	_LANG_TAG_RE = re.compile(r"^\[(?:English|Spanish|French|German|Italian|Portuguese|Japanese|Korean|Chinese|Russian)\]", re.I)
+   810	
+   811	
+   812	def normalize_prose(dd: str, kind: str, slots: Optional[Dict[str, Any]] = None) -> str:
+   813	    """Mechanical fixes only (no new content): unwrap <d>[words]</d> brackets, and put the literal 'PRIMARY MOTION - '
+   814	    label on the 'As it builds' sentence when the writer wrote the motion with a tempo word but left the label off."""
+   815	    def _d(m: "re.Match[str]") -> str:
+   816	        inner = m.group(1).strip()
+   817	        if not _LANG_TAG_RE.match(inner):
+   818	            mm = re.fullmatch(r"\[(.+)\]", inner)
+   819	            if mm:
+   820	                inner = mm.group(1).strip()
+   821	        return f"<d>{inner}</d>"
+   822	    # builder _HIS_CLOTHES_RE (build_request.py:795) matches 'stays bunched' and drops the whole clause, which deletes the
+   823	    # clearance and trips W5 (final4_c missionary/doggy). Same meaning, a word the builder keeps:
+   824	    dd = re.sub(r"(?i)\b(stay(?:s|ing)?|left|remain(?:s|ing)?) bunched\b", r"\1 gathered", dd)
+   825	    # builder _HIS_LIFT_RE (build_request.py:2233) wants 'his hips ... lift' (m09): same meaning, builder word order
+   826	    dd = re.sub(r"\((S2)\) lifts his (hips|pelvis)\b", r"his \2 lift", dd)
+   827	    dd = re.sub(r"(?i)\bhe lifts his (hips|pelvis)\b", r"his \1 lift", dd)
+   828	    # dry-matte skin (Derrick floor): shiny skin words from the read or the writer -> damp
+   829	    dd = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", dd)
+   830	    dd = re.sub(r"(?i)\bdamp,? damp\b", "damp", dd)
+   831	    # act ids never ship as prose (c8b 'At first, standing_mf;'): builder ids -> plain words
+   832	    surf = (slots or {}).get("surface") or "surface"
+   833	    for aid, words in (("standing_mf", f"standing, bent forward over the {surf}"), ("reverse_cowgirl", "reverse cowgirl"),
+   834	                       ("mf_anal", "anal"), ("female_solo", "alone"), ("standing_ff", "standing")):
+   835	        dd = re.sub(r"\b" + aid + r"\b", words, dd)
+   836	    # strip/solo tempo 'every two seconds' is not a builder tempo word (_TEMPO_RE): same tempo, with 'cycle'
+   837	    if wp_lint.mode_rules(kind)["primary"] and not br._TEMPO_RE.search(re.sub(r"<d>.*?</d>", "", dd, flags=re.S)):
+   838	        dd = re.sub(r"(?i)\b(?:about\s+)?(?:one\s+)?(?:slow\s+|smooth\s+|steady\s+)?(?:move|pull|tug|motion|stroke|peel|step)?\s*"
+   839	                    r"every (two|three|four|five|2|3|4|5) seconds\b", r"one slow cycle every \1 seconds", dd, count=1)
+   840	    # acceptance-3 (m18): 'two thrusts a second' / 'pumps a second' -> the builder tempo word 'strokes a second'
+   841	    dd = re.sub(r"(?i)\b(thrusts?|pumps?|bobs?|pushes|drives|slams?|bounces?)( a second)\b", "strokes a second", dd)
+   842	    # tag words never ship (Derrick floor): 'cinematic'/'beautiful' -> drop the adjective
+   843	    dd = re.sub(r"(?i)\s*\b(?:cinematic|beautiful(?:ly)?)\b,?", "", dd)
+   844	    for k in ("place", "light", "surface", "hair"):  # pmfix6: SHAPE blanks left literal -> fill from still_read slots
+   845	        if (slots or {}).get(k):
+   846	            dd = re.sub(r"<\s*" + k + r"\s*>", str(slots[k]), dd, flags=re.I)
+   847	    for _ in range(3):  # unwrap nested <d><d>..</d></d> the writer sometimes produces
+   848	        dd = re.sub(r"<d>\s*(?:\[English\]\s*)?<d>(.*?)</d>\s*</d>", r"<d>\1</d>", dd, flags=re.S)
+   849	    dd = re.sub(r"<d>(.*?)</d>", _d, dd, flags=re.S)
+   850	    dd = re.sub(r"<d>(\s*(?:\[English\]\s*)?)[\"\u201c\u201d']+(.*?)[\"\u201c\u201d']+</d>", r"<d>\1\2</d>", dd, flags=re.S)
+   851	    dd = re.sub(r"(?<![(\w<])S([123])(?![\w)>])", r"(S\1)", dd)  # bare S1 -> (S1)
+   852	    # acceptance-3 (m16): once her mouth is on him she is silent (builder D1): drop (S1)'s spoken units after that point
+   853	    _mk = re.sub(r"<d>.*?</d>", lambda mm: "\x00" * len(mm.group(0)), dd, flags=re.S)
+   854	    _mc = wp_lint.MOUTH_CONTACT_RE.search(_mk)
+   855	    if _mc:
+   856	        head, tail = dd[:_mc.end()], dd[_mc.end():]
+   857	        tail = re.sub(r"(?:(?<=[.!?>])|^)\s*\(S1\)[^<.!?]{0,120}<d>.*?</d>[.!?]?", "", tail, flags=re.S)
+   858	        dd = head + tail
+   859	    if wp_lint.mode_rules(kind)["primary"] and not br._PRIMARY_RE.search(dd):
+   860	        # the first sentence (outside <d>) that carries a tempo word gets the label, after a leading 'As it builds,'
+   861	        # acceptance-2 bug 1: mask every <d>...</d> span first, so a line ending in '?' or '!' never puts the label
+   862	        # inside the dialogue; a chunk that holds a masked span is only searched after its last span
+   863	        masked = re.sub(r"<d>.*?</d>", lambda mm: "\x00" * len(mm.group(0)), dd, flags=re.S)
+   864	        for m in re.finditer(r"[^.!?]*[.!?]", masked):
+   865	            sent = m.group(0)
+   866	            off = sent.rfind("\x00") + 1
+   867	            sent = sent[off:]
+   868	            if "<d>" in sent or "</d>" in sent or not br._TEMPO_RE.search(sent):
+   869	                continue
+   870	            lead = re.match(r"(?i)\s*(?:as it builds,\s*)?", sent)
+   871	            at = m.start() + off + lead.end()
+   872	            dd = dd[:at] + "PRIMARY MOTION - " + dd[at:]
+   873	            break
+   874	    return glue_fix(dd)
+   875	
+   876	
+   877	def glue_fix(dd: str) -> str:
+   878	    """acceptance-3 review (PM) #1: text glue the lint does not see."""
+   879	    dd = re.sub(r"(</d>\s*)(?:\(S\d\) )?adds in an? [^<]{0,40}?(?:tone|voice), and ", r"\1", dd)
+   880	    dd = re.sub(r"(?i)\b(the) the\b", r"\1", dd)
+   881	    dd = re.sub(r"(?i)\s*;\s*none\.?", "", dd)
+   882	    dd = re.sub(r"(?i)\s*;\s*no contact\.?", "", dd)
+   883	    dd = re.sub(r"(?i)\b(?:fully\s+)?sheathed in her mouth\b", "inside her mouth", dd)
+   884	    dd = re.sub(r"(?i)(?:(?<=[.!?>])|^)\s*(?:none|no contact)\.(?=\s|$)", "", dd)
+   885	    dd = re.sub(r"(?i)\bher skin (?:glistening|glistens|glistened|glistening with \w+)\b", "her damp skin", dd)
+   886	    dd = re.sub(r"(?i)\b(damp)\b((?:[ ,]+\w+){0,4}?)[ ,]+damp\b", r"\1\2", dd)
+   887	    return re.sub(r"\s{2,}", " ", dd).strip()
+   888	
+   889	
+   890	_S1_ONLY = re.compile(r"(?i)\b(?:bikini|bra|panties|thong|lingerie|stockings|crop top|bodysuit|dress|skirt|slip|teddy|mesh)\b")
+   891	_SIDE_RE = re.compile(r"(?i)\b(?:frame )?(?:left|right|behind(?: her)?|the door(?:way)?|off[- ]?screen)\b")
+   892	
+   893	
+   894	def partner_sex(ask: str, card_sex: str, label: Optional[str] = None) -> str:
+   895	    """The ask decides the partner's sex; respects S3 female in FFM and card futa when appropriate."""
+   896	    a = (ask or "").lower()
+   897	    cs = (card_sex or "").lower().strip()
+   898	    if re.search(r"\bffm\b", a):
+   899	        if label == "S3":
+   900	            return "woman"
+   901	        if label == "S2":
+   902	            return "futa" if re.search(r"\bfuta\b", cs) else "man"
+   903	    if re.search(r"\bmmf\b", a):
+   904	        return "man"
+   905	    if re.search(r"\bfuta\b", a) and (label != "S3" or re.search(r"\bfuta\b", cs)):
+   906	        return "futa"
+   907	    if not a and cs == "futa":
+   908	        return "futa"
+   909	    if re.search(r"\b(?:woman|girl|lesbian|girlfriend|her friend|another woman|second woman|two women|two girls)\b", a):
+   910	        if re.search(r"\b(?:him|man|guy|he)\b", a):
+   911	            if re.search(r"\b(?:female|woman|girl|f)\b", cs) or label == "S3":
+   912	                return "woman"
+   913	            return "man"
+   914	        return "woman"
+   915	    return "man"
+   916	
+   917	
+   918	def _pick_partner(partners: List[Any], label: str, idx: int) -> Dict[str, Any]:
+   919	    """Match partner entry by S2/S3 label first, skipping any S1 entry Gemma placed at index 0."""
+   920	    dicts = [p for p in partners if isinstance(p, dict)]
+   921	
+   922	    def _lbl(item: Dict[str, Any]) -> str:
+   923	        return re.sub(r"\W", "", str(item.get("label", ""))).upper()
+   924	
+   925	    exact = next((p for p in dicts if _lbl(p) == label), None)
+   926	    if exact is not None:
+   927	        return exact
+   928	    non_s1 = [p for p in dicts if _lbl(p) != "S1"]
+   929	    return non_s1[idx] if idx < len(non_s1) else {}
+   930	
+   931	
+   932	def _clean_attr(s: str, default: str) -> str:
+   933	    s = re.sub(r"[<>]", "", (s or "").strip()).rstrip(".")
+   934	    return s or default
+   935	
+   936	
+   937	def _partner_match_clause(p: Dict[str, Any], idx: int, slots: Dict[str, Any]) -> str:
+   938	    val = p.get("matches_still") if "matches_still" in p else (p.get("matches") or p.get("still"))
+   939	    if isinstance(val, bool):
+   940	        if val and idx == 1 and slots.get("s3_still"):
+   941	            return "matches <Picture 2>"
+   942	        return ""
+   943	    raw = str(val or "").strip()
+   944	    if not raw and idx == 1 and slots.get("s3_still"):
+   945	        raw = "matches <Picture 2>"
+   946	    if not raw:
+   947	        return ""
+   948	    if re.fullmatch(r"(?i)(?:true|false|yes|no|none|null|n/?a|same)", raw):
+   949	        if idx == 1 and slots.get("s3_still") and raw.lower() in ("true", "yes", "same"):
+   950	            return "matches <Picture 2>"
+   951	        return ""
+   952	    m = re.search(r"<?\bPicture\s+(\d+)\b>?", raw, flags=re.I)
+   953	    if m:
+   954	        pic = f"<Picture {m.group(1)}>"
+   955	        return raw if raw.lower().startswith("matches") and pic in raw else f"matches {pic}"
+   956	    cleaned = _clean_attr(raw, "")
+   957	    if not cleaned or not re.match(r"(?i)^matches\b", cleaned):
+   958	        return ""
+   959	    return cleaned
+   960	
+   961	
+   962	def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, Any], bodies: int, kind: str,
+   963	                    continuation: Optional[str] = None) -> str:
+   964	    place = slots.get("place") or "setting"
+   965	    light = slots.get("light") or "light"
+   966	    hair = slots.get("hair") or "her hair as shown"
+   967	    position = slots.get("position") or ""
+   968	    is_male_solo = (position == "male_solo") or re.search(r"(?i)\bmale solo\b", slots.get("ask") or "")
+   969	    if is_male_solo:
+   970	        sd = [f"<Picture 1> is the reference image defining the {place}, its {light} and the opening framing.",
+   971	              f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1), and "
+   972	              f"<Audio 1> defines his voice timbre."]
+   973	    else:
+   974	        ident = slots.get("identity") or {}
+   975	        ichar = (ident.get("character") or "").strip()
+   976	        iact = (ident.get("actor") or "").strip()
+   977	        if ichar and iact and ichar.lower() != iact.lower():
+   978	            id_prefix = f"{ichar} ({iact}), "
+   979	            voice_tail = f"<Audio 1> defines {iact}\x27s exact {ichar} voice timbre."
+   980	        elif ichar or iact:
+   981	            who = ichar or iact
+   982	            id_prefix = f"{who}, "
+   983	            voice_tail = f"<Audio 1> defines {who}\x27s voice timbre."
+   984	        else:
+   985	            id_prefix = ""
+   986	            voice_tail = "<Audio 1> defines her voice timbre."
+   987	        sd = [f"<Picture 1> is the reference image defining the exact appearance, face and hairstyle of <Subject 1>, and the {place}, "
+   988	              f"its {light} and the opening framing.",
+   989	              f"<Subject 1> is {id_prefix}the exact same woman shown in <Picture 1>; an adult woman, 25 years of age, {hair}; she is (S1), and "
+   990	              f"{voice_tail}"]
+   991	    partners = (card or {}).get("partners") or []
+   992	    want = 1 if bodies == 2 or kind == "talk" else (2 if bodies >= 3 else 0)
+   993	    if kind == "talk" and not re.search(r"\(S2\)", dd):
+   994	        want = 0
+   995	    for i in range(want):
+   996	        label = f"S{i + 2}"
+   997	        p = _pick_partner(partners, label, i)
+   998	        sex = partner_sex(slots.get("ask") or "", str(p.get("sex") or ""), label=label)
+   999	        age = p.get("age") if isinstance(p.get("age"), int) and not isinstance(p.get("age"), bool) else 30
+  1000	        age = max(25, min(int(age), 60))
+  1001	        pron = "he" if sex == "man" else "she"
+  1002	        # Derrick t1411u SHAPE form (one sentence, "and he is"): the builder's partner gate splits on ';' (shapes2)
+  1003	        build = _clean_attr(p.get("build"), "athletic build")
+  1004	        if build.lower() == (slots.get("build") or "").lower() or re.search(r"(?i)\b(?:curvy|petite|busty)\b", build):
+  1005	            build = "athletic build" if sex == "man" else "slim build"
+  1006	        attire = _clean_attr(p.get("attire"), "")
+  1007	        same_as_s1 = any(g.lower() in attire.lower() for g in (slots.get("garments_all") or []) if g)
+  1008	        bad_man_attire = (sex == "man") and bool(_S1_ONLY.search(attire))
+  1009	        if not attire or bad_man_attire or same_as_s1:
+  1010	            attire = "a dark t-shirt and jeans" if sex == "man" else "a black dress"
+  1011	        sm = _SIDE_RE.search(str(p.get("enters_from") or ""))
+  1012	        side = ("the " + sm.group(0).lower()) if sm and not sm.group(0).lower().startswith(("the", "behind", "off")) else (
+  1013	            sm.group(0).lower() if sm else "the right")
+  1014	        species = _clean_attr(p.get("species"), "")
+  1015	        if species and species.lower() not in ("human", "person"):
+  1016	            role = f"the {species}, an adult" if sex == "man" else (
+  1017	                f"the {species} futa woman, an adult" if sex == "futa" else f"the {species} woman, an adult"
+  1018	            )
+  1019	        else:
+  1020	            role = {"man": "the man, an adult", "woman": "the woman, an adult", "futa": "the woman, an adult futa"}[sex]
+  1021	        anat = _clean_attr(p.get("anatomy") or p.get("futa_anatomy"), "")
+  1022	        scale = _clean_attr(p.get("scale_anchor") or p.get("scale"), "")
+  1023	        match_str = _partner_match_clause(p, i, slots)
+  1024	        extras = ", ".join(x for x in (anat, scale, match_str) if x)
+  1025	        extra_part = f", {extras}" if extras else ""
+  1026	        sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}{extra_part}, in {attire}, who enters from {side} "
+  1027	                  f"and {pron} is ({label}).")
+  1028	    _sum_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
+  1029	    _pos_id = str(slots.get('position') or 'scene').strip()
+  1030	    _POS_SUMMARY = {
+  1031	        "standing_mf": "standing", "ff_scissoring": "scissoring", "ff_cunnilingus": "cunnilingus",
+  1032	        "mmf_double_blowjob": "double blowjob", "mmf_dp": "double penetration",
+  1033	        "reverse_cowgirl": "reverse cowgirl", "prone_bone": "prone bone",
+  1034	        "female_solo": "solo", "male_solo": "male solo",
+  1035	    }
+  1036	    _pos_human = _POS_SUMMARY.get(_pos_id, _pos_id.replace("_", " "))
+  1037	    summary = _clean_attr((card or {}).get("summary"), f"(S1) in a {_pos_human} scene on the {_sum_surf}")
+  1038	    # #2: one plain sentence of who, where and the act; never the camera line or the phase scaffold
+  1039	    _ss = [x for x in re.split(r"(?<=[.!?])\s+", summary) if x.strip() and not re.match(r"(?i)\s*the camera\b", x)]
+  1040	    summary = re.sub(r"(?i)\b(?:at first|as it builds|by the end),?\s*", "", (_ss[0] if _ss else summary)).strip().rstrip(".")
+  1041	    summary = (summary[:1].upper() + summary[1:]) if summary else f"(S1) in a {slots.get('position')} clip"
+  1042	    # acceptance-3 (m08): tag words and shine words never ship in the summary either
+  1043	    summary = re.sub(r"\s{2,}", " ", re.sub(r"(?i)\b(?:cinematic|beautiful(?:ly)?)\b,?\s*", "", summary)).strip()
+  1044	    summary = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", summary)
+  1045	    summary = re.sub(r"\b(?:A|An) (?=[aeiou])", "An ", re.sub(r"\bAn (?=[^aeiouAEIOU])", "A ", summary))
+  1046	    ret_line = ("<Subject 1>: not_in_clip - clip is male solo, (S1) is the man. <Picture 1>: fully_preserved - the "
+  1047	                f"{place}, the light and the opening framing." if is_male_solo else
+  1048	                "<Subject 1>: fully_preserved - face, hair and body from <Picture 1>. <Picture 1>: fully_preserved - the "
+  1049	                f"{place}, the light and the opening framing.")
+  1050	    out = ["subject_definitions:", *sd, "", "summary:", summary + ".", "", "retention_analysis:",
+  1051	           ret_line, "", "detailed_description:", dd]
+  1052	    if continuation:
+  1053	        out += ["", "continuation:", continuation]
+  1054	    return "\n".join(out) + "\n"
+  1055	
+  1056	
+  1057	def rewrite_messages(sysprompt: str, brief: str, card: Optional[Dict[str, Any]], dd: str, notes: List[str],
+  1058	                     kind: str = "sex", overlays: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+  1059	    msg = prose_messages(sysprompt, brief, card, kind, overlays)
+  1060	    msg[1]["content"] += ("\n\nYOUR DRAFT:\n" + dd + "\n\nRewrite the draft once. Fix exactly these points and keep everything "
+  1061	                          "else that works:\n" + "\n".join(f"- {n}" for n in notes) +
+  1062	                          "\nAnswer with the rewritten detailed_description paragraph only.")
+  1063	    return msg
+  1064	
+  1065	
+  1066	def judge_format(letters: List[str]) -> Dict[str, Any]:
+  1067	    """Totals only (no per-criterion objects, which ran past max_tokens) and a strict ranking of the letters."""
+  1068	    sch = {"type": "object", "required": ["scores", "ranking", "best"],
+  1069	           "properties": {"scores": {"type": "object", "required": letters,
+  1070	                                     "properties": {l: {"type": "integer", "minimum": 5, "maximum": 25} for l in letters}},
+  1071	                          "ranking": {"type": "array", "items": {"type": "string", "enum": letters},
+  1072	                                      "minItems": len(letters), "maxItems": len(letters)},
+  1073	                          "best": {"type": "string", "enum": letters}}}
+  1074	    return {"type": "json_schema", "json_schema": {"name": "judge", "schema": sch}}
+  1075	
+  1076	
+  1077	def judge_letter(jd: Dict[str, Any], letters: List[str]) -> str:
+  1078	    """'CANDIDATE A', 'A', 'Candidate: B', ranking[0] or the top score -> one letter that exists (fixes 'CANDIDATE A' -> 'C')."""
+  1079	    def one(v: Any) -> str:
+  1080	        t = str(v or "").strip().upper()
+  1081	        m = re.fullmatch(r"(?:CANDIDATE\s*[:#-]?\s*)?([A-Z])\.?", t) or re.search(r"\b([A-Z])\b(?!.*\b[A-Z]\b)", t)
+  1082	        return m.group(1) if m and m.group(1) in letters else ""
+  1083	    b = one(jd.get("best"))
+  1084	    if not b and isinstance(jd.get("ranking"), list) and jd["ranking"]:
+  1085	        b = one(jd["ranking"][0])
+  1086	    if not b and isinstance(jd.get("scores"), dict):
+  1087	        tot = lambda v: v if isinstance(v, (int, float)) else (v.get("total") if isinstance(v, dict) and isinstance(v.get("total"), (int, float))
+  1088	                                                                else sum(x for x in v.values() if isinstance(x, (int, float))) if isinstance(v, dict) else None)
+  1089	        sc = {one(k): tot(v) for k, v in jd["scores"].items() if one(k) and tot(v) is not None}
+  1090	        if sc:
+  1091	            b = max(sc, key=sc.get)
+  1092	    return b
+  1093	
+  1094	
+  1095	def judge_messages(cands: List[Tuple[str, str]], brief: str) -> List[Dict[str, Any]]:
+  1096	    body = "\n\n".join(f"CANDIDATE {name}:\n{dd}" for name, dd in cands)
+  1097	    return [{"role": "system", "content": "You judge short adult video clip prompts. Score each candidate 1-5 on five points: "
+  1098	             "still-specific (uses the still's own place, surface, garment and light), fresh talk (lines written for this scene), "
+  1099	             "power dynamic (clear and consistent), physical continuity (bodies move in a possible order), rhythm (varied "
+  1100	             "sentences, reads as one take). Use the full 1-5 range and give the candidates different totals. Answer JSON only: "
+  1101	             "{\"scores\": {\"A\": <total 5-25>, ...}, \"ranking\": [\"<letter best first>\", ...], \"best\": \"<letter>\"}."},
+  1102	            {"role": "user", "content": brief + "\n\n" + body}]
+  1103	
+  1104	
+  1105	# ---- builder preview + build ----------------------------------------------------------------------------------------
+  1106	def make_cast(still_read: Dict[str, Any], position: str, ask: str, continued: bool = False,
+  1107	              inherited_garments: Optional[Dict[str, str]] = None) -> Tuple[Dict[str, Any], str]:
+  1108	    still_people = None
+  1109	    rd = br._unwrap_still_read(still_read)
+  1110	    if rd.get("people"):
+  1111	        still_people = len(rd["people"]) if isinstance(rd["people"], list) else rd["people"]
+  1112	    hook_act = (br.get_act(position) or {}).get("id") if position else None
+  1113	    brief = scene_addenda.resolve_brief(ask or "", act_id=hook_act, registry=br.load_acts_registry(),
+  1114	                                        still_people=still_people if isinstance(still_people, int) else None)
+  1115	    if not hook_act and brief.get("act_id") and br.get_act(brief["act_id"]):
+  1116	        position = brief["act_id"]
+  1117	    mk: Dict[str, Any] = {}
+  1118	    if brief.get("partner_type"):
+  1119	        mk["partner_type"] = brief["partner_type"]
+  1120	    if br._CREATURE_RE.search(ask or ""):
+  1121	        mk["partner_type"] = "non-human"  # nonhuman overlay (G1)
+  1122	    if partner_type_for(position, ask) and not mk.get("partner_type"):
+  1123	        mk["partner_type"] = partner_type_for(position, ask)
+  1124	    if partner_type2_for(position, ask):
+  1125	        mk["partner_type2"] = partner_type2_for(position, ask)
+  1126	    if continued:
+  1127	        mk["continued"] = True
+  1128	    if inherited_garments:
+  1129	        mk["inherited_garments"] = dict(inherited_garments)
+  1130	    if re.search(r"(?i)\bgiant", ask or ""):
+  1131	        mk["man"] = "a giant adult man, about twice her height, twenty-six years of age, of solid adult build"
+  1132	    ck = brief.get("camera_kind")
+  1133	    if ck and ck not in ("third_person", "third-person"):
+  1134	        mk["camera_kind"] = br._CAM_KIND_MAP.get(ck, ck)
+  1135	    if (brief.get("s1_gender") == "man") or ((hook_act or brief.get("act_id") or position) == "male_solo"):
+  1136	        still_read, _ = strip_male_solo_still_read(still_read)
+  1137	        mk["voice_s1"] = "a deep, steady adult man's voice, low and hoarse"
+  1138	    return br.make_cast(still_read, position, ask, **mk), position
+  1139	
+  1140	
+  1141	def builder_preview_fn(still_read: Dict[str, Any], position: str, ask: str, continued: bool = False,
+  1142	                       inherited_garments: Optional[Dict[str, str]] = None):
+  1143	    def preview(full: str) -> Dict[str, Any]:
+  1144	        try:
+  1145	            cast, _ = make_cast(still_read, position, ask, continued=continued, inherited_garments=inherited_garments)
+  1146	            _, rep = br.finalize_writer_prompt(full, cast, strict=True)
+  1147	            return {"added": rep.get("added", []), "violations": rep.get("violations", []),
+  1148	                    "dropped": (rep.get("speech") or {}).get("dropped", []), "state": rep.get("state"),
+  1149	                    "not_ready": rep.get("not_ready") or ""}
+  1150	        except br.WriterPromptError as e:
+  1151	            return {"error": str(e), "added": []}
+  1152	        except Exception as e:  # preview is advisory; the real dry build decides
+  1153	            return {"preview_exception": f"{type(e).__name__}: {e}", "added": []}
+  1154	    return preview
+  1155	
+  1156	
+  1157	MMF_FACELESS_ACTS = ("mmf", "mmf_double_blowjob", "threesome")
+  1158	
+  1159	
+  1160	def partner_type2_for(position: str, ask: str) -> Optional[str]:
+  1161	    """Derrick t1437s5374 / t1467: MMF S2 and S3 are faceless by default (look text or a still, no RefMod)."""
+  1162	    act = ((br.get_act(position) or {}).get("id") if position else None) or position
+  1163	    if act in MMF_FACELESS_ACTS and not re.search(r"(?i)\b(?:ffm|two (?:women|girls)|another (?:woman|girl))\b", ask or ""):
+  1164	        return "faceless"
+  1165	    return None
+  1166	
+  1167	
+  1168	def partner_type_for(position: str, ask: str) -> Optional[str]:
+  1169	    """S2 on an MMF job stays a regular man (not faceless) unless the ask names a futa or non-human partner."""
+  1170	    return None
+  1171	
+  1172	
+  1173	_COLOUR_END_RE = re.compile(r"(?i)\b(?:dark|black|brown|blond|blonde|red|grey|gray|white|silver|auburn|copper|light|short|long)\s*,?$")
+  1174	
+  1175	
+  1176	def s3_look_from_card(card: Optional[Dict[str, Any]]) -> Optional[str]:
+  1177	    return partner_look_from_card(card, "S3")
+  1178	
+  1179	
+  1180	def partner_look_from_card(card: Optional[Dict[str, Any]], label: str = "S3") -> Optional[str]:
+  1181	    """MMF S3 (Derrick t1440), S2 too (#14): the card's partner as one fixed look line; None when the card has none."""
+  1182	    p3 = next((p for p in ((card or {}).get("partners") or []) if re.sub(r"\W", "", str(p.get("label", ""))).upper() == label), None)
+  1183	    if not p3 or not (p3.get("build") or p3.get("attire")):
+  1184	        return None
+  1185	    try:
+  1186	        age = max(25, int(p3.get("age") or 30))
+  1187	    except (TypeError, ValueError):
+  1188	        age = 30
+  1189	    sex = "woman" if re.search(r"(?i)\b(?:female|woman|f)\b", str(p3.get("sex", ""))) else "man"
+  1190	    species = _clean_attr(p3.get("species"), "")
+  1191	    if species and species.lower() not in ("human", "person"):
+  1192	        head = f"an adult {species}" if sex == "man" else f"an adult {species} woman"
+  1193	    else:
+  1194	        head = f"an adult {sex}"
+  1195	    bits = [f"{head}, {age} years of age", f"of {_clean_attr(p3.get('build'), 'solid')} build".replace("build build", "build")]
+  1196	    if p3.get("anatomy") or p3.get("futa_anatomy"):
+  1197	        bits.append(_clean_attr(p3.get("anatomy") or p3.get("futa_anatomy"), ""))
+  1198	    if p3.get("scale_anchor") or p3.get("scale"):
+  1199	        bits.append(_clean_attr(p3.get("scale_anchor") or p3.get("scale"), ""))
+  1200	    if p3.get("hair"):
+  1201	        h3 = _clean_attr(p3.get('hair'), '').rstrip(" ,")
+  1202	        if _COLOUR_END_RE.search(h3):  # #14: 'short dark' keeps its noun
+  1203	            h3 += " hair"
+  1204	        bits.append(f"with {h3}" + ("" if re.search(r"(?i)\b(?:hair|bald|shaved|buzz|cut|crop|beard)\b", h3) else " hair"))
+  1205	    if p3.get("attire"):
+  1206	        bits.append(f"in {re.sub(r'(?i)^(?:in|wearing)\s+', '', _clean_attr(p3.get('attire'), ''))}")
+  1207	    return re.sub(r"(?i)\b(?:cinematic|beautiful)\b\s*", "", ", ".join(b for b in bits if b.strip()))
+  1208	
+  1209	
+  1210	def run_build(run_dir: Path, ask: str, position: str, still: str, character: Optional[str], timeout: int = 300,
+  1211	              extra: Optional[List[str]] = None, names: Optional[List[str]] = None) -> Dict[str, Any]:
+  1212	    """Fill the saved template request.api.json in run_dir from writer_output.txt."""
+  1213	    t0 = time.time()
+  1214	    ex = list(extra or [])
+  1215	    def _opt(flag: str) -> Optional[str]:
+  1216	        return ex[ex.index(flag) + 1] if flag in ex and ex.index(flag) + 1 < len(ex) else None
+  1217	    ex_names: List[str] = list(names or [])
+  1218	    if "--names" in ex:
+  1219	        i = ex.index("--names") + 1
+  1220	        while i < len(ex) and not str(ex[i]).startswith("--"):
+  1221	            ex_names.append(str(ex[i])); i += 1
+  1222	    frames_s, aspect, size = _opt("--frames"), _opt("--aspect"), _opt("--size")
+  1223	    still_mode = _opt("--still-mode") or "guide"
+  1224	    p2_still, tname = _opt("--partner2-still"), _opt("--template")
+  1225	    raw = (run_dir / "writer_output.txt").read_text(encoding="utf-8") if (run_dir / "writer_output.txt").is_file() else ""
+  1226	    still = fr.pixl_abs(still)
+  1227	    w, h = br.resolve_canvas(aspect, size, still_size=br.read_still_size(still) if still else None)
+  1228	    rep = fr.fill_request(
+  1229	        raw, run_dir, ask=ask, position=position, still_image=(still or None), partner2_still=p2_still,
+  1230	        character=character, names=(ex_names or None), template_name=tname, still_mode=still_mode,
+  1231	        width=w, height=h, frames=int(frames_s) if frames_s else None, dry_run=("--queue" not in ex),
+  1232	    )
+  1233	    status = "READY" if rep.get("status") == "READY" else "NOT_READY"
+  1234	    return {"status": status, "rc": 0 if status == "READY" else 3,
+  1235	            "stdout": "%s template=%s" % (status, rep.get("template", "")), "stderr": "",
+  1236	            "report": rep, "seconds": round(time.time() - t0, 2), "reason": rep.get("reason") or ""}
+  1237	
+  1238	
+  1239	def kept_lines(full: str, rep: Dict[str, Any]) -> List[str]:
+  1240	    dropped = {wp_lint.norm(d.get("line", "")) for d in ((rep.get("build") or {}).get("speech") or {}).get("dropped", [])}
+  1241	    return [m.group(1).replace("[English]", "").strip() for m in br._D_RE.finditer(wp_lint.get_dd(full))
+  1242	            if wp_lint.norm(m.group(1)) and wp_lint.norm(m.group(1)) not in dropped]
+  1243	
+  1244	
+  1245	# ---- still handling -------------------------------------------------------------------------------------------------
+  1246	def auto_still(cfg: Dict[str, Any], run_id: str, ask: str) -> str:
+  1247	    raise RuntimeError("no still pool on X3; pass an explicit --still path")
+  1248	
+  1249	
+  1250	_SHINE_RE = re.compile(r"(?i)\b(?:glistening|glisten\w*|oily|oiled|glossy|shiny|shimmering|slick)\b(?:\s+(?:with\s+)?(?:wet\s+)?skin)?")
+  1251	MATTE_SKIN = "damp skin with a soft natural sheen and visible pores"
+  1252	
+  1253	
+  1254	def clean_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+  1255	    """U52: keep vision still captions verbatim without mutating words."""
+  1256	    return dict(d), []
+  1257	
+  1258	
+  1259	def strip_male_solo_still_read(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+  1260	    """Strip the still woman's personal attributes/garments so a male_solo still_read stays setting-only."""
+  1261	    rd = d.get("read") if isinstance(d.get("read"), dict) else d
+  1262	    nr = dict(rd)
+  1263	    changed: List[str] = []
+  1264	    for k, empty in (("hair", ""), ("skin", ""), ("build", ""), ("pose", ""), ("garments", []), ("facing_camera", False), ("people", 0)):
+  1265	        if nr.get(k) not in (empty, None):
+  1266	            changed.append(k)
+  1267	            nr[k] = empty
+  1268	    if rd is d:
+  1269	        return nr, changed
+  1270	    out = dict(d)
+  1271	    out["read"] = nr
+  1272	    return out, changed
+  1273	
+  1274	
+  1275	def ensure_still_read(run_dir: Path, still: str, still_read_src: Optional[str], client: Client, cfg: Dict[str, Any], log) -> Dict[str, Any]:
+  1276	    d = _ensure_still_read_raw(run_dir, still, still_read_src, client, cfg, log)
+  1277	    nd, changed = clean_still_read(d)
+  1278	    if changed:
+  1279	        p = run_dir / "still_read.json"
+  1280	        raw = run_dir / "still_read.raw.json"
+  1281	        if not raw.exists():
+  1282	            wp_state.atomic_write(raw, json.dumps(d, indent=2, ensure_ascii=False))
+  1283	        nd["cleaned"] = changed
+  1284	        wp_state.atomic_write(p, json.dumps(nd, indent=2, ensure_ascii=False))
+  1285	        log("still_read_cleaned", {"run": run_dir.name, "changed": changed})
+  1286	    return nd
+  1287	
+  1288	
+  1289	def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[str], client: Client, cfg: Dict[str, Any], log) -> Dict[str, Any]:
+  1290	    p = run_dir / "still_read.json"
+  1291	    if p.exists():
+  1292	        return json.loads(p.read_text(encoding="utf-8"))
+  1293	    if still_read_src:
+  1294	        d = json.loads(Path(still_read_src).read_text(encoding="utf-8"))
+  1295	        if "read" not in d:
+  1296	            d = {"read": d}
+  1297	        d["source"] = still
+  1298	        d["copied_from"] = str(still_read_src)
+  1299	        wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
+  1300	        return d
+  1301	
+  1302	    def vision_chat(messages):
+  1303	        return client.chat(messages, {"temperature": 0.2, "top_k": 20, "top_p": 0.9}, 7, 1024, purpose="vision_read")
+  1304	    read = br.vision_read(still, vision_chat)
+  1305	    d = {"read": read, "source": still, "how": "pipeline vision_read via " + cfg["model_alias"]}
+  1306	    wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
+  1307	    log("still_read_vision", {"run": run_dir.name, "still": still})
+  1308	    return d
+  1309	
+  1310	
+  1311	def chain_start_still(prev_run: Path, still: str, run_dir: Path, log) -> str:
+  1312	    mp4s = sorted(prev_run.glob("**/*.mp4"), key=lambda p: p.stat().st_mtime)
+  1313	    if not mp4s:
+  1314	        log("chain_dry_still", {"prev": str(prev_run), "still": still})
+  1315	        return still
+  1316	    out = run_dir / "start_still_from_prev.png"
+  1317	    ff = shutil.which("ffmpeg") or "ffmpeg"
+  1318	    r = subprocess.run([ff, "-y", "-sseof", "-0.1", "-i", str(mp4s[-1]), "-frames:v", "1", str(out)], capture_output=True, timeout=120)
+  1319	    if r.returncode == 0 and out.exists():
+  1320	        log("chain_last_frame", {"prev_mp4": str(mp4s[-1]), "still": str(out)})
+  1321	        return str(out)
+  1322	    log("chain_last_frame_failed", {"prev_mp4": str(mp4s[-1])})
+  1323	    return still
+  1324	
+  1325	
+  1326	# ---- run dir + start-still guard (Max Architect 2026-11-15, Derrick "Yes, make the fixes and rerun the Q8 vs Q4 test") ----
+  1327	def resolve_run_dir(raw: Any) -> Path:
+  1328	    """An absolute run dir is used as given. A relative one resolves under RUNS_ROOT (it used to land under the chat's
+  1329	    cwd, outside runs/ and past the pi write sandbox). A leading '.../runs/' prefix is dropped; '..' is refused."""
+  1330	    s = str(raw or "").strip()
+  1331	    if not s:
+  1332	        raise ValueError("run_dir is empty")
+  1333	    rp = Path(s)
+  1334	    if rp.is_absolute():
+  1335	        return rp
+  1336	    parts = [x for x in re.split(r"[\\/]+", s) if x not in ("", ".")]
+  1337	    if "runs" in parts:
+  1338	        parts = parts[len(parts) - parts[::-1].index("runs"):]
+  1339	    if not parts or ".." in parts or re.match(r"^[A-Za-z]:", parts[0]):
+  1340	        raise ValueError(f"run_dir '{s}' does not resolve under {RUNS_ROOT}; pass an absolute path under runs/")
+  1341	    return RUNS_ROOT.joinpath(*parts)
+  1342	
+  1343	
+  1344	def _file_sha256(path: Path) -> Optional[str]:
+  1345	    try:
+  1346	        h = hashlib.sha256()
+  1347	        with open(path, "rb") as f:
+  1348	            for chunk in iter(lambda: f.read(1 << 20), b""):
+  1349	                h.update(chunk)
+  1350	        return h.hexdigest()
+  1351	    except OSError:
+  1352	        return None
+  1353	
+  1354	
+  1355	def _norm_still(x: Any) -> str:
+  1356	    return os.path.normcase(os.path.normpath(os.path.expanduser(str(x).strip())))
+  1357	
+  1358	
+  1359	def still_read_mismatch(still: str, run_dir: Path, still_read_src: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+  1360	    """(not_ready_reason, warning) for the still read the pipeline is about to use (run_dir/still_read.json if present,
+  1361	    else --still-read). It must belong to the start still: same path, or the same file bytes (sha256). A read with no
+  1362	    "source" (and no "source_sha256") cannot be checked and only warns."""
+  1363	    existing = run_dir / "still_read.json"
+  1364	    srp = existing if existing.exists() else (Path(still_read_src) if still_read_src else None)
+  1365	    if srp is None:
+  1366	        return None, None
+  1367	    try:
+  1368	        d = json.loads(srp.read_text(encoding="utf-8"))
+  1369	    except Exception as e:  # noqa: BLE001
+  1370	        return f"still read {srp} is not valid JSON ({e})", None
+  1371	    d = d if isinstance(d, dict) else {}
+  1372	    sha = str(d.get("source_sha256") or "").strip().lower()
+  1373	    src = d.get("source")
+  1374	    if sha:
+  1375	        have = _file_sha256(Path(still))
+  1376	        if have and have == sha:
+  1377	            return None, None
+  1378	        return (f"still read does not belong to the start still: {srp} source_sha256 does not match --still '{still}'"), None
+  1379	    if not src:
+  1380	        return None, "still_read_unverified (no source in the still read)"
+  1381	    if _norm_still(src) == _norm_still(still):
+  1382	        return None, None
+  1383	    try:
+  1384	        if os.path.realpath(os.path.expanduser(str(src))) == os.path.realpath(os.path.expanduser(str(still))):
+  1385	            return None, None
+  1386	    except Exception:  # noqa: BLE001
+  1387	        pass
+  1388	    a, b = _file_sha256(Path(os.path.expanduser(str(src)))), _file_sha256(Path(still))
+  1389	    if a and b and a == b:
+  1390	        return None, None
+  1391	    return (f"still read does not belong to the start still: {srp.name} describes '{src}' but --still is '{still}'; "
+  1392	            "pass the still that read describes, or remove the read so the pipeline reads the new still"), None
+  1393	
+  1394	
+  1395	# ---- one clip -------------------------------------------------------------------------------------------------------
+  1396	class _Stop(Exception):
+  1397	    """A hard stop that ends the clip as NOT_READY with result['not_ready_reason'] already set."""
+  1398	
+  1399	
+  1400	def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+  1401	    ov = overrides or {}
+  1402	    t_start = time.time()
+  1403	    try:
+  1404	        run_dir = resolve_run_dir(job.get("run_dir"))
+  1405	    except ValueError as e:
+  1406	        return {"run": str(job.get("run_dir")), "run_dir": str(job.get("run_dir")), "ask": job.get("ask"),
+  1407	                "position": job.get("position"), "status": "NOT_READY", "not_ready_reason": str(e), "warnings": [],
+  1408	                "version": VERSION, "seconds": 0.0}
+  1409	    run_dir.mkdir(parents=True, exist_ok=True)
+  1410	    run_id = run_dir.name
+  1411	    ask, position = job["ask"], job["position"]
+  1412	    raw_position = position
+  1413	    debug = bool(job.get("debug"))
+  1414	    character = job.get("character")
+  1415	    identity = resolve_named_identity(ask, character=character, actor=job.get("actor"), names=job.get("names"))
+  1416	    if not character and identity and identity.get("character"):
+  1417	        character = identity["character"]
+  1418	    kind = position_kind(position, cfg)  # provisional; the router below decides after the still read
+  1419	    bodies = acts_bodies(position)
+  1420	    overlays: List[str] = []
+  1421	    arm = cfg.get("sampler_arm", "A")
+  1422	    sampler = dict((cfg.get("samplers") or {}).get(arm) or {"temperature": 1.0, "top_p": 0.95, "top_k": 64, "min_p": 0.10})
+  1423	    persona = cfg.get("persona", "current")
+  1424	    client = Client(cfg, log)
+  1425	    result: Dict[str, Any] = {"run": run_id, "run_dir": str(run_dir), "ask": ask, "position": position, "kind": kind,
+  1426	                              "status": None, "warnings": [], "version": VERSION, "sampler_arm": arm, "persona": persona}
+  1427	    state_dir = Path(cfg["shared_state_dir"]) if cfg.get("shared_state_dir") else PIPE_DIR  # one global blacklist
+  1428	    state_dir.mkdir(parents=True, exist_ok=True)
+  1429	    bl_path = state_dir / "dialogue_blacklist.jsonl"
+  1430	    recent_path = state_dir / "recent_outputs.jsonl"
+  1431	    cloned_path = state_dir / "cloned_phrases.txt"
+  1432	    try:
+  1433	        # lost-features audit (Derrick t243s811): a youth hint in the ask is a hard stop before any writer call
+  1434	        _yh = wp_lint.YOUTH_RE.search(ask or "")
+  1435	        if _yh:
+  1436	            result.update(status="NOT_READY", not_ready_reason=f"youth hint in the ask: '{_yh.group(0)}' (every person is an adult, 18+)")
+  1437	            raise _Stop()
+  1438	        # scene / chain
+  1439	        scene_id = job.get("scene")
+  1440	        prev_run = Path(job["continue"]) if job.get("continue") else None
+  1441	        if prev_run and not scene_id:
+  1442	            try:
+  1443	                scene_id = json.loads((prev_run / "pick.json").read_text(encoding="utf-8")).get("scene_id") or prev_run.name
+  1444	            except Exception:
+  1445	                scene_id = prev_run.name
+  1446	        sp = wp_state.scene_path(RUNS_ROOT, scene_id) if scene_id else None
+  1447	        is_continue = bool(prev_run or job.get("extend"))
+  1448	        if scene_id and sp and not is_continue:
+  1449	            wp_state.reset_scene(sp, scene_id)  # PM acc4 #3: clip 1 starts a fresh scene_state
+  1450	        scene_clips = wp_state.load_scene(sp) if sp and is_continue else []
+  1451	        scene_prev = scene_clips[-1] if scene_clips and is_continue else None
+  1452	        if is_continue and prev_run:
+  1453	            try:
+  1454	                parent = json.loads((prev_run / "pick.json").read_text(encoding="utf-8"))
+  1455	            except Exception:
+  1456	                parent = {}
+  1457	            if parent.get("status") == "NOT_READY" or (prev_run / "clip_NOT_READY.txt").exists() and parent.get("status") != "READY":
+  1458	                result.update(status="NOT_READY", not_ready_reason="parent clip is NOT_READY; continued clip blocked",
+  1459	                              chain="blocked_parent")
+  1460	                raise _Stop()
+  1461	            result["chain"] = "dry_chain"
+  1462	            if not list(prev_run.glob("*.mp4")):
+  1463	                result["warnings"] = list(result.get("warnings") or []) + ["chain_unverified"]
+  1464	        still = fr.pixl_abs(str(job.get("still") or "").strip())
+  1465	        if not still and is_continue:
+  1466	            if scene_prev and scene_prev.get("still"):
+  1467	                still = str(scene_prev["still"]).strip()
+  1468	            elif prev_run and (prev_run / "pick.json").is_file():
+  1469	                try:
+  1470	                    still = str(json.loads((prev_run / "pick.json").read_text(encoding="utf-8")).get("still") or "").strip()
+  1471	                except Exception:
+  1472	                    still = ""
+  1473	        if not still and job.get("template") != "named_parody":  # hard fail when --still is missing (never silently fall back to auto)
+  1474	            result.update(status="NOT_READY", not_ready_reason="start still missing: pass --still '<the start still path>' "
+  1475	                          "(or --still auto for a pool pick plus a fresh vision read)")
+  1476	            raise _Stop()
+  1477	        if still != "auto" and Path(still).is_absolute() and not Path(still).is_file():
+  1478	            result.update(status="NOT_READY", not_ready_reason=f"start still file not found: {still}")
+  1479	            raise _Stop()
+  1480	        if still == "auto":
+  1481	            if job.get("still_read") and not is_continue:
+  1482	                result.update(status="NOT_READY", not_ready_reason="start still missing: --still-read was given with "
+  1483	                              "--still auto; pass --still '<the still that read describes>'")
+  1484	                raise _Stop()
+  1485	            still = auto_still(cfg, run_id, ask)
+  1486	        if scene_prev and scene_prev.get("run_dir"):
+  1487	            still = chain_start_still(Path(scene_prev["run_dir"]), scene_prev.get("still") or still, run_dir, log)
+  1488	        else:
+  1489	            _why, _warn = still_read_mismatch(still, run_dir, job.get("still_read"))
+  1490	            if _why:
+  1491	                result.update(status="NOT_READY", not_ready_reason=_why)
+  1492	                raise _Stop()
+  1493	            if _warn:
+  1494	                result["warnings"] = list(result.get("warnings") or []) + [_warn]
+  1495	        _still_mode = br.normalize_still_mode(job.get("still_mode"))
+  1496	        _still_size = br.read_still_size(still) if still else None
+  1497	        _cw, _ch = br.resolve_canvas(job.get("aspect"), job.get("size"), still_size=_still_size)
+  1498	        _shape_warn = br.check_still_canvas_shape(
+  1499	            _still_size, _cw, _ch, aspect=job.get("aspect"), size=job.get("size"), still_mode=_still_mode,
+  1500	        ) if _still_size else None
+  1501	        if _shape_warn:
+  1502	            print(_shape_warn, file=sys.stderr)
+  1503	            result["warnings"] = list(result.get("warnings") or []) + [_shape_warn]
+  1504	            log("still_shape_mismatch", {"run": run_id, "warning": _shape_warn, "canvas": [_cw, _ch],
+  1505	                                         "still_size": list(_still_size)})
+  1506	        # 1 still read
+  1507	        still_read = ensure_still_read(run_dir, still, job.get("still_read"), client, cfg, log) if still else {"read": {}}
+  1508	        # 2b mode router (coverage B0): act + base mode + overlays; fallbacks are logged, never block
+  1509	        route = wp_router.route_mode(ask, position, still_read, cfg, continued=bool(scene_prev))
+  1510	        # acceptance-2 item 3: doggy on a waist-high-only surface is standing_mf (bent over its edge); cowgirl there warns
+  1511	        _sf = br.still_facts(still_read).get("surface") or ""
+  1512	        if surface_height(_sf) == "waist" and route["act_id"] == "doggy" and br.get_act("standing_mf"):
+  1513	            route = dict(route, position="standing_mf", act_id="standing_mf",
+  1514	                         warnings=list(route["warnings"]) + [{"warn": "waist_high_reroute", "from": "doggy", "to": "standing_mf", "surface": _sf}])
+  1515	        elif surface_height(_sf) == "waist" and route["act_id"] in ("cowgirl", "reverse_cowgirl"):
+  1516	            _surf_label = re.sub(r"(?i)^(?:the|a|an)\s+", "", _sf)
+  1517	            result["warnings"].append(f"surface_mismatch: {route['act_id']} on a waist-high {_surf_label}")
+  1518	            log("surface_mismatch_warn", {"run": run_id, "act_id": route["act_id"], "surface": _sf})
+  1519	        if route["position"] != position:
+  1520	            log("mode_fallback", {"run": run_id, "position": position, "chosen": route["position"]})
+  1521	        position, kind, overlays = route["position"], route["mode"], route["overlays"]
+  1522	        if (position == "male_solo") or (route.get("act_id") == "male_solo") or re.search(r"(?i)\bmale solo\b", ask or ""):
+  1523	            raw_sr = run_dir / "still_read.raw.json"
+  1524	            if not raw_sr.exists() and (run_dir / "still_read.json").exists():
+  1525	                wp_state.atomic_write(raw_sr, (run_dir / "still_read.json").read_text(encoding="utf-8"))
+  1526	            still_read, ms_changed = strip_male_solo_still_read(still_read)
+  1527	            if ms_changed:
+  1528	                still_read = dict(still_read, male_solo_stripped=ms_changed)
+  1529	                wp_state.atomic_write(run_dir / "still_read.json", json.dumps(still_read, indent=2, ensure_ascii=False))
+  1530	                log("male_solo_still_stripped", {"run": run_id, "fields": ms_changed})
+  1531	        bodies = acts_bodies(position)
+  1532	        for w in route["warnings"]:
+  1533	            result["warnings"].append(w["warn"])
+  1534	            log(w["warn"], dict(w, run=run_id))
+  1535	        result.update(position=position, kind=kind, mode=kind, overlays=overlays, act_id=route["act_id"], route=route)
+  1536	        if debug:
+  1537	            wp_state.atomic_write(run_dir / "route.json", json.dumps(route, indent=2, ensure_ascii=False))
+  1538	        # 2 slots
+  1539	        last_tone = (state_dir / "last_tone.txt").read_text(encoding="utf-8").strip() if (state_dir / "last_tone.txt").exists() else None
+  1540	        slots = make_slots(still_read, ask, position, kind, run_id, last_tone, scene_prev, overlays=overlays)
+  1541	        if identity:
+  1542	            slots["identity"] = identity
+  1543	            result["identity"] = identity
+  1544	        if is_continue and scene_prev:
+  1545	            _inh_pose = str(((slots.get("inherited") or {}).get("pose")) or "").strip()
+  1546	            if not _inh_pose or _inh_pose.lower() in ("none", "null", "-", "the previous clip's end pose"):
+  1547	                result["warnings"].append("missing_inherited_ending_state_pose")
+  1548	                log("missing_ending_state_pose_warn", {"run": run_id})
+  1549	        _explicit_frames = bool(job.get("frames"))
+  1550	        if _explicit_frames:
+  1551	            if job.get("template") == "long_continuation":
+  1552	                clip_frames = int(job["frames"])
+  1553	            else:
+  1554	                try:
+  1555	                    clip_frames = br.align_h3_frames(int(job["frames"]))
+  1556	                except ValueError as e:
+  1557	                    result.update(status="NOT_READY", not_ready_reason=str(e))
+  1558	                    raise _Stop()
+  1559	        elif job.get("template") == "long_continuation":
+  1560	            clip_frames = 481
+  1561	        elif kind == "talk":
+  1562	            clip_frames = br.snap_h3_frames(8.0)
+  1563	        else:
+  1564	            clip_frames = br.SINGLE_CLIP_MAX_FRAMES
+  1565	        clip_seconds = round(clip_frames / float(br.H3_FPS), 1)
+  1566	        _q_ask = _ask_quoted_lines(ask)
+  1567	        _q_words = sum(len(ql.split()) for ql in _q_ask)
+  1568	        speech_words_max = max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5)), (_q_words + 8) if _q_ask else 0)
+  1569	        max_lines_spk = max(len(_q_ask), 2 if kind == "talk" else 1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
+  1570	        slots["frames"] = clip_frames
+  1571	        slots["clip_seconds"] = clip_seconds
+  1572	        slots["speech_words_max"] = speech_words_max
+  1573	        slots["max_lines_per_speaker"] = max_lines_spk
+  1574	        s3_still_pre = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
+  1575	        if s3_still_pre:
+  1576	            slots["s3_still"] = s3_still_pre
+  1577	        if debug:
+  1578	            wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
+  1579	        sysprompt, pmeta = assemble_system(cfg, ask, persona, route["mode_blocks"])
+  1580	        result.update(pmeta)
+  1581	        # self-maintenance: cloned phrases follow the prompt sha + recent outputs
+  1582	        cloned = wp_state.refresh_cloned(cloned_path, sysprompt, pmeta["writer_prompt_sha256"], wp_state.load_recent(recent_path))
+  1583	        blacklist = [r["line"] for r in wp_state.load_blacklist(bl_path, log)]
+  1584	        # MMF S3 (Derrick t1440): reuse the scene's S3 look, use a given S3 still, else the card invents one (faceless fallback)
+  1585	        s3_still = s3_look = None
+  1586	        s2_look_saved = None
+  1587	        s3_in_frame = False
+  1588	        if bodies >= 2:
+  1589	            s2_look_saved = (scene_prev or {}).get("s2_look")
+  1590	        if bodies >= 3:
+  1591	            s3_still = job.get("partner2_still") or (scene_prev or {}).get("s3_still")
+  1592	            s3_look = (scene_prev or {}).get("s3_look")
+  1593	            s3_in_frame = bool(s3_look) if partner_type2_for(position, ask) else False
+  1594	        _inh_g = (slots.get("inherited") or {}).get("garments") if scene_prev else None
+  1595	        try:
+  1596	            cast_l, _ = make_cast(still_read, position, ask, continued=bool(scene_prev), inherited_garments=_inh_g)
+  1597	        except Exception as e:
+  1598	            cast_l = {}
+  1599	            result["warnings"].append("cast_preview_failed")
+  1600	            log("cast_preview_failed", {"run": run_id, "error": str(e)[:300]})
+  1601	
+  1602	        def _build_full_brief() -> str:
+  1603	            b = brief_block(ask, position, kind, slots, bodies)
+  1604	            if (position == "male_solo") or ((br.get_act(position) or {}).get("id") == "male_solo"):
+  1605	                b += ("\nMALE SOLO: (S1) is the man. The start still is setting only: use its place, light and surface, never the person\'s hair, skin, clothes or pose. The person in the still is not (S1) and is not in this clip.")
+  1606	            if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" and int(job.get("shot_count") or 1) > 1:
+  1607	                b += "\n" + shots_line(int(job["shot_count"]), clip_frames)
+  1608	            if bodies >= 2 and s2_look_saved:  # #14
+  1609	                b += f"\nPARTNER (S2), the same person as the last clip, every detail kept: {s2_look_saved}."
+  1610	            if bodies >= 3:
+  1611	                if s3_look:
+  1612	                    b += f"\nTHIRD PERSON (S3), the same person as the last clip, every detail kept: {s3_look}."
+  1613	                if s3_still:
+  1614	                    b += "\nTHIRD PERSON (S3): his face and body come from his own reference picture; name only his clothes."
+  1615	            if cast_l and not cast_l.get("voice_s2"):
+  1616	                # acceptance-1 f: no partner voice for this ask (builder would print 'a distinct adult voice for (S2)')
+  1617	                b += ("\nVOICE: no partner voice is set for this ask, so only (S1) speaks (at most two lines); (S2) stays silent "
+  1618	                      "or off the clip." if kind == "talk" else "\nVOICE: only (S1) speaks in this clip.")
+  1619	            return b
+  1620	
+  1621	        brief = _build_full_brief()
+  1622	        rd_ = br._unwrap_still_read(still_read)
+  1623	        wet_ok = bool(wp_lint.WET_RE.search(json.dumps(rd_)) or wp_lint.WET_RE.search(ask))
+  1624	        lint_cfg = dict(cfg.get("lint") or {})
+  1625	        lint_cfg["speech_words_max"] = speech_words_max
+  1626	        lint_cfg["max_lines_per_speaker"] = max_lines_spk
+  1627	        lint_ctx = {"kind": kind, "slots": slots, "blacklist": blacklist, "cloned": cloned, "cfg": lint_cfg,
+  1628	                    "scene": scene_prev, 
+  1629	                    "cast": cast_l, "overlays": overlays, "ask": ask, "act_id": route["act_id"], "wet_ok": wet_ok,
+  1630	                    "recent_openings": [wp_lint.opening_sentence(d) for d in wp_state.load_recent(recent_path)[-10:]]}
+  1631	        # 3 beat card (Cut 2: talk clips and runs with --frames use the in-code minimal beat card, no LLM planning call)
+  1632	        card = None
+  1633	        bc = dict(sampler, **(cfg.get("beat_card_sampler") or {}))
+  1634	        if kind == "talk" or _explicit_frames:
+  1635	            card = {
+  1636	                "clip_seconds": clip_seconds,
+  1637	                "summary": f"{position} beat" if kind != "talk" else "talk-only beat",
+  1638	                "camera": "held medium shot, her face in frame",
+  1639	                "partners": [],
+  1640	                "anchor": {"pose": slots.get("pose") or "as shown"},
+  1641	                "onset": {"action": "she begins the beat", "sound": "room tone"},
+  1642	                "development": {"line_topics": ["her line for the scene"], "sound": "her voice"},
+  1643	                "result": {"action": "she holds the look", "sound": "room tone", "line_topics": ["a closing line"]},
+  1644	                "end_state": {"pose": slots.get("pose") or "as shown", "motion": "still going"},
+  1645	            }
+  1646	        else:
+  1647	            schema = mode(kind)["schema"]
+  1648	            for attempt in (1, 2):
+  1649	                raw = client.chat(beat_messages(sysprompt, brief, kind, overlays), bc, seed_for(run_id, ask, 0) + attempt - 1,
+  1650	                                  cfg.get("beat_card_max_tokens", 1400),
+  1651	                                  response_format={"type": "json_schema", "json_schema": {"name": "beat_card", "schema": schema}},
+  1652	                                  purpose=f"beat_card_{attempt}")
+  1653	                try:
+  1654	                    c = parse_json(raw)
+  1655	                    errs = schema_errors(c, schema)
+  1656	                    if errs:
+  1657	                        raise ValueError("; ".join(errs[:6]))
+  1658	                    card = c
+  1659	                    break
+  1660	                except Exception as e:
+  1661	                    log("beat_card_invalid", {"run": run_id, "attempt": attempt, "error": str(e)[:300]})
+  1662	                    if debug:
+  1663	                        wp_state.atomic_write(run_dir / f"beat_card_invalid_{attempt}.txt", raw or "")
+  1664	        if card is not None and not _explicit_frames:
+  1665	            cs = card.get("clip_seconds")
+  1666	            if isinstance(cs, (int, float)) and not isinstance(cs, bool) and float(cs) > 0:
+  1667	                req_s = float(cs)
+  1668	                if kind == "talk":
+  1669	                    req_s = max(5.2, min(req_s, 8.7))
+  1670	                else:
+  1671	                    req_s = max(2.3, min(req_s, float(br.SINGLE_CLIP_MAX_FRAMES) / float(br.H3_FPS)))
+  1672	                new_frames = br.snap_h3_frames(req_s)
+  1673	                if new_frames != clip_frames:
+  1674	                    clip_frames = new_frames
+  1675	                    clip_seconds = round(clip_frames / float(br.H3_FPS), 1)
+  1676	                    speech_words_max = max(1, int(round((clip_frames / float(br.H3_FPS)) * 2.5)))
+  1677	                    max_lines_spk = max(2 if kind == "talk" else 1, int(round((clip_frames / float(br.H3_FPS)) / 5.0)))
+  1678	                    slots["frames"] = clip_frames
+  1679	                    slots["clip_seconds"] = clip_seconds
+  1680	                    slots["speech_words_max"] = speech_words_max
+  1681	                    slots["max_lines_per_speaker"] = max_lines_spk
+  1682	                    lint_cfg["speech_words_max"] = speech_words_max
+  1683	                    lint_cfg["max_lines_per_speaker"] = max_lines_spk
+  1684	                    if debug:
+  1685	                        wp_state.atomic_write(run_dir / "slots.json", json.dumps(slots, indent=2, ensure_ascii=False))
+  1686	                    brief = _build_full_brief()
+  1687	            card["clip_seconds"] = clip_seconds
+  1688	        elif card is not None:
+  1689	            card["clip_seconds"] = clip_seconds
+  1690	        s2_look = s2_look_saved or (partner_look_from_card(card, "S2") if (bodies >= 2 and "nonhuman" not in overlays) else None)
+  1691	        if bodies >= 3 and not s3_look:
+  1692	            s3_look = s3_look_from_card(card)
+  1693	        if bodies >= 3 and partner_type2_for(position, ask):
+  1694	            result["s3"] = {"look": s3_look, "still": s3_still,
+  1695	                            "mode": "still" if s3_still else ("generated" if s3_look else "faceless_default")}
+  1696	            log("s3_mode", dict(result["s3"], run=run_id))
+  1697	        _bx: List[str] = (["--s2-look", s2_look] if s2_look else []) + \
+  1698	            (["--s3-look", s3_look] if s3_look else []) + (["--partner2-still", s3_still] if s3_still else []) + \
+  1699	            (["--frames", str(int(clip_frames))] if (_explicit_frames or card is not None or kind == "talk") else []) + \
+  1700	            (["--partner-type", "non-human"] if "nonhuman" in overlays else []) + (["--s3-in-frame"] if s3_in_frame else []) + \
+  1701	            (["--shots", "multi"] if (job.get("shots") or cfg.get("shots_default", "single")) == "multi" else []) + \
+  1702	            (["--continued"] if scene_prev else []) + \
+  1703	            (["--inherited-garments", json.dumps(_inh_g, separators=(",", ":"))] if scene_prev and _inh_g else []) + \
+  1704	            (["--aspect", str(job["aspect"])] if job.get("aspect") else []) + \
+  1705	            (["--size", str(job["size"])] if job.get("size") else []) + \
+  1706	            (["--still-mode", str(job["still_mode"])] if job.get("still_mode") else []) + \
+  1707	            (["--template", str(job["template"])] if job.get("template") else [])
+  1708	        if card is None and kind == "talk":
+  1709	            # BTS/talk: never skip the beat card; use a minimal valid card and keep writing
+  1710	            card = {
+  1711	                "clip_seconds": clip_seconds,
+  1712	                "summary": "talk-only beat",
+  1713	                "camera": "held medium shot, her face in frame",
+  1714	                "partners": [],
+  1715	                "anchor": {"pose": slots.get("pose") or "as shown"},
+  1716	                "onset": {"action": "she turns toward the interviewer", "sound": "room tone"},
+  1717	                "development": {"line_topics": ["her answer about the scene", "a follow-up from her", "a last short reply"],
+  1718	                                "sound": "her voice"},
+  1719	                "result": {"action": "she holds the look", "sound": "room tone",
+  1720	                           "line_topics": ["a closing line from her"]},
+  1721	                "end_state": {"pose": slots.get("pose") or "standing as shown", "motion": "still speaking"},
+  1722	            }
+  1723	            result["warnings"].append("beat_card_fallback")
+  1724	        if card is None:
+  1725	            result["warnings"].append("beat_card_skipped")
+  1726	        else:
+  1727	            card.setdefault("clip_seconds", clip_seconds)
+  1728	            if route["act_id"] == "doggy" and isinstance(card.get("end_state"), dict):
+  1729	                place = " ".join(filter(None, [slots.get("place"), slots.get("surface"), slots.get("floor"), ask]))
+  1730	                if re.search(r"(?i)\b(?:log|sand)\b", place):
+  1731	                    card["end_state"]["pose"] = "on her knees in the sand, forearms on the log"
+  1732	            if route["act_id"] == "standing_mf" and isinstance(card.get("end_state"), dict) and \
+  1733	                    not re.search(r"(?i)\bstand", str(card["end_state"].get("pose") or "")):
+  1734	                # c8b: a rerouted doggy card still ended 'doggy, hands and knees'; the next clip inherits that pose
+  1735	                _end_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
+  1736	                card["end_state"]["pose"] = (f"standing at the edge of the {_end_surf}, bent forward at the hips, "
+  1737	                                             "forearms and chest on it, weight on both feet, (S2) standing behind her")
+  1738	            if debug:
+  1739	                wp_state.atomic_write(run_dir / "beat_card.json", json.dumps(card, indent=2, ensure_ascii=False))
+  1740	        def _materialise_writer_text(raw_text: str) -> Tuple[str, str]:
+  1741	            t = raw_text or ""
+  1742	            if re.search(r"(?im)^\s*(?:subject_definitions|summary|retention_analysis|detailed_description|integrated_multimodal_description)\s*:", t):
+  1743	                return t, wp_lint.get_dd(t)
+  1744	            dd_only = t.strip()
+  1745	            return assemble_output(dd_only, card, slots, bodies, kind), dd_only
+  1746	
+  1747	        # 4 prose x N (verbatim writer output; no clean_prose/normalize_prose rewriting)
+  1748	        n = int(job.get("n_candidates") or cfg.get("n_candidates", 1))
+  1749	        cands: Dict[str, Dict[str, Any]] = {}
+  1750	        for k in range(1, n + 1):
+  1751	            angle = LINE_ANGLES[(seed_for(run_id, ask, 50) + k) % len(LINE_ANGLES)]  # acceptance-2 b: lines differ per draft
+  1752	            raw = client.chat(prose_messages(sysprompt, brief + f"\nLINE ANGLE for this draft: {angle}", card, kind, overlays),
+  1753	                              sampler, seed_for(run_id, ask, k),
+  1754	                              cfg.get("prose_max_tokens", 1100), purpose=f"prose_{k}")
+  1755	            full, dd = _materialise_writer_text(raw)
+  1756	            if debug:
+  1757	                wp_state.atomic_write(run_dir / f"cand_{k}.txt", full)
+  1758	            lr = wp_lint.lint(full, lint_ctx, minimal=True)
+  1759	            if debug:
+  1760	                wp_state.atomic_write(run_dir / f"lint_{k}.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
+  1761	            cands[f"cand_{k}"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, k)}
+  1762	        # 6 opt-in single rewrite (--fix-once only; default off per U52)
+  1763	        fix_once = bool(job.get("fix_once"))
+  1764	        fixed_once = False
+  1765	        best_name = max(cands, key=lambda c: cands[c]["lint"]["score"])
+  1766	        if fix_once and not any(c["lint"]["pass"] for c in cands.values()):
+  1767	            notes = wp_lint.notes_for_rewrite(cands[best_name]["lint"])
+  1768	            raw = client.chat(rewrite_messages(sysprompt, brief, card, cands[best_name]["dd"], notes, kind, overlays), sampler,
+  1769	                              seed_for(run_id, ask, n + 1), cfg.get("prose_max_tokens", 1100), purpose="rewrite")
+  1770	            full, dd = _materialise_writer_text(raw)
+  1771	            if debug:
+  1772	                wp_state.atomic_write(run_dir / "rewrite.txt", full)
+  1773	            lr = wp_lint.lint(full, lint_ctx, minimal=True)
+  1774	            if debug:
+  1775	                wp_state.atomic_write(run_dir / "lint_rewrite.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
+  1776	            cands["rewrite"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 1), "notes": notes,
+  1777	                                "from": best_name}
+  1778	            fixed_once = True
+  1779	        # 7 rank and pick
+  1780	        # Max Architect 2026-11-16 (Derrick t2036u): min_ready_score is reported only; it never keeps a lint-pass draft out of the pool.
+  1781	        min_score = float(cfg.get("min_ready_score", 60))
+  1782	        passing = [c for c in cands if cands[c]["lint"]["pass"] and not cands[c]["lint"]["hard"]]
+  1783	        pool = passing or list(cands)
+  1784	        if not passing:
+  1785	            worst = cands[max(cands, key=lambda c: cands[c]["lint"]["score"])]["lint"]["hard"]
+  1786	            result["warnings"].append("lint_fail_fallback")
+  1787	            result["fallback_reasons"] = worst
+  1788	            log("lint_fail_fallback", {"run": run_id, "reasons": worst})
+  1789	        pool.sort(key=lambda c: cands[c]["lint"]["score"], reverse=True)
+  1790	        pick, judge = pool[0], None
+  1791	        chosen = cands[pick]
+  1792	        wp_state.atomic_write(run_dir / "writer_output.txt", chosen["full"])
+  1793	        # 8 build (dry); opt-in --fix-once retry on NOT_READY if not already retried
+  1794	        _id_names = [str(n) for n in ((identity or {}).get("names") or []) if str(n).strip()]
+  1795	        _q_flag = ["--queue"] if (job.get("queue") and job.get("yes_derrick")) else []
+  1796	        _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else []) + _q_flag
+  1797	        build = run_build(run_dir, ask, raw_position, still, character, extra=_bx_build)
+  1798	        builds = [build]
+  1799	        if fix_once and not fixed_once and build["status"] != "READY":
+  1800	            nr = run_dir / "clip_NOT_READY.txt"
+  1801	            if nr.exists():
+  1802	                shutil.move(str(nr), str(run_dir / "clip_NOT_READY_attempt1.txt"))
+  1803	            notes = ["the builder said: " + str(build["reason"])[:400]] + wp_lint.notes_for_rewrite(chosen["lint"], 4)
+  1804	            raw = client.chat(rewrite_messages(sysprompt, brief, card, chosen["dd"], notes, kind, overlays), sampler,
+  1805	                              seed_for(run_id, ask, n + 2), cfg.get("prose_max_tokens", 1100), purpose="rewrite_builder")
+  1806	            full, dd = _materialise_writer_text(raw)
+  1807	            lr = wp_lint.lint(full, lint_ctx, minimal=True)
+  1808	            if debug:
+  1809	                wp_state.atomic_write(run_dir / "rewrite_builder.txt", full)
+  1810	            if debug:
+  1811	                wp_state.atomic_write(run_dir / "lint_rewrite_builder.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
+  1812	            cands["rewrite_builder"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 2), "notes": notes}
+  1813	            pick, chosen = "rewrite_builder", cands["rewrite_builder"]
+  1814	            wp_state.atomic_write(run_dir / "writer_output.txt", full)
+  1815	            _id_names = [str(n) for n in ((identity or {}).get("names") or []) if str(n).strip()]
+  1816	            _bx_build = list(_bx) + (["--names", *_id_names] if _id_names else []) + _q_flag
+  1817	            build = run_build(run_dir, ask, raw_position, still, character, extra=_bx_build)
+  1818	            builds.append(build)
+  1819	        status = build["status"]
+  1820	        # acceptance-1 fix c: these hard rules block READY even when the builder passes (others fall back with a warning)
+  1821	        # PM acc3 #8: youth_hint and scale_adult always block (in code, not only config)
+  1822	        # PM acc4 #8 hard lint flags can still block READY. Max Architect 2026-11-16 (Derrick t2036u): low_score / min_ready_score
+  1823	        # is computed and reported (pick_score, optional warning) and never flips READY on its own.
+  1824	        min_score = float(cfg.get("min_ready_score", 60))
+  1825	        blocking = sorted(set(chosen["lint"]["hard"] or []))
+  1826	        if float(chosen["lint"].get("score") or 0) < min_score:
+  1827	            result["warnings"].append("low_score")
+  1828	        # Max Architect 2026-11-16 (Derrick t2070s7558 "Yes, make the checker warn-only"): lint only warns;
+  1829	        # only the 18+ safety flags still block.
+  1830	        _warn = [h for h in blocking if h not in ("youth_hint", "scale_adult")]
+  1831	        if _warn:
+  1832	            result["warnings"].append("lint_warn: " + ", ".join(_warn))
+  1833	        for _iss in chosen["lint"].get("issues") or []:
+  1834	            if _iss.get("code") == "audio_header_beta7":
+  1835	                result["warnings"].append(_iss["note"])
+  1836	        blocking = [h for h in blocking if h in ("youth_hint", "scale_adult")]
+  1837	        if status == "READY" and blocking:
+  1838	            status = "NOT_READY"
+  1839	            why = ", ".join(blocking) if blocking else "lint failed"
+  1840	            build = dict(build, reason="lint hard rule: " + why)
+  1841	            wp_state.atomic_write(run_dir / "clip_NOT_READY.txt", "NOT_READY: lint hard rule(s) block READY: " + why
+  1842	                                  + "\n" + "\n".join(i["note"] for i in chosen["lint"]["issues"] if i.get("hard") or i["code"] in blocking) + "\n")
+  1843	            result["warnings"].append("lint_blocked_ready")
+  1844	        result.update(status=status, pick=pick, pick_score=chosen["lint"]["score"], pick_pass=chosen["lint"]["pass"],
+  1845	                      pick_hard=chosen["lint"]["hard"], judge=judge, still=still, scene_id=scene_id,
+  1846	                      frames=clip_frames, clip_seconds=clip_seconds,
+  1847	                      candidates={c: {"score": v["lint"]["score"], "pass": v["lint"]["pass"], "hard": v["lint"]["hard"],
+  1848	                                      "seed": v["seed"]} for c, v in cands.items()},
+  1849	                      seeds={"beat_card": seed_for(run_id, ask, 0), **{c: v["seed"] for c, v in cands.items()}},
+  1850	                      sampler=sampler, beat_card_sampler=bc, judge_sampler=cfg.get("judge_sampler"), model=cfg["model_alias"],
+  1851	                      thinking=bool(cfg.get("thinking", False)), slots_tone=slots["tone"], line_focus=slots["line_focus"],
+  1852	                      builds=[{k: b[k] for k in ("status", "rc", "stdout", "seconds")} for b in builds],
+  1853	                      build_added=((build["report"].get("build") or {}).get("added") or []),
+  1854	                      cloned_hits=wp_lint.cloned_hits(chosen["dd"], cloned), spoken_words=chosen["lint"]["spoken_words"],
+  1855	                      llm_calls=client.calls)
+  1856	        if status == "READY" and job.get("queue"):
+  1857	            # Max Architect 2026-11-16 (Derrick t2036u, t2039u): same process, no second writer pass; queue-remote.sh keeps --yes-derrick, adults guard, pytest gate.
+  1858	            if not job.get("yes_derrick"):
+  1859	                status = "NOT_READY"
+  1860	                build = dict(build, reason="--queue requires --yes-derrick after Derrick approved this prompt; nothing queued")
+  1861	                result["warnings"].append("queue_refused_no_yes")
+  1862	            else:
+  1863	                qsh = Path.home() / "AI" / "render" / "x3" / "queue-remote.sh"
+  1864	                try:
+  1865	                    qp = subprocess.run(["bash", str(qsh), str(run_dir), "--yes-derrick"],
+  1866	                                        capture_output=True, text=True, timeout=180)
+  1867	                    result["submitted"] = qp.returncode == 0
+  1868	                    result["queue_rc"] = qp.returncode
+  1869	                    result["queue_stdout"] = (qp.stdout or "")[-400:]
+  1870	                    if qp.returncode not in (0, 7):
+  1871	                        status = "NOT_READY"
+  1872	                        build = dict(build, reason=f"queue-remote.sh rc={qp.returncode}; nothing confirmed queued")
+  1873	                    elif qp.returncode == 7:
+  1874	                        result["gpu_busy"] = True
+  1875	                        result["warnings"].append("gpu_busy")
+  1876	                except subprocess.TimeoutExpired:
+  1877	                    status = "NOT_READY"
+  1878	                    build = dict(build, reason="queue-remote.sh did not return within 180 s; not confirmed queued")
+  1879	        if status != "READY":
+  1880	            result["not_ready_reason"] = build["reason"]
+  1881	            log("clip_not_ready", {"run": run_id, "reason": str(build["reason"])[:500]})
+  1882	        else:
+  1883	            # 9 self-maintenance on READY
+  1884	            kl = kept_lines(chosen["full"], build["report"])
+  1885	            wp_state.update_blacklist(bl_path, kl, run_id, int(cfg.get("blacklist_cap", 20)), log)
+  1886	            wp_state.append_recent(recent_path, run_id, chosen["dd"])
+  1887	            wp_state.atomic_write(state_dir / "last_tone.txt", slots["tone"])
+  1888	            result["kept_lines"] = kl
+  1889	            if scene_id:
+  1890	                es = dict((card or {}).get("end_state") or {})
+  1891	                bstate = (build["report"].get("build") or {}).get("state") or {}
+  1892	                garments = dict(bstate.get("garments") or {})
+  1893	                for g in bstate.get("writer_aside") or []:
+  1894	                    garments[g] = "aside"
+  1895	                for g in (bstate.get("writer_removed") or []) + (bstate.get("builder_removed") or []):
+  1896	                    garments[g] = "off"
+  1897	                prev_done = (scene_prev or {}).get("done_actions") or []
+  1898	                onset = (card or {}).get("onset") or {}
+  1899	                done = prev_done + [v for k, v in onset.items() if k in ("exit", "clearance", "entry", "action") and v]
+  1900	                entry = {"clip_id": run_id, "run_dir": str(run_dir), "still": still, "primary_beat": ((card or {}).get("development") or {}).get("primary_motion") or (card or {}).get("summary"),
+  1901	                         "opening_state": (scene_prev or {}).get("ending_state") or {"pose": slots["pose"], "garments": {g: "on" for g in slots["garments_all"]},
+  1902	                                                                                     "contact": None, "camera": slots.get("framing"), "pov": False},
+  1903	                         "ending_state": {"pose": str(es.get("pose") or "").strip() or slots.get("pose") or ((card or {}).get("anchor") or {}).get("pose") or "as shown",
+  1904	                                          "garments": garments, "contact": es.get("contact"),
+  1905	                                          "camera": es.get("camera"), "pov": bool(es.get("pov"))},
+  1906	                         "anchors": {"identity": character, "wardrobe": slots["garments_all"], "location": slots["place"],
+  1907	                                     "prop": slots["props"], "prop_hand": es.get("prop_hand")},
+  1908	                         "camera": "continuity", "spoken_dialogue": kl,
+  1909	                         "ambient_sfx": [((card or {}).get(p) or {}).get("sound") for p in ("anchor", "onset", "development", "result") if ((card or {}).get(p) or {}).get("sound")],
+  1910	                         "frame_budget": (build["report"].get("frames") or clip_frames),
+  1911	                         "method": "planned cut", "done_actions": done, "ts": wp_state.now_ct(),
+  1912	                         "s3_look": s3_look, "s3_still": s3_still,
+  1913	                         "s2_look": s2_look_saved or partner_look_from_card(card, "S2")}
+  1914	                wp_state.append_scene(sp, scene_id, entry)
+  1915	                result["scene_state"] = str(sp)
+  1916	    except _Stop:
+  1917	        log("hard_stop", {"run": run_id, "reason": result.get("not_ready_reason")})
+  1918	    except WriterDown as e:
+  1919	        result.update(status="writer_down", error=str(e), llm_calls=client.calls)
+  1920	        log("writer_down", {"run": run_id, "error": str(e)})
+  1921	    except Exception as e:
+  1922	        tb = traceback.format_exc()
+  1923	        result.update(status="error", error=f"{type(e).__name__}: {e}", traceback=tb[-3000:], llm_calls=client.calls)
+  1924	        log("clip_exception", {"run": run_id, "traceback": tb[-3000:]})
+  1925	    result["seconds"] = round(time.time() - t_start, 1)
+  1926	    result["llm_seconds"] = round(sum(c.get("seconds") or 0 for c in client.calls), 1)
+  1927	    result["at"] = wp_state.now_ct()
+  1928	    wp_state.atomic_write(run_dir / "pick.json", json.dumps(result, indent=2, ensure_ascii=False, default=str))
+  1929	    log("clip_done", {"run": run_id, "status": result["status"], "seconds": result["seconds"], "pick": result.get("pick"),
+  1930	                      "warnings": result["warnings"]})
+  1931	    return result
+  1932	
+  1933	
+  1934	def summary_line(r: Dict[str, Any]) -> str:
+  1935	    st = r.get("status")
+  1936	    extra = f"reason={str(r.get('not_ready_reason') or r.get('error') or '')[:300]}" if st != "READY" else \
+  1937	        (f"pick={r.get('pick')} score={r.get('pick_score')} spoken_words={r.get('spoken_words')}"
+  1938	         + (f" submitted={r.get('submitted')}" if "submitted" in r else "")
+  1939	         + (f" lint_fail={r.get('pick_hard')}" if r.get("pick_hard") else ""))
+  1940	    return (f"{st} run={r.get('run_dir')} {extra} warnings={r.get('warnings')} seconds={r.get('seconds')} "
+  1941	            f"pick_json={Path(r.get('run_dir', '.')) / 'pick.json'} queued={bool(r.get('submitted'))}")
+  1942	
+  1943	
+  1944	def main(argv=None) -> int:
+  1945	    ap = argparse.ArgumentParser(prog="render_writer_pipeline.py",
+  1946	                                 description="Render writer pipeline. After Derrick's yes, --queue --yes-derrick writes and queues in one pass.")
+  1947	    ap.add_argument("--queue", action="store_true", help="After a READY write, queue on AlienPc (requires --yes-derrick)")
+  1948	    ap.add_argument("--yes-derrick", action="store_true", help="Max Architect 2026-11-16 (Derrick t2036u, t2039u): required with --queue")
+  1949	    ap.add_argument("run_dir", nargs="?")
+  1950	    ap.add_argument("--ask")
+  1951	    ap.add_argument("--position")
+  1952	    ap.add_argument("--still", default=None, help="start still path (required), or auto (pool pick + vision read)")
+  1953	    ap.add_argument("--still-read", help="existing still_read.json to copy into the run dir")
+  1954	    ap.add_argument("--character", default=None)
+  1955	    ap.add_argument("--actor", default=None)
+  1956	    ap.add_argument("--names", nargs="+", default=None, help="character/celebrity names for parody identity + RefMod")
+  1957	    ap.add_argument("--scene", help="scene id for a multi-clip scene (scene_state.json)")
+  1958	    ap.add_argument("--continue", dest="cont", help="previous run dir this clip continues")
+  1959	    ap.add_argument("--partner2-still", help="MMF: (S3) reference still (ComfyUI input path, e.g. community/x.jpg)")
+  1960	    ap.add_argument("--frames", type=int, help="optional frame cap for VRAM (two reference stills)")
+  1961	    ap.add_argument("--aspect", default=None, help="9:16 (default), 16:9, 1:1, 4:3, 3:4, portrait, landscape, widescreen, square, or auto")
+  1962	    ap.add_argument("--size", default=None, help="Explicit canvas WxH (multiples of 32, 256..2048)")
+  1963	    ap.add_argument("--template", default=None, choices=list(fr.TEMPLATES), help="Optional explicit template override")
+  1964	    ap.add_argument("--still-mode", default=None, choices=list(br.STILL_MODES),
+  1965	                    help="How start still is wired: guide (default frame-0 AddGuide) or ref (un-resized c0 reference, not frame-0 pinned)")
+  1966	    ap.add_argument("--shots", choices=["single", "multi"], help="B1: multi keeps the writer's [Shot N] cuts (default single)")
+  1967	    ap.add_argument("--shot-count", type=int, default=1, help="B1: shots in a multi clip")
+  1968	    ap.add_argument("--batch", help="JSONL of jobs {run_dir, ask, position, still, still_read, character, scene, continue}")
+  1969	    ap.add_argument("--config", default=str(CONFIG_PATH))
+  1970	    ap.add_argument("--n-candidates", type=int, default=None, help="A/B test flag: number of prose candidates (default 1)")
+  1971	    ap.add_argument("--debug", action="store_true", help="Write debug per-run files (cand_*, lint_*, slots.json, route.json, beat_card*)")
+  1972	    ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
+  1973	    a = ap.parse_args(argv)
+  1974	    if a.queue and not a.yes_derrick:
+  1975	        print("NOT_READY --queue requires --yes-derrick after Derrick approved this prompt")
+  1976	        return 3
+  1977	    cfg = load_config(Path(a.config))
+  1978	    log = wp_state.Log(PIPE_DIR / "logs", int(cfg.get("log_retention_days", 14)), int(cfg.get("log_cap_mb", 50)))
+  1979	    moved = wp_state.archive_old_scenes(RUNS_ROOT, int(cfg.get("scene_archive_days", 30)))
+  1980	    if moved:
+  1981	        log("scenes_archived", {"scenes": moved})
+  1982	    ov = {}
+  1983	    jobs: List[Dict[str, Any]] = []
+  1984	    if a.batch:
+  1985	        for ln in Path(a.batch).read_text(encoding="utf-8").splitlines():
+  1986	            if ln.strip():
+  1987	                jobs.append(json.loads(ln))
+  1988	    else:
+  1989	        if not (a.run_dir and a.ask and a.position):
+  1990	            print("NOT_READY usage: render_writer_pipeline.py <run_dir> --ask \"...\" --position <act> --still <path|auto> --character FCSydny")
+  1991	            return 3
+  1992	        if not Path(a.run_dir).is_absolute():
+  1993	            print(f"NOT_READY run_dir must be an absolute path: {a.run_dir}")
+  1994	            return 3
+  1995	        if a.cont and not Path(a.cont).is_absolute():
+  1996	            print(f"NOT_READY --continue must be an absolute path: {a.cont}")
+  1997	            return 3
+  1998	        jobs.append({"run_dir": a.run_dir, "ask": a.ask, "position": a.position, "still": a.still, "still_read": a.still_read,
+  1999	                     "character": a.character, "actor": a.actor, "names": a.names, "scene": a.scene, "continue": a.cont,
+  2000	                     "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
+  2001	                     "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode, "template": a.template,
+  2002	                     "n_candidates": a.n_candidates, "debug": bool(a.debug), "fix_once": bool(a.fix_once),
+  2003	                     "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
+  2004	    results = []
+  2005	    for job in jobs:  # one failing clip never blocks the next
+  2006	        r = run_clip(job, cfg, log, ov)
+  2007	        results.append(r)
+  2008	        print(summary_line(r), flush=True)
+  2009	    return 0 if all(r.get("status") == "READY" for r in results) else 3
+  2010	
+  2011	
+  2012	if __name__ == "__main__":
+  2013	    sys.exit(main())

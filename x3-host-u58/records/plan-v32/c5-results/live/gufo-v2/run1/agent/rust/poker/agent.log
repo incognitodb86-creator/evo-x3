@@ -1,0 +1,5 @@
+All 37 tests pass. The implementation:
+
+- **`parse_card`** — parses cards like `10H`, `AS`, `2S` into rank (2–14) + suit.
+- **`score`** — returns `(category, tiebreak_ranks)`, where category ranks high card (0) through straight flush (8). Handles the wheel (A-5-4-3-2 as a 5-high straight); suits never break ties, per poker rules.
+- **`winning_hands`** — scores each hand, keeps the maximum, and returns all hands tied with the best score (as the original string references).

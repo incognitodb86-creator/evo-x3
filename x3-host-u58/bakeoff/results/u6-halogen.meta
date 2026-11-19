@@ -1,0 +1,10 @@
+=== u6-halogen start 2026-11-15 10:00:48 CST
+CMD: sudo podman run --rm --name bake-arm -p 127.0.0.1:8790:8731 --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1 -e HALOGEN_REASONING_EFFORT=low -e HALOGEN_CTX=32768 -v /srv/bakeoff/halogen-models:/models:ro ghcr.io/peonist-ai/halogen-flash-server@sha256:70445bcf7acff8f1fe11396a97b866ed30dca31caf5fac62049127658080e07f
+LOAD_S 60 up=1
+long {"ttft_s": 9.24, "total_s": 10.46, "prompt_tokens": 18253, "completion_tokens": 102, "client_decode_tps": 84.03, "finish": "stop", "pass": true}
+code {"ttft_s": 0.27, "total_s": 2.84, "prompt_tokens": 141, "completion_tokens": 210, "client_decode_tps": 81.6, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.17, "total_s": 9.85, "prompt_tokens": 59, "completion_tokens": 591, "client_decode_tps": 61.03, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124          21           0           0         104         103
+=== u6-halogen end 2026-11-15 10:02:15 CST

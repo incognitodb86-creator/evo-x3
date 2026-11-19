@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_b_w7_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.8,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, white linens, and lighting remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde woman in lingerie and the shirtless man are consistently present throughout the sequence."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image's pose, framing, and clothing perfectly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Image 3 shows a side-lying position, not the required missionary position (one on back, one on top)."
+  },
+  "anatomy_defect": {
+   "answer": "yes",
+   "reason": "In Image 3, the man's arm and hand appear fused with the woman's leg/hip area."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0014,
+  "same_people": 0.033,
+  "start_kept": 0.0082,
+  "target_reached": 0.9843,
+  "anatomy_defect": 0.6438
+ },
+ "flags": [
+  "target_reached",
+  "anatomy_defect"
+ ]
+}

@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background matches START IMAGE: beige headboard, white rumpled sheets, same lighting and room layout in all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical subjects: blonde woman in white lace, brown-haired man with lean musculature, same skin tones and body types across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose: woman on back with raised leg, man kneeling, same framing and composition."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows missionary position: man on top, pelvis pressed to woman's abdomen, genitals visibly engaged in thrusting motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals/hands visible in any frame or Image 3; anatomy consistent and detailed."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0003,
+  "same_people": 0.0,
+  "start_kept": 0.0091,
+  "target_reached": 0.0013,
+  "anatomy_defect": 0.0027
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w2_img_gi102_missionary_s51170001_wf2"
+}

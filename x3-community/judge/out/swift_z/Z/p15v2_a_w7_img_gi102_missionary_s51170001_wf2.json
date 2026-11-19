@@ -1,0 +1,53 @@
+{
+ "frames": [
+  10,
+  68
+ ],
+ "diffs": [
+  62.46,
+  13.04
+ ],
+ "per_frame": [
+  {
+   "frame": 10,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "The background changed completely from a bedroom with white bedding to a dark, rocky cave environment."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The man's head is cropped out in Image 2, and the woman's arm structure appears distorted near her shoulder."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.9998,
+    "anatomy_defect": 0.4019
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 68,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "The background changed completely from a bedroom with white bedding to a dark cave setting."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The man's head is missing in Image 2, and the woman's arms appear fused into an unnatural shape."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.9999,
+    "anatomy_defect": 0.5091
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w7_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.0
+}

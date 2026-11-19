@@ -1,0 +1,53 @@
+{
+ "frames": [
+  4,
+  288
+ ],
+ "diffs": [
+  41.01,
+  10.21
+ ],
+ "per_frame": [
+  {
+   "frame": 4,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Both images feature the same cave environment with consistent rock textures, lighting, and character costumes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The anatomy in Image 2 is coherent; limbs are distinct, hands are formed correctly, and there are no fused bodies or missing parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.424,
+    "anatomy_defect": 0.4849
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 288,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background features the same rocky cave walls, lighting conditions, and overall environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "Image 2 shows a malformed green object between the legs that resembles an extra testicle or fused anatomy."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.1674,
+    "anatomy_defect": 0.821
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w7_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.1
+}

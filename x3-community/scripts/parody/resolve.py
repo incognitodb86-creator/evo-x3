@@ -187,18 +187,32 @@ def load_aliases(aliases_path: Optional[Path]) -> Dict[str, str]:
     return {}
 
 
-def find_refmods_for_name(norm_name: str, refmods_dir: Path) -> List[Path]:
-    """Find local .safetensors RefMod files matching normalized name."""
-    matches: List[Path] = []
-    if not refmods_dir.is_dir():
-        return matches
+_REFMOD_SUBJECT_RE = re.compile(r"^minimaxh3_(?:oc_)?(.+?)_v\d+(?:_|$)")
 
-    for f in refmods_dir.glob("*.safetensors"):
+
+def find_refmods_for_name(norm_name: str, refmods_dir: Path) -> List[Path]:
+    """Find local .safetensors RefMod files matching a normalized name.
+
+    A file matches exactly when the name equals a leading run of its underscore tokens, so "testachar" keeps both
+    minimaxh3_testachar_v1_refmod and the variant minimaxh3_testachar_alt_v1_refmod (KD17 stacking), and
+    "gabrielleaplin" matches minimaxh3_gabrielle_aplin_v1_refmod, while a short name like "ava" never matches
+    "avaaddams". Substring matching is only a fallback for names of 6+ characters when nothing matched exactly.
+    """
+    exact: List[Path] = []
+    partial: List[Path] = []
+    if not norm_name or not refmods_dir.is_dir():
+        return exact
+
+    for f in sorted(refmods_dir.glob("*.safetensors")):
         fname_norm = _normalize_key(f.stem)
-        # Check if name is part of filename, e.g. "emiliaclarke" in "minimaxh3_emiliaclarke_v1_refmod"
-        if norm_name in fname_norm:
-            matches.append(f)
-    return matches
+        m = _REFMOD_SUBJECT_RE.match(f.stem.lower())
+        tokens = [_normalize_key(t) for t in m.group(1).split("_")] if m else []
+        prefixes = {"".join(tokens[:k]) for k in range(1, len(tokens) + 1)}
+        if norm_name in prefixes or fname_norm == norm_name:
+            exact.append(f)
+        elif len(norm_name) >= 6 and norm_name in ("".join(tokens) or fname_norm):
+            partial.append(f)
+    return exact if exact else partial
 
 
 def validate_stills(stills: List[str], approved_dir: Optional[Path]) -> List[str]:
@@ -324,21 +338,28 @@ def resolve_identities(
             if resolved_actor not in [ec[0] for ec in expanded_candidates]:
                 expanded_candidates.append((resolved_actor, "actor"))
 
-    # 3. Match against INDEX rows
-    matched_index_rows: List[Dict[str, Any]] = []
+    # 3. Match against INDEX rows (exact matches sort ahead of substring matches so "Fox" / "Megan Fox" never picks "Jamie Foxx" first)
+    exact_index_rows: List[Dict[str, Any]] = []
+    partial_index_rows: List[Dict[str, Any]] = []
     for c_name, role in expanded_candidates:
         norm_c = _normalize_key(c_name)
+        if not norm_c:
+            continue
         for r in index_rows:
             norm_char = _normalize_key(r["character"])
             norm_act = _normalize_key(r["actor"])
-            if norm_c == norm_char or norm_c == norm_act or norm_c in norm_char or norm_c in norm_act:
-                if r not in matched_index_rows:
-                    matched_index_rows.append(r)
+            is_exact = (norm_c == norm_char or norm_c == norm_act)
+            is_sub = (not is_exact and len(norm_c) >= 5 and (norm_c in norm_char or norm_c in norm_act))
+            if is_exact or is_sub:
+                bucket = exact_index_rows if is_exact else partial_index_rows
+                if r not in exact_index_rows and r not in partial_index_rows:
+                    bucket.append(r)
                     # If matched character, also add its actor if not present
                     if r["actor"] and r["actor"] != r["character"]:
                         actor_cand = (r["actor"], "actor")
                         if actor_cand not in expanded_candidates:
                             expanded_candidates.append(actor_cand)
+    matched_index_rows: List[Dict[str, Any]] = exact_index_rows + [r for r in partial_index_rows if r not in exact_index_rows]
 
     # Determine overall INDEX status
     # Priority: if a character is explicitly requested and matched in index, its status governs.
@@ -549,8 +570,15 @@ def _still_path_parts(still_image: Optional[str]) -> List[str]:
     if not still_image:
         return []
     rel = _norm_fs(still_image)
-    for root in _STILL_LIBRARY_ROOTS:
-        prefix = _norm_fs(str(root)).rstrip("/") + "/"
+    roots = [
+        *(str(r) for r in _STILL_LIBRARY_ROOTS),
+        "/home/evo/ai/render/stills/approved_characters",
+        "/home/evo/ai/5slock/libraries",
+        "/home/derekboone/ai/render/stills/approved_characters",
+        "/home/derekboone/ai/5slock/libraries",
+    ]
+    for root in roots:
+        prefix = _norm_fs(root).rstrip("/") + "/"
         if rel.startswith(prefix):
             rel = rel[len(prefix):]
             break
@@ -640,21 +668,42 @@ def pixlstash_character_names_for_still(still_image: Optional[str]) -> List[str]
         candidates.add(_norm_fs(rel))
     names: List[str] = []
     import sqlite3
+    base_name = Path(_norm_fs(still_image)).name.lower()
+    rel_low = rel.lower()
     for vault in _PIXLSTASH_VAULTS:
         if not vault.is_file():
             continue
         try:
             con = sqlite3.connect("file:%s?mode=ro" % vault.as_posix(), uri=True)
             cur = con.cursor()
-            rows = cur.execute(
-                """
-                SELECT c.name, p.file_path
-                FROM face f
-                JOIN character c ON c.id = f.character_id
-                JOIN picture p ON p.id = f.picture_id
-                WHERE f.character_id IS NOT NULL
-                """
-            ).fetchall()
+            if rel_low and base_name:
+                rows = cur.execute(
+                    """
+                    SELECT c.name, p.file_path
+                    FROM face f
+                    JOIN character c ON c.id = f.character_id
+                    JOIN picture p ON p.id = f.picture_id
+                    WHERE f.character_id IS NOT NULL
+                      AND (LOWER(REPLACE(p.file_path, char(92), '/')) = ?
+                           OR LOWER(REPLACE(p.file_path, char(92), '/')) LIKE ?
+                           OR LOWER(p.file_path) LIKE ?)
+                    """,
+                    (rel_low, "%/" + rel_low, "%" + base_name),
+                ).fetchall()
+            elif base_name:
+                rows = cur.execute(
+                    """
+                    SELECT c.name, p.file_path
+                    FROM face f
+                    JOIN character c ON c.id = f.character_id
+                    JOIN picture p ON p.id = f.picture_id
+                    WHERE f.character_id IS NOT NULL
+                      AND (p.file_path = ? OR LOWER(p.file_path) LIKE ?)
+                    """,
+                    (rel, "%" + base_name),
+                ).fetchall()
+            else:
+                rows = []
             con.close()
         except Exception:
             continue

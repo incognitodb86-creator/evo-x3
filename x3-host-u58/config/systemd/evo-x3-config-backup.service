@@ -1,0 +1,5 @@
+[Unit]
+Description=EVO-X3 local config backup (root-only)
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/evo-x3-config-backup

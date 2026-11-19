@@ -1,0 +1,18 @@
+subject_definitions:
+<Picture 1> is the first frame of [Shot 1], showing a flat, minimalist sunset beach scene with a gradient sky transitioning from deep purple to warm orange, a pale yellow sun half-submerged on the horizon, a dark blue ocean band with a striped reflection, and a tan sand foreground.
+
+summary:
+[keyframe completion] The target video begins from <Picture 1> and shows a woman walking along the beach at sunset. The minimalist flat-design style of the reference image is preserved throughout, with the woman entering the frame and walking toward the right as the sun sinks lower.
+
+retention_analysis:
+<Picture 1> ([Shot 1] first frame): fully_preserved - the gradient sky, half-submerged sun, striped ocean reflection, and tan sand foreground are retained as the opening composition.
+
+detailed_description:
+The target video uses a flat, minimalist illustration style with clean geometric shapes and a warm sunset palette.
+[Shot 1] The video opens on <Picture 1>, the minimalist sunset beach scene with a gradient sky shifting from deep purple at the top through warm orange to a pale yellow sun half-submerged on the horizon, a dark blue ocean band with a striped reflection beneath the sun, and a tan sand foreground. A woman with long dark hair, wearing a flowing white dress, enters the frame from the left edge and walks steadily toward the right along the sand. Her silhouette is simple and stylized, matching the flat design of the scene. The camera remains static, holding the wide composition as she crosses the lower third of the frame. The sun sinks slightly lower, and the striped reflection on the water shifts subtly. Her dress sways gently with each step, and her hair trails behind her in the evening breeze. The scene maintains its serene, quiet atmosphere as she continues walking toward the right edge of the frame.
+
+overall_soundscape:
+Gentle ocean waves lapping softly against the shore continue throughout the video, with a faint breeze audible.
+
+non_diegetic_music:
+N/A

@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_b_w7_img_gi201_against_wall_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background cave environment and lighting identical across all frames and start image."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc man with matching features, clothing, and skin tones in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches start image pose, framing, and composition without jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in target pose, in contact, with act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals/hands visible in any frame."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "The two frames are identical, showing no fusion defects. The elf woman's anatomy is intact with clear limbs, head, torso, and genitalia. The green-skinned orc's anatomy is also intact with clear limbs"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0018,
+  "target_reached": 0.444,
+  "anatomy_defect": 0.0022,
+  "anatomy_zoom": 0.0018
+ },
+ "flags": []
+}

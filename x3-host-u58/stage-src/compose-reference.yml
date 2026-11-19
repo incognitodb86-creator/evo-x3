@@ -1,0 +1,56 @@
+# Documentation Reference Only — Live Fedora units use Podman Quadlets in config/quadlets/
+# Brief rev 5 (A1): "Runtime on the EVO is Podman + quadlets/systemd, as in the plan — not Windows Docker.
+# A compose file may exist as documentation, but the live units are quadlets."
+
+services:
+  gufo-engine:
+    # Pin exact SHA256 digest on Fedora before running:
+    # image: ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:PIN_DIGEST_AT_BUILD_TIME
+    image: ghcr.io/gufo-org/toolboxes/gufo-runtime:PIN_DIGEST_AT_BUILD_TIME
+    network_mode: host
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    volumes:
+      - /srv/models:/srv/models:ro,Z
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=11.5.1
+    command:
+      - "--host"
+      - "127.0.0.1"
+      - "--port"
+      - "8081"
+      - "--no-mmap"
+      - "--flash-attn"
+      - "--cache-type-k"
+      - "q8_0"
+      - "--cache-type-v"
+      - "q8_0"
+      - "--parallel"
+      - "2"
+    restart: always
+
+  playwright-mcp:
+    # Pin exact SHA256 digest on Fedora before running:
+    image: mcr.microsoft.com/playwright/mcp:PIN_DIGEST_AT_BUILD_TIME
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 4g
+    cpus: "2.0"
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=1g
+    ports:
+      - "127.0.0.1:8931:8931"
+    command:
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8931"
+      - "--isolated"
+      - "--allowed-hosts"
+      - "EVO_SERVE_NAME_AT_BUILD_TIME"
+    restart: always

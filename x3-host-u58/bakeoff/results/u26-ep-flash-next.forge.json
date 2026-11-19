@@ -1,0 +1,15 @@
+{
+ "pass": true,
+ "elapsed_s": 24.9,
+ "usage": {
+  "prompt_tokens": 181,
+  "completion_tokens": 2021,
+  "total_tokens": 2202,
+  "completion_tokens_details": {
+   "reasoning_tokens": 1562
+  }
+ },
+ "finish": "stop",
+ "err": "",
+ "code": "import time\nfrom collections import OrderedDict\n\n\nclass TTLCache:\n    def __init__(self, capacity: int, ttl: float, clock=time.monotonic):\n        if capacity < 1:\n            raise ValueError(\"capacity must be at least 1\")\n        if ttl <= 0:\n            raise ValueError(\"ttl must be positive\")\n        self._capacity = capacity\n        self._ttl = ttl\n        self._clock = clock\n        self._store: OrderedDict = OrderedDict()  # key -> (value, set_time)\n\n    def _is_expired(self, set_time: float) -> bool:\n        return self._clock() - set_time >= self._ttl\n\n    def get(self, key, default=None):\n        if key not in self._store:\n            return default\n        value, set_time = self._store[key]\n        if self._is_expired(set_time):\n            return default\n        self._store.move_to_end(key)\n        return value\n\n    def set(self, key, value):\n        now = self._clock()\n        self._store[key] = (value, now)\n        self._store.move_to_end(key)\n        if len(self._store) > self._capacity:\n            # Drop all expired entries first\n            expired = [k for k, (_, t) in self._store.items() if self._is_expired(t)]\n            for k in expired:\n                del self._store[k]\n            # Evict LRU entries if still over capacity\n            while len(self._store) > self._capacity:\n                self._store.popitem(last=False)\n\n    def __len__(self) -> int:\n        now = self._clock()\n        return sum(1 for (_, t) in self._store.values() if now - t < self._ttl)\n\n    def delete(self, key) -> bool:\n        if key not in self._store:\n            return False\n        _, set_time = self._store[key]\n        if self._is_expired(set_time):\n            return False\n        del self._store[key]\n        return True\n"
+}

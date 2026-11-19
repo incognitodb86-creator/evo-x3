@@ -1,0 +1,18 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+Downloading `Llama-Joycaption-Beta-One-Hf-Llava-Q8_0.gguf` and `llama-joycaption-beta-one-llava-mmproj-model-f16.gguf` from `concedo/llama-joycaption-beta-one-hf-llava-mmproj-gguf` into `/srv/models/joycaption/` (no pre-existing AlienPc copy/share/ssh/Taildrop access path was available without new credentials).
+
+Completed so far while waiting on the download:
+- Backed up `/etc/evo-x3/llama-swap.yaml` to `/etc/evo-x3/llama-swap.yaml.bak-20261116-u47-pre`.
+- Created `/home/evo/AI/pixlstash-tagging/joycaption_compare.py` (owned by `evo:evo`, mode `0750`), verified `py_compile`, and ran `--dry-run` (`pictures_found: 0`).
+
+Waiting for the model download task to finish before verifying checksums and proceeding (and waiting for `U46-RESULT.md` before restarting `llama-swap`).
+JoyCaption model files are downloaded, verified against HF LFS sizes and SHA256 hashes, and recorded in `/srv/models/SHA256SUMS`. `/etc/evo-x3/llama-swap.yaml` has been updated and validated (`config is valid: 6 model(s), 0 peer(s)`).
+
+Waiting for `/home/derekboone/evo-x3/records/U46-RESULT.md` before restarting `llama-swap` (polling every 2 minutes via timer).
+`U46-RESULT.md` is not present yet (U46 is waiting for `index_backfill.py` to finish). Waiting another 2 minutes before checking again.
+`U46-RESULT.md` is not present yet. Waiting another 2 minutes before checking again.
+`U46-RESULT.md` is not present yet. Waiting another 2 minutes before checking again.
+`U46-RESULT.md` is not present yet (U46 is running throttled `index_backfill.py` after `u42-pixlstash-tagger.service` was paused). Waiting another 2 minutes before checking again.
+error: interrupted
+Max 13:31:19: stopped U47 agy before its llama-swap restart so Render FCSydny test is not killed mid-write; Max finishes restart+smoke after Render queues (Derrick t1994u: add Gemma slots in same restart).

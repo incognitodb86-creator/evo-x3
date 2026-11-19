@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly PixlStash tagging timer (plan-v32 P2.3 / P4.6)
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

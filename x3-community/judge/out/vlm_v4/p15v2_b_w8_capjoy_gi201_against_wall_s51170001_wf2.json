@@ -1,0 +1,45 @@
+{
+ "tag": "p15v2_b_w8_capjoy_gi201_against_wall_s51170001_wf2",
+ "secs": 6.8,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show consistent dark cave with rough stone walls, matching START IMAGE background."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames, matching START IMAGE appearance and proportions."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows orc releasing wrists, not same pose as START IMAGE's raised arms."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows elf pressed against wall, orc behind her, genitals visibly engaged in thrust."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The green-skinned orc has a muscular torso, arms, and legs with no fusion or melting. The elf has normal limbs, head, and genitalia. Their bodies,"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.9547,
+  "target_reached": 0.0008,
+  "anatomy_defect": 0.0003,
+  "anatomy_zoom": 0.0011
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

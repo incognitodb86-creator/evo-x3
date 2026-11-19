@@ -1,0 +1,12 @@
+{
+ "run": "ali163_tr5s10p_gi102_s51170001",
+ "attempt": 0,
+ "label": "METHOD_ONLY",
+ "plan": "ALI-147",
+ "tag": "ali163_tr5s10p_gi102_s51170001",
+ "secs": 240.1,
+ "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali163_tr5s10p_gi102_s51170001\\ali163_tr5s10p_gi102_s51170001_00001_.mp4",
+ "file": "C:/AI/community/runs/ali163_tr5s10p_gi102_s51170001\\ali163_tr5s10p_gi102_s51170001.mp4",
+ "prompt_id": "238802bb-4674-4f08-a585-fdf784adac6b",
+ "finished": "2026-10-26 14:02 CT"
+}

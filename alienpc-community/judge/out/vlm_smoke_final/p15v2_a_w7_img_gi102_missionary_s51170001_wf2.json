@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_a_w7_img_gi102_missionary_s51170001_wf2",
+ "secs": 10.5,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "no",
+   "reason": "Frame 1 shows bed, frames 2-8 show cave. Background changed."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same two individuals, matching hair, body, attire across all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 is bed scene; frame 2 jumps to cave scene with different background."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Image 3 shows woman on hands and knees, man behind her, not missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 1.0,
+  "same_people": 0.002,
+  "start_kept": 0.9999,
+  "target_reached": 0.9377,
+  "anatomy_defect": 0.0118
+ },
+ "flags": [
+  "same_scene",
+  "start_kept",
+  "target_reached"
+ ]
+}

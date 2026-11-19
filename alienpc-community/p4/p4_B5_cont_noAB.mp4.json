@@ -1,0 +1,18 @@
+{
+ "phase": "P4",
+ "w": 576,
+ "h": 1024,
+ "steps": 8,
+ "seed": 51060000,
+ "vsa": true,
+ "shift": "10/3",
+ "sampler": "euler/simple",
+ "antiburn": null,
+ "chunks": 4,
+ "tag": "p4_B5_cont_noAB",
+ "secs": 340.5,
+ "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\p4_00003_.mp4",
+ "file": "C:\\AI\\community\\p4\\p4_B5_cont_noAB.mp4",
+ "prompt_id": "00a48c32-6a08-4afe-9ff6-45224f72d498",
+ "finished": "2026-10-20 11:06 CT"
+}

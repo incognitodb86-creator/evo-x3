@@ -35,12 +35,22 @@ class T(unittest.TestCase):
     def test_lock_is_exclusive_and_released(self):
         with mock.patch.object(rc, "LOCK", os.path.join(self.d, "locks", "gpu.lock")):
             self.assertEqual(rc.lock_acquire("t")[0], 0)
-            import fcntl
-            fh = open(rc.LOCK, "a+")
-            with self.assertRaises(BlockingIOError):
-                fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            rc.lock_release()
-            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB); fh.close()
+            if rc.fcntl is not None:
+                fh = open(rc.LOCK, "a+")
+                with self.assertRaises(BlockingIOError):
+                    rc.fcntl.flock(fh, rc.fcntl.LOCK_EX | rc.fcntl.LOCK_NB)
+                rc.lock_release()
+                rc.fcntl.flock(fh, rc.fcntl.LOCK_EX | rc.fcntl.LOCK_NB); fh.close()
+            else:
+                saved_fh = rc._lock_fh
+                try:
+                    rc._lock_fh = None
+                    self.assertEqual(rc.lock_acquire("t2")[0], 1)
+                finally:
+                    rc._lock_fh = saved_fh
+                rc.lock_release()
+                self.assertEqual(rc.lock_acquire("t3")[0], 0)
+                rc.lock_release()
 
     def test_enable_routes_submit_through_uploads_and_fetch_through_view(self):
         rq = importlib.import_module("run_queue")
@@ -64,6 +74,22 @@ class T(unittest.TestCase):
             side = rq.comm.fetch("p1", "clip", {}, outdir, 0)
         self.assertEqual(side["file"], os.path.join(outdir, "clip.mp4"))
         self.assertTrue(os.path.isfile(side["file"] + ".json"))
+
+    def test_detach_forwards_rq_env_to_systemd_unit(self):
+        rq = importlib.import_module("run_queue")
+        for m in (rq, rq.comm, rq.rgj):
+            saved = dict(vars(m)); self.addCleanup(lambda m=m, s=saved: (vars(m).clear(), vars(m).update(s)))
+        rc.enable(rq)
+        env = {"RQ_REMOTE_BUSY_WAIT_SEC": "1800", "COMFY_API": "https://h:8446", "LLM_KEY_PI": "secret"}
+        with mock.patch.dict(os.environ, env), \
+             mock.patch.object(rc.subprocess, "run", return_value=mock.Mock(returncode=0, stdout="", stderr="")) as run:
+            self.assertEqual(rq.detach(["--remote", "--detach", "--run-dir", self.d], self.d), 0)
+        cmd = run.call_args[0][0]
+        self.assertIn("--setenv=RQ_REMOTE_BUSY_WAIT_SEC=1800", cmd)
+        self.assertIn("--setenv=COMFY_API=https://h:8446", cmd)
+        self.assertFalse(any("LLM_KEY" in c for c in cmd))
+        self.assertNotIn("--detach", cmd)
+        self.assertLess(cmd.index("--setenv=COMFY_API=https://h:8446"), cmd.index(rq.PY))
 
     def test_remote_idle_checks_system_stats_before_queue(self):
         import io

@@ -1,0 +1,86 @@
+{
+  "window_start_ct": "2026-11-15 20:36:53 CST",
+  "quiet_window_check": {
+    "llama_swap_last_30m_non_bench_requests": 0,
+    "last_llama_swap_event": "2026-11-15 20:10:19 CST (U31 flash-next reload verify)",
+    "background_downloads_or_ralph": "none",
+    "crontab": "none"
+  },
+  "kernel": "7.3.3-200.fc44.x86_64",
+  "cmdline": "BOOT_IMAGE=(hd0,gpt6)/vmlinuz-7.3.3-200.fc44.x86_64 root=/dev/mapper/fedora-root ro rd.lvm.lv=fedora/root rhgb quiet amdgpu.gttsize=122880 ttm.pages_limit=31457280",
+  "iommu": {
+    "state": "ON",
+    "accel_device": "crw-rw-rw-. 1 root render 261, 0 Nov 15 10:48 /dev/accel/accel0",
+    "amd_iommu_off_in_cmdline": false
+  },
+  "power_mode": {
+    "bios_tdp_policy": "Balanced 85 W (BIOS default)",
+    "tuned_active": "Current active profile: accelerator-performance",
+    "platform_profile": "NO_DATA (/sys/firmware/acpi/platform_profile not present)",
+    "sensors_raw": "r8169_0_6100:00-mdio-0\nAdapter: MDIO adapter\ntemp1:        +40.5\u00b0C  (high = +120.0\u00b0C)\n\namdgpu-pci-6600\nAdapter: PCI adapter\nvddgfx:        0.00 V  \nvddnb:         0.00 V  \nedge:         +37.0\u00b0C  \nPPT:          13.92 W  (avg =  13.92 W)\n\nacpitz-acpi-0\nAdapter: ACPI interface\ntemp1:        +38.0\u00b0C  \n\nmt7925_phy0-pci-6300\nAdapter: PCI adapter\ntemp1:        +42.0\u00b0C  \n\nk10temp-pci-00c3\nAdapter: PCI adapter\nTctl:         +39.0\u00b0C  \n\nnvme-pci-6400\nAdapter: PCI adapter\nComposite:    +33.9\u00b0C  (low  = -273.1\u00b0C, high = +74.8\u00b0C)\n                       (crit = +79.8\u00b0C)\nSensor 2:     +69.8\u00b0C  (low  = -273.1\u00b0C, high = +65261.8\u00b0C)"
+  },
+  "memory_and_page_cache": {
+    "free_bytes": "total        used        free      shared  buff/cache   available\nMem:     133607890944 34913894400  5040410624   659357696 95585595392 98693996544\nSwap:     8589930496   138338304  8451592192",
+    "proc_meminfo": {
+      "MemTotal": "130476456 kB",
+      "MemFree": "4927820 kB",
+      "MemAvailable": "96386216 kB",
+      "Buffers": "64 kB",
+      "Cached": "92926828 kB",
+      "SwapTotal": "8388604 kB",
+      "SwapFree": "8253504 kB"
+    },
+    "drm_card1": {
+      "mem_info_vram_total": 1073741824,
+      "mem_info_vram_used": 177299456,
+      "mem_info_gtt_total": 128849018880,
+      "mem_info_gtt_used": 28996222976
+    },
+    "page_cache_note": "Initial warm OS page cache (~78.6 GiB Cached in /proc/meminfo) with flash-next loaded from U31 restore; unloaded explicitly before each cold TTFT / engine run and recorded per phase."
+  },
+  "engines_and_digests": {
+    "llama_swap": "version: v272 (802f1c4), built at 2026-11-10T06:55:17Z",
+    "halogen": {
+      "repo_digest": "ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568",
+      "version": "0.20.5",
+      "image_id": "5cf019aacafe"
+    },
+    "gufo": {
+      "repo_digest": "ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133",
+      "version": "0.34.0 (2845939)",
+      "image_id": "6004ce5cff20"
+    },
+    "kyuz0_vulkan_radv": {
+      "repo_digest": "docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6",
+      "llama_cpp_version": "1.0.0-dev (build 12405, commit 9f26fe11c)",
+      "image_id": "44825211b907"
+    },
+    "kyuz0_rocm": {
+      "repo_digest": "docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:987052cca2856ab78243679491ceaf1ad1fa32da19c7293436ef5616e4b4b9cf",
+      "llama_cpp_version": "1.0.0-dev (build 12408, commit 6d3568e31)",
+      "image_id": "72384f388258"
+    }
+  },
+  "model_sha256": {
+    "/srv/models/embed-small/nomic-embed-text-v1.5.Q8_0.gguf": "3e24342164b3d94991ba9692fdc0dd08e3fd7362e0aacc396a9a5c54a544c3b7",
+    "/srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf": "acc44040f74d0e55fb89c3967056cce5dbda1bcc52e909c3ba6fc72b5e9c0858",
+    "/srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf": "45792ae869072d8229384c51c7c73dd959e191505252b41dd71852d9746f5ce4",
+    "/srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf": "8c76e79d444b16a663d9c8db54e585ed3b1da13eebd2619c37b0c355da803c82",
+    "/srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf": "5de8b5dbf89409acc39468decafd4a4a95b13c29d88a14b0356107897829ec36",
+    "/srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf": "5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6",
+    "/srv/models/gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf": "1f2e89b8382fd2182ef3a7e15a5cf272722f767a8a08a58dd69ae36c52edbf1c",
+    "/srv/models/qwen27b/Qwen3.8-27B-UD-Q4_K_XL.gguf": "2a5f3565f39cf885103da591182c1266da64745737b42b452fd3e675369f1211",
+    "/srv/models/flash-next-halogen/qwen38-flash-next-mtp.hgn": "0f50e9626df98168e7c6e0cc264e2a92b5184dd885a175a06628d979b5edceeb",
+    "/srv/models/flash-next-halogen/qwen38-flash-next-v2.hgn": "71246c6ab3fc1de2cf06326f18e275fe9c2a18366d646ed3357d194c884fc687",
+    "/srv/models/flash-next-halogen/qwen38-flash-next-ngram.hgn": "3450acada94e19aabad88bd49b45eb70304820949c2240fc178067b20ae5dffe",
+    "/srv/models/flash-next-halogen/tokenizer/tokenizer.json": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+    "/srv/models/flash-next-uncensored-hgn/model.hgn": "6d5f4c66ad653301bb103c77364becb7270711df04162e8f4d85f5aad1ac16be",
+    "/srv/models/flash-next-uncensored-hgn/qwen38-flash-next-ngram.hgn": "339f5c508ca592ee2613ac5c3082587a88991d5592c4160d49a32a6dbdb3f30b",
+    "/srv/models/flash-next-uncensored-hgn/qwen38-flash-next-vision.hgn": "b6ca6716eaab601773f7155701bb09f39c72922caa21620bab577f0281f2ea2a",
+    "/srv/models/flash-next-uncensored-hgn/tokenizer/tokenizer.json": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+    "/srv/bakeoff/heretic-q4km/gemma-4-26B-A4B-it-heretic.Q4_K_M.gguf": "b8b76e7206ab7343821f02ed4ad6b4927abe7767a0e7a648354c2e0b98d32b1e",
+    "/srv/models/gemma4-heretic/gemma-4-26B-A4B-it-unsloth-mmproj-BF16.gguf": "41926ed5f1403cf5add23b0684992805ea6f97253096132e769e65646b8cef9d",
+    "/srv/models/qwen27b/Qwen3.8-27B-UD-Q8_K_XL.gguf": "af36ecb6b5db1407953345b746c14ac93f0657dda413910b4348683a2d990377",
+    "/srv/models/qwen27b/Qwen3.8-27B-DFlash2-Q4_K_M.gguf": "1a25c56858e1ebe93f2718ac1d49d1151f9323325c1bbfd6209370f4db131ebd"
+  }
+}

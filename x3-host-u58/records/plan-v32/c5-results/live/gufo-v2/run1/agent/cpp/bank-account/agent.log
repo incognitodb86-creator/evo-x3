@@ -1,0 +1,4 @@
+All tests pass (17 assertions in 17 test cases). Implementation:
+
+- **`bank_account.h`** — `Bankaccount` class with a `std::mutex` guarding a `balance_` and `is_open_` flag (copy/assign deleted since it holds a mutex).
+- **`bank_account.cpp`** — every operation (`open`, `balance`, `deposit`, `withdraw`, `close`) takes a `lock_guard`, so concurrent deposits/withdrawals can't race on the read-modify-write of the balance. Operations on unopened/closed accounts throw `std::runtime_error`; negative deposits/withdrawals and overdrafts are rejected; reopening resets the balance to zero.

@@ -1,0 +1,39 @@
+{
+ "tag": "tr29_s6_s51083002",
+ "model": "qwen3vl_judge",
+ "secs": 4.1,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background elements like balustrade, wall, trees, and wet floor match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both women retain identical body types, hair, skin tone, and facial features from START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 shows identical pose, framing, and clothing as START IMAGE with no jump."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Target pose not applicable; scene continues from terrace, no specific end pose defined."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.356,
+  "target_reached": 0.5276,
+  "anatomy_defect": 0.0094
+ },
+ "flags": [
+  "target_reached"
+ ]
+}

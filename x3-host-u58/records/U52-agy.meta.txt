@@ -1,0 +1,8 @@
+start=2026-11-16 15:44:42 America/Chicago
+model=gemini-4-hydrogen-high
+cwd=/home/derekboone/evo-x3
+brief=/home/derekboone/evo-x3/records/U52-apply-u51-beta7-brief-20261116.md
+pid_wrapper=194960
+host=evo-X3
+exit_code=0
+end=2026-11-16 16:01:37 America/Chicago

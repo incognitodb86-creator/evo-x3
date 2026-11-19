@@ -1,0 +1,30 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+Step D Ask 1 is running via `evo`'s `render-pi.sh` (`gemma4-heretic`); waiting for completion notification before proceeding with Asks 2–4 and Steps E–F.
+Re-running Step D Ask 1 (`u37_retest2_ask1`) via `evo` `render-pi.sh` after fixing `submit_parody_run.py` path portability; waiting for completion.
+Step D Ask 2 (`u37_retest2_ask2`) is running via `evo` `render-pi.sh`; waiting for completion.
+Step D Ask 3 (`u37_retest2_ask3`) is running via `evo` `render-pi.sh`; waiting for completion.
+Step D Ask 4 (`u37_retest2_ask4`) is running via `evo` `render-pi.sh`; waiting for completion.
+
+Step D Ask 4 (`u37_retest2_ask4`) is still running via `evo` `render-pi.sh`; waiting for completion.
+Completed the X3-reachable portions of [U37-fixes-retests-brief-20261116.md](file:///home/derekboone/evo-x3/records/U37-fixes-retests-brief-20261116.md) and wrote the full report to [U37-RESULT.md](file:///home/derekboone/evo-x3/records/U37-RESULT.md) (committed and pushed to `gitea/x3-pi-config` at `7129de8`).
+
+### Step Status Summary
+- **A1–A6 (AlienPc fixes): BLOCKED** — no X3 -> AlienPc shell route. Completed the read-only **A4** check of [queue-remote.sh](file:///home/derekboone/AI/render/x3/queue-remote.sh) and [remote_comfy.py](file:///home/derekboone/AI/community/scripts/remote_comfy.py): `--dry-run --probe` hits `/system_stats` (`ignorePaths`, returns `409` without waking ComfyUI), while live `remote_idle()` hits `GET /queue` (wakes `comfyui_auto` unless `/queue` is added to AlienPc's `ignorePaths` or `/system_stats` is checked first).
+- **B (Skills fix batch): DONE** — backed up all 20 edited files + 2 `evo` settings files under `/home/derekboone/evo-x3/_archive/u37/`, updated shared render skills (`~/AI/community/skills/*`), added the EVO-X3 section to [RUN_ME.md](file:///home/derekboone/AI/render/RUN_ME.md), excluded the 5 duplicate `fleet-brain/20_skills/current` render skills in [forge/.pi/settings.json](file:///home/derekboone/AI/forge/.pi/settings.json) and [render/.pi/settings.json](file:///home/derekboone/AI/render/.pi/settings.json), removed the `standing` lane claims from [h3-max-ref2va-prompt/SKILL.md](file:///home/derekboone/AI/community/skills/h3-max-ref2va-prompt/SKILL.md), and synced to `/home/evo`. Verified `loaded_skills=16 duplicates={}` as `evo`; committed & pushed (`x3-community` `41cc2fa`, `c605072`; `x3-render` `618d7a2`; `x3-forge` `e0f5dc0`).
+- **C (Builder fixes): DONE** — enforced `--still` required, enforced absolute run paths, and made `fps`/`aspect`/`throat`/`negatives` hard lint failures in [submit_parody_run.py](file:///home/derekboone/AI/community/scripts/parody/submit_parody_run.py), [render_writer_pipeline.py](file:///home/derekboone/AI/community/scripts/parody/render_writer_pipeline.py), [wp_lint.py](file:///home/derekboone/AI/community/scripts/parody/wp_lint.py), [build_request.py](file:///home/derekboone/AI/community/scripts/parody/build_request.py), and [config.yaml](file:///home/derekboone/AI/render/writer_pipeline/config.yaml), with 19 new tests in [test_u37_builder_fixes.py](file:///home/derekboone/AI/community/scripts/parody/test_u37_builder_fixes.py).
+  - `pytest scripts/parody/`: `536 passed, 6 skipped` -> `555 passed, 6 skipped` (`38 passed` as `evo` on `test_u37_builder_fixes.py` + `test_still_guard_rundir.py`).
+  - `pytest scripts/queue/`: `4 passed` -> `4 passed`.
+  - `pytest render/writer_pipeline/`: `3 passed` -> `3 passed`.
+  - `pytest scripts/tests/` (ignoring 2 Windows collection-error files): `117 passed, 6 failed, 2 skipped` -> `117 passed, 6 failed, 2 skipped` (unchanged Windows/AlienPc-only failures).
+  - Committed & pushed (`x3-community` `8289c2f`, `4f17934`; `x3-render` `7ab42bb`).
+- **D (Retest 2 — dry, no GPU, via `evo` `render-pi.sh`): DONE** — 4 asks run on `x3-local/gemma4-heretic` (`--thinking medium`), each with its own `still_read.json` and lint logs (`DRY_RUN=True`):
+  - `u37_retest2_ask1` (`doggy`, `POOL_F001.jpg`): **READY** (`rewrite`, score `75`).
+  - `u37_retest2_ask2` (`missionary`, `POOL_F015.jpg`): **NOT_READY** (`cand_2`, score `58 < 60`, `low_score`).
+  - `u37_retest2_ask3` (`blowjob`, `POOL_F034.jpg`): **READY** (`cand_3`, score `75`).
+  - `u37_retest2_ask4` (`talk`, `POOL_F047.jpg`): **READY** (`rewrite`, score `67`).
+- **E & F (Live remote render & VRAM/3-shot probes): BLOCKED** (needs AlienPc lease + GPU check; all 4 dry builds verified READY via `queue-remote.sh --yes-derrick --dry-run` with full E `prompt.txt` and node list in [U37-RESULT.md](file:///home/derekboone/evo-x3/records/U37-RESULT.md)):
+  - **E:** `/home/derekboone/AI/community/runs/u37_retest1_124f` (124f, 22 nodes)
+  - **F1:** `/home/derekboone/AI/community/runs/u37_probe_2ref_192f` (2 refs @ 192f, 24 nodes)
+  - **F2:** `/home/derekboone/AI/community/runs/u37_probe_3ref_107f` (3 refs @ 107f, 26 nodes)
+  - **F3:** `/home/derekboone/AI/community/runs/u37_probe_3shot_243f` (3-shot cut @ 243f, 22 nodes)

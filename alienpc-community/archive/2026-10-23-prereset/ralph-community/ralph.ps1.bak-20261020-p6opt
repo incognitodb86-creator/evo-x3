@@ -1,0 +1,107 @@
+# Ralph loop (ghuntley.com/ralph): community switch list (ALI-52 / ALI-127). Derrick 2026-10-20 11:04 AM CT "Have forge do it" / "Queue with Ralph loop". Copy of 5slock\ralph\ralph.ps1 pointed at this list.
+# Starts only after the P4 chaining test (C:\AI\community\scripts\p4.py) has exited.
+# forgesafe 2026-10-20 (Derek-approved "safe, no-GPU" fixes; backup: ralph.ps1.bak-20261020-forgesafe):
+#  - gpu_guard.ps1 before EVERY iteration (render scripts, Switchyard jobs, ComfyUI queue on its own port, lock file). Busy -> log
+#    "refused: render running (<reason>)", poll every $GuardPollSec s, give up after $GuardWaitMin min.
+#  - git checkpoints in C:\AI\community and ralph-community: "pre iter NN" before, "iter NN: ok|fail" after.
+#  - harness checks after each iteration: py_compile on changed .py, json.tool on changed .json (failure -> STOP_RALPH).
+#  - scope check: ralph-community may only change TASKS.md, STOP_RALPH, notes\*; other tracked changes are restored with git checkout,
+#    new files are reported (left in place). ComfyUI\user workflow .json files are hashed before/after and restored from
+#    wfsnap\iter_NN if changed. Any violation -> STOP_RALPH.
+#  - timeout 40 -> 20 min; no-progress stop (TASKS.md unchanged 2 iterations); pi exit 1 = CUTOFF, 2 in a row -> stop.
+#  - pi args: --exclude-tools codemode,tool_search --no-mcp --session-dir ralph-community\sessions; one summary line per iteration.
+param([int]$Max=10,[int]$TimeoutMin=20,[int]$GuardWaitMin=180,[int]$GuardPollSec=120)
+$R='C:\Users\derek\5slock'; $K='C:\Users\derek\5slock\ralph-community'; $L="$K\logs"; $C='C:\AI\community'
+$Guard='C:\AI\director\scripts\gpu_guard.ps1'; $WF='C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\user'; $Snap="$K\wfsnap"; $Sess="$K\sessions"; $Agents="$R\AGENTS.md"
+Set-Location $R; New-Item -ItemType Directory -Force $L, $Sess | Out-Null
+function Log($m){ "$(Get-Date -f s) $m" | Add-Content "$L\ralph.log" }
+function Stop-Ralph($m){ [IO.File]::WriteAllText("$K\STOP_RALPH", "$(Get-Date -f s) ralph.ps1: $m`r`n", (New-Object Text.UTF8Encoding $false)); Log "STOP_RALPH: $m" }
+function Open { @(Select-String -Path "$K\TASKS.md" -Pattern '^\s*- \[ \]').Count }
+function Ticks { @(Select-String -Path "$K\TASKS.md" -Pattern '^\s*- \[x\]').Count }
+function FHash($p){ if(Test-Path -LiteralPath $p){ (Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash } else { 'missing' } }
+function G { $o = & git @args 2>&1 | ForEach-Object { "$_" }; $script:GitRc = $LASTEXITCODE; $o }
+function Commit($msg){ foreach($repo in $C, $K){ $null = G -C $repo add -A; $null = G -C $repo commit -q --allow-empty -m $msg; if($script:GitRc -ne 0){ Log "git commit failed in $repo ($msg)" } } }
+function Changed($repo){
+  foreach($line in @(G -C $repo status --porcelain --untracked-files=all)){
+    if($line.Length -lt 4){ continue }
+    $rp = $line.Substring(3); if($rp -match ' -> '){ $rp = ($rp -split ' -> ')[-1] }
+    [pscustomobject]@{ Code = $line.Substring(0,2); Path = $rp.Trim('"') }
+  }
+}
+function WfFiles { if(Test-Path -LiteralPath $WF){ @(Get-ChildItem -LiteralPath $WF -Recurse -File -Filter *.json -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '\\__manager\\' }) } else { @() } }
+function WfHashes { $h=@{}; foreach($f in WfFiles){ $h[$f.FullName] = (Get-FileHash -LiteralPath $f.FullName -Algorithm SHA256).Hash }; $h }
+function WfSnapshot($n){
+  $d = "$Snap\iter_$n"
+  foreach($f in WfFiles){ $dst = Join-Path $d $f.FullName.Substring($WF.Length).TrimStart('\'); New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null; Copy-Item -LiteralPath $f.FullName -Destination $dst -Force }
+  $d
+}
+function GuardWait {
+  $t0 = Get-Date; $last = ''
+  while($true){
+    $o = (& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Guard 2>&1 | Out-String).Trim(); $rc = $LASTEXITCODE
+    if($rc -eq 0){ if($last){ Log "gpu guard: IDLE after $([int]((Get-Date)-$t0).TotalMinutes) min wait" }; return $true }
+    $why = @($o -split "`r?`n" | Where-Object { $_ -match '^BUSY' })[0]; if(-not $why){ $why = "guard rc=$rc $o" }
+    if($why -ne $last){ Log "refused: render running ($why)"; $last = $why }
+    if(((Get-Date)-$t0).TotalMinutes -ge $GuardWaitMin){ Log "refused: GPU still busy after $GuardWaitMin min; exiting ($why)"; return $false }
+    Start-Sleep -Seconds $GuardPollSec
+  }
+}
+$py = (Get-Command python -ErrorAction SilentlyContinue).Source; if(-not $py){ $py = 'C:\Program Files\Python312\python.exe' }
+$cli="$env:APPDATA\npm\node_modules\@earendil-works\pi-coding-agent\dist\bundle\cli.js"
+$a="`"$cli`" --print --provider llama-swap --model coding_sc117_strata --exclude-tools codemode,tool_search --no-mcp --session-dir `"$Sess`" `"@$K\PROMPT.md`" `"Follow PROMPT.md exactly.`""
+$why='max-iterations'; $i=0; $cut=0; $np=0
+while($i -lt $Max){
+  if(Test-Path "$K\STOP_RALPH"){$why='STOP_RALPH';break}; if((Open) -eq 0){$why='COMPLETE';break}
+  if(-not (GuardWait)){ $why='gpu-busy'; break }
+  $i++; $n='{0:D2}' -f $i
+  $preTasks = FHash "$K\TASKS.md"; $preTicks = Ticks; $preAgents = FHash $Agents
+  Commit "pre iter $n"
+  $snapDir = WfSnapshot $n; $wfBefore = WfHashes
+  "$(Get-Date -f s) iter $n start" | Add-Content "$L\ralph.log"; $t0 = Get-Date
+  $p=Start-Process node -ArgumentList $a -WorkingDirectory $R -RedirectStandardOutput "$L\iter_$n.log" -RedirectStandardError "$L\iter_$n.err.log" -WindowStyle Hidden -PassThru; $null=$p.Handle
+  $p.Id | Set-Content "$L\pi.pid"
+  $timedOut = $false
+  if(-not $p.WaitForExit($TimeoutMin*60000)){ taskkill /T /F /PID $p.Id | Out-Null; $timedOut = $true; "TIMEOUT after $TimeoutMin min" | Add-Content "$L\ralph.log" }
+  $code = $p.ExitCode
+  "$(Get-Date -f s) iter $n exit $code" | Add-Content "$L\ralph.log"
+  if(-not $timedOut -and $code -eq 1){ $cut++; Log "iter $n CUTOFF (pi exit 1: reply cut off at the output limit) [$cut in a row]" } else { $cut = 0 }
+  # --- harness checks on changed files (the harness runs them, not the model)
+  $fails = @(); $viol = @()
+  $chg = @(Changed $C | ForEach-Object { [pscustomobject]@{ Code=$_.Code; Path=$_.Path; Full=(Join-Path $C $_.Path) } }) + @(Changed $K | ForEach-Object { [pscustomobject]@{ Code=$_.Code; Path=$_.Path; Full=(Join-Path $K $_.Path); InK=$true } })
+  foreach($ch in $chg){
+    if(-not (Test-Path -LiteralPath $ch.Full -PathType Leaf)){ continue }
+    if($ch.Full -match '\.py$'){ $o = @(& $py -m py_compile $ch.Full 2>&1 | ForEach-Object { "$_".Trim() } | Where-Object { $_ }); if($LASTEXITCODE -ne 0){ $fails += "py_compile $($ch.Full): $(($o | Select-Object -Last 2) -join ' / ')" } }
+    elseif($ch.Full -match '\.json$'){ $o = @(& $py -m json.tool $ch.Full 2>&1 | ForEach-Object { "$_".Trim() } | Where-Object { $_ }); if($LASTEXITCODE -ne 0){ $fails += "json.tool $($ch.Full): $($o | Select-Object -Last 1)" } }
+  }
+  # --- scope check: ralph-community may change TASKS.md, STOP_RALPH, notes\* only; C:\AI\community is the work dir
+  foreach($ch in @($chg | Where-Object { $_.InK })){
+    $rel = $ch.Path -replace '/','\'
+    if($rel -eq 'TASKS.md' -or $rel -eq 'STOP_RALPH' -or $rel -like 'notes\*'){ continue }
+    if($ch.Code -eq '??'){ $viol += "new file outside scope (left in place, review it): $($ch.Full)" }
+    else { $null = G -C $K checkout '--' $ch.Path; $viol += "out-of-scope change restored from git: $($ch.Full) (git rc=$script:GitRc)" }
+  }
+  foreach($ch in @($chg | Where-Object { -not $_.InK -and ($_.Path -match '(?i)comfyui[\\/]user[\\/]') })){ $null = G -C $C checkout '--' $ch.Path; $viol += "ComfyUI\user path restored: $($ch.Full)" }
+  $wfAfter = WfHashes
+  foreach($f in $wfBefore.Keys){
+    if($wfAfter[$f] -ne $wfBefore[$f]){ $src = Join-Path $snapDir $f.Substring($WF.Length).TrimStart('\'); Copy-Item -LiteralPath $src -Destination $f -Force; $viol += "live ComfyUI file changed/deleted, restored from $src : $f" }
+  }
+  foreach($f in $wfAfter.Keys){ if(-not $wfBefore.ContainsKey($f)){ $viol += "new file under ComfyUI\user (left in place, review it): $f" } }
+  if((FHash $Agents) -ne $preAgents){ Log "iter $n note: 5slock\AGENTS.md was updated by the model (allowed: command notes)" }
+  foreach($f in $fails){ Log "iter $n CHECK FAIL: $f" }; foreach($v in $viol){ Log "iter $n SCOPE: $v" }
+  $status = if($fails.Count -or $viol.Count -or $timedOut -or ($code -ne 0)){ 'fail' } else { 'ok' }
+  Commit "iter ${n}: $status"
+  # --- one-line summary
+  $den = 0; $sf = Get-ChildItem -LiteralPath $Sess -Recurse -File -Filter *.jsonl -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  if($sf){ $den = @(Select-String -LiteralPath $sf.FullName -Pattern 'is not permitted to run|requires approval|Blocked by (headless guard|protected-paths)' -AllMatches | ForEach-Object { $_.Matches.Count } | Measure-Object -Sum).Sum; if(-not $den){ $den = 0 } }
+  $ex = if($timedOut){ 'TIMEOUT' } elseif($code -eq 1){ '1(CUTOFF)' } else { "$code" }
+  Log ("iter $n summary: status=$status exit=$ex ticks=+{0} wall={1:N1}m denies={2} checkfails={3} scope={4} open={5}" -f ((Ticks) - $preTicks), ((Get-Date)-$t0).TotalMinutes, $den, $fails.Count, $viol.Count, (Open))
+  # --- stop rules (existing STOP_RALPH / COMPLETE logic kept)
+  if($viol.Count){ Stop-Ralph "iter ${n}: scope check failed - $($viol -join ' | ')"; $why='scope'; break }
+  if($fails.Count){ Stop-Ralph "iter ${n}: harness check failed - $($fails -join ' | ')"; $why='check-failed'; break }
+  if(Select-String -Path "$L\iter_$n.log" -Pattern '^\s*COMPLETE\s*$' -Quiet){$why='COMPLETE';break}
+  if($cut -ge 2){ Stop-Ralph "pi was cut off at the output limit 2 iterations in a row (iter $n)"; $why='cutoff'; break }
+  if((FHash "$K\TASKS.md") -eq $preTasks){ $np++ } else { $np = 0 }
+  if($np -ge 2){ Stop-Ralph "no progress: TASKS.md unchanged for 2 iterations (iter $n)"; $why='no-progress'; break }
+}
+$t=@(Select-String -Path "$K\TASKS.md" -Pattern '^\s*- \[x\]').Count; $b=@(Select-String -Path "$K\TASKS.md" -Pattern '^\s*- \[!\]').Count
+"community ralph done $(Get-Date -f s) reason=$why iterations=$i ticked=$t blocked=$b open=$(Open)" | Set-Content "$L\DONE.txt"

@@ -153,6 +153,10 @@ def test_e2e_named_talk_clip_cassie(tmp_path, monkeypatch):
     stems = (report.get("refmods") or {}).get("stems") or []
 
     assert "Cassie Howard" in prompt_txt and "Sydney Sweeney" in prompt_txt
+    assert "<Audio 1>" not in prompt_txt and "<Picture 1>" not in prompt_txt
+    assert (run_dir / "beat_sheet.json").is_file()
+    bs = json.loads((run_dir / "beat_sheet.json").read_text(encoding="utf-8"))
+    assert {"clip_shot_id", "primary_beat", "opening_ending_state", "anchors", "camera_continuity_vs_cut", "spoken_dialogue", "ambient_sfx", "frame_budget", "method"} <= set(bs)
     assert any("sydneysweeney" in s.lower() for s in stems), stems
     assert not any("oc_poolclub" in s.lower() for s in stems), stems
     for line in ask_lines:
@@ -212,7 +216,56 @@ def test_e2e_named_spoof_clip_daenerys(tmp_path, monkeypatch):
     stems = (report.get("refmods") or {}).get("stems") or []
 
     assert "Daenerys" in prompt_txt and "Emilia Clarke" in prompt_txt
+    assert "<Audio 1>" not in prompt_txt and "<Picture 1>" not in prompt_txt
+    assert (run_dir / "beat_sheet.json").is_file()
     assert any("emiliaclarke" in s.lower() for s in stems), stems
     for line in ask_lines:
         assert line in prompt_txt, f"Missing ask line: {line}"
     assert report.get("submitted") is False
+
+
+def test_identity_collision_guard_iconic_voice_pair_and_taboo_defaults():
+    import wp_router
+    import random as _rnd
+
+    # 1) Common English words ("angel", "barbie", "lucy") in plain asks must NOT auto-hijack INDEX characters
+    assert rwp.resolve_named_identity("he pins her down and says be a good little angel for daddy") is None
+    assert rwp.resolve_named_identity("barbie-pink lingerie on the couch, doggy") is None
+
+    # 2) Bare actress name ("Sydney Sweeney", "Megan Fox" / "FCMegan", "Florence Pugh", "Sabrina Carpenter")
+    # upgrades to iconic INDEX character+actor pair (even on INDEX_BAD) or solo signature voice hint
+    id_syd = rwp.resolve_named_identity("Sydney Sweeney pinned over the desk")
+    assert id_syd and id_syd["character"] == "Cassie Howard" and id_syd["actor"] == "Sydney Sweeney"
+    assert id_syd["has_audio_refmod"] is False and "vocal-fry" in (id_syd.get("voice_cue_hint") or "")
+
+    id_meg = rwp.resolve_named_identity("rough doggy", character="FCMegan")
+    assert id_meg and id_meg["character"] == "Jennifer Check" and id_meg["actor"] == "Megan Fox"
+    assert id_meg["has_audio_refmod"] is False and id_meg["is_oc"] is False
+
+    id_pugh = rwp.resolve_named_identity("Florence Pugh rough scene")
+    assert id_pugh and id_pugh["character"] == "Yelena Belova" and id_pugh["actor"] == "Florence Pugh"
+    assert "contralto" in (id_pugh.get("voice_cue_hint") or "")
+
+    id_sab = rwp.resolve_named_identity("Sabrina Carpenter backstage")
+    assert id_sab and id_sab["character"] == "Sabrina Carpenter" and id_sab["actor"] == "Sabrina Carpenter"
+    assert "vocal-fry" in (id_sab.get("voice_cue_hint") or "")
+
+    # 2b) Exact stem token matching in find_refmods_for_name prevents 'anadearmas' or 'meganfox' false substring hits
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        tp = Path(td)
+        (tp / "minimaxh3_emilyblunt_v1_refmod.safetensors").write_bytes(b"x")
+        (tp / "minimaxh3_emilyratajkowski_v1_refmod.safetensors").write_bytes(b"x")
+        hits = [f.name for f in rwp.fr.res.find_refmods_for_name("emilyblunt", tp)]
+        assert hits == ["minimaxh3_emilyblunt_v1_refmod.safetensors"]
+
+    # 3) Taboo family keywords without "step-" trigger taboo_role overlay, and default sex tone includes reluctant/ashamed unless soft
+    rt_mom = wp_router.route_mode("keep quiet, mom is upstairs, brother takes his sister over the counter", "doggy", {}, {"position_kinds": {"sex": ["doggy"]}})
+    assert "taboo_role" in rt_mom["overlays"]
+
+    rng = _rnd.Random(7)
+    default_tones = {rwp.pick_tone("take her hard over the desk", rng, None, overlays=[], kind="sex") for _ in range(40)}
+    assert {"ashamed", "reluctant"} <= default_tones
+    soft_tones = {rwp.pick_tone("soft romantic gentle missionary", rng, None, overlays=[], kind="sex") for _ in range(40)}
+    assert not ({"ashamed", "reluctant"} & soft_tones)
+

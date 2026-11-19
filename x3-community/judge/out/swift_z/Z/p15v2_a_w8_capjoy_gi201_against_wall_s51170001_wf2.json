@@ -1,0 +1,53 @@
+{
+ "frames": [
+  8,
+  215
+ ],
+ "diffs": [
+  42.36,
+  9.82
+ ],
+ "per_frame": [
+  {
+   "frame": 8,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rock textures, lighting conditions, and environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and body parts are anatomically correct, properly connected, and show no signs of melting or distortion."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0801,
+    "anatomy_defect": 0.5055
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 215,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rock textures, lighting conditions, and environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomy is consistent; limbs are distinct, hands are formed correctly, and there are no fused bodies or missing parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0389,
+    "anatomy_defect": 0.5566
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w8_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.2
+}

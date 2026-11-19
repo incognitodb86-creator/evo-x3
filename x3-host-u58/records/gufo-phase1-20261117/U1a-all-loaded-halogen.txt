@@ -1,0 +1,11 @@
+# U1a all-loaded baseline (FN on Halogen) 2026-11-17 07:05:32 CST; tagger stopped 07:05 for quiet window
+GTT_used_GiB=40.81 MemAvailable_GiB=59.01 07:05:32
+flash-next http=200 38.3s
+GTT_used_GiB=27.01 MemAvailable_GiB=78.74 07:06:11
+embed-small http=200 1.4s
+GTT_used_GiB=27.25 MemAvailable_GiB=78.61 07:06:12
+joycaption http=200 7.5s
+GTT_used_GiB=36.55 MemAvailable_GiB=69.25 07:06:19
+ref2va-27b http=200 10.9s
+GTT_used_GiB=55.61 MemAvailable_GiB=49.83 07:06:30
+[('embed-small', 'ready'), ('flash-next', 'ready'), ('joycaption', 'ready'), ('ref2va-27b', 'ready')]

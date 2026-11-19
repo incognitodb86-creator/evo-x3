@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_a_w7_capswift_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 24.8,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The cave environment, rock textures, and lighting conditions remain consistent between the start image and all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain their specific costumes, skin tones, hair styles, and body types throughout the sequence."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows a completely different pose (arms pinned above head) compared to the start image (arms pushing against wall)."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 depicts the characters in the specified standing rear-entry position with visible contact and penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, limb fusion, or malformed body parts are visible in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.073,
+  "same_people": 0.0737,
+  "start_kept": 0.7212,
+  "target_reached": 0.0538,
+  "anatomy_defect": 0.5902
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

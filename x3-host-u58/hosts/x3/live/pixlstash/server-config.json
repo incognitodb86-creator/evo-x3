@@ -1,0 +1,20 @@
+{
+  "host": "localhost",
+  "port": 9537,
+  "require_ssl": false,
+  "default_device": "cpu",
+  "image_root": "/home/evo/.config/pixlstash/images",
+  "insightface_model_pack": "buffalo_l",
+  "require_local_for_write": false,
+  "log_level": "info",
+  "log_file": "/home/evo/.config/pixlstash/server.log",
+  "external_server_enabled": false,
+  "cookie_samesite": "Lax",
+  "cookie_secure": false,
+  "min_free_disk_gb": 1.0,
+  "cors_origins": [],
+  "max_attachment_size_mb": 50,
+  "generate_thumbnails_on_startup": true,
+  "filesystem_roots": [],
+  "daily_snapshots": true
+}

@@ -1,0 +1,53 @@
+{
+ "frames": [
+  122,
+  151
+ ],
+ "diffs": [
+  13.34,
+  13.6
+ ],
+ "per_frame": [
+  {
+   "frame": 122,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting conditions, and overall setting remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "No anatomical defects are visible; limbs, bodies, and contact areas appear structurally normal and coherent."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0328,
+    "anatomy_defect": 0.581
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 151,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background features the same dark, textured environment with similar lighting and structural elements in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, bodies, and contact areas appear anatomically correct and consistent between the two frames."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.2849,
+    "anatomy_defect": 0.3463
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w2_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 26.8
+}

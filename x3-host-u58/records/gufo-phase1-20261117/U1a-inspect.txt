@@ -1,0 +1,42 @@
+# U1a inspect 2026-11-17 07:03:46 CST
+## llama-swap argv (ExecStart wrapper evo-llama-swap)
+    PID                  STARTED COMMAND
+ 178721 Mon Nov 16 15:02:04 2026 /usr/local/bin/llama-swap -config /etc/evo-x3/llama-swap.yaml -listen 127.0.0.1:8080
+watch-config flag present? 0
+## wrapper
+#!/bin/bash
+# Start llama-swap on loopback. Canonical config keeps ${env.LLM_KEY_*} placeholders.
+# v272 rejects empty apiKeys and also fails if those env vars are unset.
+# 2026-11-15 X3 Phase 4 (Derrick t1784s6566 "empty-key guard"): REFUSE to start when every
+# LLM_KEY_* in /etc/evo-x3/llm.env is empty. Tailscale Serve publishes 127.0.0.1:8080 to the
+# tailnet, so the old auth-off fallback was not loopback-only. Backup: evo-llama-swap.bak-20261115-phase4
+set -euo pipefail
+CONFIG=/etc/evo-x3/llama-swap.yaml
+ENVFILE=/etc/evo-x3/llm.env
+LISTEN="${LISTEN_ADDR:-127.0.0.1:8080}"
+BIN=/usr/local/bin/llama-swap
+
+if [[ -f "$ENVFILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENVFILE"
+  set +a
+fi
+
+keys_present=0
+while IFS= read -r name; do
+  [[ -n "${!name-}" ]] && keys_present=1
+done < <(compgen -v | grep '^LLM_KEY_' || true)
+
+if [[ "$keys_present" -eq 1 ]]; then
+  exec "$BIN" -config "$CONFIG" -listen "$LISTEN"
+fi
+
+echo "llama-swap: REFUSING to start: every LLM_KEY_* in ${ENVFILE} is empty or missing. Auth must stay on (Tailscale Serve publishes ${LISTEN} to the tailnet). Derrick types the keys into ${ENVFILE}, then: systemctl restart llama-swap" >&2
+exit 78
+## yaml mtime 2026-11-16 14:59:41 CST; llama-swap started 2026-11-16 15:02:04 CST (after) -> running config was loaded from current on-disk file
+## /running
+{"running":[{"model":"gemma4-heretic","state":"ready","cmd":"podman run --rm --name llama-swap-gemma4-heretic\n  --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups\n  --security-opt seccomp=unconfined\n  -v /srv/models:/srv/models:ro,Z\n  docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6\n  llama-server --host 127.0.0.1 --port 8081\n  -m /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf\n  --mmproj /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-unsloth-mmproj-BF16.gguf\n  --jinja --load-mode none -fa on\n  --reasoning-format deepseek\n  -np 4 -c 524288\n  -b 2048 -ub 2048\n  --image-min-tokens 560 --image-max-tokens 1120\n  --temp 1.0 --top-p 0.95 --top-k 64\n  --alias gemma4-heretic\n","proxy":"http://127.0.0.1:8081","ttl":3600,"name":"","description":""}]}
+
+## /v1/models ids
+['embed-small', 'flash-next', 'flash-next-sub', 'flash-next-uncensored', 'gemma4-heretic', 'gemma4-heretic-sub', 'joycaption', 'qwen27b', 'ref2va-27b']

@@ -1,0 +1,92 @@
+{
+  "packages": [
+    "npm:pi-subagents@0.88.1",
+    "npm:cc-safety-net@2.7.0",
+    "npm:@juicesharp/rpiv-todo@2.15.0",
+    "npm:pi-web-access@0.46.0",
+    "npm:pi-mobile@0.4.0"
+  ],
+  "defaultProvider": "x3-local",
+  "defaultModel": "flash-next-uncensored-v2",
+  "defaultThinkingLevel": "low",
+  "enableInstallTelemetry": false,
+  "enableAnalytics": false,
+  "extensions": [
+    "-builtin:llama.cpp"
+  ],
+  "httpIdleTimeoutMs": 1950000,
+  "retry": {
+    "enabled": true,
+    "maxRetries": 2,
+    "provider": {
+      "timeoutMs": 1200000,
+      "maxRetries": 0
+    }
+  },
+  "subagents": {
+    "defaultModel": "x3-local/flash-next-uncensored-sub",
+    "disableThinking": false,
+    "defaultThinking": "low"
+  },
+  "lastChangelogVersion": "1.5.2",
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-permission-system@0.8.0\",\"scope\":\"project\"}": "0.8.0",
+    "{\"source\":\"npm:pi-memory@0.4.2\",\"scope\":\"project\"}": "0.4.2",
+    "{\"source\":\"git:github.com/EveryInc/compound-engineering-plugin@34492307\",\"scope\":\"project\"}": "3.34.0",
+    "{\"source\":\"npm:pi-workspace-history@0.5.2\",\"scope\":\"project\"}": "0.5.2",
+    "{\"source\":\"npm:pi-subagents@0.88.1\",\"scope\":\"user\"}": "0.88.1",
+    "{\"source\":\"npm:pi-web-access@0.46.0\",\"scope\":\"user\"}": "0.46.0"
+  },
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 32768,
+    "keepRecentTokens": 20000,
+    "modelOverrides": {
+      "x3-local/flash-next": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/qwen27b": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      }
+    }
+  },
+  "sessionDir": "/home/evo/.pi/agent/sessions"
+}

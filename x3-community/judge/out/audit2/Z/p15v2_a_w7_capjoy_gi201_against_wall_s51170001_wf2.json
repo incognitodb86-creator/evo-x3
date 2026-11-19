@@ -1,0 +1,49 @@
+{
+ "frames": [
+  20,
+  301
+ ],
+ "diffs": [
+  38.24,
+  9.69
+ ],
+ "per_frame": [
+  {
+   "frame": 20,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and cave structure remain identical. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionate. No melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0014,
+    "anatomy_defect": 0.0004
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 301,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and cave structure remain identical. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionate. No melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.001,
+    "anatomy_defect": 0.0005
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_a_w7_capjoy_gi201_against_wall_s51170001_wf2"
+}

@@ -1,0 +1,16 @@
+Done. All tests pass.
+
+## Implementation summary
+
+I implemented `MakeChain` in `dominoes.go`, modeling the problem as an **Eulerian circuit** in a multigraph (vertices = pip values, edges = dominoes). A closed chain using every domino exactly once exists iff:
+
+1. **Parity:** every vertex has even degree (each pip value appears an even number of half-sides). A single `[[1|2]]` fails here.
+2. **Connectivity:** all vertices with edges belong to one connected component (checked with union-find). This rejects cases like `[[1|2], [2, 1], [3, 4], [4, 3]]` where parity holds but the graph is disconnected.
+
+When both hold, I construct the chain with **Hierholzer's algorithm** (iterative, with per-vertex edge-list pointers), which runs in linear time — avoiding the exponential blowup of pure backtracking while still handling rotations (a domino `(a,b)` traversed as `b→a` is emitted as `[b|a]`).
+
+Key details:
+- `type Domino [2]int` defined as required by the signature.
+- Empty input returns `[]Domino{}, true`; doubles like `[1|1]` are treated as self-loop edges.
+- The resulting circuit is reversed from the pop order so the emitted chain is in forward traversal order, and its first/last outer halves match (it's a cycle).
+- Only the standard library is used (no imports needed in the final version).

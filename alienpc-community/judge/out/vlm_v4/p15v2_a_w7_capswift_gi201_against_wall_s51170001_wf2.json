@@ -1,0 +1,46 @@
+{
+ "tag": "p15v2_a_w7_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical cave rock wall background, matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc man appear in all frames, matching START IMAGE."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows elf woman leaning forward, not standing upright as in START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall, act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "yes",
+   "reason": "In the last frame, a green, phallic-shaped object is visible emerging from between the female character's legs, positioned where a penis would be. This appears to be an anatomical addition or fusion, "
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.7692,
+  "target_reached": 0.0015,
+  "anatomy_defect": 0.0139,
+  "anatomy_zoom": 0.6465
+ },
+ "flags": [
+  "start_kept",
+  "anatomy_zoom"
+ ]
+}

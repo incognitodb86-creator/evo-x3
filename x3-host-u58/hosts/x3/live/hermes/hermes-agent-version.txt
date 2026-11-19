@@ -1,0 +1,2 @@
+hermes-agent ae2a81ccc00e9b7c06301523e5bb09608397149c Mon Nov 16 11:28:45 2026 -0800 fix(cloud): answer 'not signed in to Nous Portal' with 409, not 401
+https://github.com/NousResearch/hermes-agent.git

@@ -1,0 +1,63 @@
+63,72c63,73
+<     # U26 2026-11-15 ~5:30 PM CT (Derrick t1774s6524 "Move Forge to Halogen native and test it at full context"):
+<     # official Peonist Halogen native v2 checkpoint (peonist-ai/halogen-qwen3.8-flash-next: qwen38-flash-next-v2.hgn
+<     # 62.1 GiB + n-gram table 47.7 GiB mmap, not held + MTP head built in) on halogen-flash-server 0.20.5 (official image,
+<     # pulled 2026-11-15, same checkpoints as 0.20.4). Full native context: HALOGEN_CTX=262144 per request; default KV pool
+<     # 524288 positions (two full conversations resident, 4 slots) because it fits: engine-measured 88.9 GiB in all
+<     # (62.1 weights + 14.4 KV pool + 12.4 working), GTT peak 27.0 GiB of 120. U26 bench (cold, effort low): 18k prefill
+<     # 1,870 tok/s, decode 85 long / 64 prose; 127k prefill 1,807 / decode 69; 237k prefill 1,707 / decode 58; tools 3/3.
+<     # Sampling defaults = Qwen card / old Gufo preset (1.0 / 0.95 / 20); requests that send their own win. Effort medium.
+<     # Loopback publish (-p 127.0.0.1) instead of --network=host: the image's API binds [::], host network would expose it.
+<     # Rollback: Gufo slot archived at ~/evo-x3/u34/flash-next-gufo-slot-archived-20261116.yaml (U34), or backup llama-swap.yaml.bak-20261115-172352-pre-u26-halogen.
+---
+>     # GUFO PHASE 1 2026-11-17 (Derrick 6:58 AM CT "First you do phase 1 and test it"; plan
+>     # 40_projects/compute-expansion/plans/2026-11-16-x3-halogen-to-gufo-plan.md rev 6, t294s1023):
+>     # Flash-Next moved off Halogen (closed-source engine, t2138u) onto Gufo 0.34.0 (MIT). Command from the U34 archive
+>     # ~/evo-x3/u34/flash-next-gufo-slot-archived-20261116.yaml (reference only), plus the approved R4 picks:
+>     # one process, --sessions 2 --context 262144, --max-pending 16, llama-swap concurrencyLimit 6 (above --sessions so
+>     # extra callers wait in Gufo's queue instead of getting a llama-swap 429). Fallback if the all-loaded test misses
+>     # MemAvailable >= 4 GiB: --sessions 1 --context 131072, still cap 6. No mmproj (text-only, decision 7).
+>     # Weights: unsloth/Qwen3.8-Flash-Next-GGUF UD-Q4_K_XL (4 shards) + shared Q8 MTP in /srv/models/flash-next.
+>     # Sampling = Qwen card (1.0 / 0.95 / 20); effort medium by default; requests that send their own win.
+>     # Rollback: restore the fresh pre-cutover backup /etc/evo-x3/llama-swap.yaml.bak-20261117-070651-pre-gufo
+>     # (Halogen slot), restart llama-swap, run ~/evo-x3/scripts/verify-serve.sh. Not a Nov 15 / U34 file.
+75,81c76,91
+<         -p 127.0.0.1:8081:8731
+<         --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
+<         -e HALOGEN_MODEL_ID=flash-next -e HALOGEN_CTX=262144
+<         -e HALOGEN_REASONING_EFFORT=medium
+<         -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
+<         -v /srv/models/flash-next-halogen:/models:ro
+<         ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+---
+>         --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups
+>         --security-opt seccomp=unconfined
+>         -v /srv/models:/srv/models:ro,Z
+>         ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133
+>         gufo serve llm --host 127.0.0.1 --port 8081
+>         --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+>         --mtp-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+>         --speculative mtp
+>         --context 262144 --sessions 2
+>         --max-pending 16
+>         --cache-ram-bytes 2147483648
+>         --preserve-thinking on
+>         --temperature 1.0 --top-p 0.95 --top-k 20
+>         --reasoning-effort medium
+>         --served-model-name flash-next
+>         --log-progress
+84,90c94,95
+<     # U27 2026-11-15 (Derrick t1784s6566 Phase 1/4): concurrencyLimit 1->4 (Halogen has 4 slots, shared KV pool, no new memory);
+<     # weights moved /srv/bakeoff/halogen-models -> /srv/models/flash-next-halogen (old path is a symlink).
+<     concurrencyLimit: 4
+<     # U29 2026-11-15 (Derrick t1811s6675): alias on the SAME slot, not a new exclusive-group member.
+<     # Subagents use flash-next-sub; llama-swap sends useModelName flash-next to Halogen.
+<     # U34 2026-11-16 (Derrick t1837u, plan U33 G3/G6): flash-next-sub is created by setParamsByID (same process, no reload);
+<     # probe ~/evo-x3/u34/think_flash-next.txt: Halogen honours top-level reasoning_effort and chat_template_kwargs.enable_thinking.
+---
+>     concurrencyLimit: 6
+>     # U29/U34: flash-next-sub stays an alias on the SAME process (no reload); effort low via setParamsByID.
+96c101
+<     checkEndpoint: "/health"
+---
+>     checkEndpoint: "/ready"

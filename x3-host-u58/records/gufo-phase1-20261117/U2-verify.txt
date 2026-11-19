@@ -1,0 +1,15 @@
+# U2 verify 2026-11-17 07:15:01 CST
+== verify-serve (tailnet URL)
+no key: 401
+LLM_KEY_BOX: 200
+== verify-serve loopback
+no key: 401
+LLM_KEY_BOX: 200
+== /ready via llama-swap upstream (keyed)
+200
+[('flash-next', 'ready')]
+GTT_used_GiB=96.07 MemAvailable_GiB=8.99 07:15:29
+== cmd check
+flash-next True False
+open-webui ghcr.io/open-webui/open-webui@sha256:59b912d4246103c7285de0e9a5f2f6586614c06b4c4e46edc51a8f29e7b099a5
+llama-swap-flash-next ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133

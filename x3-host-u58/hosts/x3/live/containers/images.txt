@@ -1,0 +1,15 @@
+# podman images (rootful)
+ghcr.io/peonist-ai/halogen-flash-server:0.20.7 sha256:773073448dc9ff4a8c6b6c278802e254fd5f1546764e27531aeb3b77cb13482e
+ghcr.io/gufo-org/toolboxes/gufo-runtime:<none> sha256:99e9b5471b7a9b007c686c2aa795afaf966744d64e753cb009c89541f9e9c2b6
+ghcr.io/peonist-ai/halogen-flash-server:0.20.5 sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0 sha256:987052cca2856ab78243679491ceaf1ad1fa32da19c7293436ef5616e4b4b9cf
+docker.io/kyuz0/amd-strix-halo-toolboxes:<none> sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0-strix-llama sha256:85a9a7cb5cd65050c6eb8e5e2a96047b0d8488977fabd3d71d9769c7913bc559
+docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0-maya sha256:cf0d43fe54fae7a744942c49656e3c7b2be9890b4d6b3c60a5570f06874efb8c
+ghcr.io/peonist-ai/halogen-flash-server:0.20.4 sha256:70445bcf7acff8f1fe11396a97b866ed30dca31caf5fac62049127658080e07f
+ghcr.io/gufo-org/toolboxes/gufo-runtime:<none> sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133
+ghcr.io/open-webui/open-webui:main sha256:59b912d4246103c7285de0e9a5f2f6586614c06b4c4e46edc51a8f29e7b099a5
+# podman images (derekboone)
+docker.io/searxng/searxng:latest sha256:932f69dca010db9880bddebb2171f05d8e1a25d04a59149ff65409993d680024
+docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+ghcr.io/gufo-org/toolboxes/gufo-runtime:latest sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133

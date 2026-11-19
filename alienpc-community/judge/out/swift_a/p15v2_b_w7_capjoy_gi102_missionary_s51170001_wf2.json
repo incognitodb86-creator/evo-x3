@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_b_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, white sheets, and lighting remain consistent throughout all frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "In frames 1-3, the partner behind is a shirtless male, not the woman described in the start image."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the pose and composition of the start image perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the two women in a missionary position with one on top, matching the target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No visible anatomical defects such as extra limbs, fusion, or malformed features are present."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.011,
+  "same_people": 0.8698,
+  "start_kept": 0.6916,
+  "target_reached": 0.007,
+  "anatomy_defect": 0.246
+ },
+ "flags": [
+  "same_people"
+ ]
+}

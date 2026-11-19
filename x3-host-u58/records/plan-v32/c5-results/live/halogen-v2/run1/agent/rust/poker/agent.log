@@ -1,0 +1,15 @@
+All 37 tests pass (0 failures, including the previously `#[ignore]`d ones).
+
+## Implementation
+
+**`src/lib.rs`** — full implementation of `winning_hands`, using only std:
+
+- **Parsing** (`Hand::parse`): splits each hand on whitespace; each card's last character is the suit and the remainder is the rank (so `10H` parses correctly). Ranks map to `2..=14`.
+- **Scoring** (`Hand::score`) returns `(category, tiebreakers)`. Since `Vec<u8>` implements lexicographic `Ord`, the tuple `(u8, Vec<u8>)` gives exactly poker ordering: category first, then tiebreakers compared card by card (tiebreak vectors have a fixed length per category, so no cross-length surprises).
+  - Category ranks: `0` high card … `8` straight flush.
+  - Cards are grouped by rank and sorted by `(count, rank)` descending, which yields correctly ordered tiebreakers for pairs/two-pair/trips/quads/full-house (e.g. quads compare the quad rank, then the kicker).
+  - Flushes and high-card hands compare all five ranks; straights compare only the high card.
+- **Straight detection** (`straight_high`): dedupes the descending rank list, then scans for a run of five consecutive descending ranks. The `A-5-4-3-2` wheel is checked separately and scored as five-high; ace-in-the-middle shapes like `Q-K-A-2-3` (14,13,12,3,2) correctly fail both checks since `14,13,12,11,10` is the only run reaching the ace.
+- **`winning_hands`**: computes every hand's score once, takes the maximum, then returns all input slices whose score equals it — preserving the original `&str` references rather than rebuilt strings.
+
+`Cargo.toml` needed no changes (edition/name/version already valid, `src/lib.rs` auto-detected as the lib target, and no external deps are used).

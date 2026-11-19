@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -401,11 +402,12 @@ class TestWaitFinalize(unittest.TestCase):
         (self.run / "clip" / "clip.mp4").write_bytes(b"mp4")
         out = spr.finalize_clip(self.run, ["clip"], "python")
         self.assertEqual(Path(out["final_mp4"]).read_bytes(), b"mp4")
-        with mock.patch.object(spr.subprocess, "run") as run:
-            run.return_value = mock.Mock(returncode=0, stdout="Copied", stderr="")
+        runs = tempfile.mkdtemp()
+        with mock.patch.dict(os.environ, {"RQ_QNAP_RUNS": runs}):
             q = spr.qnap_put(Path(out["final_mp4"]), self.run.name, "python")
-        self.assertEqual(q["qnap_path"], "pi-drop/parody_x_1.mp4")
-        self.assertIn("put", run.call_args[0][0])
+        # the delivery target is the runs share layout: <runs>/<run>/clip/clip.mp4 (Derek browses NAS > renders > runs)
+        self.assertEqual(Path(q["qnap_path"]), Path(runs) / self.run.name / "clip" / "clip.mp4")
+        self.assertEqual(Path(q["qnap_path"]).read_bytes(), b"mp4")
 
     def test_finalize_cells_stitch(self):
         for t in ("c01_s51083601", "c02_s51083602"):

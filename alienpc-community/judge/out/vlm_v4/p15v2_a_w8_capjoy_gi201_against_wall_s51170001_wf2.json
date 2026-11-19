@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w8_capjoy_gi201_against_wall_s51170001_wf2",
+ "secs": 6.6,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical rough cave wall background, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames, matching START IMAGE features."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in target pose, in contact, with act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals/hands in any frame."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both characters have intact, clearly defined anatomy. The elf woman has normal human-like proportions with pointed ears, and the green-skinned orc has muscular humanoid form with no missing or extra\u80a2\u4f53"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0309,
+  "target_reached": 0.2986,
+  "anatomy_defect": 0.0037,
+  "anatomy_zoom": 0.0019
+ },
+ "flags": []
+}

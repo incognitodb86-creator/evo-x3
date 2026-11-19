@@ -1,0 +1,22 @@
+0.00.000.882 I srv  llama_server: initializing ...
+0.00.084.499 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.084.853 W srv  server_setup: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
+0.00.087.025 I srv    load_model: loading model '/srv/bakeoff/heretic-q4km/gemma-4-26B-A4B-it-heretic.Q4_K_M.gguf'
+0.00.593.556 W load: override 'tokenizer.ggml.add_bos_token' to 'true' for Gemma4
+0.00.644.477 W load: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.00.644.499 W load: control-looking token:     50 '<|tool_response>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.00.647.445 W load: '</s>' is a normal token here, removing it from EOG list
+0.01.962.092 I cmn          init: llama threadpool init, n_threads = 16
+0.03.013.555 I srv    load_model: loaded multimodal model, '/srv/bakeoff/heretic-mmproj/Gemma-4-26B-A4B-Heretic.mmproj-Q8_0.gguf'
+0.03.066.205 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 32768, kv_unified = 'false'
+0.03.067.999 I srv  server_run_i: model loaded
+0.03.068.009 I srv  server_on_li: listening on http://127.0.0.1:8090
+0.03.965.163 I slot get_availabl: id  0 | task -1 | selected slot by LRU, n_tokens = 0, t_last = -1
+0.03.965.228 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.06.464.589 I slot print_timing: id  0 | task 0 | prompt eval time =    1412.53 ms /   162 tokens (    8.72 ms per token,   114.69 tokens per second)
+0.06.464.594 I slot print_timing: id  0 | task 0 |        eval time =    1086.81 ms /    69 tokens (   15.98 ms per token,    62.57 tokens per second)
+0.06.464.595 I slot print_timing: id  0 | task 0 |       total time =    2499.33 ms /   231 tokens
+0.06.464.601 I slot print_timing: id  0 | task 0 |    graphs reused =         68
+0.06.464.601 I slot print_timing: id  0 | task 0 |   graph reallocs =          0    /     0        (same size) / (changed size)
+0.06.464.635 I slot      release: id  0 | task 0 | stop processing: n_tokens = 230, truncated = 0
+0.06.509.324 I srv    operator(): operator(): cleaning up before exit...

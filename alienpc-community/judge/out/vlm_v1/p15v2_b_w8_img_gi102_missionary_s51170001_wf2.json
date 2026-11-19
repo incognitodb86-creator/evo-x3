@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w8_img_gi102_missionary_s51170001_wf2",
+ "secs": 3.8,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same bedroom with rumpled white linens and consistent lighting, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and dark-haired man appear throughout, matching descriptions and body types."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 mirrors START IMAGE pose: woman on all fours, man kneeling behind her, same framing and lighting."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with penetration visible, matching target pose description."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, malformed limbs, or extra/missing genitalia observed across all frames."
+  }
+ },
+ "flags": []
+}

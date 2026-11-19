@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_b_w7_capswift_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 24.6,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, white bedding, and lighting remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde woman in the bra and the shirtless man are consistently present throughout the clip."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image perfectly, showing the same pose, clothing, and composition."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "The final frame shows a rear-entry position (doggy style), not the required missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, extra limbs, or fusion issues are visible in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0025,
+  "same_people": 0.0287,
+  "start_kept": 0.0157,
+  "target_reached": 0.9996,
+  "anatomy_defect": 0.1124
+ },
+ "flags": [
+  "target_reached"
+ ]
+}

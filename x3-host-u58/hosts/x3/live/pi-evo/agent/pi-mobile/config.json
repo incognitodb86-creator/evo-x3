@@ -1,0 +1,6 @@
+{
+  "port": 7878,
+  "enabled": true,
+  "tailscale": false,
+  "publicUrl": "https://evo-x3-1.tailf242b2.ts.net:8444"
+}

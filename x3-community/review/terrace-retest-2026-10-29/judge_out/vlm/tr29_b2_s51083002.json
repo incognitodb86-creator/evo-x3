@@ -1,0 +1,40 @@
+{
+ "tag": "tr29_b2_s51083002",
+ "model": "qwen3vl_judge",
+ "secs": 20.5,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background elements like balustrade, wall, trees, and wet floor match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both women retain identical hair, skin tone, body proportions, and facial features from START IMAGE."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows <Subject 1> striding forward, breaking the static pose of START IMAGE."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Target pose not defined; clip continues terrace scene. Final frame shows ongoing action, not a static target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.6042,
+  "target_reached": 0.5707,
+  "anatomy_defect": 0.0207
+ },
+ "flags": [
+  "start_kept",
+  "target_reached"
+ ]
+}

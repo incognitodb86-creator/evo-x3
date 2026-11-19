@@ -1,0 +1,45 @@
+{
+ "tag": "p15v2_b_w7_img_gi102_missionary_s51170001_wf2",
+ "secs": 7.0,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same bedroom with white linens and consistent background elements as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and muscular man appear in all frames, matching START IMAGE's features and attire."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, but START IMAGE has her on all fours with man kneeling behind; frame 1 is not identical to START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman on back, man on top in missionary position with visible penetration and contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both frames show two distinct, anatomically correct adult human bodies in a sexual position. There are no fusion defects: bodies are not merged or melting into each other, no shapeless flesh blobs, no"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.5979,
+  "target_reached": 0.0764,
+  "anatomy_defect": 0.0008,
+  "anatomy_zoom": 0.001
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

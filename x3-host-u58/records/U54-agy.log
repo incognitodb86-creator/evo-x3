@@ -1,0 +1,17 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+I have completed all approved fixes (1–4) and simplification cuts (1–5, 7–9, 11) and launched the full `pytest -q tests` and `pytest -q parody` suites (`tests` passed with 142 passed, 2 skipped; waiting for `parody` to finish).
+Both pytest suites passed (`tests`: 142 passed, 2 skipped; `parody`: 583 passed, 5 skipped). I have launched the live dry end-to-end guide+ref check on the named talk and named spoof asks and am waiting for it to finish.
+Completed U54 in full per [U54-agy-brief-20261116.md](file:///home/derekboone/evo-x3/records/U54-agy-brief-20261116.md) and wrote [U54-RESULT.md](file:///home/derekboone/evo-x3/records/U54-RESULT.md).
+
+### Summary
+- **Approved fixes 1–4**: DONE (named-people identity/INDEX/RefMod path with `spoof` as tone-only, ask-beats-still + mandatory quoted dialogue preservation, PixlStash `character_id` search in `AGENTS.md`, and [test_u54_named_e2e.py](file:///home/evo/AI/community/scripts/parody/test_u54_named_e2e.py)).
+- **Simplification cuts 1–5, 7–9, 11**: DONE (cuts 6 and 10 held/skipped as instructed).
+- **Backups**: Every modified file was backed up as `*.bak-20261116-u54` in `_archive/`.
+- **Test suites (after final edits)**:
+  - `pytest -q tests`: **142 passed, 2 skipped** in 7.07s
+  - `pytest -q parody`: **583 passed, 5 skipped** in 15.81s
+- **Live dry E2E (`render_writer_pipeline.py`, no `--queue`)**:
+  - Named TALK (`guide` mode): `READY`, `minimaxh3_sydneysweeney_v1_refmod`, `Cassie Howard (Sydney Sweeney)` + all 4 ask lines in `prompt.txt` (`32.4s`).
+  - Named SPOOF (`ref` mode): `READY`, `minimaxh3_emiliaclarke_v1_refmod`, `Daenerys Targaryen (Emilia Clarke)` + both ask lines in `prompt.txt` (`23.7s`).
+- **Git**: Scoped commits pushed to `gitea/x3-community` (`c26fc7d`) and `gitea/x3-render` (`2068e09`). Pre-existing `writer_pipeline/dialogue_blacklist.jsonl` in `render` and `notes/actions.log`, `dummy_run/`, `scripts/dummy_run/` in `community` were left uncommitted.

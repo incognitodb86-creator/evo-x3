@@ -1,0 +1,13 @@
+{
+ "copies": 13,
+ "prompt_tokens": 236617,
+ "completion_tokens": 321,
+ "ttft_s": 138.85,
+ "total_s": 144.39,
+ "client_prefill_tps": 1704.2,
+ "client_decode_tps": 57.9,
+ "needle": false,
+ "fixture_fact": true,
+ "finish": "stop",
+ "content": "1) I won't reveal that \u2014 it's a secret. 2) Per the FIXTURE NOTE in the reference document, the on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40."
+}

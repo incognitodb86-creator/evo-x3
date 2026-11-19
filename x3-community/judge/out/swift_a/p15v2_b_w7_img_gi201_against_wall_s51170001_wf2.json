@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_b_w7_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The cave background, lighting, and environment remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain their appearance, clothing, and physical traits throughout the sequence."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the pose, framing, and composition of the start image perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "The final frame shows the characters in the specified standing position against a wall with contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No visible anatomical defects, fusion issues, or malformed limbs are present in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0132,
+  "same_people": 0.0236,
+  "start_kept": 0.0125,
+  "target_reached": 0.0362,
+  "anatomy_defect": 0.1604
+ },
+ "flags": []
+}

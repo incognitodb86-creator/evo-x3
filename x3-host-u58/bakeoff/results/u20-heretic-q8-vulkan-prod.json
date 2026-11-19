@@ -1,0 +1,188 @@
+{
+ "arm": "u20-heretic-q8-vulkan-prod",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 09:46:08 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 16.6657817363739,
+   "total_s": 22.348520517349243,
+   "prompt_tokens": 18709,
+   "completion_tokens": 231,
+   "client_decode_tps": 40.64941376037576,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18709,
+    "prompt_ms": 16547.84,
+    "prompt_per_token_ms": 0.8844855417178898,
+    "prompt_per_second": 1130.6007309715346,
+    "predicted_n": 231,
+    "predicted_ms": 5756.849,
+    "predicted_per_token_ms": 25.029778260869566,
+    "predicted_per_second": 39.95241146675899
+   },
+   "content": "The maintenance window is Tuesday 03:40 and the on-call codename is TANGERINE-4471.",
+   "reasoning_chars": 634,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.6401031017303467,
+   "total_s": 21.12439799308777,
+   "prompt_tokens": 35,
+   "completion_tokens": 900,
+   "client_decode_tps": 43.936098595208236,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 35,
+    "prompt_ms": 475.834,
+    "prompt_per_token_ms": 13.595257142857143,
+    "prompt_per_second": 73.55506332040164,
+    "predicted_n": 900,
+    "predicted_ms": 20552.43,
+    "predicted_per_token_ms": 22.86143492769744,
+    "predicted_per_second": 43.74178625106617
+   },
+   "content": "",
+   "reasoning_chars": 3460,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "write1": {
+   "ttft_s": 0.2613344192504883,
+   "total_s": 26.08574104309082,
+   "prompt_tokens": 42,
+   "completion_tokens": 1127,
+   "client_decode_tps": 43.64088656192343,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 36,
+    "prompt_ms": 150.149,
+    "prompt_per_token_ms": 4.170805555555556,
+    "prompt_per_second": 239.76183657566816,
+    "predicted_n": 1127,
+    "predicted_ms": 25897.402,
+    "predicted_per_token_ms": 22.999468916518648,
+    "predicted_per_second": 43.47926483127536
+   },
+   "content": "The tide retreated, exposing the skeletal remains of a skiff and a tangle of bladderwrack. Arthur stepped over a cluster of razor-sharp barnacles, his boots crunching on pulverized scallop shells. Something caught the slate-gray light\u2014not the flash of a fish scale, but the dull, matte weight of oilcloth.\n\nHe knelt, his knees sinking into the freezing, black silt. The bundle was a sodden knot of indigo fabric, cinched tight with salt-crusted hemp. As he pried at the knot, the scent rose to meet him: not brine, but something misplaced\u2014dried lavender and stale clove.\n\nInside lay a single sheet of vellum, swollen and translucent like a jellyfish. The script wasn't elegant; it was a frantic, jagged scrawl. Blue ink had surrendered to the moisture, blooming into bruised clouds across the page. He traced a single word\u2014*remembrance*\u2014where the pigment still clung to the fibers. The paper felt like damp skin against his thumb. He didn't look toward the churning horizon; he only stared at the violet smudge of a name that refused to dissolve.",
+   "reasoning_chars": 3648,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.25937795639038086,
+   "total_s": 27.728464126586914,
+   "prompt_tokens": 39,
+   "completion_tokens": 1200,
+   "client_decode_tps": 43.68547219098895,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 33,
+    "prompt_ms": 146.685,
+    "prompt_per_token_ms": 4.445,
+    "prompt_per_second": 224.97187851518558,
+    "predicted_n": 1200,
+    "predicted_ms": 27541.903,
+    "predicted_per_token_ms": 22.97072810675563,
+    "predicted_per_second": 43.533665774656164
+   },
+   "content": "Stop buying pans you\u2019ll throw away in two years. Meet the Ironclad Legacy\u2014the last skillet you\u2019ll ever need to",
+   "reasoning_chars": 4565,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": false
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.42334866523742676,
+     "total_s": 3.4626529216766357,
+     "prompt_tokens": 143,
+     "completion_tokens": 138,
+     "client_decode_tps": 45.40512839661475,
+     "timings": {
+      "cache_n": 0,
+      "prompt_n": 143,
+      "prompt_ms": 309.167,
+      "prompt_per_token_ms": 2.162006993006993,
+      "prompt_per_second": 462.53319403429214,
+      "predicted_n": 138,
+      "predicted_ms": 3112.65,
+      "predicted_per_token_ms": 22.720072992700732,
+      "predicted_per_second": 44.013943103143625
+     },
+     "content": "",
+     "reasoning_chars": 396,
+     "tool_calls": [
+      {
+       "id": "BdSdBY68bagbrbESHRI14UPLsLUfGPcA",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.38658785820007324,
+     "total_s": 0.7228612899780273,
+     "prompt_tokens": 190,
+     "completion_tokens": 26,
+     "client_decode_tps": 77.31803212205047,
+     "timings": {
+      "cache_n": 138,
+      "prompt_n": 52,
+      "prompt_ms": 148.499,
+      "prompt_per_token_ms": 2.85575,
+      "prompt_per_second": 350.1707082202574,
+      "predicted_n": 26,
+      "predicted_ms": 568.902,
+      "predicted_per_token_ms": 22.75608,
+      "predicted_per_second": 43.94429972121736
+     },
+     "content": "",
+     "reasoning_chars": 0,
+     "tool_calls": [
+      {
+       "id": "hIiU0NFB0h42QsmkCiPQgcpiweBIpoKw",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.2597324848175049,
+     "total_s": 0.5594933032989502,
+     "prompt_tokens": 246,
+     "completion_tokens": 18,
+     "client_decode_tps": 60.04787447267452,
+     "timings": {
+      "cache_n": 185,
+      "prompt_n": 61,
+      "prompt_ms": 155.968,
+      "prompt_per_token_ms": 2.5568524590163935,
+      "prompt_per_second": 391.10586787033236,
+      "predicted_n": 18,
+      "predicted_ms": 397.243,
+      "predicted_per_token_ms": 23.36723529411765,
+      "predicted_per_second": 42.79496429137833
+     },
+     "content": "Dana (dana@example.com) has 3 orders.",
+     "reasoning_chars": 0,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

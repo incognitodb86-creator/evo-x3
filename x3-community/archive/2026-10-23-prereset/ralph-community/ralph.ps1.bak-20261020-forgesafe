@@ -1,0 +1,20 @@
+﻿# Ralph loop (ghuntley.com/ralph): community switch list (ALI-52 / ALI-127). Derrick 2026-10-20 11:04 AM CT "Have forge do it" / "Queue with Ralph loop". Copy of 5slock\ralph\ralph.ps1 pointed at this list.
+# Starts only after the P4 chaining test (C:\AI\community\scripts\p4.py) has exited.
+param([int]$Max=10,[int]$TimeoutMin=40)
+$R='C:\Users\derek\5slock'; $K='C:\Users\derek\5slock\ralph-community'; $L="$K\logs"; Set-Location $R; New-Item -ItemType Directory -Force $L | Out-Null
+if(Get-CimInstance Win32_Process -Filter "Name='python.exe'" | ? { $_.CommandLine -match 'community\\scripts\\p4\.py' }){ "$(Get-Date -f s) refused: P4 still rendering" | Add-Content "$L\ralph.log"; exit 1 }
+$cli="$env:APPDATA\npm\node_modules\@earendil-works\pi-coding-agent\dist\bundle\cli.js"
+$a="`"$cli`" --print --provider llama-swap --model coding_sc117_strata `"@$K\PROMPT.md`" `"Follow PROMPT.md exactly.`""
+$why='max-iterations'; $i=0
+function Open { @(Select-String -Path "$K\TASKS.md" -Pattern '^\s*- \[ \]').Count }
+while($i -lt $Max){
+  if(Test-Path "$K\STOP_RALPH"){$why='STOP_RALPH';break}; if((Open) -eq 0){$why='COMPLETE';break}
+  $i++; $n='{0:D2}' -f $i; "$(Get-Date -f s) iter $n start" | Add-Content "$L\ralph.log"
+  $p=Start-Process node -ArgumentList $a -WorkingDirectory $R -RedirectStandardOutput "$L\iter_$n.log" -RedirectStandardError "$L\iter_$n.err.log" -WindowStyle Hidden -PassThru; $null=$p.Handle
+  $p.Id | Set-Content "$L\pi.pid"
+  if(-not $p.WaitForExit($TimeoutMin*60000)){ taskkill /T /F /PID $p.Id | Out-Null; "TIMEOUT after $TimeoutMin min" | Add-Content "$L\ralph.log" }
+  "$(Get-Date -f s) iter $n exit $($p.ExitCode)" | Add-Content "$L\ralph.log"
+  if(Select-String -Path "$L\iter_$n.log" -Pattern '^\s*COMPLETE\s*$' -Quiet){$why='COMPLETE';break}
+}
+$t=@(Select-String -Path "$K\TASKS.md" -Pattern '^\s*- \[x\]').Count; $b=@(Select-String -Path "$K\TASKS.md" -Pattern '^\s*- \[!\]').Count
+"community ralph done $(Get-Date -f s) reason=$why iterations=$i ticked=$t blocked=$b open=$(Open)" | Set-Content "$L\DONE.txt"

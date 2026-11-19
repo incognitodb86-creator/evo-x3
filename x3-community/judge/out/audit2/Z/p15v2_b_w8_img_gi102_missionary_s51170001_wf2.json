@@ -1,0 +1,49 @@
+{
+ "frames": [
+  30,
+  113
+ ],
+ "diffs": [
+  9.2,
+  9.51
+ ],
+ "per_frame": [
+  {
+   "frame": 30,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background walls, bed, and lighting remain consistent. No new objects or structural changes visible."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies appear anatomically correct. No melting, extra limbs, or detached parts observed."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0004,
+    "anatomy_defect": 0.0001
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 113,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background walls, bed, and pillows unchanged. Lighting and furniture consistent between frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs and bodies intact. No melting, extra limbs, or floating parts. Hands and genitals anatomically correct."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0003,
+    "anatomy_defect": 0.0001
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_b_w8_img_gi102_missionary_s51170001_wf2"
+}

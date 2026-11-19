@@ -1,0 +1,13 @@
+{
+ "shot": {
+  "id": "p4_b3_5s",
+  "image_note": "adult woman, dark hair slicked back, metallic geometric top, black photo studio, hard key light",
+  "beat": "She sits down on a black studio stool, crosses her legs, leans forward with her elbows on her knees and laughs softly.",
+  "prev_beat": "She turns in a slow full circle under the key light, hands on her hips, looking back over her shoulder at the camera."
+ },
+ "arm": "short",
+ "secs": 5,
+ "words": 73,
+ "model": "coding_sc117_strata",
+ "guide": "MiniMax-H3 VIDEO_PROMPT_WRITING_GUIDE_base_en.md"
+}

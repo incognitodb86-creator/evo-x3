@@ -1,0 +1,29 @@
++ cd /home/derekboone/evo-x3
++ python3 -m venv .venv-ldr
++ .venv-ldr/bin/pip install -q --upgrade pip
++ .venv-ldr/bin/pip install -q --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple torch
++ .venv-ldr/bin/pip install -q local-deep-research
++ echo LDR_OK
+LDR_OK
++ python3 -m venv .venv-gptr
++ .venv-gptr/bin/pip install -q --upgrade pip
++ .venv-gptr/bin/pip install -q gpt-researcher
++ echo GPTR_OK
+GPTR_OK
++ .venv-ldr/bin/pip show local-deep-research
++ head -3
+Name: local-deep-research
+Version: 2.0.1
+Summary: AI-powered research assistant with deep, iterative analysis using LLMs and web searches
+ERROR: Pipe to stdout was broken
++ .venv-gptr/bin/pip show gpt-researcher
++ head -3
+Name: gpt-researcher
+Version: 0.17.0
+Summary: GPT Researcher is an autonomous agent designed for comprehensive online research on a variety of tasks.
+ERROR: Pipe to stdout was broken
++ du -sh .venv-ldr .venv-gptr
+3.2G	.venv-ldr
+1.2G	.venv-gptr
++ echo INSTALL_DONE
+INSTALL_DONE

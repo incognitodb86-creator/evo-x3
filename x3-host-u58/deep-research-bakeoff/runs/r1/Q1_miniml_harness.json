@@ -1,0 +1,80 @@
+{
+  "arm": "R1_kyuz0_3tier_cleanroom",
+  "question_id": "Q1_miniml_harness",
+  "question": "Which coding harness ranked first in miniml's local harness-bench, and with what pass rate and per-task time for its top cell?",
+  "started_ct": "2026-11-15 23:51:32 CST",
+  "wall_s": 64.84,
+  "angles": [
+    "miniml local harness-bench coding harness ranking pass rate",
+    "miniml harness-bench top cell pass rate per-task time"
+  ],
+  "pages_saved": [
+    {
+      "url": "https://neuralnoise.com/2026/harness-bench-wip/",
+      "title": "[WIP] Benchmarking Local LLMs Against Coding Agent Harnesses",
+      "file": "66b12cf034a2.md",
+      "chars": 18593
+    },
+    {
+      "url": "https://arena.ai/blog/coding-agents-harness-tax",
+      "title": "HarnessTax: How Much Does the Harness Matter for Coding Agents? - Arena.ai",
+      "file": "c2dd74e6beaf.md",
+      "chars": 84
+    },
+    {
+      "url": "https://github.com/Waveorwaves/harness-bench",
+      "title": "GitHub - Waveorwaves/harness-bench \u00b7 GitHub",
+      "file": "1c01eb81a777.md",
+      "chars": 11607
+    },
+    {
+      "url": "https://composio.dev/content/best-ai-agent-harnesses",
+      "title": "8 Best AI Agent Harnesses in 2026: Performance, Cost, and Speed Compared | Composio",
+      "file": "432a0db058a0.md",
+      "chars": 39755
+    }
+  ],
+  "sources_urls": [
+    "https://neuralnoise.com/2026/harness-bench-wip/",
+    "https://arena.ai/blog/coding-agents-harness-tax",
+    "https://github.com/Waveorwaves/harness-bench",
+    "https://composio.dev/content/best-ai-agent-harnesses"
+  ],
+  "analyses": [
+    {
+      "url": "https://neuralnoise.com/2026/harness-bench-wip/",
+      "title": "[WIP] Benchmarking Local LLMs Against Coding Agent Harnesses",
+      "facts": "Based on the provided excerpts from the source URL `https://neuralnoise.com/2026/harness-bench-wip/`, here are the concrete facts regarding the coding harness rankings and performance:\n\n**1. Top-Ranked Harness (Overall)**\n*   **Harness:** `pi`\n*   **Overall Pass Rate:** **76.9%** (123/160 cells)\n*   **Average Agent Time:** **163 s**\n*   **Context:** `pi` is described as the \"strongest harness on this benchmark \u2013 and also the fastest of the top three.\" It outperformed `qwen` (75.0%), `claude` (66.2%), `opencode` (63.8%), and `aider` (62.5%).\n\n**2. Top (Model, Harness) Cell Performance**\n*   **Combination:** **Qwen3.6-27B (UD-Q4_K_XL) + pi**\n*   **Pass Rate:** **16/16** (100%)\n*   **Per-Task Time:** **~207 s/task**\n*   **Context:** This was the \"single perfect cell on the matrix\" and the only combination across all 85 tested cells to clear the full benchmark.\n\n**3. Notable Throughput Cell**\n*   **Combination:** **gpt-oss-120b (MXFP4) + pi**\n*   **Pass Rate:** **15/16**\n*   **Per-Task Time:** **~34 s/task**\n*   **Context:** This cell is noted as the \"fastest member of the 15/16 tier overall,\" being about 6\u00d7 faster than the top combo for only one extra failure."
+    },
+    {
+      "url": "https://arena.ai/blog/coding-agents-harness-tax",
+      "title": "HarnessTax: How Much Does the Harness Matter for Coding Agents? - Arena.ai",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://github.com/Waveorwaves/harness-bench",
+      "title": "GitHub - Waveorwaves/harness-bench \u00b7 GitHub",
+      "facts": "NO_RELEVANT_FACTS"
+    },
+    {
+      "url": "https://composio.dev/content/best-ai-agent-harnesses",
+      "title": "8 Best AI Agent Harnesses in 2026: Performance, Cost, and Speed Compared | Composio",
+      "facts": "NO_RELEVANT_FACTS\n\nThe provided excerpts describe a benchmark conducted by **Composio** (not \"miniml's local harness-bench\"). While the data shows that **Oh My Pi** ranked first with an 88% pass rate and a median time of 231.7s, the source and benchmark name do not match the question's premise (\"miniml's local harness-bench\"). Therefore, the excerpts do not support an answer to the specific question asked."
+    }
+  ],
+  "report": "## Answer\n\nIn **miniml's local harness-bench**, the coding harness **`pi`** ranked first overall with a **76.9% pass rate** (123/160 cells) and an average agent time of 163 s [1](https://neuralnoise.com/2026/harness-bench-wip/).\n\nThe **top cell** (best single model + harness combination) on the matrix was:\n\n| Metric | Value |\n|--------|-------|\n| **Combination** | Qwen3.6-27B (UD-Q4_K_XL) + `pi` |\n| **Pass Rate** | **16/16 (100%)** |\n| **Per-Task Time** | **~207 s/task** |\n\nThis was the only combination across all 85 tested cells to clear the full benchmark, described as the \"single perfect cell on the matrix\" [1](https://neuralnoise.com/2026/harness-bench-wip/).\n\nFor context, `pi` was characterized as \"the strongest harness on this benchmark \u2013 and also the fastest of the top three,\" outperforming `qwen` (75.0%), `claude` (66.2%), `opencode` (63.8%), and `aider` (62.5%) [1](https://neuralnoise.com/2026/harness-bench-wip/).\n\n---\n\n### Sources\n\n1. [WIP] Benchmarking Local LLMs Against Coding Agent Harnesses \u2014 https://neuralnoise.com/2026/harness-bench-wip/",
+  "metrics": {
+    "prompt_tokens": 26859,
+    "completion_tokens": 3065,
+    "tool_calls": {
+      "search_web": 6,
+      "fetch_page": 7,
+      "analyze_page": 4
+    }
+  },
+  "quotas": {
+    "search_web": 4,
+    "fetch_page": 6,
+    "analyze_page": 6
+  }
+}

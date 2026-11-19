@@ -1,0 +1,20 @@
+[Unit]
+Description=llama-swap Loopback Proxy for EVO-X3 (U7 / U14)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Derrick creates /etc/evo-x3/llm.env (chmod 0600, root:root) containing LLM_KEY_* entries
+EnvironmentFile=/etc/evo-x3/llm.env
+# In U7 (before U14 proxy): LISTEN_ADDR defaults to 127.0.0.1:8080
+# In U14 (with evo-rate-proxy on 127.0.0.1:8080): override LISTEN_ADDR to 127.0.0.1:8082
+Environment=LISTEN_ADDR=127.0.0.1:8080
+ExecStart=/usr/local/bin/evo-llama-swap
+Restart=always
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

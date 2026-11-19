@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains dark cave texture across all frames, matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and green-skinned man appear in all frames, unchanged in appearance."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing exactly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Final frame shows them braced against wall, but penis not visibly penetrating vagina."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or final image."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0011,
+  "same_people": 0.001,
+  "start_kept": 0.013,
+  "target_reached": 0.6845,
+  "anatomy_defect": 0.0922
+ },
+ "finish": "stop",
+ "flags": [
+  "target_reached"
+ ],
+ "tag": "p15v2_b_w7_capswift_gi201_against_wall_s51170001_wf2"
+}

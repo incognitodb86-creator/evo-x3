@@ -1,0 +1,61 @@
+{
+ "jobs": [
+  {
+   "tag": "bjpov_b1",
+   "guides": [
+    {
+     "image": "community/bj_pov_20261030/start_pov_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/bj_pov_20261030/start_pov_768x1344.png",
+    "community/bj_pov_20261030/face_a.png",
+    "community/bj_pov_20261030/face_b.png"
+   ],
+   "prompt_file": "bjpov_b1_prompt.txt",
+   "pose": "oral: by the last frame her mouth is on his shaft with deep oral contact, motion still running",
+   "arm": "b1_s51083020",
+   "judged_file": "C:\\AI\\community\\runs\\bj_pov_20261030\\b1_s51083020\\bj_pov_b1_s51083020.mp4",
+   "judged_size": "768x1344",
+   "instrument_caveat": "start image is the man's own lap and shows no woman; the clip's job is to bring her in, so same_scene/same_people/start_kept are not applicable on this cell"
+  },
+  {
+   "tag": "bjpov_b4",
+   "guides": [
+    {
+     "image": "community/bj_pov_20261030/her_close_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/bj_pov_20261030/her_close_768x1344.png",
+    "community/bj_pov_20261030/face_a.png",
+    "community/bj_pov_20261030/face_b.png"
+   ],
+   "prompt_file": "bjpov_b4_prompt.txt",
+   "pose": "oral: by the last frame her mouth is on his shaft with deep oral contact, motion still running, her face large in the upper frame",
+   "arm": "b4_s51083021",
+   "judged_file": "C:\\AI\\community\\runs\\bj_pov_20261030\\b4_s51083021\\bj_pov_b4_s51083021.mp4",
+   "judged_size": "768x1344",
+   "instrument_caveat": "the man is not in the start image at all; his penis enters from the lower frame edge, so a missing-man answer on same_people is the design of this cell, not a break"
+  },
+  {
+   "tag": "bjpov_b5_lora",
+   "guides": [
+    {
+     "image": "community/bj_pov_20261030/start_pov_768x1344.png"
+    }
+   ],
+   "refs": [
+    "community/bj_pov_20261030/start_pov_768x1344.png",
+    "community/bj_pov_20261030/face_a.png",
+    "community/bj_pov_20261030/face_b.png"
+   ],
+   "prompt_file": "bjpov_b5_lora_prompt.txt",
+   "pose": "oral: by the last frame her mouth is on his shaft with deep oral contact, motion still running",
+   "arm": "b5_s51083020_lora",
+   "judged_file": "C:\\AI\\community\\runs\\bj_pov_20261030\\b5_s51083020_lora\\bj_pov_b5_s51083020_lora.mp4",
+   "judged_size": "768x1344",
+   "instrument_caveat": "same as b1: the start image has no woman in it; this cell differs from b1 by the face LoRA only"
+  }
+ ]
+}

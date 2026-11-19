@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w7_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 12.8,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background shows identical bed, headboard, and lighting as START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and dark-haired man with matching body types and clothing appear in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or repositioning."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows man on top in missionary position, fully in contact with woman, meeting target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show anatomically correct, intact bodies with no fusion, missing limbs, or malformed features."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "All body regions are anatomically correct and clearly defined. There are no fusion defects, missing or extra limbs, malformed genitals, or shapeless flesh blobs. The bodies are distinct and properly\u6bd4\u4f8b"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.1705,
+  "target_reached": 0.0579,
+  "anatomy_defect": 0.0003,
+  "anatomy_zoom": 0.0016
+ },
+ "flags": []
+}

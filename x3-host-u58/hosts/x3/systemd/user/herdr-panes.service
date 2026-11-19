@@ -1,0 +1,13 @@
+[Unit]
+Description=Create the Render / Forge / Sydney pi panes in herdr if missing (consolidation P3, runs as evo)
+Requires=herdr-server.service
+After=herdr-server.service pi-mobile-hub.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=/bin/bash %h/evo-x3/scripts/herdr-panes.sh
+
+[Install]
+WantedBy=default.target

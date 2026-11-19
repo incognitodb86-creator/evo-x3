@@ -1,0 +1,53 @@
+{
+ "frames": [
+  273,
+  329
+ ],
+ "diffs": [
+  15.41,
+  16.93
+ ],
+ "per_frame": [
+  {
+   "frame": 273,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rock textures, lighting conditions, and environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "Image 2 shows a malformed, fused limb structure between the characters' legs, appearing as a shapeless flesh blob."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0377,
+    "anatomy_defect": 0.8302
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 329,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rocky cave walls and lighting conditions in both images."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The male character's genitalia is malformed, appearing as a smooth, fleshy protrusion lacking anatomical detail."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0183,
+    "anatomy_defect": 0.8459
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w8_capswift_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.0
+}

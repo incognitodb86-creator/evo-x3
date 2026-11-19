@@ -1,0 +1,691 @@
+{
+ "rubric": "p7-rubric-v1 (2026-10-20)",
+ "when": "2026-10-21 12:20 CT",
+ "judge": "qwen3vl_judge",
+ "model_used": true,
+ "calls": 16,
+ "asks": 16,
+ "judge_failures": 0,
+ "judge_secs": 71.3,
+ "weights": {
+  "abs": 0.4,
+  "pairwise": 0.4,
+  "objective": 0.2,
+  "flag_penalty": 0.75
+ },
+ "dims": {
+  "motion_quality": 0.15,
+  "temporal_consistency": 0.15,
+  "burn_exposure": 0.1,
+  "identity_consistency": 0.2,
+  "prompt_adherence": 0.1,
+  "artifacts": 0.2,
+  "pacing_cuts": 0.1
+ },
+ "title": "P7 comparison",
+ "ranking": [
+  {
+   "name": "p6_1min_community",
+   "label": "V1",
+   "video": "C:\\AI\\community\\runs\\p6_1min_community\\p6_1min_community_stitched.mp4",
+   "kind": "full",
+   "metrics": {
+    "frames": 1444,
+    "fps": 24.0,
+    "duration": 60.157,
+    "cuts_detected": 4,
+    "cut_times": [
+     20.08,
+     23.17,
+     40.12,
+     43.17
+    ],
+    "motion": 4.051,
+    "lum_flicker": 0.459,
+    "tex_flicker": 1.199,
+    "freeze_frac": 0.01,
+    "seam_ratio": 2.29,
+    "sat_mean": 0.4227,
+    "clip_frac": 0.0036,
+    "sharpness": 388.3,
+    "sat_drift_max": 0.2258,
+    "clip_late_max": 0.016,
+    "sharp_drift_min": -0.4062,
+    "color_drift_max": 6.095,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 20.04,
+      "sat_drift": -0.2693491397648937,
+      "clip_late": 0.01600620958259847,
+      "sharp_drift": -0.08298778751187519,
+      "color_drift_ab": 6.095245572729171
+     },
+     {
+      "t0": 20.04,
+      "t1": 23.17,
+      "sat_drift": 0.06070167463586573,
+      "clip_late": 0.0025100124926513818,
+      "sharp_drift": -0.2860420962716028,
+      "color_drift_ab": 0.9104192500720418
+     },
+     {
+      "t0": 23.17,
+      "t1": 40.08,
+      "sat_drift": -0.28054423304249765,
+      "clip_late": 0.0030336015579071132,
+      "sharp_drift": 2.1949791010003183,
+      "color_drift_ab": 5.595156227593554
+     },
+     {
+      "t0": 40.08,
+      "t1": 43.17,
+      "sat_drift": -0.17122534292281932,
+      "clip_late": 0.0001699368018812463,
+      "sharp_drift": -0.40622027266475447,
+      "color_drift_ab": 3.6268350592372163
+     },
+     {
+      "t0": 43.17,
+      "t1": 60.13,
+      "sat_drift": 0.2257875658920394,
+      "clip_late": 0.0003731720311581422,
+      "sharp_drift": -0.26920480100400523,
+      "color_drift_ab": 3.1455513439582914
+     }
+    ],
+    "objective_score": 7.02,
+    "objective_penalties": {
+     "lum_flicker": 0.07,
+     "tex_flicker": 0.21,
+     "burn_sat_drift": 1.41,
+     "burn_clip": 0.18,
+     "blur_drift": 0.77,
+     "color_drift": 0.34,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 7.02,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V1\\w01_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 8,
+       "identity_consistency": 9,
+       "prompt_adherence": 7,
+       "artifacts": 5,
+       "pacing_cuts": 7
+      },
+      "reasons": {
+       "motion_quality": "Strap release is jerky, lacks natural weight; arms move unnaturally.",
+       "temporal_consistency": "Minor flicker in skin texture; background slightly shifts.",
+       "burn_exposure": "Skin has warm, slightly over-saturated glow; no burn.",
+       "identity_consistency": "Face, hair, body, outfit consistent across frames.",
+       "prompt_adherence": "Action sequence incomplete; strap not fully released by F6.",
+       "artifacts": "F4-F6 show melting strap edges and slight limb warping.",
+       "pacing_cuts": "Cuts land cleanly; rhythm readable but action feels rushed."
+      },
+      "flags": [
+       "identity_break"
+      ],
+      "worst_frame": "F4"
+     }
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V1\\w02_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 8,
+       "identity_consistency": 9,
+       "prompt_adherence": 7,
+       "artifacts": 5,
+       "pacing_cuts": 7
+      },
+      "reasons": {
+       "motion_quality": "Hands slide down but motion feels rubbery, no weight or timing realism.",
+       "temporal_consistency": "Minor flicker in skin texture, background slightly shifts.",
+       "burn_exposure": "Skin overly saturated, highlights slightly burnt.",
+       "identity_consistency": "Face, hair, body, outfit consistent across frames.",
+       "prompt_adherence": "Action sequence incomplete; no clear shoulder look-back or lip bite.",
+       "artifacts": "Melting skin texture, duplicated hands in F4, warped anatomy.",
+       "pacing_cuts": "Cuts land cleanly but rhythm lacks flow, pauses feel jarring."
+      },
+      "flags": [
+       "identity_break",
+       "severe_burn",
+       "body_horror",
+       "frozen"
+      ],
+      "worst_frame": "F4"
+     }
+    },
+    {
+     "seg": 2,
+     "t0": 20.04,
+     "t1": 30.06,
+     "beat": "Cut to the dark living room: topless in her black bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V1\\w03_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 8,
+       "temporal_consistency": 9,
+       "burn_exposure": 9,
+       "identity_consistency": 10,
+       "prompt_adherence": 9,
+       "artifacts": 9,
+       "pacing_cuts": 9
+      },
+      "reasons": {
+       "motion_quality": "Smooth, grounded walk with natural weight shift; no floaty motion.",
+       "temporal_consistency": "No flicker or morphing; background and lighting stable across frames.",
+       "burn_exposure": "Natural skin tones and ambient lighting; no overexposure or color creep.",
+       "identity_consistency": "Face, hair, body, and outfit identical to reference across all frames.",
+       "prompt_adherence": "Walks toward window, city lights visible, framing matches beat.",
+       "artifacts": "Clean limbs and skin; no melting, duplication, or warping.",
+       "pacing_cuts": "Cuts land cleanly at 21.1s, 22.7s, 24.3s, 25.8s, 27.4s, 29.0s; rhythm clear."
+      },
+      "flags": [],
+      "worst_frame": "F1"
+     }
+    },
+    {
+     "seg": 2,
+     "t0": 30.06,
+     "t1": 40.08,
+     "beat": "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V1\\w04_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 8,
+       "temporal_consistency": 9,
+       "burn_exposure": 9,
+       "identity_consistency": 10,
+       "prompt_adherence": 9,
+       "artifacts": 9,
+       "pacing_cuts": 9
+      },
+      "reasons": {
+       "motion_quality": "Smooth, natural stretch and arch; no floaty motion or frozen frames.",
+       "temporal_consistency": "No flicker or morphing; background city lights stable across frames.",
+       "burn_exposure": "Natural skin tones and exposure; no burnt highlights or oversaturation.",
+       "identity_consistency": "Face, hair, outfit, and body state identical to reference across all frames.",
+       "prompt_adherence": "Full action sequence completed: leaning, stretching, arching, smiling, city lights visible.",
+       "artifacts": "Clean frames; no melting, duplicated limbs, or warped faces.",
+       "pacing_cuts": "Cuts land cleanly on beat; rhythm readable and smooth."
+      },
+      "flags": [],
+      "worst_frame": "F1"
+     }
+    },
+    {
+     "seg": 3,
+     "t0": 40.08,
+     "t1": 50.1,
+     "beat": "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V1\\w05_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 7,
+       "temporal_consistency": 8,
+       "burn_exposure": 9,
+       "identity_consistency": 9,
+       "prompt_adherence": 8,
+       "artifacts": 7,
+       "pacing_cuts": 8
+      },
+      "reasons": {
+       "motion_quality": "Smooth transitions, but slight rubbery quality in leg movements.",
+       "temporal_consistency": "Minor flicker in background lights, otherwise stable.",
+       "burn_exposure": "Natural skin tones and lighting, no overexposure.",
+       "identity_consistency": "Face, hair, and outfit consistent across frames.",
+       "prompt_adherence": "Action sequence mostly followed, cut to sofa at 45.9s.",
+       "artifacts": "Minor hand/finger blurring, slight melting in F5.",
+       "pacing_cuts": "Cuts land cleanly, rhythm readable, no jarring joins."
+      },
+      "flags": [],
+      "worst_frame": "F5"
+     }
+    },
+    {
+     "seg": 3,
+     "t0": 50.1,
+     "t1": 60.13,
+     "beat": "Now nude, she rolls onto her side facing the camera, props her head on one hand, laughs softly and blows the camera a kiss.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V1\\w06_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 7,
+       "temporal_consistency": 8,
+       "burn_exposure": 9,
+       "identity_consistency": 9,
+       "prompt_adherence": 8,
+       "artifacts": 8,
+       "pacing_cuts": 8
+      },
+      "reasons": {
+       "motion_quality": "Rolling and posing feel staged, not fluid; slight rubbery transitions.",
+       "temporal_consistency": "Minor flicker in skin highlights; background stable.",
+       "burn_exposure": "Natural exposure, skin tones consistent, no over-saturation.",
+       "identity_consistency": "Face, hair, outfit match reference across all frames.",
+       "prompt_adherence": "Rolls, props head, laughs, blows kiss \u2014 all actions present.",
+       "artifacts": "Clean limbs and face; no melting or duplication.",
+       "pacing_cuts": "Cuts land cleanly; rhythm readable, no jarring joins."
+      },
+      "flags": [],
+      "worst_frame": "F1"
+     }
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V1\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\ref_D15.jpg",
+   "abs": 7.776,
+   "pairwise": 8.194,
+   "flags": [
+    "identity_break"
+   ],
+   "dims": {
+    "motion_quality": 7.4,
+    "temporal_consistency": 8.0,
+    "burn_exposure": 8.0,
+    "identity_consistency": 9.2,
+    "prompt_adherence": 8.4,
+    "artifacts": 7.5,
+    "pacing_cuts": 8.4
+   },
+   "global_judge": {
+    "scores": {
+     "motion_quality": 8,
+     "temporal_consistency": 8,
+     "burn_exposure": 7,
+     "identity_consistency": 9,
+     "prompt_adherence": 9,
+     "artifacts": 8,
+     "pacing_cuts": 9
+    },
+    "reasons": {
+     "motion_quality": "Smooth, weighted movements; no floaty or rubbery motion.",
+     "temporal_consistency": "Minor shimmer in background lights; no major morphing or flicker.",
+     "burn_exposure": "Slight over-saturation in skin tones; exposure drifts slightly over time.",
+     "identity_consistency": "Face, hair, body, and outfit remain consistent across all frames and cuts.",
+     "prompt_adherence": "All beats and cuts occur as described, with clear transitions.",
+     "artifacts": "Minor hand/finger blurring in some frames; otherwise clean.",
+     "pacing_cuts": "Cuts land precisely on beat markers; rhythm is readable and smooth."
+    },
+    "flags": [],
+    "worst_frame": "F1"
+   },
+   "weakest_window": 6.95,
+   "segment_scores": {
+    "1": 6.95,
+    "2": 9.05,
+    "3": 8.05
+   },
+   "weakest_segment": 1,
+   "bt_strength": 2.1304,
+   "composite": 7.042,
+   "rank": 1
+  },
+  {
+   "name": "p7_r2_c3_pmot_full_pool",
+   "label": "V2",
+   "video": "C:\\AI\\community\\runs\\p7_r2_c3_pmot_full_pool\\p7_r2_c3_pmot_full_pool_stitched.mp4",
+   "kind": "full",
+   "metrics": {
+    "frames": 1444,
+    "fps": 24.0,
+    "duration": 60.157,
+    "cuts_detected": 3,
+    "cut_times": [
+     20.08,
+     30.21,
+     40.12
+    ],
+    "motion": 4.272,
+    "lum_flicker": 0.512,
+    "tex_flicker": 1.213,
+    "freeze_frac": 0.02,
+    "seam_ratio": 0.87,
+    "sat_mean": 0.4119,
+    "clip_frac": 0.0097,
+    "sharpness": 366.4,
+    "sat_drift_max": 0.0042,
+    "clip_late_max": 0.0596,
+    "sharp_drift_min": 0.0086,
+    "color_drift_max": 6.861,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 20.04,
+      "sat_drift": -0.26009115897268953,
+      "clip_late": 0.05958122060552616,
+      "sharp_drift": 0.17160328696574556,
+      "color_drift_ab": 2.3184469149040723
+     },
+     {
+      "t0": 20.04,
+      "t1": 30.21,
+      "sat_drift": 0.004169410951663455,
+      "clip_late": 0.0003703014770723104,
+      "sharp_drift": 0.9831804526221826,
+      "color_drift_ab": 6.861337162559977
+     },
+     {
+      "t0": 30.21,
+      "t1": 40.08,
+      "sat_drift": -0.0767684757428565,
+      "clip_late": 0.0005127629755605945,
+      "sharp_drift": 0.008588949568506976,
+      "color_drift_ab": 6.661863947816234
+     },
+     {
+      "t0": 40.08,
+      "t1": 60.13,
+      "sat_drift": -0.07136544583700244,
+      "clip_late": 0.006921020723104057,
+      "sharp_drift": 0.6132752281549321,
+      "color_drift_ab": 0.6874834925159647
+     }
+    ],
+    "objective_score": 7.67,
+    "objective_penalties": {
+     "lum_flicker": 0.14,
+     "tex_flicker": 0.27,
+     "burn_sat_drift": 0.0,
+     "burn_clip": 1.49,
+     "blur_drift": 0.0,
+     "color_drift": 0.43,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 7.67,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera. Slow, smooth, continuous movement with natural weight.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V2\\w01_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 8,
+       "identity_consistency": 9,
+       "prompt_adherence": 8,
+       "artifacts": 7,
+       "pacing_cuts": 8
+      },
+      "reasons": {
+       "motion_quality": "Strap release is jerky, not smooth; body lacks natural weight and timing.",
+       "temporal_consistency": "Minor flicker in water and background; slight shimmer on skin.",
+       "burn_exposure": "Skin slightly oversaturated, highlights warm but not burnt.",
+       "identity_consistency": "Face, hair, body, and outfit consistent across frames.",
+       "prompt_adherence": "Action and setting match prompt; cut timing readable.",
+       "artifacts": "Minor hand/finger errors; strap slightly melted in F5.",
+       "pacing_cuts": "Cuts land cleanly; rhythm readable despite slight stutter."
+      },
+      "flags": [],
+      "worst_frame": "F5"
+     }
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip. Slow, smooth, continuous movement with natural weight.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V2\\w02_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 8,
+       "identity_consistency": 9,
+       "prompt_adherence": 7,
+       "artifacts": 5,
+       "pacing_cuts": 8
+      },
+      "reasons": {
+       "motion_quality": "Hands slide down but motion feels rubbery, lacks natural weight and fluidity.",
+       "temporal_consistency": "Minor flicker in skin highlights; background slightly shifts between frames.",
+       "burn_exposure": "Skin has warm, slightly oversaturated glow; not burnt but unnatural.",
+       "identity_consistency": "Face, hair, body, and outfit remain consistent across frames.",
+       "prompt_adherence": "Action sequence partially followed; turns and sway present but not fully smooth or complete.",
+       "artifacts": "Hands and fingers show slight melting; skin texture has smudged, glossy artifacts.",
+       "pacing_cuts": "Cuts land cleanly; rhythm readable but not perfectly timed to beat."
+      },
+      "flags": [
+       "frozen"
+      ],
+      "worst_frame": "F2"
+     }
+    },
+    {
+     "seg": 2,
+     "t0": 20.04,
+     "t1": 30.06,
+     "beat": "Cut to the dark living room: topless in her sheer beige bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass. Slow, smooth, continuous movement with natural weight.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V2\\w03_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 8,
+       "temporal_consistency": 9,
+       "burn_exposure": 9,
+       "identity_consistency": 10,
+       "prompt_adherence": 9,
+       "artifacts": 9,
+       "pacing_cuts": 9
+      },
+      "reasons": {
+       "motion_quality": "Smooth, weighted walk; slight float in F2/F3 but natural rhythm.",
+       "temporal_consistency": "No flicker or morphing; background stable; reflections consistent.",
+       "burn_exposure": "Natural skin tones and lighting; no oversaturation or burn.",
+       "identity_consistency": "Face, hair, body, and bikini identical to reference across all frames.",
+       "prompt_adherence": "Walks toward window, city lights visible, continuous motion as requested.",
+       "artifacts": "Clean; no melting, duplicated limbs, or warped faces.",
+       "pacing_cuts": "Cuts land cleanly; rhythm readable; no jarring transitions."
+      },
+      "flags": [],
+      "worst_frame": "F2"
+     }
+    },
+    {
+     "seg": 2,
+     "t0": 30.06,
+     "t1": 40.08,
+     "beat": "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her. Slow, smooth, continuous movement with natural weight.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V2\\w04_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 8,
+       "temporal_consistency": 9,
+       "burn_exposure": 9,
+       "identity_consistency": 10,
+       "prompt_adherence": 9,
+       "artifacts": 9,
+       "pacing_cuts": 9
+      },
+      "reasons": {
+       "motion_quality": "Smooth arc from back-to-front stretch, natural weight, no floaty motion.",
+       "temporal_consistency": "No flicker or morphing; background city lights stable.",
+       "burn_exposure": "Natural skin tones and lighting, no oversaturation or burn.",
+       "identity_consistency": "Face, hair, outfit, and body state identical to reference across all frames.",
+       "prompt_adherence": "Full action sequence completed: leans, stretches, arches, smiles, city lights visible.",
+       "artifacts": "Clean, no melting limbs, duplicated parts, or warped faces.",
+       "pacing_cuts": "Cuts land cleanly on beat; rhythm readable, no jarring joins."
+      },
+      "flags": [],
+      "worst_frame": "F1"
+     }
+    },
+    {
+     "seg": 3,
+     "t0": 40.08,
+     "t1": 50.1,
+     "beat": "Cut to a white leather sofa: she lies back on the cushions, hooks her thumbs into her bikini bottoms, slides them down her legs and drops them on the floor. Slow, smooth, continuous movement with natural weight.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V2\\w05_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 8,
+       "temporal_consistency": 9,
+       "burn_exposure": 9,
+       "identity_consistency": 10,
+       "prompt_adherence": 9,
+       "artifacts": 9,
+       "pacing_cuts": 9
+      },
+      "reasons": {
+       "motion_quality": "Smooth, weighted motion; thumbs hook, slide, drop with natural timing.",
+       "temporal_consistency": "No flicker or morphing; background and sofa stable across frames.",
+       "burn_exposure": "Natural skin tones and lighting; no oversaturation or burn highlights.",
+       "identity_consistency": "Face, hair, body, and outfit identical to reference across all frames.",
+       "prompt_adherence": "Beat fully executed: cut to sofa, thumbs hook, slide down, drop bottoms.",
+       "artifacts": "Clean frames; no melting, duplicated limbs, or warped features.",
+       "pacing_cuts": "Cuts land cleanly at 41.1s, 42.7s, 44.3s, 45.9s, 47.5s, 49.1s; rhythm clear."
+      },
+      "flags": [],
+      "worst_frame": "F1"
+     }
+    },
+    {
+     "seg": 3,
+     "t0": 50.1,
+     "t1": 60.13,
+     "beat": "Now nude, she rolls onto her side facing the camera, props her head on one hand, laughs softly and blows the camera a kiss. Slow, smooth, continuous movement with natural weight.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V2\\w06_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 9,
+       "identity_consistency": 9,
+       "prompt_adherence": 7,
+       "artifacts": 8,
+       "pacing_cuts": 8
+      },
+      "reasons": {
+       "motion_quality": "Rolling motion lacks weight; poses feel staged, not fluid.",
+       "temporal_consistency": "Minor flicker in hair and sofa seams; background stable.",
+       "burn_exposure": "Natural skin tones and lighting; no burn or oversaturation.",
+       "identity_consistency": "Face, hair, body, and outfit consistent across frames.",
+       "prompt_adherence": "Action sequence incomplete; no kiss/blow, setting mismatch (pool\u2192sofa).",
+       "artifacts": "Minor hand/finger blurring; no melting or duplicated limbs.",
+       "pacing_cuts": "Cuts land cleanly; rhythm readable but action not fully executed."
+      },
+      "flags": [],
+      "worst_frame": "F1"
+     }
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\V2\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\reviews\\p7_r2_full_review\\review_pair1_work\\ref_POOL.jpg",
+   "abs": 7.806,
+   "pairwise": 1.806,
+   "flags": [],
+   "dims": {
+    "motion_quality": 7.4,
+    "temporal_consistency": 7.6,
+    "burn_exposure": 8.4,
+    "identity_consistency": 9.3,
+    "prompt_adherence": 8.5,
+    "artifacts": 7.5,
+    "pacing_cuts": 8.3
+   },
+   "global_judge": {
+    "scores": {
+     "motion_quality": 8,
+     "temporal_consistency": 7,
+     "burn_exposure": 8,
+     "identity_consistency": 9,
+     "prompt_adherence": 9,
+     "artifacts": 7,
+     "pacing_cuts": 8
+    },
+    "reasons": {
+     "motion_quality": "Smooth transitions, natural weight, but some frames show slight rubbery limb motion.",
+     "temporal_consistency": "Minor flicker in background lights and slight shimmer on skin in some frames.",
+     "burn_exposure": "Natural exposure and color, slight orange tint on skin in later frames.",
+     "identity_consistency": "Face, hair, body, and outfit remain consistent across all frames and cuts.",
+     "prompt_adherence": "All beats and cuts occur as described, with clear, readable rhythm.",
+     "artifacts": "Minor hand/finger errors and slight melting in some poses, especially F10-F12.",
+     "pacing_cuts": "Cuts land cleanly, rhythm is readable, no jarring transitions."
+    },
+    "flags": [],
+    "worst_frame": "F10"
+   },
+   "weakest_window": 7.05,
+   "segment_scores": {
+    "1": 7.3,
+    "2": 9.05,
+    "3": 8.4
+   },
+   "weakest_segment": 1,
+   "bt_strength": 0.4694,
+   "composite": 5.379,
+   "rank": 2
+  }
+ ],
+ "pairs": [
+  {
+   "x": "p6_1min_community",
+   "y": "p7_r2_c3_pmot_full_pool",
+   "score_x": 1.0,
+   "consistent": true,
+   "xy": {
+    "winner": "A",
+    "dims": {
+     "motion_quality": "A",
+     "temporal_consistency": "A",
+     "burn_exposure": "A",
+     "identity_consistency": "A",
+     "prompt_adherence": "A",
+     "artifacts": "A",
+     "pacing_cuts": "A"
+    },
+    "reason": "A\u2019s frames show natural motion, consistent identity, clean artifacts, and perfect cut timing. B\u2019s frames suffer from identity break (wrong hair/face) and motion artifacts."
+   },
+   "yx": {
+    "winner": "B",
+    "dims": {
+     "motion_quality": "B",
+     "temporal_consistency": "B",
+     "burn_exposure": "B",
+     "identity_consistency": "B",
+     "prompt_adherence": "B",
+     "artifacts": "B",
+     "pacing_cuts": "B"
+    },
+    "reason": "B matches reference perfectly: consistent identity, natural motion, clean cuts, no artifacts, and flawless adherence to all 6 beats."
+   }
+  }
+ ],
+ "top3": [
+  "p6_1min_community",
+  "p7_r2_c3_pmot_full_pool"
+ ],
+ "verdicts": [
+  {
+   "parent": "p6_1min_community",
+   "child": "p7_r2_c3_pmot_full_pool",
+   "verdict": "KEEP_PARENT",
+   "consistent_child_win": false,
+   "parent_composite": 7.042,
+   "child_composite": 5.379,
+   "child_weakest_segment": 1
+  }
+ ]
+}

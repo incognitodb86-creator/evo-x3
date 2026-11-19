@@ -1,0 +1,7 @@
+All tests pass. Implementation summary:
+
+**connect.go** — `ResultOf` does a flood-fill (DFS) twice:
+1. **Player X**: seed the stack with all `X` stones in the leftmost column, then explore hex neighbors; if any reachable `X` touches the rightmost column, X wins.
+2. **Player O**: seed with `O` stones in the top row; if any reachable `O` touches the bottom row, O wins.
+
+Hex neighbor offsets in the offset-coordinate grid are `(0,±1)`, `(±1,0)`, `(1,-1)`, `(-1,+1)`. Returns `"X"`, `"O"`, or `""` when neither player has a connecting path.

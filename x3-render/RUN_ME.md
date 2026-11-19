@@ -4,7 +4,7 @@ Last Updated: 2026-11-16
 Quickstart for running the H3 writer pipeline on EVO-X3 Linux (`/home/evo/AI/render`).
 
 ## 0. EVO-X3 Launch & Queue
-- **User & launcher**: Render pi panes run as user `evo` (uid 1001, `/home/evo/AI/render`), launched via `/home/evo/AI/render/x3/render-pi.sh` (loads `x3-local/gemma4-heretic`, `--thinking medium`, `h3-parody-identity` + `h3-prompting` skills, `/home/evo/AI/render/AGENTS.md`):
+- **User & launcher**: Render pi panes run as user `evo` (uid 1001, `/home/evo/AI/render`), launched via `/home/evo/AI/render/x3/render-pi.sh` (loads `x3-local/flash-next-uncensored`, `--thinking low`, `h3-parody-identity` + `h3-prompting` skills, `/home/evo/AI/render/OPERATOR.md`):
   ```bash
   sudo -n -u evo env XDG_RUNTIME_DIR=/run/user/1001 HOME=/home/evo PATH=/home/evo/.local/bin:/usr/bin bash /home/evo/AI/render/x3/render-pi.sh
   ```
@@ -35,8 +35,8 @@ Quickstart for running the H3 writer pipeline on EVO-X3 Linux (`/home/evo/AI/ren
    - Report the `READY` / `NOT_READY` status line, `<run_dir>/pick.json` path, and `submitted=`. **Never pass `--queue` or `--yes-derrick` unless Derrick explicitly approved queueing.**
 
 ## 2. Characters, RefMods, Voice Refs, and Stills Vault
-- **All adult RefMods and all voice refs are allowed**: OC RefMods, INDEX celebrity/character RefMods, PixlStash-tagged identities, and voice refs (`*_refmod_audio` + `<Audio 1>`) are all supported.
-- **Vault on X3**: `/home/evo/AI/5slock/libraries/vault.db` is on the X3. Never open or browse library pictures, captions, sidecars, or face groups; look up stills only via the PixlStash API with `character_id` (and `$PIXL_KEY` in env, never printed).
+- **Adult RefMods & OC vs. Named-Parody Voice Rule**: OC RefMods (`FCSydny`, `FCMegan`) attach both visual and audio RefMods (`*_refmod_audio` + `<Audio 1>`). Named INDEX/celebrity parodies attach visual RefMods only (**no** voice ref and **no** `<Audio 1>`; voice comes from the INDEX character+actor voice line in `detailed_description:`). `<Picture 1>` appears only on `--still-mode ref` (never on default `--still-mode guide`).
+- **Vault on X3**: `/home/evo/AI/5slock/libraries/vault.db` is on the X3. Never open or browse library pictures, captions, sidecars, or face groups (except the generated 2x3 candidate contact sheet from `x3/still_candidate_sheet.py`); look up stills only via the PixlStash API with `character_id` (and `$PIXL_KEY` in env, never printed).
 - **Content rule**: Only `18+` adults-only applies (`guard_ok` and youth lint stay locked). Never use minor-coded terms.
 
 ## 3. Prompt Compilation & Acceptance

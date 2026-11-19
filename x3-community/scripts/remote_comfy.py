@@ -16,7 +16,12 @@ timeouts, /interrupt + /queue delete, DONE/FAILED lines) is reused unchanged:
   RTX upscale post-pass      -> deferred (decision D5: AlienPc ComfyUI step, not wired yet); logged, rc unaffected
 No secrets: :8446 has no key (scoped by the Tailscale grant), so nothing is read or sent.
 """
-import fcntl, json, mimetypes, os, re, shlex, subprocess, sys, time, urllib.parse, urllib.request, uuid
+import email.utils, json, mimetypes, os, re, shlex, subprocess, sys, time, urllib.parse, urllib.request, uuid
+try:
+    import fcntl
+except ImportError:
+    fcntl = None  # Windows host testing; lock_acquire uses msvcrt when fcntl is unavailable
+    import msvcrt
 
 API = os.environ.get("COMFY_API", "https://alienpc.tailf242b2.ts.net:8446").rstrip("/")
 HOME = os.path.expanduser("~")
@@ -89,16 +94,27 @@ def upload(item, timeout=300):
     return json.loads(urllib.request.urlopen(r, timeout=timeout).read())
 
 
-def download(subfolder, filename, dst, timeout=900):
+def download(subfolder, filename, dst, timeout=900, not_before=None):
+    """GET /view into dst. With not_before (epoch s), refuse a file whose Last-Modified is older or missing."""
     q = urllib.parse.urlencode({"filename": filename, "subfolder": subfolder or "", "type": "output"})
     tmp = dst + ".part"
-    with urllib.request.urlopen(API + "/view?" + q, timeout=timeout) as r, open(tmp, "wb") as f:
+    with urllib.request.urlopen(API + "/view?" + q, timeout=timeout) as r:
+        if not_before is not None:
+            lm = r.headers.get("Last-Modified") if getattr(r, "headers", None) is not None else None
+            ts = email.utils.parsedate_to_datetime(lm).timestamp() if lm else None
+            if ts is None or ts < not_before:
+                raise ValueError(f"stale or undated output {filename} (Last-Modified={lm})")
+        _stream(r, tmp)
+    os.replace(tmp, dst)
+    return os.path.getsize(dst)
+
+
+def _stream(r, tmp):
+    with open(tmp, "wb") as f:
         while True:
             chunk = r.read(1 << 20)
             if not chunk: break
             f.write(chunk)
-    os.replace(tmp, dst)
-    return os.path.getsize(dst)
 
 
 def lock_acquire(note):
@@ -108,8 +124,16 @@ def lock_acquire(note):
         os.makedirs(os.path.dirname(LOCK), exist_ok=True)
         fh = open(LOCK, "a+")
         try:
-            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
+            if fcntl is not None:
+                fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            else:
+                fh.seek(0)
+                if os.path.getsize(LOCK) == 0:
+                    fh.write(" ")
+                    fh.flush()
+                    fh.seek(0)
+                msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+        except (BlockingIOError, OSError):
             fh.close(); return 1, "held"
         fh.seek(0); fh.truncate(); fh.write("%d %s %s\n" % (os.getpid(), time.strftime("%Y-%m-%dT%H:%M:%S"), note)); fh.flush()
         _lock_fh = fh
@@ -122,14 +146,22 @@ def lock_release():
     global _lock_fh
     if _lock_fh:
         try:
-            _lock_fh.seek(0); _lock_fh.truncate(); fcntl.flock(_lock_fh, fcntl.LOCK_UN); _lock_fh.close()
+            if fcntl is not None:
+                _lock_fh.seek(0); _lock_fh.truncate(); fcntl.flock(_lock_fh, fcntl.LOCK_UN); _lock_fh.close()
+            else:
+                _lock_fh.seek(0)
+                try:
+                    msvcrt.locking(_lock_fh.fileno(), msvcrt.LK_UNLCK, 1)
+                except OSError:
+                    pass
+                _lock_fh.seek(0); _lock_fh.truncate(); _lock_fh.close()
         finally:
             _lock_fh = None
         return 0, "released"
     return 0, "not held"
 
 
-def remote_idle(timeout=20):
+def remote_idle(timeout=20, logfile=None, comm_mod=None):
     """Check /system_stats (in AlienPc llama-swap ignorePaths) before /queue so an unloaded ComfyUI
     (409) is treated as idle without waking comfyui_auto. Returns True when loaded and /queue is empty,
     None when unloaded (409), or False when busy/unreachable."""
@@ -137,10 +169,18 @@ def remote_idle(timeout=20):
         with urllib.request.urlopen(API + "/system_stats", timeout=timeout) as resp:
             if getattr(resp, "status", 200) != 200:
                 return False
+            raw_stats = resp.read()
     except urllib.error.HTTPError as e:
         return None if e.code == 409 else False
     except Exception:
         return False
+    if comm_mod is not None and raw_stats:
+        try:
+            st = json.loads(raw_stats)
+            if hasattr(comm_mod, "check_launch_argv"):
+                comm_mod.check_launch_argv(st, logfile)
+        except ValueError:
+            pass
     try:
         q = json.loads(urllib.request.urlopen(API + "/queue", timeout=timeout).read())
         return not (q.get("queue_running") or q.get("queue_pending"))
@@ -148,6 +188,41 @@ def remote_idle(timeout=20):
         return None if e.code == 409 else False
     except Exception:
         return False
+
+
+def remote_view_harvest(prefix, local_comfy_root, since=None, timeout=300):
+    """Recover an evicted render over GET /view when unambiguous (_00001_ present, _00002_ absent).
+    With since (attempt start), the file must be no older than since - 5 s, the same rule as run_queue.prefix_output,
+    so an earlier attempt's output under the same prefix is never adopted."""
+    if not prefix:
+        return None
+    norm = prefix.replace("\\", "/").strip("/")
+    subf, stem = (os.path.dirname(norm), os.path.basename(norm))
+    if not stem:
+        return None
+    for ext in (".mp4", ".png"):
+        q2 = urllib.parse.urlencode({"filename": f"{stem}_00002_{ext}", "subfolder": subf, "type": "output"})
+        try:
+            with urllib.request.urlopen(API + "/view?" + q2, timeout=15) as r2:
+                if getattr(r2, "status", 200) == 200:
+                    return None  # ambiguous multi-file prefix on remote output dir; skip blind harvest
+        except Exception:
+            pass
+        fname = f"{stem}_00001_{ext}"
+        dst_dir = os.path.join(local_comfy_root, "output", *([p for p in subf.split("/") if p]))
+        os.makedirs(dst_dir, exist_ok=True)
+        dst = os.path.join(dst_dir, fname)
+        try:
+            n = download(subf, fname, dst, timeout=timeout, not_before=None if since is None else since - 5)
+            if n > 0:
+                return dst
+        except Exception:
+            if os.path.exists(dst + ".part"):
+                try:
+                    os.remove(dst + ".part")
+                except OSError:
+                    pass
+    return None
 
 
 def enable(rq):
@@ -174,14 +249,44 @@ def enable(rq):
             if "-Acquire" in args:
                 rc, msg = lock_acquire(" ".join(args[-2:]))
                 if rc == 0:
-                    idle = remote_idle()
-                    if idle is False:
-                        lock_release(); return 1, "AlienPc ComfyUI /queue busy or unreadable"
+                    wait_cap = max(0, int(os.environ.get("RQ_REMOTE_BUSY_WAIT_SEC", "0") or 0))
+                    poll_s = max(1, int(os.environ.get("RQ_REMOTE_BUSY_POLL_SEC", "15") or 15))
+                    deadline = time.monotonic() + wait_cap
+                    while True:
+                        idle = remote_idle(comm_mod=comm)
+                        if idle is not False:
+                            break
+                        if time.monotonic() >= deadline:
+                            lock_release(); return 1, "AlienPc ComfyUI /queue busy or unreadable"
+                        time.sleep(min(poll_s, max(1.0, deadline - time.monotonic())))
                 return rc, msg
             if "-Release" in args:
                 return lock_release()
         return orig_ps_run(file, *args)
     rgj.ps_run = ps_run
+
+    orig_wake = rgj.wake
+    def wake(log):
+        ok = orig_wake(log)
+        if ok:
+            try:
+                st = comm.http(API + "/system_stats", timeout=15)
+                if hasattr(comm, "check_launch_argv"):
+                    comm.check_launch_argv(st)
+            except Exception as ex:
+                if "ARGV_MISMATCH" in str(ex):
+                    raise
+        return ok
+    rgj.wake = wake
+
+    orig_prefix_output = getattr(rq, "prefix_output", None)
+    if callable(orig_prefix_output):
+        def prefix_output(prefix, since):
+            hit = orig_prefix_output(prefix, since)
+            if hit:
+                return hit
+            return remote_view_harvest(prefix, comm.C, since=since)
+        rq.prefix_output = prefix_output
 
     orig_submit = comm.submit
     def submit(g, tag, meta, outdir, logfile=None, out=None):
@@ -224,8 +329,10 @@ def enable(rq):
         args = [a for a in argv if a != "--detach"]
         out = os.path.join(run_dir, "_run_queue.out.log")
         unit = "render-batch-" + re.sub(r"[^A-Za-z0-9_.-]", "_", os.path.basename(run_dir))[:80]
+        # systemd-run --user does not inherit this shell's environment: forward the knobs the batch reads.
+        env = [f"--setenv={k}={v}" for k, v in sorted(os.environ.items()) if k.startswith("RQ_") or k == "COMFY_API"]
         cmd = ["systemd-run", "--user", "--collect", "--unit", unit, "--working-directory", root,
-               "--property", "StandardOutput=append:" + out, "--property", "StandardError=append:" + out,
+               "--property", "StandardOutput=append:" + out, "--property", "StandardError=append:" + out, *env,
                rq.PY, "-u", os.path.abspath(rq.__file__), *args]
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         if r.returncode:

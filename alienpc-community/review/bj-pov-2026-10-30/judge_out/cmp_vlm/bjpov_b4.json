@@ -1,0 +1,39 @@
+{
+ "tag": "bjpov_b4",
+ "model": "qwen3vl_judge",
+ "secs": 4.5,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains warm wooden interior with consistent lighting and fixtures across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same woman with identical hair, face, body, and clothing visible in all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows upright pose; frames 2-8 show progressive bending and oral action, not direct continuation."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Last frame shows woman's mouth on penis with deep oral contact, face large and readable in upper frame."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No malformed genitals, extra limbs, or melted bodies visible in any frame or final image."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0008,
+  "same_people": 0.0,
+  "start_kept": 0.5589,
+  "target_reached": 0.0,
+  "anatomy_defect": 0.0041
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

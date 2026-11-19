@@ -1,0 +1,10 @@
+=== u6-strixllama start 2026-11-15 09:24:58 CST
+CMD: sudo podman run --rm --name bake-strixllama --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined -v /srv/models:/srv/models:ro,Z docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:1488457676baa0b0f82c1ea01306474347ca01bcddafef51c0c6da5440030fbb llama-server --host 127.0.0.1 --port 8090 -m /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf -dev ROCm0 -ngl all -fa on -fit off --load-mode none --lazy-mode on-direct -ctk f16 -ctv f16 -c 32768 -b 16384 -ub 16384 --parallel 1 --jinja --spec-type draft-mtp,ngram-mod --spec-draft-n-max 3 --spec-draft-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf --spec-draft-device ROCm0 --spec-draft-ngl all --alias flash-next --no-slots
+LOAD_S 66 up=1
+long {"ttft_s": 15.85, "total_s": 18.64, "prompt_tokens": 18253, "completion_tokens": 104, "client_decode_tps": 37.22, "finish": "stop", "pass": true}
+code {"ttft_s": 0.9, "total_s": 5.27, "prompt_tokens": 141, "completion_tokens": 204, "client_decode_tps": 46.65, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.78, "total_s": 24.51, "prompt_tokens": 59, "completion_tokens": 856, "client_decode_tps": 36.07, "finish": "stop", "pass": true}
+               total        used        free      shared  buff/cache   available
+Mem:             124         109           2           2          17          15
+=== u6-strixllama end 2026-11-15 09:26:58 CST

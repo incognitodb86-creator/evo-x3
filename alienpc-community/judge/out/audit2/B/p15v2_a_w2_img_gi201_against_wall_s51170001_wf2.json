@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Cave rock textures and lighting match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames with identical features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows orc penetrating elf against wall, wrists pinned, matching target pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show clear, distinct anatomy with no fused bodies or malformed limbs/penis."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0004,
+  "same_people": 0.0,
+  "start_kept": 0.067,
+  "target_reached": 0.0003,
+  "anatomy_defect": 0.0111
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w2_img_gi201_against_wall_s51170001_wf2"
+}

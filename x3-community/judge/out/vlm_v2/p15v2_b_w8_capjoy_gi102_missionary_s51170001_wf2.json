@@ -1,0 +1,31 @@
+{
+ "tag": "p15v2_b_w8_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 4.2,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: same bed, sheets, and neutral wall throughout all frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "Subject 2 is a man, not a woman as specified in the prompt; Subject 1 is correct."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows a man behind the woman, not the described kneeling woman behind her."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with intimate face-to-face contact and pelvic grinding."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All bodies show correct anatomy with no fused limbs, missing parts, or malformed genitals visible."
+  }
+ },
+ "flags": [
+  "same_people",
+  "start_kept"
+ ]
+}

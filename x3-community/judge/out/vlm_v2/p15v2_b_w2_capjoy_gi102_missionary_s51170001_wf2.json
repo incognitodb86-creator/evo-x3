@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_b_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 4.0,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom setting, white sheets, and background throughout."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and man appear consistently across all frames with matching features."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and lighting without jump cuts."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary pose with full body contact and intimate action."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  }
+ },
+ "flags": []
+}

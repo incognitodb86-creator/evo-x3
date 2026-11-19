@@ -1,0 +1,1 @@
+1f2e89b8382fd2182ef3a7e15a5cf272722f767a8a08a58dd69ae36c52edbf1c  /srv/models/gemma4-heretic/gemma-4-26B-A4B-it-heretic.Q8_0.gguf

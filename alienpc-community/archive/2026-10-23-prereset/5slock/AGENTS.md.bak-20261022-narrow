@@ -1,0 +1,39 @@
+# AGENTS.md - Forge rules for C:/Users/derek/5slock (Ralph's cwd). Derek-approved 2026-10-20 (forgesafe). Keep it under 40 lines.
+
+## Shell: your bash tool is Git Bash on Windows
+- One command per tool call. Never chain or pipe: no ; && || | and no > or >> redirects, no $(...) or backticks. They are denied and waste a turn.
+- Use forward slashes (C:/AI/community/scripts/comm.py) and quote paths that contain spaces.
+- Prefer the read / grep / find / ls tools over shell commands for reading and searching.
+
+## Check commands (one call each)
+- Python syntax: python -m py_compile C:/AI/community/scripts/<file>.py
+- JSON: python -m json.tool C:/AI/community/shots/<file>.json
+- Video duration: "C:/Users/derek/AppData/Local/Microsoft/Winget/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.0.1-full_build/bin/ffprobe.exe" -v error -show_entries format=duration -of csv=p=0 <file.mp4>
+
+## The GPU is off-limits
+- Never call llama-swap (127.0.0.1:8080), /upstream/*, /load, /unload, ComfyUI (:8188, :8189, :1000x) or Strata. One request unloads you and kills a running render.
+- Never run render scripts (p3-p6*.py, batch_queue.py, sy_1min.py, p6_variants.ps1, p6_rerun.ps1, chain.ps1). Compile-check them only.
+- Hard guards block these. Do not retry or work around a block; note it in your result (or BLOCKED + STOP_RALPH).
+
+## Scope
+- Only edit files named in your task.
+- Never edit ComfyUI/user, live workflows (*.app.json), llama-swap.yaml, Strata or Pi config, chain.ps1, PROMPT.md, ralph.ps1 (except a harness fix outside its PERMS block), or anything in C:/Apps.
+- Git checkpoints handle backups: the harness commits before and after every iteration, so no .bak copies are needed. Do not run git checkout / reset yourself; git commit only for a harness fix (PROMPT.md, scriptfix 2026-10-22).
+- After each iteration the harness runs the checks above on changed files and restores out-of-scope edits.
+
+## Content
+- Adults only: every character is a fictional adult aged 21+ (canon: C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md). Nothing involving minors, ever.
+
+## Keep this file useful
+- When you learn the right command for something (a check, a path, a flag), update the command notes above in one short line.
+- No status or progress notes here; those go in TASKS.md or C:/AI/community/notes/.
+
+## Learnings (ALI-160, Huntley Ralph pattern; one short operational line each, max 15 lines; Max prunes at review)
+- When you learn something new about how to run or check this work, add one short line here. No changelog, no status.
+- ALI-147 graph arms: request.api.json must be a byte-identical copy of that arm's submitted_graph.pretty.json (check: plain `cmp <file> <file>.pretty.json`, no output = identical; `cmp -s ... && echo` is denied by the *&&* rule); one job per p7\JOB_REQUEST.json. Byte-identical copy (cp and python -c with ; are permission-denied): python -c "open(r'<dst>','wb').write(open(r'<src>','rb').read())"
+- ALI-147 PROOF frame count: verify objective.json with ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets,r_frame_rate,width,height -of csv=p=0 <file.mp4>
+- ALI-147 PROOF sha256 of any file (mp4, still, sheet): certutil.exe -hashfile <path> SHA256; byte-compare graphs with plain `cmp a b` (no output = identical) because `cmp -s ... && echo` is denied by the *&&* rule; built-ins (MiniMaxH3ReferenceToVideo) are NOT in specs\extender_object_info.json (Extender nodes only) so confirm them from the harness static_check (GETs 127.0.0.1:10004/object_info, writes STATIC_FAIL on an unknown class - grep runs\ for STATIC_FAIL = none); the start still has two identities: approved source C:\Users\derek\5slock\approved_characters\POOL\COND_POOL_BIKINI_PORTRAIT.jpg = fc4f4ea4... (the RS0 hash) vs every graph's `img` LoadImage ComfyUI\input\community\POOL_768x1344.png = 9cf9ff95...; sheet/image check (RS1, read-only): dimensions with one expression (python -c with ; is denied) `python -c "print(__import__('PIL.Image',fromlist=['open']).open(r'<path>').size)"` -> (w,h) plus .mode/.format, image reading is DISABLED in the Ralph model so a sheet's layout (face panel / full-body row) can never be confirmed by eye, only by dimensions + sha256, and a sheet outside ComfyUI\input needs an absolute/"input/"-rooted LoadImage string in the graph (no copying in a read-only check)
+- ALI-147 DIP: dip_join.py concat + `-r 24` gave 1444 packets -> ok=false / "DIP end FAIL"; fixed by DIP_FIX 0f03d9a - build() ends with -frames:v sum(probed seg frames)=1443, no `-r 24`; py_compile it read-only before re-requesting kind=dip. Count frames with ffprobe -count_packets, never format/stream duration: a 1443-packet mp4 reports 60.166667 s / avg_frame_rate 8658/361 from aac padding (~41.7 ms), not a 1444th frame. A dip request is only {"jobs":[{"id":"ali147_pool_dip_s51080000","kind":"dip"}]} (dip_join.py reads BASE seg1..3, writes dip.log + ffmpeg_cmd.txt); a re-request needs the old p7\jobs\<id>.result.json/.out/.err.out and runs\<id>\* moved to *.failed-<yyyymmdd> (the harness does this at 17:17, then the id is free - no "id already used" refusal)
+- ALI-147 graph builds: the writable scratch for a builder + schema self-check is C:/AI/community/notes/*.py (runs/ali147_pool_* is only request.api.json/PROOF.md/fairness.txt); MiniMaxH3 clip lengths are 5+17k frames at 24 fps (243/260 grid - the base run's 238-frame chunk-2 is off-grid); PromptPackBridge prompt_N accept plain strings (forceInput STRING passes ComfyUI validation), validated:true + the full clips_json schema (color_adjustment/loras/local_refs/guides) keeps a headless full_batch from blocking on UI state
+- ALI-147 FIX4 (correction of the line above): clips_json "validated": true is the UI clip-card checkbox and the Extender refuses to sample it - a cold headless run raises "Ref2VA clip 1 is marked Validated but its disk cache is missing" (extender.py 6104-6107, 6317-6323) 3/3 in 5.1 s -> STUCK. Set "validated": false on every clip for a headless run; the per-node-id project is ComfyUI\custom_nodes\ComfyUI_MiniMax_H3_Extender\cache\chain_extender_<node id>.json (empty = "segments": [], final_frame_count 0)
+- ALI-147 REF images (RS3): a LoadImage string must resolve inside ComfyUI\input - nodes.py:1764 -> folder_paths.get_annotated_filepath (folder_paths.py:343-357) joins get_input_directory() and hard-requires is_within_directory, so an absolute C:\Users\derek\5slock\... path raises ValueError "Invalid file path"; use the input-rooted relative form (the arm's own "community/POOL_768x1344.png"), and a sheet absent from ComfyUI\input (check: glob input\**\RS016* = 0) means placement = a copy outside the writable list = a decision, so [!] + BLOCKED, no workaround. Arm graph_diff.txt, no new script (specs\ali147.md:103): `git -C C:/AI/community/runs diff --no-index --output=C:/AI/community/runs/<arm>/graph_diff.txt "<base arm>\submitted_graph.pretty.json" "<arm>\request.api.json"` (exit 1 = diff found). The live line's "static object_info check passes" is the harness's at render time (GET 127.0.0.1:10004 = GPU, off-limits): LoadImage is in specs\extender_object_info.json, MiniMaxH3ReferenceToVideo / ref_image_size ["match","max"] only in ComfyUI\comfy_extras\nodes_minimax_h3.py:252-282

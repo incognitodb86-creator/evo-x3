@@ -1,0 +1,26 @@
+{
+ "shot": {
+  "id": "p6_1min_ab05_seg2_c0",
+  "image": "D15",
+  "image_note": "adult woman with long dark hair in a high bun, toned and tanned, black mesh triangle bikini, standing at a steel-and-glass balcony railing in a dark modern penthouse",
+  "beat": "Cut to the dark living room: topless in her black bikini bottoms she walks barefoot across the polished floor toward the floor-to-ceiling window, city lights glowing behind the glass.",
+  "chunks": [
+   "She leans her back against the cool glass, stretches both arms overhead, arches slightly and smiles at the camera as the city lights blink behind her."
+  ],
+  "chunk_secs": 10,
+  "mode": "r2v",
+  "arm": "long_r2v",
+  "secs": 10,
+  "seed": 51080001,
+  "w": 768,
+  "h": 1344,
+  "steps": 10,
+  "antiburn": 0.5,
+  "prev_beat": null
+ },
+ "arm": "long_r2v",
+ "secs": 10,
+ "words": 543,
+ "model": "coding_sc117_strata",
+ "guide": "MiniMax-H3 VIDEO_PROMPT_WRITING_GUIDE_ref_en.md"
+}

@@ -1,0 +1,17 @@
+All tests pass. Here's a summary of the implementation in `alphametics.go`:
+
+**Approach: column-wise backtracking** (like solving the addition by hand, right-to-left), which prunes the search space aggressively:
+
+1. **Parse** the puzzle: split on `==`, then split the left side into addend words on `+`/whitespace. Validate that words contain only letters and there's exactly one result word.
+
+2. **Preprocess**:
+   - Map each distinct letter to an index (error if more than 10 letters).
+   - Mark letters that lead a multi-digit word (can't be zero).
+   - Build per-column data (least-significant digit first): the addend letter indices in that column plus the result letter (`-1` if the result has no digit there).
+
+3. **Search** with three mutually recursive functions:
+   - `solveCol(col, carry)` — walks columns; success when all columns are done and the final carry is 0.
+   - `assign(col, row, sum)` — tries digits 0–9 for each unassigned addend letter in the column (skipping used digits and illegal leading zeros), accumulating the column sum.
+   - `solveCol2(col, sum)` — once the column total is known, checks `total % 10` against the result letter (assigning it if unassigned, verifying if already assigned) and carries `total / 10` to the next column.
+
+Results: all 10 test cases pass, including the 199-addend puzzle, and the full benchmark suite runs in ~91 ms per iteration.

@@ -1,0 +1,715 @@
+#!/usr/bin/env python3
+"""pi-job: detached single-job runner for Hermes-X3 (plan-v32 P4.3, P4.8, P4.11).
+
+Source: evo-x3/scripts/pi-job
+Installed root-owned (0755) at /usr/local/bin/pi-job.
+"""
+from __future__ import annotations
+
+import argparse
+import fcntl
+import hashlib
+import hmac
+import json
+import os
+import secrets
+import shutil
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+HOME = Path.home()
+RUNS_DIR = HOME / "AI" / "_runs"
+LOCK_FILE = RUNS_DIR / "pi-job.lock"
+ACTIVE_FILE = RUNS_DIR / "pi-job.active"
+NATIVE_INPUTS_DIR = HOME / ".hermes" / "cache" / "documents" / "native-inputs"
+PIXL_INBOX_DIR = HOME / "AI" / "pixl-inbox"
+IMPORT_INBOX_PY = HOME / "AI" / "pixlstash-tagging" / "import_inbox.py"
+FORGE_LAUNCHER = HOME / "evo-x3" / "pi-chats" / "forge-pi.sh"
+RENDER_LAUNCHER = HOME / "evo-x3" / "pi-chats" / "render-pi.sh"
+QUEUE_REMOTE = HOME / "AI" / "render" / "x3" / "queue-remote.sh"
+# t2564u/t2565u: RTX 2x of an already-rendered run, as one AlienPC ComfyUI job (run_queue.py --upscale-only); no new render.
+COMMUNITY_DIR = HOME / "AI" / "community"
+COMMUNITY_RUNS = COMMUNITY_DIR / "runs"
+RQ_PY = HOME / "AI" / "render" / "x3" / ".venv" / "bin" / "python"
+NTFY_TOKEN_FILE = HOME / ".config" / "evo-x3" / "ntfy-x3.token"
+NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
+# P5.3: AlienPC Swift when the X3 render lock is free at job start; one resume on the X3 after a failed request.
+X3_RENDER_LOCK = HOME / "AI" / "locks" / "gpu-render.lock"
+ALIENPC_MODEL = "alienpc/coding_swift15_iq3s_esp"
+RESUME_PROMPT = "Continue from where you stopped and finish the task."
+# 2026-11-19 hermesflow (Derrick t2572u/t2572s9151): Hermes chat shows the still Render picked + the full prompt, the
+# user's in-chat yes queues it (`pi-job approve`), and the 2x upscaled video comes back as a renders-share link.
+QNAP_RUNS = Path("/mnt/qnap/renders/runs")
+RENDERS_URL = "https://evo-x3-1.tailf242b2.ts.net:8443/renders"
+CHAT_APPROVAL_TTL = 3600  # seconds the in-chat yes stays valid after the preview is shown
+
+
+def _now_iso() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%S%z")
+
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _send_ntfy(title: str, body: str, priority: str = "default") -> bool:
+    if not NTFY_TOKEN_FILE.is_file():
+        return False
+    token = NTFY_TOKEN_FILE.read_text(encoding="utf-8").strip()
+    if not token:
+        return False
+    req = urllib.request.Request(
+        NTFY_URL,
+        data=body.encode("utf-8"),
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Title": title,
+            "Priority": priority,
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+
+def _active_job_id() -> str | None:
+    if not ACTIVE_FILE.is_file():
+        return None
+    jid = ACTIVE_FILE.read_text(encoding="utf-8").strip()
+    if not jid:
+        return None
+    unit = f"pi-job-{jid}.service"
+    r = subprocess.run(
+        ["systemctl", "--user", "is-active", "--quiet", unit],
+        capture_output=True,
+    )
+    if r.returncode == 0:
+        return jid
+    return None
+
+
+def _acquire_single_job_lock():
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    fd = os.open(LOCK_FILE, os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(fd)
+        running = _active_job_id() or "unknown"
+        print(f"REFUSED: another pi-job is already running ({running})", file=sys.stderr)
+        sys.exit(1)
+    running = _active_job_id()
+    if running:
+        os.close(fd)
+        print(f"REFUSED: another pi-job is already running ({running})", file=sys.stderr)
+        sys.exit(1)
+    return fd
+
+
+def _write_status(run_dir: Path, status: str, detail: str = "") -> None:
+    lines = [f"status={status}", f"updated={_now_iso()}"]
+    if detail:
+        lines.append(f"detail={detail}")
+    (run_dir / "status").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _new_job_id(role: str) -> str:
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    return f"{ts}-{role}-{secrets.token_hex(2)}"
+
+
+def _validate_native_still(still_arg: str) -> Path:
+    allowed_root = Path(os.path.realpath(NATIVE_INPUTS_DIR))
+    resolved = Path(os.path.realpath(still_arg))
+    try:
+        resolved.relative_to(allowed_root)
+    except ValueError:
+        raise ValueError(
+            f"REFUSED: --still path {resolved} is outside {allowed_root}"
+        )
+    if not resolved.is_file():
+        raise ValueError(f"REFUSED: --still file not found: {resolved}")
+    return resolved
+
+
+def _create_approval(run_dir: Path, job_id: str, prompt_file: Path | None = None) -> tuple[str, str]:
+    prompt_file = prompt_file or (run_dir / "prompt.txt")
+    prompt_sha = _sha256_file(prompt_file)
+    hash8 = prompt_sha[:8]
+    code = f"{secrets.randbelow(1000000):06d}"
+    salt = secrets.token_hex(16)
+    code_hash = hashlib.sha256((salt + code).encode("utf-8")).hexdigest()
+    approval = {
+        "job_id": job_id,
+        "salt": salt,
+        "code_hash": code_hash,
+        "prompt_sha256": prompt_sha,
+        "created_at": time.time(),
+        "expires_at": time.time() + 900,
+        "prompt_file": str(prompt_file),
+        "attempts_left": 3,
+        "used": False,
+    }
+    ap = run_dir / ".approval.json"
+    ap.write_text(json.dumps(approval, indent=2) + "\n", encoding="utf-8")
+    os.chmod(ap, 0o600)
+    return code, hash8
+
+
+def _render_run_name(job_id: str) -> str:
+    return "hermes_" + job_id.replace("-", "_")
+
+
+def _publish_preview(crun: Path) -> tuple[str | None, str | None]:
+    """Copy prompt.txt and the start still Render picked into the renders share (runs/<run>/preview/), so the Hermes
+    chat can show them by URL. Never raw clips; never overwrites. Returns (still_url, prompt_url)."""
+    if not (QNAP_RUNS.is_dir() and os.access(QNAP_RUNS, os.W_OK)):
+        return None, None
+    dst = QNAP_RUNS / crun.name / "preview"
+    dst.mkdir(parents=True, exist_ok=True)
+    base = f"{RENDERS_URL}/{crun.name}/preview"
+    prompt_url = still_url = None
+    if (crun / "prompt.txt").is_file():
+        if not (dst / "prompt.txt").exists():
+            shutil.copyfile(crun / "prompt.txt", dst / "prompt.txt")
+        prompt_url = f"{base}/prompt.txt"
+    still = None
+    for name, key in (("pick.json", "still"), ("still_read.json", "source")):
+        try:
+            v = json.loads((crun / name).read_text(encoding="utf-8")).get(key)
+        except (OSError, ValueError):
+            v = None
+        if isinstance(v, str) and v and Path(v).is_file():
+            still = Path(v)
+            break
+    if still is not None:
+        ext = still.suffix.lower() or ".png"
+        if not (dst / f"still{ext}").exists():
+            shutil.copyfile(still, dst / f"still{ext}")
+        still_url = f"{base}/still{ext}"
+    return still_url, prompt_url
+
+
+def _render_final(crun: Path) -> tuple[str, str]:
+    """(state, detail) of a queued render: WAITING / RENDERING / PUBLISHING / DONE / FAIL."""
+    qlog = crun / "_render_queue.log"
+    lines = qlog.read_text(encoding="utf-8", errors="replace").splitlines() if qlog.is_file() else []
+    ok = crun / "clip" / "render_ok.json"
+    if ok.is_file():
+        try:
+            okd = json.loads(ok.read_text(encoding="utf-8"))
+        except ValueError:
+            okd = {}
+        if isinstance(okd.get("upscale"), dict):
+            rel = str(okd.get("clip") or "clip/clip.mp4").replace("\\", "/")
+            pub = QNAP_RUNS / crun.name / rel
+            if pub.is_file():
+                return "DONE", f"{RENDERS_URL}/{crun.name}/{rel}"
+            return "PUBLISHING", "upscaled; waiting for evo-renders-sync (every 2 min) to publish it"
+    fails = [x for x in lines if " FAIL" in x]
+    closed = [x for x in lines if "BATCH closed" in x or "UPSCALE-ONLY closed" in x]
+    if fails and closed and lines.index(closed[-1]) > lines.index(fails[-1]):
+        return "FAIL", fails[-1][-400:]
+    if closed and not ok.is_file():
+        return "FAIL", closed[-1][-400:]
+    if lines:
+        return "RENDERING", lines[-1][-300:]
+    return "WAITING", "no _render_queue.log yet"
+
+
+def _make_queueable(crun: Path) -> str | None:
+    """Turn a READY dry-run dir into a queueable one without rebuilding: the same two file changes fill_request.py
+    makes for --queue (write _render_order.json from build_report.json, retire the DRY_RUN marker). request.api.json and
+    prompt.txt are untouched. Returns an error string or None."""
+    try:
+        rep = json.loads((crun / "build_report.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        return f"cannot read build_report.json: {e}"
+    if rep.get("status") != "READY":
+        return f"build_report status is {rep.get('status')}, not READY"
+    order = crun / "_render_order.json"
+    if not order.exists():
+        order.write_text(json.dumps({"order": [{"pos": 1, "tag": "clip", "arm": "oc_writer",
+                                                "scene": rep.get("position"), "seed": rep.get("seed")}]}, indent=2),
+                         encoding="utf-8")
+    marker = crun / "DRY_RUN"
+    if marker.exists():
+        marker.rename(crun / "DRY_RUN.approved")
+    return None
+
+
+def _x3_render_lock_free() -> bool:
+    """P5.3 'free at start': flock -n on the X3's own render lock (held by an X3-queued render)."""
+    try:
+        fd = os.open(X3_RENDER_LOCK, os.O_RDONLY)
+    except FileNotFoundError:
+        return True
+    except OSError:
+        return False
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        return True
+    except BlockingIOError:
+        return False
+    finally:
+        os.close(fd)
+
+
+def _last_stop_reason(run_dir: Path) -> str | None:
+    """stopReason of the last assistant message in the newest pi session file in run_dir (P5.3 tested: a 503
+    after pi's 2 retries ends rc=1 with stopReason 'error')."""
+    sessions = sorted(run_dir.glob("*.jsonl"), key=lambda q: q.stat().st_mtime)
+    if not sessions:
+        return None
+    last = None
+    for line in sessions[-1].read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        m = e.get("message") or {}
+        if e.get("type") == "message" and m.get("role") == "assistant":
+            last = m.get("stopReason")
+    return last
+
+
+def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple[int, str]:
+    """P5.3: AlienPC first when the X3 render lock is free, else the launcher's X3 default. If the AlienPC run
+    stops on a failed request (503 from the fail-fast gate or any error), resume once on the X3 in the same
+    session (--continue picks the newest session in run_dir). Never moves back to the AlienPC."""
+    def run(extra: list[str], text: str, model: str | None) -> int:
+        env = dict(os.environ)
+        if model:
+            env["FORGE_MODEL"] = model
+        else:
+            env.pop("FORGE_MODEL", None)
+        cmd = ["timeout", timeout_s, "bash", str(FORGE_LAUNCHER), "-p", "--session-dir", str(run_dir),
+               *extra, "--thinking", "low", text]
+        return subprocess.run(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=logf,
+                              stderr=subprocess.STDOUT).returncode
+
+    if not _x3_render_lock_free():
+        return run([], prompt, None), "x3"
+    rc = run([], prompt, ALIENPC_MODEL)
+    if rc == 0:
+        return rc, "alienpc"
+    reason = _last_stop_reason(run_dir)
+    if reason not in ("error", "aborted"):
+        return rc, f"alienpc(rc={rc},stop={reason})"
+    logf.write(f"\n[pi-job] AlienPC run stopped (rc={rc}, stop={reason}); resuming once on the X3\n".encode())
+    logf.flush()
+    return run(["--continue"], RESUME_PROMPT, None), "alienpc->x3"
+
+
+def _exec_job(job_id: str) -> int:
+    run_dir = RUNS_DIR / job_id
+    meta = json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))
+    role = meta["role"]
+    log_path = run_dir / "log"
+    _write_status(run_dir, "RUNNING", f"role={role}")
+    ACTIVE_FILE.write_text(job_id + "\n", encoding="utf-8")
+
+    try:
+        with log_path.open("ab") as logf:
+            if role == "code":
+                repo = Path(meta["target"])
+                base_head = subprocess.check_output(
+                    ["git", "-C", str(repo), "rev-parse", "HEAD"], text=True
+                ).strip()
+                rc, where = _run_pi(run_dir, "3600", meta["prompt"], str(repo), logf)
+                ahead = subprocess.check_output(
+                    ["git", "-C", str(repo), "rev-list", "--count", f"{base_head}..HEAD"],
+                    text=True,
+                ).strip()
+                if rc == 0 and int(ahead) > 0:
+                    _write_status(run_dir, "DONE", f"commits_added={ahead} model={where}")
+                    _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
+                    return 0
+                _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}")
+                _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={rc}, commits={ahead})")
+                return 1
+
+            if role == "review":
+                repo = Path(meta["target"])
+                rc, where = _run_pi(run_dir, "1800", meta["prompt"], str(repo), logf)
+                st = "DONE" if rc == 0 else "STUCK"
+                _write_status(run_dir, st, f"rc={rc} model={where}")
+                _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
+                return 0 if rc == 0 else 1
+
+            if role == "upscale":
+                run = Path(meta["target"])
+                cmd = ["timeout", "2400", str(RQ_PY), "scripts/run_queue.py", "--remote", "--upscale-only",
+                       "--run-dir", str(run)]
+                proc = subprocess.run(cmd, cwd=str(COMMUNITY_DIR), stdin=subprocess.DEVNULL, stdout=logf,
+                                      stderr=subprocess.STDOUT)
+                qlog = run / "_render_queue.log"
+                last = [x for x in (qlog.read_text(encoding="utf-8", errors="replace").splitlines() if qlog.is_file() else [])
+                        if " UPSCALE" in x][-2:]
+                st = "DONE" if proc.returncode == 0 else "STUCK"
+                _write_status(run_dir, st, f"rc={proc.returncode} " + " | ".join(last)[-400:])
+                _send_ntfy(f"pi-job {job_id}", f"{st} (upscale {run.name}, rc={proc.returncode})")
+                return 0 if proc.returncode == 0 else 1
+
+            if role == "render":
+                crun = COMMUNITY_RUNS / meta.get("run_name", _render_run_name(job_id))
+                render_prompt = (
+                    f"Dry-run render prep (do not queue). Use exactly this run folder: {crun} "
+                    f"Ask: {meta['prompt']}"
+                )
+                if meta.get("still_copy"):
+                    render_prompt += f" Use exact still path: {meta['still_copy']}."
+                cmd = [
+                    "timeout",
+                    "1800",
+                    "bash",
+                    str(RENDER_LAUNCHER),
+                    "-p",
+                    "--session-dir",
+                    str(run_dir),
+                    "--thinking",
+                    "low",
+                    render_prompt,
+                ]
+                proc = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT)
+                prompt_file = crun / "prompt.txt"
+                try:
+                    built = json.loads((crun / "build_report.json").read_text(encoding="utf-8")).get("status")
+                except (OSError, ValueError):
+                    built = None
+                if prompt_file.is_file() and built == "READY" and (crun / "clip" / "request.api.json").is_file():
+                    code, hash8 = _create_approval(run_dir, job_id, prompt_file)
+                    sent = _send_ntfy(
+                        f"pi-job {job_id}",
+                        f"Run {job_id}, prompt {hash8}: code {code}, 15 min",
+                        priority="high",
+                    )
+                    still_url, prompt_url = _publish_preview(crun)
+                    note = f"run={crun.name} prompt_hash8={hash8} ntfy_sent={sent} preview={'ok' if still_url else 'no-still'}"
+                    _write_status(run_dir, "READY", note)
+                    return 0
+                nr = crun / "clip_NOT_READY.txt"
+                why = nr.read_text(encoding="utf-8", errors="replace").strip()[:300] if nr.is_file() else ""
+                _write_status(run_dir, "STUCK", f"rc={proc.returncode} run={crun.name} build={built} "
+                                               f"prompt_exists={prompt_file.is_file()} {why}".strip())
+                _send_ntfy(f"pi-job {job_id}", f"STUCK (render, rc={proc.returncode})")
+                return 1
+
+        _write_status(run_dir, "STUCK", f"unknown role={role}")
+        return 2
+    finally:
+        if ACTIVE_FILE.is_file() and ACTIVE_FILE.read_text(encoding="utf-8").strip() == job_id:
+            ACTIVE_FILE.unlink(missing_ok=True)
+
+
+def _start_detached(role: str, target: str | None, prompt: str, still_path: str | None = None) -> int:
+    fd = _acquire_single_job_lock()
+    try:
+        job_id = _new_job_id(role)
+        run_dir = RUNS_DIR / job_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        still_copy_str = None
+        if still_path:
+            try:
+                src = _validate_native_still(still_path)
+            except ValueError as e:
+                print(str(e), file=sys.stderr)
+                return 2
+            dst = run_dir / f"dropped_still{src.suffix.lower()}"
+            shutil.copy2(src, dst)
+            still_copy_str = str(dst)
+            if PIXL_INBOX_DIR.is_dir():
+                inbox_dst = PIXL_INBOX_DIR / f"{job_id}_{src.name}"
+                shutil.copy2(src, inbox_dst)
+                if IMPORT_INBOX_PY.is_file():
+                    subprocess.run(
+                        ["python3", str(IMPORT_INBOX_PY)],
+                        capture_output=True,
+                        timeout=60,
+                    )
+
+        meta = {
+            "job_id": job_id,
+            "role": role,
+            "target": target,
+            "prompt": prompt,
+            "still_copy": still_copy_str,
+            "created": _now_iso(),
+        }
+        if role == "render":
+            meta["run_name"] = _render_run_name(job_id)
+        (run_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+        _write_status(run_dir, "QUEUED", f"role={role}")
+        ACTIVE_FILE.write_text(job_id + "\n", encoding="utf-8")
+
+        subprocess.run(
+            [
+                "systemd-run",
+                "--user",
+                f"--unit=pi-job-{job_id}",
+                "--description",
+                f"pi-job {role} {job_id}",
+                os.path.realpath(__file__),
+                "--_exec",
+                job_id,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        print(job_id)
+        return 0
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+
+
+def _cmd_queue(run_ref: str, code: str) -> int:
+    if not NTFY_TOKEN_FILE.is_file() or not NTFY_TOKEN_FILE.read_text(encoding="utf-8").strip():
+        print("REFUSED: P4.11 ntfy-x3.token missing; queue stays off until P4.11 passes.", file=sys.stderr)
+        return 2
+    run_dir = Path(run_ref) if Path(run_ref).is_absolute() else (RUNS_DIR / run_ref)
+    ap = run_dir / ".approval.json"
+    prompt_file = run_dir / "prompt.txt"
+    if not ap.is_file():
+        print(f"REFUSED: missing .approval.json in {run_dir}", file=sys.stderr)
+        return 2
+
+    data = json.loads(ap.read_text(encoding="utf-8"))
+    prompt_file = Path(data.get("prompt_file") or prompt_file)
+    if not prompt_file.is_file():
+        print(f"REFUSED: missing {prompt_file}", file=sys.stderr)
+        return 2
+    if data.get("used"):
+        print("REFUSED: approval code already used.", file=sys.stderr)
+        return 2
+    if time.time() > float(data.get("expires_at", 0)):
+        print("REFUSED: approval code expired.", file=sys.stderr)
+        return 2
+    if int(data.get("attempts_left", 0)) <= 0:
+        print("REFUSED: no attempts left.", file=sys.stderr)
+        return 2
+    cur_sha = _sha256_file(prompt_file)
+    if cur_sha != data.get("prompt_sha256"):
+        print("REFUSED: prompt.txt changed after approval code was sent.", file=sys.stderr)
+        return 2
+    expected_hash = data.get("code_hash", "")
+    got_hash = hashlib.sha256((data.get("salt", "") + code.strip()).encode("utf-8")).hexdigest()
+    if not hmac.compare_digest(got_hash, expected_hash):
+        data["attempts_left"] = int(data.get("attempts_left", 1)) - 1
+        ap.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        print(f"REFUSED: invalid code ({data['attempts_left']} tries left).", file=sys.stderr)
+        return 2
+
+    data["used"] = True
+    data["approved_via"] = "ntfy_code"
+    ap.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return _queue_render(run_dir)
+
+
+def _queue_render(job_dir: Path) -> int:
+    meta = json.loads((job_dir / "meta.json").read_text(encoding="utf-8"))
+    crun = COMMUNITY_RUNS / meta.get("run_name", _render_run_name(job_dir.name))
+    err = _make_queueable(crun)
+    if err:
+        print(f"REFUSED: {err}", file=sys.stderr)
+        return 2
+    proc = subprocess.run([str(QUEUE_REMOTE), str(crun), "--yes-derrick"], stdin=subprocess.DEVNULL,
+                          capture_output=True, text=True, timeout=300)
+    out = (proc.stdout + proc.stderr).strip()
+    if out:
+        print(out[-1500:])
+    _write_status(job_dir, "RENDER_QUEUED" if proc.returncode == 0 else "QUEUE_FAILED",
+                  f"run={crun.name} queue_rc={proc.returncode}")
+    return proc.returncode
+
+
+def _cmd_approve(job_id: str) -> int:
+    """In-chat approval (Derrick t2572s9151): Hermes calls this only after the user said yes in the same chat that
+    showed this job's still and full prompt. Replaces the ntfy code for Hermes chats; one use, 60 min, prompt unchanged."""
+    run_dir = RUNS_DIR / job_id
+    ap = run_dir / ".approval.json"
+    st = run_dir / "status"
+    if not ap.is_file() or not (run_dir / "meta.json").is_file():
+        print(f"REFUSED: {job_id} has no pending render approval", file=sys.stderr)
+        return 2
+    if not st.is_file() or "status=READY" not in st.read_text(encoding="utf-8"):
+        print(f"REFUSED: {job_id} is not READY", file=sys.stderr)
+        return 2
+    data = json.loads(ap.read_text(encoding="utf-8"))
+    if data.get("used"):
+        print("REFUSED: this render was already approved/queued.", file=sys.stderr)
+        return 2
+    created = float(data.get("created_at") or (float(data.get("expires_at", 0)) - 900))
+    if time.time() > created + CHAT_APPROVAL_TTL:
+        print("REFUSED: preview is older than 60 min; start a new render.", file=sys.stderr)
+        return 2
+    prompt_file = Path(data.get("prompt_file") or (run_dir / "prompt.txt"))
+    if not prompt_file.is_file() or _sha256_file(prompt_file) != data.get("prompt_sha256"):
+        print("REFUSED: prompt.txt changed after the preview was shown.", file=sys.stderr)
+        return 2
+    data["used"] = True
+    data["approved_via"] = "hermes_chat"
+    data["approved_at"] = _now_iso()
+    ap.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return _queue_render(run_dir)
+
+
+def _render_report(job_id: str) -> tuple[str, str]:
+    """Extra status lines for render jobs + a ready-to-paste chat block. Returns (state, text)."""
+    run_dir = RUNS_DIR / job_id
+    try:
+        meta = json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "", ""
+    if meta.get("role") != "render":
+        return "", ""
+    st = (run_dir / "status").read_text(encoding="utf-8")
+    crun = COMMUNITY_RUNS / meta.get("run_name", _render_run_name(job_id))
+    out = [f"run={crun.name}"]
+    if "status=READY" in st:
+        still_url, prompt_url = _publish_preview(crun)
+        prompt = (crun / "prompt.txt").read_text(encoding="utf-8", errors="replace").strip()
+        out += [f"still_url={still_url or 'none'}", f"prompt_url={prompt_url or 'none'}",
+                "--- chat_reply (paste verbatim) ---"]
+        if still_url:
+            out.append(f"![still Render picked]({still_url})\n")
+        out += [f"**Job:** `{job_id}`\n", "**Full prompt:**\n", "```text", prompt, "```\n",
+                "**Render this?** (yes / no)"]
+        return "READY", "\n".join(out)
+    if "status=RENDER_QUEUED" in st:
+        state, detail = _render_final(crun)
+        out.append(f"final={state}")
+        if state == "DONE":
+            out += [f"video_url={detail}", "--- chat_reply (paste verbatim) ---",
+                    f"Your render is done (RTX 2x upscaled).\n", f"<video>{detail}</video>\n",
+                    f"[Open the 2x video]({detail})"]
+        else:
+            out.append(f"detail={detail}")
+        return state, "\n".join(out)
+    return "", "\n".join(out)
+
+
+def _cmd_wait(job_id: str, timeout_s: int) -> int:
+    """Block up to timeout_s while the job is still working (prep running, or queued render not DONE/FAIL)."""
+    start = time.time()
+    run_dir = RUNS_DIR / job_id
+    while time.time() - start < timeout_s:
+        st = (run_dir / "status").read_text(encoding="utf-8") if (run_dir / "status").is_file() else ""
+        if not st:
+            break
+        if "status=QUEUED" in st or "status=RUNNING" in st:
+            pass
+        elif "status=RENDER_QUEUED" in st:
+            if _render_report(job_id)[0] in ("DONE", "FAIL"):
+                break
+        else:
+            break
+        time.sleep(10)
+    print(f"waited={int(time.time() - start)}s")
+    return _cmd_status(job_id)
+
+
+def _cmd_status(job_id: str) -> int:
+    run_dir = RUNS_DIR / job_id
+    st = run_dir / "status"
+    if not st.is_file():
+        print(f"NOT_FOUND: {job_id}", file=sys.stderr)
+        return 1
+    print(st.read_text(encoding="utf-8").strip())
+    rstate, rtext = _render_report(job_id)
+    if rtext:
+        print(rtext)
+    log_file = run_dir / "log"
+    if log_file.is_file() and not rstate:
+        tail = log_file.read_text(encoding="utf-8", errors="replace").splitlines()[-20:]
+        if tail:
+            print("--- log tail ---")
+            print("\n".join(tail))
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="pi-job")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p_code = sub.add_parser("code")
+    p_code.add_argument("target")
+    p_code.add_argument("prompt")
+
+    p_rev = sub.add_parser("review")
+    p_rev.add_argument("target")
+    p_rev.add_argument("prompt")
+
+    p_ren = sub.add_parser("render")
+    p_ren.add_argument("--still", default=None)
+    p_ren.add_argument("ask")
+
+    p_q = sub.add_parser("queue")
+    p_q.add_argument("run")
+    p_q.add_argument("code")
+
+    p_up = sub.add_parser("upscale")
+    p_up.add_argument("run")
+
+    p_st = sub.add_parser("status")
+    p_st.add_argument("job_id")
+
+    p_ap = sub.add_parser("approve")
+    p_ap.add_argument("job_id")
+
+    p_w = sub.add_parser("wait")
+    p_w.add_argument("job_id")
+    p_w.add_argument("--timeout", type=int, default=170)
+
+    ap.add_argument("--_exec", dest="exec_id", default=None, help=argparse.SUPPRESS)
+
+    if argv is None:
+        argv = sys.argv[1:]
+    if len(argv) >= 2 and argv[0] == "--_exec":
+        return _exec_job(argv[1])
+
+    args = ap.parse_args(argv)
+    if args.cmd == "code":
+        return _start_detached("code", str(Path(args.target).resolve()), args.prompt)
+    if args.cmd == "review":
+        return _start_detached("review", str(Path(args.target).resolve()), args.prompt)
+    if args.cmd == "render":
+        return _start_detached("render", None, args.ask, still_path=args.still)
+    if args.cmd == "queue":
+        return _cmd_queue(args.run, args.code)
+    if args.cmd == "upscale":
+        run = Path(args.run) if Path(args.run).is_absolute() else (COMMUNITY_RUNS / args.run)
+        run = Path(os.path.realpath(run))
+        try:
+            run.relative_to(os.path.realpath(COMMUNITY_RUNS))
+        except ValueError:
+            print(f"REFUSED: {run} is outside {COMMUNITY_RUNS}", file=sys.stderr)
+            return 2
+        if not (run / "_render_order.json").is_file() or not (run / "_render_queue.log").is_file():
+            print(f"REFUSED: {run} is not a finished render run (no _render_order.json/_render_queue.log)", file=sys.stderr)
+            return 2
+        return _start_detached("upscale", str(run), "rtx 2x upscale-only")
+    if args.cmd == "status":
+        return _cmd_status(args.job_id)
+    if args.cmd == "approve":
+        return _cmd_approve(args.job_id)
+    if args.cmd == "wait":
+        return _cmd_wait(args.job_id, max(10, min(args.timeout, 170)))
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

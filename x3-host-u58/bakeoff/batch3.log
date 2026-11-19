@@ -1,0 +1,8 @@
+=== u6-halogen start 2026-11-15 10:00:48 CST
+LOAD_S 60 up=1
+long {"ttft_s": 9.24, "total_s": 10.46, "prompt_tokens": 18253, "completion_tokens": 102, "client_decode_tps": 84.03, "finish": "stop", "pass": true}
+code {"ttft_s": 0.27, "total_s": 2.84, "prompt_tokens": 141, "completion_tokens": 210, "client_decode_tps": 81.6, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+decode {"ttft_s": 0.17, "total_s": 9.85, "prompt_tokens": 59, "completion_tokens": 591, "client_decode_tps": 61.03, "finish": "stop", "pass": true}
+=== u6-halogen end 2026-11-15 10:02:15 CST
+BATCH3_DONE

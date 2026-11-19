@@ -1,0 +1,97 @@
+#!/bin/bash
+# U10 file-level config copy to QNAP X3-drop (//192.168.0.147/X3-drop).
+# CIFS cannot store symlinks, so the restore artifact is a zstd tar (symlinks
+# preserved inside the archive). A browsable tree of regular files is also
+# rsynced with --no-links. Models/weights and secrets are excluded.
+# Does not restart services. 2026-11-15.
+set -euo pipefail
+
+DEST_ROOT="${DEST_ROOT:-/mnt/qnap/pi-drop/evo-x3-rollback/config}"
+STAMP=$(date +%Y%m%d-%H%M)
+LOCAL_DIR=/var/backups/evo-x3
+mkdir -p "$DEST_ROOT" "$LOCAL_DIR"
+chmod 700 "$LOCAL_DIR"
+
+TAR_NAME="evo-x3-config-${STAMP}.tar.zst"
+LOCAL_TAR="$LOCAL_DIR/$TAR_NAME"
+
+# Excludes apply to member names as stored (no leading slash when using -C /)
+# Keep /etc/.git OFF the QNAP copy: the local etckeeper repo holds shadow/host keys.
+EXCLUDES=(
+  --exclude=etc/.git
+  --exclude=etc/evo-x3/*.env
+  --exclude=etc/evo-x3/*.cred
+  --exclude=etc/shadow
+  --exclude=etc/shadow-
+  --exclude=etc/gshadow
+  --exclude=etc/gshadow-
+  --exclude=etc/ssh/*_key
+  --exclude=etc/ssh/*_key.old
+  --exclude=etc/NetworkManager/system-connections
+  --exclude=etc/wpa_supplicant/wpa_supplicant.conf
+  --exclude=etc/crypttab
+  --exclude=home/derekboone/.pi/**/node_modules
+  --exclude=home/derekboone/evo-x3/**/*.gguf
+  --exclude=home/derekboone/evo-x3/**/*.hgn
+  --exclude=home/derekboone/evo-x3/**/*.safetensors
+  --exclude=srv
+  --exclude=*.gguf
+  --exclude=*.hgn
+  --exclude=*.safetensors
+)
+
+# Build the high-fidelity archive locally, then copy the file to QNAP.
+# Only include the U10 config paths that exist.
+MEMBERS=(etc usr/local)
+[ -d /opt ] && MEMBERS+=(opt)
+[ -d /home/derekboone/.pi ] && MEMBERS+=(home/derekboone/.pi)
+[ -d /home/derekboone/evo-x3 ] && MEMBERS+=(home/derekboone/evo-x3)
+if [ -d /home/derekboone/.config/systemd/user ]; then
+  MEMBERS+=(home/derekboone/.config/systemd/user)
+fi
+
+tar --zstd -C / -cf "$LOCAL_TAR" "${EXCLUDES[@]}" "${MEMBERS[@]}"
+chmod 600 "$LOCAL_TAR"
+
+# Keep last 14 local qnap-bound tars
+ls -1t "$LOCAL_DIR"/evo-x3-config-*.tar.zst 2>/dev/null | tail -n +15 | xargs -r rm -f
+
+cp -f "$LOCAL_TAR" "$DEST_ROOT/$TAR_NAME"
+cp -f "$LOCAL_TAR" "$DEST_ROOT/evo-x3-config-latest.tar.zst"
+
+# Browsable regular-file tree (skip symlinks; CIFS cannot create them)
+RSYNC=(rsync -rtD --no-links --human-readable --info=stats1)
+# CIFS cannot store symlinks; --no-links skips them and rsync then exits 23.
+rsync_tree() { "${RSYNC[@]}" "$@" || { rc=$?; [ "$rc" -eq 23 ] || [ "$rc" -eq 24 ] || exit "$rc"; }; }
+
+rsync_tree \
+  --exclude '.git/' \
+  --exclude 'evo-x3/*.env' \
+  --exclude 'evo-x3/*.cred' \
+  --exclude 'shadow' --exclude 'shadow-' \
+  --exclude 'gshadow' --exclude 'gshadow-' \
+  --exclude 'ssh/*_key' --exclude 'ssh/*_key.old' \
+  --exclude 'NetworkManager/system-connections/' \
+  --exclude 'wpa_supplicant/wpa_supplicant.conf' \
+  --exclude 'crypttab' \
+  /etc/ "$DEST_ROOT/etc/"
+rsync_tree /usr/local/ "$DEST_ROOT/usr-local/"
+[ -d /opt ] && rsync_tree /opt/ "$DEST_ROOT/opt/"
+[ -d /home/derekboone/.pi ] && rsync_tree --exclude '**/node_modules/' /home/derekboone/.pi/ "$DEST_ROOT/dot-pi/"
+if [ -d /home/derekboone/evo-x3 ]; then
+  rsync_tree --exclude '**/*.gguf' --exclude '**/*.hgn' --exclude '**/*.safetensors' \
+    /home/derekboone/evo-x3/ "$DEST_ROOT/home-evo-x3/"
+fi
+if [ -d /home/derekboone/.config/systemd/user ]; then
+  rsync_tree /home/derekboone/.config/systemd/user/ "$DEST_ROOT/systemd-user/"
+fi
+
+# Verify the archive itself has no secret member names
+if tar -tf "$LOCAL_TAR" | grep -E '(^|/)(etc/evo-x3/[^/]+\.(env|cred)|etc/shadow-?$|etc/gshadow-?$|etc/ssh/[^/]+_key$|etc/ssh/[^/]+_key\.old$|etc/\.git/)' ; then
+  echo "ERROR: secret or etckeeper repo leaked into archive" >&2
+  rm -f "$DEST_ROOT/$TAR_NAME" "$DEST_ROOT/evo-x3-config-latest.tar.zst"
+  exit 1
+fi
+
+date +"synced %Y-%m-%d %H:%M:%S %Z  archive=$TAR_NAME" > "$DEST_ROOT/LAST_SYNC.txt"
+echo "rsync ok $DEST_ROOT archive=$TAR_NAME size=$(du -h "$LOCAL_TAR" | awk '{print $1}')"

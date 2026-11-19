@@ -1,0 +1,188 @@
+{
+ "arm": "u20-heretic-q4km-rocm",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 09:52:48 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 16.16699504852295,
+   "total_s": 17.093246698379517,
+   "prompt_tokens": 18709,
+   "completion_tokens": 43,
+   "client_decode_tps": 46.423668996064585,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18709,
+    "prompt_ms": 16021.572,
+    "prompt_per_token_ms": 0.8563564060078037,
+    "prompt_per_second": 1167.7380971105706,
+    "predicted_n": 43,
+    "predicted_ms": 1027.037,
+    "predicted_per_token_ms": 24.453261904761906,
+    "predicted_per_second": 40.89433973654308
+   },
+   "content": "The on-call codename is TANGERINE-4471, and the EVO-X3 maintenance window is Tuesday 03:40 (FIXTURE NOTE).",
+   "reasoning_chars": 0,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.24236202239990234,
+   "total_s": 16.210325241088867,
+   "prompt_tokens": 35,
+   "completion_tokens": 900,
+   "client_decode_tps": 56.36285527929051,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 35,
+    "prompt_ms": 127.162,
+    "prompt_per_token_ms": 3.6332,
+    "prompt_per_second": 275.239458328746,
+    "predicted_n": 900,
+    "predicted_ms": 16026.495,
+    "predicted_per_token_ms": 17.827024471635152,
+    "predicted_per_second": 56.094610830378066
+   },
+   "content": "",
+   "reasoning_chars": 3465,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "write1": {
+   "ttft_s": 0.18276524543762207,
+   "total_s": 24.543513774871826,
+   "prompt_tokens": 42,
+   "completion_tokens": 1359,
+   "client_decode_tps": 55.786463144101255,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 36,
+    "prompt_ms": 107.526,
+    "prompt_per_token_ms": 2.9868333333333332,
+    "prompt_per_second": 334.8027453825121,
+    "predicted_n": 1359,
+    "predicted_ms": 24417.676,
+    "predicted_per_token_ms": 17.98061561119293,
+    "predicted_per_second": 55.61544841532012
+   },
+   "content": "The tide had retreated, exposing a graveyard of fractured basalt and tangled, bladderwrack ribbons. Bram moved through the sludge, his heavy rubber boots suctioning against the grit. He wasn't hunting for secrets; he was scavenging for driftwood to feed the evening\u2019s kerosene burner.\n\nHis gloved hand snagged on something rigid wedged between two salt-slicked stones. Not wood. A small, heavy cylinder of pewter, pitted by salt and dented by some unseen impact. He knelt, the damp cold of the shoreline seeping through his canvas trousers. With a grunt, he pried the cap loose.\n\nInside lay a scrap of heavy, cream-colored vellum, miraculously dry. The ink was a sharp, violet pigment, the handwriting a jagged, frantic calligraphy that seemed to vibrate against the pale surface.\n\n*\u201cThe constellations have shifted. Do not look for the North Star.\u201d*\n\nBram wiped a smear of salt from his spectacles. Above him, the great Fresnel lens groaned in its rotation, casting a rhythmic, amber pulse across the churning slate of the Atlantic. The light felt suddenly, unnervingly, like a spotlight on a stage where the actors had already fled.",
+   "reasoning_chars": 4598,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "write2": {
+   "ttft_s": 0.17903733253479004,
+   "total_s": 22.24748706817627,
+   "prompt_tokens": 39,
+   "completion_tokens": 1235,
+   "client_decode_tps": 55.96224541343395,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 33,
+    "prompt_ms": 103.042,
+    "prompt_per_token_ms": 3.1224848484848486,
+    "prompt_per_second": 320.2577589720696,
+    "predicted_n": 1235,
+    "predicted_ms": 22124.836,
+    "predicted_per_token_ms": 17.929364667747162,
+    "predicted_per_second": 55.774424723419415
+   },
+   "content": "Meet the last pan you\u2019ll ever buy. Forged from high-carbon iron, this skillet doesn\u2019t just cook\u2014it commands. It holds heat with relentless precision, delivering that deep, edge-to-edge crust that flimsy non-stick pans can only dream of. From searing thick-cut ribeyes to baking honey-glazed cornbread, it is the ultimate, indestructible culinary workhorse.\n\nAs you use it, the pan develops a natural, slick patina, becoming more non-stick with every meal. But here is the unexpected truth: this is the only piece of kitchenware that doubles as a legitimate way to train your forearms. One heavy-duty lift during cleanup and you\u2019re essentially doing bicep curls between stovetop sessions.\n\nStop cycling through disposable cookware. Invest in a legend. This isn\u2019t just a tool; it\u2019s a heavy-hitting heirloom that grows more delicious with age, one sear at a time.",
+   "reasoning_chars": 4028,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.26261258125305176,
+     "total_s": 2.4375693798065186,
+     "prompt_tokens": 143,
+     "completion_tokens": 128,
+     "client_decode_tps": 58.85174366917587,
+     "timings": {
+      "cache_n": 5,
+      "prompt_n": 138,
+      "prompt_ms": 184.795,
+      "prompt_per_token_ms": 1.3390942028985506,
+      "prompt_per_second": 746.7734516626533,
+      "predicted_n": 128,
+      "predicted_ms": 2232.232,
+      "predicted_per_token_ms": 17.576629921259844,
+      "predicted_per_second": 56.8937278920829
+     },
+     "content": "",
+     "reasoning_chars": 362,
+     "tool_calls": [
+      {
+       "id": "HTc2i05I746cHU7Buctrg1UccLFmdy3G",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.28164029121398926,
+     "total_s": 0.5439603328704834,
+     "prompt_tokens": 190,
+     "completion_tokens": 26,
+     "client_decode_tps": 99.11556827993638,
+     "timings": {
+      "cache_n": 138,
+      "prompt_n": 52,
+      "prompt_ms": 99.71,
+      "prompt_per_token_ms": 1.9175,
+      "prompt_per_second": 521.5123859191656,
+      "predicted_n": 26,
+      "predicted_ms": 440.613,
+      "predicted_per_token_ms": 17.62452,
+      "predicted_per_second": 56.73913388846902
+     },
+     "content": "",
+     "reasoning_chars": 0,
+     "tool_calls": [
+      {
+       "id": "5AsNednGOWYJF6ox8b6iP9ZYkZVHpSKj",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.16742300987243652,
+     "total_s": 2.7382071018218994,
+     "prompt_tokens": 246,
+     "completion_tokens": 149,
+     "client_decode_tps": 57.95897075394268,
+     "timings": {
+      "cache_n": 185,
+      "prompt_n": 61,
+      "prompt_ms": 107.263,
+      "prompt_per_token_ms": 1.7584098360655738,
+      "prompt_per_second": 568.69563596021,
+      "predicted_n": 149,
+      "predicted_ms": 2627.381,
+      "predicted_per_token_ms": 17.752574324324325,
+      "predicted_per_second": 56.329858516903336
+     },
+     "content": "Dana (dana@example.com) has 3 orders.",
+     "reasoning_chars": 391,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

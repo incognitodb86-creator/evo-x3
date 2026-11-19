@@ -1,0 +1,17 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+I have started the video-tagging verification test on the synthetic test video (`id=33569`) and am waiting for the background command to finish.
+Completed U49 in full and wrote [U49-RESULT.md](file:///home/derekboone/evo-x3/records/U49-RESULT.md).
+
+**Summary (`PASS`):**
+- **PixlStash API check:** Confirmed `POST /api/v1/pictures/import` accepts `STAGING_ALLOWED_MEDIA_EXTS` (`VIDEO_EXTENSIONS`: `.mp4`, `.webm`, `.avi`, `.mov`, `.mkv`) in PixlStash's `routes/pictures/_import.py` and `utils/image_processing/video_utils.py`.
+- **Backups created:**
+  - `/home/evo/AI/pixlstash-tagging/_archive/import_inbox.py.bak-20261116-u49`
+  - `/home/evo/AI/pixlstash-tagging/_archive/tag_runner.py.bak-20261116-u49`
+- **Files changed:**
+  - [import_inbox.py](file:///home/evo/AI/pixlstash-tagging/import_inbox.py): Added `.mp4`, `.webm`, `.mov` to `EXT`.
+  - [tag_runner.py](file:///home/evo/AI/pixlstash-tagging/tag_runner.py): Added `probe_video_duration`, `run_ffmpeg_frame`, `extract_video_frames_ffmpeg`, and `Runner.query_vlm_for_image`; updated `Runner.process_one_picture` so video items (`fmt in VIDEO_FORMATS`) extract first, middle, and last frames via `ffmpeg` into a `tempfile.TemporaryDirectory`, run the existing VLM tagging path on those frames, merge tags/people by union under existing thresholds/caps, and delete the temp files. Image path unchanged.
+- **Verification:**
+  - `py_compile` passed on both scripts.
+  - Imported a 5 s `ffmpeg testsrc` `.mp4` via `import_inbox.py` (`{"files": 1, "imported": 1, "duplicate": 0, "failed": 0}`, `id=33569`), tagged it via `Runner.process_one_picture` (`tags_added=24`, PixlStash tag count `27`, `leftover_tmp_dirs=0`), then deleted and purged test item `33569` (library count restored to `33564`) and removed the test file from `_imported/`.
+  - Restarted `u42-pixlstash-tagger.service` once: confirmed `active (running)` (PID `178941`), and `u42_state.db` `done` count rose from `2059` to `2076`.

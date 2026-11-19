@@ -1,0 +1,20 @@
+# Podman Quadlet: Strata Bake-off Arm (U6 — Not Default)
+# Replace PIN_DIGEST_AT_BUILD_TIME and verified image URI from live pull on Fedora.
+
+[Unit]
+Description=EVO-X3 Strata Bake-off Engine (127.0.0.1:8081)
+After=network-online.target
+
+[Container]
+Image=STRATA_IMAGE_AT_BUILD_TIME@sha256:PIN_DIGEST_AT_BUILD_TIME
+ContainerName=evo-strata-bakeoff
+Network=host
+AddDevice=/dev/kfd
+AddDevice=/dev/dri
+GroupAdd=keep-groups
+Volume=/srv/models:/srv/models:ro,Z
+Exec=--host 127.0.0.1 --port 8081
+
+[Service]
+Restart=no
+TimeoutStartSec=300

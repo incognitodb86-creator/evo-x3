@@ -1,0 +1,345 @@
+{
+  // Pi permission policy. Phase B1 rules preserved; Phase B2 (U11, 2026-10-15) adds
+  // memory / subagent / ComfyUI-MCP boundaries and the pay/send/delete guard rails.
+  // Bash + tool patterns: last matching rule wins, so broad fallbacks come first.
+  "defaultPolicy": { "tools": "allow", "bash": "allow", "mcp": "allow", "skills": "allow", "special": "allow" }, // 2026-10-30 Max2 stock-strip (Derrick 5:53 AM): bash+mcp default allow; was ask/deny. Prior note 2026-10-28 9:30 PM CT Max: Derrick wants no approval prompts (yoloMode was not taking effect at runtime); every deny below still wins
+
+  "tools": {
+    "read": "allow",
+    "grep": "allow",
+    "find": "allow",
+    "ls": "allow",
+    "edit": "allow",
+    "write": "allow",
+    "bash": "allow", // 2026-10-30 Max2 stock-strip (Derrick 5:53 AM): bash re-enabled (was deny, Max CAPA fix 2)
+    // community (ALI-163, 2026-10-23 11:49 AM CT, Derrick "Yes, switch Forge to the community permissions (1, 2, 4, 5)"): reads widen to /home/derekboone/AI/* and
+    // ComfyUI custom_nodes source (special.external_directory below).
+    // 2026-11-03 ~10:45 AM CT, Derek: "Give yourself permission to edit anything". These two lines were "deny" (community
+    // ALI-163, 2026-10-23) and are now "allow", so Pi's file tools may edit/write anywhere under /home/derekboone/AI. This is the FIRST
+    // match, so every later deny in this file still wins; the kept guard rails are re-listed at the end of "tools" below.
+    "edit:/home/derekboone/AI/*": "allow",
+    "write:/home/derekboone/AI/*": "allow",
+    "read:/home/derekboone/.pi/agent/sessions/*": "deny",
+    "read:/home/derekboone/AI/part1-2026-10-15/pi-sessions/*": "deny",
+    "read:*/sessions/*": "deny",
+    "read:*.log": "deny",
+  // 2026-10-20 7:55 PM CT, Derek "do whatever you recommend": bench showed the *.log deny stopped runs. Allow logs in Forge work folders only; re-deny sessions after.
+  "read:/home/derekboone/AI/community/*.log": "allow",
+  "read:/home/derekboone/AI/bench/*.log": "allow",
+  "read:/home/derekboone/AI/forge/ralph-community/logs/*": "allow",
+  "read:/home/derekboone/AI/forge/*.log": "allow",
+  // 2026-10-28 7:50 AM CT, Derek via Grok Bot ('Let Pi read finished render folders and their logs under /home/derekboone/AI/community/runs'): read-only, runs folder only.
+  "read:/home/derekboone/AI/community/runs/*": "allow",
+  "read:/home/derekboone/AI/community/runs/*/*": "allow",
+  "read:/home/derekboone/AI/community/runs/*/*/*": "allow",
+  "read:*/sessions/*": "deny",
+
+    // U11 test scratch (edit/write only; deletes are still blocked via bash rules below)
+
+    // --- U11: pi-hermes-memory (background review pinned to local alienpc model, no cloud) ---
+    "memory_search": "allow",
+    "memory_add": "allow",
+    "memory_replace": "allow",
+    "memory_remove": "allow",
+    "session_search": "allow",
+    "skill_manage": "allow",
+
+    // --- U11: pi-subagents delegation (children inherit this policy) ---
+    "subagents_enable": "allow",
+    "subagent": "allow",
+    "bg_wait": "allow",
+
+    // --- U11: ComfyUI MCP via pi-mcp-extension. Read-only allow-list; anything that
+    // queues/submits a render is denied (Switchyard owns renders). ---
+    "mcp_comfyui_run_workflow": "deny", "mcp_comfyui_regenerate": "deny", "mcp_comfyui_cancel_job": "deny", // 2026-10-30 Max2 stock-strip: blanket mcp_comfyui_* deny removed; render-submit stays denied (GPU lock / run_graph_job.py only)
+    // 2026-10-28 ~9:10 AM CT, Derek: "I want pi and our agent/forge to have playwright installed so it can use the Internet and browsers". Microsoft @playwright/mcp 0.0.83 (headless, isolated profile) at /home/derekboone/AI/community/tools/playwright-mcp. Allow browsing; deny file upload, arbitrary JS and code execution (exfiltration / prompt-injection hazards). Last match wins.
+    "mcp_connect": "deny", // 2026-10-28 pi-mcp-extension 1.11.7: model must not start MCP servers itself
+    "mcp_playwright_browser_file_upload": "deny",
+    "mcp_playwright_browser_evaluate": "deny",
+    "mcp_playwright_browser_run_code_unsafe": "deny",
+    // 2026-10-28 Derek: "Yes, install both web tools for Pi". open-websearch 2.2.0 (stdio, duckduckgo+startpage only, its page-fetch tools disabled) and mcp-server-fetch 2026.10.24 (blocks private/loopback/file). Results are UNTRUSTED data; never put secrets in queries or URLs.
+    // --- ALI-159 (Derrick 2026-10-22 2:41 PM CT, comfy-mcp trial): Comfy-Org comfy-mcp at :10004. Deny all, then allow only
+    // read / validate / single run-wait / job status / outputs. Launch, stop, node install, model download, update stay denied. ---
+    "mcp_comfy_mcp_launch_comfyui": "deny",
+    "mcp_comfy_mcp_stop_comfyui": "deny",
+    "mcp_comfy_mcp_restart_comfyui": "deny",
+    "mcp_comfy_mcp_install_node": "deny",
+    "mcp_comfy_mcp_download_model": "deny",
+    "mcp_comfy_mcp_download": "deny",
+    "mcp_comfy_mcp_update_comfyui": "deny",
+    "mcp_comfy_mcp_switch_comfyui_version": "deny",
+    "mcp_comfy_mcp_free_memory": "deny",
+    "mcp_comfy_mcp_upload_file": "deny",
+    "mcp_comfy_mcp_auth_login": "deny",
+
+    // --- forge2 (2026-10-15, Max Architect setup, Derrick-approved Forge jobs A/B): repo-scoped edits.
+    // Guardrail files stay denied (listed after, last match wins).
+    "edit:/home/derekboone/AI/director/AGENTS.md": "deny",
+    "write:/home/derekboone/AI/director/AGENTS.md": "deny",
+    "edit:/home/derekboone/AI/director/.agents/*": "deny",
+    "write:/home/derekboone/AI/director/.agents/*": "deny",
+    "edit:/home/derekboone/AI/director/docs/forge-lessons.md": "deny",
+    "write:/home/derekboone/AI/director/docs/forge-lessons.md": "deny",
+    "edit:/home/derekboone/AI/director/.pi/*": "deny",
+    "write:/home/derekboone/AI/director/.pi/*": "deny",
+
+    // --- loop1017 (2026-10-17, Derrick-approved 7:49 PM CT): repo-scoped write/edit.
+    // pi policy files and git internals inside the repo stay denied (listed after, last match wins).
+
+    // --- finance-rebuild (2026-10-18 3:51 PM CT, Derrick "Yes, allow edits in the rebuild folder and restart step 1"):
+    // repo-scoped write/edit for ALI-55 Forge units + its result folder. Live C:/Apps/finance-app stays ask.
+    // git internals, pi policy, secrets and data inside the repo stay denied (listed after, last match wins).
+
+    // --- Max community-upgrades R1-R8 (ALI-103), 2026-10-19 9:54 PM CT, Derrick: 'Then give it a cross wtf'. Edit/write only; no C:/Apps, no ComfyUI, no deletes.
+    // loop1017/pipeline_defaults.json (R3/R4/R7) is already covered by the loop1017 rule above.
+
+    // --- forgefix (2026-10-20 12:30 PM CT, Derek: "Yes, apply the Forge fixes and restart Ralph from C2"): community Ralph scope.
+    // Listed last so these win (last match wins). Loop scripts, logs and live ComfyUI workflows stay denied (listed after the allows).
+    "codemode": "deny", // runs JS that calls tools; under the headless guard it would be auto-approved
+    "edit:/home/derekboone/AI/community/*": "allow",
+    "write:/home/derekboone/AI/community/*": "allow",
+  // 2026-10-29 8:20 AM CT Max2, Derrick: "Remove PROMPT.md from pi's protected list so Forge can edit it". Removed the 4 exact-path edit/write PROMPT.md denies (were at lines 171-172 and 235-236); nothing else changed. Backup: pi-permissions.jsonc.bak-20261029-promptmd
+    "edit:/home/derekboone/AI/comfy-alienpc/user/*": "deny",
+    "write:/home/derekboone/AI/comfy-alienpc/user/*": "deny",
+
+    // --- p7lock (2026-10-20 8:15 PM CT, Derek: "do whatever you recommend"): GPU pipeline + P7 harness files are supervisor-only.
+    // Listed last in tools so they beat the /home/derekboone/AI/community/* and /home/derekboone/AI/director/* allows above (last match wins).
+    // Forge keeps: shots/p7_*.json, p7/JOB_REQUEST.json, p7/notes/*, runs/P7_*.md and ralph-community/TASKS.md (pi-permissions-p7lock.test.mjs).
+    // 2026-10-30 Max2 stock-strip (Derrick 5:53 AM): removed Max p7lock write-denies (comm.py, p3-p6, mk_, batch_queue, prompt_writer, scripts/*.ps1, KNOBS, p7 jobs/reviews, P6_RANKING, p7_budget). GPU lock scripts stay denied below.
+    "edit:/home/derekboone/AI/director/scripts/gpu_guard.ps1": "deny",
+    "write:/home/derekboone/AI/director/scripts/gpu_guard.ps1": "deny",
+    "edit:/home/derekboone/AI/director/scripts/gpu_lock.ps1": "deny",
+    "write:/home/derekboone/AI/director/scripts/gpu_lock.ps1": "deny",
+    "edit:/home/derekboone/AI/director/scripts/overnight_chain.ps1": "deny",
+    "write:/home/derekboone/AI/director/scripts/overnight_chain.ps1": "deny",
+    // --- scriptfix (2026-10-22 4:55 PM CT, Derrick: "Yes it should"): Forge may fix small harness bugs in /home/derekboone/AI/community/scripts/* and
+    // ralph-community/ralph.ps1 (smallest change, .bak, test/dry run, learnings line). Listed after the p7lock denies so it wins.
+    // Still denied: scripts/tests/* (the backpressure test), PROMPT.md, logs, p7 jobs/KNOBS/budget, this policy file.
+    "edit:/home/derekboone/AI/community/scripts/*": "allow",
+    "write:/home/derekboone/AI/community/scripts/*": "allow",
+    "edit:/home/derekboone/AI/community/scripts/tests/test_p6_review.py": "deny", // stock-strip 2026-10-30: adults guard tests stay protected
+    "write:/home/derekboone/AI/community/scripts/tests/test_p6_review.py": "deny",
+    "edit:/home/derekboone/AI/community/scripts/tests/test_guard_scope.py": "deny",
+    "write:/home/derekboone/AI/community/scripts/tests/test_guard_scope.py": "deny",
+    // --- narrow (2026-10-22 ~6:05 PM CT, Fleet Reviewer P1): scriptfix went beyond "small script bugs". Re-deny the guard and policy files.
+    // 2026-10-30 Max2 stock-strip: removed ralph.ps1 and comm.p? re-denies (Forge may edit its own files incl. comm.py, Derrick Oct 23).
+    "edit:/home/derekboone/.pi/*": "deny",
+    "write:/home/derekboone/.pi/*": "deny",
+    "edit:*pi-permissions*": "deny",
+    "write:*pi-permissions*": "deny",
+
+    // --- forgeup (2026-10-21 CT, ALI-146, Derek: Forge may write the staging repo /home/derekboone/AI/forge-upgrades): listed last so it wins.
+    // Staging repo only. Its .git, .pi, AGENTS.md, .gitignore and the reference copy of this policy stay denied; the loop folder too.
+    "edit:/home/derekboone/AI/forge-upgrades/*": "allow",
+    "write:/home/derekboone/AI/forge-upgrades/*": "allow",
+    "edit:/home/derekboone/AI/forge-upgrades/.git/*": "deny",
+    "write:/home/derekboone/AI/forge-upgrades/.git/*": "deny",
+    "edit:/home/derekboone/AI/forge-upgrades/.pi/*": "deny",
+    "write:/home/derekboone/AI/forge-upgrades/.pi/*": "deny",
+    "edit:/home/derekboone/AI/forge-upgrades/AGENTS.md": "deny",
+    "write:/home/derekboone/AI/forge-upgrades/AGENTS.md": "deny",
+    "edit:/home/derekboone/AI/forge-upgrades/.gitignore": "deny",
+    "write:/home/derekboone/AI/forge-upgrades/.gitignore": "deny",
+    "edit:/home/derekboone/AI/forge-upgrades/config/pi-permissions.jsonc": "deny",
+    "write:/home/derekboone/AI/forge-upgrades/config/pi-permissions.jsonc": "deny",
+    "read:/home/derekboone/AI/secrets/*": "deny",
+    "read:/home/derekboone/AI/forge-upgrades/.env*": "deny",
+    // --- launchers (ALI-150, 2026-10-21 4:0x PM CT, Derek via Grok Bot: Forge builds /home/derekboone/AI/Launchers + the organize plan). Listed last so it wins.
+    // Write scope = the Launchers folder and the one plan file only. .lnk files on Desktop/Start Menu are made with the powershell tool (already allowed).
+    "edit:/home/derekboone/AI/Launchers/*": "allow",
+    "write:/home/derekboone/AI/Launchers/*": "allow",
+    "edit:/home/derekboone/AI/ORGANIZE_PLAN_2026-10-21.md": "allow",
+    "write:/home/derekboone/AI/ORGANIZE_PLAN_2026-10-21.md": "allow",
+    // never read secrets files (adds to the existing secrets/.env denies; .env.example stays readable)
+    "read:*/.env": "deny",
+    "read:*/.env.local": "deny",
+    "read:*/.env.production": "deny",
+    // --- skillspector (ALI-151, 2026-10-21 CT, Derek via Grok Bot: Forge installs NVIDIA SkillSpector and scans read-only, report only). Listed last so it wins.
+    // Write scope = /home/derekboone/AI/security/skillspector only (reports, RESULT.md, install.txt). No script files there; TASK/REVIEW/launcher stay read-only.
+    "edit:/home/derekboone/AI/security/skillspector/*": "allow",
+    "write:/home/derekboone/AI/security/skillspector/*": "allow",
+    "edit:/home/derekboone/AI/security/skillspector/*.ps1": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.ps1": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/*.psm1": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.psm1": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/*.cmd": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.cmd": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/*.bat": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.bat": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/*.py": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.py": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/*.sh": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.sh": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/*.js": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.js": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/*.vbs": "deny",
+    "write:/home/derekboone/AI/security/skillspector/*.vbs": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/TASK.md": "deny",
+    "write:/home/derekboone/AI/security/skillspector/TASK.md": "deny",
+    "edit:/home/derekboone/AI/security/skillspector/REVIEW.md": "deny",
+    "write:/home/derekboone/AI/security/skillspector/REVIEW.md": "deny",
+    // readme (ALI-163, 2026-10-23 11:07 AM CT, Derrick "Yes do it"): custom_nodes README*.md are read-only for Forge (read/grep via special.external_directory below).
+    "edit:/home/derekboone/AI/comfy-alienpc/custom_nodes/*/README*.md": "deny",
+    "write:/home/derekboone/AI/comfy-alienpc/custom_nodes/*/README*.md": "deny",
+    // bakeoff (ALI-173, 2026-10-23 1:07 PM CT, Derrick "Yes, add 120 GPU min and 10 jobs for the bakeoff and let Forge restart and call ComfyUI itself"):
+    // the restart helper is Max's (it holds the render-running refusal), so it stays out of the scriptfix allow above.
+    "edit:/home/derekboone/AI/community/scripts/comfy_ctl.py": "deny",
+    "write:/home/derekboone/AI/community/scripts/comfy_ctl.py": "deny",
+    // ownskills (2026-10-28 1:27 PM CT, Derek: "Dont restrict pi from editing its own skills"): Pi may edit/write its own skills folder only. Listed last so it wins over the .pi/* deny; auth.json, sessions, pi-permissions and settings stay denied.
+    "edit:/home/derekboone/.pi/agent/skills/*": "allow",
+    "write:/home/derekboone/.pi/agent/skills/*": "allow",
+    // guardrails (2026-11-03, same pass as the widening above): these stay out of the write scope, listed LAST so they
+    // beat the broad /home/derekboone/AI/* allow. GPU lock and guard scripts, Max's own files, the adults-guard tests, the ComfyUI
+    // restart helper, the repo internals, secret shapes, and the private trigger map.
+    "edit:/home/derekboone/AI/locks/*": "deny",
+    "write:/home/derekboone/AI/locks/*": "deny",
+    "edit:/home/derekboone/AI/secrets/*": "deny",
+    "write:/home/derekboone/AI/secrets/*": "deny",
+    "edit:/home/derekboone/AI/community/agent-shared/AGENTS.md": "deny",
+    "write:/home/derekboone/AI/community/agent-shared/AGENTS.md": "deny",
+    "edit:/home/derekboone/AI/community/PROMPT.md": "deny",
+    "write:/home/derekboone/AI/community/PROMPT.md": "deny",
+    "edit:/home/derekboone/AI/community/fix_plan.md": "deny",
+    "write:/home/derekboone/AI/community/fix_plan.md": "deny",
+    "edit:/home/derekboone/AI/community/progress.md": "deny",
+    "write:/home/derekboone/AI/community/progress.md": "deny",
+    "edit:/home/derekboone/AI/community/skills/*": "deny",
+    "write:/home/derekboone/AI/community/skills/*": "deny",
+    "edit:/home/derekboone/AI/community/scripts/gpu_guard.ps1": "deny",
+    "write:/home/derekboone/AI/community/scripts/gpu_guard.ps1": "deny",
+    "edit:/home/derekboone/AI/community/scripts/gpu_lock.ps1": "deny",
+    "write:/home/derekboone/AI/community/scripts/gpu_lock.ps1": "deny",
+    "edit:**/.env*": "deny",
+    "write:**/.env*": "deny",
+    "edit:**/auth.json": "deny",
+    "write:**/auth.json": "deny",
+    "edit:**/TRIGGER_MAP_private.txt": "deny",
+    "write:**/TRIGGER_MAP_private.txt": "deny",
+    "edit:**/.git/*": "deny",
+    "write:**/.git/*": "deny",
+    // 2026-11-08 Derek GO (Sydney chat review 2026-11-07, ask 3): the phone chat client cannot show a question form, so a form is an invisible ask. Measured 2026-11-01 19:29:07 in the Sydney lane: a three-question form, 29 h with no answer, the three ordered clips never built. Ask in plain chat text instead. The phone client renders plain text reliably.
+    // 2026-11-15 U31 (Antigravity MF-03, Derrick t1819u): protect the X3 Ralph loop.
+    // Leftover AlienPc 5slock path rules were dropped (that directory is empty on the X3).
+    // These denies are last in tools so they beat /home/derekboone/AI/* allow.
+    "edit:/home/derekboone/AI/forge/ralph-community/*.sh": "deny",
+    "write:/home/derekboone/AI/forge/ralph-community/*.sh": "deny",
+    "edit:/home/derekboone/AI/forge/ralph-community/logs/*": "deny",
+    "write:/home/derekboone/AI/forge/ralph-community/logs/*": "deny",
+    "ask_user_question": "deny"
+  },
+
+  "mcp": {
+    // 2026-11-15 X3 Phase 2 (Derrick t1784s6566): MCP allows dropped (no MCP servers on the EVO-X3); denies kept. AlienPc copy unchanged.
+    // 2026-10-30 Max2 stock-strip: blanket comfyui/comfy_mcp denies removed; render-submit and ComfyUI start/stop/install denies kept (GPU lock).
+    "comfyui:run_workflow": "deny",
+    "comfyui_run_workflow": "deny",
+    "comfyui:regenerate": "deny",
+    "comfyui_regenerate": "deny",
+    "comfyui:cancel_job": "deny",
+    "comfyui_cancel_job": "deny",
+    "comfy_mcp:launch_comfyui": "deny",
+    "comfy_mcp_launch_comfyui": "deny",
+    "comfy_mcp:stop_comfyui": "deny",
+    "comfy_mcp_stop_comfyui": "deny",
+    "comfy_mcp:restart_comfyui": "deny",
+    "comfy_mcp_restart_comfyui": "deny",
+    "comfy_mcp:install_node": "deny",
+    "comfy_mcp_install_node": "deny",
+    "comfy_mcp:download_model": "deny",
+    "comfy_mcp_download_model": "deny",
+    "comfy_mcp:download": "deny",
+    "comfy_mcp_download": "deny",
+    "comfy_mcp:update_comfyui": "deny",
+    "comfy_mcp_update_comfyui": "deny",
+    "comfy_mcp:switch_comfyui_version": "deny",
+    "comfy_mcp_switch_comfyui_version": "deny",
+    "comfy_mcp:free_memory": "deny",
+    "comfy_mcp_free_memory": "deny",
+    "comfy_mcp:upload_file": "deny",
+    "comfy_mcp_upload_file": "deny",
+    "comfy_mcp:auth_login": "deny",
+    "comfy_mcp_auth_login": "deny"
+  },
+
+  "bash": {
+    "*": "allow",
+    "echo*": "allow",
+    "cat*": "allow",
+    "ls*": "allow",
+    "dir*": "allow",
+    "pwd*": "allow",
+    "find*": "allow",
+    "grep*": "allow",
+    "Select-String*": "allow",
+    "Get-Content*": "allow",
+    "git status*": "allow",
+    "git diff*": "allow",
+    "git log*": "allow",
+    "git show*": "allow",
+    // 2026-10-30 Max2 stock-strip (Derrick 5:53 AM): Max shell deny floor removed. Kept: secrets, GPU lock + guard files, policy file, ask-first items.
+    "*pi-permissions*": "deny",
+    // ask-first (Derrick): QNAP NAS delete/move, UniFi changes, Home Assistant unlock/disarm/open, money, passwords/keys/tokens
+    "*qnap*": "ask", "*QNAP*": "ask", "*Qnap*": "ask", "*\\\\NAS*": "ask", "*//NAS*": "ask",
+    "*unifi*": "ask", "*UniFi*": "ask", "*Unifi*": "ask", "*firewall*": "ask", "*netsh*": "ask",
+    "*homeassistant*": "ask", "*home-assistant*": "ask", "*:8123*": "ask", "*unlock*": "ask", "*disarm*": "ask", "*open_cover*": "ask", "*garage*": "ask",
+    "*payment*": "ask", "*purchase*": "ask", "*checkout*": "ask", "*stripe*": "ask", "*paypal*": "ask",
+    "*password*": "ask", "*passwd*": "ask", "*token*": "ask", "*api_key*": "ask", "*apikey*": "ask", "*secret*": "ask", "*credential*": "ask",
+    "*.env": "deny", "*.env *": "deny", "*/.env*": "deny", "*\\.env*": "deny",
+    "*auth.json*": "deny", "*rclone.conf*": "deny", "*.pem*": "deny", "*id_rsa*": "deny", "*id_ed25519*": "deny", "*/home/derekboone/AI/secrets*": "deny", "*/home/derekboone/AI/secrets*": "deny",
+    "*Remove-Item*gpu-render.lock*": "deny", "*rm *gpu-render.lock*": "deny", "*del *gpu-render.lock*": "deny", "*Move-Item*gpu-render.lock*": "deny", "*Set-Content*gpu-render.lock*": "deny", "*Out-File*gpu-render.lock*": "deny", "*>*gpu-render.lock*": "deny",
+    "*Remove-Item*test_p6_review*": "deny", "*Remove-Item*test_guard_scope*": "deny", "*rm *test_p6_review*": "deny", "*rm *test_guard_scope*": "deny", "*>*test_p6_review*": "deny", "*>*test_guard_scope*": "deny",
+    // 2026-11-15 U31 (MF-03): bash write-guards for the X3 Ralph loop. Execute ralph.sh is still allowed; edit/overwrite/delete of the loop scripts and logs is not.
+    "*rm *forge/ralph-community/*.sh*": "deny",
+    "*rm *forge/ralph-community/logs*": "deny",
+    "*mv *forge/ralph-community/*.sh*": "deny",
+    "*mv *forge/ralph-community/logs*": "deny",
+    "*sed -i*forge/ralph-community*": "deny",
+    "*tee *forge/ralph-community/*.sh*": "deny",
+    "*tee *forge/ralph-community/logs*": "deny",
+    "*>*forge/ralph-community/*.sh*": "deny",
+    "*>*forge/ralph-community/logs*": "deny",
+    "*cp *forge/ralph-community/*.sh*": "deny",
+    "*truncate *forge/ralph-community*": "deny",
+    "*python*forge/ralph-community/*.sh*": "deny"
+  },
+
+  "special": {
+    "external_directory": "deny",
+    "doom_loop": "ask",
+    // finance-rebuild (2026-10-18): Forge may use file tools here (outside its repo cwd) for its RESULT file. Nothing else outside cwd.
+    // R1 (ALI-104, 2026-10-19 9:54 PM CT): the one Desktop audit copy only
+    // forgefix 2026-10-20: community Ralph work dir + its loop folder
+    "external_directory:/home/derekboone/AI/community": "allow", // the folder itself (ls/grep on the dir)
+    "external_directory:/home/derekboone/AI/community/*": "allow",
+    "external_directory:/home/derekboone/AI/forge/ralph-community": "allow",
+    "external_directory:/home/derekboone/AI/forge/ralph-community/*": "allow",
+    // launchers (ALI-150, 2026-10-21): file tools may reach the Launchers folder and the one plan file outside cwd. Nothing else.
+    "external_directory:/home/derekboone/AI/Launchers": "allow",
+    "external_directory:/home/derekboone/AI/Launchers/*": "allow",
+    "external_directory:/home/derekboone/AI/ORGANIZE_PLAN_2026-10-21.md": "allow",
+    // skillspector (ALI-151, 2026-10-21 CT, Derek via Grok Bot: Forge installs NVIDIA SkillSpector and scans read-only, report only): file tools may reach the SkillSpector work folder. Scan targets are read via the powershell tool only (no new external_directory for them).
+    "external_directory:/home/derekboone/AI/security/skillspector": "allow",
+    "external_directory:/home/derekboone/AI/security/skillspector/*": "allow",
+    // readme (ALI-163, 2026-10-23 11:07 AM CT, Derrick "Yes do it"): file tools may open custom_nodes/**/README*.md only (edit/write denied in tools). Nothing else in HardcoreNSFW-TestRuntime.
+    "external_directory:/home/derekboone/AI/comfy-alienpc/custom_nodes/*/README*.md": "allow",
+    "external_directory:/home/derekboone/AI/comfy-alienpc/custom_nodes/*/README*/*": "deny", // README* must be the file, not a folder
+    // community (ALI-163, 2026-10-23 11:49 AM CT, Derrick "Yes, switch Forge to the community permissions (1, 2, 4, 5)"): file tools may READ all of /home/derekboone/AI and the
+    // ComfyUI custom_nodes source (edit/write stay denied in tools above). Secret and finance paths stay blocked (listed last so they win; the guard also blocks them for Forge).
+    "external_directory:/home/derekboone/AI": "allow",
+    "external_directory:/home/derekboone/AI/*": "allow",
+    "external_directory:/home/derekboone/AI/comfy-alienpc/custom_nodes": "allow",
+    "external_directory:/home/derekboone/AI/comfy-alienpc/custom_nodes/*": "allow",
+    // ownskills (2026-10-28 1:35 PM CT, Derek: "Dont restrict pi from editing its own skills"): file tools may reach Pi's own skills folder outside cwd (edit/write allow is in tools above). auth.json and sessions floors below still win.
+    "external_directory:/home/derekboone/.pi/agent/skills": "allow",
+    "external_directory:/home/derekboone/.pi/agent/skills/*": "allow",
+    // 2026-11-08 Derek GO (Sydney chat review 2026-11-07, ask 1): the talk lane may use its own file tools on its own lane folder. Measured: every read/edit of the lane AGENTS.md, its lane skills and its own notes returned the hard external-directory denial, and the 2026-11-07 review loop spent 14 extra calls on cat/python workarounds. The secret guard rails below (.env, .key, .pem, rclone, sessions, auth.json) are listed after this rule and still win.
+    "external_directory:*/.env*": "deny",
+    "external_directory:*.key": "deny",
+    "external_directory:*.pem": "deny",
+    "external_directory:*rclone*": "deny",
+    "external_directory:*/sessions/*": "deny",
+    "external_directory:*/pi-sessions/*": "deny",
+    "external_directory:*/.git/config": "deny",
+    "external_directory:/home/derekboone/.pi/agent/auth.json": "deny",
+  }
+}

@@ -1,0 +1,8 @@
+[Unit]
+Description=QNAP homes (derek) for pi-drop
+
+[Mount]
+What=//192.168.0.147/homes
+Where=/mnt/qnap/derek-homes
+Type=cifs
+Options=credentials=/etc/evo-x3/qnap-derek.cred,vers=3.0,uid=evo,gid=evo,file_mode=0664,dir_mode=0775,_netdev,nofail

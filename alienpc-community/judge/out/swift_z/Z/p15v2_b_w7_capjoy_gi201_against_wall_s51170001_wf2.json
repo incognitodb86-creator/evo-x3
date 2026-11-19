@@ -1,0 +1,53 @@
+{
+ "frames": [
+  82,
+  290
+ ],
+ "diffs": [
+  9.76,
+  10.55
+ ],
+ "per_frame": [
+  {
+   "frame": 82,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting conditions, and surrounding structures remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The characters' anatomy appears structurally sound with no visible melting, extra limbs, or significant deformities in this frame."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0143,
+    "anatomy_defect": 0.6611
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 290,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting, and setting remain consistent between the two images."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "In Image 2, the green character's genitalia is a smooth, featureless blob, lacking anatomical detail."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.1753,
+    "anatomy_defect": 0.8542
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w7_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.0
+}

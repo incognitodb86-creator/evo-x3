@@ -1,0 +1,18 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+root agent idle; waiting for 1 background task(s) to finish
+Waiting for the `gitleaks` scan on `/home/evo/AI/community` to finish before fixing line endings and committing.
+Completed the U40 code-fix batch in `/home/evo/AI/render` and `/home/evo/AI/community` as user `evo`, and wrote the full report to [U40-RESULT.md](file:///home/derekboone/evo-x3/records/U40-RESULT.md).
+
+### Key Highlights
+- **12 dirty render files & merged-vault docs:** Reviewed and committed all 12 dirty files in `/home/evo/AI/render` (`35e098d`), plus merged-vault doc updates in `AGENTS.md` and `RUN_ME.md` (`2904e1b`).
+- **U37 decisions 2–4, PixlStash repoint, and extend-seam fixes (`0530815` in `/home/evo/AI/community`):**
+  - Added `/home/evo/AI/render/stills/approved_characters` (and `~/` expansion) to `resolve.py:APPROVED_IMAGE_POOLS`.
+  - Updated `remote_comfy.py:remote_idle()` to query `GET /system_stats` before `GET /queue` (returning `None` on `409` without touching `/queue`).
+  - Extended `wp_lint.py` `MOUTH_CONTACT_RE` (`enters? her mouth`) and `MODE_RULES["oral"]["banned_contact"]` (`deep in her` / `buried in her` / `inside her` without `mouth`/`throat`).
+  - Repointed `submit_parody_run.py:_PIXLSTASH_VAULTS` exclusively to `_AI_ROOT / "5slock" / "libraries" / "vault.db"` (dropped `approved_characters/vault.db`). `/home/evo/AI/5slock/libraries/vault.db` exists (`1,163,423,744` bytes); `/home/evo/.config/pixlstash/` is not present yet, and API/token checks skip cleanly.
+  - Confirmed `3dd04d1` voice-on-tail (`minimaxh3_oc_poolclub_v1_refmod_audio` on beats 1–3, `2000==2000`, `2130==2130`, `2074==2074`) and `27d4e39` window-local shot-clock rebasing are intact; added per-beat `overlap_consistency` checks, optional seam audio crossfade (`declick` 15 ms / `soft_av` 8 ticks, default `False`) + loudness trace, and `parse_plan_end_actions()`.
+- **Pack & hashes:** Placed the unchanged pack in `/home/evo/AI/community/runs/extend-test-3beat-20261115/` (matching all 3 sha256 hashes in C0) and repinned [PROMPT.md](file:///home/derekboone/evo-x3/records/voice-cap-followup/PROMPT.md).
+- **Dry build & tests (no render queued, PR #15375 not implemented):**
+  - `scripts/parody`: `562 passed, 6 skipped`; `scripts/tests/test_remote_comfy.py`: `6 passed`; `render` (`--ignore=_archive --ignore=x3/bakeoff`): `3 passed`.
+  - Dry build (`dry-u40`): beat 2 overlap `39` across carry/trim/assembly/clocks, window-local cut times `00:03.958` / `00:06.958` (`Shot 1` visible `56f` / `2.333 s`, not `1.625 s`); beat 3 overlap `22` (`00:06.500` -> global `513`).
+- **Blocked:** `git push gitea` from `evo` failed because `evo` has no Gitea credentials configured (`terminal prompts disabled`); commits are local on `x3-linux`.

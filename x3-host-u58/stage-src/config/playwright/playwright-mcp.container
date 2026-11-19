@@ -1,0 +1,34 @@
+# Podman Quadlet: U18 Playwright MCP Container (Hardened, Isolated, Loopback-Only)
+# Adapted from microsoft/playwright-mcp README + Awesome Testing security recommendations.
+#
+# CRITICAL RULES:
+# - Run as dedicated unprivileged user (not root, not llama-swap user)
+# - Keep bound to 127.0.0.1:8931 (behind evo-mcp-proxy on 127.0.0.1:8930)
+# - NEVER expose off loopback until Derrick approves the TOOLS PORT gate card
+# - NEVER add --user-data-dir, --storage-state, --secrets, or --shared-browser-context
+# - Replace PIN_DIGEST_AT_BUILD_TIME and EVO_SERVE_NAME_AT_BUILD_TIME before enabling
+
+[Unit]
+Description=EVO-X3 U18 Hardened Playwright MCP Container (Loopback Only)
+After=network-online.target
+
+[Container]
+Image=mcr.microsoft.com/playwright/mcp@sha256:PIN_DIGEST_AT_BUILD_TIME
+ContainerName=evo-playwright-mcp
+Network=evo-mcp-egress.network
+PublishPort=127.0.0.1:8931:8931
+ReadOnly=true
+DropCapability=ALL
+NoNewPrivileges=true
+PidsLimit=256
+Memory=4g
+PodmanArgs=--cpus=2.0 --tmpfs=/tmp:rw,noexec,nosuid,size=1g --tmpfs=/home/node/.cache:rw,nosuid,size=512m
+Exec=--host 0.0.0.0 --port 8931 --isolated --allowed-hosts EVO_SERVE_NAME_AT_BUILD_TIME
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

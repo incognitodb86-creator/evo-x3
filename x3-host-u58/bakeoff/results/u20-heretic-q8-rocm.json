@@ -1,0 +1,188 @@
+{
+ "arm": "u20-heretic-q8-rocm",
+ "model": "gemma4-heretic",
+ "effort": "low",
+ "started": "2026-11-15 09:47:59 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 16.097139596939087,
+   "total_s": 24.396032571792603,
+   "prompt_tokens": 18709,
+   "completion_tokens": 280,
+   "client_decode_tps": 33.73943980822843,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18709,
+    "prompt_ms": 15957.728,
+    "prompt_per_token_ms": 0.8529439307285264,
+    "prompt_per_second": 1172.410007239126,
+    "predicted_n": 280,
+    "predicted_ms": 8395.575,
+    "predicted_per_token_ms": 30.09166666666667,
+    "predicted_per_second": 33.23179174743838
+   },
+   "content": "The maintenance window for this fixture is Tuesday 03:40, and the on-call codename is TANGERINE-4471.",
+   "reasoning_chars": 765,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "decode": {
+   "ttft_s": 0.2915821075439453,
+   "total_s": 21.660953998565674,
+   "prompt_tokens": 35,
+   "completion_tokens": 900,
+   "client_decode_tps": 42.11635253435465,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 35,
+    "prompt_ms": 165.098,
+    "prompt_per_token_ms": 4.717085714285715,
+    "prompt_per_second": 211.99529976135383,
+    "predicted_n": 900,
+    "predicted_ms": 21444.613,
+    "predicted_per_token_ms": 23.853852057842047,
+    "predicted_per_second": 41.92195028187265
+   },
+   "content": "Most people think of heating a home as a process of \"creating\" warmth\u2014like a furnace burning gas to make a flame. However, a heat pump works on a completely different principle. Instead of creating heat, a heat pump simply **moves** it from one place to another. \n\nThink of a heat pump like a sponge. A sponge doesn't create water; it soaks it up in one place and",
+   "reasoning_chars": 3079,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": true
+  },
+  "write1": {
+   "ttft_s": 0.23696088790893555,
+   "total_s": 28.87178063392639,
+   "prompt_tokens": 42,
+   "completion_tokens": 1200,
+   "client_decode_tps": 41.90702126444838,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 36,
+    "prompt_ms": 143.24,
+    "prompt_per_token_ms": 3.978888888888889,
+    "prompt_per_second": 251.32644512705946,
+    "predicted_n": 1200,
+    "predicted_ms": 28709.639,
+    "predicted_per_token_ms": 23.944653044203502,
+    "predicted_per_second": 41.7629772356246
+   },
+   "content": "",
+   "reasoning_chars": 4769,
+   "tool_calls": [],
+   "finish": "length",
+   "pass": false
+  },
+  "write2": {
+   "ttft_s": 0.23458242416381836,
+   "total_s": 23.030138731002808,
+   "prompt_tokens": 39,
+   "completion_tokens": 960,
+   "client_decode_tps": 42.113471023823465,
+   "timings": {
+    "cache_n": 6,
+    "prompt_n": 33,
+    "prompt_ms": 138.076,
+    "prompt_per_token_ms": 4.184121212121212,
+    "prompt_per_second": 238.99881224832703,
+    "predicted_n": 960,
+    "predicted_ms": 22871.633,
+    "predicted_per_token_ms": 23.849460896767468,
+    "predicted_per_second": 41.929668948430574
+   },
+   "content": "Meet the last pan you\u2019ll ever own.\n\nForged from heavy-duty, pre-seasoned iron, this skillet isn't just cookware\u2014it\u2019s a kitchen legend. It handles the searing heat that would make stainless steel buckle. From bone-in ribeyes with a perfect, crusty char to golden, buttery cornbread, the heat retention is unmatched. It doesn't just cook food; it transforms it.\n\nThe more you use it, the better it gets. Every meal builds a natural, non-stick patina that evolves with your cooking style. It\u2019s rugged, indestructible, and ready for the stovetop, the oven, or the campfire.\n\n**And here\u2019s the twist:** When you\u2019re finished in the kitchen, its perfect weight and ergonomic handle make it an elite improvised kettlebell for your morning bicep curls.\n\nStop buying disposable pans. Invest in a culinary legacy that works as hard as you do.",
+   "reasoning_chars": 2900,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.3240056037902832,
+     "total_s": 3.300427198410034,
+     "prompt_tokens": 143,
+     "completion_tokens": 130,
+     "client_decode_tps": 43.6766082583835,
+     "timings": {
+      "cache_n": 5,
+      "prompt_n": 138,
+      "prompt_ms": 225.605,
+      "prompt_per_token_ms": 1.6348188405797102,
+      "prompt_per_second": 611.6885707320316,
+      "predicted_n": 130,
+      "predicted_ms": 3052.713,
+      "predicted_per_token_ms": 23.664441860465118,
+      "predicted_per_second": 42.25749358030053
+     },
+     "content": "",
+     "reasoning_chars": 386,
+     "tool_calls": [
+      {
+       "id": "hgI84I0Yd2JbnqDsjhLrgYtajtiqW5AR",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.3674302101135254,
+     "total_s": 0.7204298973083496,
+     "prompt_tokens": 190,
+     "completion_tokens": 26,
+     "client_decode_tps": 73.65445620253575,
+     "timings": {
+      "cache_n": 138,
+      "prompt_n": 52,
+      "prompt_ms": 122.644,
+      "prompt_per_token_ms": 2.3585384615384615,
+      "prompt_per_second": 423.99138971331655,
+      "predicted_n": 26,
+      "predicted_ms": 593.877,
+      "predicted_per_token_ms": 23.75508,
+      "predicted_per_second": 42.09625898965611
+     },
+     "content": "",
+     "reasoning_chars": 0,
+     "tool_calls": [
+      {
+       "id": "BUwSfg3ERbcwx6HIEyR2bmxLGEGYRE0A",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.2313675880432129,
+     "total_s": 0.5448174476623535,
+     "prompt_tokens": 246,
+     "completion_tokens": 18,
+     "client_decode_tps": 57.425452421229416,
+     "timings": {
+      "cache_n": 185,
+      "prompt_n": 61,
+      "prompt_ms": 128.593,
+      "prompt_per_token_ms": 2.1080819672131144,
+      "prompt_per_second": 474.3648565629545,
+      "predicted_n": 18,
+      "predicted_ms": 412.28,
+      "predicted_per_token_ms": 24.25176470588235,
+      "predicted_per_second": 41.2341127389153
+     },
+     "content": "Dana (dana@example.com) has 3 orders.",
+     "reasoning_chars": 0,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  }
+ }
+}

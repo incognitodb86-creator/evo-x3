@@ -1,0 +1,19 @@
+warning: --mode auto is not available for this account; continuing in the default mode.
+All 7 remaining items in [U36-consolidation-handoff-20261116.md](file:///home/derekboone/evo-x3/records/U36-consolidation-handoff-20261116.md) are **DONE** and recorded in [U36-RESULT.md](file:///home/derekboone/evo-x3/records/U36-RESULT.md).
+
+### Summary
+1. **`herdr` duplicate workspaces:** Closed stale `w1`/`w2`, updated `/home/evo/evo-x3/scripts/herdr-panes.sh` (and [herdr-panes.sh](file:///home/derekboone/evo-x3/scripts/evo-agent-host/herdr-panes.sh)) to match restored panes via `herdr pane list` + `herdr workspace get` by label/cwd. Restart test (`systemctl restart user@1001.service`) left `herdr-server`, `pi-mobile-hub`, and `herdr-panes` `active` with exactly 2 workspaces (`w3` render, `w4` forge, both `idle`).
+2. **Gap tables (R5):** Wrote [U36-gap-tables-20261116.md](file:///home/derekboone/evo-x3/records/U36-gap-tables-20261116.md) covering Render, Forge, and Sydney (noting AlienPc SSH port 22 timed out from X3 so AlienPc baseline is cited from `U23`/`U33`/`U34`; `qmd` recorded as open gap; `ralph.sh` verified at `0` diff vs `e9730b3`; Forge MCP key placeholders and Sydney D7 copy list documented).
+3. **Forge workspace (D8):** Confirmed `/home/evo/AI/forge` is `285M` (no bulk copy of AlienPc's 61.5 GB folder) at `x3-forge` `330dd23` (`e9730b3` content intact).
+4. **Portable paths + `evo` sync:** Updated runtime scripts/configs in `~/AI/community` (`7731a05`) and `~/AI/render` (`f309f84`) to derive paths via `__file__` / `expanduser` / `Path.home()` / `~/` (locked [submit_parody_run.py](file:///home/derekboone/AI/community/scripts/parody/submit_parody_run.py), `skills/*`, and render `AGENTS.md` untouched), synced those plus P1b `queue-remote.sh` to `/home/evo/AI/{community,render}`, and verified `38 passed` (`test_p6_review.py`, `test_guard_scope.py`, `test_remote_comfy.py`) as both `derekboone` (`2.85s`) and `evo` (`2.83s`).
+5. **Docs, rollback notes & Gitea:** Updated [README-X3.md](file:///home/derekboone/AI/render/x3/README-X3.md), [README.md](file:///home/derekboone/evo-x3/pi-chats/README.md), and [U34-rollback-notes.txt](file:///home/derekboone/evo-x3/records/U34-rollback-notes.txt). All commits gitleaks-clean (`0` leaks) and pushed: `gitea/x3-community` (`7731a05`), `gitea/x3-render` (`f309f84`), `gitea/x3-pi-config` (`8cf8c80`).
+6. **Smoke-render prep (D6, NO QUEUE):** Dry-run verified `/home/evo/AI/community/runs/_x3_remote_dryrun_20261116` (`queue-remote.sh ... --yes-derrick --dry-run` exited `0`, `:8446` returned `409`, nothing queued); full `prompt.txt` and approval command are pasted in [U36-RESULT.md](file:///home/derekboone/evo-x3/records/U36-RESULT.md).
+7. **`pi-mobile` pairing QR:** Configured `publicUrl` (`https://evo-x3-1.tailf242b2.ts.net:8444`) in `evo`'s `pi-mobile/config.json`, restarted `user@1001.service`, and saved the `0600` PNG (10-minute pairing TTL) at:
+   - [pi-mobile-qr.png](file:///home/derekboone/evo-x3/records/pi-mobile-qr.png) (copied from `/home/evo/evo-x3/records/pi-mobile-qr.png`)
+
+### Derrick-only next steps
+- Scan [pi-mobile-qr.png](file:///home/derekboone/evo-x3/records/pi-mobile-qr.png) (regenerate via `/remote pair` if >10 min since `08:38:22 CST`).
+- Type Forge's MCP keys (placeholders in [U36-gap-tables-20261116.md](file:///home/derekboone/evo-x3/records/U36-gap-tables-20261116.md)).
+- Sign into `agy` as `evo`.
+- Approve the smoke-render prompt in [U36-RESULT.md](file:///home/derekboone/evo-x3/records/U36-RESULT.md) (D6).
+- Copy Sydney's private files to `/home/evo/AI/sydney` (D7).

@@ -1,0 +1,17 @@
+{
+    "started":  "2026-10-21T11:29:47",
+    "rc":  0,
+    "budget_cap_min":  360,
+    "budget_used_min":  193,
+    "log":  "C:\\AI\\community\\p7\\jobs\\p7_r2_c3_pmot_full_pool.out",
+    "id":  "p7_r2_c3_pmot_full_pool",
+    "ok":  true,
+    "kind":  "render",
+    "note":  "batch_queue rc=0 rendered=3/3 prompts_reused=0 stitch=True",
+    "outputs":  [
+                    "C:\\AI\\community\\runs\\p7_r2_c3_pmot_full_pool\\results.json",
+                    "C:\\AI\\community\\runs\\p7_r2_c3_pmot_full_pool\\p7_r2_c3_pmot_full_pool_stitched.mp4"
+                ],
+    "finished":  "2026-10-21T12:16:48",
+    "wall_min":  47
+}

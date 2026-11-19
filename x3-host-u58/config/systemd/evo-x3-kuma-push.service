@@ -1,0 +1,10 @@
+[Unit]
+Description=Push EVO-X3 heartbeats to Uptime Kuma
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/evo-x3/kuma.env
+ExecStart=/usr/local/libexec/evo-x3-kuma-push.sh
+Nice=10

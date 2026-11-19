@@ -1,0 +1,49 @@
+{
+ "frames": [
+  127,
+  152
+ ],
+ "diffs": [
+  9.36,
+  8.23
+ ],
+ "per_frame": [
+  {
+   "frame": 127,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background remains consistent: same bed, sheets, wall, and lighting with no new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are anatomically correct and connected; no melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0003,
+    "anatomy_defect": 0.0001
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 152,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background remains consistent: same bed, sheets, and wall structure with no new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs and bodies are intact, proportionate, and correctly positioned without melting, floating, or malformed parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0005,
+    "anatomy_defect": 0.0002
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_b_w8_capjoy_gi102_missionary_s51170001_wf2"
+}

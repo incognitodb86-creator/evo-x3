@@ -1,0 +1,11 @@
+All tests pass. 
+
+**Solution approach** (`zebra_puzzle.cpp`): brute-force search over permutations of the five categories (colors, nationalities, beverages, hobbies, pets) with early pruning:
+
+- Colors pruned first: house 1 must be blue (clues 10, 15) and green must sit immediately right of ivory (clue 6) — leaving only 12 color layouts.
+- Nationalities, beverages, and hobbies are then filtered in nested loops by clues 2, 4, 5, 8, 9, 13, 14.
+- Pets are checked last for the fox/reader and painter/horse adjacency (clues 11, 12).
+
+**Answers:**
+- The **Norwegian** drinks water.
+- The **Japanese** owns the zebra.

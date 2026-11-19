@@ -1,0 +1,31 @@
+{
+ "bjpov_b1_s51083020": {
+  "tag": "bjpov_b1_s51083020",
+  "dino_start_min": 0.2175,
+  "dino_start_last": 0.2734,
+  "dino_prev_min": 0.6333,
+  "clip_start_min": 0.7211,
+  "clip_start_last": 0.7211,
+  "clip_prev_min": 0.9174,
+  "cuts_adaptive": 0,
+  "transition": false,
+  "flags": "jump",
+  "info": "",
+  "vlm_flags": "start_kept",
+  "vlm_answers": {
+   "same_scene": "yes",
+   "same_people": "yes",
+   "start_kept": "no",
+   "target_reached": "yes",
+   "anatomy_defect": "no"
+  },
+  "vlm_reasons": {
+   "same_scene": "Background remains pale wall and grey carpet, matching START IMAGE throughout frames 1-8.",
+   "same_people": "Man's body, jeans, boxers, and hand match START IMAGE; woman's appearance and clothing are consistent across frames.",
+   "start_kept": "Frame 1 shows woman entering frame, not the same pose as START IMAGE which has no woman.",
+   "target_reached": "Image 3 shows woman's mouth on man's shaft with deep oral contact, matching TARGET POSE.",
+   "anatomy_defect": "No malformed genitals, extra limbs, or melted bodies visible in any frame or Image 3."
+  },
+  "instrument_caveat": "start-image comparison checks (same_scene, same_people, start_kept) are not applicable to this cell: the start image is a first-person lap shot with no woman in it and the clip must add her. Signal here = anatomy_defect, target_reached, and the precheck jump threshold."
+ }
+}

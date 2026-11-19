@@ -1,0 +1,26 @@
+{
+ "exe": "/srv/bakeoff/src/PolyStrata/engine-poly/strata-poly",
+ "args": [
+  "--model",
+  "/srv/bakeoff/heretic-q4km-poly/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+  "--max-context",
+  "32768",
+  "--expert-profile",
+  "/srv/bakeoff/src/PolyStrata-data/packs/gemma4-ud-q4_k_m/expert-profile.txt",
+  "--draft-model",
+  "/srv/bakeoff/polystrata-data/gemma4-UD-Q4_K_M/mtp-gemma-4-26B-A4B-it-Q8_0.gguf",
+  "--conversation-cache-mib",
+  "auto",
+  "--kv-whole"
+ ],
+ "cwd": "/srv/bakeoff/src/PolyStrata",
+ "tokenizer": "/srv/bakeoff/src/PolyStrata-data/packs/gemma4-ud-q4_k_m/tokenizer",
+ "model_name": "gemma-4-26b-a4b-ud-q4_k_m",
+ "display_name": "Gemma 4 26B-A4B UD-Q4_K_M",
+ "log": "/srv/bakeoff/src/PolyStrata/strata-gemma4-heretic-q4km.log",
+ "lib_dirs": [
+  "/home/derekboone/rocm/install/lib"
+ ],
+ "port": 8093,
+ "backend": "hip"
+}

@@ -1,0 +1,4 @@
+
+# consolidation P2 2026-11-16: herdr-panes.sh relaunches each pane with its launcher (full argv); herdr native resume would start a bare pi --session
+[session]
+resume_agents_on_restore = false

@@ -1,0 +1,62 @@
+{
+ "tag": "p15v2_b_w2_capswift_gi201_against_wall_s51170001_wf2",
+ "mp4": "C:\\AI\\community\\runs\\p15v2_b_w2_capswift_gi201_against_wall_s51170001_wf2\\p15v2_b_w2_capswift_gi201_against_wall_s51170001_wf2.mp4",
+ "start_image": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\input\\community\\hc\\GI201.jpg",
+ "n_frames": 349,
+ "sampled": 16,
+ "cuts_adaptive": 0,
+ "cuts_content": 0,
+ "dino": {
+  "start_min": 0.7011,
+  "start_mean": 0.8011,
+  "start_last": 0.7011,
+  "prev_min": 0.9161,
+  "prev_mean": 0.9501,
+  "per_frame_start": [
+   0.9215,
+   0.8844,
+   0.8758,
+   0.9017,
+   0.8534,
+   0.8249,
+   0.8272,
+   0.8063,
+   0.7982,
+   0.78,
+   0.719,
+   0.7312,
+   0.7534,
+   0.7177,
+   0.7216,
+   0.7011
+  ]
+ },
+ "clip": {
+  "start_min": 0.7907,
+  "start_mean": 0.9127,
+  "start_last": 0.7907,
+  "prev_min": 0.9101,
+  "prev_mean": 0.9641,
+  "per_frame_start": [
+   0.9725,
+   0.9771,
+   0.9789,
+   0.9678,
+   0.943,
+   0.9474,
+   0.957,
+   0.9425,
+   0.9435,
+   0.9226,
+   0.8927,
+   0.8315,
+   0.8275,
+   0.8436,
+   0.8656,
+   0.7907
+  ]
+ },
+ "transition": true,
+ "info": [],
+ "flags": []
+}

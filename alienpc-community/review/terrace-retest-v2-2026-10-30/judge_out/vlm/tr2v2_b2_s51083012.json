@@ -1,0 +1,37 @@
+{
+ "tag": "tr2v2_b2_s51083012",
+ "model": "qwen3vl_judge",
+ "secs": 4.0,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains identical terrace, balustrade, trees, and sea horizon across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both women retain same hair, skin tone, body proportions, and facial features throughout."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 shows identical pose, framing, and clothing as START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Final frame shows clear physical contact, intimate pose, and act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0685,
+  "target_reached": 0.1181,
+  "anatomy_defect": 0.0008
+ },
+ "flags": []
+}

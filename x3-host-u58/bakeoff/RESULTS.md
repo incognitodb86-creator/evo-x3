@@ -1,0 +1,162 @@
+# EVO-X3 LLM bake-off results
+
+Date: 2026-11-15 (America/Chicago). Last updated 7:45 PM CT. Status: **superseded in part** — see the 7:45 PM status update below. The 11:56 AM table is kept as the morning bake-off record.
+
+Fixture: 18,253-token (Qwen tokenizer) Hermes-style stand-in prompt (system + PolyStrata docs + one planted fact), cold (first request after load, no warmup), reasoning effort low. Tasks: long-context read (planted fact), coding fix (median bug), 3-step tool chain (`lookup_user` → `get_orders` → answer), ~500-word / ~900-token prose decode, plus `write1`/`write2` on Heretic arms. Prefill and engine decode are from engine timing logs (`prompt_per_second` / `predicted_per_second`). Cold TTFT is the streaming client’s time-to-first-token on the 18k long task. Load is `LOAD_S` from each arm’s `.meta` (seconds until `/health` or `/v1/models` returned 200).
+
+Nothing in this table changes production `llama-swap` or pi config. Picks below are recommendations only; they need Derrick’s yes before any cutover.
+
+## Status update, 7:45 PM CT 2026-11-15 (U31, Antigravity MF-14 / MF-16 / SF-09)
+
+The 11:56 AM table below is the morning bake-off and is left as a historical record. Live production and later tests (U24–U27, U6) supersede these claims:
+
+- **Production Forge slot is official Halogen native Flash-Next** (v2 HGN at `/srv/models/flash-next-halogen`, 262K, llama-swap `concurrencyLimit` 4 as of U27), not Gufo. Gufo remains the rollback slot `flash-next-gufo`. Heretic stays Q8_0 on kyuz0 Vulkan (2 × 262K, `concurrencyLimit` 2 after a failed `-np 4` trial in U27). The morning Q4_K_M writer recommendation was not applied.
+- **qwen27b is not an always-resident helper (MF-14).** U25 upgraded it to UD-Q8_K_XL + DFlash2, which invalidates the 11:56 AM “27B already on disk also fits beside the writer” math (that figure was Q4_K_XL at 32,768 / 1 session). Only a small 3B–8B helper is treated as a safe co-resident beside Heretic. Exclusive `main` is unchanged.
+- **Uncensored Flash-Next is no longer HF-gated.** U26 ran the johnlockejrr Huihui HGN as the non-production `flash-next-uncensored` slot (coding pass, tools 3/3, write1/write2 pass, refusal probes 3/3, long13 ~236k needle+fact found). It has not had the formal 3-run 262K protocol.
+- **Formal official 262K 3-run protocol (U6, `~/u6-262k`, finished 6:41 PM CT): 3/3 pass.** Each run found all three planted facts (courier, code, ferry) at ~253,066 prompt tokens, ~1,693–1,704 tok/s prefill, 66–79 tok/s decode, peak GTT 27.01 GiB, no OOM or llama-swap restart. U26’s earlier official long7/long13 needle probe is a separate mixed-result smoke run and is not that protocol.
+- EQ-Bench Creative Writing v3 and RULER were not run (paid judge not approved). The Q8 vs Q4 writer comparison remains a short smoke test, not a production writer switch.
+- Halogen weights live at `/srv/models/flash-next-halogen` (`/srv/bakeoff/halogen-models` is a symlink). llama-swap is running (the 11:56 AM “stopped since 10:50 AM” note is stale).
+
+## Main table
+
+| Arm | Engine / image | Model + quant | Prefill tok/s (18k, engine) | Decode tok/s (engine: long-ctx / prose) | Cold TTFT | Load | Tools | Notes |
+|---|---|---|---|---|---|---|---|---|
+| U6 Halogen native | halogen-flash-server 0.20.4 @sha256:70445bcf | Halogen v2 checkpoint (own weights) | 1,985 | 84.3 / 61.0 | 9.24 s | 60 s | 3/3 | Fastest Flash-Next arm |
+| U6 Gufo (production engine) | gufo-runtime 0.34.0 @sha256:49b1fce4 | Flash-Next UD-Q4_K_XL + shared Q8 MTP | 1,624 | 65.4 / 50.1 | 11.26 s | 23 s | 3/3 | Current production Flash-Next slot. Earlier 23k-context run: 1,590 / 64.9 / 50.9, TTFT 14.73 s, load 22 s |
+| U6 Halogen BYO GGUF | halogen 0.20.4 @sha256:70445bcf | Flash-Next UD-Q4_K_XL (production file) + Halogen MTP head | 1,321 | 49.6 / 44.0 | 13.87 s | 76 s | 3/3 | `HALOGEN_MAX_TOK=16384`. Slower than the native Halogen checkpoint |
+| U6 kyuz0 strix-llama | rocm-10.0-strix-llama @sha256:14884576 (llama.cpp 12477) | Flash-Next UD-Q4_K_XL + shared Q8 MTP | 1,153 | 36.9 / 36.0 | 15.85 s | 66 s | 3/3 | kyuz0 docs/building.md flags |
+| U6 Strata Flash-Next | PolyStrata 67dde64 strata, gfx1151 | Unsloth UD-Q4_K_XL (pinned shards, SHA OK) | 458 | 44.9 / 34.8 | 39.98 s | 40 s | 3/3 | Finished 11:34 AM CT. **All four tasks passed** (long, code, tool, decode). Correct, but the slowest Flash-Next prefill and cold TTFT |
+| U6 uncensored FN Halogen | halogen 0.20.4, BYO GGUF, same flags as U6 Halogen BYO | orcarouter Qwen3.8-Flash-Next-Uncensored IQ4_XS (~90.8 GiB) | — | — | — | — | — | **BLOCKED.** The GGUF repo is gated. HF account `Incognitodb` is authenticated but not on the authorized list. Derrick needs to open https://huggingface.co/orcarouter/Qwen3.8-Flash-Next-Uncensored-GGUF while signed in as that account and accept access. Scripts to download and run both engines are ready on the X3 (`dl-fn-uncens.sh`, `run-fn-uncens.sh`) |
+| U6 uncensored FN Gufo | gufo-runtime 0.34.0, same flags as production Gufo | same IQ4_XS GGUF (official shared Q8 MTP first; uncensored MTP-draft as fallback) | — | — | — | — | — | Same gate blocker. Will include `write1`/`write2` plus a short refusal probe |
+| U15 GLM-5.3-Flash Maya-S24 | kyuz0 rocm-10.0-maya @sha256:cf0d43fe, Maya v1.1.63 (`maya-serve --mode mtp --context 32768`) | Maya-S24 IQ2_XXS_S, 94.70 GB (94,701,676,224 bytes, SHA OK 11:52 AM CT) | 275 | 28.1 / 23.0 | 62.31 s | 33 s | 3/3 | Finished 11:56 AM CT. **All four tasks passed.** Prompt is 17,100 tokens on the GLM tokenizer (same fixture that is 18,253 on Qwen). Does **not** beat Flash-Next (Halogen 1,985 / 84.3 / 61.0, 9.24 s, or Gufo 1,624 / 65.4 / 50.1, 11.26 s). Per R10 the default stays Flash-Next unless a later yes says otherwise. Resident ~101.4 GiB (18.6 GiB GTT free). First start failed because the pack looked one directory too high for the GGUFs; that log is in `results/_archive/`. |
+| 27B Gufo AR | Gufo 0.34.0 | Qwen3.8-27B UD-Q4_K_XL | 535 | 11.4 / 12.1 | 34.12 s | 7 s | 3/3 | |
+| 27B Gufo DFlash2 | Gufo 0.34.0 + z-lab DFlash2 Q4_K_M | Qwen3.8-27B UD-Q4_K_XL | 506 | 27.3 (at 18k depth) / 27.6 | 36.11 s | 4 s | 3/3 | DFlash2 is ~2.4× faster than plain 27B at 18k depth |
+| 27B production | kyuz0 vulkan-radv @sha256:9a9e4d8f | Qwen3.8-27B UD-Q4_K_XL | 355 | 11.5 / 12.0 | 51.37 s | 5 s | 3/3 | Production 27B flags |
+| 27B ROCm | kyuz0 rocm-10.0 @sha256:459730d6 | Qwen3.8-27B UD-Q4_K_XL | 327 | 11.2 / 11.9 | 55.78 s | 3 s | 3/3 | `-ngl 999 -b 4096 -ub 2048` |
+| U20 Heretic PolyStrata Q4_K_M | strata-poly gfx1151 (PolyStrata 67dde64) | heretic Q4_K_M (mradermacher) | 929 | 68.1 / 63.1 | 20.31 s | 11 s | 3/3 | Best Heretic long-context decode. write1/write2 passed (60.9 / 63.1 tok/s) |
+| U20 Heretic llama.cpp Vulkan Q4_K_M | kyuz0 vulkan-radv @sha256:9a9e4d8f | heretic Q4_K_M | 1,104 | 52.8 / 61.8 | 17.08 s | 4 s | 3/3 | Best Heretic prefill / cold TTFT among Q4_K_M. write1/write2 passed (60.7 / 60.4) |
+| U20 Heretic llama.cpp ROCm Q4_K_M | kyuz0 rocm-10.0 | heretic Q4_K_M | 1,168 | 40.9 / 56.1 | 16.17 s | 3 s | 3/3 | write1/write2 passed (55.6 / 55.8) |
+| U20 Heretic PolyStrata Q8_0 | strata-poly gfx1151 | heretic Q8_0 (production file) | 951 | 58.8 / 54.9 | 19.81 s | 25 s | 3/3 | write1/write2 passed (63.2 / 54.1) |
+| U20 Heretic production Q8_0 | kyuz0 vulkan-radv @sha256:9a9e4d8f | heretic Q8_0 | 1,131 | 40.0 / 43.7 | 16.67 s | 22 s | 3/3 | Current production Heretic slot. Combined run: write2 hit the 1,200-token cap (counted fail). Dedicated write rerun: both passed, decode 44.6 / 43.4 |
+| U20 Heretic ROCm Q8_0 | kyuz0 rocm-10.0 | heretic Q8_0 | 1,172 | 33.2 / 41.9 | 16.10 s | 6 s | 3/3 | Write runs were flaky (empty or length-capped content). Prefer Q4_K_M or Vulkan Q8 |
+| U19 IOMMU on r1 / r2 | Gufo 0.34.0 | Flash-Next UD-Q4_K_XL | 1,612 / 1,618 | 76.5 / 48.5 ; 61.8 / 37.3 | 11.34 / 11.30 s | 23 / 27 s | n/a | r1 long-decode 76.5 looks like an outlier; r2 matches the off runs. IOMMU is currently on; `/dev/accel/accel0` is present |
+| U19 IOMMU off r1 / r2 | Gufo 0.34.0 | Flash-Next UD-Q4_K_XL | 1,651 / 1,620 | 62.7 / 42.0 ; 61.1 / 43.3 | 11.07 / 11.28 s | 25 / 26 s | n/a | Speed is a wash vs IOMMU on. NPU `/dev/accel` is gone when off |
+| U19 85 W vs 140 W | — | — | NO_DATA | NO_DATA | NO_DATA | — | — | BIOS setting; needs Derrick |
+
+## Vision
+
+Test image: three shapes (yellow/gold circle, red square, green triangle) plus the text `X3-BAKEOFF`. Pass = all four checks.
+
+| Arm | Engine | TTFT | Prefill tok/s | Decode tok/s | Checks | Result |
+|---|---|---|---|---|---|---|
+| U20 Heretic Q4_K_M PolyStrata vision | strata-poly gfx1151 | 0.63 s | 259 | 77.1 | 4/4 | **Works.** Fastest passing vision arm |
+| U20 Heretic Q4_K_M Vulkan vision | kyuz0 vulkan-radv | 1.41 s | 115 | 62.6 | 4/4 | **Works.** |
+| U20 Heretic Q4_K_M Vulkan vision (ub512, truncated) | kyuz0 vulkan-radv | 1.97 s | 83 | 62.3 | 0/4 | **Fail** (`finish=length`). Do not use those flags |
+
+Flash-Next vision was not run. The uncensored orcarouter repo includes `mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf` (0.85 GiB); it was not downloaded because the repo is gated.
+
+## Writing samples and refusal
+
+Heretic `write1` (200-word lighthouse scene) and `write2` (150-word skillet blurb) use temperature 1.0. A task counts as fail if the visible content is under 200 characters or the finish reason is not `stop`. Official Flash-Next arms were only run with long/code/tool/decode, so they have **no writing samples** yet. The uncensored arm was going to add write1/write2 plus a short refusal probe (benign over-refusal vs consensual adult fiction, Render-relevant); that did not run.
+
+| Arm | write1 | write2 | Notes |
+|---|---|---|---|
+| Heretic PolyStrata Q4_K_M | pass, 60.9 tok/s | pass, 63.1 tok/s | Clean completes |
+| Heretic Vulkan Q4_K_M | pass, 60.7 tok/s | pass, 60.4 tok/s | Clean completes |
+| Heretic ROCm Q4_K_M | pass, 55.6 tok/s | pass, 55.8 tok/s | Clean completes |
+| Heretic PolyStrata Q8_0 | pass, 63.2 tok/s | pass, 54.1 tok/s | Clean completes |
+| Heretic Vulkan Q8_0 (production) | pass in dedicated rerun, 44.6 tok/s | pass in dedicated rerun, 43.4 tok/s | Combined run’s write2 hit the 1,200-token cap mid-sentence |
+| Heretic ROCm Q8_0 | fail / flaky | fail / flaky | Empty or length-capped content; not a content-policy refusal |
+| Official Flash-Next (all engines) | not run | not run | |
+| Uncensored Flash-Next IQ4_XS | not run | not run | Blocked on the HF gate |
+
+Q4_K_M is the more reliable Heretic writer quant in this fixture, and it decodes writing about 40% faster than production Q8_0 (~61 vs ~44 tok/s).
+
+## Recommended picks (need Derrick’s yes; do not apply yet)
+
+Current production (`/etc/evo-x3/llama-swap.yaml`, unchanged): exclusive `main` group with **Gufo Flash-Next UD-Q4_K_XL**, **Heretic Q8_0 on kyuz0 Vulkan**, and **27B UD-Q4_K_XL on kyuz0 Vulkan**. `embed-small` stays persistent.
+
+| Chat role | Recommended model | Engine | Quant | Sampler / thinking | Why |
+|---|---|---|---|---|---|
+| Render writer | Gemma 4 26B A4B Heretic | kyuz0 vulkan-radv @sha256:9a9e4d8f (same engine family as production) | Q4_K_M, not production Q8_0 | Keep arm A as-is | Stays Heretic: official Flash-Next has no writing samples, and the uncensored arm has not run, so the data does not support a writer switch. Q4_K_M beats production Q8_0 on writer decode (~61 vs ~44 tok/s) and completed both writing prompts cleanly. Among Q4_K_M engines, Vulkan wins the long-prompt metrics that matter here (prefill 1,104 vs PolyStrata 929; cold TTFT 17.1 s vs 20.3 s). PolyStrata Q4_K_M is the better long-decode (68.1) and vision engine if he prefers that trade. |
+| Sydney | Gemma 4 26B A4B Heretic | PolyStrata strata-poly gfx1151 | Q4_K_M | low / existing Sydney settings | Same Heretic family, best Heretic long decode (68.1 / 63.1), and the faster passing vision arm (0.63 s TTFT, 77 tok/s, 4/4). Uncensored Flash-Next could still be the better Sydney fit once it is actually measured. |
+| Forge | Qwen3.8-Flash-Next (official) | Halogen 0.20.4 native checkpoint @sha256:70445bcf | Halogen v2 (not the BYO GGUF) | reasoning effort low | Fastest coding/tool arm: 1,985 prefill, 81.6 tok/s on the code task, 84.3 / 61.0 long/prose, 3/3 tools, 9.24 s cold TTFT. Production Gufo is the next-best Flash-Next (1,624 / 65.4 / 50.1, 11.26 s) and loads faster (23 s vs Halogen 60 s), which matters under exclusive swap. 27B is far slower even with DFlash2. Switching Forge from Gufo to Halogen needs an explicit yes. |
+| General / default pi | Qwen3.8-Flash-Next (official) | Halogen native, or keep production Gufo if faster swaps matter more than peak speed | Halogen v2, or production UD-Q4_K_XL | reasoning effort low | Same speed story as Forge. Strata Flash-Next works but is not in the running (458 prefill, 40 s TTFT). Uncensored FN is still pending. GLM-5.3-Flash Maya-S24 passed the same fixture but is much slower (275 prefill, 28.1 / 23.0 decode, 62 s TTFT), so it must not replace Flash-Next without a later yes (R10). |
+| Vision (Render / Sydney option) | Gemma 4 26B A4B Heretic | PolyStrata strata-poly gfx1151 | Q4_K_M + existing mmproj path from the PolyStrata vision run | — | Both PolyStrata and Vulkan Q4_K_M passed 4/4. PolyStrata is faster. Do not use the failed ub512 flags. Flash-Next vision is untested. |
+| Phone | follows its pi session | — | — | — | No separate model pick |
+
+Exclusive swap (already the default): if Render/Sydney stay on Heretic and Forge/general stay on Flash-Next, a mid-conversation switch pays the load time above (Heretic Q4_K_M is a few seconds; Gufo Flash-Next ~23 s; Halogen native ~60 s).
+
+## What was not changed
+
+- Production `llama-swap.yaml` and pi config were not edited.
+- llama-swap was **not** restarted. It has been stopped since 10:50 AM CT for the bake-off. I held the restart because the uncensored arm still needs the GPU, and bringing production back now would only have to be stopped again. Say the word if production should come back immediately; `verify-serve.sh` is ready.
+- Halogen weights at `/srv/bakeoff/halogen-models/` were **not** moved to `/srv/_archive`. The uncensored Halogen arm still needs the MTP head (`qwen38-flash-next-mtp.hgn`) and tokenizer, and the native v2 checkpoint is the recommended Forge/general engine until he says otherwise.
+- Windows partitions, BIOS, and the USB backup were not touched.
+
+## Pending
+
+1. **Uncensored Flash-Next IQ4_XS on Halogen and Gufo**, including writing samples and a short refusal probe. Blocker: accept the gated repo at https://huggingface.co/orcarouter/Qwen3.8-Flash-Next-Uncensored-GGUF as Hugging Face user `Incognitodb` (Peonist recommended this GGUF, IQ4_XS, for Halogen BYO). After that, run `~/evo-x3/bakeoff/dl-fn-uncens.sh` then `~/evo-x3/bakeoff/run-fn-uncens.sh`.
+2. ~~GLM-5.3-Flash Maya-S24 arm~~ **Done** 11:56 AM CT: SHA OK, all four tasks passed. It is slower than Flash-Next, so it does not replace the default (R10).
+3. Official Flash-Next writing samples (optional but useful before any Render-writer switch).
+4. U19 85 W vs 140 W, BIOS, needs Derrick.
+5. Restart production llama-swap and run `~/evo-x3/scripts/verify-serve.sh` (expect no-key 401, `LLM_KEY_BOX` 200) once the remaining GPU arms are done, or sooner if he wants production back now.
+
+## Always-resident helper, and whether vision evicts the writer
+
+Analysis only. No llama-swap or pi config was changed. The machine reports 124 GiB in `free -g` and 120.0 GiB GTT (`mem_info_gtt_total` = 120 GiB) plus a 1.0 GiB iGPU firmware carve-out that never appears in `/proc/meminfo`. llama-swap already has a persistent, non-exclusive `small` group holding `embed-small` (nomic-embed-text-v1.5 Q8_0, 139.4 MiB / 146,146,432 bytes). That is negligible. The `main` group is still exclusive, so today’s production config will evict the writer to answer a Forge/general question. The question is whether a small helper can stay loaded *beside* the picked main model so short questions do not pay that swap. Derrick decides; the numbers below are the bake-off measurements.
+
+### What each pick actually used
+
+Weights on disk:
+
+- Heretic Q4_K_M: 15.64 GiB (16,796,011,680 bytes)
+- Heretic Q8_0: 25.01 GiB (26,859,855,008 bytes)
+- Heretic mmproj Q8_0: 0.75 GiB (806,408,480 bytes)
+- Qwen3.8-27B UD-Q4_K_XL: 16.45 GiB (17,659,407,264 bytes)
+- Flash-Next UD-Q4_K_XL + shared Q8 MTP: 107 GiB of files on disk; engines do not keep all of that locked
+
+Resident use at the context we actually ran (and that production already plans for the writer):
+
+| Loaded model | Context used in the run | Measured resident use | Leftover on the 120 GiB GTT / 124 GiB host | Source |
+|---|---|---|---|---|
+| Heretic Q4_K_M, kyuz0 Vulkan (recommended writer flags: `-c 65536 -np 2`, q8_0 KV, 2 × 32,768) | 2 × 32,768 | `free -g` after the arm: 20 GiB used, 103 GiB available. Weights are 15.64 GiB, so KV + runtime is about 4–5 GiB at this context. Q8_0 under the same flags was 30 GiB used / 94 GiB available, a 10 GiB gap that matches the 9.4 GiB weight difference. | ~95–100 GiB apparent | llama.cpp did **not** print a GTT breakdown, so this is `free(1)` on UMA. Some mappings can sit in cache. Even if KV+runtime is doubled to a conservative ~10 GiB, resident use is still only ~26 GiB including the 0.75 GiB mmproj. |
+| Heretic Q4_K_M, PolyStrata, 32,768 context (recommended Sydney / vision) | 32,768 | `free -g`: 22 GiB used, 101 GiB available | ~100 GiB apparent | Same UMA caveat. No separate GTT line in the strata log. |
+| Flash-Next, Gufo 0.34.0, 32,768, 1 session (production FN slot) | 32,768 | **84.43 GiB** device (`gpu_device_used_mib=86456` of `gpu_device_total_mib=122880`). After load, host available 35.9 GiB; after the fixture, ~34.7 GiB. Process RSS was only 2.7–4.0 GiB; the weights live in GTT. | **~35.6 GiB GTT / ~35 GiB host** | Trust this figure. Gufo reports device use directly. |
+| Flash-Next, Halogen native, 32,768 | 32,768 | Engine-measured **76.7 GiB locked** (62.1 GiB weights + 1.8 GiB KV pool + 12.8 GiB working memory). The 47.7 GiB n-gram table is *not* locked; it is read through the file cache as needed. After load the engine reported 44.8 GiB left, “most of it not contiguous.” | **~45 GiB**, but some of that is useful as n-gram file cache, and it is fragmented | Halogen startup log. Do not trust `free` / MemAvailable here: the engine warned they will report ~107 GiB because locked weights are mis-counted as reclaimable cache. |
+| Qwen3.8-27B, Gufo, 32,768, 1 session | 32,768 | **22.84 GiB** device (`gpu_device_used_mib=23388`) | ~97 GiB host available in that run | Gufo device counter. This is 16.45 GiB weights plus ~6.4 GiB KV/overhead at 32k. Production 27B is `-c 262144 -np 2` (two 131k slots); KV would scale up a lot, and that larger context was **not** measured on the device counter. |
+| GLM-5.3-Flash Maya-S24, kyuz0 Maya MTP, 32,768 | 32,768 | **~101.4 GiB** resident. Engine: 11.44 GiB before the expert pool + 89.50 GiB expert pool; “19,097 MiB of VRAM free with everything loaded” (18.6 GiB of 120). `free -g` after the fixture: 101 GiB used, 22 GiB available. KV at 32,768 was only 0.48 GiB. | **~18.6 GiB GTT** | Maya startup + end-of-run log. A 3B–8B helper would be tight beside it (after ~8–10 GiB OS). The 27B (22.8 GiB) does **not** fit next to GLM. Not recommended as a coresident main model. |
+
+Leave ~8–10 GiB for the OS, Tailscale, llama-swap, and a little file cache (the X3 is headless). If pi/herdr later run on the X3 itself, budget more.
+
+### Can a helper sit beside the writer?
+
+**Yes, comfortably, if the resident main model is Heretic Q4_K_M.** That is the recommended Render writer (and Sydney). At the planned 2 × 32,768 q8_0 context it used about 20–26 GiB. That leaves on the order of **90+ GiB**.
+
+- A small 3B–8B instruct model at 8k–32k would be a rounding error next to the writer. None is on the X3 today; only `embed-small` and the 27B are already present.
+- The **27B already on disk** also fits beside the writer at the bake-off context: it measured 22.84 GiB at 32,768 / 1 session. 26 + 23 + 8–10 OS still leaves ~60 GiB. That is the capable helper we can name without downloading anything. Do not assume the same fit at production 27B’s 2 × 131,072 context; re-measure before using that window with the writer also loaded.
+- llama-swap already has the right place for this: the persistent, non-exclusive `small` group next to `embed-small`. No production edit was made.
+
+**Beside Flash-Next, a helper is tighter and depends on the engine.**
+
+- Next to **production Gufo FN** (~84.4 GiB, ~36 GiB left): a 3B–8B helper at modest context is the comfortable choice. The 27B at 32k (22.8 GiB) would leave only ~13 GiB after OS — possible, but tight, and not recommended as the first try.
+- Next to **Halogen native FN** (76.7 GiB locked, ~45 GiB left but fragmented, plus n-gram cache pressure): a 3B–8B helper is the safe option. 27B at 32k is on paper close to the leftover and would fight the n-gram cache; I would not promise it without a live coexistence run. Beside **GLM Maya-S24** (~101.4 GiB, 18.6 GiB free) there is not enough room for the 27B, and even a small helper would be tight after OS reserve.
+
+### Could the writer and Flash-Next stay loaded together?
+
+The production config still says no (exclusive `main` group). That was written against a smaller visible GTT. After the UMA / 120 GiB GTT change, the **paper fit is close, not proven**:
+
+- Gufo FN 84.4 + Heretic Q4_K_M ~20–26 ≈ 104–110 GiB of 120, plus OS and maybe mmproj. Margin is about 10–15 GiB if the Heretic `free` figure is right, thinner if KV was under-counted.
+- Halogen FN 76.7 locked + Heretic ~26 + Halogen’s 47.7 GiB n-gram file is too much if the table is even partly cached.
+
+I am **not** recommending turning off exclusive swap on this math alone. A live coexistence test (both loaded, one fixture prompt on each, GTT and `MemAvailable` recorded) would be the way to find out. Until that test exists, assume a Forge/general turn still evicts the writer (23 s Gufo load or 60 s Halogen load).
+
+### Does the vision option force a swap with the writer?
+
+**Not if writer and vision are the same Heretic Q4_K_M process with the mmproj loaded.** The projector is 0.75 GiB. Adding it to the Vulkan or PolyStrata Q4_K_M writer is well inside the headroom above. Both engines already passed the vision card at this quant (PolyStrata 4/4 in 0.63 s TTFT; Vulkan 4/4 in 1.41 s). A vision turn then does not evict the writer.
+
+**Yes, it would evict the writer if the two stay on different engines** — which is what the raw picks would do if applied literally (Render writer on Vulkan text-only, Sydney/vision on PolyStrata). A vision request would unload Vulkan and load PolyStrata, paying the 4–11 s Heretic load, and the next Render write would pay it again the other way.
+
+**Recommendation (still his yes):** run Render writer, Sydney, and the vision option on **one** resident Heretic Q4_K_M + mmproj. If vision matters, prefer PolyStrata for that shared slot (faster vision, better long decode) and accept the slower long-prompt prefill (929 vs 1,104). If long writer prompts matter more than vision latency, prefer Vulkan and enable its mmproj so vision does not swap. Either way, one process, no writer eviction for pictures.
+
+If he also wants a helper for short questions, put a small instruct model (or the 27B at 32k) in the existing persistent `small` group beside `embed-small`, and keep Flash-Next on exclusive `main` until a coexistence test says otherwise. That is the combination that stops a quick question from evicting the writer, without betting the 120 GiB GTT on two large models at once.

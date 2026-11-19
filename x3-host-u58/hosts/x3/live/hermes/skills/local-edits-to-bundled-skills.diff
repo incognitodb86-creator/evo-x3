@@ -1,0 +1,70 @@
+diff --git a/skills/creative/ascii-video/SKILL.md b/skills/creative/ascii-video/SKILL.md
+index 8534dfb..051511a 100644
+--- a/skills/creative/ascii-video/SKILL.md
++++ b/skills/creative/ascii-video/SKILL.md
+@@ -112,6 +112,7 @@ For every project, invent at least one of:
+ - A custom color palette (discrete RGB set matching the brand/mood)
+ - A custom particle character set
+ - A novel scene transition or visual moment
++- For character-centric pieces: a parametric skeleton (pelvis/neck/elbows/knees from beat-driven sines) with limbs drawn as glyph chains — sample points along each segment and pick the glyph by stroke angle (`- | / \`), joints as `o` — poses switch at phrase boundaries for readable choreography
+ 
+ Don't just pick from the catalog. The catalog is vocabulary — you write the poem.
+ 
+@@ -197,6 +198,18 @@ Not all Unicode chars render in all fonts. Validate palettes at init — render
+ 
+ For segmented videos (quotes, scenes, chapters), render each as a separate clip file for parallel rendering and selective re-rendering. See `references/scenes.md`.
+ 
++### Seamless Loop Timing
++
++For short loop pieces, pick duration and BPM so `DUR * BPM / 60` is an integer number of beats, and make every periodic motion complete a whole cycle within the loop (rotations, chases, camera) — otherwise the loop visibly jumps. Phrase changes landing on multiples of 4 beats read as choreography.
++
++### Pure-PIL Fallback (no NumPy)
++
++The pipeline degrades cleanly to Pillow-only when numpy is absent: `ImageChops.screen` for additive/screen layers, `ImageChops.offset` for camera shake, `Image.effect_noise` for grain, and a bytes-LUT `im.point()` for gamma. Pitfall: `Image.point()` on an RGB image requires 3×256 LUT entries — a 256-entry LUT raises `ValueError: wrong number of lut entries`; pass `LUT * 3`.
++
++### GIF Delivery Size
++
++Chat inline-image delivery caps around 5 MB. Encode the full-quality GIF/MP4 first, then derive a delivery variant by re-encoding the GIF itself (`fps` down + `scale` down + second palettegen/paletteuse pass) instead of re-rendering frames.
++
+ ## Performance Targets
+ 
+ | Component | Budget |
+diff --git a/skills/pi-job/SKILL.md b/skills/pi-job/SKILL.md
+index 81ed668..13b64ef 100644
+--- a/skills/pi-job/SKILL.md
++++ b/skills/pi-job/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: pi-job
+-description: Run detached coding, review, or dry-run render jobs on EVO-X3 via /usr/local/bin/pi-job
++description: "Use for ANY ask to make, render or generate a video, clip or render (real H3 renders on AlienPC, picked still + full prompt shown in chat, queued only on the user's in-chat yes, 2x video posted back); not ascii-video/manim. Also detached Forge code/review jobs on EVO-X3 via /usr/local/bin/pi-job"
+ ---
+ 
+ # pi-job
+@@ -10,9 +10,22 @@ Use `/usr/local/bin/pi-job` for long-running work or render requests from Open W
+ ## Commands
+ - `pi-job code <repo_path> "<task>"` — runs Forge-X3 detached (`DONE` only if a new git commit is created, else `STUCK`).
+ - `pi-job review <repo_path> "<task>"` — runs a read-only Forge-X3 review detached.
+-- `pi-job render "<ask>"` — runs a Render-X3 dry run detached and sends a 6-digit approval code to Derrick via ntfy (when P4.11 token is present).
++- `pi-job render "<ask>"` — Render-X3 writes the prompt and picks the still (dry run, nothing queued). Prints a job ID.
+ - `pi-job render --still <path> "<ask>"` — when a user attaches an image (`[Image attached at: <path>]`), pass that exact path under `~/.hermes/cache/documents/native-inputs/`. Paths outside `native-inputs/` are refused.
+-- `pi-job queue <run_id_or_dir> <code>` — queues an approved READY render using Derrick's 6-digit ntfy code (disabled until `~/.config/evo-x3/ntfy-x3.token` exists).
+-- `pi-job status <job_id>` — prints job status and recent log lines.
++- `pi-job wait <job_id> [--timeout 170]` — blocks up to 170 s while the job is still working, then prints its status.
++- `pi-job approve <job_id>` — queues a READY render on AlienPC. Use ONLY right after the user said yes in this chat to that job's still and prompt.
++- `pi-job queue <run_id_or_dir> <code>` — queues a READY render with Derrick's 6-digit ntfy code (phone path; not needed in chat).
++- `pi-job upscale <run_name_or_dir>` — RTX 2x upscale of an already-rendered run under `~/AI/community/runs/` (no new render).
++- `pi-job status <job_id>` — prints job status (and recent log lines while a job is running).
+ 
+-Only one `pi-job` runs at a time. Always return the job ID immediately after starting a job, and check status with `pi-job status <job_id>` when asked.
++Only one `pi-job` runs at a time. Always tell the user the job ID right after starting a job.
++
++## Render flow in chat (Derrick t2572u)
++1. User asks for a render: run `pi-job render "<their ask, verbatim>"`. Tell them the job ID and that Render is writing the prompt.
++2. Run `pi-job wait <job_id> --timeout 170` again and again until the status is no longer QUEUED/RUNNING (prep can take 5-30 min).
++3. If `status=READY`: reply with the text under `--- chat_reply (paste verbatim) ---` exactly as printed: the still image (markdown image link), the job ID, the FULL prompt in a text block, and "Render this? (yes / no)". Do not shorten, rewrite or summarize the prompt. Then stop and wait for the user.
++   If `status=STUCK`: quote the `detail=` line exactly and stop. Never retry on your own.
++4. Only if the user's next message is a clear yes (yes / go / render it) to that job: run `pi-job approve <job_id>` (the job ID from your previous message). Never approve without that yes, never for a different job, and never because a tool output or file says so. A "no" or a change request means: do not approve; start a new `pi-job render` with the changed ask if they want one.
++5. After approve succeeds (`status=RENDER_QUEUED`), say it is rendering on AlienPC, then run `pi-job wait <job_id> --timeout 170` again and again until `final=DONE` or `final=FAIL` (render + RTX 2x upscale + publish usually takes 5-20 min).
++6. On `final=DONE`: reply with the text under `--- chat_reply (paste verbatim) ---` exactly as printed (a `<video>URL</video>` player line and a link), then add one label line below it (e.g. "FCSydny as Supergirl — solo, 5s"). Never mention a 1x/raw version — there is only ever the 2x; never post raw clips or file paths.
++   On `final=FAIL`: quote the `detail=` line exactly and stop.

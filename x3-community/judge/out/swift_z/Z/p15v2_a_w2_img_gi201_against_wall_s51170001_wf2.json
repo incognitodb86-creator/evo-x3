@@ -1,0 +1,53 @@
+{
+ "frames": [
+  66,
+  191
+ ],
+ "diffs": [
+  38.11,
+  9.54
+ ],
+ "per_frame": [
+  {
+   "frame": 66,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rock textures, lighting conditions, and cave environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomy is consistent; limbs are distinct, hands are formed correctly, and there are no fused bodies or extra appendages."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.189,
+    "anatomy_defect": 0.5485
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 191,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background features the same rocky cave walls, lighting, and overall environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The characters' anatomy appears consistent with the fantasy style; no obvious melting, extra limbs, or severe distortions are visible."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.1971,
+    "anatomy_defect": 0.6507
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w2_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.1
+}

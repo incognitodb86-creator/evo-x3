@@ -1,0 +1,11 @@
+=== u20-heretic-q4km-rocm start 2026-11-15 09:52:45 CST
+CMD: sudo podman run --rm --name bake-arm --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups --security-opt seccomp=unconfined -v /srv/models:/srv/models:ro,Z -v /srv/bakeoff:/srv/bakeoff:ro,Z docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:459730d6cdfdd43b10036414be6ab3c2c0fe634a22fa764c9f5d577ddc40306c llama-server --host 127.0.0.1 --port 8090 -m /srv/bakeoff/heretic-q4km/gemma-4-26B-A4B-it-heretic.Q4_K_M.gguf --jinja --load-mode none -fa on -ngl 999 -b 4096 -ub 2048 -ctk q8_0 -ctv q8_0 -np 1 -c 32768 --no-slots --temp 1.0 --top-p 0.95 --top-k 64 --alias gemma4-heretic
+LOAD_S 3 up=1
+long {"ttft_s": 16.17, "total_s": 17.09, "prompt_tokens": 18709, "completion_tokens": 43, "client_decode_tps": 46.42, "finish": "stop", "pass": true}
+decode {"ttft_s": 0.24, "total_s": 16.21, "prompt_tokens": 35, "completion_tokens": 900, "client_decode_tps": 56.36, "finish": "length", "pass": true}
+write1 {"ttft_s": 0.18, "total_s": 24.54, "prompt_tokens": 42, "completion_tokens": 1359, "client_decode_tps": 55.79, "finish": "stop", "pass": true}
+write2 {"ttft_s": 0.18, "total_s": 22.25, "prompt_tokens": 39, "completion_tokens": 1235, "client_decode_tps": 55.96, "finish": "stop", "pass": true}
+tool {"pass": true, "step_pass": [true, true, true]}
+               total        used        free      shared  buff/cache   available
+Mem:             124          22           0           0         103         102
+=== u20-heretic-q4km-rocm end 2026-11-15 09:54:14 CST

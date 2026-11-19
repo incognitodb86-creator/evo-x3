@@ -1,0 +1,391 @@
+{
+ "rubric": "p7-rubric-v1 (2026-10-20)",
+ "when": "2026-10-21 12:51 CT",
+ "judge": "qwen3vl_judge",
+ "model_used": true,
+ "calls": 8,
+ "asks": 8,
+ "judge_failures": 0,
+ "judge_secs": 51.9,
+ "weights": {
+  "abs": 0.4,
+  "pairwise": 0.4,
+  "objective": 0.2,
+  "flag_penalty": 0.75
+ },
+ "dims": {
+  "motion_quality": 0.15,
+  "temporal_consistency": 0.15,
+  "burn_exposure": 0.1,
+  "identity_consistency": 0.2,
+  "prompt_adherence": 0.1,
+  "artifacts": 0.2,
+  "pacing_cuts": 0.1
+ },
+ "title": "P7 comparison",
+ "ranking": [
+  {
+   "name": "p6_1min_community:seg1",
+   "label": "V1",
+   "video": "C:\\AI\\community\\runs\\p6_1min_community\\p6_1min_seg1.mp4",
+   "kind": "segment",
+   "metrics": {
+    "frames": 481,
+    "fps": 24.0,
+    "duration": 20.042,
+    "cuts_detected": 0,
+    "cut_times": [],
+    "motion": 4.425,
+    "lum_flicker": 0.244,
+    "tex_flicker": 1.156,
+    "freeze_frac": 0.002,
+    "seam_ratio": 0.0,
+    "sat_mean": 0.5212,
+    "clip_frac": 0.0075,
+    "sharpness": 414.4,
+    "sat_drift_max": -0.2693,
+    "clip_late_max": 0.016,
+    "sharp_drift_min": -0.083,
+    "color_drift_max": 6.095,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 20.04,
+      "sat_drift": -0.2693491397648937,
+      "clip_late": 0.01600620958259847,
+      "sharp_drift": -0.08298778751187519,
+      "color_drift_ab": 6.095245572729171
+     }
+    ],
+    "objective_score": 9.45,
+    "objective_penalties": {
+     "lum_flicker": 0.0,
+     "tex_flicker": 0.03,
+     "burn_sat_drift": 0.0,
+     "burn_clip": 0.18,
+     "blur_drift": 0.0,
+     "color_drift": 0.34,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 9.45,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\V1\\w01_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 8,
+       "identity_consistency": 9,
+       "prompt_adherence": 7,
+       "artifacts": 5,
+       "pacing_cuts": 7
+      },
+      "reasons": {
+       "motion_quality": "Strap release is jerky, lacks natural weight; arms move unnaturally.",
+       "temporal_consistency": "Minor flicker in skin texture; background slightly shifts.",
+       "burn_exposure": "Skin has warm, slightly over-saturated glow; no burn but not natural.",
+       "identity_consistency": "Face, hair, body, and outfit remain consistent across frames.",
+       "prompt_adherence": "Action sequence is mostly correct but timing feels rushed; final frame shows strap fully detached.",
+       "artifacts": "Hands and strap show slight melting; strap appears duplicated in F6.",
+       "pacing_cuts": "Cuts land at timestamps but rhythm feels uneven; F5-F6 transition jarring."
+      },
+      "flags": [],
+      "worst_frame": ""
+     }
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\V1\\w02_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 8,
+       "identity_consistency": 9,
+       "prompt_adherence": 7,
+       "artifacts": 5,
+       "pacing_cuts": 7
+      },
+      "reasons": {
+       "motion_quality": "Hands slide down but motion feels rubbery, no weight or timing realism.",
+       "temporal_consistency": "Minor flicker in skin highlights, background slightly shifts.",
+       "burn_exposure": "Skin overly saturated, highlights slightly burnt, contrast creeping.",
+       "identity_consistency": "Face, hair, body, and outfit consistent across frames.",
+       "prompt_adherence": "Action sequence incomplete; no clear turn toward light or lip bite.",
+       "artifacts": "Hands and fingers slightly melted, duplicated limbs in F4, warped face in F5.",
+       "pacing_cuts": "Cuts land cleanly but rhythm feels uneven, no clear beat sync."
+      },
+      "flags": [
+       "body_horror",
+       "frozen"
+      ],
+      "worst_frame": "F5"
+     }
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\V1\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\ref_D15.jpg",
+   "abs": 7.118,
+   "pairwise": 8.194,
+   "flags": [],
+   "dims": {
+    "motion_quality": 6.0,
+    "temporal_consistency": 7.0,
+    "burn_exposure": 8.0,
+    "identity_consistency": 9.0,
+    "prompt_adherence": 7.4,
+    "artifacts": 5.8,
+    "pacing_cuts": 7.4
+   },
+   "global_judge": {
+    "scores": {
+     "motion_quality": 6,
+     "temporal_consistency": 7,
+     "burn_exposure": 8,
+     "identity_consistency": 9,
+     "prompt_adherence": 8,
+     "artifacts": 7,
+     "pacing_cuts": 8
+    },
+    "reasons": {
+     "motion_quality": "Struggles with natural weight; some poses feel rubbery, especially in F5-F8 where motion is abrupt.",
+     "temporal_consistency": "Minor flicker and shimmer in background lights; slight texture boiling in F7-F8.",
+     "burn_exposure": "Skin has warm, slightly orange tint; exposure consistent but not perfectly natural.",
+     "identity_consistency": "Face, hair, and body remain consistent across all frames; outfit changes are cleanly executed.",
+     "prompt_adherence": "Beat 1: Untying strap and letting it fall is shown clearly. Beat 2: Swaying and looking back is captured with good rhythm.",
+     "artifacts": "Minor hand/finger errors in F5-F8; slight melting at hip edges in F7-F8.",
+     "pacing_cuts": "Cuts land cleanly; rhythm of the beat is readable, though some transitions feel slightly jarring."
+    },
+    "flags": [],
+    "worst_frame": "F7"
+   },
+   "weakest_window": 6.95,
+   "segment_scores": {
+    "1": 6.95
+   },
+   "weakest_segment": 1,
+   "bt_strength": 2.1304,
+   "composite": 8.015,
+   "rank": 1
+  },
+  {
+   "name": "p7_r3_c3_sd1000:seg1",
+   "label": "V2",
+   "video": "C:\\AI\\community\\runs\\p7_r3_c3_sd1000\\p7_r3_c3_sd1000_seg1.mp4",
+   "kind": "segment",
+   "metrics": {
+    "frames": 481,
+    "fps": 24.0,
+    "duration": 20.042,
+    "cuts_detected": 0,
+    "cut_times": [],
+    "motion": 4.017,
+    "lum_flicker": 0.259,
+    "tex_flicker": 1.129,
+    "freeze_frac": 0.0,
+    "seam_ratio": 0.0,
+    "sat_mean": 0.3373,
+    "clip_frac": 0.0087,
+    "sharpness": 436.4,
+    "sat_drift_max": -0.1505,
+    "clip_late_max": 0.0124,
+    "sharp_drift_min": -0.0015,
+    "color_drift_max": 2.877,
+    "shots": [
+     {
+      "t0": 0.0,
+      "t1": 20.04,
+      "sat_drift": -0.15050352328826677,
+      "clip_late": 0.01238150352733686,
+      "sharp_drift": -0.0015475109983483781,
+      "color_drift_ab": 2.8765223798868744
+     }
+    ],
+    "objective_score": 9.93,
+    "objective_penalties": {
+     "lum_flicker": 0.0,
+     "tex_flicker": 0.0,
+     "burn_sat_drift": 0.0,
+     "burn_clip": 0.07,
+     "blur_drift": 0.0,
+     "color_drift": 0.0,
+     "freeze": 0.0,
+     "seam_jump": 0.0
+    }
+   },
+   "objective": 9.93,
+   "windows": [
+    {
+     "seg": 1,
+     "t0": 0.0,
+     "t1": 10.02,
+     "beat": "At the balcony railing she unties the center strap of her bikini top and lets it fall to the floor, keeping eye contact with the camera.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\V2\\w01_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 8,
+       "temporal_consistency": 9,
+       "burn_exposure": 9,
+       "identity_consistency": 10,
+       "prompt_adherence": 10,
+       "artifacts": 9,
+       "pacing_cuts": 10
+      },
+      "reasons": {
+       "motion_quality": "Smooth, natural motion of hands untieing strap, water droplets fall realistically.",
+       "temporal_consistency": "No flicker or morphing; background and subject stable across frames.",
+       "burn_exposure": "Natural skin tones and lighting; no oversaturation or burnt highlights.",
+       "identity_consistency": "Face, hair, body, and bikini remain consistent with reference still.",
+       "prompt_adherence": "Action, setting, framing, and timing match the requested beat perfectly.",
+       "artifacts": "Clean, no melting limbs, duplicated parts, or warped faces.",
+       "pacing_cuts": "Cuts land precisely on beat; rhythm is clean and readable."
+      },
+      "flags": [],
+      "worst_frame": "F1"
+     }
+    },
+    {
+     "seg": 1,
+     "t0": 10.02,
+     "t1": 20.04,
+     "beat": "She turns toward the window light, slides both hands down over her bare breasts and stomach to her hips, sways slowly and looks back over her shoulder, biting her lip.",
+     "sheet": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\V2\\w02_sheet.jpg",
+     "judge": {
+      "scores": {
+       "motion_quality": 6,
+       "temporal_consistency": 7,
+       "burn_exposure": 8,
+       "identity_consistency": 9,
+       "prompt_adherence": 7,
+       "artifacts": 5,
+       "pacing_cuts": 7
+      },
+      "reasons": {
+       "motion_quality": "Hands slide down but motion looks rubbery, no weight or timing realism.",
+       "temporal_consistency": "Minor flicker in skin highlights, background slightly shifts between frames.",
+       "burn_exposure": "Skin has warm orange tint, exposure slightly overdone.",
+       "identity_consistency": "Face, hair, body and outfit consistent across frames.",
+       "prompt_adherence": "Action sequence incomplete; no clear turn toward window light or lip bite.",
+       "artifacts": "Melting skin texture, duplicated hands in F2, warped anatomy.",
+       "pacing_cuts": "Cuts land cleanly but rhythm lacks flow; F4-F6 feel abrupt."
+      },
+      "flags": [
+       "identity_break",
+       "severe_burn",
+       "body_horror",
+       "frozen"
+      ],
+      "worst_frame": "F2"
+     }
+    }
+   ],
+   "global_sheet": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\V2\\global_sheet.jpg",
+   "ref": "C:\\AI\\community\\p7\\reviews\\p7_r3_probe_review\\review_pair1_work\\ref_POOL.jpg",
+   "abs": 7.405,
+   "pairwise": 1.806,
+   "flags": [
+    "identity_break"
+   ],
+   "dims": {
+    "motion_quality": 6.6,
+    "temporal_consistency": 7.6,
+    "burn_exposure": 8.3,
+    "identity_consistency": 9.3,
+    "prompt_adherence": 7.9,
+    "artifacts": 6.2,
+    "pacing_cuts": 7.5
+   },
+   "global_judge": {
+    "scores": {
+     "motion_quality": 6,
+     "temporal_consistency": 7,
+     "burn_exposure": 8,
+     "identity_consistency": 9,
+     "prompt_adherence": 7,
+     "artifacts": 5,
+     "pacing_cuts": 6
+    },
+    "reasons": {
+     "motion_quality": "Rubbery strap release, slow sway lacks weight; frozen poses dominate.",
+     "temporal_consistency": "Minor flicker in water highlights; background stable.",
+     "burn_exposure": "Slight orange tint in skin, exposure consistent.",
+     "identity_consistency": "Face, hair, outfit match reference across all frames.",
+     "prompt_adherence": "Beat 1: strap removal incomplete; Beat 2: sway and turn not fully executed.",
+     "artifacts": "Melting water droplets, duplicated hands in F5, warped hips in F12.",
+     "pacing_cuts": "Cuts land cleanly but rhythm feels uneven; F10-F12 feel rushed."
+    },
+    "flags": [
+     "identity_break"
+    ],
+    "worst_frame": "F12"
+   },
+   "weakest_window": 6.95,
+   "segment_scores": {
+    "1": 8.1
+   },
+   "weakest_segment": 1,
+   "bt_strength": 0.4694,
+   "composite": 4.92,
+   "rank": 2
+  }
+ ],
+ "pairs": [
+  {
+   "x": "p6_1min_community:seg1",
+   "y": "p7_r3_c3_sd1000:seg1",
+   "score_x": 1.0,
+   "consistent": true,
+   "xy": {
+    "winner": "A",
+    "dims": {
+     "motion_quality": "A",
+     "temporal_consistency": "A",
+     "burn_exposure": "A",
+     "identity_consistency": "A",
+     "prompt_adherence": "A",
+     "artifacts": "A",
+     "pacing_cuts": "A"
+    },
+    "reason": "A\u2019s frames show smoother motion, consistent lighting, and faithful adherence to the prompt with no artifacts or identity breaks."
+   },
+   "yx": {
+    "winner": "B",
+    "dims": {
+     "motion_quality": "B",
+     "temporal_consistency": "B",
+     "burn_exposure": "B",
+     "identity_consistency": "B",
+     "prompt_adherence": "B",
+     "artifacts": "B",
+     "pacing_cuts": "B"
+    },
+    "reason": "B matches reference perfectly: same hair, outfit, lighting, and motion sequence. A has wrong hair color, wrong setting, and motion feels rubbery."
+   }
+  }
+ ],
+ "top3": [
+  "p6_1min_community:seg1",
+  "p7_r3_c3_sd1000:seg1"
+ ],
+ "verdicts": [
+  {
+   "parent": "p6_1min_community:seg1",
+   "child": "p7_r3_c3_sd1000:seg1",
+   "verdict": "KEEP_PARENT",
+   "consistent_child_win": false,
+   "parent_composite": 8.015,
+   "child_composite": 4.92,
+   "child_weakest_segment": 1
+  }
+ ]
+}

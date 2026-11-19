@@ -1,0 +1,177 @@
+{
+ "arm": "u6-strata-fn-q4kxl",
+ "model": "qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+ "effort": "low",
+ "started": "2026-11-15 11:33:16 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 39.977038621902466,
+   "total_s": 42.23783755302429,
+   "prompt_tokens": 18253,
+   "completion_tokens": 104,
+   "client_decode_tps": 46.001437177075445,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 18253,
+    "prompt_ms": 39891.3,
+    "prompt_per_token_ms": 2.185,
+    "prompt_per_second": 457.6,
+    "predicted_n": 104,
+    "predicted_ms": 2313.7,
+    "predicted_per_token_ms": 22.247,
+    "predicted_per_second": 44.9,
+    "draft_n": 85,
+    "draft_n_accepted": 79
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 264,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "code": {
+   "ttft_s": 2.3749680519104004,
+   "total_s": 7.266860485076904,
+   "prompt_tokens": 141,
+   "completion_tokens": 188,
+   "client_decode_tps": 38.43093497424029,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 141,
+    "prompt_ms": 2331.6,
+    "prompt_per_token_ms": 16.536,
+    "prompt_per_second": 60.5,
+    "predicted_n": 188,
+    "predicted_ms": 4931.1,
+    "predicted_per_token_ms": 26.229,
+    "predicted_per_second": 38.1,
+    "draft_n": 180,
+    "draft_n_accepted": 130
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 1:\n        return s[mid]\n    return (s[mid - 1] + s[mid]) / 2\n```",
+   "reasoning_chars": 368,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 3.545635461807251,
+     "total_s": 5.566424369812012,
+     "prompt_tokens": 370,
+     "completion_tokens": 84,
+     "client_decode_tps": 41.567924124711254,
+     "timings": {
+      "cache_n": 0,
+      "prompt_n": 370,
+      "prompt_ms": 3502.3,
+      "prompt_per_token_ms": 9.466,
+      "prompt_per_second": 105.6,
+      "predicted_n": 84,
+      "predicted_ms": 2059.6,
+      "predicted_per_token_ms": 24.519,
+      "predicted_per_second": 40.8,
+      "draft_n": 73,
+      "draft_n_accepted": 57
+     },
+     "content": "",
+     "reasoning_chars": 242,
+     "tool_calls": [
+      {
+       "id": "call_25209062c5ab48458c17542c",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 1.0684449672698975,
+     "total_s": 2.0498788356781006,
+     "prompt_tokens": 434,
+     "completion_tokens": 45,
+     "client_decode_tps": 45.85128091512261,
+     "timings": {
+      "cache_n": 365,
+      "prompt_n": 69,
+      "prompt_ms": 1024.0,
+      "prompt_per_token_ms": 14.841,
+      "prompt_per_second": 67.4,
+      "predicted_n": 45,
+      "predicted_ms": 1022.0,
+      "predicted_per_token_ms": 22.711,
+      "predicted_per_second": 44.0,
+      "draft_n": 38,
+      "draft_n_accepted": 33
+     },
+     "content": "",
+     "reasoning_chars": 27,
+     "tool_calls": [
+      {
+       "id": "call_563d934319e04418b3584d19",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 1.776771068572998,
+     "total_s": 3.137608289718628,
+     "prompt_tokens": 507,
+     "completion_tokens": 53,
+     "client_decode_tps": 38.94661255324983,
+     "timings": {
+      "cache_n": 429,
+      "prompt_n": 78,
+      "prompt_ms": 1732.7,
+      "prompt_per_token_ms": 22.214,
+      "prompt_per_second": 45.0,
+      "predicted_n": 53,
+      "predicted_ms": 1399.8,
+      "predicted_per_token_ms": 26.411,
+      "predicted_per_second": 37.9,
+      "draft_n": 47,
+      "draft_n_accepted": 34
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (A1, A2, A3).",
+     "reasoning_chars": 93,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  },
+  "decode": {
+   "ttft_s": 0.9298713207244873,
+   "total_s": 23.354795455932617,
+   "prompt_tokens": 59,
+   "completion_tokens": 781,
+   "client_decode_tps": 34.82731960612501,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 59,
+    "prompt_ms": 884.8,
+    "prompt_per_token_ms": 14.997,
+    "prompt_per_second": 66.7,
+    "predicted_n": 781,
+    "predicted_ms": 22465.7,
+    "predicted_per_token_ms": 28.765,
+    "predicted_per_second": 34.8,
+    "draft_n": 767,
+    "draft_n_accepted": 454
+   },
+   "content": "# How a Heat Pump Works\n\nMost people think of heating and cooling as two completely different processes. A furnace burns fuel to make heat. An air conditioner removes heat from inside your house. A heat pump is interesting because it does both with the same basic trick, and that trick is surprisingly simple once you understand it.\n\n**The core idea: heat is a substance you can move around**\n\nHere's the thing about heat that surprises people. Heat isn't just something that exists inside hot things. Even in freezing cold air, there's still heat energy bouncing around at the molecular level. Cold air isn't the *absence* of heat. It just has less of it.\n\nA heat pump works by grabbing that heat energy from one place and moving it to another. It doesn't create heat. It doesn't burn anything. It just picks up heat from outside your house and dumps it inside. In summer, it reverses and pulls heat from inside your house and dumps it outside.\n\nThink of it like a water pump. A water pump doesn't create water. It moves water from one place to another. A heat pump does the same thing with heat energy.\n\n**The four-step cycle**\n\nA heat pump uses a special fluid called refrigerant that circulates through a closed loop of pipes. The refrigerant has a very useful property: it changes between liquid and gas at temperatures close to what we experience in everyday life. Here's what happens in the cycle:\n\n**Step 1: Evaporation.** The refrigerant enters the outdoor unit as a very cold liquid. Because it's so cold, even cold outdoor air is warmer than the refrigerant. Heat naturally flows from warm things to cold things, so heat from the outside air flows into the refrigerant. This heat causes the refrigerant to boil and turn into a gas. (This is exactly how sweat cools your skin. The liquid evaporates, and in doing so, it pulls heat away from your body.)\n\n**Step 2: Compression.** The gas gets sucked into a compressor, which squeezes it tightly. When you squeeze a gas, it gets hot. This is the same reason a bicycle pump gets warm when you use it. The compressor raises the refrigerant's temperature to something much higher than the indoor air.\n\n**Step 3: Condensation.** The hot, high-pressure gas flows through coils inside your house. Because the refrigerant is now hotter than the indoor air, heat flows out of it and into your rooms. As it loses heat, the refrigerant condenses back into a liquid.\n\n**Step 4: Expansion.** The liquid passes through a tiny valve that suddenly drops its pressure. This causes it to cool dramatically, ready to start the cycle all over again.\n\n**Why it's so efficient**\n\nThis is where heat pumps really shine. A traditional electric heater converts one unit of electricity into one unit of heat. A heat pump uses one unit of electricity to *move* three to four units of heat from outside to inside. You're not creating heat from scratch. You're just paying for the energy needed to move it, which is much cheaper.\n\nThat's why heat pumps can be three or four times more efficient than electric resistance heating, and often cheaper to run than gas furnaces too.",
+   "reasoning_chars": 476,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

@@ -1,0 +1,12 @@
+# All-loaded test 2x262144 2026-11-17 07:28:18 CST
+flash-next 200
+embed-small 200
+[('embed-small', 'ready'), ('flash-next', 'ready')]
+GTT_used_GiB=96.91 MemAvailable_GiB=7.96 07:28:20
+MemTotal:       130476452 kB
+MemFree:         2258644 kB
+MemAvailable:    8351468 kB
+Cached:          7118520 kB
+SwapCached:          348 kB
+SwapTotal:       8388604 kB
+SwapFree:             92 kB

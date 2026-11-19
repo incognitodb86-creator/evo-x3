@@ -1,0 +1,10 @@
+2026-10-26 13:12:30 CT gpu_guard rc=0 IDLE
+2026-10-26 13:12:31 CT gpu_lock acquire rc=0 ACQUIRED pid 37848
+2026-10-26 13:12:31 CT UNLOAD LLM coding_swift15_iq3s
+2026-10-26 13:12:41 CT wake: GET /comfyui/ is ignored by llama-swap (docs/comfyui.md); polling /comfyui/system_stats
+2026-10-26 13:12:59 CT JOB start ali163_tr5s_gi102_s51170001 prompt_id=4c6a0151-fb9a-484b-9f98-95c91bf21726
+2026-10-26 13:16:59 CT JOB end ali163_tr5s_gi102_s51170001 ok secs=240.2 file=runs/ali163_tr5s_gi102_s51170001\ali163_tr5s_gi102_s51170001.mp4
+2026-10-26 13:17:00 CT OBJECTIVE ok ali163_tr5s_gi102_s51170001 image=False frames=124 size=1344x768 audio=True dur=5.167 bytes=1565994 contact=runs/ali163_tr5s_gi102_s51170001\ali163_tr5s_gi102_s51170001_stills_contact.png
+2026-10-26 13:17:01 CT UNLOAD comfyui_auto (POST /api/models/unload)
+2026-10-26 13:17:01 CT gpu_lock release rc=0 RELEASED pid 37848
+2026-10-26 13:17:01 CT BUDGET updated C:\Users\derek\5slock\ralph-community\logs\p7_budget.json: used_min=501.7 jobs=41

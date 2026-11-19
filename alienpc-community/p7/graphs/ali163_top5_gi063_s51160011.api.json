@@ -1,0 +1,246 @@
+{
+  "avae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "c0": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "audio_vae": [
+        "avae",
+        0
+      ],
+      "clip": [
+        "clip",
+        0
+      ],
+      "height": 768,
+      "length": 124,
+      "prompt": "\nsubject_definitions:\n<Subject 1> is the human female on the left side of the frame in the 16:9 start photograph in <Picture 1>, a fictional adult aged 27 (canon declaration): fair, glistening with sweat, long, wavy blonde hair, the pink lace lingerie set (bra and panties) she wears, black fishnet stockings on right leg only, clear high-heeled sandals with straps, prone on a black padded bench with the upper body propped on forearms, head turned toward camera, mouth slightly open with drool visible from the corner of the lip, chained at wrists to the bench edge and chained at the ankles to the bench leg by heavy silver chains. Her face, hair, body and figure all come from <Picture 1>, and her face and hair are the face and hair in the face crop in <Picture 2>.\n<Subject 2> is the anthropomorphic metallic robot in the same 16:9 start photograph, a fictional adult aged 31 of a fictional non-human machine species (canon declaration), tall, muscular, with articulated limbs with visible joints and segments, a smooth metallic dome head with sensor-like details, black tight-fitting shorts over the pelvic area and bare metal elsewhere. It stands bent at waist over the hips of <Subject 1>, right hand gripping her right buttock, left arm extended downward with a cylindrical metallic appendage near her lower back and hip. The dome head, limbs and shorts of the robot all come from <Picture 1>.\n<Picture 1> is the approved 16:9 start photograph: a dark interior, a studio or interrogation-style chamber with matte black walls, indistinct equipment or furniture silhouettes along the far wall, a black padded bench/table with metal frame at the centre, a large flat-screen tv mounted on the back wall, displaying a blurred image of a similar scene, <Subject 1> prone on a black padded bench and chained at wrists, and <Subject 2> bent at waist over her hips. The photograph is the first frame of the video, and the first frame defines both bodies, the room, the bench, the chains, the screen, the light, the colour cast, the crop and the camera position.\n<Picture 2> is the face crop of <Subject 1>, the same human female, a fictional adult aged 27 (canon declaration), forehead, hair, cheek and neck filling the square. It is an identity reference for her face and hair only.\n\nsummary:\n[reference generation] One continuous 16:9 shot of 5.167 seconds in the dark interior of <Picture 1>. <Subject 1>, the human female prone on a black padded bench, a fictional adult aged 27 (canon declaration), keeps her forearms propped and her head turned toward camera. <Subject 2>, the anthropomorphic metallic robot, a fictional adult aged 31 of a fictional non-human machine species (canon declaration), stays bent at waist over her hips with one hand on her right buttock as the lens closes in and stops. The card record shows restraint and gives no consent evidence, and notes/needs_derrick.md row 21 carries that question to Derrick. <Picture 1> is the first frame and the scene; <Picture 2> is her face and hair only.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]) the human female, a fictional adult aged 27 (canon declaration): fully_preserved - her long, wavy blonde hair, the pink lace lingerie set, black fishnet stockings on right leg only, clear high-heeled sandals with straps, fair, glistening with sweat, the prone position on the bench, the chains at her wrists and ankles, the head turned toward camera and the framing of <Picture 1>.\n<Subject 2> (appears in [Shot 1]) the anthropomorphic metallic robot, a fictional adult aged 31 of a fictional non-human machine species (canon declaration): fully_preserved - the tall, muscular frame, articulated limbs with visible joints and segments, the smooth metallic dome head with sensor-like details, the black tight-fitting shorts, the bent at waist posture over her hips and the crop of the start photograph, all of it as the robot stands in <Picture 1>.\n<Picture 1> ([Shot 1] first frame): fully_preserved - the dark interior, matte black walls, indistinct equipment or furniture silhouettes, black padded bench/table with metal frame, heavy silver chains, large flat-screen tv, displaying a blurred image of a similar scene, cool blue glow, strong directional lighting from front-left, soft shadows cast under the bench, the 16:9 framing, the camera height, and both figures in their opening positions.\n\ndetailed_description:\nLive-action, cinematic realism, 16:9, one continuous medium shot in the dark interior of <Picture 1>, its light, colour cast, crop and camera height unchanged, shallow depth of field held on the two bodies.\n[Shot 1] <Picture 1> is the first frame, and the framing, room, light and camera height stay as the photograph sets them. Strong directional lighting from front-left, a key at camera left, rakes the bench, highlighting the woman's skin, hair, and the metallic surfaces of the robot and casting soft shadows cast under the bench, and the woman in the pink lace lingerie set is a fictional adult aged 27 (canon declaration). <Subject 1> lies prone on a black padded bench, upper body propped on forearms, head turned toward camera, mouth slightly open with drool at the corner of the lip, long, wavy blonde hair spread on the pad, the pink lace lingerie set and clear high-heeled sandals with straps on her body, chained at wrists and chained at the ankles. The robot stands bent at waist over her hips, an anthropomorphic metallic robot with articulated limbs with visible joints and segments and a smooth metallic dome head with sensor-like details, in the black tight-fitting shorts it wears, and the polished silver metal plating of the forearm and hand rests on her hip. The camera opens on a Static Shot of the pair, then a Push In with small amplitude at slow speed closes the lens distance by a hand's width across the first third of the segment, and from 00:03.600 the camera stops and holds the same frame for the rest of the segment.\nAt 00:00.000, the frame is the opening photograph: <Subject 1> prone on a black padded bench, chained at wrists to the bench edge, forearms propped, head turned toward camera; <Subject 2> bent at waist over her hips with one hand on her right buttock and the other arm extended downward with a cylindrical metallic appendage near her lower back and hip; the large flat-screen tv, the heavy silver chains and the soft shadows cast under the bench steady behind them.\nAt 00:01.400, the hand on her right buttock presses and holds, her shoulder blades lift under the pink lace lingerie set, her elbows straighten, and a strand of long, wavy blonde hair moves across the pad.\nAt 00:02.900, her hips rise against the pad, her heels bend so her toes lift, the articulated joints at the waist of the robot tighten while the hand stays on her hip, and the cool blue glow shifts along her hair.\nAt 00:04.200, the camera holds, her breathing rises and falls with her back, the metal hand presses once at her hip, and her face stays turned toward the lens.\nThe segment ends as it was framed: <Subject 1> propped on forearms on the black padded bench with the chains at her wrists, the robot bent at waist over her hips with its hand on her hip, the crop of <Picture 1> unchanged.\noverall_soundscape:\nThe room tone of the dark interior in <Picture 1>: a low ventilation hum, the faint electrical wash of a screen, chain links ticking once as a wrist turns, the padded bench creaking under a shoulder, cloth friction at the hip, two quickened breaths, a low resonant hum from the machine, short rising sounds.\n\nnon_diegetic_music:\nA low muted guitar figure over a slow finger-snare loop, low volume, tempo around 68 bpm, dynamics rising gently while the lens closes in and settling as the camera stops and holds.",
+      "ref_image_size": "max",
+      "ref_images.ref_image_1": [
+        "img",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "img2",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ],
+      "width": 1344
+    }
+  },
+  "clip": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "dec_a": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "s0_samp",
+        0
+      ],
+      "vae": [
+        "avae",
+        0
+      ]
+    }
+  },
+  "dec_v": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "s0_samp",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "g0": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "frame_idx": 0,
+      "image": [
+        "img",
+        0
+      ],
+      "latent": [
+        "c0",
+        1
+      ],
+      "positive": [
+        "c0",
+        0
+      ],
+      "vae": [
+        "vvae",
+        0
+      ]
+    }
+  },
+  "img": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/GI063.jpg"
+    }
+  },
+  "img2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "community/hc/GI063_w1_face.png"
+    }
+  },
+  "ksel": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    }
+  },
+  "m_attn": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "pytorch attention",
+      "model": [
+        "unet",
+        0
+      ]
+    }
+  },
+  "m_shift": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "m_vsa",
+        0
+      ],
+      "shift_audio": 3.0,
+      "shift_video": 10.0
+    }
+  },
+  "m_vsa": {
+    "class_type": "BlockSparseAttention",
+    "inputs": {
+      "dense_blocks": "",
+      "end_percent": 1.0,
+      "extra_tokens": 256,
+      "min_tokens": 12288,
+      "model": [
+        "m_attn",
+        0
+      ],
+      "selection": "vsa",
+      "selection.keep_percent": 10,
+      "sink_conditioning": "exact_kv_and_rows",
+      "start_percent": 0.2,
+      "verbose": false
+    }
+  },
+  "mkvid": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "dec_a",
+        0
+      ],
+      "fps": 24,
+      "images": [
+        "dec_v",
+        0
+      ]
+    }
+  },
+  "noise": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 51160011
+    }
+  },
+  "s0_guide": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "g0",
+        0
+      ],
+      "model": [
+        "m_shift",
+        0
+      ]
+    }
+  },
+  "s0_samp": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "s0_guide",
+        0
+      ],
+      "latent_image": [
+        "c0",
+        1
+      ],
+      "noise": [
+        "noise",
+        0
+      ],
+      "sampler": [
+        "ksel",
+        0
+      ],
+      "sigmas": [
+        "s0_sched",
+        0
+      ]
+    }
+  },
+  "s0_sched": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "m_shift",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8
+    }
+  },
+  "save": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "community/ali163_top5_gi063_s51160011/ali163_top5_gi063_s51160011",
+      "format": "auto",
+      "video": [
+        "mkvid",
+        0
+      ]
+    }
+  },
+  "unet": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "vvae": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+    }
+  }
+}

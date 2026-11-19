@@ -1,0 +1,641 @@
+{
+ "arm": "u6-gufo",
+ "model": "flash-next",
+ "effort": "low",
+ "started": "2026-11-15 09:23:53 CST",
+ "tasks": {
+  "long": {
+   "ttft_s": 11.257251262664795,
+   "total_s": 12.83922266960144,
+   "prompt_tokens": 18253,
+   "completion_tokens": 103,
+   "client_decode_tps": 65.10863568605885,
+   "timings": {
+    "prompt_n": 18253,
+    "prompt_ms": 11242.803796,
+    "prompt_per_token_ms": 0.6159427927463978,
+    "prompt_per_second": 1623.5273986097764,
+    "predicted_n": 103,
+    "predicted_ms": 1575.5484440000002,
+    "predicted_per_token_ms": 15.296586834951459,
+    "predicted_per_second": 65.37406094509144,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 28.910377000000004,
+    "cache_disk_enqueue_ms": 0.00352,
+    "draft_rounds": 20,
+    "draft_n": 111,
+    "draft_n_accepted": 83,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 18253,
+     "captures": 6,
+     "captured_capacity_bytes": 1315045376,
+     "borrowed_capacity_bytes": 498401280,
+     "copied_payload_bytes": 805979668,
+     "captured_checkpoint_ids": [
+      2,
+      484,
+      969,
+      1454,
+      1939,
+      2145
+     ],
+     "global_spill": {
+      "idle_bytes": 0,
+      "foreground_bytes": 0,
+      "idle_copy_ms": 0,
+      "foreground_copy_ms": 0,
+      "stream_wait_ms": 0,
+      "residual_wait_ms": 2.892751,
+      "reassignments": 1,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3484603786,
+     "global_ram_bytes": 3484603786,
+     "global_peak_ledger_bytes": 3484637648,
+     "global_peak_ram_bytes": 3484637648,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1884160000,
+       "reserved_bytes": 0,
+       "peak_bytes": 2266103808
+      },
+      "backing_assigned": {
+       "bytes": 498401280,
+       "reserved_bytes": 498401280,
+       "peak_bytes": 498860032
+      },
+      "backing_materialized": {
+       "bytes": 4653056,
+       "reserved_bytes": 0,
+       "peak_bytes": 4653056
+      },
+      "private_state": {
+       "bytes": 800980992,
+       "reserved_bytes": 0,
+       "peak_bytes": 800980992
+      },
+      "private_tail": {
+       "bytes": 11010048,
+       "reserved_bytes": 0,
+       "peak_bytes": 11010048
+      },
+      "metadata": {
+       "bytes": 285398410,
+       "reserved_bytes": 0,
+       "peak_bytes": 285432272
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 25,
+    "lookup_n_accepted": 18
+   },
+   "content": "The on-call codename is TANGERINE-4471 and the maintenance window is Tuesday 03:40.",
+   "reasoning_chars": 264,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "code": {
+   "ttft_s": 0.32786989212036133,
+   "total_s": 3.419058084487915,
+   "prompt_tokens": 141,
+   "completion_tokens": 203,
+   "client_decode_tps": 65.67054070057166,
+   "timings": {
+    "prompt_n": 141,
+    "prompt_ms": 286.16295,
+    "prompt_per_token_ms": 2.0295244680851066,
+    "prompt_per_second": 492.7262596363365,
+    "predicted_n": 203,
+    "predicted_ms": 3085.7001539999987,
+    "predicted_per_token_ms": 15.200493369458123,
+    "predicted_per_second": 65.78733832477234,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 8.006821,
+    "cache_disk_enqueue_ms": 0.00167,
+    "draft_rounds": 40,
+    "draft_n": 240,
+    "draft_n_accepted": 163,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 141,
+     "captures": 2,
+     "captured_capacity_bytes": 277348352,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 273436052,
+     "captured_checkpoint_ids": [
+      2147,
+      2148
+     ],
+     "global_spill": {
+      "idle_bytes": 30670848,
+      "foreground_bytes": 467730432,
+      "idle_copy_ms": 2.557252,
+      "foreground_copy_ms": 35.211302,
+      "stream_wait_ms": 0.344205,
+      "residual_wait_ms": 42.883555,
+      "reassignments": 2,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3484352318,
+     "global_ram_bytes": 3484352318,
+     "global_peak_ledger_bytes": 3484637648,
+     "global_peak_ram_bytes": 3484637648,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 1606811648,
+       "reserved_bytes": 0,
+       "peak_bytes": 2266103808
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 498860032
+      },
+      "backing_materialized": {
+       "bytes": 503054336,
+       "reserved_bytes": 0,
+       "peak_bytes": 503054336
+      },
+      "private_state": {
+       "bytes": 1067974656,
+       "reserved_bytes": 0,
+       "peak_bytes": 1067974656
+      },
+      "private_tail": {
+       "bytes": 21364736,
+       "reserved_bytes": 0,
+       "peak_bytes": 21364736
+      },
+      "metadata": {
+       "bytes": 285146942,
+       "reserved_bytes": 0,
+       "peak_bytes": 285432272
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    },
+    "lookup_n": 43,
+    "lookup_n_accepted": 40
+   },
+   "content": "```python\ndef median(xs):\n    \"\"\"Return the median of a non-empty list of numbers.\"\"\"\n    s = sorted(xs)\n    n = len(s)\n    mid = n // 2\n    if n % 2 == 0:\n        return (s[mid - 1] + s[mid]) / 2\n    return s[mid]\n```",
+   "reasoning_chars": 420,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  },
+  "tool": {
+   "steps": {
+    "step1": {
+     "ttft_s": 0.545271635055542,
+     "total_s": 2.030714750289917,
+     "prompt_tokens": 388,
+     "completion_tokens": 83,
+     "client_decode_tps": 55.87558294812532,
+     "timings": {
+      "prompt_n": 388,
+      "prompt_ms": 537.703214,
+      "prompt_per_token_ms": 1.385833025773196,
+      "prompt_per_second": 721.5876526265287,
+      "predicted_n": 83,
+      "predicted_ms": 1483.2675970000003,
+      "predicted_per_token_ms": 17.87069393975904,
+      "predicted_per_second": 55.95753602915118,
+      "cache_n": 0,
+      "cache_restore_ms": 0,
+      "cache_snapshot_ms": 8.138646,
+      "cache_disk_enqueue_ms": 0.001451,
+      "draft_rounds": 17,
+      "draft_n": 103,
+      "draft_n_accepted": 66,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "none",
+       "selection_reason": 6,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 0,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 0,
+       "restored_bytes": 0,
+       "prefilled_tokens": 388,
+       "captures": 2,
+       "captured_capacity_bytes": 282525696,
+       "borrowed_capacity_bytes": 6815744,
+       "copied_payload_bytes": 272877888,
+       "captured_checkpoint_ids": [
+        2150,
+        2178
+       ],
+       "global_spill": {
+        "idle_bytes": 30670848,
+        "foreground_bytes": 467730432,
+        "idle_copy_ms": 2.557252,
+        "foreground_copy_ms": 35.211302,
+        "stream_wait_ms": 0.344205,
+        "residual_wait_ms": 44.684812,
+        "reassignments": 3,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 3484442018,
+       "global_ram_bytes": 3484442018,
+       "global_peak_ledger_bytes": 3484637648,
+       "global_peak_ram_bytes": 3484637648,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 1324285952,
+         "reserved_bytes": 0,
+         "peak_bytes": 2266103808
+        },
+        "backing_assigned": {
+         "bytes": 6815744,
+         "reserved_bytes": 6815744,
+         "peak_bytes": 498860032
+        },
+        "backing_materialized": {
+         "bytes": 503119872,
+         "reserved_bytes": 0,
+         "peak_bytes": 503119872
+        },
+        "private_state": {
+         "bytes": 1334968320,
+         "reserved_bytes": 0,
+         "peak_bytes": 1334968320
+        },
+        "private_tail": {
+         "bytes": 30015488,
+         "reserved_bytes": 0,
+         "peak_bytes": 30015488
+        },
+        "metadata": {
+         "bytes": 285236642,
+         "reserved_bytes": 0,
+         "peak_bytes": 285432272
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 242,
+     "tool_calls": [
+      {
+       "id": "call_blclo9bg1er7fa11p54l",
+       "name": "lookup_user",
+       "arguments": "{\"email\":\"dana@example.com\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step2": {
+     "ttft_s": 0.20223355293273926,
+     "total_s": 1.057032823562622,
+     "prompt_tokens": 452,
+     "completion_tokens": 49,
+     "client_decode_tps": 57.32339940333942,
+     "timings": {
+      "prompt_n": 72,
+      "prompt_ms": 196.643981,
+      "prompt_per_token_ms": 2.731166402777778,
+      "prompt_per_second": 366.14392992786287,
+      "predicted_n": 49,
+      "predicted_ms": 850.487079,
+      "predicted_per_token_ms": 17.356879163265305,
+      "predicted_per_second": 57.61404401065569,
+      "cache_n": 380,
+      "cache_restore_ms": 1.806357,
+      "cache_snapshot_ms": 7.985311,
+      "cache_disk_enqueue_ms": 0.0014,
+      "draft_rounds": 9,
+      "draft_n": 53,
+      "draft_n_accepted": 40,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 380,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 380,
+       "restored_bytes": 143148688,
+       "prefilled_tokens": 72,
+       "captures": 2,
+       "captured_capacity_bytes": 279052288,
+       "borrowed_capacity_bytes": 0,
+       "copied_payload_bytes": 276285248,
+       "captured_checkpoint_ids": [
+        2179,
+        2180
+       ],
+       "global_spill": {
+        "idle_bytes": 37486592,
+        "foreground_bytes": 467730432,
+        "idle_copy_ms": 2.983717,
+        "foreground_copy_ms": 35.211302,
+        "stream_wait_ms": 0.347645,
+        "residual_wait_ms": 46.306003,
+        "reassignments": 4,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 3484513626,
+       "global_ram_bytes": 3484513626,
+       "global_peak_ledger_bytes": 3484637648,
+       "global_peak_ram_bytes": 3484637648,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 1045233664,
+         "reserved_bytes": 0,
+         "peak_bytes": 2266103808
+        },
+        "backing_assigned": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 498860032
+        },
+        "backing_materialized": {
+         "bytes": 509935616,
+         "reserved_bytes": 0,
+         "peak_bytes": 509935616
+        },
+        "private_state": {
+         "bytes": 1601961984,
+         "reserved_bytes": 0,
+         "peak_bytes": 1601961984
+        },
+        "private_tail": {
+         "bytes": 42074112,
+         "reserved_bytes": 0,
+         "peak_bytes": 42074112
+        },
+        "metadata": {
+         "bytes": 285308250,
+         "reserved_bytes": 0,
+         "peak_bytes": 285432272
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "",
+     "reasoning_chars": 46,
+     "tool_calls": [
+      {
+       "id": "call_idupnxb8v0m1f3l0gb6r",
+       "name": "get_orders",
+       "arguments": "{\"user_id\":\"u-4821\"}"
+      }
+     ],
+     "finish": "tool_calls"
+    },
+    "step3": {
+     "ttft_s": 0.21654868125915527,
+     "total_s": 0.8098809719085693,
+     "prompt_tokens": 525,
+     "completion_tokens": 32,
+     "client_decode_tps": 53.93267904730983,
+     "timings": {
+      "prompt_n": 81,
+      "prompt_ms": 211.428985,
+      "prompt_per_token_ms": 2.6102343827160497,
+      "prompt_per_second": 383.10735871905166,
+      "predicted_n": 32,
+      "predicted_ms": 589.440837,
+      "predicted_per_token_ms": 18.42002615625,
+      "predicted_per_second": 54.28873941423234,
+      "cache_n": 444,
+      "cache_restore_ms": 1.840188,
+      "cache_snapshot_ms": 6.530794,
+      "cache_disk_enqueue_ms": 0.001431,
+      "draft_rounds": 7,
+      "draft_n": 43,
+      "draft_n_accepted": 25,
+      "component_cache": {
+       "schema": "component-cache-v1",
+       "reuse": "ram",
+       "selection_reason": 1,
+       "deepest_live_tokens": 0,
+       "deepest_ram_tokens": 444,
+       "deepest_disk_tokens": 0,
+       "selected_tokens": 444,
+       "restored_bytes": 144852880,
+       "prefilled_tokens": 81,
+       "captures": 2,
+       "captured_capacity_bytes": 277413888,
+       "borrowed_capacity_bytes": 6815744,
+       "copied_payload_bytes": 266620308,
+       "captured_checkpoint_ids": [
+        2181,
+        2209
+       ],
+       "global_spill": {
+        "idle_bytes": 37486592,
+        "foreground_bytes": 467730432,
+        "idle_copy_ms": 2.983717,
+        "foreground_copy_ms": 35.211302,
+        "stream_wait_ms": 0.347645,
+        "residual_wait_ms": 47.928574,
+        "reassignments": 5,
+        "idle_failures": 0
+       },
+       "global_ledger_bytes": 3617902930,
+       "global_ram_bytes": 3617902930,
+       "global_peak_ledger_bytes": 3617923172,
+       "global_peak_ram_bytes": 3617923172,
+       "global_persistence_pinned_bytes": 0,
+       "global_peak_persistence_pinned_bytes": 0,
+       "global_categories": {
+        "backing_free": {
+         "bytes": 901120000,
+         "reserved_bytes": 0,
+         "peak_bytes": 2266103808
+        },
+        "backing_assigned": {
+         "bytes": 6815744,
+         "reserved_bytes": 6815744,
+         "peak_bytes": 498860032
+        },
+        "backing_materialized": {
+         "bytes": 510001152,
+         "reserved_bytes": 0,
+         "peak_bytes": 510001152
+        },
+        "private_state": {
+         "bytes": 1868955648,
+         "reserved_bytes": 0,
+         "peak_bytes": 1868955648
+        },
+        "private_tail": {
+         "bytes": 45613056,
+         "reserved_bytes": 0,
+         "peak_bytes": 45613056
+        },
+        "metadata": {
+         "bytes": 285397330,
+         "reserved_bytes": 0,
+         "peak_bytes": 285432272
+        },
+        "transfer_staging": {
+         "bytes": 0,
+         "reserved_bytes": 0,
+         "peak_bytes": 0
+        }
+       }
+      }
+     },
+     "content": "Dana (dana@example.com) has **3 orders** (A1, A2, A3).",
+     "reasoning_chars": 19,
+     "tool_calls": [],
+     "finish": "stop"
+    }
+   },
+   "pass": true,
+   "step_pass": [
+    true,
+    true,
+    true
+   ]
+  },
+  "decode": {
+   "ttft_s": 0.19768714904785156,
+   "total_s": 17.377419233322144,
+   "prompt_tokens": 59,
+   "completion_tokens": 861,
+   "client_decode_tps": 50.11719599446655,
+   "timings": {
+    "prompt_n": 59,
+    "prompt_ms": 194.001778,
+    "prompt_per_token_ms": 3.2881657288135595,
+    "prompt_per_second": 304.1209240876133,
+    "predicted_n": 861,
+    "predicted_ms": 17173.984400999994,
+    "predicted_per_token_ms": 19.946555634146335,
+    "predicted_per_second": 50.13396890880292,
+    "cache_n": 0,
+    "cache_restore_ms": 0,
+    "cache_snapshot_ms": 6.2243759999999995,
+    "cache_disk_enqueue_ms": 0.00182,
+    "draft_rounds": 320,
+    "draft_n": 875,
+    "draft_n_accepted": 541,
+    "component_cache": {
+     "schema": "component-cache-v1",
+     "reuse": "none",
+     "selection_reason": 6,
+     "deepest_live_tokens": 0,
+     "deepest_ram_tokens": 0,
+     "deepest_disk_tokens": 0,
+     "selected_tokens": 0,
+     "restored_bytes": 0,
+     "prefilled_tokens": 59,
+     "captures": 2,
+     "captured_capacity_bytes": 270532608,
+     "borrowed_capacity_bytes": 0,
+     "copied_payload_bytes": 269015804,
+     "captured_checkpoint_ids": [
+      2211,
+      2212
+     ],
+     "global_spill": {
+      "idle_bytes": 44302336,
+      "foreground_bytes": 467730432,
+      "idle_copy_ms": 3.654237,
+      "foreground_copy_ms": 35.211302,
+      "stream_wait_ms": 0.353846,
+      "residual_wait_ms": 49.971488,
+      "reassignments": 6,
+      "idle_failures": 0
+     },
+     "global_ledger_bytes": 3884568558,
+     "global_ram_bytes": 3884568558,
+     "global_peak_ledger_bytes": 3884581964,
+     "global_peak_ram_bytes": 3884581964,
+     "global_persistence_pinned_bytes": 0,
+     "global_peak_persistence_pinned_bytes": 0,
+     "global_categories": {
+      "backing_free": {
+       "bytes": 897187840,
+       "reserved_bytes": 0,
+       "peak_bytes": 2266103808
+      },
+      "backing_assigned": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 498860032
+      },
+      "backing_materialized": {
+       "bytes": 516816896,
+       "reserved_bytes": 0,
+       "peak_bytes": 516816896
+      },
+      "private_state": {
+       "bytes": 2135949312,
+       "reserved_bytes": 0,
+       "peak_bytes": 2135949312
+      },
+      "private_tail": {
+       "bytes": 49152000,
+       "reserved_bytes": 0,
+       "peak_bytes": 49152000
+      },
+      "metadata": {
+       "bytes": 285462510,
+       "reserved_bytes": 0,
+       "peak_bytes": 285475916
+      },
+      "transfer_staging": {
+       "bytes": 0,
+       "reserved_bytes": 0,
+       "peak_bytes": 0
+      }
+     }
+    }
+   },
+   "content": "# How a Heat Pump Works\n\nA heat pump is a machine that moves heat from one place to another. That's it. It doesn't burn fuel to create warmth, and it doesn't \"make\" cold air. It simply picks up heat from one location and drops it off somewhere else. This is the same basic principle behind your refrigerator \u2014 except a heat pump can run in both directions.\n\n**The core idea**\n\nThink of heat like water in a sponge. A heat pump is like a sponge that can soak up water from one place and wring it out somewhere else. The \"sponge\" is a special fluid called a refrigerant, which circulates through the system in a closed loop. The refrigerant is chosen because it boils and condenses at very low temperatures \u2014 even colder than the air outside your house in winter.\n\n**The four-step cycle**\n\nThe refrigerant travels through four stages, over and over:\n\n1. **Evaporation.** The refrigerant starts as a cold, low-pressure liquid. It passes through a coil (called the evaporator) that is exposed to the outside air. Because the refrigerant is even colder than the air around it, heat naturally flows from the air into the refrigerant. The refrigerant absorbs that heat and boils into a gas. Notice: even on a freezing day, there is still heat energy in the air. The refrigerant soaks it up.\n\n2. **Compression.** A compressor squeezes that gas into a much smaller volume. When you compress a gas, its temperature rises dramatically \u2014 just like a bicycle pump gets warm when you use it. Now the refrigerant is a hot, high-pressure gas.\n\n3. **Condensation.** This hot gas flows through a second coil (the condenser) inside your home. Because the gas is now hotter than the indoor air, heat flows out of the refrigerant and into your living space. As it loses heat, the gas condenses back into a liquid.\n\n4. **Expansion.** The high-pressure liquid passes through a small valve that suddenly drops its pressure. This causes the refrigerant to cool sharply, and it returns to step one to do it all over again.\n\n**Reversing the cycle**\n\nA small device called a reversing valve can flip the direction of refrigerant flow. In summer, the system picks up heat from inside your house and dumps it outside \u2014 cooling your home. In winter, it picks up heat from outside and dumps it inside \u2014 heating your home. The same four steps happen either way.\n\n**Why it's so efficient**\n\nA traditional electric heater converts electricity directly into heat. For every unit of electricity, you get roughly one unit of heat. A heat pump, by contrast, uses electricity only to move heat that already exists. For every unit of electricity, it can deliver three to five units of heat. That's because it's not creating heat \u2014 it's just transporting it.\n\n**The catch**\n\nHeat pumps work best when the temperature difference between inside and outside is moderate. In extremely cold weather, there's less heat energy available in the outside air, and the system has to work harder. That's why some heat pumps include a backup electric heater for the coldest days.\n\nIn short, a heat pump is a heat mover. It exploits the simple fact that heat naturally flows from warm to cold, and uses a compressor and a clever fluid to direct that flow wherever you want it.",
+   "reasoning_chars": 662,
+   "tool_calls": [],
+   "finish": "stop",
+   "pass": true
+  }
+ }
+}

@@ -1,0 +1,37 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "no",
+   "reason": "Frame 1 shows bed, frames 2-8 show cave. Background changed between start and subsequent frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same two individuals, matching hair, body types, and clothing in all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows bed, frame 2 shows cave. Pose and framing differ from START IMAGE."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows woman on back, man on top, bodies in contact, penetration visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.9997,
+  "same_people": 0.0008,
+  "start_kept": 0.9994,
+  "target_reached": 0.3404,
+  "anatomy_defect": 0.0398
+ },
+ "finish": "stop",
+ "flags": [
+  "same_scene",
+  "start_kept"
+ ],
+ "tag": "p15v2_a_w7_img_gi102_missionary_s51170001_wf2"
+}

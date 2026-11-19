@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "no",
+   "reason": "Frames 4-8 show a brazier and lit bowl, absent in START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same build, skin tone, hair, and clothing across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and outfit exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows elf woman pressed against wall, orc behind her, target pose achieved."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.9028,
+  "same_people": 0.0,
+  "start_kept": 0.0422,
+  "target_reached": 0.4463,
+  "anatomy_defect": 0.1113
+ },
+ "finish": "stop",
+ "flags": [
+  "same_scene"
+ ],
+ "tag": "p15v2_b_w8_img_gi201_against_wall_s51170001_wf2"
+}

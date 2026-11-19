@@ -1,0 +1,16 @@
+# U34 2026-11-16 (Derrick t1837u, plan U33 decision 9 "SearXNG on the X3"): permanent localhost-only SearXNG for
+# pi-web-access and the deep-research tools. Replaces QNAP 192.168.0.147:8888 in ~/.pi/agent/web-search.json.
+# Config ~/.config/searxng/settings.yml (secret_key inside, not in git). Rollback: systemctl --user stop searxng;
+# restore ~/.pi/agent/web-search.json.bak-20261116-065140-u34.
+[Unit]
+Description=SearXNG (localhost only)
+[Container]
+ContainerName=searxng
+Image=docker.io/searxng/searxng@sha256:932f69dca010db9880bddebb2171f05d8e1a25d04a59149ff65409993d680024
+PublishPort=127.0.0.1:8888:8080
+Volume=%h/.config/searxng:/etc/searxng:Z
+Volume=searxng-cache:/var/cache/searxng
+[Service]
+Restart=always
+[Install]
+WantedBy=default.target

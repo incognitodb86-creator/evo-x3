@@ -527,7 +527,7 @@ BARE_LABEL_RE = re.compile(r"(?<![(\w<,/])S[123](?![\w)>,/])")
 RIDE_ACTS = ("cowgirl", "reverse_cowgirl")
 
 
-def final_text_checks(full: str, plain: str) -> List[Dict[str, Any]]:
+def final_text_checks(full: str, plain: str, ctx: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     m = BEAT_SHEET_TS_RE.search(full or "")
     if m:
@@ -541,6 +541,17 @@ def final_text_checks(full: str, plain: str) -> List[Dict[str, Any]]:
         out.append(_fix("end_pose_placeholder", "placeholder \"previous clip's end pose\" in the text; write the actual pose", hard=True))
     if re.search(r"(?i)\bsays\s*,\s*\(S\b|\bsays\s*,\s*\(S\d\)", full or ""):
         out.append(_fix("says_glue", "malformed 'says, (S' speech glue", hard=True))
+    # Reference manifest audit (U56 Goal #2 + guide/ref boundary): flag phantom <Audio N>, <Picture N>, or <Video N> tags
+    slots = (ctx or {}).get("slots") or {}
+    ident = slots.get("identity") or {}
+    still_mode = str(slots.get("still_mode") or "").strip().lower()
+    has_ident_audio = bool(ident.get("has_audio_refmod", ident.get("is_oc")))
+    if ident and not has_ident_audio and re.search(r"(?i)<Audio\s+\d+>", full or ""):
+        out.append(_fix("parody_audio_tag", "named parody has no voice RefMod; never write <Audio N>, voice comes from the character+actor voice line", hard=True))
+    if still_mode == "guide" and not slots.get("s3_still") and re.search(r"(?i)<Picture\s+\d+>", plain or ""):
+        out.append(_fix("guide_picture_tag", "--still-mode guide pins frame 0 via AddGuide with no reference image slot; omit <Picture N> in prose", hard=False))
+    if re.search(r"(?i)<Video\s+\d+>", full or "") and "continuation:" not in (full or "").lower():
+        out.append(_fix("unexpected_video_tag", "unexpected <Video N> tag without a continuation section", hard=False))
     return out
 
 
@@ -635,7 +646,7 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
                                               "an adult woman's proportions at miniature scale')"))
         if not SCALE_ANCHOR_RE.search(plain):
             issues.append(_fix("scale_anchor", "fix one measurable scale anchor (e.g. 'no taller than his forearm') and keep it", False, 5))
-    issues += final_text_checks(full, plain)
+    issues += final_text_checks(full, plain, ctx)
     issues += stop_checks(dd, plain, ctx)
     if minimal:
         _lines = spoken_lines(dd)

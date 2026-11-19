@@ -1,0 +1,61 @@
+{
+  "arm": "flash-next-uncensored-v2",
+  "model": "flash-next-uncensored-v2",
+  "http": 200,
+  "elapsed_s": 1.076,
+  "ttft_s": 0.3685,
+  "prompt_tokens": 297,
+  "completion_tokens": 43,
+  "prompt_per_second": 805.97,
+  "predicted_per_second": 67.051,
+  "timings": {
+    "prompt_n": 297,
+    "predicted_n": 43,
+    "prompt_ms": 368.5,
+    "predicted_ms": 641.3,
+    "prompt_per_second": 805.97,
+    "predicted_per_second": 67.051,
+    "cache_n": 0,
+    "disk_restore_n": 0,
+    "disk_restore_ms": 0.0,
+    "draft_n": 61,
+    "draft_n_accepted": 29,
+    "speculation": {
+      "drafter": "mtp",
+      "rounds": 13,
+      "head": {
+        "rounds": 13,
+        "drafted": 61,
+        "accepted": 29
+      },
+      "lookup": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+      },
+      "grammar": {
+        "rounds": 0,
+        "drafted": 0,
+        "accepted": 0
+      }
+    }
+  },
+  "usage": {
+    "prompt_tokens": 297,
+    "completion_tokens": 43,
+    "total_tokens": 340,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "finish": "stop",
+  "content": "The image features a blue background with three shapes: a yellow circle, a red square, and a green triangle. In the top left corner, there is white text that reads \"XB-BAKEOFF\".",
+  "checks": {
+    "yellow_or_gold_circle": true,
+    "red_square": true,
+    "green_triangle": true,
+    "text_x3_bakeoff": false
+  },
+  "checks_passed": 3,
+  "vision_works": true
+}

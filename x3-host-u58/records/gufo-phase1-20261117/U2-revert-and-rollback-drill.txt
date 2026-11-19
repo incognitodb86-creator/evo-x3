@@ -1,0 +1,12 @@
+# REVERT to fresh backup + Halogen rollback drill 2026-11-17 07:33:31 CST
+Reason: plan U2 — all-loaded floor (MemAvailable >= 4 GiB with embed-small+JoyCaption+Ref2VA) missed at 2x262144 AND at 1x131072 fallback -> revert the fresh backup, stop, ask.
+fd930cb7c787e67db5322aed8f2142b59d8e2631d4b2d9cd356ff40908ecf8da  /etc/evo-x3/llama-swap.yaml
+fd930cb7c787e67db5322aed8f2142b59d8e2631d4b2d9cd356ff40908ecf8da  /etc/evo-x3/llama-swap.yaml.bak-20261117-070651-pre-gufo
+active
+no key: 401
+LLM_KEY_BOX: 200
+tool {"pass": true, "step_pass": [true, true, true]}
+flash-next True
+open-webui ghcr.io/open-webui/open-webui@sha256:59b912d4246103c7285de0e9a5f2f6586614c06b4c4e46edc51a8f29e7b099a5
+llama-swap-flash-next ghcr.io/peonist-ai/halogen-flash-server@sha256:3041272385d1ac88e5b842be3dbf4b99472bb079f22430c1ea3b3e0dbd1e1568
+GTT_used_GiB=27.01 MemAvailable_GiB=78.31 07:34:02

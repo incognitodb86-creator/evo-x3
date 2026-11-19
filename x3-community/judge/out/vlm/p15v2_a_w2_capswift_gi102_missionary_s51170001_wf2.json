@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w2_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 4.6,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same bed, white sheets, and beige headboard as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman in white lace, same dark-haired man, consistent body types and skin tones across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cuts or pose change."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman on back, man kneeling over her, leg draped over shoulder, penetration visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, malformed genitals or hands visible in any frame or Image 3."
+  }
+ },
+ "flags": []
+}

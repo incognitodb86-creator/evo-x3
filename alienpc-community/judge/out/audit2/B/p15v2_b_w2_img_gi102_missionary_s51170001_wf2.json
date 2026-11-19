@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: same bed, linens, and room lighting across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical subjects: same blonde woman in white lingerie and dark-haired man, no replacements or morphs."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary pose with full body contact and visible rhythmic motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly formed limbs, hands, and genitalia without fusion or malformations."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0002,
+  "same_people": 0.0,
+  "start_kept": 0.0258,
+  "target_reached": 0.0002,
+  "anatomy_defect": 0.0041
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w2_img_gi102_missionary_s51170001_wf2"
+}

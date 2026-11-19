@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, bed, neutral wall, and lighting from left side across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman in white lingerie and same man appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, while START IMAGE shows her on her back; pose differs immediately."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with face-to-face contact and pelvic grinding visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly formed bodies with no fused limbs, missing parts, or malformed genitalia."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0208,
+  "same_people": 0.3745,
+  "start_kept": 0.7595,
+  "target_reached": 0.0635,
+  "anatomy_defect": 0.0639
+ },
+ "finish": "stop",
+ "flags": [
+  "start_kept"
+ ],
+ "tag": "p15v2_b_w8_capjoy_gi102_missionary_s51170001_wf2"
+}

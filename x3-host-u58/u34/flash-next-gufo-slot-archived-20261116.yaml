@@ -1,0 +1,39 @@
+# Archived from /etc/evo-x3/llama-swap.yaml by U34 (2026-11-16). U21: Halogen won TTFT/prefill/cold load and has 4 slots.
+# Restore: paste under models:, add "flash-next-gufo" to routing.main members, restart llama-swap. Weights stay in /srv/models/flash-next.
+models:
+  "flash-next-gufo":
+    # U26 2026-11-15 ~5:30 PM CT: ROLLBACK slot. This was "flash-next" (Gufo) until Derrick t1774s6524 moved Forge to Halogen.
+    # To roll back: rename this back to "flash-next" and the Halogen slot above to "flash-next-halogen", restart llama-swap.
+    # Qwen3.8-Flash-Next UD-Q4_K_XL (4 shards, 111.3 GB) + shared Q8 MTP (2.79 GB)
+    # Official source: unsloth/Qwen3.8-Flash-Next-GGUF
+    # Official Gufo flags: `gufo serve llm` with --mtp-model and --speculative mtp
+    # (not llama.cpp --mtp / --flash-attn). Native context 262144.
+    # Weights 103.69 GiB + shared Q8 MTP 2.60 GiB. At --context 262144 --sessions 1 measured ~108-115 GiB of the
+    # 120 GiB GTT (KV/state ~27.5 KiB/token with MTP, ~6.9 GiB; LLMKube 108,240 MiB on one Strix Halo).
+    # --sessions 1.
+    # TUNE 2026-11-15 ~4 PM CT (Derrick t1760u): full native 262144 context (Gufo doc: ~27.5 KiB/token with MTP =
+    # (103.69 + 2.60 + 6.9 = ~113 GiB of the 120 GiB GTT). --cache-ram-bytes 2 GiB because the auto default
+    # (half of free RAM, up to 32 GiB) would overcommit UMA. --preserve-thinking on per Qwen/Unsloth for multi-turn
+    # coding. Sampling left on Gufo's model/thinking preset (= card: 1.0/0.95/20/0, presence 0). Effort medium default,
+    # per-request override (xhigh for planning). Vision: Flash-Next is multimodal via mmproj-BF16.gguf (not downloaded).
+    cmd: |
+      podman run --rm --name llama-swap-flash-next-gufo
+        --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133
+        gufo serve llm --host 127.0.0.1 --port 8081
+        --model /srv/models/flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+        --mtp-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+        --speculative mtp
+        --context 262144 --sessions 1
+        --cache-ram-bytes 2147483648
+        --preserve-thinking on
+        --served-model-name flash-next-gufo
+        --reasoning-effort medium
+        --log-progress
+    proxy: "http://127.0.0.1:8081"
+    ttl: 86400
+    concurrencyLimit: 1
+    checkEndpoint: "/health"
+
