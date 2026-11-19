@@ -28,9 +28,9 @@ Skills loaded by AlienPc pi (directory symlinks in `C:\Users\derek\.pi\agent\ski
 
 | Skill | Target | Status / Tracked at |
 |---|---|---|
-| `comfy-render`, `video-render`, `image-render`, `h3-hc-render` (execution parts) | `C:\AI\community\skills\<name>` | Keep linked. Tracked on `mono` under `alienpc/community/skills/<name>/`. |
+| `comfy-render`, `video-render`, `image-render`, `h3-hc-render` | `C:\AI\community\skills\<name>` | Keep linked (primary render + execution). Tracked on `mono` under `alienpc/community/skills/<name>/`. |
+| `h3-prompting`, `h3-max-ref2va-prompt`, `h3-parody-identity`, `alienpc-hardcore-i2v-director`, `alienpc-stills-pose-edit-prompting` | `C:\AI\community\skills\<name>` | Keep linked (backup writer lane when X3 Gufo is busy coding). Tracked on `mono` under `alienpc/community/skills/<name>/`. |
 | `ralph-loop` | `C:\AI\community\agent-shared\skills\ralph-loop` | Keep linked. Tracked on `mono` under `alienpc/community/agent-shared/skills/ralph-loop/SKILL.md`. |
 | `rea-video` | `C:\Users\derek\forge\tools\rea-video\skills\rea-video` | Keep linked. Upstream clone `https://github.com/JuneYaooo/rea-video` at `e385853` (cloned 2026-11-17 9:43 PM CT); only local change is an untracked `HANDOFF-forge.md`. Read upstream for the skill text. |
-| `h3-prompting`, `h3-max-ref2va-prompt`, `h3-parody-identity`, `alienpc-hardcore-i2v-director`, `alienpc-stills-pose-edit-prompting` | `C:\AI\community\skills\<name>` | Unlink on AlienPc (move links, keep targets). Prompts are authored on X3. |
 
 Other skill roots in `settings.json`: `C:/AI/community/agent-shared/skills` (branch `alienpc-community`) and `C:/AI/fleet-brain/20_skills/current` (the fleet brain, not this repo).
