@@ -1,0 +1,38 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "no",
+   "reason": "Frame 1 shows a bed with pillows; frames 2-8 show a rocky cave background."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same faces, hair, body types, and clothing throughout all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on bed, but frames 2-8 show her in cave, different pose and setting."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Frame 8 shows woman on hands and knees, man behind her, not missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals without fusion or missing parts."
+  }
+ },
+ "p_defect": {
+  "same_scene": 1.0,
+  "same_people": 0.0438,
+  "start_kept": 0.9986,
+  "target_reached": 0.5652,
+  "anatomy_defect": 0.0699
+ },
+ "finish": "stop",
+ "flags": [
+  "same_scene",
+  "start_kept",
+  "target_reached"
+ ],
+ "tag": "p15v2_a_w7_img_gi102_missionary_s51170001_wf2"
+}

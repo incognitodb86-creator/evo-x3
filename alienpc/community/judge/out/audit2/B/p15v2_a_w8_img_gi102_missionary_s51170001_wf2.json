@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent white rumpled bed and beige headboard across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical blonde woman and dark-haired man appear in all frames, matching START IMAGE features."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cuts or pose change."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with bodies in continuous intimate contact as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0004,
+  "same_people": 0.0,
+  "start_kept": 0.0185,
+  "target_reached": 0.0004,
+  "anatomy_defect": 0.0013
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w8_img_gi102_missionary_s51170001_wf2"
+}

@@ -1,0 +1,17 @@
+{
+    "started":  "2026-10-20T23:14:50",
+    "rc":  0,
+    "budget_cap_min":  360,
+    "budget_used_min":  0,
+    "log":  "",
+    "id":  "p7_r1_rank",
+    "ok":  true,
+    "kind":  "review",
+    "note":  "reused runs\\P6_RANKING.json from 2026-10-20 23:12 CT (overnight_chain pre-run; rubric p7-rubric-v1 (2026-10-20), judge qwen3vl_judge, 0/55 judge failures); no GPU time used",
+    "outputs":  [
+                    "C:\\AI\\community\\runs\\P6_RANKING.md",
+                    "C:\\AI\\community\\runs\\P6_RANKING.json"
+                ],
+    "finished":  "2026-10-20T23:14:50",
+    "wall_min":  0
+}

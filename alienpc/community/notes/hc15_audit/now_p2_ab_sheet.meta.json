@@ -1,0 +1,43 @@
+{
+ "sheet": "C:/AI/community/notes/hc15_audit/now_p2_ab_sheet.png",
+ "run_copy": "C:/AI/community/runs/ali163_hc15_bd002_s51150021/now_p2_ab_sheet.png",
+ "bytes": 2181978,
+ "sha": "d78bc971973ae6ee8276b78a4ab8789177b56454dba2db228a4fc3769a292f8c",
+ "size": [
+  2240,
+  854
+ ],
+ "tiles": 13,
+ "labels": [
+  "start still community/hc/BD002.jpg",
+  "ali163_hc15_bd002_s51150011 [before] frame 0 SSIM 0.915 PSNR 29.58  steps [8] attn comfy kitchen attention ref ['max'] lora ['none']",
+  "ali163_hc15_bd002_s51150021 [after] frame 0 SSIM 0.916 PSNR 29.64  steps [12] attn pytorch attention ref ['match'] lora ['h3_antiburn_universal_v1.safetensors@0.5']",
+  "ali163_hc15_bd002_s51150011 [before] t=0.50s frame 12",
+  "ali163_hc15_bd002_s51150011 [before] t=2.60s frame 62",
+  "ali163_hc15_bd002_s51150011 [before] t=5.00s frame 120",
+  "ali163_hc15_bd002_s51150011 [before] t=7.40s frame 177",
+  "ali163_hc15_bd002_s51150011 [before] t=9.60s frame 230",
+  "ali163_hc15_bd002_s51150021 [after] t=0.50s frame 12",
+  "ali163_hc15_bd002_s51150021 [after] t=2.60s frame 62",
+  "ali163_hc15_bd002_s51150021 [after] t=5.00s frame 120",
+  "ali163_hc15_bd002_s51150021 [after] t=7.40s frame 177",
+  "ali163_hc15_bd002_s51150021 [after] t=9.60s frame 230"
+ ],
+ "tile_std": [
+  64.39,
+  65.96,
+  66.18,
+  59.39,
+  59.47,
+  63.21,
+  54.68,
+  55.59,
+  60.44,
+  62.0,
+  66.57,
+  56.18,
+  55.43
+ ],
+ "generated": "2026-10-25 08:25:22",
+ "tool": "notes/hc15_anchor_fix_build.py --ab-sheet"
+}

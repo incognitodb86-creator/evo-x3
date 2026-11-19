@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, beige headboard, neutral wall, and lighting from left across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and brown-haired man appear with identical body types, hair, skin tone, and clothing across all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, while frame 2 already shows her supine, indicating a pose jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Final frame shows woman supine, man on top in missionary pose with clear genital contact and body fusion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly proportioned anatomy with no fused bodies, missing limbs, or malformed genitals visible."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0018,
+  "same_people": 0.0,
+  "start_kept": 0.881,
+  "target_reached": 0.0004,
+  "anatomy_defect": 0.0055
+ },
+ "finish": "stop",
+ "flags": [
+  "start_kept"
+ ],
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2"
+}

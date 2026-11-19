@@ -1,0 +1,49 @@
+{
+ "frames": [
+  10,
+  68
+ ],
+ "diffs": [
+  62.46,
+  13.04
+ ],
+ "per_frame": [
+  {
+   "frame": 10,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "Background changed from bed to rocky cave; lighting and textures differ significantly."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, heads, hands, and genitalia appear anatomically correct and connected without deformities."
+    }
+   },
+   "p_defect": {
+    "same_scene": 1.0,
+    "anatomy_defect": 0.0
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 68,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "Background changed from bed to cave. Walls, lighting, and furniture are entirely different."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionate. No melting, floating parts, or extra limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 1.0,
+    "anatomy_defect": 0.0002
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_a_w7_img_gi102_missionary_s51170001_wf2"
+}

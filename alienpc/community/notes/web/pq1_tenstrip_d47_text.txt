@@ -1,0 +1,26 @@
+If I set it to, for example, 10 or 12, will I get worse, better, or the same result? And does this affect the sound quality in any way?
+
+ See translation EllipsesMark Sep 12 <div
+
+---- block ----
+
+If I set it to, for example, 10 or 12, will I get worse, better, or the same result? And does this affect the sound quality in any way?
+
+ 
+ What have you noticed? What happens when you set it to 10 or 12? 
+
+ See translation Rkss Sep 12 <div
+
+---- block ----
+
+At worst, it overcooks your video; otherwise, it probably does nothing
+
+ See translation TenStrip Owner Sep 13 <div
+
+---- block ----
+
+Depends on sampler. 9 should be the maximum ever needed and thats on LCM/beta. Some samplers only clean up fast motion at 6-8 steps, but you will get cooked contrast. The MiniMax H3 Latent Contrast node before video VAE decode set on 0.8-0.9 removes that look with no impact. https://github.com/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler 
+
+ See translation 👍 1 1 + Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ <path d="M29 25H3a1 1 0 1 0 0 2h26a1 1 0 1 0 0-2Z" fill="current

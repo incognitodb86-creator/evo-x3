@@ -1,0 +1,578 @@
+{
+ "rows": [
+  {
+   "run": "ali163_hc15_bd002_s51150001",
+   "prompt_id": "2f4e38f5-ad41-42bf-be97-d3c9352fedb1",
+   "frames": 362,
+   "wall_secs": 757.4,
+   "finished": "2026-10-24 16:59 CT",
+   "segments": null,
+   "sampling_secs": null,
+   "log_sum": null,
+   "overhead_secs": null,
+   "segment_shapes": null,
+   "log": null
+  },
+  {
+   "run": "ali163_hc15_bd006_s51150002",
+   "prompt_id": "f3d123b3-2122-4673-9728-283fdc5b2463",
+   "frames": 362,
+   "wall_secs": 752.5,
+   "finished": "2026-10-24 17:13 CT",
+   "segments": null,
+   "sampling_secs": null,
+   "log_sum": null,
+   "overhead_secs": null,
+   "segment_shapes": null,
+   "log": null
+  },
+  {
+   "run": "ali163_hc15_bd013_s51150003",
+   "prompt_id": "89564103-d35c-4162-b598-68b8d0f10e53",
+   "frames": 362,
+   "wall_secs": 752.4,
+   "finished": "2026-10-24 17:26 CT",
+   "segments": null,
+   "sampling_secs": null,
+   "log_sum": null,
+   "overhead_secs": null,
+   "segment_shapes": null,
+   "log": null
+  },
+  {
+   "run": "ali163_hc15_gi046_s51150004",
+   "prompt_id": "92e70d01-9dcb-4a35-9914-14a8bf20007f",
+   "frames": 362,
+   "wall_secs": 777.1,
+   "finished": "2026-10-24 17:40 CT",
+   "segments": null,
+   "sampling_secs": null,
+   "log_sum": null,
+   "overhead_secs": null,
+   "segment_shapes": null,
+   "log": null
+  },
+  {
+   "run": "ali163_hc15_gi063_s51150005",
+   "prompt_id": "18e51215-880d-427b-af75-cb08d48be67f",
+   "frames": 362,
+   "wall_secs": 787.5,
+   "finished": "2026-10-24 17:54 CT",
+   "segments": null,
+   "sampling_secs": null,
+   "log_sum": null,
+   "overhead_secs": null,
+   "segment_shapes": null,
+   "log": null
+  },
+  {
+   "run": "ali163_hc15_gi072_s51150006",
+   "prompt_id": "1cdba919-cd0e-4677-afab-bf2a9b435f5a",
+   "frames": 362,
+   "wall_secs": 802.5,
+   "finished": "2026-10-24 18:08 CT",
+   "segments": null,
+   "sampling_secs": null,
+   "log_sum": null,
+   "overhead_secs": null,
+   "segment_shapes": null,
+   "log": null
+  }
+ ],
+ "prompt_log_files": [],
+ "prompt_logs_present": false,
+ "executed_lines": [
+  {
+   "file": "comfyui.log",
+   "at": "2026-06-27 16:28:09.915",
+   "elapsed": "0"
+  },
+  {
+   "file": "comfyui.log",
+   "at": "2026-06-27 16:28:32.261",
+   "elapsed": "0"
+  },
+  {
+   "file": "comfyui.prev.log",
+   "at": "2026-06-27 16:21:33.911",
+   "elapsed": "28"
+  },
+  {
+   "file": "comfyui.prev.log",
+   "at": "2026-06-27 16:22:22.083",
+   "elapsed": "47"
+  },
+  {
+   "file": "comfyui.prev2.log",
+   "at": "2026-06-27 15:59:00.596",
+   "elapsed": "85"
+  },
+  {
+   "file": "comfyui.prev2.log",
+   "at": "2026-06-27 16:00:23.641",
+   "elapsed": "64"
+  },
+  {
+   "file": "comfyui.prev2.log",
+   "at": "2026-06-27 16:06:28.854",
+   "elapsed": "110"
+  },
+  {
+   "file": "comfyui.prev2.log",
+   "at": "2026-06-27 16:07:30.871",
+   "elapsed": "61"
+  },
+  {
+   "file": "comfyui_10002.log",
+   "at": "2026-10-20 18:31:24.329",
+   "elapsed": "00:14:08"
+  },
+  {
+   "file": "comfyui_10002.log",
+   "at": "2026-10-20 18:45:13.935",
+   "elapsed": "00:13:45"
+  },
+  {
+   "file": "comfyui_10002.log",
+   "at": "2026-10-20 18:58:59.928",
+   "elapsed": "00:13:44"
+  },
+  {
+   "file": "comfyui_10002.prev.log",
+   "at": "2026-10-20 17:44:10.868",
+   "elapsed": "00:13:56"
+  },
+  {
+   "file": "comfyui_10002.prev.log",
+   "at": "2026-10-20 17:57:42.805",
+   "elapsed": "00:13:31"
+  },
+  {
+   "file": "comfyui_10002.prev.log",
+   "at": "2026-10-20 18:11:14.334",
+   "elapsed": "00:13:30"
+  },
+  {
+   "file": "comfyui_10002.prev2.log",
+   "at": "2026-10-20 16:55:59.353",
+   "elapsed": "00:14:01"
+  },
+  {
+   "file": "comfyui_10002.prev2.log",
+   "at": "2026-10-20 17:09:45.457",
+   "elapsed": "00:13:45"
+  },
+  {
+   "file": "comfyui_10002.prev2.log",
+   "at": "2026-10-20 17:23:33.244",
+   "elapsed": "00:13:46"
+  },
+  {
+   "file": "comfyui_10004.prev.log",
+   "at": "2026-10-24 18:08:12.679",
+   "elapsed": "00:13:21"
+  },
+  {
+   "file": "comfyui_10004.prev2.log",
+   "at": "2026-10-24 17:54:11.206",
+   "elapsed": "00:13:02"
+  },
+  {
+   "file": "comfyui_8188.log",
+   "at": "2026-09-30 22:13:05.179",
+   "elapsed": "31"
+  },
+  {
+   "file": "comfyui_8188.prev.log",
+   "at": "2026-09-30 22:07:40.008",
+   "elapsed": "0"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:11:30.940",
+   "elapsed": "157"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:19:22.927",
+   "elapsed": "140"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:21:07.481",
+   "elapsed": "8"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:25:02.620",
+   "elapsed": "140"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:26:46.579",
+   "elapsed": "8"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:30:40.105",
+   "elapsed": "138"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:32:23.888",
+   "elapsed": "8"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:36:19.969",
+   "elapsed": "138"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:38:04.411",
+   "elapsed": "8"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:41:59.164",
+   "elapsed": "140"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:43:45.194",
+   "elapsed": "9"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:47:39.692",
+   "elapsed": "141"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 00:49:24.836",
+   "elapsed": "9"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:11:22.595",
+   "elapsed": "43"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:13:42.479",
+   "elapsed": "43"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:16:01.440",
+   "elapsed": "43"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:18:20.982",
+   "elapsed": "43"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:20:42.635",
+   "elapsed": "46"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:23:08.546",
+   "elapsed": "46"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:25:34.463",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:26:19.739",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:28:46.019",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:29:31.887",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:31:57.730",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:32:48.031",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:35:18.430",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:40:38.741",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:42:59.625",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:43:41.579",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:46:12.253",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:47:01.589",
+   "elapsed": "37"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:49:23.711",
+   "elapsed": "136"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:50:13.710",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:52:38.473",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:53:20.896",
+   "elapsed": "35"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:55:41.875",
+   "elapsed": "134"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:56:29.458",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:58:50.039",
+   "elapsed": "133"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 03:59:31.426",
+   "elapsed": "35"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:01:51.540",
+   "elapsed": "133"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:02:32.201",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:05:03.854",
+   "elapsed": "135"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:05:49.393",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:08:12.858",
+   "elapsed": "136"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:08:59.094",
+   "elapsed": "33"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:12:18.152",
+   "elapsed": "193"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 04:12:59.601",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:00:18.659",
+   "elapsed": "44"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:01:05.172",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:01:51.426",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:02:33.744",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:03:18.663",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:04:09.144",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:04:59.402",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:05:50.300",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:06:36.505",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:07:22.903",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:08:04.650",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:08:50.029",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:09:40.587",
+   "elapsed": "38"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:10:23.275",
+   "elapsed": "35"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:11:04.505",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:11:46.853",
+   "elapsed": "35"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:12:32.907",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:13:14.861",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:13:56.131",
+   "elapsed": "33"
+  },
+  {
+   "file": "comfyui_8189.log",
+   "at": "2026-10-16 05:14:36.885",
+   "elapsed": "34"
+  },
+  {
+   "file": "comfyui_8189.prev.log",
+   "at": "2026-10-15 12:37:52.085",
+   "elapsed": "27"
+  },
+  {
+   "file": "comfyui_8189.prev.log",
+   "at": "2026-10-15 12:41:35.181",
+   "elapsed": "104"
+  },
+  {
+   "file": "comfyui_8189.prev.log",
+   "at": "2026-10-15 15:23:53.395",
+   "elapsed": "8"
+  },
+  {
+   "file": "comfyui_8189.prev.log",
+   "at": "2026-10-15 15:25:06.964",
+   "elapsed": "29"
+  },
+  {
+   "file": "comfyui_8189.prev.log",
+   "at": "2026-10-15 15:26:38.307",
+   "elapsed": "51"
+  },
+  {
+   "file": "comfyui_8189.prev.log",
+   "at": "2026-10-15 15:27:16.252",
+   "elapsed": "0"
+  }
+ ],
+ "vram_lines": [
+  {
+   "file": "comfyui_10004.log",
+   "line": "[2026-10-24 18:15:05.459] Total VRAM 16275 MB, total RAM 65235 MB"
+  },
+  {
+   "file": "comfyui_10004.prev.log",
+   "line": "[2026-10-24 17:54:36.503] Total VRAM 16275 MB, total RAM 65235 MB"
+  },
+  {
+   "file": "comfyui_10004.prev2.log",
+   "line": "[2026-10-24 17:40:48.026] Total VRAM 16275 MB, total RAM 65235 MB"
+  }
+ ],
+ "per_clip_secs": {
+  "ali163_hc15_bd002_s51150001": 757.4,
+  "ali163_hc15_bd006_s51150002": 752.5,
+  "ali163_hc15_bd013_s51150003": 752.4,
+  "ali163_hc15_gi046_s51150004": 777.1,
+  "ali163_hc15_gi063_s51150005": 787.5,
+  "ali163_hc15_gi072_s51150006": 802.5
+ }
+}

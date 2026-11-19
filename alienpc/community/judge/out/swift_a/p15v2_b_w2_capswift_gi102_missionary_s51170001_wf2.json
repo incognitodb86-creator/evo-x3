@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_b_w2_capswift_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, white sheets, and lighting remain consistent throughout all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde woman in the lace bra and the nude man with dark curly hair are present in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the start image pose, framing, and clothing perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the man on top of the woman in missionary position with visible contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0288,
+  "same_people": 0.0479,
+  "start_kept": 0.1,
+  "target_reached": 0.0055,
+  "anatomy_defect": 0.2084
+ },
+ "flags": []
+}

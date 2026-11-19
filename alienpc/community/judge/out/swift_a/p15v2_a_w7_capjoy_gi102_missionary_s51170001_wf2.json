@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.1,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, beige headboard, and white sheets are consistent across all frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "In frame 1, the man is shirtless; in subsequent frames he wears a black crop top, an inconsistency."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows a missionary pose, not the all-fours pose from the start image."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 clearly depicts the man on top of the woman in a missionary position with contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0436,
+  "same_people": 0.2715,
+  "start_kept": 0.8541,
+  "target_reached": 0.0028,
+  "anatomy_defect": 0.6205
+ },
+ "flags": [
+  "same_people",
+  "start_kept"
+ ]
+}

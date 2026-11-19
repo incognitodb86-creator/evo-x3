@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background consistently shows same beige headboard and rumpled white sheets across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical blonde woman and muscular man appear in all frames with matching features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or pose changes."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman on back, man on top in missionary position with visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All bodies show correct anatomy, no fused limbs, malformed genitals, or blob-like shapes."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0111,
+  "target_reached": 0.0013,
+  "anatomy_defect": 0.0002
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w2_img_gi102_missionary_s51170001_wf2"
+}

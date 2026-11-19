@@ -1,0 +1,460 @@
+{
+ "asks": {
+  "A": {
+   "provenance": "notes/scenes/GI046.md 'prompt_sent' (ask A, 2026-10-25 04:34 CT): 'Use the read tool once on <path>.' replaced by 'Look at the attached image.'; the rest is byte-identical.",
+   "sha256": "eb742e931f0e3b34383e5247dc46c6eaa1d3c9b2502156585adf7113831a2a04",
+   "text": "Look at the attached image. Then list every figure in frame - species/race, build, skin, hair colour, wardrobe, pose, position - then the room, the props and the light. Quote nothing you cannot see. No prose before it."
+  },
+  "B": {
+   "provenance": "notes/scenes/GI072.md 'prompt_sent' (ask B, 2026-10-25 04:38 CT): same first-sentence substitution; the rest is byte-identical.",
+   "sha256": "50053e40e47188ca77d59b5333fc7044d241757c31e993f234d579a3a46adf1e",
+   "text": "Look at the attached image. Give only the non-sexual identity and composition record: for EACH figure in frame state species as visible, build, skin tone, hair colour, the wardrobe items visible, and where it sits in the frame; then the room, the props and the light. Do not describe any sexual act, nudity, genitals, nipple/areola, erection, or body position during a sexual act. No prose before it."
+  },
+  "C": {
+   "provenance": "this pass (CARD-VL2, 2026-10-26): the regions the 2025 cards left silent. needs_derrick.md row 28 (Derrick 2026-10-26 7:49 AM CT on the GI046 render) names anatomy the GI046 card never described; the 2025 GI063 card's own rows name the head and the groin it did not speak of. Ask C asks for those rows by name and keeps the 2025 rule 'if a region is not visible write not visible'; the transport and the no-thinking options are unchanged.",
+   "sha256": "f2767575b29d97e26bd791f905bdd68ba5813d1346a9797ba8f148350210c08e",
+   "text": "Look at the attached image. Caption this start still. List, in your own words, exactly what is visible: (1) every figure - apparent age range, skin, hair, build, wardrobe, pose, position in frame, and whether the head is in frame. (2) For EACH figure, say in plain words what is visible at the head and face, at the chest, and at the groin and pelvic region, including any pubic, genital, erect, covering, clothing, shading or shadow detail visible there. (3) The room: walls, floor, furniture, equipment, screens, and the direction and colour of the light. (4) Every object, screen, television, restraint, or prop, and what it shows. (5) The size and height relation between the figures, and what each figure's hands are doing and where they touch. If a region is not visible, out of frame, hidden by an angle, an object, a crop, blur, shadow, or resolution, write 'not visible' for that region. Do not name real people, do not guess, do not invent, do not judge quality, do not refuse, do not omit a figure, do not skip a region that is visible, and write no prose outside the caption."
+  }
+ },
+ "gates": [
+  {
+   "ask_id": "A",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "kind": "pre-request",
+   "scene": "GI063",
+   "ts": "2026-10-26T09:25:56-05:00"
+  },
+  {
+   "ask_id": "B",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "kind": "pre-request",
+   "scene": "GI063",
+   "ts": "2026-10-26T09:26:12-05:00"
+  },
+  {
+   "ask_id": "C",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "kind": "pre-request",
+   "scene": "GI063",
+   "ts": "2026-10-26T09:26:18-05:00"
+  },
+  {
+   "ask_id": "A",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "kind": "pre-request",
+   "scene": "GI046",
+   "ts": "2026-10-26T09:26:25-05:00"
+  },
+  {
+   "ask_id": "B",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "kind": "pre-request",
+   "scene": "GI046",
+   "ts": "2026-10-26T09:26:31-05:00"
+  },
+  {
+   "ask_id": "C",
+   "gpu_guard_rc": 0,
+   "gpu_guard_text": "IDLE",
+   "kind": "pre-request",
+   "scene": "GI046",
+   "ts": "2026-10-26T09:26:37-05:00"
+  }
+ ],
+ "goal": "the GI063 (robot) and GI046 (orc) scene cards rebuilt from the uncensored captions only, the vision model redoning them - Derrick 2026-10-26 7:08 AM CT 'Yes, have Forge rebuild the GI063 card from the uncensored captions only' + 8:23 AM CT 'yea it needs to have the vision model redo them'; item CARD-VL2, Derrick 2026-10-26 7:08 AM CT + 8:23 AM CT",
+ "model_evidence": {
+  "id": "vl_judge",
+  "source": "C:/AI/director/config/llama-swap.yaml:74-86 read 2026-10-25",
+  "table": [
+   {
+    "aliases": [
+     "vision_9b",
+     "darkroast",
+     "qwen3.5-9b-dark-roast-q8"
+    ],
+    "evidence": "cmd --mmproj C:\\AI\\vlm\\models\\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.mmproj-Q8_0.gguf",
+    "id": "vl_judge",
+    "kinds": [
+     "llama.cpp-mmproj"
+    ]
+   }
+  ],
+  "uncensored_proof": "the model file named by --mmproj/cmd carries 'Uncensored'"
+ },
+ "role": "objective record only. no score, no rank, no keep, no judgement of any caption or still. KEEP is Derrick's alone. every read is of a START STILL, never of a rendered clip.",
+ "rows": [
+  {
+   "arm": "card-ask-A;no-thinking",
+   "ask_id": "A",
+   "ask_sha256": "eb742e931f0e3b34383e5247dc46c6eaa1d3c9b2502156585adf7113831a2a04",
+   "asked_at_local": "2026-10-26 09:26:11 CT",
+   "caption": "Figure 1 (Human Female):\n- Species/race: Human, appears Caucasian.\n- Build: Slim, toned.\n- Skin: Fair, glistening with sweat.\n- Hair colour: Long, wavy blonde.\n- Wardrobe: Pink lace lingerie set (bra and panties), black fishnet stockings on right leg only, clear high-heeled sandals with straps.\n- Pose: Prone on a black padded bench, upper body propped on forearms, head turned toward camera, mouth slightly open, drool visible from corner of lip.\n- Position: Left side of frame, chained at wrists to bench edge and at ankles to bench leg.\n\nFigure 2 (Robot):\n- Species/race: Anthropomorphic metallic robot.\n- Build: Tall, muscular, articulated limbs with visible joints and segments.\n- Skin: Polished silver metal plating with darker mechanical underlayers.\n- Hair colour: None (head is a smooth metallic dome with sensor-like details).\n- Wardrobe: Black tight-fitting shorts covering pelvic area; otherwise bare metal.\n- Pose: Bent at waist, leaning over the woman’s hips, right hand gripping her right buttock, left arm extended downward with a cylindrical metallic appendage near her lower back/hip.\n- Position: Right side of frame, standing on floor behind bench.\n\nRoom:\n- Dark interior, likely a studio or interrogation-style chamber.\n- Walls and floor are matte black or very dark gray.\n- Minimal background detail; left side shows indistinct equipment or furniture silhouettes.\n\nProps:\n- Black padded bench/table with metal frame.\n- Heavy silver chains: one looped around each wrist, attached to bench edge; another chain from right ankle to bench leg.\n- Large flat-screen TV mounted on back wall, displaying a blurred image of a similar scene (robot and woman).\n\nLight:\n- Strong directional lighting from front-left, highlighting the woman’s skin, hair, and the metallic surfaces of the robot.\n- Soft shadows cast under the bench and behind the robot.\n- TV screen emits a cool blue glow, contributing ambient backlighting.",
+   "caption_chars": 1931,
+   "caption_words": 305,
+   "comfy_copy_sha_match": true,
+   "comfy_input_copy": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "command": "python C:/AI/community/notes/top_card_vl_build.py --run --tag 2 --model vl_judge --scenes GI063,GI046 --asks A,B,C --max-tokens 3000 --no-thinking",
+   "completion_tokens": 448,
+   "decline_markers": [],
+   "end_iso": "2026-10-26T09:26:11-05:00",
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "error": "",
+   "finish_reason": "stop",
+   "guard_rc": 0,
+   "guard_text": "IDLE",
+   "http_status": 200,
+   "image_bytes": 531083,
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "image_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI063.jpg",
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "max_tokens": 3000,
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "model_id": "vl_judge",
+   "prompt_sha": "eb742e931f0e3b34383e5247dc46c6eaa1d3c9b2502156585adf7113831a2a04",
+   "raw_body_excerpt": "",
+   "raw_path": "C:/AI/community/notes/scenes/raw/GI063_vl2_A.txt",
+   "raw_sha256": "499d7cbed9bda554695cd0fca63b2025538563917ab3ec620833ea3a92a2fe58",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "request_options": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "reasoning_effort": "none"
+   },
+   "scene": "GI063",
+   "start_iso": "2026-10-26T09:25:56-05:00",
+   "still_id": "GI063",
+   "temperature": 0.0,
+   "usage": {
+    "completion_tokens": 448,
+    "prompt_tokens": 1857,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "total_tokens": 2305
+   },
+   "wall_s": 14.89
+  },
+  {
+   "arm": "card-ask-B;no-thinking",
+   "ask_id": "B",
+   "ask_sha256": "50053e40e47188ca77d59b5333fc7044d241757c31e993f234d579a3a46adf1e",
+   "asked_at_local": "2026-10-26 09:26:17 CT",
+   "caption": "Figure 1:\n- Species: Human\n- Build: Slim, athletic\n- Skin tone: Fair\n- Hair colour: Blonde\n- Wardrobe items visible: Pink lace lingerie set, silver metallic harness across torso, black fishnet stockings on right leg, clear high-heeled sandals with ankle straps\n- Position in frame: Lying prone on a black padded examination table, left side of frame, head turned toward viewer\n\nFigure 2:\n- Species: Robot\n- Build: Tall, articulated mechanical frame\n- Skin tone: N/A (metallic silver finish)\n- Hair colour: N/A\n- Wardrobe items visible: Black shorts covering lower torso and upper thighs\n- Position in frame: Standing to the right, leaning forward over Figure 1, right hand placed on Figure 1’s hip\n\nRoom:\n- Dark interior space resembling a clinical or laboratory setting\n- Walls and floor are dark gray or black\n- Minimal background furniture; a large screen mounted on the wall displays a blurred image of a similar scene\n\nProps:\n- Black padded examination table with metal frame\n- Heavy silver chains attached to Figure 1’s wrists and ankles, looped through table fixtures\n- Large flat-screen monitor on the back wall\n\nLight:\n- Dramatic, directional lighting from above and slightly in front\n- Highlights skin sheen and metallic surfaces\n- Background is dimly lit, creating contrast with foreground subjects",
+   "caption_chars": 1309,
+   "caption_words": 215,
+   "comfy_copy_sha_match": true,
+   "comfy_input_copy": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "command": "python C:/AI/community/notes/top_card_vl_build.py --run --tag 2 --model vl_judge --scenes GI063,GI046 --asks A,B,C --max-tokens 3000 --no-thinking",
+   "completion_tokens": 294,
+   "decline_markers": [],
+   "end_iso": "2026-10-26T09:26:17-05:00",
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "error": "",
+   "finish_reason": "stop",
+   "guard_rc": 0,
+   "guard_text": "IDLE",
+   "http_status": 200,
+   "image_bytes": 531083,
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "image_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI063.jpg",
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "max_tokens": 3000,
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "model_id": "vl_judge",
+   "prompt_sha": "50053e40e47188ca77d59b5333fc7044d241757c31e993f234d579a3a46adf1e",
+   "raw_body_excerpt": "",
+   "raw_path": "C:/AI/community/notes/scenes/raw/GI063_vl2_B.txt",
+   "raw_sha256": "3edf7bdae7829e8435dc7ac1045bd51fb77bd706120b525939ecadbbdbb997f6",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "request_options": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "reasoning_effort": "none"
+   },
+   "scene": "GI063",
+   "start_iso": "2026-10-26T09:26:12-05:00",
+   "still_id": "GI063",
+   "temperature": 0.0,
+   "usage": {
+    "completion_tokens": 294,
+    "prompt_tokens": 1895,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "total_tokens": 2189
+   },
+   "wall_s": 4.53
+  },
+  {
+   "arm": "card-ask-C;no-thinking",
+   "ask_id": "C",
+   "ask_sha256": "f2767575b29d97e26bd791f905bdd68ba5813d1346a9797ba8f148350210c08e",
+   "asked_at_local": "2026-10-26 09:26:24 CT",
+   "caption": "(1) Figure 1: Young adult female, fair skin, long wavy blonde hair, slender build. Lying prone on a black padded bench, head turned left toward camera, mouth open, drool visible. Wearing pink lace lingerie with silver metallic straps across torso and hips, black fishnet stockings, clear high-heeled sandals. Hands extended forward on bench, wrists bound by thick silver cuffs connected by chains to bench frame. Legs bent at knees, feet planted on floor, ankles also cuffed with matching silver restraints.\n\n(2) Head and face: Blonde hair cascades over left shoulder; eyes wide, pupils dilated, gazing upward-left. Lips parted, saliva dripping from lower lip onto chin. Skin appears glossy, possibly from sweat or lighting. Chest: Pink lace bralette with thin straps, silver metallic harness-style straps crisscrossing ribcage and waist. Groin and pelvic region: Minimal coverage—pink lace panties barely visible beneath harness straps; pubic area partially shadowed but discernible; no erect genitalia visible; skin tone matches torso, slightly glistening.\n\n(3) Room: Dark industrial-style space with matte black walls and concrete-like floor. Single large flat-screen TV mounted on back wall, angled slightly left. Lighting is directional, cool-toned, originating from upper left, casting strong highlights on skin and metal surfaces, deep shadows under bench and behind robot.\n\n(4) Objects and screens: Black padded examination-style bench with metal frame. Heavy silver wrist and ankle cuffs linked by chains to bench legs. Large wall-mounted screen displaying a blurred, mirrored scene of the same setup: a similar robot interacting with a figure in similar pose and attire. No other props or furniture clearly visible beyond bench and screen.\n\n(5) Size and height relation: Female figure is shorter than the robot, lying horizontally while robot stands upright and leans forward over her. Robot’s torso extends well above her head. Hands: Her hands rest flat on bench surface, fingers slightly spread, wrists secured. Robot’s right hand grips her right hip/thigh area; left arm extends downward, forearm positioned near her lower back/glute region, fingers curled as if stabilizing or pressing. No other contact points visible.",
+   "caption_chars": 2234,
+   "caption_words": 335,
+   "comfy_copy_sha_match": true,
+   "comfy_input_copy": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI063.jpg",
+   "command": "python C:/AI/community/notes/top_card_vl_build.py --run --tag 2 --model vl_judge --scenes GI063,GI046 --asks A,B,C --max-tokens 3000 --no-thinking",
+   "completion_tokens": 457,
+   "decline_markers": [],
+   "end_iso": "2026-10-26T09:26:24-05:00",
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "error": "",
+   "finish_reason": "stop",
+   "guard_rc": 0,
+   "guard_text": "IDLE",
+   "http_status": 200,
+   "image_bytes": 531083,
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "image_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI063.jpg",
+   "image_sha256": "e8fdb85a6f2a2cce82fbc1a3a32aaa71c1d732be87efae3e7f16a1c5bd977295",
+   "max_tokens": 3000,
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "model_id": "vl_judge",
+   "prompt_sha": "f2767575b29d97e26bd791f905bdd68ba5813d1346a9797ba8f148350210c08e",
+   "raw_body_excerpt": "",
+   "raw_path": "C:/AI/community/notes/scenes/raw/GI063_vl2_C.txt",
+   "raw_sha256": "b05c0593fed01f451b329dc9a6a44b4b09bdf43f050aa581507be30a29f79d0d",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "request_options": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "reasoning_effort": "none"
+   },
+   "scene": "GI063",
+   "start_iso": "2026-10-26T09:26:18-05:00",
+   "still_id": "GI063",
+   "temperature": 0.0,
+   "usage": {
+    "completion_tokens": 457,
+    "prompt_tokens": 2067,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "total_tokens": 2524
+   },
+   "wall_s": 6.52
+  },
+  {
+   "arm": "card-ask-A;no-thinking",
+   "ask_id": "A",
+   "ask_sha256": "eb742e931f0e3b34383e5247dc46c6eaa1d3c9b2502156585adf7113831a2a04",
+   "asked_at_local": "2026-10-26 09:26:30 CT",
+   "caption": "Figure 1:\n- Species/race: Human female\n- Build: Slim, toned\n- Skin: Light, glossy\n- Hair colour: Blonde, long and wavy\n- Wardrobe: Silver chain-link bikini top and bottom, matching choker necklace, tiara\n- Pose: Lying prone on stomach, upper body propped on forearms, hips lifted, legs slightly bent\n- Position: Center-left foreground, facing camera\n\nFigure 2:\n- Species/race: Green-skinned humanoid (Hulk-like)\n- Build: Extremely muscular, large hands and feet\n- Skin: Green, textured with visible muscle definition\n- Hair colour: Not visible (head mostly out of frame)\n- Wardrobe: Black athletic shorts\n- Pose: Kneeling behind Figure 1, leaning forward with both hands placed on Figure 1’s lower back and thigh\n- Position: Upper-right background, partially cropped at top and right edges\n\nRoom:\n- Interior living space with dark wood flooring\n- Large beige shag rug covering most of the floor in foreground\n- Beige upholstered sofa visible in background, slightly out of focus\n\nProps:\n- Silver chain-link bikini and choker\n- Sparkling tiara\n- Beige shag rug\n- Dark wood floor\n- Beige sofa\n\nLight:\n- Soft, diffused lighting from front-left, creating gentle highlights on skin and metallic jewelry\n- Minimal shadows, suggesting indoor ambient or studio-style lighting\n- No direct sunlight or harsh artificial sources visible",
+   "caption_chars": 1324,
+   "caption_words": 209,
+   "comfy_copy_sha_match": true,
+   "comfy_input_copy": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI046.jpg",
+   "command": "python C:/AI/community/notes/top_card_vl_build.py --run --tag 2 --model vl_judge --scenes GI063,GI046 --asks A,B,C --max-tokens 3000 --no-thinking",
+   "completion_tokens": 318,
+   "decline_markers": [],
+   "end_iso": "2026-10-26T09:26:30-05:00",
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "error": "",
+   "finish_reason": "stop",
+   "guard_rc": 0,
+   "guard_text": "IDLE",
+   "http_status": 200,
+   "image_bytes": 567489,
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "image_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI046.jpg",
+   "image_sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+   "max_tokens": 3000,
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "model_id": "vl_judge",
+   "prompt_sha": "eb742e931f0e3b34383e5247dc46c6eaa1d3c9b2502156585adf7113831a2a04",
+   "raw_body_excerpt": "",
+   "raw_path": "C:/AI/community/notes/scenes/raw/GI046_vl2_A.txt",
+   "raw_sha256": "14f54ca2387d6939ebe7d014a1d214368a3d39fa405c267eaf06a19e4b096e64",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "request_options": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "reasoning_effort": "none"
+   },
+   "scene": "GI046",
+   "start_iso": "2026-10-26T09:26:25-05:00",
+   "still_id": "GI046",
+   "temperature": 0.0,
+   "usage": {
+    "completion_tokens": 318,
+    "prompt_tokens": 1857,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "total_tokens": 2175
+   },
+   "wall_s": 4.79
+  },
+  {
+   "arm": "card-ask-B;no-thinking",
+   "ask_id": "B",
+   "ask_sha256": "50053e40e47188ca77d59b5333fc7044d241757c31e993f234d579a3a46adf1e",
+   "asked_at_local": "2026-10-26 09:26:36 CT",
+   "caption": "Figure 1:\n- Species: Human\n- Build: Curvaceous\n- Skin tone: Light\n- Hair colour: Blonde\n- Wardrobe items visible: Silver chain-link bikini top and matching bottom; silver tiara; silver choker necklace\n- Position in frame: Lying prone on a beige shag rug, left side of frame, facing slightly right toward the camera\n\nFigure 2:\n- Species: Humanoid (green-skinned, muscular)\n- Build: Extremely muscular, broad-shouldered\n- Skin tone: Green\n- Hair colour: Not visible\n- Wardrobe items visible: Black athletic shorts\n- Position in frame: Kneeling behind Figure 1, right side of frame, torso and arms visible, hands placed on Figure 1’s back and thigh\n\nRoom:\n- Interior living space with dark wood flooring\n- Beige shag rug covering central floor area\n- Tan upholstered sofa visible in background, out of focus\n\nProps:\n- Beige shag rug\n- Silver chain-link bikini set\n- Silver tiara\n- Silver choker necklace\n- Black athletic shorts\n\nLight:\n- Soft, diffused indoor lighting\n- Highlights skin and metallic jewelry with gentle sheen\n- No harsh shadows; even illumination across scene",
+   "caption_chars": 1073,
+   "caption_words": 176,
+   "comfy_copy_sha_match": true,
+   "comfy_input_copy": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI046.jpg",
+   "command": "python C:/AI/community/notes/top_card_vl_build.py --run --tag 2 --model vl_judge --scenes GI063,GI046 --asks A,B,C --max-tokens 3000 --no-thinking",
+   "completion_tokens": 267,
+   "decline_markers": [],
+   "end_iso": "2026-10-26T09:26:36-05:00",
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "error": "",
+   "finish_reason": "stop",
+   "guard_rc": 0,
+   "guard_text": "IDLE",
+   "http_status": 200,
+   "image_bytes": 567489,
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "image_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI046.jpg",
+   "image_sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+   "max_tokens": 3000,
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "model_id": "vl_judge",
+   "prompt_sha": "50053e40e47188ca77d59b5333fc7044d241757c31e993f234d579a3a46adf1e",
+   "raw_body_excerpt": "",
+   "raw_path": "C:/AI/community/notes/scenes/raw/GI046_vl2_B.txt",
+   "raw_sha256": "81a4f81dc7ff937466a9129a8b92317b049d84da6930e16f5643e0c95264af2b",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "request_options": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "reasoning_effort": "none"
+   },
+   "scene": "GI046",
+   "start_iso": "2026-10-26T09:26:31-05:00",
+   "still_id": "GI046",
+   "temperature": 0.0,
+   "usage": {
+    "completion_tokens": 267,
+    "prompt_tokens": 1895,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "total_tokens": 2162
+   },
+   "wall_s": 4.2
+  },
+  {
+   "arm": "card-ask-C;no-thinking",
+   "ask_id": "C",
+   "ask_sha256": "f2767575b29d97e26bd791f905bdd68ba5813d1346a9797ba8f148350210c08e",
+   "asked_at_local": "2026-10-26 09:26:44 CT",
+   "caption": "(1) Figures:\n- Female figure: apparent age 20–30, fair skin, long wavy blonde hair, slender build. She is lying prone on a shag rug, torso and hips arched, head turned to face the camera. Her head is fully in frame.\n- Male figure: apparent age 20–40, green skin, very muscular build. He is kneeling behind her, torso bent forward, arms extended toward her back and thigh. His head is out of frame; only his torso, arms, legs, and hands are visible.\n\n(2) Per figure, visible regions:\n- Female:\n  - Head and face: clear view of face; blue eyes, glossy lips, neutral expression. No headwear other than a thin jeweled tiara on her hairline.\n  - Chest: covered by a delicate chain-link bikini top with small jeweled accents; the chains drape over the breasts and around the neck.\n  - Groin and pelvic region: hips and buttocks are exposed; a thin chain-link strap runs from the bikini top across the lower back/hip area. The pubic area is not visible due to the prone angle and framing; no genital detail is shown.\n- Male:\n  - Head and face: not visible (out of frame).\n  - Chest: upper chest and abdomen visible; green skin, defined musculature. He wears dark gray athletic shorts.\n  - Groin and pelvic region: covered by the shorts; no genital or pubic detail is visible.\n\n(3) Room:\n- Walls: neutral-toned, softly lit; details indistinct.\n- Floor: dark wood flooring visible around the rug.\n- Furniture: a beige sectional sofa in the background, slightly out of focus.\n- Equipment/screens: none visible.\n- Lighting: warm, directional light from the front-left, creating highlights on skin and soft shadows behind the figures.\n\n(4) Objects, screens, restraints, props:\n- Jeweled tiara on the female’s head.\n- Delicate chain-link bikini top with jeweled accents on the female.\n- A thin chain-link strap across the female’s lower back/hip.\n- Dark gray athletic shorts on the male.\n- No screens, televisions, restraints, or additional props are visible.\n\n(5) Size/height relation and hand positions:\n- The male is taller and significantly more muscular than the female.\n- Female’s hands: both hands are placed flat on the rug in front of her, fingers spread.\n- Male’s hands: one hand rests on the female’s lower back/hip area; the other hand grips her right thigh near the knee.",
+   "caption_chars": 2271,
+   "caption_words": 383,
+   "comfy_copy_sha_match": true,
+   "comfy_input_copy": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc/GI046.jpg",
+   "command": "python C:/AI/community/notes/top_card_vl_build.py --run --tag 2 --model vl_judge --scenes GI063,GI046 --asks A,B,C --max-tokens 3000 --no-thinking",
+   "completion_tokens": 569,
+   "decline_markers": [],
+   "end_iso": "2026-10-26T09:26:44-05:00",
+   "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+   "error": "",
+   "finish_reason": "stop",
+   "guard_rc": 0,
+   "guard_text": "IDLE",
+   "http_status": 200,
+   "image_bytes": 567489,
+   "image_dims": [
+    1792,
+    1008
+   ],
+   "image_path": "C:/Users/derek/5slock/approved_characters/GROK_IMAGINE_2026-10-19/GI046.jpg",
+   "image_sha256": "3be40b2aeef5dc9876b4c5a2ad489800d97cdea3571b6b76f11b2e3db08cbdfd",
+   "max_tokens": 3000,
+   "message_fields": [
+    "content",
+    "role"
+   ],
+   "model_id": "vl_judge",
+   "prompt_sha": "f2767575b29d97e26bd791f905bdd68ba5813d1346a9797ba8f148350210c08e",
+   "raw_body_excerpt": "",
+   "raw_path": "C:/AI/community/notes/scenes/raw/GI046_vl2_C.txt",
+   "raw_sha256": "12418be36301a92bd979a04f8678440a1829adcf2242c7496c727b555df1328b",
+   "reasoning_text": "",
+   "reasoning_words": 0,
+   "request_options": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "reasoning_effort": "none"
+   },
+   "scene": "GI046",
+   "start_iso": "2026-10-26T09:26:37-05:00",
+   "still_id": "GI046",
+   "temperature": 0.0,
+   "usage": {
+    "completion_tokens": 569,
+    "prompt_tokens": 2067,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "total_tokens": 2636
+   },
+   "wall_s": 7.88
+  }
+ ],
+ "schema": "top-card-vl-1",
+ "scope": {
+  "asks": [
+   "A",
+   "B",
+   "C"
+  ],
+  "scenes": [
+   "GI046",
+   "GI063"
+  ]
+ },
+ "started": "2026-10-26 09:25:55 CT",
+ "tag": "2"
+}

@@ -1,0 +1,459 @@
+{
+ "rows": [
+  {
+   "id": "ali163_hc15_bd002_s51150001",
+   "mp4": "C:\\AI\\community\\runs\\hc15_bd002_s51150001\\ali163_hc15_bd002_s51150001.mp4",
+   "frames": 362,
+   "canvas": "1344x768",
+   "seed": 51150001,
+   "start": "community/hc/BD002.jpg",
+   "crops": [
+    "community/hc/BD002_w2_face.png"
+   ],
+   "secs": 757.4,
+   "nodes": 33,
+   "src_faces": [
+    [
+     [
+      738.2,
+      44.4,
+      867.0,
+      219.2
+     ],
+     0.897
+    ],
+    [
+     [
+      252.3,
+      92.5,
+      466.3,
+      197.4
+     ],
+     0.771
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.347619,
+     "psnr_cover": 6.74198,
+     "ssim_stretch": 0.350931,
+     "psnr_stretch": 6.666501,
+     "faces": 2,
+     "best_cos": [
+      0.217,
+      0.328
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.364643,
+     "psnr_cover": 5.78817,
+     "ssim_stretch": 0.366935,
+     "psnr_stretch": 5.706991,
+     "faces": 0,
+     "best_cos": [
+      null,
+      null
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.296231,
+     "psnr_cover": 5.698822,
+     "ssim_stretch": 0.298078,
+     "psnr_stretch": 5.646458,
+     "faces": 1,
+     "best_cos": [
+      0.29,
+      0.108
+     ]
+    }
+   }
+  },
+  {
+   "id": "ali163_hc15_bd002_s51150011",
+   "mp4": "C:/AI/community/runs/ali163_hc15_bd002_s51150011\\ali163_hc15_bd002_s51150011.mp4",
+   "frames": 362,
+   "canvas": "1344x768",
+   "seed": 51150001,
+   "start": "community/hc/BD002.jpg",
+   "crops": [
+    "community/hc/BD002_w2_face.png"
+   ],
+   "secs": 571.7,
+   "nodes": 27,
+   "src_faces": [
+    [
+     [
+      738.2,
+      44.4,
+      867.0,
+      219.2
+     ],
+     0.897
+    ],
+    [
+     [
+      252.3,
+      92.5,
+      466.3,
+      197.4
+     ],
+     0.771
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.915424,
+     "psnr_cover": 29.580949,
+     "ssim_stretch": 0.771982,
+     "psnr_stretch": 20.271323,
+     "faces": 2,
+     "best_cos": [
+      0.875,
+      0.748
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.357721,
+     "psnr_cover": 6.7112,
+     "ssim_stretch": 0.358458,
+     "psnr_stretch": 6.631023,
+     "faces": 2,
+     "best_cos": [
+      0.247,
+      0.108
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.346141,
+     "psnr_cover": 6.39856,
+     "ssim_stretch": 0.349496,
+     "psnr_stretch": 6.327019,
+     "faces": 1,
+     "best_cos": [
+      0.066,
+      0.187
+     ]
+    }
+   }
+  },
+  {
+   "id": "ali163_hc15_bd006_s51150002",
+   "mp4": "C:\\AI\\community\\runs\\hc15_bd006_s51150002\\ali163_hc15_bd006_s51150002.mp4",
+   "frames": 362,
+   "canvas": "1344x768",
+   "seed": 51150002,
+   "start": "community/hc/BD006.jpg",
+   "crops": [
+    "community/hc/BD006_w2_face.png"
+   ],
+   "secs": 752.5,
+   "nodes": 33,
+   "src_faces": [
+    [
+     [
+      536.9,
+      90.3,
+      646.2,
+      231.3
+     ],
+     0.89
+    ],
+    [
+     [
+      214.5,
+      145.9,
+      370.4,
+      237.3
+     ],
+     0.631
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.238916,
+     "psnr_cover": 7.011666,
+     "ssim_stretch": 0.243409,
+     "psnr_stretch": 6.996422,
+     "faces": 2,
+     "best_cos": [
+      0.404,
+      0.059
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.243956,
+     "psnr_cover": 7.046053,
+     "ssim_stretch": 0.245957,
+     "psnr_stretch": 7.062239,
+     "faces": 0,
+     "best_cos": [
+      null,
+      null
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.271856,
+     "psnr_cover": 7.855976,
+     "ssim_stretch": 0.272194,
+     "psnr_stretch": 7.848783,
+     "faces": 2,
+     "best_cos": [
+      0.138,
+      0.251
+     ]
+    }
+   }
+  },
+  {
+   "id": "ali163_hc15_bd013_s51150003",
+   "mp4": "C:\\AI\\community\\runs\\hc15_bd013_s51150003\\ali163_hc15_bd013_s51150003.mp4",
+   "frames": 362,
+   "canvas": "1344x768",
+   "seed": 51150003,
+   "start": "community/hc/BD013.jpg",
+   "crops": [
+    "community/hc/BD013_w2_face.png"
+   ],
+   "secs": 752.4,
+   "nodes": 33,
+   "src_faces": [
+    [
+     [
+      709.4,
+      57.9,
+      821.9,
+      211.4
+     ],
+     0.894
+    ],
+    [
+     [
+      413.7,
+      70.8,
+      568.2,
+      176.5
+     ],
+     0.787
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.314749,
+     "psnr_cover": 6.143693,
+     "ssim_stretch": 0.316511,
+     "psnr_stretch": 6.126803,
+     "faces": 2,
+     "best_cos": [
+      0.163,
+      0.097
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.367516,
+     "psnr_cover": 6.395432,
+     "ssim_stretch": 0.371105,
+     "psnr_stretch": 6.385054,
+     "faces": 2,
+     "best_cos": [
+      0.268,
+      0.179
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.365308,
+     "psnr_cover": 6.257917,
+     "ssim_stretch": 0.368766,
+     "psnr_stretch": 6.239997,
+     "faces": 1,
+     "best_cos": [
+      0.155,
+      0.066
+     ]
+    }
+   }
+  },
+  {
+   "id": "ali163_hc15_gi046_s51150004",
+   "mp4": "C:\\AI\\community\\runs\\hc15_gi046_s51150004\\ali163_hc15_gi046_s51150004.mp4",
+   "frames": 362,
+   "canvas": "1344x768",
+   "seed": 51150004,
+   "start": "community/hc/GI046.jpg",
+   "crops": [
+    "community/hc/GI046_w1_face.png"
+   ],
+   "secs": 777.1,
+   "nodes": 33,
+   "src_faces": [
+    [
+     [
+      340.7,
+      329.9,
+      542.0,
+      531.2
+     ],
+     0.872
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.292776,
+     "psnr_cover": 11.633429,
+     "ssim_stretch": 0.293192,
+     "psnr_stretch": 11.633458,
+     "faces": 1,
+     "best_cos": [
+      0.257
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.316412,
+     "psnr_cover": 11.005987,
+     "ssim_stretch": 0.317343,
+     "psnr_stretch": 10.995933,
+     "faces": 1,
+     "best_cos": [
+      0.208
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.300888,
+     "psnr_cover": 11.13439,
+     "ssim_stretch": 0.301512,
+     "psnr_stretch": 11.146137,
+     "faces": 1,
+     "best_cos": [
+      0.223
+     ]
+    }
+   }
+  },
+  {
+   "id": "ali163_hc15_gi063_s51150005",
+   "mp4": "C:\\AI\\community\\runs\\ali163_hc15_gi063_s51150005\\ali163_hc15_gi063_s51150005.mp4",
+   "frames": 362,
+   "canvas": "1344x768",
+   "seed": 51150005,
+   "start": "community/hc/GI063.jpg",
+   "crops": [
+    "community/hc/GI063_w1_face.png"
+   ],
+   "secs": 787.5,
+   "nodes": 33,
+   "src_faces": [
+    [
+     [
+      209.3,
+      233.3,
+      375.5,
+      435.2
+     ],
+     0.869
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.310824,
+     "psnr_cover": 11.288206,
+     "ssim_stretch": 0.316589,
+     "psnr_stretch": 11.331636,
+     "faces": 0,
+     "best_cos": [
+      null
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.304315,
+     "psnr_cover": 10.007685,
+     "ssim_stretch": 0.30907,
+     "psnr_stretch": 10.013701,
+     "faces": 0,
+     "best_cos": [
+      null
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.284973,
+     "psnr_cover": 10.727111,
+     "ssim_stretch": 0.287516,
+     "psnr_stretch": 10.718807,
+     "faces": 1,
+     "best_cos": [
+      0.258
+     ]
+    }
+   }
+  },
+  {
+   "id": "ali163_hc15_gi072_s51150006",
+   "mp4": "C:\\AI\\community\\runs\\ali163_hc15_gi072_s51150006\\ali163_hc15_gi072_s51150006.mp4",
+   "frames": 362,
+   "canvas": "1344x768",
+   "seed": 51150006,
+   "start": "community/hc/GI072.jpg",
+   "crops": [
+    "community/hc/GI072_w1_face.png",
+    "community/hc/GI072_w2_face.png"
+   ],
+   "secs": 802.5,
+   "nodes": 34,
+   "src_faces": [
+    [
+     [
+      908.7,
+      344.7,
+      997.8,
+      474.2
+     ],
+     0.844
+    ],
+    [
+     [
+      1138.7,
+      39.0,
+      1228.0,
+      157.9
+     ],
+     0.867
+    ]
+   ],
+   "frames_measured": {
+    "0": {
+     "ssim_cover": 0.231496,
+     "psnr_cover": 8.507316,
+     "ssim_stretch": 0.229185,
+     "psnr_stretch": 8.504662,
+     "faces": 1,
+     "best_cos": [
+      0.314,
+      0.025
+     ]
+    },
+    "181": {
+     "ssim_cover": 0.249506,
+     "psnr_cover": 8.906289,
+     "ssim_stretch": 0.249204,
+     "psnr_stretch": 8.896522,
+     "faces": 0,
+     "best_cos": [
+      null,
+      null
+     ]
+    },
+    "361": {
+     "ssim_cover": 0.247354,
+     "psnr_cover": 9.206213,
+     "ssim_stretch": 0.246846,
+     "psnr_stretch": 9.220092,
+     "faces": 2,
+     "best_cos": [
+      0.059,
+      0.119
+     ]
+    }
+   }
+  }
+ ],
+ "gate_floor": 0.45,
+ "tool": "notes/hc15_anchor_fix_build.py --metrics"
+}

@@ -1,0 +1,48 @@
+Would be great if there was a turbo hybrid version with the Ref2VAVSAGatePatch already applied for ultra-fast generation. 
+
+ Link: https://github.com/Kablex/ComfyUI-Ref2VA-VSA 
+
+ See translation LokkenJP 5 days ago • edited 5 days ago <div
+
+---- block ----
+
+This is exactly what Fast H3 already does, including the gate tensors, but fine tuned for 4 steps instead, which honestly, even if they manage to get something decent working for video, I'm pretty sure will drop again audio quality.
+
+ You can already use VSA sparse with the current Beta6, so the gain won't be nowhere as large as the charts shown on that repo.
+
+ In any case, TenStrip will change the base for Eros as soon as FastH3 Omni is released tomorrow, so we better wait and see how well that works (and will probably make many of the previous turbos/tricks obsolete if not directly incompatible)
+
+ See translation 🔥 1 1 + TenStrip Owner 4 days ago <div
+
+---- block ----
+
+Yeah I think FastOmni will be the thing I try next and see how they solved that issue. That repo kind of solves the issue in-workflow by excluding and changing attention, technically you would run that node on the current "unstable" version which has the gates and that would be that. Seems like something that should be patched into the default comfy attention select to isolate reference like that node does.
+
+ See translation 👍 1 1 + snake8888 4 days ago <div
+
+---- block ----
+
+Non turbo b6 version?
+
+ See translation Know532 3 days ago <div
+
+---- block ----
+
+This is exactly what Fast H3 already does, including the gate tensors, but fine tuned for 4 steps instead, which honestly, even if they manage to get something decent working for video, I'm pretty sure will drop again audio quality.
+
+ You can already use VSA sparse with the current Beta6, so the gain won't be nowhere as large as the charts shown on that repo.
+
+ In any case, TenStrip will change the base for Eros as soon as FastH3 Omni is released tomorrow, so we better wait and see how well that works (and will probably make many of the previous turbos/tricks obsolete if not directly incompatible)
+
+ 
+ The gains I got are about 15% faster compared to beta5 with traditional MSA node VSA+Kitchen. 
+
+ See translation Know532 3 days ago <div
+
+---- block ----
+
+Nevermind. After more tests the model refuses to follow many prompts with this enabled. It isn't worth it, beta5 and 6 are the way.
+
+ See translation Edit Preview Upload images, audio, and videos by dragging in the text input, pasting, or clicking here . Tap or paste here to upload images Comment · Sign up or log in to comment
+
+ </pa

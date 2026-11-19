@@ -1,0 +1,68 @@
+summary C:\AI\community\notes\ali147_summary.md bytes=31781 sha256=51f32ec47d32844f8932365fa061faed6a9f96b13cde7a1e42b135984b264c64 lines=193 local time=2026-10-22 21:51:18
+PASS notes/ali147_summary.md exists
+PASS arm named: ali147_pool_ctrl_s51080000 (count=16)
+PASS arm named: ali147_pool_fix1_s51080000 (count=15)
+PASS arm named: ali147_pool_fix5_s51080000 (count=14)
+PASS arm named: ali147_pool_dip_s51080000 (count=11)
+PASS arm named: ali147_pool_fix4_s51080000 (count=25)
+PASS METHOD_ONLY label present
+PASS KEEP-is-Derrick line present
+PASS CTRL-by-driver note present
+PASS required column/term present: render secs
+PASS required column/term present: ffprobe
+PASS required column/term present: contact sheet
+PASS required column/term present: dip.log
+PASS required column/term present: status.log
+PASS required column/term present: bytes
+PASS required column/term present: duration
+PASS required column/term present: failures
+PASS required column/term present: STUCK
+PASS required column/term present: redo
+PASS section present: # Matrix
+PASS section present: ### CTRL
+PASS section present: ### FIX1
+PASS section present: ### FIX5
+PASS section present: ### DIP
+PASS section present: ### FIX4
+PASS section present: ## Failures
+PASS section present: ## Appendix
+PASS section present: ## Method notes
+PASS no empty table cells (found 0)
+PASS no TBD placeholder
+PASS no TODO placeholder
+PASS no FIXME placeholder
+PASS no placeholder placeholder
+PASS no duplicate mp4 path (n=6)
+   mp4s: ['ali147_pool_ctrl_s51080000\\ali147_pool_ctrl_s51080000.mp4', 'ali147_pool_fix1_s51080000\\ali147_pool_fix1_s51080000.mp4', 'ali147_pool_fix4_s51080000\\ali147_pool_fix4_s51080000.mp4', 'ali147_pool_fix5_s51080000\\ali147_pool_fix5_s51080000.mp4', 'ali147_pool_refsheet_b_s51080000\\ali147_pool_refsheet_b_s51080000.mp4', 'ali147_pool_refsheet_s51080000\\ali147_pool_refsheet_s51080000.mp4']
+PASS every render under runs/ is named in the summary
+   missing: []
+PASS every sbs under runs/ is named in the summary
+   sbs: ['ali147_pool_refsheet_b_s51080000\\sbs_refsheet_refsheetb.mp4', 'ali147_pool_refsheet_s51080000\\sbs_fix1_refsheet.mp4'] missing: []
+PASS every quoted log line (35 total, 6 with elisions) is verbatim in a real log
+PASS the real dip.log last line is quoted exactly
+   last line: 2026-10-22 17:23:36 CT DIP end ok
+PASS no failure lines in any LIVE p7 *.out
+   live hits: []
+PASS the .failed-20261022 archive carries the STUCK/JOB-error evidence
+   archive hits: [('ali147_pool_fix4_s51080000.out.failed-20261022', 10)]
+PASS numbers for ali147_pool_ctrl_s51080000 come from objective.json and are stated (secs=809.7 bytes=5781091 frames=481 sheet=1711845 B)
+   not stated: []
+PASS numbers for ali147_pool_fix1_s51080000 come from objective.json and are stated (secs=857.5 bytes=5841241 frames=481 sheet=1715915 B)
+   not stated: []
+PASS numbers for ali147_pool_fix5_s51080000 come from objective.json and are stated (secs=706.8 bytes=5705872 frames=481 sheet=1705795 B)
+   not stated: []
+PASS numbers for ali147_pool_fix4_s51080000 come from objective.json and are stated (secs=3004.9 bytes=65791775 frames=1433 sheet=5463574 B)
+   not stated: []
+PASS DIP output bytes stated: base_reenc.mp4
+   actual 35488827 B
+PASS DIP output bytes stated: dipblack.mp4
+   actual 36068806 B
+PASS DIP output bytes stated: dipwhite.mp4
+   actual 38260910 B
+PASS DIP frame count 1443 stated
+PASS RS1 PROOF.md is absent on disk (documented gap)
+PASS the summary states the RS0/RS1 evidence gap instead of citing it as evidence
+PASS cited evidence exists: C:\AI\community\runs\ali147_pool_dip_s51080000\dip.log
+PASS cited evidence exists: C:\AI\community\runs\ali147_pool_dip_s51080000\ffmpeg_cmd.txt
+PASS DIP has no objective.json (as the summary states)
+ALL CHECKS PASS

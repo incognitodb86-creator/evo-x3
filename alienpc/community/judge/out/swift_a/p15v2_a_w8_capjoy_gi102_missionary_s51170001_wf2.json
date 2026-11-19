@@ -1,0 +1,37 @@
+{
+ "tag": "p15v2_a_w8_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.1,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The bedroom setting, beige headboard, and white sheets remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The blonde woman and brown-haired man maintain their identities and physical characteristics throughout the clip."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the pose, framing, and clothing of the start image perfectly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the missionary position with the man on top, mouth near breast, and penis visible between legs."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0039,
+  "same_people": 0.0867,
+  "start_kept": 0.0569,
+  "target_reached": 0.0494,
+  "anatomy_defect": 0.4125
+ },
+ "flags": []
+}

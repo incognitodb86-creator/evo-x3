@@ -1,0 +1,3 @@
+Task 2 of 4 (small; no render, no GPU, no git, no commit).
+Do a real file edit. The file C:/AI/community/notes/_u3c/sydney_taskB_target.txt has 4 lines. Change the line that says target = 3 so that it says target = 7, and change nothing else in that file.
+Then report exactly three things: the tool you used, the command or call you made, and the 4 lines of the file as they are now.

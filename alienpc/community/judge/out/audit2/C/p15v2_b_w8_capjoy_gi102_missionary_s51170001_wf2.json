@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: same bed, rumpled sheets, neutral wall, and lighting across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman in white lace bra and same man appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE: blonde woman on all fours, man behind her, same pose and framing."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position: man on top, woman on back, faces kissing, bodies in contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, separate bodies with correct limbs, hands, and genitalia without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0098,
+  "same_people": 0.3458,
+  "start_kept": 0.3941,
+  "target_reached": 0.2938,
+  "anatomy_defect": 0.0863
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w8_capjoy_gi102_missionary_s51170001_wf2"
+}

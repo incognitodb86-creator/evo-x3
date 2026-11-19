@@ -1,0 +1,19 @@
+pending upload
+# Terrace community-settings retest — fair stock baseline + one change at a time
+
+Derrick decision(s) this comes from: "can you confirm the exact stuff and audit it to confirm it was done correctly?" (4:38 PM CT Oct 29) → verification found T4 was not stock (/workspace/audits/2026-10-29-terrace-test-verification.md) → "ce-plan this out" (4:46 PM CT). B2 stays the default until this says otherwise (Derrick 6:59 AM CT Oct 29).
+
+**Goal:** Find out fairly whether true stock LokkenJP simple_v2, or any single TenStrip/LokkenJP recommended setting, beats B2.
+**Done when:** Derrick has blind-scored every clip (filenames hidden, raw/native files only) and sees one table: arm | mean score | judge flags | render time. Pass for an arm = mean ≥ 1 point above B2 on the same seeds AND it beats B2 on at least 2 of 3 seeds, compared seed by seed.
+**Writer inputs:** none. Every arm uses B2's existing terrace prompt unchanged (hash-checked), except arm S8, which adds LokkenJP's #74 "<Picture 1> is the correct scene identity" line only.
+**Pictures:** Picture 1 = `TERRACE2_768x1344.png`, also the open frame, in every arm. Output stays 9:16 at 768x1344.
+**Who builds:** Forge builds each graph from B2's saved graph (or, for T4c, LokkenJP's live simple_v2 JSON) and renders. Max briefs and checks only.
+**Community baseline:** TenStrip 10Eros-Max README and discussions #71–#79, LokkenJP `H3_Turbo_2Pass_ErosMax_b7_simple_v2.json` (live copy, sha a315ac74…). No new controls. The adults-only check stays on before every render. One GPU job at a time via `C:\AI\locks\gpu-render.lock`.
+
+**Stage 1 — fair baseline (6 clips):** B2 vs **T4c** (simple_v2 as shipped for model, sampler, text encoder, upscaler, second pass and guides, with the start image loaded so both Add Guides turn on). Declared deviations from shipped, all to match B2's test conditions: portrait 9:16 size set by hand (the selector has no 9:16 preset, only 1:1, 3:2, 4:3, 16:9); length 121 frames (5 s) instead of the stock 15 s (~362); fixed seeds instead of the stock -1; final upscale megapixels 0.98 (768x1344) instead of 1 (~768x1376). RTX VSR 1.2 ULTRA and grain 0.005 stay on as shipped, but T4c is scored on its `_raw` files (before RTX and grain). Seeds 51083002 plus two new fixed seeds, the same for every arm.
+**Stage 2 — one change from B2 (8 clips, seed 51083002):** S1 er_sde + sgm_uniform (TenStrip's named pairing, changed together) · S2 activation_learned_HQ UNet · S3 fp16 3D upscaler (model swap only, B2's x2 scale kept) · S4 ref_image_size "match" · S5 no Add Guide (reference-only) · S6 6 steps · S7 res_multistep/simple 8 · S8 #74 Picture-1 line. Only an arm that strictly beats B2 on seed 51083002 gets the other two seeds.
+**Length (Derrick 4:58 PM CT, less time):** every arm, B2 included, renders 5 s (121 frames at 24 fps) for screening. Only an arm that passes gets one confirmation render at B2's full 243 frames, to catch late-clip drift or flicker.
+**Not in this plan:** beta5 (deleted Oct 9; would need a download) and the Eros-Max LoRA (#76). Separate yes needed. Also not tested here: the text encoder alone, LCM/simple 6–8 steps, and 15 s length; each would be a later one-change arm.
+
+**Acceptance before GPU:** Max diffs every arm's api.json against B2 (or simple_v2 for T4c) and confirms exactly one intended change, the same still, seed and prompt hash, 9:16 output and guard on. He sends that diff table to Derrick before GO. The judge (qwen3vl + Z zoom) runs on every clip; its flags are informational only and don't change scores or pass/fail. This is the first real Z run.
+**Stop:** Stage 1 first. If T4c doesn't beat B2, still run Stage 2 (it tests single settings). Stop after Stage 2's seed follow-ups. If no arm passes, B2 stays and settings work is closed; next is the prompt-and-still arm. Any render error or diff mismatch stops that arm and is reported, not retried with changes.

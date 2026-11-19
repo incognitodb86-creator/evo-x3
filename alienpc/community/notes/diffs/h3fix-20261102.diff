@@ -1,0 +1,406 @@
+--- orig/comm.py	2026-11-02 20:23:47.256417810 -0600
++++ comm.py	2026-11-02 20:26:43.005712282 -0600
+@@ -263,7 +263,54 @@
+     log(f"JOB timeout {tag}", logfile)
+     return outcome(out, "stalled", pid, note=f"no history in {timeout}s; the render may have landed in ComfyUI output")
+ 
++# --- (b) 2026-11-02: no LLM/llama-swap chat call while a render holds the GPU lock -------------------------------
++# Same lock rule as gpu_guard.ps1 / ralph.ps1 GpuBusy: a lock file whose first number is a live PID = held; a dead PID is
++# stale and ignored. The holder itself (os.getpid() or GPU_LOCK_DRIVER_PID, e.g. a VLM judge that took the lock) may call.
++GPU_LOCK_FILE = r"C:\AI\locks\gpu-render.lock"
++GPU_COLLECTED_FILE = r"C:\AI\locks\gpu-render.collected"
++
++class GpuBusy(RuntimeError):
++    pass
++
++def _pid_alive(pid):
++    if pid <= 0: return False
++    if os.name == "nt":
++        import ctypes
++        h = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
++        if not h: return False
++        code = ctypes.c_ulong(); ctypes.windll.kernel32.GetExitCodeProcess(h, ctypes.byref(code)); ctypes.windll.kernel32.CloseHandle(h)
++        return code.value == 259  # STILL_ACTIVE
++    try: os.kill(pid, 0); return True
++    except OSError: return False
++
++def gpu_lock_holder(lock_file=None, alive=None):
++    """PID holding the GPU lock (live), else None. A lock without a PID counts as held (-1), as in ralph.ps1."""
++    alive = alive or _pid_alive
++    lf = lock_file or GPU_LOCK_FILE
++    try: raw = open(lf, encoding="utf-8", errors="replace").read()
++    except OSError: return None
++    m = re.search(r"(\d+)", raw)
++    if not m: return -1
++    pid = int(m.group(1))
++    return pid if alive(pid) else None
++
++def llm_gate(lock_file=None, alive=None, me=None):
++    """Raise GpuBusy if a render (any live PID but this process / its declared driver) holds the GPU lock."""
++    h = gpu_lock_holder(lock_file, alive)
++    if h is None: return
++    mine = {me or os.getpid()}
++    if os.environ.get("GPU_LOCK_DRIVER_PID", "").isdigit(): mine.add(int(os.environ["GPU_LOCK_DRIVER_PID"]))
++    if h in mine: return
++    raise GpuBusy(f"GPU lock {lock_file or GPU_LOCK_FILE} held by pid {h}: no LLM call while a render holds the GPU")
++
++def mark_collected(pid=None, path=None):
++    """(c) the lock holder says 'outputs collected': comfy_graceful_stop.ps1 may stop comfyui_auto before the lock goes."""
++    try:
++        with open(path or GPU_COLLECTED_FILE, "w", encoding="ascii") as f: f.write("%d %s\n" % (pid or os.getpid(), time.strftime("%Y-%m-%dT%H:%M:%S")))
++    except OSError: pass
++
+ def llm(system, user, max_tokens=3000, temperature=0.6, model="coding_swift15_iq3s_esp"):
++    llm_gate()
+     body = {"model": model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+             "max_tokens": max_tokens, "temperature": temperature}
+     r = http(LS + "/v1/chat/completions", body, timeout=1200)
+--- orig/h3_lora_ab_judge_check.py	2026-11-02 20:23:47.256417810 -0600
++++ h3_lora_ab_judge_check.py	2026-11-02 20:24:01.760194534 -0600
+@@ -24,6 +24,7 @@
+ #   ... --pack     # build the blinded pack + key.csv (no model, no GPU)
+ import argparse
+ import csv
++import hashlib
+ import json
+ import os
+ import random
+@@ -58,6 +59,35 @@
+     return json.loads(ORDER.read_text(encoding="utf-8"))["order"]
+ 
+ 
++def sha256_file(path):
++    """(d) 2026-11-02: clip_sha256 from the clip bytes, same digest as run_queue.py:235 (was written as "")."""
++    h = hashlib.sha256()
++    with open(path, "rb") as fh:
++        for chunk in iter(lambda: fh.read(1 << 20), b""):
++            h.update(chunk)
++    return h.hexdigest()
++
++
++def backfill_clip_sha(key_csv=None, runs=None):
++    """(d) fill empty clip_sha256 cells in an existing key.csv from <runs>/<cell>/<cell>.mp4. CPU only, no rescoring;
++    every other column is left byte-for-byte as it was. Returns the number of rows filled."""
++    key_csv, runs = Path(key_csv or STAGE / "key.csv"), Path(runs or RUNS)
++    with open(key_csv, newline="", encoding="utf-8") as fh:
++        rd = csv.DictReader(fh)
++        fields, rows = rd.fieldnames, list(rd)
++    n = 0
++    for r in rows:
++        if not r.get("clip_sha256"):
++            src = runs / r["cell"] / (r["cell"] + ".mp4")
++            r["clip_sha256"] = sha256_file(src)
++            n += 1
++    with open(key_csv, "w", newline="", encoding="utf-8") as fh:
++        w = csv.DictWriter(fh, fieldnames=fields)
++        w.writeheader()
++        w.writerows(rows)
++    return n
++
++
+ def face_summary(cell):
+     p = FACE_DIR / ("face_curve_%s.json" % cell)
+     if not p.exists():
+@@ -157,7 +187,7 @@
+         j = next(x for x in cells() if x["tag"] == cell)
+         row = {"pack_id": pid, "cell": cell, "lora": j["lora"], "strength_model": j["strength_model"],
+                "bytes": src.stat().st_size, "seed": j["seed"], "prompt_sha256": j["prompt_sha256"][:16],
+-               "clip_sha256": "", "packaged_as": pid + ".mp4"}
++               "clip_sha256": sha256_file(src), "packaged_as": pid + ".mp4"}
+         row.update(face_summary(cell))
+         s = summary.get(PREFIX + cell, {})
+         row["precheck_flags"] = ";".join(s.get("flags", []))
+@@ -179,7 +209,11 @@
+     ap.add_argument("--vlm", action="store_true", help="VLM flag tier (takes gpu-render.lock)")
+     ap.add_argument("--pack", action="store_true", help="build the blinded pack + key.csv")
+     ap.add_argument("--frames", type=int, default=16)
++    ap.add_argument("--backfill-sha", action="store_true", help="(d) only fill empty clip_sha256 in key.csv; no judge, no GPU")
+     a = ap.parse_args()
++    if a.backfill_sha:
++        print("clip_sha256 backfilled rows:", backfill_clip_sha())
++        return 0
+     jobs = stage()
+     summary = run_prechecks(jobs, a.frames)
+     if a.vlm:
+--- orig/run_graph_job.py	2026-11-02 20:27:32.680947556 -0600
++++ run_graph_job.py	2026-11-02 20:27:32.692947372 -0600
+@@ -204,6 +204,7 @@
+         else:
+             log(f"STUCK {a.tag} objective failure after {a.max_redo} redos - flagged for Derrick")
+     finally:
++        comm.mark_collected()  # (c) 2026-11-02: outputs collected; comfy_graceful_stop.ps1 need not wait for the lock
+         try: post(f"{LS}/api/models/unload/comfyui_auto", 300); log("UNLOAD comfyui_auto (POST /api/models/unload)")
+         except Exception as e: log(f"unload note {str(e)[:120]}")
+         gpu_unlock(log)   # RENDER-TIMEOUT: release C:/AI/locks/gpu-render.lock so the gate opens for the next job
+--- orig/run_queue.py	2026-11-02 20:23:47.256417810 -0600
++++ run_queue.py	2026-11-02 20:26:29.397921766 -0600
+@@ -198,12 +198,101 @@
+     return max(c, key=os.path.getmtime) if c else None
+ 
+ 
++# --- (c) 2026-11-02 (brief 2026-11-02-2010): prompt_ids saved at submit, harvested before any re-submit ---------------
++PIDS_FILE = "_prompt_ids.json"
++
++
++def expected_prefix(g):
++    """filename_prefix of the graph's SaveVideo/SaveImage node (where ComfyUI will write the output), else None."""
++    for n in (g or {}).values():
++        if n.get("class_type") in ("SaveVideo", "SaveImage") and isinstance(n.get("inputs", {}).get("filename_prefix"), str):
++            return n["inputs"]["filename_prefix"]
++    return None
++
++
++def load_pids(run_dir):
++    p = os.path.join(run_dir, PIDS_FILE)
++    try:
++        return json.load(open(p, encoding="utf-8"))
++    except (OSError, ValueError):
++        return {}
++
++
++def save_pid(run_dir, tag, pid, prefix, retry):
++    """Written right after each POST /prompt, so a driver/Shell death or an eviction never loses the prompt_id."""
++    d = load_pids(run_dir)
++    d[tag] = {"prompt_id": pid, "tag": tag, "expected_prefix": prefix, "submitted_at": time.time(),
++              "submitted_at_ct": time.strftime("%Y-%m-%d %H:%M:%S CT"), "retry": bool(retry)}
++    tmp = os.path.join(run_dir, PIDS_FILE + ".tmp")
++    json.dump(d, open(tmp, "w", encoding="utf-8"), indent=1)
++    os.replace(tmp, os.path.join(run_dir, PIDS_FILE))
++
++
++def prefix_output(prefix, since):
++    """Disk look-up by the saved expected prefix: output/<prefix>_NNNNN_.ext, flat or one folder down. Newest wins."""
++    import glob
++    if not prefix:
++        return None
++    base = os.path.join(comm.C, "output", *prefix.replace("\\", "/").split("/"))
++    stem = os.path.basename(base)
++    pat = re.compile(re.escape(stem) + r"_\d{5}_?\.(png|mp4)$", re.I)
++    pats = [glob.escape(base) + "_*", os.path.join(glob.escape(base), glob.escape(stem) + "_*")]
++    try:
++        c = [p for pp in pats for p in glob.glob(pp) if pat.match(os.path.basename(p)) and os.path.getmtime(p) >= since - 5]
++    except OSError:
++        return None
++    return max(c, key=os.path.getmtime) if c else None
++
++
++def harvest(run_dir, jobs, frames, size, slog, queue_ids=None):
++    """Before submitting, look for each job's earlier prompt_id: still in ComfyUI's queue -> adopt it (collect, do not
++    re-submit); in /history -> collect; gone -> look on disk by the expected prefix. Returns (to_submit, adopted, done)
++    where adopted = {prompt_id: entry} for run_wave to keep collecting."""
++    rec = load_pids(run_dir)
++    if not rec:
++        return list(jobs), {}, []
++    if queue_ids is None:
++        try:
++            q = comm.http(comm.BASE + "/queue", timeout=comm.POLL_TIMEOUT)
++            queue_ids = {x[1] for x in q.get("queue_running", []) + q.get("queue_pending", [])}
++        except Exception as ex:
++            slog("harvest warn queue %s" % str(ex)[:120]); queue_ids = set()
++    todo, adopted, done = [], {}, []
++    for j in jobs:
++        r = rec.get(j["tag"])
++        if not r or not r.get("prompt_id"):
++            todo.append(j); continue
++        pid, d = r["prompt_id"], os.path.join(run_dir, j["tag"])
++        e = {"job": j, "out": {}, "t_att": r.get("submitted_at", 0), "t0": r.get("submitted_at", 0),
++             "log": os.path.join(d, "status.log"), "g0": json.load(open(os.path.join(d, "request.api.json"), encoding="utf-8"))}
++        if pid in queue_ids:
++            qlog(run_dir, "HARVEST pos=%d tag=%s prompt_id=%s still in ComfyUI queue - adopted, not re-submitted" % (j["pos"], j["tag"], pid))
++            adopted[pid] = e; continue
++        s = None
++        try:
++            s = comm.fetch(pid, j["tag"], meta(j, False), d, e["t0"], e["log"], e["out"])
++        except Exception as ex:
++            slog("harvest warn history %s %s" % (j["tag"], str(ex)[:120]))
++        if s is comm.PENDING or s is None and not e["out"]:
++            s = None
++            src = prefix_output(r.get("expected_prefix"), e["t_att"]) or disk_output(run_dir, j["tag"], e["t_att"])
++            if src:
++                comm.outcome(e["out"], "evicted", pid, note="harvested from disk by expected prefix")
++        if s or e["out"].get("outcome") == "evicted":
++            qlog(run_dir, "HARVEST pos=%d tag=%s prompt_id=%s collected from %s - not re-submitted" % (
++                j["pos"], j["tag"], pid, "history" if s else "disk"))
++            if settle(run_dir, e, s, frames, size, False, slog):
++                done.append(j); continue
++        todo.append(j)
++    return todo, adopted, done
++
++
+ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
+     """After a job ends (or stalls/evicts): disk fallback, then the OBJECTIVE check and the DONE line."""
+     tag, d = job["tag"], os.path.join(run_dir, job["tag"])
+     t = tag
+     if not s and out.get("outcome") in ("stalled", "evicted", "submit_stall"):
+-        src = disk_output(run_dir, t, t_att) or rgj.collect_from_disk(t, t_att, slog)
++        src = prefix_output(expected_prefix(g0), t_att) or disk_output(run_dir, t, t_att) or rgj.collect_from_disk(t, t_att, slog)
+         if not src:
+             qlog(run_dir, "FAIL pos=%d tag=%s stall %s prompt_id=%s" % (job["pos"], tag, out["outcome"], out.get("prompt_id"))); return False
+         dst = os.path.join(d, t + os.path.splitext(src)[1])
+@@ -271,10 +360,11 @@
+         return False
+ 
+ 
+-def run_wave(run_dir, jobs, frames, size, retry, slog):
++def run_wave(run_dir, jobs, frames, size, retry, slog, adopt=None):
+     """Submit every job to ComfyUI's /prompt queue up front, then collect each as it finishes.
++    adopt = {prompt_id: entry} from harvest(): jobs already in ComfyUI's queue, collected without a re-submit.
+     Returns (failed jobs, stopped)."""
+-    failed, live = [], {}
++    failed, live = [], dict(adopt or {})
+     for j in jobs:
+         if stop_seen(run_dir):
+             qlog(run_dir, "STOP file seen: halted before submitting pos=%d tag=%s" % (j["pos"], j["tag"]))
+@@ -293,6 +383,8 @@
+         if pid is None:  # guard hit, POST rejected or submit stall: settled now, exactly as the one-job path does
+             if not settle(run_dir, e, None, frames, size, retry, slog): failed.append(j)
+             continue
++        try: save_pid(run_dir, j["tag"], pid, expected_prefix(e["g0"]), retry)
++        except Exception as ex: slog("prompt_ids note %s" % str(ex)[:120])
+         live[pid] = e
+     slog("QUEUE submitted %d clip(s) to ComfyUI up front" % len(live))
+     while live:
+@@ -370,6 +462,7 @@
+     if a.dry_run:
+         for j in todo:
+             print("  pos %2d %s" % (j["pos"], j["tag"]))
++        print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
+         print("dry run: no lock, GPU or HTTP call made")
+         return 0
+     if not todo:
+@@ -398,7 +491,10 @@
+             rc, reason = 4, "ComfyUI down at batch start"
+             qlog(run_dir, "FAIL batch ComfyUI down"); return rc
+         qlog(run_dir, "BATCH open: %d clips, lock held, comfyui_auto kept loaded" % len(todo))
+-        first, stopped = run_wave(run_dir, todo, a.frames, size, False, slog)
++        adopted = {}
++        if a.resume or stale:  # (c) a resumed or killed batch: collect earlier prompt_ids before any re-submit
++            todo, adopted, _h = harvest(run_dir, todo, a.frames, size, slog)
++        first, stopped = run_wave(run_dir, todo, a.frames, size, False, slog, adopt=adopted)
+         if first and not stopped:
+             again, stopped = run_wave(run_dir, first, a.frames, size, True, slog)
+             for j in again:
+@@ -414,6 +510,7 @@
+         rc, reason = 8, "error %s: %s" % (type(e).__name__, str(e)[:160].replace("\n", " "))
+         qlog(run_dir, "ERROR batch %s" % reason)
+     finally:
++        comm.mark_collected()  # (c) graceful-stop may stop comfyui_auto now: every output this batch will collect is in
+         try: rgj.post(comm.LS + "/api/models/unload/comfyui_auto", 300); slog("UNLOAD comfyui_auto")
+         except Exception as e: slog("unload note %s" % str(e)[:120])
+         try: rgj.gpu_unlock(slog)
+--- orig/comfy_graceful_stop.ps1	2026-11-02 20:23:47.256417810 -0600
++++ comfy_graceful_stop.ps1	2026-11-02 20:27:23.413090223 -0600
+@@ -3,8 +3,10 @@
+ # This waits while ComfyUI's own /queue (ComfyUI server route) shows running or pending jobs, up to MaxWaitSec,
+ # then does the same taskkill as before. llama-swap's model unloadTimeout must be > MaxWaitSec.
+ # Usage (llama-swap.yaml): cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'
+-param([Parameter(Mandatory)][int]$ProcId, [string]$Port = '', [int]$MaxWaitSec = 1800, [int]$PollSec = 10, [switch]$WhatIfKill)
+-$log = 'C:\AI\director\logs\comfy-graceful-stop.log'
++param([Parameter(Mandatory)][int]$ProcId, [string]$Port = '', [int]$MaxWaitSec = 1800, [int]$PollSec = 10, [switch]$WhatIfKill,
++      [string]$LockFile = 'C:\AI\locks\gpu-render.lock', [string]$CollectedFile = 'C:\AI\locks\gpu-render.collected',
++      [string]$LogFile = 'C:\AI\director\logs\comfy-graceful-stop.log')
++$log = $LogFile
+ function L($m){ "$(Get-Date -f 'yyyy-MM-dd HH:mm:ss') CT pid=$ProcId $m" | Add-Content $log }
+ if ($Port -notmatch '^\d+$') {  # ${PORT} not substituted: find the listener in the process tree (venv launcher -> child)
+   $ids = @($ProcId) + @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcId" -EA SilentlyContinue | % ProcessId)
+@@ -19,6 +21,28 @@
+   if (-not $waited) { L "render queue busy ($busy job(s)) on :$Port, waiting"; $waited = $true }
+   Start-Sleep $PollSec
+ }
++# (c) 2026-11-02 (brief 2026-11-02-2010): an empty queue is not "collected". On 2026-11-02 13:59:46 this stopped
++# comfyui_auto after the queue drained but before run_queue read /history, so the batch re-rendered all 3 clips.
++# Now also wait while a RENDER DRIVER (lock note run_queue / run_graph_job) holds gpu-render.lock with a live PID, until
++# that driver writes gpu-render.collected with its PID (comm.mark_collected, right before its own unload) or releases
++# the lock. Other lock holders (VLM judge, benches) are not waited on: they may be the reason for the swap.
++function RenderLockPid {
++  if (-not (Test-Path -LiteralPath $LockFile)) { return 0 }
++  $raw = [IO.File]::ReadAllText($LockFile)
++  if ($raw -notmatch '^\s*(\d+)\s+\S+\s+(run_queue|run_graph_job)') { return 0 }
++  $lp = [int]$Matches[1]
++  if (-not (Get-Process -Id $lp -EA SilentlyContinue)) { return 0 }
++  if ((Test-Path -LiteralPath $CollectedFile) -and ([IO.File]::ReadAllText($CollectedFile) -match '^\s*(\d+)') -and ([int]$Matches[1] -eq $lp)) { return 0 }
++  return $lp
++}
++$lw = $false
++while ($true) {
++  $lp = RenderLockPid
++  if ($lp -eq 0) { break }
++  if (((Get-Date) - $t0).TotalSeconds -ge $MaxWaitSec) { L "cap ${MaxWaitSec}s reached while render driver pid $lp holds the GPU lock uncollected, stop anyway"; break }
++  if (-not $lw) { L "render driver pid $lp holds gpu-render.lock and has not collected, waiting"; $lw = $true }
++  Start-Sleep $PollSec
++}
+ L ("stop after {0:N0}s (port={1})" -f ((Get-Date) - $t0).TotalSeconds, $Port)
+ if ($WhatIfKill) { L "WhatIf: taskkill /T /F /PID $ProcId"; exit 0 }
+ taskkill /T /F /PID $ProcId | Out-Null
+--- orig/ralph.ps1	2026-11-02 20:23:47.256417810 -0600
++++ ralph.ps1	2026-11-02 20:26:49.449613082 -0600
+@@ -10,7 +10,8 @@
+   [int]$IterationTimeoutSec = 7200,
+   [string]$CommandOverride = '',
+   [string]$LogPath = '',
+-  [int]$PassLimitSec = 3600   # 2026-11-02 (Derrick Q2 answer): per-pass cap 60 min (was 1500s / 25 min); effective cap = min(this, IterationTimeoutSec)
++  [int]$PassLimitSec = 3600,  # 2026-11-02 (Derrick Q2 answer): per-pass cap 60 min (was 1500s / 25 min); effective cap = min(this, IterationTimeoutSec)
++  [int]$LockPollSec = 2        # (b) 2026-11-02: GPU-lock check cadence DURING a pass (was: only at pass start)
+ )
+ $K = $PSScriptRoot; Set-Location $K
+ $day = Get-Date -Format yyyyMMdd
+@@ -20,7 +21,8 @@
+ $run = "$logDir\ralph-$day-$PID.log"   # index only: one line per event; full output goes to per-iteration files
+ function Log($m) { $l = "$(Get-Date -Format s) $m"; Add-Content -LiteralPath $idx -Value $l -Encoding UTF8; Add-Content -LiteralPath $run -Value $l -Encoding UTF8; Write-Host $l }
+ # Max Architect 2 2026-10-31 (Derrick 6:48 PM CT, audit F6/F13): model key self-load + single-instance lock
+-$env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
++$env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
++
+ $env:PYTHONUTF8 = '1'; $env:PYTHONIOENCODING = 'utf-8'
+ 
+ if (-not $CommandOverride) {
+@@ -47,6 +49,27 @@
+   }
+   return "lock $GpuLockPath present without a pid"
+ }
++# (b) 2026-11-02 (brief 2026-11-02-2010, Derek GO 8:19 PM CT): the pass start check was not enough - on 2026-11-02 the L5
++# launch pass kept calling the LLM through llama-swap for ~45 min after its own detached run_queue took the lock, and each
++# call swapped comfyui_auto out. Now the lock is checked every $LockPollSec s while pi runs; when a lock appears whose PID is
++# NOT inside this pass's process tree (a detached render, WMI parent), the pass ends at once so pi sends no further request.
++# A lock held by a pi child (a non-detached render pi is waiting on) does not end the pass: pi is blocked, not calling.
++function LockPid {
++  if (-not (Test-Path -LiteralPath $GpuLockPath)) { return 0 }
++  $raw = [IO.File]::ReadAllText($GpuLockPath)
++  if ($raw -match '(\d+)') { return [int]$Matches[1] }
++  return -1
++}
++function InTree([int]$Child, [int]$Root) {
++  $cur = $Child
++  for ($n = 0; $n -lt 32 -and $cur -gt 0; $n++) {
++    if ($cur -eq $Root) { return $true }
++    $p = Get-CimInstance Win32_Process -Filter "ProcessId=$cur" -EA SilentlyContinue
++    if (-not $p) { return $false }
++    $cur = [int]$p.ParentProcessId
++  }
++  return $false
++}
+ 
+ for ($i = 1; $i -le $Max; $i++) {
+   Log "iter $i of $Max start"
+@@ -89,9 +112,19 @@
+   $passCap = [Math]::Min($PassLimitSec, $IterationTimeoutSec)
+   "$(Get-Date -Format s) iter=$i state=start cap=${passCap}s item=$topItem" | Set-Content -LiteralPath $hb -Encoding UTF8
+   $proc = [System.Diagnostics.Process]::Start($psi)
+-  $timedOut = -not $proc.WaitForExit($passCap * 1000)
++  $deadline = (Get-Date).AddSeconds($passCap); $timedOut = $false; $lockEnd = ''
++  while (-not $proc.WaitForExit($LockPollSec * 1000)) {
++    $b = GpuBusy
++    if ($b) { $lp = LockPid; if ($lp -le 0 -or -not (InTree $lp $proc.Id)) { $lockEnd = $b; break } }
++    if ((Get-Date) -ge $deadline) { $timedOut = $true; break }
++  }
+ 
+-  if ($timedOut) {
++  if ($lockEnd) {
++    Log "iter $i : GPU_LOCK_MIDPASS ($lockEnd) - render window opened outside this pass; ending the pass now (pi tree PID $($proc.Id)) so no LLM request reaches llama-swap while the lock is held"
++    & taskkill /PID $proc.Id /T /F | Out-Null
++    $proc.WaitForExit(3000) | Out-Null
++    $piRc = 125
++  } elseif ($timedOut) {
+     Log "iter $i : ITERATION_TIMEOUT after ${passCap}s - killing process tree PID $($proc.Id)..."
+     & taskkill /PID $proc.Id /T /F | Out-Null
+     $proc.WaitForExit(3000)

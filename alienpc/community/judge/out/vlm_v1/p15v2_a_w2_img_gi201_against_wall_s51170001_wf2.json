@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w2_img_gi201_against_wall_s51170001_wf2",
+ "secs": 3.6,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical cave background and lighting as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Characters retain same appearance, clothing, and body types across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows orc thrusting into elf, both in target standing rear-entry pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No merged bodies, malformed genitals, or extra limbs visible in any frame."
+  }
+ },
+ "flags": []
+}

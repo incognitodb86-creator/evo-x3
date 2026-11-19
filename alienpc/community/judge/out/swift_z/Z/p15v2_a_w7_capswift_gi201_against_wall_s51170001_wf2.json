@@ -1,0 +1,53 @@
+{
+ "frames": [
+  22,
+  240
+ ],
+ "diffs": [
+  41.17,
+  9.18
+ ],
+ "per_frame": [
+  {
+   "frame": 22,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rocky cave walls, lighting conditions, and environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomy is consistent; limbs are distinct, hands have correct finger counts, and no body parts are fused or malformed."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0526,
+    "anatomy_defect": 0.5463
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 240,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rocky cave walls and lighting conditions in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomy is consistent; hands, limbs, and bodies are well-formed with no melting, extra parts, or distortions."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0821,
+    "anatomy_defect": 0.6733
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w7_capswift_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 32.7
+}

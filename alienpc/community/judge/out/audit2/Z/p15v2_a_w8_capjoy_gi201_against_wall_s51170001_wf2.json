@@ -1,0 +1,49 @@
+{
+ "frames": [
+  8,
+  215
+ ],
+ "diffs": [
+  42.36,
+  9.82
+ ],
+ "per_frame": [
+  {
+   "frame": 8,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and overall cave structure remain consistent between frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionally correct; no melting or floating parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.001,
+    "anatomy_defect": 0.0002
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 215,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background rocks, lighting, and overall cave structure remain identical between frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are intact and proportionally correct with no deformities."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0005,
+    "anatomy_defect": 0.0
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_a_w8_capjoy_gi201_against_wall_s51170001_wf2"
+}

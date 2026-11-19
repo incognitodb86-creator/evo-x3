@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bed, pillows, and background wall from START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same hair, skin, build, and clothing across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with bodies in continuous contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0012,
+  "target_reached": 0.003,
+  "anatomy_defect": 0.0086
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w8_img_gi102_missionary_s51170001_wf2"
+}

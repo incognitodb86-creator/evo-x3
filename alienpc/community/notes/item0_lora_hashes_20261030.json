@@ -1,0 +1,32 @@
+[
+ {
+  "file": "H3_Combat_V2.safetensors",
+  "bytes": 155110280,
+  "sha256": "5b3edb09e9d6029439badf9bc9db4ba4a355ae679b0810888de82c4793c0bac8"
+ },
+ {
+  "file": "H3_Fight_Flow_V1.safetensors",
+  "bytes": 155110296,
+  "sha256": "579e8eca67b6d70f4db94b2db67cd938751d576ee3d72aba875dae3d911f7398"
+ },
+ {
+  "file": "H3_speed_slider_1.1.safetensors",
+  "bytes": 187384,
+  "sha256": "e5970e97f8a5aa69e3ddc8d2ec4018e6c493cf8c7d0f1f1aa5c17d16e01270b1"
+ },
+ {
+  "file": "Motion_Repair_V2.safetensors",
+  "bytes": 155110272,
+  "sha256": "edfa0e2858caeba7be9108883f61da8525d3c58af998c94ac7a449d9603d7574"
+ },
+ {
+  "file": "MysticXXX_MMH3-V1.safetensors",
+  "bytes": 596451528,
+  "sha256": "7dd837f4c5420d4ec59f3ff1757b3f9d264a6c0f120d65d9c4f59c77584dd0be"
+ },
+ {
+  "file": "minimax_h3_dmad_full_dareties_v4_step600_comfy_fro.safetensors",
+  "bytes": 956743688,
+  "sha256": "4d4ea608992d72303e4971f78728f587f43ecb72490f365a042ed82e37a907ce"
+ }
+]

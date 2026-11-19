@@ -1,0 +1,31 @@
+{
+ "tag": "p15v2_a_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 4.2,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, beige headboard, same lighting and room layout across all frames."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "START IMAGE shows two women; frames show a man and a woman, violating same_people requirement."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours; frames show woman on back, pose changed immediately."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows missionary position with bodies in contact, genital alignment, and active motion as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or Image 3."
+  }
+ },
+ "flags": [
+  "same_people",
+  "start_kept"
+ ]
+}

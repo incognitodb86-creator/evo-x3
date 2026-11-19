@@ -1,0 +1,144 @@
+=== node app1 class_type=MiniMaxH3AppendContinuation
+  class_type = "MiniMaxH3AppendContinuation"
+  input overlap_audio_tokens = ["win1", 3]
+  input overlap_video_tokens = ["win1", 2]
+  input previous_av_latent = ["s0_samp", 0]
+  input sampled_window = ["s1_samp", 0]
+  input transition_audio_tokens = ["win1", 5]
+  input transition_video_tokens = ["win1", 4]
+=== node avae class_type=VAELoader
+  class_type = "VAELoader"
+  input vae_name = "minimax_h3_audio_vae_fp32.safetensors"
+=== node c0 class_type=MiniMaxH3ReferenceToVideo
+  class_type = "MiniMaxH3ReferenceToVideo"
+  input audio_vae = ["avae", 0]
+  input clip = ["clip", 0]
+  input height = 1344
+  input length = 243
+  input prompt = <PROMPT len=3951>
+  input ref_image_size = "max"
+  input ref_images.ref_image_1 = ["img", 0]
+  input ref_images.ref_image_2 = ["sheet", 0]
+  input vae = ["vvae", 0]
+  input width = 768
+=== node c1 class_type=MiniMaxH3ReferenceToVideo
+  class_type = "MiniMaxH3ReferenceToVideo"
+  input audio_vae = ["avae", 0]
+  input clip = ["clip", 0]
+  input height = 1344
+  input length = ["win1", 1]
+  input prompt = <PROMPT len=2569>
+  input ref_image_size = "max"
+  input ref_images.ref_image_1 = ["sheet", 0]
+  input vae = ["vvae", 0]
+  input width = 768
+=== node clip class_type=CLIPLoader
+  class_type = "CLIPLoader"
+  input clip_name = "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+  input device = "default"
+  input type = "minimax"
+=== node dec_a class_type=VAEDecodeAudio
+  class_type = "VAEDecodeAudio"
+  input samples = ["app1", 0]
+  input vae = ["avae", 0]
+=== node dec_v class_type=VAEDecode
+  class_type = "VAEDecode"
+  input samples = ["app1", 0]
+  input vae = ["vvae", 0]
+=== node img class_type=LoadImage
+  class_type = "LoadImage"
+  input image = "community/POOL_768x1344.png"
+=== node ksel class_type=KSamplerSelect
+  class_type = "KSamplerSelect"
+  input sampler_name = "euler"
+=== node m_attn class_type=ModelAttentionBackend
+  class_type = "ModelAttentionBackend"
+  input attention = "comfy kitchen attention"
+  input model = ["unet", 0]
+=== node m_shift class_type=MiniMaxH3SigmaShift
+  class_type = "MiniMaxH3SigmaShift"
+  input model = ["m_vsa", 0]
+  input shift_audio = 3.0
+  input shift_video = 10.0
+=== node m_vsa class_type=BlockSparseAttention
+  class_type = "BlockSparseAttention"
+  input dense_blocks = ""
+  input end_percent = 1.0
+  input extra_tokens = 256
+  input min_tokens = 12288
+  input model = ["m_attn", 0]
+  input selection = "vsa"
+  input selection.keep_percent = 10
+  input sink_conditioning = "exact_kv_and_rows"
+  input start_percent = 0.2
+  input verbose = false
+=== node mkvid class_type=CreateVideo
+  class_type = "CreateVideo"
+  input audio = ["dec_a", 0]
+  input fps = 24
+  input images = ["dec_v", 0]
+=== node noise class_type=RandomNoise
+  class_type = "RandomNoise"
+  input noise_seed = 51080000
+=== node s0_guide class_type=BasicGuider
+  class_type = "BasicGuider"
+  input conditioning = ["c0", 0]
+  input model = ["m_shift", 0]
+=== node s0_samp class_type=SamplerCustomAdvanced
+  class_type = "SamplerCustomAdvanced"
+  input guider = ["s0_guide", 0]
+  input latent_image = ["c0", 1]
+  input noise = ["noise", 0]
+  input sampler = ["ksel", 0]
+  input sigmas = ["s0_sched", 0]
+=== node s0_sched class_type=BasicScheduler
+  class_type = "BasicScheduler"
+  input denoise = 1.0
+  input model = ["m_shift", 0]
+  input scheduler = "simple"
+  input steps = 10
+=== node s1_guide class_type=BasicGuider
+  class_type = "BasicGuider"
+  input conditioning = ["tail1", 0]
+  input model = ["m_shift", 0]
+=== node s1_samp class_type=SamplerCustomAdvanced
+  class_type = "SamplerCustomAdvanced"
+  input guider = ["s1_guide", 0]
+  input latent_image = ["win1", 0]
+  input noise = ["noise", 0]
+  input sampler = ["ksel", 0]
+  input sigmas = ["s1_sched", 0]
+=== node s1_sched class_type=BasicScheduler
+  class_type = "BasicScheduler"
+  input denoise = 1.0
+  input model = ["m_shift", 0]
+  input scheduler = "simple"
+  input steps = 10
+=== node save class_type=SaveVideo
+  class_type = "SaveVideo"
+  input codec = "auto"
+  input filename_prefix = "community/ali147_pool_refsheet_b_s51080000/ali147_pool_refsheet_b_s51080000"
+  input format = "auto"
+  input video = ["mkvid", 0]
+=== node sheet class_type=LoadImage
+  class_type = "LoadImage"
+  input image = "community/RS016_portrait_1152x2016.png"
+=== node tail1 class_type=MiniMaxH3LatentTailGuide
+  class_type = "MiniMaxH3LatentTailGuide"
+  input overlap_audio_tokens = ["win1", 3]
+  input overlap_video_tokens = ["win1", 2]
+  input positive = ["c1", 0]
+  input previous_av_latent = ["s0_samp", 0]
+  input target_av_latent = ["win1", 0]
+=== node unet class_type=UNETLoader
+  class_type = "UNETLoader"
+  input unet_name = "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors"
+  input weight_dtype = "default"
+=== node vvae class_type=VAELoader
+  class_type = "VAELoader"
+  input vae_name = "minimax_h3_video_vae_int8_convrot.safetensors"
+=== node win1 class_type=MiniMaxH3GuidedContinuationWindow
+  class_type = "MiniMaxH3GuidedContinuationWindow"
+  input extension_frames = 238
+  input overlap_frames = 22
+  input previous_av_latent = ["s0_samp", 0]

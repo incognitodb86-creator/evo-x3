@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_b_w2_img_gi102_missionary_s51170001_wf2",
+ "secs": 6.8,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bedroom with white rumpled sheets and same lighting, no scene swap detected."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical blonde woman in white lace and dark-haired man appear consistently across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing with no jump or composition change."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman on back, man on top in missionary pose with visible intimate contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show correct anatomy: five fingers, defined limbs, no fusion or missing parts."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "All body regions are anatomically correct and clearly defined. There are no fusion defects, missing or extra limbs, malformed genitals, or shapeless flesh blobs. The bodies are in a natural, intimate,"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.1277,
+  "target_reached": 0.0001,
+  "anatomy_defect": 0.0002,
+  "anatomy_zoom": 0.0007
+ },
+ "flags": []
+}

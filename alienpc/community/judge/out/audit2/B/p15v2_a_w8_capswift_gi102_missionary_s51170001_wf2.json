@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: same tan headboard, rumpled white sheets, and warm lighting across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical characters: blonde woman in white lace, nude man with dark hair, matching body types and skin tones in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition without jump cuts or pose changes."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Final frame shows clear missionary position with continuous pelvic contact and visible thrusting motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, malformed limbs, or extra/missing genitalia visible in any frame or final image."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0002,
+  "same_people": 0.0,
+  "start_kept": 0.005,
+  "target_reached": 0.0001,
+  "anatomy_defect": 0.0016
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w8_capswift_gi102_missionary_s51170001_wf2"
+}

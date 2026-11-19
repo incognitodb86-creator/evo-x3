@@ -1,0 +1,20 @@
+subject_definitions:
+<Subject 1> is the adult woman shown in <Picture 1> and <Picture 2>, with long straight blonde hair worn loose past her shoulders, blue eyes, slim toned lightly tanned skin, and a wet sheer champagne-beige scoop-neck bikini top with matching low-rise bottoms.
+<Picture 1> is the start still of the same adult woman at a dark metal balcony railing at night, in a three-quarter medium shot with warm wall light from the left, cooler ambient light from the open balcony side and a shallow depth of field; it gives her appearance for the opening frame, while the environment, camera movement, lighting and action are composed freely for the target shot.
+<Picture 2> is the reference sheet for <Subject 1>, a face panel above a full-body front, side and back row; it gives only her face, hair, eyes, build and proportions, and gives no scene, background, lighting, camera, wardrobe state, pose or action.
+
+summary:
+[reference generation] The target video is a 10-second single continuous shot of <Subject 1> at a balcony railing. The shot uses <Picture 1> only as appearance guidance while freely composing the environment and camera. She unties the center strap of her bikini top, lets it fall to the floor, and keeps eye contact with the camera.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - <Picture 1> provides the adult woman's identity, long straight blonde hair, blue eyes, slim toned lightly tanned skin, and initial wet sheer champagne-beige bikini; the intended untying and removal of the top is an action, not a loss of identity.
+
+detailed_description:
+The target video is a realistic, softly lit balcony scene with a shallow depth of field and a calm, continuous camera movement.
+[Shot 1] The shot opens with <Subject 1>, the adult woman from <Picture 1>, standing at a dark metal balcony railing in a three-quarter medium shot. Her long straight blonde hair hangs loose past her shoulders, her blue eyes face the camera, and her slim toned lightly tanned skin shows wet sheen. She wears the wet, sheer champagne-beige scoop-neck bikini top and matching low-rise bottoms. The balcony railing runs across the lower third of the frame, with warm wall light from the left and cooler ambient light from the open balcony side. The camera begins at a slight side angle, then drifts slowly forward and left in a smooth arc, keeping her centered and maintaining eye contact. Her right hand reaches to the center strap of the bikini top. She pinches the small knot with her thumb and forefinger, then pulls it gently apart. The strap loosens, and the front of the top separates at the center. Her fingers stay relaxed and precise; the movement has natural weight, with her shoulder rolling slightly as the strap releases and her torso turning very little. The wet fabric clings and slides with visible friction, not floating. The camera keeps a stable focal plane, with background lights softly blurred and the railing edge in sharp focus. Her breathing remains even, and her gaze stays level, never breaking to look down at the knot. She continues looking directly at the camera with a calm expression while the top shifts on her torso. With a slow, natural motion, she lets go. The top slips downward under its own weight, catching briefly on her shoulders before sliding away. The fabric falls onto the tiled floor beside the railing and settles in a damp, sheer pile. The matching low-rise bottoms remain in place. The camera continues its slow arc, subtly reframing her upper body and the fallen top without cutting. Her hair moves slightly with the motion, and her expression remains steady, direct, and unbroken. The shot ends as she stands at the railing, the removed top on the floor, still facing the camera.
+
+overall_soundscape:
+Soft outdoor balcony room tone, faint distant city air, subtle fabric rustle, a small strap click, and the light wet cloth falling to tile.
+
+non_diegetic_music:
+N/A

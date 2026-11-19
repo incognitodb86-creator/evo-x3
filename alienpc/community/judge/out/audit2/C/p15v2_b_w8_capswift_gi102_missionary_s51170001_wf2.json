@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: same bed, sheets, pillow, wall, and lighting across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both subjects retain identical appearance, clothing, and body types throughout all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly before motion begins."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows clear missionary position with pelvic contact and thrusting motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly formed limbs and bodies with no fusion or missing parts."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0002,
+  "same_people": 0.0,
+  "start_kept": 0.1273,
+  "target_reached": 0.0032,
+  "anatomy_defect": 0.0203
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w8_capswift_gi102_missionary_s51170001_wf2"
+}

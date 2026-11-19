@@ -1,0 +1,53 @@
+{
+ "frames": [
+  155,
+  226
+ ],
+ "diffs": [
+  9.76,
+  10.84
+ ],
+ "per_frame": [
+  {
+   "frame": 155,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, including the bed linens, headboard, and lighting conditions, remains consistent between both images."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "Image 2 shows a severe anatomical defect: an extra arm extending from the woman's back to touch her own hip."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0209,
+    "anatomy_defect": 0.97
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 226,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "The scene changes from a man and woman to two women, altering the subjects entirely."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The top woman's left arm is malformed, appearing as a fused mass of flesh near the bottom woman's shoulder."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.5551,
+    "anatomy_defect": 0.272
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w7_capjoy_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.2
+}

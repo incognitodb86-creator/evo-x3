@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_a_w2_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.0,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The cave environment, rock textures, and lighting conditions in the frames match the START IMAGE."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "In frames 2-8, the male character's clothing changes from armor to black shorts, deviating from the START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 is identical to the START IMAGE in pose, framing, and wardrobe details."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows the characters in a standing rear-entry position against the wall with visible contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, limb fusion, or malformed features are observed in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0615,
+  "same_people": 0.2793,
+  "start_kept": 0.2678,
+  "target_reached": 0.0247,
+  "anatomy_defect": 0.5428
+ },
+ "flags": [
+  "same_people"
+ ]
+}

@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Rock wall and cave environment consistent across all frames and start image."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical elf woman and orc character with same features and attire in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches start image pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in target pose, in contact, with act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals/hands visible in any frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.013,
+  "target_reached": 0.0015,
+  "anatomy_defect": 0.0012
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w8_img_gi201_against_wall_s51170001_wf2"
+}

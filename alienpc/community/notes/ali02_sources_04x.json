@@ -1,0 +1,18 @@
+[
+ {"name":"04x_hf_space_api.json","url":"https://huggingface.co/api/spaces/mirceaganghf/HF-Face-Detection-Package"},
+ {"name":"04x_hf_space_disc.json","url":"https://huggingface.co/api/spaces/mirceaganghf/HF-Face-Detection-Package/discussions"},
+ {"name":"04x_hf_arcface_api.json","url":"https://huggingface.co/api/models/mirceaganghf/arcface"},
+ {"name":"04x_hf_buffalo_api.json","url":"https://huggingface.co/api/models/mirceaganghf/buffalo_l"},
+ {"name":"04x_hf_bufla_api.json","url":"https://huggingface.co/api/models/mirceaganghf/buffalo_a"},
+ {"name":"04x_hf_antelope_api.json","url":"https://huggingface.co/api/models/mirceaganghf/antelopev2"},
+ {"name":"04x_hf_insight_api.json","url":"https://huggingface.co/api/models/mirceaganghf/insightface"},
+ {"name":"04x_tenstrip_repo.json","url":"https://huggingface.co/api/models/TenStrip/10Eros-Concept-LoRAs-H3"},
+ {"name":"04x_tenmax_card.json","url":"https://huggingface.co/TenStrip/10Eros-Max-Turbo-LoRA"},
+ {"name":"04x_docs_prompt.json","url":"https://docs.comfy.org/pipeline/technical-docs/prompt-guide"},
+ {"name":"04x_cwb_dataset.json","url":"https://huggingface.co/api/datasets/amirfarzam/CodexBench"},
+ {"name":"04x_comfy_changelog.json","url":"https://raw.githubusercontent.com/Comfy-Org/ComfyUI/main/CHANGELOG.json"},
+ {"name":"04x_cont_repo.json","url":"https://api.github.com/repos/ukr8b3g-cmyk/ComfyUI-H3-Continuum"},
+ {"name":"04x_extender_repo.json","url":"https://api.github.com/repos/tritant/ComfyUI_MiniMax_H3_Extender"},
+ {"name":"04x_latentup_repo.json","url":"https://api.github.com/repos/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler"},
+ {"name":"04x_infinitereg.json","url":"https://api.comfy.org/nodes/comfyui-infinite-creation"}
+]

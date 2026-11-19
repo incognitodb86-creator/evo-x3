@@ -1,0 +1,83 @@
+{
+ "card_title": "the blonde woman chained to a padded bench and the metallic robot, with a wall TV showing a similar scene",
+ "naming_source": "Max's naming sentence (notes/needs_derrick.md row 18, 2026-10-24 9:30 PM CT, quoted in the superseded card of 04:34 CT) says 'black and silver metallic humanoid robot, behind a blonde woman on a dark couch with a TV behind them'. The two captions now state the metal, the robot shape and the TV in their own words; the couch does NOT appear (the surface is a padded bench / examination table), so 'couch' and 'sofa' stay banned.",
+ "facts_extra": {
+  "naming_allowed": ["black", "silver", "metal", "metallic", "humanoid", "robot"],
+  "_naming_source": "Max's naming sentence (needs_derrick.md row 18) named the colour, the metal, the humanoid shape, the couch and the TV. The two captions of 2026-10-25 independently state the metal plating, the articulated frame, the metallic dome head and the wall TV, so those are now card facts with quotes; the couch is not in any caption, so it stays banned. The mechanical parts the old card could not see (servo, piston, wire, panel, jaw, antenna, chassis) stay banned: no caption states them.",
+  "_consent_note": "The old card's words 'anguished, distressed expression' are NOT in the two captions of 2026-10-25: ask A says 'head turned toward camera, mouth slightly open, drool visible'. The restraint is now quoted directly from the captions ('chained at wrists to bench edge and at ankles to bench leg'), so the consent question is stated on caption words and stays with Derrick.",
+  "consent": {
+   "status": "NOT_RESOLVABLE_FROM_THE_FRAME",
+   "card_words": "chained at wrists to bench edge and at ankles to bench leg; mouth slightly open, drool visible; head turned toward camera",
+   "shipped_words": "the woman is consenting and eager (the shipped prompt wording, cited in the superseded facts.json)",
+   "_note": "The captions record restraint (wrists and ankles chained to the bench) and an open mouth with drool, and no caption states an emotion, an eagerness, or a refusal. Prose cannot convert restraint into eagerness. The gate bans every eagerness claim and requires the prompt to state that the card gives no consent evidence. notes/needs_derrick.md row 21/22 asks Derrick to rule the scene or replace the still. This is NOT resolved by this pass."
+  }
+ },
+ "figures": [
+  {
+   "kind": "human",
+   "noun": "the blonde woman",
+   "species": "human, appears caucasian",
+   "build": "slim, toned (ask B adds 'slim, athletic')",
+   "skin": "fair, glistening with sweat",
+   "hair": "long, wavy blonde",
+   "wardrobe": "pink lace lingerie set (bra and panties), black fishnet stockings on right leg only, clear high-heeled sandals with straps; ask B adds a silver metallic harness across the torso",
+   "pose": "prone on a black padded bench, upper body propped on forearms, head turned toward camera, mouth slightly open, drool visible from corner of lip",
+   "position": "left side of frame, chained at wrists to bench edge and at ankles to bench leg",
+   "head_in_frame": true,
+   "visible": ["human, appears caucasian", "slim, toned", "fair, glistening with sweat", "long, wavy blonde", "pink lace lingerie set", "black fishnet stockings on right leg only", "clear high-heeled sandals with straps", "prone on a black padded bench", "head turned toward camera", "mouth slightly open, drool visible", "chained at wrists", "ankles to bench leg", "left side of frame", "silver metallic harness across torso"],
+   "not_visible": ["the left leg's stocking", "genitals", "areola", "nipple", "erection", "any facial expression word (no caption states one)"]
+  },
+  {
+   "kind": "non-human",
+   "noun": "the metallic robot",
+   "species": "anthropomorphic metallic robot",
+   "build": "tall, muscular, articulated limbs with visible joints and segments",
+   "skin": "polished silver metal plating with darker mechanical underlayers",
+   "hair": "none (head is a smooth metallic dome with sensor-like details)",
+   "wardrobe": "black tight-fitting shorts covering pelvic area; otherwise bare metal",
+   "pose": "bent at waist, leaning over the woman's hips, right hand gripping her right buttock, left arm extended downward with a cylindrical metallic appendage near her lower back/hip",
+   "position": "right side of frame, standing on floor behind bench",
+   "head_in_frame": true,
+   "visible": ["anthropomorphic metallic robot", "articulated limbs with visible joints and segments", "polished silver metal plating", "head is a smooth metallic dome with sensor-like details", "black tight-fitting shorts", "right hand gripping her right buttock", "left arm extended downward", "cylindrical metallic appendage", "standing on floor behind bench", "bent at waist"],
+   "not_visible": ["eyes", "mouth", "a face", "fingers in detail", "genitals under the shorts", "any expression (the head is a smooth dome)"]
+  }
+ ],
+ "room": ["dark interior", "matte black", "studio or interrogation-style chamber", "indistinct equipment or furniture silhouettes"],
+ "props": ["black padded bench/table with metal frame", "heavy silver chains", "large flat-screen tv", "displaying a blurred image of a similar scene"],
+ "room_banned": ["couch", "sofa", "bed", "lamp", "curtain", "window", "balcony", "pool", "dungeon", "cellar", "chandelier", "bookcase", "fireplace", "rug", "floor lamp"],
+ "light": ["strong directional lighting from front-left", "highlighting the woman\u2019s skin, hair, and the metallic surfaces of the robot", "soft shadows cast under the bench", "cool blue glow"],
+ "light_banned": ["golden hour", "sunset", "candlelight", "firelight", "neon", "moonlight", "string lights", "fireplace", "camera flash", "sunlight"],
+ "camera": ["left side of frame", "right side of frame", "the TV is mounted on the back wall"],
+ "core_tokens": ["long, wavy blonde", "pink lace lingerie set", "chained at wrists", "prone on a black padded bench", "anthropomorphic metallic robot", "polished silver metal plating", "black tight-fitting shorts", "bent at waist", "heavy silver chains", "large flat-screen tv", "dark interior", "cool blue glow"],
+ "prompt_delta": {
+  "measured_facts": [
+   "ck_top_card fires on the built GI063 graphs, c0 and c1: F-CARD-BANNED figure 1: 'anguished', 'crying', 'distressed', 'he'; figure 2: 'LED', 'anguished', 'face', 'he' (c0) / 'he', 'skin', 'tail' (c1)",
+   "F-CARD-POSE figure 1 opening beat lacks the card pose 'prone on a black padded bench', 'chained at wrists'; figure 2 lacks 'bent at waist'",
+   "F-CARD-ROOM: no card room/light word 'dark interior', 'matte black', 'studio or interrogation-style chamber', 'indistinct equipment or furniture silhouettes'",
+   "F-CARD-CONSENT: 'anguished', 'distressed', 'crying' — the shipped prose states emotion words the new card bans",
+   "F-CARD-CONSENT2: no card-honesty line stating that the record shows restraint and gives no consent evidence",
+   "TOP-MANIFEST card words in c0: 0/12 and in c1: 0/12 (the shipped prompts carry none of the 12 words the new card makes every chunk carry)",
+   "ck_top_facts PASSES on this facts file; the live gate measures 39/39 card quotes verbatim"
+  ],
+  "owner_of_the_fix": "the prompt-rewrite rows (CARD-CONSENT-LINE, EMOTION-BAN, ANCHOR-CARRY, DIALOGUE-NO-MOUTH, NO-SOLO): the words and the consent line in the shipped prompts are what change, not the card"
+ },
+ "aliases": {
+  "1": ["she", "her", "hers", "herself", "woman", "blonde", "the blonde woman", "<subject 1>"],
+  "2": ["it", "its", "robot", "machine", "the metallic robot", "metal", "metallic", "articulated", "dome-headed", "<subject 2>"]
+ },
+ "banned": {
+  "1": ["dark-haired", "dark hair", "brunette", "black hair", "brown hair", "straight hair", "eager", "consenting and eager", "enthusiastic", "muscular", "tall", "anguished", "distressed", "screaming", "crying", "tears", "smiling", "laughing", "bound to a chair", "in a cage"],
+  "2": ["chrome", "optical", "jaw", "plate", "plates", "panel", "panels", "seam", "mesh", "glowing", "glow", "servo", "hydraulic", "piston", "circuit", "alloy", "steel", "grinning", "smiling", "gloved", "glove", "antenna", "chassis", "endoskeleton", "carbon", "fibre", "wire", "wires", "screw", "screws", "bolt", "bolts", "plastic", "rubber", "latex", "fingers", "toes", "knees", "elbows", "shoulders", "biceps", "navel", "collarbone", "spine", "fur", "claw", "claws", "tusk", "horn", "tail", "wings", "cables", "visor", "LED", "red eyes", "blue eyes", "eyes", "face", "human face", "skin", "bare chest", "chest", "abs", "navel", "collarbone", "spine", "fur", "claw", "claws", "tusk", "horn", "tail", "wings", "cables", "visor", "LED", "red eyes", "blue eyes", "eyes", "face", "human face", "shirt", "t-shirt", "jeans", "boots", "shoes", "helmet", "paint", "rusted", "rust", "oil", "grease", "dents", "scratches"],
+  "any": ["the only person", "alone in the room", "standing alone", "the only bodies", "the only figure", "the only subject", "she is alone", "one person", "single figure", "a man", "the man", "he", "his", "him", "a couple in love", "on a couch", "on a sofa", "in a bedroom", "bedroom", "screaming", "anguished", "in a cage", "on a bed"]
+ },
+ "head_allow": [],
+ "open_beat": {"1": ["prone on a black padded bench", "chained at wrists"], "2": ["bent at waist"]},
+ "open_beat_ban": {"1": ["unfasten", "unlock", "unchain", "release her", "frees her", "stands up", "slips", "loosens", "takes off", "removes the", "she stands", "sits up"], "2": ["stands upright", "steps back", "withdraws", "removes his hand", "lets go"]},
+ "consent_gate": {
+  "ban": ["consenting and eager", "enthusiastic", "she loves", "loves it", "begging for", "willingly", "she wants this", "she is eager", "she begs for", "orgasm", "anguished", "distressed", "screaming", "crying"],
+  "require": ["the card record shows restraint and gives no consent evidence", "notes/needs_derrick.md row 21"],
+  "_note": "The captions state the chains and an open mouth with drool, and no caption states an emotion. The gate bans both the eagerness claims and the distress words the old card used, and requires the prompt to say plainly that the card gives no consent evidence and names the row that carries the question to Derrick."
+ },
+ "solo_phrases": ["the only person", "alone in the room", "standing alone", "the only bodies", "the only figure", "the only subject", "she is alone", "one person", "single figure"],
+ "card_extra": "caption_conflict: ask A puts the key light 'from front-left'; ask B puts it 'from above and slightly in front'. Both are quoted. A prompt must not state one direction as settled. caption_conflict: the wardrobe in ask B adds 'a silver metallic harness across torso' that ask A does not list; the row names the ask it came from."
+}

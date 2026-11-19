@@ -1,0 +1,63 @@
+# ALI-173 BAKEOFF GPU ledger (B1 GATE HARDENING, 2026-10-23)
+
+Rule: one line per GPU window, and budget state read before any `p7/JOB_REQUEST.json` write.
+Budget file for this loop = `C:/Users/derek/5slock/ralph-community/logs/p7_budget.json` (the
+`C:/AI/community` ledger does not exist; AGENTS.md).
+
+| # | time (CT) | action | queue | guard | GPU | notes |
+|---|-----------|--------|-------|-------|-----|-------|
+| 1 | 18:05 | `python C:/AI/community/scripts/comfy_ctl.py start` (BAKEOFF-authorized; ALI-173 B2 window) | - | - | - | goal = read-only `/object_info` for the Continuum schema |
+| 2 | 18:12 | `GET :10004/system_stats` + `GET :10004/object_info` (read-only, 8.2 s, 2605 classes) | 0/0 | `IDLE (10004, 10002) free=True` | `0 %, 4551 MiB, 0 processes` | `comfy_ok=True`, running model = `comfyui_auto`; no render touched; ComfyUI stopped again at the end of the window |
+| 3 | 18:14 | `comfy_ctl.py status` | - | `IDLE (10004, 10002) free=True` | `0 %, 5208 MiB, 0 processes` | idle between windows |
+| 4 | 18:26 | budget read | 0/0 (ComfyUI asleep) | `IDLE` | `0 %` | `used_min 467.5 / cap_min 615`, `jobs 37 / job_cap 45`, `updated 2026-10-23T17:28:21` |
+
+Budget read in full: `{"used_min": 467.5, "jobs": 37, "cap_min": 615, "job_cap": 45}` - one graph job
+of 15 min fits (467.5 + 15 = 482.5 < 615; 37 + 1 = 38 < 45), and `STOP_RALPH` (Max 18:17 CT) asks to
+relaunch with `-GpuCapMin 700 -JobMax 55`, which widens it further.
+
+No `p7/JOB_REQUEST.json` was written in this loop: `STOP_RALPH` is active (Max 18:17 CT "stop after
+iter 07 to relaunch with -GpuCapMin 700 -JobMax 55"), so the B2 job is staged, not submitted, and
+`p7/JOB_REQUEST.json` does not exist right now (verified by the pre-submit gate, which checks the
+file is absent and the id is unused).
+
+## 18:35 CT - pre-submit gates and the staged request (B2)
+
+Guard command reality (fixed after the first run): the GPU guard is
+`C:\AI\director\scripts\gpu_guard.ps1`, called with NO arguments, exactly as `ralph.ps1:77` calls it
+(`-File $Guard`); it prints `IDLE` and exits 0, `BUSY: <reason>` and exits 1, and it fail-closes (rc 2)
+on its own errors. `status` is NOT an argument - passing it dies on `Cannot process argument
+transformation on parameter 'TimeoutSec'`, and the first version of `notes/ali173_b2_objinfo.py`
+carried a `DUR` path to a `.pi\guard\gpu_guard.mjs` file that does not exist, which is why the 18:12 CT
+log line came from `comfy_ctl status` instead of the guard. Both files now use the real path
+(`notes/ali173_b2_objinfo.py` logs `STEP 1b gpu_guard rc=...` plus an nvidia-smi utilisation line,
+because `ralph.ps1 GuardWait:79-81` also fails a window over `-UtilMax` 30 % while the guard says IDLE).
+
+| # | time (CT) | action | queue | guard | GPU | notes |
+|---|-----------|--------|-------|-------|-----|-------|
+| 5 | 18:34 | `gpu_guard.ps1` (no args) + nvidia-smi | 0/0 (ComfyUI asleep) | `IDLE` rc=0 | `0 %, 15224 MiB` | resident VRAM with 0 % = the idle llama-swap model, not work |
+| 6 | 18:35 | budget re-read, then `p7/JOB_REQUEST.json` staged | 0/0 | `IDLE` rc=0 | `0 %` | `used_min 467.5 / 615`, `jobs 37 / 45`; one 15-min estimate job fits; STOP_RALPH asks for 700/55 at relaunch |
+
+Staged request (written, not rendered):
+
+    {"jobs": [{"id": "ali173_cont_hc1_s51140001", "kind": "graph", "frames": 240, "frames_tol": 33, "minutes": 60}]}
+
+- `frames_tol: 33` = the batch's tolerance (iter 09 used 0 for a seg, the R-lines used 33). Continuum's
+  own seam trims can land a few frames off 240, so 33 % avoids a false "frame count" failure; the
+  objective.json will record the true count and the ledger notes the exact number.
+- `minutes: 60` -> per-attempt timeout 1200 s, `--max-redo 2` (ralph.ps1:287-294); the harness clamps
+  to 30..180. Budget accounting uses the actual wall minutes (`BudgetAdd`), not this number.
+- Ids checked against every `ralph.ps1` id gate by `notes/ali173_b2_req_check.py` before the write.
+
+No render happened in this loop: the harness runs graph jobs only between iterations after a clean pass,
+and `STOP_RALPH` (Max 18:17 CT) wants a relaunch at `-GpuCapMin 700 -JobMax 55` first.
+`p7/jobs/ali173_cont_hc1_s51140001.result.json` does not exist as of 18:36 CT.
+| 7 | 18:5x CT | (cpu) | durable graph copy + restore: notes/ali173_b2_graph_ali173_cont_hc1_s51140001.json (runs/ is gitignored, C:/AI/community/.gitignore:10, and ralph.ps1 has no `git clean` = grep 0 hits), notes/ali173_b2_restore_graph.py OK byte-identical sha=1efecedd53549c5e, --selftest 4/4 probes fired (missing durable / missing live / edited live / clean) | graph sha 1efecedd53549c5e05887985f352a18d5897ca8587588af39b67052bfabd2088; git ca155bc | - | no render |
+
+## Ledger keys this task does not own
+- `wall_s` per render: the harness records the job wall time in p7/jobs/<id>.result.json; I do not time a render I do not run.
+- `first_frame_png`, `contact_sheet_sha256`, `seam_delta`, `face_similarity`, `retry`, `prompt_source`: created with the
+  result.json, objective.json and contact sheet, i.e. the pass after the harness runs the job.
+- `prompt_source` is already fixed in writing: notes/hc_c1_c0.txt, sha256 4d73c059385d88d7b3238503922e2d254fe78691b37e2d2ff669da059ca176a2, shacl128 4d73c059385d88d7, unchanged.
+| 2026-10-24 12:33:00 -> 2026-10-24 12:33:06 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.1 | PW1d smoke rewrite REF2AV 16:9 10.0 s, seed 42, 7B Q4_K_M + Q8_0 Omni adapter | (0, 0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_objective.json` |
+| 2026-10-24 12:36:05 -> 2026-10-24 12:36:11 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.1 | PW1d smoke rewrite REF2AV 16:9 10.0 s, seed 42, 7B Q4_K_M + Q8_0 Omni adapter | (0, 0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_objective.json` |
+| 2026-10-24 12:36:40 -> 2026-10-24 12:37:01 | ComfyUI wake + ONE Omni prompt-writer job (text only, no DiT) | 0.3 | PW1d smoke rewrite REF2AV 16:9 10.0 s, seed 42, 7B Q4_K_M + Q8_0 Omni adapter | (0, 0) | `notes/pw1_smoke_omni_hc3.md`, `notes/pw1d_objective.json` |

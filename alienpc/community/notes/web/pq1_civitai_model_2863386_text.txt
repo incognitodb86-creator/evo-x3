@@ -1,0 +1,185 @@
+[civitai model 2863386] MiniMax H3 Prompt Writer | type Other | nsfw False | tags tool, comfyui, prompt generation, local llm, minimax music 3, minimax, video generation, llama.cpp, ollama, gguf, prompt guide, prompt writer, minimax h3
+
+---- block ----
+
+MiniMax H3 Prompt Writer Choose a MiniMax H3 mode, add your photo or other references, and describe the video you want in plain language. Writer uses your selected LLM to turn that brief into a prompt formatted for MiniMax H3. Review it, make any changes, and copy it into your video tool or workflow. 
+
+ ComfyUI · v0.4.6 Runs inside ComfyUI. Includes workflow media integration and Auto VRAM.
+
+ Installation guide 
+
+ Windows Standalone · v0.1.7 Runs without ComfyUI. Includes the same prompt writing, Sequence, Composer and Editor tools.
+
+ Setup guide 
+
+ Select the version for your setup on this Civitai page and download its ZIP. The two editions use separate version numbers.
+
+ What's New In both editions Sequence: write prompts for longer videos by splitting one brief into timed chunks. Each chunk gets its own complete, editable prompt, with shared references and individual refinement. Copy the prompts into your preferred video tool or use them in a manual workflow. Choose Official for the H3 prompt structure or Compact for descriptive prompts that are easier to adapt to other tools.
+
+ Media Composer: combine pictures and video contact sheets into a reference collage.
+
+ Media Editor: crop pictures, trim and crop video, and extract frames.
+
+ Light theme and interface size: switch themes and make the UI larger.
+
+ ComfyUI only Add to workflow: drag media from the floating panel onto the canvas to create a loader, or onto a compatible loader to replace its file. Supports native image, video and audio loaders, plus VHS Load Video (Upload). Drag again to transfer later edits.
+
+ Auto VRAM: coordinate memory between ComfyUI and supported local Writer models.
+
+ Core Features 
+ Supports all current H3 input modes:
+
+ T2VA 
+
+ I2VA 
+
+ FL2VA 
+
+ L2VA 
+
+ Reference 
+
+ Reference mode supports up to 9 images, 3 videos and 3 audio references, with 12 files total .
+
+ 
+
+ Tell Writer what each reference should provide: 
+
+ Use Picture 1 for the character, Picture 2 only for the clothes, and only the movement from Video 1. Put the character on a rainy street at night.
+
+ Writer handles the H3-specific prompt structure and reference syntax around that.
+
+ Other features:
+
+ Editable generated prompts 
+
+ Refine an existing prompt with a short instruction 
+
+ Separate saved drafts for every H3 mode 
+
+ Insert Picture / Video / Audio tags directly into the text 
+
+ Video contact sheets with frame sampling controls 
+
+ Automatic context handling 
+
+ Local model unload and VRAM controls 
+
+ Custom system prompts 
+
+ Official MiniMax prompt-writing guides used during generation 
+
+ MiniMax Music 3 workspace 
+
+ Writer prepares prompts and reference media. It does not generate videos. Copy the finished prompt into your H3 tool or workflow.
+
+ 
+
+ Prompt Model Providers 
+
+ 
+ The model writing the prompt is separate from the MiniMax H3 model used in your video workflow .
+
+ There are currently four ways to run it.
+
+ Ollama The simplest local starting point for most users. See the provider guide for tested models and setup.
+
+ GGUF ComfyUI: Direct GGUF loads the prompt model through llama-cpp-python. Supports Gemma 4, Qwen 3.8, compatible Qwen 3.8 fine-tunes and Qwen3-VL. Images and video require a matching vision projector.
+
+ Windows Standalone: Local GGUF uses your own llama-server executable and existing GGUF models. Select the runtime, model and matching vision projector in Settings.
+
+ External llama.cpp Connect Writer to your own llama-server .
+
+ Useful if you already use llama.cpp or want full control over model loading, GPU placement, context, KV cache and the runtime itself.
+
+ API Providers Supports:
+
+ Gemini 
+
+ OpenAI 
+
+ OpenRouter 
+
+ Custom OpenAI-compatible endpoints 
+
+ Custom endpoints can also be used with local servers such as LM Studio.
+
+ When the provider runs on your computer, the prompt request and prepared media stay local. Remote providers, including a remote Ollama host, receive the data needed for the request.
+
+ Provider guide:
+ https://github.com/duckyshell/ComfyUI-MiniMaxH3-Prompt-Writer/blob/main/docs/PROVIDERS.md 
+
+ MiniMax Music 3 Prompt Writer also includes a separate workspace for MiniMax Music 3 .
+
+ Describe the track you want in normal language and Writer builds the structured Music 3 caption.
+
+ Lyrics can be written manually, generated from the Music Brief, or rewritten using Refine .
+
+ Music 3 is separate from H3 video prompting, but uses the same provider system.
+
+ Basic Usage Open H3 Prompt Writer
+
+ Go to Settings and choose your provider / model
+
+ Select the H3 mode
+
+ Add your references
+
+ Write the Creative Brief normally
+
+ Press Generate prompt 
+
+ Edit it, use Refine , or copy it into your H3 workflow
+
+ 
+
+ You do not need to manually write H3 timestamps, sections or reference formatting. 
+
+ Installation Select ComfyUI v0.4.6 or Windows v0.1.7 on this Civitai page and download the matching ZIP.
+
+ ComfyUI 
+
+ Extract the ComfyUI package into ComfyUI/custom_nodes/ .
+
+ The final folder should be:
+
+ ComfyUI/custom_nodes/ComfyUI-MiniMaxH3-Prompt-Writer/ Restart ComfyUI. Open the floating H3 Prompt Writer button or Extensions > H3 Prompt Writer .
+
+ This is a UI extension. No Writer node appears in node search.
+
+ Installation guide 
+
+If you can't find H3 Prompt Writer in ComfyUI, open it from the Extensions menu or use the H3 Writer button:
+
+ 
+
+ Windows Standalone 
+
+ Extract the Standalone package to a writable folder and run start.bat .
+
+ Requires Windows 10/11 x64 and Python 3.10+ or uv. The first launch creates its own Python environment. Models and llama.cpp binaries are installed separately.
+
+ Setup guide 
+
+ GGUF Setup For Direct GGUF inside ComfyUI, follow the Direct GGUF guide .
+
+ For Local GGUF in Windows Standalone, follow the Standalone setup guide .
+
+ Notes Video references are shown to the prompt model as ordered contact sheets instead of the full encoded video.
+
+ Prompt models do not listen to uploaded audio files. Describe what should be taken from the audio, such as voice, music, rhythm or soundtrack.
+
+ The base ComfyUI extension has no additional Python dependencies. Provider setup is separate. Standalone installs its own dependencies on first launch.
+
+ The project itself is released under the MIT License .
+
+ MiniMax-provided guides and model files retain their upstream terms.
+
+ Links GitHub 
+ https://github.com/duckyshell/ComfyUI-MiniMaxH3-Prompt-Writer 
+
+ Usage / Creative Brief examples 
+ https://github.com/duckyshell/ComfyUI-MiniMaxH3-Prompt-Writer/blob/main/docs/USAGE.md 
+
+ Troubleshooting 
+ https://github.com/duckyshell/ComfyUI-MiniMaxH3-Prompt-Writer/blob/main/docs/TROUBLESHOOTING.md

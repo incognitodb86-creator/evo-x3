@@ -1,0 +1,7 @@
+FAILED tests/test_adults_guard.py::TestAdultsGuard::test_graph_require_adult
+FAILED tests/test_phase1_still.py::TestPatcher::test_kv_plan_dials_patch_only_their_keys
+FAILED tests/test_phase1_still.py::TestStillBranch::test_still_ok_no_frames_or_audio
+FAILED tests/test_phase1_still.py::TestStillBranch::test_still_wrong_size_fails
+FAILED tests/test_phase1_still.py::TestStillBranch::test_video_job_still_uses_video_checks
+FAILED tests/test_phase1_still.py::TestTemplate::test_guard_ok_on_template_prompts
+FAILED tests/test_phase1_still.py::TestTemplate::test_shipped_values

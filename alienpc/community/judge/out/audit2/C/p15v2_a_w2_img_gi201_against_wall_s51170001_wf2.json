@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical cave wall, rock texture, and lighting as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same skin tone, hair, clothing, and body types across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and outfit exactly before motion begins."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows both bodies in target pose, in contact, with act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, distinct limbs and genitals without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0008,
+  "target_reached": 0.0013,
+  "anatomy_defect": 0.0211
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w2_img_gi201_against_wall_s51170001_wf2"
+}

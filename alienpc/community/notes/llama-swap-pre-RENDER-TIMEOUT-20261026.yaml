@@ -1,0 +1,121 @@
+# Llama-swap configuration (Last Updated: 2026-10-16)
+# Supervisor for Strata 0.2.1.1 (Qwen3.8 Flash-Next IQ3_S 96K + ESP; IQ3_XXS fallback), Dark Roast Q8 vision judge (with mmproj), and ComfyUI 0.38.x.
+# All backends share one exclusive swap:true group so only one model/GPU job runs at a time.
+
+healthCheckTimeout: 1200
+logLevel: info
+startPort: 10001
+globalTTL: 0
+unloadTimeout: 15
+
+timeouts:
+  responseHeader: 1200
+
+
+upstream:
+  ignorePaths:
+    - '.*\.(js|json|css|png|gif|jpg|jpeg|ico|txt)$'
+    # CA2 0.2 (2026-11-03): docs/kb/guides/upstreams/comfyui.md names THREE patterns to set by
+    # hand for /upstream/ (the /comfyui/ route ships the same set built in). Forge queues through
+    # /upstream/comfyui_auto (C:/AI/community/scripts/comm.py:6), and the doc's own fix for the
+    # idle-tab reload is "an upstream.ignorePaths entry for the path it polls" = /api/jobs.
+    - '^/api/jobs$'
+    - '^/ws(/|$)'
+
+routing:
+  router:
+    use: group
+    settings:
+      groups:
+        main:
+          swap: true
+          exclusive: true
+          members:
+            - comfyui_auto
+            - coding_sc117_strata
+            - coding_swift15_iq3s
+            - coding_swift15_iq3s_esp
+            - vl_judge
+            - qwen3vl_judge
+            - comfyui_longvideo
+
+models:
+  coding_sc117_strata:
+    aliases:
+      - strata
+      - qwen3.8-flash-next-iq3_xxs
+      - coding_heretic27b
+      - coding_huihui27b
+    cmd: '"C:\AI\strata-0.2.2\.venv\Scripts\python.exe" C:\AI\strata-0.2.2\sy_strata_launch.py -m C:\AI\Strata-data\models\qwen38-flash-next-iq3s\IQ3_S\Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --engine strata --config C:\AI\strata-0.2.2\strata-iq3_s.json --host 127.0.0.1 --port ${PORT}'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    env:
+      - "SY_STRATA_WARMUP=0"
+    checkEndpoint: /health
+    ttl: 600
+    unloadTimeout: 15
+
+  coding_swift15_iq3s:
+    cmd: '"C:\AI\strata-0.2.2\.venv\Scripts\python.exe" C:\AI\strata-0.2.2\sy_strata_launch.py -m C:\AI\Strata-data\models\swift15-iq3s\Swift-Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --engine strata --config C:\AI\strata-0.2.2\strata-swift15-iq3s.json --host 127.0.0.1 --port ${PORT}'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    env:
+      - "SY_STRATA_WARMUP=0"
+    checkEndpoint: /health
+    ttl: 600
+    unloadTimeout: 15
+
+  coding_swift15_iq3s_esp:
+    cmd: '"C:\AI\strata-0.2.2\.venv\Scripts\python.exe" C:\AI\strata-0.2.2\sy_strata_launch.py -m C:\AI\Strata-data\models\swift15-iq3s\Swift-Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --engine strata --config C:\AI\strata-0.2.2\strata-swift15-iq3s-esp.json --host 127.0.0.1 --port ${PORT}'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    env:
+      - "SY_STRATA_WARMUP=0"
+    checkEndpoint: /health
+    ttl: 600
+    unloadTimeout: 15
+
+  vl_judge:
+    aliases:
+      - vision_9b
+      - darkroast
+      - qwen3.5-9b-dark-roast-q8
+    cmd: 'C:\AI\vlm\llama.cpp\llama-server.exe -m C:\AI\vlm\models\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf --mmproj C:\AI\vlm\models\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.mmproj-Q8_0.gguf -ngl 99 -c 65536 -fa on -ctk q8_0 -ctv q8_0 -np 1 --host 127.0.0.1 --port ${PORT} --image-min-tokens 1024'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    checkEndpoint: /health
+    ttl: 300
+    unloadTimeout: 15
+
+  qwen3vl_judge:
+    aliases:
+      - qwen3-vl-8b-abliterated
+    cmd: 'C:\AI\vlm\llama.cpp\llama-server.exe -m C:\AI\vlm\models\qwen3-vl-8b-abliterated\Huihui-Qwen3-VL-8B-Instruct-abliterated-Q8_0.gguf --mmproj C:\AI\vlm\models\qwen3-vl-8b-abliterated\mmproj-F32.gguf -ngl 99 -c 32768 -fa on -ctk q8_0 -ctv q8_0 -np 1 --host 127.0.0.1 --port ${PORT} --image-min-tokens 1024'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    checkEndpoint: /health
+    ttl: 300
+    unloadTimeout: 15
+  comfyui_auto:
+    aliases:
+      - ls_comfyui
+    cmd: 'C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe -u C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --lowvram --disable-async-offload --disable-pinned-memory --use-ck-attention'
+    cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'  # ALI-156: waits for the render queue (max 1800 s), then taskkill
+    checkEndpoint: /
+    ttl: 0
+    unloadTimeout: 1900  # ALI-156: > graceful-stop cap
+    unlisted: true
+    compat:
+      ignoreWebsockets: true
+
+  comfyui_longvideo:
+    aliases:
+      - ls_comfyui_longvideo
+    cmd: 'C:\AI\comfy-longvideo\ComfyUI\.venv\Scripts\python.exe -u C:\AI\comfy-longvideo\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --lowvram --disable-async-offload --disable-pinned-memory --use-ck-attention --input-directory C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input --output-directory C:\AI\director\part2\regress15\L\out'
+    # CA2 0.2 (2026-11-03): docs/comfyui.md - cmdStop is what releases the GPU, and "llama-swap's
+    # unloadTimeout must be greater than the budget of that script", because llama-swap SIGKILLs a
+    # cmdStop that runs past unloadTimeout. A plain taskkill here kills a render mid-job, the same
+    # failure ALI-156 fixed for comfyui_auto (director 9034dd7), so the queue-aware script is used
+    # and unloadTimeout is raised above its 1800 s cap (1900, as for comfyui_auto).
+    cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'
+    checkEndpoint: /
+    ttl: 0
+    unloadTimeout: 1900
+    unlisted: true
+    compat:
+      ignoreWebsockets: true

@@ -1,0 +1,30 @@
+{
+ "tag": "p15v2_b_w7_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 4.4,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent dark cave texture across all frames, matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and green-skinned male appear in all frames, unchanged in appearance."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump cuts."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Final frame shows them braced against wall, but not in rear-entry position as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals/hands visible in any frame."
+  }
+ },
+ "flags": [
+  "target_reached"
+ ]
+}

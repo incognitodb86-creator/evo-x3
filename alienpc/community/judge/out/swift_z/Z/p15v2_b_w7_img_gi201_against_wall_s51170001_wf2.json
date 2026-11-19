@@ -1,0 +1,53 @@
+{
+ "frames": [
+  209,
+  274
+ ],
+ "diffs": [
+  12.02,
+  10.81
+ ],
+ "per_frame": [
+  {
+   "frame": 209,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting conditions, and surrounding structures remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The characters' anatomy is coherent; limbs are distinct, hands are formed correctly, and there are no fused body parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0154,
+    "anatomy_defect": 0.3781
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 274,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting conditions, and surrounding structures remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All body parts, including hands, limbs, and facial features, appear structurally intact and anatomically correct in both images."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0208,
+    "anatomy_defect": 0.3342
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w7_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 26.8
+}

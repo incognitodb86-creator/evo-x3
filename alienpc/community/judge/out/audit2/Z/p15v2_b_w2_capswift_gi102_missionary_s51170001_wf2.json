@@ -1,0 +1,49 @@
+{
+ "frames": [
+  200,
+  230
+ ],
+ "diffs": [
+  8.9,
+  11.06
+ ],
+ "per_frame": [
+  {
+   "frame": 200,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background remains consistent: same bed, sheets, and wall textures. No new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs and bodies are intact, proportionate, and correctly positioned. No malformed parts or floating elements."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0002,
+    "anatomy_defect": 0.0001
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 230,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background remains consistent: same bed, pillows, wall, and lighting with no new objects or structural changes."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies are anatomically correct and connected; no melting, floating parts, or extra/missing limbs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0003,
+    "anatomy_defect": 0.0001
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_b_w2_capswift_gi102_missionary_s51170001_wf2"
+}

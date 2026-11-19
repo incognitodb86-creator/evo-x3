@@ -1,0 +1,16 @@
+RS4 Render REFSHEET - [!] BLOCKED (render succeeded; two check items are not Forge's files)
+
+The render ran (harness, after the previous iteration's request) and every OBJECTIVE item in RS4's check passes:
+- status.log "2026-10-22 18:07:10 CT JOB start ali147_pool_refsheet_s51080000" and "18:22:13 CT JOB end ... ok secs=902.7"; grep of "JOB error|CLIP_SKIP|error|SKIP|redo|STUCK" over status.log = no matches; p7\jobs\...err.out = 0 bytes; result.json ok=true rc=0, one attempt, no redo, no STUCK.
+- objective.json 481 frames / 768x1344 / 24/1 / audio true / 20.041688 s / 5,733,637 B / blackfreeze [] (no black or frozen frames); my own ffprobe -count_packets = 481 packets (avg 24/1, aac 32000 Hz 2ch).
+- sha256 recorded: mp4 4a467b1f4f9f553c6efe51461bdfca535d9bbbcc21c89864db0eee52493b5223.
+- cmp request.api.json vs the harness's ali147_pool_refsheet_s51080000.api.json = byte-identical (the graph that rendered is exactly RS3's); graph_diff.txt = the 3 RS3 changes + the sheet LoadImage node + filename_prefix only; the sheet resolved - ComfyUI\input\community\RS016_portrait_1152x2016.png SHA256 da0b6a0b0c313e468cb225c7ca0e46dd97321722764aee9d7e76c7297b5caa4a = RS1's.
+- Render seconds 902.7 s vs FIX1 857.5 s = +45.2 s (+5.27%); vs CTRL 809.7 s = +93.0 s. Numbers only, no quality claim.
+
+Two items in the check cannot be produced by Forge and do not exist:
+1. `sbs_fix1_refsheet.mp4` (hstack FIX1|REFSHEET, labels) - run_graph_job.py has NO hstack path (grep = 0) and `find C:\AI\community\runs -name sbs_*` = 0 files, so no ALI-147 arm has one. It needs an ffmpeg hstack/drawtext render into runs\<arm>\, outside Forge's writable files (ffmpeg by Forge is allowed only as a CPU dry run for a harness fix).
+2. A still at frame 0 - the harness contact sheet (ali147_pool_refsheet_s51080000_stills_contact.png, 1,721,371 B) covers t=8.5-11.5 s and t=18.5-20.0 s = frames 204-276 and 444/456/468/480 by code (run_graph_job.py:45-52), so it DOES contain the requested 230/243/256/480, but never frame 0; the 0:30/0:40/0:50 windows fall past this 20.04 s clip.
+
+Needs Max/Derrick: produce `sbs_fix1_refsheet.mp4` and the frame-0 still (the plan's Proof section assigns `sbs_<arm>.mp4` to the box executor); then RS4 can be ticked. Full evidence: C:\AI\community\notes\ali147_refsheet_rs4_verify.md.
+
+METHOD_ONLY. No vision judge, no quality judgment, no A/B claim. KEEP is Derrick's only.

@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains dark, mottled cave texture in all frames, no new objects or lighting changes."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same build, skin tone, hair, and outfits across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing with no jump or cut."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "By frame 8, they are not braced against a wall; bodies are separated and not in rear-entry pose."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All limbs, hands, and genitals are intact and clearly defined in every frame."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0002,
+  "same_people": 0.0062,
+  "start_kept": 0.0005,
+  "target_reached": 0.9283,
+  "anatomy_defect": 0.1724
+ },
+ "finish": "stop",
+ "flags": [
+  "target_reached"
+ ],
+ "tag": "p15v2_b_w7_capswift_gi201_against_wall_s51170001_wf2"
+}
