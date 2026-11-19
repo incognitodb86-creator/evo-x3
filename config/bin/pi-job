@@ -588,7 +588,7 @@ def _exec_job(job_id: str) -> int:
                         f"pi-job {job_id}",
                         f"Run {job_id}, prompt {hash8}: code {code}, 15 min",
                         priority="high",
-                        actions=f"copy, Copy, queue {job_id} {code}",
+                        actions=f"copy, Copy, pi-job queue {job_id} {code}",
                     )
                     still_url, prompt_url = _publish_preview(crun)
                     note = f"run={crun.name} prompt_hash8={hash8} ntfy_sent={sent} preview={'ok' if still_url else 'no-still'}"
