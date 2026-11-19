@@ -9,7 +9,7 @@ thinking: false                         # chat_template_kwargs.enable_thinking (
 timeout_s: 900
 retry_backoff_s: [10, 30, 90]
 writer_prompt: writer_prompt.md          # relative to /home/evo/AI/render/writer_pipeline
-writer_prompt_sha256: a64f24e9a491304e17c7ec98d433a2b223b3eb7b6cd5870fa1c74ed3f0751ec6
+writer_prompt_sha256: d733c753184a13ee121aaf2e278a291ff6dbd302c74155d635dfbe0d3a8efd70
 persona: current                        # pinned
 n_candidates: 1
 min_ready_score: 60  # reported only; never blocks READY (Max Architect 2026-11-16 (Derrick t2036u))
