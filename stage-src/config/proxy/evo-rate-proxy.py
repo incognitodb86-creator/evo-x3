@@ -15,6 +15,8 @@ import hmac
 import http.client
 import json
 import os
+import posixpath
+import re
 import sys
 import threading
 import time
@@ -28,8 +30,11 @@ CT_TZ = ZoneInfo("America/Chicago")
 LISTEN_HOST, LISTEN_PORT_STR = os.environ.get("EVO_PROXY_LISTEN", "127.0.0.1:8080").rsplit(":", 1)
 LISTEN_PORT = int(LISTEN_PORT_STR)
 UPSTREAM_URL = urlparse(os.environ.get("EVO_LLAMASWAP_UPSTREAM", "http://127.0.0.1:8082"))
-MAX_CONCURRENT_PER_KEY = int(os.environ.get("EVO_MAX_CONCURRENT_PER_KEY", "2"))
-RPM_PER_KEY = int(os.environ.get("EVO_RPM_PER_KEY", "60"))
+MAX_CONCURRENT_PER_KEY = int(os.environ.get("EVO_MAX_CONCURRENT_PER_KEY", "4"))
+RPM_PER_KEY = int(os.environ.get("EVO_RPM_PER_KEY", "120"))
+MAX_BODY_BYTES = int(os.environ.get("EVO_MAX_BODY_BYTES", str(64 * 1024 * 1024)))
+# Blocks /slots, //slots, /v1/../slots and llama-swap passthrough /upstream/<model>/slots.
+SLOTS_PATH_RE = re.compile(r"^/+(?:upstream/+[^/]+/+)?slots(?:/|$)", re.IGNORECASE)
 
 
 def load_key_map():
@@ -92,9 +97,38 @@ class RateProxyHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _read_request_body(self):
+        te = self.headers.get("Transfer-Encoding", "").lower()
+        if "chunked" in te:
+            chunks = []
+            total = 0
+            while True:
+                line = self.rfile.readline(65537)
+                if not line:
+                    break
+                size_str = line.split(b";", 1)[0].strip()
+                chunk_len = int(size_str, 16)
+                if chunk_len == 0:
+                    self.rfile.readline(65537)
+                    break
+                total += chunk_len
+                if total > MAX_BODY_BYTES:
+                    raise OverflowError("request body too large")
+                chunks.append(self.rfile.read(chunk_len))
+                self.rfile.read(2)  # CRLF
+            return b"".join(chunks)
+        raw_len = self.headers.get("Content-Length", "0") or "0"
+        content_len = int(raw_len)
+        if content_len < 0:
+            raise ValueError("negative Content-Length")
+        if content_len > MAX_BODY_BYTES:
+            raise OverflowError("request body too large")
+        return self.rfile.read(content_len) if content_len > 0 else b""
+
     def _handle(self):
         parsed = urlparse(self.path)
-        if parsed.path.startswith("/slots"):
+        norm_path = posixpath.normpath(parsed.path or "/")
+        if SLOTS_PATH_RE.match(parsed.path or "") or SLOTS_PATH_RE.match(norm_path):
             self._send_json(401, {"error": "slots endpoint disabled"})
             log_ct(None, self.command, parsed.path, 401, "-", 0, None)
             return
@@ -124,9 +158,19 @@ class RateProxyHandler(BaseHTTPRequestHandler):
             return
 
         req_model = "-"
+        conn = None
         try:
-            content_len = int(self.headers.get("Content-Length", "0") or "0")
-            req_body = self.rfile.read(content_len) if content_len > 0 else b""
+            try:
+                req_body = self._read_request_body()
+            except ValueError:
+                self._send_json(400, {"error": "invalid request framing"})
+                log_ct(key_id, self.command, parsed.path, 400, "-", 0, None)
+                return
+            except OverflowError:
+                self._send_json(413, {"error": "request body exceeds max limit"})
+                log_ct(key_id, self.command, parsed.path, 413, "-", 0, None)
+                return
+
             if req_body and self.headers.get("Content-Type", "").startswith("application/json"):
                 try:
                     parsed_json = json.loads(req_body)
@@ -137,30 +181,45 @@ class RateProxyHandler(BaseHTTPRequestHandler):
 
             fwd_headers = {}
             for h_k, h_v in self.headers.items():
-                if h_k.lower() not in ("host", "connection", "transfer-encoding"):
+                if h_k.lower() not in ("host", "connection", "transfer-encoding", "content-length"):
                     fwd_headers[h_k] = h_v
+            fwd_headers["Content-Length"] = str(len(req_body))
 
             t0 = time.monotonic()
-            conn = http.client.HTTPConnection(UPSTREAM_URL.hostname, UPSTREAM_URL.port, timeout=300)
-            conn.request(self.command, self.path, body=req_body, headers=fwd_headers)
-            resp = conn.getresponse()
+            try:
+                conn = http.client.HTTPConnection(UPSTREAM_URL.hostname, UPSTREAM_URL.port, timeout=600)
+                conn.request(self.command, self.path, body=req_body, headers=fwd_headers)
+                resp = conn.getresponse()
+            except (OSError, http.client.HTTPException):
+                self._send_json(502, {"error": "upstream unavailable"})
+                log_ct(key_id, self.command, parsed.path, 502, req_model, 0, None)
+                return
+
+            resp_ctype = (resp.getheader("Content-Type") or "").lower()
+            resp_te = (resp.getheader("Transfer-Encoding") or "").lower()
+            is_sse = "text/event-stream" in resp_ctype
+            is_chunked = "chunked" in resp_te
+            stream_as_chunked = is_chunked or (is_sse and resp.getheader("Content-Length") is None)
 
             self.send_response(resp.status)
-            is_chunked = False
             for r_k, r_v in resp.getheaders():
                 lk = r_k.lower()
-                if lk in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "upgrade"):
+                if lk in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "upgrade", "transfer-encoding"):
                     continue
-                if lk == "transfer-encoding" and "chunked" in r_v.lower():
-                    is_chunked = True
+                if stream_as_chunked and lk == "content-length":
+                    continue
                 self.send_header(r_k, r_v)
+            if stream_as_chunked:
+                self.send_header("Transfer-Encoding", "chunked")
             self.end_headers()
 
-            if is_chunked:
+            if stream_as_chunked:
                 while True:
-                    chunk = resp.read(8192)
+                    # read1 returns as soon as any bytes arrive; read(n) would block until n bytes and stall SSE tokens.
+                    chunk = resp.read1(65536)
                     if not chunk:
                         self.wfile.write(b"0\r\n\r\n")
+                        self.wfile.flush()
                         break
                     self.wfile.write(f"{len(chunk):x}\r\n".encode("ascii") + chunk + b"\r\n")
                     self.wfile.flush()
@@ -181,8 +240,14 @@ class RateProxyHandler(BaseHTTPRequestHandler):
                 except Exception:
                     pass
                 log_ct(key_id, self.command, parsed.path, resp.status, req_model, out_toks, tok_s)
-            conn.close()
+        except (BrokenPipeError, ConnectionResetError):
+            log_ct(key_id, self.command, parsed.path, 499, req_model, 0, None)
         finally:
+            if conn is not None:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
             sem.release()
 
     def do_GET(self):
