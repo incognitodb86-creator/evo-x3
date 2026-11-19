@@ -1,0 +1,219 @@
+{
+ "1": {
+  "_meta": {
+   "title": "unet_miraclein"
+  },
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "Miraclein_4.3_9b_NVFP4.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "3": {
+  "_meta": {
+   "title": "clip"
+  },
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+   "device": "default",
+   "type": "flux2"
+  }
+ },
+ "4": {
+  "_meta": {
+   "title": "vae"
+  },
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  }
+ },
+ "5": {
+  "_meta": {
+   "title": "positive"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "Photorealistic medium portrait of an adult woman standing in warm natural window light, casual wardrobe, natural skin texture, shallow depth of field, 35mm photography."
+  }
+ },
+ "6": {
+  "_meta": {
+   "title": "negative"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": ""
+  }
+ },
+ "12": {
+  "_meta": {
+   "title": "klein9_refmods_loader"
+  },
+  "class_type": "Klein9RefModsLoader",
+  "inputs": {
+   "mod_1": "(none)",
+   "mod_2": "(none)",
+   "mod_3": "(none)",
+   "mod_4": "(none)",
+   "mod_5": "(none)",
+   "mod_6": "(none)",
+   "mod_7": "(none)",
+   "mod_8": "(none)",
+   "strength_1": 1.0,
+   "strength_2": 1.0,
+   "strength_3": 1.0,
+   "strength_4": 1.0,
+   "strength_5": 1.0,
+   "strength_6": 1.0,
+   "strength_7": 1.0,
+   "strength_8": 1.0
+  }
+ },
+ "13": {
+  "_meta": {
+   "title": "klein9_refmod_apply"
+  },
+  "class_type": "Klein9RefModApply",
+  "inputs": {
+   "blend_mode": "manifold_blur",
+   "conditioning": [
+    "5",
+    0
+   ],
+   "ref_method": "default",
+   "refmods": [
+    "12",
+    0
+   ],
+   "retention": "partially_preserved (0.7)"
+  }
+ },
+ "17": {
+  "_meta": {
+   "title": "guider"
+  },
+  "class_type": "CFGGuider",
+  "inputs": {
+   "cfg": 1.1,
+   "model": [
+    "1",
+    0
+   ],
+   "negative": [
+    "6",
+    0
+   ],
+   "positive": [
+    "13",
+    0
+   ]
+  }
+ },
+ "18": {
+  "_meta": {
+   "title": "sampler"
+  },
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "euler"
+  }
+ },
+ "19": {
+  "_meta": {
+   "title": "scheduler"
+  },
+  "class_type": "Flux2Scheduler",
+  "inputs": {
+   "height": 1376,
+   "steps": 12,
+   "width": 768
+  }
+ },
+ "20": {
+  "_meta": {
+   "title": "noise"
+  },
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 0
+  }
+ },
+ "21": {
+  "_meta": {
+   "title": "latent"
+  },
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "batch_size": 1,
+   "height": 1376,
+   "width": 768
+  }
+ },
+ "22": {
+  "_meta": {
+   "title": "sample"
+  },
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "guider": [
+    "17",
+    0
+   ],
+   "latent_image": [
+    "21",
+    0
+   ],
+   "noise": [
+    "20",
+    0
+   ],
+   "sampler": [
+    "18",
+    0
+   ],
+   "sigmas": [
+    "19",
+    0
+   ]
+  }
+ },
+ "23": {
+  "_meta": {
+   "title": "decode"
+  },
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "22",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "24": {
+  "_meta": {
+   "title": "save"
+  },
+  "class_type": "SaveImage",
+  "inputs": {
+   "filename_prefix": "community/miraclein_m4/TAG_refmod",
+   "images": [
+    "23",
+    0
+   ]
+  }
+ }
+}

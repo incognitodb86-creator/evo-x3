@@ -1,0 +1,272 @@
+{
+ "1": {
+  "_meta": {
+   "title": "unet_miraclein"
+  },
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "Miraclein_4.3_9b_NVFP4.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "3": {
+  "_meta": {
+   "title": "clip"
+  },
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+   "device": "default",
+   "type": "flux2"
+  }
+ },
+ "4": {
+  "_meta": {
+   "title": "vae"
+  },
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  }
+ },
+ "5": {
+  "_meta": {
+   "title": "positive"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "Edit the adult woman from image 1: SINGLE_CHANGE. Keep the same face, hairstyle, hair color, framing, and lighting, photoreal."
+  }
+ },
+ "6": {
+  "_meta": {
+   "title": "negative"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": ""
+  }
+ },
+ "7": {
+  "_meta": {
+   "title": "image1"
+  },
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/miraclein_m4/STILL.png"
+  }
+ },
+ "10": {
+  "_meta": {
+   "title": "image_size"
+  },
+  "class_type": "GetImageSize",
+  "inputs": {
+   "image": [
+    "25",
+    0
+   ]
+  }
+ },
+ "11": {
+  "_meta": {
+   "title": "enc_image1"
+  },
+  "class_type": "VAEEncode",
+  "inputs": {
+   "pixels": [
+    "25",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "13": {
+  "_meta": {
+   "title": "ref1_pos"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "5",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "15": {
+  "_meta": {
+   "title": "ref1_neg"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "6",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "17": {
+  "_meta": {
+   "title": "guider"
+  },
+  "class_type": "CFGGuider",
+  "inputs": {
+   "cfg": 1.1,
+   "model": [
+    "1",
+    0
+   ],
+   "negative": [
+    "15",
+    0
+   ],
+   "positive": [
+    "13",
+    0
+   ]
+  }
+ },
+ "18": {
+  "_meta": {
+   "title": "sampler"
+  },
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "euler"
+  }
+ },
+ "19": {
+  "_meta": {
+   "title": "scheduler"
+  },
+  "class_type": "Flux2Scheduler",
+  "inputs": {
+   "height": [
+    "10",
+    1
+   ],
+   "steps": 12,
+   "width": [
+    "10",
+    0
+   ]
+  }
+ },
+ "20": {
+  "_meta": {
+   "title": "noise"
+  },
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 0
+  }
+ },
+ "21": {
+  "_meta": {
+   "title": "latent"
+  },
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "batch_size": 1,
+   "height": [
+    "10",
+    1
+   ],
+   "width": [
+    "10",
+    0
+   ]
+  }
+ },
+ "22": {
+  "_meta": {
+   "title": "sample"
+  },
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "guider": [
+    "17",
+    0
+   ],
+   "latent_image": [
+    "21",
+    0
+   ],
+   "noise": [
+    "20",
+    0
+   ],
+   "sampler": [
+    "18",
+    0
+   ],
+   "sigmas": [
+    "19",
+    0
+   ]
+  }
+ },
+ "23": {
+  "_meta": {
+   "title": "decode"
+  },
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "22",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "24": {
+  "_meta": {
+   "title": "save"
+  },
+  "class_type": "SaveImage",
+  "inputs": {
+   "filename_prefix": "community/miraclein_m4/TAG_edit",
+   "images": [
+    "23",
+    0
+   ]
+  }
+ },
+ "25": {
+  "_meta": {
+   "title": "scale_total_pixels"
+  },
+  "class_type": "ImageScaleToTotalPixels",
+  "inputs": {
+   "image": [
+    "7",
+    0
+   ],
+   "megapixels": 1.0,
+   "resolution_steps": 16,
+   "upscale_method": "lanczos"
+  }
+ }
+}
