@@ -9,7 +9,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 function checkCommand(filePath: string): [string, string[]] | null {
   const ext = path.extname(filePath).toLowerCase();
-  if (ext === ".py") return ["python3", ["-m", "py_compile", filePath]];
+  if (ext === ".py") return ["python3", ["-c", "import ast,sys;ast.parse(open(sys.argv[1],encoding='utf-8').read())", filePath]];
   if (ext === ".sh" || ext === ".bash") return ["bash", ["-n", filePath]];
   if (ext === ".json") return ["jq", ["empty", filePath]];
   return null;
