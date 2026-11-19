@@ -16,7 +16,7 @@ description: Write FLUX stills prompts on AlienPc for the adopted S2 workflow (K
 ## Setup
 - Workflow = S2, adopted by Derrick 1:16 AM CT Oct 31 ("Adopt S2 as the FLUX stills workflow now").
 - Settings, files and node order: C:\AI\community\templates\flux_stills_s2.README.md (do not restate or change them here).
-- Run it with `C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\make_render.py still <id|pick> [count]` (pass 1 then pass 2), then queue via `C:\AI\render\x3\queue-remote.sh <run_dir> --yes-derrick` after Derrick's yes. On the X3, `C:\AI\locks\gpu-render.lock` (`flock`) is only a local single-submitter lock — AlienPc's lock is invisible from here, so verify AlienPc's GPU/lease is free before queueing.
+- Run it with `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\make_render.py still <id|pick> [count]` (pass 1 then pass 2). One GPU job at a time via `run_queue.py` and `C:\AI\locks\gpu-render.lock`.
 
 ## Pass 1 prompt (Klein 9B-KV): change -> keep -> light/style
 Klein reads the prompt as written and weights what comes first (BFL). So:

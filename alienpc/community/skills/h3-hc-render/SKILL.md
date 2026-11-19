@@ -3,13 +3,11 @@ name: h3-hc-render
 description: Wire, gate, request and verify a MiniMax-H3 / 10Eros-Max (beta7 int8HQ, default since 2026-10-28) ComfyUI clip for the legacy B2 lane (named INDEX + RefMod parodies defer to h3-parody-identity and direct queueing, never Ralph) - graph keys, reference-image wiring, frame/canvas math and the objective proof checks. Use when building a graph, requesting a render or checking a rendered clip.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). After Derrick's yes, run `render_writer_pipeline.py` with `--queue --yes-derrick` so it writes and queues in one pass (queue-remote.sh; adults guard and pytest gate stay).
-
 # H3 hardcore render
 
 ## Named-parody precedence
 
-For named INDEX + RefMod parodies, `h3-parody-identity` owns the locked single-pass graph, approved duration/aspect/start-image/second-speaker options and tested prompt/voice/soundscape contract. Its route overrides the legacy two-pass B2 defaults and Ralph/request-proof loop below: after Derrick's yes, run `render_writer_pipeline.py` with `--queue --yes-derrick` (write and queue in one pass; never Ralph or a coding-model launch for renders). Existing guards and GPU-lock rules stay unchanged. The B2 guidance below remains for its other lanes; do not use it to rewrite the tested parody graph or prompt.
+For named INDEX + RefMod parodies, `h3-parody-identity` owns the locked single-pass graph, approved duration/aspect/start-image/second-speaker options and tested prompt/voice/soundscape contract. Its route overrides the legacy two-pass B2 defaults and Ralph/request-proof loop below: AlienPc backup writer writes prompts dry via `render_writer_pipeline.py` (X3 queues renders, or local `run_queue.py` after Derrick's yes; never Ralph or a coding-model launch for renders). Existing guards and GPU-lock rules stay unchanged. The B2 guidance below remains for its other lanes; do not use it to rewrite the tested parody graph or prompt.
 
 R2. Render rules (adults only 18+, guard_ok; all adult RefMods and voice refs allowed) live in C:\AI\render\AGENTS.md; run render work from C:\AI\render.
 
@@ -23,13 +21,13 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 
 ## 1. Read the state before anything
 
-- Forge ralph logs on X3: `tail -n 15 C:\AI\forge\ralph-community\logs\*.log` (if checking a Forge loop).
-- GPU state (X3 remote): check `curl -sS -o /dev/null -w "%{http_code}\n" https://alienpc.tailf242b2.ts.net:8446/system_stats` (`409` = ComfyUI unloaded/idle, `200` = loaded; never wakes ComfyUI) or `bash C:\AI\render\x3\queue-remote.sh <run_dir> --yes-derrick --dry-run`. Also confirm AlienPc's lease/GPU is free. Never stop/restart ComfyUI while a render runs.
+- Forge ralph logs: `Get-Content C:\Users\derek\forge\ralph-community\logs\*.log -Tail 15` (if checking a Forge loop).
+- GPU state (AlienPc local): check `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\comfy_ctl.py status` and confirm `C:\AI\locks\gpu-render.lock` is free. Never stop/restart ComfyUI while a render runs.
 
 ## 2. Graph wiring (the part that has actually broken)
 
 - Request graph (default for the B2 lane only, optional elsewhere; named parodies use the single-pass h3-parody-identity graph; Derrick 2026-10-30 "Only make the B2 template file the default"): build it with
-  `C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\make_b2_request.py` from
+  `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\make_b2_request.py` from
   `C:\AI\community\templates\b2.api.json` (see `templates/b2.README.md`). It patches only the per-run fields
   `c0.prompt`, `noise.noise_seed`, `img.image`, `save.filename_prefix` and `c0.length` (frames, set by the plan; the
   template's 124 is only an example, not part of B2). B2 itself is locked (decision 2026-10-30-keep-b2-render-settings):
@@ -75,9 +73,9 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
   fail is worthless.
 - To re-request a dead clip, clone its rendered `ok=True` sibling graph and change only the per-clip keys.
 - One seed per clip. Never request a quality redo (harness redos = same seed, then seed+1).
-- Single clip = a batch of one: dry-check with `C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\run_queue.py --remote --run-dir <run_dir> --frames <n> --dry-run`, then after Derrick's yes queue via `bash C:\AI\render\x3\queue-remote.sh <run_dir> --yes-derrick`. `run_graph_job.py` is an internal helper `run_queue` imports; never run it directly.
-- "Pick an image" (Derrick): on X3, pick from `C:\AI\render\_inputs` or `C:\AI\render\stills\approved_characters\POOL` (AlienPc NAS: `//NAS4CBE37.local/home/AlienPc-approved/approved_characters/INDEX.csv`); a quick check for stills not used recently is OK. Seed default: a random int made in code (`random.randint(1, 2**31-1)`); never grep runs for uniqueness.
-- Search narrowly: use `grep -rn` (`rg` is not installed on X3) inside the folder the brief names (notes, templates, scripts, or one run dir); never `grep -r` or `find` across `C:\AI\community` or `/`. Set `PYTHONIOENCODING=utf-8` when printing workflow text.
+- Single clip = a batch of one: dry-check with `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_queue.py --run-dir <run_dir> --frames <n> --dry-run`, then after Derrick's yes launch detached (`run_queue.py --detach`). `run_graph_job.py` is an internal helper `run_queue` imports; never run it directly.
+- "Pick an image" (Derrick): pick from `C:\AI\render\_inputs`, `C:\AI\render\stills\approved_characters\POOL`, or `\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\INDEX.csv`; a quick check for stills not used recently is OK. Seed default: a random int made in code (`random.randint(1, 2**31-1)`); never grep runs for uniqueness.
+- Search narrowly inside the folder the brief names (notes, templates, scripts, or one run dir); never recursively scan all of `C:\AI\community`. Set `PYTHONIOENCODING=utf-8` when printing workflow text.
 - For node inputs, search `notes/objinfo/NODE_INDEX.txt` or read `NODE_INPUTS.md`; never parse custom-node Python source.
 - Prompt: use Example 1 for structure only (beat order, clause shape), not its content or tone; write the scene from what Derrick asked for. Example 1 is in `skills/h3-prompting/references/worked-examples.md`; for length/stats reuse `scripts/prompt_stats.py`. No per-clip check scripts.
 
@@ -105,17 +103,17 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 Steps a-g for one render item, then script reuse and research rules:
    - For a render item (stock path):
      a. Pick one approved, never-animated still with `C:\AI\community\notes\hc_pick_scan_20261023.py` (unless named in MAX). GI063 render hold is RELEASED (Derrick 2026-10-27 9:09 AM CT — wrongly flagged by wrong model; do NOT treat GI063 as hold; keep youth guard on GI063).
-     b. Caption once with your own model (EVO-X3: `x3-local/flash-next-uncensored` with vision on, or `joycaption` fallback; AlienPc: `coding_swift15_iq3s_esp`, the `ralph.ps1` default): one ask, one image.
+     b. Caption once with your own model (AlienPc: `coding_swift15_iq3s_esp`, the `ralph.ps1` default): one ask, one image.
      c. Write one natural-language H3 prompt from that caption, following h3-prompting (no word cap; long, literal, in time order).
-     d. Check: `C:\AI\render\x3\.venv\bin\python -m pytest -q C:\AI\community\scripts\tests\test_p6_review.py C:\AI\community\scripts\tests\test_guard_scope.py`. `comm.guard_ok` also runs inside `run_graph_job.py` before `/prompt` POST; never loosen either.
-     e. Build graph: `C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\make_b2_request.py --arm-dir <run_dir> --prompt-file <txt> --seed <n> --image <ComfyUI input path> --prefix <sub/name> [--frames <n>]` writes `<run_dir>/request.api.json` from `C:\AI\community\templates\b2.api.json` (the B2 recipe, Derrick decision 2026-10-30; details in `templates/b2.README.md`). Only prompt, seed, start image, filename prefix and frames change; everything else is locked.
-     f. Dry-check, then render only after Derrick's yes: dry-probe with `bash C:\AI\render\x3\queue-remote.sh <run_dir> --yes-derrick --dry-run` (or `C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\run_queue.py --remote --run-dir <run_dir> --frames <n> --dry-run`), paste prompt for approval, and after his yes run `bash C:\AI\render\x3\queue-remote.sh <run_dir> --yes-derrick` (`n` must equal `c0.length`). `run_graph_job.py` is a helper `run_queue.py` imports; never run it directly.
+     d. Check: `C:\AI\director\.venv\Scripts\python.exe -m pytest -q C:\AI\community\scripts\tests\test_p6_review.py C:\AI\community\scripts\tests\test_guard_scope.py`. `comm.guard_ok` also runs inside `run_graph_job.py` before `/prompt` POST; never loosen either.
+     e. Build graph: `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\make_b2_request.py --arm-dir <run_dir> --prompt-file <txt> --seed <n> --image <ComfyUI input path> --prefix <sub/name> [--frames <n>]` writes `<run_dir>\request.api.json` from `C:\AI\community\templates\b2.api.json` (the B2 recipe, Derrick decision 2026-10-30; details in `templates/b2.README.md`). Only prompt, seed, start image, filename prefix and frames change; everything else is locked.
+     f. Dry-check, then render only after Derrick's yes: dry-probe with `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\run_queue.py --run-dir <run_dir> --frames <n> --dry-run`, paste prompt for approval, and after his yes run `run_queue.py --run-dir <run_dir> --frames <n> --detach` (`n` must equal `c0.length`). `run_graph_job.py` is a helper `run_queue.py` imports; never run it directly.
         Frames: the plan sets the frame count per run (e.g. 124 for the terrace retest); `c0.length` and `--frames` must be equal.
      g. Finish: commit once in each repo touched and append one line to `notes/progress.md`. Then stop.
    - Script reuse: reuse the existing scripts, never repeat steps by hand - render/QC tools `C:\AI\community\scripts\make_b2_request.py`, `run_queue.py`, `verify_cell.py`, `prompt_stats.py`, `review_pack.py`, `finalize_encode.py`. Prompt rules live in `C:\AI\community\skills\h3-prompting\SKILL.md` (cite its R numbers); render dials in `C:\AI\community\skills\h3-hc-render\SKILL.md`. Review is objective checks only; Derrick gives the only KEEP.
 
-2. Research rules: at most one fetch per URL, no retries. If saved in `notes/web`, reuse it. Fetch -> `C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\check_web_saves.py` -> `git add notes/web && git commit` in same iteration. Reading `ComfyUI/custom_nodes` with read tool is denied.
+2. Research rules: at most one fetch per URL, no retries. If saved in `notes/web`, reuse it. Fetch -> `C:\AI\director\.venv\Scripts\python.exe C:\AI\community\scripts\check_web_saves.py` -> `git add notes/web && git commit` in same iteration. Reading `ComfyUI/custom_nodes` with read tool is denied.
 
 
 ### GPU lock and render window
-GPU lock: on the X3, `C:\AI\locks\gpu-render.lock` (`flock`) is only a local single-submitter lock — AlienPc's `C:\AI\locks\gpu-render.lock` is not visible here. Before queueing via `queue-remote.sh`, check that AlienPc's GPU and lease are free (do not rely on the local lock file alone). Full rule lives in `C:\AI\render\AGENTS.md`.
+GPU lock: `run_graph_job.py` and `run_queue.py` take `C:\AI\locks\gpu-render.lock` (`rc 7 = GPU_BUSY`). While it is held, send no model requests and start no second job; wait for the render to finish. Full rule lives in `C:\AI\render\AGENTS.md`.

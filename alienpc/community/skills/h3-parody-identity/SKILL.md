@@ -6,7 +6,7 @@ description: >-
   autonomous chat execution from C:\AI\render or writer-run builds.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). Before Derrick's yes, run `render_writer_pipeline.py` dry and show `prompt.txt`. After Derrick's yes: run `queue-remote.sh <run_dir> --yes-derrick` on an existing `READY` folder (or run `render_writer_pipeline.py` once with `--queue --yes-derrick` if Derrick already approved writing + queueing upfront).
+> AlienPc backup writer: Primary writer is X3 (Gufo). AlienPc writes prompts dry via `render_writer_pipeline.py` only as backup when X3 is busy coding and AlienPc is idle (no render, `:8447` idle). X3 queues renders (or local `run_queue.py` after Derrick's yes, taking `C:\AI\locks\gpu-render.lock`).
 # H3 parody / identity lane (INDEX + RefMod)
 
 Internals, legacy CLI, VRAM: `references/h3-parody-identity-reference.md`. Read only when changing pipeline code.
@@ -18,9 +18,9 @@ Internals, legacy CLI, VRAM: `references/h3-parody-identity-reference.md`. Read 
   - **OC with audio weights (`FCSydny`):** Attach both visual and audio RefMods (`minimaxh3_oc_poolclub_v1_refmod_visual` + `minimaxh3_oc_poolclub_v1_refmod_audio` with `<Audio 1>`). `FCMegan` is a visual-only alias for Megan Fox (treated like a named parody below, no `<Audio 1>`).
   - **Named INDEX / celebrity parodies:** Attach visual RefMods **only** (`audio_refs` empty, **never** `<Audio 1>`). Voice comes exclusively from the character+actor voice line in `detailed_description:` (`(S1) says in <Actor>'s exact <Character> voice with signature vocal timbre, <cue>: <d>[English] ...</d>`).
   - **`--still-mode guide` (default) vs `--still-mode ref`:** In default `guide` mode, the start still pins frame 0 via `MiniMaxH3AddGuide` and **`<Picture 1>` is omitted**. `<Picture 1>` and the `[reference generation]` summary prefix appear **only** when `--still-mode ref` is passed.
-  - **Local PixlStash vault on X3:** `C:\Users\derek\5slock\libraries\vault.db` is local on the EVO-X3; search stills via the PixlStash HTTP API (`character_id=1` for `FCSydny`, `2` for `FCMegan`), never by browsing folders. Report errors if a requested name has no local RefMod weights instead of downloading anything.
+  - **Local PixlStash vault:** `C:\Users\derek\5slock\libraries\vault.db`; search stills via the PixlStash HTTP API (`character_id=1` for `FCSydny`, `2` for `FCMegan`), never by browsing folders. Report errors if a requested name has no local RefMod weights instead of downloading anything.
 - Never use minor-coded words (`underage`, `minor`, `child`, `children`) — `guard_ok` blocks the submit (`18+` is the only content rule).
-- **Single Writer Command (`C:\AI\render`, `flash-next-uncensored` on EVO-X3):** Always use `render_writer_pipeline.py` (or `fill_request.py` when `writer_output.txt` already exists):
+- **Single Writer Command (`C:\AI\render`, AlienPc backup writer `gemma4_heretic_poly_think` via `:8085/v1`):** Always use `render_writer_pipeline.py` (or `fill_request.py` when `writer_output.txt` already exists):
   - Flags supported on `render_writer_pipeline.py`: `<run_dir> --ask "<ask>" --position "<position>" --still "<still>" [--still-read "<json>"] [--character "<Character>"] [--actor "<Actor>"] [--names "<Name>" ...] [--frames <N>] [--shots single|multi] [--shot-count <k>] [--scene "<scene_id>"] [--continue "<prev_run_dir>"] [--partner2-still "<still>"] [--still-mode guide|ref] [--aspect 9:16|16:9] [--size WxH] [--template <name>] [--queue --yes-derrick]`.
   - *(Do **not** pass retired classic `submit_parody_run.py` flags such as `--description`, `--camera`, `--dialogue`, `--end-action`, or `--pronoun` to `render_writer_pipeline.py`; put scene/camera/quoted `<d>` dialogue inside `--ask`.)*
 
@@ -36,14 +36,13 @@ Use concrete detail to describe the scene clearly; avoid repetition and contradi
 - **Aspect & Duration:** `9:16` (`768x1344`, default) or `16:9` (`1344x768`, when the plan asks). Single continuous shot up to **10.1 s (`243f` on the `17n+5` H3 grid; 15 s single shots fail on 16 GB VRAM)**.
 - **Spoken Dialogue & Sound:** At most `2.5` spoken words per second (`2-3` lines on talk-only clips). Every quoted `<d>[English] ...</d>` line in `--ask` is preserved verbatim. End `detailed_description:` with 1–3 plain diegetic sound sentences (never `overall_soundscape:` or `non_diegetic_music:` headers).
 
-## Write and queue in one pass after Derrick's yes (X3 recipe)
+## Write dry on AlienPc backup writer (X3 queues renders, or local `--queue` after Derrick's yes)
 
-1. After Derrick's yes (and after confirming AlienPc's GPU/lease is free), write and queue in one pass with the ONE writer command (`render_writer_pipeline.py`, which calls `fill_request.py` with a saved template in `templates/` and queues via `run_queue.py`) and `--queue --yes-derrick`:
-```bash
-C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\parody\render_writer_pipeline.py <run_dir> \
-  --ask "<ask>" --position <act> --still <still_path> \
-  --character "<Character>" --actor "<Actor>" --names "<Character>" "<Actor>" \
-  --queue --yes-derrick
+1. Run dry by default from `C:\AI\render` with the ONE writer command (`render_writer_pipeline.py`, which calls `fill_request.py` with a saved template in `templates/`). X3 queues renders; only pass `--queue --yes-derrick` locally after Derrick's yes when `C:\AI\locks\gpu-render.lock` is free:
+```powershell
+& 'C:\Program Files\Python312\python.exe' C:\AI\community\scripts\parody\render_writer_pipeline.py <run_dir> `
+  --ask "<ask>" --position <act> --still <still_path> `
+  --character "<Character>" --actor "<Actor>" --names "<Character>" "<Actor>"
 ```
 (Without `--queue --yes-derrick`, `render_writer_pipeline.py` runs dry and stops at `READY`.)
 - **Do NOT** poll manually. On `ValueError`, quote it, fix wording once if yours, else stop. After `rc=0`, optionally upload `<run_dir>/clip/clip.mp4` to QNAP `pi-drop/` per `AGENTS.md`.

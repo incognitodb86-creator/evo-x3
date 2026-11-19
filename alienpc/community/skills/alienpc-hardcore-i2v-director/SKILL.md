@@ -1,6 +1,6 @@
 ---
 name: alienpc-hardcore-i2v-director
-description: Use when Derrick wants approved Condition stills animated into hardcore I2V clips on AlienPc (MiniMax-H3 / 10Eros-Max via Tailscale Serve :8446 / queue-remote.sh from the X3). Covers still-to-intent matching, the director card, and package D triage. KEEP is Derrick's GO only.
+description: Use when Derrick wants approved Condition stills animated into hardcore I2V clips on AlienPc (MiniMax-H3 / 10Eros-Max via llama-swap :8080/comfyui). Covers still-to-intent matching, the director card, and package D triage. KEEP is Derrick's GO only.
 ---
 
 # AlienPc hardcore I2V director
@@ -45,6 +45,6 @@ Identity = same character as the Cond. Records decide whether a character is fic
 - *Beat 2 (Native Join, ordinary hold):* `The camera holds a static shot.` Seamless join from Beat 1: hands anchored, eyeline held. Composed line: "Right where you are." Breath and friction.
 
 ## Notes
-- Production render host is AlienPc ComfyUI (from the X3, queued via `C:\AI\render\x3\queue-remote.sh` over Tailscale Serve `https://alienpc.tailf242b2.ts.net:8446`; AlienPc local: `llama-swap :8080/comfyui`). Ports :8188 and :8189 are retired.
+- Production host is Max on llama-swap `:8080/comfyui`. Ports :8188 and :8189 are retired.
 - A ~1 min product needs a beat sheet with distinct primary motion per clip; continuous long asks use 2+ explicit native beats (carrying camera/pose across native joins) not separate clips; stitches without beats are method smokes only.
 - Out of scope: ReActor face paste, EmptyLatent as Cond, Artframe, soft-sway lanes.

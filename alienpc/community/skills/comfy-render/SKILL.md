@@ -3,12 +3,10 @@ name: comfy-render
 description: Run ComfyUI render workflows on AlienPc (B2 video, stills) via llama-swap (standing policy route http://127.0.0.1:8080/comfyui/; comm.py:6 currently sets /upstream/comfyui_auto — discrepancy unresolved). Named INDEX + RefMod parodies defer to h3-parody-identity and render_writer_pipeline.py.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). After Derrick's yes, run `render_writer_pipeline.py` with `--queue --yes-derrick` so it writes and queues in one pass (queue-remote.sh; adults guard and pytest gate stay).
-
 # ComfyUI Render (`comfy-render`)
 
-- **Named-parody precedence:** For named character, actor, or celebrity INDEX + RefMod parodies, defer to `h3-parody-identity` (`render_writer_pipeline.py`, then `--queue --yes-derrick` via `queue-remote.sh` after Derrick's yes).
-- **Render & likeness rules:** Live in `C:\AI\render\AGENTS.md` and `C:\AI\comfy-alienpc\LANE_IMAGE_RULES.md` (adults 18+ only, `guard_ok` on every submit; on the X3, `C:\AI\locks\gpu-render.lock` is only a local single-submitter lock and AlienPc's lock is invisible, so check AlienPc's GPU/lease before queueing; approved-still character-sheet runs stay fictional folder-names only, while named parody runs follow `h3-parody-identity`).
+- **Named-parody precedence:** For named character, actor, or celebrity INDEX + RefMod parodies, defer to `h3-parody-identity` (`render_writer_pipeline.py` / `run_queue.py`; AlienPc backup writer writes prompts dry, X3 queues renders or local `run_queue.py` after Derrick's yes).
+- **Render & likeness rules:** Live in `C:\AI\render\AGENTS.md` and `C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\LANE_IMAGE_RULES.md` (adults 18+ only, `guard_ok` on every submit, one GPU job at a time via `C:\AI\locks\gpu-render.lock`; approved-still character-sheet runs stay fictional folder-names only, while named parody runs follow `h3-parody-identity`).
 
 ## Workflow Execution
 - **Legacy / do-not-call:** `scripts/render_workflow.py` is legacy: it bypasses `gpu-render.lock` and the locked baseline. Do not call it; all submissions go through `run_queue.py` (directly or via `render_writer_pipeline.py --queue --yes-derrick`).

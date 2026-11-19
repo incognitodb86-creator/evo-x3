@@ -178,7 +178,7 @@ here). Both gates pass before a cell is staged; a gate failure is fixed in the p
 
 ## 4. Our graph, so the paste matches what can be fed
 
-- Node: `MiniMaxH3ReferenceToVideo` on 10Eros-Max beta7 on AlienPc ComfyUI (from the X3, queued via `C:\AI\render\x3\queue-remote.sh` to `https://alienpc.tailf242b2.ts.net:8446`); model dials, wiring, queue
+- Node: `MiniMaxH3ReferenceToVideo` on 10Eros-Max beta7 via llama-swap `:8080/comfyui`; model dials, wiring, queue
   and triage are `h3-hc-render`.
 - Builder: `C:\AI\community\scripts\make_b2_request.py` -> `scripts/comm.py` `build()/first_pass()`; mode `r2v` wires
   `ref_images.ref_image_1` + `ref_image_size: "max"`; a reference image cannot share a node with
