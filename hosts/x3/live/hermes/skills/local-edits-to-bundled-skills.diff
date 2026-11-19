@@ -1,11 +1,3 @@
-diff --git a/skills/apple/DESCRIPTION.md b/skills/apple/DESCRIPTION.md
-deleted file mode 100644
-index 25def25..0000000
---- a/skills/apple/DESCRIPTION.md
-+++ /dev/null
-@@ -1,2 +0,0 @@
--Apple / macOS skills — tools that interact with the Mac desktop (Finder,
--native apps) or system features (accessibility, screenshots).
 diff --git a/skills/apple/apple-notes/SKILL.md b/skills/apple/apple-notes/SKILL.md
 deleted file mode 100644
 index 3fcf4c2..0000000
@@ -30018,15 +30010,6 @@ index 148e3d3..0000000
 -The lyric-writing and prompting craft in this skill applies to
 -heartmula too — its input format is lyrics with bracketed structure
 -tags plus comma-separated style tags.
-diff --git a/skills/email/DESCRIPTION.md b/skills/email/DESCRIPTION.md
-deleted file mode 100644
-index 14fe0c4..0000000
---- a/skills/email/DESCRIPTION.md
-+++ /dev/null
-@@ -1,3 +0,0 @@
-----
--description: Skills for sending, receiving, searching, and managing email from the terminal.
-----
 diff --git a/skills/email/email-inbox-triage/SKILL.md b/skills/email/email-inbox-triage/SKILL.md
 deleted file mode 100644
 index 6330e78..0000000
@@ -30878,15 +30861,6 @@ index 2dbd7a9..0000000
 -- Save and exit the editor to send; exit without saving to cancel.
 -- MML parts are compiled to proper MIME when sending.
 -- Use `himalaya message export --full` to inspect the raw MIME structure of received emails.
-diff --git a/skills/media/DESCRIPTION.md b/skills/media/DESCRIPTION.md
-deleted file mode 100644
-index 61e3de7..0000000
---- a/skills/media/DESCRIPTION.md
-+++ /dev/null
-@@ -1,3 +0,0 @@
-----
--description: Skills for working with media content — YouTube transcripts and summaries.
-----
 diff --git a/skills/media/youtube-content/SKILL.md b/skills/media/youtube-content/SKILL.md
 deleted file mode 100644
 index 1e87b46..0000000
@@ -31181,15 +31155,6 @@ index 96c239e..0000000
 -
 -if __name__ == "__main__":
 -    main()
-diff --git a/skills/note-taking/DESCRIPTION.md b/skills/note-taking/DESCRIPTION.md
-deleted file mode 100644
-index 6b828df..0000000
---- a/skills/note-taking/DESCRIPTION.md
-+++ /dev/null
-@@ -1,3 +0,0 @@
-----
--description: Note taking skills, to save information, assist with research, and collab on multi-session planning and information sharing.
-----
 diff --git a/skills/note-taking/obsidian/SKILL.md b/skills/note-taking/obsidian/SKILL.md
 deleted file mode 100644
 index cc8f3cf..0000000
@@ -42134,15 +42099,6 @@ index 929a17b..0000000
 -- [ ] Source failures reported as coverage gaps, never as "no news."
 -- [ ] Materiality decisions replay consistently from the watch contract.
 -- [ ] The cutoff advanced only for successfully covered sources.
-diff --git a/skills/social-media/DESCRIPTION.md b/skills/social-media/DESCRIPTION.md
-deleted file mode 100644
-index 27785c9..0000000
---- a/skills/social-media/DESCRIPTION.md
-+++ /dev/null
-@@ -1,3 +0,0 @@
-----
--description: Skills for interacting with social platforms and social-media workflows — posting, reading, monitoring, and account operations.
-----
 diff --git a/skills/social-media/xurl/SKILL.md b/skills/social-media/xurl/SKILL.md
 deleted file mode 100644
 index a784e2a..0000000
