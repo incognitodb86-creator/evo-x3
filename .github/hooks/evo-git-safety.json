@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "node .github/hooks/scripts/evo-git-safety.mjs",
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "command": "node .github/hooks/scripts/evo-git-safety.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}
