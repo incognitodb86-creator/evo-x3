@@ -12,6 +12,7 @@ STEPS (one run folder per clip, under /home/evo/AI/community/runs/<run_name>)
    - `Sydney Sweeney` (a celebrity: pass `--actor 'Sydney Sweeney' --names 'Sydney Sweeney'`) is not `FCSydny` (Derrick's OC, `character_id` 1).
    - Uploaded image = the still: copy the uploaded image into `<run_dir>/_inputs/<file>` and pass `--still <run_dir>/_inputs/<file>` (no PixlStash call before the render). The uploaded image goes through the still read (`still_read.json`) + lint as a hard `NOT_READY` gate before any AlienPc job. After the run is set up, drop a copy into `/home/evo/AI/pixl-inbox/` for normal background import.
    - Never run `find`, `ls`, or `identify` over `/home/evo/AI/5slock/libraries/` and never browse library pictures or captions, except the generated 2x3 candidate contact sheet (`x3/still_candidate_sheet.py`). Inspect that sheet to pick, then inspect the single chosen still with the `read` tool.
+   - Build the candidate sheet with `--out <crun>/contact_sheet.jpg` so `pi-job` can publish it.
 2. Write `<run_dir>/still_read.json`:
    `{"read": {"room": ..., "place": ..., "surface": ..., "bed": true|false, "sheets": ..., "floor": ..., "pose": "<verb-first posture>", "facing_camera": true|false, "framing": ..., "light": ..., "people": <int>, "garments": [{"type": ..., "name": ..., "look": ...}], "build": ..., "skin": ..., "hair": ...}, "source": "<still path>"}`
    (Or omit `still_read.json` to let `render_writer_pipeline.py` auto-caption the still via `vision_model_alias: joycaption`.)
