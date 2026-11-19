@@ -2,7 +2,7 @@
 # Copy live X3 setup (configs, units, launchers, Hermes/pi/herdr/PixlStash config) into ~/evo-x3/hosts/x3/live.
 # Read-only on live files. Secrets are replaced with <redacted-in-locked-keyfile>. Max Architect, Derrick t2613u.
 set -uo pipefail
-R=~/evo-x3/hosts/x3/live
+R="${SNAPSHOT_OUT:-$HOME/evo-x3/hosts/x3/live}"
 rm -rf "$R"; mkdir -p "$R"/{containers,tailscale,ssh,agy,herdr,hermes/skills,pi-derekboone/agent,pi-evo/panes/forge,pi-evo/panes/render}
 E() { sudo -n -u evo "$@"; }
 cpe() { # cpe <evo-src> <dest>  (copy evo-owned file)
@@ -67,7 +67,6 @@ for f in /usr/local/bin/*; do case "$f" in *.bak*|*/llama-swap) continue;; esac
 A=/home/evo/.pi/agent
 for f in AGENTS.md settings.json pi-permissions.jsonc web-search.json trust.json npm/package.json extensions/herdr-agent-state.ts extensions/pi-permission-system/config.json extensions/subagent/config.json pi-subagents/last-seen-version.json pi-web-access/last-seen-version.json; do
   E test -f "$A/$f" && scrub_evo "$A/$f" "$R/pi-evo/agent/$f"; done
-scrub_evo "$A/mcp.json" "$R/pi-evo/agent/mcp.json"
 cpe "$A/npm/package-lock.json" "$R/pi-evo/agent/npm/package-lock.json"
 E cat "$A/models.json" | python3 -c '
 import json,sys,re
@@ -81,7 +80,7 @@ for p in forge render; do
   for f in $(E find /home/evo/.pi/panes/$p -maxdepth 1 \( -type f -o -type l \) 2>/dev/null); do
     b=$(basename "$f")
     if E test -L "$f"; then echo "$b -> $(E readlink "$f")" >> "$R/pi-evo/panes/$p/SYMLINKS.txt"
-    else case "$b" in auth.json|models-store.json|*.secret|*.log) continue;; esac; scrub_evo "$f" "$R/pi-evo/panes/$p/$b"; fi
+    else case "$b" in auth.json|models-store.json|mcp.json|*.secret|*.log) continue;; esac; scrub_evo "$f" "$R/pi-evo/panes/$p/$b"; fi
   done; done
 for f in README.md render-pi.sh forge-pi.sh; do E test -f /home/evo/evo-x3/pi-chats/$f && scrub_evo /home/evo/evo-x3/pi-chats/$f "$R/pi-evo/pi-chats/$f"; done
 for f in $(E find /home/evo/evo-x3/scripts -type f -not -path '*/_archive/*'); do scrub_evo "$f" "$R/pi-evo/evo-x3-scripts/${f#/home/evo/evo-x3/scripts/}"; done
@@ -116,8 +115,10 @@ herdr --version > "$R/herdr/herdr-version.txt" 2>&1 || true
 
 # --- PixlStash (config only; no DB, library, tokens, password)
 scrub_evo /home/evo/.config/pixlstash/server-config.json "$R/pixlstash/server-config.json"
+PIXL_DST="${SNAPSHOT_OUT:+$R/pixlstash-tagging}"
+PIXL_DST="${PIXL_DST:-$HOME/evo-x3/hosts/x3/pixlstash-tagging}"
 for f in tag_runner.py import_inbox.py index_backfill.py index_map.py joycaption_compare.py; do
-  E test -f /home/evo/AI/pixlstash-tagging/$f && scrub_evo /home/evo/AI/pixlstash-tagging/$f ~/evo-x3/hosts/x3/pixlstash-tagging/$f; done
+  E test -f /home/evo/AI/pixlstash-tagging/$f && scrub_evo /home/evo/AI/pixlstash-tagging/$f "$PIXL_DST/$f"; done
 
 # --- forge-mcp launchers (tokens stay in evo-only files)
 for f in $(E find /home/evo/.config/forge-mcp -maxdepth 1 -name 'run-*.sh'); do scrub_evo "$f" "$R/forge-mcp/$(basename "$f")"; done
@@ -133,4 +134,15 @@ agy --version > "$R/agy/agy-version.txt" 2>&1 || true
   for d in ~/evo-x3/bench/quant-bench ~/evo-x3/src/gemma4-gufo-extension; do echo "$d $(git -C $d remote get-url origin 2>/dev/null) $(git -C $d rev-parse HEAD)"; done
   for d in /home/evo/.hermes/hermes-agent; do echo "$d $(E git -C $d remote get-url origin) $(E git -C $d rev-parse HEAD)"; done
 } > "$R/nested-repos.txt"
+
+# --- Guard: fail before any commit if mcp.json or unredacted Authorization/Bearer headers appear
+if find "$R" -name 'mcp.json' -print -quit | grep -q .; then
+  echo "ERROR: mcp.json found in snapshot output $R" >&2
+  exit 1
+fi
+if grep -rIliE '(^|[^A-Za-z0-9_])(authorization[[:space:]]*[:=][[:space:]]*["'\'']?(bearer|basic|token)[[:space:]]+[A-Za-z0-9._~+/=-]{8,}|bearer[[:space:]]+[A-Za-z0-9._~+/=-]{12,})' "$R"; then
+  echo "ERROR: possible unredacted Authorization/Bearer header found in snapshot output $R" >&2
+  exit 1
+fi
+
 find "$R" -type f | wc -l
