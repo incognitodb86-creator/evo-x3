@@ -1,0 +1,30 @@
+[Unit]
+Description=H3 Weekly read-only stale worktree report via ntfy (0 swaps, zero secrets)
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=EVO_NTFY_TOKEN_FILE=%h/.config/evo-x3/ntfy-x3.token
+Environment=EVO_NTFY_URL=https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg
+Environment=EVO_AI_DIR=/home/evo/AI
+ExecStart=/usr/bin/flock -n /tmp/evo-weekly-worktrees.lock /usr/bin/python3 -c "exec(chr(10).join([ \
+  '''import os, pathlib, subprocess, urllib.request''', \
+  '''E = os.environ''', \
+  '''base = pathlib.Path(E['EVO_AI_DIR'])''', \
+  '''rows = []''', \
+  '''for d in (sorted(base.iterdir()) if base.is_dir() else []):''', \
+  '''    if not (d / '.git').exists(): continue''', \
+  '''    wt = subprocess.run(['git', '-C', str(d), 'worktree', 'list', '--porcelain'], capture_output=True, text=True)''', \
+  '''    wts = [l[9:] for l in wt.stdout.splitlines() if l.startswith('worktree ')]''', \
+  '''    st = subprocess.run(['git', '-C', str(d), 'status', '--porcelain'], capture_output=True, text=True)''', \
+  '''    dirty = len([l for l in st.stdout.splitlines() if l.strip()])''', \
+  '''    if len(wts) > 1 or dirty: rows.append(f'{d.name}: worktrees={len(wts)} dirty={dirty}')''', \
+  '''body = 'X3 weekly worktree report' + chr(10) + (chr(10).join(rows) if rows else 'All scanned repos clean, 0 extra worktrees.')''', \
+  '''print(body)''', \
+  '''tp = pathlib.Path(E['EVO_NTFY_TOKEN_FILE'])''', \
+  '''tok = tp.read_text(encoding='utf-8').strip() if tp.is_file() else '' ''', \
+  '''if tok:''', \
+  '''    req = urllib.request.Request(E['EVO_NTFY_URL'], data=body.encode('utf-8'), method='POST', headers={'Authorization': 'Bearer ' + tok, 'Title': 'EVO-X3 Weekly Worktrees', 'Priority': 'low'})''', \
+  '''    urllib.request.urlopen(req, timeout=10).read()''', \
+  '''else: print('ntfy skipped: token file missing')''', \
+]))"
