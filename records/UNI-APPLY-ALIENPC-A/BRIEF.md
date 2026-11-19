@@ -6,7 +6,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 
 ## Needs before launch (do not launch until met; held items stay skipped)
 1. **Derrick's live yes** to apply `alienpc/community/` file-only items (`M4`, `ST4`, `ST5` candidate templates + `S2` allowlist script and offline tests) into `C:\AI\community`.
-2. **AlienPc lease taken** (following brain `10_packs/max/max-briefing.md` convention, mirrored to `records/status/`).
+2. **AlienPc lease free** (AlienPc lease per brain `10_packs/max/max-briefing.md`). The doer takes it as ONE line (`<who> | <what> | <start time>`) and clears it when done; no lease-taken/released files, no brain or `records/status/` mirrors, no git commit for the lease, no message to Derrick.
 3. **Max import + bridge patch staged** from `mono` tip `5ccba67` (or newer):
    - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
    - `C:\AI\community` does **not** track `derrick/evo-x3`: its upstream is the separate Gitea repo `derrick/alienpc-community-pc` (`master`), and its remote URL carries a credential (monorepo Q6), so never run `git remote -v` or print that URL. Until `MONO-S6` passes smoke, Max stages one patch on the X3 instead of a pull:
@@ -22,7 +22,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 - **Doer:** AlienPc Forge (`C:\Users\derek\forge` -> `5slock`, pi panes `w2V:p3`/`p7`), running as user `derek` (sudo/admin: **no**).
 - **Target repo:** `C:\AI\community` (Gitea `alienpc-community`).
 - **Backup root:** `C:\AI\_archive\20261119\community\`.
-- **Lease:** AlienPc lease (brain `10_packs/max/max-briefing.md`, mirrored to `records/status/`). No GPU is used in this brief; still verify no active render before pulling `C:\AI\community`.
+- **Lease:** AlienPc lease (brain `10_packs/max/max-briefing.md`): ONE line `alienpc-forge | UNI-APPLY-ALIENPC-A | <start time>` at start, cleared when done or blocked; no status files, mirrors, commits, or messages for the lease. No GPU is used in this brief; still verify no active render before pulling `C:\AI\community`.
 
 ## Work (stop on first failure)
 
