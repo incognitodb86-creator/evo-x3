@@ -1522,7 +1522,7 @@ def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[s
         v_model = cfg.get("vision_model_alias") or cfg.get("model_alias")
         v_client = Client({**cfg, "model_alias": v_model}, log) if v_model != cfg.get("model_alias") else client
         return v_client.chat(messages, {"temperature": 0.2, "top_k": 20, "top_p": 0.9}, 7, 1024, purpose="vision_read")
-    read = br.vision_read(still, vision_chat)
+    read = br.vision_read(still, vision_chat, cache_dir=RUNS_ROOT / "_still_read_cache")
     d = {"read": read, "source": still, "how": "pipeline vision_read via " + str(cfg.get("vision_model_alias") or cfg["model_alias"])}
     wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
     log("still_read_vision", {"run": run_dir.name, "still": still})
@@ -1531,6 +1531,13 @@ def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[s
 
 def chain_start_still(prev_run: Path, still: str, run_dir: Path, log) -> str:
     mp4s = sorted(prev_run.glob("**/*.mp4"), key=lambda p: p.stat().st_mtime)
+    lf_cand = (mp4s[-1].parent / "last_frame.png") if mp4s else None
+    if not (lf_cand and lf_cand.is_file() and lf_cand.stat().st_size > 0):
+        lfs = sorted(prev_run.glob("**/last_frame.png"), key=lambda p: p.stat().st_mtime)
+        lf_cand = lfs[-1] if lfs and lfs[-1].stat().st_size > 0 else None
+    if lf_cand is not None:
+        log("chain_last_frame", {"prev_last_frame": str(lf_cand), "still": str(lf_cand)})
+        return str(lf_cand)
     if not mp4s:
         log("chain_dry_still", {"prev": str(prev_run), "still": still})
         return still
@@ -2110,8 +2117,11 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 result["warnings"].append("queue_refused_no_yes")
             else:
                 qsh = Path.home() / "AI" / "render" / "x3" / "queue-remote.sh"
+                qcmd = ["bash", str(qsh), str(run_dir), "--yes-derrick"]
+                if scene_id or is_continue:
+                    qcmd.append("--keep-comfy-process")
                 try:
-                    qp = subprocess.run(["bash", str(qsh), str(run_dir), "--yes-derrick"],
+                    qp = subprocess.run(qcmd,
                                         capture_output=True, text=True, timeout=180)
                     result["submitted"] = qp.returncode == 0
                     result["queue_rc"] = qp.returncode

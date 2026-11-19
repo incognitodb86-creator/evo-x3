@@ -31,6 +31,88 @@ INPUT_ROOTS = [p for p in os.environ.get("RQ_INPUT_ROOTS", "").split(os.pathsep)
 LOAD_KEYS = {"image", "audio", "video", "file"}
 MEDIA_RE = re.compile(r"\.(png|jpe?g|webp|bmp|gif|wav|mp3|flac|ogg|m4a|aac|mp4|webm|mov|mkv)$", re.I)
 _lock_fh = None
+_UPLOAD_CACHE = {}  # (api, abs_path, subfolder) -> {"size", "mtime_ns", "name", "subfolder"}
+_UPLOAD_CACHE_FILE = "_remote_uploads.json"
+
+
+def _upload_sig(local_path):
+    st = os.stat(local_path)
+    return st.st_size, st.st_mtime_ns
+
+
+def _upload_cache_key(item):
+    return (API, os.path.abspath(item["local"]), item.get("subfolder") or "")
+
+
+def _load_run_upload_cache(run_dir):
+    if not run_dir:
+        return {}
+    p = os.path.join(run_dir, _UPLOAD_CACHE_FILE)
+    if not os.path.isfile(p):
+        return {}
+    try:
+        data = json.load(open(p, encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_run_upload_cache(run_dir, data):
+    if not run_dir:
+        return
+    try:
+        os.makedirs(run_dir, exist_ok=True)
+        p = os.path.join(run_dir, _UPLOAD_CACHE_FILE)
+        tmp = p + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=1)
+        os.replace(tmp, p)
+    except OSError:
+        pass
+
+
+def _invalidate_upload_cache(items, run_dir=None):
+    disk = _load_run_upload_cache(run_dir)
+    dirty = False
+    for it in items:
+        k = _upload_cache_key(it)
+        _UPLOAD_CACHE.pop(k, None)
+        dk = f"{k[0]}|{k[1]}|{k[2]}"
+        if dk in disk:
+            disk.pop(dk, None)
+            dirty = True
+    if dirty:
+        _save_run_upload_cache(run_dir, disk)
+
+
+def upload_cached(item, run_dir=None, force=False, timeout=None):
+    """Upload `item` unless the same (path, size, mtime_ns, subfolder) was already uploaded.
+    Returns (response_dict, reused_bool)."""
+    k = _upload_cache_key(item)
+    size, mtime_ns = _upload_sig(item["local"])
+    dk = f"{k[0]}|{k[1]}|{k[2]}"
+    if not force:
+        ent = _UPLOAD_CACHE.get(k)
+        if ent is None and run_dir:
+            ent = _load_run_upload_cache(run_dir).get(dk)
+            if isinstance(ent, dict):
+                _UPLOAD_CACHE[k] = ent
+        if isinstance(ent, dict) and ent.get("size") == size and ent.get("mtime_ns") == mtime_ns and ent.get("name"):
+            return {"name": ent["name"], "subfolder": ent.get("subfolder", "")}, True
+    try:
+        r = upload(item) if timeout is None else upload(item, timeout=timeout)
+    except Exception:
+        _invalidate_upload_cache([item], run_dir=run_dir)
+        raise
+    ent = {"path": k[1], "size": size, "mtime_ns": mtime_ns,
+           "name": r.get("name") or os.path.basename(item["local"]),
+           "subfolder": r.get("subfolder", item.get("subfolder", ""))}
+    _UPLOAD_CACHE[k] = ent
+    if run_dir:
+        disk = _load_run_upload_cache(run_dir)
+        disk[dk] = ent
+        _save_run_upload_cache(run_dir, disk)
+    return r, False
 
 
 def input_files(g):
@@ -290,19 +372,42 @@ def enable(rq):
 
     orig_submit = comm.submit
     def submit(g, tag, meta, outdir, logfile=None, out=None):
+        run_dir = os.path.dirname(outdir)
         try:
-            plan = upload_plan(g, os.path.dirname(outdir))
+            plan = upload_plan(g, run_dir)
         except FileNotFoundError as e:
             comm.log(f"JOB error {tag} {e}; nothing posted", logfile)
             return comm.outcome(out, "node_error", note=str(e)[:300])
-        for it in plan:
-            try:
-                r = upload(it)
-                comm.log(f"UPLOAD {tag} {it['kind']} {it['name']} {it['bytes']}B -> {r.get('subfolder','')}/{r.get('name')}", logfile)
-            except Exception as e:
-                comm.log(f"JOB error {tag} upload {it['name']} failed: {str(e)[:200]}; nothing posted", logfile)
-                return comm.outcome(out, "node_error", note="upload failed: " + it["name"])
-        return orig_submit(g, tag, meta, outdir, logfile, out)
+
+        def _do_uploads(force=False):
+            reused_any = False
+            for it in plan:
+                try:
+                    r, reused = upload_cached(it, run_dir=run_dir, force=force)
+                    if reused:
+                        reused_any = True
+                        comm.log(f"UPLOAD_SKIP {tag} {it['kind']} {it['name']} {it['bytes']}B (unchanged -> {r.get('subfolder','')}/{r.get('name')})", logfile)
+                    else:
+                        comm.log(f"UPLOAD {tag} {it['kind']} {it['name']} {it['bytes']}B -> {r.get('subfolder','')}/{r.get('name')}", logfile)
+                except Exception as e:
+                    comm.log(f"JOB error {tag} upload {it['name']} failed: {str(e)[:200]}; nothing posted", logfile)
+                    return None, comm.outcome(out, "node_error", note="upload failed: " + it["name"])
+            return reused_any, None
+
+        reused_any, err = _do_uploads(force=False)
+        if reused_any is None:
+            return err
+        sub_out = out if out is not None else {}
+        pid = orig_submit(g, tag, meta, outdir, logfile, sub_out)
+        if pid is None and reused_any and sub_out.get("outcome") == "node_error":
+            comm.log(f"UPLOAD_RETRY {tag} queue rejected after cached upload; forcing fresh upload", logfile)
+            _invalidate_upload_cache(plan, run_dir=run_dir)
+            reused_retry, err2 = _do_uploads(force=True)
+            if reused_retry is None:
+                return err2
+            sub_out.clear()
+            pid = orig_submit(g, tag, meta, outdir, logfile, sub_out)
+        return pid
     comm.submit = submit
 
     def fetch(pid, tag, meta, outdir, t0, logfile=None, out=None):
@@ -316,6 +421,8 @@ def enable(rq):
             os.makedirs(outdir, exist_ok=True)
             dst = os.path.join(outdir, tag + os.path.splitext(name)[1])
             n = download(sub, name, dst)
+            if dst.lower().endswith(".mp4") and callable(getattr(rq, "extract_last_frame", None)):
+                rq.extract_last_frame(dst, os.path.join(outdir, "last_frame.png"))
             side = dict(meta, tag=tag, secs=round(dt, 1), comfy_output="alienpc:output/%s/%s" % (sub or "", name), file=dst,
                         bytes=n, prompt_id=pid, finished=time.strftime('%Y-%m-%d %H:%M CT'))
             json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)

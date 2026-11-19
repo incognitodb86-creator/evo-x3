@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly 03:30 copy of X3 render finals to the QNAP renders share
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

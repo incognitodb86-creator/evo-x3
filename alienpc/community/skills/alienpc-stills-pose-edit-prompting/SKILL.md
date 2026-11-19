@@ -4,6 +4,9 @@ description: Write FLUX stills prompts on AlienPc for the adopted S2 workflow (K
 ---
 # AlienPc FLUX stills prompting (S2, 2026-10-31)
 
+> For Miraclein 4.5, Klein9 RefMod, RefControl pose/layout, and general FLUX.2 Klein still prompts, use [flux-klein-prompting](../flux-klein-prompting/SKILL.md).
+> This file keeps the locked Oct 31 S2 (`flux-2-klein-9b-kv-fp8` + `bfs_head_v1`) rules unchanged until `M4` promotes Miraclein 4.5.
+
 > Render rules live in C:\AI\render\AGENTS.md; run render work from C:\AI\render. Character index: [references/characters/README.md](references/characters/README.md) (OC/PixlStash rules in [../h3-parody-identity/SKILL.md](../h3-parody-identity/SKILL.md)).
 
 ## When

@@ -3,8 +3,8 @@
 Canonical copy for `hosts/x3/hermes/`. Applied on EVO-X3 (`/home/evo/.hermes/skills/`) by X3 Forge under the X3 lease after Max imports this commit.
 
 - Source snapshot: `hosts/x3/live/hermes/skills/all-skills.txt` @ `eabc8c7` (46 installed skills on Hermes `v0.23.2`: 44 stock + 2 custom `pi-job`, `pixlstash-image-library`).
-- Result: **27 removed** (archived out of `~/.hermes/skills/`), **19 kept** (17 stock + 2 local custom: `pi-job` adapted in `hosts/x3/hermes/skills/pi-job/SKILL.md`, and `pixlstash-image-library` from H8).
-- Reserved / planned (do **not** prune when added later): `h3-writer` (from the held `records/hermes-direct-render/PLAN.md` U0-U9 track; not created or modified here).
+- Result: **27 removed** (archived out of `~/.hermes/skills/`), **20 kept** (17 stock + 2 existing local custom: `pi-job` adapted in `hosts/x3/hermes/skills/pi-job/SKILL.md`, and `pixlstash-image-library` from H8 + 1 reserved custom: `flux-klein-prompting`, installed at FX1 apply).
+- Reserved / planned (do **not** prune when added later): `h3-writer` (from the held `records/hermes-direct-render/PLAN.md` U0-U9 track; not created or modified here); `flux-klein-prompting` (installed at FX1 apply from `x3/community/skills/flux-klein-prompting/SKILL.md`).
 
 ## Guardrails & X3 Adaptations
 
@@ -46,7 +46,7 @@ Canonical copy for `hosts/x3/hermes/`. Applied on EVO-X3 (`/home/evo/.hermes/ski
 | 26 | `./social-media/xurl/SKILL.md` | Unused X/Twitter CLI |
 | 27 | `./software-development/dogfood/SKILL.md` | Unused browser-QA dogfooding bloat |
 
-## KEEP (19 skills)
+## KEEP (20 skills, including 1 reserved)
 
 | # | Skill path (`all-skills.txt`) | Mode | X3 note |
 |---|---|---|---|
@@ -69,16 +69,18 @@ Canonical copy for `hosts/x3/hermes/`. Applied on EVO-X3 (`/home/evo/.hermes/ski
 | 17 | `./software-development/systematic-debugging/SKILL.md` | stock | Debugging |
 | 18 | `./software-development/test-driven-development/SKILL.md` | stock | Pairs with H5 `make check-all` / pytest |
 | 19 | `./web/blocked-page-recovery/SKILL.md` | stock | Pairs with H2 web/browser under SSRF blocklist |
+| 20 | `./flux-klein-prompting/SKILL.md` | **custom (reserved)** | FLUX.2 Klein / Miraclein 4.5 stills prompting; installed at FX1 apply from `x3/community/skills/flux-klein-prompting/SKILL.md` |
 
 ## Reserved / Planned (do not prune)
 
 - `h3-writer` (held under `records/hermes-direct-render/PLAN.md` U0-U9).
+- `flux-klein-prompting` (installed at FX1 apply to `/home/evo/.hermes/skills/flux-klein-prompting/SKILL.md`).
 
 ## Apply & Verify (X3 Forge, under X3 lease)
 
 1. Backup: `cp -a /home/evo/.hermes/skills /home/evo/.hermes/skills.bak-h4-$(date +%F-%H%M%S)`
 2. Archive the 27 removed skill directories into `/home/evo/.hermes/skills-archived/` (preserving relative subpaths; remove empty parent dirs like `apple/`, `email/`, `media/`, `note-taking/`, `social-media/`).
 3. Install adapted `pi-job`: `install -m 0644 -o evo -g evo hosts/x3/hermes/skills/pi-job/SKILL.md /home/evo/.hermes/skills/pi-job/SKILL.md`
-4. Verify: run Hermes skill loader check (`hermes skills list` / frontmatter validation) and `SKILL_SMOKE_OK`; confirm 19 active skills, 0 broken paths, and both `pi-job` and `pixlstash-image-library` loaded.
+4. Verify: run Hermes skill loader check (`hermes skills list` / frontmatter validation) and `SKILL_SMOKE_OK`; confirm 19 active skills before FX1 apply (20 including `flux-klein-prompting` once installed at FX1 apply), 0 broken paths, and `pi-job`, `pixlstash-image-library`, and `flux-klein-prompting` loaded.
 5. Re-snapshot with `scripts/snapshot-live-setup.sh` so `hosts/x3/hermes/skills-installed.txt` matches live.
 6. Rollback: restore `/home/evo/.hermes/skills` from the `skills.bak-h4-*` backup.
