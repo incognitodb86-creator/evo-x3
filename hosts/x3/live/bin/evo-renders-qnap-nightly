@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Nightly copy of finished X3-queued final files to /mnt/qnap/renders/runs (Derrick t2716u).
+# 2026-11-19 t2716u (Derrick): Hermes and PixlStash already show clips, so the QNAP share is a backup
+# only. This script replaces the per-run publish that used to live in sync-renders (t2555). It writes
+# final upscaled files or still PNGs only, never raw clips; never overwrites (cp -n). If the mount is
+# not writable, skip quietly. SYNC_DRY=1 lists what would be copied and copies nothing.
+set -euo pipefail
+
+QNAP_RUNS="/mnt/qnap/renders/runs"
+DRY="${SYNC_DRY:-0}"
+
+publish_x3() {   # X3 run dirs on stdin -> $QNAP_RUNS/<run>/<rel> (final files only)
+  local run ok rel dst
+  while IFS= read -r run; do
+    for ok in "$run"/*/render_ok.json; do
+      [ -f "$ok" ] || continue
+      if jq -e '.upscale | type == "object"' "$ok" >/dev/null 2>&1; then
+        rel="$(jq -r '.clip // empty' "$ok" | tr '\\' '/')"
+      elif jq -e '.job_type == "still"' "$ok" >/dev/null 2>&1; then
+        rel="$(jq -r '.image // empty' "$ok" | tr '\\' '/')"
+      else
+        continue
+      fi
+      case "$rel" in ""|*_raw.mp4|*.tmp.mp4|*..*|/*) continue;; esac
+      [ -f "$run/$rel" ] || continue
+      dst="$QNAP_RUNS/$(basename "$run")/$rel"
+      [ -e "$dst" ] && continue
+      if [ "$DRY" = 1 ]; then echo "WOULD PUBLISH $run/$rel -> $dst"; continue; fi
+      mkdir -p "$(dirname "$dst")" && cp -n -p "$run/$rel" "$dst" || echo "publish failed: $dst" >&2
+    done
+  done
+}
+
+# Skip quietly if the QNAP renders mount is not present or not writable.
+if [ -d /home/evo/AI/community/runs ] && [ -d "$QNAP_RUNS" ] && [ -w "$QNAP_RUNS" ]; then
+  publish_x3 < <(find /home/evo/AI/community/runs -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
+fi

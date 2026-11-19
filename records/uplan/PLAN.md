@@ -34,6 +34,21 @@ Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo pl
 
 **Review 2026-11-19 13:15 status (already fixed on `mono`, do not redo):** Audit F1 `M3`/`M4`/Card 19 (`2f4f2c2`) + `M4` candidates synced to `Miraclein 4.5` (`691a4b4`); F5 `H4` `pi-job` merge + skills review rows 1–2 (`pixlstash-image-library` KEEP + `pi-job` merge, `9ebe5a0`); F6 `H2` `flash-next-uncensored-v2` (`ef51f83`); F7 cards/leases/`H1c` (`b96560f`, `d80617f`, `12c3cb4`); `.github/` one-line lease & roles (`bab584a`); `hosts/SETUP-MAP.md` `mono` column (worker pass). Remaining Audit F2–F4, F8–F9 and `SK1–SK6` / `TQ1–TQ8` are folded below.
 
+## Derrick decisions 2026-11-19 (chat)
+
+These override any older line in this plan or in an Opus commit that says otherwise (t2830u). Opus findings for today: [OPUS-FINDINGS-20261119.md](./OPUS-FINDINGS-20261119.md).
+
+- 2026-11-19 t2843u: always test and use the community uncensored (heretic/abliterated) version of a model, never the stock one. The stock ref2va Q5 is cancelled and deleted. W1b runs heretic Q4 (step 2c), then heretic Q5 (step 2b), and nothing else.
+- 2026-11-19 t2810u: test every model the official way: its own guide and request format, thinking and sampler as upstream says, and the recommended quant.
+- 2026-11-19 t2846u: Derrick's clear "Go" in Max's chat is his yes for named H3 renders. Do not send him to Hermes chat for the go.
+- 2026-11-19 t2850u: plan applies must not disturb the running X3 benchmark (W1b). Writer, Hermes and llama-swap items wait until W1b has a `RESULT.md`.
+- 2026-11-19 t2854u: all plans are to be completed today, except Linux (`LX1-LX9`).
+- 2026-11-19 t2830u: where an Opus commit conflicts with Derrick's chat words, Derrick wins. Otherwise follow Opus and this plan.
+- 2026-11-19 t2833u: Max uses background subagents for implementation.
+- 2026-11-19 t2872u: running two models at once (Hermes model + a test model in a non-exclusive llama-swap group) is deferred until all benchmarks are done.
+- 2026-11-19 t2868u: add a Mystic LoRA audio arm to the H3 A/B tests (A7), from [HF 10Eros-Max discussion #98](https://huggingface.co/TenStrip/10Eros-Max/discussions/98): LTX2 LoRA Loader Advanced with `video` and `video_to_audio` at 0, `beta` scheduler, `lcm` sampler.
+- 2026-11-19 observed: W1b official heretic Q4 case 1 took 1164 s (13,645 completion tokens, thinking on). 12 cases is about 4 h per arm, so about 8 h for both arms.
+
 ## Order of work: benchmarks first, two machines in parallel (Derrick 2026-11-19 13:46 / 13:55 CT)
 
 Derrick: "we should run benchmarks first, to determine our settings for everything"; "stuff that is depending on another
@@ -48,7 +63,7 @@ Rules:
   when AlienPc is idle.
 - W1 arms 2/3 unload Gufo for a quiet window: Hermes chat and X3 coding pause. Tell Derrick the time first, and don't
   run that window while the AlienPc lane is running tests (coding would have nowhere to go).
-- Derrick answers every yes in chat; Max records it here.
+- Derrick answers every yes in chat; Max records it here. A clear "Go" in Max's chat counts for named H3 renders (2026-11-19 t2846u).
 
 **X3 lane (prompts, code, Hermes)**
 
@@ -61,7 +76,7 @@ Rules:
 <!-- merged 2026-11-19: upstream said ESP-off alias on both machines -->
 | X4b | Hermes renders itself, pi only for coding (`H9` setup): `h3-render` + `h3-writer` skills built from `OPERATOR.md` / `writer_prompt.md`, community skills via `skills.external_dirs`, stock SOUL + `USER.md` + `MEMORY.md`, `lab-status` + `fleet-brain` skills, `approvals.mode: smart`, coding-only `pi-job` skill, `--prose-file` gate, queue guard hook + morning digest; then Derrick's chat checks | `UNI-APPLY-X3-E-HERMES` | X2 + X4 | Hermes is the render entry point |
 | X4c | GrokBot parity + local secret guard (Derrick 15:50 CT: "2 & 3"): install `scripts/gitleaks-pre-commit.sh` on X3 `mono` clones; wire read-only `gitea` MCP (+ `google-workspace`/`unifi` only if creds filled, never Vaultwarden) into Hermes with `tools.exclude`; optional `ntfy` push on morning digest | `UNI-APPLY-X3-F-PARITY` | X4b | Forge cannot commit secrets; Hermes has read-only MCP parity |
-| X5 | Writer benchmark W1 (models already on disk, no downloads) | `BENCH-X3-W1` | X2 | writer model + sampler |
+| X5 | Writer benchmark W1 (models already on disk, no downloads). **2026-11-19 t2810u/t2843u:** W1 results are replaced by W1b: official guide, thinking and sampler, heretic Q4 (step 2c) then heretic Q5 (step 2b) only; about 4 h per arm (case 1 = 1164 s). Nothing else touches the X3 writer slot while it runs (t2850u). | `BENCH-X3-W1` | X2 | writer model + sampler |
 | X6 | W2 downloads only if X5 has no good winner; duckyshell / API writer only if Derrick wants them as extra arms | (after X5) | X5 + Derrick yes | - |
 | X7 | W4 deploy the winner + retune checklist; AlienPc `writer_prompt.md` sync (card 40) | (written after X5) | X5 (X6 if run) | live writer |
 | X8 | Pipeline vs "write it yourself" comparison (card 43) in Derrick's one Hermes chat (no profiles, see Hermes plan Update 15:00 CT), rerun `build-hermes-skills.sh` after W4, add still asks using the A5 winners; retire `pi-job render` only on Derrick's yes after 3 good Hermes renders (R13) | Hermes plan | X4b + X7 + A5 | how Hermes renders |
@@ -77,7 +92,7 @@ Rules:
 | A4 | Render timing R1 (read timings from renders Derrick already approves; no changes) | `BENCH-ALIENPC-1` step 1 | A3 | which speed flags to try |
 | A5 | Flux / Miraclein still tests: M4 (T2I, RefMod, edit), ST4 T2I, ST5 pose + layout; prompts written on the X3 with the FX1 skill; Derrick yes per still | `BENCH-ALIENPC-1` step 2 | A3 + X2 | still templates |
 | A6 | Speed flags R3/R4 only if A4 shows they help; R2 only if Derrick wants that download | (after A4) | A4 | ComfyUI flags |
-| A7 | Video template A/B, fixed seed, Derrick picks by eye: TQ1 -> TQ4 -> TQ2/TQ3 -> TQ5, then M5 realism | (after A6) | A6 | production templates |
+| A7 | Video template A/B, fixed seed, Derrick picks by eye: TQ1 -> TQ4 -> TQ2/TQ3 -> TQ5, then M5 realism; plus a Mystic LoRA audio arm (2026-11-19 t2868u, HF discussion #98, settings in "Derrick decisions") | (after A6) | A6 | production templates |
 | A8 | Lock down: S2 allowlist hook (lists A5/A7 winners), then S1 Manager `strong` (after the last node install) | (after A7) | A5, A7 | - |
 
 **Monorepo switchover (S5/S6) - Derrick yes 2026-11-19 14:05 CT:** waits for `S1b` (patch the scripts that use `Path(__file__).resolve().parents[N]` / `git rev-parse --show-toplevel` so they still find `/home/evo/AI/...` once `render`, `community` and `forge` are symlinks into the `mono` clone; file work on `mono`, not on the old branches), then a window when neither lane is running. **S1b status 14:30 CT:** the Python sites are done on `mono` `1f8eb17` (`EVO_AI_ROOT`, else `/home/evo/AI`; same paths as today, so they are safe to apply before S5). **Ralph loop fixed for `mono` (Derrick 14:28 CT: "we already switched over, do the ralph loop fix"):** see the monorepo plan, Update 14:45 CT. Max pulls the `mono` clone (`git -C /home/evo/AI/evo-x3 pull --ff-only`) while no Ralph loop runs; `ralph.sh` is live straight from the clone. Tailscale ACL (card 11): Derrick, any time.
@@ -350,7 +365,7 @@ Size: S = small file or one command, M = a half-day live pass, L = multi-step wi
 
 | ID | Opus file? | Owner (live / apply) | Machine | Lease | Size | What | Verify | Rollback |
 |---|---|---|---|---|---|---|---|---|
-| W1 | no | X3 Forge (run) + Hydrogen (score if needed) + Derrick blind pick | X3 | X3 (quiet window if unloading Gufo) | L | 16-ask bakeoff, models already on `/srv/models`. Arms 1a/1b/2/3 as in F4. No conflicting Gufo thinking flags. | Per-arm READY/refusal/drift/timing table + Derrick's blind ranking. `records/W1/RESULT.md`. | Restore `llama-swap` pins; no downloads to delete. |
+| W1 | no | X3 Forge (run) + Hydrogen (score if needed) + Derrick blind pick | X3 | X3 (quiet window if unloading Gufo) | L | 16-ask bakeoff, models already on `/srv/models`. Arms 1a/1b/2/3 as in F4. No conflicting Gufo thinking flags. **2026-11-19 t2810u/t2843u:** superseded by W1b: uncensored (heretic) builds only, each tested the official way (own guide/request format, upstream thinking and sampler, recommended quant); heretic Q4 (step 2c) then heretic Q5 (step 2b); stock ref2va Q5 cancelled and deleted; about 4 h per arm. | Per-arm READY/refusal/drift/timing table + Derrick's blind ranking. `records/W1/RESULT.md`. | Restore `llama-swap` pins; no downloads to delete. |
 | W2 | no | Derrick yes first, then same as W1 | X3 | X3 | L | Optional Stage 2, 1 download at a time, only if W1 loses. | Beats W1 on READY + Derrick pick, else delete the losing download. | Delete losing files; restore pins. |
 | W3a | **yes** (`x3/community/scripts/parody/beta7_convert.py` + tests) | Max imports; X3 Forge applies + tests | X3 | X3 | M | One shared Beta 7 converter used by duckyshell, pytraveler, REA-Video, and later Hermes. | Unit tests + `lint.py` READY, 0 header violations on fixtures. | Revert the commit. |
 | W3b | no | X3 Forge (X3 side) / AlienPc Forge (AlienPc side), Derrick yes | X3 and/or AlienPc | matching | M | Install duckyshell Standalone v0.1.10 if license is open. Point at X3 `/v1`. Never Direct GGUF/Ollama on AlienPc. Pass copied prompts through `W3a`. | App starts; one converted prompt passes `lint.py`. | Uninstall the app; no ComfyUI change. |

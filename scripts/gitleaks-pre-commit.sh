@@ -57,7 +57,7 @@ pat = re.compile(
     r"ts" r"key-[A-Za-z0-9-]{16,}|"
     r"sk-[A-Za-z0-9]{20,}|"
     r"AKIA[0-9A-Z]{16}|"
-    r"-"*5 + r"BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY" + r"-"*5
+    r"-{5}BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-{5}"
     r")"
 )
 cur_file = ""

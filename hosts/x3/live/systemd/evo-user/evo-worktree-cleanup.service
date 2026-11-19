@@ -1,0 +1,6 @@
+[Unit]
+Description=Nightly cleanup of stale clean git worktrees in ~/AI/_worktrees (unified plan L3, card 36)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/evo-worktree-cleanup

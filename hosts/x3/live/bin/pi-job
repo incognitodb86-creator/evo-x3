@@ -12,6 +12,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import shutil
 import subprocess
@@ -37,13 +38,17 @@ COMMUNITY_RUNS = COMMUNITY_DIR / "runs"
 RQ_PY = HOME / "AI" / "render" / "x3" / ".venv" / "bin" / "python"
 NTFY_TOKEN_FILE = HOME / ".config" / "evo-x3" / "ntfy-x3.token"
 NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
-# P5.3: AlienPC Swift when the X3 render lock is free at job start; one resume on the X3 after a failed request.
+# H1c (Derrick 2026-11-19 12:29 CT card 21): AlienPC Swift (ESP on, Derrick t2764u reversed card 21) first for code/review whenever AlienPC is idle
+# (X3 render lock free + :8447 /health 2xx); fall back to X3 Gufo when busy/unreachable, with 1-way X3 --continue
+# resume if a render starts mid-run (503). X3 Gufo stays the writer/Hermes model.
 X3_RENDER_LOCK = HOME / "AI" / "locks" / "gpu-render.lock"
-ALIENPC_MODEL = "alienpc/coding_swift15_iq3s_esp"
+ALIENPC_MODEL = os.environ.get("PI_JOB_ALIENPC_MODEL", "alienpc/coding_swift15_iq3s_esp")
+ALIENPC_GATE_URL = os.environ.get("PI_JOB_ALIENPC_GATE_URL", "https://alienpc.tailf242b2.ts.net:8447/health")
 RESUME_PROMPT = "Continue from where you stopped and finish the task."
 # 2026-11-19 hermesflow (Derrick t2572u/t2572s9151): Hermes chat shows the still Render picked + the full prompt, the
-# user's in-chat yes queues it (`pi-job approve`), and the 2x upscaled video comes back as a renders-share link.
+# user's in-chat yes queues it (`pi-job approve`), and the 2x upscaled video comes back as a MEDIA:<local clip> line (Hermes WebUI inline player) plus a renders-share fallback link.
 QNAP_RUNS = Path("/mnt/qnap/renders/runs")
+SHEETS_DIR = Path("/srv/renders/sheets")
 RENDERS_URL = "https://evo-x3-1.tailf242b2.ts.net:8443/renders"
 CHAT_APPROVAL_TTL = 3600  # seconds the in-chat yes stays valid after the preview is shown
 
@@ -60,7 +65,7 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def _send_ntfy(title: str, body: str, priority: str = "default") -> bool:
+def _send_ntfy(title: str, body: str, priority: str = "default", actions: str | None = None) -> bool:
     if not NTFY_TOKEN_FILE.is_file():
         return False
     token = NTFY_TOKEN_FILE.read_text(encoding="utf-8").strip()
@@ -76,6 +81,8 @@ def _send_ntfy(title: str, body: str, priority: str = "default") -> bool:
             "Priority": priority,
         },
     )
+    if actions:
+        req.add_header("Actions", actions)
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return 200 <= resp.status < 300
@@ -122,6 +129,61 @@ def _write_status(run_dir: Path, status: str, detail: str = "") -> None:
     if detail:
         lines.append(f"detail={detail}")
     (run_dir / "status").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_stuck_bundle(run_dir: Path, meta: dict, detail: str) -> Path:
+    """L6: write ~/AI/_runs/<id>/escalate.md on STUCK with task, git status/diff, and last 3 tool errors."""
+    sections = [
+        f"# Escalation bundle: {meta.get('job_id', run_dir.name)}",
+        f"- Role: `{meta.get('role', '?')}`",
+        f"- Updated: `{_now_iso()}`",
+        f"- Detail: `{detail}`",
+        "",
+        "## Task",
+        "```text",
+        str(meta.get("prompt", "")).strip(),
+        "```",
+    ]
+    target = meta.get("target")
+    if target and Path(target).is_dir() and (Path(target) / ".git").exists():
+        st = subprocess.run(["git", "-C", str(target), "status", "--short"], capture_output=True, text=True)
+        df = subprocess.run(["git", "-C", str(target), "diff"], capture_output=True, text=True)
+        sections += [
+            "",
+            "## Git status",
+            "```text",
+            (st.stdout or "(clean)").strip()[:4000],
+            "```",
+            "",
+            "## Git diff (truncated)",
+            "```diff",
+            (df.stdout or "(none)").strip()[:8000],
+            "```",
+        ]
+    errors: list[str] = []
+    sessions = sorted(run_dir.glob("*.jsonl"), key=lambda q: q.stat().st_mtime)
+    if sessions:
+        for line in sessions[-1].read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                e = json.loads(line)
+            except ValueError:
+                continue
+            m = e.get("message") or {}
+            if m.get("isError") or e.get("isError"):
+                errors.append(json.dumps(m or e, ensure_ascii=False)[:600])
+    if not errors and (run_dir / "log").is_file():
+        log_lines = (run_dir / "log").read_text(encoding="utf-8", errors="replace").splitlines()
+        err_lines = [ln for ln in log_lines if any(k in ln.lower() for k in ("error", "traceback", "failed", "refused"))]
+        errors = (err_lines or log_lines)[-3:]
+    sections += ["", "## Last 3 tool errors"]
+    if errors:
+        for idx, err in enumerate(errors[-3:], 1):
+            sections += [f"### Error {idx}", "```text", err, "```"]
+    else:
+        sections.append("(none captured)")
+    out = run_dir / "escalate.md"
+    out.write_text("\n".join(sections) + "\n", encoding="utf-8")
+    return out
 
 
 def _new_job_id(role: str) -> str:
@@ -201,10 +263,63 @@ def _publish_preview(crun: Path) -> tuple[str | None, str | None]:
     return still_url, prompt_url
 
 
+def _publish_contact_sheet(crun: Path) -> str | None:
+    """L4 (#11): copy the 2x3 contact sheet to /srv/renders/sheets/ (local archive) and QNAP preview/; return a URL
+    ONLY for the QNAP copy so we never emit a 404 URL when QNAP is not writable."""
+    sheet = None
+    for name in ("contact_sheet.jpg", "contact_sheet.png", "sheet.jpg", "sheet.png"):
+        cand = crun / name
+        if cand.is_file():
+            sheet = cand
+            break
+    if sheet is None:
+        return None
+    ext = sheet.suffix.lower() or ".jpg"
+    try:
+        if SHEETS_DIR.parent.is_dir() and os.access(SHEETS_DIR.parent, os.W_OK):
+            SHEETS_DIR.mkdir(parents=True, exist_ok=True)
+            dst_local = SHEETS_DIR / f"{crun.name}{ext}"
+            if not dst_local.exists():
+                shutil.copyfile(sheet, dst_local)
+    except OSError:
+        pass
+    if QNAP_RUNS.is_dir() and os.access(QNAP_RUNS, os.W_OK):
+        dst = QNAP_RUNS / crun.name / "preview"
+        dst.mkdir(parents=True, exist_ok=True)
+        if not (dst / f"sheet{ext}").exists():
+            shutil.copyfile(sheet, dst / f"sheet{ext}")
+        return f"{RENDERS_URL}/{crun.name}/preview/sheet{ext}"
+    return None
+
+
+def _upscaled_clip(crun: Path) -> Path | None:
+    """Absolute path of the kept RTX 2x clip in the community run dir, or None if it is not there yet."""
+    ok = crun / "clip" / "render_ok.json"
+    if not ok.is_file():
+        return None
+    try:
+        okd = json.loads(ok.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(okd.get("upscale"), dict):
+        return None
+    rel = str(okd.get("clip") or "clip/clip.mp4").replace("\\", "/")
+    local = crun / rel
+    return local.resolve() if local.is_file() else None
+
+
 def _render_final(crun: Path) -> tuple[str, str]:
-    """(state, detail) of a queued render: WAITING / RENDERING / PUBLISHING / DONE / FAIL."""
+    """(state, detail) of a queued render: WAITING / RENDERING / PUBLISHING / DONE / FAIL.
+
+    DONE is the local upscaled file in the community run dir (L9 / ST7): do not wait for the
+    QNAP copy, which after ST7 only lands in the nightly 03:30 backup.
+    """
     qlog = crun / "_render_queue.log"
     lines = qlog.read_text(encoding="utf-8", errors="replace").splitlines() if qlog.is_file() else []
+    local = _upscaled_clip(crun)
+    if local is not None:
+        rel = str(local.relative_to(crun.resolve())).replace("\\", "/")
+        return "DONE", f"{RENDERS_URL}/{crun.name}/{rel}"
     ok = crun / "clip" / "render_ok.json"
     if ok.is_file():
         try:
@@ -212,11 +327,7 @@ def _render_final(crun: Path) -> tuple[str, str]:
         except ValueError:
             okd = {}
         if isinstance(okd.get("upscale"), dict):
-            rel = str(okd.get("clip") or "clip/clip.mp4").replace("\\", "/")
-            pub = QNAP_RUNS / crun.name / rel
-            if pub.is_file():
-                return "DONE", f"{RENDERS_URL}/{crun.name}/{rel}"
-            return "PUBLISHING", "upscaled; waiting for evo-renders-sync (every 2 min) to publish it"
+            return "PUBLISHING", "upscaled; waiting for local clip file"
     fails = [x for x in lines if " FAIL" in x]
     closed = [x for x in lines if "BATCH closed" in x or "UPSCALE-ONLY closed" in x]
     if fails and closed and lines.index(closed[-1]) > lines.index(fails[-1]):
@@ -267,6 +378,18 @@ def _x3_render_lock_free() -> bool:
         os.close(fd)
 
 
+def _alienpc_gate_idle(timeout: float = 3.0) -> bool:
+    """True only when X3 render lock is free AND AlienPC :8447 (--fail-if-busy) reports idle (2xx)."""
+    if not _x3_render_lock_free():
+        return False
+    req = urllib.request.Request(ALIENPC_GATE_URL, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+
 def _last_stop_reason(run_dir: Path) -> str | None:
     """stopReason of the last assistant message in the newest pi session file in run_dir (P5.3 tested: a 503
     after pi's 2 retries ends rc=1 with stopReason 'error')."""
@@ -286,9 +409,9 @@ def _last_stop_reason(run_dir: Path) -> str | None:
 
 
 def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple[int, str]:
-    """P5.3: AlienPC first when the X3 render lock is free, else the launcher's X3 default. If the AlienPC run
-    stops on a failed request (503 from the fail-fast gate or any error), resume once on the X3 in the same
-    session (--continue picks the newest session in run_dir). Never moves back to the AlienPC."""
+    """H1c (card 21): AlienPC Swift (ESP on, Derrick t2764u reversed card 21) first for code/review whenever AlienPC :8447 probes idle (and X3 render
+    lock is free), else X3 Gufo. If an AlienPC run stops on a failed request (503 from the fail-fast gate or any error),
+    resume once on the X3 in the same session (--continue). Never moves back to the AlienPC."""
     def run(extra: list[str], text: str, model: str | None) -> int:
         env = dict(os.environ)
         if model:
@@ -300,9 +423,10 @@ def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple
         return subprocess.run(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=logf,
                               stderr=subprocess.STDOUT).returncode
 
-    if not _x3_render_lock_free():
+    alienpc_model = os.environ.get("PI_JOB_ALIENPC_MODEL", ALIENPC_MODEL).strip()
+    if os.environ.get("PI_JOB_FORCE_X3") == "1" or not alienpc_model or not _alienpc_gate_idle():
         return run([], prompt, None), "x3"
-    rc = run([], prompt, ALIENPC_MODEL)
+    rc = run([], prompt, alienpc_model)
     if rc == 0:
         return rc, "alienpc"
     reason = _last_stop_reason(run_dir)
@@ -311,6 +435,28 @@ def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple
     logf.write(f"\n[pi-job] AlienPC run stopped (rc={rc}, stop={reason}); resuming once on the X3\n".encode())
     logf.flush()
     return run(["--continue"], RESUME_PROMPT, None), "alienpc->x3"
+
+
+def _run_makefile_check_all(repo: Path, logf) -> int | None:
+    """H5 (#8): if target repo has a Makefile with a `check-all` target, run `make check-all` and return its rc."""
+    mk = repo / "Makefile"
+    if not mk.is_file():
+        return None
+    try:
+        text = mk.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    if not re.search(r"^check-all\s*:", text, re.MULTILINE):
+        return None
+    logf.write(b"\n[pi-job] running make check-all (H5 gate)\n")
+    logf.flush()
+    return subprocess.run(
+        ["timeout", "600", "make", "check-all"],
+        cwd=str(repo),
+        stdin=subprocess.DEVNULL,
+        stdout=logf,
+        stderr=subprocess.STDOUT,
+    ).returncode
 
 
 def _exec_job(job_id: str) -> int:
@@ -334,10 +480,24 @@ def _exec_job(job_id: str) -> int:
                     text=True,
                 ).strip()
                 if rc == 0 and int(ahead) > 0:
+                    chk_rc = _run_makefile_check_all(repo, logf)
+                    if chk_rc is not None and chk_rc != 0:
+                        detail = f"rc={rc} commits_added={ahead} model={where} check_all_rc={chk_rc}"
+                        _write_status(run_dir, "STUCK", detail)
+                        try:
+                            _write_stuck_bundle(run_dir, meta, detail)
+                        except Exception:
+                            pass
+                        _send_ntfy(f"pi-job {job_id}", f"STUCK (code, make check-all rc={chk_rc})")
+                        return 1
                     _write_status(run_dir, "DONE", f"commits_added={ahead} model={where}")
                     _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
                     return 0
                 _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}")
+                try:
+                    _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}")
+                except Exception:
+                    pass
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={rc}, commits={ahead})")
                 return 1
 
@@ -346,6 +506,11 @@ def _exec_job(job_id: str) -> int:
                 rc, where = _run_pi(run_dir, "1800", meta["prompt"], str(repo), logf)
                 st = "DONE" if rc == 0 else "STUCK"
                 _write_status(run_dir, st, f"rc={rc} model={where}")
+                if st == "STUCK":
+                    try:
+                        _write_stuck_bundle(run_dir, meta, f"rc={rc} model={where}")
+                    except Exception:
+                        pass
                 _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
                 return 0 if rc == 0 else 1
 
@@ -359,7 +524,13 @@ def _exec_job(job_id: str) -> int:
                 last = [x for x in (qlog.read_text(encoding="utf-8", errors="replace").splitlines() if qlog.is_file() else [])
                         if " UPSCALE" in x][-2:]
                 st = "DONE" if proc.returncode == 0 else "STUCK"
-                _write_status(run_dir, st, f"rc={proc.returncode} " + " | ".join(last)[-400:])
+                detail = f"rc={proc.returncode} " + " | ".join(last)[-400:]
+                _write_status(run_dir, st, detail)
+                if st == "STUCK":
+                    try:
+                        _write_stuck_bundle(run_dir, meta, detail)
+                    except Exception:
+                        pass
                 _send_ntfy(f"pi-job {job_id}", f"{st} (upscale {run.name}, rc={proc.returncode})")
                 return 0 if proc.returncode == 0 else 1
 
@@ -371,6 +542,8 @@ def _exec_job(job_id: str) -> int:
                 )
                 if meta.get("still_copy"):
                     render_prompt += f" Use exact still path: {meta['still_copy']}."
+                if meta.get("pick") is not None:
+                    render_prompt += f" Pick candidate #{meta['pick']} from the contact sheet."
                 cmd = [
                     "timeout",
                     "1800",
@@ -395,6 +568,7 @@ def _exec_job(job_id: str) -> int:
                         f"pi-job {job_id}",
                         f"Run {job_id}, prompt {hash8}: code {code}, 15 min",
                         priority="high",
+                        actions=f"copy, Copy, pi-job queue {job_id} {code}",
                     )
                     still_url, prompt_url = _publish_preview(crun)
                     note = f"run={crun.name} prompt_hash8={hash8} ntfy_sent={sent} preview={'ok' if still_url else 'no-still'}"
@@ -402,8 +576,15 @@ def _exec_job(job_id: str) -> int:
                     return 0
                 nr = crun / "clip_NOT_READY.txt"
                 why = nr.read_text(encoding="utf-8", errors="replace").strip()[:300] if nr.is_file() else ""
-                _write_status(run_dir, "STUCK", f"rc={proc.returncode} run={crun.name} build={built} "
-                                               f"prompt_exists={prompt_file.is_file()} {why}".strip())
+                stuck_detail = (
+                    f"rc={proc.returncode} run={crun.name} build={built} "
+                    f"prompt_exists={prompt_file.is_file()} {why}"
+                ).strip()
+                _write_status(run_dir, "STUCK", stuck_detail)
+                try:
+                    _write_stuck_bundle(run_dir, meta, stuck_detail)
+                except Exception:
+                    pass
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (render, rc={proc.returncode})")
                 return 1
 
@@ -414,7 +595,38 @@ def _exec_job(job_id: str) -> int:
             ACTIVE_FILE.unlink(missing_ok=True)
 
 
-def _start_detached(role: str, target: str | None, prompt: str, still_path: str | None = None) -> int:
+def _trigger_pixl_import_detached() -> None:
+    """ST3 (#7): start pixl-import as the same detached transient unit used by sync-renders (skip if active)."""
+    active = subprocess.run(
+        ["systemctl", "--user", "is-active", "--quiet", "pixl-import.service"],
+        capture_output=True,
+    )
+    if active.returncode == 0:
+        return
+    venv_py = HOME / ".venvs" / "pixlstash" / "bin" / "python"
+    py = str(venv_py) if venv_py.is_file() else "python3"
+    subprocess.run(
+        [
+            "systemd-run",
+            "--user",
+            "--unit=pixl-import",
+            "--collect",
+            "--description",
+            "PixlStash inbox import",
+            py,
+            str(IMPORT_INBOX_PY),
+        ],
+        capture_output=True,
+    )
+
+
+def _start_detached(
+    role: str,
+    target: str | None,
+    prompt: str,
+    still_path: str | None = None,
+    pick: int | None = None,
+) -> int:
     fd = _acquire_single_job_lock()
     try:
         job_id = _new_job_id(role)
@@ -434,11 +646,7 @@ def _start_detached(role: str, target: str | None, prompt: str, still_path: str 
                 inbox_dst = PIXL_INBOX_DIR / f"{job_id}_{src.name}"
                 shutil.copy2(src, inbox_dst)
                 if IMPORT_INBOX_PY.is_file():
-                    subprocess.run(
-                        ["python3", str(IMPORT_INBOX_PY)],
-                        capture_output=True,
-                        timeout=60,
-                    )
+                    _trigger_pixl_import_detached()
 
         meta = {
             "job_id": job_id,
@@ -450,6 +658,8 @@ def _start_detached(role: str, target: str | None, prompt: str, still_path: str 
         }
         if role == "render":
             meta["run_name"] = _render_run_name(job_id)
+            if pick is not None:
+                meta["pick"] = pick
         (run_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
         _write_status(run_dir, "QUEUED", f"role={role}")
         ACTIVE_FILE.write_text(job_id + "\n", encoding="utf-8")
@@ -567,6 +777,88 @@ def _cmd_approve(job_id: str) -> int:
     return _queue_render(run_dir)
 
 
+def _cmd_recompile(run_ref: str) -> int:
+    """L8: after prompt.txt is edited on a READY job, lint with wp_lint.py, update clip/request.api.json directly,
+    and issue a fresh P4.11 approval code tied to the new prompt hash."""
+    run_dir = Path(run_ref) if Path(run_ref).is_absolute() else (RUNS_DIR / run_ref)
+    meta_file = run_dir / "meta.json"
+    st_file = run_dir / "status"
+    if not meta_file.is_file() or not st_file.is_file():
+        print(f"REFUSED: missing meta.json or status in {run_dir}", file=sys.stderr)
+        return 2
+    if "status=READY" not in st_file.read_text(encoding="utf-8", errors="replace"):
+        print(f"REFUSED: {run_dir.name} is not READY", file=sys.stderr)
+        return 2
+    meta = json.loads(meta_file.read_text(encoding="utf-8"))
+    if meta.get("role") != "render":
+        print(f"REFUSED: {run_dir.name} is not a render job", file=sys.stderr)
+        return 2
+    job_id = str(meta.get("job_id") or run_dir.name)
+    crun = COMMUNITY_RUNS / meta.get("run_name", _render_run_name(job_id))
+    prompt_file = crun / "prompt.txt"
+    req_file = crun / "clip" / "request.api.json"
+    parody_dir = COMMUNITY_DIR / "scripts" / "parody"
+    wp_lint_py = parody_dir / "wp_lint.py"
+    if not prompt_file.is_file() or not req_file.is_file():
+        print(f"REFUSED: missing prompt.txt or clip/request.api.json in {crun}", file=sys.stderr)
+        return 2
+    if not wp_lint_py.is_file():
+        print(f"REFUSED: wp_lint.py missing at {wp_lint_py} (fail closed)", file=sys.stderr)
+        return 2
+
+    prompt_text = prompt_file.read_text(encoding="utf-8").strip()
+    kind = "sex"
+    try:
+        kind = str(json.loads((crun / "build_report.json").read_text(encoding="utf-8")).get("kind") or "sex")
+    except (OSError, ValueError):
+        pass
+
+    py = str(RQ_PY) if RQ_PY.is_file() else sys.executable
+    lint_code = (
+        "import json, os, sys; sys.path.insert(0, sys.argv[1]); import wp_lint; "
+        "text = open(sys.argv[2], encoding='utf-8').read().strip(); "
+        "ctx = json.load(open(sys.argv[4], encoding='utf-8')) if os.path.isfile(sys.argv[4]) else {}; "
+        "ctx.setdefault('kind', sys.argv[3]); "
+        "res = wp_lint.lint(text, ctx); "
+        "print(json.dumps({'pass': res.get('pass'), 'hard': res.get('hard', []), 'score': res.get('score')})); "
+        "sys.exit(0 if res.get('pass') else 1)"
+    )
+    # N3: lint with the run's full context (slots, blacklist, cloned, cfg) saved by render_writer_pipeline.
+    r = subprocess.run([py, "-c", lint_code, str(parody_dir), str(prompt_file), kind, str(crun / "lint_ctx.json")],
+                       capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        print(f"REFUSED: wp_lint failed:\n{(r.stdout + r.stderr).strip()[-1000:]}", file=sys.stderr)
+        return 2
+
+    graph = json.loads(req_file.read_text(encoding="utf-8"))
+    if not isinstance(graph.get("c0"), dict) or not isinstance(graph["c0"].get("inputs"), dict):
+        print(f"REFUSED: invalid clip/request.api.json (missing c0.inputs)", file=sys.stderr)
+        return 2
+    old_c0_prompt = graph["c0"]["inputs"].get("prompt")
+    graph["c0"]["inputs"]["prompt"] = prompt_text
+    c1 = graph.get("c1")
+    # N1: on long_continuation runs c1 has its own continuation prompt; only mirror c0 when c1 was a copy of it.
+    if isinstance(c1, dict) and isinstance(c1.get("inputs"), dict) and c1["inputs"].get("prompt") == old_c0_prompt:
+        c1["inputs"]["prompt"] = prompt_text
+    req_file.write_text(json.dumps(graph, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    if QNAP_RUNS.is_dir() and os.access(QNAP_RUNS, os.W_OK):
+        dst = QNAP_RUNS / crun.name / "preview"
+        dst.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(prompt_file, dst / "prompt.txt")
+
+    code, hash8 = _create_approval(run_dir, job_id, prompt_file)
+    sent = _send_ntfy(
+        f"pi-job {job_id} (recompiled)",
+        f"Run {job_id}, prompt {hash8}: code {code}, 15 min",
+        priority="high",
+        actions=f"copy, Copy, pi-job queue {job_id} {code}",
+    )
+    _write_status(run_dir, "READY", f"run={crun.name} recompiled=1 prompt_hash8={hash8} ntfy_sent={sent}")
+    print(f"recompiled job={job_id} prompt_hash8={hash8} ntfy_sent={sent}")
+    return 0
+
+
 def _render_report(job_id: str) -> tuple[str, str]:
     """Extra status lines for render jobs + a ready-to-paste chat block. Returns (state, text)."""
     run_dir = RUNS_DIR / job_id
@@ -581,9 +873,12 @@ def _render_report(job_id: str) -> tuple[str, str]:
     out = [f"run={crun.name}"]
     if "status=READY" in st:
         still_url, prompt_url = _publish_preview(crun)
+        sheet_url = _publish_contact_sheet(crun)
         prompt = (crun / "prompt.txt").read_text(encoding="utf-8", errors="replace").strip()
-        out += [f"still_url={still_url or 'none'}", f"prompt_url={prompt_url or 'none'}",
-                "--- chat_reply (paste verbatim) ---"]
+        out += [f"still_url={still_url or 'none'}", f"sheet_url={sheet_url or 'none'}",
+                f"prompt_url={prompt_url or 'none'}", "--- chat_reply (paste verbatim) ---"]
+        if sheet_url:
+            out.append(f"![contact sheet]({sheet_url})\n")
         if still_url:
             out.append(f"![still Render picked]({still_url})\n")
         out += [f"**Job:** `{job_id}`\n", "**Full prompt:**\n", "```text", prompt, "```\n",
@@ -593,9 +888,12 @@ def _render_report(job_id: str) -> tuple[str, str]:
         state, detail = _render_final(crun)
         out.append(f"final={state}")
         if state == "DONE":
+            local = _upscaled_clip(crun)
             out += [f"video_url={detail}", "--- chat_reply (paste verbatim) ---",
-                    f"Your render is done (RTX 2x upscaled).\n", f"<video>{detail}</video>\n",
-                    f"[Open the 2x video]({detail})"]
+                    "Your render is done (RTX 2x upscaled).\n"]
+            if local is not None:
+                out.append(f"MEDIA:{local}\n")
+            out.append(f"[Open the 2x video]({detail})")
         else:
             out.append(f"detail={detail}")
         return state, "\n".join(out)
@@ -622,7 +920,60 @@ def _cmd_wait(job_id: str, timeout_s: int) -> int:
     return _cmd_status(job_id)
 
 
-def _cmd_status(job_id: str) -> int:
+def _cmd_status_overview() -> int:
+    """L5: overview when `pi-job status` is called without a job ID (resident model, MemAvailable, AlienPC, last 3)."""
+    model = "unknown"
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:8080/running", timeout=2) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if isinstance(data, dict) and isinstance(data.get("running"), list):
+            names = [str(x.get("model") or x.get("id") or x) if isinstance(x, dict) else str(x) for x in data["running"]]
+            model = ", ".join(names) if names else "none"
+        elif isinstance(data, list):
+            names = [str(x.get("model") or x.get("id") or x) if isinstance(x, dict) else str(x) for x in data]
+            model = ", ".join(names) if names else "none"
+    except Exception:
+        pass
+
+    mem_avail = "unknown"
+    meminfo = Path("/proc/meminfo")
+    if meminfo.is_file():
+        for line in meminfo.read_text(encoding="utf-8", errors="replace").splitlines():
+            if line.startswith("MemAvailable:"):
+                parts = line.split()
+                if len(parts) >= 2 and parts[1].isdigit():
+                    mem_avail = f"{int(parts[1]) / (1024 * 1024):.2f} GiB"
+                break
+
+    lock_s = "free" if _x3_render_lock_free() else "busy"
+    gate_s = "idle" if _alienpc_gate_idle(timeout=2.0) else "busy"
+    print(f"model={model}")
+    print(f"mem_available={mem_avail}")
+    print(f"alienpc=lock:{lock_s},gate:{gate_s}")
+
+    jobs: list[Path] = []
+    if RUNS_DIR.is_dir():
+        jobs = sorted(
+            [p for p in RUNS_DIR.iterdir() if p.is_dir() and (p / "status").is_file()],
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )[:3]
+    print("last_jobs:")
+    if not jobs:
+        print("  (none)")
+    for jd in jobs:
+        st_lines = dict(
+            line.split("=", 1)
+            for line in (jd / "status").read_text(encoding="utf-8", errors="replace").splitlines()
+            if "=" in line
+        )
+        print(f"  {jd.name}: {st_lines.get('status', '?')} {st_lines.get('detail', '')}".rstrip())
+    return 0
+
+
+def _cmd_status(job_id: str | None) -> int:
+    if not job_id:
+        return _cmd_status_overview()
     run_dir = RUNS_DIR / job_id
     st = run_dir / "status"
     if not st.is_file():
@@ -655,6 +1006,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p_ren = sub.add_parser("render")
     p_ren.add_argument("--still", default=None)
+    p_ren.add_argument("--pick", type=int, default=None)
     p_ren.add_argument("ask")
 
     p_q = sub.add_parser("queue")
@@ -665,10 +1017,13 @@ def main(argv: list[str] | None = None) -> int:
     p_up.add_argument("run")
 
     p_st = sub.add_parser("status")
-    p_st.add_argument("job_id")
+    p_st.add_argument("job_id", nargs="?", default=None)
 
     p_ap = sub.add_parser("approve")
     p_ap.add_argument("job_id")
+
+    p_rec = sub.add_parser("recompile")
+    p_rec.add_argument("run")
 
     p_w = sub.add_parser("wait")
     p_w.add_argument("job_id")
@@ -687,7 +1042,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "review":
         return _start_detached("review", str(Path(args.target).resolve()), args.prompt)
     if args.cmd == "render":
-        return _start_detached("render", None, args.ask, still_path=args.still)
+        return _start_detached("render", None, args.ask, still_path=args.still, pick=args.pick)
     if args.cmd == "queue":
         return _cmd_queue(args.run, args.code)
     if args.cmd == "upscale":
@@ -706,6 +1061,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_status(args.job_id)
     if args.cmd == "approve":
         return _cmd_approve(args.job_id)
+    if args.cmd == "recompile":
+        return _cmd_recompile(args.run)
     if args.cmd == "wait":
         return _cmd_wait(args.job_id, max(10, min(args.timeout, 170)))
     return 2

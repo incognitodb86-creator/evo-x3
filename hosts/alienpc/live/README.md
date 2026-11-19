@@ -2,6 +2,8 @@
 
 > **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`). Agent file copies in this folder remain the proposed AGT1 versions, not live.
 
+Live refresh 2026-11-19 4:54 PM CT (America/Chicago): re-read `community-HEAD.txt` (still `8eec1d3d`), `custom-nodes.tsv`, `pip-freeze.txt`, `comfy.settings.json`, `extra_model_paths.yaml`; all unchanged since 4:29 PM CT. `model-inventory.txt` not re-read this time.
+
 Live refresh 2026-11-19 4:29 PM CT (America/Chicago): `C:\AI\community` local HEAD is `8eec1d3d` (see `community-HEAD.txt`). ComfyUI `custom-nodes.tsv` now shows `ComfyUI-Fantastic-MiniMaxH3-PromptBuilder` enabled (it was `.disabled` at 13:52 CT); `pip-freeze.txt` has eight Comfy frontend/template package bumps. Model inventory re-read: same counts as 12:30 PM CT (RefMods still counts only). Agent file copies are unchanged vs the proposed AGT1 versions; AGT1 still blocked (see `records/UNI-APPLY-ALIENPC-B-AGT1/RESULT-attempt1-blocked.md`).
 
 Original snapshot taken 2026-11-19 ~10:50 AM CT (America/Chicago) by Max Architect, read-only, for Opus review on GitHub.

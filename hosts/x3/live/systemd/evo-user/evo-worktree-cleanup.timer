@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly 04:15 cleanup of stale clean git worktrees (after the 03:30 QNAP copy)
+
+[Timer]
+OnCalendar=*-*-* 04:15:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

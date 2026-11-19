@@ -1,6 +1,6 @@
 ---
 name: pi-job
-description: "Use for ANY ask to make, render or generate a video, clip or render (real H3 renders on AlienPC, picked still + full prompt shown in chat, queued only on the user's in-chat yes, 2x video posted back); not ascii-video/manim. Also detached Forge code/review jobs on EVO-X3 via /usr/local/bin/pi-job"
+description: "Use for ANY coding or code-review job (hands it to pi: pi-job code|review, AlienPc Swift when idle, X3 Gufo when busy) and ANY ask to make, render or generate a video, clip or render (real H3 renders on AlienPC, picked still + full prompt shown in chat, queued only on the user's in-chat yes, 2x video posted back); not ascii-video/manim. Also detached Forge code/review jobs on EVO-X3 via /usr/local/bin/pi-job"
 ---
 
 # pi-job

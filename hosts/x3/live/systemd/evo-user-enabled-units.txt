@@ -11,10 +11,12 @@ wireplumber.service            enabled enabled
 dbus.socket                    enabled enabled
 pipewire-pulse.socket          enabled enabled
 pipewire.socket                enabled enabled
+evo-renders-qnap-nightly.timer enabled disabled
 evo-renders-sync.timer         enabled disabled
+evo-worktree-cleanup.timer     enabled disabled
 grub-boot-success.timer        enabled enabled
 hermes-state-commit.timer      enabled disabled
 systemd-tmpfiles-clean.timer   enabled enabled
 u42-pixlstash-tagger.timer     enabled disabled
 
-17 unit files listed.
+19 unit files listed.

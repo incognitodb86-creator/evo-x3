@@ -31230,14 +31230,14 @@ index cc8f3cf..0000000
 -
 -Obsidian links notes with `[[Note Name]]` syntax. When creating notes, use these to link related content.
 diff --git a/skills/pi-job/SKILL.md b/skills/pi-job/SKILL.md
-index 81ed668..5b1f4b5 100644
+index 81ed668..7f9f8b2 100644
 --- a/skills/pi-job/SKILL.md
 +++ b/skills/pi-job/SKILL.md
 @@ -1,18 +1,42 @@
  ---
  name: pi-job
 -description: Run detached coding, review, or dry-run render jobs on EVO-X3 via /usr/local/bin/pi-job
-+description: "Use for ANY ask to make, render or generate a video, clip or render (real H3 renders on AlienPC, picked still + full prompt shown in chat, queued only on the user's in-chat yes, 2x video posted back); not ascii-video/manim. Also detached Forge code/review jobs on EVO-X3 via /usr/local/bin/pi-job"
++description: "Use for ANY coding or code-review job (hands it to pi: pi-job code|review, AlienPc Swift when idle, X3 Gufo when busy) and ANY ask to make, render or generate a video, clip or render (real H3 renders on AlienPC, picked still + full prompt shown in chat, queued only on the user's in-chat yes, 2x video posted back); not ascii-video/manim. Also detached Forge code/review jobs on EVO-X3 via /usr/local/bin/pi-job"
  ---
  
  # pi-job
