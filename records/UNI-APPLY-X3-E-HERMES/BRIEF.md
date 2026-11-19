@@ -11,7 +11,7 @@ Authority: Derrick t2598u (Hermes renders with no pi hop), t2600u (same agreed r
 
 ## Access & Lease
 - **Doer:** X3 Forge as `evo`. No sudo needed.
-- **Source:** `/home/derekboone/evo-x3/hosts/x3/hermes/` (`bin/build-hermes-skills.sh`, `skills/h3-render/HEAD.md`, `skills/h3-writer/SKILL.md`, `skills/lab-status/SKILL.md`, `skills/pi-job/SKILL.after-h9.md`, `memories/USER.md`, `memories/MEMORY.md`, `SOUL.md`, `agent-hooks/guard-render-queue.sh`, `scripts/morning-digest.sh`).
+- **Source:** `/home/derekboone/evo-x3/hosts/x3/hermes/` (`bin/build-hermes-skills.sh`, `skills/h3-render/HEAD.md`, `skills/h3-writer/SKILL.md`, `skills/lab-status/SKILL.md`, `skills/fleet-brain/SKILL.md`, `skills/pi-job/SKILL.after-h9.md`, `memories/USER.md`, `memories/MEMORY.md`, `SOUL.md`, `agent-hooks/guard-render-queue.sh`, `scripts/morning-digest.sh`).
 - **Backup root:** `/home/evo/.hermes/_archive/20261119-h9/`.
 - **Lease take:** one line to `/home/derekboone/AI/locks/x3-lease.txt`: `forge-x3 | UNI-APPLY-X3-E-HERMES | <start time>`. If not empty, stop.
 - **Lease release:** `: > /home/derekboone/AI/locks/x3-lease.txt` when done or blocked.
@@ -40,24 +40,29 @@ bash /home/derekboone/evo-x3/hosts/x3/hermes/bin/build-hermes-skills.sh --check 
 hermes config set skills.external_dirs '[/home/evo/AI/community/skills]'
 hermes config set skills.disabled '[alienpc-hardcore-i2v-director, alienpc-stills-pose-edit-prompting, comfy-render, h3-hc-render, h3-max-ref2va-prompt, image-render, video-render, ascii-video, manim-video, comfyui]'
 hermes config set skills.write_approval true
+hermes config set approvals.mode smart
 hermes config set approvals.timeout 300
+hermes config set approvals.cron_mode deny
+hermes config set approvals.single_query_mode deny
+hermes config set approvals.unattended_mode deny
 hermes config set agent.max_turns 80
 hermes config set agent.reasoning_effort low
 hermes config show > /home/evo/.hermes/_archive/20261119-h9/config-show.after.txt 2>&1
 ```
 - If `hermes config set` refuses (for example the live `config.yaml` has `terminal:`, `agent:` and `gateway:` twice), stop (`BLOCKED`), restore `config.yaml` from Step 0 and report the exact error. Do not hand-edit `config.yaml`.
-- The diff of `config-show.before.txt` vs `.after.txt` must show only these 6 keys.
+- The diff of `config-show.before.txt` vs `.after.txt` must show only these 10 keys. (If `approvals.mode smart` or `cron_mode`/`single_query_mode` is unsupported in this Hermes build, keep `approvals.mode manual` + `approvals.unattended_mode deny` and record the note.)
 - Move the local `flux-klein-prompting` copy out (the community folder copy now loads, and a local copy would shadow it): `mv /home/evo/.hermes/skills/flux-klein-prompting /home/evo/.hermes/_archive/20261119-h9/flux-klein-prompting.local` (skip if absent).
 
-### Item 3 - SOUL, memory, lab-status & pi-job skill (one switch)
+### Item 3 - SOUL, memory, lab-status, fleet-brain & pi-job skill (one switch)
 - First: if `/home/evo/.hermes/memories/USER.md` exists and is not empty, stop (`BLOCKED`) and report its size only (do not overwrite or print Derrick's memories).
 ```bash
 S=/home/derekboone/evo-x3/hosts/x3/hermes
 install -m 0644 "$S/SOUL.md" /home/evo/.hermes/SOUL.md
-mkdir -p /home/evo/.hermes/memories /home/evo/.hermes/skills/devops/lab-status
+mkdir -p /home/evo/.hermes/memories /home/evo/.hermes/skills/devops/lab-status /home/evo/.hermes/skills/knowledge/fleet-brain
 install -m 0644 "$S/memories/USER.md" /home/evo/.hermes/memories/USER.md
 [ -s /home/evo/.hermes/memories/MEMORY.md ] || install -m 0644 "$S/memories/MEMORY.md" /home/evo/.hermes/memories/MEMORY.md
 install -m 0644 "$S/skills/lab-status/SKILL.md" /home/evo/.hermes/skills/devops/lab-status/SKILL.md
+install -m 0644 "$S/skills/fleet-brain/SKILL.md" /home/evo/.hermes/skills/knowledge/fleet-brain/SKILL.md
 install -m 0644 "$S/skills/pi-job/SKILL.after-h9.md" /home/evo/.hermes/skills/pi-job/SKILL.md
 ```
 - `SOUL.md` goes back to tone only (Hermes docs: SOUL is identity and tone, not workflow). The OC and 18+ facts move to `memories/USER.md`. The render routing lives in the `h3-render` skill; `pi-job` is coding only.
@@ -87,7 +92,7 @@ install -m 0644 "$S/skills/pi-job/SKILL.after-h9.md" /home/evo/.hermes/skills/pi
   - Create `/home/evo/.config/systemd/user/hermes-webui.service.d/20-media-roots.conf` setting `MEDIA_ALLOWED_ROOTS` with that exact separator to include: `/home/evo/AI/5slock/libraries`, `/home/evo/AI/community/runs`, `/home/evo/AI/evo-x3/x3/community/runs`, `/home/evo/AI/render/_inputs`, `/srv/renders`.
   - Run `systemctl --user daemon-reload`.
 - Restart both units only when no chat is mid-turn: `systemctl --user restart hermes-gateway hermes-webui`; then `systemctl --user is-active hermes-gateway hermes-webui` (both `active`).
-- `hermes skills list` shows `h3-render`, `h3-writer`, `h3-prompting`, `h3-parody-identity`, `flux-klein-prompting`, `lab-status`, `pi-job`, `pixlstash-image-library`, and none of the 10 disabled names.
+- `hermes skills list` shows `h3-render`, `h3-writer`, `h3-prompting`, `h3-parody-identity`, `flux-klein-prompting`, `lab-status`, `fleet-brain`, `pi-job`, `pixlstash-image-library`, and none of the 10 disabled names.
 - `grep -c '\$PIXL_KEY' /home/evo/.hermes/skills/creative/h3-render/SKILL.md` is `0` (token-file substitution applied).
 - `wc -c /home/evo/.hermes/memories/USER.md` is at most 1375; `wc -c /home/evo/.hermes/memories/MEMORY.md` is at most 2200.
 - `cd /home/evo/AI/community/scripts/parody && /home/evo/AI/render/x3/.venv/bin/python3 -m pytest -q -p no:cacheprovider test_prose_file_gate.py test_flux_h3_redteam.py test_beta7_convert.py` -> all passed.
@@ -108,7 +113,7 @@ B=/home/evo/.hermes/_archive/20261119-h9
 cp -a "$B/config.yaml" "$B/SOUL.md" /home/evo/.hermes/
 cp -a "$B/pi-job.SKILL.md" /home/evo/.hermes/skills/pi-job/SKILL.md
 rm -rf /home/evo/.hermes/memories/USER.md; [ -d "$B/memories" ] && cp -a "$B/memories/." /home/evo/.hermes/memories/
-rm -rf /home/evo/.hermes/skills/creative/h3-render /home/evo/.hermes/skills/creative/h3-writer /home/evo/.hermes/skills/devops/lab-status
+rm -rf /home/evo/.hermes/skills/creative/h3-render /home/evo/.hermes/skills/creative/h3-writer /home/evo/.hermes/skills/devops/lab-status /home/evo/.hermes/skills/knowledge/fleet-brain
 rm -f /home/evo/.hermes/agent-hooks/guard-render-queue.sh /home/evo/.hermes/scripts/morning-digest.sh /home/evo/.hermes/shell-hooks-allowlist.json
 hermes cron list 2>/dev/null | grep -q morning-lab-digest && hermes cron remove morning-lab-digest 2>/dev/null || true
 rm -f /home/evo/.config/systemd/user/hermes-webui.service.d/20-media-roots.conf

@@ -1,0 +1,61 @@
+# Read-only MCP servers for Hermes GrokBot parity (UNI-APPLY-X3-F-PARITY).
+# Copy only the enabled entries into /home/evo/.hermes/config.yaml under `mcp_servers:`.
+# Every wrapper under /home/evo/.config/forge-mcp/ reads its own 0600 evo-only credential file at runtime —
+# ZERO keys or tokens ever enter Hermes config.yaml or .env.
+# Vaultwarden is deliberately OMITTED (never expose password vault to an uncensored local chat model).
+
+mcp_servers:
+  # 1. Gitea (already verified live in U37/U38 with a read-only token + 28 read-only tools)
+  gitea:
+    command: "/home/evo/.config/forge-mcp/run-gitea-mcp.sh"
+    args: ["--host", "https://qnap.tailf242b2.ts.net", "--read-only"]
+    tools:
+      exclude:
+        - "*create*"
+        - "*update*"
+        - "*delete*"
+        - "*merge*"
+        - "*fork*"
+        - "*push*"
+        - "*write*"
+        - "*edit*"
+        - "*add*"
+        - "*remove*"
+
+  # 2. Google Workspace (Gmail / Calendar / Drive) — uncomment ONLY after Derrick populates
+  #    /home/evo/.config/forge-mcp/google-workspace.env and google-creds/ (U38).
+  # google-workspace:
+  #   command: "/home/evo/.config/forge-mcp/run-google-workspace-mcp.sh"
+  #   args: ["--single-user"]
+  #   tools:
+  #     exclude:
+  #       - "*send*"
+  #       - "*create*"
+  #       - "*delete*"
+  #       - "*trash*"
+  #       - "*update*"
+  #       - "*modify*"
+  #       - "*write*"
+  #       - "*draft*"
+  #       - "*post*"
+  #       - "*share*"
+  #       - "*move*"
+
+  # 3. UniFi Network (read-only) — uncomment ONLY after Derrick populates
+  #    /home/evo/.config/forge-mcp/unifi.env (wrapper defaults UNIFI_READ_ONLY=true).
+  # unifi:
+  #   command: "/home/evo/.config/forge-mcp/run-unifi-mcp.sh"
+  #   args: []
+  #   tools:
+  #     exclude:
+  #       - "*create*"
+  #       - "*update*"
+  #       - "*delete*"
+  #       - "*set*"
+  #       - "*write*"
+  #       - "*reboot*"
+  #       - "*restart*"
+  #       - "*block*"
+  #       - "*unblock*"
+  #       - "*kick*"
+  #       - "*reconnect*"
