@@ -514,7 +514,10 @@ def _exec_job(job_id: str) -> int:
                     _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
                     return 0
                 _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}")
-                _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}")
+                try:
+                    _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}")
+                except Exception:
+                    pass
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={rc}, commits={ahead})")
                 return 1
 
@@ -524,7 +527,10 @@ def _exec_job(job_id: str) -> int:
                 st = "DONE" if rc == 0 else "STUCK"
                 _write_status(run_dir, st, f"rc={rc} model={where}")
                 if st == "STUCK":
-                    _write_stuck_bundle(run_dir, meta, f"rc={rc} model={where}")
+                    try:
+                        _write_stuck_bundle(run_dir, meta, f"rc={rc} model={where}")
+                    except Exception:
+                        pass
                 _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
                 return 0 if rc == 0 else 1
 
@@ -541,7 +547,10 @@ def _exec_job(job_id: str) -> int:
                 detail = f"rc={proc.returncode} " + " | ".join(last)[-400:]
                 _write_status(run_dir, st, detail)
                 if st == "STUCK":
-                    _write_stuck_bundle(run_dir, meta, detail)
+                    try:
+                        _write_stuck_bundle(run_dir, meta, detail)
+                    except Exception:
+                        pass
                 _send_ntfy(f"pi-job {job_id}", f"{st} (upscale {run.name}, rc={proc.returncode})")
                 return 0 if proc.returncode == 0 else 1
 
@@ -592,7 +601,10 @@ def _exec_job(job_id: str) -> int:
                     f"prompt_exists={prompt_file.is_file()} {why}"
                 ).strip()
                 _write_status(run_dir, "STUCK", stuck_detail)
-                _write_stuck_bundle(run_dir, meta, stuck_detail)
+                try:
+                    _write_stuck_bundle(run_dir, meta, stuck_detail)
+                except Exception:
+                    pass
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (render, rc={proc.returncode})")
                 return 1
 
