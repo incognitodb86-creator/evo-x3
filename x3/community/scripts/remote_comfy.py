@@ -421,6 +421,8 @@ def enable(rq):
             os.makedirs(outdir, exist_ok=True)
             dst = os.path.join(outdir, tag + os.path.splitext(name)[1])
             n = download(sub, name, dst)
+            if dst.lower().endswith(".mp4") and callable(getattr(rq, "extract_last_frame", None)):
+                rq.extract_last_frame(dst, os.path.join(outdir, "last_frame.png"))
             side = dict(meta, tag=tag, secs=round(dt, 1), comfy_output="alienpc:output/%s/%s" % (sub or "", name), file=dst,
                         bytes=n, prompt_id=pid, finished=time.strftime('%Y-%m-%d %H:%M CT'))
             json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
