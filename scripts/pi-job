@@ -31,6 +31,10 @@ IMPORT_INBOX_PY = HOME / "AI" / "pixlstash-tagging" / "import_inbox.py"
 FORGE_LAUNCHER = HOME / "evo-x3" / "pi-chats" / "forge-pi.sh"
 RENDER_LAUNCHER = HOME / "evo-x3" / "pi-chats" / "render-pi.sh"
 QUEUE_REMOTE = HOME / "AI" / "render" / "x3" / "queue-remote.sh"
+# t2564u/t2565u: RTX 2x of an already-rendered run, as one AlienPC ComfyUI job (run_queue.py --upscale-only); no new render.
+COMMUNITY_DIR = HOME / "AI" / "community"
+COMMUNITY_RUNS = COMMUNITY_DIR / "runs"
+RQ_PY = HOME / "AI" / "render" / "x3" / ".venv" / "bin" / "python"
 NTFY_TOKEN_FILE = HOME / ".config" / "evo-x3" / "ntfy-x3.token"
 NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
 # P5.3: AlienPC Swift when the X3 render lock is free at job start; one resume on the X3 after a failed request.
@@ -256,6 +260,20 @@ def _exec_job(job_id: str) -> int:
                 _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
                 return 0 if rc == 0 else 1
 
+            if role == "upscale":
+                run = Path(meta["target"])
+                cmd = ["timeout", "2400", str(RQ_PY), "scripts/run_queue.py", "--remote", "--upscale-only",
+                       "--run-dir", str(run)]
+                proc = subprocess.run(cmd, cwd=str(COMMUNITY_DIR), stdin=subprocess.DEVNULL, stdout=logf,
+                                      stderr=subprocess.STDOUT)
+                qlog = run / "_render_queue.log"
+                last = [x for x in (qlog.read_text(encoding="utf-8", errors="replace").splitlines() if qlog.is_file() else [])
+                        if " UPSCALE" in x][-2:]
+                st = "DONE" if proc.returncode == 0 else "STUCK"
+                _write_status(run_dir, st, f"rc={proc.returncode} " + " | ".join(last)[-400:])
+                _send_ntfy(f"pi-job {job_id}", f"{st} (upscale {run.name}, rc={proc.returncode})")
+                return 0 if proc.returncode == 0 else 1
+
             if role == "render":
                 render_prompt = (
                     f"Dry-run render prep into run_dir {run_dir} (do not queue). "
@@ -433,6 +451,9 @@ def main(argv: list[str] | None = None) -> int:
     p_q.add_argument("run")
     p_q.add_argument("code")
 
+    p_up = sub.add_parser("upscale")
+    p_up.add_argument("run")
+
     p_st = sub.add_parser("status")
     p_st.add_argument("job_id")
 
@@ -452,6 +473,18 @@ def main(argv: list[str] | None = None) -> int:
         return _start_detached("render", None, args.ask, still_path=args.still)
     if args.cmd == "queue":
         return _cmd_queue(args.run, args.code)
+    if args.cmd == "upscale":
+        run = Path(args.run) if Path(args.run).is_absolute() else (COMMUNITY_RUNS / args.run)
+        run = Path(os.path.realpath(run))
+        try:
+            run.relative_to(os.path.realpath(COMMUNITY_RUNS))
+        except ValueError:
+            print(f"REFUSED: {run} is outside {COMMUNITY_RUNS}", file=sys.stderr)
+            return 2
+        if not (run / "_render_order.json").is_file() or not (run / "_render_queue.log").is_file():
+            print(f"REFUSED: {run} is not a finished render run (no _render_order.json/_render_queue.log)", file=sys.stderr)
+            return 2
+        return _start_detached("upscale", str(run), "rtx 2x upscale-only")
     if args.cmd == "status":
         return _cmd_status(args.job_id)
     return 2
