@@ -31,8 +31,9 @@ INPUT_ROOTS = [p for p in os.environ.get("RQ_INPUT_ROOTS", "").split(os.pathsep)
 LOAD_KEYS = {"image", "audio", "video", "file"}
 MEDIA_RE = re.compile(r"\.(png|jpe?g|webp|bmp|gif|wav|mp3|flac|ogg|m4a|aac|mp4|webm|mov|mkv)$", re.I)
 _lock_fh = None
-_UPLOAD_CACHE = {}  # (api, abs_path, subfolder) -> {"size", "mtime_ns", "name", "subfolder"}
+_UPLOAD_CACHE = {}  # (api, subfolder, server_basename) -> {"path", "size", "mtime_ns", "name", "subfolder"}
 _UPLOAD_CACHE_FILE = "_remote_uploads.json"
+_MISSING_INPUT_RE = re.compile(r"(?:not found|no such file|does not exist|invalid (?:image|audio|video)|missing)", re.I)
 
 
 def _upload_sig(local_path):
@@ -41,7 +42,9 @@ def _upload_sig(local_path):
 
 
 def _upload_cache_key(item):
-    return (API, os.path.abspath(item["local"]), item.get("subfolder") or "")
+    sub = (item.get("subfolder") or "").strip("/")
+    sname = os.path.basename(item.get("name") or item["local"])
+    return (API, sub, sname)
 
 
 def _load_run_upload_cache(run_dir):
@@ -85,11 +88,24 @@ def _invalidate_upload_cache(items, run_dir=None):
         _save_run_upload_cache(run_dir, disk)
 
 
+def _clear_run_upload_cache(run_dir=None):
+    for k in [k for k in list(_UPLOAD_CACHE) if k[0] == API]:
+        _UPLOAD_CACHE.pop(k, None)
+    if run_dir:
+        p = os.path.join(run_dir, _UPLOAD_CACHE_FILE)
+        try:
+            if os.path.isfile(p):
+                os.remove(p)
+        except OSError:
+            pass
+
+
 def upload_cached(item, run_dir=None, force=False, timeout=None):
-    """Upload `item` unless the same (path, size, mtime_ns, subfolder) was already uploaded.
-    Returns (response_dict, reused_bool)."""
+    """Upload `item` unless the same server (subfolder, name) was already uploaded from the same
+    (local path, size, mtime_ns). Returns (response_dict, reused_bool)."""
     k = _upload_cache_key(item)
-    size, mtime_ns = _upload_sig(item["local"])
+    abs_local = os.path.abspath(item["local"])
+    size, mtime_ns = _upload_sig(abs_local)
     dk = f"{k[0]}|{k[1]}|{k[2]}"
     if not force:
         ent = _UPLOAD_CACHE.get(k)
@@ -97,16 +113,21 @@ def upload_cached(item, run_dir=None, force=False, timeout=None):
             ent = _load_run_upload_cache(run_dir).get(dk)
             if isinstance(ent, dict):
                 _UPLOAD_CACHE[k] = ent
-        if isinstance(ent, dict) and ent.get("size") == size and ent.get("mtime_ns") == mtime_ns and ent.get("name"):
+        if (isinstance(ent, dict)
+                and ent.get("path") == abs_local
+                and ent.get("size") == size
+                and ent.get("mtime_ns") == mtime_ns
+                and ent.get("subfolder", "") == k[1]
+                and ent.get("name") == k[2]):
             return {"name": ent["name"], "subfolder": ent.get("subfolder", "")}, True
     try:
         r = upload(item) if timeout is None else upload(item, timeout=timeout)
     except Exception:
         _invalidate_upload_cache([item], run_dir=run_dir)
         raise
-    ent = {"path": k[1], "size": size, "mtime_ns": mtime_ns,
-           "name": r.get("name") or os.path.basename(item["local"]),
-           "subfolder": r.get("subfolder", item.get("subfolder", ""))}
+    ent = {"path": abs_local, "size": size, "mtime_ns": mtime_ns,
+           "name": r.get("name") or k[2],
+           "subfolder": (r.get("subfolder", k[1]) or "").strip("/")}
     _UPLOAD_CACHE[k] = ent
     if run_dir:
         disk = _load_run_upload_cache(run_dir)
@@ -428,8 +449,12 @@ def enable(rq):
             json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
             comm.log(f"JOB end {tag} ok secs={dt:.1f} file={dst} (downloaded {n}B via /view)", logfile); return side
         msgs = [m for m in st.get("messages", []) if m[0] == "execution_error"]
-        comm.log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile)
-        return comm.outcome(out, "node_error", pid, note=json.dumps(msgs)[:300])
+        msgs_s = json.dumps(msgs)
+        if _MISSING_INPUT_RE.search(msgs_s):
+            _clear_run_upload_cache(os.path.dirname(outdir))
+            comm.log(f"UPLOAD_CACHE_CLEAR {tag} execution_error named missing input; next retry will re-upload", logfile)
+        comm.log(f"JOB error {tag} secs={dt:.1f} {msgs_s[:1500]}", logfile)
+        return comm.outcome(out, "node_error", pid, note=msgs_s[:300])
     comm.fetch = fetch
 
     def detach(argv, run_dir):

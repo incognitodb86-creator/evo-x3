@@ -1505,6 +1505,14 @@ def ensure_still_read(run_dir: Path, still: str, still_read_src: Optional[str], 
     return nd
 
 
+def _queue_remote_cmd(run_dir: Path, is_continue: bool, qsh: Optional[Path] = None) -> List[str]:
+    script = qsh or (Path.home() / "AI" / "render" / "x3" / "queue-remote.sh")
+    cmd = ["bash", str(script), str(run_dir), "--yes-derrick"]
+    if is_continue:
+        cmd.append("--keep-comfy-process")
+    return cmd
+
+
 def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[str], client: Client, cfg: Dict[str, Any], log) -> Dict[str, Any]:
     p = run_dir / "still_read.json"
     if p.exists():
@@ -2117,10 +2125,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 build = dict(build, reason="--queue requires --yes-derrick after Derrick approved this prompt; nothing queued")
                 result["warnings"].append("queue_refused_no_yes")
             else:
-                qsh = Path.home() / "AI" / "render" / "x3" / "queue-remote.sh"
-                qcmd = ["bash", str(qsh), str(run_dir), "--yes-derrick"]
-                if scene_id or is_continue:
-                    qcmd.append("--keep-comfy-process")
+                qcmd = _queue_remote_cmd(run_dir, is_continue=is_continue)
                 try:
                     qp = subprocess.run(qcmd,
                                         capture_output=True, text=True, timeout=180)

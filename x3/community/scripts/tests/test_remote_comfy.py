@@ -212,10 +212,45 @@ class T(unittest.TestCase):
         self.assertEqual(prompt_attempts["n"], 2)
         self.assertEqual(len(upload_calls), 3)
 
-    def test_writer_pipeline_passes_keep_comfy_process_for_chains_only(self):
-        rwp_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "parody", "render_writer_pipeline.py"))
-        src = open(rwp_path, encoding="utf-8").read()
-        self.assertIn('if scene_id or is_continue:\n                    qcmd.append("--keep-comfy-process")', src)
+        # 4) Different local file targeting the same server subfolder/name -> overwrites cache, re-uploads
+        alt_dir = os.path.join(self.d, "alt")
+        os.makedirs(os.path.join(alt_dir, "community"), exist_ok=True)
+        alt_img = os.path.join(alt_dir, "community", "a.jpg")
+        open(alt_img, "wb").write(b"different-jpg-bytes")
+        alt_out = os.path.join(alt_dir, "clip")
+        with mock.patch.object(rc.urllib.request, "urlopen", side_effect=fake_urlopen), \
+             mock.patch.object(rq.comm, "http", return_value={"prompt_id": "p_alt"}):
+            self.assertEqual(rq.comm.submit(json.loads(json.dumps(g_img)), "c5", {}, alt_out), "p_alt")
+            self.assertEqual(len(upload_calls), 4)
+            # Switching back to original file under the same server name must also re-upload
+            self.assertEqual(rq.comm.submit(json.loads(json.dumps(g_img)), "c6", {}, outdir), "p_alt")
+            self.assertEqual(len(upload_calls), 5)
+
+        # 5) Fetch execution_error naming a missing input invalidates the run upload cache
+        hist_err = {"p_alt": {"status": {"status_str": "error",
+                                         "messages": [["execution_error", {"exception_message": "File not found: community/a.jpg"}]]},
+                              "outputs": {}}}
+        with mock.patch.object(rq.comm, "http", return_value=hist_err):
+            self.assertIsNone(rq.comm.fetch("p_alt", "c6", {}, outdir, 0))
+        self.assertFalse(os.path.exists(os.path.join(self.d, rc._UPLOAD_CACHE_FILE)))
+        with mock.patch.object(rc.urllib.request, "urlopen", side_effect=fake_urlopen), \
+             mock.patch.object(rq.comm, "http", return_value={"prompt_id": "p_after_err"}):
+            self.assertEqual(rq.comm.submit(json.loads(json.dumps(g_img)), "c7", {}, outdir), "p_after_err")
+        self.assertEqual(len(upload_calls), 6)
+
+    def test_writer_pipeline_passes_keep_comfy_process_for_continue_only(self):
+        from pathlib import Path
+        parody_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "parody"))
+        if parody_dir not in sys.path:
+            sys.path.insert(0, parody_dir)
+        import render_writer_pipeline as rwp
+        rd = Path(self.d) / "run_1"
+        cmd_single = rwp._queue_remote_cmd(rd, is_continue=False)
+        cmd_chain = rwp._queue_remote_cmd(rd, is_continue=True)
+        self.assertNotIn("--keep-comfy-process", cmd_single)
+        self.assertIn("--keep-comfy-process", cmd_chain)
+        self.assertIn("--yes-derrick", cmd_single)
+        self.assertIn("--yes-derrick", cmd_chain)
 
 
 if __name__ == "__main__":
