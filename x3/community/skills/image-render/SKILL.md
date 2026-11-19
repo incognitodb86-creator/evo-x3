@@ -15,7 +15,8 @@ description: Stage, build, render, and score FLUX.2 Klein 9B-KV + BFS (S2) still
 - Never open, read, or parse Derrick's Grok Imagine prompts or prompt sidecar files. Never open, read, or list `~/AI/sydney/` or any `talk-persona.md`.
 
 ## FLUX Stills Pipeline & Companion Skills
-- **FLUX stills (Klein 9B-KV + BFS, S2):** Load companion skill `alienpc-stills-pose-edit-prompting` for prompt structure and graph details (`~/AI/community/templates/flux_stills_s2_kv.api.json`, `~/AI/community/templates/flux_stills_s2_bfs.api.json`, `~/AI/community/templates/flux_stills_s2.README.md`).
+- **FLUX stills (Klein 9B-KV + BFS, S2 — locked default):** Load companion skill `alienpc-stills-pose-edit-prompting` for locked S2 prompt structure and graph details (`~/AI/community/templates/flux_stills_s2_kv.api.json`, `~/AI/community/templates/flux_stills_s2_bfs.api.json`, `~/AI/community/templates/flux_stills_s2.README.md`).
+- **FLUX.2 Klein / Miraclein 4.5 prompting & candidate templates (`M4` / `ST4` / `ST5`):** Load `flux-klein-prompting` for prompt text on T2I, Klein9 RefMod, ReferenceLatent single-change edits, RefControl poses (`refcontrol_v2_poses`), and H3Max start-stills (`768x1344` portrait). Candidate templates: `~/AI/community/templates/flux_stills_t2i_klein.candidate.api.json`, `~/AI/community/templates/flux_stills_pose_klein.candidate.api.json`, `~/AI/community/templates/flux_stills_layout_klein.candidate.api.json` (plus M4 Miraclein 4.5 / Klein9 RefMod candidates). S2 remains the locked default until `M4` promotes Miraclein 4.5.
 - **Build & run:** Build with the `/render` prompt (`~/AI/community/agent-shared/prompts/render.md`) + `~/AI/render/x3/.venv/bin/python ~/AI/community/scripts/make_render.py`.
 - **ComfyUI endpoint:** On X3, AlienPc ComfyUI is over Tailscale Serve `https://alienpc.tailf242b2.ts.net:8446` (llama-swap `comfyui_auto`; AlienPc local: `http://127.0.0.1:8080/comfyui/`). Check non-waking status with:
   ```bash
