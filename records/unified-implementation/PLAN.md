@@ -26,6 +26,8 @@ Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo pl
 
 **Apply briefs (ready for Max to review, take lease, and launch after prerequisites):** [UNI-APPLY-X3-A/BRIEF.md](../UNI-APPLY-X3-A/BRIEF.md) · [UNI-APPLY-X3-B-PIJOB/BRIEF.md](../UNI-APPLY-X3-B-PIJOB/BRIEF.md) · [UNI-APPLY-ALIENPC-A/BRIEF.md](../UNI-APPLY-ALIENPC-A/BRIEF.md).
 
+**Decisions 2026-11-19 ~12:35 CT (Derrick, orchestrator chat; no message id):** (A) Hermes is Derrick's main chat interface and only calls pi for coding (matches C11 + H9; `pi-job` render helpers L1/L4/L8/ST3 ship in `pi-job` but are `SKIPPED` in `UNI-APPLY-X3-B-PIJOB` live tests, and `OPERATOR.md` ST2/L4 text is legacy pi Render docs while Hermes `h3-writer` is primary); (B) Derrick answers decision cards in chat (never in files), and Max records each answer + message id in this plan.
+
 ## For Opus reviewer (read this first)
 
 This is the ONE plan to review (Derrick t2646u). It stands alone: every fact it relies on is restated here with its live evidence. Copilot (Opus) sees only this GitHub repo; it has no access to the X3, AlienPc, Gitea, the QNAP or the chat.
