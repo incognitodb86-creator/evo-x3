@@ -1,4 +1,4 @@
-Goal: After `UNI-APPLY-X3-A` has a `RESULT.md`, install unified-plan items `ST7` (QNAP nightly copy) and `L9` (Hermes inline clip via `MEDIA:`, Derrick t2719u) on the EVO-X3 under the X3 lease.
+Goal: After `UNI-APPLY-X3-A` has a `RESULT.md`, install unified-plan item `ST7` (QNAP nightly copy) on the EVO-X3 under the X3 lease. (`L9` moved to `UNI-APPLY-X3-B-PIJOB`, final review 2026-11-19.)
 
 # UNI-APPLY-X3-C-QNAP-NIGHTLY (X3 Forge): Install ST7 QNAP nightly copy and L9 Hermes MEDIA: clip delivery on EVO-X3, Nov 19 2026
 
@@ -51,32 +51,8 @@ Authority: Derrick 2026-11-19 t2716u (QNAP copy of finished renders moves to a n
   ```
 - Do **not** change Tailscale Serve. `/renders/` on 8443 stays pointed at `/mnt/qnap/renders/runs` until Derrick yeses a separate card.
 
-### Item 2 — Install `L9` (Hermes inline clip via `MEDIA:`, Derrick t2719u)
-- No-write syntax check first:
-  ```bash
-  python3 -c "import py_compile; py_compile.compile('/home/derekboone/evo-x3/config/bin/pi-job', doraise=True)"
-  ```
-- Install `pi-job` (sudo yes, `root:root 0755`; backup already taken in Step 0):
-  ```bash
-  sudo install -o root -g root -m 0755 /home/derekboone/evo-x3/config/bin/pi-job /usr/local/bin/pi-job
-  ```
-- Install the skill (no sudo, `evo:evo 0644`) to the live Hermes skills path:
-  ```bash
-  install -m 0644 /home/derekboone/evo-x3/hosts/x3/hermes/skills/pi-job/SKILL.md /home/evo/.hermes/skills/pi-job/SKILL.md
-  ```
-- Verify with a finished job (must print a `MEDIA:` line pointing at the local community-run clip; no raw `<video>` tag). Pick the latest `RENDER_QUEUED` job whose community run already has the upscaled file:
-  ```bash
-  last=$(ls -1dt /home/evo/AI/_runs/*-render-* 2>/dev/null | while read -r d; do
-    grep -q 'status=RENDER_QUEUED' "$d/status" 2>/dev/null || continue
-    run=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('run_name',''))" "$d/meta.json")
-    [ -n "$run" ] && [ -f "/home/evo/AI/community/runs/$run/clip/clip.mp4" ] || continue
-    echo "$(basename "$d")"
-    break
-  done)
-  echo "verifying job=$last"
-  /usr/local/bin/pi-job wait "$last" --timeout 5
-  ```
-- The `--- chat_reply (paste verbatim) ---` block must contain a `MEDIA:/home/evo/AI/community/runs/<run>/...mp4` line and the https fallback link, and must not contain a raw `<video>` tag. `final=DONE` must not wait on the QNAP copy.
+### Item 2 — MOVED to `UNI-APPLY-X3-B-PIJOB` (final review 2026-11-19)
+- `config/bin/pi-job` on `mono` already carries `H1c` (AlienPc-first coding). Installing it here, before Max adds the ESP-off alias, would send idle-AlienPc coding jobs to a model that does not exist yet. So `pi-job` is installed ONCE, in `UNI-APPLY-X3-B-PIJOB`, after the alias; the `L9` skill install and `MEDIA:` check moved there too. Mark Item 2 `SKIPPED (moved to X3-B)`; do not install `pi-job` or the `pi-job` skill here; skip the Step 0 `pi-job` backups.
 
 ### Item 3 — Verify ST7
   ```bash

@@ -53,6 +53,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
    - `mkdir -p /home/evo/AI/_archive/20261119`
    - Back up live file: `cp -a /usr/local/bin/pi-job /home/evo/AI/_archive/20261119/pi-job`
    - Install: `sudo install -o root -g root -m 0755 /home/derekboone/evo-x3/config/bin/pi-job /usr/local/bin/pi-job`
+   - Hermes skill (moved here from `UNI-APPLY-X3-C` item 2, final review 2026-11-19; carries `L9` `MEDIA:` lines and the coding trigger): `cp -a /home/evo/.hermes/skills/pi-job/SKILL.md /home/evo/AI/_archive/20261119/pi-job.SKILL.md` then `install -m 0644 /home/derekboone/evo-x3/hosts/x3/hermes/skills/pi-job/SKILL.md /home/evo/.hermes/skills/pi-job/SKILL.md` (no sudo, `evo:evo`).
    - Verify (no-write AST parse + CLI help):
      ```bash
      python3 -c 'import ast,sys; ast.parse(open(sys.argv[1]).read())' /usr/local/bin/pi-job
@@ -64,7 +65,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 ## Tests (coding/review path only; **if ANY post-install test fails, run Rollback immediately**)
 
 1. **H1c — AlienPc idle vs render-busy routing + `PI_JOB_FORCE_X3=1` (Card 13 & Card 21, `b96560f`):**
-   - **Idle path:** With AlienPc idle (`:8447/health` returns `200`, no `gpu-render.lock`), run a `pi-job code` smoke task -> verify job log shows route `alienpc` with `coding_swift15_iq3s` (ESP off) and **0 X3 llama-swap swaps**.
+   - **Idle path:** With AlienPc idle (`:8447/health` returns `200`, no `gpu-render.lock`), run a `pi-job code` smoke task in a throwaway `/tmp/pijob-route-test` git repo (prompt `"do not edit any file; reply done"`) -> verify job log shows route `alienpc` with `coding_swift15_iq3s` (ESP off) and **0 X3 llama-swap swaps**.
    - **Busy / render-wins path:** With an approved AlienPc render running (`:8447/health` returns non-2xx), run a `pi-job code` smoke task -> verify job log shows route `x3` and **0 X3 llama-swap swaps** (503 during a run also resumes on `x3`). X3 Gufo remains the writer/Hermes model.
    - **Forced-X3 check:** Run `PI_JOB_FORCE_X3=1 /usr/local/bin/pi-job code ...` -> verify job log shows route `x3` and **0 X3 llama-swap swaps**.
 
@@ -74,12 +75,17 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 3. **H5 + L6 — `make check-all` failure -> `STUCK` + `escalate.md`:**
    - In a throwaway `/tmp/pijob-h5-test` git repo with a `Makefile` containing `check-all: ; @false`, run `pi-job code` with prompt `"do not edit any file; reply done"` -> verify non-zero `make check-all` marks `STUCK`, writes `~/AI/_runs/<id>/escalate.md` (with task, git diff, last 3 errors), and still fires the STUCK ntfy. Remove `/tmp/pijob-h5-test` after.
 
-4. **Legacy `pi-job` render items (`L1`, `L4`, `L8`, `ST3` `pi-job render --still` trigger) — DO NOT live-test:**
+4. **L9 — Hermes inline clip (`MEDIA:`, Derrick t2719u; moved from X3-C), read-only check:** pick the latest finished render job (`ls -1dt /home/evo/AI/_runs/*-render-*`, status `RENDER_QUEUED`, community run has its upscaled clip) and run `/usr/local/bin/pi-job wait <job> --timeout 5`. The `--- chat_reply (paste verbatim) ---` block must contain a `MEDIA:/home/evo/AI/community/runs/<run>/...mp4` line and the https fallback link, and no raw `<video>` tag. No new render.
+
+5. **Hermes -> pi coding hand-off (Hermes plan R11; Derrick: Hermes is the main chat and goes to pi only for coding):** in Hermes WebUI (default profile) ask for a tiny coding job on `/tmp/pijob-route-test` (e.g. "add a README line"). Verify Hermes loads the `pi-job` skill and runs `pi-job code`, the route follows Test 1 (AlienPc when idle, X3 when busy), and the job ends `DONE` with one new commit in that repo. Remove `/tmp/pijob-route-test` after.
+
+6. **Legacy `pi-job` render items (`L1`, `L4`, `L8`, `ST3` `pi-job render --still` trigger) — DO NOT live-test:**
    - Mark all four in `RESULT.md` as: `SKIPPED - legacy pi-job render path, superseded by H9; code ships inside pi-job but is not live-tested or relied on` (Derrick 2026-11-19 ~12:35 CT: Hermes is main chat interface; pi is for coding only).
    - Do **not** run `pi-job recompile`, `pi-job queue`, `pi-job render --pick`, or `pi-job render --still`.
 
 ## Rollback (mandatory if ANY post-install test fails)
 - Restore backup: `sudo install -o root -g root -m 0755 /home/evo/AI/_archive/20261119/pi-job /usr/local/bin/pi-job`
+- Restore the Hermes skill: `install -m 0644 /home/evo/AI/_archive/20261119/pi-job.SKILL.md /home/evo/.hermes/skills/pi-job/SKILL.md`.
 - Verify `/usr/local/bin/pi-job --help` exits 0 and record `snapshot: pending Max` in `RESULT.md`.
 
 ## Closeout (Max only, after `RESULT.md`)
@@ -91,4 +97,4 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 - No unauthorized renders. Stop on first failed check, run Rollback if `pi-job` was already installed, and record exact stdout/stderr (redacted of any secrets).
 - Cite `mono` SHAs (`b96560f` / `3217c67 (or newer at Max import)`) in `RESULT.md`.
 
-STOP CONDITION: when done or blocked, write `/home/derekboone/evo-x3/records/UNI-APPLY-X3-B-PIJOB/RESULT.md`, then stop. List Pre-install (incl. `:8447/health` HTTP code during approved render), Install, Tests 1-3 (`H1c` idle/busy/`PI_JOB_FORCE_X3=1`, `L5`, `H5+L6`), and `L1`/`L4`/`L8`/`ST3 render trigger` (`SKIPPED - legacy pi-job render path, superseded by H9; code ships inside pi-job but is not live-tested or relied on`) with `mono` SHAs, backup path, route logs + swap count, rollback status if triggered, and `snapshot: pending Max`.
+STOP CONDITION: when done or blocked, write `/home/derekboone/evo-x3/records/UNI-APPLY-X3-B-PIJOB/RESULT.md`, then stop. List Pre-install (incl. `:8447/health` HTTP code during approved render), Install, Tests 1-5 (`H1c` idle/busy/`PI_JOB_FORCE_X3=1`, `L5`, `H5+L6`, `L9` `MEDIA:` line, Hermes -> pi coding hand-off), and `L1`/`L4`/`L8`/`ST3 render trigger` (`SKIPPED - legacy pi-job render path, superseded by H9; code ships inside pi-job but is not live-tested or relied on`) with `mono` SHAs, backup path, route logs + swap count, rollback status if triggered, and `snapshot: pending Max`.
