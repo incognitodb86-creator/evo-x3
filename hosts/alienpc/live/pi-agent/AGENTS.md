@@ -32,7 +32,7 @@
 ## Fixed rules (Derrick)
 - Community way first, smallest fix. No deletes without Derrick's OK; move to an _archive folder instead.
 - Smallest working change: use the installed community implementation instead of re-deriving its internals; no speculative abstractions, unrelated cleanup or new controls; keep working behavior. Back up every file before you edit it. Verify with the relevant existing tests plus the actual requested result. When a test fails, diagnose it; do not rewrite assertions to fit your code. If an obstacle would widen scope, stop and report it concretely first. Stop once the requested result works.
-- Never stop, restart, or reconfigure llama-swap (:8080), gpu_lock_gate (:8085), strata, pi-mobile (hub :7878, Tailscale front :8443), the ComfyUI install/config or other pi processes; never stop another job on your own judgment.
+- Never stop, restart, or reconfigure llama-swap (:8080), gpu_lock_gate (:8085), strata, pi-mobile (hub :7878, Tailscale front :8443), the ComfyUI install/config or other pi processes unless a BRIEF with a Derrick id names the change; never stop another job on your own judgment.
 - Desktop control (pi-computer-use): never use it while C:\AI\locks\gpu-render.lock exists (check first); never open C:\Users\derek\sydney\ or any talk-persona.md; never touch vault apps, the Imagine library or prompts, or the llama-swap/ComfyUI/Strata windows; ask Derrick first for anything on the approval list.
 - Google Voice: texts only, one at a time after Derrick's exact yes (skill google-voice-texts); pi does not place Voice calls; contacts read-only; never log numbers or names.
 ## Records
