@@ -1,0 +1,389 @@
+{
+ "1": {
+  "_meta": {
+   "title": "unet"
+  },
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "flux-2-klein-9b-kv-fp8.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "2": {
+  "_meta": {
+   "title": "lora_refcontrol_pose"
+  },
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "lora_name": "refcontrol_v2_poses.safetensors",
+   "model": [
+    "1",
+    0
+   ],
+   "strength_model": 0.9
+  }
+ },
+ "3": {
+  "_meta": {
+   "title": "clip"
+  },
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+   "device": "default",
+   "type": "flux2"
+  }
+ },
+ "4": {
+  "_meta": {
+   "title": "vae"
+  },
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  }
+ },
+ "5": {
+  "_meta": {
+   "title": "positive"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "apply pose from image 1 with reference from image 2. Show the adult woman from image 2 in the exact pose of image 1. Keep the same face, hairstyle and hair color. LIGHT, photoreal."
+  }
+ },
+ "6": {
+  "_meta": {
+   "title": "negative"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "bad quality, noise, blurry, worst quality, low resolution, blur, distortion, unnatural blending, cartoon, illustration, painting"
+  }
+ },
+ "7": {
+  "_meta": {
+   "title": "image1_pose_ref"
+  },
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/flux_stills_pose/POSE_REF.png"
+  }
+ },
+ "8": {
+  "_meta": {
+   "title": "image2_identity"
+  },
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/flux_stills_pose/IDENTITY.png"
+  }
+ },
+ "9": {
+  "_meta": {
+   "title": "identity_resize_1mp"
+  },
+  "class_type": "ResizeImageMaskNode",
+  "inputs": {
+   "input": [
+    "8",
+    0
+   ],
+   "resize_type": "scale total pixels",
+   "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos"
+  }
+ },
+ "10": {
+  "_meta": {
+   "title": "pose_size"
+  },
+  "class_type": "GetImageSize",
+  "inputs": {
+   "image": [
+    "25",
+    0
+   ]
+  }
+ },
+ "11": {
+  "_meta": {
+   "title": "enc_pose_map"
+  },
+  "class_type": "VAEEncode",
+  "inputs": {
+   "pixels": [
+    "27",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "12": {
+  "_meta": {
+   "title": "enc_identity"
+  },
+  "class_type": "VAEEncode",
+  "inputs": {
+   "pixels": [
+    "9",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "13": {
+  "_meta": {
+   "title": "ref1_pos_pose"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "5",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "14": {
+  "_meta": {
+   "title": "ref2_pos_identity"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "13",
+    0
+   ],
+   "latent": [
+    "12",
+    0
+   ]
+  }
+ },
+ "15": {
+  "_meta": {
+   "title": "ref1_neg_pose"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "6",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "16": {
+  "_meta": {
+   "title": "ref2_neg_identity"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "15",
+    0
+   ],
+   "latent": [
+    "12",
+    0
+   ]
+  }
+ },
+ "17": {
+  "_meta": {
+   "title": "guider"
+  },
+  "class_type": "CFGGuider",
+  "inputs": {
+   "cfg": 1.0,
+   "model": [
+    "26",
+    0
+   ],
+   "negative": [
+    "16",
+    0
+   ],
+   "positive": [
+    "14",
+    0
+   ]
+  }
+ },
+ "18": {
+  "_meta": {
+   "title": "sampler"
+  },
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "lcm"
+  }
+ },
+ "19": {
+  "_meta": {
+   "title": "scheduler"
+  },
+  "class_type": "Flux2Scheduler",
+  "inputs": {
+   "height": [
+    "10",
+    1
+   ],
+   "steps": 4,
+   "width": [
+    "10",
+    0
+   ]
+  }
+ },
+ "20": {
+  "_meta": {
+   "title": "noise"
+  },
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 0
+  }
+ },
+ "21": {
+  "_meta": {
+   "title": "latent"
+  },
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "batch_size": 1,
+   "height": [
+    "10",
+    1
+   ],
+   "width": [
+    "10",
+    0
+   ]
+  }
+ },
+ "22": {
+  "_meta": {
+   "title": "sample"
+  },
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "guider": [
+    "17",
+    0
+   ],
+   "latent_image": [
+    "21",
+    0
+   ],
+   "noise": [
+    "20",
+    0
+   ],
+   "sampler": [
+    "18",
+    0
+   ],
+   "sigmas": [
+    "19",
+    0
+   ]
+  }
+ },
+ "23": {
+  "_meta": {
+   "title": "decode"
+  },
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "22",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "24": {
+  "_meta": {
+   "title": "save"
+  },
+  "class_type": "SaveImage",
+  "inputs": {
+   "filename_prefix": "community/flux_stills_pose/TAG",
+   "images": [
+    "23",
+    0
+   ]
+  }
+ },
+ "25": {
+  "_meta": {
+   "title": "pose_resize_1mp"
+  },
+  "class_type": "ResizeImageMaskNode",
+  "inputs": {
+   "input": [
+    "7",
+    0
+   ],
+   "resize_type": "scale total pixels",
+   "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos"
+  }
+ },
+ "26": {
+  "_meta": {
+   "title": "kv_cache"
+  },
+  "class_type": "FluxKVCache",
+  "inputs": {
+   "model": [
+    "2",
+    0
+   ]
+  }
+ },
+ "27": {
+  "_meta": {
+   "title": "dwpose_map"
+  },
+  "class_type": "DWPreprocessor",
+  "inputs": {
+   "bbox_detector": "yolox_l.onnx",
+   "detect_body": "enable",
+   "detect_face": "enable",
+   "detect_hand": "enable",
+   "image": [
+    "25",
+    0
+   ],
+   "pose_estimator": "dw-ll_ucoco_384.onnx",
+   "resolution": 1024,
+   "scale_stick_for_xinsr_cn": "disable"
+  }
+ }
+}
