@@ -31,7 +31,7 @@
     "npm:pi-say@1.1.1"
   ],
   "defaultProvider": "llama-swap",
-  "defaultThinkingLevel": "off",
+  "defaultThinkingLevel": "medium",
   "thinkingBudgets": {
     "minimal": 512,
     "low": 1024,
