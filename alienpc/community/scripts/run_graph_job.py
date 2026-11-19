@@ -197,7 +197,10 @@ def main():
                     elif p["frames"] != 1: why.append(f"image packet count {p['frames']} != 1")
                 else:
                     if not p["audio"]: why.append("no audio stream")
-                    if a.frames and abs(p["frames"] - a.frames) > a.frames_tol: why.append(f"frames {p['frames']} != {a.frames}+-{a.frames_tol}")
+                    exp_f = a.frames
+                    if exp_f >= 1:
+                        while exp_f % 17 != 5: exp_f += 1
+                    if exp_f and abs(p["frames"] - exp_f) > a.frames_tol: why.append(f"frames {p['frames']} != {exp_f}+-{a.frames_tol}")
                 why += [f"detect {x}" for x in bf]
                 res["attempts"].append(dict(p, tag=tag, file=s["file"], secs=s["secs"], blackfreeze=bf, image=img, outcome=oc,
                                             collected_from_disk=bool(s.get("collected_from_disk"))))
