@@ -54,6 +54,8 @@ These override any older line in this plan or in an Opus commit that says otherw
 
 **Opus fixes for today's findings (2026-11-19 17:05 CT):** see "Opus response" in [OPUS-FINDINGS-20261119.md](./OPUS-FINDINGS-20261119.md). Short version: #4 LoRA slash fixed in code; #1/#2/#3 turned into brief rules; three more Opus faults added (#6 X3-F path, #7 the rest of the W1 brief faults, #8 X3-D and Hermes `MEMORY.md` assumed S5 was done). Nothing here touches the X3 writer slot while W1b runs (t2850u).
 
+**Setup audit (2026-11-19 17:40 CT):** "Setup audit" in the same file. Model settings were checked against upstream cards: the writer's `Q` sampler is not the Qwen card preset (S1), ref2va heretic and gemma4 match (S5, S6), and the AlienPc Swift llama-swap entry has no copy in the repo (S8). Fixed in files: Hermes `h3-render` runs long commands in the background (B1), `pi-job` uses thinking medium on AlienPc Swift (B2), and the AGT1 `settings.json` duplicate key is gone (B3). Open for Derrick: **Q-W1c** (official-way writer arms after W1b) and **Q-B6** (pin `qwen27b`).
+
 Derrick: "we should run benchmarks first, to determine our settings for everything"; "stuff that is depending on another
 step should wait until after the first step is complete"; "x3 and alienpc ... have different tasks, i.e. while we choose
 prompt writer we can install and test our setup for flux miraclein".

@@ -40,5 +40,19 @@ them exactly. The numbered points below only change how things work in this chat
 6. **On DONE:** `mkdir -p /home/evo/.hermes/image_cache && ln -sf '<clip>' /home/evo/.hermes/image_cache/clip_<run_name>.mp4`, then reply at once (no yes needed to deliver) with `MEDIA:/home/evo/.hermes/image_cache/clip_<run_name>.mp4` on its own line and one label line. There is only ever the 2x clip; never post a raw clip.
 7. **"Write it yourself"** (Derrick's words, or "community way" / "path B"): load `h3-writer`, write the prompt, save it to `<run_dir>/hermes_prose.txt`, then run THE ONE COMMAND with the same arguments plus `--prose-file <run_dir>/hermes_prose.txt`. Same READY gate, same Beta 7 header guard, same yes rule. On NOT_READY fix once from the reason, rerun, then stop and report.
 8. Never edit render, community or forge code or config yourself.
+9. **Long commands run in the background.** Terminal calls stop at 180 s, and THE ONE COMMAND takes about 2 min (up to 30). The same goes for `flux_still.py ... --queue --yes-derrick` (ComfyUI may need to wake up first). Never run them in the foreground. Start them like this, with the command exactly as you would have typed it:
+   ```bash
+   r='<run_dir>'; mkdir -p "$r"; cat > "$r/_hermes_cmd.sh" <<'EOF'
+   <the full command, exactly as written above>
+   echo "EXIT $?"
+   EOF
+   setsid nohup bash "$r/_hermes_cmd.sh" > "$r/_hermes_cmd.log" 2>&1 < /dev/null &
+   echo started
+   ```
+   Then poll in short rounds until the `EXIT` line shows, and read READY / NOT_READY (or the still path) from the log:
+   ```bash
+   r='<run_dir>'; for i in $(seq 1 16); do grep -q '^EXIT ' "$r/_hermes_cmd.log" && break; sleep 10; done; tail -n 60 "$r/_hermes_cmd.log"
+   ```
+   Tell Derrick "writing the prompt, about 2 min" once, then keep polling. Never start a second copy while the first has no `EXIT` line.
 
 ## OPERATOR.md (verbatim, built in by build-hermes-skills.sh)

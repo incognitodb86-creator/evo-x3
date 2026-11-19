@@ -53,10 +53,6 @@
     "keepRecentTokens": 16384,
     "modelOverrides": {
       "llama-swap/coding_swift15_iq3s_esp": {
-        "reserveTokens": 20480,
-        "keepRecentTokens": 8000
-      },
-      "llama-swap/coding_swift15_iq3s_esp": {
         "reserveTokens": 24576,
         "keepRecentTokens": 16384
       },

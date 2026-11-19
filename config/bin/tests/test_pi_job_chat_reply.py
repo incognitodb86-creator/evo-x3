@@ -77,3 +77,24 @@ def test_chat_reply_has_media_line_not_video_tag(tmp_path, monkeypatch, pi_job):
     assert "<video>" not in text
     assert "--- chat_reply (paste verbatim) ---" in text
     assert "[Open the 2x video](" in text
+
+
+def test_run_pi_thinking_medium_on_alienpc_low_on_x3(pi_job, tmp_path, monkeypatch):
+    """Swift on AlienPc codes with thinking medium (Derrick t2766s9752); the X3 fallback keeps low."""
+    seen = []
+
+    class _P:
+        returncode = 0
+
+    def fake_run(cmd, **kw):
+        seen.append((kw["env"].get("FORGE_MODEL"), cmd[cmd.index("--thinking") + 1]))
+        return _P()
+
+    monkeypatch.setattr(pi_job.subprocess, "run", fake_run)
+    monkeypatch.delenv("PI_JOB_FORCE_X3", raising=False)
+    monkeypatch.setattr(pi_job, "_alienpc_gate_idle", lambda: True)
+    rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
+    assert (rc, where) == (0, "alienpc") and seen[-1] == ("alienpc/coding_swift15_iq3s_esp", "medium")
+    monkeypatch.setenv("PI_JOB_FORCE_X3", "1")
+    rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
+    assert where == "x3" and seen[-1] == (None, "low")

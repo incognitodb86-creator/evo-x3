@@ -52,7 +52,7 @@ Three more Opus faults found while checking:
    - `writer_pipeline/acceptance/wp_accept.py` has no `--arm` option, must run with the render venv (`/home/evo/AI/render/x3/.venv/bin/python3`), uses fixed still paths nobody checked on the X3, and its `comfy_busy()` probes `127.0.0.1:8188`, not AlienPc.
    - `test_u54_named_e2e.py` is a mocked pytest, not a runner for the 2 named-parody asks.
    - The "4 creative-writing asks from F4" were only categories, not prompts.
-   - Arm 1b's sampler was a range; `config.yaml` already pins `sampler_arm: Q`.
+   - Arm 1b's "Qwen native non-thinking" sampler was a range and had the thinking-mode top_p (0.95). The real non-thinking values are 0.7 / 0.80 / 20 / presence 1.5 (see Setup audit S1/S2).
 
 8. **X3-D brief and Hermes `MEMORY.md` said S5 had already happened.** I read Derrick's "we already switched over" (the `mono` branch) as the live S5 switch. `/home/evo/AI/evo-x3` does not exist yet. Both now say "after S5", and X3-D says to use the part-branch bridge until then and to hold SK1 until W1b has a `RESULT.md`.
 
@@ -64,3 +64,41 @@ Also synced in this commit (left over from the 14:20-16:30 CT reviews):
 - PLAN: W3e row (MIT, already live, leave Reference Cache off), X4 row (tests pending), stale ESP-off comment, Derrick's 16:48 CT words.
 
 Not done here, needs a look on its own: the other `alienpc/community/skills/` copies differ from `x3/community/skills/` in 24 files, mostly from before today. Copying them over blind could break AlienPc paths, so this waits for SK4 in `UNI-APPLY-ALIENPC-C`.
+
+## Setup audit 2026-11-19 17:40 CT (Opus, read-only, Derrick: "debug our setup")
+
+Sources: live copies on `mono` `df79048` (X3 snapshot 4:29 PM CT, AlienPc refresh 4:54 PM CT), repo code, and upstream model cards and runtime docs read today (links in each line). Nothing here was run on a box.
+
+**Model settings vs upstream (the "official way" rule, t2810u):**
+
+| # | What | Ours (where) | Upstream (source) | Verdict |
+|---|---|---|---|---|
+| S1 | Writer sampler, thinking off | `sampler_arm: Q` 0.85 / 0.90 / 20 / min_p 0 / presence 0.5, labelled "Qwen3.8-Flash-Next card preset" (`x3/render/writer_pipeline/config.yaml`, U56) | Non-thinking: 0.7 / 0.80 / 20 / min_p 0 / presence 1.5 ([Qwen/Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next) card; the Huihui abliterated card gives no sampler) | **WRONG label and values.** Not changed live (W1b running, t2850u). Proposed arm W1c below. |
+| S2 | My W1 Arm 1b "Qwen native non-thinking" | 0.7-1.0 / top_p 0.95 / 20 | 0.7 / 0.80 / 20 / presence 1.5 | **WRONG** (top_p 0.95 is the thinking value). Adds to #7. |
+| S3 | Writer thinking | off (`enable_thinking: false`) | On by default, effort `xhigh` | Our choice for speed. Never tested the official way. W1c. |
+| S4 | Gufo server defaults for `flash-next-uncensored-v2` | 1.0 / 0.95 / 20, effort medium, `--reasoning-budget 8192` | Thinking values 1.0 / 0.95 / 20 match. No upstream source for the 8192 cap (Qwen allows up to 262,144 reasoning tokens); default effort is xhigh | OK sampler. Budget 8192 is a community cap (Derrick t2322), not upstream; keep, but note it can cut long Hermes/pi thinking. |
+| S5 | ref2va heretic Q4 (W1b) | 0.7 / 0.8 / 20, 16384 out, thinking on, xhigh, ctx 32768 | Same ([lightx2v vllm_server.sh / post_vllm.py](https://huggingface.co/lightx2v/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA)) | **OK.** Check W1b sends the official system prompt + `VIDEO_PROMPT_WRITING_GUIDE_ref_en.md`, and images interleaved with their labels. Case 1 used 13,645 of 16,384 tokens: count `finish_reason=length` cases as truncated, not as model failures. |
+| S6 | gemma4 heretic | 1.0 / 0.95 / 64 | Same ([google/gemma-4-26B-A4B-it](https://huggingface.co/google/gemma-4-26B-A4B-it)) | OK (pinned to Gufo by `halogen-only`, so not in use). |
+| S7 | Swift 1.5 coding | pi "medium"; AlienPc `thinkingBudgets.medium = 2048`; X3 pi `thinkingTokenBudgetField: thinking_budget_tokens` | Effort is set with `chat_template_kwargs.reasoning_effort` (xhigh default; medium/low supported); sampler 1.0 / 0.95 / 20 / 0 / presence 0 ([ukisai/Swift1.5-Qwen3.8-Flash-Next](https://huggingface.co/ukisai/Swift1.5-Qwen3.8-Flash-Next)) | **ASSUMPTION / check:** pi's "medium" may not set `reasoning_effort: medium` at all; it may run xhigh thinking with a 2,048-token cap, which cuts reasoning short. Check one request body on AlienPc (llama-swap log). "ESP" is not in any Swift card: say where it comes from in the AlienPc llama-swap entry. |
+| S8 | AlienPc Swift llama-swap entry | not in the repo | - | **GAP:** `C:\AI\director\config\llama-swap.yaml` has no redacted copy under `hosts/alienpc/live/`, so nobody can check Swift's sampler, context or ESP flags from GitHub. Add it to the AlienPc snapshot. |
+| S9 | Miraclein 4.5 (A5) | candidate templates | Author: "12 steps Euler CFG 1.1" ([civitai 2453960](https://civitai.com/models/2453960)); stock Klein 9B distilled: 4 steps, guidance 1.0 | Check the 3 `miraclein_*.candidate` templates use 12 / Euler / 1.1 before A5 (the official-way arm). |
+| S10 | Klein9 RefMod | `--hybrid` 0.85 + LoRA 0.60; default retention 0.7 | Guide: strength 0.80-0.90 (0.90 each for 2 people); `partially_preserved (0.7)` for creative, `fully_preserved (1.0)` + strength 1.0 for portraits ([malcolmrey guide](https://huggingface.co/datasets/malcolmrey/various)) | OK. |
+| S11 | 10Eros-Max beta_7 (A7) | `res_multistep` / Euler arms | "8 step Euler/Simple or Er/SGM to start", shift 12/3, VSA 90% sparsity, no cache/spectrum with references ([TenStrip/10Eros-Max](https://huggingface.co/TenStrip/10Eros-Max)) | Our TQ3 bans `er_sde`; upstream lists `er_sde` / `sgm_uniform` as an optimal pair. Add it as a TQ3 arm instead of banning it, and check shift 12/3 on the beta7 candidates. |
+| S12 | H3 realism LoRA | default 0.7, trigger `r34l1sm` | 1.0 intended, 0.6-0.8 lighter, trigger `r34l1sm` ([fal/MiniMax-H3-Realism-People-LoRA](https://huggingface.co/fal/MiniMax-H3-Realism-People-LoRA)) | OK (M5 tests 0.60 and 1.00). |
+
+**Setup bugs found:**
+
+| # | Issue | Evidence | Fix |
+|---|---|---|---|
+| B1 | Hermes `h3-render` ran THE ONE COMMAND in the foreground, but Hermes stops terminal calls at 180 s and the writer takes about 2 min, up to 30 (Opus fault, `9b10d43`) | live `hosts/x3/live/hermes/config.yaml` `terminal.timeout: 180`; pi-job skill "prep usually ~2 min, can take up to 30 min" | **Fixed in this commit:** `hosts/x3/hermes/skills/h3-render/HEAD.md` item 9 runs it (and `flux_still.py --queue`) with `setsid nohup` and polls for an `EXIT` line. The queue guard hook still sees the flags. Goes live with X3-E. |
+| B2 | `pi-job` codes on AlienPc Swift with `--thinking low`, but Derrick wants medium (t2766s9752, 16:48 CT) | `config/bin/pi-job` `_run_pi` | **Fixed in this commit:** medium on the AlienPc route (`PI_JOB_ALIENPC_THINKING` to change it), low on the X3 fallback; new test passes. Not live until Max reinstalls `pi-job` (after W1b). |
+| B3 | AlienPc `settings.json` has the same key twice (`llama-swap/coding_swift15_iq3s_esp` in `compaction.modelOverrides`), left by the ESP rename in `0ac71cf` | JSON duplicate-key scan | **Fixed in this commit** in the proposed AGT1 copy (kept the last one, which is the value JSON already uses). |
+| B4 | Gufo returns HTTP 400 when a request has top-level `reasoning_effort` and `enable_thinking: false` (by design, [gufo openai_chat.cpp](https://github.com/gufo-org/gufo)). llama-swap `setParamsByID` adds `reasoning_effort: low` to `flash-next-uncensored-v2-sub` / `flash-next-uncensored-sub`. | live `llama-swap.yaml` | Any caller that asks for a `-sub` name with thinking off gets a 400. Today pi subagents keep thinking low, so it does not fire. If it ever shows: send `reasoning_effort: "none"`, or put the effort inside `chat_template_kwargs`. |
+| B5 | Hermes sets reasoning effort twice: `model.reasoning_effort: low` and `agent.reasoning_effort: medium` | live Hermes `config.yaml` | Max: check which one Hermes sends (`hermes config get`) and delete the other. |
+| B6 | `qwen27b` is still a pi model and in the exclusive `main` group with no `halogen-only` pin, so picking it in pi unloads Gufo (Hermes + writer down, ttl 1800 s) | live `llama-swap.yaml`, pi `models.json.example` | Pin it like the others, or drop it from pi's model list. Derrick's call (Q card below). |
+| B7 | Gufo runs `--sessions 2` while llama-swap allows `concurrencyLimit: 4`; Hermes, the writer, Forge/Ralph and pi-job's X3 fallback all share 2 sessions | live `llama-swap.yaml` | Writer calls can wait behind a Ralph loop (writer timeout 900 s). Note only; measure before changing. The slot's comments still describe Halogen KV pools: stale. |
+| B8 | The production writer/Hermes model loads from `/srv/bakeoff/...@cbc7fba/` | live `llama-swap.yaml` | Kept by the P2.2 manifest, so safe today. Move it to `/srv/models/` in a quiet window so a future bakeoff cleanup can't take it. |
+
+**Proposed, needs Derrick's yes (Q cards):**
+- **Q-W1c:** after W1b has a `RESULT.md`, run the live writer (Gufo `flash-next-uncensored-v2`, already the uncensored build) the official way, as 2 extra arms on the same 12 cases: (a) Qwen non-thinking 0.7 / 0.80 / 20 / 0 / presence 1.5; (b) thinking on, effort xhigh, 1.0 / 0.95 / 20 (slow). Compare with today's `Q`. Only `config.yaml` copies change; no model downloads.
+- **Q-B6:** pin `qwen27b` to Gufo in `halogen-only` (or remove it from pi)?

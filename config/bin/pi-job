@@ -418,8 +418,10 @@ def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple
             env["FORGE_MODEL"] = model
         else:
             env.pop("FORGE_MODEL", None)
+        # AlienPc Swift codes with thinking medium (Derrick t2766s9752, 2026-11-19 16:48 CT); the X3 Gufo fallback stays low.
+        thinking = os.environ.get("PI_JOB_ALIENPC_THINKING", "medium") if model else "low"
         cmd = ["timeout", timeout_s, "bash", str(FORGE_LAUNCHER), "-p", "--session-dir", str(run_dir),
-               *extra, "--thinking", "low", text]
+               *extra, "--thinking", thinking, text]
         return subprocess.run(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=logf,
                               stderr=subprocess.STDOUT).returncode
 
