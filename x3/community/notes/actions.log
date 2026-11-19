@@ -4540,3 +4540,25 @@ eeds_derrick.md (backup needs_derrick.md.bak-20261107-chatreview); no .pi config
 2026-11-17T15:25:52-06:00 run_queue ckattn-ab-clip10-20261117: DONE pos=1 tag=clip ok 1344x768 192f audio yes wall=?s bytes=2663415 retry=False
 2026-11-17T15:25:52-06:00 run_queue ckattn-ab-clip10-20261117: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
 2026-11-17T15:25:52-06:00 run_queue ckattn-ab-clip10-20261117: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-18T13:56:44-06:00 run_queue sydney_hesitant_stand: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-18T13:56:44-06:00 run_queue sydney_hesitant_stand: START pos=1 tag=clip arm=oc_writer scene=standing, slow backward walk then a hip-swaying turn seed=51083601
+2026-11-18T14:01:09-06:00 run_queue sydney_hesitant_stand: DONE pos=1 tag=clip ok 768x1344 192f audio yes wall=?s bytes=2527471 retry=False
+2026-11-18T14:01:09-06:00 run_queue sydney_hesitant_stand: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-18T14:01:09-06:00 run_queue sydney_hesitant_stand: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-18T14:31:21-06:00 run_queue bro_room_b1: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-18T14:31:21-06:00 run_queue bro_room_b1: START pos=1 tag=clip arm=oc_writer scene=tease seed=51083601
+2026-11-18T14:34:52-06:00 run_queue bro_room_b1: STOP file seen: stopped collecting with 1 submitted clip(s) unfinished; ComfyUI queue cleared and running prompt interrupted
+2026-11-18T14:34:52-06:00 run_queue bro_room_b1: UPSCALE deferred (X3 remote mode, decision D5: the 2x post-pass runs on AlienPc and is not wired yet); clips stay at the render size
+2026-11-18T14:34:52-06:00 run_queue bro_room_b1: BATCH closed rc=1 reason=STOP file done=0/1: comfyui_auto unloaded, lock released
+2026-11-19T07:43:21-06:00 run_queue run: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=73 audio=yes bytes=6836690 elapsed=0.3s raw=clip_raw.mp4
+2026-11-19T07:59:02-06:00 run_queue sydney_hesitant_stand: UPSCALE FAIL pos=1 tag=clip POST /prompt 400 {"error": {"type": "prompt_outputs_failed_validation", "message": "Prompt outputs failed validation", "details": "", "extra_info": {}}, "node_errors": {"1": {"errors": [{"type": "cust (raw clip kept)
+2026-11-19T07:59:02-06:00 run_queue sydney_hesitant_stand: UPSCALE-ONLY closed ok=0 fail=1, lock released
+2026-11-19T08:01:47-06:00 run_queue sydney_hesitant_stand: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=192 audio=yes bytes=23891084 elapsed=34.7s raw=clip_raw.mp4
+2026-11-19T08:01:47-06:00 run_queue sydney_hesitant_stand: UPSCALE-ONLY closed ok=1 fail=0, lock released
+2026-11-19T09:01:20-06:00 run_queue hermes_20261119_085149_render_8818: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-19T09:01:20-06:00 run_queue hermes_20261119_085149_render_8818: START pos=1 tag=clip arm=oc_writer scene=standing and dancing on a crowded nightclub dance floor, three-quarter turn toward camera seed=51083601
+2026-11-19T09:06:42-06:00 run_queue hermes_20261119_085149_render_8818: DONE pos=1 tag=clip ok 768x1344 243f audio yes wall=?s bytes=3959110 retry=False
+2026-11-19T09:07:13-06:00 run_queue hermes_20261119_085149_render_8818: UPSCALE ok pos=1 tag=clip 768x1344->1536x2688 fps=24/1 frames=243 audio=yes bytes=28437213 elapsed=29.2s raw=deleted
+2026-11-19T09:07:13-06:00 run_queue hermes_20261119_085149_render_8818: BATCH closed rc=0 reason=all queued clips DONE ok done=1/1: comfyui_auto unloaded, lock released
+2026-11-19T09:40:14-06:00 run_queue hermes_20261119_093206_render_7e44: BATCH open: 1 clips, lock held, comfyui_auto kept loaded
+2026-11-19T09:40:14-06:00 run_queue hermes_20261119_093206_render_7e44: START pos=1 tag=clip arm=oc_writer scene=talk seed=51083601

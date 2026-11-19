@@ -306,6 +306,6 @@ Allowed length pairs at 24 fps: duration_s 5|8|10 with frames 124|192|243. Cap o
 Hard bans (fail closed; cite live rules):
 - Never emit a labeled soundscape or non-diegetic-music header (R7, R32; TenStrip #77).
 - No hosted six-section dump; five local sections only (R5).
-- All adult RefMods and voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed on 1-pass `templates/b2_refmod.api.json`; no 2-pass upscaler and no sampler/CFG/steps/resolution in the paste (R33).
+- All adult RefMods are allowed and voice refs (`*_refmod_audio` + `<Audio 1>`) are for OCs only; named INDEX/celebrity parodies get the visual RefMod only and never `<Audio 1>` (main SKILL.md), on 1-pass `templates/b2_refmod.api.json`; no 2-pass upscaler and no sampler/CFG/steps/resolution in the paste (R33).
 - No 350-500 word cap; length follows h3-prompting R9 (no word floor or quota, staying under the encoder limit; Derek).
 - Dialogue = spoken words only inside lane markup (R37). Continuations never restart the scene (R10). Adults 18+ only.

@@ -105,7 +105,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
 Steps a-g for one render item, then script reuse and research rules:
    - For a render item (stock path):
      a. Pick one approved, never-animated still with `~/AI/community/notes/hc_pick_scan_20261023.py` (unless named in MAX). GI063 render hold is RELEASED (Derrick 2026-10-27 9:09 AM CT — wrongly flagged by wrong model; do NOT treat GI063 as hold; keep youth guard on GI063).
-     b. Caption once with your own model (EVO-X3: `x3-local/gemma4-heretic` with vision on; AlienPc: `coding_swift15_iq3s_esp`, the `ralph.ps1` default): one ask, one image.
+     b. Caption once with your own model (EVO-X3: `x3-local/flash-next-uncensored` with vision on, or `joycaption` fallback; AlienPc: `coding_swift15_iq3s_esp`, the `ralph.ps1` default): one ask, one image.
      c. Write one natural-language H3 prompt from that caption, following h3-prompting (no word cap; long, literal, in time order).
      d. Check: `~/AI/render/x3/.venv/bin/python -m pytest -q ~/AI/community/scripts/tests/test_p6_review.py ~/AI/community/scripts/tests/test_guard_scope.py`. `comm.guard_ok` also runs inside `run_graph_job.py` before `/prompt` POST; never loosen either.
      e. Build graph: `~/AI/render/x3/.venv/bin/python ~/AI/community/scripts/make_b2_request.py --arm-dir <run_dir> --prompt-file <txt> --seed <n> --image <ComfyUI input path> --prefix <sub/name> [--frames <n>]` writes `<run_dir>/request.api.json` from `~/AI/community/templates/b2.api.json` (the B2 recipe, Derrick decision 2026-10-30; details in `templates/b2.README.md`). Only prompt, seed, start image, filename prefix and frames change; everything else is locked.

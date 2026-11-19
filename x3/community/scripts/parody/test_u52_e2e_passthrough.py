@@ -241,7 +241,10 @@ def test_summary_line_queued_and_surface_mismatch_warning(tmp_path, monkeypatch)
         self.calls.append({"purpose": purpose, "seconds": 0.0})
         if str(purpose).startswith("beat_card"):
             return "not json"
-        return _stub_writer_prompt("sex")
+        return _stub_writer_prompt("sex").replace(
+            "PRIMARY MOTION - steady strokes, one every second, keeping hips flush.",
+            "PRIMARY MOTION - she rises and sinks at one cycle every second as his hips lift a few inches to meet each sink.",
+        )
 
     monkeypatch.setattr(rwp.Client, "chat", fake_chat)
     _patch_inproc_writer_run(monkeypatch)
