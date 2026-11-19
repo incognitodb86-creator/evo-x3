@@ -9,12 +9,12 @@ attachments:
 plugins:
   clone_timeout_seconds: 300
 model:
-  default: flash-next-uncensored
+  default: flash-next-uncensored-v2
   provider: custom
   base_url: http://127.0.0.1:8080/v1
   context_length: 131072
   reasoning_effort: low
-  key_env: "<redacted>"
+  key_env: LLM_KEY_HERMES
 kanban:
   review_dispatch: true
 cron:
@@ -69,9 +69,9 @@ compression:
   protect_first_n: 3
   idle_compact_after_seconds: 0
   hygiene_max_turn_hold_seconds: 10
-  proactive_prune_tokens: "<redacted>"
+  proactive_prune_tokens: 0
   proactive_prune_min_result_chars: 8000
-  proactive_prune_min_reclaim_tokens: "<redacted>"
+  proactive_prune_min_reclaim_tokens: 4096
 prompt_caching:
   cache_ttl: 5m
 memory:
@@ -205,10 +205,10 @@ updates:
 auxiliary:
   vision:
     provider: custom
-    model: flash-next-uncensored
+    model: flash-next-uncensored-v2
     base_url: http://127.0.0.1:8080/v1
     reasoning_effort: low
-    key_env: "<redacted>"
+    key_env: LLM_KEY_HERMES
 approvals:
   unattended_mode: deny
   timeout: 30
