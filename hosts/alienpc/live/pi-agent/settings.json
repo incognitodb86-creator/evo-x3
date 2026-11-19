@@ -90,8 +90,8 @@
     "blockImages": false,
     "autoResize": true
   },
-  "model": "coding_swift15_iq3s_esp",
-  "defaultModel": "coding_swift15_iq3s_esp",
+  "model": "coding_swift15_iq3s",
+  "defaultModel": "coding_swift15_iq3s",
   "lastChangelogVersion": "1.5.0",
   "skills": [
     "C:/AI/community/skills",

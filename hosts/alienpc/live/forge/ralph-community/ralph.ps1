@@ -1,9 +1,9 @@
 # Plain capped Ralph loop for Forge. Runs pi on PROMPT.md, repeats, stops at -Max cap.
 # Forge owns this file.
-# Usage: .\ralph.ps1 [-Max 10] [-Model coding_swift15_iq3s_esp] [-Section <heading>] [-GpuWaits 30] [-GpuWaitSec 120] [-GpuLockPath <lock>] [-IterationTimeoutSec 7200] [-CommandOverride <cmd>] [-LogPath <path>] [-Root <dir>]
+# Usage: .\ralph.ps1 [-Max 10] [-Model coding_swift15_iq3s] [-Section <heading>] [-GpuWaits 30] [-GpuWaitSec 120] [-GpuLockPath <lock>] [-IterationTimeoutSec 7200] [-CommandOverride <cmd>] [-LogPath <path>] [-Root <dir>]
 param(
   [int]$Max = 10,
-  [string]$Model = 'coding_swift15_iq3s_esp',
+  [string]$Model = 'coding_swift15_iq3s',
   [string]$Section = '',         # 2026-11-14: work only items under "## <Section>" heading and stop when none remain open; empty = current behavior
   [int]$GpuWaits = 30,
   [int]$GpuWaitSec = 120,
