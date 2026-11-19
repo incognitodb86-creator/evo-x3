@@ -2,7 +2,7 @@ Goal: Apply unified-plan `mono` groups 1-3 on the EVO-X3 (R5, ST2+L4 desk text, 
 
 # UNI-APPLY-X3-A (X3 Forge): Apply unified-plan groups 1-3 on EVO-X3, Nov 19 2026
 
-Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge execution strategy) and `records/unified-implementation/PLAN.md` + `records/unified-implementation/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", groups 1-3, X3 side). Max verifies your `RESULT.md` afterwards.
+Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge execution strategy) and `records/uplan/PLAN.md` + `records/uplan/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", groups 1-3, X3 side). Max verifies your `RESULT.md` afterwards.
 
 ## Needs before launch (Max / Derrick checklist — do not launch until met)
 - **Derrick's live yes in chat:** Card 1 (live apply), Card 26 (`ST1` default), and Card 12 (`P4.11` ntfy token for H3 timers) answered in chat (Max records id).

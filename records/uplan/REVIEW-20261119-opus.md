@@ -1,6 +1,6 @@
 VERDICT: CHANGES
 
-Review of `records/unified-implementation/PLAN.md` at `local-github/u58` = `e0c446f` (plus the Hermes and monorepo plan diffs in the same commit, and the cited `hosts/**` / `config/**` copies). Reviewer: Claude Opus 5.5 in VS Code on Derrick's PC, read-only git, 2026-11-19 ~11:05-11:40 AM CT. Packet: `20261119-1102-evo-plan-reviewer-unified-implementation.md`. Nothing was checked on the X3 or AlienPc; "live" rows are compared only against the git copies.
+Review of `records/uplan/PLAN.md` at `local-github/u58` = `e0c446f` (plus the Hermes and monorepo plan diffs in the same commit, and the cited `hosts/**` / `config/**` copies). Reviewer: Claude Opus 5.5 in VS Code on Derrick's PC, read-only git, 2026-11-19 ~11:05-11:40 AM CT. Packet: `20261119-1102-evo-plan-reviewer-uplan.md`. Nothing was checked on the X3 or AlienPc; "live" rows are compared only against the git copies.
 
 Short version: the merge itself is sound. Every source ID is carried over, the source blobs match, the Opus/live split is right, and the big download/render gates are in place. The changes needed are about **who can actually run what**: AlienPc Forge's own rules forbid most of the AlienPc work it is given, its LLM shares the GPU it would test on, the lease model doesn't cover four doers, "git pull" doesn't deploy the `u58` copies, and the Opus-on-GitHub flow has no rule for when Gitea has moved. Stills intake needs one clear 18+ image gate and one clear ST4 render-yes rule.
 

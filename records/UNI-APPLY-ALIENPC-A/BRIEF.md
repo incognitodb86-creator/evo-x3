@@ -2,7 +2,7 @@ Goal: Check AlienPc `C:\AI\community` dirty files (M7), then apply (staged patch
 
 # UNI-APPLY-ALIENPC-A (AlienPc Forge): M7 check + M4/ST4/ST5 candidates + S2 script on AlienPc, Nov 19 2026
 
-Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `records/unified-implementation/PLAN.md` + `records/unified-implementation/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", AlienPc side). Max verifies your `RESULT.md` afterwards.
+Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `records/uplan/PLAN.md` + `records/uplan/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", AlienPc side). Max verifies your `RESULT.md` afterwards.
 
 ## Needs before launch (do not launch until met; held items stay skipped)
 1. **Derrick's live yes in chat:** Card 1 (live apply for `alienpc/community/` file-only items: `M4`, `ST4`, `ST5` candidate templates + `S2` allowlist script and offline tests into `C:\AI\community`) answered in chat (Max records id). (Card 33 M7 dirty check is answered: checked in step 1 below, Derrick 2026-11-19 12:29 CT, side chat.)

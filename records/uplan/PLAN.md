@@ -20,6 +20,8 @@ Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo pl
 
 # Unified implementation plan (F4 + LX + M + RV + ST)
 
+**Path rename 2026-11-19 13:43 CT (Derrick t2731u-t2733u):** this folder was `records/unified-implementation/`; renamed to `records/uplan/` because Forge-X3's pi permission rule for the UniFi folder (`*unifi*`) also matched "unified" and blocked reads of this plan. All references updated.
+
 **Status 2026-11-19:** Reviewed by Opus (`VERDICT: CHANGES`, [REVIEW-20261119-opus.md](./REVIEW-20261119-opus.md)); delta re-reviewed (`VERDICT: CHANGES`, 1 major bridge + text fixes); all delta fixes applied in this revision (reviewer confirmed text-only fixes need no further review).
 
 **Code on `mono` 2026-11-19:** all Opus-file items from Card 2 are on `mono` (render, community-code, templates, u58-pijob, hermes, leftovers). Opus code review [CODE-REVIEW-20261119-opus.md](./CODE-REVIEW-20261119-opus.md) (`CHANGES`, L3/L8 blocked) -> one fix round -> delta [CODE-REVIEW-20261119-opus-delta.md](./CODE-REVIEW-20261119-opus-delta.md) (`APPROVE`, 6 MINOR follow-ups N1-N6). **Max: use the delta file's "Apply order for Max"**; cite `mono` SHAs (not worker branch SHAs) in RESULT files. Follow-ups N1 (recompile vs long_continuation), N2 (L3 detached-HEAD worktrees), N3 (recompile lint ctx), N5 (inbox sidecar restarts) are open; no L3 timer and no `recompile` on long_continuation until fixed.
@@ -514,7 +516,7 @@ First pass 2026-11-19 10:28-10:32 AM CT; full live re-audit 10:42-10:55 AM CT. T
 
 ## Definition of Done (for a future work run, not this file)
 
-Wave items marked DONE in `records/unified-implementation/RESULT.md` with evidence; leases cleared; decision answers recorded; Gitea and GitHub tips match; no secrets in git.
+Wave items marked DONE in `records/uplan/RESULT.md` with evidence; leases cleared; decision answers recorded; Gitea and GitHub tips match; no secrets in git.
 
 ## Rollback (plan file)
 

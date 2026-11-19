@@ -1,6 +1,6 @@
 VERDICT: CHANGES
 
-Delta re-review of `records/unified-implementation/PLAN.md` and `records/hermes-direct-render/PLAN.md`, `e0c446f..mono` (`4c4d4a6`), commits `69d7af6` + `66ea7b5`. Reviewer: Claude Opus 5.5, VS Code on Derrick's PC, read-only `git --git-dir=C:\tmp\evo-work\mono.git`, 2026-11-19 ~11:45 AM CT. Packet: `20261119-1145-evo-plan-reviewer-delta.md`. Derrick's decisions (GitHub `mono` first, Max mirrors to Gitea; `opus/<group>` in VS Code; Card 2 = yes) are taken as given. Nothing checked on a host.
+Delta re-review of `records/uplan/PLAN.md` and `records/hermes-direct-render/PLAN.md`, `e0c446f..mono` (`4c4d4a6`), commits `69d7af6` + `66ea7b5`. Reviewer: Claude Opus 5.5, VS Code on Derrick's PC, read-only `git --git-dir=C:\tmp\evo-work\mono.git`, 2026-11-19 ~11:45 AM CT. Packet: `20261119-1145-evo-plan-reviewer-delta.md`. Derrick's decisions (GitHub `mono` first, Max mirrors to Gitea; `opus/<group>` in VS Code; Card 2 = yes) are taken as given. Nothing checked on a host.
 
 Short version: 13 of 15 findings and all of M1-M9 are fixed. One new MAJOR: the plan never says how a `mono` commit under `x3/*` or `alienpc/*` reaches a live checkout that is still on its old part branch before `MONO-S5`/`S6`. That is a 2-line fix. The rest is small text.
 

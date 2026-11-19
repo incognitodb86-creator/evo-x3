@@ -13,7 +13,7 @@ pending_upload: true
 
 # evo-x3 monorepo consolidation
 
-Related: ../hermes-direct-render/PLAN.md · **single plan for review: [../unified-implementation/PLAN.md](../unified-implementation/PLAN.md)** (live audit 2026-11-19 10:42-10:55 AM CT; Wave 5 = this plan)
+Related: ../hermes-direct-render/PLAN.md · **single plan for review: [../uplan/PLAN.md](../uplan/PLAN.md)** (live audit 2026-11-19 10:42-10:55 AM CT; Wave 5 = this plan)
 
 Status: **REVIEWED (`VERDICT: CHANGES` addressed, 2026-11-19 CT) & APPROVED BY DERRICK TO RUN S1–S7** after Max mirrors `u58` from GitHub to Gitea. S1 repo-file prep (`.gitignore`, `scripts/snapshot-live-setup.sh`, untracking the 2 `gufo` `mcp.json` index entries) landed on `u58` alongside this revision; live host/box work (S1 dry run + gitleaks, S1b–S7) has NOT started yet. Labels: VERIFIED (read live or against repo refs), ASSUMPTION (to test in the step that uses it).
 

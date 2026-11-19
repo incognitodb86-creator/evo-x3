@@ -1,6 +1,6 @@
 # H7 + H8 Result (2026-11-19)
 
-**Plan:** `records/unified-implementation/PLAN.md` rows H7, H8 (brief: `records/H7-H8-agy-brief-20261119.md`)
+**Plan:** `records/uplan/PLAN.md` rows H7, H8 (brief: `records/H7-H8-agy-brief-20261119.md`)
 **Overall status:** PASS
 
 ---

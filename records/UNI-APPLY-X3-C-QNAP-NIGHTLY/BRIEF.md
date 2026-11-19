@@ -2,7 +2,7 @@ Goal: After `UNI-APPLY-X3-A` has a `RESULT.md`, install unified-plan items `ST7`
 
 # UNI-APPLY-X3-C-QNAP-NIGHTLY (X3 Forge): Install ST7 QNAP nightly copy and L9 Hermes MEDIA: clip delivery on EVO-X3, Nov 19 2026
 
-Authority: Derrick 2026-11-19 t2716u (QNAP copy of finished renders moves to a nightly backup; Hermes and PixlStash already show clips; supersedes t2555 for X3-queued runs) and t2719u (Hermes must post the finished clip inline via `MEDIA:`, without asking); `records/unified-implementation/PLAN.md` items `ST7` and `L9`. Max verifies your `RESULT.md` afterwards. This brief is file-only until applied; do not start until `UNI-APPLY-X3-A/RESULT.md` exists.
+Authority: Derrick 2026-11-19 t2716u (QNAP copy of finished renders moves to a nightly backup; Hermes and PixlStash already show clips; supersedes t2555 for X3-queued runs) and t2719u (Hermes must post the finished clip inline via `MEDIA:`, without asking); `records/uplan/PLAN.md` items `ST7` and `L9`. Max verifies your `RESULT.md` afterwards. This brief is file-only until applied; do not start until `UNI-APPLY-X3-A/RESULT.md` exists.
 
 ## Needs before launch (ALL required — do not launch until met)
 - **`UNI-APPLY-X3-A` `RESULT.md` is present** at `/home/derekboone/evo-x3/records/UNI-APPLY-X3-A/RESULT.md`. If it is missing, stop (`BLOCKED`) and do not take the lease.

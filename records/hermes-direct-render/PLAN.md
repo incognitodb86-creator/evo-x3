@@ -12,7 +12,7 @@ pending_upload: true
 
 > **Update 2026-11-19 12:31 PM CT (Derrick t2688u):** Open WebUI is retired. Hermes WebUI (127.0.0.1:8787) is the tailnet chat UI via Serve 8443 `/`. Lines below that mention Open WebUI or :3000 are historical.
 
-Related: ../monorepo-consolidation/PLAN.md · **single plan for review: [../unified-implementation/PLAN.md](../unified-implementation/PLAN.md)** (owners, live audit 2026-11-19 10:42-10:55 AM CT, Stills intake `ST1-ST5`)
+Related: ../monorepo-consolidation/PLAN.md · **single plan for review: [../uplan/PLAN.md](../uplan/PLAN.md)** (owners, live audit 2026-11-19 10:42-10:55 AM CT, Stills intake `ST1-ST5`)
 
 # Hermes direct H3 render on EVO-X3: two side-by-side paths
 

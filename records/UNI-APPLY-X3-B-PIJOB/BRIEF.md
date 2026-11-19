@@ -2,7 +2,7 @@ Goal: Perform ONE install of `config/bin/pi-job` -> `/usr/local/bin/pi-job` on t
 
 # UNI-APPLY-X3-B-PIJOB (X3 Forge): Single `pi-job` install and coding-path live verification on EVO-X3, Nov 19 2026
 
-Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick 2026-11-19 ~12:35 CT (Hermes is main chat interface, pi is coding-only -> C11 + H9; cards answered in chat), and `records/unified-implementation/PLAN.md` + `records/unified-implementation/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", item 4). Max verifies your `RESULT.md` afterwards.
+Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick 2026-11-19 ~12:35 CT (Hermes is main chat interface, pi is coding-only -> C11 + H9; cards answered in chat), and `records/uplan/PLAN.md` + `records/uplan/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", item 4). Max verifies your `RESULT.md` afterwards.
 
 ## Needs before launch (ALL required — do not launch until met)
 1. **Derrick's live yes in chat:** Card 13 (`H1c`: AlienPc Swift `ESP off` when `:8447` idle and no `gpu-render.lock`, X3 Gufo when busy; render always wins, 503 -> resume on X3) and Card 21 (`coding_swift15_iq3s` ESP off everywhere — AlienPc Forge AND `pi-job`) are **ANSWERED YES** (Derrick 2026-11-19 12:29 CT, side chat); Card 1 live `/usr/local/bin/pi-job` install yes answered in chat (Max records id).

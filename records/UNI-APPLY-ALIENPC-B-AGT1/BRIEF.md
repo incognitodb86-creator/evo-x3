@@ -2,7 +2,7 @@ Goal: Apply AGT1 (AlienPc global AGENTS.md + approved INV1b + backup-writer line
 
 # UNI-APPLY-ALIENPC-B-AGT1 (AlienPc Forge): Apply AGT1 agent files redo on AlienPc, Nov 19 2026
 
-Authority: Derrick 2026-11-19 12:29 CT (side chat: Card 21 ESP-off everywhere -> `coding_swift15_iq3s`; `INV1` resolved as single master `C:\Users\derek\.pi\agent\AGENTS.md` -> `AGT1`; Card 38 `INV1b` APPROVED — brief from X3/Max, AlienPc Forge is the hands), Derrick 2026-11-19 12:54 CT (orchestrator chat: AlienPc = backup prompt writer when X3 is busy coding and AlienPc is idle -> keep writer book and all 9 skills linked), and `records/unified-implementation/PLAN.md`. Max verifies your `RESULT.md` afterwards.
+Authority: Derrick 2026-11-19 12:29 CT (side chat: Card 21 ESP-off everywhere -> `coding_swift15_iq3s`; `INV1` resolved as single master `C:\Users\derek\.pi\agent\AGENTS.md` -> `AGT1`; Card 38 `INV1b` APPROVED — brief from X3/Max, AlienPc Forge is the hands), Derrick 2026-11-19 12:54 CT (orchestrator chat: AlienPc = backup prompt writer when X3 is busy coding and AlienPc is idle -> keep writer book and all 9 skills linked), and `records/uplan/PLAN.md`. Max verifies your `RESULT.md` afterwards.
 
 ## Needs before launch (ALL required — do not launch until met)
 1. **Derrick's live yes in chat:** Card 21 (`coding_swift15_iq3s` ESP off everywhere), `INV1` -> `AGT1`, and Card 38 (`INV1b`) are **ANSWERED YES** (Derrick 2026-11-19 12:29 CT, side chat); Card 1 live apply yes for AGT1 answered in chat (Max records id).
