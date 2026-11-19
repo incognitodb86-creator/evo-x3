@@ -1,30 +1,148 @@
 #!/usr/bin/env python3
-"""Import every image in /home/evo/AI/pixl-inbox into PixlStash (Max, Nov 16 2026, Derrick t2002s7376).
-Imported files move to _imported/, failures to _failed/. Prints counts only. Token read from file, never printed.
+"""Import media in /home/evo/AI/pixl-inbox into PixlStash (Max, Nov 16 2026, Derrick t2002s7376; ST3b caps).
+Imported files move to _imported/, explicit failures to _failed/, timed-out or unstarted files stay in the inbox for
+the next pass. Prints counts and timings only (never filenames or tokens). Token read from file, never printed.
 Usage: sudo -u evo python3 /home/evo/AI/pixlstash-tagging/import_inbox.py"""
-import json, os, shutil, time, urllib.request, uuid, mimetypes
-INBOX = "/home/evo/AI/pixl-inbox"; API = "http://127.0.0.1:9537/api/v1/pictures/import"
-TOK = open("/home/evo/.config/pixlstash/tagger-write.token").read().strip()
-H = {"Authorization": "Bearer " + TOK}
+from __future__ import annotations
+
+import json
+import mimetypes
+import os
+import shutil
+import time
+import urllib.request
+import uuid
+
+INBOX = os.environ.get("PIXL_INBOX", "/home/evo/AI/pixl-inbox")
+API = os.environ.get("PIXL_IMPORT_API", "http://127.0.0.1:9537/api/v1/pictures/import")
+TOKEN_FILE = os.environ.get("PIXL_TOKEN_FILE", "/home/evo/.config/pixlstash/tagger-write.token")
+BATCH_SIZE = max(1, int(os.environ.get("PIXL_IMPORT_BATCH_SIZE", "10")))
+MAX_SECONDS = max(1.0, float(os.environ.get("PIXL_IMPORT_MAX_SECONDS", "900")))
+BATCH_MAX_SECONDS = max(1.0, float(os.environ.get("PIXL_IMPORT_BATCH_SECONDS", "300")))
+POLL_INTERVAL = max(0.05, float(os.environ.get("PIXL_IMPORT_POLL_SECONDS", "3")))
 EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".mp4", ".webm", ".mov")
-files = sorted(f for f in os.listdir(INBOX) if f.lower().endswith(EXT) and os.path.isfile(os.path.join(INBOX, f)))
-tot = {"files": len(files), "imported": 0, "duplicate": 0, "failed": 0}
-for i in range(0, len(files), 50):
-    batch = files[i:i+50]; b = uuid.uuid4().hex; body = b""
+
+
+def _build_multipart(inbox: str, batch: list[str]) -> tuple[bytes, str]:
+    boundary = uuid.uuid4().hex
+    parts: list[bytes] = []
     for f in batch:
         ct = mimetypes.guess_type(f)[0] or "application/octet-stream"
-        body += f'--{b}\r\nContent-Disposition: form-data; name="file"; filename="{f}"\r\nContent-Type: {ct}\r\n\r\n'.encode()
-        body += open(os.path.join(INBOX, f), "rb").read() + b"\r\n"
-    body += f"--{b}--\r\n".encode()
-    tid = json.load(urllib.request.urlopen(urllib.request.Request(API, data=body, method="POST",
-          headers={**H, "Content-Type": "multipart/form-data; boundary=" + b}), timeout=600))["task_id"]
-    while True:
-        s = json.load(urllib.request.urlopen(urllib.request.Request(API + "/status?task_id=" + tid, headers=H), timeout=60))
-        if s.get("status") in ("completed", "failed", "error", "cancelled"): break
-        time.sleep(3)
-    tot["imported"] += s.get("imported_count") or 0; tot["duplicate"] += s.get("duplicate_count") or 0
-    ok = s.get("status") == "completed"
-    if not ok: tot["failed"] += len(batch)
-    for f in batch:
-        shutil.move(os.path.join(INBOX, f), os.path.join(INBOX, "_imported" if ok else "_failed", f))
-print(json.dumps(tot))
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{f}"\r\n'
+            f"Content-Type: {ct}\r\n\r\n".encode("utf-8")
+        )
+        with open(os.path.join(inbox, f), "rb") as fh:
+            parts.append(fh.read())
+        parts.append(b"\r\n")
+    parts.append(f"--{boundary}--\r\n".encode("utf-8"))
+    return b"".join(parts), boundary
+
+
+def run_import(
+    inbox: str = INBOX,
+    api: str = API,
+    token: str | None = None,
+    batch_size: int = BATCH_SIZE,
+    max_seconds: float = MAX_SECONDS,
+    batch_max_seconds: float = BATCH_MAX_SECONDS,
+    poll_interval: float = POLL_INTERVAL,
+) -> dict:
+    start = time.monotonic()
+    overall_deadline = start + max_seconds
+    if token is None:
+        with open(TOKEN_FILE, "r", encoding="utf-8") as fh:
+            token = fh.read().strip()
+    headers = {"Authorization": "Bearer " + token}
+
+    files = sorted(
+        f for f in os.listdir(inbox)
+        if f.lower().endswith(EXT) and os.path.isfile(os.path.join(inbox, f))
+    )
+    tot = {
+        "files": len(files),
+        "batches": 0,
+        "imported": 0,
+        "duplicate": 0,
+        "failed": 0,
+        "timed_out": 0,
+        "remaining": len(files),
+        "elapsed_s": 0.0,
+        "stopped_reason": "done",
+    }
+    if not files:
+        tot["elapsed_s"] = round(time.monotonic() - start, 2)
+        return tot
+
+    os.makedirs(os.path.join(inbox, "_imported"), exist_ok=True)
+    os.makedirs(os.path.join(inbox, "_failed"), exist_ok=True)
+
+    processed = 0
+    for i in range(0, len(files), batch_size):
+        now = time.monotonic()
+        if now >= overall_deadline:
+            tot["stopped_reason"] = "overall_timeout"
+            break
+        batch = files[i : i + batch_size]
+        tot["batches"] += 1
+        batch_deadline = min(overall_deadline, now + batch_max_seconds)
+        body, boundary = _build_multipart(inbox, batch)
+
+        post_timeout = max(5.0, min(batch_max_seconds, batch_deadline - time.monotonic()))
+        try:
+            req = urllib.request.Request(
+                api,
+                data=body,
+                method="POST",
+                headers={**headers, "Content-Type": "multipart/form-data; boundary=" + boundary},
+            )
+            with urllib.request.urlopen(req, timeout=post_timeout) as resp:
+                tid = json.load(resp)["task_id"]
+        except Exception:
+            # Leave unfinished files in inbox for the next pass.
+            tot["timed_out"] += len(batch)
+            tot["stopped_reason"] = "post_error"
+            break
+
+        status_obj = None
+        while True:
+            if time.monotonic() >= batch_deadline:
+                break
+            poll_timeout = max(5.0, min(60.0, batch_deadline - time.monotonic()))
+            try:
+                sreq = urllib.request.Request(f"{api}/status?task_id={tid}", headers=headers)
+                with urllib.request.urlopen(sreq, timeout=poll_timeout) as sresp:
+                    s = json.load(sresp)
+            except Exception:
+                s = {}
+            if s.get("status") in ("completed", "failed", "error", "cancelled"):
+                status_obj = s
+                break
+            rem = batch_deadline - time.monotonic()
+            if rem <= 0:
+                break
+            time.sleep(min(poll_interval, rem))
+
+        if status_obj is None:
+            # Per-batch or overall cap hit: leave this batch in inbox for the next pass.
+            tot["timed_out"] += len(batch)
+            tot["stopped_reason"] = "overall_timeout" if time.monotonic() >= overall_deadline else "batch_timeout"
+            break
+
+        tot["imported"] += status_obj.get("imported_count") or 0
+        tot["duplicate"] += status_obj.get("duplicate_count") or 0
+        ok = status_obj.get("status") == "completed"
+        if not ok:
+            tot["failed"] += len(batch)
+        dest_dir = os.path.join(inbox, "_imported" if ok else "_failed")
+        for f in batch:
+            shutil.move(os.path.join(inbox, f), os.path.join(dest_dir, f))
+        processed += len(batch)
+
+    tot["remaining"] = len(files) - processed
+    tot["elapsed_s"] = round(time.monotonic() - start, 2)
+    return tot
+
+
+if __name__ == "__main__":
+    print(json.dumps(run_import()))
