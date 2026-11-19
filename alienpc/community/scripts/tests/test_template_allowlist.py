@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -205,3 +206,48 @@ def test_promoted_template_allowed_and_candidate_ignored(tmp_path: Path):
     cand_file.write_text(json.dumps(custom), encoding="utf-8")
     ok, _, _ = ta.check_graph(g, promoted=[cand_file])
     assert not ok
+
+
+def test_promoted_manifest_checks_sha256_and_rejects_traversal(tmp_path: Path):
+    tdir = tmp_path / "templates"
+    tdir.mkdir()
+    custom = {
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "custom.safetensors", "weight_dtype": "default"}},
+        "2": {"class_type": "RandomNoise", "inputs": {"noise_seed": 1}},
+        "3": {"class_type": "SaveImage", "inputs": {"images": ["1", 0], "filename_prefix": "community/custom/out"}},
+    }
+    good_file = tdir / "custom_promoted.api.json"
+    good_bytes = json.dumps(custom).encode("utf-8")
+    good_file.write_bytes(good_bytes)
+    good_sha = hashlib.sha256(good_bytes).hexdigest()
+
+    # Valid manifest next to scripts (outside templates/) with matching sha256 passes
+    manifest = tmp_path / "allowlist_promoted.json"
+    manifest.write_text(json.dumps([{"file": "custom_promoted.api.json", "sha256": good_sha}]), encoding="utf-8")
+    ok, matched, reason = ta.check_graph(custom, templates_dir=tdir, promoted_manifest=manifest)
+    assert ok, reason
+    assert matched == "custom_promoted"
+
+    # Hash mismatch is refused
+    bad_manifest = tmp_path / "bad_sha.json"
+    bad_manifest.write_text(json.dumps([{"file": "custom_promoted.api.json", "sha256": "0" * 64}]), encoding="utf-8")
+    ok, _, _ = ta.check_graph(custom, templates_dir=tdir, promoted_manifest=bad_manifest)
+    assert not ok
+
+    # Planted manifest entries with "..", "/", or "\\" are refused even with valid sha256
+    outside_file = tmp_path / "evil.api.json"
+    outside_file.write_bytes(good_bytes)
+    for bad_name in ("../evil.api.json", "sub/evil.api.json", r"sub\evil.api.json"):
+        trav_manifest = tmp_path / "trav.json"
+        trav_manifest.write_text(json.dumps([{"file": bad_name, "sha256": good_sha}]), encoding="utf-8")
+        ok, _, _ = ta.check_graph(custom, templates_dir=tdir, promoted_manifest=trav_manifest)
+        assert not ok, f"traversal name {bad_name!r} should be refused"
+
+    # Manifest sitting inside templates/ is ignored by default (default manifest is in scripts/)
+    assert ta.DEFAULT_PROMOTED_MANIFEST.parent == ta.SCRIPTS_DIR
+    (tdir / "allowlist_promoted.json").write_text(
+        json.dumps([{"file": "custom_promoted.api.json", "sha256": good_sha}]), encoding="utf-8"
+    )
+    ok, _, _ = ta.check_graph(custom, templates_dir=tdir)
+    assert not ok
+

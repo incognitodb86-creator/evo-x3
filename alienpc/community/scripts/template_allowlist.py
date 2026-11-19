@@ -7,14 +7,16 @@ parameters match an allowlisted production template:
   - b2.api.json and b2_refmod.api.json
   - the 3-node RTX VSR upscale graph (VHS_LoadVideo -> RTXVideoSuperResolution ->
     VHS_VideoCombine, matching x3-community scripts/remote_upscale.py)
-  - later promoted templates (loaded via explicit `promoted` arg or an optional
-    templates/allowlist_promoted.json manifest; *.candidate.api.json is never allowed)
+  - later promoted templates listed in scripts/allowlist_promoted.json (next to
+    scripts/u55_allowlist_specs.json, never in templates/) with a verified sha256.
+    Promotion is ONLY by a Derrick-approved commit updating that manifest;
+    *.candidate.api.json and names with '/', '\\', or '..' are always refused.
 
 Refuses:
   - any LLM / prompt-rewriter node graph (e.g. b2_omni_rewriter.api.json)
   - any extra, missing, or substituted node
   - any rewired edge or non-variable parameter change
-  - path traversal in image/video/RefMod/filename_prefix fields
+  - path traversal in image/video/RefMod/filename_prefix fields or promoted manifest
 
 Allowed variable fields on matched templates:
   prompt, text, noise_seed, seed, image, video, mod_1..mod_8, strength_1..strength_8,
@@ -25,6 +27,7 @@ This module is pure offline validation (no HTTP server, no ComfyUI import).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -34,7 +37,8 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 SCRIPTS_DIR = Path(__file__).resolve().parent
 DEFAULT_TEMPLATES_DIR = SCRIPTS_DIR.parent / "templates"
 DEFAULT_U55_SPECS = SCRIPTS_DIR / "u55_allowlist_specs.json"
-PROMOTED_MANIFEST_NAME = "allowlist_promoted.json"
+DEFAULT_PROMOTED_MANIFEST = SCRIPTS_DIR / "allowlist_promoted.json"
+_SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 U55_TEMPLATE_NAMES = (
     "plain",
@@ -265,12 +269,66 @@ def _match_template(nodes: Dict[str, Dict[str, Any]], spec: Dict[str, Dict[str, 
     return True, ""
 
 
+def _is_safe_promoted_filename(name: Any) -> bool:
+    if not isinstance(name, str) or not name or "\x00" in name:
+        return False
+    if "/" in name or "\\" in name or ".." in name:
+        return False
+    if not name.endswith(".api.json") or name.endswith(".candidate.api.json"):
+        return False
+    return True
+
+
+def _load_promoted_manifest(
+    manifest_path: Optional[Path],
+    templates_dir: Optional[Path],
+) -> List[Tuple[str, Dict[str, Any]]]:
+    """Load promoted templates from scripts/allowlist_promoted.json with strict name + sha256 checks."""
+    if not manifest_path or not templates_dir:
+        return []
+    mpath = Path(manifest_path)
+    tdir = Path(templates_dir).resolve()
+    if not mpath.is_file():
+        return []
+    try:
+        data = json.loads(mpath.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(data, list):
+        return []
+
+    loaded: List[Tuple[str, Dict[str, Any]]] = []
+    for entry in data:
+        if not isinstance(entry, dict):
+            continue
+        fname = entry.get("file")
+        expected_sha = entry.get("sha256")
+        if not _is_safe_promoted_filename(fname):
+            continue
+        if not isinstance(expected_sha, str) or not _SHA256_RE.match(expected_sha):
+            continue
+        p = (tdir / fname).resolve()
+        if p.parent != tdir or not p.is_file():
+            continue
+        raw_bytes = p.read_bytes()
+        actual_sha = hashlib.sha256(raw_bytes).hexdigest()
+        if actual_sha.lower() != expected_sha.lower():
+            continue
+        try:
+            raw = json.loads(raw_bytes.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            continue
+        loaded.append((fname.removesuffix(".api.json"), raw))
+    return loaded
+
+
 def load_allowlist(
     templates_dir: Path = DEFAULT_TEMPLATES_DIR,
     u55_specs_path: Path = DEFAULT_U55_SPECS,
     promoted: Optional[Sequence[Any]] = None,
+    promoted_manifest: Optional[Path] = DEFAULT_PROMOTED_MANIFEST,
 ) -> Dict[str, Dict[str, Dict[str, Any]]]:
-    """Load allowlisted template specs from disk + U55 fallback + promoted templates."""
+    """Load allowlisted template specs from disk + U55 fallback + verified promoted templates."""
     specs: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
     u55_fallback: Dict[str, Any] = {}
@@ -291,18 +349,16 @@ def load_allowlist(
             if parsed and not _has_llm_node(parsed):
                 specs[name] = parsed
 
-    # Optional manifest of promoted templates (never candidates, never LLM graphs)
-    manifest = (tdir / PROMOTED_MANIFEST_NAME) if tdir else None
-    manifest_entries: List[Any] = []
-    if manifest and manifest.is_file():
-        data = json.loads(manifest.read_text(encoding="utf-8"))
-        if isinstance(data, list):
-            manifest_entries = [tdir / str(x) for x in data]
+    # Verified manifest entries (next to u55_allowlist_specs.json; Derrick-approved commits only)
+    for name, raw in _load_promoted_manifest(promoted_manifest, tdir):
+        parsed = _graph_nodes(raw)
+        if parsed and not _has_llm_node(parsed):
+            specs[name] = parsed
 
-    for item in list(manifest_entries) + list(promoted or []):
+    for item in list(promoted or []):
         if isinstance(item, (str, Path)):
             p = Path(item)
-            if p.name.endswith(".candidate.api.json") or not p.is_file():
+            if not _is_safe_promoted_filename(p.name) or not p.is_file():
                 continue
             name = p.name.removesuffix(".api.json")
             raw = json.loads(p.read_text(encoding="utf-8"))
@@ -325,6 +381,7 @@ def check_graph(
     templates_dir: Path = DEFAULT_TEMPLATES_DIR,
     u55_specs_path: Path = DEFAULT_U55_SPECS,
     promoted: Optional[Sequence[Any]] = None,
+    promoted_manifest: Optional[Path] = DEFAULT_PROMOTED_MANIFEST,
 ) -> Tuple[bool, Optional[str], str]:
     """Return (allowed, matched_template_name, reason). Fail closed."""
     nodes = _graph_nodes(graph)
@@ -343,6 +400,7 @@ def check_graph(
         templates_dir=templates_dir,
         u55_specs_path=u55_specs_path,
         promoted=promoted,
+        promoted_manifest=promoted_manifest,
     )
 
     closest: List[Tuple[int, str, str]] = []
@@ -366,6 +424,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("graph_json", help="Path to request.api.json (or '-' for stdin)")
     ap.add_argument("--templates-dir", default=str(DEFAULT_TEMPLATES_DIR))
     ap.add_argument("--u55-specs", default=str(DEFAULT_U55_SPECS))
+    ap.add_argument("--promoted-manifest", default=str(DEFAULT_PROMOTED_MANIFEST))
     ap.add_argument("--promoted", action="append", default=[], help="Additional promoted .api.json file")
     args = ap.parse_args(argv)
 
@@ -381,6 +440,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         templates_dir=Path(args.templates_dir),
         u55_specs_path=Path(args.u55_specs),
         promoted=[Path(p) for p in args.promoted],
+        promoted_manifest=Path(args.promoted_manifest),
     )
     if ok:
         print(f"ALLOW {matched}")
