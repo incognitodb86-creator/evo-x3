@@ -37,3 +37,7 @@ src/gemma4-gufo-extension/
 # C5 bench build trees (logs/json kept)
 records/plan-v32/c5-results/live/**/build/
 records/plan-v32/c5-results/live/**/target/
+
+# pi mcp.json can hold literal service auth headers (Home Assistant) - never commit
+**/mcp.json
+**/auth.json
