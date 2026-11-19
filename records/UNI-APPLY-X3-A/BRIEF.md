@@ -13,6 +13,8 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
   - Until `MONO-S5` passes smoke: Max bridges `x3/render/` commits onto Gitea `x3-render` (never `x3-linux`) via `git format-patch --relative=x3/render/ <range>` + `git am`, and `x3/community/` commits onto Gitea `x3-community` via `git format-patch --relative=x3/community/ <range>` + `git am`, then pushes both part branches to Gitea. (After `MONO-S5`, live checkouts pull `mono` directly.)
   - Root-copy files (`config/`, `hosts/`) are read from the fetched `mono` checkout at `/home/derekboone/evo-x3` (or Max's staged path) and installed per the Install table below.
 
+- **If `MONO-S5` already passed:** `/home/evo/AI/render` and `/home/evo/AI/community` are symlinks into the `mono` clone; skip the part-branch bridge and run `git -C /home/evo/AI/evo-x3 pull --ff-only` instead. Everything else in this brief is unchanged.
+
 ## Access & Lease
 - **Doer:** X3 Forge (`/home/evo/AI/forge`, pi panes `w4:p1-p3`), running as `evo`. Use `sudo` only where an Install row says `sudo: yes` (`/usr/local/bin/sync-renders`).
 - **Live checkouts:** `/home/evo/AI/render` (Gitea `x3-render`), `/home/evo/AI/community` (Gitea `x3-community`), `/home/derekboone/evo-x3` (`mono`, read-only source for root-copy installs).

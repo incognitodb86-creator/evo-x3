@@ -14,6 +14,8 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 5. **No active render during install**, and **not during the Hermes bakeoff window** (Plan C16). (Test 1 below observes a real AlienPc render — only run with Derrick's render yes or alongside an already-approved render.)
 6. **Max import complete** from `mono` tip `5ccba67` (or newer) with clean `gitleaks`.
 
+- **If `MONO-S5` already passed:** `/home/evo/AI/render` and `/home/evo/AI/community` are symlinks into the `mono` clone; skip the part-branch bridge and run `git -C /home/evo/AI/evo-x3 pull --ff-only` instead. Everything else in this brief is unchanged.
+
 ## Access & Lease
 - **Doer:** X3 Forge (`/home/evo/AI/forge`, pi panes `w4:p1-p3`), running as `evo`. `sudo` is allowed **only** for installing/rolling back `/usr/local/bin/pi-job`.
 - **Source on `mono`:** `config/bin/pi-job` in `/home/derekboone/evo-x3` (`mono` SHAs: `07369ec` H1c, `48e7358` L1, `febc22c` L4, `c8056a8` L5, `27999a6` L6, `952d165` L8, `658dc18` L8 fix, `03340b1` H1c fix, `a5a86ce` ST3 fix, `dbc7156` H5 fix, `f353e3e` L4 fix, `9b86a78` L6 fix, `db00dde` L1 fix; latest `pi-job` commit `db00dde`, `mono` tip `5ccba67`).

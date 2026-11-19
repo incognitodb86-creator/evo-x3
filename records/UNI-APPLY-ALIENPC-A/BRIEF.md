@@ -1,4 +1,4 @@
-Goal: Check AlienPc `C:\AI\community` dirty files (M7), then bridge-apply M4/ST4/ST5 candidate templates and the S2 allowlist script + offline pytest (without hooking S2 into `comm.py`/gate) under the AlienPc lease.
+Goal: Check AlienPc `C:\AI\community` dirty files (M7), then apply (staged patch) M4/ST4/ST5 candidate templates and the S2 allowlist script + offline pytest (without hooking S2 into `comm.py`/gate) under the AlienPc lease.
 
 # UNI-APPLY-ALIENPC-A (AlienPc Forge): M7 check + M4/ST4/ST5 candidates + S2 script on AlienPc, Nov 19 2026
 
@@ -7,9 +7,12 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 ## Needs before launch (do not launch until met; held items stay skipped)
 1. **Derrick's live yes** to apply `alienpc/community/` file-only items (`M4`, `ST4`, `ST5` candidate templates + `S2` allowlist script and offline tests) into `C:\AI\community`.
 2. **AlienPc lease taken** (following brain `10_packs/max/max-briefing.md` convention, mirrored to `records/status/`).
-3. **Max import + pre-cutover bridge complete** from `mono` tip `5ccba67` (or newer):
+3. **Max import + bridge patch staged** from `mono` tip `5ccba67` (or newer):
    - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
-   - Until `MONO-S6` passes smoke: Max bridges `alienpc/community/` commits (`a808401`, `30f9997`, `df6815c`, `4c4d4a6`, `6129330`, `c0c9492`) onto Gitea `alienpc-community` via `git format-patch --relative=alienpc/community/ <range>` + `git am` under the AlienPc lease, then pushes `alienpc-community` to Gitea. (After `MONO-S6`, `C:\AI\community` pulls `mono` directly.)
+   - `C:\AI\community` does **not** track `derrick/evo-x3`: its upstream is the separate Gitea repo `derrick/alienpc-community-pc` (`master`), and its remote URL carries a credential (monorepo Q6), so never run `git remote -v` or print that URL. Until `MONO-S6` passes smoke, Max stages one patch on the X3 instead of a pull:
+     `git diff --binary 947aa26 <mono-sha> --relative=alienpc/community/ -- alienpc/community > /home/derekboone/evo-x3/_bridge/UNI-APPLY-ALIENPC-A.patch`
+     and gives the patch sha256 in the launch message. (`mono` SHAs in it: `a808401`, `30f9997`, `df6815c`, `4c4d4a6`, `6129330`, `c0c9492`; all 10 files are new on AlienPc.)
+   - If `MONO-S6` already passed: `C:\AI\community` is a junction into the `mono` clone; skip the patch and run `git -C C:\AI\evo-x3 pull --ff-only` instead (then the same tests).
 4. **HELD — do NOT apply unless Derrick explicitly unlocks before launch:**
    - **`INV1`** (`hosts/alienpc/live/pi-agent/AGENTS.md` line 1 fix, mono `1e2dc13`): requires Derrick's answer on which `AGENTS.md` copy is master (`C:\Users\derek\.pi\agent\AGENTS.md` vs `C:\AI\community\agent-shared\AGENTS.md`).
    - **`INV1b`** (`hosts/alienpc/live/pi-agent/AGENTS.md` line 35 scope rule, mono `79ccbc8`, DRAFT): requires Derrick's explicit approval of **Card 38** before copying to `C:\Users\derek\.pi\agent\AGENTS.md` (backup `C:\AI\_archive\20261119\pi-agent\`).
@@ -45,19 +48,20 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
    - Record `git -C C:\AI\community rev-parse HEAD` for `RESULT.md`.
    - Create `C:\AI\_archive\20261119\community\` and copy any pre-existing file from the list in step 1 into it (expect none; all 10 are new files).
 
-3. **Bridge pull into `C:\AI\community`:**
-   - Run `git -C C:\AI\community pull --ff-only gitea alienpc-community` (brings bridged `mono` commits:
-     - **S2:** `a808401`, `6129330`, `c0c9492` -> `scripts/template_allowlist.py`, `scripts/u55_allowlist_specs.json`, `scripts/allowlist_promoted.json`, `scripts/tests/test_template_allowlist.py`
-     - **M4:** `30f9997` -> `templates/miraclein_{t2i,refmod,edit}.candidate.api.json`
-     - **ST4:** `df6815c` -> `templates/flux_stills_t2i_klein.candidate.api.json`
-     - **ST5:** `4c4d4a6` -> `templates/flux_stills_{pose,layout}_klein.candidate.api.json`)
+3. **Apply the staged patch to `C:\AI\community` (no pull, no remote access):**
+   - Allowed X3 command for this brief (Plan finding 14; no `-AsDerek`, no sudo): copy the patch only:
+     `scp x3:/home/derekboone/evo-x3/_bridge/UNI-APPLY-ALIENPC-A.patch C:\AI\_archive\20261119\community\`
+   - Check `(Get-FileHash C:\AI\_archive\20261119\community\UNI-APPLY-ALIENPC-A.patch -Algorithm SHA256).Hash` equals the sha256 Max gave; stop if not.
+   - `git -C C:\AI\community apply --check C:\AI\_archive\20261119\community\UNI-APPLY-ALIENPC-A.patch`, then the same without `--check`.
+   - Commit only these 10 paths, even if other files are staged: `git -C C:\AI\community add -- <10 paths from step 1>` then
+     `git -C C:\AI\community commit -m "UNI-APPLY-ALIENPC-A: S2 allowlist + M4/ST4/ST5 candidates (mono 5ccba67)" -- <10 paths>`.
+   - Don't push. Report the new HEAD so Max's `MONO-S6` freeze accounts for it.
    - Confirm locked templates and `comm.py` were not modified:
      ```powershell
-     git -C C:\AI\community diff -- scripts/comm.py templates/flux_stills_s2_kv.api.json
+     git -C C:\AI\community diff HEAD~1 HEAD --stat -- scripts/comm.py templates/flux_stills_s2_kv.api.json
      ```
    - **DO NOT** hook `template_allowlist.py` into `scripts/comm.py` or `gpu_lock_gate.py`.
-   - **DO NOT** apply `INV1` or `INV1b` to `C:\Users\derek\.pi\agent\AGENTS.md` (leave both `SKIPPED (held — Needs before launch)` unless Derrick explicitly unlocked them before launch).
-
+   - **DO NOT** apply `INV1` or `INV1b` to `C:\Users\derek\.pi\agent\AGENTS.md` (leave both `SKIPPED (held - Needs before launch)` unless Derrick explicitly unlocked them before launch).
 ## Tests (CPU / offline only — no GPU, no ComfyUI)
 
 1. **S2 pytest suite:**
@@ -78,7 +82,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 
 ## Rollback
 - **NEVER run `git reset --hard`** in `C:\AI\community` (would destroy the 131 unrelated dirty files from M7).
-- To roll back cleanly: `git -C C:\AI\community revert --no-edit <pre-pull-HEAD>..HEAD` (or remove only the 10 newly added files and restore any backed-up file from `C:\AI\_archive\20261119\community\`).
+- To roll back cleanly: `git -C C:\AI\community revert --no-edit HEAD` (the one apply commit), or remove only the 10 newly added files and restore any backed-up file from `C:\AI\_archive\20261119\community\`.
 
 ## Rules
 - **No ComfyUI restart, no ComfyUI-Manager, no model/node downloads, no GPU use, no renders.**
@@ -87,4 +91,4 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 - Do **not** open `C:\Users\derek\sydney\`. No secrets on argv or in output.
 - Cite `mono` SHAs (`a808401`, `30f9997`, `df6815c`, `4c4d4a6`, `6129330`, `c0c9492`) in `RESULT.md`.
 
-STOP CONDITION: when done or blocked, write `records/UNI-APPLY-ALIENPC-A/RESULT.md` (for Max to file in `evo-x3/records/UNI-APPLY-ALIENPC-A/RESULT.md`), then stop. List `M7 check`, `Bridge pull`, `Tests 1-3`, and `INV1`/`INV1b`/`S2 hook` as `DONE`, `BLOCKED`, or `SKIPPED` with `mono` SHAs, pre/post `HEAD` SHAs, `git status -- templates scripts` output, and pytest totals.
+STOP CONDITION: when done or blocked, write `records/UNI-APPLY-ALIENPC-A/RESULT.md` (for Max to file in `evo-x3/records/UNI-APPLY-ALIENPC-A/RESULT.md`), then stop. List `M7 check`, `Patch apply`, `Tests 1-3`, and `INV1`/`INV1b`/`S2 hook` as `DONE`, `BLOCKED`, or `SKIPPED` with `mono` SHAs, pre/post `HEAD` SHAs, patch sha256, `git status -- templates scripts` output, and pytest totals.
