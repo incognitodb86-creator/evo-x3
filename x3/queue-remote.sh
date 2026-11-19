@@ -60,6 +60,6 @@ rm -f "$RUN/DRY_RUN"
 [ -f "$RUN/_render_order.json" ] || printf %s "$ORD" > "$RUN/_render_order.json"
 "$PY" "${ARGS[@]}" --detach
 if [ "$WAIT" = 1 ]; then
-  until grep -q "BATCH closed" "$RUN/_render_queue.log" 2>/dev/null; do sleep 30; done
+  until grep -q "BATCH closed" "$RUN/_render_queue.log" 2>/dev/null; do sleep 5; done
   grep "BATCH closed" "$RUN/_render_queue.log" | tail -1
 fi
