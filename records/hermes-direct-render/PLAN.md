@@ -70,7 +70,7 @@ Approval and output
 - R5. No ntfy phone code on the Hermes path. Pass: a full render through either path leaves the ntfy send log/pi-job job list unchanged (no `pi-job` job is created). Gate: Max check. VERIFIED today: `queue-remote.sh`, `run_queue.py`, `remote_upscale.py` contain no ntfy call; ntfy lives only in `/usr/local/bin/pi-job`.
 - R6. Only the RTX 2x final is kept; the raw clip is deleted; the 2x is published to the QNAP runs share and PixlStash by the `evo-renders-sync` timer. Pass: after a render, `<run>/<tag>/render_ok.json` has an `upscale` block with `raw_deleted`, no `*_raw.mp4` exists, the clip is under `/mnt/qnap/renders/runs/<run>/<tag>/` and a new PixlStash entry exists (count only, never opened; wait for `ST3`'s detached `pixl-import` unit if `ST3` is live — unified plan C16). Gate: existing `run_queue.py` (t2571u) + `/usr/local/bin/sync-renders`. Owner: X3 Forge (apply) / Max (verify).
 - R7. The finished 2x plays inline in the Hermes WebUI chat, not as a paraphrase or a bare web link. Pass: Hermes's last message contains `file:///home/evo/AI/community/runs/<run>/<tag>/<clip>.mp4` and WebUI shows a video player. Gate: desk addendum + `MEDIA_ALLOWED_ROOTS`. Owner: X3 Forge (apply) / Max (verify).
-- R8. Model is llama-swap `flash-next-uncensored` with thinking low, same resident model as Render (zero GPU swaps). Live 2026-11-19 10:45 AM CT: llama-swap profile `halogen-only` pins `flash-next-uncensored` (and `flash-next`, `gemma4-heretic`) to the resident Gufo 0.35.0 slot `flash-next-uncensored-v2`; Halogen slots are cold. Pass: both profiles' `model.default` is the same alias the writer config uses, and `reasoning_effort` is `low` under both `model:` and `agent:`. Gate: config read-back. Owner: X3 Forge (apply) / Max (verify). See open issue O4 about the `-v2` alias.
+- R8. Model is llama-swap `flash-next-uncensored-v2` with thinking low, same resident model as Render (zero GPU swaps; live `hermes/config.yaml` updated to `flash-next-uncensored-v2` in `eabc8c7`). Pass: both profiles' `model.default` is `flash-next-uncensored-v2`, and `reasoning_effort` is `low` under both `model:` and `agent:`. Gate: config read-back. Owner: X3 Forge (apply) / Max (verify). See O4 (resolved: v2).
 
 Keys and safety
 - R9. Keys only in the locked X3 key file or the existing token files, never new copies, never on a command line, never in chat or this plan. Pass: `rg` over the new files finds no key value; PIXL_KEY is exported at runtime from `~/.config/pixlstash/render-read.token` exactly like `render-pi.sh` line 23; the WebUI password is read from the locked X3 key file by the start wrapper; profile `.env` is not a new copy (see D1). Gate: Max + gitleaks pre-push. Owner: X3 Forge (apply) / Max (secrets & verify).
@@ -82,7 +82,7 @@ Coding hand-off (t2609u)
 - R13. Only the render part of pi-job retires, and only on Derrick's yes after 3 good renders on the winning path. `pi-job code|review|status|wait` stay. Pass: until that yes, the default profile's pi-job skill and `/usr/local/bin/pi-job render` are unchanged. Gate: Derrick's yes card. Owner: Derrick.
 
 Setup shape
-- R14. Hermes WebUI is installed as evo, bound to 127.0.0.1:8787, reached by SSH tunnel; Tailscale Serve only with Derrick's separate OK. Pass: `ss -ltnp` shows 127.0.0.1:8787 only; page opens over `ssh -L 8787:127.0.0.1:8787 evo-x3-1`; password prompt works. Gate: Derrick types the password. Owner: X3 Forge (apply) / Max (verify) / Derrick (password).
+- R14. Hermes WebUI is installed as evo, bound to `127.0.0.1:8787`, **and live via Tailscale Serve `8443 /` -> `:8787`** (DONE via `H7`, Derrick `t2688u`, 2026-11-19 12:31 PM CT; Open WebUI `:3000` retired). Pass: `ss -ltnp` shows `127.0.0.1:8787`; page opens on tailnet `https://...:8443/`; password prompt works. Gate: Derrick check. Owner: DONE (`H7`).
 - R15. SOUL.md is stock; Derrick's OC facts are in `memories/USER.md` (FCSydny and FCMegan are Derrick's fictional OCs, adults 18+, adult use fine). Pass: SOUL.md equals the pre-2026-11-19-09:16 backup; USER.md ≤ 1,375 chars, § separated, holds only those facts plus "Derrick" preferences already agreed. Owner: X3 Forge (apply) / Max (verify).
 - R16. Approval wait 300 s, turn limit about 80. Pass: `approvals.timeout: 300`, `agent.max_turns: 80` in each profile; a render + wait loop finishes inside one turn budget. Owner: X3 Forge (apply) / Max (verify).
 - R17. Both paths run side by side in Derrick's visible Hermes chat and are compared with a numeric win rule (Test protocol). Pass: Test protocol results table filled for 3 asks x 2 paths. Gate: Derrick picks. Owner: Derrick.
@@ -150,7 +150,7 @@ Hermes WebUI facts (VERIFIED from `nesquena/hermes-webui` master `6c4aaaa`, 2026
 
 - D1. Profile `.env` copies. `profile create --clone` (and a blank create) copies the default `.env` into the new profile (H3), which is a new copy of existing keys. Options: (a) after create, replace each profile `.env` with a symlink to `/home/evo/.hermes/.env` so there is one file (ASSUMPTION A3: Hermes reads a symlinked `.env`; tested in U3); (b) accept the copies (Derrick has said copying existing keys is OK, but the newer rule says keys live only in the locked files); (c) drop profiles and use one profile with a config swap per test. Plan default: (a), fall back to asking.
 - D2. Pick a harmless coding test task for R11 (example: "add a one-line comment to the README in a scratch branch of `/home/evo/AI/forge`").
-- D3. Tailscale Serve for 8787: not in this plan; SSH tunnel only unless Derrick says yes separately. (Serve already forwards 443→8080, 8443→3000 + `/renders/`, 8444→7878, 8445→9537 on the X3; no new port added.)
+- D3. **RESOLVED (live, Derrick `t2688u`, 2026-11-19 12:31 PM CT):** Tailscale Serve `8443 /` -> `127.0.0.1:8787` (Hermes WebUI) is live; Open WebUI (`:3000`) is retired. No new port added.
 
 ### Assumptions (must be tested where used)
 
@@ -195,16 +195,13 @@ U0 → U1 → U2 → U3 → U4 → (U5 ∥ U6) → U7 → U8 → U9. U5/U6 touch
 ### U1. Shared base on the default profile
 - Goal: R8, R15, R16 (KTD8).
 - Files: `/home/evo/.hermes/SOUL.md`, `/home/evo/.hermes/memories/USER.md` (new), `/home/evo/.hermes/config.yaml`.
-- Steps: restore SOUL.md from `_archive/SOUL.md.bak-20261119-0916-uncensored` after a diff shows only Max's 3 appended lines differ (if more differs, stop and ask); write USER.md with the OC facts (FCSydny and FCMegan are Derrick's fictional OCs, adults 18+, adult use fine; `Sydney Sweeney` is a celebrity, not FCSydny), ≤1,375 chars, `§` separated, no prompt text; set `approvals.timeout: 300`, `agent.max_turns: 80`, `agent.reasoning_effort: low`; leave `model.*`, `terminal.cwd`, gateway and API settings alone. Restart gateway only when no Open WebUI chat is mid-turn: `sudo -n systemctl --user -M evo@ restart hermes-gateway`.
-- Test: `hermes config check` (or `hermes doctor`) clean; gateway active; Open WebUI chat answers one "hi".
+- Steps: restore SOUL.md from `_archive/SOUL.md.bak-20261119-0916-uncensored` after a diff shows only Max's 3 appended lines differ (if more differs, stop and ask); write USER.md with the OC facts (FCSydny and FCMegan are Derrick's fictional OCs, adults 18+, adult use fine; `Sydney Sweeney` is a celebrity, not FCSydny), ≤1,375 chars, `§` separated, no prompt text; set `approvals.timeout: 300`, `agent.max_turns: 80`, `agent.reasoning_effort: low`; leave `model.*` (`flash-next-uncensored-v2`), `terminal.cwd`, gateway and API settings alone. Restart gateway only when no Hermes WebUI chat is mid-turn: `sudo -n systemctl --user -M evo@ restart hermes-gateway`.
+- Test: `hermes config check` (or `hermes doctor`) clean; gateway active; Hermes WebUI (`:8787` / Serve `8443 /`) answers one "hi". *(Open WebUI `:3000` check dropped — retired per Derrick `t2688u`.)*
 - Rollback: copy the three backups back, delete USER.md, restart gateway.
 
-### U2. Hermes WebUI install (shared)
+### U2. Hermes WebUI install (shared) — **DONE via `H7` (`eabc8c7`, Derrick `t2688u`)**
 - Goal: R7, R14 (KTD4, KTD5).
-- Files: `/home/evo/AI/hermes-webui/` (clone, pinned commit recorded), `/home/evo/AI/hermes-desk/bin/webui-start.sh`, `~/.config/systemd/user/hermes-webui.service` (evo).
-- Steps: clone `nesquena/hermes-webui` as evo; check size (A4); run `bootstrap.py` with `HERMES_HOME=/home/evo/.hermes`, `HERMES_WEBUI_AGENT_DIR=/home/evo/.hermes/hermes-agent`, `HERMES_WEBUI_HOST=127.0.0.1`, `HERMES_WEBUI_PORT=8787`, `MEDIA_ALLOWED_ROOTS=/home/evo/AI/community/runs`, `HERMES_WEBUI_DEFAULT_WORKSPACE=/home/evo/AI/hermes-desk`; the start wrapper reads the password from the locked X3 key file (Derrick types it in there; Max never sees it) and exports PIXL_KEY from the token file; never pass either on a command line. Unit `Restart=on-failure`, enabled for evo.
-- Test: `ss -ltnp` shows only 127.0.0.1:8787; through `ssh -L 8787:127.0.0.1:8787 evo-x3-1` the login page appears; Derrick logs in; profile chip shows `default`.
-- Rollback: `systemctl --user -M evo@ disable --now hermes-webui`, move the clone to `_archive`.
+- Status: **DONE via `H7`** (`records/H7-H8/H7-H8-RESULT.md`, unit `hosts/x3/live/systemd/evo-user/hermes-webui.service`, `127.0.0.1:8787`, `nesquena/hermes-webui @ 6c4aaaa`, Serve `8443 /` -> `:8787` live; pending Derrick's visual check). Skip re-install; proceed to `U3` once Card 3 / Card 43 is decided.
 
 ### U3. Create profiles render-a and render-b
 - Goal: KTD1, D1, R3, R9.
@@ -245,7 +242,7 @@ U0 → U1 → U2 → U3 → U4 → (U5 ∥ U6) → U7 → U8 → U9. U5/U6 touch
 
 ### U9. Close, inventory, rollback table
 - Goal: R10, R18. Clear the lease line; write `~/evo-x3/records/hermes-direct-render/RESULT.md` (DONE/MISSING/DRIFTED/UNVERIFIED per R); commit explicit files only; push Gitea, then GitHub via the box clone; brain NEXT.md status line.
-- Rollback table (default profile byte-for-byte): restore `config.yaml`, `SOUL.md`, `skills/pi-job/SKILL.md` from `_archive/20261119-hermes-two-path/`, delete `memories/USER.md`, delete both profiles, disable `hermes-webui`, restore `render_writer_pipeline.py`, restart gateway.
+- Rollback table (default profile byte-for-byte): restore `config.yaml`, `SOUL.md`, `skills/pi-job/SKILL.md` from `_archive/20261119-hermes-two-path/`, delete `memories/USER.md`, delete both profiles, restore `render_writer_pipeline.py`, restart gateway. *(Keep `hermes-webui` running — Open WebUI `:3000` is retired per Derrick `t2688u`.)*
 
 ---
 
@@ -295,7 +292,7 @@ Same model alias and thinking level as Render (R8, O4), same `render_writer_pipe
 
 - R1-R18 each marked DONE with evidence in `records/hermes-direct-render/RESULT.md`, or MISSING/UNVERIFIED with reason.
 - Test protocol table filled; Derrick has picked A or B.
-- Default profile still works for Open WebUI; rollback table tested on paper against the backups.
+- Default profile still works in Hermes WebUI (`:8787` / Serve `8443 /`; Open WebUI `:3000` retired per Derrick `t2688u`); rollback table tested on paper against the backups.
 - Lease cleared; commits pushed to Gitea and GitHub; brain NEXT.md updated.
 
 ---
@@ -305,10 +302,10 @@ Same model alias and thinking level as Render (R8, O4), same `render_writer_pipe
 - O1. Render's writer voiced FCSydny as a real actress in a recent run (identity bleed between `FCSydny` and the celebrity name). Both paths: ask 2 checks that the OC talk clip uses OC-only voice refs and no celebrity name; Path B's desk keeps OPERATOR.md's "Sydney Sweeney is not FCSydny" line.
 - O2. ntfy is still sent on the pi path (`pi-job` lines 338-407). Hermes paths do not call pi-job for renders (R5). Turning ntfy off in pi-job itself is out of scope until the render part retires.
 - O3. Hermes paraphrases the prompt and posts a renders-share link instead of the video. Fixed here by the desk addendum (verbatim `prompt.txt`, `file://` 2x path) and `MEDIA_ALLOWED_ROOTS` (R7).
-- O4. ANSWERED at config level by the 2026-11-19 audit: `/etc/evo-x3/llama-swap.yaml` profile `halogen-only` pins `flash-next-uncensored` → `flash-next-uncensored-v2`, so both aliases hit the one resident Gufo slot (runtime `/running` not checked; needs the key). Original note: Model alias mismatch: render-pi.sh defaults to `flash-next-uncensored-v2`, writer config and Hermes use `flash-next-uncensored` (F2). Not verified whether these are one resident model in llama-swap (the `/v1/models` call needs the llama-swap key, which this plan does not handle). Check from an existing authorised path before U4; if they differ, align Hermes to what the writer uses (zero GPU swaps), without editing llama-swap.yaml.
+- O4. **RESOLVED (`eabc8c7`):** live `hermes/config.yaml` and `render-pi.sh` both use `flash-next-uncensored-v2` (and llama-swap profile `halogen-only` pins `flash-next-uncensored` → `flash-next-uncensored-v2`). Zero GPU swaps.
 - O5. Template count is 16 `*.api.json` (+ `faces/FC_SYDNEY.api.json`), not 17 as said in chat (F12).
 - O6. `pi-job`'s Forge/Render launchers resolve under `~/evo-x3/pi-chats/` (derekboone's copy symlinks to `/home/derekboone/AI/render/x3/render-pi.sh`; evo's copy is a 2,741 B file). Not changed here; noted because R11 relies on Forge launching as before.
-- O7. Open WebUI on port 3000 talks to the gateway API; per H6 its dangerous commands are auto-denied unless the client uses `/v1/runs`. Another reason to test in Hermes WebUI rather than Open WebUI.
+- O7. **RETIRED (Derrick `t2688u`, 2026-11-19 12:31 PM CT):** Open WebUI (`:3000`) is retired; Hermes WebUI (`:8787`, Serve `8443 /`) is live via `H7`.
 
 ## Stills from chat (cross-link)
 

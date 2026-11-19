@@ -1505,6 +1505,14 @@ def ensure_still_read(run_dir: Path, still: str, still_read_src: Optional[str], 
     return nd
 
 
+def _queue_remote_cmd(run_dir: Path, is_continue: bool, qsh: Optional[Path] = None) -> List[str]:
+    script = qsh or (Path.home() / "AI" / "render" / "x3" / "queue-remote.sh")
+    cmd = ["bash", str(script), str(run_dir), "--yes-derrick"]
+    if is_continue:
+        cmd.append("--keep-comfy-process")
+    return cmd
+
+
 def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[str], client: Client, cfg: Dict[str, Any], log) -> Dict[str, Any]:
     p = run_dir / "still_read.json"
     if p.exists():
@@ -1518,12 +1526,13 @@ def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[s
         wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
         return d
 
+    v_model = str(cfg.get("vision_model_alias") or cfg.get("model_alias") or "")
+
     def vision_chat(messages):
-        v_model = cfg.get("vision_model_alias") or cfg.get("model_alias")
         v_client = Client({**cfg, "model_alias": v_model}, log) if v_model != cfg.get("model_alias") else client
         return v_client.chat(messages, {"temperature": 0.2, "top_k": 20, "top_p": 0.9}, 7, 1024, purpose="vision_read")
-    read = br.vision_read(still, vision_chat)
-    d = {"read": read, "source": still, "how": "pipeline vision_read via " + str(cfg.get("vision_model_alias") or cfg["model_alias"])}
+    read = br.vision_read(still, vision_chat, cache_dir=RUNS_ROOT / "_still_read_cache", model_alias=v_model)
+    d = {"read": read, "source": still, "how": "pipeline vision_read via " + v_model}
     wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
     log("still_read_vision", {"run": run_dir.name, "still": still})
     return d
@@ -1534,6 +1543,10 @@ def chain_start_still(prev_run: Path, still: str, run_dir: Path, log) -> str:
     if not mp4s:
         log("chain_dry_still", {"prev": str(prev_run), "still": still})
         return still
+    lf = mp4s[-1].parent / "last_frame.png"
+    if lf.is_file() and lf.stat().st_size > 0:
+        log("chain_last_frame", {"prev_last_frame": str(lf), "still": str(lf)})
+        return str(lf)
     out = run_dir / "start_still_from_prev.png"
     ff = shutil.which("ffmpeg") or "ffmpeg"
     r = subprocess.run([ff, "-y", "-sseof", "-0.1", "-i", str(mp4s[-1]), "-frames:v", "1", str(out)], capture_output=True, timeout=120)
@@ -2109,9 +2122,9 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 build = dict(build, reason="--queue requires --yes-derrick after Derrick approved this prompt; nothing queued")
                 result["warnings"].append("queue_refused_no_yes")
             else:
-                qsh = Path.home() / "AI" / "render" / "x3" / "queue-remote.sh"
+                qcmd = _queue_remote_cmd(run_dir, is_continue=is_continue)
                 try:
-                    qp = subprocess.run(["bash", str(qsh), str(run_dir), "--yes-derrick"],
+                    qp = subprocess.run(qcmd,
                                         capture_output=True, text=True, timeout=180)
                     result["submitted"] = qp.returncode == 0
                     result["queue_rc"] = qp.returncode

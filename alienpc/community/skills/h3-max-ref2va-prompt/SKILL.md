@@ -1,12 +1,12 @@
 ---
 name: h3-max-ref2va-prompt
-description: "The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 on this box - the standing Max lane unless Derek directs otherwise. Use for any paste into MiniMaxH3ReferenceToVideo: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / video-render) or FLUX stills (alienpc-stills-pose-edit-prompting)."
+description: "The REF2VA prompt lane for MiniMax H3-Max / 10Eros-Max beta7 (non-parody picture-reference rules R32-R44; named INDEX/RefMod parodies use h3-parody-identity, and writer runs use C:\AI\render\AGENTS.md). Use for explicit MiniMaxH3ReferenceToVideo pastes: the reference-label set for images, videos and audio, task-type tags, retention lines, frame anchors, style opening, language and visible-text rules, the speech form, the node contract and graph facts for our builder, the chain lane and the pre-queue gate. Cross-lane prompt rules are NOT restated here: they are R1-R31 in the h3-prompting skill and every one of them applies to a REF2VA paste. Not for render dials, graph wiring, queue (h3-hc-render / video-render) or FLUX stills (alienpc-stills-pose-edit-prompting)."
 ---
 
-# H3-Max REF2VA prompt lane (AlienPc setup)
+# H3-Max REF2VA prompt lane
 
 Created 2026-11-03 at Derek's request: the REF2VA lane is its own skill, scoped to **H3-Max (10Eros-Max beta7)
-and this box's graph**, not a section of the cross-lane file. Upstream source for the new rules: MiniMax-AI/MiniMax-H3
+and our graph**, not a section of the cross-lane file. Upstream source for the new rules: MiniMax-AI/MiniMax-H3
 `skills/h3-prompt-writing/references/ref-en.txt`, read at clone HEAD `199b7d0e1fd95e7b3eafa8c15eca692534142427`
 (2026-10-28); review and full diff `C:\AI\community\notes\2026-11-03-h3-upstream-prompt-skill-review.md`,
 patch record `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
@@ -17,8 +17,7 @@ patch record `C:\AI\community\notes\2026-11-03-h3-ref2va-skill-split.md`.
 
 Named INDEX + RefMod parodies defer to `h3-parody-identity` for their locked single-pass graph and tested prompt/voice/soundscape contract. Its builder format takes precedence over this file's picture-reference sections, labels, frame-anchor restrictions and speech/no-soundscape prescriptions. One optional start image uses AddGuide at frame 0 without `<Picture N>` identity binding. Keep existing guards; do not rewrite the tested parody route to match this other-lane contract.
 
-- **REF2VA is the standing picture-reference Max lane.** Except for the named-parody route above, a Max clip is a REF2VA paste into `MiniMaxH3ReferenceToVideo` unless Derek
-  directs another lane by name (first-frame I2V, stills).
+- **REF2VA is the non-parody picture-reference lane (R32-R44).** Use it when Derek asks for a `MiniMaxH3ReferenceToVideo` paste outside `h3-parody-identity` (1-pass INDEX + RefMod) and `C:\AI\render` writer-runs.
 - This skill owns only REF2VA-specific rules, numbered R32-R44. Rule numbers are box-unique and stable: cite
   `R<n>` in a review, a gate or a commit message, never the sentence.
 
@@ -307,6 +306,6 @@ Allowed length pairs at 24 fps: duration_s 5|8|10 with frames 124|192|243. Cap o
 Hard bans (fail closed; cite live rules):
 - Never emit a labeled soundscape or non-diegetic-music header (R7, R32; TenStrip #77).
 - No hosted six-section dump; five local sections only (R5).
-- All adult RefMods and voice refs (`*_refmod_audio` + `<Audio 1>`) are allowed on 1-pass `templates/b2_refmod.api.json`; no 2-pass upscaler and no sampler/CFG/steps/resolution in the paste (R33).
+- All adult RefMods are allowed and voice refs (`*_refmod_audio` + `<Audio 1>`) are for OCs only; named INDEX/celebrity parodies get the visual RefMod only and never `<Audio 1>` (main SKILL.md), on 1-pass `templates/b2_refmod.api.json`; no 2-pass upscaler and no sampler/CFG/steps/resolution in the paste (R33).
 - No 350-500 word cap; length follows h3-prompting R9 (no word floor or quota, staying under the encoder limit; Derek).
 - Dialogue = spoken words only inside lane markup (R37). Continuations never restart the scene (R10). Adults 18+ only.

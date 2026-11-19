@@ -1,0 +1,65 @@
+# AlienPc ComfyUI-only llama-swap configuration (2026-11-17 fleet architecture lock)
+# Target path on AlienPc: C:\AI\director\config\llama-swap.yaml
+#
+# Standing rule: AlienPc (RTX 5070 Ti 16 GB GDDR7, 64 GB DDR5) is 100% dedicated to
+# ComfyUI rendering. Zero local LLM or VLM slots may live in this file; all LLM/VLM
+# requests route over Tailscale to EVO-X3 (https://evo-x3-1.tailf242b2.ts.net/v1).
+#
+# llama-swap remains on 127.0.0.1:8080 strictly to provide on-demand ComfyUI startup,
+# Tailscale Serve (:8446 -> http://127.0.0.1:8080/upstream/comfyui_auto) routing,
+# 300 s idle TTL self-heal, and queue-aware graceful shutdown (comfy_graceful_stop.ps1).
+
+healthCheckTimeout: 1200
+logLevel: info
+startPort: 10001
+globalTTL: 0
+unloadTimeout: 1900
+
+timeouts:
+  responseHeader: 1200
+
+upstream:
+  ignorePaths:
+    - '.*\.(js|json|css|png|gif|jpg|jpeg|ico|txt)$'
+    - '^/system_stats$'
+    - '^/api/jobs$'
+    - '^/ws(/|$)'
+
+routing:
+  router:
+    use: group
+    settings:
+      groups:
+        comfy_render:
+          swap: true
+          exclusive: true
+          members:
+            - comfyui_auto
+            - comfyui_longvideo
+
+models:
+  comfyui_auto:
+    aliases:
+      - ls_comfyui
+    cmd: 'C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe -u C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --use-ck-attention --disable-pinned-memory --reserve-vram 1.5'
+    cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'
+    checkEndpoint: /
+    concurrencyLimit: 999
+    ttl: 300
+    unloadTimeout: 1900
+    unlisted: true
+    compat:
+      ignoreWebsockets: true
+
+  comfyui_longvideo:
+    aliases:
+      - ls_comfyui_longvideo
+    cmd: 'C:\AI\comfy-longvideo\ComfyUI\.venv\Scripts\python.exe -u C:\AI\comfy-longvideo\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --use-ck-attention --disable-pinned-memory --reserve-vram 1.5 --input-directory C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input'
+    cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'
+    checkEndpoint: /
+    concurrencyLimit: 999
+    ttl: 600
+    unloadTimeout: 1900
+    unlisted: true
+    compat:
+      ignoreWebsockets: true

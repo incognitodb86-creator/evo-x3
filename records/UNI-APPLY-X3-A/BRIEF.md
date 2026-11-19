@@ -87,7 +87,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
    - Verify: `make -C /home/evo/AI/community/agent-shared/python-harness/sample-tool check-all` (ruff + ty + pytest 3 passed).
    - Rollback: restore `/home/evo/AI/_archive/20261119/community-AGENTS.md` and `git revert` on `x3-community` to `<pre-pull-HEAD>` (no force).
 
-8. **H4 (archive pruned Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9ebe5a0`, rebased on live snapshot `eabc8c7`).
+8. **H4 (archive pruned Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9ebe5a0`, rebased on live snapshot `eabc8c7`, plus **`ef1fc2b` L9** `MEDIA:` inline-clip lines — install from the same `mono` tip).
    - Install table: dest `/home/evo/.hermes/skills/pi-job/SKILL.md`, owner/mode `evo:evo 0644`, sudo: **no**, backup `/home/evo/AI/_archive/20261119/hermes/skills/`.
    - Copy `/home/evo/.hermes/skills/` to `/home/evo/AI/_archive/20261119/hermes/skills/` before changes.
    - Create `/home/evo/.hermes/skills-archived/` and move the skills listed for removal in `/home/derekboone/evo-x3/hosts/x3/hermes/SKILLS-PRUNE.md` into `/home/evo/.hermes/skills-archived/` (leaving **19** active skills — `pixlstash-image-library` kept; `h3-writer` remains reserved).
@@ -113,9 +113,10 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
 
 ### Group 3 — ST3 pair (`sync-renders` + `import_inbox.py`), L2 poster frame, and H3 units
 
-10. **ST3 pair + L2 (`sync-renders` + `import_inbox.py`, install together)** — Source on `mono`:
-    - `config/bin/sync-renders` (`79a706a`, `60ef314`, `a5a86ce`) -> `/usr/local/bin/sync-renders` | `root:root 0755` | sudo: **yes** | backup `/home/evo/AI/_archive/20261119/sync-renders`
+10. **ST3 pair + L2 + ST7 (`sync-renders` + `import_inbox.py`, install together)** — Source on `mono`:
+    - `config/bin/sync-renders` (`79a706a`, `60ef314`, `a5a86ce`, **`990ffd0` ST7**) -> `/usr/local/bin/sync-renders` | `root:root 0755` | sudo: **yes** | backup `/home/evo/AI/_archive/20261119/sync-renders`
     - `hosts/x3/pixlstash-tagging/import_inbox.py` (`79a706a`, `a5a86ce`) -> `/home/evo/AI/pixlstash-tagging/import_inbox.py` | `evo:evo 0755` | sudo: **no** | backup `/home/evo/AI/_archive/20261119/import_inbox.py`
+    - **ST7 coordination (`990ffd0`):** `config/bin/sync-renders` now also carries `ST7` (QNAP publish moved to the nightly 03:30 timer). Pull `sync-renders` from the **same `mono` tip** as `records/UNI-APPLY-X3-C-QNAP-NIGHTLY/BRIEF.md`; **default: install `X3-A`'s `sync-renders` + `import_inbox.py` together with `X3-C`'s nightly script/units in one window** (or run `X3-C` immediately after `X3-A`).
     - Pre-install syntax check (no-write AST parse):
       ```bash
       bash -n /home/derekboone/evo-x3/config/bin/sync-renders

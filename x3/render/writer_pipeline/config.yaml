@@ -3,13 +3,13 @@
 # acceptance\sampler_ab.json); never re-tuned automatically.
 version: wp-2026-11-17.u56
 endpoint: http://127.0.0.1:8080/v1      # EVO-X3 llama-swap (loopback; key read in-process from pi models.json x3-local). AlienPc used the :8085 GPU-lock gate
-model_alias: flash-next-uncensored      # EVO-X3: Huihui Qwen3.8-Flash-Next abliterated HGN on Halogen 0.20.5 (same resident model as Render's pi chat -> zero GPU swaps)
+model_alias: flash-next-uncensored-v2   # EVO-X3: Huihui Qwen3.8-Flash-Next abliterated HGN on Halogen 0.20.5 (v1 name was an alias; same resident model as Render's pi chat -> zero GPU swaps)
 vision_model_alias: joycaption          # Non-exclusive 'small' group VLM fallback when still_read.json is omitted (never evicts flash-next-uncensored)
 thinking: false                         # chat_template_kwargs.enable_thinking (disabled on headless writer calls for speed and full answer budget)
 timeout_s: 900
 retry_backoff_s: [10, 30, 90]
 writer_prompt: writer_prompt.md          # relative to /home/evo/AI/render/writer_pipeline
-writer_prompt_sha256: a64f24e9a491304e17c7ec98d433a2b223b3eb7b6cd5870fa1c74ed3f0751ec6
+writer_prompt_sha256: d733c753184a13ee121aaf2e278a291ff6dbd302c74155d635dfbe0d3a8efd70
 persona: current                        # pinned
 n_candidates: 1
 min_ready_score: 60  # reported only; never blocks READY (Max Architect 2026-11-16 (Derrick t2036u))

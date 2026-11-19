@@ -47,7 +47,7 @@ Work the loop in this order. One job per pass. Never mix a request pass with a p
   `ref_images.ref_image_1` = the approved full-body start still (the body/scene reference, `<Picture 1>`),
   `ref_image_2`/`ref_image_3` = face crops (face + hair only, `<Picture 2>`/`<Picture 3>`). r3r-r6 used face crops
   only and the start still was not in the graph at all - that is the failure Derrick rejected. Builder:
-  `/home/derekboone/AI/community/notes/ali163_hc_bq1_build.py` (r4g2 builder stays frozen so old ids reproduce).
+  `/home/evo/AI/community/notes/ali163_hc_bq1_build.py` (r4g2 builder stays frozen so old ids reproduce).
 - Read ref slots with `fullmatch(r"ref_images\.ref_image_\d+")` over nodes whose `class_type` starts with
   `MiniMaxH3` (submitted graphs also carry a `ref_images` dict, so a bare key scan false-fails). Seed is
   `inputs["noise_seed"]` (RandomNoise has no `seed`).

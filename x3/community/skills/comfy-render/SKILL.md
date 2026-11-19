@@ -12,5 +12,5 @@ description: Run ComfyUI render workflows on AlienPc (B2 video, stills) via llam
 
 ## Workflow Execution
 - **Legacy / do-not-call:** `scripts/render_workflow.py` is legacy: it bypasses `gpu-render.lock` and the locked baseline. Do not call it; all submissions go through `run_queue.py` (directly or via `render_writer_pipeline.py --queue --yes-derrick`).
-- Standing policy route (`video-render` / `image-render` / prior `AGENTS.md`) is `http://127.0.0.1:8080/comfyui/`, whereas `/home/derekboone/AI/community/scripts/comm.py:6` currently sets `BASE = "http://127.0.0.1:8080/upstream/comfyui_auto"` (unresolved code-vs-policy discrepancy; configured `ignorePaths` alone does not prove identical wake behavior; never call backend port `:10004` directly).
-Never copies template workflows; points directly to canonical templates in `/home/derekboone/AI/community/templates/`.
+- Standing policy route (`video-render` / `image-render` / prior `AGENTS.md`) is `http://127.0.0.1:8080/comfyui/`, whereas `/home/evo/AI/community/scripts/comm.py:6` currently sets `BASE = "http://127.0.0.1:8080/upstream/comfyui_auto"` (unresolved code-vs-policy discrepancy; configured `ignorePaths` alone does not prove identical wake behavior; never call backend port `:10004` directly).
+Never copies template workflows; points directly to canonical templates in `/home/evo/AI/community/templates/`.
