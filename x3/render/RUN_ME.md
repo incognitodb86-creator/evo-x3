@@ -24,6 +24,7 @@ Quickstart for running the H3 writer pipeline on EVO-X3 Linux (`/home/evo/AI/ren
      --still "<still path>" [--character "<Character>"] [--actor "<Actor>"] [--names "<Name>" ...]
    ```
    Optional flags:
+   - `--still <path>` (start still path; for an uploaded image, copy it to `<run_dir>/_inputs/<file>` and pass `--still <run_dir>/_inputs/<file>` with no PixlStash call before the render — it goes through `still_read.json` + lint as a hard `NOT_READY` gate before any AlienPc job, then drop a copy into `/home/evo/AI/pixl-inbox/` after run setup for normal background import)
    - `--frames <N>` (cap frames <= 243, e.g. for two reference stills)
    - `--shots single|multi` and `--shot-count <k>` (multi-shot cuts inside `[Shot N]`)
    - `--scene <scene_id>` and `--continue <prev_run_dir>` (stateful continuation chains)
