@@ -1,7 +1,7 @@
 """Fill a saved ComfyUI API template with per-clip values."""
 from __future__ import annotations
 
-import argparse, copy, json, sys
+import argparse, copy, json, os, sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -67,6 +67,15 @@ REALISM_LORA_DEFAULT = {
 }
 
 
+# ComfyUI lists subfolder LoRAs with the separator of the OS it runs on. Renders run on AlienPc (Windows), so
+# `klein9/x.safetensors` fails validation (value_not_in_list) unless written `klein9\x.safetensors`
+# (OPUS-FINDINGS-20261119 #4). Set EVO_COMFY_PATH_SEP=/ only for a ComfyUI on Linux.
+def comfy_lora_name(name: str) -> str:
+    sep = os.environ.get("EVO_COMFY_PATH_SEP") or "\\"
+    s = str(name or "").strip()
+    return s.replace("/" if sep == "\\" else "\\", sep)
+
+
 def parse_lora_spec(spec: str) -> Dict[str, Any]:
     """Parse `<lora_file>[:<strength>[:<trigger>]]` into a normalized LoRA dict."""
     parts = [p.strip() for p in str(spec or "").split(":")]
@@ -103,7 +112,7 @@ def _prepend_lora_triggers(prompt: str, loras: Sequence[Dict[str, Any]]) -> str:
 def _inject_h3_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Chain LoraLoaderModelOnly node(s) between `unet` and any node consuming `["unet", 0]`."""
     active = [
-        {"name": str(lr["name"]).strip(), "strength": float(lr.get("strength", 0.7)), "trigger": str(lr.get("trigger") or "").strip()}
+        {"name": comfy_lora_name(lr["name"]), "strength": float(lr.get("strength", 0.7)), "trigger": str(lr.get("trigger") or "").strip()}
         for lr in loras if str(lr.get("name") or "").strip() and float(lr.get("strength", 0.7)) > 0
     ]
     if not active or "unet" not in graph:

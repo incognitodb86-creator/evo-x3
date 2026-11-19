@@ -4,6 +4,10 @@ Goal: Perform ONE install of `config/bin/pi-job` -> `/usr/local/bin/pi-job` on t
 
 Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick 2026-11-19 ~12:35 CT (Hermes is main chat interface, pi is coding-only -> C11 + H9; cards answered in chat), and `records/uplan/PLAN.md` + `records/uplan/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", item 4). Max verifies your `RESULT.md` afterwards.
 
+## Update 2026-11-19 17:05 CT (Opus)
+- Install is DONE (16:36 CT, `RESULT.md`). The PENDING tests (H1c, L5, H5 + L6, L9, R11) run only after W1b has a `RESULT.md` (t2850u), as a second pass that appends to the same `RESULT.md`. No reinstall.
+- The H1c idle-path test below says "(ESP off)". That is wrong: the route is `coding_swift15_iq3s_esp` with ESP on (t2764u), thinking medium (t2766s9752).
+
 ## Needs before launch (ALL required — do not launch until met)
 1. **Derrick's live yes in chat:** Card 13 (`H1c`: AlienPc Swift `ESP on` when `:8447` idle and no `gpu-render.lock`, X3 Gufo when busy; render always wins, 503 -> resume on X3) and Card 21 (`coding_swift15_iq3s_esp` ESP on everywhere (Derrick t2764u 14:17 CT reversed Card 21) — AlienPc Forge AND `pi-job`) are **ANSWERED YES** (Derrick 2026-11-19 12:29 CT, side chat); Card 1 live `/usr/local/bin/pi-job` install yes answered in chat (Max records id).
 2. **Card 21 ESP-on alias `coding_swift15_iq3s_esp` added on BOTH sides BEFORE installing `pi-job`** (see the Max-owned Prerequisite section below; Max confirms both aliases in the launch message — Forge never reads `models.json`).

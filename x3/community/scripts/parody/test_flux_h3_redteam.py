@@ -41,7 +41,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
         "Adult woman in her late twenties standing by a sunlit window, natural skin pores, 35mm film.",
         mode="t2i",
         refmods=["klein9_sydney_sweeney_v1.safetensors"],
-        loras=[{"name": "loras/klein9/fk9_sydneysweeney_v1.safetensors", "strength": 0.8}],
+        loras=[{"name": "klein9/fk9_sydneysweeney_v1_prodigy.safetensors", "strength": 0.8}],
         character="Sydney Sweeney",
         dry_run=True,
     )
@@ -57,6 +57,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     lora_nodes = [nid for nid, n in g.items() if n.get("class_type") == "LoraLoaderModelOnly"]
     assert len(lora_nodes) == 1
     assert g[lora_nodes[0]]["inputs"]["model"] == ["1", 0]
+    assert g[lora_nodes[0]]["inputs"]["lora_name"] == "klein9\\fk9_sydneysweeney_v1_prodigy.safetensors"
     assert g["17"]["inputs"]["model"] == [lora_nodes[0], 0]
     meta = json.loads((tmp_path / "f1" / "flux_meta.json").read_text(encoding="utf-8"))
     assert "Sydney Sweeney" in meta["names"] and (tmp_path / "f1" / "DRY_RUN").is_file()
@@ -72,7 +73,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     assert gh["12"]["inputs"]["mod_1"] == "fk9_sydneysweeney_v1_refmod.safetensors"
     assert gh["12"]["inputs"]["strength_1"] == 0.85
     hl = [n for n in gh.values() if isinstance(n, dict) and n.get("class_type") == "LoraLoaderModelOnly"]
-    assert hl and hl[0]["inputs"]["lora_name"] == "klein9/fk9_sydneysweeney_v1_prodigy.safetensors"
+    assert hl and hl[0]["inputs"]["lora_name"] == "klein9\\fk9_sydneysweeney_v1_prodigy.safetensors"
     assert hl[0]["inputs"]["strength_model"] == 0.60
 
 
@@ -110,7 +111,7 @@ def test_comfy_png_celeb_refmod_and_lora_auto_pickup_for_h3max(tmp_path, monkeyp
         {
             "2": {
                 "class_type": "LoraLoaderModelOnly",
-                "inputs": {"lora_name": "loras/klein9/fk9_meganfox_v1_prodigy.safetensors", "strength_model": 0.85},
+                "inputs": {"lora_name": "klein9\\fk9_meganfox_v1_prodigy.safetensors", "strength_model": 0.85},
             }
         },
     )
@@ -166,6 +167,25 @@ def test_h3_realism_lora_wiring_and_r31_trigger_hygiene(tmp_path):
     assert g_on["lora_1"]["inputs"]["lora_name"] == "h3-realism-people-t2v-i2v-r2v.safetensors"
     assert g_on["lora_1"]["inputs"]["model"] == ["unet", 0]
     assert g_on["m_attn"]["inputs"]["model"] == ["lora_1", 0]
+
+
+def test_lora_subfolder_uses_alienpc_backslash(tmp_path, monkeypatch):
+    # OPUS-FINDINGS-20261119 #4: Windows ComfyUI lists subfolder LoRAs as `folder\file`.
+    monkeypatch.delenv("EVO_COMFY_PATH_SEP", raising=False)
+    assert fr.comfy_lora_name("klein9/a.safetensors") == "klein9\\a.safetensors"
+    assert fr.comfy_lora_name("klein9\\a.safetensors") == "klein9\\a.safetensors"
+    assert fr.comfy_lora_name(" top.safetensors ") == "top.safetensors"
+    png = _make_comfy_png(tmp_path / "plain.png", {})
+    r = fr.fill_request(
+        "detailed_description: " + GOOD_SEX, tmp_path / "sub",
+        ask="she has sex with him", position="doggy", still_image=str(png),
+        loras=[fr.parse_lora_spec("h3max/concept_a.safetensors:0.4")],
+    )
+    assert r["status"] == "READY"
+    g = json.loads((tmp_path / "sub" / "clip" / "request.api.json").read_text(encoding="utf-8"))
+    assert g["lora_1"]["inputs"]["lora_name"] == "h3max\\concept_a.safetensors"
+    monkeypatch.setenv("EVO_COMFY_PATH_SEP", "/")
+    assert fr.comfy_lora_name("klein9\\a.safetensors") == "klein9/a.safetensors"
 
 
 def test_beta7_convert_strips_banned_headers_on_prose_file(home, tmp_path, monkeypatch):

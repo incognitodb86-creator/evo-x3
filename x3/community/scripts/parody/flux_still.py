@@ -76,7 +76,7 @@ def _find_node(graph: Dict[str, Any], class_type: str, title_substr: Optional[st
 
 def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     active = [
-        {"name": str(lr["name"]).strip(), "strength": float(lr.get("strength", 0.85))}
+        {"name": fr.comfy_lora_name(lr["name"]), "strength": float(lr.get("strength", 0.85))}
         for lr in loras if str(lr.get("name") or "").strip() and float(lr.get("strength", 0.85)) > 0
     ]
     if not active:
