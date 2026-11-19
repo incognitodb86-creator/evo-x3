@@ -16,6 +16,9 @@ Snapshot 2026-11-19 (Derrick t2613u). Live machines are the source of truth; the
 | Full live X3 snapshot, one folder per program: llama-swap (Gufo/Halogen/strix launch lines), container images + digests, Hermes, pi (evo + derekboone, extensions, packages, panes), herdr, PixlStash server config, system + evo user units, /usr/local/bin, Forge MCP launchers, aria2, agy/tailscale versions. Refresh with `scripts/snapshot-live-setup.sh` | `u58` | `hosts/x3/live/` (see its README.md) |
 | AlienPc ComfyUI (version, custom node list with commits, extra_model_paths, settings, launch scripts, pip freeze) | `u58` | `hosts/alienpc/comfyui/` |
 | AlienPc launchers (comfy-guarded, llama-swap control) | `u58` | `hosts/alienpc/launchers/` |
+| AlienPc live snapshot (global pi agent, Forge loop, skill links map) | `u58` | `hosts/alienpc/live/` (see its README.md) |
+| AlienPc global pi folder (`C:\Users\derek\.pi\agent\`: AGENTS.md, settings.json, pi-permissions.jsonc, web-search.json, extensions) | `u58` | `hosts/alienpc/live/pi-agent/` |
+| AlienPc Forge (`C:\Users\derek\forge` -> `5slock`: README, x3run.ps1/x3put.ps1, ralph-community) | `u58` | `hosts/alienpc/live/forge/` |
 | AlienPc render repo (C:\AI\render) | `alienpc-render` | repo root |
 | AlienPc community repo (C:\AI\community) | `alienpc-community` | repo root |
 
