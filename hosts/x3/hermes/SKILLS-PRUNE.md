@@ -2,8 +2,8 @@
 
 Canonical copy for `hosts/x3/hermes/`. Applied on EVO-X3 (`/home/evo/.hermes/skills/`) by X3 Forge under the X3 lease after Max imports this commit.
 
-- Source snapshot: `hosts/x3/hermes/skills-installed.txt` (45 installed skills on Hermes `v0.23.2`).
-- Result: **27 removed** (archived out of `~/.hermes/skills/`), **18 kept** (17 stock + 1 local custom `pi-job`, adapted in `hosts/x3/hermes/skills/pi-job/SKILL.md`).
+- Source snapshot: `hosts/x3/live/hermes/skills/all-skills.txt` @ `eabc8c7` (46 installed skills on Hermes `v0.23.2`: 44 stock + 2 custom `pi-job`, `pixlstash-image-library`).
+- Result: **27 removed** (archived out of `~/.hermes/skills/`), **19 kept** (17 stock + 2 local custom: `pi-job` adapted in `hosts/x3/hermes/skills/pi-job/SKILL.md`, and `pixlstash-image-library` from H8).
 - Reserved / planned (do **not** prune when added later): `h3-writer` (from the held `records/hermes-direct-render/PLAN.md` U0-U9 track; not created or modified here).
 
 ## Guardrails & X3 Adaptations
@@ -46,9 +46,9 @@ Canonical copy for `hosts/x3/hermes/`. Applied on EVO-X3 (`/home/evo/.hermes/ski
 | 26 | `./social-media/xurl/SKILL.md` | Unused X/Twitter CLI |
 | 27 | `./software-development/dogfood/SKILL.md` | Unused browser-QA dogfooding bloat |
 
-## KEEP (18 skills)
+## KEEP (19 skills)
 
-| # | Skill path (`skills-installed.txt`) | Mode | X3 note |
+| # | Skill path (`all-skills.txt`) | Mode | X3 note |
 |---|---|---|---|
 | 1 | `./autonomous-ai-agents/hermes-agent/SKILL.md` | stock | Hermes self-reference; `SOUL.md` and `pi-job` take precedence |
 | 2 | `./creative/architecture-diagram/SKILL.md` | stock | Local architecture diagrams |
@@ -56,18 +56,19 @@ Canonical copy for `hosts/x3/hermes/`. Applied on EVO-X3 (`/home/evo/.hermes/ski
 | 4 | `./creative/humanizer/SKILL.md` | stock | General writing helper |
 | 5 | `./devops/sdlc-review/SKILL.md` | stock | Pairs with `pi-job review` |
 | 6 | `./pi-job/SKILL.md` | **custom (adapted)** | Updated in `hosts/x3/hermes/skills/pi-job/SKILL.md` (X3 paths, `U56 Decision #1`, `/srv/renders`, no unguarded Comfy MCP) |
-| 7 | `./productivity/document-to-action-items/SKILL.md` | stock | Local text utility, no external SaaS |
-| 8 | `./productivity/pdf/SKILL.md` | stock | Local PDF inspection |
-| 9 | `./research/arxiv/SKILL.md` | stock | Research paper lookup |
-| 10 | `./research/grounded-citations/SKILL.md` | stock | Pairs with H2 local SearXNG (`http://127.0.0.1:8888`) |
-| 11 | `./software-development/codebase-inspection/SKILL.md` | stock | Local repo inspection |
-| 12 | `./software-development/github/SKILL.md` | stock | `gh`/GitHub inspection; no unsupervised pushes |
-| 13 | `./software-development/requesting-code-review/SKILL.md` | stock | Pairs with `pi-job review` |
-| 14 | `./software-development/simplify-code/SKILL.md` | stock | Pairs with `pi-job code` |
-| 15 | `./software-development/spike/SKILL.md` | stock | Prototyping |
-| 16 | `./software-development/systematic-debugging/SKILL.md` | stock | Debugging |
-| 17 | `./software-development/test-driven-development/SKILL.md` | stock | Pairs with H5 `make check-all` / pytest |
-| 18 | `./web/blocked-page-recovery/SKILL.md` | stock | Pairs with H2 web/browser under SSRF blocklist |
+| 7 | `./pixlstash-image-library/SKILL.md` | **custom (H8, done)** | Local PixlStash image library skill; keep untouched |
+| 8 | `./productivity/document-to-action-items/SKILL.md` | stock | Local text utility, no external SaaS |
+| 9 | `./productivity/pdf/SKILL.md` | stock | Local PDF inspection |
+| 10 | `./research/arxiv/SKILL.md` | stock | Research paper lookup |
+| 11 | `./research/grounded-citations/SKILL.md` | stock | Pairs with H2 local SearXNG (`http://127.0.0.1:8888`) |
+| 12 | `./software-development/codebase-inspection/SKILL.md` | stock | Local repo inspection |
+| 13 | `./software-development/github/SKILL.md` | stock | `gh`/GitHub inspection; no unsupervised pushes |
+| 14 | `./software-development/requesting-code-review/SKILL.md` | stock | Pairs with `pi-job review` |
+| 15 | `./software-development/simplify-code/SKILL.md` | stock | Pairs with `pi-job code` |
+| 16 | `./software-development/spike/SKILL.md` | stock | Prototyping |
+| 17 | `./software-development/systematic-debugging/SKILL.md` | stock | Debugging |
+| 18 | `./software-development/test-driven-development/SKILL.md` | stock | Pairs with H5 `make check-all` / pytest |
+| 19 | `./web/blocked-page-recovery/SKILL.md` | stock | Pairs with H2 web/browser under SSRF blocklist |
 
 ## Reserved / Planned (do not prune)
 
@@ -78,6 +79,6 @@ Canonical copy for `hosts/x3/hermes/`. Applied on EVO-X3 (`/home/evo/.hermes/ski
 1. Backup: `cp -a /home/evo/.hermes/skills /home/evo/.hermes/skills.bak-h4-$(date +%F-%H%M%S)`
 2. Archive the 27 removed skill directories into `/home/evo/.hermes/skills-archived/` (preserving relative subpaths; remove empty parent dirs like `apple/`, `email/`, `media/`, `note-taking/`, `social-media/`).
 3. Install adapted `pi-job`: `install -m 0644 -o evo -g evo hosts/x3/hermes/skills/pi-job/SKILL.md /home/evo/.hermes/skills/pi-job/SKILL.md`
-4. Verify: run Hermes skill loader check (`hermes skills list` / frontmatter validation) and `SKILL_SMOKE_OK`; confirm 18 active skills, 0 broken paths, and `pi-job` loaded.
+4. Verify: run Hermes skill loader check (`hermes skills list` / frontmatter validation) and `SKILL_SMOKE_OK`; confirm 19 active skills, 0 broken paths, and both `pi-job` and `pixlstash-image-library` loaded.
 5. Re-snapshot with `scripts/snapshot-live-setup.sh` so `hosts/x3/hermes/skills-installed.txt` matches live.
 6. Rollback: restore `/home/evo/.hermes/skills` from the `skills.bak-h4-*` backup.
