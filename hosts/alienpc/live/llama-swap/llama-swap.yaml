@@ -1,0 +1,181 @@
+# Llama-swap configuration (Last Updated: 2026-11-02)
+# Supervisor for Strata 0.2.8 (Qwen3.8 Flash-Next IQ3_S 128K + ESP; IQ3_S fallback), Dark Roast Q8 vision judge (with mmproj), and ComfyUI 0.38.x.
+# GPU backends share one exclusive swap:true `main` group.
+
+healthCheckTimeout: 1200  # Readiness wait only. Per official docs, unloadTimeout (not healthCheckTimeout) governs graceful shutdown.
+logLevel: info
+logTimeFormat: rfc3339
+startPort: 10001
+globalTTL: 0
+unloadTimeout: 15
+
+timeouts:
+  responseHeader: 1200
+
+
+upstream:
+  ignorePaths:
+    - '.*\.(js|json|css|png|gif|jpg|jpeg|ico|txt)$'
+    # CA2 0.2 (2026-10-25): docs/kb/guides/upstreams/comfyui.md names THREE patterns to set by
+    # hand for /upstream/ (the /comfyui/ route ships the same set built in). Forge queues through
+    # /upstream/comfyui_auto (C:/AI/community/scripts/comm.py:6), and the doc's own fix for the
+    # idle-tab reload is "an upstream.ignorePaths entry for the path it polls" = /api/jobs.
+    - '^/api/jobs$'
+    - '^/ws(/|$)'
+    # memory-fixes 2026-10-31 (Derrick 1:22 AM CT): status/object-info GETs must not wake comfyui_auto and evict strata
+    - '^/object_info(/|$)'
+    - '^/system_stats$'
+    - '^/api/object_info(/|$)'
+    - '^/api/system_stats$'
+    # U37A 2026-11-16: /queue GETs must not wake comfyui_auto
+    - '^/queue(/|$)'
+    - '^/api/queue(/|$)'
+
+# GPU-LOCK (2026-10-26, ralph-community plan row Forge-L130.md; Derrick 2026-10-24 3:16 PM CT "render the clips
+# yourself", 2026-10-25 3:56 AM "Forge renders through llama-swap /comfyui itself"). comfyui_auto stays in the ONE
+# swap/exclusive `main` group with the LLM ids, on purpose, and the record of why is measured:
+#   director 66cddc1 (2026-10-25 07:13) put comfyui_auto in a group of its own flagged `persistent`; director 36dadae
+#   (2026-10-25 19:35) reverted it with the message "prevent VRAM squeeze", no body, no note, and left the model's ttl
+#   comment claiming the group was persistent. That left the standing gate red for a day
+#   (notes/rt_window_probe.py = RT_WINDOW_PROBE FAULTS RT_PERSISTENT).
+#   Measured on this box 2026-10-26: nvidia-smi 16,303 MiB total, 15,355 MiB used, 641 MiB free with comfyui_auto
+#   resident and NO LLM loaded; 66cddc1's own record puts comfyui_auto at ~12 GB and the LLM at ~11.5 GB. The published
+#   meaning of the `persistent` flag (C:/AI/community/notes/web/rt_ls_groups-and-matrix.txt:57, "other groups can never
+#   unload this one") is co-residency, and on 16 GB there is no room for it: 36dadae's reason was sound, only its record
+#   was missing.
+#   What keeps a running render alive instead, in this order: run_graph_job.py gates on gpu_guard.ps1 IDLE and holds the
+#   gpu-render lock, so the loop issues no LLM request inside a window; if a request does arrive, cmdStop is
+#   comfy_graceful_stop.ps1, which waits for ComfyUI's own queue (MaxWaitSec 1800 s) and llama-swap's unloadTimeout
+#   (1900 s) sits above that cap, the published rule; and a client stall collects the landed mp4 from disk and never
+#   re-queues. Measured in C:/AI/director/logs/comfy-graceful-stop.log: 10 "render queue busy (1 job(s)) ... waiting"
+#   rows, 8 of them at :10004 between 2026-10-24 21:58 and 2026-10-25 03:58, where the script waited 771-911 s for the
+#   queue to drain (one at 390 s), i.e. the swap request deferred to the render, never the reverse. The only caller on a
+#   ~20-minute cadence was the ForgeAgyMonitor scheduled task, now Disabled. After the 36dadae shape, the two lock-held
+#   windows both paid: C:/AI/community/runs/ali163_top5_gi046_s51160001 and ...s51160002 status.log "gpu_lock release
+#   rc=0" with the mp4 on disk.
+#   Gate (it reads this file): C:/Users/derek/5slock/ralph-community/notes/rt_window_probe.py --check and --selftest
+#   (RT_NO_CO_LOAD / RT_STOP_DEFERS / RT_UNLOAD_BUDGET / RT_TTL_SELFHEAL; the RT_NO_CO_LOAD seed restores the 66cddc1
+#   group text verbatim, so a future pass that re-adds a persistent group sees it go red and reads this note).
+#   Record: C:/AI/community/notes/render_window_lock_only_20261026.md.
+routing:
+  router:
+    use: group
+    settings:
+      groups:
+        main:
+          swap: true
+          exclusive: true
+          members:
+            - coding_swift15_iq3s
+            - coding_swift15_iq3s_esp
+            - vl_judge
+            - qwen3vl_judge
+            - joycaption
+            - comfyui_longvideo
+            - comfyui_auto
+            - gemma4_heretic_poly
+            - gemma4_heretic_poly_think
+
+
+models:
+  # HERETIC-LABEL 2026-10-26 (Derrick 2026-10-25 6:48 PM CT, "Fix the coding_heretic27b mislabel"):
+  # this upstream serves Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S, and its aliases named a 27B Heretic, a
+  # Huihui 27B and an IQ3_XXS. A client naming any of those three was served Flash-Next IQ3_S
+  # silently, and GET /v1/models never advertises aliases, so nothing on the surface showed it. The
+  # three false names are removed; llama-swap answers them with a loud 4xx now. Only names the served
+  # file supports are kept. The real RVN-Qwen3.8-27B-Heretic-GSQ-RCO-IQ3_XXS-mtp.gguf IS on disk at
+  # C:/AI/models (10,569,270,720 B + mmproj Q8_0/BF16) and is NOT served by llama-swap; :8090 has 0
+  # listeners; no Huihui GGUF exists on this box. Serving the 27B is Derrick's call - see
+  # C:/AI/community/notes/needs_derrick.md. Record:
+  # C:/AI/community/notes/heretic27b_label_20261026.md. Gate (it reads this file):
+  # C:/AI/community/notes/heretic_label_check.py --check / --selftest / --live.
+  coding_swift15_iq3s:
+    cmd: '"C:\AI\strata-0.2.7\.venv\Scripts\python.exe" C:\AI\strata-0.2.7\sy_strata_launch.py -m C:\AI\Strata-data\models\swift15-iq3s\Swift-Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --engine strata --config C:\AI\strata-0.2.7\strata-swift15-iq3s.json --host 127.0.0.1 --port ${PORT}'
+    cmdStop: 'powershell -NoProfile -Command "$p = (Get-NetTCPConnection -OwningProcess ${PID} -State Listen -EA SilentlyContinue | Select-Object -First 1).LocalPort; if ($p) { curl.exe -sS -m 45 -X POST http://127.0.0.1:$p/unload?wait=20 -H \"Content-Type: application/json\" -d \"{}\" | Out-Null }; taskkill /T /F /PID ${PID}"'
+    env:
+      - "SY_STRATA_WARMUP=0"
+      - 'STRATA_COMPONENTS_DIR=C:\AI\strata-engine-028'
+    checkEndpoint: /health
+    ttl: 3600  # Raised from 600: keep Swift resident during coding stretches (Derrick 2026-10-27; brief Fix 1)
+    unloadTimeout: 60
+
+  coding_swift15_iq3s_esp:
+    cmd: '"C:\AI\strata-0.2.7\.venv\Scripts\python.exe" C:\AI\strata-0.2.7\sy_strata_launch.py -m C:\AI\Strata-data\models\swift15-iq3s\Swift-Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --engine strata --config C:\AI\strata-0.2.7\strata-swift15-iq3s-esp.json --host 127.0.0.1 --port ${PORT}'
+    cmdStop: 'powershell -NoProfile -Command "$p = (Get-NetTCPConnection -OwningProcess ${PID} -State Listen -EA SilentlyContinue | Select-Object -First 1).LocalPort; if ($p) { curl.exe -sS -m 45 -X POST http://127.0.0.1:$p/unload?wait=20 -H \"Content-Type: application/json\" -d \"{}\" | Out-Null }; taskkill /T /F /PID ${PID}"'
+    env:
+      - "SY_STRATA_WARMUP=0"
+      - 'STRATA_COMPONENTS_DIR=C:\AI\strata-engine-028'  # engine 0.1.54 (v0.2.8), Derrick 1:31 AM CT 2026-10-31; revert: delete this line
+      - "STRATA_TRACE=1"
+    checkEndpoint: /health
+    ttl: 3600
+    unloadTimeout: 60
+
+  vl_judge:
+    aliases:
+      - vision_9b
+      - darkroast
+      - qwen3.5-9b-dark-roast-q8
+    cmd: 'C:\AI\vlm\llama.cpp\llama-server.exe -m C:\AI\vlm\models\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.Q8_0.gguf --mmproj C:\AI\vlm\models\Qwen3.5-9B-The-Defiant-Fable-DARK-ROAST-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP.mmproj-Q8_0.gguf -ngl 99 -c 65536 -fa on -ctk q8_0 -ctv q8_0 -np 1 --host 127.0.0.1 --port ${PORT} --image-min-tokens 1024'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    checkEndpoint: /health
+    ttl: 300
+    unloadTimeout: 15
+
+  qwen3vl_judge:
+    aliases:
+      - qwen3-vl-8b-abliterated
+    cmd: 'C:\AI\vlm\llama.cpp\llama-server.exe -m C:\AI\vlm\models\qwen3-vl-8b-abliterated\Huihui-Qwen3-VL-8B-Instruct-abliterated-Q8_0.gguf --mmproj C:\AI\vlm\models\qwen3-vl-8b-abliterated\mmproj-F32.gguf -ngl 99 -c 32768 -fa on -ctk q8_0 -ctv q8_0 -np 1 --host 127.0.0.1 --port ${PORT} --image-min-tokens 1024'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    checkEndpoint: /health
+    ttl: 300
+    unloadTimeout: 15
+
+  joycaption:
+    aliases:
+      - joycaption_beta_one
+    cmd: 'C:\AI\vlm\llama.cpp\llama-server.exe -m C:\AI\models\joycaption\Llama-Joycaption-Beta-One-Hf-Llava-Q8_0.gguf --mmproj C:\AI\models\joycaption\llama-joycaption-beta-one-llava-mmproj-model-f16.gguf -ngl 99 -c 4096 -fa on --host 127.0.0.1 --port ${PORT} --temp 0.6 --top-p 0.9'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    checkEndpoint: /health
+    ttl: 300
+    unloadTimeout: 15
+  # H3-Max rewriter models (Max Architect 3, 2026-11-13 t1288u: "put the models in llama swap and pi and render").
+  # Same on-disk files the pytraveler Comfy node uses; official Omni rewriter = base + mmproj + H3-Max LoRA GGUF.
+  gemma4_heretic_poly:
+    aliases: [gemma4-heretic-poly]
+    cmd: 'C:\AI\PolyStrata\.venv\Scripts\python.exe C:\AI\PolyStrata\serve\server.py --engine strata --config C:\AI\PolyStrata\strata-gemma4-heretic-poly.json --port ${PORT}'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    checkEndpoint: /health
+    ttl: 300
+    unloadTimeout: 15
+
+  gemma4_heretic_poly_think:
+    aliases: [gemma4-heretic-poly-think]
+    cmd: 'C:\AI\PolyStrata\.venv\Scripts\python.exe C:\AI\PolyStrata\serve\server.py --engine strata --config C:\AI\PolyStrata\strata-gemma4-heretic-poly-think.json --port ${PORT}'
+    cmdStop: 'taskkill /T /F /PID ${PID}'
+    checkEndpoint: /health
+    ttl: 300
+    unloadTimeout: 15
+
+  comfyui_auto:
+    aliases:
+      - ls_comfyui
+    cmd: 'C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe -u C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --use-ck-attention --disable-pinned-memory --reserve-vram 1.5'
+    cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'  # ALI-156: waits for the render queue (max 1800 s), then taskkill
+    checkEndpoint: /
+    ttl: 900  # 2026-11-17 5:12 PM CT (Derrick t2274u): raised 300 -> 900 s (top of the published 300-900 range) to keep ComfyUI warm between chained clips. RENDER-TIMEOUT self-heal: unload comfyui_auto after 900 s idle, so a driver that died without an unload does not strand the GPU. The published timer "measures inactivity, not lifetime - it resets on every request" (C:/AI/community/notes/web/rt_ls_ttl-and-unloading.txt:41; 300-900 s is the published range at :91-94) and the runner polls /comfyui every 60 s, so a render keeps the timer reset. This line used to claim "The group is persistent" - that was false from director 36dadae (2026-10-25 19:35) until 2026-10-26: see the GPU-LOCK note above `routing:`. Gate: C:/Users/derek/5slock/ralph-community/notes/rt_window_probe.py RT_TTL_SELFHEAL
+    unloadTimeout: 1900  # ALI-156: > graceful-stop cap (1800 s). Per docs/kb/guides/model-runtime/ttl-and-unloading.md, unloadTimeout applies to all unloads (TTL, API, and swaps).
+    unlisted: true
+    compat:
+      ignoreWebsockets: true
+
+  comfyui_longvideo:
+    aliases:
+      - ls_comfyui_longvideo
+    cmd: 'C:\AI\comfy-longvideo\ComfyUI\.venv\Scripts\python.exe -u C:\AI\comfy-longvideo\ComfyUI\main.py --listen 127.0.0.1 --port ${PORT} --use-ck-attention --disable-pinned-memory --reserve-vram 1.5 --input-directory C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\input'
+    cmdStop: 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\AI\director\scripts\comfy_graceful_stop.ps1 -ProcId ${PID} -Port ${PORT}'
+    checkEndpoint: /
+    ttl: 600
+    unloadTimeout: 1900
+    unlisted: true
+    compat:
+      ignoreWebsockets: true

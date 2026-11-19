@@ -50,6 +50,7 @@ routing:
             - "flash-next-uncensored-v2"
             - "gemma4-heretic"
             - "qwen27b"
+            - "ref2va-27b-heretic-q4"  # W1 arm3q5 official window only (2026-11-19, Derrick t2810u)
         "small":
           swap: false
           persistent: true
@@ -327,7 +328,7 @@ models:
   #       docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
   #       llama-server --host 127.0.0.1 --port 8085
   #       -m /srv/models/ref2va-27b/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-Q4_K_M.gguf
-  #       --mmproj /srv/models/ref2va-27b/mmproj-MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-F16.gguf
+  #       --mmproj /srv/models/ref2va-27b-heretic/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-heretic.mmproj-f16.gguf
   #       --jinja --load-mode none -fa on -ngl 999
   #       -np 1 -c 32768 -n 4096
   #       --temp 0
@@ -337,6 +338,29 @@ models:
   #   ttl: 300
   #   concurrencyLimit: 1
   #   checkEndpoint: "/health"
+
+  "ref2va-27b-heretic-q4":
+    # W1 arm3q5 official WINDOW ONLY (2026-11-19 Derrick t2810u). Restored from llama-swap.yaml.backup after the run.
+    # pytraveler GGUF card flags: --mmproj F16 --jinja --ctx-size 32768 --n-gpu-layers 999 (llama.cpp build 12405 >= b10310).
+    # Sampling per request = upstream defaults (0.7/0.8/20, max_tokens 16384, thinking on, xhigh). No -n / --temp pin here.
+    cmd: |
+      podman run --rm --name llama-swap-ref2va-27b-heretic-q4
+        --network=host --device=/dev/dri --device=/dev/kfd --group-add=keep-groups
+        --security-opt seccomp=unconfined
+        -v /srv/models:/srv/models:ro,Z
+        docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
+        llama-server --host 127.0.0.1 --port 8085
+        -m /srv/models/ref2va-27b-heretic/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-heretic.i1-Q4_K_M.gguf
+        --mmproj /srv/models/ref2va-27b-heretic/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-heretic.mmproj-f16.gguf
+        --jinja --ctx-size 32768 --n-gpu-layers 999
+        --load-mode none -fa on -np 1
+        --reasoning-format deepseek
+        --spec-type draft-mtp --spec-draft-n-max 3
+        --alias ref2va-27b-heretic-q4
+    proxy: "http://127.0.0.1:8085"
+    ttl: 600
+    concurrencyLimit: 1
+    checkEndpoint: "/health"
 
 # 2026-11-17 09:45 CT (Derrick t76 approval): keep flash-next-uncensored from being swapped out.
 # hooks.on_startup.preload loads Halogen FIRST on every llama-swap start (before ref2va/embed can fill RAM);

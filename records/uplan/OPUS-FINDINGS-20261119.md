@@ -65,6 +65,10 @@ Also synced in this commit (left over from the 14:20-16:30 CT reviews):
 
 Not done here, needs a look on its own: the other `alienpc/community/skills/` copies differ from `x3/community/skills/` in 24 files, mostly from before today. Copying them over blind could break AlienPc paths, so this waits for SK4 in `UNI-APPLY-ALIENPC-C`.
 
+## W1b correction 2026-11-19 17:13 CT
+
+W1 ran ref2va with our `writer_prompt.md` replacing its trained guide (wrong shape). Fixed per the model card and the pytraveler MiniMax-H3-Prompt-Rewriter node: the system message is only `fast_system_prompt.txt`, and `fast_user_prefix.txt` goes at the start of the user message before `Original prompt:`. Thinking is off, `max_tokens` is 3000, and MTP stays on if the llama-server build supports it. Official thinking-on heretic Q4 (step 2c) was paused after 3 finished cases; heretic Q4 then Q5 are rerun in this layout. General writers (Flash-Next) still use `writer_prompt.md`.
+
 ## Setup audit 2026-11-19 17:40 CT (Opus, read-only, Derrick: "debug our setup")
 
 Sources: live copies on `mono` `df79048` (X3 snapshot 4:29 PM CT, AlienPc refresh 4:54 PM CT), repo code, and upstream model cards and runtime docs read today (links in each line). Nothing here was run on a box.
@@ -102,3 +106,39 @@ Sources: live copies on `mono` `df79048` (X3 snapshot 4:29 PM CT, AlienPc refres
 **Proposed, needs Derrick's yes (Q cards):**
 - **Q-W1c:** after W1b has a `RESULT.md`, run the live writer (Gufo `flash-next-uncensored-v2`, already the uncensored build) the official way, as 2 extra arms on the same 12 cases: (a) Qwen non-thinking 0.7 / 0.80 / 20 / 0 / presence 1.5; (b) thinking on, effort xhigh, 1.0 / 0.95 / 20 (slow). Compare with today's `Q`. Only `config.yaml` copies change; no model downloads.
 - **Q-B6:** pin `qwen27b` to Gufo in `halogen-only` (or remove it from pi)?
+
+## beta7_validate gap 2026-11-19 evening
+
+`beta7_validate` only checks banned headers/markdown/refusals/tag balance, so it passed 12/12 W1 outputs that were missing sections. The six-section check must be part of scoring. Needed fix: add a section-completeness check for ref2va outputs.
+
+## Opus 466bcf3b verification 2026-11-19 5:33 PM CT (box, read-only on live X3 and AlienPc)
+
+Checked against live X3 writer `config.yaml` and `/etc/evo-x3/llama-swap.yaml`, live Hermes `config.yaml`, live `/usr/local/bin/pi-job`, the fresh snapshots (including the AlienPc Swift llama-swap file), and the repo copies. No live fixes. `config/bin/tests/test_pi_job_chat_reply.py`: 5 passed.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| S1 | correct | Live and repo writer `sampler_arm: Q` is 0.85 / 0.90 / 20 / min_p 0 / presence 0.5, labelled "Qwen3.8-Flash-Next card preset". Not changed live. |
+| S2 | correct | W1 brief step 3 still says temp 0.7-1.0, top_p 0.95, top_k 20 for the "Qwen native non-thinking" arm. |
+| S3 | correct | Live writer `thinking: false`. Official-way writer arms remain the open Q-W1c card. |
+| S4 | correct | Live Gufo `flash-next-uncensored-v2` is 1.0 / 0.95 / 20, `--reasoning-effort medium`, `--reasoning-budget 8192`. |
+| S5 | correct (superseded in the client) | Live Q4 slot comment still says per-request 0.7 / 0.8 / 20, `max_tokens` 16384, thinking on, xhigh, `--ctx-size 32768`. Later t2884u/t2887u client runs use thinking off and `max_tokens` 3000. |
+| S6 | correct | Live `gemma4-heretic` is 1.0 / 0.95 / 64; `halogen-only` pins it to Gufo. |
+| S7 | partly right | AlienPc `defaultThinkingLevel: medium` and `thinkingBudgets.medium = 2048` are right. `thinkingTokenBudgetField: thinking_budget_tokens` is only on the AlienPc Swift entry in X3 pi config; X3 local Flash-Next models use `thinking_budget`. The Swift entry has no `medium` → `reasoning_effort` map (only an `off` sampler override), so the "medium may not set effort" check still stands; no live request body was read (W1b running). ESP is the `_esp` llama-swap slot (`--config strata-swift15-iq3s-esp.json`) plus pi `experimental_speed_projection: true`. |
+| S8 | correct (gap now filled) | The live file exists at `C:\AI\director\config\llama-swap.yaml` (11,926 bytes, mtime 2026-11-17 5:11 PM CT). It was missing from the repo; a redacted copy is in this commit at `hosts/alienpc/live/llama-swap/llama-swap.yaml`. No keys in the live file. |
+| S9 | correct (already matches) | All 3 `miraclein_*.candidate` templates (X3 and AlienPc) already use 12 steps, Euler, CFG 1.1. |
+| S10 | correct | `--hybrid` is RefMod 0.85 + LoRA 0.60; default retention is `partially_preserved (0.7)`. |
+| S11 | correct | TQ3 still bans `er_sde` (`res_multistep` vs `euler`). |
+| S12 | correct (later dropped from use) | Repo `h3_realism_lora` is strength 0.7, trigger `r34l1sm`, `enabled: false`. t2885u later archived the realism LoRA; values in the file were right. |
+| B1 | correct, not live | Repo `hosts/x3/hermes/skills/h3-render/HEAD.md` has `setsid`/`nohup`. Live Hermes skills do not include `h3-render`. Waits on X3-E. |
+| B2 | correct, not live | Repo `pi-job` has `PI_JOB_ALIENPC_THINKING`; tests 5 passed. Live `/usr/local/bin/pi-job` is still sha256 `c7858c1a…` with no such flag. Waits on reinstall after W1b. |
+| B3 | correct | The proposed AGT1 repo `settings.json` has one `llama-swap/coding_swift15_iq3s_esp` override key. Live AlienPc `settings.json` still has that key twice. Repo copy was not overwritten. |
+| B4 | yaml correct; 400 not re-tested | Live `setParamsByID` still adds `reasoning_effort: low` on `flash-next-uncensored-v2-sub` and `flash-next-uncensored-sub`. The Gufo HTTP 400 was not reproduced (would hit the writer slot during W1b). |
+| B5 | partly right | Live Hermes has `model.reasoning_effort: low` and `agent.reasoning_effort: medium`, and also `auxiliary.vision.reasoning_effort: low`. |
+| B6 | correct | `qwen27b` is in exclusive group `main` and is not in `halogen-only` pins ("qwen27b left alone"). It is still in pi `models.json.example`. |
+| B7 | correct | Live Gufo slot has `--sessions 2` and `concurrencyLimit: 4`. |
+| B8 | correct | Live writer/Hermes weights path is `/srv/bakeoff/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba/`. |
+
+## Opus got wrong (466bcf3b setup audit)
+
+1. **S7 over-generalized the token-budget field.** Opus wrote "X3 pi `thinkingTokenBudgetField: thinking_budget_tokens`". In the live X3 pi `models.json.example`, that field is `thinking_budget` on the local Flash-Next models and `thinking_budget_tokens` only on the AlienPc Swift (`coding_swift15_iq3s_esp`) entry. The AlienPc `thinkingBudgets.medium = 2048` figure was right. The open check (does pi "medium" set `reasoning_effort: medium` on Swift?) was not closed; the Swift entry has no medium/low/high effort map, which keeps the concern open. ESP origin, which S7 asked to name, is the AlienPc llama-swap `_esp` slot config `strata-swift15-iq3s-esp.json` and the pi flag `experimental_speed_projection: true`.
+2. **B5 was incomplete.** Hermes also sets `auxiliary.vision.reasoning_effort: low`, a third copy besides `model` (low) and `agent` (medium).

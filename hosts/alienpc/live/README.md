@@ -2,6 +2,8 @@
 
 > **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`). Agent file copies in this folder remain the proposed AGT1 versions, not live.
 
+Live refresh 2026-11-19 5:33 PM CT (America/Chicago): re-read ComfyUI `custom-nodes.tsv`, `pip-freeze.txt`, `comfy.settings.json`, `extra_model_paths.yaml`, `community-HEAD.txt`, and `model-inventory.txt`. Added a redacted copy of the live AlienPc Swift llama-swap file (`C:\AI\director\config\llama-swap.yaml`) at `llama-swap/llama-swap.yaml` (S8 gap). Agent file copies stay the proposed AGT1 versions (live `settings.json` still has the duplicate `compaction.modelOverrides` key that B3 fixed in the repo copy).
+
 Live refresh 2026-11-19 4:54 PM CT (America/Chicago): re-read `community-HEAD.txt` (still `8eec1d3d`), `custom-nodes.tsv`, `pip-freeze.txt`, `comfy.settings.json`, `extra_model_paths.yaml`; all unchanged since 4:29 PM CT. `model-inventory.txt` not re-read this time.
 
 Live refresh 2026-11-19 4:29 PM CT (America/Chicago): `C:\AI\community` local HEAD is `8eec1d3d` (see `community-HEAD.txt`). ComfyUI `custom-nodes.tsv` now shows `ComfyUI-Fantastic-MiniMaxH3-PromptBuilder` enabled (it was `.disabled` at 13:52 CT); `pip-freeze.txt` has eight Comfy frontend/template package bumps. Model inventory re-read: same counts as 12:30 PM CT (RefMods still counts only). Agent file copies are unchanged vs the proposed AGT1 versions; AGT1 still blocked (see `records/UNI-APPLY-ALIENPC-B-AGT1/RESULT-attempt1-blocked.md`).
