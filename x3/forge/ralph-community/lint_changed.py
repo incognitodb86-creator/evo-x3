@@ -8,6 +8,7 @@ Rules: E9 (syntax/IO), F63 (bad comparisons), F7 (misplaced statements), F82 (un
 already exist in the base version of a file are ignored (matched by file, code and message, not line), so legacy
 issues never block an unrelated edit. Exit codes: 0 clean or nothing to lint, 3 new findings, 0 with a WARNING
 when ruff itself is unavailable (the pytest gate still runs).
+<repo> may be a subfolder of a repo (mono: x3/community); paths are relative to it.
 """
 import collections, json, os, subprocess, sys, tempfile
 
@@ -40,7 +41,7 @@ def main(argv):
     repo = os.path.realpath(argv[1] if len(argv) > 1 else ".")
     base = argv[2] if len(argv) > 2 and argv[2] else "HEAD"
     try:
-        changed = set(git(repo, "diff", "--name-only", "--diff-filter=AMR", base, "--", "*.py").splitlines())
+        changed = set(git(repo, "diff", "--relative", "--name-only", "--diff-filter=AMR", base, "--", "*.py").splitlines())
         changed |= set(git(repo, "ls-files", "--others", "--exclude-standard", "--", "*.py").splitlines())
     except (OSError, subprocess.CalledProcessError) as e:
         print(f"LINT_WARNING cannot list changed files in {repo} against {base}, lint skipped: {e}")
@@ -55,7 +56,7 @@ def main(argv):
             old = []
             for p in changed:
                 try:
-                    src = git(repo, "show", f"{base}:{p}")
+                    src = git(repo, "show", f"{base}:./{p}")
                 except subprocess.CalledProcessError:
                     continue  # new file: every finding is new
                 dst = os.path.join(tmp, p)

@@ -307,6 +307,20 @@ PY
 }
 
 # I2-5: One git worktree per loop.
+# mono (2026-11-19): render, community and forge are folders (x3/<part>) of ONE clone, reached through symlinks.
+# The work and target dirs are then subfolders of one worktree of that clone; with separate repos it is one worktree each.
+repo_top() { git -C "$1" rev-parse --show-toplevel 2>/dev/null || true; }
+repo_prefix() { local p; p="$(git -C "$1" rev-parse --show-prefix 2>/dev/null || true)"; echo "${p%/}"; }
+in_sub() { if [ -n "$2" ]; then echo "$1/$2"; else echo "$1"; fi; }
+link_pi_runtime() { # Symlink untracked pi runtime dirs (.pi/npm, .pi/git) from the live dir into its worktree copy
+  local src="$1" dst="$2" sub
+  for sub in npm git; do
+    if [ -e "$src/.pi/$sub" ] && [ ! -e "$dst/.pi/$sub" ]; then
+      mkdir -p "$dst/.pi"
+      ln -s "$src/.pi/$sub" "$dst/.pi/$sub"
+    fi
+  done
+}
 setup_worktrees() {
   RunWorkDir="$K"
   [ -d "$WorkDir" ] && RunWorkDir="$WorkDir"
@@ -317,27 +331,23 @@ setup_worktrees() {
   local tag="ralph-$day-$$"
   local loopDir="$WorktreeRoot/$tag"
   mkdir -p "$loopDir"
-  local workRoot=""
-  workRoot="$(git -C "$WorkDir" rev-parse --show-toplevel 2>/dev/null || true)"
+  local workRoot="" workTop=""
+  workRoot="$(repo_top "$WorkDir")"
   if [ -n "$workRoot" ]; then
+    local workSub; workSub="$(repo_prefix "$WorkDir")"
     wtWorkRepo="$workRoot"
     wtWorkStart="$(git -C "$workRoot" rev-parse HEAD)"
-    wtWorkDir="$loopDir/$(basename "$workRoot")"
+    workTop="$loopDir/$(basename "$workRoot")"
     local br="${tag}-$(basename "$workRoot")"
-    if git -C "$workRoot" worktree add -b "$br" "$wtWorkDir" HEAD >/dev/null 2>&1; then
-      # Symlink untracked pi runtime dirs (.pi/npm, .pi/git) if WorkDir is forge
-      for sub in npm git; do
-        if [ -e "$workRoot/.pi/$sub" ] && [ ! -e "$wtWorkDir/.pi/$sub" ]; then
-          mkdir -p "$wtWorkDir/.pi"
-          ln -s "$workRoot/.pi/$sub" "$wtWorkDir/.pi/$sub"
-        fi
-      done
+    if git -C "$workRoot" worktree add -b "$br" "$workTop" HEAD >/dev/null 2>&1; then
+      wtWorkDir="$(in_sub "$workTop" "$workSub")"
+      link_pi_runtime "$(in_sub "$workRoot" "$workSub")" "$wtWorkDir"
       RunWorkDir="$wtWorkDir"
       export RALPH_FORGE_WORKTREE="$wtWorkDir"
-      log "WORKTREE work repo=$workRoot branch=$br path=$wtWorkDir"
+      log "WORKTREE work repo=$workRoot${workSub:+ sub=$workSub} branch=$br path=$wtWorkDir"
     else
       log "WORKTREE_WARN failed to create worktree for $workRoot; using $WorkDir"
-      wtWorkDir=""; wtWorkRepo=""
+      wtWorkDir=""; wtWorkRepo=""; workTop=""
     fi
   fi
 
@@ -345,27 +355,30 @@ setup_worktrees() {
   if [ "$TargetRepo" = "none" ]; then
     resolvedTarget=""
   elif [ "$TargetRepo" = "auto" ]; then
-    [ -d "$HOME/AI/community/.git" ] && resolvedTarget="$HOME/AI/community"
+    [ -n "$(repo_top "$HOME/AI/community")" ] && resolvedTarget="$HOME/AI/community"
   else
     resolvedTarget="$TargetRepo"
   fi
   if [ -n "$resolvedTarget" ]; then
-    local tRoot=""
-    tRoot="$(git -C "$resolvedTarget" rev-parse --show-toplevel 2>/dev/null || true)"
-    if [ -n "$tRoot" ] && [ "$tRoot" != "$wtWorkRepo" ]; then
+    local tRoot="" tSub=""
+    tRoot="$(repo_top "$resolvedTarget")"
+    tSub="$(repo_prefix "$resolvedTarget")"
+    if [ -n "$tRoot" ] && [ "$tRoot" = "$wtWorkRepo" ] && [ -n "$workTop" ]; then
+      # Same repo as the work dir (mono): use the target's folder inside the work worktree.
+      wtTargetDir="$(in_sub "$workTop" "$tSub")"
+      link_pi_runtime "$(in_sub "$tRoot" "$tSub")" "$wtTargetDir"
+      export RALPH_WORKTREE="$wtTargetDir"
+      log "WORKTREE target repo=$tRoot sub=${tSub:-.} shares the work worktree path=$wtTargetDir"
+    elif [ -n "$tRoot" ] && [ "$tRoot" != "$wtWorkRepo" ]; then
       wtTargetRepo="$tRoot"
       wtTargetStart="$(git -C "$tRoot" rev-parse HEAD)"
-      wtTargetDir="$loopDir/$(basename "$tRoot")"
+      local tTop="$loopDir/$(basename "$tRoot")"
       local tbr="${tag}-$(basename "$tRoot")"
-      if git -C "$tRoot" worktree add -b "$tbr" "$wtTargetDir" HEAD >/dev/null 2>&1; then
-        for sub in npm git; do
-          if [ -e "$tRoot/.pi/$sub" ] && [ ! -e "$wtTargetDir/.pi/$sub" ]; then
-            mkdir -p "$wtTargetDir/.pi"
-            ln -s "$tRoot/.pi/$sub" "$wtTargetDir/.pi/$sub"
-          fi
-        done
+      if git -C "$tRoot" worktree add -b "$tbr" "$tTop" HEAD >/dev/null 2>&1; then
+        wtTargetDir="$(in_sub "$tTop" "$tSub")"
+        link_pi_runtime "$(in_sub "$tRoot" "$tSub")" "$wtTargetDir"
         export RALPH_WORKTREE="$wtTargetDir"
-        log "WORKTREE target repo=$tRoot branch=$tbr path=$wtTargetDir"
+        log "WORKTREE target repo=$tRoot${tSub:+ sub=$tSub} branch=$tbr path=$wtTargetDir"
       else
         log "WORKTREE_WARN failed to create worktree for $tRoot"
         wtTargetDir=""; wtTargetRepo=""
@@ -373,7 +386,8 @@ setup_worktrees() {
     fi
   fi
   # Ensure relative symlink forge/AGENTS.md -> ../community/agent-shared/AGENTS.md resolves if community wasn't cloned into loopDir
-  if [ -n "$wtWorkDir" ] && [ ! -e "$loopDir/community" ] && [ -d "$HOME/AI/community" ]; then
+  # (pre-mono layout only; under mono the community folder is inside the same worktree).
+  if [ -n "$wtWorkDir" ] && [ "$wtWorkDir" = "$loopDir/$(basename "$wtWorkDir")" ] && [ ! -e "$loopDir/community" ] && [ -d "$HOME/AI/community" ]; then
     ln -s "$HOME/AI/community" "$loopDir/community"
   fi
 }
@@ -381,7 +395,7 @@ setup_worktrees() {
 # -PiCwd: where pi runs each pass. work = WorkDir (or its loop worktree), target = TargetRepo (or its loop worktree), else a path.
 resolve_pass_cwd() {
   local tgt=""
-  case "$TargetRepo" in auto) [ -d "$HOME/AI/community/.git" ] && tgt="$HOME/AI/community";; none) ;; *) tgt="$TargetRepo";; esac
+  case "$TargetRepo" in auto) [ -n "$(repo_top "$HOME/AI/community")" ] && tgt="$HOME/AI/community";; none) ;; *) tgt="$TargetRepo";; esac
   case "$PiCwd" in
     target) PassCwd="${wtTargetDir:-${tgt:-$RunWorkDir}}" ;;
     work|"") PassCwd="$RunWorkDir" ;;
@@ -396,15 +410,15 @@ declare -A PRE_HEAD
 declare -A PRE_DIRTY
 repo_dirty_lines() {
   local repo="$1" ph="$2"
-  { git -C "$repo" diff --name-only "$ph" 2>/dev/null; git -C "$repo" status --porcelain 2>/dev/null | sed -E 's/^.. //; s/^.* -> //'; }     | grep -v '^$'     | grep -vE '^(ralph-community/(fix_plan\.md|notes/|logs/|sessions/|_archive/)|\.pi/(npm|git)$|dummy_run/|scripts/dummy_run/)'     | sort -u || true
+  { git -C "$repo" diff --name-only "$ph" 2>/dev/null; git -C "$repo" status --porcelain 2>/dev/null | sed -E 's/^.. //; s/^.* -> //'; }     | grep -v '^$'     | grep -vE '^(x3/[^/]+/)?(ralph-community/(fix_plan\.md|notes/|logs/|sessions/|_archive/)|\.pi/(npm|git)$|dummy_run/|scripts/dummy_run/)'     | sort -u || true
 }
 record_pre_pass() {
   PRE_HEAD=()
   PRE_DIRTY=()
   for r in "$wtWorkDir" "$wtTargetDir" "$WorkDir" "$HOME/AI/community" "$HOME/AI/forge"; do
     [ -n "$r" ] && [ -d "$r" ] || continue
-    local realR; realR="$(realpath "$r" 2>/dev/null || echo "$r")"
-    git -C "$realR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
+    local realR; realR="$(repo_top "$r")"
+    [ -n "$realR" ] || continue
     local ph; ph="$(git -C "$realR" rev-parse HEAD 2>/dev/null || true)"
     PRE_HEAD["$realR"]="$ph"
     PRE_DIRTY["$realR"]="$(repo_dirty_lines "$realR" "$ph")"
@@ -414,6 +428,7 @@ record_pre_pass() {
 revert_worktrees_to_pre() {
   for r in "$wtWorkDir" "$wtTargetDir"; do
     [ -n "$r" ] && [ -d "$r" ] || continue
+    r="$(repo_top "$r")"; [ -n "$r" ] || continue
     local ph="${PRE_HEAD[$r]:-}"
     [ -n "$ph" ] && git -C "$r" reset --hard "$ph" >/dev/null 2>&1 || true
     git -C "$r" clean -fd >/dev/null 2>&1 || true
@@ -430,10 +445,10 @@ run_backpressure() {
   local seenRepos=""
   for r in "$wtWorkDir" "$wtTargetDir" "$HOME/AI/community" "$HOME/AI/forge"; do
     [ -n "$r" ] && [ -d "$r" ] || continue
-    local realR; realR="$(realpath "$r" 2>/dev/null || echo "$r")"
+    local realR; realR="$(repo_top "$r")"
+    [ -n "$realR" ] || continue
     case " $seenRepos " in *" $realR "*) continue;; esac
     seenRepos="$seenRepos $realR"
-    git -C "$realR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
 
     local ph="${PRE_HEAD[$realR]:-HEAD}"
     local curDirty="" diffNames=""
@@ -535,7 +550,7 @@ PY
   if [ -z "$failReason" ] && [ -n "$BackpressureCmd" ]; then
     # Commit the target worktree was at before this pass, so a backpressure command can lint only what changed.
     if [ -n "${wtTargetDir:-}" ]; then
-      RALPH_PASS_BASE="${PRE_HEAD[$(realpath "$wtTargetDir" 2>/dev/null || echo "$wtTargetDir")]:-}"; export RALPH_PASS_BASE
+      RALPH_PASS_BASE="${PRE_HEAD[$(repo_top "$wtTargetDir")]:-}"; export RALPH_PASS_BASE
     fi
     if ! bash -c "cd \"$RunWorkDir\" && $BackpressureCmd" >>"$idx" 2>&1; then
       failReason="BackpressureCmd failed: $BackpressureCmd"
