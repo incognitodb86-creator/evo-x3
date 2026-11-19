@@ -1,0 +1,6 @@
+90c36651de3a392f9d922b6a9fc3ade4b01c3e51
+2026-11-19T13:52:42-06:00
+UNI-APPLY-ALIENPC-A: S2 allowlist + M4/ST4/ST5 candidates (mono 85a6114)
+
+# C:\AI\community local HEAD, unpushed. Recorded 2026-11-19 14:03 CT (America/Chicago)
+# during the mono closeout snapshot. Remote URL not listed (credential-bearing).

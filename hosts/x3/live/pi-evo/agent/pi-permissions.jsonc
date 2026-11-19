@@ -349,8 +349,7 @@
     "*truncate *forge/ralph-community*": "deny",
     "*python*forge/ralph-community/*.sh*": "deny",
     // U35 2026-11-16 (Derrick yes t1866s6872, red-team C1 backstop): agents run as evo (no sudo); deny sudo and /etc/evo-x3 anyway. Last match wins.
-    "sudo*": "deny",
-    "*sudo *": "deny",
+    // 2026-11-19 14:00 Max (Derrick t2750u): sudo deny removed so Forge-X3 can do installs; evo given sudo in /etc/sudoers.d/91-evo-forge.
     "*/etc/evo-x3*": "deny",
   },
 

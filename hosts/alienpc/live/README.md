@@ -1,8 +1,10 @@
 # AlienPc live snapshot (agent instructions, pi config, Forge loop)
 
-> **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`).
+> **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`). Agent file copies in this folder remain the proposed AGT1 versions, not live.
 
-Snapshot taken 2026-11-19 ~10:50 AM CT (America/Chicago) by Max Architect, read-only, for Opus review on GitHub.
+Live refresh 2026-11-19 14:03 CT (America/Chicago): `C:\AI\community` is at local unpushed commit `90c36651` (ALIENPC-A applied by Hydrogen; see `community-HEAD.txt`). ComfyUI `custom-nodes.tsv` / `pip-freeze.txt` were re-read and are unchanged vs the 13:52 CT snapshot. AGT1 still blocked (see `records/UNI-APPLY-ALIENPC-B-AGT1/RESULT-attempt1-blocked.md`).
+
+Original snapshot taken 2026-11-19 ~10:50 AM CT (America/Chicago) by Max Architect, read-only, for Opus review on GitHub.
 These are COPIES. The live files stay on AlienPc; editing these copies changes nothing until Max imports and applies them.
 Secret scan: gitleaks `--no-git` on the staged copies found no leaks (2026-11-19 10:51 AM CT).
 

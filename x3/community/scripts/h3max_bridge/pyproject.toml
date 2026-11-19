@@ -7,7 +7,7 @@ name = "h3max-bridge"
 version = "0.1.0"
 description = "REA-Video breakdown.json to MiniMax-H3 10Eros-Max Beta 7 exporter and validator (RV2)"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["pyyaml>=6.0"]
 
 [project.scripts]
 h3max-bridge = "h3max_bridge.h3max_bridge:main"
