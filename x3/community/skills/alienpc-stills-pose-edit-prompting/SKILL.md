@@ -4,7 +4,7 @@ description: Write FLUX stills prompts on AlienPc for the adopted S2 workflow (K
 ---
 # AlienPc FLUX stills prompting (S2, 2026-10-31)
 
-> Render rules live in /home/derekboone/AI/render/AGENTS.md; run render work from /home/derekboone/AI/render. Character sheets: [references/characters/sydney.md](references/characters/sydney.md).
+> Render rules live in /home/evo/AI/render/AGENTS.md; run render work from /home/evo/AI/render. Character index: [references/characters/README.md](references/characters/README.md) (OC/PixlStash rules in [../h3-parody-identity/SKILL.md](../h3-parody-identity/SKILL.md)).
 
 ## When
 - Any FLUX still from an approved character: a new pose, camera angle or scene; start frames for Max/H3 clips.

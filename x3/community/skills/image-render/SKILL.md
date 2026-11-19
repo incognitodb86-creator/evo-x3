@@ -9,7 +9,7 @@ description: Stage, build, render, and score FLUX.2 Klein 9B-KV + BFS (S2) still
 > Render rules live in ~/AI/render/AGENTS.md; run render work from ~/AI/render.
 
 ## Character Rules & Sheets
-- **Character sheets:** Load `references/characters/<name>.md` (e.g. [references/characters/sydney.md](references/characters/sydney.md); index in [references/characters/README.md](references/characters/README.md)).
+- **Character sheets:** See [references/characters/README.md](references/characters/README.md) and OC/PixlStash identity rules in [../h3-parody-identity/SKILL.md](../h3-parody-identity/SKILL.md).
 - `~/AI/community/approved_characters` is add-only: never remove, move, or delete an image there.
 - Folder-name only on Cond/character sheets (no celeb LoRAs there). Named adult INDEX+RefMod parodies → `h3-parody-identity` (dry-build first, then `queue-remote.sh` after his yes).
 - Never open, read, or parse Derrick's Grok Imagine prompts or prompt sidecar files. Never open, read, or list `~/AI/sydney/` or any `talk-persona.md`.
