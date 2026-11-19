@@ -266,7 +266,8 @@ def _publish_preview(crun: Path) -> tuple[str | None, str | None]:
 
 
 def _publish_contact_sheet(crun: Path) -> str | None:
-    """L4: copy the 2x3 contact sheet to /srv/renders/sheets/ (and preview/) and return its chat URL."""
+    """L4 (#11): copy the 2x3 contact sheet to /srv/renders/sheets/ (local archive) and QNAP preview/; return a URL
+    ONLY for the QNAP copy so we never emit a 404 URL when QNAP is not writable."""
     sheet = None
     for name in ("contact_sheet.jpg", "contact_sheet.png", "sheet.jpg", "sheet.png"):
         cand = crun / name
@@ -276,14 +277,12 @@ def _publish_contact_sheet(crun: Path) -> str | None:
     if sheet is None:
         return None
     ext = sheet.suffix.lower() or ".jpg"
-    url = None
     try:
         if SHEETS_DIR.parent.is_dir() and os.access(SHEETS_DIR.parent, os.W_OK):
             SHEETS_DIR.mkdir(parents=True, exist_ok=True)
             dst_local = SHEETS_DIR / f"{crun.name}{ext}"
             if not dst_local.exists():
                 shutil.copyfile(sheet, dst_local)
-            url = f"{RENDERS_URL}/sheets/{crun.name}{ext}"
     except OSError:
         pass
     if QNAP_RUNS.is_dir() and os.access(QNAP_RUNS, os.W_OK):
@@ -291,8 +290,8 @@ def _publish_contact_sheet(crun: Path) -> str | None:
         dst.mkdir(parents=True, exist_ok=True)
         if not (dst / f"sheet{ext}").exists():
             shutil.copyfile(sheet, dst / f"sheet{ext}")
-        url = f"{RENDERS_URL}/{crun.name}/preview/sheet{ext}"
-    return url
+        return f"{RENDERS_URL}/{crun.name}/preview/sheet{ext}"
+    return None
 
 
 def _render_final(crun: Path) -> tuple[str, str]:
