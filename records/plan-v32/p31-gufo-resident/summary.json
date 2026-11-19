@@ -1,0 +1,50 @@
+{
+  "model": "flash-next-uncensored-v2",
+  "started": "2026-11-18 19:47:56 CST",
+  "checks": {
+    "c2": {
+      "jobs": [
+        100000,
+        100000,
+        100000,
+        100000
+      ],
+      "total_wall_s": 118.01,
+      "all_pass": true,
+      "results": [
+        {
+          "i": 0,
+          "target_tokens": 100000,
+          "prompt_tokens": 75039,
+          "wall_s": 117.75,
+          "pass": true,
+          "answer": "100000"
+        },
+        {
+          "i": 1,
+          "target_tokens": 100000,
+          "prompt_tokens": 75039,
+          "wall_s": 117.99,
+          "pass": true,
+          "answer": "107919"
+        },
+        {
+          "i": 2,
+          "target_tokens": 100000,
+          "prompt_tokens": 75039,
+          "wall_s": 40.58,
+          "pass": true,
+          "answer": "115838"
+        },
+        {
+          "i": 3,
+          "target_tokens": 100000,
+          "prompt_tokens": 75039,
+          "wall_s": 48.87,
+          "pass": true,
+          "answer": "123757"
+        }
+      ]
+    }
+  }
+}
