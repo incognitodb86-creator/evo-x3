@@ -20,10 +20,10 @@ fi
 
 echo "Applying nftables egress blocks on bridge interface $BRIDGE_IF ($SUBNET_CIDR)..."
 
-# Create dedicated nftables table for evo-mcp egress isolation (idempotent)
+# Create dedicated nftables table for evo-mcp egress isolation (idempotent even when table does not exist yet)
+nft add table inet evo_mcp_egress 2>/dev/null || true
+nft flush table inet evo_mcp_egress 2>/dev/null || true
 nft -f - <<EOF
-table inet evo_mcp_egress
-delete table inet evo_mcp_egress
 table inet evo_mcp_egress {
     chain forward {
         type filter hook forward priority filter - 10; policy accept;
@@ -43,8 +43,10 @@ table inet evo_mcp_egress {
     }
     chain input {
         type filter hook input priority filter - 10; policy accept;
+        iifname "${BRIDGE_IF}" ip daddr 10.89.44.1 udp dport 53 accept
+        iifname "${BRIDGE_IF}" ip daddr 10.89.44.1 tcp dport 53 accept
         iifname "${BRIDGE_IF}" meta l4proto tcp counter reject with tcp reset
-        iifname "${BRIDGE_IF}" ip daddr != 10.89.44.1 counter drop
+        iifname "${BRIDGE_IF}" counter drop
     }
 }
 EOF
