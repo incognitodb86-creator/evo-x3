@@ -39,13 +39,14 @@ if [[ ! -f "${SCRATCH_ROOT}/incoming/${SCRIPT_NAME}" ]]; then
 fi
 
 cp "${SCRATCH_ROOT}/incoming/${SCRIPT_NAME}" "${HOST_SCRATCH}/task.sh"
-chmod 0700 "${HOST_SCRATCH}/task.sh"
+chmod 0700 "$HOST_SCRATCH" "${HOST_SCRATCH}/task.sh"
 
-# Fixed, non-overridable rootless Podman execution
+# Fixed, non-overridable rootless Podman execution.
+# --userns=keep-id runs the container as the unprivileged host evosandbox UID (no --user override), so it can
+# read task.sh and write results into /workspace; all capabilities are dropped and no-new-privileges is set.
 exec timeout --signal=KILL "${TIMEOUT_SECONDS}" \
   podman run --rm \
     --userns=keep-id \
-    --user 65534:65534 \
     --cap-drop=ALL \
     --security-opt=no-new-privileges \
     --read-only \

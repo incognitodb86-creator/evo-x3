@@ -4754,22 +4754,102 @@ def _parse_json_reply(text: str) -> Dict[str, Any]:
         raise WriterNotReady(f"NOT_READY: the vision read is not JSON ({e})")
 
 
-def vision_read(image: Any, chat: Callable[[List[Dict[str, Any]]], str]) -> Dict[str, Any]:
+STILL_READ_CACHE_DIR = Path.home() / "AI" / "community" / "runs" / "_still_read_cache"
+VISION_READ_MAX_SIDE = 1024
+
+
+def _still_file_sha256(path: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _valid_vision_read(read: Any) -> bool:
+    return isinstance(read, dict) and bool(read.get("room") or read.get("place") or read.get("surface"))
+
+
+def _still_cache_suffix(model_alias: str = "") -> str:
+    import hashlib
+    raw = (VISION_READ_PROMPT + "\0" + str(model_alias or "")).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()[:8]
+
+
+def vision_read(
+    image: Any,
+    chat: Callable[[List[Dict[str, Any]]], str],
+    cache_dir: Any = None,
+    model_alias: str = "",
+) -> Dict[str, Any]:
     """One structured read of the start still (setting, bed, surface, floor, light, framing, pose, garments, hair, skin,
     build, people). `chat(messages) -> reply text` is the caller's vision model call (the EWT used the native Swift
-    vision on llama-swap); this function loads no model itself. Any failure is NOT_READY."""
+    vision on llama-swap); this function loads no model itself. Any failure is NOT_READY.
+    Caching is opt-in: pass `cache_dir` to cache by still sha256 + VISION_READ_PROMPT + model_alias."""
     import base64
     import io
+    import os
     from PIL import Image
-    im = image if hasattr(image, "save") else Image.open(image)
+
+    cdir = Path(cache_dir) if cache_dir else None
+    cache_path: Optional[Path] = None
+    digest: Optional[str] = None
+    prompt_sig: Optional[str] = None
+    if cdir is not None and not hasattr(image, "save"):
+        img_path = Path(image)
+        if img_path.is_file():
+            digest = _still_file_sha256(img_path)
+            prompt_sig = _still_cache_suffix(model_alias)
+            cache_path = cdir / f"{digest}_{prompt_sig}.json"
+            if cache_path.is_file():
+                try:
+                    cached = json.loads(cache_path.read_text(encoding="utf-8"))
+                    cached_read = cached.get("read") if isinstance(cached, dict) and "read" in cached else cached
+                    if _valid_vision_read(cached_read):
+                        return cached_read
+                except Exception:
+                    pass
+
+    if hasattr(image, "save"):
+        rgb = image.convert("RGB")
+    else:
+        with Image.open(image) as opened:
+            rgb = opened.convert("RGB")
+    if max(rgb.size) > VISION_READ_MAX_SIDE:
+        resampling = getattr(getattr(Image, "Resampling", Image), "LANCZOS", Image.BICUBIC)
+        rgb.thumbnail((VISION_READ_MAX_SIDE, VISION_READ_MAX_SIDE), resampling)
     buf = io.BytesIO()
-    im.convert("RGB").save(buf, "PNG")
-    url = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    try:
+        rgb.save(buf, "JPEG", quality=85)
+        mime = "image/jpeg"
+    except Exception:
+        buf = io.BytesIO()
+        rgb.save(buf, "PNG")
+        mime = "image/png"
+    url = f"data:{mime};base64," + base64.b64encode(buf.getvalue()).decode()
     reply = chat([{"role": "user", "content": [{"type": "text", "text": VISION_READ_PROMPT},
                                                {"type": "image_url", "image_url": {"url": url}}]}])
     read = _parse_json_reply(reply)
-    if not isinstance(read, dict) or not (read.get("room") or read.get("place") or read.get("surface")):
+    if not _valid_vision_read(read):
         raise WriterNotReady("NOT_READY: the vision read has no setting")
+
+    if cache_path is not None:
+        try:
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "read": read,
+                "source": str(image),
+                "sha256": digest,
+                "prompt_sha8": prompt_sig,
+                "model_alias": str(model_alias or ""),
+                "how": "vision_read_cache",
+            }
+            tmp = cache_path.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+            os.replace(tmp, cache_path)
+        except OSError:
+            pass
     return read
 
 

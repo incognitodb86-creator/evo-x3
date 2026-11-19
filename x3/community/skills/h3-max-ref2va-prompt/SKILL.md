@@ -198,7 +198,7 @@ here). Both gates pass before a cell is staged; a gate failure is fixed in the p
 6. No `<scenetrans>`; continuity in prose; if the token appears anywhere in the paste, stop (R40).
 7. No speech unless Derek asked for it; if present, the R37 form is exact, and the render needs his GO.
 8. Sections English, original language only inside `<d>` and for quoted visible text (R38).
-9. The node contract checks for the lane: `/home/derekboone/AI/community/scripts/verify_cell.py` and the adults-only tests named in
+9. The node contract checks for the lane: `/home/evo/AI/community/scripts/verify_cell.py` and the adults-only tests named in
    `references/chain-lane.md` / `h3-prompting` gate; then the R30 diff gate.
 
 ## 6. Paste skeleton (structure only; content comes from the run's records, R14)
@@ -235,12 +235,12 @@ and R11's clauses are copied verbatim from there.
   `references/base-en.txt`), read from a local clone at HEAD `199b7d0` (2026-10-28); `npx skills add
   https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing` is the vendor install - **not installed on this
   box on purpose**: two skills stating the same rules breaks the "each rule in exactly one skill" check of
-  `/home/derekboone/AI/community/notes/2026-10-29-forge-cleanup-plan.md` (U2).
+  `/home/evo/AI/community/notes/2026-10-29-forge-cleanup-plan.md` (U2).
 - Box contract: `ComfyUI/comfy_extras/nodes_minimax_h3.py:243-284,335`; `ComfyUI/comfy/text_encoders/minimax.py:3-13,32,160,175-178`;
-  `/home/derekboone/AI/community/scripts/comm.py:120-149` (what our builder feeds the node).
+  `/home/evo/AI/community/scripts/comm.py:120-149` (what our builder feeds the node).
 - Model owner measurements: TenStrip HF 10Eros-Max #77 (audio), #63 (retention lead-in), #50/#49 (format per version).
-- Review and patch records: `/home/derekboone/AI/community/notes/2026-11-03-h3-upstream-prompt-skill-review.md`,
-  `/home/derekboone/AI/community/notes/2026-11-03-h3-ref2va-skill-split.md`.
+- Review and patch records: `/home/evo/AI/community/notes/2026-11-03-h3-upstream-prompt-skill-review.md`,
+  `/home/evo/AI/community/notes/2026-11-03-h3-ref2va-skill-split.md`.
 - Everything else (R1-R31 evidence) stays in `h3-prompting` section 8.
 
 

@@ -17,7 +17,7 @@ This reference defines the structured beat sheet fields, prompt-compilation rule
 5. **Dials & Render settings**:
    Do not copy render dials (steps, shifts, CFG, VSA, denoise, sampler) into prompts or beat sheets. All render settings defer to [skills/h3-hc-render/SKILL.md](../../h3-hc-render/SKILL.md).
 6. **Image rules**:
-   Do not restate or define image rules in prompt skills. All image guidelines defer to `ComfyUI/LANE_IMAGE_RULES.md` in the render runtime (`C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\LANE_IMAGE_RULES.md`).
+   Do not restate or define image rules in prompt skills. All image guidelines defer to `ComfyUI/LANE_IMAGE_RULES.md` in the render runtime (`C:\AI\comfy-alienpc\LANE_IMAGE_RULES.md`).
 
 ---
 
@@ -51,16 +51,14 @@ Every long-clip beat sheet entry requires these fields (keep `spoken_dialogue` s
 
 ---
 
-## Method Selection Rules
+## Method Selection Rules (Extend-First Default + Cinematic Planned Cuts)
 
-- **`in-clip [Shot N]` (Preferred)**:
-  Used when beats, angle changes, or micro-actions fit within a single generation window. Employs timed `[Shot 1]`, `[Shot 2]` headers without seam re-encoding.
-- **`planned cut`**:
-  Used when transitioning between distinct scene locations, camera setups, or beats exceeding single-clip limits. Generates independent cells stitched via hard video cuts (`ffmpeg` stream copy / matched audio).
-- **`native A/V continuation` (2+ explicit `--beat` scenes)**:
-  One graph uses GuidedContinuationWindow -> LatentTailGuide -> sampling -> AppendContinuation, carrying the previous sampled/cumulative video AND audio latent. The 22-frame overlap is hidden and trimmed; windows do not require visible cuts. The two-beat result above is the verified scope, not 3+ beats, 24 seconds or timed multi-image guidance.
-- **Long asks without 2+ explicit beats**:
-  The existing shared-anchor cells render in one queue batch and are stitched; this is distinct from native continuation. Plan visible cuts where the story needs them, not merely because a new generation window begins.
+- **`in-clip [Shot N]` (<= 243 frames / 10.125s)**:
+  One continuous `[Shot 1]` is the default. Use 2–3 timed `[Shot N] At MM:SS.mmm, the camera cuts to ...` angles inside one 243f window only when `--shots multi` or coverage is requested.
+- **`native A/V continuation` / `--continue` Extension (DEFAULT for > 10.1s same-scene escalation)**:
+  Generally prefer **extending** over making isolated single clips and stitching whenever the scene stays in the same room, light, and continuous physical act! One native continuation graph (`GuidedContinuationWindow -> LatentTailGuide -> Sampler -> AppendContinuation`, carrying sampled video + audio latent across the hidden 22-frame airlock with RefMod on every beat, or stateful `--scene <id> --continue <prev_run_dir>` last-frame handoff) preserves body momentum, garment states, and vocal register without hard-reset seams. (Two-beat named-parody GPU path verified at 379f; 3-beat `566f` layout verified in CPU tests.)
+- **`planned cut` + Stitched Movie Chapters (Intentional Film Editing)**:
+  Use independent single clips + hard cuts (`take_chain_stitch.py`, 60 ms audio crossfade) deliberately when directing a multi-chapter professional movie: changing rooms/locations, time jumps, setup-banter -> bedroom transition, full undress chapter -> new sex position chapter, or distinct reverse/coverage camera setups that should read as intentional cinema edits.
 
 ---
 

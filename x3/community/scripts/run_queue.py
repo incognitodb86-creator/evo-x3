@@ -214,6 +214,7 @@ def upscale_done(run_dir, jobs, slog):
             meta_ok["upscale"]["raw_clip"] = None
             meta_ok["upscale"]["raw_deleted"] = "t2571u: only the upscaled clip is kept"
         json.dump(meta_ok, open(okp, "w", encoding="utf-8"), indent=1)
+        extract_last_frame(clip, os.path.join(os.path.dirname(clip), "last_frame.png"))
         n_ok += 1
         copy_to_pi_drop(run_dir, tag, clip, slog)   # t2554: only the 2x clip goes to pi-drop
         qlog(run_dir, "UPSCALE ok pos=%d tag=%s %dx%d->%dx%d fps=%s frames=%d audio=%s bytes=%d elapsed=%.1fs raw=%s" % (
@@ -336,6 +337,53 @@ def prompt_sha(g, value):
     if not t:
         return "unresolved", (note or "no prompt text")
     return hashlib.sha256(t.encode("utf-8")).hexdigest(), ""
+
+
+def extract_last_frame(mp4_path, out_path=None):
+    """Extract the exact last frame of `mp4_path` to `last_frame.png` using ffprobe frame count + ffmpeg select.
+    Removes any pre-existing `last_frame.png` first so a failed retry never leaves a stale frame behind.
+    Returns the output path on success, or None if ffprobe/ffmpeg is unavailable or fails."""
+    if not mp4_path or not os.path.isfile(mp4_path):
+        return None
+    out = out_path or os.path.join(os.path.dirname(mp4_path), "last_frame.png")
+    try:
+        if os.path.exists(out):
+            os.remove(out)
+    except OSError:
+        pass
+    fp = shutil.which("ffprobe") or "ffprobe"
+    ff = shutil.which("ffmpeg") or "ffmpeg"
+    try:
+        pr = subprocess.run(
+            [fp, "-v", "error", "-select_streams", "v:0", "-count_frames",
+             "-show_entries", "stream=nb_read_frames,nb_frames", "-of", "json", mp4_path],
+            capture_output=True, text=True, timeout=60,
+        )
+        if pr.returncode != 0:
+            return None
+        streams = (json.loads(pr.stdout or "{}").get("streams") or [])
+        count = 0
+        for st in streams:
+            for key in ("nb_read_frames", "nb_frames"):
+                val = st.get(key)
+                if val is not None and str(val).isdigit() and int(val) > 0:
+                    count = int(val)
+                    break
+            if count > 0:
+                break
+        if count <= 0:
+            return None
+        last_idx = count - 1
+        r = subprocess.run(
+            [ff, "-y", "-i", mp4_path, "-vf", f"select=eq(n\\,{last_idx})",
+             "-fps_mode", "passthrough", "-frames:v", "1", out],
+            capture_output=True, timeout=120,
+        )
+        if r.returncode == 0 and os.path.isfile(out) and os.path.getsize(out) > 0:
+            return out
+    except Exception:
+        return None
+    return None
 
 
 def still_done(run_dir, job, tag, f, g0, size, t0, retry, slog):
@@ -608,6 +656,9 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     slog("OBJECTIVE ok %s frames=%d size=%sx%s audio=True bytes=%d" % (t, p["frames"], p["w"], p["h"], p["bytes"]))
     # t2554 (Derrick 2026-11-19): pi-drop gets only the RTX-upscaled clip, copied in upscale_done after UPSCALE ok
     rgj.contact_sheet(s["file"], os.path.join(d, tag + "_stills_contact.png"), p["duration"])
+    lf_path = os.path.join(d, "last_frame.png")
+    if not (os.path.isfile(lf_path) and os.path.getsize(lf_path) > 0 and os.path.getmtime(lf_path) >= os.path.getmtime(s["file"])):
+        extract_last_frame(s["file"], lf_path)
     outs = [os.path.join(OUT_ROOT, t, f) for f in os.listdir(os.path.join(OUT_ROOT, t))] if os.path.isdir(os.path.join(OUT_ROOT, t)) else []
     wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None
     psha, pnote = prompt_sha(g0, next((n["inputs"].get("prompt", "") for n in g0.values()

@@ -10,7 +10,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 3. **`UNI-APPLY-X3-A` completed first** (specifically ST3 `import_inbox.py` with `flock`).
 4. **X3 lease free** (`/home/derekboone/AI/locks/x3-lease.txt` empty). The doer takes it at start (one line, see Access & Lease). No lease-taken/released files, no brain or `records/status/` mirrors, no git commit for the lease, no message to Derrick.
 5. **Approved render window available for the Pre-install `:8447/health` busy check**, no active render during the install step itself, and **not during the Hermes bakeoff window** (Plan C16).
-6. **Max import complete** from `mono` tip `bab584a (or newer at Max import)` (includes `b96560f` H1c card-21 routing; **ONE BRANCH:** `mono` is the ONLY branch anyone pushes — Derrick ~13:05 CT, no part-branch pushes) with clean `gitleaks`.
+6. **Max import complete** from `mono` tip `ef1fc2b (or newer at Max import)` (includes `b96560f` H1c card-21 routing and **`ef1fc2b` L9** Hermes inline clip via `MEDIA:` + auto-post on finish — install from the same `mono` tip; **ONE BRANCH:** `mono` is the ONLY branch anyone pushes — Derrick ~13:05 CT, no part-branch pushes) with clean `gitleaks`.
 
 - **If `MONO-S5` already passed:** `/home/evo/AI/render` and `/home/evo/AI/community` are symlinks into the `mono` clone; skip the part-branch bridge and run `git -C /home/evo/AI/evo-x3 pull --ff-only` instead. Everything else in this brief is unchanged.
 
@@ -29,7 +29,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 
 ## Access & Lease
 - **Doer:** X3 Forge (`/home/evo/AI/forge`, pi panes `w4:p1-p3`), running as `evo`. `sudo` is allowed **only** for installing/rolling back `/usr/local/bin/pi-job`.
-- **Source on `mono`:** `config/bin/pi-job` in `/home/derekboone/evo-x3` (`mono` SHAs: `07369ec` H1c, `48e7358` L1, `febc22c` L4, `c8056a8` L5, `27999a6` L6, `952d165` L8, `658dc18` L8 fix, `03340b1` H1c fix, `a5a86ce` ST3 fix, `dbc7156` H5 fix, `f353e3e` L4 fix, `9b86a78` L6 fix, `db00dde` L1 fix, **`b96560f` H1c card 21**; latest `pi-job` commit `b96560f`, `mono` tip `3217c67 (or newer at Max import)`).
+- **Source on `mono`:** `config/bin/pi-job` in `/home/derekboone/evo-x3` (`mono` SHAs: `07369ec` H1c, `48e7358` L1, `febc22c` L4, `c8056a8` L5, `27999a6` L6, `952d165` L8, `658dc18` L8 fix, `03340b1` H1c fix, `a5a86ce` ST3 fix, `dbc7156` H5 fix, `f353e3e` L4 fix, `9b86a78` L6 fix, `db00dde` L1 fix, `b96560f` H1c card 21, **`ef1fc2b` L9**; latest `pi-job` commit `ef1fc2b`, install from the same `mono` tip `ef1fc2b (or newer at Max import)`).
 - **Backup root:** `/home/evo/AI/_archive/20261119/`.
 - **Lease take:** write ONE line to `/home/derekboone/AI/locks/x3-lease.txt`: `x3-forge | UNI-APPLY-X3-B-PIJOB | <start time>`. If the file is not empty, stop.
 - **Lease release:** truncate `/home/derekboone/AI/locks/x3-lease.txt` (`: > /home/derekboone/AI/locks/x3-lease.txt`) when done or blocked. No status files, mirrors, commits, or messages for the lease.

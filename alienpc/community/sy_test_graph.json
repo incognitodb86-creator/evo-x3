@@ -9,7 +9,7 @@
   "2": {
    "class_type": "UNETLoader",
    "inputs": {
-    "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+    "unet_name": "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors",
     "weight_dtype": "default"
    }
   },
@@ -58,7 +58,7 @@
      "2",
      0
     ],
-    "shift_video": 10.0,
+    "shift_video": 12.0,
     "shift_audio": 3.0
    }
   },
@@ -96,7 +96,7 @@
      0
     ],
     "scheduler": "simple",
-    "steps": 10,
+    "steps": 8,
     "denoise": 1.0
    }
   },
@@ -198,8 +198,8 @@
  },
  "eff": {
   "preset": "production",
-  "steps": 10,
-  "shift": 10.0,
+  "steps": 8,
+  "shift": 12.0,
   "audio_shift": 3.0,
   "sampler": "euler",
   "frames": 124,

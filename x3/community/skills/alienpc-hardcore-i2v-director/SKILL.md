@@ -5,7 +5,7 @@ description: Use when Derrick wants approved Condition stills animated into hard
 
 # AlienPc hardcore I2V director
 
-> Render rules live in ~/AI/render/AGENTS.md; run render work from ~/AI/render. Character sheets: [references/characters/sydney.md](references/characters/sydney.md).
+> Render rules live in ~/AI/render/AGENTS.md; run render work from ~/AI/render. Character index: [references/characters/README.md](references/characters/README.md) (OC/PixlStash rules in [../h3-parody-identity/SKILL.md](../h3-parody-identity/SKILL.md)).
 
 Identity = same character as the Cond. Records decide whether a character is fictional: approved_characters/INDEX.csv or max-DECISIONS.md. A face, a resemblance or a shared word in a filename ("Sheer", "Sarah") is never evidence. If you have a real concern, say it once, in one line, with the record, and pause that one item. Once Derrick answers, it's settled: don't raise it again.
 

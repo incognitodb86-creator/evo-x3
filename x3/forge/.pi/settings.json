@@ -39,6 +39,14 @@
     "/home/evo/AI/community/agent-shared/extensions"
   ],
   "skills": [
+    "~/AI/community/skills",
+    "-~/AI/community/skills/alienpc-hardcore-i2v-director",
+    "-~/AI/community/skills/alienpc-stills-pose-edit-prompting",
+    "-~/AI/community/skills/comfy-render",
+    "-~/AI/community/skills/h3-hc-render",
+    "-~/AI/community/skills/h3-max-ref2va-prompt",
+    "-~/AI/community/skills/image-render",
+    "-~/AI/community/skills/video-render",
     "/home/evo/AI/community/agent-shared/skills",
     "-/home/evo/AI/community/agent-shared/skills/google-voice-texts"
   ],
@@ -105,7 +113,7 @@
     "enabled": true
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-uncensored-sub",
+    "defaultModel": "x3-local/flash-next-uncensored-v2-sub",
     "disableThinking": false,
     "defaultThinking": "low"
   },

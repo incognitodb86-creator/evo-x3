@@ -11,7 +11,7 @@ For named INDEX + RefMod parodies, `h3-parody-identity` owns the tested prompt f
 
 Every MiniMax-H3 / 10Eros-Max prompt guideline on this box lives in this file and only here. **Advisory vs. Hard Gate:** R4 (18+ / youth guard) is the only content hard stop; R5-R31 below are **craft advice** (the pipeline passes writer text through verbatim and logs rule checks as advisory warnings/notes rather than rewriting or blocking). The REF2VA lane files in references\ (ref2va-lane.md, ref2va-chain-lane.md),
 and the `alienpc-hardcore-i2v-director` prompt sections point here and must not restate a
-rule; a rule duplicated in two skills is a defect (plan `/home/derekboone/AI/community/notes/2026-10-29-forge-cleanup-plan.md`,
+rule; a rule duplicated in two skills is a defect (plan `/home/evo/AI/community/notes/2026-10-29-forge-cleanup-plan.md`,
 unit U2, check "each rule string appears in exactly one skill"). Rule numbers are stable: cite them as `R11` in a
 review, a diff gate or a commit message, never the sentence.
 
@@ -61,7 +61,7 @@ silent freeze. For a first-and-last-frame (keyframe completion) clip, describe t
 
 **R7 - Audio is plain cues in the main prompt, never a section. No labeled soundscape or
 non-diegetic-music header, no music/foley score.** TenStrip (model owner, HF 10Eros-Max discussion #77, quoted in
-`/home/derekboone/AI/community/notes/web/tenstrip_hf77_audio_20261029.md`): *"Don't use developer H3 style prompting, it causes
+`/home/evo/AI/community/notes/web/tenstrip_hf77_audio_20261029.md`): *"Don't use developer H3 style prompting, it causes
 the most interference. 'overall_soundcape' especially is actually the easiest way to introduce extremely bad audio
 and will cause the model to go out of it's way and start putting cartoon sounds on the output and ignore prompt and
 should be deleted. Prompt very normal audio queues in prompt or at the end of the main prompt."* So: at the END of
@@ -93,7 +93,7 @@ For fictional adult OC / Cond stills (and runs without an attached voice referen
 (`<Video 1>` = the previous clip). A continuation without `<Video 1>` is invalid - rewrite it. Only a hard cut to a
 new scene has no `<Video 1>`, and it must be labelled `hard cut`. Storyboard runs reference `<Shot Reference N>` for
 their panel. Every continued clip carries references again: a chunk with no `<Picture N>` drifts
-(`/home/derekboone/AI/community/notes/hc_redo_research_20261023.md`).
+(`/home/evo/AI/community/notes/hc_redo_research_20261023.md`).
 
 ## 2. Keeping identity, bodies and wardrobe
 
@@ -174,22 +174,22 @@ Moved verbatim to [references/worked-examples.md](references/worked-examples.md)
 - `h3-hc-render` owns graph/request wiring and the render dials; this file never sets steps, shift, VSA, fps.
 - `alienpc-stills-pose-edit-prompting` owns FLUX.2 still prompts.
 - **Long-clip beat sheet & multi-shot continuity**: [references/longclip-beat-sheet.md](references/longclip-beat-sheet.md) (beat sheet fields, in-clip [Shot N] preference, one primary beat per clip; C2V runtime marked UNPROVEN).
-- The writer model's system prompt `/home/derekboone/AI/5slock/ralph-community/notes/p15_writer_skill.md` (the only copy
-  on this box - `/home/derekboone/AI/community/notes/` has none) keeps its
+- The writer model's system prompt `/home/evo/AI/5slock/ralph-community/notes/p15_writer_skill.md` (the only copy
+  on this box - `/home/evo/AI/community/notes/` has none) keeps its
   own rubric and few-shots: it is a model prompt, not a rule file, so it is not merged and not edited here. Its
   labeled soundscape-header instruction is superseded by R7 for anything written fresh on this box.
 
 ## 8. Sources
 
 Model card and community: `huggingface.co/TenStrip/10Eros-Max` discussions #77 (audio, saved at
-`/home/derekboone/AI/community/notes/web/tenstrip_hf77_audio_20261029.md`), #63 (beta6 thread: TenStrip scene-identity string; retention lead-in format is from user Portland01's official-format prompt in the same thread), #50 (prompt format per version, beta5), #49 (FL2VA/ref2va note; author unverified as TenStrip); MiniMax `VIDEO_PROMPT_WRITING_GUIDE_ref_en.md`
+`/home/evo/AI/community/notes/web/tenstrip_hf77_audio_20261029.md`), #63 (beta6 thread: TenStrip scene-identity string; retention lead-in format is from user Portland01's official-format prompt in the same thread), #50 (prompt format per version, beta5), #49 (FL2VA/ref2va note; author unverified as TenStrip); MiniMax `VIDEO_PROMPT_WRITING_GUIDE_ref_en.md`
 (`huggingface.co/MiniMaxAI/MiniMax-H3`); civitai guides. Reddit `.json` endpoints return a "Blocked" HTML page from
 this box - cite HF/GitHub/civitai.
-Box evidence: `/home/derekboone/AI/5slock/ralph-community/notes/p15_writer_skill.md` (persona, standards, rubric, its two
-few-shots), `/home/derekboone/AI/community/notes/hc_face_research_20261023.md`, `notes/hc_redo_research_20261023.md`,
+Box evidence: `/home/evo/AI/5slock/ralph-community/notes/p15_writer_skill.md` (persona, standards, rubric, its two
+few-shots), `/home/evo/AI/community/notes/hc_face_research_20261023.md`, `notes/hc_redo_research_20261023.md`,
 `notes/bq1_prompt_diff.txt`, `notes/forge-learnings.md`, `notes/prompt_guide_20261023.md`, `notes/im1_prompts.md`,
-`/home/derekboone/AI/community/specs/prompt_v2/*.txt`, `/home/derekboone/AI/community/runs/terrace_dom_q5guide_20261028_s51083007/prompt_seg0.txt`
-(the current B2 KEEP paste, with the old audio blocks), `/home/derekboone/AI/community/skills/h3-hc-render/SKILL.md`,
+`/home/evo/AI/community/specs/prompt_v2/*.txt`, `/home/evo/AI/community/runs/terrace_dom_q5guide_20261028_s51083007/prompt_seg0.txt`
+(the current B2 KEEP paste, with the old audio blocks), `/home/evo/AI/community/skills/h3-hc-render/SKILL.md`,
 the 2026-10-28 prompt corrections in MEMORY (slap-to-face, the response dial, beta 7 dials).
 Upstream (read 2026-11-03): MiniMax-AI/MiniMax-H3 `skills/h3-prompt-writing/references/ref-en.txt` and `base-en.txt`
 (local clone, HEAD `199b7d0`, 2026-10-28) - the source of the REF2VA rules R32-R41 in `h3-max-ref2va-prompt`; the
