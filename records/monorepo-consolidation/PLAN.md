@@ -171,3 +171,17 @@ With KTD3 (links at the same paths): 0 files must change. If paths were repointe
 No crontab or systemd unit (system or evo user) references these paths (VERIFIED 0 hits); the timer calls `/usr/local/bin/sync-renders`.
 
 CE steps: plan Durable (this file) · doc review: Opus (outside AI) per Derrick · work not started · compound n/a.
+
+## Max's recommendations on the open questions (Derrick asked for these, t2624u/t2625u, Nov 19 2026)
+
+Context for the reviewer: Derrick's reviewer (Opus via GitHub Copilot) sees only this GitHub repo. It has no access to the X3, AlienPc, the QNAP, Gitea or the chat, so this file must carry the full context.
+
+1. Default branch: **yes.** Make `mono` the default on Gitea and GitHub once its checks pass, and tag the old part branches `archive/<branch>`. One default branch puts the whole setup in front of the reviewer.
+2. Old side branches (`main`, `x3-forge`, `x3-pi-config`, `x3-bakeoffs`, `feature/forge-coding-u57`, `job/2026-11-15-gitea-backup`, `evo-x3-all`): **tags only.** They're past work, and importing them would clutter the review.
+3. `u58` content: **keep it at the repo root.** Moving it to `x3/host/` means editing repo-relative paths in its scripts, which adds risk and gains nothing.
+4. AlienPc uncommitted changes (131 in community, 9 in render): **run a gitleaks scan, pull out anything it flags, then commit the rest as it is.** If they're stashed instead, they never reach GitHub and can't be reviewed.
+5. The two tracked `mcp.json` backups under `records/gufo-phase1-20261117/`: **untrack them** (index only; the files stay on disk). Max checked them, and they hold a file-path reference (`!cat <path>`), not a literal token. Untracking keeps the rule simple: no `mcp.json` in git.
+6. AlienPc remotes with a login inside the URL: **yes, switch to Git Credential Manager** during the switchover.
+7. Separate Gitea repos `alienpc-render` and `alienpc-community-pc`: **archive them (read-only, not deleted)** after the switchover.
+
+GitHub mirror: GitHub is currently pushed by hand from Max's box after each Gitea save (Gitea is primary). Until mirroring is automated, every Gitea push in this plan should be followed by the same fast-forward push to GitHub, so the reviewer's copy stays current.
