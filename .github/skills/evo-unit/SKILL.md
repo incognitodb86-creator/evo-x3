@@ -1,7 +1,7 @@
 ---
 name: evo-unit
-description: "Use when starting or closing an EVO-X3 unit of work: new PLAN.md, U## agy brief for Antigravity on the X3, RESULT file, or X3/AlienPc lease take/release file. Templates and naming for records/."
-argument-hint: "What to create: plan <topic> | brief U## <slug> | result U## | lease take|release <holder> <job>"
+description: "Use when starting or closing an EVO-X3 unit of work: new PLAN.md, U## agy brief for Antigravity on the X3, Forge apply BRIEF, or RESULT file. Templates and naming for records/."
+argument-hint: "What to create: plan <topic> | brief U## <slug> | result U##"
 ---
 
 # EVO unit files
@@ -15,10 +15,10 @@ Templates for the files one unit of work produces. The naming and record rules a
    runs. `evo-plan-reviewer` reviews it, then Derrick answers the Q# cards and gives his yes (S0).
 2. **Brief** (`records/U##-<slug>-brief-YYYYMMDD.md`) from [brief-template.md](./assets/brief-template.md),
    one per approved step that agy runs on the box.
-3. **Lease**: the runner takes it on the box before mutating work, using
-   [lease-taken-template.md](./assets/lease-taken-template.md), and releases it with
-   [lease-released-template.md](./assets/lease-released-template.md). From this Windows clone you only draft
-   these files; you never hold a lease.
+3. **Lease** (Derrick Nov 17, per Max `d80617f`): the doer writes ONE line `<who> | <what> | <start time>` to
+   `/home/derekboone/AI/locks/x3-lease.txt` at start (stop if it isn't empty) and clears it when done or blocked
+   (AlienPc: one line per brain `10_packs/max/max-briefing.md`). No lease files, mirrors, commits or messages.
+   From this Windows clone you never hold a lease.
 4. **Result** (`records/U##-RESULT.md` or `records/<topic>/RESULT.md`) from
    [result-template.md](./assets/result-template.md). agy writes it on the box. Max or a reviewer checks it.
 

@@ -8,7 +8,7 @@ Derrick <t####u>: "<his words>". Plan: <records/<topic>/PLAN.md step S#, or none
 ## Access
 - You run as <derekboone | evo>. Repos: <paths>. <Use `sudo -n -u evo bash -c '...'` for evo-owned repos.>
 - Work in your per-run worktree `~/evo-x3/_worktrees/U<##>-<repo>` on branch `agy/U<##>` (records/agy-launcher-convention.md).
-- Lease: <records/status/...-evo-x3-lease-taken-agy-u<##>-<job>.md | read-only, no lease>.
+- Lease: <one line `agy | U<##> <job> | <start time>` in /home/derekboone/AI/locks/x3-lease.txt, taken at start (stop if not empty), cleared when done or blocked | read-only, no lease>.
 - Why: <the problem this fixes, with run/log evidence>.
 
 ## Work

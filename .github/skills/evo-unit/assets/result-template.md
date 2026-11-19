@@ -32,4 +32,4 @@ Summary of work: <2–4 sentences: what changed, where, and how it was proven.>
 
 ## Lease
 
-<lease file taken/released, or "read-only, no lease">
+<"lease line taken and cleared (x3-lease.txt)", or "read-only, no lease">

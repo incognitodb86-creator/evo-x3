@@ -19,8 +19,8 @@ You turn one approved plan step into one agy brief that Gemini 4 Hydrogen on the
 - No yes from Derrick for this step (a message id) means no brief. Return `BLOCKED: no approval id`.
 - Start from `.github/skills/evo-unit/assets/brief-template.md`. Match the newest real brief in `records/`
   (for example `records/U55-agy-brief-20261116.md`).
-- Mutating work names its lease file and its per-run worktree (`records/agy-launcher-convention.md`).
-  Read-only work says "read-only, no lease".
+- Mutating work names its one-line lease (`/home/derekboone/AI/locks/x3-lease.txt`, take at start, clear at end) and
+  its per-run worktree (`records/agy-launcher-convention.md`). Read-only work says "read-only, no lease".
 - Tests must fail if the work is wrong. Include exact commands and expected results.
 - Don't launch agy, write meta or launch files, or take a lease. That happens on the box.
 - Plain short sentences. No secrets, tokens or key values anywhere in the brief.
