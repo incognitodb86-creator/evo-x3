@@ -7,7 +7,7 @@ Type=oneshot
 Environment=EVO_NTFY_TOKEN_FILE=%h/.config/evo-x3/ntfy-x3.token
 Environment=EVO_NTFY_URL=https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg
 Environment=EVO_GUFO_URL=http://127.0.0.1:8080/running
-Environment=EVO_ALIEN_URL=http://alienpc.tailf242b2.ts.net:8447/health
+Environment=EVO_ALIEN_URL=https://alienpc.tailf242b2.ts.net:8447/health
 Environment=EVO_JC_LOG=/home/evo/AI/pixlstash-tagging/runner-stdout.log
 Environment=EVO_RUNS_DIR=/home/evo/AI/community/runs
 ExecStart=/usr/bin/flock -n /tmp/evo-morning-status.lock /usr/bin/python3 -c "exec(chr(10).join([ \
@@ -26,7 +26,7 @@ ExecStart=/usr/bin/flock -n /tmp/evo-morning-status.lock /usr/bin/python3 -c "ex
   '''jc = pathlib.Path(E['EVO_JC_LOG'])''', \
   '''jc_lines = len(jc.read_text(errors='ignore').splitlines()[-500:]) if jc.is_file() else 0''', \
   '''runs = pathlib.Path(E['EVO_RUNS_DIR'])''', \
-  '''pending = sum(1 for d in runs.iterdir() if d.is_dir() and not (d / 'render_ok.json').exists()) if runs.is_dir() else 0''', \
+  '''pending = sum(1 for d in runs.iterdir() if d.is_dir() and not any(d.glob('*/render_ok.json'))) if runs.is_dir() else 0''', \
   '''body = chr(10).join(['X3 morning status', f'Gufo: {gufo} | AlienPC: {alien}', f'MemAvailable: {mem_gib} GiB | Disk free: {disk_free} GiB', f'JoyCaption log tail: {jc_lines} | Pending runs: {pending}'])''', \
   '''print(body)''', \
   '''tp = pathlib.Path(E['EVO_NTFY_TOKEN_FILE'])''', \

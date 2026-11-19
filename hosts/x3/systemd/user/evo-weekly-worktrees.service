@@ -16,7 +16,7 @@ ExecStart=/usr/bin/flock -n /tmp/evo-weekly-worktrees.lock /usr/bin/python3 -c "
   '''    if not (d / '.git').exists(): continue''', \
   '''    wt = subprocess.run(['git', '-C', str(d), 'worktree', 'list', '--porcelain'], capture_output=True, text=True)''', \
   '''    wts = [l[9:] for l in wt.stdout.splitlines() if l.startswith('worktree ')]''', \
-  '''    st = subprocess.run(['git', '-C', str(d), 'status', '--porcelain'], capture_output=True, text=True)''', \
+  '''    st = subprocess.run(['git', '--no-optional-locks', '-C', str(d), 'status', '--porcelain'], capture_output=True, text=True)''', \
   '''    dirty = len([l for l in st.stdout.splitlines() if l.strip()])''', \
   '''    if len(wts) > 1 or dirty: rows.append(f'{d.name}: worktrees={len(wts)} dirty={dirty}')''', \
   '''body = 'X3 weekly worktree report' + chr(10) + (chr(10).join(rows) if rows else 'All scanned repos clean, 0 extra worktrees.')''', \
