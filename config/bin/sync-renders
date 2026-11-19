@@ -92,13 +92,15 @@ if [ -d /mnt/qnap/renders/runs ]; then
   sync_runs < <(find /mnt/qnap/renders/runs -mindepth 1 -maxdepth 1 -type d -newer "$QNAP_SINCE" 2>/dev/null || true)
 fi
 
-# 3. Import any newly staged files into PixlStash (ST3a: detached transient user unit so the 2-min oneshot sync
-#    never waits on it and KillMode=control-group does not kill it; fixed unit name acts as lock: if pixl-import
-#    already exists or is active, skip).
-if [ "$DRY" != 1 ] && [ "$NEW" -gt 0 ] && [ -f "$IMPORT_PY" ]; then
-  if ! systemctl --user is-active --quiet pixl-import.service 2>/dev/null; then
-    systemd-run --user --unit=pixl-import --collect \
-      --description="PixlStash inbox import" \
-      /home/evo/.venvs/pixlstash/bin/python "$IMPORT_PY" >/dev/null 2>&1 || true
+# 3. Import any staged or left-over files in $INBOX into PixlStash (ST3a + review #6: start whenever $INBOX has
+#    files, not only when NEW>0, so timed-out batches retry on the next 2-min pass; detached transient user unit
+#    survives oneshot exit; fixed unit name acts as lock: if pixl-import is active or exists, skip).
+if [ "$DRY" != 1 ] && [ -f "$IMPORT_PY" ] && [ -d "$INBOX" ]; then
+  if [ "$NEW" -gt 0 ] || [ -n "$(find "$INBOX" -maxdepth 1 -type f ! -name '.*' -print -quit 2>/dev/null || true)" ]; then
+    if ! systemctl --user is-active --quiet pixl-import.service 2>/dev/null; then
+      systemd-run --user --unit=pixl-import --collect \
+        --description="PixlStash inbox import" \
+        /home/evo/.venvs/pixlstash/bin/python "$IMPORT_PY" >/dev/null 2>&1 || true
+    fi
   fi
 fi

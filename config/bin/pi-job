@@ -571,6 +571,31 @@ def _exec_job(job_id: str) -> int:
             ACTIVE_FILE.unlink(missing_ok=True)
 
 
+def _trigger_pixl_import_detached() -> None:
+    """ST3 (#7): start pixl-import as the same detached transient unit used by sync-renders (skip if active)."""
+    active = subprocess.run(
+        ["systemctl", "--user", "is-active", "--quiet", "pixl-import.service"],
+        capture_output=True,
+    )
+    if active.returncode == 0:
+        return
+    venv_py = HOME / ".venvs" / "pixlstash" / "bin" / "python"
+    py = str(venv_py) if venv_py.is_file() else "python3"
+    subprocess.run(
+        [
+            "systemd-run",
+            "--user",
+            "--unit=pixl-import",
+            "--collect",
+            "--description",
+            "PixlStash inbox import",
+            py,
+            str(IMPORT_INBOX_PY),
+        ],
+        capture_output=True,
+    )
+
+
 def _start_detached(
     role: str,
     target: str | None,
@@ -597,11 +622,7 @@ def _start_detached(
                 inbox_dst = PIXL_INBOX_DIR / f"{job_id}_{src.name}"
                 shutil.copy2(src, inbox_dst)
                 if IMPORT_INBOX_PY.is_file():
-                    subprocess.run(
-                        ["python3", str(IMPORT_INBOX_PY)],
-                        capture_output=True,
-                        timeout=60,
-                    )
+                    _trigger_pixl_import_detached()
 
         meta = {
             "job_id": job_id,
