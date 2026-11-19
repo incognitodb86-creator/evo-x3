@@ -8,9 +8,9 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
 - **Derrick's live yes in chat:** Card 1 (live apply), Card 26 (`ST1` default), and Card 12 (`P4.11` ntfy token for H3 timers) answered in chat (Max records id).
 - **X3 lease free** (`/home/derekboone/AI/locks/x3-lease.txt` empty). The doer takes it at start (one line, see Access & Lease). No lease-taken/released files, no brain or `records/status/` mirrors, no git commit for the lease, no message to Derrick.
 - **No active render** on X3/AlienPc (required for R5 and `sync-renders`), and **not during the Hermes bakeoff window** (Plan C16).
-- **Max import + pre-cutover bridge complete** from `mono` tip `3217c67 (or newer at Max import)`:
-  - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
-  - Until `MONO-S5` passes smoke: Max bridges `x3/render/` commits onto Gitea `x3-render` (never `x3-linux`) via `git format-patch --relative=x3/render/ <range>` + `git am`, and `x3/community/` commits onto Gitea `x3-community` via `git format-patch --relative=x3/community/ <range>` + `git am`, then pushes both part branches to Gitea. (After `MONO-S5`, live checkouts pull `mono` directly.)
+- **Max import + pre-cutover bridge complete** from `mono` tip `bab584a (or newer at Max import)`:
+  - **ONE BRANCH (`mono` ONLY — Derrick 2026-11-19 ~13:05 CT):** `mono` is the ONLY branch anyone pushes from now on (no further pushes to `x3-render`, `x3-community`, `alienpc-*`, or `u58` anywhere). `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
+  - Until `MONO-S5` passes smoke: Max's 12:49 CT bridge pushes (`x3-render` `a24f81b`, `x3-community` `f90c5bb`) already carry ST1, R5, ST2, L4, W3a, H5, RV1, RV2, ST4, and ST5, so this brief's `--ff-only` pulls stay valid. For any newer `x3/*` change before `MONO-S5`, Max applies it **locally** onto the live checkout (`git format-patch --relative=<prefix>/ <range>` + `git am` or staged patch) and does **NOT** push any part branch. (After `MONO-S5`, live checkouts pull `mono` directly.)
   - Root-copy files (`config/`, `hosts/`) are read from the fetched `mono` checkout at `/home/derekboone/evo-x3` (or Max's staged path) and installed per the Install table below.
 
 - **If `MONO-S5` already passed:** `/home/evo/AI/render` and `/home/evo/AI/community` are symlinks into the `mono` clone; skip the part-branch bridge and run `git -C /home/evo/AI/evo-x3 pull --ff-only` instead. Everything else in this brief is unchanged.
