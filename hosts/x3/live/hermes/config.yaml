@@ -9,7 +9,7 @@ attachments:
 plugins:
   clone_timeout_seconds: 300
 model:
-  default: flash-next-uncensored
+  default: flash-next-uncensored-v2
   provider: custom
   base_url: http://127.0.0.1:8080/v1
   context_length: 131072
@@ -196,7 +196,7 @@ updates:
 auxiliary:
   vision:
     provider: custom
-    model: flash-next-uncensored
+    model: flash-next-uncensored-v2
     base_url: http://127.0.0.1:8080/v1
     reasoning_effort: low
     key_env: LLM_KEY_HERMES
