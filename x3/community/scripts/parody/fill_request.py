@@ -67,6 +67,11 @@ REALISM_LORA_DEFAULT = {
 }
 
 
+def comfy_lora_name(name: str) -> str:
+    """ComfyUI on Windows (AlienPc) lists subfolder LoRAs with a backslash; a '/' fails value_not_in_list."""
+    return str(name or "").strip().replace("/", "\\")
+
+
 def parse_lora_spec(spec: str) -> Dict[str, Any]:
     """Parse `<lora_file>[:<strength>[:<trigger>]]` into a normalized LoRA dict."""
     parts = [p.strip() for p in str(spec or "").split(":")]
@@ -117,7 +122,7 @@ def _inject_h3_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -> 
             "_meta": {"title": f"H3 LoRA {idx}: {lr['name']}"},
             "class_type": "LoraLoaderModelOnly",
             "inputs": {
-                "lora_name": lr["name"],
+                "lora_name": comfy_lora_name(lr["name"]),
                 "model": prev_ref,
                 "strength_model": lr["strength"],
             },

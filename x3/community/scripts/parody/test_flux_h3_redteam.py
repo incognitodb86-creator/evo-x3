@@ -72,7 +72,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     assert gh["12"]["inputs"]["mod_1"] == "fk9_sydneysweeney_v1_refmod.safetensors"
     assert gh["12"]["inputs"]["strength_1"] == 0.85
     hl = [n for n in gh.values() if isinstance(n, dict) and n.get("class_type") == "LoraLoaderModelOnly"]
-    assert hl and hl[0]["inputs"]["lora_name"] == "klein9/fk9_sydneysweeney_v1_prodigy.safetensors"
+    assert hl and hl[0]["inputs"]["lora_name"] == "klein9\\fk9_sydneysweeney_v1_prodigy.safetensors"
     assert hl[0]["inputs"]["strength_model"] == 0.60
 
 
@@ -188,3 +188,10 @@ def test_beta7_convert_strips_banned_headers_on_prose_file(home, tmp_path, monke
     for banned in ("integrated_multimodal_description:", "overall_soundscape:", "non_diegetic_music:"):
         assert banned not in out
     assert "Soft surf and breath." in out
+
+
+def test_comfy_lora_name_windows_backslash():
+    # AlienPc ComfyUI (Windows) lists subfolder LoRAs as 'sub\\file'; '/' fails value_not_in_list.
+    assert fr.comfy_lora_name("sub/dir/x.safetensors") == "sub\\dir\\x.safetensors"
+    assert fr.comfy_lora_name("sub\\x.safetensors") == "sub\\x.safetensors"
+    assert fr.comfy_lora_name("top.safetensors") == "top.safetensors"
