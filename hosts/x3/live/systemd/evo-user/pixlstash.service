@@ -1,0 +1,13 @@
+[Unit]
+Description=PixlStash Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/evo/.venvs/pixlstash/bin/pixlstash-server
+Restart=on-failure
+RestartSec=5
+WorkingDirectory=/home/evo
+
+[Install]
+WantedBy=default.target

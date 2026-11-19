@@ -1,0 +1,12 @@
+All tests pass (17 assertions in 17 test cases).
+
+**Implementation summary:**
+
+- **bank_account.h**: Declared `Bankaccount` class with an `AccountState` enum (OPEN/CLOSED), an `int balance_`, and a `mutable std::mutex` to guard all accesses.
+- **bank_account.cpp**: Every operation (`open`, `close`, `balance`, `deposit`, `withdraw`) locks the mutex with `std::lock_guard`, making it thread-safe against race conditions. Operations throw `std::runtime_error` for:
+  - `open()` when already open (resetting balance to 0 on fresh open)
+  - `close()` when not open
+  - `balance()`, `deposit()`, `withdraw()` on a closed account
+  - negative deposits/withdrawals, and withdrawals exceeding the balance
+
+Since the `lock_guard` is scoped, exceptions safely release the mutex.

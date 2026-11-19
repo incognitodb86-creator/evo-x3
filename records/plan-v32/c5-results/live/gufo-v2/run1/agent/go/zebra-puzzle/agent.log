@@ -1,0 +1,18 @@
+Tests pass. The solution in `zebra_puzzle.go`:
+
+**Approach:** A constraint-pruned backtracking search over permutations of the 5 attribute values (colors, nationalities, beverages, smokes, pets) assigned to 5 houses — 120 permutations per category instead of 5!⁵ ≈ 24.8 billion combinations, because each category's constraints are applied as early as possible:
+
+- **Colors:** green immediately right of ivory (clue 6)
+- **Nationalities:** Englishman in red house (2), Norwegian in first house (10), Norwegian next to blue (15)
+- **Drinks:** coffee in green (4), milk in middle (9), Ukrainian drinks tea (5)
+- **Smokes:** Kools in yellow (8), Lucky Strike ↔ orange juice (13), Japanese ↔ Parliaments (14)
+- **Pets:** Spaniard owns dog (3), Old Gold ↔ snails (7), Chesterfields next to fox (11), Kools next to horse (12)
+
+The first full assignment satisfying all 15 clues is the unique solution, from which the resident sharing the house with water and with the zebra is read off.
+
+**Result:** The **Norwegian** drinks water, and the **Japanese** owns the zebra.
+
+```
+ok      zebra   0.002s          (test passes)
+BenchmarkScore-32   10    46916 ns/op
+```

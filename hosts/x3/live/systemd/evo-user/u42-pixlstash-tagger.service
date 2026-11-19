@@ -1,0 +1,17 @@
+[Unit]
+Description=U42 PixlStash Unattended Tagging Sidecar (joycaption + InsightFace)
+After=pixlstash.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/evo/AI/pixlstash-tagging
+Environment=U44_VLM_CONCURRENCY=1
+ExecStart=/home/evo/.venvs/pixlstash/bin/python -u /home/evo/AI/pixlstash-tagging/tag_runner.py
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=45
+StandardOutput=append:/home/evo/AI/pixlstash-tagging/runner-stdout.log
+StandardError=append:/home/evo/AI/pixlstash-tagging/runner-stdout.log
+
+[Install]
+WantedBy=default.target

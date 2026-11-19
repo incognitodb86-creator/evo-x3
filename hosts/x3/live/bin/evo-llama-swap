@@ -1,0 +1,30 @@
+#!/bin/bash
+# Start llama-swap on loopback. Canonical config keeps ${env.LLM_KEY_*} placeholders.
+# v272 rejects empty apiKeys and also fails if those env vars are unset.
+# 2026-11-15 X3 Phase 4 (Derrick t1784s6566 "empty-key guard"): REFUSE to start when every
+# LLM_KEY_* in /etc/evo-x3/llm.env is empty. Tailscale Serve publishes 127.0.0.1:8080 to the
+# tailnet, so the old auth-off fallback was not loopback-only. Backup: evo-llama-swap.bak-20261115-phase4
+set -euo pipefail
+CONFIG=/etc/evo-x3/llama-swap.yaml
+ENVFILE=/etc/evo-x3/llm.env
+LISTEN="${LISTEN_ADDR:-127.0.0.1:8080}"
+BIN=/usr/local/bin/llama-swap
+
+if [[ -f "$ENVFILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENVFILE"
+  set +a
+fi
+
+keys_present=0
+while IFS= read -r name; do
+  [[ -n "${!name-}" ]] && keys_present=1
+done < <(compgen -v | grep '^LLM_KEY_' || true)
+
+if [[ "$keys_present" -eq 1 ]]; then
+  exec "$BIN" -config "$CONFIG" -listen "$LISTEN"
+fi
+
+echo "llama-swap: REFUSING to start: every LLM_KEY_* in ${ENVFILE} is empty or missing. Auth must stay on (Tailscale Serve publishes ${LISTEN} to the tailnet). Derrick types the keys into ${ENVFILE}, then: systemctl restart llama-swap" >&2
+exit 78

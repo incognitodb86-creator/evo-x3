@@ -1,0 +1,12 @@
+[Unit]
+Description=Push EVO-X3 heartbeats to Uptime Kuma every 60s
+
+[Timer]
+OnBootSec=10s
+OnUnitActiveSec=60s
+AccuracySec=1s
+Persistent=true
+Unit=evo-x3-kuma-push.service
+
+[Install]
+WantedBy=timers.target

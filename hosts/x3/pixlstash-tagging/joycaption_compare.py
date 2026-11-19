@@ -25,7 +25,7 @@ LLAMA_SWAP_URL = "http://127.0.0.1:8080"
 JOYCAPTION_MODEL = "joycaption"
 TRIGGER_TAG = "jc-test"
 
-PIXL_TOKEN_CANDIDATES = (
+PIXL_TOKEN_CANDIDATES = "<redacted-in-locked-keyfile>"
     "/home/evo/.config/pixlstash/tagger-write.token",
 )
 PIXL_TOKEN_GLOB = "/home/evo/.config/pixlstash/*.token"
@@ -58,7 +58,7 @@ def read_pixl_token() -> str:
     for path in candidates:
         try:
             with open(path, "r", encoding="utf-8") as handle:
-                token = handle.read().strip()
+                token = "<redacted-in-locked-keyfile>"
             if token:
                 return token
         except OSError:
@@ -168,7 +168,7 @@ def query_joycaption(llm_client: httpx.Client, b64_img: str, prompt: str, max_to
         "model": JOYCAPTION_MODEL,
         "temperature": 0.6,
         "top_p": 0.9,
-        "max_tokens": max_tokens,
+        "max_tokens": "<redacted-in-locked-keyfile>"
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
@@ -247,12 +247,12 @@ def is_picture_done(out_dir: str, pid: int) -> bool:
 
 
 def run_compare(dry_run: bool, force: bool) -> dict[str, int | float | bool | None]:
-    pixl_token = read_pixl_token()
+    pixl_token = "<redacted-in-locked-keyfile>"
     llm_key = read_llm_key()
 
     pixl_headers = {"Authorization": f"Bearer {pixl_token}"}
     llm_headers = {
-        "Authorization": f"Bearer {llm_key}",
+        "Authorization": "<redacted-in-locked-keyfile>"
         "Content-Type": "application/json",
     }
 

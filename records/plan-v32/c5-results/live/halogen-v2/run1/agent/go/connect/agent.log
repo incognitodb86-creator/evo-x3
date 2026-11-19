@@ -1,0 +1,7 @@
+All tests pass. Implementation notes:
+
+- `parseBoard` strips whitespace and validates cells (`.`, `O`, `X`).
+- `connected` runs BFS for a player: seeds from the goal edge (top row for `O`, column 0 for `X`) and wins when a reachable stone touches the opposite edge (bottom row for `O`, last column for `X`).
+- Neighbour offsets account for the parallelogram layout (rows shifted right), so the six neighbours of `(r, c)` are `(r, c±1)`, `(r-1, c)`, `(r-1, c+1)`, `(r+1, c)`, `(r+1, c-1)`; ragged rows are bounds-checked per row.
+
+Result: `ok connect` — all cases (empty board, 1×1 wins, edge-only, illegal diagonal, crossing paths, spiral) pass.

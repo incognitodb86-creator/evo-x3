@@ -1,0 +1,9 @@
+[Unit]
+Description=Automount QNAP X3-drop at /mnt/qnap/pi-drop
+
+[Automount]
+Where=/mnt/qnap/pi-drop
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target

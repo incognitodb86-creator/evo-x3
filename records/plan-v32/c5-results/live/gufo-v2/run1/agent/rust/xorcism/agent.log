@@ -1,0 +1,24 @@
+All tests pass (77 base, 109 with `--features io`, including all previously-ignored ones).
+
+**`src/lib.rs`** — full implementation:
+
+```rust
+pub struct Xorcism<'a> { key: &'a [u8], offset: usize }
+
+pub fn new<Key: AsRef<[u8]> + ?Sized>(key: &'a Key) -> Xorcism<'a>
+pub fn munge_in_place(&mut self, data: &mut [u8])
+pub fn munge<'b, Data: IntoIterator>(&'b mut self, data: Data)
+    -> impl Iterator<Item = u8> + 'b + use<'a, 'b, Data>
+where Data::Item: Borrow<u8>, Data: 'b
+pub fn reader<R: Read>(self, reader: R) -> XorcismReader<'a, R>   // feature = "io"
+pub fn writer<W: Write>(self, writer: W) -> XorcismWriter<'a, W>  // feature = "io"
+```
+
+Design notes:
+- **Non-allocating**: holds `&'a [u8]` (borrowed via `AsRef`, `?Sized` so `&str`, `&[u8]`, `[u8; N]`, `&&[u8; N]` all work), plus a `usize` key offset — the state that makes repeated munges differ.
+- **Shared helper**: `next_key_byte(&mut self)` returns the next (wrapping) key byte, so `munge_in_place` and `munge` both reduce to one line each and share identical state advancement. An empty key degenerates to XOR with `0` instead of panicking.
+- **`munge`** is a pure combinator: `data.into_iter().map(move |byte| *byte.borrow() ^ self.next_key_byte())` — lazy, stateful, zero-alloc; `Borrow<u8>` accepts owned `u8`, `&u8`, `Vec<u8>`, `&[u8]`, or even another munge iterator (round-trip tests).
+- Lifetime wrangling: the returned `impl Iterator` captures `&'b mut self` plus the key lifetime, handled with precise capturing (`use<'a, 'b, Data>`); requiring `'b: 'a` instead would have over-constrained callers with short-lived keys.
+- **io adaptors** (`XorcismReader`/`XorcismWriter`) own the `Xorcism` state so they nest (`reader(reader)` / `writer(writer)` round-trips). The writer XORs through a 256-byte inline scratch buffer and `write_all`s each chunk so a partial underlying write never forces a re-munge (which would desync the key).
+
+`Cargo.toml` already declared the `io` feature, so it needed no changes.

@@ -1,0 +1,16 @@
+All 44 tests pass. Summary of the implementation in `src/lib.rs`:
+
+**Representation** — `Decimal { negative: bool, digits: Vec<u8>, scale: usize }`:
+- `digits` holds the magnitude as base-10 digits, **least-significant first** (e.g., `-1.230` → `[0,3,2,1]`, scale 3)
+- `scale` = number of fractional digits
+- Normalized on construction: leading/trailing zeros stripped, zero is always positive — so `0 == 0000000000000.00000...` works
+
+**Key operations**:
+- `try_from` — parses optional `+`/`-` sign, integer and fractional parts, rejects empty/malformed input (returns `None`)
+- `aligned()` — brings two values to a common scale by zero-padding the fractional (low) end
+- `add_mag`/`sub_mag` — schoolbook digit addition with carry, and subtraction (assumes `a ≥ b`) with borrow
+- `Add`/`Sub` — same signs: add magnitudes; differing signs: compare magnitudes and subtract (sign taken from the larger); `Sub` implemented as `self + (-other)`
+- `Mul` — O(n·m) digit-by-digit multiplication, scales added, sign is XOR of signs
+- `PartialEq`/`Eq`/`PartialOrd`/`Ord` — sign first, then magnitude comparison at common scale (reversed for two negatives)
+
+No external crates; `Cargo.toml` needed no changes.

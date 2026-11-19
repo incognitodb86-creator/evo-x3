@@ -1,0 +1,38 @@
+   Compiling macros v0.1.0 (/home/derekboone/evo-x3/records/plan-v32/c5-results/live/gufo-v2/run1/agent/grade/rust/macros)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running unittests src/lib.rs (target/debug/deps/macros-17a60ec2dd53cfc2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/macros.rs (target/debug/deps/macros-9bb348657b778b45)
+
+running 18 tests
+test no_trailing_comma ... ok
+test test::type_not_in_scope ... ok
+test trailing_comma ... ok
+test single ... ok
+test nested ... ok
+test empty ... ok
+test test::macro_out_of_scope ... ok
+test type_override ... ok
+test compile_fails_two_arrows ... ok
+test compile_fails_no_comma ... ok
+test compile_fails_double_commas ... ok
+test compile_fails_leading_comma ... ok
+test compile_fails_only_arrow ... ok
+test compile_fails_missing_argument ... ok
+test compile_fails_comma_sep ... ok
+test compile_fails_single_argument ... ok
+test compile_fails_triple_arguments ... ok
+test compile_fails_only_comma ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+   Doc-tests macros
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

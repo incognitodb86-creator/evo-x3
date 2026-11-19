@@ -1,0 +1,23 @@
+--- FAIL: TestSolve (0.00s)
+    --- FAIL: TestSolve/puzzle_with_three_letters (0.00s)
+panic: runtime error: index out of range [3] with length 3 [recovered, repanicked]
+
+goroutine 7 [running]:
+testing.tRunner.func1.2({0x57bf80, 0x17f7c35ce1b0})
+	/usr/lib/golang/src/testing/testing.go:1974 +0x232
+testing.tRunner.func1()
+	/usr/lib/golang/src/testing/testing.go:1977 +0x349
+panic({0x57bf80?, 0x17f7c35ce1b0?})
+	/usr/lib/golang/src/runtime/panic.go:860 +0x13a
+alphametics.(*solver).solve(0x0?, 0x17f7c36a1b00?, 0x3?, 0x2?, {0x17f7c36a1b60?, 0x0?, 0x0?})
+	/home/derekboone/evo-x3/records/plan-v32/c5-results/live/halogen-v2/run1/agent/grade/go/alphametics/alphametics.go:219 +0xa6
+alphametics.Solve({0x58e9d6?, 0xd?})
+	/home/derekboone/evo-x3/records/plan-v32/c5-results/live/halogen-v2/run1/agent/grade/go/alphametics/alphametics.go:186 +0x1b7b
+alphametics.TestSolve.func1(0x17f7c36d2488)
+	/home/derekboone/evo-x3/records/plan-v32/c5-results/live/halogen-v2/run1/agent/grade/go/alphametics/alphametics_test.go:11 +0x3b
+testing.tRunner(0x17f7c36d2488, 0x17f7c35de450)
+	/usr/lib/golang/src/testing/testing.go:2036 +0xea
+created by testing.(*T).Run in goroutine 6
+	/usr/lib/golang/src/testing/testing.go:2101 +0x4c5
+FAIL	alphametics	0.003s
+FAIL

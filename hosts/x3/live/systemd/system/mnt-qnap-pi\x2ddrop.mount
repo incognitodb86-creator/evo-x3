@@ -1,0 +1,13 @@
+[Unit]
+Description=QNAP X3-drop at /mnt/qnap/pi-drop
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What=//192.168.0.147/X3-drop
+Where=/mnt/qnap/pi-drop
+Type=cifs
+Options=credentials=/etc/evo-x3/qnap.cred,vers=3.0,uid=derekboone,gid=derekboone,_netdev,nofail
+
+[Install]
+WantedBy=multi-user.target

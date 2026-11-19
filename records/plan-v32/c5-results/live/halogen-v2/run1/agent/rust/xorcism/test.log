@@ -1,0 +1,25 @@
+   Compiling xorcism v0.1.0 (/home/derekboone/evo-x3/records/plan-v32/c5-results/live/halogen-v2/run1/agent/grade/rust/xorcism)
+error[E0700]: hidden type for `impl Iterator<Item = u8>` captures lifetime that does not appear in bounds
+  --> src/lib.rs:94:9
+   |
+89 |       pub fn munge<Data>(&mut self, data: Data) -> impl Iterator<Item = u8>
+   |                          ---------                 ------------------------ opaque type defined here
+   |                          |
+   |                          hidden type `Munge<'_, 'a, _>` captures the anonymous lifetime defined here
+...
+94 | /         Munge {
+95 | |             key: self.stream(),
+96 | |             pos: &self.pos,
+97 | |             data: data.into_iter(),
+98 | |         }
+   | |_________^
+   |
+help: add a `use<...>` bound to explicitly capture `'_`
+   |
+89 |     pub fn munge<Data>(&mut self, data: Data) -> impl Iterator<Item = u8> + use<'_, Data>
+   |                                                                           +++++++++++++++
+
+For more information about this error, try `rustc --explain E0700`.
+error: could not compile `xorcism` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `xorcism` (lib test) due to 1 previous error

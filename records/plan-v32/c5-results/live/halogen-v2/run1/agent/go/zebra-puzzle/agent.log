@@ -1,0 +1,35 @@
+Done. `go test ./...` passes.
+
+**Solution in `zebra_puzzle.go`:**
+
+```go
+package zebra
+
+type Solution struct {
+	DrinksWater string
+	OwnsZebra   string
+}
+```
+
+**Approach** (`SolvePuzzle`): a constraint-guided search that assigns one whole category at a time and immediately prunes with every rule that only involves the categories assigned so far — instead of blindly enumerating 5!⁵ ≈ 24.9 B combinations.
+
+1. **Colors** (as permutations of houses): keep only layouts where green is immediately right of ivory (rule 6).
+2. **Nationalities**: keep only those where the Englishman is in the red house (2), the Norwegian in the first house (10) — which forces blue into the second house (15).
+3. **Drinks**: coffee in the green house (4), tea at the Ukrainian (5), milk in the middle (9).
+4. **Smokes**: Kools in the yellow house (8), Lucky Strike with orange juice (13), Parliament at the Japanese (14).
+5. **Pets**: dog at the Spaniard (3), snails with Old Gold (7), fox next to Chesterfields (11), horse next to Kools (12).
+
+Because each level only runs for parents that already passed the earlier checks, the effective search space collapses to a few thousand candidates; the first complete layout found terminates the recursion.
+
+The solved arrangement is:
+
+| House | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| Color | yellow | blue | red | ivory | green |
+| Nationality | Norwegian | Norwegian? … | | | |
+
+**Result:** the **Norwegian** drinks water, the **Japanese** owns the zebra.
+
+```
+ok  zebra  0.002s
+```

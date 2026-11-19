@@ -1,0 +1,18 @@
+All 44 tests pass with no warnings. 
+
+## Summary
+
+I implemented `Decimal` from scratch in `src/lib.rs` (no external crates, `Cargo.toml` unchanged):
+
+**Representation** — each value is stored as:
+- `neg: bool` — sign flag (zero is always stored non-negative, so `-0` and `0` compare equal)
+- `mag: Vec<u32>` — magnitude as an integer in little-endian base-10⁹ chunks
+- `scale: u32` — number of fractional digits, i.e. value = `mag / 10^scale`
+
+**Core helpers**:
+- `parse_mag` — converts the digit string (integer digits ++ fraction digits) into base-10⁹ chunks, with `scale = fraction length`
+- `cmp_mag` / `add_mag` / `sub_mag` / `mul_mag` — schoolbook big-integer operations on the chunk representation
+- `rescale(m, k)` — multiplies a magnitude by 10ᵏ (shift by `k/9` whole chunks plus a multiply by `10^(k%9)`), used to bring operands to a common scale
+- `add_raw` / `make` — signed addition logic handling same-sign (magnitude add) vs. mixed-sign (magnitude subtract with sign selection), with zero normalization
+
+**Traits implemented**: `PartialEq`, `Eq`, `Ord`, `PartialOrd` (all via a scale-aware `cmp_val` that rescales to the max scale before comparing), plus `Add`, `Sub` (via `add_raw` with flipped sign), and `Mul` (scale = sum of scales).

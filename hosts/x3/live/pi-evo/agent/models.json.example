@@ -1,0 +1,487 @@
+{
+  "providers": {
+    "x3-local": {
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "api": "openai-completions",
+      "apiKey": "<redacted-in-locked-keyfile>",
+      "models": [
+        {
+          "id": "gemma4-heretic",
+          "name": "X3 local Gemma 4 26B A4B Heretic Q8_0 + official unsloth mmproj BF16 vision (llama.cpp Vulkan)",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 64
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "supportsReasoningEffort": false,
+            "supportsDeveloperRole": false
+          }
+        },
+        {
+          "id": "gemma4-heretic-sub",
+          "name": "X3 local Gemma 4 26B A4B Heretic Q8_0 subagent (maxTokens 4096, thinking off)",
+          "reasoning": false,
+          "contextWindow": 131072,
+          "maxTokens": 4096,
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "supportsReasoningEffort": false,
+            "supportsDeveloperRole": false
+          }
+        },
+        {
+          "id": "qwen27b",
+          "name": "X3 local Qwen3.8-27B UD-Q8_K_XL + DFlash2 (Gufo)",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template"
+          }
+        },
+        {
+          "id": "flash-next",
+          "name": "X3 local Qwen3.8-Flash-Next native HGN v2 (Halogen 0.20.5)",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        },
+        {
+          "id": "flash-next-sub",
+          "name": "X3 local Qwen3.8-Flash-Next native HGN v2 (Halogen 0.20.5) subagent 128K/8K",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 8192,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        },
+        {
+          "id": "flash-next-uncensored",
+          "name": "X3 local Huihui Qwen3.8-Flash-Next abliterated HGN (Halogen 0.20.5) NON-PRODUCTION, 4 slots, vision",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        },
+        {
+          "id": "flash-next-uncensored-sub",
+          "name": "X3 local Huihui Qwen3.8-Flash-Next abliterated HGN subagent 128K/8K",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 8192,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        },
+        {
+          "id": "flash-next-uncensored-v2",
+          "name": "X3 local Huihui Qwen3.8-Flash-Next abliterated HGN (Halogen 0.20.7) NON-PRODUCTION, 4 slots, vision [v2 HGN]",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        },
+        {
+          "id": "flash-next-uncensored-v2-sub",
+          "name": "X3 local Huihui Qwen3.8-Flash-Next abliterated HGN subagent 128K/8K [v2 HGN]",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 8192,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        }
+      ]
+    },
+    "x3-local-coding": {
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "api": "openai-completions",
+      "apiKey": "<redacted-in-locked-keyfile>",
+      "models": [
+        {
+          "id": "flash-next-uncensored",
+          "name": "Huihui Flash-Next abliterated (same served slot) CODING sampling temp 0.6 (Forge)",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0,
+            "repetition_penalty": 1.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        },
+        {
+          "id": "flash-next-uncensored-v2",
+          "name": "Huihui Flash-Next abliterated (same served slot) CODING sampling temp 0.6 (Forge) [v2 HGN]",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0.0,
+            "repetition_penalty": 1.0
+          },
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget"
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
+            }
+          }
+        }
+      ],
+      "name": "X3 local (coding sampling: Qwen card thinking-coding temp 0.6)"
+    },
+    "alienpc": {
+      "baseUrl": "https://alienpc.tailf242b2.ts.net:8447/v1",
+      "api": "openai-completions",
+      "apiKey": "<redacted-in-locked-keyfile>",
+      "models": [
+        {
+          "id": "coding_swift15_iq3s_esp",
+          "name": "Swift 1.5 Qwen3.8-Flash-Next IQ3_S + ESP via AlienPc fail-fast gate :8447 (P5.2)",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 122000,
+          "maxTokens": 8192,
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
+          },
+          "samplingParams": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "experimental_speed_projection": true
+          },
+          "samplingParamsByThinkingLevel": {
+            "off": {
+              "temperature": 0.7,
+              "top_p": 0.8,
+              "top_k": 20,
+              "min_p": 0,
+              "presence_penalty": 1.5,
+              "repetition_penalty": 1.0
+            }
+          },
+          "inputLimits": {
+            "images": {
+              "resize": {
+                "maxWidth": 1568,
+                "maxHeight": 1568
+              }
+            }
+          }
+        }
+      ],
+      "name": "AlienPc Swift via fail-fast gate (P5.2)"
+    }
+  }
+}

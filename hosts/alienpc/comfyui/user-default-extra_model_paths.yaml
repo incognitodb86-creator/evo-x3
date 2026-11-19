@@ -1,0 +1,13 @@
+﻿comfyui:
+  base_path: .
+  checkpoints: models/checkpoints,models/diffusion_models
+  clip: models/clip
+  clip_vision: models/clip_vision
+  configs: models/configs
+  controlnet: models/controlnet
+  embeddings: models/embeddings
+  loras: models/loras
+  unet: models/unet
+  vae: models/vae
+  diffusion_models: models/diffusion_models
+  ipadapter: models/ipadapter

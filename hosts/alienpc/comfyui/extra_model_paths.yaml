@@ -1,0 +1,44 @@
+# Master extra_model_paths.yaml — Unified Model Registry
+# Configured for Derek's RTX 5070 Ti (16GB VRAM) Pipeline
+# Last Updated: 2026-09-11
+
+comfyui_primary:
+  base_path: C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/
+  checkpoints: models/checkpoints,models/diffusion_models,models/unet
+  clip: models/clip
+  clip_vision: models/clip_vision
+  configs: models/configs
+  controlnet: models/controlnet
+  diffusion_models: models/diffusion_models
+  embeddings: models/embeddings
+  ipadapter: models/ipadapter
+  loras: models/loras
+  unet: models/unet
+  vae: models/vae
+  upscale_models: models/upscale_models
+  text_encoders: models/text_encoders
+  latent_upscale_models: models/latent_upscale_models
+
+shared_vault_e:
+  base_path: E:/LTX_Models/
+  checkpoints: checkpoints/
+  diffusion_models: diffusion_models/
+  unet: unet/
+  loras: loras/
+  text_encoders: text_encoders/
+  vae: vae/
+  controlnet: controlnet/
+  clip: clip/
+  clip_vision: clip_vision/
+  latent_upscale_models: latent_upscale_models/
+  upscale_models: upscale_models/
+
+ltx_pipeline_c:
+  base_path: C:/Users/derek/HardcoreNSFW-LTX-Pipeline/ComfyUI/models/
+  checkpoints: checkpoints/
+  loras: loras/
+  unet: unet/
+  text_encoders: text_encoders/
+  vae: vae/
+  controlnet: controlnet/
+  latent_upscale_models: latent_upscale_models/

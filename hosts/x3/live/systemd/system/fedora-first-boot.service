@@ -1,0 +1,7 @@
+[Unit]
+Description=Keep Fedora first in UEFI boot order
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/fedora-first-boot.sh
+[Install]
+WantedBy=multi-user.target

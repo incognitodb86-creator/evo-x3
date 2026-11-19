@@ -30,3 +30,10 @@ deep-research-bakeoff/searxng/*.bak-*
 
 # Pairing QR PNG encodes a secret
 records/pi-mobile-qr.png
+
+# nested community repos (recorded in hosts/x3/live/nested-repos.txt)
+bench/quant-bench/
+src/gemma4-gufo-extension/
+# C5 bench build trees (logs/json kept)
+records/plan-v32/c5-results/live/**/build/
+records/plan-v32/c5-results/live/**/target/

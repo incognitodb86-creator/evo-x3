@@ -1,0 +1,71 @@
+{
+  "$schema": "https://pi.dev/mcp.schema.json",
+  "autoEnableCodemode": false,
+  "mcpServers": {
+    "homeassistant": {
+      "url": "http://192.168.0.196/api/mcp",
+      "headers": {
+        "Authorization": "!cat /home/evo/.config/forge-mcp/HA_BEARER"
+      },
+      "enabled": false
+    },
+    "gitea": {
+      "command": "/home/evo/.config/forge-mcp/run-gitea-mcp.sh",
+      "args": [
+        "-t",
+        "stdio",
+        "-r",
+        "-H",
+        "https://qnap.tailf242b2.ts.net"
+      ],
+      "description": "Read-only Gitea MCP (qnap) with token from evo-only file",
+      "exposure": "deferred"
+    },
+    "playwright": {
+      "command": "/home/evo/.local/bin/playwright-mcp",
+      "args": [
+        "--headless",
+        "--browser",
+        "chromium",
+        "--user-data-dir",
+        "/home/evo/.cache/forge-playwright"
+      ],
+      "description": "Headless Playwright browser (Chromium) with dedicated profile",
+      "exposure": "deferred"
+    },
+    "searxng": {
+      "command": "/home/evo/.local/bin/mcp-searxng",
+      "env": {
+        "SEARXNG_URL": "http://127.0.0.1:8888"
+      },
+      "description": "Local X3 SearXNG web search (pinned mcp-searxng 2.10.1)",
+      "exposure": "deferred"
+    },
+    "fetch": {
+      "command": "/usr/bin/uvx",
+      "args": [
+        "mcp-server-fetch==2026.11.11"
+      ],
+      "description": "Official MCP web fetch server (pinned mcp-server-fetch 2026.11.11)",
+      "exposure": "deferred"
+    },
+    "vaultwarden": {
+      "command": "/home/evo/.config/forge-mcp/run-vaultwarden-mcp.sh",
+      "enabled": false,
+      "description": "Vaultwarden / Bitwarden MCP (disabled until vaultwarden.env is filled)"
+    },
+    "google-workspace": {
+      "command": "/home/evo/.config/forge-mcp/run-google-workspace-mcp.sh",
+      "args": [
+        "--single-user"
+      ],
+      "enabled": false,
+      "description": "Google Workspace MCP (disabled until OAuth client is set and signed in)"
+    },
+    "unifi": {
+      "command": "/home/evo/.config/forge-mcp/run-unifi-mcp.sh",
+      "enabled": false,
+      "description": "UniFi Network MCP (read-only by default; disabled until unifi.env is filled)"
+    }
+  }
+}

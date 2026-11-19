@@ -1,0 +1,25 @@
+All 12 test cases pass (69 assertions).
+
+**Implementation** (`binary_search_tree.h` — everything is a template, so it lives in the header):
+
+```cpp
+template<typename T>
+class binary_tree {
+public:
+    explicit binary_tree(const T& data_value);
+    void insert(const T& value);          // iterative: <= goes left, > goes right
+    const T& data() const;
+    const std::unique_ptr<binary_tree>& left() const;   // works with (bool) and ->
+    const std::unique_ptr<binary_tree>& right() const;
+    const_iterator begin() const;         // in-order
+    const_iterator end() const;           // empty sentinel
+private:
+    T data_;
+    std::unique_ptr<binary_tree> left_, right_;
+};
+```
+
+Key points:
+- **`insert`** walks down from the root, going left for values `<= node->data_` (so duplicates land on the left, as the `same_number_at_left_node` test expects) and right otherwise, allocating the child when it hits `nullptr`.
+- **`const_iterator`** is a forward iterator holding a `std::stack<const binary_tree*>` of the pending "left spine". Construction pushes the whole left spine; `operator++` pops the top (next-smallest) and pushes the right child's left spine — giving in-order (sorted) traversal without recursion or extra storage. `end()` is the empty-stack iterator, so equality is just stack comparison.
+- `binary_search_tree.cpp` stays as-is (no non-template code needed), and no names were changed.

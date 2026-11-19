@@ -27,7 +27,7 @@ STREAM_BATCH_LIMIT = 5000
 
 def read_secret_token(path: str) -> str:
     with open(path, "r", encoding="utf-8") as handle:
-        token = handle.read().strip()
+        token = "<redacted-in-locked-keyfile>"
     if not token:
         raise RuntimeError(f"Empty token file: {path}")
     return token
@@ -103,7 +103,7 @@ def write_unmatched_file(path: str, entries: list[tuple[str, int]]) -> None:
 
 
 def run_backfill(dry_run: bool) -> dict[str, int | bool]:
-    token = read_secret_token(PIXL_TOKEN_FILE)
+    token = "<redacted-in-locked-keyfile>"
     mapper = index_map.get_mapper()
 
     counts: dict[str, int | bool] = {

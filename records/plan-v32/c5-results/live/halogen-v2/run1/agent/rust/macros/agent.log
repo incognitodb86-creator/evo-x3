@@ -1,0 +1,29 @@
+All 18 tests pass (including the previously `#[ignore]`d ones and the trybuild-style compile-fail tests).
+
+**`src/lib.rs`**
+
+```rust
+#[macro_export]
+macro_rules! hashmap {
+    () => {
+        ::std::collections::HashMap::new()
+    };
+    ( $( $key:expr => $value:expr ),+ $(,)? ) => {
+        {
+            let mut hm = ::std::collections::HashMap::new();
+            $(
+                hm.insert($key, $value);
+            )+
+            hm
+        }
+    };
+}
+```
+
+Notes on the design:
+
+- **Two arms**: an empty arm (needed because `HashMap::new()` alone in the repeating arm would never be reached, and `hashmap!()` must type-infer) and a repeating arm for `key => value` pairs.
+- **`$(,)? ` optional trailing comma** so `hashmap!(1 => 2, 3 => 4,)` works while `hashmap!(1 => 2, ,)` (double comma), `, 'a' => 2` (leading comma) etc. fail to match — that's what makes the `tests/invalid/*.rs` files fail to compile.
+- **`expr` fragments** allow arbitrary expressions as keys/values, including nested `hashmap!(...)` invocations and block expressions.
+- **Fully-qualified `::std::collections::HashMap`** so a user's shadowing `mod std { … }` (the `type_override` test) can't hijack the type; and no `$crate::` helpers are used, so `macros::hashmap!()` path-qualified invocation works too.
+- `Cargo.toml` needed no changes (still edition 2021, no dependencies).

@@ -1,0 +1,9 @@
+[Unit]
+Description=Automount QNAP homes (derek) at /mnt/qnap/derek-homes
+
+[Automount]
+Where=/mnt/qnap/derek-homes
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target

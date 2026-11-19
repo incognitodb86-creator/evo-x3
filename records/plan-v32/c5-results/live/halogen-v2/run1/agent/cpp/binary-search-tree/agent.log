@@ -1,0 +1,9 @@
+All tests pass (69 assertions, 12 test cases). ✅
+
+**What I implemented** — everything lives in `binary_search_tree.h` since the tree is a class template (the `.cpp` just includes the header):
+
+- **`binary_tree<T>`** — holds `T data_` plus `std::unique_ptr<binary_tree> left_/right_` (owning pointers, so cleanup is automatic and no manual `delete` is needed).
+  - `insert(const T&)`: `<=` goes left (so duplicates land on the left, matching `same_number_at_left_node`), `>` goes right; recurses when the child already exists.
+  - `data()`, `left()`, `right()` return `const T&` and `const std::unique_ptr<binary_tree>&` so the tests can bind them to `tree_ptr<T>` and test them in a boolean context.
+  - `begin()` / `end()` return a `tree_iterator<T>` for in-order traversal.
+- **`tree_iterator<T>`** — a forward iterator (`iterator_category`, `value_type`, etc. defined) that keeps the path to the current node in a `std::stack`. `begin()` pushes the left spine; `operator++` pops the current node and pushes the left spine of its right subtree. This yields sorted output in O(1) amortized per step with no extra vector, and the `end()` iterator is simply the empty stack.

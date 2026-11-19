@@ -116,7 +116,7 @@ def resolve_vlm_concurrency(cli_value: int | None) -> int:
 
 def read_secret_token(path: str) -> str:
     with open(path, "r", encoding="utf-8") as handle:
-        token = handle.read().strip()
+        token = "<redacted-in-locked-keyfile>"
     if not token:
         raise RuntimeError(f"Empty token file: {path}")
     return token
@@ -562,11 +562,11 @@ class Runner:
         self.vlm_started = False
         self.db_lock = threading.Lock()
         self.conn = init_state_db(STATE_DB)
-        self.pixl_token = read_secret_token(PIXL_TOKEN_FILE)
+        self.pixl_token = "<redacted-in-locked-keyfile>"
         self.llm_key = read_llm_key(LLM_ENV_FILE)
         self.pixl_headers = {"Authorization": f"Bearer {self.pixl_token}"}
         self.llm_headers = {
-            "Authorization": f"Bearer {self.llm_key}",
+            "Authorization": "<redacted-in-locked-keyfile>"
             "Content-Type": "application/json",
         }
         self._tls = threading.local()
@@ -904,7 +904,7 @@ class Runner:
         user_text = BOORU_PROMPT if unassigned_faces == 0 else BOORU_PERSON_PROMPT
         llm_payload = {
             "model": VLM_MODEL,
-            "max_tokens": VLM_MAX_TOKENS,
+            "max_tokens": "<redacted-in-locked-keyfile>"
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {
