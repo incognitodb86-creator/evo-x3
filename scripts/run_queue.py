@@ -208,6 +208,7 @@ def upscale_done(run_dir, jobs, slog):
                         "bytes": p1["bytes"]})
         json.dump(meta_ok, open(okp, "w", encoding="utf-8"), indent=1)
         n_ok += 1
+        copy_to_pi_drop(run_dir, tag, clip, slog)   # t2554: only the 2x clip goes to pi-drop
         qlog(run_dir, "UPSCALE ok pos=%d tag=%s %dx%d->%dx%d fps=%s frames=%d audio=%s bytes=%d elapsed=%.1fs raw=%s" % (
             j["pos"], tag, p0["w"], p0["h"], p1["w"], p1["h"], p1["fps"], p1["frames"], "yes" if p1["audio"] else "no",
             p1["bytes"], el, os.path.basename(raw)))
@@ -579,7 +580,7 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     if why:
         qlog(run_dir, "FAIL pos=%d tag=%s objective %s" % (job["pos"], tag, "; ".join(why))); return False
     slog("OBJECTIVE ok %s frames=%d size=%sx%s audio=True bytes=%d" % (t, p["frames"], p["w"], p["h"], p["bytes"]))
-    copy_to_pi_drop(run_dir, tag, s["file"], slog)
+    # t2554 (Derrick 2026-11-19): pi-drop gets only the RTX-upscaled clip, copied in upscale_done after UPSCALE ok
     rgj.contact_sheet(s["file"], os.path.join(d, tag + "_stills_contact.png"), p["duration"])
     outs = [os.path.join(OUT_ROOT, t, f) for f in os.listdir(os.path.join(OUT_ROOT, t))] if os.path.isdir(os.path.join(OUT_ROOT, t)) else []
     wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None
