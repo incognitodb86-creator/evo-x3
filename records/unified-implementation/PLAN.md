@@ -36,7 +36,7 @@ Four sibling plans landed on GitHub `evo-x3-all` this morning (blob SHAs above, 
 
 Work is done in waves so independent tracks run in parallel. File-only work is handed to Opus on GitHub (Copilot can only see GitHub). Max later fetches that commit, reviews the diff, scans for secrets, applies it under a lease, verifies, and pushes to Gitea (GitHub already has Opus's commit; Max fast-forwards Gitea to the same SHA). Live runs, installs, downloads, GPU, secrets, and test renders stay off GitHub and go to X3 Forge, Hydrogen, or Max under an AlienPc lease.
 
-There is **no live AlienPc Forge / pi coding chat today** (VERIFIED against `hosts/SETUP-MAP.md`, `hosts/alienpc/**`, and the `alienpc-community` / `alienpc-render` trees: only an Oct 23 archived `ralph-community` and a historical Start Menu "Start Forge" shortcut, not a current coding pane). This plan does not invent one. Until Derrick asks to set one up, AlienPc GPU and install work is Max under an AlienPc lease, with prompts and queueing from the X3 as they are now (`render-pi.sh` / `render_writer_pipeline.py` / `queue-remote.sh`).
+**AlienPc Forge is live** (VERIFIED live on AlienPc, Nov 19 10:40 AM CT; correction to an earlier draft that relied only on the committed inventory): pi coding chats run in herdr panes, Forge's chat folder is `C:\Users\derek\forge` (last active Nov 19 7:26 AM CT), and Render's is `C:\AI\render`. `hosts/SETUP-MAP.md` is missing it and should be updated (Opus item). AlienPc-side scripts, installs and Comfy node setup go to AlienPc Forge with a BRIEF and RESULT file, only while ComfyUI is idle; Max verifies. Prompts and queueing stay on the X3 as now (`render-pi.sh` / `render_writer_pipeline.py` / `queue-remote.sh`).
 
 Remaining Antigravity / Hydrogen usage is **UNKNOWN**: `agy` on the X3 has no stock usage or quota subcommand (VERIFIED `agy help`, 10:31 AM CT). Use Hydrogen only where a strong live coding or scoring pass is worth it (`W1` analysis, hard packages if Opus does not take them). Prefer Opus for file-only work so both Max and Hydrogen are saved.
 
@@ -89,7 +89,7 @@ Brainstorm was kept short: the four source plans already state what to build. Th
 |---|---|---|
 | **Opus on GitHub** | File-only: AGENTS.md, OPERATOR.md, SOUL, skills, config *text* (llama-swap.yaml, Hermes `config.yaml`, pi settings, systemd unit text), briefs, docs, scripts and templates that do not need a live run. Preferred for all of that (t2632u). | Live runs, installs, downloads, GPU, secrets, test renders, Gitea, X3, AlienPc, force pushes. |
 | **X3 Forge** | Live X3 execution of a one-line goal plus `records/<id>/BRIEF.md`; writes `RESULT.md`. Chooses its own method. Good for `wp_accept` runs, `RV0` CPU decompose, `H1` concurrent Hermes+code test, `H5` sample after the scaffold exists, unit tests after an apply. | Starting its own renders without Derrick's Hermes yes. Editing `llama-swap.yaml` during a render. |
-| **AlienPc Forge** | **Not available today** (VERIFIED). Do not invent it. Proposed later only on Derrick's yes: a Windows pi pane at `C:\AI\forge` with the same BRIEF/RESULT pattern, reached only when `:8447 --fail-if-busy` says idle, never during ComfyUI. | — |
+| **AlienPc Forge** | **Live** (`C:\Users\derek\forge`, pi in herdr). Takes AlienPc-side scripts, installs and Comfy node setup (R1-R7 setup steps, M* installs) with a BRIEF/RESULT, only when `:8447 --fail-if-busy` says idle, never during a ComfyUI render. Max verifies. | — |
 | **Hydrogen** (`agy`, `gemini-4-hydrogen` on the X3) | Hard live coding or scoring that is worth the remaining (unknown) quota: `W1` bakeoff analysis if Forge should not judge quality, or `RV2` if Opus does not take the package. Prefer low/medium effort; reserve xhigh for a stuck scoring or a hard test failure. | File-only work Opus can do. Secret handling. Renders. |
 | **Max-apply / Max-verify** | Briefs, import-and-apply (below), RESULT checks, tiny or direct fixes, Gitea+GitHub mirrors. AlienPc installs and GPU steps until a Forge exists there. | Guessing. Viewing PixlStash contents. Running Render jobs (queue only after Derrick's yes). |
 | **Derrick** | Decision cards, Hermes-chat render yes, Tailscale Admin, logins (Civitai), any secret typing except the already-allowed PixlStash token copy, downloads over ~5 GB, new software, deletes, widened access. | — |
@@ -244,7 +244,7 @@ Answer these in chat, or let Opus recommend and then confirm. Defaults below are
 17. **`RV4`:** consider Guide / AudioRefine nodes? Separate yes each, and only after RV0-RV3.
 18. **`R2`/`R3`/`R4`/`R6`/`R7` and each `M*` / `RV0` / `RV3` step:** yes at the time, not in advance. `R6`/`R7` stay later.
 19. **Miraclein downloads:** yes to NVFP4 (4.82 GB, Civitai login is yours)? Yes to TE+VAE if missing (~9 GB)? FP8 only if NVFP4 fails.
-20. **Build an AlienPc Forge later?** Not required for this plan. If yes, it would be a new Windows pi pane at `C:\AI\forge`, idle-only, same BRIEF/RESULT pattern — a separate small plan, not invented here.
+20. *(Removed: AlienPc Forge already exists and is used as an owner above.)*
 
 ## Grounding (read-only, 2026-11-19 10:28-10:32 AM CT, America/Chicago)
 
@@ -253,7 +253,7 @@ Answer these in chat, or let Opus recommend and then confirm. Defaults below are
 - Ports up: `127.0.0.1:8080` (llama-swap), `:8642` (Hermes), Tailscale `:8443` and `:8445`. Disk ~936 GB free on root (VERIFIED). `/srv` is the same volume.
 - X3 Forge: `/home/evo/AI/forge` exists (evo-owned; this login cannot list it). `pi-chats/forge-pi.sh` and `/home/derekboone/AI/forge` are present (VERIFIED).
 - `agy` is installed; models include `gemini-4-hydrogen-*`. No stock usage/quota command (VERIFIED). Remaining Hydrogen usage: UNKNOWN.
-- AlienPc Forge / pi coding chat: not present in the committed inventory (VERIFIED). ComfyUI inventory path matches `C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI`.
+- AlienPc Forge: live at `C:\Users\derek\forge` (pi in herdr), missing from `hosts/SETUP-MAP.md`. ComfyUI inventory path matches `C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI`.
 - Hermes and monorepo plans are already on `u58` (Gitea + GitHub) and in the brain under `40_projects/`.
 
 ## Verification Contract
