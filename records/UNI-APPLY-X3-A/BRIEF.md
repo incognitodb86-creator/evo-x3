@@ -87,7 +87,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
    - Verify: `make -C /home/evo/AI/community/agent-shared/python-harness/sample-tool check-all` (ruff + ty + pytest 3 passed).
    - Rollback: restore `/home/evo/AI/_archive/20261119/community-AGENTS.md` and `git revert` on `x3-community` to `<pre-pull-HEAD>` (no force).
 
-8. **H4 (archive pruned Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9ebe5a0`, rebased on live snapshot `eabc8c7`).
+8. **H4 (archive pruned Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9ebe5a0`, rebased on live snapshot `eabc8c7`, plus **`ef1fc2b` L9** `MEDIA:` inline-clip lines — install from the same `mono` tip).
    - Install table: dest `/home/evo/.hermes/skills/pi-job/SKILL.md`, owner/mode `evo:evo 0644`, sudo: **no**, backup `/home/evo/AI/_archive/20261119/hermes/skills/`.
    - Copy `/home/evo/.hermes/skills/` to `/home/evo/AI/_archive/20261119/hermes/skills/` before changes.
    - Create `/home/evo/.hermes/skills-archived/` and move the skills listed for removal in `/home/derekboone/evo-x3/hosts/x3/hermes/SKILLS-PRUNE.md` into `/home/evo/.hermes/skills-archived/` (leaving **19** active skills — `pixlstash-image-library` kept; `h3-writer` remains reserved).

@@ -46,7 +46,7 @@ ALIENPC_MODEL = os.environ.get("PI_JOB_ALIENPC_MODEL", "alienpc/coding_swift15_i
 ALIENPC_GATE_URL = os.environ.get("PI_JOB_ALIENPC_GATE_URL", "https://alienpc.tailf242b2.ts.net:8447/health")
 RESUME_PROMPT = "Continue from where you stopped and finish the task."
 # 2026-11-19 hermesflow (Derrick t2572u/t2572s9151): Hermes chat shows the still Render picked + the full prompt, the
-# user's in-chat yes queues it (`pi-job approve`), and the 2x upscaled video comes back as a renders-share link.
+# user's in-chat yes queues it (`pi-job approve`), and the 2x upscaled video comes back as a MEDIA:<local clip> line (Hermes WebUI inline player) plus a renders-share fallback link.
 QNAP_RUNS = Path("/mnt/qnap/renders/runs")
 SHEETS_DIR = Path("/srv/renders/sheets")
 RENDERS_URL = "https://evo-x3-1.tailf242b2.ts.net:8443/renders"
@@ -292,10 +292,34 @@ def _publish_contact_sheet(crun: Path) -> str | None:
     return None
 
 
+def _upscaled_clip(crun: Path) -> Path | None:
+    """Absolute path of the kept RTX 2x clip in the community run dir, or None if it is not there yet."""
+    ok = crun / "clip" / "render_ok.json"
+    if not ok.is_file():
+        return None
+    try:
+        okd = json.loads(ok.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(okd.get("upscale"), dict):
+        return None
+    rel = str(okd.get("clip") or "clip/clip.mp4").replace("\\", "/")
+    local = crun / rel
+    return local.resolve() if local.is_file() else None
+
+
 def _render_final(crun: Path) -> tuple[str, str]:
-    """(state, detail) of a queued render: WAITING / RENDERING / PUBLISHING / DONE / FAIL."""
+    """(state, detail) of a queued render: WAITING / RENDERING / PUBLISHING / DONE / FAIL.
+
+    DONE is the local upscaled file in the community run dir (L9 / ST7): do not wait for the
+    QNAP copy, which after ST7 only lands in the nightly 03:30 backup.
+    """
     qlog = crun / "_render_queue.log"
     lines = qlog.read_text(encoding="utf-8", errors="replace").splitlines() if qlog.is_file() else []
+    local = _upscaled_clip(crun)
+    if local is not None:
+        rel = str(local.relative_to(crun.resolve())).replace("\\", "/")
+        return "DONE", f"{RENDERS_URL}/{crun.name}/{rel}"
     ok = crun / "clip" / "render_ok.json"
     if ok.is_file():
         try:
@@ -303,11 +327,7 @@ def _render_final(crun: Path) -> tuple[str, str]:
         except ValueError:
             okd = {}
         if isinstance(okd.get("upscale"), dict):
-            rel = str(okd.get("clip") or "clip/clip.mp4").replace("\\", "/")
-            pub = QNAP_RUNS / crun.name / rel
-            if pub.is_file():
-                return "DONE", f"{RENDERS_URL}/{crun.name}/{rel}"
-            return "PUBLISHING", "upscaled; waiting for evo-renders-sync (every 2 min) to publish it"
+            return "PUBLISHING", "upscaled; waiting for local clip file"
     fails = [x for x in lines if " FAIL" in x]
     closed = [x for x in lines if "BATCH closed" in x or "UPSCALE-ONLY closed" in x]
     if fails and closed and lines.index(closed[-1]) > lines.index(fails[-1]):
@@ -862,9 +882,12 @@ def _render_report(job_id: str) -> tuple[str, str]:
         state, detail = _render_final(crun)
         out.append(f"final={state}")
         if state == "DONE":
+            local = _upscaled_clip(crun)
             out += [f"video_url={detail}", "--- chat_reply (paste verbatim) ---",
-                    f"Your render is done (RTX 2x upscaled).\n", f"<video>{detail}</video>\n",
-                    f"[Open the 2x video]({detail})"]
+                    "Your render is done (RTX 2x upscaled).\n"]
+            if local is not None:
+                out.append(f"MEDIA:{local}\n")
+            out.append(f"[Open the 2x video]({detail})")
         else:
             out.append(f"detail={detail}")
         return state, "\n".join(out)

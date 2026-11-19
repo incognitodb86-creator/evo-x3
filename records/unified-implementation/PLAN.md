@@ -242,7 +242,8 @@ File-only work is done in VS Code on Derrick's PC (GitHub Copilot: Opus or Gemin
 
 | Items | Canonical repo copy (edit this one) | Live destination | Owner / mode | Sudo? | Backup |
 |---|---|---|---|---|---|
-| `H1c`, `L1`, `L4-L6`, `L8` | `config/bin/pi-job` | `/usr/local/bin/pi-job` | `root:root 0755` | yes | `/home/evo/AI/_archive/<date>/pi-job` |
+| `H1c`, `L1`, `L4-L6`, `L8`, `L9` | `config/bin/pi-job` | `/usr/local/bin/pi-job` | `root:root 0755` | yes | `/home/evo/AI/_archive/<date>/pi-job` |
+| `L9` | `hosts/x3/hermes/skills/pi-job/SKILL.md` | `/home/evo/.hermes/skills/pi-job/SKILL.md` | `evo:evo 0644` | no | `/home/evo/AI/_archive/<date>/hermes/skills/pi-job/SKILL.md` |
 | `ST3`, `L2`, `ST7` | `config/bin/sync-renders` (canonical over `hosts/x3/live/bin/sync-renders`; install from same `mono` tip as `UNI-APPLY-X3-C-QNAP-NIGHTLY`) | `/usr/local/bin/sync-renders` | `root:root 0755` | yes | `/home/evo/AI/_archive/<date>/sync-renders` |
 | `ST6` | `config/bin/evo-raw-clip-cleanup` (first run dry-run list for Derrick's yes) | `/usr/local/bin/evo-raw-clip-cleanup` | `root:root 0755` | yes | `/home/evo/AI/_archive/<date>/evo-raw-clip-cleanup` |
 | `ST7` | `config/bin/evo-renders-qnap-nightly` | `/usr/local/bin/evo-renders-qnap-nightly` | `root:root 0755` | yes | `/home/evo/AI/_archive/<date>/evo-renders-qnap-nightly` |
@@ -325,6 +326,7 @@ Size: S = small file or one command, M = a half-day live pass, L = multi-step wi
 | L6 | **yes** (`config/bin/pi-job`) | Max imports; X3 Forge applies | X3 | X3 (apply + verify; sudo writes `/usr/local/bin`) | S | STUCK bundle `escalate.md` with task, diff, last errors. | File written on STUCK. | Revert those lines. |
 | L7 | **yes** (`config/pi-evo/extensions/syntax-check.ts`) | Max imports; X3 Forge applies | X3 | X3 (apply + verify) | S | Syntax check extension (`py_compile` / `bash -n` / `jq empty`). | Errors appear in tool output. | Remove the extension. |
 | L8 | **yes** (`config/bin/pi-job`) | Max imports; X3 Forge applies | X3 | X3 (apply + verify; sudo writes `/usr/local/bin`) | S | `pi-job recompile <run_id>` after prompt edit; new P4.11 code. | New code matches new prompt hash. | Revert the subcommand. |
+| L9 | **yes** (`config/bin/pi-job`, `hosts/x3/hermes/skills/pi-job/SKILL.md`) | Max imports; X3 Forge applies after `UNI-APPLY-X3-A` (`records/UNI-APPLY-X3-C-QNAP-NIGHTLY/BRIEF.md` item 2); no apply during an active render or the Hermes bakeoff window (C16) | X3 | X3 (apply + verify; sudo writes `/usr/local/bin`; skill is evo-owned) | S | Inline clip delivery in Hermes via `MEDIA:` (Derrick t2719u): when a render finishes, `pi-job wait` `chat_reply` emits `MEDIA:<abs path of the upscaled clip in ~/AI/community/runs/<run>/…>` on its own line plus the https fallback link (no raw `<video>` tag). Hermes posts that reply immediately; delivering the finished clip needs no yes. DONE is the local upscaled file (not the QNAP copy), so this still works after ST7. | `pi-job wait <last finished run> --timeout 5` prints a `MEDIA:` line; skill tells Hermes to post it without asking. | Revert `pi-job` and the skill from `_archive`. |
 
 ### Miraclein (`M0-M5`) — AlienPc ComfyUI only, prompts from X3
 
