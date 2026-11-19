@@ -701,7 +701,60 @@ def _cmd_wait(job_id: str, timeout_s: int) -> int:
     return _cmd_status(job_id)
 
 
-def _cmd_status(job_id: str) -> int:
+def _cmd_status_overview() -> int:
+    """L5: overview when `pi-job status` is called without a job ID (resident model, MemAvailable, AlienPC, last 3)."""
+    model = "unknown"
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:8080/running", timeout=2) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if isinstance(data, dict) and isinstance(data.get("running"), list):
+            names = [str(x.get("model") or x.get("id") or x) if isinstance(x, dict) else str(x) for x in data["running"]]
+            model = ", ".join(names) if names else "none"
+        elif isinstance(data, list):
+            names = [str(x.get("model") or x.get("id") or x) if isinstance(x, dict) else str(x) for x in data]
+            model = ", ".join(names) if names else "none"
+    except Exception:
+        pass
+
+    mem_avail = "unknown"
+    meminfo = Path("/proc/meminfo")
+    if meminfo.is_file():
+        for line in meminfo.read_text(encoding="utf-8", errors="replace").splitlines():
+            if line.startswith("MemAvailable:"):
+                parts = line.split()
+                if len(parts) >= 2 and parts[1].isdigit():
+                    mem_avail = f"{int(parts[1]) / (1024 * 1024):.2f} GiB"
+                break
+
+    lock_s = "free" if _x3_render_lock_free() else "busy"
+    gate_s = "idle" if _alienpc_gate_idle(timeout=2.0) else "busy"
+    print(f"model={model}")
+    print(f"mem_available={mem_avail}")
+    print(f"alienpc=lock:{lock_s},gate:{gate_s}")
+
+    jobs: list[Path] = []
+    if RUNS_DIR.is_dir():
+        jobs = sorted(
+            [p for p in RUNS_DIR.iterdir() if p.is_dir() and (p / "status").is_file()],
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )[:3]
+    print("last_jobs:")
+    if not jobs:
+        print("  (none)")
+    for jd in jobs:
+        st_lines = dict(
+            line.split("=", 1)
+            for line in (jd / "status").read_text(encoding="utf-8", errors="replace").splitlines()
+            if "=" in line
+        )
+        print(f"  {jd.name}: {st_lines.get('status', '?')} {st_lines.get('detail', '')}".rstrip())
+    return 0
+
+
+def _cmd_status(job_id: str | None) -> int:
+    if not job_id:
+        return _cmd_status_overview()
     run_dir = RUNS_DIR / job_id
     st = run_dir / "status"
     if not st.is_file():
@@ -745,7 +798,7 @@ def main(argv: list[str] | None = None) -> int:
     p_up.add_argument("run")
 
     p_st = sub.add_parser("status")
-    p_st.add_argument("job_id")
+    p_st.add_argument("job_id", nargs="?", default=None)
 
     p_ap = sub.add_parser("approve")
     p_ap.add_argument("job_id")
