@@ -4,7 +4,7 @@ description: Write FLUX stills prompts on AlienPc for the adopted S2 workflow (K
 ---
 # AlienPc FLUX stills prompting (S2, 2026-10-31)
 
-> Render rules live in C:\AI\render\AGENTS.md; run render work from C:\AI\render. Character sheets: [references/characters/sydney.md](references/characters/sydney.md).
+> Render rules live in C:\AI\render\AGENTS.md; run render work from C:\AI\render. Character index: [references/characters/README.md](references/characters/README.md) (OC/PixlStash rules in [../h3-parody-identity/SKILL.md](../h3-parody-identity/SKILL.md)).
 
 ## When
 - Any FLUX still from an approved character: a new pose, camera angle or scene; start frames for Max/H3 clips.
@@ -13,7 +13,7 @@ description: Write FLUX stills prompts on AlienPc for the adopted S2 workflow (K
 ## Setup
 - Workflow = S2, adopted by Derrick 1:16 AM CT Oct 31 ("Adopt S2 as the FLUX stills workflow now").
 - Settings, files and node order: C:\AI\community\templates\flux_stills_s2.README.md (do not restate or change them here).
-- Run it with `make_render.py still <id|pick> [count]` (pass 1 then pass 2). One GPU job at a time via run_queue.py and C:\AI\locks\gpu-render.lock.
+- Run it with `C:\AI\render\x3\.venv\bin\python C:\AI\community\scripts\make_render.py still <id|pick> [count]` (pass 1 then pass 2), then queue via `C:\AI\render\x3\queue-remote.sh <run_dir> --yes-derrick` after Derrick's yes. On the X3, `C:\AI\locks\gpu-render.lock` (`flock`) is only a local single-submitter lock — AlienPc's lock is invisible from here, so verify AlienPc's GPU/lease is free before queueing.
 
 ## Pass 1 prompt (Klein 9B-KV): change -> keep -> light/style
 Klein reads the prompt as written and weights what comes first (BFL). So:

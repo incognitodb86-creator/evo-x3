@@ -29,7 +29,7 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
 - Length: `--frames N` (H3 grid, ≤ 243) or `--seconds S` (`snap_h3_frames`: `(f-5) % 17 == 0`, 56..243). `--beat` (repeat 2+) + `--beat-dialogue` / `--beat-camera` / `--beat-seconds` → one native latent-tail continuation graph (§0.7).
 - Canvas: `--aspect 9:16|16:9|1:1|4:3|3:4|portrait|landscape|widescreen|square` (768x1344, 1344x768, 1024x1024, 1152x864, 864x1152) or `--size WxH` (multiples of 32, 256..2048).
 - Camera: `--camera "<framing, lens, motion>"`. There is no locked-off tail. When the scene has a `The camera holds ...` sentence, the `[cam]` header is derived from it; otherwise the default header is `[static medium shot, eye level, 50mm lens, shallow depth of field]`. A still camera is one positive framing sentence (official H3 §4.3); add amplitude and speed only when the camera moves.
-- Images (U2, live `d53e082` / Nov 6): `--image` takes **exactly one** `approved_characters` path (full path or sub-path inside `C:\Users\derek\5slock\approved_characters` or `\\NAS4CBE37.local\home\AlienPc-approved\approved_characters`); `>1` raises `ValueError`; any `sydney` path or anything outside the pools → `ValueError`. Staged to `ComfyUI\input\community\parody_ref_<sha10>_<stem>.<ext>`, wired as `img_1: LoadImage` → `add_guide: MiniMaxH3AddGuide` (`frame_idx=0`) → `refapply: MiniMaxH3RefModApply` (conditioning chain `c0 → add_guide → refapply → s0_guide`). **No** `c0.ref_images`, **no** `<Picture N>` / `[reference generation]` / `retention_analysis:` in the prompt — Qwen sees text-only, so voice stays intact. Derrick (`t314u`, watched clips): `RefMod` still drives the celebrity's face likeness onto the AddGuide shot (e.g. Emilia Clarke face on a generic apartment still) while keeping voice. Omit `--image` for RefMod-only composition; pass `--image` to pin frame-0 composition/wardrobe/pose/setting.
+- Images (U2, live `d53e082` / Nov 6 — **historical (pre-U55)**; superseded by §1 below, where all adult RefMods and PixlStash/any image path are allowed and `18+` is the only content rule): `--image` takes **exactly one** `approved_characters` path (full path or sub-path inside `C:\Users\derek\5slock\approved_characters` or `\\NAS4CBE37.local\home\AlienPc-approved\approved_characters`); `>1` raises `ValueError`; any `sydney` path or anything outside the pools → `ValueError`. Staged to `ComfyUI\input\community\parody_ref_<sha10>_<stem>.<ext>`, wired as `img_1: LoadImage` → `add_guide: MiniMaxH3AddGuide` (`frame_idx=0`) → `refapply: MiniMaxH3RefModApply` (conditioning chain `c0 → add_guide → refapply → s0_guide`). **No** `c0.ref_images`, **no** `<Picture N>` / `[reference generation]` / `retention_analysis:` in the prompt — Qwen sees text-only, so voice stays intact. Derrick (`t314u`, watched clips): `RefMod` still drives the celebrity's face likeness onto the AddGuide shot (e.g. Emilia Clarke face on a generic apartment still) while keeping voice. Omit `--image` for RefMod-only composition; pass `--image` to pin frame-0 composition/wardrobe/pose/setting.
 - Second subject (U4): `--name2 --character2 --actor2 --description2 --dialogue2 --pronoun2`; RefMods merge 4 + 4 into `mod_1..mod_8` (spare slots go to whoever has more); `(S2)` line in `subject_definitions`, accurate `Non-speaking characters:`, `(S2): <d>…</d>` when it speaks; the scene/summary drop the `(S1)` prefix, so write `(S1)`/`(S2)` inside `--scene`.
 - Run control: `--seed`, `--slug`, `--run-dir`, `--dry-run`, `--wait`, `--qnap-put`, `--wait-timeout` (default 3 h).
 
@@ -85,7 +85,7 @@ Code: `C:\AI\community\scripts\parody\{build_request.py, resolve.py, submit_paro
 
 ## 1. Active Locked Baseline (`4bc9bba` / `ab72d88`, Derrick Nov 6, 2026 `t218u` & `t375s1715`)
 - **Graph (`templates/b2_refmod.api.json`)**: Single-pass `768x1344`, `8` steps (`euler` / `simple`, `shift` `12.0` video / `3.0` audio, `cfg=1.0`, `denoise=1.0`) on `10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors`.
-- **Identity (`INDEX + RefMod + PixlStash tags`)**: `MiniMaxH3RefModsLoader` (`mod_1..mod_8`, `strength=1.0`) → `MiniMaxH3RefModApply` (`retention=1.0`). All adult RefMods (OC, INDEX, PixlStash-tagged across `approved_characters\vault.db` and Stills `C:\Users\derek\5slock\libraries\vault.db`) and all voice refs (`*_refmod_audio` + `<Audio 1>` / `<Subject 1>` labels; e.g. `FCSydny` -> `poolclub` visual + audio) are allowed; 2-pass upscaler is retired; `18+` (`guard_ok` / youth lint) is the only content rule. `LoadImage` start photo (`img_1`) is used when `--image` or `writer-run --still` is passed.
+- **Identity (`INDEX + RefMod + PixlStash tags`)**: `MiniMaxH3RefModsLoader` (`mod_1..mod_8`, `strength=1.0`) → `MiniMaxH3RefModApply` (`retention=1.0`). All adult RefMods (OC, INDEX, PixlStash-tagged) are allowed, with stills from the PixlStash API or any image path; voice refs (`*_refmod_audio` + `<Audio 1>`) are for OCs only; named INDEX/celebrity parodies get the visual RefMod only and never `<Audio 1>` (main SKILL.md) (e.g. `FCSydny` -> `poolclub` visual + audio); 2-pass upscaler is retired; `18+` (`guard_ok` / youth lint) is the only content rule. `LoadImage` start photo (`img_1`) is used when `--image` or `writer-run --still` is passed.
 - **Direct execution**: Queue `run_queue.py` directly on saved `request.api.json` or `submit_parody_run.py` output — no `pi.ps1`, no `ralph.ps1`, no local LLM load. Any new CLI flag, ComfyUI node/input, multi-file edit, or test arm requires a 1:1 question card yes from Derrick first.
 - **Dialogue / beat-sheet hygiene**: Never pass beat-sheet timestamps (`t=00.00.000-...`), `"No speech"`, foley/SFX cues (`room tone`, `glass clink`, `heels on wood`), or backticks inside `--dialogue` / `<d>...</d>` (H3 TTS speaks stage cues out loud). Pass spoken words only inside `<d>...</d>`, and omit `<d>` (`dialogue=None`) on silent clips. Always inspect generated `prompt.txt` before `run_queue.py`.
 
@@ -113,7 +113,7 @@ Do **not** load for ordinary approved-still REF2VA pastes that only use `<Pictur
 
 ## Hard bans (Derrick)
 
-1. **Stills / conds / refs only from `approved_characters`.** That folder is the whole likeness gate (movie/TV screenshots OK once they are in the pool after the one-time adults-only check). No separate "no real-person photos" rule.
+1. **Stills / conds / refs only from `approved_characters`.** *(historical (pre-U55) — superseded by §1 above)* That folder is the whole likeness gate (movie/TV screenshots OK once they are in the pool after the one-time adults-only check). No separate "no real-person photos" rule.
 2. Image/adults-only rules live only in the ComfyUI/render folder `AGENTS.md` - do not add new Forge global `AGENTS.md` rules without Derrick's card yes.
 3. Never Sydney paths.
 4. KEEP dials unchanged (B2 / REF2VA 10strip eros beta7 stock). No 9th RefMod slot (loader max 8).
@@ -149,7 +149,7 @@ On this box for parody:
 
 1. Put the **INDEX name** (character and/or actor as the resolver chose) in `subject_definitions`.
 2. Add a **short description** (face/hair/body/wardrobe cues) — name alone is incomplete.
-3. With RefMods loaded, do **not** rely on `<Picture N> is the reference image defining…` for that subject's face (that is the picture-ref lane). Optional stills come only from approved_characters (scene/body/wardrobe or Cond/start — including movie/TV screenshots already in the pool).
+3. With RefMods loaded, do **not** rely on `<Picture N> is the reference image defining…` for that subject's face (that is the picture-ref lane). Optional stills come only from approved_characters *(historical (pre-U55) — superseded by §1 above)* (scene/body/wardrobe or Cond/start — including movie/TV screenshots already in the pool).
 4. Still obey shared motion/adults/speech rules from `h3-prompting` (R1–R31) and REF2VA section order from `h3-max-ref2va-prompt` when the graph is REF2VA — only the **identity binding** changes here.
 
 ## RefMod wiring (reminder)
@@ -184,7 +184,7 @@ This skill only changes **identity binding** (INDEX + RefMod + name/description)
 ---
 
 ## 3. Superseded Archive — Nov 6, 2026 6:43 AM `2-pass` Skill Text (`7,614 B`, RETIRED by `ab72d88` / `t375s1715`)
-Kept verbatim per non-deletion rule for historical audit reference only; superseded by Section 1 above (2-pass is retired; **today's code allows all adult RefMods and voice refs via `*_refmod_audio` + `<Audio 1>`, with `18+` as the only content rule**). Do not run 2-pass or treat historical notes below as current locks.
+Kept verbatim per non-deletion rule for historical audit reference only; superseded by Section 1 above (2-pass is retired; **today's code allows all adult RefMods; voice refs (`*_refmod_audio` + `<Audio 1>`) are for OCs only; named INDEX/celebrity parodies get the visual RefMod only and never `<Audio 1>` (main SKILL.md); `18+` is the only content rule**). Do not run 2-pass or treat historical notes below as current locks.
 
 ```markdown
 ---
@@ -210,7 +210,7 @@ One shared pipeline for every named character or actor parody run on MiniMax H3 
    - Wire `MiniMaxH3RefModsLoader` (`mod_1..mod_8` from `models/refmods/minimaxh3_<id>_v<N>_refmod.safetensors`, `strength=1.0`) -> `MiniMaxH3RefModApply` (`retention=1.0`) once into the positive conditioning feeding **both** Pass-1 (`s0_guide`) and Pass-2 (`s1_guide`).
    - Do **not** attach `RefLoRA` (`MiniMaxH3LoraLoaderModelOnly` / `LoraLoaderModelOnly`) on named-parody runs: `INDEX + RefMod` alone preserves the model's native voice timbre and cadence without synthetic vocal coloration.
    - **Fail closed on silent empty RefMod**: if a matching `models/refmods/minimaxh3_<id>_v<N>_refmod.safetensors` file exists on disk, `loaded_refmods` in `assets.json` must be non-empty (`mod_1 != "(none)"`). Never silently render name-only when a standalone RefMod is installed.
-3. **No start photo by default; `approved_characters` is the entire still gate**:
+3. **No start photo by default; `approved_characters` is the entire still gate** *(historical (pre-U55) — superseded by §1 above)*:
    - Named-character/actor parody runs use **no start photo by default** (`--image` omitted -> omit `LoadImage`, `MiniMaxH3AddGuide`, and `<Picture 1>` everywhere in the graph and prompt).
    - When an optional scene/wardrobe still (`Cond`) is passed, it must come **only** from the `approved_characters` pool (movie/TV screenshots in that pool are allowed once admitted; do not layer a separate "no real-person photos" ban on top of `approved_characters`).
    - Optional `Cond` stills always stack **on top of** `INDEX + RefMod` — never run `Cond`-only for a named character.
