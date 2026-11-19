@@ -9,6 +9,10 @@
     "edit:*": "deny",
     "write:*": "deny",
     "edit:/home/evo/AI/community/runs/*": "allow",
-    "write:/home/evo/AI/community/runs/*": "allow"
+    "write:/home/evo/AI/community/runs/*": "allow",
+    "edit:/home/evo/AI/render/records/*": "allow",
+    "write:/home/evo/AI/render/records/*": "allow",
+    "edit:/home/evo/AI/render/notes/*": "allow",
+    "write:/home/evo/AI/render/notes/*": "allow"
   }
 }

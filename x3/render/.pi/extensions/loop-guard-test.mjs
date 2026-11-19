@@ -1,5 +1,5 @@
 // Node 22+ strip-types import of loop-guard.ts helpers
-import { tokenizeCmd, runDirFromCmd, normalizeRunDir, parodyRunKey } from './loop-guard.ts';
+import { tokenizeCmd, runDirFromCmd, normalizeRunDir, parodyRunKey, detectCycle } from './loop-guard.ts';
 import process from 'node:process';
 
 const cases = [
@@ -26,5 +26,9 @@ if (process.platform !== 'win32') {
   }
 }
 if (tokenizeCmd("run 'a b' c").join('|') !== 'run|a b|c') { console.error('FAIL tokenize'); fail++; }
+if (detectCycle(['A', 'A', 'A']) !== 1) { console.error('FAIL cycle 1'); fail++; }
+if (detectCycle(['A', 'B', 'A', 'B', 'A', 'B']) !== 2) { console.error('FAIL cycle 2'); fail++; }
+if (detectCycle(['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']) !== 3) { console.error('FAIL cycle 3'); fail++; }
+if (detectCycle(['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B']) !== 0) { console.error('FAIL no cycle yet'); fail++; }
 if (fail) { console.error(fail, 'failed'); process.exit(1); }
 console.log('loop-guard unit tests OK', cases.length + 2);
