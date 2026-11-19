@@ -2013,6 +2013,12 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         # 4 prose x N (verbatim writer output; no clean_prose/normalize_prose rewriting)
         n = int(job.get("n_candidates") or cfg.get("n_candidates", 1))
         cands: Dict[str, Dict[str, Any]] = {}
+        if job.get("prose_file"):
+            # Hermes plan U5 (Path B): Hermes wrote the prose; no writer call, same lint, hard stops and build as below
+            full, dd = _materialise_writer_text(Path(job["prose_file"]).read_text(encoding="utf-8"))
+            cands["hermes"] = {"full": full, "dd": dd, "lint": wp_lint.lint(full, lint_ctx, minimal=True), "seed": None}
+            result["prose_source"] = "hermes"
+            n = 0
         for k in range(1, n + 1):
             angle = LINE_ANGLES[(seed_for(run_id, ask, 50) + k) % len(LINE_ANGLES)]  # acceptance-2 b: lines differ per draft
             raw = client.chat(prose_messages(sysprompt, brief + f"\nLINE ANGLE for this draft: {angle}", card, kind, overlays),
@@ -2026,7 +2032,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 wp_state.atomic_write(run_dir / f"lint_{k}.json", json.dumps(lr, indent=2, ensure_ascii=False, default=str))
             cands[f"cand_{k}"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, k)}
         # 6 opt-in single rewrite (--fix-once only; default off per U52)
-        fix_once = bool(job.get("fix_once"))
+        fix_once = bool(job.get("fix_once")) and not job.get("prose_file")  # Path B: Hermes fixes and resubmits
         fixed_once = False
         best_name = max(cands, key=lambda c: cands[c]["lint"]["score"])
         if fix_once and not any(c["lint"]["pass"] for c in cands.values()):
@@ -2245,7 +2251,16 @@ def main(argv=None) -> int:
     ap.add_argument("--n-candidates", type=int, default=None, help="A/B test flag: number of prose candidates (default 1)")
     ap.add_argument("--debug", action="store_true", help="Write debug per-run files (cand_*, lint_*, slots.json, route.json, beat_card*)")
     ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
+    ap.add_argument("--prose-file", help="Hermes Path B: prose Hermes wrote; skips the writer call, same lint/hard stops/build")
     a = ap.parse_args(argv)
+    if a.prose_file:
+        pf = Path(a.prose_file)
+        if not pf.is_absolute() or not pf.is_file() or not pf.read_text(encoding="utf-8", errors="replace").strip():
+            print(f"NOT_READY --prose-file must be an absolute path to a non-empty file: {a.prose_file}")
+            return 3
+        if a.batch or a.fix_once:
+            print("NOT_READY --prose-file cannot be combined with --batch or --fix-once")
+            return 3
     if a.queue and not a.yes_derrick:
         print("NOT_READY --queue requires --yes-derrick after Derrick approved this prompt")
         return 3
@@ -2275,6 +2290,7 @@ def main(argv=None) -> int:
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
                      "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode, "template": a.template,
                      "n_candidates": a.n_candidates, "debug": bool(a.debug), "fix_once": bool(a.fix_once),
+                     "prose_file": a.prose_file,
                      "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []
     for job in jobs:  # one failing clip never blocks the next

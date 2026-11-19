@@ -12,6 +12,14 @@ pending_upload: true
 
 > **Update 2026-11-19 12:31 PM CT (Derrick t2688u):** Open WebUI is retired. Hermes WebUI (127.0.0.1:8787) is the tailnet chat UI via Serve 8443 `/`. Lines below that mention Open WebUI or :3000 are historical.
 
+> **Update 2026-11-19 15:00 CT (Derrick 14:38 CT: "hermes is the entry point and handles all renders and stuff. and then delegates to pi"; files on `mono`, brief `UNI-APPLY-X3-E-HERMES`):**
+> - **One profile, not `render-a`/`render-b`.** VERIFIED: the live `hermes-webui.service` runs `HERMES_WEBUI_CHAT_BACKEND=gateway` (H7), while U3 assumed the in-process mode where the WebUI profile picker drives profiles. So Derrick's normal Hermes chat gets the render skills, and the A/B (card 43) is one chat with two modes: default = pipeline writes (Path A), "write it yourself" = `h3-writer` + `--prose-file` (Path B).
+> - **Skills, not desk `AGENTS.md`.** `h3-render` = Hermes header + verbatim `render/OPERATOR.md`, built on the box by `hosts/x3/hermes/bin/build-hermes-skills.sh` (`--check` = drift check, replaces `check-drift.sh`). Hermes docs: SOUL is identity/tone (slot 1), project rules come from `AGENTS.md` in the working folder, skills load on demand and from `skills.external_dirs` (docs: hermes-agent.nousresearch.com features/personality, context-files, skills). This matches the community way (benjiyaya/Minimax-H3-Prompt-AgentSkill: an H3 prompt skill under `~/.hermes/skills/creative/`).
+> - **`h3-writer` reads `writer_prompt.md`** (the compiled writer prompt the pipeline model gets), not raw `render/AGENTS.md`, so both modes use the same rules text.
+> - **`--prose-file` (U5) is on `mono`** with `test_prose_file_gate.py` (3 tests: READY with no writer call; youth cue NOT_READY with no rewrite; CLI refuses empty/relative files and `--fix-once`).
+> - **PIXL_KEY:** no `webui-start.sh` / `with-pixl`; the skill reads the token from file inside the command, like `pixlstash-image-library` (H8).
+> - ASSUMPTION to watch: Hermes injects an `AGENTS.md` it finds in folders it touches, so commands under `/home/evo/AI/render/` may add `render/AGENTS.md` (the writer rules) to the chat. Same agreed rules; no action unless the chat check shows a problem.
+
 Related: ../monorepo-consolidation/PLAN.md · **single plan for review: [../uplan/PLAN.md](../uplan/PLAN.md)** (owners, live audit 2026-11-19 10:42-10:55 AM CT, Stills intake `ST1-ST5`)
 
 # Hermes direct H3 render on EVO-X3: two side-by-side paths
