@@ -1,6 +1,7 @@
 /**
  * loop-guard: stops the run when the SAME tool call (same tool name + identical
- *   args) is made 3 times in a row (2026-10-30, Forge/Sydney).
+ *   args) is made 3 times in a row, or when a 2..4-call cycle repeats 3 times in
+ *   a row (e.g. A,B,C,A,B,C,A,B,C).
  * Rule 2 (per-folder writer-run cap) was removed Max Architect 2026-11-16 (Derrick t2036u).
  * No network, no file I/O, no env/credential access. Pure in-memory counters.
  * Rule 1 modelled on the tool_call hook in alisorcorp/pi-small-model-addons@e251d0b
@@ -9,6 +10,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const LIMIT = 3;
+const MAX_CYCLE = 4;
 
 function stable(v: unknown): string {
   if (v === null || typeof v !== "object") return JSON.stringify(v);
@@ -66,7 +68,7 @@ export function runDirFromCmd(cmd: string): string {
       if (!t.includes("=") && !BOOL_FLAGS.test(t) && tokens[i + 1] && !isFlag(tokens[i + 1])) i++;
       continue;
     }
-        return t;
+    return t;
   }
   return "";
 }
@@ -87,25 +89,49 @@ export function parodyRunKey(input: unknown): string | null {
   return "parody::" + (norm || "?");
 }
 
+/** Returns repeating cycle length p (1..maxCycle) if the tail of history repeats p calls limit times, else 0. */
+export function detectCycle(history: readonly string[], limit = LIMIT, maxCycle = MAX_CYCLE): number {
+  for (let p = 1; p <= maxCycle; p++) {
+    const need = p * limit;
+    if (history.length < need) continue;
+    const start = history.length - need;
+    let match = true;
+    for (let i = p; i < need; i++) {
+      if (history[start + i] !== history[start + (i % p)]) {
+        match = false;
+        break;
+      }
+    }
+    if (match) return p;
+  }
+  return 0;
+}
+
 export default function (pi: ExtensionAPI) {
-  let last = "";
-  let count = 0;
-  const resetStreak = () => { last = ""; count = 0; };
-  pi.on("session_start", resetStreak);
-  pi.on("agent_settled", resetStreak);
+  let history: string[] = [];
+  const maxLen = LIMIT * MAX_CYCLE;
+  const resetHistory = () => { history = []; };
+  pi.on("session_start", resetHistory);
+  pi.on("agent_settled", resetHistory);
 
   pi.on("tool_call", async (event, ctx) => {
-    // Rule 1: identical call repeated.
     let key: string;
     try { key = event.toolName + "::" + stable(event.input); } catch { key = event.toolName + "::?"; }
-    if (key === last) count++; else { last = key; count = 1; }
-    if (count < LIMIT) return undefined;
-    resetStreak();
-    if (ctx.hasUI) ctx.ui.notify(`loop-guard: "${event.toolName}" called ${LIMIT}x in a row with identical args - stopping`, "warning");
+    history.push(key);
+    if (history.length > maxLen) history.shift();
+    const cycle = detectCycle(history, LIMIT, MAX_CYCLE);
+    if (!cycle) return undefined;
+    resetHistory();
+    const msg = cycle === 1
+      ? `loop-guard: "${event.toolName}" called ${LIMIT}x in a row with identical args - stopping`
+      : `loop-guard: ${cycle}-call tool cycle repeated ${LIMIT}x in a row - stopping`;
+    if (ctx.hasUI) ctx.ui.notify(msg, "warning");
     return {
       block: true,
       terminate: true,
-      reason: `loop-guard: this is the ${LIMIT}rd identical "${event.toolName}" call in a row with the same arguments. Stopping the run; change approach instead of repeating it.`,
+      reason: cycle === 1
+        ? `loop-guard: this is the ${LIMIT}rd identical "${event.toolName}" call in a row with the same arguments. Stopping the run; change approach instead of repeating it.`
+        : `loop-guard: detected a ${cycle}-step identical tool-call cycle repeated ${LIMIT} times in a row. Stopping the run; change approach instead of repeating it.`,
     };
   });
 }
