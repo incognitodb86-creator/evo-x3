@@ -31,7 +31,7 @@ def _decode_data_url(messages):
     return header, im
 
 
-def test_vision_read_cache_same_still_once_different_bytes_twice(tmp_path):
+def test_vision_read_cache_same_still_once_different_bytes_twice(tmp_path, monkeypatch):
     still = _make_png(tmp_path / "still_a.png", size=(320, 240), color=(10, 20, 30))
     cache_dir = tmp_path / "_still_read_cache"
     calls = []
@@ -40,21 +40,37 @@ def test_vision_read_cache_same_still_once_different_bytes_twice(tmp_path):
         calls.append(messages)
         return json.dumps({"room": "bedroom", "surface": "bed", "people": "one woman"})
 
-    r1 = br.vision_read(still, fake_chat, cache_dir=cache_dir)
-    r2 = br.vision_read(still, fake_chat, cache_dir=cache_dir)
+    # Default cache_dir=None: cache is off by default
+    br.vision_read(still, fake_chat)
+    br.vision_read(still, fake_chat)
+    assert len(calls) == 2
+
+    calls.clear()
+    r1 = br.vision_read(still, fake_chat, cache_dir=cache_dir, model_alias="vision_v1")
+    r2 = br.vision_read(still, fake_chat, cache_dir=cache_dir, model_alias="vision_v1")
     assert len(calls) == 1
     assert r1 == r2 == {"room": "bedroom", "surface": "bed", "people": "one woman"}
 
     digest = hashlib.sha256(still.read_bytes()).hexdigest()
-    cache_file = cache_dir / f"{digest}.json"
+    sig = br._still_cache_suffix("vision_v1")
+    cache_file = cache_dir / f"{digest}_{sig}.json"
     assert cache_file.is_file()
     doc = json.loads(cache_file.read_text(encoding="utf-8"))
-    assert doc["read"] == r1 and doc["sha256"] == digest and doc["source"] == str(still)
+    assert doc["read"] == r1 and doc["sha256"] == digest and doc["prompt_sha8"] == sig and doc["model_alias"] == "vision_v1"
 
-    # Different bytes -> second vision call
-    still_b = _make_png(tmp_path / "still_b.png", size=(320, 240), color=(200, 150, 50))
-    r3 = br.vision_read(still_b, fake_chat, cache_dir=cache_dir)
+    # Different model alias -> cache miss
+    br.vision_read(still, fake_chat, cache_dir=cache_dir, model_alias="vision_v2")
     assert len(calls) == 2
+
+    # Changed VISION_READ_PROMPT -> cache miss
+    monkeypatch.setattr(br, "VISION_READ_PROMPT", br.VISION_READ_PROMPT + "\n# extra")
+    br.vision_read(still, fake_chat, cache_dir=cache_dir, model_alias="vision_v1")
+    assert len(calls) == 3
+
+    # Different bytes -> cache miss
+    still_b = _make_png(tmp_path / "still_b.png", size=(320, 240), color=(200, 150, 50))
+    r3 = br.vision_read(still_b, fake_chat, cache_dir=cache_dir, model_alias="vision_v1")
+    assert len(calls) == 4
     assert r3["room"] == "bedroom"
 
 

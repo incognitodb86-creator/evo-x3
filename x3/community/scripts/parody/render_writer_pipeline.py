@@ -1518,12 +1518,13 @@ def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[s
         wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
         return d
 
+    v_model = str(cfg.get("vision_model_alias") or cfg.get("model_alias") or "")
+
     def vision_chat(messages):
-        v_model = cfg.get("vision_model_alias") or cfg.get("model_alias")
         v_client = Client({**cfg, "model_alias": v_model}, log) if v_model != cfg.get("model_alias") else client
         return v_client.chat(messages, {"temperature": 0.2, "top_k": 20, "top_p": 0.9}, 7, 1024, purpose="vision_read")
-    read = br.vision_read(still, vision_chat, cache_dir=RUNS_ROOT / "_still_read_cache")
-    d = {"read": read, "source": still, "how": "pipeline vision_read via " + str(cfg.get("vision_model_alias") or cfg["model_alias"])}
+    read = br.vision_read(still, vision_chat, cache_dir=RUNS_ROOT / "_still_read_cache", model_alias=v_model)
+    d = {"read": read, "source": still, "how": "pipeline vision_read via " + v_model}
     wp_state.atomic_write(p, json.dumps(d, indent=2, ensure_ascii=False))
     log("still_read_vision", {"run": run_dir.name, "still": still})
     return d

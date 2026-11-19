@@ -4771,27 +4771,37 @@ def _valid_vision_read(read: Any) -> bool:
     return isinstance(read, dict) and bool(read.get("room") or read.get("place") or read.get("surface"))
 
 
+def _still_cache_suffix(model_alias: str = "") -> str:
+    import hashlib
+    raw = (VISION_READ_PROMPT + "\0" + str(model_alias or "")).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()[:8]
+
+
 def vision_read(
     image: Any,
     chat: Callable[[List[Dict[str, Any]]], str],
     cache_dir: Any = None,
+    model_alias: str = "",
 ) -> Dict[str, Any]:
     """One structured read of the start still (setting, bed, surface, floor, light, framing, pose, garments, hair, skin,
     build, people). `chat(messages) -> reply text` is the caller's vision model call (the EWT used the native Swift
-    vision on llama-swap); this function loads no model itself. Any failure is NOT_READY."""
+    vision on llama-swap); this function loads no model itself. Any failure is NOT_READY.
+    Caching is opt-in: pass `cache_dir` to cache by still sha256 + VISION_READ_PROMPT + model_alias."""
     import base64
     import io
     import os
     from PIL import Image
 
-    cdir = STILL_READ_CACHE_DIR if cache_dir is None else (Path(cache_dir) if cache_dir else None)
+    cdir = Path(cache_dir) if cache_dir else None
     cache_path: Optional[Path] = None
     digest: Optional[str] = None
+    prompt_sig: Optional[str] = None
     if cdir is not None and not hasattr(image, "save"):
         img_path = Path(image)
         if img_path.is_file():
             digest = _still_file_sha256(img_path)
-            cache_path = cdir / f"{digest}.json"
+            prompt_sig = _still_cache_suffix(model_alias)
+            cache_path = cdir / f"{digest}_{prompt_sig}.json"
             if cache_path.is_file():
                 try:
                     cached = json.loads(cache_path.read_text(encoding="utf-8"))
@@ -4827,7 +4837,14 @@ def vision_read(
     if cache_path is not None:
         try:
             cache_path.parent.mkdir(parents=True, exist_ok=True)
-            payload = {"read": read, "source": str(image), "sha256": digest, "how": "vision_read_cache"}
+            payload = {
+                "read": read,
+                "source": str(image),
+                "sha256": digest,
+                "prompt_sha8": prompt_sig,
+                "model_alias": str(model_alias or ""),
+                "how": "vision_read_cache",
+            }
             tmp = cache_path.with_suffix(".json.tmp")
             tmp.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
             os.replace(tmp, cache_path)
