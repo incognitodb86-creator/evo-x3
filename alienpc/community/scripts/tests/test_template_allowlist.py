@@ -194,18 +194,64 @@ def test_promoted_template_allowed_and_candidate_ignored(tmp_path: Path):
     ok, _, _ = ta.check_graph(custom)
     assert not ok
 
-    # With explicit promotion: allowed
+    # With explicit promotion + declared variable_fields: allowed
     g = copy.deepcopy(custom)
     g["2"]["inputs"]["noise_seed"] = 99
-    ok, matched, reason = ta.check_graph(g, promoted=[promoted_file])
+    ok, matched, reason = ta.check_graph(g, promoted=[("custom_promoted", custom, {"2": ["noise_seed"]})])
     assert ok, reason
     assert matched == "custom_promoted"
+
+    # Without variable_fields, mutating noise_seed is refused (exact match only)
+    ok, _, _ = ta.check_graph(g, promoted=[promoted_file])
+    assert not ok
 
     # Candidate filenames are never accepted via promotion
     cand_file = tmp_path / "draft.candidate.api.json"
     cand_file.write_text(json.dumps(custom), encoding="utf-8")
-    ok, _, _ = ta.check_graph(g, promoted=[cand_file])
+    ok, _, _ = ta.check_graph(custom, promoted=[cand_file])
     assert not ok
+
+
+def test_per_template_variable_fields_refuses_fixed_negative_text(tmp_path: Path):
+    tdir = tmp_path / "templates"
+    tdir.mkdir()
+    still_tpl = {
+        "3": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_3_8b_fp8mixed.safetensors", "device": "default", "type": "flux2"}},
+        "5": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["3", 0], "text": "An adult woman in warm light."}},
+        "6": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["3", 0], "text": "bad quality, blurry"}},
+        "20": {"class_type": "RandomNoise", "inputs": {"noise_seed": 0}},
+        "24": {"class_type": "SaveImage", "inputs": {"images": ["5", 0], "filename_prefix": "community/still/TAG"}},
+    }
+    tpl_file = tdir / "flux_still_promoted.api.json"
+    tpl_bytes = json.dumps(still_tpl).encode("utf-8")
+    tpl_file.write_bytes(tpl_bytes)
+    tpl_sha = hashlib.sha256(tpl_bytes).hexdigest()
+
+    manifest = tmp_path / "allowlist_promoted.json"
+    manifest.write_text(
+        json.dumps([{
+            "file": "flux_still_promoted.api.json",
+            "sha256": tpl_sha,
+            "variable_fields": {"5": ["text"], "20": ["noise_seed"], "24": ["filename_prefix"]},
+        }]),
+        encoding="utf-8",
+    )
+
+    # Varying positive prompt ("5".text), seed, and prefix passes
+    g_ok = copy.deepcopy(still_tpl)
+    g_ok["5"]["inputs"]["text"] = "An adult woman standing by a sunlit window."
+    g_ok["20"]["inputs"]["noise_seed"] = 777
+    g_ok["24"]["inputs"]["filename_prefix"] = "community/still/run01"
+    ok, matched, reason = ta.check_graph(g_ok, templates_dir=tdir, promoted_manifest=manifest)
+    assert ok, reason
+    assert matched == "flux_still_promoted"
+
+    # Mutating fixed negative CLIPTextEncode ("6".text) is refused
+    g_bad_neg = copy.deepcopy(g_ok)
+    g_bad_neg["6"]["inputs"]["text"] = "tampered negative prompt"
+    ok, _, reason = ta.check_graph(g_bad_neg, templates_dir=tdir, promoted_manifest=manifest)
+    assert not ok
+    assert "node 6.text" in reason
 
 
 def test_promoted_manifest_checks_sha256_and_rejects_traversal(tmp_path: Path):

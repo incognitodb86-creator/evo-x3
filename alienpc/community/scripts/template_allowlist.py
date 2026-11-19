@@ -32,7 +32,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 DEFAULT_TEMPLATES_DIR = SCRIPTS_DIR.parent / "templates"
@@ -82,6 +82,27 @@ VARIABLE_KEYS = (
     | DIM_KEYS
     | PREFIX_KEYS
 )
+
+_H3_C0_VARS = frozenset({"prompt", "length", "width", "height"})
+_H3_C1_VARS = frozenset({"prompt", "width", "height"})
+_H3_REFMOD_VARS = REFMOD_NAME_KEYS | REFMOD_STRENGTH_KEYS
+_NOISE_VARS = frozenset({"noise_seed"})
+_IMG_VARS = frozenset({"image"})
+_SAVE_VARS = frozenset({"filename_prefix"})
+
+# Per-template map of node_id -> allowed variable input keys. Every other node/key must match exactly.
+TEMPLATE_VARIABLE_FIELDS: Dict[str, Dict[str, FrozenSet[str]]] = {
+    "b2": {"c0": _H3_C0_VARS, "img": _IMG_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "b2_refmod": {"c0": _H3_C0_VARS, "refmods": _H3_REFMOD_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "plain": {"c0": _H3_C0_VARS, "img_1": _IMG_VARS, "refmods": _H3_REFMOD_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "oc_guide": {"c0": _H3_C0_VARS, "img_1": _IMG_VARS, "refmods": _H3_REFMOD_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "oc_ref": {"c0": _H3_C0_VARS, "img_1": _IMG_VARS, "refmods": _H3_REFMOD_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "named_parody": {"c0": _H3_C0_VARS, "refmods": _H3_REFMOD_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "talk": {"c0": _H3_C0_VARS, "img_1": _IMG_VARS, "refmods": _H3_REFMOD_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "two_person": {"c0": _H3_C0_VARS, "img": _IMG_VARS, "img2": _IMG_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "long_continuation": {"c0": _H3_C0_VARS, "c1": _H3_C1_VARS, "img": _IMG_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+    "ref2va_16x9": {"c0": _H3_C0_VARS, "img": _IMG_VARS, "noise": _NOISE_VARS, "save": _SAVE_VARS},
+}
 
 _SAFE_RTX_INPUT_RE = re.compile(r"^(?:x3_rtx2x_input\.mp4|rtx2x_[A-Za-z0-9._-]+\.(?:mp4|mov|mkv|webm))$")
 
@@ -231,7 +252,25 @@ def _match_rtx_vsr(nodes: Dict[str, Dict[str, Any]]) -> Tuple[bool, str]:
     return True, ""
 
 
-def _match_template(nodes: Dict[str, Dict[str, Any]], spec: Dict[str, Dict[str, Any]]) -> Tuple[bool, str]:
+def _normalize_var_fields(raw_map: Any) -> Dict[str, FrozenSet[str]]:
+    """Normalize a per-template {node_id: [keys]} map, keeping only recognized VARIABLE_KEYS."""
+    if not isinstance(raw_map, dict):
+        return {}
+    out: Dict[str, FrozenSet[str]] = {}
+    for nid, keys in raw_map.items():
+        if not isinstance(nid, str) or not isinstance(keys, (list, tuple, set, frozenset)):
+            continue
+        allowed = frozenset(k for k in keys if isinstance(k, str) and k in VARIABLE_KEYS)
+        if allowed:
+            out[nid] = allowed
+    return out
+
+
+def _match_template(
+    nodes: Dict[str, Dict[str, Any]],
+    spec: Dict[str, Dict[str, Any]],
+    var_fields: Dict[str, FrozenSet[str]],
+) -> Tuple[bool, str]:
     if set(nodes.keys()) != set(spec.keys()):
         extra = sorted(set(nodes.keys()) - set(spec.keys()))
         missing = sorted(set(spec.keys()) - set(nodes.keys()))
@@ -250,6 +289,7 @@ def _match_template(nodes: Dict[str, Dict[str, Any]], spec: Dict[str, Dict[str, 
         g_in = gnode["inputs"]
         if set(g_in.keys()) != set(s_in.keys()):
             return False, f"node {nid} input keys mismatch"
+        allowed_keys = var_fields.get(nid, frozenset())
         for k, expected in s_in.items():
             actual = g_in[k]
             if _is_link(expected):
@@ -258,12 +298,12 @@ def _match_template(nodes: Dict[str, Dict[str, Any]], spec: Dict[str, Dict[str, 
                 continue
             if _is_link(actual):
                 return False, f"node {nid}.{k} unexpected link {actual!r}"
-            if expected == VAR_SENTINEL or k in VARIABLE_KEYS:
+            if k in allowed_keys:
                 err = _validate_var_value(k, actual)
                 if err:
                     return False, f"node {nid}.{k}: {err}"
             else:
-                if actual != expected:
+                if expected == VAR_SENTINEL or actual != expected:
                     return False, f"node {nid}.{k} fixed value {actual!r} != {expected!r}"
 
     return True, ""
@@ -282,7 +322,7 @@ def _is_safe_promoted_filename(name: Any) -> bool:
 def _load_promoted_manifest(
     manifest_path: Optional[Path],
     templates_dir: Optional[Path],
-) -> List[Tuple[str, Dict[str, Any]]]:
+) -> List[Tuple[str, Dict[str, Any], Dict[str, FrozenSet[str]]]]:
     """Load promoted templates from scripts/allowlist_promoted.json with strict name + sha256 checks."""
     if not manifest_path or not templates_dir:
         return []
@@ -297,7 +337,7 @@ def _load_promoted_manifest(
     if not isinstance(data, list):
         return []
 
-    loaded: List[Tuple[str, Dict[str, Any]]] = []
+    loaded: List[Tuple[str, Dict[str, Any], Dict[str, FrozenSet[str]]]] = []
     for entry in data:
         if not isinstance(entry, dict):
             continue
@@ -318,7 +358,8 @@ def _load_promoted_manifest(
             raw = json.loads(raw_bytes.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
             continue
-        loaded.append((fname.removesuffix(".api.json"), raw))
+        var_fields = _normalize_var_fields(entry.get("variable_fields"))
+        loaded.append((fname.removesuffix(".api.json"), raw, var_fields))
     return loaded
 
 
@@ -327,9 +368,9 @@ def load_allowlist(
     u55_specs_path: Path = DEFAULT_U55_SPECS,
     promoted: Optional[Sequence[Any]] = None,
     promoted_manifest: Optional[Path] = DEFAULT_PROMOTED_MANIFEST,
-) -> Dict[str, Dict[str, Dict[str, Any]]]:
-    """Load allowlisted template specs from disk + U55 fallback + verified promoted templates."""
-    specs: Dict[str, Dict[str, Dict[str, Any]]] = {}
+) -> Dict[str, Tuple[Dict[str, Dict[str, Any]], Dict[str, FrozenSet[str]]]]:
+    """Load allowlisted (spec, variable_fields) pairs from disk + U55 fallback + verified promoted templates."""
+    specs: Dict[str, Tuple[Dict[str, Dict[str, Any]], Dict[str, FrozenSet[str]]]] = {}
 
     u55_fallback: Dict[str, Any] = {}
     if u55_specs_path and Path(u55_specs_path).is_file():
@@ -337,25 +378,27 @@ def load_allowlist(
 
     tdir = Path(templates_dir) if templates_dir else None
     for name in CORE_TEMPLATE_NAMES:
+        var_fields = TEMPLATE_VARIABLE_FIELDS.get(name, {})
         tpath = (tdir / f"{name}.api.json") if tdir else None
         if tpath and tpath.is_file():
             raw = json.loads(tpath.read_text(encoding="utf-8"))
             parsed = _graph_nodes(raw)
             if parsed and not _has_llm_node(parsed):
-                specs[name] = parsed
+                specs[name] = (parsed, var_fields)
                 continue
         if name in u55_fallback:
             parsed = _graph_nodes(u55_fallback[name])
             if parsed and not _has_llm_node(parsed):
-                specs[name] = parsed
+                specs[name] = (parsed, var_fields)
 
     # Verified manifest entries (next to u55_allowlist_specs.json; Derrick-approved commits only)
-    for name, raw in _load_promoted_manifest(promoted_manifest, tdir):
+    for name, raw, var_fields in _load_promoted_manifest(promoted_manifest, tdir):
         parsed = _graph_nodes(raw)
         if parsed and not _has_llm_node(parsed):
-            specs[name] = parsed
+            specs[name] = (parsed, var_fields)
 
     for item in list(promoted or []):
+        var_fields = {}
         if isinstance(item, (str, Path)):
             p = Path(item)
             if not _is_safe_promoted_filename(p.name) or not p.is_file():
@@ -366,11 +409,15 @@ def load_allowlist(
             name, raw = str(item[0]), item[1]
             if name.endswith(".candidate"):
                 continue
+        elif isinstance(item, tuple) and len(item) == 3:
+            name, raw, var_fields = str(item[0]), item[1], _normalize_var_fields(item[2])
+            if name.endswith(".candidate"):
+                continue
         else:
             continue
         parsed = _graph_nodes(raw)
         if parsed and not _has_llm_node(parsed):
-            specs[name] = parsed
+            specs[name] = (parsed, var_fields)
 
     return specs
 
@@ -404,8 +451,8 @@ def check_graph(
     )
 
     closest: List[Tuple[int, str, str]] = []
-    for name, spec in specs.items():
-        ok, err = _match_template(nodes, spec)
+    for name, (spec, var_fields) in specs.items():
+        ok, err = _match_template(nodes, spec, var_fields)
         if ok:
             return True, name, ""
         # Rank closest mismatch by node-ID overlap for a clear refusal message
