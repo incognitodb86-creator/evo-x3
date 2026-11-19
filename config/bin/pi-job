@@ -63,7 +63,7 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def _send_ntfy(title: str, body: str, priority: str = "default") -> bool:
+def _send_ntfy(title: str, body: str, priority: str = "default", actions: str | None = None) -> bool:
     if not NTFY_TOKEN_FILE.is_file():
         return False
     token = NTFY_TOKEN_FILE.read_text(encoding="utf-8").strip()
@@ -79,6 +79,8 @@ def _send_ntfy(title: str, body: str, priority: str = "default") -> bool:
             "Priority": priority,
         },
     )
+    if actions:
+        req.add_header("Actions", actions)
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return 200 <= resp.status < 300
@@ -427,6 +429,7 @@ def _exec_job(job_id: str) -> int:
                         f"pi-job {job_id}",
                         f"Run {job_id}, prompt {hash8}: code {code}, 15 min",
                         priority="high",
+                        actions=f"copy, Copy, queue {job_id} {code}",
                     )
                     still_url, prompt_url = _publish_preview(crun)
                     note = f"run={crun.name} prompt_hash8={hash8} ntfy_sent={sent} preview={'ok' if still_url else 'no-still'}"
