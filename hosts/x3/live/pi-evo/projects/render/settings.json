@@ -1,0 +1,119 @@
+{
+  "packages": [
+    "npm:pi-permission-system@0.8.0",
+    "npm:pi-memory@0.4.2",
+    "npm:@plannotator/pi-extension@0.28.40",
+    "npm:pi-canvas@0.1.1",
+    "npm:pi-say@1.1.1",
+    {
+      "source": "git:github.com/EveryInc/compound-engineering-plugin@34492307",
+      "skills": [
+        "!ce-babysit-pr",
+        "!ce-resolve-pr-feedback",
+        "!ce-test-browser",
+        "!ce-proof",
+        "!ce-strategy",
+        "!ce-riffrec-feedback-analysis",
+        "!ce-ideate",
+        "!ce-pov",
+        "!ce-bakeoff",
+        "!ce-optimize",
+        "!ce-prototype",
+        "!lfg"
+      ]
+    }
+  ],
+  "defaultProvider": "x3-local",
+  "defaultModel": "flash-next-uncensored-v2",
+  "defaultThinkingLevel": "low",
+  "extensions": [
+    "-builtin:llama.cpp"
+  ],
+  "skills": [
+    "~/AI/community/skills",
+    "-~/AI/community/skills/alienpc-hardcore-i2v-director",
+    "-~/AI/community/skills/alienpc-stills-pose-edit-prompting",
+    "-~/AI/community/skills/comfy-render",
+    "-~/AI/community/skills/h3-hc-render",
+    "-~/AI/community/skills/h3-max-ref2va-prompt",
+    "-~/AI/community/skills/image-render",
+    "-~/AI/community/skills/video-render",
+    "~/AI/community/agent-shared/skills",
+    "~/AI/fleet-brain/20_skills/current",
+    "-~/AI/fleet-brain/20_skills/current/fantasy-news-scout",
+    "-~/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
+    "-~/AI/fleet-brain/20_skills/current/household-money-tracker",
+    "-~/AI/fleet-brain/20_skills/current/tech-deals-watch",
+    "-~/AI/fleet-brain/20_skills/current/imagine-dump-ops",
+    "-~/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
+    "-~/AI/fleet-brain/20_skills/current/h3-hc-render",
+    "-~/AI/fleet-brain/20_skills/current/h3-max-ref2va-prompt",
+    "-~/AI/fleet-brain/20_skills/current/h3-parody-identity",
+    "-~/AI/fleet-brain/20_skills/current/h3-prompting",
+    "-~/AI/fleet-brain/20_skills/current/video-render",
+    "-~/AI/community/agent-shared/skills/google-voice-texts"
+  ],
+  "prompts": [
+    "~/AI/community/agent-shared/prompts"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 32768,
+    "keepRecentTokens": 20000,
+    "modelOverrides": {
+      "x3-local/flash-next": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/gemma4-heretic-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/qwen27b": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local-coding/flash-next-uncensored-v2": {
+        "reserveTokens": 32768,
+        "keepRecentTokens": 20000
+      },
+      "x3-local/flash-next-uncensored-v2-sub": {
+        "reserveTokens": 16384,
+        "keepRecentTokens": 20000
+      }
+    }
+  },
+  "images": {
+    "blockImages": false,
+    "autoResize": true
+  },
+  "subagents": {
+    "defaultModel": "x3-local/flash-next-uncensored-v2-sub",
+    "disableThinking": false,
+    "defaultThinking": "low"
+  }
+}

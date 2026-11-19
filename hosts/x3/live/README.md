@@ -7,8 +7,10 @@ Live files stay the source of truth; nothing here was edited on the box. Values 
 | Program | Folder |
 |---|---|
 | llama-swap (model router; Gufo, Halogen and strix toolboxes are launched from its `cmd:` lines) | `llama-swap/` |
-| Container images incl. gufo-runtime, halogen-flash-server, strix toolboxes, Open WebUI (tags + digests) | `containers/images.txt` |
-| Open WebUI + SearXNG quadlets | `containers/` |
+| Container images incl. gufo-runtime, halogen-flash-server, strix toolboxes (tags + digests) | `containers/images.txt` |
+| SearXNG quadlet; retired Open WebUI quadlet (removed 2026-11-19, Derrick t2688u) | `containers/`, `containers/_archive/` |
+| Hermes WebUI (tailnet chat UI since 2026-11-19: Serve 8443 `/` → 127.0.0.1:8787; nesquena/hermes-webui @ 6c4aaaa in `/home/evo/hermes-webui`, code not copied) | `systemd/evo-user/hermes-webui.service` |
+| Forge + Render project `.pi` (settings, extensions incl. auto-continue.ts) | `pi-evo/projects/` |
 | Hermes Agent (config, SOUL, custom skills, edits to bundled skills, version) | `hermes/` |
 | pi (evo: settings, permissions, MCP, models example, extensions, packages, panes) | `pi-evo/agent`, `pi-evo/panes` |
 | pi chat launchers (Render, Forge) and evo-x3 scripts (pi-mobile hub, herdr panes, comfy-submit) | `pi-evo/pi-chats`, `pi-evo/evo-x3-scripts` |

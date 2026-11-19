@@ -94,6 +94,11 @@ for f in README.md render-pi.sh forge-pi.sh; do E test -f /home/evo/evo-x3/pi-ch
 for f in $(E find /home/evo/evo-x3/scripts -type f -not -path '*/_archive/*'); do scrub_evo "$f" "$R/pi-evo/evo-x3-scripts/${f#/home/evo/evo-x3/scripts/}"; done
 E test -f /home/evo/.pi/agent/pi-mobile/config.json && scrub_evo /home/evo/.pi/agent/pi-mobile/config.json "$R/pi-evo/agent/pi-mobile/config.json"
 
+# --- Forge + Render project .pi (settings, project extensions incl. auto-continue.ts, npm manifest; no auth/models/sessions)
+for p in forge render; do
+  for f in $(E find /home/evo/AI/$p/.pi -maxdepth 2 -type f \( -name settings.json -o -name '*.ts' -o -name package.json -o -name AGENTS.md \) -not -path '*/_archive/*' -not -path '*/node_modules/*' 2>/dev/null); do
+    scrub_evo "$f" "$R/pi-evo/projects/$p/${f#/home/evo/AI/$p/.pi/}"; done; done
+
 # --- pi (derekboone, Max's own harness)
 for f in AGENTS.md settings.json pi-permissions.jsonc web-search.json; do [ -f ~/.pi/agent/$f ] && python3 -c "$SCRUB" "$f" "$R/pi-derekboone/agent/$f" < ~/.pi/agent/$f; done
 

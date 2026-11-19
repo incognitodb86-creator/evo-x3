@@ -3,6 +3,7 @@ dbus-broker.service            enabled enabled
 herdr-panes.service            enabled disabled
 herdr-server.service           enabled disabled
 hermes-gateway.service         enabled disabled
+hermes-webui.service           enabled disabled
 pi-mobile-hub.service          enabled disabled
 pixlstash.service              enabled disabled
 systemd-tmpfiles-setup.service enabled enabled
@@ -16,4 +17,4 @@ hermes-state-commit.timer      enabled disabled
 systemd-tmpfiles-clean.timer   enabled enabled
 u42-pixlstash-tagger.timer     enabled disabled
 
-16 unit files listed.
+17 unit files listed.

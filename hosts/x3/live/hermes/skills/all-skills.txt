@@ -21,6 +21,7 @@ email/himalaya/SKILL.md
 media/youtube-content/SKILL.md
 note-taking/obsidian/SKILL.md
 pi-job/SKILL.md
+pixlstash-image-library/SKILL.md
 productivity/document-to-action-items/SKILL.md
 productivity/google-workspace/SKILL.md
 productivity/maps/SKILL.md

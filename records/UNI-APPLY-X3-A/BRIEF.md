@@ -87,12 +87,12 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
    - Verify: `make -C /home/evo/AI/community/agent-shared/python-harness/sample-tool check-all` (ruff + ty + pytest 3 passed).
    - Rollback: restore `/home/evo/AI/_archive/20261119/community-AGENTS.md` and `git revert` on `x3-community` to `<pre-pull-HEAD>` (no force).
 
-8. **H4 (archive 27 Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9b796d9`).
+8. **H4 (archive pruned Hermes skills + install `pi-job` SKILL.md)** — Source on `mono`: `hosts/x3/hermes/SKILLS-PRUNE.md`, `hosts/x3/hermes/skills/pi-job/SKILL.md` (`9b796d9`; note: hermes worker is rebasing H4/H2 on the `eabc8c7` live copies — Max imports the rebased commit before launch).
    - Install table: dest `/home/evo/.hermes/skills/pi-job/SKILL.md`, owner/mode `evo:evo 0644`, sudo: **no**, backup `/home/evo/AI/_archive/20261119/hermes/skills/`.
    - Copy `/home/evo/.hermes/skills/` to `/home/evo/AI/_archive/20261119/hermes/skills/` before changes.
-   - Create `/home/evo/.hermes/skills-archived/` and move the exact 27 skills listed for removal in `/home/derekboone/evo-x3/hosts/x3/hermes/SKILLS-PRUNE.md` into `/home/evo/.hermes/skills-archived/` (leaving 18 active skills; `h3-writer` remains reserved).
+   - Create `/home/evo/.hermes/skills-archived/` and move the skills listed for removal in `/home/derekboone/evo-x3/hosts/x3/hermes/SKILLS-PRUNE.md` into `/home/evo/.hermes/skills-archived/` (leaving **19** active skills — `pixlstash-image-library` kept; `h3-writer` remains reserved).
    - Install: `install -m 0644 /home/derekboone/evo-x3/hosts/x3/hermes/skills/pi-job/SKILL.md /home/evo/.hermes/skills/pi-job/SKILL.md`.
-   - Verify: run `hermes skills list` — expected: **18** active skills, `pi-job` listed, 0 broken paths / frontmatter errors.
+   - Verify: run `hermes skills list` — expected: **19** active skills (`pixlstash-image-library` and `pi-job` listed), 0 broken paths / frontmatter errors.
    - **H2 comment copy (delta #14, `hosts/x3/hermes/config.yaml`, mono `8069885`, `6701567`):** `SKIPPED (held with H2)` — do **not** merge `config.yaml` until live SSRF proxy + H1a + Derrick yes; record as `SKIPPED (held with H2)` in `RESULT.md`.
    - Re-snapshot: **Max closeout step** (record `snapshot: pending Max` in `RESULT.md`).
    - Rollback: move archived skills back from `/home/evo/.hermes/skills-archived/` and restore `/home/evo/AI/_archive/20261119/hermes/skills/`.

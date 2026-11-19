@@ -24,7 +24,7 @@
     }
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-uncensored-sub",
+    "defaultModel": "x3-local/flash-next-uncensored-v2-sub",
     "disableThinking": false,
     "defaultThinking": "low"
   },
@@ -70,7 +70,7 @@
         "reserveTokens": 16384,
         "keepRecentTokens": 20000
       },
-      "x3-local/flash-next-uncensored-sub": {
+      "x3-local/flash-next-uncensored-v2-sub": {
         "reserveTokens": 16384,
         "keepRecentTokens": 20000
       },
@@ -80,10 +80,6 @@
       },
       "x3-local-coding/flash-next-uncensored-v2": {
         "reserveTokens": 32768,
-        "keepRecentTokens": 20000
-      },
-      "x3-local/flash-next-uncensored-v2-sub": {
-        "reserveTokens": 16384,
         "keepRecentTokens": 20000
       }
     }
