@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Nightly stale worktree cleanup (L3, unified plan e0c446f).
-# For each worktree under $WORKTREES_DIR older than $MAX_AGE_DAYS (default 7), save git status + git diff
-# to $RUNS_DIR, then remove and prune the worktree. Set DRY_RUN=1 to preview without removing.
+# Nightly stale worktree cleanup (L3, unified plan e0c446f; code review #1 fix).
+# Skips any dirty worktree (non-empty `git status --porcelain`) and reports it without removing.
+# For clean worktrees, judges age by the newest of latest commit time and newest file mtime;
+# if older than $MAX_AGE_DAYS (default 7), saves `git status --short` + `git diff HEAD` to $RUNS_DIR,
+# then removes without `--force` and prunes. Set DRY_RUN=1 to preview without removing.
 set -euo pipefail
 
 WORKTREES_DIR="${WORKTREES_DIR:-$HOME/AI/_worktrees}"
@@ -12,19 +14,43 @@ DRY_RUN="${DRY_RUN:-0}"
 [ -d "$WORKTREES_DIR" ] || exit 0
 mkdir -p "$RUNS_DIR"
 
+NOW="$(date +%s)"
+CUTOFF=$((NOW - MAX_AGE_DAYS * 86400))
 STAMP="$(date +%Y%m%d-%H%M%S)"
 REPORT="$RUNS_DIR/stale-worktrees-${STAMP}.log"
 COUNT=0
+SKIPPED_DIRTY=0
 
 while IFS= read -r wt; do
   [ -n "$wt" ] || continue
-  name="$(basename "$wt")"
+  # Never remove a worktree with uncommitted/staged/untracked changes.
+  porcelain="$(git -C "$wt" status --porcelain 2>/dev/null || echo "STATUS_ERROR")"
+  if [ -n "$porcelain" ]; then
+    SKIPPED_DIRTY=$((SKIPPED_DIRTY + 1))
+    {
+      echo "=== SKIP DIRTY worktree: $wt ==="
+      printf '%s\n' "$porcelain"
+    } >> "$REPORT"
+    continue
+  fi
+
+  # Judge staleness from the newest commit time and newest file mtime inside the worktree.
+  commit_ts="$(git -C "$wt" log -1 --format=%ct 2>/dev/null || echo 0)"
+  file_ts="$(find "$wt" -path "$wt/.git" -prune -o -printf '%T@\n' 2>/dev/null | awk 'BEGIN{m=0} {v=int($1); if(v>m) m=v} END{print m}')"
+  newest_ts="$commit_ts"
+  if [ "${file_ts:-0}" -gt "${newest_ts:-0}" ]; then
+    newest_ts="$file_ts"
+  fi
+  if [ "${newest_ts:-0}" -gt "$CUTOFF" ]; then
+    continue
+  fi
+
   COUNT=$((COUNT + 1))
   {
-    echo "=== stale worktree: $wt ==="
+    echo "=== stale clean worktree: $wt (newest_ts=$newest_ts) ==="
     git -C "$wt" status --short 2>&1 || true
-    echo "--- diff ---"
-    git -C "$wt" diff 2>&1 || true
+    echo "--- diff HEAD ---"
+    git -C "$wt" diff HEAD 2>&1 || true
   } >> "$REPORT"
   if [ "$DRY_RUN" = "1" ]; then
     echo "DRY_RUN: would remove $wt" >> "$REPORT"
@@ -33,15 +59,15 @@ while IFS= read -r wt; do
   common_dir="$(git -C "$wt" rev-parse --git-common-dir 2>/dev/null || true)"
   if [ -n "$common_dir" ] && [ -d "$common_dir" ]; then
     parent_repo="$(dirname "$(realpath "$common_dir")")"
-    git -C "$parent_repo" worktree remove --force "$wt" >> "$REPORT" 2>&1 || true
+    git -C "$parent_repo" worktree remove "$wt" >> "$REPORT" 2>&1 || true
     git -C "$parent_repo" worktree prune >> "$REPORT" 2>&1 || true
   else
     echo "SKIP remove (not a git worktree): $wt" >> "$REPORT"
   fi
-done < <(find "$WORKTREES_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +"$MAX_AGE_DAYS" 2>/dev/null || true)
+done < <(find "$WORKTREES_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
 
-if [ "$COUNT" -gt 0 ]; then
-  echo "cleaned=$COUNT report=$REPORT"
+if [ "$COUNT" -gt 0 ] || [ "$SKIPPED_DIRTY" -gt 0 ]; then
+  echo "cleaned=$COUNT skipped_dirty=$SKIPPED_DIRTY report=$REPORT"
 else
   rm -f "$REPORT"
 fi
