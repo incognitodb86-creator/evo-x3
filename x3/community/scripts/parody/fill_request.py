@@ -60,12 +60,90 @@ def _stage_still(still: Optional[str]) -> Optional[str]:
     return s
 
 
+REALISM_LORA_DEFAULT = {
+    "name": "h3-realism-people-t2v-i2v-r2v.safetensors",
+    "strength": 0.7,
+    "trigger": "r34l1sm",
+}
+
+
+def parse_lora_spec(spec: str) -> Dict[str, Any]:
+    """Parse `<lora_file>[:<strength>[:<trigger>]]` into a normalized LoRA dict."""
+    parts = [p.strip() for p in str(spec or "").split(":")]
+    name = parts[0]
+    if not name:
+        raise ValueError(f"empty lora spec: {spec!r}")
+    strength = float(parts[1]) if len(parts) > 1 and parts[1] else 0.7
+    trigger = parts[2] if len(parts) > 2 and parts[2] else ""
+    if not trigger and "h3-realism-people" in name.lower():
+        trigger = "r34l1sm"
+    return {"name": name, "strength": strength, "trigger": trigger}
+
+
+def _prepend_lora_triggers(prompt: str, loras: Sequence[Dict[str, Any]]) -> str:
+    """Prepend active LoRA trigger word(s) to detailed_description (or prompt start) ONLY when loaded (R31)."""
+    import re
+    triggers = []
+    for lr in loras:
+        t = str(lr.get("trigger") or "").strip()
+        if t and float(lr.get("strength", 0.0) or 0.0) > 0:
+            if not re.search(rf"(?i)\b{re.escape(t)}\b", prompt) and t not in triggers:
+                triggers.append(t)
+    if not triggers:
+        return prompt
+    lead = ", ".join(triggers)
+    m = re.search(r"(?im)^(detailed_description\s*:\s*)", prompt)
+    if m:
+        after = prompt[m.end():]
+        sep = " " if after and not after.startswith(("\n", " ")) else ""
+        return prompt[:m.end()] + f"{lead}, " + sep + after.lstrip(" ")
+    return f"{lead}, {prompt}"
+
+
+def _inject_h3_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Chain LoraLoaderModelOnly node(s) between `unet` and any node consuming `["unet", 0]`."""
+    active = [
+        {"name": str(lr["name"]).strip(), "strength": float(lr.get("strength", 0.7)), "trigger": str(lr.get("trigger") or "").strip()}
+        for lr in loras if str(lr.get("name") or "").strip() and float(lr.get("strength", 0.7)) > 0
+    ]
+    if not active or "unet" not in graph:
+        return []
+    prev_ref: List[Any] = ["unet", 0]
+    for idx, lr in enumerate(active, start=1):
+        nid = f"lora_{idx}"
+        while nid in graph:
+            nid += "_x"
+        graph[nid] = {
+            "_meta": {"title": f"H3 LoRA {idx}: {lr['name']}"},
+            "class_type": "LoraLoaderModelOnly",
+            "inputs": {
+                "lora_name": lr["name"],
+                "model": prev_ref,
+                "strength_model": lr["strength"],
+            },
+        }
+        prev_ref = [nid, 0]
+    # Rewire every existing consumer of ["unet", 0] (except the newly added lora_1) to the last LoRA node.
+    first_lora_id = next(k for k, v in graph.items() if isinstance(v, dict) and v.get("class_type") == "LoraLoaderModelOnly" and v.get("inputs", {}).get("model") == ["unet", 0])
+    for nid, node in graph.items():
+        if nid == first_lora_id or not isinstance(node, dict):
+            continue
+        inp = node.get("inputs")
+        if not isinstance(inp, dict):
+            continue
+        for k, v in list(inp.items()):
+            if v == ["unet", 0]:
+                inp[k] = list(prev_ref)
+    return active
+
+
 def fill_request(
     prompt_text: str, run_dir: Path, ask: str = "", position: str = "", still_image: Optional[str] = None,
     partner2_still: Optional[str] = None, character: Optional[str] = None, names: Optional[Sequence[str]] = None,
     refmod_stems: Optional[Sequence[str]] = None, template_name: Optional[str] = None, still_mode: str = "guide",
     width: int = 768, height: int = 1344, frames: Optional[int] = None, seed: int = 51083601,
     continuation_prompt: Optional[str] = None, dry_run: bool = True,
+    loras: Optional[Sequence[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     run_dir = Path(run_dir); run_dir.mkdir(parents=True, exist_ok=True)
     still_image, partner2_still = pixl_abs(still_image), pixl_abs(partner2_still)
@@ -85,12 +163,21 @@ def fill_request(
         return _fail(str(e).removeprefix("NOT_READY: "))
 
     stems, id_info = list(refmod_stems or []), {}
-    if refmod_stems is None and (character or names or (still_image and res.oc_keys_for_still_and_names(still_image))):
-        picked = res.resolve_writer_refmods(still_image=still_image, character=character, names=names)
+    still_detected = res.detect_still_identity(still_image) if (refmod_stems is None and still_image and not (character or names)) else {}
+    auto_names = list(still_detected.get("names") or [])
+    if refmod_stems is None and (character or names or auto_names or (still_image and res.oc_keys_for_still_and_names(still_image))):
+        picked = res.resolve_writer_refmods(
+            still_image=still_image,
+            character=character or still_detected.get("character"),
+            names=(list(names) if names else (auto_names or None)),
+        )
         if (character or names) and picked.get("reason") and not picked.get("stems"):
             return _fail(picked["reason"])
         stems = list(picked.get("stems") or [])
         id_info = {k: picked.get(k) for k in ("source", "index", "trigger")}
+        if still_detected.get("source") and not (character or names):
+            id_info["still_detected_source"] = still_detected["source"]
+            id_info["still_detected_names"] = auto_names
 
     mode = br.normalize_still_mode(still_mode)
     tname = template_name or pick_template(bool(still_image), mode, bool(character or names or stems), character, partner2_still, position, width, height)
@@ -98,7 +185,10 @@ def fill_request(
     if not tpath or not tpath.is_file(): return _fail(f"unknown or missing template: {tname!r}")
 
     g = copy.deepcopy(json.loads(tpath.read_text(encoding="utf-8")))
+    applied_loras = _inject_h3_loras(g, loras or [])
     final_prompt = f"{br.REF_MODE_PICTURE1_LEAD}\n\n{raw}" if (mode == "ref" and "ref_images.ref_image_1" in (g.get("c0") or {}).get("inputs", {}) and not raw.startswith(br.REF_MODE_PICTURE1_LEAD)) else raw
+    if applied_loras:
+        final_prompt = _prepend_lora_triggers(final_prompt, applied_loras)
     (run_dir / "prompt.txt").write_text(final_prompt + "\n", encoding="utf-8")
 
     c0_in = g["c0"]["inputs"]
@@ -126,7 +216,7 @@ def fill_request(
     if (nr := run_dir / "clip_NOT_READY.txt").exists(): nr.unlink()
     total_frames = (int(c0_in["length"]) + int(g["win1"]["inputs"].get("extension_frames") or 0)) if "win1" in g else (int(c0_in["length"]) if isinstance(c0_in.get("length"), int) else int(frames or 243))
     rep.update(status="READY", template=tname, template_path=str(tpath), still_mode=mode, canvas=[int(width), int(height)],
-               frames=total_frames, refmods={"stems": stems[:8], **id_info}, build={"total_frames": total_frames})
+               frames=total_frames, refmods={"stems": stems[:8], **id_info}, loras=applied_loras, build={"total_frames": total_frames})
     if warnings:
         rep["warnings"] = warnings
     marker, order_file = run_dir / "DRY_RUN", run_dir / "_render_order.json"
@@ -147,13 +237,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         ap.add_argument(f, default="" if f in ("--ask", "--position") else None)
     ap.add_argument("--names", nargs="+", default=None); ap.add_argument("--still-mode", default="guide", choices=list(br.STILL_MODES))
     ap.add_argument("--frames", type=int, default=None); ap.add_argument("--seed", type=int, default=51083601); ap.add_argument("--queue", action="store_true")
+    ap.add_argument("--lora", action="append", default=[], help="H3 LoRA spec: <filename>[:<strength>[:<trigger>]] (repeatable)")
+    ap.add_argument("--realism-lora", nargs="?", const=str(REALISM_LORA_DEFAULT["strength"]), default=None,
+                    help="Attach MiniMax-H3-Realism-People-LoRA (optional strength, default 0.7; injects r34l1sm trigger)")
     a = ap.parse_args(argv); d = Path(a.run_dir)
     if not d.is_absolute() or not (d / "writer_output.txt").is_file():
         print("NOT_READY run_dir must be absolute and contain writer_output.txt"); return 3
+    lora_list = [parse_lora_spec(s) for s in (a.lora or [])]
+    if a.realism_lora is not None:
+        lora_list.append({**REALISM_LORA_DEFAULT, "strength": float(a.realism_lora)})
     w, h = br.resolve_canvas(a.aspect, a.size, still_size=br.read_still_size(a.still) if a.still else None)
     r = fill_request((d / "writer_output.txt").read_text(encoding="utf-8"), d, ask=a.ask, position=a.position, still_image=a.still,
                      partner2_still=a.partner2_still, character=a.character, names=a.names, template_name=a.template,
-                     still_mode=a.still_mode, width=w, height=h, frames=a.frames, seed=a.seed, dry_run=not a.queue)
+                     still_mode=a.still_mode, width=w, height=h, frames=a.frames, seed=a.seed, dry_run=not a.queue,
+                     loras=(lora_list or None))
     print(r.get("status"), r.get("template", ""), r.get("reason", ""))
     return 0 if r.get("status") == "READY" else 3
 

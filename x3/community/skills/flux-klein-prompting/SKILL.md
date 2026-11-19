@@ -109,6 +109,25 @@ Assemble the paragraph in this exact priority order:
 4. **RefControl Pose (`refcontrol_v2_poses.safetensors`, two subjects):**
    > Apply pose from image 1 with reference from image 2 for the adult woman in her late twenties on the left and the adult man in his thirties on the right beside a wooden counter. Her weight rests on her left hip, right forearm pressed flat on the counter, wearing her olive cotton tank and jeans from image 2. Cool window daylight enters from the left. Medium-full shot at chest height, 50mm lens at f/2.0.
 
+## Running Flux Stills from X3 (Auto-Import to PixlStash + H3Max Celeb Handoff)
+
+Use `/home/evo/AI/community/scripts/parody/flux_still.py` (dry run by default; requires `--queue --yes-derrick` after Derrick approves the still prompt):
+
+```bash
+/home/evo/AI/render/x3/.venv/bin/python3 /home/evo/AI/community/scripts/parody/flux_still.py \
+  '/home/evo/AI/community/runs/<still_run_name>' --prompt '<prompt>' \
+  --mode t2i|refmod|edit|klein_t2i|pose|layout \
+  [--refmod '<klein9_refmod>'] [--retention 'partially_preserved (0.7)'] \
+  [--lora 'loras/klein9/<file>.safetensors:0.85'] \
+  [--image '<ref_still>'] [--pose-image '<pose_ref>'] \
+  [--character '<Name>'] [--actor '<Actor>'] [--names '<Name>' ...] \
+  [--width 768 --height 1344] [--queue --yes-derrick]
+```
+
+- **RefMods AND LoRAs:** Supports Klein9 RefMods (`--refmod`), Klein9 LoRAs (`--lora`), or both together on any Miraclein/Klein template (wires `LoraLoaderModelOnly` / `Klein9RefModsLoader` automatically on the per-run copy).
+- **PixlStash auto-import:** After `--queue --yes-derrick` finishes, `flux_still.py` (and `sync-renders` for any AlienPc-run still) copies the generated PNG into `/home/evo/AI/pixl-inbox/` so PixlStash imports it automatically in the background.
+- **H3Max celeb pickup:** `flux_still.py` writes `flux_meta.json` beside the PNG (and ComfyUI embeds the workflow JSON in the PNG metadata). Passing that PNG to `render_writer_pipeline.py --still <png>` automatically detects the celeb RefMod/LoRA, links her to the H3Max celeb INDEX + iconic character voice, and loads her H3Max visual RefMod.
+
 ## Review Rubric
 
 Review every rendered still at full size, one image at a time, using [strict-still-review.md](../alienpc-stills-pose-edit-prompting/references/strict-still-review.md) (checks 1–9; X3 path `/home/evo/AI/community/skills/alienpc-stills-pose-edit-prompting/references/strict-still-review.md`). Bots report broken checks only; `KEEP` is Derrick only.

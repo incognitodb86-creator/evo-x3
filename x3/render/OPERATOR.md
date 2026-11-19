@@ -4,14 +4,16 @@ Note: Full prose craft rules live in /home/evo/AI/render/AGENTS.md (compiled int
 Note (ST4/ST5/M4 stills): For FLUX.2 Klein / Miraclein 4.5 still prompts (T2I, Klein9 RefMod, single-change edits, RefControl poses, H3Max start-stills), use `/home/evo/AI/community/skills/flux-klein-prompting/SKILL.md`.
 
 STEPS (one run folder per clip, under /home/evo/AI/community/runs/<run_name>)
-1. Pick the start still from /home/evo/AI/render/_inputs, an explicit path Derrick gives, or via the PixlStash API (http://127.0.0.1:9537, header `Authorization: Bearer $PIXL_KEY` from env; never print $PIXL_KEY):
+1. Pick or create the start still — three sources:
+   - **Source A — PixlStash / existing still:** pick from `/home/evo/AI/render/_inputs`, an explicit path Derrick gives, or via the PixlStash API (http://127.0.0.1:9537, header `Authorization: Bearer $PIXL_KEY` from env; never print $PIXL_KEY):
    - Scene/setting ask: `curl -s -H "Authorization: Bearer $PIXL_KEY" "http://127.0.0.1:9537/api/v1/pictures/search?query=<short scene words>&limit=10" | jq -c '.[] | {id, file_path, width, height}'`
    - OC ask: `curl -s -H "Authorization: Bearer $PIXL_KEY" "http://127.0.0.1:9537/api/v1/pictures?character_id=<id>&sort=DATE&descending=true&limit=20&offset=0" | jq -c '.[] | {id, file_path, width, height}'` (`FCSydny` = `1`, `FCMegan` = `2`; `file_path` is relative to `/home/evo/AI/5slock/libraries/`). Results come newest first (`sort=DATE&descending=true`; use `sort=IMPORTED_AT` for newest imported). Those are the only date sorts, so never guess other sort params or page through offsets to find recent pictures.
    - Character or person ask: list all existing PixlStash character names first and pick the closest match (for example `"Sydney"` -> `FCSydny`, unless celebrity `"Sydney Sweeney"` is explicitly requested):
      `curl -s -H "Authorization: Bearer $PIXL_KEY" "http://127.0.0.1:9537/api/v1/characters" | jq -c '.[] | {id, name, image_count}'`
      then run the OC-ask command above with that `character_id`. If no character matches, run one scene search with the name; after one empty result, stop and ask Derrick (never retry the same search or dig through old run folders).
    - `Sydney Sweeney` (a celebrity: pass `--actor 'Sydney Sweeney' --names 'Sydney Sweeney'`) is not `FCSydny` (Derrick's OC, `character_id` 1).
-   - Uploaded image = the still: copy the uploaded image into `<run_dir>/_inputs/<file>` and pass `--still <run_dir>/_inputs/<file>` (no PixlStash call before the render). The uploaded image goes through the still read (`still_read.json`) + lint as a hard `NOT_READY` gate before any AlienPc job. After the run is set up, drop a copy into `/home/evo/AI/pixl-inbox/` for normal background import.
+   - **Source B — Image Derrick uploaded in chat:** copy the uploaded image into `<run_dir>/_inputs/<file>` and pass `--still <run_dir>/_inputs/<file>` (no PixlStash call before the render). The uploaded image goes through the still read (`still_read.json`) + lint as a hard `NOT_READY` gate before any AlienPc job. After the run is set up, drop a copy into `/home/evo/AI/pixl-inbox/` for normal background import.
+   - **Source C — Generate a new AI still with Flux / Miraclein 4.5:** load `flux-klein-prompting`, write the positive 45–80 word still prompt, dry-run `/home/evo/AI/render/x3/.venv/bin/python3 /home/evo/AI/community/scripts/parody/flux_still.py '/home/evo/AI/community/runs/<still_run>' --prompt '<prompt>' --mode t2i|refmod|edit|pose|layout [--refmod ...] [--lora ...] [--character ...]`, show the prompt and ask "Generate this still?". Only after Derrick's yes, run with `--queue --yes-derrick`. It downloads the PNG, drops a copy into `/home/evo/AI/pixl-inbox/` (auto-imported to PixlStash), and writes `flux_meta.json` so passing `--still <png>` to `render_writer_pipeline.py` automatically picks up any celeb RefMod/LoRA and links her to the H3Max INDEX character + visual RefMod.
    - Never run `find`, `ls`, or `identify` over `/home/evo/AI/5slock/libraries/` and never browse library pictures or captions, except the generated 2x3 candidate contact sheet (`x3/still_candidate_sheet.py`). Inspect that sheet to pick, then inspect the single chosen still with the `read` tool.
    - Build the candidate sheet with `--out <crun>/contact_sheet.jpg` so `pi-job` can publish it.
 2. Write `<run_dir>/still_read.json`:
@@ -24,7 +26,7 @@ STEPS (one run folder per clip, under /home/evo/AI/community/runs/<run_name>)
      [--character '<Character>'] [--actor '<Actor>'] [--names '<Name>' ...] \
      [--frames <N>] [--shots single|multi] [--shot-count <k>] \
      [--scene '<scene_id>'] [--continue '<prev_run_dir>'] [--partner2-still '<still>'] \
-     [--still-mode guide|ref] [--aspect 9:16|16:9] [--queue --yes-derrick]
+     [--still-mode guide|ref] [--aspect 9:16|16:9] [--lora '<file>[:<strength>[:<trigger>]]'] [--realism-lora [<strength>]] [--queue --yes-derrick]
    ```
    - Multi-Beat & Movie Sequencing (`beat_sheet.json` auto-saved on every clip, timestamps never enter `prompt.txt`):
      - **Extend-First Default:** When continuing the same act, room, and camera flow past `10.1 s` (`243f`), prefer **extending** (`--scene '<scene_id>' --continue '<prev_run_dir>'` or native 22f AV latent-tail continuation via `build_writer_beats_continuation_request`) so body motion, garments, and audio stay seamless without reset artifacts.

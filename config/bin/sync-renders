@@ -42,14 +42,40 @@ sync_one() {
   NEW=$((NEW + 1))
 }
 
-# For each <run>/<tag>/render_ok.json with an "upscale" block, sync <run>/<clip> (the 2x file).
+# For each <run>/<tag>/render_ok.json:
+# - Video clips: require an "upscale" block, sync 2x .mp4 to /srv/renders and $INBOX (never *_raw.mp4).
+# - Flux stills (job_type == "still"): copy finished .png/.jpg/.webp to $INBOX for PixlStash auto-import.
+sync_still() {
+  local run_id="$1" src="$2"
+  local base dst
+  base="$(basename "$src")"
+  dst="$INBOX/${run_id}_${base}"
+  if grep -Fxq "$dst" "$STATE_FILE" 2>/dev/null || [ -e "$dst" ]; then
+    return 0
+  fi
+  if [ "$DRY" = 1 ]; then echo "WOULD IMPORT STILL $src -> $dst"; return 0; fi
+  if [ -d "$INBOX" ]; then
+    cp -p "$src" "$dst"
+    echo "$dst" >> "$STATE_FILE"
+    NEW=$((NEW + 1))
+  fi
+}
+
 sync_runs() {   # run dirs on stdin
-  local run tagdir ok clip
+  local run tagdir ok clip jtype
   while IFS= read -r run; do
     for ok in "$run"/*/render_ok.json; do
       [ -f "$ok" ] || continue
-      jq -e '.upscale | type == "object"' "$ok" >/dev/null 2>&1 || continue
       tagdir="$(dirname "$ok")"
+      jtype="$(jq -r '.job_type // empty' "$ok" 2>/dev/null || true)"
+      if [ "$jtype" = "still" ]; then
+        clip="$(jq -r '.clip // .file // empty' "$ok" 2>/dev/null | tr '\\' '/')"
+        [ -n "$clip" ] || clip="$(basename "$tagdir")/$(basename "$tagdir").png"
+        case "$clip" in *contact_sheet*|*..* ) continue;; *.png|*.jpg|*.jpeg|*.webp) ;; *) continue;; esac
+        [ -f "$run/$clip" ] && sync_still "$(basename "$run")" "$run/$clip"
+        continue
+      fi
+      jq -e '.upscale | type == "object"' "$ok" >/dev/null 2>&1 || continue
       clip="$(jq -r '.clip // empty' "$ok" | tr '\\' '/')"
       [ -n "$clip" ] || clip="$(basename "$tagdir")/$(basename "$tagdir").mp4"
       case "$clip" in *_raw.mp4|*.tmp.mp4|*..*) continue;; *.mp4) ;; *) continue;; esac

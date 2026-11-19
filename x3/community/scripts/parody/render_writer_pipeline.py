@@ -1439,6 +1439,13 @@ def run_build(run_dir: Path, ask: str, position: str, still: str, character: Opt
         i = ex.index("--names") + 1
         while i < len(ex) and not str(ex[i]).startswith("--"):
             ex_names.append(str(ex[i])); i += 1
+    ex_loras: List[Dict[str, Any]] = []
+    for idx, tok in enumerate(ex):
+        if tok == "--lora" and idx + 1 < len(ex):
+            ex_loras.append(fr.parse_lora_spec(ex[idx + 1]))
+        elif tok == "--realism-lora":
+            val = ex[idx + 1] if (idx + 1 < len(ex) and not str(ex[idx + 1]).startswith("--")) else str(fr.REALISM_LORA_DEFAULT["strength"])
+            ex_loras.append({**fr.REALISM_LORA_DEFAULT, "strength": float(val)})
     frames_s, aspect, size = _opt("--frames"), _opt("--aspect"), _opt("--size")
     still_mode = _opt("--still-mode") or "guide"
     p2_still, tname = _opt("--partner2-still"), _opt("--template")
@@ -1449,6 +1456,7 @@ def run_build(run_dir: Path, ask: str, position: str, still: str, character: Opt
         raw, run_dir, ask=ask, position=position, still_image=(still or None), partner2_still=p2_still,
         character=character, names=(ex_names or None), template_name=tname, still_mode=still_mode,
         width=w, height=h, frames=int(frames_s) if frames_s else None, dry_run=("--queue" not in ex),
+        loras=(ex_loras or None),
     )
     status = "READY" if rep.get("status") == "READY" else "NOT_READY"
     return {"status": status, "rc": 0 if status == "READY" else 3,
@@ -1712,6 +1720,23 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         if still != "auto" and Path(still).is_absolute() and not Path(still).is_file():
             result.update(status="NOT_READY", not_ready_reason=f"start still file not found: {still}")
             raise _Stop()
+        # Flux/ComfyUI PNG metadata + sidecar + PixlStash tag auto-pickup: if the ask did not name a celeb/character,
+        # detect whether the start still was generated with a Klein9 RefMod/LoRA (or tagged in PixlStash) and link to INDEX + H3 RefMod.
+        if not identity and still and still != "auto":
+            import resolve as _res_still
+            still_id = _res_still.detect_still_identity(still)
+            if still_id.get("names") or still_id.get("character") or still_id.get("actor"):
+                identity = resolve_named_identity(
+                    ask,
+                    character=still_id.get("character"),
+                    actor=still_id.get("actor"),
+                    names=still_id.get("names") or None,
+                )
+                if identity:
+                    if not character and identity.get("character"):
+                        character = identity["character"]
+                    result["still_identity_source"] = still_id.get("source")
+                    result["still_identity_names"] = list(still_id.get("names") or [])
         if still == "auto":
             if job.get("still_read") and not is_continue:
                 result.update(status="NOT_READY", not_ready_reason="start still missing: --still-read was given with "
@@ -1941,6 +1966,13 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             (["--size", str(job["size"])] if job.get("size") else []) + \
             (["--still-mode", str(job["still_mode"])] if job.get("still_mode") else []) + \
             (["--template", str(job["template"])] if job.get("template") else [])
+        for _lr in (job.get("loras") or []):
+            _bx += ["--lora", str(_lr)]
+        _rl_cfg = cfg.get("h3_realism_lora") if isinstance(cfg.get("h3_realism_lora"), dict) else {}
+        if job.get("realism_lora") is not None:
+            _bx += ["--realism-lora", str(job["realism_lora"])]
+        elif _rl_cfg.get("enabled"):
+            _bx += ["--lora", f"{_rl_cfg.get('name') or fr.REALISM_LORA_DEFAULT['name']}:{_rl_cfg.get('strength', 0.7)}:{_rl_cfg.get('trigger', 'r34l1sm')}"]
         if card is None and kind == "talk":
             # BTS/talk: never skip the beat card; use a minimal valid card and keep writing
             card = {
@@ -2000,9 +2032,12 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             }, indent=2, ensure_ascii=False))
         def _materialise_writer_text(raw_text: str) -> Tuple[str, str]:
             t = raw_text or ""
-            if re.search(r"(?im)^\s*(?:subject_definitions|summary|retention_analysis|detailed_description|integrated_multimodal_description)\s*:", t):
+            # Enforce U56 Decision #1 (TenStrip HF #77) on both writer and Hermes Path B outputs via shared beta7_convert.
+            if re.search(r"(?im)^\s*(?:#+\s*|\*\*)?(?:integrated_multimodal_description|overall_soundscape|non_diegetic_music)\s*(?:\*\*)?\s*:|```", t):
+                import beta7_convert as _b7
+                t, _ = _b7.convert_to_beta7(t, mode="auto")
+            if re.search(r"(?im)^\s*(?:subject_definitions|summary|retention_analysis|detailed_description)\s*:", t):
                 return t, wp_lint.get_dd(t)
-            # U56 Goal #1: strip stray overall_soundscape / non_diegetic_music headers if emitted on bare prose while keeping sound sentences
             dd_only = re.sub(r"(?im)^\s*(?:overall_soundscape|non_diegetic_music)\s*:\s*", "", t).strip()
             return assemble_output(dd_only, card, slots, bodies, kind), dd_only
 
@@ -2252,6 +2287,9 @@ def main(argv=None) -> int:
     ap.add_argument("--debug", action="store_true", help="Write debug per-run files (cand_*, lint_*, slots.json, route.json, beat_card*)")
     ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
     ap.add_argument("--prose-file", help="Hermes Path B: prose Hermes wrote; skips the writer call, same lint/hard stops/build")
+    ap.add_argument("--lora", action="append", default=[], help="H3 Beta 7 LoRA spec: <filename>[:<strength>[:<trigger>]] (repeatable)")
+    ap.add_argument("--realism-lora", nargs="?", const=str(fr.REALISM_LORA_DEFAULT["strength"]), default=None,
+                    help="Attach MiniMax-H3-Realism-People-LoRA (optional strength, default 0.7; injects r34l1sm trigger)")
     a = ap.parse_args(argv)
     if a.prose_file:
         pf = Path(a.prose_file)
@@ -2291,6 +2329,7 @@ def main(argv=None) -> int:
                      "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode, "template": a.template,
                      "n_candidates": a.n_candidates, "debug": bool(a.debug), "fix_once": bool(a.fix_once),
                      "prose_file": a.prose_file,
+                     "loras": list(a.lora or []), "realism_lora": a.realism_lora,
                      "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []
     for job in jobs:  # one failing clip never blocks the next

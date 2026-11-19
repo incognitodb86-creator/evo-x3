@@ -22,7 +22,7 @@ Authority: Derrick 2026-11-19 (11:11/11:16 CT Card 2 file work; 13:09 CT render 
 
 ### Item 1 — Writer files (SK1 persona lines + recompile, SK3 model name)
 - Comes in with the render checkout (`x3/render/AGENTS.md`, `writer_pipeline/writer_prompt.md`, `writer_pipeline/config.yaml`).
-- Verify: `sha256sum /home/evo/AI/render/writer_pipeline/writer_prompt.md` = `d733c753184a13ee121aaf2e278a291ff6dbd302c74155d635dfbe0d3a8efd70` and equals `writer_prompt_sha256` in `config.yaml`; recompile check with `python3 /home/evo/AI/community/scripts/parody/wp_compile_prompt.py` as `RUN_ME.md` says (77/77 PASS, 0 hard_fail); one dry writer ask (`render_writer_pipeline.py` dry run, no queue) reaches READY.
+- Verify: `sha256sum /home/evo/AI/render/writer_pipeline/writer_prompt.md` = `5e7643b7c3cf016df572a81c3646ac73bab451b6cf49c42a2d66244d0855c572` and equals `writer_prompt_sha256` in `config.yaml`; recompile check with `python3 /home/evo/AI/community/scripts/parody/wp_compile_prompt.py` as `RUN_ME.md` says (77/77 PASS, 0 hard_fail); one dry writer ask (`render_writer_pipeline.py` dry run, no queue) reaches READY.
 
 ### Item 2 — Render pipeline speedups (RP1-RP3)
 - Comes in with the community checkout.

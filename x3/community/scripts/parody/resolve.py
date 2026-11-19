@@ -940,6 +940,15 @@ def resolve_writer_refmods(
             out["trigger"] = _oc_trigger(matched)
             return out
 
+    still_id = detect_still_identity(still_image)
+    if still_id.get("names"):
+        matched = _resolve_names(still_id["names"])
+        if matched:
+            out["stems"] = matched
+            out["source"] = still_id.get("source") or "still_meta"
+            out["trigger"] = _oc_trigger(matched)
+            return out
+
     out["reason"] = (
         "no RefMod matched this still via installed files, the trained trigger, "
         "the POOL folder, a PixlStash character tag, or the character name; "
@@ -947,4 +956,168 @@ def resolve_writer_refmods(
         "(for example FCSydny / poolclub or poolblonde), or pass --character <name>."
     )
     return out
+
+
+# --- Flux / ComfyUI PNG metadata & sidecar identity handoff to H3Max ---
+_NON_IDENTITY_FLUX_LORA_RE = re.compile(
+    r"(?i)(?:refcontrol|bfs_head|ms_real|snofs|tripleview|quadview|realism|stomach_bulge|anatomy|consistency|turbo|detail)"
+)
+
+
+def extract_comfy_png_prompt(still_image: Optional[str]) -> Optional[Dict[str, Any]]:
+    """Read ComfyUI's embedded workflow JSON from a PNG `prompt` text chunk (pure stdlib, no PIL required)."""
+    if not still_image:
+        return None
+    p = Path(still_image)
+    if not p.is_file() or p.suffix.lower() != ".png":
+        return None
+    try:
+        import struct, zlib
+        data = p.read_bytes()
+        if data[:8] != b"\x89PNG\r\n\x1a\n":
+            return None
+        pos, n = 8, len(data)
+        while pos + 8 <= n:
+            length, ctype = struct.unpack(">I4s", data[pos:pos + 8])
+            chunk = data[pos + 8:pos + 8 + length]
+            pos += 12 + length
+            if ctype == b"tEXt":
+                sep = chunk.find(b"\x00")
+                if sep > 0 and chunk[:sep] == b"prompt":
+                    parsed = json.loads(chunk[sep + 1:].decode("utf-8", errors="replace"))
+                    if isinstance(parsed, dict):
+                        return parsed
+            elif ctype == b"iTXt":
+                sep = chunk.find(b"\x00")
+                if sep > 0 and chunk[:sep] == b"prompt":
+                    rest = chunk[sep + 1:]
+                    if len(rest) >= 2:
+                        comp_flag = rest[0]
+                        # skip comp_method(1), lang\0, translated_kw\0
+                        i = 2
+                        for _ in range(2):
+                            z = rest.find(b"\x00", i)
+                            i = (z + 1) if z >= 0 else len(rest)
+                        raw_txt = zlib.decompress(rest[i:]) if comp_flag == 1 else rest[i:]
+                        parsed = json.loads(raw_txt.decode("utf-8", errors="replace"))
+                        if isinstance(parsed, dict):
+                            return parsed
+            elif ctype == b"IEND":
+                break
+    except Exception:
+        return None
+    return None
+
+
+def names_from_flux_refmod_or_lora(filename: Optional[str]) -> List[str]:
+    """Extract a celebrity/character lookup token from a Klein9/H3 RefMod or Klein9 celeb LoRA filename."""
+    if not filename:
+        return []
+    s = str(filename).strip().replace("\\", "/")
+    if not s or s.lower() in ("(none)", "none"):
+        return []
+    stem = Path(s).stem
+    if _NON_IDENTITY_FLUX_LORA_RE.search(stem):
+        return []
+    # Strip known prefixes/suffixes: klein9_, fk9_, minimaxh3_, oc_, _v1, _v2, _prodigy, _refmod, _visual, _audio
+    cleaned = re.sub(r"(?i)^(?:klein9|fk9|flux2?klein9?|minimaxh3|h3)[_-]+", "", stem)
+    cleaned = re.sub(r"(?i)^oc[_-]+", "", cleaned)
+    cleaned = re.sub(r"(?i)(?:[_-]+(?:v\d+(?:\.\d+)?|prodigy|refmod|visual|audio|alt|lora|klein9|rank\d+|step\d+))+$", "", cleaned)
+    cleaned = cleaned.strip("_- ")
+    if len(cleaned) < 3:
+        return []
+    spaced = re.sub(r"[_-]+", " ", cleaned).strip()
+    out: List[str] = [spaced]
+    compact = re.sub(r"[^a-zA-Z0-9]", "", cleaned)
+    if compact and compact.lower() != spaced.lower():
+        out.append(compact)
+    return out
+
+
+def detect_still_identity(still_image: Optional[str]) -> Dict[str, Any]:
+    """Detect celeb/character identity embedded in a Flux sidecar (`flux_meta.json`), ComfyUI PNG `prompt` chunk,
+    or PixlStash character tag so H3Max automatically picks up the same celeb + INDEX character + visual RefMod."""
+    empty: Dict[str, Any] = {
+        "names": [], "character": None, "actor": None, "source": None,
+        "flux_refmods": [], "flux_loras": [],
+    }
+    if not still_image:
+        return empty
+    p = Path(still_image)
+
+    # 1. Adjacent flux_meta.json sidecar (<still>.flux_meta.json or <still_dir>/flux_meta.json)
+    sidecars = [p.with_suffix(".flux_meta.json"), Path(str(p) + ".flux_meta.json"), p.parent / "flux_meta.json"]
+    for sc in sidecars:
+        if sc.is_file():
+            try:
+                meta = json.loads(sc.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            if not isinstance(meta, dict):
+                continue
+            names: List[str] = []
+            for k in ("character", "actor"):
+                v = str(meta.get(k) or "").strip()
+                if v and v not in names:
+                    names.append(v)
+            for n in (meta.get("names") or []):
+                v = str(n or "").strip()
+                if v and v not in names:
+                    names.append(v)
+            f_mods = [str(x).strip() for x in (meta.get("refmods") or []) if str(x or "").strip()]
+            f_loras = [str(x.get("name") if isinstance(x, dict) else x).strip() for x in (meta.get("loras") or []) if x]
+            for fn in f_mods + f_loras:
+                for nm in names_from_flux_refmod_or_lora(fn):
+                    if nm not in names:
+                        names.append(nm)
+            if names or f_mods or f_loras:
+                return {
+                    "names": names,
+                    "character": str(meta.get("character") or "").strip() or None,
+                    "actor": str(meta.get("actor") or "").strip() or None,
+                    "source": "flux_meta",
+                    "flux_refmods": f_mods,
+                    "flux_loras": f_loras,
+                }
+
+    # 2. ComfyUI PNG `prompt` metadata (Klein9RefModsLoader / MiniMaxH3RefModsLoader / LoraLoaderModelOnly)
+    graph = extract_comfy_png_prompt(still_image)
+    if isinstance(graph, dict):
+        f_mods, f_loras, names = [], [], []
+        for node in graph.values():
+            if not isinstance(node, dict):
+                continue
+            ct = str(node.get("class_type") or "")
+            inp = node.get("inputs") or {}
+            if ct in ("Klein9RefModsLoader", "MiniMaxH3RefModsLoader"):
+                for i in range(1, 9):
+                    m = str(inp.get(f"mod_{i}") or "").strip()
+                    st = float(inp.get(f"strength_{i}", 1.0) or 0.0)
+                    if m and m.lower() != "(none)" and st > 0:
+                        f_mods.append(m)
+            elif ct in ("LoraLoaderModelOnly", "LoraLoader"):
+                ln = str(inp.get("lora_name") or "").strip()
+                st = float(inp.get("strength_model", 1.0) or 0.0)
+                if ln and ln.lower() != "(none)" and st > 0:
+                    f_loras.append(ln)
+        for fn in f_mods + f_loras:
+            for nm in names_from_flux_refmod_or_lora(fn):
+                if nm not in names:
+                    names.append(nm)
+        if names:
+            return {
+                "names": names, "character": None, "actor": None, "source": "comfy_png",
+                "flux_refmods": f_mods, "flux_loras": f_loras,
+            }
+
+    # 3. PixlStash character tag (works for celebrities as well as OCs)
+    tagged = pixlstash_character_names_for_still(still_image)
+    if tagged:
+        return {
+            "names": list(tagged), "character": tagged[0], "actor": None, "source": "pixlstash",
+            "flux_refmods": [], "flux_loras": [],
+        }
+
+    return empty
+
 

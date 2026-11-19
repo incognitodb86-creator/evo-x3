@@ -59,20 +59,26 @@ install -m 0644 "$S/skills/pi-job/SKILL.after-h9.md" /home/evo/.hermes/skills/pi
 ```
 - `SOUL.md` goes back to tone only (Hermes docs: SOUL is identity and tone, not workflow). The OC and 18+ facts move to `memories/USER.md`. The render routing lives in the `h3-render` skill; `pi-job` is coding only.
 
-### Item 4 - Restart and check (no render)
-- Restart the gateway only when no chat is mid-turn: `systemctl --user restart hermes-gateway`; then `systemctl --user is-active hermes-gateway hermes-webui` (both `active`).
+### Item 4 - WebUI media roots, restart and check (no render)
+- **Fix `MEDIA_ALLOWED_ROOTS` so inline 2x MP4 playback works on the first try** (red-team catch: live `hermes-webui.service` lists only `/home/evo/AI/5slock/libraries`, which blocks symlinks to `/home/evo/AI/community/runs/` and its `mono` target `/home/evo/AI/evo-x3/x3/community/runs/`):
+  - First check the separator `hermes-webui` expects in `/home/evo/hermes-webui` (`grep -rn "MEDIA_ALLOWED_ROOTS" /home/evo/hermes-webui` — typically comma `,` or `os.pathsep` `:`).
+  - Create `/home/evo/.config/systemd/user/hermes-webui.service.d/20-media-roots.conf` setting `MEDIA_ALLOWED_ROOTS` with that exact separator to include: `/home/evo/AI/5slock/libraries`, `/home/evo/AI/community/runs`, `/home/evo/AI/evo-x3/x3/community/runs`, `/home/evo/AI/render/_inputs`, `/srv/renders`.
+  - Run `systemctl --user daemon-reload`.
+- Restart both units only when no chat is mid-turn: `systemctl --user restart hermes-gateway hermes-webui`; then `systemctl --user is-active hermes-gateway hermes-webui` (both `active`).
 - `hermes skills list` shows `h3-render`, `h3-writer`, `h3-prompting`, `h3-parody-identity`, `flux-klein-prompting`, `pi-job`, `pixlstash-image-library`, and none of the 10 disabled names.
+- `grep -c '\$PIXL_KEY' /home/evo/.hermes/skills/creative/h3-render/SKILL.md` is `0` (token-file substitution applied).
 - `wc -c /home/evo/.hermes/memories/USER.md` is at most 1375.
-- `cd /home/evo/AI/community/scripts/parody && /home/evo/AI/render/x3/.venv/bin/python3 -m pytest -q -p no:cacheprovider test_prose_file_gate.py` -> `3 passed`.
+- `cd /home/evo/AI/community/scripts/parody && /home/evo/AI/render/x3/.venv/bin/python3 -m pytest -q -p no:cacheprovider test_prose_file_gate.py test_flux_h3_redteam.py test_beta7_convert.py` -> all passed.
 - `hermes chat --oneshot -q "Which skill do you use to render a video, and which to change code in a repo? Reply with the two skill names only."` -> names `h3-render` and `pi-job`. (If this Hermes build has no `--oneshot`, mark this check `SKIPPED` and say why.)
 
 ### Item 5 - Derrick's chat checks (Max tells Derrick it is ready; Forge does not run these)
 In Hermes WebUI, Derrick's own asks:
-1. A render ask -> still + full prompt + "Render this?", nothing queued.
+1. A render ask (from PixlStash or chat-uploaded image) -> still + full prompt + "Render this?", nothing queued.
 2. The same ask with "write it yourself" -> `<run_dir>/hermes_prose.txt` exists, READY or an exact NOT_READY reason, nothing queued.
 3. Derrick's yes on one READY run -> queued, the 2x clip plays inline (`MEDIA:` link from `/home/evo/.hermes/image_cache/`).
 4. A small coding ask -> `pi-job code` job ID -> `DONE` + commit SHA (or `STUCK`).
-Max records these in `RESULT.md` under "Derrick checks". If 3 does not play inline, Max checks `MEDIA_ALLOWED_ROOTS` in `hermes-webui.service` (it lists only `/home/evo/AI/5slock/libraries`) before changing anything.
+5. A Flux still ask with a celeb RefMod or Klein9 LoRA -> shows still prompt, queues on Derrick's yes, PNG shows inline and lands in `/home/evo/AI/pixl-inbox/`, then animating that still in H3Max auto-picks up the celeb + INDEX character + H3 visual RefMod.
+Max records these in `RESULT.md` under "Derrick checks".
 
 ### Rollback
 ```bash
@@ -81,8 +87,9 @@ cp -a "$B/config.yaml" "$B/SOUL.md" /home/evo/.hermes/
 cp -a "$B/pi-job.SKILL.md" /home/evo/.hermes/skills/pi-job/SKILL.md
 rm -rf /home/evo/.hermes/memories/USER.md; [ -d "$B/memories" ] && cp -a "$B/memories/." /home/evo/.hermes/memories/
 rm -rf /home/evo/.hermes/skills/creative/h3-render /home/evo/.hermes/skills/creative/h3-writer
+rm -f /home/evo/.config/systemd/user/hermes-webui.service.d/20-media-roots.conf
 [ -d "$B/flux-klein-prompting.local" ] && mv "$B/flux-klein-prompting.local" /home/evo/.hermes/skills/flux-klein-prompting
-systemctl --user restart hermes-gateway
+systemctl --user daemon-reload && systemctl --user restart hermes-gateway hermes-webui
 ```
 
 ## Later (not this brief)
@@ -92,7 +99,7 @@ systemctl --user restart hermes-gateway
 
 ## Rules
 - Stop on first failure. No renders, no `--queue`, no `queue-remote.sh` (Derrick's check 3 is his yes, not yours).
-- No `llama-swap.yaml` edits. Restart only `hermes-gateway`.
+- No `llama-swap.yaml` edits. Restart only `hermes-gateway` and `hermes-webui`.
 - Never read, print or copy secrets (`.env`, `/home/evo/.config/evo-x3/*`, `/home/evo/.config/pixlstash/*.token`). Never view PixlStash library contents.
 - Cite `mono` SHAs in `RESULT.md`.
 

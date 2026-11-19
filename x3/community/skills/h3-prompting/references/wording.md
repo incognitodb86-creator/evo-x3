@@ -47,8 +47,7 @@ clips, the response dial Derek named (R21), the absence list (R27), the adults-o
 names and line counts identical to the baseline being compared, so a side-by-side changes references and wording,
 never structure.
 
-**R31 - LoRA trigger words only when that LoRA is loaded**, at weight 0.2-0.6 in the paste, and never a general
-NSFW LoRA (Mystic and friends) on beta 7. A trigger for a LoRA that is not in the graph is a defect, not a hint.
+**R31 - LoRA trigger words only when that LoRA is loaded**, at weight 0.2-0.6 in the paste (or `0.6–1.0` for `fal/MiniMax-H3-Realism-People-LoRA` `h3-realism-people-t2v-i2v-r2v.safetensors`, trigger `r34l1sm` — pass `--realism-lora [strength]` or `--lora <file>[:<strength>[:<trigger>]]` to `render_writer_pipeline.py` / `fill_request.py`, which wires `LoraLoaderModelOnly` and prepends the trigger automatically ONLY when loaded), and never a general NSFW LoRA (Mystic and friends) or external Turbo LoRA on baked-TURBO beta 7. A trigger for a LoRA that is not in the graph is a defect, not a hint — do not write `r34l1sm` manually in prose unless that LoRA is actually loaded.
 
 ## Worked example: OC doggy clip, built prompt (writer output after the builder, 2026-11-11)
 

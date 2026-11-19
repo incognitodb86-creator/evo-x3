@@ -15,8 +15,12 @@ done
 
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/h3-render" "$tmp/h3-writer/references"
-{ cat "$SRC/h3-render/HEAD.md"; printf '\nSource: %s, sha256 %s\n\n' "$OP" "$(sha256sum "$OP" | cut -d' ' -f1)"; cat "$OP"; } \
-  > "$tmp/h3-render/SKILL.md"
+{
+  cat "$SRC/h3-render/HEAD.md"
+  printf '\nSource: %s, sha256 %s\n\n' "$OP" "$(sha256sum "$OP" | cut -d' ' -f1)"
+  # Replace pi's $PIXL_KEY env var in OPERATOR.md curl lines with Hermes's token-file command substitution
+  sed 's|\$PIXL_KEY|$(cat /home/evo/.config/pixlstash/render-read.token)|g' "$OP"
+} > "$tmp/h3-render/SKILL.md"
 cp "$SRC/h3-writer/SKILL.md" "$tmp/h3-writer/SKILL.md"
 cp "$WP" "$tmp/h3-writer/references/writer_prompt.md"
 

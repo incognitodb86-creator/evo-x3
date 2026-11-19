@@ -9,7 +9,7 @@ thinking: false                         # chat_template_kwargs.enable_thinking (
 timeout_s: 900
 retry_backoff_s: [10, 30, 90]
 writer_prompt: writer_prompt.md          # relative to /home/evo/AI/render/writer_pipeline
-writer_prompt_sha256: d733c753184a13ee121aaf2e278a291ff6dbd302c74155d635dfbe0d3a8efd70
+writer_prompt_sha256: 5e7643b7c3cf016df572a81c3646ac73bab451b6cf49c42a2d66244d0855c572
 persona: current                        # pinned
 n_candidates: 1
 min_ready_score: 60  # reported only; never blocks READY (Max Architect 2026-11-16 (Derrick t2036u))
@@ -41,6 +41,13 @@ blacklist_cap: 20
 log_retention_days: 14
 log_cap_mb: 50
 scene_archive_days: 30
+# M5 Realism LoRA default (keep enabled: false until AlienPc confirms the exact ComfyUI relative filename and M5 A/B picks strength;
+# per-run opt-in works immediately via --realism-lora [strength] or --lora <file>:<strength>:<trigger>, R31 trigger auto-injected only when loaded):
+h3_realism_lora:
+  enabled: false
+  name: h3-realism-people-t2v-i2v-r2v.safetensors
+  strength: 0.7
+  trigger: r34l1sm
 lint:
   speech_words_max: 25
   blacklist_ratio: 0.8
