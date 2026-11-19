@@ -1,3 +1,4 @@
+import hashlib
 import http.server
 import json
 import os
@@ -11,6 +12,10 @@ import unittest
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parent.parent / "evo-raw-clip-cleanup"
+
+
+def _sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 def _write(path: Path, data: bytes) -> Path:
@@ -78,35 +83,45 @@ class TestEvoRawClipCleanup(unittest.TestCase):
         self.env = os.environ.copy()
         self.env["PATH"] = str(self.bin) + os.pathsep + self.env.get("PATH", "")
 
-        # 1. Valid upscaled run -> candidate
-        self.ok_up = _write(self.runs / "run_ok" / "clip" / "clip.mp4", b"upscaled-video-bytes")
-        self.ok_raw = _write(self.runs / "run_ok" / "clip" / "clip_raw.mp4", b"raw-video-bytes-1234")
+        # 1. Valid upscaled run -> candidate (with clip_sha256 + raw_sha256)
+        ok_up_data, ok_raw_data = b"upscaled-video-bytes", b"raw-video-bytes-1234"
+        self.ok_up = _write(self.runs / "run_ok" / "clip" / "clip.mp4", ok_up_data)
+        self.ok_raw = _write(self.runs / "run_ok" / "clip" / "clip_raw.mp4", ok_raw_data)
         _write(self.runs / "run_ok" / "clip" / "still.png", b"png")
         _write(self.runs / "run_ok" / "clip" / "notes.txt", b"txt")
         _write(
             self.runs / "run_ok" / "clip" / "render_ok.json",
-            json.dumps({"clip": "clip/clip.mp4", "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+            json.dumps({
+                "clip": "clip/clip.mp4",
+                "clip_sha256": _sha(ok_up_data),
+                "upscale": {"raw_clip": "clip/clip_raw.mp4", "raw_sha256": _sha(ok_raw_data)},
+            }).encode(),
         )
 
-        # 2. Second valid upscaled run (used to verify --apply only deletes listed paths)
-        self.ok2_up = _write(self.runs / "run_ok2" / "clip" / "clip.mp4", b"upscaled-2")
-        self.ok2_raw = _write(self.runs / "run_ok2" / "clip" / "clip_raw.mp4", b"raw-2-bytes")
+        # 2. Second valid upscaled run (raw_sha256 omitted -> still valid; used for --apply exact-list check)
+        ok2_up_data, ok2_raw_data = b"upscaled-2", b"raw-2-bytes"
+        self.ok2_up = _write(self.runs / "run_ok2" / "clip" / "clip.mp4", ok2_up_data)
+        self.ok2_raw = _write(self.runs / "run_ok2" / "clip" / "clip_raw.mp4", ok2_raw_data)
         _write(
             self.runs / "run_ok2" / "clip" / "render_ok.json",
-            json.dumps({"clip": "clip/clip.mp4", "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+            json.dumps({
+                "clip": "clip/clip.mp4",
+                "clip_sha256": _sha(ok2_up_data),
+                "upscale": {"raw_clip": "clip/clip_raw.mp4"},
+            }).encode(),
         )
 
         # 3. No upscale block -> NOT a candidate
         _write(self.runs / "run_no_up" / "clip" / "clip.mp4", b"raw-only")
         self.no_up_raw = _write(self.runs / "run_no_up" / "clip" / "clip_raw.mp4", b"raw-no-up")
-        _write(self.runs / "run_no_up" / "clip" / "render_ok.json", json.dumps({"clip": "clip/clip.mp4"}).encode())
+        _write(self.runs / "run_no_up" / "clip" / "render_ok.json", json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"raw-only")}).encode())
 
         # 4. 0-byte upscaled file -> NOT a candidate
         _write(self.runs / "run_zero" / "clip" / "clip.mp4", b"")
         self.zero_raw = _write(self.runs / "run_zero" / "clip" / "clip_raw.mp4", b"raw-zero")
         _write(
             self.runs / "run_zero" / "clip" / "render_ok.json",
-            json.dumps({"clip": "clip/clip.mp4", "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b""), "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
         )
 
         # 5. ffprobe fails or duration==0 -> NOT candidates
@@ -114,13 +129,13 @@ class TestEvoRawClipCleanup(unittest.TestCase):
         self.bad_raw = _write(self.runs / "run_badprobe" / "badprobe" / "badprobe_raw.mp4", b"raw-bad")
         _write(
             self.runs / "run_badprobe" / "badprobe" / "render_ok.json",
-            json.dumps({"clip": "badprobe/badprobe.mp4", "upscale": {"raw_clip": "badprobe/badprobe_raw.mp4"}}).encode(),
+            json.dumps({"clip": "badprobe/badprobe.mp4", "clip_sha256": _sha(b"corrupt"), "upscale": {"raw_clip": "badprobe/badprobe_raw.mp4"}}).encode(),
         )
         _write(self.runs / "run_zerodur" / "zerodur" / "zerodur.mp4", b"zero-dur")
         self.zerodur_raw = _write(self.runs / "run_zerodur" / "zerodur" / "zerodur_raw.mp4", b"raw-zerodur")
         _write(
             self.runs / "run_zerodur" / "zerodur" / "render_ok.json",
-            json.dumps({"clip": "zerodur/zerodur.mp4", "upscale": {"raw_clip": "zerodur/zerodur_raw.mp4"}}).encode(),
+            json.dumps({"clip": "zerodur/zerodur.mp4", "clip_sha256": _sha(b"zero-dur"), "upscale": {"raw_clip": "zerodur/zerodur_raw.mp4"}}).encode(),
         )
 
         # 6. Still job and QNAP-only layout (no render_ok.json) -> NOT candidates
@@ -128,9 +143,62 @@ class TestEvoRawClipCleanup(unittest.TestCase):
         self.still_raw = _write(self.runs / "run_still" / "s1" / "s1_raw.mp4", b"not-video-job")
         _write(
             self.runs / "run_still" / "s1" / "render_ok.json",
-            json.dumps({"job_type": "still", "upscale": {"raw_clip": "s1/s1_raw.mp4"}}).encode(),
+            json.dumps({"job_type": "still", "clip_sha256": _sha(b"img"), "upscale": {"raw_clip": "s1/s1_raw.mp4"}}).encode(),
         )
         self.qnap_raw = _write(self.runs / "run_qnap" / "clip" / "clip_raw.mp4", b"qnap-only")
+
+        # 7. SHA256 mismatch cases (#5) -> NOT candidates
+        _write(self.runs / "run_bad_clip_sha" / "clip" / "clip.mp4", b"up-sha")
+        _write(self.runs / "run_bad_clip_sha" / "clip" / "clip_raw.mp4", b"raw-sha")
+        _write(
+            self.runs / "run_bad_clip_sha" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": "0" * 64, "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+        )
+        _write(self.runs / "run_bad_raw_sha" / "clip" / "clip.mp4", b"up-sha2")
+        _write(self.runs / "run_bad_raw_sha" / "clip" / "clip_raw.mp4", b"raw-sha2")
+        _write(
+            self.runs / "run_bad_raw_sha" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"up-sha2"), "upscale": {"raw_clip": "clip/clip_raw.mp4", "raw_sha256": "f" * 64}}).encode(),
+        )
+
+        # 8. Path-traversal, absolute, cross-tag, nested-subdir, _raw.mp4 clip (#3, #8) -> NOT candidates
+        _write(self.runs / "run_tricky" / "clip" / "clip.mp4", b"up-tricky")
+        _write(self.runs / "run_tricky" / "other" / "other_raw.mp4", b"cross-tag-raw")
+        _write(self.runs / "run_tricky" / "clip" / "sub" / "sub_raw.mp4", b"nested-raw")
+        _write(
+            self.runs / "run_tricky" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"up-tricky"), "upscale": {"raw_clip": "../outside_raw.mp4"}}).encode(),
+        )
+        _write(self.runs / "run_abs" / "clip" / "clip.mp4", b"up-abs")
+        _write(
+            self.runs / "run_abs" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"up-abs"), "upscale": {"raw_clip": "/etc/x_raw.mp4"}}).encode(),
+        )
+        _write(self.runs / "run_xtag" / "clip" / "clip.mp4", b"up-xtag")
+        _write(self.runs / "run_xtag" / "other" / "x_raw.mp4", b"xtag")
+        _write(
+            self.runs / "run_xtag" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"up-xtag"), "upscale": {"raw_clip": "other/x_raw.mp4"}}).encode(),
+        )
+        _write(self.runs / "run_nested" / "clip" / "clip.mp4", b"up-nested")
+        _write(self.runs / "run_nested" / "clip" / "sub" / "clip_raw.mp4", b"nested")
+        _write(
+            self.runs / "run_nested" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"up-nested"), "upscale": {"raw_clip": "clip/sub/clip_raw.mp4"}}).encode(),
+        )
+        _write(self.runs / "run_rawclip" / "clip" / "clip_raw.mp4", b"raw-as-clip")
+        _write(
+            self.runs / "run_rawclip" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip_raw.mp4", "clip_sha256": _sha(b"raw-as-clip"), "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+        )
+
+        # 9. Hardlink samefile (#4): raw hardlinked to upscaled -> NOT a candidate
+        hl_up = _write(self.runs / "run_samefile" / "clip" / "clip.mp4", b"same-inode")
+        os.link(hl_up, self.runs / "run_samefile" / "clip" / "clip_raw.mp4")
+        _write(
+            self.runs / "run_samefile" / "clip" / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"same-inode"), "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+        )
 
         # Outside file that must never be touched
         self.outside = _write(self.root / "outside_raw.mp4", b"keep-me")
@@ -170,30 +238,89 @@ class TestEvoRawClipCleanup(unittest.TestCase):
         stale_raw = _write(self.runs / "run_stale" / "clip" / "clip_raw.mp4", b"stale-raw")
         _write(
             self.runs / "run_stale" / "clip" / "render_ok.json",
-            json.dumps({"clip": "clip/clip.mp4", "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"good"), "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
         )
         # Now break stale_up to 0 bytes before --apply to verify re-check blocks deletion
         stale_up.write_bytes(b"")
 
+        ok_raw_size = self.ok_raw.stat().st_size
         apply_list = self.out / "custom-apply.txt"
         apply_list.write_text(
             "\n".join([str(self.ok_raw), str(self.ok_up), str(self.outside), str(stale_raw)]) + "\n",
             encoding="utf-8",
         )
         r2 = self._run("--runs-dir", str(self.runs), "--apply", str(apply_list))
-        self.assertEqual(r2.returncode, 0, r2.stderr)
-        self.assertIn(f"APPLY deleted=1 bytes={self.ok_raw.stat().st_size if self.ok_raw.exists() else 20} skipped=3", r2.stdout)
+        self.assertEqual(r2.returncode, 1, r2.stdout + r2.stderr)
+        self.assertIn(f"DELETED {self.ok_raw}", r2.stdout)
+        self.assertIn(f"SKIP {self.ok_up} not_qualified", r2.stdout)
+        self.assertIn(f"APPLY deleted=1 bytes={ok_raw_size} skipped=3 failed=0", r2.stdout)
+        applied_log = Path(str(apply_list) + ".applied")
+        self.assertTrue(applied_log.is_file())
+        self.assertIn(f"DELETED {self.ok_raw}", applied_log.read_text(encoding="utf-8"))
 
         # Only ok_raw was deleted; everything else (including unlisted ok2_raw) survived
         self.assertFalse(self.ok_raw.exists())
         for p in (self.ok_up, self.ok2_raw, self.outside, stale_raw, self.no_up_raw, self.zero_raw, self.bad_raw):
             self.assertTrue(p.exists(), f"Should not have deleted {p}")
 
+        # Clean apply list (all items valid) -> exits 0
+        clean_list = self.out / "clean-apply.txt"
+        clean_list.write_text(str(self.ok2_raw) + "\n", encoding="utf-8")
+        r3 = self._run("--runs-dir", str(self.runs), "--apply", str(clean_list))
+        self.assertEqual(r3.returncode, 0, r3.stdout + r3.stderr)
+        self.assertFalse(self.ok2_raw.exists())
+
+    def test_hardlink_nlink_bytes_and_qnap_refusal_and_symlinks(self):
+        # Hard-linked raw (st_nlink == 2, distinct from upscaled) -> candidate, but freed bytes == 0 (#4)
+        hl_run = self.runs / "run_hl_other" / "clip"
+        hl_up = _write(hl_run / "clip.mp4", b"hl-upscaled")
+        hl_raw = _write(hl_run / "clip_raw.mp4", b"hl-raw-linked-elsewhere")
+        other_link = self.root / "comfy_output_copy.mp4"
+        os.link(hl_raw, other_link)
+        _write(
+            hl_run / "render_ok.json",
+            json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"hl-upscaled"), "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+        )
+        # Symlinked raw, tag, and run (#8) — created when OS permits symlinks
+        sym_created = False
+        try:
+            sym_up = _write(self.runs / "run_sym_raw" / "clip" / "clip.mp4", b"sym-up")
+            os.symlink(self.outside, self.runs / "run_sym_raw" / "clip" / "clip_raw.mp4")
+            _write(
+                self.runs / "run_sym_raw" / "clip" / "render_ok.json",
+                json.dumps({"clip": "clip/clip.mp4", "clip_sha256": _sha(b"sym-up"), "upscale": {"raw_clip": "clip/clip_raw.mp4"}}).encode(),
+            )
+            os.symlink(self.runs / "run_ok", self.runs / "run_sym_run", target_is_directory=True)
+            (self.runs / "run_sym_tag").mkdir()
+            os.symlink(self.runs / "run_ok" / "clip", self.runs / "run_sym_tag" / "clip", target_is_directory=True)
+            sym_created = True
+        except OSError:
+            pass
+
+        r = self._run("--runs-dir", str(self.runs), "--out-dir", str(self.out), "--no-pixlstash")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        m = re.search(r"DRY_RUN candidates=(\d+) bytes=(\d+) list=(.+)", r.stdout)
+        self.assertIsNotNone(m, r.stdout)
+        self.assertEqual(int(m.group(1)), 3)  # ok_raw, ok2_raw, hl_raw (none of the symlinked ones)
+        # hl_raw has st_nlink==2 so contributes 0 to freed bytes
+        self.assertEqual(int(m.group(2)), self.ok_raw.stat().st_size + self.ok2_raw.stat().st_size)
+        if sym_created:
+            listed = Path(m.group(3).strip()).read_text(encoding="utf-8")
+            self.assertNotIn("run_sym_", listed)
+
+        # Refuse --runs-dir under /mnt/qnap (#7)
+        rq = self._run("--runs-dir", "/mnt/qnap/renders/runs", "--out-dir", str(self.out), "--no-pixlstash")
+        self.assertEqual(rq.returncode, 2)
+        self.assertIn("refused:", rq.stderr)
+
     def test_pixlstash_dry_run_report_only_ids_and_counts(self):
         inbox = self.root / "pixl-inbox"
         _write(inbox / "_imported" / "run_ok_clip.mp4", b"a")
         _write(inbox / "_imported" / "run_ok_clip_raw.mp4", b"b")
         _write(inbox / "_imported" / "run_ok2_clip.mp4", b"c")
+        # Unknown video names (celeb downloads etc.) must NEVER appear in report (#1)
+        _write(inbox / "_imported" / "taylor_swift_beach.mp4", b"d")
+        _write(inbox / "_imported" / "taylor_swift_beach_raw.mp4", b"e")
 
         secret = "tok-never-print-98765"
         tok_file = _write(self.root / "pixl.token", (secret + "\n").encode())
@@ -207,6 +334,8 @@ class TestEvoRawClipCleanup(unittest.TestCase):
                     {"id": 102, "format": "mp4", "file_path": "/data/run_ok_clip.mp4"},
                     {"id": 103, "format": "mp4", "file_path": "/data/run_ok2_clip.mp4"},
                     {"id": 104, "format": "png", "file_path": "/data/run_ok_still.png"},
+                    {"id": 105, "format": "mp4", "file_path": "/data/taylor_swift_beach.mp4"},
+                    {"id": 106, "format": "mp4", "file_path": "/data/taylor_swift_beach_raw.mp4"},
                 ],
             }
         ]
@@ -228,6 +357,7 @@ class TestEvoRawClipCleanup(unittest.TestCase):
 
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertNotIn(secret, r.stdout)
+        self.assertNotIn("taylor", r.stdout.lower())
         self.assertNotIn("clip_raw.mp4", r.stdout.split("PIXLSTASH_REPORT", 1)[1])
         m = re.search(r"PIXLSTASH_REPORT (.+)", r.stdout)
         self.assertIsNotNone(m, r.stdout)
@@ -235,6 +365,18 @@ class TestEvoRawClipCleanup(unittest.TestCase):
         self.assertEqual(rep["inbox_imported_multi_video_runs"], {"run_ok": 2})
         self.assertEqual(rep["pixlstash_api"]["status"], "ok")
         self.assertEqual(rep["pixlstash_api"]["multi_video_runs"], {"run_ok": {"count": 2, "picture_ids": [101, 102]}})
+
+        # Non-loopback PixlStash URL must be refused without sending token (#6)
+        r_ext = self._run(
+            "--runs-dir", str(self.runs),
+            "--out-dir", str(self.out),
+            "--inbox-dir", str(inbox),
+            "--pixl-url", "http://example.com:9537",
+            "--pixl-token-file", str(tok_file),
+        )
+        self.assertEqual(r_ext.returncode, 0, r_ext.stderr)
+        rep_ext = json.loads(re.search(r"PIXLSTASH_REPORT (.+)", r_ext.stdout).group(1))
+        self.assertEqual(rep_ext["pixlstash_api"]["status"], "refused_non_loopback")
 
 
 if __name__ == "__main__":
