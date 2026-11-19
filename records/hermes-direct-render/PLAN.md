@@ -10,6 +10,8 @@ author: Max Architect (executor subagent), plan only, nothing applied on the X3
 pending_upload: true
 ---
 
+Related: ../monorepo-consolidation/PLAN.md
+
 # Hermes direct H3 render on EVO-X3: two side-by-side paths
 
 Status of this file: PLAN ONLY. Nothing below has been applied on the X3. Derrick wants another AI to verify it before any `ce-work` run (t2607u). Labels: VERIFIED = re-checked live on the X3 or in source/docs on 2026-11-19 between 9:37 and 9:50 AM CT; ASSUMPTION = not proven, must be tested in the unit that relies on it.
