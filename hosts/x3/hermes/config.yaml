@@ -36,8 +36,9 @@ browser:
   inactivity_timeout: 120
 web:
   # H2 draft (Hermes v0.23.2): local SearXNG quadlet (config/quadlet/searxng.container); zero external API keys.
-  # Apply only with the H2 network-layer SSRF blocklist active (blocks 127.0.0.0/8, 100.64.0.0/10, 192.168.0.0/16,
-  # 169.254.0.0/16, ::1, fc00::/7, fe80::/10 for browser/extract fetches while allowing 127.0.0.1:8888 SearXNG).
+  # Apply only with the H2 network-layer SSRF blocklist active (denies 127.0.0.0/8, ::1/128, 100.64.0.0/10,
+  # 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7, 169.254.0.0/16, fe80::/10, 0.0.0.0/8, ::/128
+  # for browser/extract fetches while allowing 127.0.0.1:8888 SearXNG only).
   search_backend: searxng
   searxng_url: http://127.0.0.1:8888
 tool_loop_guardrails:
