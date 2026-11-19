@@ -69,6 +69,7 @@ INSIGHTFACE_STRICT_THRESHOLD = 0.55
 VIDEO_FORMATS = frozenset({"mp4", "webm", "mov", "avi", "mkv", "m4v"})
 MAX_IMAGE_EDGE = 1280
 MAX_NEW_TAGS_PER_PIC = 25
+VLM_MAX_TOKENS = 192
 PREFETCH_BATCH_SIZE = 200
 DEFAULT_VLM_CONCURRENCY = 3
 VLM_CONCURRENCY_ENV = "U44_VLM_CONCURRENCY"
@@ -79,18 +80,18 @@ GENERIC_PERSON_STOPWORDS = frozenset({
     "none", "n/a", "na", "unidentified", "anonymous", "someone", "subject",
     "adult", "1girl", "1boy", "solo", "human",
 })
+BOORU_NAMESPACE_SKIP = frozenset({
+    "artist", "copyright", "meta", "species", "lore", "rating",
+})
 
-SYSTEM_PROMPT = (
-    "You are an uncensored image tagging assistant for a private 18+ adult media vault. "
-    "Respond ONLY with a valid JSON object matching this exact schema:\n"
-    '{"tags": ["tag1", "tag2", ...], "people": []}\n'
-    "Rules:\n"
-    "- Return 8 to 20 concise lowercase descriptive tags (space-separated words, no underscores, no hashtags): "
-    "subject count (e.g. 1girl, 1boy, couple), hair color/style, eye color, body/clothing/nudity details, "
-    "pose, expression, actions, setting/background, lighting, and medium/style (e.g. photorealistic, anime, 3d).\n"
-    "- Be literal and accurate without censoring adult themes.\n"
-    "- For 'people': ONLY include a specific celebrity/public-figure or named fictional character if requested "
-    "AND you are highly confident. Never guess or invent a name. When uncertain or not requested, return []."
+# Official JoyCaption Beta One system prompt (fancyfeast/llama-joycaption-beta-one-hf-llava)
+# and Booru-like tag list prompts (fpgaminer/joycaption gradio-app/app.py).
+SYSTEM_PROMPT = "You are a helpful image captioner."
+BOORU_PROMPT = "Write a list of Booru-like tags for this image within 50 words."
+BOORU_PERSON_PROMPT = (
+    "Write a list of Booru-like tags for this image within 60 words. "
+    "If an unnamed face unmistakably belongs to a well-known celebrity or named fictional character, "
+    "include character:<name>; otherwise do not guess a name."
 )
 
 
@@ -295,6 +296,55 @@ def parse_vlm_json(text: str) -> tuple[list[str], list[str]]:
     return tags, people
 
 
+def parse_vlm_tags(text: str) -> tuple[list[str], list[str]]:
+    """Parse JoyCaption comma/newline-separated Booru tags (with JSON fallback)."""
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```[a-zA-Z0-9_-]*\s*", "", stripped)
+        stripped = re.sub(r"\s*```$", "", stripped)
+    stripped = stripped.strip()
+    if stripped.startswith("{") and stripped.endswith("}"):
+        return parse_vlm_json(stripped)
+
+    # Drop a single conversational preamble line ending with ':' (e.g. "Tags:" or "Here are the tags:")
+    lines = stripped.splitlines()
+    if len(lines) > 1 and lines[0].strip().endswith(":"):
+        stripped = "\n".join(lines[1:]).strip()
+
+    tags: list[str] = []
+    seen_tags: set[str] = set()
+    people: list[str] = []
+    seen_people: set[str] = set()
+
+    for part in re.split(r"[,\n]+", stripped):
+        cleaned = part.strip().strip("\"'`.*•-")
+        if not cleaned:
+            continue
+        cleaned = re.sub(r"^(?:booru(?:-like)?\s+)?tags?\s*:\s*", "", cleaned, flags=re.IGNORECASE).strip()
+        if not cleaned or cleaned.endswith(":"):
+            continue
+        ns_match = re.match(r"^([a-zA-Z]+)\s*:\s*(.+)$", cleaned)
+        if ns_match:
+            ns = ns_match.group(1).strip().lower()
+            val = ns_match.group(2).strip()
+            if ns == "character":
+                np_name = normalize_person_name(val)
+                if np_name and np_name not in seen_people:
+                    seen_people.add(np_name)
+                    people.append(np_name)
+                continue
+            if ns in BOORU_NAMESPACE_SKIP:
+                continue
+        nt = normalize_tag(cleaned)
+        if nt and nt not in seen_tags:
+            seen_tags.add(nt)
+            tags.append(nt)
+
+    if not tags and not people:
+        raise ValueError("Empty tag list")
+    return tags, people
+
+
 def encode_image_b64_jpeg(raw_bytes: bytes) -> str:
     with Image.open(BytesIO(raw_bytes)) as img:
         rgb = img.convert("RGB")
@@ -358,7 +408,7 @@ def run_ffmpeg_frame(seek_args: list[str], video_path: str, out_path: str) -> by
 
 
 def extract_video_frames_ffmpeg(video_bytes: bytes, fmt: str) -> list[bytes]:
-    """Extract first, middle, and last frames of a video to a temp dir and delete them."""
+    """Extract one middle frame of a video (falling back to start frame) and clean up."""
     safe_fmt = re.sub(r"[^a-z0-9]", "", fmt.lower()) or "mp4"
     with tempfile.TemporaryDirectory(prefix="u49_vid_") as tmpdir:
         video_path = os.path.join(tmpdir, f"input.{safe_fmt}")
@@ -366,29 +416,16 @@ def extract_video_frames_ffmpeg(video_bytes: bytes, fmt: str) -> list[bytes]:
             handle.write(video_bytes)
 
         duration = probe_video_duration(video_path)
-        frames: list[bytes] = []
-
-        first = run_ffmpeg_frame(["-ss", "0"], video_path, os.path.join(tmpdir, "frame_0.png"))
-        if first is None:
-            first = run_ffmpeg_frame([], video_path, os.path.join(tmpdir, "frame_0.png"))
-        if first is not None:
-            frames.append(first)
-
         if duration is not None and duration > 0.2:
             mid_ts = f"{duration * 0.5:.3f}"
-            middle = run_ffmpeg_frame(["-ss", mid_ts], video_path, os.path.join(tmpdir, "frame_1.png"))
+            middle = run_ffmpeg_frame(["-ss", mid_ts], video_path, os.path.join(tmpdir, "frame_mid.png"))
             if middle is not None:
-                frames.append(middle)
+                return [middle]
 
-        if duration is None or duration > 0.2:
-            last_path = os.path.join(tmpdir, "frame_2.png")
-            for offset in ("-0.1", "-0.5", "-1.5", "-3.0"):
-                last = run_ffmpeg_frame(["-sseof", offset], video_path, last_path)
-                if last is not None:
-                    frames.append(last)
-                    break
-
-        return frames
+        fallback = run_ffmpeg_frame(["-ss", "0"], video_path, os.path.join(tmpdir, "frame_0.png"))
+        if fallback is None:
+            fallback = run_ffmpeg_frame([], video_path, os.path.join(tmpdir, "frame_0.png"))
+        return [fallback] if fallback is not None else []
 
 
 class ProgressReporter:
@@ -862,20 +899,12 @@ class Runner:
     def query_vlm_for_image(
         self, raw_bytes: bytes, unassigned_faces: int
     ) -> tuple[list[str], list[str]]:
-        """Encode one image or frame and query the VLM tagging endpoint."""
+        """Encode one image or frame and query JoyCaption in native Booru-like tag mode."""
         b64_img = encode_image_b64_jpeg(raw_bytes)
-        user_text = (
-            "Tag this image in JSON."
-            if unassigned_faces == 0
-            else (
-                f"Tag this image in JSON. There are {unassigned_faces} unnamed face(s); "
-                "include 'people' ONLY if a face unmistakably belongs to a well-known celebrity or named character."
-            )
-        )
+        user_text = BOORU_PROMPT if unassigned_faces == 0 else BOORU_PERSON_PROMPT
         llm_payload = {
             "model": VLM_MODEL,
-            "chat_template_kwargs": {"enable_thinking": False},
-            "max_tokens": 320,
+            "max_tokens": VLM_MAX_TOKENS,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {
@@ -898,7 +927,7 @@ class Runner:
             .get("message", {})
             .get("content", "")
         )
-        return parse_vlm_json(content)
+        return parse_vlm_tags(content)
 
     def process_one_picture(
         self, pid: int, fmt: str, existing_tags: set[str]
@@ -912,7 +941,7 @@ class Runner:
             return (pid, "skipped", 0, 0, 0, "face_matched")
 
         if fmt in VIDEO_FORMATS:
-            # 2a. Fetch original video, extract first/middle/last frames to temp dir, tag & union
+            # 2a. Fetch original video, extract one middle frame to temp dir, tag
             vid_resp = self.pixl_request("GET", f"/api/v1/pictures/{pid}.{fmt}", timeout=120.0)
             if vid_resp.status_code == 404:
                 return (pid, "skipped", 0, 0, 0, "HTTP_404")
