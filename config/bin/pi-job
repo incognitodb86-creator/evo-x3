@@ -38,11 +38,11 @@ COMMUNITY_RUNS = COMMUNITY_DIR / "runs"
 RQ_PY = HOME / "AI" / "render" / "x3" / ".venv" / "bin" / "python"
 NTFY_TOKEN_FILE = HOME / ".config" / "evo-x3" / "ntfy-x3.token"
 NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
-# H1c (Derrick 2026-11-19 12:29 CT card 21): AlienPC Swift (ESP off) first for code/review whenever AlienPC is idle
+# H1c (Derrick 2026-11-19 12:29 CT card 21): AlienPC Swift (ESP on, Derrick t2764u reversed card 21) first for code/review whenever AlienPC is idle
 # (X3 render lock free + :8447 /health 2xx); fall back to X3 Gufo when busy/unreachable, with 1-way X3 --continue
 # resume if a render starts mid-run (503). X3 Gufo stays the writer/Hermes model.
 X3_RENDER_LOCK = HOME / "AI" / "locks" / "gpu-render.lock"
-ALIENPC_MODEL = os.environ.get("PI_JOB_ALIENPC_MODEL", "alienpc/coding_swift15_iq3s")
+ALIENPC_MODEL = os.environ.get("PI_JOB_ALIENPC_MODEL", "alienpc/coding_swift15_iq3s_esp")
 ALIENPC_GATE_URL = os.environ.get("PI_JOB_ALIENPC_GATE_URL", "https://alienpc.tailf242b2.ts.net:8447/health")
 RESUME_PROMPT = "Continue from where you stopped and finish the task."
 # 2026-11-19 hermesflow (Derrick t2572u/t2572s9151): Hermes chat shows the still Render picked + the full prompt, the
@@ -409,7 +409,7 @@ def _last_stop_reason(run_dir: Path) -> str | None:
 
 
 def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple[int, str]:
-    """H1c (card 21): AlienPC Swift (ESP off) first for code/review whenever AlienPC :8447 probes idle (and X3 render
+    """H1c (card 21): AlienPC Swift (ESP on, Derrick t2764u reversed card 21) first for code/review whenever AlienPC :8447 probes idle (and X3 render
     lock is free), else X3 Gufo. If an AlienPC run stops on a failed request (503 from the fail-fast gate or any error),
     resume once on the X3 in the same session (--continue). Never moves back to the AlienPC."""
     def run(extra: list[str], text: str, model: str | None) -> int:

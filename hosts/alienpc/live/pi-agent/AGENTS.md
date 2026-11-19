@@ -7,7 +7,7 @@
 - AlienPc Forge runs X3-side jobs that are hard for X3 to do itself (such as benchmarking) from a Max/X3 brief.
 - A render always wins over delegated work.
 ## Run
-- Agent: pi 1.4.0, provider llama-swap, model coding_swift15_iq3s. Authoritative token/context and auto-compaction limits live in C:\Users\derek\.pi\agent\models.json (contextWindow, maxTokens) and C:\Users\derek\.pi\agent\settings.json (compaction / compaction.modelOverrides); one permission policy C:\Users\derek\.pi\agent\pi-permissions.jsonc (chats and loop). Shell: the powershell tool (PowerShell 5.1).
+- Agent: pi 1.4.0, provider llama-swap, model coding_swift15_iq3s_esp. Authoritative token/context and auto-compaction limits live in C:\Users\derek\.pi\agent\models.json (contextWindow, maxTokens) and C:\Users\derek\.pi\agent\settings.json (compaction / compaction.modelOverrides); one permission policy C:\Users\derek\.pi\agent\pi-permissions.jsonc (chats and loop). Shell: the powershell tool (PowerShell 5.1).
 - Loop: C:\Users\derek\forge\ralph-community\ralph.ps1 (runs pi --print on PROMPT.md, one fix_plan item per pass; logs in ralph-community\logs). When to use it: Route "Multi-step" line.
 - Write pi-permissions.jsonc, settings.json and mcp.json without a UTF-8 BOM. Append logs with Add-Content -Encoding UTF8.
 ## Route (load the named skill before the work; pi lists skills by description, force one with /skill:name)

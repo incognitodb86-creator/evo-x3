@@ -56,7 +56,7 @@
         "reserveTokens": 20480,
         "keepRecentTokens": 8000
       },
-      "llama-swap/coding_swift15_iq3s": {
+      "llama-swap/coding_swift15_iq3s_esp": {
         "reserveTokens": 24576,
         "keepRecentTokens": 16384
       },
@@ -90,8 +90,8 @@
     "blockImages": false,
     "autoResize": true
   },
-  "model": "coding_swift15_iq3s",
-  "defaultModel": "coding_swift15_iq3s",
+  "model": "coding_swift15_iq3s_esp",
+  "defaultModel": "coding_swift15_iq3s_esp",
   "lastChangelogVersion": "1.5.0",
   "skills": [
     "C:/AI/community/skills",

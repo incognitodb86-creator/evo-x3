@@ -1,26 +1,26 @@
-Goal: Apply AGT1 (AlienPc global AGENTS.md + approved INV1b + backup-writer lines, Forge settings.json -> `coding_swift15_iq3s`, ralph PROMPT/script, agent-shared pointer; keeps `C:\AI\render\AGENTS.md` writer book and all 9 skills linked) on AlienPc under the AlienPc lease.
+Goal: Apply AGT1 (AlienPc global AGENTS.md + approved INV1b + backup-writer lines, Forge settings.json -> `coding_swift15_iq3s_esp`, ralph PROMPT/script, agent-shared pointer; keeps `C:\AI\render\AGENTS.md` writer book and all 9 skills linked) on AlienPc under the AlienPc lease.
 
 # UNI-APPLY-ALIENPC-B-AGT1 (AlienPc Forge): Apply AGT1 agent files redo on AlienPc, Nov 19 2026
 
-Authority: Derrick 2026-11-19 12:29 CT (side chat: Card 21 ESP-off everywhere -> `coding_swift15_iq3s`; `INV1` resolved as single master `C:\Users\derek\.pi\agent\AGENTS.md` -> `AGT1`; Card 38 `INV1b` APPROVED — brief from X3/Max, AlienPc Forge is the hands), Derrick 2026-11-19 12:54 CT (orchestrator chat: AlienPc = backup prompt writer when X3 is busy coding and AlienPc is idle -> keep writer book and all 9 skills linked), and `records/uplan/PLAN.md`. Max verifies your `RESULT.md` afterwards.
+Authority: Derrick 2026-11-19 12:29 CT (side chat: Card 21, reversed by Derrick t2764u 14:17 CT to ESP on everywhere -> `coding_swift15_iq3s_esp`; `INV1` resolved as single master `C:\Users\derek\.pi\agent\AGENTS.md` -> `AGT1`; Card 38 `INV1b` APPROVED — brief from X3/Max, AlienPc Forge is the hands), Derrick 2026-11-19 12:54 CT (orchestrator chat: AlienPc = backup prompt writer when X3 is busy coding and AlienPc is idle -> keep writer book and all 9 skills linked), and `records/uplan/PLAN.md`. Max verifies your `RESULT.md` afterwards.
 
 ## Needs before launch (ALL required — do not launch until met)
-1. **Derrick's live yes in chat:** Card 21 (`coding_swift15_iq3s` ESP off everywhere), `INV1` -> `AGT1`, and Card 38 (`INV1b`) are **ANSWERED YES** (Derrick 2026-11-19 12:29 CT, side chat); Card 1 live apply yes for AGT1 answered in chat (Max records id).
+1. **Derrick's live yes in chat:** Card 21 (`coding_swift15_iq3s_esp` ESP on everywhere (Derrick t2764u 14:17 CT reversed Card 21)), `INV1` -> `AGT1`, and Card 38 (`INV1b`) are **ANSWERED YES** (Derrick 2026-11-19 12:29 CT, side chat); Card 1 live apply yes for AGT1 answered in chat (Max records id).
 2. **AlienPc lease free** (AlienPc lease per brain `10_packs/max/max-briefing.md`). The doer takes it as ONE line (`<who> | <what> | <start time>`) and clears it when done; no lease-taken/released files, no brain or `records/status/` mirrors, no git commit for the lease, no message to Derrick.
-3. **Max-owned Prerequisite (ESP-off alias `coding_swift15_iq3s`) COMPLETE before copying `settings.json`** (same prerequisite as `records/UNI-APPLY-X3-B-PIJOB/BRIEF.md`; Max confirms in the launch message — Forge never reads `models.json`).
+3. **Max-owned Prerequisite (ESP-on alias `coding_swift15_iq3s_esp`) COMPLETE before copying `settings.json`** (same prerequisite as `records/UNI-APPLY-X3-B-PIJOB/BRIEF.md`; Max confirms in the launch message — Forge never reads `models.json`).
 4. **Max import + staged files ready** from `mono` tip `bab584a (or newer at Max import)` (**ONE BRANCH:** `mono` is the ONLY branch anyone pushes — Derrick ~13:05 CT, no part-branch pushes; `gitleaks` clean; includes AGT1 backup-writer revert of A4/A5/A6).
    - Until `MONO-S6` passes smoke (recommended next — it ends the bridge), Max stages the AGT1 source files locally on the X3 under `/home/derekboone/evo-x3/_bridge/UNI-APPLY-ALIENPC-B-AGT1/` with a `SHA256SUMS.txt` (Forge copies them read-only via `scp x3:`; allowed even while X3 Forge holds the X3 lease). After `MONO-S6`, read directly from `C:\AI\evo-x3`.
 
-## Max-owned Prerequisite: ESP-off alias `coding_swift15_iq3s` (same prereq as `UNI-APPLY-X3-B-PIJOB`; complete before launching Forge)
+## Max-owned Prerequisite (DONE 2026-11-19 14:20 CT: `coding_swift15_iq3s_esp` is already live in `C:\AI\director\config\llama-swap.yaml` and is the current pi `defaultModel`, so no llama-swap or models.json edit is needed): ESP-on alias `coding_swift15_iq3s_esp` (same prereq as `UNI-APPLY-X3-B-PIJOB`; complete before launching Forge)
 - **AlienPc `llama-swap` (Max, or AlienPc Forge via X3/Max brief — Card 38 `INV1b` APPROVED, Derrick 2026-11-19 12:29 CT, side chat):**
   1. Take the AlienPc lease. Confirm idle: `Test-Path C:\AI\locks\gpu-render.lock` is `False` and `https://alienpc.tailf242b2.ts.net:8447/health` returns `200` (never edit during a render).
   2. Back up AlienPc llama-swap config to `C:\AI\_archive\20261119\llama-swap\`.
-  3. Add/enable the exact ESP-off alias `coding_swift15_iq3s` (ESP off everywhere — both AlienPc Forge and `pi-job` use `coding_swift15_iq3s`, Card 21), then reload llama-swap.
-  4. Verify `/v1/models` lists exact id `"coding_swift15_iq3s"` (exact-id match count = `1`, not substring match on `_esp`).
+  3. Add/enable the exact ESP-on alias `coding_swift15_iq3s_esp` (ESP on everywhere (Derrick t2764u 14:17 CT reversed Card 21) — both AlienPc Forge and `pi-job` use `coding_swift15_iq3s_esp`, Card 21), then reload llama-swap.
+  4. Verify `/v1/models` lists exact id `"coding_swift15_iq3s_esp"` (exact-id match count = `1`).
   5. Rollback: restore from `C:\AI\_archive\20261119\llama-swap\` and reload llama-swap.
 - **AlienPc `C:\Users\derek\.pi\agent\models.json` (Max ONLY — secrets rule; Forge never reads `models.json`):**
   1. Back up `C:\Users\derek\.pi\agent\models.json` to `C:\AI\_archive\20261119\agents\pi-agent\models.json` (never printed or committed).
-  2. Ensure `coding_swift15_iq3s` is defined without printing any keys.
+  2. Ensure `coding_swift15_iq3s_esp` is defined without printing any keys.
   3. Rollback: restore `C:\AI\_archive\20261119\agents\pi-agent\models.json`.
 - State in the Forge launch message that both `llama-swap` and `models.json` aliases are verified live.
 
@@ -38,7 +38,7 @@ Authority: Derrick 2026-11-19 12:29 CT (side chat: Card 21 ESP-off everywhere ->
 ## Work (stop on first failure; back up every file before overwriting)
 
 1. **Pre-checks & fetch staged files:**
-   - Confirm Max's launch message states `coding_swift15_iq3s` is live in AlienPc `llama-swap` and `models.json` (**do NOT read `models.json`**).
+   - Confirm Max's launch message states `coding_swift15_iq3s_esp` is live in AlienPc `llama-swap` and `models.json` (**do NOT read `models.json`**).
    - Create backup dirs under `C:\AI\_archive\20261119\agents\{pi-agent,ralph-community,forge,agent-shared}`.
    - Allowed X3 command (Plan finding 14; read-only copy allowed even while X3 Forge holds the X3 lease):
      `scp -r x3:/home/derekboone/evo-x3/_bridge/UNI-APPLY-ALIENPC-B-AGT1 C:\AI\_archive\20261119\agents\_staged`
@@ -55,9 +55,9 @@ Authority: Derrick 2026-11-19 12:29 CT (side chat: Card 21 ESP-off everywhere ->
 
 ## Tests (CPU / offline + pi smoke only — no GPU, no ComfyUI)
 
-1. **`pi` starts on `coding_swift15_iq3s`:**
-   - Verify `settings.json` has no UTF-8 BOM and `defaultModel` is `coding_swift15_iq3s`.
-   - Run `pi -p --no-session "reply ok"` -> exits 0 using `coding_swift15_iq3s`.
+1. **`pi` starts on `coding_swift15_iq3s_esp`:**
+   - Verify `settings.json` has no UTF-8 BOM and `defaultModel` is `coding_swift15_iq3s_esp`.
+   - Run `pi -p --no-session "reply ok"` -> exits 0 using `coding_swift15_iq3s_esp`.
 2. **Writer book & backup-writer lines present:**
    - Confirm `C:\AI\render\AGENTS.md` (writer book) is still present and intact, `C:\AI\render\writer_pipeline\writer_prompt.md` is untouched, and `"backup"` / backup-writer lines are present in `C:\Users\derek\.pi\agent\AGENTS.md` (and `C:\Users\derek\forge\README.md`).
 3. **`agent-shared\AGENTS.md` pointer & no hard link:**

@@ -11,7 +11,7 @@ Secret scan: gitleaks `--no-git` on the staged copies found no leaks (2026-11-19
 | Copy in this folder | Live path on AlienPc | Notes |
 |---|---|---|
 | `pi-agent/AGENTS.md` | `C:\Users\derek\.pi\agent\AGENTS.md` | Master global AGENTS for AlienPc Forge (and any pi chat without its own AGENTS). `alienpc/community/agent-shared/AGENTS.md` is now a 2-line pointer (no hard link). Includes Role, inline GPU-lock, idle rule, and scoped "EVO-X3 access" (`x3run.ps1` / `x3put.ps1`). |
-| `pi-agent/settings.json` | `C:\Users\derek\.pi\agent\settings.json` | Default model `coding_swift15_iq3s` (ESP off; AlienPc llama-swap), packages, skill roots. |
+| `pi-agent/settings.json` | `C:\Users\derek\.pi\agent\settings.json` | Default model `coding_swift15_iq3s_esp` (ESP on, Derrick t2764u; AlienPc llama-swap), packages, skill roots. |
 | `pi-agent/pi-permissions.jsonc` | `C:\Users\derek\.pi\agent\pi-permissions.jsonc` | Permission rules for AlienPc pi chats. |
 | `pi-agent/web-search.json` | `C:\Users\derek\.pi\agent\web-search.json` | Search provider config (no key). |
 | `pi-agent/extensions/loop-guard.ts`, `extensions/*/config.json` | `C:\Users\derek\.pi\agent\extensions\...` | `herdr-agent-state.ts` is identical to the X3 copy in `hosts/x3/live/pi-evo/agent/extensions/` and is not duplicated here. |

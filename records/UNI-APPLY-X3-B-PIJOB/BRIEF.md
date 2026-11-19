@@ -5,8 +5,8 @@ Goal: Perform ONE install of `config/bin/pi-job` -> `/usr/local/bin/pi-job` on t
 Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick 2026-11-19 ~12:35 CT (Hermes is main chat interface, pi is coding-only -> C11 + H9; cards answered in chat), and `records/uplan/PLAN.md` + `records/uplan/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", item 4). Max verifies your `RESULT.md` afterwards.
 
 ## Needs before launch (ALL required — do not launch until met)
-1. **Derrick's live yes in chat:** Card 13 (`H1c`: AlienPc Swift `ESP off` when `:8447` idle and no `gpu-render.lock`, X3 Gufo when busy; render always wins, 503 -> resume on X3) and Card 21 (`coding_swift15_iq3s` ESP off everywhere — AlienPc Forge AND `pi-job`) are **ANSWERED YES** (Derrick 2026-11-19 12:29 CT, side chat); Card 1 live `/usr/local/bin/pi-job` install yes answered in chat (Max records id).
-2. **Card 21 ESP-off alias `coding_swift15_iq3s` added on BOTH sides BEFORE installing `pi-job`** (see the Max-owned Prerequisite section below; Max confirms both aliases in the launch message — Forge never reads `models.json`).
+1. **Derrick's live yes in chat:** Card 13 (`H1c`: AlienPc Swift `ESP on` when `:8447` idle and no `gpu-render.lock`, X3 Gufo when busy; render always wins, 503 -> resume on X3) and Card 21 (`coding_swift15_iq3s_esp` ESP on everywhere (Derrick t2764u 14:17 CT reversed Card 21) — AlienPc Forge AND `pi-job`) are **ANSWERED YES** (Derrick 2026-11-19 12:29 CT, side chat); Card 1 live `/usr/local/bin/pi-job` install yes answered in chat (Max records id).
+2. **Card 21 ESP-on alias `coding_swift15_iq3s_esp` added on BOTH sides BEFORE installing `pi-job`** (see the Max-owned Prerequisite section below; Max confirms both aliases in the launch message — Forge never reads `models.json`).
 3. **`UNI-APPLY-X3-A` completed first** (specifically ST3 `import_inbox.py` with `flock`).
 4. **X3 lease free** (`/home/derekboone/AI/locks/x3-lease.txt` empty). The doer takes it at start (one line, see Access & Lease). No lease-taken/released files, no brain or `records/status/` mirrors, no git commit for the lease, no message to Derrick.
 5. **Approved render window available for the Pre-install `:8447/health` busy check**, no active render during the install step itself, and **not during the Hermes bakeoff window** (Plan C16).
@@ -14,16 +14,16 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 
 - **If `MONO-S5` already passed:** `/home/evo/AI/render` and `/home/evo/AI/community` are symlinks into the `mono` clone; skip the part-branch bridge and run `git -C /home/evo/AI/evo-x3 pull --ff-only` instead. Everything else in this brief is unchanged.
 
-## Max-owned Prerequisite: ESP-off alias `coding_swift15_iq3s` (complete before launching Forge)
+## Max-owned Prerequisite: ESP-on alias `coding_swift15_iq3s_esp` (complete before launching Forge)
 - **AlienPc `llama-swap` (Max, or AlienPc Forge via X3/Max brief — Card 38 `INV1b` APPROVED, Derrick 2026-11-19 12:29 CT, side chat):**
   1. Take the AlienPc lease. Confirm idle: `Test-Path C:\AI\locks\gpu-render.lock` is `False` and `https://alienpc.tailf242b2.ts.net:8447/health` returns `200` (never edit during a render).
   2. Back up AlienPc llama-swap config to `C:\AI\_archive\20261119\llama-swap\`.
-  3. Add/enable the exact ESP-off alias `coding_swift15_iq3s` (ESP off everywhere — both AlienPc Forge and `pi-job` use `coding_swift15_iq3s`, Card 21), then reload llama-swap.
-  4. Verify `/v1/models` lists exact id `"coding_swift15_iq3s"` (exact-id match count = `1`, not substring match on `_esp`).
+  3. Add/enable the exact ESP-on alias `coding_swift15_iq3s_esp` (ESP on everywhere (Derrick t2764u 14:17 CT reversed Card 21) — both AlienPc Forge and `pi-job` use `coding_swift15_iq3s_esp`, Card 21), then reload llama-swap.
+  4. Verify `/v1/models` lists exact id `"coding_swift15_iq3s_esp"` (exact-id match count = `1`).
   5. Rollback: restore from `C:\AI\_archive\20261119\llama-swap\` and reload llama-swap. Release AlienPc lease.
 - **X3 pi `models.json` (Max ONLY — secrets rule; Forge never reads `models.json`):**
   1. Under X3 lease, back up `/home/evo/.pi/agent/models.json` to `/home/evo/AI/_archive/20261119/models.json` (`0600`, never printed or committed).
-  2. Add `alienpc/coding_swift15_iq3s` alias without printing any keys.
+  2. Add `alienpc/coding_swift15_iq3s_esp` alias without printing any keys.
   3. Rollback: restore `/home/evo/AI/_archive/20261119/models.json` (`0600`).
 - State in the Forge launch message that both aliases are verified live.
 
@@ -37,7 +37,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 ## Work (ONE install — stop on first failure)
 
 1. **Pre-install checks (MUST pass before touching `/usr/local/bin/pi-job`):**
-   - **Aliases:** Confirm Max's launch message states both `coding_swift15_iq3s` aliases are in place (**do NOT read `models.json`**). Optionally check AlienPc `/v1/models` JSON for exact `"id": "coding_swift15_iq3s"` and print **only** the exact-id match count (`1`).
+   - **Aliases:** Confirm Max's launch message states both `coding_swift15_iq3s_esp` aliases are in place (**do NOT read `models.json`**). Optionally check AlienPc `/v1/models` JSON for exact `"id": "coding_swift15_iq3s_esp"` and print **only** the exact-id match count (`1`).
    - **H1c AlienPc busy gate check (review #5 — BEFORE install):** During an approved AlienPc render, run:
      ```bash
      curl -s -o /dev/null -w '%{http_code}\n' https://alienpc.tailf242b2.ts.net:8447/health
@@ -65,7 +65,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution), Derrick
 ## Tests (coding/review path only; **if ANY post-install test fails, run Rollback immediately**)
 
 1. **H1c — AlienPc idle vs render-busy routing + `PI_JOB_FORCE_X3=1` (Card 13 & Card 21, `b96560f`):**
-   - **Idle path:** With AlienPc idle (`:8447/health` returns `200`, no `gpu-render.lock`), run a `pi-job code` smoke task in a throwaway `/tmp/pijob-route-test` git repo (prompt `"do not edit any file; reply done"`) -> verify job log shows route `alienpc` with `coding_swift15_iq3s` (ESP off) and **0 X3 llama-swap swaps**.
+   - **Idle path:** With AlienPc idle (`:8447/health` returns `200`, no `gpu-render.lock`), run a `pi-job code` smoke task in a throwaway `/tmp/pijob-route-test` git repo (prompt `"do not edit any file; reply done"`) -> verify job log shows route `alienpc` with `coding_swift15_iq3s_esp` (ESP off) and **0 X3 llama-swap swaps**.
    - **Busy / render-wins path:** With an approved AlienPc render running (`:8447/health` returns non-2xx), run a `pi-job code` smoke task -> verify job log shows route `x3` and **0 X3 llama-swap swaps** (503 during a run also resumes on `x3`). X3 Gufo remains the writer/Hermes model.
    - **Forced-X3 check:** Run `PI_JOB_FORCE_X3=1 /usr/local/bin/pi-job code ...` -> verify job log shows route `x3` and **0 X3 llama-swap swaps**.
 
