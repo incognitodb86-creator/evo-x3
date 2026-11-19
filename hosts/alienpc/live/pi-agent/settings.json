@@ -1,0 +1,118 @@
+{
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "packages": [
+    "npm:pi-permission-system@0.8.0",
+    "npm:pi-subagents@0.83.1",
+    "npm:pi-mobile@0.4.0",
+    "npm:@juicesharp/rpiv-todo@2.15.0",
+    "npm:cc-safety-net@2.7.0",
+    "npm:pi-memory@0.4.2",
+    "npm:@plannotator/pi-extension@0.28.40",
+    "npm:pi-canvas@0.1.1",
+    "npm:pi-web-access@0.46.0",
+    "npm:@injaneity/pi-computer-use@0.5.1",
+    {
+      "source": "git:github.com/EveryInc/compound-engineering-plugin@34492307",
+      "skills": [
+        "!ce-babysit-pr",
+        "!ce-resolve-pr-feedback",
+        "!ce-test-browser",
+        "!ce-proof",
+        "!ce-strategy",
+        "!ce-riffrec-feedback-analysis",
+        "!ce-ideate",
+        "!ce-pov",
+        "!ce-bakeoff",
+        "!ce-optimize",
+        "!ce-prototype",
+        "!lfg"
+      ]
+    },
+    "npm:pi-say@1.1.1"
+  ],
+  "defaultProvider": "llama-swap",
+  "defaultThinkingLevel": "off",
+  "thinkingBudgets": {
+    "minimal": 512,
+    "low": 1024,
+    "medium": 2048,
+    "high": 4096
+  },
+  "defaultTools": [
+    "read",
+    "powershell",
+    "edit",
+    "write",
+    "grep",
+    "find",
+    "ls"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 24576,
+    "keepRecentTokens": 16384,
+    "modelOverrides": {
+      "llama-swap/coding_swift15_iq3s_esp": {
+        "reserveTokens": 20480,
+        "keepRecentTokens": 8000
+      },
+      "llama-swap/coding_swift15_iq3s": {
+        "reserveTokens": 24576,
+        "keepRecentTokens": 16384
+      },
+      "llama-swap/gemma4_heretic_poly_think": {
+        "reserveTokens": 24576,
+        "keepRecentTokens": 16384
+      },
+      "llama-swap/gemma4_heretic_poly": {
+        "reserveTokens": 24576,
+        "keepRecentTokens": 16384
+      }
+    }
+  },
+  "httpIdleTimeoutMs": 1950000,
+  "retry": {
+    "enabled": true,
+    "maxRetries": 2,
+    "provider": {
+      "timeoutMs": 1200000,
+      "maxRetries": 0
+    }
+  },
+  "enableInstallTelemetry": false,
+  "enableAnalytics": false,
+  "showCacheMissNotices": true,
+  "extensions": [
+    "-builtin:llama.cpp",
+    "C:/AI/community/agent-shared/extensions"
+  ],
+  "images": {
+    "blockImages": false,
+    "autoResize": true
+  },
+  "model": "coding_swift15_iq3s_esp",
+  "defaultModel": "coding_swift15_iq3s_esp",
+  "lastChangelogVersion": "1.5.0",
+  "skills": [
+    "C:/AI/community/skills",
+    "C:/AI/community/agent-shared/skills",
+    "C:/AI/fleet-brain/20_skills/current",
+    "-C:/AI/fleet-brain/20_skills/current/fantasy-news-scout",
+    "-C:/AI/fleet-brain/20_skills/current/fantasy-strategy-cot",
+    "-C:/AI/fleet-brain/20_skills/current/household-money-tracker",
+    "-C:/AI/fleet-brain/20_skills/current/tech-deals-watch",
+    "-C:/AI/fleet-brain/20_skills/current/imagine-dump-ops",
+    "-C:/AI/fleet-brain/20_skills/current/grok-bot-setup-playbook",
+    "-C:/AI/community/agent-shared/skills/google-voice-texts"
+  ],
+  "prompts": [
+    "C:/AI/community/agent-shared/prompts"
+  ],
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-permission-system@0.8.0\",\"scope\":\"user\"}": "0.8.0",
+    "{\"source\":\"npm:pi-subagents@0.83.1\",\"scope\":\"user\"}": "0.83.1",
+    "{\"source\":\"npm:pi-memory@0.4.2\",\"scope\":\"user\"}": "0.4.2",
+    "{\"source\":\"npm:pi-web-access@0.46.0\",\"scope\":\"user\"}": "0.46.0",
+    "{\"source\":\"git:github.com/EveryInc/compound-engineering-plugin@34492307\",\"scope\":\"user\"}": "3.34.0"
+  }
+}

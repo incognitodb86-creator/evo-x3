@@ -1,0 +1,36 @@
+# forgesafe 2026-10-20: git checkpoints for the Ralph loop folder (local only, never pushed).
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.wav
+*.safetensors
+*.gguf
+runs/
+tmpx/
+__pycache__/
+*.pyc
+*.log
+logs/
+sessions/
+wfsnap/
+*.pid
+*.out
+# item 1.1 (ali09) probe fixtures: fake .env/.pem/token trees, rebuilt by `node notes/ali09_secrets_probe.mjs --seed`.
+# Never commit fake secret-shaped file names: a .env in git trips scanners and reads as a real secret.
+notes/.forge11/
+# item 1.4 (ali11): the adults gate probe stamps a new artifact every run and the check suite runs it every
+# pass. The durable record is the manifest row in notes/pass_checks/, not 7 timestamped files a day.
+notes/ali10_probe_result_*.json
+# safe cleanup zip backup
+backups/*.zip
+
+
+# backup files (audit fix 2026-10-29)
+*.bak-*
+# scratch test clones and snapshots (Item 10)
+notes/_*/clone*/
+notes/_*/snapshot*/
+*.bak*
+notes/_f6b_after/
