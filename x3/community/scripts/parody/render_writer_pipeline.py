@@ -2110,8 +2110,11 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 result["warnings"].append("queue_refused_no_yes")
             else:
                 qsh = Path.home() / "AI" / "render" / "x3" / "queue-remote.sh"
+                qcmd = ["bash", str(qsh), str(run_dir), "--yes-derrick"]
+                if scene_id or is_continue:
+                    qcmd.append("--keep-comfy-process")
                 try:
-                    qp = subprocess.run(["bash", str(qsh), str(run_dir), "--yes-derrick"],
+                    qp = subprocess.run(qcmd,
                                         capture_output=True, text=True, timeout=180)
                     result["submitted"] = qp.returncode == 0
                     result["queue_rc"] = qp.returncode
