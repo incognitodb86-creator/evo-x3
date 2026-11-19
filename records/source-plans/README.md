@@ -1,6 +1,6 @@
 # Source plans (copied from branch `evo-x3-all`, tip 96b71aa, 2026-11-19)
 
-These are the plans the unified plan ([../unified-implementation/PLAN.md](../unified-implementation/PLAN.md)) was built
+These are the plans the unified plan ([../uplan/PLAN.md](../uplan/PLAN.md)) was built
 from. They are kept here so `mono` holds every plan; the unified plan is the one to follow. Copies are byte-exact
 (`git show origin/evo-x3-all:plans/<file>`); do not edit them, update the unified plan instead.
 

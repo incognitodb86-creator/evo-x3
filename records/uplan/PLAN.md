@@ -20,7 +20,7 @@ Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo pl
 
 # Unified implementation plan (F4 + LX + M + RV + ST)
 
-**Path rename 2026-11-19 13:43 CT (Derrick t2731u-t2733u):** this folder was `records/unified-implementation/`; renamed to `records/uplan/` because Forge-X3's pi permission rule for the UniFi folder (`*unifi*`) also matched "unified" and blocked reads of this plan. All references updated.
+**Path rename 2026-11-19 13:43 CT (Derrick t2731u-t2733u):** this folder was `records/uplan/`; renamed to `records/uplan/` because Forge-X3's pi permission rule for the UniFi folder (`*unifi*`) also matched "unified" and blocked reads of this plan. All references updated.
 
 **Status 2026-11-19:** Reviewed by Opus (`VERDICT: CHANGES`, [REVIEW-20261119-opus.md](./REVIEW-20261119-opus.md)); delta re-reviewed (`VERDICT: CHANGES`, 1 major bridge + text fixes); all delta fixes applied in this revision (reviewer confirmed text-only fixes need no further review).
 
