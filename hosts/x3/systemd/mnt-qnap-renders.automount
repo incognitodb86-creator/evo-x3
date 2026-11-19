@@ -1,0 +1,9 @@
+[Unit]
+Description=Automount QNAP renders share (read-only) at /mnt/qnap/renders
+
+[Automount]
+Where=/mnt/qnap/renders
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target

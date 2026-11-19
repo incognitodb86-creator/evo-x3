@@ -1,0 +1,11 @@
+# plan-v32 P4.7 (Max Architect 2026-11-19): AlienPC renders share, READ-ONLY, for sync-renders -> /srv/renders.
+[Unit]
+Description=QNAP renders share (read-only) at /mnt/qnap/renders
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What=//192.168.0.147/renders
+Where=/mnt/qnap/renders
+Type=cifs
+Options=ro,credentials=/etc/evo-x3/qnap-derek.cred,vers=3.0,uid=evo,gid=evo,file_mode=0444,dir_mode=0555,_netdev,nofail

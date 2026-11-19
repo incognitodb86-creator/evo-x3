@@ -33,6 +33,10 @@ RENDER_LAUNCHER = HOME / "evo-x3" / "pi-chats" / "render-pi.sh"
 QUEUE_REMOTE = HOME / "AI" / "render" / "x3" / "queue-remote.sh"
 NTFY_TOKEN_FILE = HOME / ".config" / "evo-x3" / "ntfy-x3.token"
 NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
+# P5.3: AlienPC Swift when the X3 render lock is free at job start; one resume on the X3 after a failed request.
+X3_RENDER_LOCK = HOME / "AI" / "locks" / "gpu-render.lock"
+ALIENPC_MODEL = "alienpc/coding_swift15_iq3s_esp"
+RESUME_PROMPT = "Continue from where you stopped and finish the task."
 
 
 def _now_iso() -> str:
@@ -152,6 +156,70 @@ def _create_approval(run_dir: Path, job_id: str) -> tuple[str, str]:
     return code, hash8
 
 
+def _x3_render_lock_free() -> bool:
+    """P5.3 'free at start': flock -n on the X3's own render lock (held by an X3-queued render)."""
+    try:
+        fd = os.open(X3_RENDER_LOCK, os.O_RDONLY)
+    except FileNotFoundError:
+        return True
+    except OSError:
+        return False
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        return True
+    except BlockingIOError:
+        return False
+    finally:
+        os.close(fd)
+
+
+def _last_stop_reason(run_dir: Path) -> str | None:
+    """stopReason of the last assistant message in the newest pi session file in run_dir (P5.3 tested: a 503
+    after pi's 2 retries ends rc=1 with stopReason 'error')."""
+    sessions = sorted(run_dir.glob("*.jsonl"), key=lambda q: q.stat().st_mtime)
+    if not sessions:
+        return None
+    last = None
+    for line in sessions[-1].read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        m = e.get("message") or {}
+        if e.get("type") == "message" and m.get("role") == "assistant":
+            last = m.get("stopReason")
+    return last
+
+
+def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple[int, str]:
+    """P5.3: AlienPC first when the X3 render lock is free, else the launcher's X3 default. If the AlienPC run
+    stops on a failed request (503 from the fail-fast gate or any error), resume once on the X3 in the same
+    session (--continue picks the newest session in run_dir). Never moves back to the AlienPC."""
+    def run(extra: list[str], text: str, model: str | None) -> int:
+        env = dict(os.environ)
+        if model:
+            env["FORGE_MODEL"] = model
+        else:
+            env.pop("FORGE_MODEL", None)
+        cmd = ["timeout", timeout_s, "bash", str(FORGE_LAUNCHER), "-p", "--session-dir", str(run_dir),
+               *extra, "--thinking", "low", text]
+        return subprocess.run(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=logf,
+                              stderr=subprocess.STDOUT).returncode
+
+    if not _x3_render_lock_free():
+        return run([], prompt, None), "x3"
+    rc = run([], prompt, ALIENPC_MODEL)
+    if rc == 0:
+        return rc, "alienpc"
+    reason = _last_stop_reason(run_dir)
+    if reason not in ("error", "aborted"):
+        return rc, f"alienpc(rc={rc},stop={reason})"
+    logf.write(f"\n[pi-job] AlienPC run stopped (rc={rc}, stop={reason}); resuming once on the X3\n".encode())
+    logf.flush()
+    return run(["--continue"], RESUME_PROMPT, None), "alienpc->x3"
+
+
 def _exec_job(job_id: str) -> int:
     run_dir = RUNS_DIR / job_id
     meta = json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))
@@ -167,49 +235,26 @@ def _exec_job(job_id: str) -> int:
                 base_head = subprocess.check_output(
                     ["git", "-C", str(repo), "rev-parse", "HEAD"], text=True
                 ).strip()
-                cmd = [
-                    "timeout",
-                    "3600",
-                    "bash",
-                    str(FORGE_LAUNCHER),
-                    "-p",
-                    "--session-dir",
-                    str(run_dir),
-                    "--thinking",
-                    "low",
-                    meta["prompt"],
-                ]
-                proc = subprocess.run(cmd, cwd=str(repo), stdout=logf, stderr=subprocess.STDOUT)
+                rc, where = _run_pi(run_dir, "3600", meta["prompt"], str(repo), logf)
                 ahead = subprocess.check_output(
                     ["git", "-C", str(repo), "rev-list", "--count", f"{base_head}..HEAD"],
                     text=True,
                 ).strip()
-                if proc.returncode == 0 and int(ahead) > 0:
-                    _write_status(run_dir, "DONE", f"commits_added={ahead}")
+                if rc == 0 and int(ahead) > 0:
+                    _write_status(run_dir, "DONE", f"commits_added={ahead} model={where}")
                     _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
                     return 0
-                _write_status(run_dir, "STUCK", f"rc={proc.returncode} commits_added={ahead}")
-                _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={proc.returncode}, commits={ahead})")
+                _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}")
+                _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={rc}, commits={ahead})")
                 return 1
 
             if role == "review":
                 repo = Path(meta["target"])
-                cmd = [
-                    "timeout",
-                    "1800",
-                    "bash",
-                    str(FORGE_LAUNCHER),
-                    "-p",
-                    "--no-session",
-                    "--thinking",
-                    "low",
-                    meta["prompt"],
-                ]
-                proc = subprocess.run(cmd, cwd=str(repo), stdout=logf, stderr=subprocess.STDOUT)
-                st = "DONE" if proc.returncode == 0 else "STUCK"
-                _write_status(run_dir, st, f"rc={proc.returncode}")
-                _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={proc.returncode})")
-                return 0 if proc.returncode == 0 else 1
+                rc, where = _run_pi(run_dir, "1800", meta["prompt"], str(repo), logf)
+                st = "DONE" if rc == 0 else "STUCK"
+                _write_status(run_dir, st, f"rc={rc} model={where}")
+                _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
+                return 0 if rc == 0 else 1
 
             if role == "render":
                 render_prompt = (
