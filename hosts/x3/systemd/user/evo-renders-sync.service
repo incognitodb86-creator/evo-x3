@@ -1,0 +1,6 @@
+[Unit]
+Description=Sync finished renders to /srv/renders and PixlStash (plan-v32 P4.7)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/sync-renders

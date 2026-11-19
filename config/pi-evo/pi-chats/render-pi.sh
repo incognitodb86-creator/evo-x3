@@ -19,8 +19,8 @@ cd "$R"
 export PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/panes/render}"
 export PI_MEMORY_DIR="${PI_MEMORY_DIR:-$HOME/.pi/panes/render/memory}"  # own memory per chat (Derrick t2318u)
 export PATH="$R/x3/.venv/bin:$HOME/.local/bin:$PATH"
-# Owner-only stills token is loaded here on the live host; path and value omitted from this snapshot.
-[ -r "<owner-only token file>" ] && export PIXL_KEY="<redacted>"
+# PixlStash read token for still lookups (AGENTS.md uses $PIXL_KEY; Max 2026-11-16, Derrick t2190u)
+[ -r "$HOME/.config/pixlstash/render-read.token" ] && export PIXL_KEY="$(tr -d '[:space:]' < "$HOME/.config/pixlstash/render-read.token")"
 exec pi --approve \
   --name "${RENDER_NAME:-Render-X3}" \
   --no-extensions \

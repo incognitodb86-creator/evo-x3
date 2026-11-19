@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly Hermes skills and memories git commit timer
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

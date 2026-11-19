@@ -150,17 +150,22 @@ models:
     # sha256 verified in /srv/models/flash-next-uncensored-v2-hgn. Same engine image and flags as v1. v1 slot kept until v2 passes all checks.
     cmd: |
       podman run --rm --name llama-swap-flash-next-uncensored-v2
-        -p 127.0.0.1:8081:8731
-        --device /dev/kfd --device /dev/dri --group-add keep-groups --ipc=host --ulimit memlock=-1:-1
-        -e HALOGEN_MODEL_ID=flash-next-uncensored-v2 -e HALOGEN_CTX=262144
-        -e HALOGEN_KV_POOL_POSITIONS=524288 -e HALOGEN_KV_SLOTS=4
-        -e HALOGEN_WEIGHTS_LOCK=1
-        -e HALOGEN_CHECKPOINT=/models/model.hgn
-        -e HALOGEN_VISION_TOWER=1
-        -e HALOGEN_REASONING_EFFORT=medium -e HALOGEN_MAX_THINKING_TOKENS=8192
-        -e HALOGEN_TEMPERATURE=1.0 -e HALOGEN_TOP_P=0.95 -e HALOGEN_TOP_K=20
-        -v /srv/models/flash-next-uncensored-v2-hgn:/models:ro
-        ghcr.io/peonist-ai/halogen-flash-server@sha256:773073448dc9ff4a8c6b6c278802e254fd5f1546764e27531aeb3b77cb13482e
+        --network=host --device=/dev/kfd --device=/dev/dri --group-add=keep-groups
+        --security-opt seccomp=unconfined --security-opt label=disable
+        -v /srv/models:/srv/models:ro -v /srv/bakeoff:/srv/bakeoff:ro
+        ghcr.io/gufo-org/toolboxes/gufo-runtime@sha256:99e9b5471b7a9b007c686c2aa795afaf966744d64e753cb009c89541f9e9c2b6
+        gufo serve llm --host 127.0.0.1 --port 8081
+        --model /srv/bakeoff/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+        --mmproj /srv/bakeoff/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba/mmproj-Qwen3.8-Flash-Next-BF16.gguf
+        --mtp-model /srv/models/flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+        --speculative mtp
+        --served-model-name flash-next-uncensored-v2
+        --sessions 2 --context 131072 --preserve-thinking on
+        --reasoning-effort medium --reasoning-budget 8192
+        --cache-ram-bytes 2147483648 --max-pending 16
+        --temperature 1.0 --top-p 0.95 --top-k 20
+        --stall-timeout-ms 120000
+        --log-progress
     proxy: "http://127.0.0.1:8081"
     ttl: 0  # Derrick t71u 2026-11-17: stay loaded; a cold start with ref2va resident is ~2.35 GiB short
     # 2026-11-17 5:00 PM CT (Derrick t2261s8122): restored 524288 pool / 4 slots (gemma gone, Sydney deleted, Gufo canceled).

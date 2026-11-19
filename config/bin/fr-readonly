@@ -1,0 +1,16 @@
+#!/bin/bash
+# Fleet Reviewer read-only forced command (Derrick yes, Nov 17 2026 6:48 PM CT, FR card t298s1047)
+set -f
+cmd="${SSH_ORIGINAL_COMMAND:-}"
+logger -t fr-readonly -- "cmd: ${cmd:0:300}"
+[ -z "$cmd" ] && { echo "fr-readonly: interactive login not allowed" >&2; exit 1; }
+case "$cmd" in *[\;\&\|\`\$\>\<\(\)\{\}\\]*|*$'\n'*) echo "fr-readonly: shell metacharacters not allowed" >&2; exit 1;; esac
+read -r -a argv <<< "$cmd"
+case "${argv[0]}" in cat|ls|grep|diff|jq|ps|stat|readlink) ;; *) echo "fr-readonly: only cat ls grep diff jq ps stat readlink" >&2; exit 1;; esac
+for a in "${argv[@]:1}"; do
+  case "$a" in
+    *.env|*.env.*|*/.env*|*/etc/evo-x3/*.cred|*qnap*.cred|*/.ssh*|*auth.json|*/keys*|*secret*|*token*|*password*|*vaultwarden.env*|*/etc/evo-x3/keys*|*/etc/evo-x3/secrets*|*/proc/*/environ*) echo "fr-readonly: blocked path: $a" >&2; exit 1;;
+  esac
+  case "${argv[0]}" in grep) case "$a" in -r|-R|--recursive|-*r*|-*R*) echo "fr-readonly: recursive grep not allowed (name files explicitly)" >&2; exit 1;; esac;; esac
+done
+exec "${argv[@]}"

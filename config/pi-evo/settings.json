@@ -37,7 +37,6 @@
     "{\"source\":\"npm:pi-subagents@0.88.1\",\"scope\":\"user\"}": "0.88.1",
     "{\"source\":\"npm:pi-web-access@0.46.0\",\"scope\":\"user\"}": "0.46.0"
   },
-  "sessionDir": "/home/evo/.pi/agent/sessions",
   "compaction": {
     "enabled": true,
     "reserveTokens": 32768,
@@ -88,5 +87,6 @@
         "keepRecentTokens": 20000
       }
     }
-  }
+  },
+  "sessionDir": "/home/evo/.pi/agent/sessions"
 }
