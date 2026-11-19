@@ -6,7 +6,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
 
 ## Needs before launch (Max / Derrick checklist — do not launch until met)
 - **Derrick's live yes in chat:** Card 1 (live apply), Card 26 (`ST1` default), and Card 12 (`P4.11` ntfy token for H3 timers) answered in chat (Max records id).
-- **X3 lease taken (written by Max — Card 28 answered, Derrick 2026-11-19 12:29 CT, side chat):** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-taken-x3-forge-uni-apply-x3-a.md` (mirrored to `records/status/`).
+- **X3 lease free** (`/home/derekboone/AI/locks/x3-lease.txt` empty). The doer takes it at start (one line, see Access & Lease). No lease-taken/released files, no brain or `records/status/` mirrors, no git commit for the lease, no message to Derrick.
 - **No active render** on X3/AlienPc (required for R5 and `sync-renders`), and **not during the Hermes bakeoff window** (Plan C16).
 - **Max import + pre-cutover bridge complete** from `mono` tip `3217c67 (or newer at Max import)`:
   - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
@@ -19,8 +19,8 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
 - **Doer:** X3 Forge (`/home/evo/AI/forge`, pi panes `w4:p1-p3`), running as `evo`. Use `sudo` only where an Install row says `sudo: yes` (`/usr/local/bin/sync-renders`).
 - **Live checkouts:** `/home/evo/AI/render` (Gitea `x3-render`), `/home/evo/AI/community` (Gitea `x3-community`), `/home/derekboone/evo-x3` (`mono`, read-only source for root-copy installs).
 - **Backup root:** `/home/evo/AI/_archive/20261119/` (create `mkdir -p /home/evo/AI/_archive/20261119/{hermes,systemd-user,rea-video-capabilities}` first).
-- **Lease take:** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-taken-x3-forge-uni-apply-x3-a.md` (mirrored to `records/status/`).
-- **Lease release:** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-released-x3-forge-uni-apply-x3-a.md` (mirrored to `records/status/`).
+- **Lease take:** write ONE line to `/home/derekboone/AI/locks/x3-lease.txt`: `x3-forge | UNI-APPLY-X3-A | <start time>`. If the file is not empty, stop.
+- **Lease release:** truncate `/home/derekboone/AI/locks/x3-lease.txt` (`: > /home/derekboone/AI/locks/x3-lease.txt`) when done or blocked. No status files, mirrors, commits, or messages for the lease.
 
 ## Work (stop on first failure in any group)
 

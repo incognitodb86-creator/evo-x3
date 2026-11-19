@@ -6,7 +6,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 
 ## Needs before launch (do not launch until met; held items stay skipped)
 1. **Derrick's live yes in chat:** Card 1 (live apply for `alienpc/community/` file-only items: `M4`, `ST4`, `ST5` candidate templates + `S2` allowlist script and offline tests into `C:\AI\community`) answered in chat (Max records id). (Card 33 M7 dirty check is answered: checked in step 1 below, Derrick 2026-11-19 12:29 CT, side chat.)
-2. **AlienPc lease taken (written by Max — Card 28 answered, Derrick 2026-11-19 12:29 CT, side chat):** `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-taken-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`). Release file on closeout: `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-released-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`, written by Max).
+2. **AlienPc lease free** (AlienPc lease per brain `10_packs/max/max-briefing.md`). The doer takes it as ONE line (`<who> | <what> | <start time>`) and clears it when done; no lease-taken/released files, no brain or `records/status/` mirrors, no git commit for the lease, no message to Derrick.
 3. **Max import + bridge patch staged** from `mono` tip `3217c67 (or newer at Max import)`:
    - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
    - `C:\AI\community` does **not** track `derrick/evo-x3`: its upstream is the separate Gitea repo `derrick/alienpc-community-pc` (`master`), and its remote URL carries a credential (monorepo Q6), so never run `git remote -v` or print that URL. Until `MONO-S6` passes smoke, Max stages one patch on the X3 instead of a pull:
@@ -22,8 +22,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
 - **Doer:** AlienPc Forge (`C:\Users\derek\forge` -> `5slock`, pi panes `w2V:p3`/`p7`), running as user `derek` (sudo/admin: **no**).
 - **Target repo:** `C:\AI\community` (Gitea `derrick/alienpc-community-pc`, branch `master`).
 - **Backup root:** `C:\AI\_archive\20261119\community\`.
-- **Lease take (written by Max, Card 28):** `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-taken-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`).
-- **Lease release (written by Max, Card 28):** `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-released-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`).
+- **Lease:** AlienPc lease (brain `10_packs/max/max-briefing.md`): ONE line `alienpc-forge | UNI-APPLY-ALIENPC-A | <start time>` at start, cleared when done or blocked; no status files, mirrors, commits, or messages for the lease.
 - **No GPU is used in this brief**; still confirm no active render before touching `C:\AI\community`:
   ```powershell
   Test-Path C:\AI\locks\gpu-render.lock
