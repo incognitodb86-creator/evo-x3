@@ -1,0 +1,416 @@
+#!/usr/bin/env python3
+"""pi-job: detached single-job runner for Hermes-X3 (plan-v32 P4.3, P4.8, P4.11).
+
+Source: evo-x3/scripts/pi-job
+Installed root-owned (0755) at /usr/local/bin/pi-job.
+"""
+from __future__ import annotations
+
+import argparse
+import fcntl
+import hashlib
+import hmac
+import json
+import os
+import secrets
+import shutil
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+HOME = Path.home()
+RUNS_DIR = HOME / "AI" / "_runs"
+LOCK_FILE = RUNS_DIR / "pi-job.lock"
+ACTIVE_FILE = RUNS_DIR / "pi-job.active"
+NATIVE_INPUTS_DIR = HOME / ".hermes" / "cache" / "documents" / "native-inputs"
+PIXL_INBOX_DIR = HOME / "AI" / "pixl-inbox"
+IMPORT_INBOX_PY = HOME / "AI" / "pixlstash-tagging" / "import_inbox.py"
+FORGE_LAUNCHER = HOME / "evo-x3" / "pi-chats" / "forge-pi.sh"
+RENDER_LAUNCHER = HOME / "evo-x3" / "pi-chats" / "render-pi.sh"
+QUEUE_REMOTE = HOME / "AI" / "render" / "x3" / "queue-remote.sh"
+NTFY_TOKEN_FILE = HOME / ".config" / "evo-x3" / "ntfy-x3.token"
+NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
+
+
+def _now_iso() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%S%z")
+
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _send_ntfy(title: str, body: str, priority: str = "default") -> bool:
+    if not NTFY_TOKEN_FILE.is_file():
+        return False
+    token = NTFY_TOKEN_FILE.read_text(encoding="utf-8").strip()
+    if not token:
+        return False
+    req = urllib.request.Request(
+        NTFY_URL,
+        data=body.encode("utf-8"),
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Title": title,
+            "Priority": priority,
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+
+def _active_job_id() -> str | None:
+    if not ACTIVE_FILE.is_file():
+        return None
+    jid = ACTIVE_FILE.read_text(encoding="utf-8").strip()
+    if not jid:
+        return None
+    unit = f"pi-job-{jid}.service"
+    r = subprocess.run(
+        ["systemctl", "--user", "is-active", "--quiet", unit],
+        capture_output=True,
+    )
+    if r.returncode == 0:
+        return jid
+    return None
+
+
+def _acquire_single_job_lock():
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    fd = os.open(LOCK_FILE, os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(fd)
+        running = _active_job_id() or "unknown"
+        print(f"REFUSED: another pi-job is already running ({running})", file=sys.stderr)
+        sys.exit(1)
+    running = _active_job_id()
+    if running:
+        os.close(fd)
+        print(f"REFUSED: another pi-job is already running ({running})", file=sys.stderr)
+        sys.exit(1)
+    return fd
+
+
+def _write_status(run_dir: Path, status: str, detail: str = "") -> None:
+    lines = [f"status={status}", f"updated={_now_iso()}"]
+    if detail:
+        lines.append(f"detail={detail}")
+    (run_dir / "status").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _new_job_id(role: str) -> str:
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    return f"{ts}-{role}-{secrets.token_hex(2)}"
+
+
+def _validate_native_still(still_arg: str) -> Path:
+    allowed_root = Path(os.path.realpath(NATIVE_INPUTS_DIR))
+    resolved = Path(os.path.realpath(still_arg))
+    try:
+        resolved.relative_to(allowed_root)
+    except ValueError:
+        raise ValueError(
+            f"REFUSED: --still path {resolved} is outside {allowed_root}"
+        )
+    if not resolved.is_file():
+        raise ValueError(f"REFUSED: --still file not found: {resolved}")
+    return resolved
+
+
+def _create_approval(run_dir: Path, job_id: str) -> tuple[str, str]:
+    prompt_file = run_dir / "prompt.txt"
+    prompt_sha = _sha256_file(prompt_file)
+    hash8 = prompt_sha[:8]
+    code = f"{secrets.randbelow(1000000):06d}"
+    salt = secrets.token_hex(16)
+    code_hash = hashlib.sha256((salt + code).encode("utf-8")).hexdigest()
+    approval = {
+        "job_id": job_id,
+        "salt": salt,
+        "code_hash": code_hash,
+        "prompt_sha256": prompt_sha,
+        "expires_at": time.time() + 900,
+        "attempts_left": 3,
+        "used": False,
+    }
+    ap = run_dir / ".approval.json"
+    ap.write_text(json.dumps(approval, indent=2) + "\n", encoding="utf-8")
+    os.chmod(ap, 0o600)
+    return code, hash8
+
+
+def _exec_job(job_id: str) -> int:
+    run_dir = RUNS_DIR / job_id
+    meta = json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))
+    role = meta["role"]
+    log_path = run_dir / "log"
+    _write_status(run_dir, "RUNNING", f"role={role}")
+    ACTIVE_FILE.write_text(job_id + "\n", encoding="utf-8")
+
+    try:
+        with log_path.open("ab") as logf:
+            if role == "code":
+                repo = Path(meta["target"])
+                base_head = subprocess.check_output(
+                    ["git", "-C", str(repo), "rev-parse", "HEAD"], text=True
+                ).strip()
+                cmd = [
+                    "timeout",
+                    "3600",
+                    "bash",
+                    str(FORGE_LAUNCHER),
+                    "-p",
+                    "--session-dir",
+                    str(run_dir),
+                    "--thinking",
+                    "low",
+                    meta["prompt"],
+                ]
+                proc = subprocess.run(cmd, cwd=str(repo), stdout=logf, stderr=subprocess.STDOUT)
+                ahead = subprocess.check_output(
+                    ["git", "-C", str(repo), "rev-list", "--count", f"{base_head}..HEAD"],
+                    text=True,
+                ).strip()
+                if proc.returncode == 0 and int(ahead) > 0:
+                    _write_status(run_dir, "DONE", f"commits_added={ahead}")
+                    _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
+                    return 0
+                _write_status(run_dir, "STUCK", f"rc={proc.returncode} commits_added={ahead}")
+                _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={proc.returncode}, commits={ahead})")
+                return 1
+
+            if role == "review":
+                repo = Path(meta["target"])
+                cmd = [
+                    "timeout",
+                    "1800",
+                    "bash",
+                    str(FORGE_LAUNCHER),
+                    "-p",
+                    "--no-session",
+                    "--thinking",
+                    "low",
+                    meta["prompt"],
+                ]
+                proc = subprocess.run(cmd, cwd=str(repo), stdout=logf, stderr=subprocess.STDOUT)
+                st = "DONE" if proc.returncode == 0 else "STUCK"
+                _write_status(run_dir, st, f"rc={proc.returncode}")
+                _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={proc.returncode})")
+                return 0 if proc.returncode == 0 else 1
+
+            if role == "render":
+                render_prompt = (
+                    f"Dry-run render prep into run_dir {run_dir} (do not queue). "
+                    f"Ask: {meta['prompt']}"
+                )
+                if meta.get("still_copy"):
+                    render_prompt += f" Use exact still path: {meta['still_copy']}."
+                cmd = [
+                    "timeout",
+                    "1800",
+                    "bash",
+                    str(RENDER_LAUNCHER),
+                    "-p",
+                    "--session-dir",
+                    str(run_dir),
+                    "--thinking",
+                    "low",
+                    render_prompt,
+                ]
+                proc = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT)
+                prompt_file = run_dir / "prompt.txt"
+                if proc.returncode == 0 and prompt_file.is_file():
+                    code, hash8 = _create_approval(run_dir, job_id)
+                    sent = _send_ntfy(
+                        f"pi-job {job_id}",
+                        f"Run {job_id}, prompt {hash8}: code {code}, 15 min",
+                        priority="high",
+                    )
+                    note = f"prompt_hash8={hash8} ntfy_sent={sent}"
+                    _write_status(run_dir, "READY", note)
+                    return 0
+                _write_status(run_dir, "STUCK", f"rc={proc.returncode} prompt_exists={prompt_file.is_file()}")
+                _send_ntfy(f"pi-job {job_id}", f"STUCK (render, rc={proc.returncode})")
+                return 1
+
+        _write_status(run_dir, "STUCK", f"unknown role={role}")
+        return 2
+    finally:
+        if ACTIVE_FILE.is_file() and ACTIVE_FILE.read_text(encoding="utf-8").strip() == job_id:
+            ACTIVE_FILE.unlink(missing_ok=True)
+
+
+def _start_detached(role: str, target: str | None, prompt: str, still_path: str | None = None) -> int:
+    fd = _acquire_single_job_lock()
+    try:
+        job_id = _new_job_id(role)
+        run_dir = RUNS_DIR / job_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        still_copy_str = None
+        if still_path:
+            try:
+                src = _validate_native_still(still_path)
+            except ValueError as e:
+                print(str(e), file=sys.stderr)
+                return 2
+            dst = run_dir / f"dropped_still{src.suffix.lower()}"
+            shutil.copy2(src, dst)
+            still_copy_str = str(dst)
+            if PIXL_INBOX_DIR.is_dir():
+                inbox_dst = PIXL_INBOX_DIR / f"{job_id}_{src.name}"
+                shutil.copy2(src, inbox_dst)
+                if IMPORT_INBOX_PY.is_file():
+                    subprocess.run(
+                        ["python3", str(IMPORT_INBOX_PY)],
+                        capture_output=True,
+                        timeout=60,
+                    )
+
+        meta = {
+            "job_id": job_id,
+            "role": role,
+            "target": target,
+            "prompt": prompt,
+            "still_copy": still_copy_str,
+            "created": _now_iso(),
+        }
+        (run_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+        _write_status(run_dir, "QUEUED", f"role={role}")
+        ACTIVE_FILE.write_text(job_id + "\n", encoding="utf-8")
+
+        subprocess.run(
+            [
+                "systemd-run",
+                "--user",
+                f"--unit=pi-job-{job_id}",
+                "--description",
+                f"pi-job {role} {job_id}",
+                os.path.realpath(__file__),
+                "--_exec",
+                job_id,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        print(job_id)
+        return 0
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+
+
+def _cmd_queue(run_ref: str, code: str) -> int:
+    if not NTFY_TOKEN_FILE.is_file() or not NTFY_TOKEN_FILE.read_text(encoding="utf-8").strip():
+        print("REFUSED: P4.11 ntfy-x3.token missing; queue stays off until P4.11 passes.", file=sys.stderr)
+        return 2
+    run_dir = Path(run_ref) if Path(run_ref).is_absolute() else (RUNS_DIR / run_ref)
+    ap = run_dir / ".approval.json"
+    prompt_file = run_dir / "prompt.txt"
+    if not ap.is_file() or not prompt_file.is_file():
+        print(f"REFUSED: missing .approval.json or prompt.txt in {run_dir}", file=sys.stderr)
+        return 2
+
+    data = json.loads(ap.read_text(encoding="utf-8"))
+    if data.get("used"):
+        print("REFUSED: approval code already used.", file=sys.stderr)
+        return 2
+    if time.time() > float(data.get("expires_at", 0)):
+        print("REFUSED: approval code expired.", file=sys.stderr)
+        return 2
+    if int(data.get("attempts_left", 0)) <= 0:
+        print("REFUSED: no attempts left.", file=sys.stderr)
+        return 2
+    cur_sha = _sha256_file(prompt_file)
+    if cur_sha != data.get("prompt_sha256"):
+        print("REFUSED: prompt.txt changed after approval code was sent.", file=sys.stderr)
+        return 2
+    expected_hash = data.get("code_hash", "")
+    got_hash = hashlib.sha256((data.get("salt", "") + code.strip()).encode("utf-8")).hexdigest()
+    if not hmac.compare_digest(got_hash, expected_hash):
+        data["attempts_left"] = int(data.get("attempts_left", 1)) - 1
+        ap.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        print(f"REFUSED: invalid code ({data['attempts_left']} tries left).", file=sys.stderr)
+        return 2
+
+    data["used"] = True
+    ap.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    proc = subprocess.run([str(QUEUE_REMOTE), str(run_dir), "--yes-derrick"])
+    return proc.returncode
+
+
+def _cmd_status(job_id: str) -> int:
+    run_dir = RUNS_DIR / job_id
+    st = run_dir / "status"
+    if not st.is_file():
+        print(f"NOT_FOUND: {job_id}", file=sys.stderr)
+        return 1
+    print(st.read_text(encoding="utf-8").strip())
+    log_file = run_dir / "log"
+    if log_file.is_file():
+        tail = log_file.read_text(encoding="utf-8", errors="replace").splitlines()[-20:]
+        if tail:
+            print("--- log tail ---")
+            print("\n".join(tail))
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="pi-job")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p_code = sub.add_parser("code")
+    p_code.add_argument("target")
+    p_code.add_argument("prompt")
+
+    p_rev = sub.add_parser("review")
+    p_rev.add_argument("target")
+    p_rev.add_argument("prompt")
+
+    p_ren = sub.add_parser("render")
+    p_ren.add_argument("--still", default=None)
+    p_ren.add_argument("ask")
+
+    p_q = sub.add_parser("queue")
+    p_q.add_argument("run")
+    p_q.add_argument("code")
+
+    p_st = sub.add_parser("status")
+    p_st.add_argument("job_id")
+
+    ap.add_argument("--_exec", dest="exec_id", default=None, help=argparse.SUPPRESS)
+
+    if argv is None:
+        argv = sys.argv[1:]
+    if len(argv) >= 2 and argv[0] == "--_exec":
+        return _exec_job(argv[1])
+
+    args = ap.parse_args(argv)
+    if args.cmd == "code":
+        return _start_detached("code", str(Path(args.target).resolve()), args.prompt)
+    if args.cmd == "review":
+        return _start_detached("review", str(Path(args.target).resolve()), args.prompt)
+    if args.cmd == "render":
+        return _start_detached("render", None, args.ask, still_path=args.still)
+    if args.cmd == "queue":
+        return _cmd_queue(args.run, args.code)
+    if args.cmd == "status":
+        return _cmd_status(args.job_id)
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
