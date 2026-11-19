@@ -12,6 +12,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import shutil
 import subprocess
@@ -457,6 +458,28 @@ def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple
     return run(["--continue"], RESUME_PROMPT, None), "alienpc->x3"
 
 
+def _run_makefile_check_all(repo: Path, logf) -> int | None:
+    """H5 (#8): if target repo has a Makefile with a `check-all` target, run `make check-all` and return its rc."""
+    mk = repo / "Makefile"
+    if not mk.is_file():
+        return None
+    try:
+        text = mk.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    if not re.search(r"^check-all\s*:", text, re.MULTILINE):
+        return None
+    logf.write(b"\n[pi-job] running make check-all (H5 gate)\n")
+    logf.flush()
+    return subprocess.run(
+        ["timeout", "600", "make", "check-all"],
+        cwd=str(repo),
+        stdin=subprocess.DEVNULL,
+        stdout=logf,
+        stderr=subprocess.STDOUT,
+    ).returncode
+
+
 def _exec_job(job_id: str) -> int:
     run_dir = RUNS_DIR / job_id
     meta = json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))
@@ -478,6 +501,16 @@ def _exec_job(job_id: str) -> int:
                     text=True,
                 ).strip()
                 if rc == 0 and int(ahead) > 0:
+                    chk_rc = _run_makefile_check_all(repo, logf)
+                    if chk_rc is not None and chk_rc != 0:
+                        detail = f"rc={rc} commits_added={ahead} model={where} check_all_rc={chk_rc}"
+                        _write_status(run_dir, "STUCK", detail)
+                        try:
+                            _write_stuck_bundle(run_dir, meta, detail)
+                        except Exception:
+                            pass
+                        _send_ntfy(f"pi-job {job_id}", f"STUCK (code, make check-all rc={chk_rc})")
+                        return 1
                     _write_status(run_dir, "DONE", f"commits_added={ahead} model={where}")
                     _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
                     return 0
