@@ -215,6 +215,25 @@ def upscale_done(run_dir, jobs, slog):
     return n_ok, n_fail
 
 
+def upscale_only(run_dir, jobs):
+    """--upscale-only (t2565u): the 2x post-pass alone on a finished run, with no render, under the same GPU lock."""
+    slog = lambda m: comm.log(m, os.path.join(run_dir, "status.log"))
+    lrc, lout = rgj.ps_run(rgj.GPU_LOCK_PS, "-Acquire", "-Owner", str(os.getpid()), "-Note", "upscale-only " + os.path.basename(run_dir))
+    slog("gpu_lock acquire rc=%d %s" % (lrc, lout[:140]))
+    if lrc != 0:
+        qlog(run_dir, "UPSCALE-ONLY not started: GPU lock rc=%d %s" % (lrc, lout[:140]))
+        return 7 if lrc == 1 else 8
+    n_ok = n_fail = 0
+    try:
+        if not rgj.wake(slog):
+            qlog(run_dir, "UPSCALE-ONLY FAIL ComfyUI down"); return 4
+        n_ok, n_fail = upscale_done(run_dir, jobs, slog)
+    finally:
+        rgj.gpu_unlock(slog)
+        qlog(run_dir, "UPSCALE-ONLY closed ok=%d fail=%d, lock released" % (n_ok, n_fail))
+    return 9 if n_fail else 0
+
+
 def qlog(run_dir, line):
     """One log line: ISO-8601 local wall-clock with the real UTC offset (F12 2026-11-08), then the text.
 
@@ -763,19 +782,26 @@ def main():
                          "Default off: a normal run unloads comfyui_auto in finally as before.")
     ap.add_argument("--remote", action="store_true",
                     help="EVO-X3: queue on AlienPc ComfyUI over the tailnet (Serve :8446; scripts/remote_comfy.py). Implied on Linux.")
+    ap.add_argument("--upscale-only", action="store_true",
+                    help="t2565u: run only the RTX 2x post-pass on a finished run (no render), under the GPU lock")
     ap.add_argument("--probe", action="store_true", help="with --dry-run --remote: one GET /system_stats (ignored path, never wakes ComfyUI)")
     a = ap.parse_args()
     run_dir = os.path.abspath(a.run_dir)
     remote = a.remote or os.name != "nt"  # consolidation P1b 2026-11-16: the X3 has no local ComfyUI
     if remote:
         import remote_comfy
+        local_upscale_done = upscale_done
         remote_comfy.enable(sys.modules[__name__])
+        import remote_upscale  # t2564u: the 2x post-pass runs as one AlienPc ComfyUI job (was D5 "deferred")
+        remote_upscale.enable(sys.modules[__name__], local_upscale_done)
     if a.detach:
         return detach(sys.argv[1:], run_dir)
     q = json.load(open(a.queue or os.path.join(run_dir, "_render_order.json"), encoding="utf-8"))
     jobs = q["order"] if isinstance(q, dict) else q
     global _CELL_CONTRACT  # B2-10: the long-clip plan declares the cell contract in its order file
     _CELL_CONTRACT = bool(q.get("cell_contract")) if isinstance(q, dict) else False
+    if a.upscale_only and not a.dry_run:
+        return upscale_only(run_dir, jobs)
     done = done_tags(run_dir) if a.resume else set()
     todo = [j for j in jobs if j["tag"] not in done]
     size = tuple(int(x) for x in a.size.lower().split("x"))
@@ -795,7 +821,7 @@ def main():
         for j in todo:
             print("  pos %2d %s" % (j["pos"], j["tag"]))
         print("prompt_ids on file: %d (%s)" % (len(load_pids(run_dir)), PIDS_FILE))
-        print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "deferred to AlienPc (X3 remote, D5)" if remote else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
+        print("post-pass: %s" % ("off (--no-upscale)" if a.no_upscale else "RTX 2x as one AlienPc ComfyUI job (t2564u)" if remote else "RTX VideoSuperRes 2x ULTRA at native fps on every video clip"))
         print("comfy process: %s" % ("kept loaded at batch close (--keep-comfy-process: /free still runs, llama-swap unload skipped)"
                                      if a.keep_comfy_process else "unloaded at batch close (default)"))
         if remote:
