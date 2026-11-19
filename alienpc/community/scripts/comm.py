@@ -251,7 +251,15 @@ def ensure_comfy(logfile=None):
         for n in names:  # ALI-154: documented POST /api/models/unload/:model_id (llama-swap README), not legacy GET /unload
             if n and n != "comfyui_auto": http(LS + "/api/models/unload/" + n, timeout=120, method="POST")
     t0 = time.time()
-    st = http(BASE + "/system_stats", timeout=300)
+    if comfy_loaded() is not True:  # /system_stats is in llama-swap upstream.ignorePaths: it never wakes comfyui_auto (409 cold)
+        log(f"wake: GET {BASE}/ starts comfyui_auto (same trigger as run_graph_job.wake)", logfile)
+        try: urllib.request.urlopen(BASE + "/", timeout=10).read()
+        except Exception as ex: log(f"wake: start trigger sent ({ex})", logfile)
+    while True:
+        try: st = http(BASE + "/system_stats", timeout=60); break
+        except Exception:
+            if time.time() - t0 > SUBMIT_TIMEOUT: raise
+            time.sleep(5)
     check_launch_argv(st, logfile)
     log(f"COMFY ready v{st['system']['comfyui_version']} wait={time.time()-t0:.0f}s vram_free={st['devices'][0].get('vram_free',0)/2**30:.1f}GiB", logfile)
 
