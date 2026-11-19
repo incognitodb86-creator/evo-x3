@@ -34,6 +34,29 @@ Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo pl
 
 **Review 2026-11-19 13:15 status (already fixed on `mono`, do not redo):** Audit F1 `M3`/`M4`/Card 19 (`2f4f2c2`) + `M4` candidates synced to `Miraclein 4.5` (`691a4b4`); F5 `H4` `pi-job` merge + skills review rows 1–2 (`pixlstash-image-library` KEEP + `pi-job` merge, `9ebe5a0`); F6 `H2` `flash-next-uncensored-v2` (`ef51f83`); F7 cards/leases/`H1c` (`b96560f`, `d80617f`, `12c3cb4`); `.github/` one-line lease & roles (`bab584a`); `hosts/SETUP-MAP.md` `mono` column (worker pass). Remaining Audit F2–F4, F8–F9 and `SK1–SK6` / `TQ1–TQ8` are folded below.
 
+## Order of work: benchmarks first (Derrick 2026-11-19 13:46 CT)
+
+Derrick: "we should run benchmarks first, to determine our settings for everything"; "stuff that is depending on another
+step should wait until after the first step is complete." A step starts only after the step it depends on has a RESULT.
+Settings (writer model, sampler, templates, ComfyUI flags) are picked from benchmark results, not decided up front.
+
+| # | Step | Machine | Waits for | Picks / unlocks |
+|---|---|---|---|---|
+| 1 | Apply briefs with no setting choices: X3-A (running 13:45), X3-C nightly QNAP, AlienPc-A, AlienPc-B (AGT1); X3-B `pi-job` after the ESP-off alias is added | X3, AlienPc | nothing (X3-B: alias) | files live |
+| 2 | Writer benchmark `W1` (models already on disk, no downloads) | X3 | 1 (X3-A) | writer model + sampler |
+| 3 | `W2` downloads only if 2 has no good winner; duckyshell / API writer (`W3b`/`W3c`) only if Derrick wants them as extra arms | X3 / AlienPc | 2 | - |
+| 4 | `W4` deploy the winner + retune checklist (Sydney stays on the writer model, `G6`) | X3 | 2 (3 if run) | live writer |
+| 5 | Hermes U3-U9 side-by-side test (render-a vs render-b, card 43) | X3 | 4 | how Hermes renders |
+| 6 | Render speed: `R1` timing only, then `R3`/`R4` only if R1 shows they help; `R2` only if Derrick wants that download | AlienPc | 1 (can run beside 2) | ComfyUI flags |
+| 7 | Render quality A/B, fixed seed, Derrick picks by eye: `TQ1` -> `TQ4` -> `TQ2`/`TQ3` -> `TQ5`, `M5` | AlienPc | 6 | production templates |
+| 8 | `S2` allowlist hook (lists the promoted winners), then `S1` Manager `strong` (after the last node install) | AlienPc | 7 | lock-down |
+| 9 | Stills: `M3` import check -> `M4`/`ST4`/`ST5` tests (Derrick yes per still) -> depth LoRA (card 24) only if layout stills need it | AlienPc | 1 | still templates |
+| - | Monorepo `S5`/`S6`, Tailscale ACL (card 11): independent, any quiet window | X3, AlienPc | Derrick yes | - |
+
+Already answered by the snapshots (13:45-13:52 CT): `M1` done live (MiniMaxH3Mod `54f93eb`); `G6` Sydney already
+moved to `flash-next-uncensored` (llama-swap comment 2026-11-17, t70u) - keep it on the writer model; card 12: live
+`pi-job` already sends ntfy with `ntfy-x3.token` (Max only checks mode `0600`).
+
 ## For Opus reviewer (read this first)
 
 This is the ONE plan to review (Derrick t2646u). It stands alone: every fact it relies on is restated here with its live evidence. Copilot (Opus) sees only this GitHub repo; it has no access to the X3, AlienPc, Gitea, the QNAP or the chat.
