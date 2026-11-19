@@ -61,14 +61,22 @@
   },
   "class_type": "Klein9RefModsLoader",
   "inputs": {
-   "mod_1": "(none)",
-   "mod_2": "(none)",
-   "mod_3": "(none)",
-   "mod_4": "(none)",
-   "mod_5": "(none)",
-   "mod_6": "(none)",
-   "mod_7": "(none)",
-   "mod_8": "(none)",
+   "copies_1": 1,
+   "copies_2": 1,
+   "copies_3": 1,
+   "copies_4": 1,
+   "copies_5": 1,
+   "copies_6": 1,
+   "copies_7": 1,
+   "copies_8": 1,
+   "mod_1": "none",
+   "mod_2": "none",
+   "mod_3": "none",
+   "mod_4": "none",
+   "mod_5": "none",
+   "mod_6": "none",
+   "mod_7": "none",
+   "mod_8": "none",
    "strength_1": 1.0,
    "strength_2": 1.0,
    "strength_3": 1.0,
@@ -90,11 +98,12 @@
     "5",
     0
    ],
-   "ref_method": "default",
-   "refmods": [
+   "custom_retention": 1.0,
+   "klein9_refmods": [
     "12",
     0
    ],
+   "ref_method": "default",
    "retention": "partially_preserved (0.7)"
   }
  },

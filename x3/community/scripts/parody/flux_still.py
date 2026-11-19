@@ -130,19 +130,44 @@ def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -
     return active
 
 
+def _klein9_refmod_name(spec: str) -> str:
+    """Turn a filename, stem, or plain celeb name (e.g. 'Sydney Sweeney') into a Klein9 RefMod filename.
+    ComfyUI-Flux2Klein9Mod lists `.safetensors` filenames from `models/refmods-klein9/` (e.g. `fk9_sydneysweeney_v1_refmod.safetensors`)."""
+    s = str(spec or "").strip()
+    if not s or s.lower() in ("none", "(none)"):
+        return "none"
+    if s.endswith(".safetensors"):
+        return s
+    if " " in s or not any(tok in s.lower() for tok in ("fk9_", "klein9", "_refmod", "_v1", "_v2")):
+        import re
+        compact = re.sub(r"[^a-zA-Z0-9]", "", s).lower()
+        return f"fk9_{compact}_v1_refmod.safetensors"
+    return f"{s}.safetensors"
+
+
+def _hybrid_stack_for_name(name: str) -> tuple[str, Dict[str, Any]]:
+    """Malcolmrey empirical 98%-likeness Hybrid stack: RefMod @ 0.85 + Prodigy LoRA @ 0.60."""
+    import re
+    compact = re.sub(r"[^a-zA-Z0-9]", "", str(name or "")).lower()
+    return (
+        f"fk9_{compact}_v1_refmod.safetensors",
+        {"name": f"klein9/fk9_{compact}_v1_prodigy.safetensors", "strength": 0.60},
+    )
+
+
 def _inject_flux_refmods(
     graph: Dict[str, Any],
     refmods: Sequence[str],
     strength: float = 1.0,
     retention: str = "partially_preserved (0.7)",
 ) -> List[str]:
-    clean = [res._mod_stem(m) for m in refmods if str(m or "").strip()]
+    clean = [_klein9_refmod_name(m) for m in refmods if str(m or "").strip()]
+    clean = [m for m in clean if m != "none"]
     if not clean:
         return []
     loader_id = _find_node(graph, "Klein9RefModsLoader")
     apply_id = _find_node(graph, "Klein9RefModApply")
     if not loader_id or not apply_id:
-        # Wire Klein9RefModsLoader + Klein9RefModApply in front of CFGGuider.positive so any Flux template supports RefMods.
         guider_id = _find_node(graph, "CFGGuider")
         if not guider_id:
             raise ValueError("Flux template has no CFGGuider node to attach Klein9RefModApply")
@@ -153,8 +178,9 @@ def _inject_flux_refmods(
             "_meta": {"title": "klein9_refmods_loader"},
             "class_type": "Klein9RefModsLoader",
             "inputs": {
-                **{f"mod_{i}": "(none)" for i in range(1, 9)},
+                **{f"mod_{i}": "none" for i in range(1, 9)},
                 **{f"strength_{i}": 1.0 for i in range(1, 9)},
+                **{f"copies_{i}": 1 for i in range(1, 9)},
             },
         }
         graph[apply_id] = {
@@ -163,16 +189,21 @@ def _inject_flux_refmods(
             "inputs": {
                 "blend_mode": "manifold_blur",
                 "conditioning": pos_in,
+                "custom_retention": 1.0,
+                "klein9_refmods": [loader_id, 0],
                 "ref_method": "default",
-                "refmods": [loader_id, 0],
                 "retention": _norm_retention(retention),
             },
         }
         graph[guider_id]["inputs"]["positive"] = [apply_id, 0]
 
     for i in range(1, 9):
-        graph[loader_id]["inputs"][f"mod_{i}"] = clean[i - 1] if i <= len(clean) else "(none)"
+        graph[loader_id]["inputs"][f"mod_{i}"] = clean[i - 1] if i <= len(clean) else "none"
         graph[loader_id]["inputs"][f"strength_{i}"] = float(strength)
+        graph[loader_id]["inputs"].setdefault(f"copies_{i}", 1)
+    if "refmods" in graph[apply_id]["inputs"] and "klein9_refmods" not in graph[apply_id]["inputs"]:
+        graph[apply_id]["inputs"]["klein9_refmods"] = graph[apply_id]["inputs"].pop("refmods")
+    graph[apply_id]["inputs"].setdefault("custom_retention", 1.0)
     graph[apply_id]["inputs"]["retention"] = _norm_retention(retention)
     return clean[:8]
 
@@ -355,10 +386,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--prompt", required=True, help="Positive FLUX still prompt (per flux-klein-prompting skill)")
     ap.add_argument("--mode", default="t2i", choices=sorted(MODES), help="Flux mode (default: t2i; auto-refmod if --refmod)")
     ap.add_argument("--template", default=None, help="Optional explicit template JSON path")
-    ap.add_argument("--refmod", action="append", default=[], help="Klein9 RefMod filename/stem (repeatable, up to 8)")
-    ap.add_argument("--refmod-strength", type=float, default=1.0)
+    ap.add_argument("--refmod", action="append", default=[], help="Klein9 RefMod filename, stem, or celeb name (repeatable, up to 8)")
+    ap.add_argument("--refmod-strength", type=float, default=None, help="RefMod strength (default 1.0; 0.85 with --hybrid)")
     ap.add_argument("--retention", default="partially_preserved (0.7)", help="Klein9RefModApply retention preset/string")
     ap.add_argument("--lora", action="append", default=[], help="Klein9 LoRA spec: <filename>[:<strength>] (repeatable)")
+    ap.add_argument("--hybrid", default=None, help="Hybrid 98%%-likeness stack for a celeb name: fk9_<name>_v1_refmod @ 0.85 + fk9_<name>_v1_prodigy LoRA @ 0.60")
     ap.add_argument("--image", default=None, help="Input/identity image path (for edit / pose / layout)")
     ap.add_argument("--pose-image", default=None, help="Pose/layout reference image path (for pose / layout)")
     ap.add_argument("--width", type=int, default=768)
@@ -379,14 +411,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not d.is_absolute():
         print(f"NOT_READY run_dir must be an absolute path: {a.run_dir}")
         return 3
+    refmods = list(a.refmod or [])
     loras = [fr.parse_lora_spec(s) for s in (a.lora or [])]
+    refmod_strength = a.refmod_strength
+    char = a.character
+    if a.hybrid:
+        h_mod, h_lora = _hybrid_stack_for_name(a.hybrid)
+        refmods.insert(0, h_mod)
+        loras.insert(0, h_lora)
+        if refmod_strength is None:
+            refmod_strength = 0.85
+        if not char:
+            char = a.hybrid
+    if refmod_strength is None:
+        refmod_strength = 1.0
     rep = build_flux_still(
         d, a.prompt, a.mode,
         template_path=Path(a.template) if a.template else None,
-        refmods=a.refmod, refmod_strength=a.refmod_strength, retention=a.retention,
+        refmods=refmods, refmod_strength=refmod_strength, retention=a.retention,
         loras=loras, image=a.image, pose_image=a.pose_image,
         width=a.width, height=a.height, steps=a.steps, cfg=a.cfg, seed=a.seed,
-        character=a.character, actor=a.actor, names=a.names,
+        character=char, actor=a.actor, names=a.names,
         dry_run=not a.queue,
     )
     if rep.get("status") != "READY":

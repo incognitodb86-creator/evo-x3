@@ -11,7 +11,7 @@ Authority: Derrick t2598u (Hermes renders with no pi hop), t2600u (same agreed r
 
 ## Access & Lease
 - **Doer:** X3 Forge as `evo`. No sudo needed.
-- **Source:** `/home/derekboone/evo-x3/hosts/x3/hermes/` (`bin/build-hermes-skills.sh`, `skills/h3-render/HEAD.md`, `skills/h3-writer/SKILL.md`, `skills/pi-job/SKILL.after-h9.md`, `memories/USER.md`, `SOUL.md`).
+- **Source:** `/home/derekboone/evo-x3/hosts/x3/hermes/` (`bin/build-hermes-skills.sh`, `skills/h3-render/HEAD.md`, `skills/h3-writer/SKILL.md`, `skills/lab-status/SKILL.md`, `skills/pi-job/SKILL.after-h9.md`, `memories/USER.md`, `memories/MEMORY.md`, `SOUL.md`).
 - **Backup root:** `/home/evo/.hermes/_archive/20261119-h9/`.
 - **Lease take:** one line to `/home/derekboone/AI/locks/x3-lease.txt`: `forge-x3 | UNI-APPLY-X3-E-HERMES | <start time>`. If not empty, stop.
 - **Lease release:** `: > /home/derekboone/AI/locks/x3-lease.txt` when done or blocked.
@@ -49,12 +49,15 @@ hermes config show > /home/evo/.hermes/_archive/20261119-h9/config-show.after.tx
 - The diff of `config-show.before.txt` vs `.after.txt` must show only these 6 keys.
 - Move the local `flux-klein-prompting` copy out (the community folder copy now loads, and a local copy would shadow it): `mv /home/evo/.hermes/skills/flux-klein-prompting /home/evo/.hermes/_archive/20261119-h9/flux-klein-prompting.local` (skip if absent).
 
-### Item 3 - SOUL, memory, pi-job skill (one switch)
+### Item 3 - SOUL, memory, lab-status & pi-job skill (one switch)
 - First: if `/home/evo/.hermes/memories/USER.md` exists and is not empty, stop (`BLOCKED`) and report its size only (do not overwrite or print Derrick's memories).
 ```bash
 S=/home/derekboone/evo-x3/hosts/x3/hermes
 install -m 0644 "$S/SOUL.md" /home/evo/.hermes/SOUL.md
-mkdir -p /home/evo/.hermes/memories && install -m 0644 "$S/memories/USER.md" /home/evo/.hermes/memories/USER.md
+mkdir -p /home/evo/.hermes/memories /home/evo/.hermes/skills/devops/lab-status
+install -m 0644 "$S/memories/USER.md" /home/evo/.hermes/memories/USER.md
+[ -s /home/evo/.hermes/memories/MEMORY.md ] || install -m 0644 "$S/memories/MEMORY.md" /home/evo/.hermes/memories/MEMORY.md
+install -m 0644 "$S/skills/lab-status/SKILL.md" /home/evo/.hermes/skills/devops/lab-status/SKILL.md
 install -m 0644 "$S/skills/pi-job/SKILL.after-h9.md" /home/evo/.hermes/skills/pi-job/SKILL.md
 ```
 - `SOUL.md` goes back to tone only (Hermes docs: SOUL is identity and tone, not workflow). The OC and 18+ facts move to `memories/USER.md`. The render routing lives in the `h3-render` skill; `pi-job` is coding only.
@@ -65,9 +68,9 @@ install -m 0644 "$S/skills/pi-job/SKILL.after-h9.md" /home/evo/.hermes/skills/pi
   - Create `/home/evo/.config/systemd/user/hermes-webui.service.d/20-media-roots.conf` setting `MEDIA_ALLOWED_ROOTS` with that exact separator to include: `/home/evo/AI/5slock/libraries`, `/home/evo/AI/community/runs`, `/home/evo/AI/evo-x3/x3/community/runs`, `/home/evo/AI/render/_inputs`, `/srv/renders`.
   - Run `systemctl --user daemon-reload`.
 - Restart both units only when no chat is mid-turn: `systemctl --user restart hermes-gateway hermes-webui`; then `systemctl --user is-active hermes-gateway hermes-webui` (both `active`).
-- `hermes skills list` shows `h3-render`, `h3-writer`, `h3-prompting`, `h3-parody-identity`, `flux-klein-prompting`, `pi-job`, `pixlstash-image-library`, and none of the 10 disabled names.
+- `hermes skills list` shows `h3-render`, `h3-writer`, `h3-prompting`, `h3-parody-identity`, `flux-klein-prompting`, `lab-status`, `pi-job`, `pixlstash-image-library`, and none of the 10 disabled names.
 - `grep -c '\$PIXL_KEY' /home/evo/.hermes/skills/creative/h3-render/SKILL.md` is `0` (token-file substitution applied).
-- `wc -c /home/evo/.hermes/memories/USER.md` is at most 1375.
+- `wc -c /home/evo/.hermes/memories/USER.md` is at most 1375; `wc -c /home/evo/.hermes/memories/MEMORY.md` is at most 2200.
 - `cd /home/evo/AI/community/scripts/parody && /home/evo/AI/render/x3/.venv/bin/python3 -m pytest -q -p no:cacheprovider test_prose_file_gate.py test_flux_h3_redteam.py test_beta7_convert.py` -> all passed.
 - `hermes chat --oneshot -q "Which skill do you use to render a video, and which to change code in a repo? Reply with the two skill names only."` -> names `h3-render` and `pi-job`. (If this Hermes build has no `--oneshot`, mark this check `SKIPPED` and say why.)
 
@@ -86,7 +89,7 @@ B=/home/evo/.hermes/_archive/20261119-h9
 cp -a "$B/config.yaml" "$B/SOUL.md" /home/evo/.hermes/
 cp -a "$B/pi-job.SKILL.md" /home/evo/.hermes/skills/pi-job/SKILL.md
 rm -rf /home/evo/.hermes/memories/USER.md; [ -d "$B/memories" ] && cp -a "$B/memories/." /home/evo/.hermes/memories/
-rm -rf /home/evo/.hermes/skills/creative/h3-render /home/evo/.hermes/skills/creative/h3-writer
+rm -rf /home/evo/.hermes/skills/creative/h3-render /home/evo/.hermes/skills/creative/h3-writer /home/evo/.hermes/skills/devops/lab-status
 rm -f /home/evo/.config/systemd/user/hermes-webui.service.d/20-media-roots.conf
 [ -d "$B/flux-klein-prompting.local" ] && mv "$B/flux-klein-prompting.local" /home/evo/.hermes/skills/flux-klein-prompting
 systemctl --user daemon-reload && systemctl --user restart hermes-gateway hermes-webui

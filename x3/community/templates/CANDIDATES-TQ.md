@@ -19,7 +19,7 @@ All 5 candidates keep the exact node IDs `fill_request.py` fills (`c0`, `c1`, `w
 Max / AlienPc Forge run A/B comparisons on a copy of the request using **fixed seed + same start still + same prompt** (except TQ5's prompt-header arm):
 
 - **TQ2 (VSA dense start):** `m_vsa.inputs.start_percent`: `0.2` vs `0.0` (curbs early layout/limb/wardrobe drift; measure time/VRAM delta).
-- **TQ3 (Sampler):** `ksel.inputs.sampler_name`: `res_multistep` vs `euler` with `simple` scheduler (**`er_sde` is banned** — failed 4/7 sets on Oct 30). Test on both 1-pass and 2-pass copies.
+- **TQ3 (Sampler):** `ksel.inputs.sampler_name`: `res_multistep` (TenStrip's go-to for best motion quality, 6–8 steps) vs `euler` with `simple` scheduler (**`er_sde` is banned** — failed 4/7 sets on Oct 30). Test on both 1-pass and 2-pass copies. *(Optional audio check from TenStrip's README: `lcm` / `simple` 6–8 steps is TenStrip's pick for best turbo audio if `res_multistep`/`euler` audio sounds rough.)*
 - **TQ5 (Prompt format):** header-free plain prose (via `beta7_convert.py`) vs 4-header format (`subject_definitions:`, `summary:`, `retention_analysis:`, `detailed_description:`) on identical seed, still, and graph.
 
 ## Suggested A/B Order & Promotion

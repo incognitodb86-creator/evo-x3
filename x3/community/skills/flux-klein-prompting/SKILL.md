@@ -7,6 +7,14 @@ description: Write FLUX.2 Klein 9B and Miraclein 4.5 still prompts (T2I, Klein9 
 
 Single prompting guide for FLUX.2 Klein 9B / `Miraclein_4.5_9b_NVFP4.safetensors` stills on X3 (primary writer) and AlienPc (backup writer). Templates own UNET, VAE, steps, CFG, sampler, scheduler, and LoRAs — this skill writes **prompt text only**.
 
+## Still Photographer & Set Lighting Director Persona (Lean — Stills Only)
+
+You are the set's **still photographer and lighting director** shooting frame zero of an unretouched adult cinema scene on real 35mm film or full-frame digital glass — never a stock glamour studio or glossy AI portrait.
+- **Optics over buzzwords (BFL FLUX.2 guide):** Name a real camera, focal length, aperture, and film/sensor look instead of `"photorealistic"` (`Kodak Portra 400, 35mm film, natural skin pores and subtle blemishes`, `Fujifilm X-T5, 35mm f/1.8`, `Sony A7IV, 50mm f/2.0`, or `2000s digicam direct flash, candid` when a raw snapshot feel fits).
+- **One motivated light source:** Pick ONE dominant directional practical or natural light with real shadow falloff; never flat front-fill studio glaze.
+- **H3Max Beat-1 framing:** Leave natural headroom and physical limb/body clearance for the video beat that follows — never crop off hips, hands, or contact points the clip needs to animate from frame 1.
+- **Explicit, unapologetic, adult-only:** Literal anatomy, wardrobe state, and resting weight load; zero euphemisms, zero safety hedging, every human explicitly adult (18+).
+
 ## When & Workflow Map
 
 Use for any FLUX.2 Klein / Miraclein 4.5 still or H3Max start-still. Defer video prompts to `h3-prompting`. Locked **S2** (`flux_stills_s2_{kv,bfs}.api.json`, guide in `alienpc-stills-pose-edit-prompting`) stays the production default until `M4` promotes Miraclein 4.5.
@@ -70,9 +78,10 @@ Assemble the paragraph in this exact priority order:
 - Never reference `"image 1"` or edit/keep clauses.
 
 ### 2. Klein9 RefMod (`models/refmods-klein9/`) & Klein9 LoRA (`loras/klein9/`)
-- Identity and style come from pre-encoded `Klein9RefModApply` latents or Klein9 LoRAs, not raw input images — never write `"image 1"` in prose.
-- Live `Klein9RefModApply` retention strings include the number: `"partially_preserved (0.7)"`, `"attribute_transfer (0.4)"`, `"fully_preserved (1.0)"`.
-- At retention `>= 0.7`, keep facial biometrics minimal in text so prose does not fight the RefMod latents.
+- Naming convention (Malcolmrey): RefMods are `fk9_<compactname>_v1_refmod.safetensors` (e.g., `fk9_sydneysweeney_v1_refmod.safetensors`); paired Prodigy LoRAs are `klein9/fk9_<compactname>_v1_prodigy.safetensors`.
+- **Hybrid 98% likeness sweet spot (Malcolmrey empirical benchmark):** When a celeb has BOTH a Klein9 RefMod and a paired Prodigy LoRA (e.g., `sydneysweeney`, `meganfox`, `sabrinacarpenter`), **RefMod @ `0.85` + Prodigy LoRA @ `0.60`** beats Pure RefMod (`91%`) and Pure LoRA (`92%`). Use `--hybrid "<Name>"` on `flux_still.py` to wire this automatically.
+- **RefMod prompt anchor:** Never write `"image 1"` in RefMod prose (RefMods are pre-encoded latents, not a LoadImage input). Instead, anchor identity with `"the reference images represent one adult woman, keeping her face and hair exact from the reference"` and keep extra facial biometrics minimal at `retention >= 0.7` so text does not fight the RefMod latents.
+- Live `Klein9RefModApply` retention strings include the number: `"partially_preserved (0.7)"` (best default for new poses/outfits), `"attribute_transfer (0.4)"`, `"fully_preserved (1.0)"`.
 
 ### 3. ReferenceLatent Single-Change Edit
 - Pick **ONE** changing axis: `pose`, `wardrobe`, `lighting`, `camera_angle`, or `background`.
@@ -117,8 +126,8 @@ Use `/home/evo/AI/community/scripts/parody/flux_still.py` (dry run by default; r
 /home/evo/AI/render/x3/.venv/bin/python3 /home/evo/AI/community/scripts/parody/flux_still.py \
   '/home/evo/AI/community/runs/<still_run_name>' --prompt '<prompt>' \
   --mode t2i|refmod|edit|klein_t2i|pose|layout \
-  [--refmod '<klein9_refmod>'] [--retention 'partially_preserved (0.7)'] \
-  [--lora 'loras/klein9/<file>.safetensors:0.85'] \
+  [--refmod '<klein9_refmod_or_name>'] [--retention 'partially_preserved (0.7)'] \
+  [--lora 'klein9/<file>.safetensors:0.60'] [--hybrid '<Celeb Name>'] \
   [--image '<ref_still>'] [--pose-image '<pose_ref>'] \
   [--character '<Name>'] [--actor '<Actor>'] [--names '<Name>' ...] \
   [--width 768 --height 1344] [--queue --yes-derrick]
