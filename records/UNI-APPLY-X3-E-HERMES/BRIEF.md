@@ -11,7 +11,7 @@ Authority: Derrick t2598u (Hermes renders with no pi hop), t2600u (same agreed r
 
 ## Access & Lease
 - **Doer:** X3 Forge as `evo`. No sudo needed.
-- **Source:** `/home/derekboone/evo-x3/hosts/x3/hermes/` (`bin/build-hermes-skills.sh`, `skills/h3-render/HEAD.md`, `skills/h3-writer/SKILL.md`, `skills/lab-status/SKILL.md`, `skills/pi-job/SKILL.after-h9.md`, `memories/USER.md`, `memories/MEMORY.md`, `SOUL.md`).
+- **Source:** `/home/derekboone/evo-x3/hosts/x3/hermes/` (`bin/build-hermes-skills.sh`, `skills/h3-render/HEAD.md`, `skills/h3-writer/SKILL.md`, `skills/lab-status/SKILL.md`, `skills/pi-job/SKILL.after-h9.md`, `memories/USER.md`, `memories/MEMORY.md`, `SOUL.md`, `agent-hooks/guard-render-queue.sh`, `scripts/morning-digest.sh`).
 - **Backup root:** `/home/evo/.hermes/_archive/20261119-h9/`.
 - **Lease take:** one line to `/home/derekboone/AI/locks/x3-lease.txt`: `forge-x3 | UNI-APPLY-X3-E-HERMES | <start time>`. If not empty, stop.
 - **Lease release:** `: > /home/derekboone/AI/locks/x3-lease.txt` when done or blocked.
@@ -62,6 +62,25 @@ install -m 0644 "$S/skills/pi-job/SKILL.after-h9.md" /home/evo/.hermes/skills/pi
 ```
 - `SOUL.md` goes back to tone only (Hermes docs: SOUL is identity and tone, not workflow). The OC and 18+ facts move to `memories/USER.md`. The render routing lives in the `h3-render` skill; `pi-job` is coding only.
 
+### Item 3b - Optional Hermes guard hook & no-agent morning digest (Derrick 15:23 CT: "ok do it")
+- Install both scripts first (safe regardless of Hermes CLI version):
+  ```bash
+  S=/home/derekboone/evo-x3/hosts/x3/hermes
+  mkdir -p /home/evo/.hermes/agent-hooks /home/evo/.hermes/scripts
+  install -m 0755 "$S/agent-hooks/guard-render-queue.sh" /home/evo/.hermes/agent-hooks/guard-render-queue.sh
+  install -m 0755 "$S/scripts/morning-digest.sh" /home/evo/.hermes/scripts/morning-digest.sh
+  bash /home/evo/.hermes/scripts/morning-digest.sh   # smoke run; prints 6-line digest
+  ```
+- **Render-queue `pre_tool_call` guard hook:** check if this Hermes build supports `hermes hooks` (`hermes hooks --help >/dev/null 2>&1`).
+  - If supported:
+    1. `hermes config set hooks.pre_tool_call '[{"matcher":"terminal","command":"/home/evo/.hermes/agent-hooks/guard-render-queue.sh","timeout":5,"fail_closed":true}]'`
+    2. Add the gateway approval entry in `/home/evo/.hermes/shell-hooks-allowlist.json` (`{"approvals":[{"event":"pre_tool_call","command":"/home/evo/.hermes/agent-hooks/guard-render-queue.sh"}]}` — merge into existing `approvals` array if the file already exists).
+    3. Verify with `hermes hooks doctor` and `hermes hooks test pre_tool_call --for-tool terminal`.
+  - If `hermes hooks` is not in this Hermes version (`ae2a81ccc0`): mark the hook registration `SKIPPED (unsupported in this Hermes build)` and do not block `X3-E` (the scripts themselves still enforce `--yes-derrick` and `NOT_READY`).
+- **Morning digest cron (08:00 CT, no-agent mode — zero LLM calls):** check if `hermes cron create --help` includes `--no-agent`.
+  - If supported: `hermes cron create "0 8 * * *" --no-agent --script morning-digest.sh --name "morning-lab-digest"` (skip if a job named `morning-lab-digest` already exists in `hermes cron list`).
+  - If `--no-agent` is not in this Hermes version: mark cron registration `SKIPPED (no --no-agent in this Hermes build)` and report; do not create an LLM-backed cron that could collide with Gufo.
+
 ### Item 4 - WebUI media roots, restart and check (no render)
 - **Fix `MEDIA_ALLOWED_ROOTS` so inline 2x MP4 playback works on the first try** (red-team catch: live `hermes-webui.service` lists only `/home/evo/AI/5slock/libraries`, which blocks symlinks to `/home/evo/AI/community/runs/` and its `mono` target `/home/evo/AI/evo-x3/x3/community/runs/`):
   - First check the separator `hermes-webui` expects in `/home/evo/hermes-webui` (`grep -rn "MEDIA_ALLOWED_ROOTS" /home/evo/hermes-webui` — typically comma `,` or `os.pathsep` `:`).
@@ -90,6 +109,8 @@ cp -a "$B/config.yaml" "$B/SOUL.md" /home/evo/.hermes/
 cp -a "$B/pi-job.SKILL.md" /home/evo/.hermes/skills/pi-job/SKILL.md
 rm -rf /home/evo/.hermes/memories/USER.md; [ -d "$B/memories" ] && cp -a "$B/memories/." /home/evo/.hermes/memories/
 rm -rf /home/evo/.hermes/skills/creative/h3-render /home/evo/.hermes/skills/creative/h3-writer /home/evo/.hermes/skills/devops/lab-status
+rm -f /home/evo/.hermes/agent-hooks/guard-render-queue.sh /home/evo/.hermes/scripts/morning-digest.sh /home/evo/.hermes/shell-hooks-allowlist.json
+hermes cron list 2>/dev/null | grep -q morning-lab-digest && hermes cron remove morning-lab-digest 2>/dev/null || true
 rm -f /home/evo/.config/systemd/user/hermes-webui.service.d/20-media-roots.conf
 [ -d "$B/flux-klein-prompting.local" ] && mv "$B/flux-klein-prompting.local" /home/evo/.hermes/skills/flux-klein-prompting
 systemctl --user daemon-reload && systemctl --user restart hermes-gateway hermes-webui

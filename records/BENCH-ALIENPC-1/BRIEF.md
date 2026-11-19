@@ -17,7 +17,7 @@ Authority: Derrick 2026-11-19 13:46 CT ("run benchmarks first") and 13:55 CT ("w
 ### Step 2 — Flux / Miraclein still tests (Derrick yes per still, in chat)
 - First fix nothing silently: if `UNI-APPLY-ALIENPC-C` reported a widget-name or enum mismatch for a candidate, stop and report it (Max fixes the candidate on `mono`).
 - Run each through the existing queue path (`run_queue` + `C:\AI\locks\gpu-render.lock`), one at a time, only after Derrick's yes for that still:
-  1. `miraclein_t2i.candidate` (M4 T2I), 2. `miraclein_refmod.candidate` (M4 RefMod), 3. `miraclein_edit.candidate` (M4 single-change edit),
+  1. `miraclein_t2i.candidate` (M4 T2I), 2. `miraclein_refmod.candidate` (M4 RefMod — also optional Hybrid arm `0.85` RefMod + `0.60` Prodigy LoRA via `flux_still.py --hybrid "Sydney Sweeney"` or `"Megan Fox"`), 3. `miraclein_edit.candidate` (M4 single-change edit),
   4. `flux_stills_t2i_klein.candidate` (ST4), 5. `flux_stills_pose_klein.candidate` + 6. `flux_stills_layout_klein.candidate` (ST5; each reference picture goes through the existing still read + text lint first, card 30).
 - Record per still: pass/fail, seconds warm and cold, peak VRAM (target < 16 GB), any node error. Derrick judges identity, skin and pose by eye; images stay on AlienPc / Hermes chat, never in git.
 - Depth LoRA (card 24) only if the layout still fails to keep the background and Derrick says yes.

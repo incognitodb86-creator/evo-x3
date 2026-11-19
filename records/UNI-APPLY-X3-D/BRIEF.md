@@ -7,7 +7,7 @@ Authority: Derrick 2026-11-19 (11:11/11:16 CT Card 2 file work; 13:09 CT render 
 ## Needs before launch (ALL required)
 - `/home/derekboone/evo-x3/records/UNI-APPLY-X3-A/RESULT.md` exists. If not, stop (`BLOCKED`) without taking the lease.
 - X3 lease free (`/home/derekboone/AI/locks/x3-lease.txt` empty). No active render (`ps aux | grep -E 'queue-remote|run_queue' | grep -v grep` empty).
-- Max import of `mono` (this brief's commit or newer) into `/home/derekboone/evo-x3`, gitleaks clean. The bridge includes `1f8eb17` (S1b `EVO_AI_ROOT` paths in `x3/community/scripts/parody` and `x3/render/writer_pipeline/acceptance`, and `lint_ctx.json` for N3); after it, run `python -m pytest -q` in `community/scripts/parody` and record pass/fail counts. Until `MONO-S5` passes, Max applies the `x3/render/`, `x3/community/` and `x3/forge/` changes since his last bridge onto the live checkouts locally (`git format-patch --relative=<prefix>/` + `git am`, no part-branch push) and names the new HEADs in the launch message. If `MONO-S5` already passed: `git -C /home/evo/AI/evo-x3 pull --ff-only` instead.
+- Max import of `mono` (this brief's commit or newer) into `/home/derekboone/evo-x3`, gitleaks clean. The bridge includes `1f8eb17` (S1b `EVO_AI_ROOT` paths and `lint_ctx.json` for N3), `8c942bc` (Ralph loop `mono` fix), `9b10d43` (`--prose-file`), `9d35c65` (`flux_still.py`, `detect_still_identity`, H3 LoRA/`--realism-lora`, `beta7_convert` wiring, `writer_prompt.md` recompile), and `c012e81` (`miraclein_refmod.candidate` schema fix, Flux Photographer persona + `--hybrid`, `syntax-check.ts` YAML check). After pull/bridge, run `python3 -m pytest -q -p no:cacheprovider test_prose_file_gate.py test_flux_h3_redteam.py test_beta7_convert.py` (all pass) plus full `pytest -q` in `community/scripts/parody` and record pass/fail counts. Since `MONO-S5` has already switched over (`git -C /home/evo/AI/evo-x3 pull --ff-only`), pull the `mono` clone directly instead of part-branch patches.
 
 ## Access & Lease
 - Doer: X3 Forge as `evo`. `sudo` only for `/usr/local/bin` installs and rollbacks.
@@ -34,10 +34,11 @@ Authority: Derrick 2026-11-19 (11:11/11:16 CT Card 2 file work; 13:09 CT render 
 - Hermes copy (no sudo, `evo:evo 0644`): `mkdir -p /home/evo/.hermes/skills/flux-klein-prompting && install -m 0644 /home/evo/AI/community/skills/flux-klein-prompting/SKILL.md /home/evo/.hermes/skills/flux-klein-prompting/SKILL.md`.
 - Verify: `hermes skills list` shows `flux-klein-prompting` and `pi-job`; no broken relative links under `community/skills` (`grep -rn '](' ... ` spot check of 3 files).
 
-### Item 4 — pi settings (SK2 Forge skills, SK3 v2 subagent model)
+### Item 4 — pi settings & YAML syntax-check (SK2 Forge skills, SK3 v2 subagent model, L7 YAML upgrade)
 - `x3/forge/.pi/settings.json` comes in with the forge checkout. It is your own settings file: do not restart your own panes; it loads on the next pane start (Max restarts panes after your RESULT).
 - `install -m 0644 /home/derekboone/evo-x3/config/pi-evo/settings.json /home/evo/.pi/agent/settings.json`.
-- Verify: both files parse (`python3 -m json.tool <file> >/dev/null`), and `grep -c flash-next-uncensored-v2-sub` > 0 in each.
+- Update `syntax-check.ts` (adds `.yaml`/`.yml` validation): `install -m 0644 /home/derekboone/evo-x3/config/pi-evo/extensions/syntax-check.ts /home/evo/.pi/agent/extensions/syntax-check.ts`.
+- Verify: both JSON settings parse (`python3 -m json.tool <file> >/dev/null`), `grep -c flash-next-uncensored-v2-sub` > 0 in each, and `grep -c 'yaml\.safe_load' /home/evo/.pi/agent/extensions/syntax-check.ts` > 0.
 - Note for Max (not yours): live `/home/evo/.pi/.../panes/{forge,render}/settings.json` still name the v1 `-sub` model; Max fixes them on the box.
 
 ### Item 5 — ST6 raw-clip cleanup, install + dry run only

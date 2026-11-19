@@ -19,3 +19,7 @@ Snapshot taken 2026-11-19 09:44 CST.
 - `skills/pi-job/SKILL.after-h9.md`: the coding-only pi-job skill installed at the switch. `skills/pi-job/SKILL.md`
   stays the current one until then.
 - `memories/USER.md`: Derrick's facts (OCs, 18+, Hermes renders / pi codes), 578 chars of the 1,375 limit.
+- `memories/MEMORY.md`: starter lab facts (mono paths, services, Flux `--hybrid`, Beta 7 rules), 1,102 chars of the 2,200 limit.
+- `skills/lab-status/SKILL.md`: read-only X3 + AlienPc status command (non-waking `:8446/system_stats`, `:8447/health`, `:8080/running`, `pi-job status`, inbox, disk).
+- `agent-hooks/guard-render-queue.sh`: `pre_tool_call` `fail_closed` shell hook blocking `queue-remote.sh` / `flux_still.py --queue` / `render_writer_pipeline.py --queue` without `--yes-derrick` or when `*_NOT_READY.txt` exists.
+- `scripts/morning-digest.sh`: 08:00 CT no-agent cron morning lab digest (zero LLM calls).
