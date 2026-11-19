@@ -1,0 +1,6 @@
+[Unit]
+Description=Nightly copy of X3 render finals to the QNAP renders share (Derrick t2716u)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/evo-renders-qnap-nightly
