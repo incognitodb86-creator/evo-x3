@@ -5,7 +5,7 @@
   },
   "class_type": "UNETLoader",
   "inputs": {
-   "unet_name": "Miraclein_4.3_9b_NVFP4.safetensors",
+   "unet_name": "Miraclein_4.5_9b_NVFP4.safetensors",
    "weight_dtype": "default"
   }
  },

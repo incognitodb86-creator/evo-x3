@@ -5,7 +5,7 @@
   },
   "class_type": "UNETLoader",
   "inputs": {
-   "unet_name": "Miraclein_4.3_9b_NVFP4.safetensors",
+   "unet_name": "Miraclein_4.5_9b_NVFP4.safetensors",
    "weight_dtype": "default"
   }
  },
@@ -91,7 +91,7 @@
   },
   "class_type": "Flux2Scheduler",
   "inputs": {
-   "height": 1376,
+   "height": 1344,
    "steps": 12,
    "width": 768
   }
@@ -112,7 +112,7 @@
   "class_type": "EmptyFlux2LatentImage",
   "inputs": {
    "batch_size": 1,
-   "height": 1376,
+   "height": 1344,
    "width": 768
   }
  },
