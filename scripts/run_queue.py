@@ -91,6 +91,9 @@ QUEUE_TIMEOUT_STOPPING = 10  # short /queue timeout (s) after repeated timeouts 
 # venv that runs this queue, so the frame loop runs there as a child process (frame by frame, never the whole clip in RAM).
 UPSCALE_PY = os.environ.get("RQ_UPSCALE_PY", os.path.join(os.path.dirname(ROOT), "comfy-alienpc", ".venv", "Scripts", "python.exe"))
 UPSCALE_TIMEOUT = 1800
+# t2571u (Derrick 2026-11-19): X3 renders keep only the upscaled video. remote_upscale.enable sets this, so after a
+# verified UPSCALE ok the raw clip is deleted (a failed post-pass still keeps it). AlienPc's local runs are unchanged.
+DELETE_RAW_AFTER_UPSCALE = False
 _UPSCALE_SRC = r"""
 import json, subprocess, sys, time
 import torch, nvvfx
@@ -206,12 +209,16 @@ def upscale_done(run_dir, jobs, slog):
                               "frames": p1["frames"], "elapsed_s": round(el, 1), "child": info}
         meta_ok.update({"clip_sha256": hashlib.sha256(open(clip, "rb").read()).hexdigest(), "w": p1["w"], "h": p1["h"],
                         "bytes": p1["bytes"]})
+        if DELETE_RAW_AFTER_UPSCALE:   # t2571u: the 2x passed every check above, so the raw clip goes
+            os.remove(raw)
+            meta_ok["upscale"]["raw_clip"] = None
+            meta_ok["upscale"]["raw_deleted"] = "t2571u: only the upscaled clip is kept"
         json.dump(meta_ok, open(okp, "w", encoding="utf-8"), indent=1)
         n_ok += 1
         copy_to_pi_drop(run_dir, tag, clip, slog)   # t2554: only the 2x clip goes to pi-drop
         qlog(run_dir, "UPSCALE ok pos=%d tag=%s %dx%d->%dx%d fps=%s frames=%d audio=%s bytes=%d elapsed=%.1fs raw=%s" % (
             j["pos"], tag, p0["w"], p0["h"], p1["w"], p1["h"], p1["fps"], p1["frames"], "yes" if p1["audio"] else "no",
-            p1["bytes"], el, os.path.basename(raw)))
+            p1["bytes"], el, "deleted" if DELETE_RAW_AFTER_UPSCALE else os.path.basename(raw)))
     return n_ok, n_fail
 
 

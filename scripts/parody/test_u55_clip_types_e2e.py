@@ -133,7 +133,7 @@ def test_e2e_per_clip_type_template_diff(tmp_path, monkeypatch, case):
         "talk": {"ask": "she smiles and says <d>[English] What a sunset.</d>", "position": "talk", "still": str(s_port), "still_read": str(_sr_file(s_port)), "frames": 124},
         "two_person": {"ask": "two people together on the beach", "position": "two_person", "still": str(s_land), "still_read": str(_sr_file(s_land)), "partner2_still": str(s_p2), "size": "1344x768", "frames": 124},
         "long_continuation": {"ask": "long continuous walk on the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "template": "long_continuation", "size": "576x1024", "frames": 481},
-        "ref2va_16x9": {"ask": "widescreen beach walk at sunset", "position": "walking", "still": str(s_land), "still_read": str(_sr_file(s_land)), "aspect": "16:9", "size": "1344x768", "frames": 124},
+        "ref2va_16x9": {"ask": "widescreen beach walk at sunset", "position": "walking", "still": str(s_land), "still_read": str(_sr_file(s_land)), "template": "ref2va_16x9", "aspect": "16:9", "size": "1344x768", "frames": 124},
     }
 
     res = rwp.run_clip({"run_dir": str(run_dir), **jobs[case]}, cfg, lambda *a: None)
@@ -184,3 +184,69 @@ def test_18plus_still_blocks_and_position_is_free_text(tmp_path, monkeypatch):
         rwp.load_config(rwp.PIPE_DIR / "config.yaml"), lambda *a: None,
     )
     assert res["status"] == "NOT_READY" and "youth hint" in (res.get("not_ready_reason") or "").lower()
+
+
+def test_u56_16x9_uses_beta7_plain_and_hard_stops_block_ready(tmp_path, monkeypatch):
+    home = _make_home(tmp_path)
+    cfg = json.loads((home / "config.yaml").read_text(encoding="utf-8"))
+    cfg["lint"]["filler_lines"] = ["fuck me harder"]
+    cfg["position_kinds"]["sex"] = ["cowgirl", "doggy"]
+    (home / "config.yaml").write_text(json.dumps(cfg), encoding="utf-8")
+    monkeypatch.setattr(rwp, "PIPE_DIR", home)
+    monkeypatch.setattr(rwp, "RUNS_ROOT", tmp_path / "runs")
+    monkeypatch.setattr(br, "COMFY_INPUT_COMMUNITY", tmp_path / "comfy_in" / "community")
+
+    s_land = _make_still(tmp_path / "land.png", 160, 90)
+    sr_land = _sr_file(s_land)
+
+    def _ok_chat(self, messages, sampler, seed, max_tokens, response_format=None, purpose="chat", **kw):
+        self.calls.append({"purpose": purpose, "seconds": 0.0})
+        return "[Shot 1] Wide 35mm shot in sunset light. At first, (S1) walks across the sand. As it builds, she turns toward the surf. By the end, she keeps strolling as waves break."
+
+    monkeypatch.setattr(rwp.Client, "chat", _ok_chat)
+    res_g = rwp.run_clip(
+        {"run_dir": str(tmp_path / "runs" / "u56_16x9_guide"), "ask": "widescreen beach walk",
+         "position": "walking", "still": str(s_land), "still_read": str(sr_land), "aspect": "16:9", "frames": 124},
+        rwp.load_config(home / "config.yaml"), lambda *a: None,
+    )
+    assert res_g["status"] == "READY"
+    rep_g = json.loads((tmp_path / "runs" / "u56_16x9_guide" / "build_report.json").read_text(encoding="utf-8"))
+    req_g = json.loads((tmp_path / "runs" / "u56_16x9_guide" / "clip" / "request.api.json").read_text(encoding="utf-8"))
+    assert rep_g["template"] == "plain" and rep_g["canvas"] == [1344, 768]
+    assert "beta7_int8HQ" in req_g["unet"]["inputs"]["unet_name"]
+    assert "<Picture 1>" not in req_g["c0"]["inputs"]["prompt"]
+
+    res_r = rwp.run_clip(
+        {"run_dir": str(tmp_path / "runs" / "u56_16x9_ref"), "ask": "widescreen beach walk",
+         "position": "walking", "still": str(s_land), "still_read": str(sr_land), "still_mode": "ref", "aspect": "16:9", "frames": 124},
+        rwp.load_config(home / "config.yaml"), lambda *a: None,
+    )
+    assert res_r["status"] == "READY"
+    rep_r = json.loads((tmp_path / "runs" / "u56_16x9_ref" / "build_report.json").read_text(encoding="utf-8"))
+    ptxt_r = (tmp_path / "runs" / "u56_16x9_ref" / "prompt.txt").read_text(encoding="utf-8")
+    assert rep_r["template"] == "oc_ref" and "[reference generation]" in ptxt_r
+
+    def _stock_chat(self, messages, sampler, seed, max_tokens, response_format=None, purpose="chat", **kw):
+        self.calls.append({"purpose": purpose, "seconds": 0.0})
+        return "[Shot 1] Medium shot. At first, (S1) kneels on the sand. (S1) says in a breathless voice, <d>[English] Fuck me harder.</d> By the end, she keeps moving as waves break."
+
+    monkeypatch.setattr(rwp.Client, "chat", _stock_chat)
+    res_st = rwp.run_clip(
+        {"run_dir": str(tmp_path / "runs" / "u56_stock_block"), "ask": "doggy on the beach",
+         "position": "doggy", "still": str(s_land), "still_read": str(sr_land), "frames": 124},
+        rwp.load_config(home / "config.yaml"), lambda *a: None,
+    )
+    assert res_st["status"] == "NOT_READY" and "stock_talk" in (res_st.get("not_ready_reason") or "")
+
+    def _bad_cowgirl_chat(self, messages, sampler, seed, max_tokens, response_format=None, purpose="chat", **kw):
+        self.calls.append({"purpose": purpose, "seconds": 0.0})
+        return "[Shot 1] Medium shot. At first, (S1) straddles him on the sand, his penis buried in her vagina. As it builds, PRIMARY MOTION - she moves at one stroke a second while he lies flat. By the end, she keeps riding as waves break."
+
+    monkeypatch.setattr(rwp.Client, "chat", _bad_cowgirl_chat)
+    res_cg = rwp.run_clip(
+        {"run_dir": str(tmp_path / "runs" / "u56_cowgirl_block"), "ask": "cowgirl on the beach",
+         "position": "cowgirl", "still": str(s_land), "still_read": str(sr_land), "frames": 124},
+        rwp.load_config(home / "config.yaml"), lambda *a: None,
+    )
+    assert res_cg["status"] == "NOT_READY" and "cowgirl_check" in (res_cg.get("not_ready_reason") or "")
+

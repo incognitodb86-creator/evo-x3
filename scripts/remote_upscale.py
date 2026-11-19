@@ -12,6 +12,7 @@ import urllib.error, urllib.request
 
 import remote_comfy as rc
 
+INPUT_NAME = "x3_rtx2x_input.mp4"   # AlienPc ComfyUI input/ (t2571u)
 OUT_SUBDIR = "community/rtx2x"   # AlienPc ComfyUI output/community/rtx2x/ (render outputs live under output/community/)
 
 
@@ -53,7 +54,10 @@ def upscale_clip(src, dst, timeout=1800):
     """Same contract as run_queue.upscale_clip: write the 2x clip to dst, return an info dict, raise on failure."""
     t0 = time.time()
     run, tag = os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(src)))), os.path.basename(os.path.dirname(src))
-    name = "rtx2x_%s_%s.mp4" % (run, tag)
+    # t2571u: one fixed input name, overwritten by each upscale (the GPU lock serialises jobs), so AlienPc's ComfyUI
+    # input folder holds at most one X3 clip; ComfyUI's API has no delete. VHS_LoadVideo keys its cache on path+mtime,
+    # so an overwrite is always re-read.
+    name = INPUT_NAME
     with open(src, "rb") as fh:   # rc.upload names the file after the local basename (clip.mp4); send our own name
         body, ct = rc._multipart({"subfolder": "", "type": "input", "overwrite": "true"}, name, fh.read())
     urllib.request.urlopen(urllib.request.Request(rc.API + "/upload/image", data=body, headers={"Content-Type": ct},
@@ -91,4 +95,5 @@ def upscale_clip(src, dst, timeout=1800):
 def enable(rq, upscale_done):
     """Put the real post-pass back (remote_comfy.enable set the D5 'deferred' stub) with the ComfyUI frame loop."""
     rq.upscale_clip = upscale_clip
+    rq.DELETE_RAW_AFTER_UPSCALE = True   # t2571u: X3 renders keep only the upscaled clip
     rq.upscale_done = upscale_done

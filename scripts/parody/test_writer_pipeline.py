@@ -135,7 +135,11 @@ def test_oral_rules():
 
 
 def test_talk_rules():
-    two = GOOD_TALK.replace(" (S1) says in a teasing voice, <d>[English] Then arrest me, Detective.</d>", "")
+    two = (
+        GOOD_TALK
+        .replace(" (S1) says in a teasing voice, <d>[English] Then arrest me, Detective.</d>", "")
+        .replace(" (S2) says in a clipped voice, <d>[English] Your bodysuit left a wet trail.</d>", "")
+    )
     r = wp_lint.lint(full(two, "talk"), ctx("talk", "talk"))
     assert "talk_lines" in [i["code"] for i in r["issues"]] and "talk_lines" not in r["hard"]
     r2 = wp_lint.lint(full(GOOD_TALK.replace("Then arrest me, Detective.", "Then arrest me, Detective, right now, cuff me to that log and walk me home slowly."), "talk"),
