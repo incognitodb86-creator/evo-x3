@@ -24,6 +24,8 @@ Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo pl
 
 **Code on `mono` 2026-11-19:** all Opus-file items from Card 2 are on `mono` (render, community-code, templates, u58-pijob, hermes, leftovers). Opus code review [CODE-REVIEW-20261119-opus.md](./CODE-REVIEW-20261119-opus.md) (`CHANGES`, L3/L8 blocked) -> one fix round -> delta [CODE-REVIEW-20261119-opus-delta.md](./CODE-REVIEW-20261119-opus-delta.md) (`APPROVE`, 6 MINOR follow-ups N1-N6). **Max: use the delta file's "Apply order for Max"**; cite `mono` SHAs (not worker branch SHAs) in RESULT files. Follow-ups N1 (recompile vs long_continuation), N2 (L3 detached-HEAD worktrees), N3 (recompile lint ctx), N5 (inbox sidecar restarts) are open; no L3 timer and no `recompile` on long_continuation until fixed.
 
+**Apply briefs (ready for Max to review, take lease, and launch after prerequisites):** [UNI-APPLY-X3-A/BRIEF.md](../UNI-APPLY-X3-A/BRIEF.md) · [UNI-APPLY-X3-B-PIJOB/BRIEF.md](../UNI-APPLY-X3-B-PIJOB/BRIEF.md) · [UNI-APPLY-ALIENPC-A/BRIEF.md](../UNI-APPLY-ALIENPC-A/BRIEF.md).
+
 ## For Opus reviewer (read this first)
 
 This is the ONE plan to review (Derrick t2646u). It stands alone: every fact it relies on is restated here with its live evidence. Copilot (Opus) sees only this GitHub repo; it has no access to the X3, AlienPc, Gitea, the QNAP or the chat.
