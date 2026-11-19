@@ -1540,16 +1540,13 @@ def _ensure_still_read_raw(run_dir: Path, still: str, still_read_src: Optional[s
 
 def chain_start_still(prev_run: Path, still: str, run_dir: Path, log) -> str:
     mp4s = sorted(prev_run.glob("**/*.mp4"), key=lambda p: p.stat().st_mtime)
-    lf_cand = (mp4s[-1].parent / "last_frame.png") if mp4s else None
-    if not (lf_cand and lf_cand.is_file() and lf_cand.stat().st_size > 0):
-        lfs = sorted(prev_run.glob("**/last_frame.png"), key=lambda p: p.stat().st_mtime)
-        lf_cand = lfs[-1] if lfs and lfs[-1].stat().st_size > 0 else None
-    if lf_cand is not None:
-        log("chain_last_frame", {"prev_last_frame": str(lf_cand), "still": str(lf_cand)})
-        return str(lf_cand)
     if not mp4s:
         log("chain_dry_still", {"prev": str(prev_run), "still": still})
         return still
+    lf = mp4s[-1].parent / "last_frame.png"
+    if lf.is_file() and lf.stat().st_size > 0:
+        log("chain_last_frame", {"prev_last_frame": str(lf), "still": str(lf)})
+        return str(lf)
     out = run_dir / "start_still_from_prev.png"
     ff = shutil.which("ffmpeg") or "ffmpeg"
     r = subprocess.run([ff, "-y", "-sseof", "-0.1", "-i", str(mp4s[-1]), "-frames:v", "1", str(out)], capture_output=True, timeout=120)

@@ -214,6 +214,7 @@ def upscale_done(run_dir, jobs, slog):
             meta_ok["upscale"]["raw_clip"] = None
             meta_ok["upscale"]["raw_deleted"] = "t2571u: only the upscaled clip is kept"
         json.dump(meta_ok, open(okp, "w", encoding="utf-8"), indent=1)
+        extract_last_frame(clip, os.path.join(os.path.dirname(clip), "last_frame.png"))
         n_ok += 1
         copy_to_pi_drop(run_dir, tag, clip, slog)   # t2554: only the 2x clip goes to pi-drop
         qlog(run_dir, "UPSCALE ok pos=%d tag=%s %dx%d->%dx%d fps=%s frames=%d audio=%s bytes=%d elapsed=%.1fs raw=%s" % (
@@ -340,10 +341,16 @@ def prompt_sha(g, value):
 
 def extract_last_frame(mp4_path, out_path=None):
     """Extract the exact last frame of `mp4_path` to `last_frame.png` using ffprobe frame count + ffmpeg select.
+    Removes any pre-existing `last_frame.png` first so a failed retry never leaves a stale frame behind.
     Returns the output path on success, or None if ffprobe/ffmpeg is unavailable or fails."""
     if not mp4_path or not os.path.isfile(mp4_path):
         return None
     out = out_path or os.path.join(os.path.dirname(mp4_path), "last_frame.png")
+    try:
+        if os.path.exists(out):
+            os.remove(out)
+    except OSError:
+        pass
     fp = shutil.which("ffprobe") or "ffprobe"
     ff = shutil.which("ffmpeg") or "ffmpeg"
     try:
@@ -369,7 +376,7 @@ def extract_last_frame(mp4_path, out_path=None):
         last_idx = count - 1
         r = subprocess.run(
             [ff, "-y", "-i", mp4_path, "-vf", f"select=eq(n\\,{last_idx})",
-             "-vsync", "0", "-frames:v", "1", out],
+             "-fps_mode", "passthrough", "-frames:v", "1", out],
             capture_output=True, timeout=120,
         )
         if r.returncode == 0 and os.path.isfile(out) and os.path.getsize(out) > 0:
@@ -650,7 +657,7 @@ def finish(run_dir, job, frames, size, retry, slog, s, out, g0, t0, t_att):
     # t2554 (Derrick 2026-11-19): pi-drop gets only the RTX-upscaled clip, copied in upscale_done after UPSCALE ok
     rgj.contact_sheet(s["file"], os.path.join(d, tag + "_stills_contact.png"), p["duration"])
     lf_path = os.path.join(d, "last_frame.png")
-    if not (os.path.isfile(lf_path) and os.path.getsize(lf_path) > 0):
+    if not (os.path.isfile(lf_path) and os.path.getsize(lf_path) > 0 and os.path.getmtime(lf_path) >= os.path.getmtime(s["file"])):
         extract_last_frame(s["file"], lf_path)
     outs = [os.path.join(OUT_ROOT, t, f) for f in os.listdir(os.path.join(OUT_ROOT, t))] if os.path.isdir(os.path.join(OUT_ROOT, t)) else []
     wall = (max(map(os.path.getmtime, outs)) - t0) if outs else None

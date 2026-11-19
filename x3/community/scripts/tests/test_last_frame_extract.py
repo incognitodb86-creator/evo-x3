@@ -38,7 +38,22 @@ def test_extract_last_frame_selects_exact_last_index(tmp_path):
     assert len(calls) == 2
     assert "-count_frames" in calls[0]
     assert "select=eq(n\\,123)" in calls[1]
+    assert "-fps_mode" in calls[1] and "passthrough" in calls[1]
+    assert "-vsync" not in calls[1]
     assert calls[1][-1] == str(out)
+
+
+def test_extract_last_frame_removes_stale_file_on_retry_failure(tmp_path):
+    mp4 = tmp_path / "clip.mp4"
+    mp4.write_bytes(b"fake-mp4")
+    stale = tmp_path / "last_frame.png"
+    stale.write_bytes(b"old-stale-frame")
+
+    with mock.patch.object(rq.subprocess, "run", return_value=mock.Mock(returncode=1, stdout="", stderr="err")):
+        res = rq.extract_last_frame(str(mp4), str(stale))
+
+    assert res is None
+    assert not stale.exists()
 
 
 def test_extract_last_frame_falls_back_to_nb_frames_and_handles_failure(tmp_path):
@@ -85,6 +100,9 @@ def test_chain_start_still_uses_last_frame_png_when_present(tmp_path):
 
 def test_chain_start_still_falls_back_to_ffmpeg_sseof_when_no_last_frame(tmp_path):
     prev_run = tmp_path / "prev"
+    other_tag = prev_run / "other_tag"
+    other_tag.mkdir(parents=True)
+    (other_tag / "last_frame.png").write_bytes(b"\x89PNGwrongtag")
     clip_dir = prev_run / "clip"
     clip_dir.mkdir(parents=True)
     mp4 = clip_dir / "clip.mp4"
