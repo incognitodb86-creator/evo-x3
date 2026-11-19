@@ -16,6 +16,7 @@ Reuses regexes and section splitting from `build_request.py` and `wp_lint.py` wi
 from __future__ import annotations
 
 import argparse
+import os
 import json
 import re
 import sys
@@ -202,6 +203,174 @@ def _check_d_balance(text: str) -> str | None:
     return None
 
 
+REF2VA_SIX_SECTIONS: tuple[str, ...] = (
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music",
+)
+_SIX_SECTION_ALIASES = {"integrated_multimodal_description": "detailed_description"}
+_SIX_SECTION_RE = re.compile(
+    r"(?im)^[ \t]*(?:#+[ \t]*|\*\*)?("
+    + "|".join(list(REF2VA_SIX_SECTIONS) + list(_SIX_SECTION_ALIASES))
+    + r")(?:\*\*)?[ \t]*:?[ \t]*"
+)
+_SUBJECT_TAG_RE = re.compile(r"<Subject\s+(\d+)>", re.IGNORECASE)
+_SUBJECT_SPEAKER_RE = re.compile(r"<Subject\s+(\d+)>\s*\(S(\d+)\)", re.IGNORECASE)
+_SPEAKER_TAG_RE = re.compile(r"\(S(\d+)\)")
+_FEM_PERSON_RE = re.compile(r"\b(?:woman|female|she|her|hers)\b", re.IGNORECASE)
+_MASC_PERSON_RE = re.compile(r"\b(?:man|male|he|him|his)\b", re.IGNORECASE)
+REGEN_CODES = frozenset({"filler_lines", "speaker_tag_mismatch"})
+
+
+def _config_yaml_candidates() -> list[Path]:
+    here = Path(__file__).resolve()
+    paths: list[Path] = []
+    env = os.environ.get("WP_HOME")
+    if env:
+        paths.append(Path(env) / "config.yaml")
+    # x3/community/scripts/parody/this.py -> x3/render/writer_pipeline/config.yaml
+    if len(here.parents) >= 4:
+        paths.append(here.parents[3] / "render" / "writer_pipeline" / "config.yaml")
+    return paths
+
+
+def load_filler_lines(cfg: dict[str, Any] | None = None) -> list[str]:
+    """Return the existing writer-pipeline filler_lines list. Never invent a new list."""
+    if cfg and cfg.get("filler_lines"):
+        return [str(x) for x in cfg["filler_lines"]]
+    for path in _config_yaml_candidates():
+        if not path.is_file():
+            continue
+        m = re.search(r"(?m)^\s*filler_lines:\s*(\[.*\])\s*$", path.read_text(encoding="utf-8"))
+        if m:
+            return list(json.loads(m.group(1)))
+    return []
+
+
+def six_section_report(text: str) -> dict[str, Any]:
+    """Official 6-section Ref2VA completeness (W1 scoring / validator gap).
+
+    `integrated_multimodal_description` counts as the official name of `detailed_description`.
+    """
+    seen: set[str] = set()
+    for m in _SIX_SECTION_RE.finditer(text or ""):
+        key = m.group(1).lower()
+        seen.add(_SIX_SECTION_ALIASES.get(key, key))
+    present = [k for k in REF2VA_SIX_SECTIONS if k in seen]
+    return {
+        "sections_present": present,
+        "six_section_complete": all(k in seen for k in REF2VA_SIX_SECTIONS),
+        "missing_sections": [k for k in REF2VA_SIX_SECTIONS if k not in seen],
+    }
+
+
+def _infer_person(text: str) -> str | None:
+    fem = len(_FEM_PERSON_RE.findall(text or ""))
+    masc = len(_MASC_PERSON_RE.findall(text or ""))
+    if fem > masc and fem:
+        return "her"
+    if masc > fem and masc:
+        return "him"
+    return None
+
+
+def _declared_subjects(text: str) -> dict[int, dict[str, Any]]:
+    """Map subject number -> {speaker, person} from <Subject N> definitions."""
+    body = text or ""
+    found = list(_SUBJECT_TAG_RE.finditer(body))
+    out: dict[int, dict[str, Any]] = {}
+    for i, m in enumerate(found):
+        n = int(m.group(1))
+        end = found[i + 1].start() if i + 1 < len(found) else len(body)
+        chunk = body[m.start():end]
+        sm = re.match(r"<Subject\s+(\d+)>\s*(?:\(S(\d+)\))?", chunk, flags=re.IGNORECASE)
+        speaker = int(sm.group(2)) if sm and sm.group(2) else n
+        out[n] = {"speaker": speaker, "person": _infer_person(chunk), "decl": chunk[:240]}
+    return out
+
+
+def check_speaker_tags(text: str) -> list[dict[str, str]]:
+    """(S#) must match a declared <Subject #> with the same number and the right person."""
+    body = text or ""
+    violations: list[dict[str, str]] = []
+    subjects = _declared_subjects(body)
+    for m in _SUBJECT_SPEAKER_RE.finditer(body):
+        n, s = int(m.group(1)), int(m.group(2))
+        if n != s:
+            violations.append({
+                "code": "speaker_tag_mismatch",
+                "note": f"<Subject {n}> is tagged (S{s}); speaker tags must use the same number",
+            })
+        elif subjects and n not in subjects:
+            violations.append({
+                "code": "speaker_tag_mismatch",
+                "note": f"(S{s}) is paired with undeclared <Subject {n}>",
+            })
+    if subjects:
+        declared_speakers = set(subjects)
+        for spk in {int(m.group(1)) for m in _SPEAKER_TAG_RE.finditer(body)}:
+            if spk not in declared_speakers:
+                violations.append({
+                    "code": "speaker_tag_mismatch",
+                    "note": f"(S{spk}) has no declared <Subject {spk}>",
+                })
+        # Gendered cue next to a tag that belongs to the other person.
+        for m in re.finditer(r"(?s)[^.]{0,200}\(S(\d+)\)[^.<]{0,80}<d>", body, flags=re.IGNORECASE):
+            spk = int(m.group(1))
+            cue = _infer_person(m.group(0))
+            person = (subjects.get(spk) or {}).get("person")
+            if cue and person and cue != person:
+                violations.append({
+                    "code": "speaker_tag_mismatch",
+                    "note": f"(S{spk}) is declared as {person}, but the line is written as {cue}",
+                })
+    # Deduplicate identical notes
+    seen: set[str] = set()
+    uniq: list[dict[str, str]] = []
+    for v in violations:
+        if v["note"] in seen:
+            continue
+        seen.add(v["note"])
+        uniq.append(v)
+    return uniq
+
+
+def check_filler_lines(text: str, *, cfg: dict[str, Any] | None = None, ask: str = "") -> list[dict[str, str]]:
+    """Reuse wp_lint's stock-talk matcher and the existing filler_lines list."""
+    fillers = [wp_lint.norm(f) for f in load_filler_lines(cfg)]
+    if not fillers:
+        return []
+    ask_n = wp_lint.norm(ask or "")
+    dd = wp_lint.get_dd(text) or (text or "")
+    out: list[dict[str, str]] = []
+    for line in wp_lint.spoken_lines(dd):
+        if any(f and re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", line) for f in fillers) and line not in ask_n:
+            out.append({"code": "filler_lines", "note": f"line '{line}' is stock talk; write a line about the still"})
+            break
+    return out
+
+
+def _not_ready_reason(violations: Sequence[dict[str, str]]) -> str | None:
+    if not violations:
+        return None
+    codes = [v.get("code") or "" for v in violations]
+    for code in ("filler_lines", "speaker_tag_mismatch", "six_section_incomplete", "youth_hint"):
+        if code in codes:
+            return code
+    return codes[0]
+
+
+def violation_codes(val: dict[str, Any]) -> set[str]:
+    return {str(v.get("code") or "") for v in (val.get("violations") or [])}
+
+
+def needs_regenerate(val: dict[str, Any]) -> bool:
+    return bool(violation_codes(val) & REGEN_CODES)
+
+
 def validate_beta7(
     text: str,
     *,
@@ -209,19 +378,30 @@ def validate_beta7(
     refmod_pictures: Iterable[int] | None = None,
     lint_ctx: dict[str, Any] | None = None,
     minimal_lint: bool = True,
+    require_six_sections: bool = False,
 ) -> dict[str, Any]:
     """Pre-flight validator for Beta 7 prompts (`U56 Decision #1`).
 
     Returns dict with `status` (`"READY"` or `"NOT_READY"`), `header_violations`,
-    `violations`, and optional `lint` (from `wp_lint.lint`).
+    `violations`, optional `lint` (from `wp_lint.lint`), `sections_present`,
+    `six_section_complete`, and `not_ready_reason`.
     """
     body = (text or "").strip()
     violations: list[dict[str, str]] = []
     header_violations: list[str] = []
+    six = six_section_report(body)
 
     if not body:
         violations.append({"code": "empty", "note": "empty prompt text"})
-        return {"status": "NOT_READY", "header_violations": [], "violations": violations, "lint": None}
+        return {
+            "status": "NOT_READY",
+            "header_violations": [],
+            "violations": violations,
+            "lint": None,
+            "sections_present": [],
+            "six_section_complete": False,
+            "not_ready_reason": "empty",
+        }
 
     # 1. Banned Beta 7 headers (U56 Decision #1)
     for m in BANNED_HEADER_RE.finditer(body):
@@ -282,7 +462,23 @@ def validate_beta7(
                 })
             prev_t = t_sec
 
-    # 8. Optional wp_lint.lint integration
+    # 8. Official 6-section completeness (hard only when scoring raw Ref2VA)
+    if require_six_sections and not six["six_section_complete"]:
+        missing = ", ".join(six["missing_sections"])
+        violations.append({
+            "code": "six_section_incomplete",
+            "note": f"Ref2VA output is missing section(s): {missing}",
+        })
+
+    # 9. Speaker tags must match declared <Subject #> (same number, right person)
+    violations.extend(check_speaker_tags(body))
+
+    # 10. Existing filler_lines lint (same list and matcher as wp_lint)
+    lint_cfg = ((lint_ctx or {}).get("cfg") or None)
+    ask = str((lint_ctx or {}).get("ask") or "")
+    violations.extend(check_filler_lines(body, cfg=lint_cfg, ask=ask))
+
+    # 11. Optional wp_lint.lint integration
     lint_result: dict[str, Any] | None = None
     if lint_ctx is not None:
         lint_result = wp_lint.lint(body, lint_ctx, minimal=minimal_lint)
@@ -300,7 +496,124 @@ def validate_beta7(
         "header_violations": header_violations,
         "violations": violations,
         "lint": lint_result,
+        "sections_present": six["sections_present"],
+        "six_section_complete": six["six_section_complete"],
+        "not_ready_reason": _not_ready_reason(violations) if status == "NOT_READY" else None,
     }
+
+
+def convert_and_validate(
+    raw: str,
+    *,
+    omit_pictures: Iterable[int] | None = None,
+    mode: str = "auto",
+    clip_seconds: float | None = None,
+    lint_ctx: dict[str, Any] | None = None,
+    require_six_sections: bool = False,
+) -> tuple[str, dict[str, Any], dict[str, Any]]:
+    converted, conv = convert_to_beta7(raw, omit_pictures=omit_pictures, mode=mode)
+    val = validate_beta7(
+        converted,
+        clip_seconds=clip_seconds,
+        refmod_pictures=omit_pictures,
+        lint_ctx=lint_ctx,
+        require_six_sections=require_six_sections,
+    )
+    return converted, conv, val
+
+
+def run_with_single_regen(
+    generate,
+    *,
+    seed: int | None = 0,
+    omit_pictures: Iterable[int] | None = None,
+    mode: str = "auto",
+    clip_seconds: float | None = None,
+    lint_ctx: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Call generate(seed), convert, and validate. On filler_lines or speaker_tag_mismatch,
+    regenerate once with seed+1. If it still hits, keep the second result and mark NOT_READY.
+    """
+    first_seed = 0 if seed is None else int(seed)
+    raw = generate(first_seed)
+    converted, conv, val = convert_and_validate(
+        raw, omit_pictures=omit_pictures, mode=mode, clip_seconds=clip_seconds, lint_ctx=lint_ctx
+    )
+    regen: dict[str, Any] = {"attempted": False, "seed": first_seed, "final_seed": first_seed, "first_codes": []}
+    if needs_regenerate(val):
+        new_seed = first_seed + 1
+        raw = generate(new_seed)
+        first_codes = sorted(violation_codes(val) & REGEN_CODES)
+        converted, conv, val = convert_and_validate(
+            raw, omit_pictures=omit_pictures, mode=mode, clip_seconds=clip_seconds, lint_ctx=lint_ctx
+        )
+        regen = {
+            "attempted": True,
+            "seed": first_seed,
+            "final_seed": new_seed,
+            "first_codes": first_codes,
+        }
+    return {
+        "raw": raw,
+        "text": converted,
+        "conversion": conv,
+        "validation": val,
+        "regen": regen,
+    }
+
+
+def score_ref2va_output(
+    raw: str,
+    *,
+    omit_pictures: Iterable[int] | None = None,
+    clip_seconds: float | None = None,
+    lint_ctx: dict[str, Any] | None = None,
+    generate=None,
+    seed: int | None = None,
+    mode: str = "auto",
+) -> dict[str, Any]:
+    """Scoring path: six-section check on the raw official output, then convert + validate.
+
+    When `generate` is given, the filler/speaker regenerate-once rule is applied first.
+    """
+    regen = {"attempted": False, "seed": seed, "final_seed": seed, "first_codes": []}
+    if generate is not None:
+        boxed = run_with_single_regen(
+            generate,
+            seed=0 if seed is None else seed,
+            omit_pictures=omit_pictures,
+            mode=mode,
+            clip_seconds=clip_seconds,
+            lint_ctx=lint_ctx,
+        )
+        raw = boxed["raw"]
+        converted, conv, val = boxed["text"], boxed["conversion"], boxed["validation"]
+        regen = boxed["regen"]
+    else:
+        converted, conv, val = convert_and_validate(
+            raw, omit_pictures=omit_pictures, mode=mode, clip_seconds=clip_seconds, lint_ctx=lint_ctx
+        )
+    six = six_section_report(raw)
+    status = "READY" if val["status"] == "READY" and six["six_section_complete"] else "NOT_READY"
+    if not six["six_section_complete"]:
+        reason = "six_section_incomplete"
+    elif val["status"] != "READY":
+        reason = val.get("not_ready_reason") or _not_ready_reason(val.get("violations") or [])
+    else:
+        reason = None
+    return {
+        "status": status,
+        "not_ready_reason": reason,
+        "raw": raw,
+        "text": converted,
+        "conversion": conv,
+        "validation": val,
+        "sections_present": six["sections_present"],
+        "six_section_complete": six["six_section_complete"],
+        "missing_sections": six["missing_sections"],
+        "regen": regen,
+    }
+
 
 
 def main(argv: Sequence[str] | None = None) -> int:

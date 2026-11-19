@@ -314,19 +314,31 @@ def compile_prompt_via_llm(
     }
 
     post_fn = http_post or _default_http_post
-    resp = post_fn(endpoint, payload, headers, timeout_s)
-    choices = resp.get("choices") or []
-    if not choices:
-        raise RuntimeError("llama-swap returned empty choices list")
-    raw_prompt = str((choices[0].get("message") or {}).get("content") or "").strip()
-
     b7 = load_beta7_convert()
     omit_pics = [r.picture_index for r in refmods if r.picture_index is not None]
-    converted, conv_report = b7.convert_to_beta7(raw_prompt, omit_pictures=omit_pics, mode="plain")
-    validation = b7.validate_beta7(converted, clip_seconds=pack.duration_s, refmod_pictures=omit_pics)
+    start_seed = 12345
+
+    def _generate(seed: int) -> str:
+        body = dict(payload)
+        body["seed"] = seed
+        resp = post_fn(endpoint, body, headers, timeout_s)
+        choices = resp.get("choices") or []
+        if not choices:
+            raise RuntimeError("llama-swap returned empty choices list")
+        return str((choices[0].get("message") or {}).get("content") or "").strip()
+
+    boxed = b7.run_with_single_regen(
+        _generate,
+        seed=start_seed,
+        omit_pictures=omit_pics,
+        mode="plain",
+        clip_seconds=pack.duration_s,
+    )
+    converted, conv_report, validation = boxed["text"], boxed["conversion"], boxed["validation"]
     if validation["status"] != "READY":
         codes = ", ".join(v["code"] for v in validation["violations"])
-        raise BridgeValidationError(f"Beta 7 pre-flight failed ({codes})", validation)
+        reason = validation.get("not_ready_reason") or codes
+        raise BridgeValidationError(f"Beta 7 pre-flight failed ({reason})", validation)
 
     return converted, conv_report, validation
 

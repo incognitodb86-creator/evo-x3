@@ -2,6 +2,8 @@
 
 > **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`). Agent file copies in this folder remain the proposed AGT1 versions, not live.
 
+Live refresh 2026-11-19 5:58 PM CT (America/Chicago): re-read ComfyUI `custom-nodes.tsv`, `pip-freeze.txt`, `comfy.settings.json`, and `extra_model_paths.yaml` (unchanged vs the 5:33 PM CT copies). `community-HEAD.txt` is still `8eec1d3d`. Updated the redacted live AlienPc Swift llama-swap copy: the ComfyUI launch line now includes `--fast fp16_accumulation` (R6). Agent file copies stay the proposed AGT1 versions. Inventory file left as the 5:25 PM CT copy (this refresh did not rewrite counts).
+
 Live refresh 2026-11-19 5:33 PM CT (America/Chicago): re-read ComfyUI `custom-nodes.tsv`, `pip-freeze.txt`, `comfy.settings.json`, `extra_model_paths.yaml`, `community-HEAD.txt`, and `model-inventory.txt`. Added a redacted copy of the live AlienPc Swift llama-swap file (`C:\AI\director\config\llama-swap.yaml`) at `llama-swap/llama-swap.yaml` (S8 gap). Agent file copies stay the proposed AGT1 versions (live `settings.json` still has the duplicate `compaction.modelOverrides` key that B3 fixed in the repo copy).
 
 Live refresh 2026-11-19 4:54 PM CT (America/Chicago): re-read `community-HEAD.txt` (still `8eec1d3d`), `custom-nodes.tsv`, `pip-freeze.txt`, `comfy.settings.json`, `extra_model_paths.yaml`; all unchanged since 4:29 PM CT. `model-inventory.txt` not re-read this time.
