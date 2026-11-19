@@ -14,6 +14,8 @@ Snapshot 2026-11-19 (Derrick t2613u). Live machines are the source of truth; the
 | PixlStash tagger code | `u58` | `hosts/x3/pixlstash-tagging/` |
 | Plans and records (incl. Hermes direct-render plan) | `u58` | `records/` |
 | Full live X3 snapshot, one folder per program: llama-swap (Gufo/Halogen/strix launch lines), container images + digests, Hermes, pi (evo + derekboone, extensions, packages, panes), herdr, PixlStash server config, system + evo user units, /usr/local/bin, Forge MCP launchers, aria2, agy/tailscale versions. Refresh with `scripts/snapshot-live-setup.sh` | `u58` | `hosts/x3/live/` (see its README.md) |
+| Live changes 2026-11-19: Hermes WebUI unit (tailnet chat UI, Serve 8443 `/` → :8787; Open WebUI retired, quadlet in `containers/_archive/`), Forge/Render project `.pi` (`pi-evo/projects/`), PixlStash memcap, H7/H8 records | `mono` | `hosts/x3/live/`, `records/H7-H8/` |
+| AlienPc model inventory (names + bytes only: Klein9 LoRAs, MinimaxH3 LoRAs, Miraclein, RefMods count) | `mono` | `hosts/alienpc/live/model-inventory.txt` |
 | AlienPc ComfyUI (version, custom node list with commits, extra_model_paths, settings, launch scripts, pip freeze) | `u58` | `hosts/alienpc/comfyui/` |
 | AlienPc launchers (comfy-guarded, llama-swap control) | `u58` | `hosts/alienpc/launchers/` |
 | AlienPc live snapshot (global pi agent, Forge loop, skill links map) | `u58` | `hosts/alienpc/live/` (see its README.md) |
