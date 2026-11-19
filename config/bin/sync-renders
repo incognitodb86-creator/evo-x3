@@ -30,6 +30,11 @@ sync_one() {
   fi
   if [ "$DRY" = 1 ]; then echo "WOULD COPY $src -> $dst"; return 0; fi
   cp -p "$src" "$dst"
+  # L2: grab one poster frame per clip into /srv/renders/<run_id>.jpg for chat preview.
+  local poster="$DEST/${run_id}.jpg"
+  if [ ! -e "$poster" ] && command -v ffmpeg >/dev/null 2>&1; then
+    ffmpeg -nostdin -loglevel error -y -ss 0.5 -i "$dst" -frames:v 1 -q:v 3 "$poster" 2>/dev/null || true
+  fi
   if [ -d "$INBOX" ]; then
     cp -p "$src" "$INBOX/${run_id}_${base}"
   fi
