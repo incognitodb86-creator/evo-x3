@@ -1,4 +1,4 @@
-Goal: After `UNI-APPLY-X3-A` has a `RESULT.md`, install unified-plan item `ST7` (QNAP nightly copy) on the EVO-X3 under the X3 lease. (`L9` moved to `UNI-APPLY-X3-B-PIJOB`, final review 2026-11-19.)
+Goal: After `UNI-APPLY-X3-A` has a `RESULT.md`, install unified-plan item `ST7` (QNAP nightly copy) and the `L3` nightly worktree cleanup (card 36) on the EVO-X3 under the X3 lease. (`L9` moved to `UNI-APPLY-X3-B-PIJOB`, final review 2026-11-19.)
 
 # UNI-APPLY-X3-C-QNAP-NIGHTLY (X3 Forge): Install ST7 QNAP nightly copy and L9 Hermes MEDIA: clip delivery on EVO-X3, Nov 19 2026
 
@@ -14,7 +14,7 @@ Authority: Derrick 2026-11-19 t2716u (QNAP copy of finished renders moves to a n
 
 ## Access & Lease
 - **Doer:** X3 Forge (`/home/evo/AI/forge`, pi panes `w4:p1-p3`), running as `evo`. Use `sudo` only to install or roll back files under `/usr/local/bin`.
-- **Source on `mono`:** `/home/derekboone/evo-x3` (`config/bin/sync-renders`, `config/bin/evo-renders-qnap-nightly`, `hosts/x3/systemd/user/evo-renders-qnap-nightly.{service,timer}`, `config/bin/pi-job`, `hosts/x3/hermes/skills/pi-job/SKILL.md`).
+- **Source on `mono`:** `/home/derekboone/evo-x3` (`config/bin/sync-renders`, `config/bin/evo-renders-qnap-nightly`, `hosts/x3/systemd/user/evo-renders-qnap-nightly.{service,timer}`, `config/bin/evo-worktree-cleanup` + `hosts/x3/systemd/user/evo-worktree-cleanup.{service,timer}` (`1f8eb17`, also N5 in `sync-renders`), `config/bin/pi-job`, `hosts/x3/hermes/skills/pi-job/SKILL.md`).
 - **Backup root:** `/home/evo/AI/_archive/20261119/st7-qnap-nightly/` (do not overwrite `UNI-APPLY-X3-A` backups in `/home/evo/AI/_archive/20261119/`).
 - **Lease take:** write ONE line to `/home/derekboone/AI/locks/x3-lease.txt`: `forge-x3 | UNI-APPLY-X3-C-QNAP-NIGHTLY | <start time>`. If the file is not empty, stop.
 - **Lease release:** truncate `/home/derekboone/AI/locks/x3-lease.txt` (`: > /home/derekboone/AI/locks/x3-lease.txt`) when done or blocked. No status files, mirrors, commits, or messages for the lease.
@@ -30,6 +30,7 @@ Authority: Derrick 2026-11-19 t2716u (QNAP copy of finished renders moves to a n
   - if the unit files exist under `/home/evo/.config/systemd/user/`: `cp -a` `evo-renders-qnap-nightly.service` and `evo-renders-qnap-nightly.timer` into the backup dir
   - `cp -a /usr/local/bin/pi-job /home/evo/AI/_archive/20261119/st7-qnap-nightly/pi-job`
   - `cp -a /home/evo/.hermes/skills/pi-job/SKILL.md /home/evo/AI/_archive/20261119/st7-qnap-nightly/pi-job.SKILL.md`
+  - if `/usr/local/bin/evo-worktree-cleanup` exists: `cp -a` it into the same backup dir
 
 ### Item 1 — Install `ST7`
 - No-write syntax check first:
@@ -71,21 +72,40 @@ Authority: Derrick 2026-11-19 t2716u (QNAP copy of finished renders moves to a n
 - `systemctl --user list-timers evo-renders-qnap-nightly.timer` must show the timer, next elapse around 03:30 local, `Persistent=true`.
 - Re-snapshot: **Max closeout step** (record `snapshot: pending Max` in `RESULT.md`).
 
+### Item 4 — Install `L3` nightly worktree cleanup (card 36, `1f8eb17`)
+- No-write checks first, then one dry run (it lists, removes nothing):
+  ```bash
+  bash -n /home/derekboone/evo-x3/config/bin/evo-worktree-cleanup
+  sudo install -o root -g root -m 0755 /home/derekboone/evo-x3/config/bin/evo-worktree-cleanup /usr/local/bin/evo-worktree-cleanup
+  DRY_RUN=1 /usr/local/bin/evo-worktree-cleanup
+  ```
+  The dry run prints nothing or `cleaned=N skipped_dirty=M report=...`; `DRY_RUN: would remove` lines are in the report only. Paste the summary line in `RESULT.md`.
+- Install units (no sudo, `evo:evo 0644`) and enable the timer:
+  ```bash
+  install -m 0644 /home/derekboone/evo-x3/hosts/x3/systemd/user/evo-worktree-cleanup.service /home/evo/.config/systemd/user/evo-worktree-cleanup.service
+  install -m 0644 /home/derekboone/evo-x3/hosts/x3/systemd/user/evo-worktree-cleanup.timer /home/evo/.config/systemd/user/evo-worktree-cleanup.timer
+  systemctl --user daemon-reload
+  systemctl --user enable --now evo-worktree-cleanup.timer
+  systemctl --user list-timers evo-worktree-cleanup.timer
+  ```
+  Must show next elapse around 04:15 local.
+
 ### Rollback
 - Restore `/home/evo/AI/_archive/20261119/st7-qnap-nightly/sync-renders` with `sudo install -o root -g root -m 0755`.
 - `systemctl --user disable --now evo-renders-qnap-nightly.timer`, remove the two unit files (or restore backups), `systemctl --user daemon-reload`.
 - If the new script was installed: `sudo rm -f /usr/local/bin/evo-renders-qnap-nightly` (or restore the backup if one existed).
 - Restore `/home/evo/AI/_archive/20261119/st7-qnap-nightly/pi-job` with `sudo install -o root -g root -m 0755` to `/usr/local/bin/pi-job`.
 - Restore `/home/evo/AI/_archive/20261119/st7-qnap-nightly/pi-job.SKILL.md` to `/home/evo/.hermes/skills/pi-job/SKILL.md`.
+- L3: `systemctl --user disable --now evo-worktree-cleanup.timer`, remove its two unit files, `systemctl --user daemon-reload`, and `sudo rm -f /usr/local/bin/evo-worktree-cleanup` (or restore the backup if one existed).
 
 ## Closeout (Max only, after `RESULT.md`)
 - As `derekboone` in `/home/derekboone/evo-x3`: run `scripts/snapshot-live-setup.sh` and `scripts/sync-config-copies.sh`, run `gitleaks`, and commit snapshot updates by explicit path. (Forge never runs these scripts as `evo`.)
 
 ## Rules
 - **Stop on first failure.** Do not skip a failed install or verify step.
-- No `llama-swap.yaml` edits. No service restarts beyond `systemctl --user daemon-reload` and enabling the nightly timer. Do not restart or trigger `evo-renders-sync.timer` except for the one `sync-renders` verify run above.
+- No `llama-swap.yaml` edits. No service restarts beyond `systemctl --user daemon-reload` and enabling the two nightly timers. Do not restart or trigger `evo-renders-sync.timer` except for the one `sync-renders` verify run above.
 - No renders. Nothing runs during an active render. No apply during the Hermes bakeoff window (C16).
 - Never read, print, or copy secrets. Never view PixlStash library contents. Do not change Tailscale Serve.
 - Cite `mono` SHAs (never worker branch SHAs) in `RESULT.md`.
 
-STOP CONDITION: when done or blocked, write `/home/derekboone/evo-x3/records/UNI-APPLY-X3-C-QNAP-NIGHTLY/RESULT.md`, then release the lease and stop. List Step 0, Item 1, Item 2, and Item 3 as `DONE`, `BLOCKED`, or `SKIPPED` with `mono` SHAs, backup paths, exact verify commands + pass/fail outputs, `snapshot: pending Max`, and rollback status if triggered.
+STOP CONDITION: when done or blocked, write `/home/derekboone/evo-x3/records/UNI-APPLY-X3-C-QNAP-NIGHTLY/RESULT.md`, then release the lease and stop. List Step 0 and Items 1-4 as `DONE`, `BLOCKED`, or `SKIPPED` with `mono` SHAs, backup paths, exact verify commands + pass/fail outputs, `snapshot: pending Max`, and rollback status if triggered.

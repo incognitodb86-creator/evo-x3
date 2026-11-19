@@ -7,7 +7,7 @@ Authority: Derrick 2026-11-19 (11:11/11:16 CT Card 2 file work; 13:09 CT render 
 ## Needs before launch (ALL required)
 - `/home/derekboone/evo-x3/records/UNI-APPLY-X3-A/RESULT.md` exists. If not, stop (`BLOCKED`) without taking the lease.
 - X3 lease free (`/home/derekboone/AI/locks/x3-lease.txt` empty). No active render (`ps aux | grep -E 'queue-remote|run_queue' | grep -v grep` empty).
-- Max import of `mono` (this brief's commit or newer) into `/home/derekboone/evo-x3`, gitleaks clean. Until `MONO-S5` passes, Max applies the `x3/render/`, `x3/community/` and `x3/forge/` changes since his last bridge onto the live checkouts locally (`git format-patch --relative=<prefix>/` + `git am`, no part-branch push) and names the new HEADs in the launch message. If `MONO-S5` already passed: `git -C /home/evo/AI/evo-x3 pull --ff-only` instead.
+- Max import of `mono` (this brief's commit or newer) into `/home/derekboone/evo-x3`, gitleaks clean. The bridge includes `1f8eb17` (S1b `EVO_AI_ROOT` paths in `x3/community/scripts/parody` and `x3/render/writer_pipeline/acceptance`, and `lint_ctx.json` for N3); after it, run `python -m pytest -q` in `community/scripts/parody` and record pass/fail counts. Until `MONO-S5` passes, Max applies the `x3/render/`, `x3/community/` and `x3/forge/` changes since his last bridge onto the live checkouts locally (`git format-patch --relative=<prefix>/` + `git am`, no part-branch push) and names the new HEADs in the launch message. If `MONO-S5` already passed: `git -C /home/evo/AI/evo-x3 pull --ff-only` instead.
 
 ## Access & Lease
 - Doer: X3 Forge as `evo`. `sudo` only for `/usr/local/bin` installs and rollbacks.
