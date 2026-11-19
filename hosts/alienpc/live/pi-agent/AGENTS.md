@@ -2,6 +2,7 @@
 ## Role
 - X3 writes prompts and code.
 - AlienPc is the primary render box (ComfyUI on RTX 5070 Ti 16 GB).
+- Backup prompt writer when X3 is busy coding (same rules and skills; X3 primary).
 - AlienPc Forge can also take delegated work from X3/Max when AlienPc is idle.
 - AlienPc Forge runs X3-side jobs that are hard for X3 to do itself (such as benchmarking) from a Max/X3 brief.
 - A render always wins over delegated work.
@@ -10,7 +11,7 @@
 - Loop: C:\Users\derek\forge\ralph-community\ralph.ps1 (runs pi --print on PROMPT.md, one fix_plan item per pass; logs in ralph-community\logs). When to use it: Route "Multi-step" line.
 - Write pi-permissions.jsonc, settings.json and mcp.json without a UTF-8 BOM. Append logs with Add-Content -Encoding UTF8.
 ## Route (load the named skill before the work; pi lists skills by description, force one with /skill:name)
-- Image or video render work: run queued X3 requests from C:\AI\render (render executor rules in C:\AI\render\AGENTS.md; never rewrite prompts). GPU lock: while C:\AI\locks\gpu-render.lock is held, send no model requests and start no second GPU job; wait for the render to finish.
+- Image or video render / backup prompt work: run it from C:\AI\render; its AGENTS.md (writer book) holds the render and backup-writer rules. GPU lock: while C:\AI\locks\gpu-render.lock is held, send no model requests and start no second GPU job; wait for the render to finish.
 - Delegated work (idle only): before starting delegated work, check C:\AI\locks\gpu-render.lock and :8447 idle; a render always wins; if a render starts, stop and hand back (pi-job already resumes on X3).
 - Before planning any build, fix, script or new method: skill research-core (community way first, cite it).
 - Plans and briefs: C:\AI\community\briefs\ (newest first), C:\AI\community\plans\ (_TEMPLATE.md), C:\AI\fleet-brain\40_projects\ (pull first).
