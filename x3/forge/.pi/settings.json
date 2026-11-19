@@ -105,7 +105,7 @@
     "enabled": true
   },
   "subagents": {
-    "defaultModel": "x3-local/flash-next-uncensored-sub",
+    "defaultModel": "x3-local/flash-next-uncensored-v2-sub",
     "disableThinking": false,
     "defaultThinking": "low"
   },

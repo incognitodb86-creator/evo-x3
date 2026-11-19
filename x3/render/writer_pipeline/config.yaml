@@ -3,7 +3,7 @@
 # acceptance\sampler_ab.json); never re-tuned automatically.
 version: wp-2026-11-17.u56
 endpoint: http://127.0.0.1:8080/v1      # EVO-X3 llama-swap (loopback; key read in-process from pi models.json x3-local). AlienPc used the :8085 GPU-lock gate
-model_alias: flash-next-uncensored      # EVO-X3: Huihui Qwen3.8-Flash-Next abliterated HGN on Halogen 0.20.5 (same resident model as Render's pi chat -> zero GPU swaps)
+model_alias: flash-next-uncensored-v2   # EVO-X3: Huihui Qwen3.8-Flash-Next abliterated HGN on Halogen 0.20.5 (v1 name was an alias; same resident model as Render's pi chat -> zero GPU swaps)
 vision_model_alias: joycaption          # Non-exclusive 'small' group VLM fallback when still_read.json is omitted (never evicts flash-next-uncensored)
 thinking: false                         # chat_template_kwargs.enable_thinking (disabled on headless writer calls for speed and full answer budget)
 timeout_s: 900
