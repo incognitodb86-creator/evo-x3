@@ -12,7 +12,3 @@ ghcr.io/gufo-org/toolboxes/gufo-runtime:<none> sha256:49b1fce40cb43e33c46d91595e
 docker.io/searxng/searxng:latest sha256:932f69dca010db9880bddebb2171f05d8e1a25d04a59149ff65409993d680024
 docker.io/kyuz0/amd-strix-halo-toolboxes:vulkan-radv sha256:9a9e4d8f56e7792dffca1e2906d9399ff03ef87c9e2148983c9393fcbb8d7fb6
 ghcr.io/gufo-org/toolboxes/gufo-runtime:latest sha256:49b1fce40cb43e33c46d91595e300cb320cdec768fcd976f8c8da24b402fc133
-# rootful volumes matching webui (2026-11-19 12:3x CT: NONE listed; open-webui volume not found in rootful, derekboone or evo podman)
-# rootful containers
-llama-swap-flash-next-uncensored-v2 Up 18 hours
-llama-swap-embed-small Up 15 hours
