@@ -708,6 +708,57 @@ def _cmd_approve(job_id: str) -> int:
     return _queue_render(run_dir)
 
 
+def _cmd_recompile(run_ref: str) -> int:
+    """L8: after prompt.txt is edited, rerun only lint + graph filler and issue a fresh P4.11 approval code."""
+    run_dir = Path(run_ref) if Path(run_ref).is_absolute() else (RUNS_DIR / run_ref)
+    meta_file = run_dir / "meta.json"
+    if not meta_file.is_file():
+        print(f"REFUSED: missing meta.json in {run_dir}", file=sys.stderr)
+        return 2
+    meta = json.loads(meta_file.read_text(encoding="utf-8"))
+    if meta.get("role") != "render":
+        print(f"REFUSED: {run_dir.name} is not a render job", file=sys.stderr)
+        return 2
+    job_id = str(meta.get("job_id") or run_dir.name)
+    crun = COMMUNITY_RUNS / meta.get("run_name", _render_run_name(job_id))
+    prompt_file = crun / "prompt.txt"
+    if not prompt_file.is_file():
+        print(f"REFUSED: missing {prompt_file}", file=sys.stderr)
+        return 2
+
+    py = str(RQ_PY) if RQ_PY.is_file() else sys.executable
+    lint_py = COMMUNITY_DIR / "scripts" / "parody" / "lint.py"
+    if lint_py.is_file():
+        r = subprocess.run([py, str(lint_py), str(prompt_file)], capture_output=True, text=True, timeout=60)
+        if r.returncode != 0:
+            print(f"REFUSED: lint failed:\n{(r.stdout + r.stderr).strip()[-1000:]}", file=sys.stderr)
+            return 2
+
+    fill_py = COMMUNITY_DIR / "scripts" / "parody" / "fill_request.py"
+    if fill_py.is_file():
+        r = subprocess.run([py, str(fill_py), "--run-dir", str(crun)], cwd=str(COMMUNITY_DIR),
+                           capture_output=True, text=True, timeout=120)
+        if r.returncode != 0:
+            print(f"REFUSED: fill_request failed:\n{(r.stdout + r.stderr).strip()[-1000:]}", file=sys.stderr)
+            return 2
+
+    if QNAP_RUNS.is_dir() and os.access(QNAP_RUNS, os.W_OK):
+        dst = QNAP_RUNS / crun.name / "preview"
+        dst.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(prompt_file, dst / "prompt.txt")
+
+    code, hash8 = _create_approval(run_dir, job_id, prompt_file)
+    sent = _send_ntfy(
+        f"pi-job {job_id} (recompiled)",
+        f"Run {job_id}, prompt {hash8}: code {code}, 15 min",
+        priority="high",
+        actions=f"copy, Copy, queue {job_id} {code}",
+    )
+    _write_status(run_dir, "READY", f"run={crun.name} recompiled=1 prompt_hash8={hash8} ntfy_sent={sent}")
+    print(f"recompiled job={job_id} prompt_hash8={hash8} ntfy_sent={sent}")
+    return 0
+
+
 def _render_report(job_id: str) -> tuple[str, str]:
     """Extra status lines for render jobs + a ready-to-paste chat block. Returns (state, text)."""
     run_dir = RUNS_DIR / job_id
@@ -868,6 +919,9 @@ def main(argv: list[str] | None = None) -> int:
     p_ap = sub.add_parser("approve")
     p_ap.add_argument("job_id")
 
+    p_rec = sub.add_parser("recompile")
+    p_rec.add_argument("run")
+
     p_w = sub.add_parser("wait")
     p_w.add_argument("job_id")
     p_w.add_argument("--timeout", type=int, default=170)
@@ -904,6 +958,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_status(args.job_id)
     if args.cmd == "approve":
         return _cmd_approve(args.job_id)
+    if args.cmd == "recompile":
+        return _cmd_recompile(args.run)
     if args.cmd == "wait":
         return _cmd_wait(args.job_id, max(10, min(args.timeout, 170)))
     return 2
