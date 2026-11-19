@@ -13,7 +13,7 @@ pending_upload: true
 
 # evo-x3 monorepo consolidation
 
-Related: ../hermes-direct-render/PLAN.md
+Related: ../hermes-direct-render/PLAN.md · **single plan for review: [../unified-implementation/PLAN.md](../unified-implementation/PLAN.md)** (live audit 2026-11-19 10:42-10:55 AM CT; Wave 5 = this plan)
 
 PLAN ONLY. No branch was merged, no folder moved, no live checkout touched. Facts below were read live (read-only) on 2026-11-19 ~10:00-10:10 AM CT. Labels: VERIFIED (read live), ASSUMPTION (to test in the step that uses it).
 
@@ -51,6 +51,8 @@ Gitea `derrick/evo-x3` branches (commits / tracked files / last commit):
 | `alienpc-community` (6dadffc) | copy of AlienPc `C:\AI\community` | 636 | 3,486 | AlienPc `C:\AI\community` pushes to `derrick/alienpc-community-pc` (master) |
 | `evo-x3-all` | flat snapshot, one folder per part (no history) | 24 | 11,328 | none |
 | also | `main` (9, 2026-11-15), `x3-forge` (9), `x3-pi-config` (19), `x3-bakeoffs` (1), `feature/forge-coding-u57`, `job/2026-11-15-gitea-backup` | | | none |
+
+Not a git checkout but part of the setup (added after the 2026-11-19 live audit): AlienPc Forge `C:\Users\derek\forge` is a junction to `C:\Users\derek\5slock` (pi working root, ralph loop, x3run/x3put), and the AlienPc global pi folder `C:\Users\derek\.pi\agent\` (AGENTS.md, settings, permissions, extensions, skill links). Their instruction/config files are tracked as read-only copies under `u58` `hosts/alienpc/live/`; runtime data there (runs, sessions, libraries) stays out. Decide in S2 whether `5slock` gets its own folder in `mono` (default: keep the `hosts/alienpc/live/` copy).
 
 Notes: `x3-community` and `alienpc-community` share history (merge-base c85afa00); `x3-render` and `alienpc-render` too (7c219cce). AlienPc `C:\AI\community` has 131 uncommitted changes and `C:\AI\render` 9. GitHub `incognitodb86-creator/evo-x3` mirrors these branches, pushed from the box clone `/workspace/evo-x3-u57`.
 
@@ -93,7 +95,7 @@ u58 stays at the root rather than under `x3/host/` because its scripts write rep
 ### Assumptions
 
 - A1. Python/bash code that calls `Path.resolve()`/`realpath` on `/home/evo/AI/...` works when that path is a symlink (resolved path changes to the clone path; any code that compares resolved paths to hardcoded strings would break). Test: pytest suites in x3/community/scripts/parody and a dry render.
-- A2. `git filter-repo` is installable on the box (pip, ~100 KB).
+- A2. `git filter-repo` is installable on the box (pip, ~100 KB). Audit 2026-11-19: not installed on the box, the X3 or AlienPc.
 - A3. The Hermes context-file rule that skips symlinks pointing outside the project (see Hermes plan H2) does not affect Render, because render-pi.sh passes OPERATOR.md by path with `--no-context-files`. Hermes desk files (Hermes plan) live outside these repos.
 
 ### Secret safety (planned step S1)
@@ -113,8 +115,8 @@ u58 stays at the root rather than under `x3/host/` because its scripts write rep
 | S2 | X3 + AlienPc | take X3 lease + AlienPc lease | Freeze: no render/Forge/Hermes job running; commit or stash AlienPc's 131 + 9 changes per Q4; push all part branches; record tip SHAs in `records/monorepo-consolidation/FREEZE.md`. | all `git status` clean or stashed; SHAs recorded |
 | S3 | box `/workspace/evo-x3-mono` | leases held | Fresh clones from Gitea; filter-repo per part to its prefix; `mono` = u58 + 5 unrelated-history merges; add root README map. | tree hash per prefix == part tip tree; gitleaks full history; `git log -- x3/render/OPERATOR.md` shows old commits |
 | S4 | Gitea, GitHub | leases held | Push `mono` to Gitea (new branch), then from box clone to GitHub via gh. | tips equal |
-| S5 | X3 | X3 lease | As evo: clone `mono` to `/home/evo/AI/evo-x3` ; move untracked runtime dirs into the clone; rename `/home/evo/AI/{render,community,forge}` to `*.pre-mono`; `ln -s` each to `evo-x3/x3/{render,community,forge}`; `/home/derekboone/evo-x3` switched to branch `mono` (same path). | smoke list below |
-| S6 | AlienPc | AlienPc lease | Clone `mono` sparse to `C:\AI\evo-x3`; rename `C:\AI\render`, `C:\AI\community` to `*.pre-mono`; `mklink /J` each to `C:\AI\evo-x3\alienpc\...`; move untracked runtime data. | ComfyUI launcher starts; one X3 remote render job completes |
+| S5 | X3 (X3 Forge) | X3 lease | As evo: clone `mono` to `/home/evo/AI/evo-x3` ; move untracked runtime dirs into the clone; rename `/home/evo/AI/{render,community,forge}` to `*.pre-mono`; `ln -s` each to `evo-x3/x3/{render,community,forge}`; `/home/derekboone/evo-x3` switched to branch `mono` (same path). | smoke list below |
+| S6 | AlienPc (AlienPc Forge) | AlienPc lease | Clone `mono` sparse to `C:\AI\evo-x3`; rename `C:\AI\render`, `C:\AI\community` to `*.pre-mono`; `mklink /J` each to `C:\AI\evo-x3\alienpc\...`; move untracked runtime data. | ComfyUI launcher starts; one X3 remote render job completes |
 | S7 | Gitea | none | Leases cleared; part branches frozen (no new pushes; README note); archive tags + default-branch switch only on Q1 yes; `*.pre-mono` dirs removed only on Derrick's yes after 7 days. | RESULT.md filled |
 
 S5 smoke list (X3): `render-pi.sh` starts and shows OPERATOR.md; `render_writer_pipeline.py` dry ask returns READY/NOT_READY with correct paths; `queue-remote.sh <run> --yes-derrick --dry-run` passes its checks; pytest in `x3/community/scripts/parody` green; `evo-renders-sync.service` one manual run exits 0 and still sees `/home/evo/AI/community/runs`; `pi-job status` and a `pi-job review` dry task start Forge; Hermes gateway `is-active`; `evo-x3-config-rsync-qnap` dry run reads `/home/derekboone/evo-x3`.

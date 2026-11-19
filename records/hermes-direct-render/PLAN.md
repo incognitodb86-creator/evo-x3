@@ -10,7 +10,7 @@ author: Max Architect (executor subagent), plan only, nothing applied on the X3
 pending_upload: true
 ---
 
-Related: ../monorepo-consolidation/PLAN.md
+Related: ../monorepo-consolidation/PLAN.md · **single plan for review: [../unified-implementation/PLAN.md](../unified-implementation/PLAN.md)** (owners, live audit 2026-11-19 10:42-10:55 AM CT, Stills intake `ST1-ST5`)
 
 # Hermes direct H3 render on EVO-X3: two side-by-side paths
 
@@ -27,7 +27,7 @@ Status of this file: PLAN ONLY. Nothing below has been applied on the X3. Derric
 | Authority | Derrick t2598u (Hermes WebUI yes, no pi hop), t2600u (same agreed rules as Render, NSFW parody accepted, all templates), t2602u (everything in the right place), card t2603s9268 ("Set up both and test them side by side in my Hermes chat"), t2607u (plan file, push Gitea + GitHub + brain), t2609u (keep pi coding hand-off), t2610u (everything on GitHub for review). |
 | Execution profile | One device (EVO-X3), user-level changes as `evo`, under the X3 lease, every change backed up to `_archive` first with a written rollback. |
 | Stop conditions | Any unit test fails twice; any rule in "Hard constraints" would be bent; a render is active on AlienPc when a llama-swap/Hermes restart is needed; Derrick says hold. |
-| Who finishes | Max does U0-U9 himself (no agy hand-off needed; it is config + one small flag). Derrick: types the WebUI password into the locked X3 key file, gives the test asks and every render yes in his WebUI chat, picks the winner, says yes to retiring the pi-job render part. |
+| Who finishes | X3 Forge applies U0-U9 from a brief under the X3 lease (four-doer split, Derrick t2641u-t2643u; corrected 2026-11-19 audit). Max writes the brief, handles the WebUI password file and other secrets, and verifies RESULT. Derrick: types the WebUI password into the locked X3 key file, gives the test asks and every render yes in his WebUI chat, picks the winner, says yes to retiring the pi-job render part. |
 
 ## One-page summary
 
@@ -68,7 +68,7 @@ Approval and output
 - R5. No ntfy phone code on the Hermes path. Pass: a full render through either path leaves the ntfy send log/pi-job job list unchanged (no `pi-job` job is created). Gate: Max check. VERIFIED today: `queue-remote.sh`, `run_queue.py`, `remote_upscale.py` contain no ntfy call; ntfy lives only in `/usr/local/bin/pi-job`.
 - R6. Only the RTX 2x final is kept; the raw clip is deleted; the 2x is published to the QNAP runs share and PixlStash by the `evo-renders-sync` timer. Pass: after a render, `<run>/<tag>/render_ok.json` has an `upscale` block with `raw_deleted`, no `*_raw.mp4` exists, the clip is under `/mnt/qnap/renders/runs/<run>/<tag>/` and a new PixlStash entry exists (count only, never opened). Gate: existing `run_queue.py` (t2571u) + `/usr/local/bin/sync-renders`. Owner: Max.
 - R7. The finished 2x plays inline in the Hermes WebUI chat, not as a paraphrase or a bare web link. Pass: Hermes's last message contains `file:///home/evo/AI/community/runs/<run>/<tag>/<clip>.mp4` and WebUI shows a video player. Gate: desk addendum + `MEDIA_ALLOWED_ROOTS`. Owner: Max.
-- R8. Model is Halogen/llama-swap `flash-next-uncensored` with thinking low, same resident model as Render (zero GPU swaps). Pass: both profiles' `model.default` is the same alias the writer config uses, and `reasoning_effort` is `low` under both `model:` and `agent:`. Gate: config read-back. Owner: Max. See open issue O4 about the `-v2` alias.
+- R8. Model is llama-swap `flash-next-uncensored` with thinking low, same resident model as Render (zero GPU swaps). Live 2026-11-19 10:45 AM CT: llama-swap profile `halogen-only` pins `flash-next-uncensored` (and `flash-next`, `gemma4-heretic`) to the resident Gufo 0.35.0 slot `flash-next-uncensored-v2`; Halogen slots are cold. Pass: both profiles' `model.default` is the same alias the writer config uses, and `reasoning_effort` is `low` under both `model:` and `agent:`. Gate: config read-back. Owner: Max. See open issue O4 about the `-v2` alias.
 
 Keys and safety
 - R9. Keys only in the locked X3 key file or the existing token files, never new copies, never on a command line, never in chat or this plan. Pass: `rg` over the new files finds no key value; PIXL_KEY is exported at runtime from `~/.config/pixlstash/render-read.token` exactly like `render-pi.sh` line 23; the WebUI password is read from the locked X3 key file by the start wrapper; profile `.env` is not a new copy (see D1). Gate: Max + gitleaks pre-push. Owner: Max.
@@ -148,7 +148,7 @@ Hermes WebUI facts (VERIFIED from `nesquena/hermes-webui` master `6c4aaaa`, 2026
 
 - D1. Profile `.env` copies. `profile create --clone` (and a blank create) copies the default `.env` into the new profile (H3), which is a new copy of existing keys. Options: (a) after create, replace each profile `.env` with a symlink to `/home/evo/.hermes/.env` so there is one file (ASSUMPTION A3: Hermes reads a symlinked `.env`; tested in U3); (b) accept the copies (Derrick has said copying existing keys is OK, but the newer rule says keys live only in the locked files); (c) drop profiles and use one profile with a config swap per test. Plan default: (a), fall back to asking.
 - D2. Pick a harmless coding test task for R11 (example: "add a one-line comment to the README in a scratch branch of `/home/evo/AI/forge`").
-- D3. Tailscale Serve for 8787: not in this plan; SSH tunnel only unless Derrick says yes separately.
+- D3. Tailscale Serve for 8787: not in this plan; SSH tunnel only unless Derrick says yes separately. (Serve already forwards 443→8080, 8443→3000 + `/renders/`, 8444→7878, 8445→9537 on the X3; no new port added.)
 
 ### Assumptions (must be tested where used)
 
@@ -303,10 +303,14 @@ Same model alias and thinking level as Render (R8, O4), same `render_writer_pipe
 - O1. Render's writer voiced FCSydny as a real actress in a recent run (identity bleed between `FCSydny` and the celebrity name). Both paths: ask 2 checks that the OC talk clip uses OC-only voice refs and no celebrity name; Path B's desk keeps OPERATOR.md's "Sydney Sweeney is not FCSydny" line.
 - O2. ntfy is still sent on the pi path (`pi-job` lines 338-407). Hermes paths do not call pi-job for renders (R5). Turning ntfy off in pi-job itself is out of scope until the render part retires.
 - O3. Hermes paraphrases the prompt and posts a renders-share link instead of the video. Fixed here by the desk addendum (verbatim `prompt.txt`, `file://` 2x path) and `MEDIA_ALLOWED_ROOTS` (R7).
-- O4. Model alias mismatch: render-pi.sh defaults to `flash-next-uncensored-v2`, writer config and Hermes use `flash-next-uncensored` (F2). Not verified whether these are one resident model in llama-swap (the `/v1/models` call needs the llama-swap key, which this plan does not handle). Check from an existing authorised path before U4; if they differ, align Hermes to what the writer uses (zero GPU swaps), without editing llama-swap.yaml.
+- O4. ANSWERED at config level by the 2026-11-19 audit: `/etc/evo-x3/llama-swap.yaml` profile `halogen-only` pins `flash-next-uncensored` → `flash-next-uncensored-v2`, so both aliases hit the one resident Gufo slot (runtime `/running` not checked; needs the key). Original note: Model alias mismatch: render-pi.sh defaults to `flash-next-uncensored-v2`, writer config and Hermes use `flash-next-uncensored` (F2). Not verified whether these are one resident model in llama-swap (the `/v1/models` call needs the llama-swap key, which this plan does not handle). Check from an existing authorised path before U4; if they differ, align Hermes to what the writer uses (zero GPU swaps), without editing llama-swap.yaml.
 - O5. Template count is 16 `*.api.json` (+ `faces/FC_SYDNEY.api.json`), not 17 as said in chat (F12).
 - O6. `pi-job`'s Forge/Render launchers resolve under `~/evo-x3/pi-chats/` (derekboone's copy symlinks to `/home/derekboone/AI/render/x3/render-pi.sh`; evo's copy is a 2,741 B file). Not changed here; noted because R11 relies on Forge launching as before.
 - O7. Open WebUI on port 3000 talks to the gateway API; per H6 its dangerous commands are auto-denied unless the client uses `/v1/runs`. Another reason to test in Hermes WebUI rather than Open WebUI.
+
+## Stills from chat (cross-link)
+
+An image Derrick attaches in Hermes WebUI is used directly as the still (copied to `<run_dir>/_inputs/`, passed as `--still`), with the PixlStash import after, in the background. Design, owners and tests: unified plan `ST2` (and `ST1` fresh sheets, `ST3` import fix, `ST4` generate when no image, `ST5` pose/background reference).
 
 ## Hard constraints carried (from Derrick's standing rules; not restated in full)
 
