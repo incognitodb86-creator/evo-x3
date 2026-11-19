@@ -38,3 +38,10 @@ plus one, mark it ASSUMPTION, and let Derrick or Max confirm it.
   `VERDICT: APPROVE|CHANGES|BLOCK`.
 - No secrets, tokens, auth headers or pairing codes in records. Point to where the secret lives instead.
 - Every step that touches a live host names its lease, its test and its rollback.
+- Benchmark briefs (OPUS-FINDINGS-20261119 #1/#2): every arm names its community uncensored build
+  (heretic/abliterated, never stock), its upstream guide and request format, its thinking setting, sampler and quant,
+  each with a link, and runs that way. Our own prompt or settings is a separate arm only when Derrick asks for it.
+  Name a real runner and the real prompts (not categories), and check the model that actually loaded (`/running`).
+- Every path a brief names must exist on the box today (read the newest `hosts/` snapshot or a RESULT). If it only
+  exists after a later step (for example `MONO-S5`), say so and give the path to use until then.
+- A changed hook or script is run once on a clean input (and once on a bad one) before it is committed.

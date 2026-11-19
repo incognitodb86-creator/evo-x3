@@ -76,7 +76,7 @@ def _find_node(graph: Dict[str, Any], class_type: str, title_substr: Optional[st
 
 def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     active = [
-        {"name": str(lr["name"]).strip(), "strength": float(lr.get("strength", 0.85))}
+        {"name": fr.comfy_lora_name(lr["name"]), "strength": float(lr.get("strength", 0.85))}
         for lr in loras if str(lr.get("name") or "").strip() and float(lr.get("strength", 0.85)) > 0
     ]
     if not active:
@@ -97,7 +97,7 @@ def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -
     prev_ref: List[Any] = [unet_id, 0]
     start_idx = 0
     if existing_lora:
-        graph[existing_lora]["inputs"]["lora_name"] = fr.comfy_lora_name(active[0]["name"])
+        graph[existing_lora]["inputs"]["lora_name"] = active[0]["name"]
         graph[existing_lora]["inputs"]["strength_model"] = active[0]["strength"]
         prev_ref = [existing_lora, 0]
         start_idx = 1
@@ -111,7 +111,7 @@ def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -
         graph[nid] = {
             "_meta": {"title": f"flux_lora_{idx}"},
             "class_type": "LoraLoaderModelOnly",
-            "inputs": {"lora_name": fr.comfy_lora_name(lr["name"]), "model": list(prev_ref), "strength_model": lr["strength"]},
+            "inputs": {"lora_name": lr["name"], "model": list(prev_ref), "strength_model": lr["strength"]},
         }
         if first_added is None:
             first_added = nid
@@ -151,7 +151,7 @@ def _hybrid_stack_for_name(name: str) -> tuple[str, Dict[str, Any]]:
     compact = re.sub(r"[^a-zA-Z0-9]", "", str(name or "")).lower()
     return (
         f"fk9_{compact}_v1_refmod.safetensors",
-        {"name": f"klein9\\fk9_{compact}_v1_prodigy.safetensors", "strength": 0.60},
+        {"name": f"klein9/fk9_{compact}_v1_prodigy.safetensors", "strength": 0.60},
     )
 
 

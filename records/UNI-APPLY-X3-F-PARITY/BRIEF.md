@@ -4,6 +4,10 @@ Goal: After `UNI-APPLY-X3-E-HERMES` has a `RESULT.md`, install the local `gitlea
 
 Authority: Derrick 2026-11-19 15:34 / 15:50 CT ("i want grokbot parity with our setup" -> "2 & 3": Hermes GrokBot-parity pack + X3 `gitleaks` pre-commit hook). Plans: `records/uplan/PLAN.md` (step `X4c`) and `records/hermes-direct-render/PLAN.md`. Max verifies your `RESULT.md` afterwards.
 
+## Update 2026-11-19 17:05 CT (Opus)
+- Item 1 is DONE on `/home/derekboone/evo-x3` (`RESULT.md`, hook sha256 `11cba7e5...`, Max's regex fix). This brief named `/home/evo/AI/evo-x3`, which does not exist until `MONO-S5` (OPUS-FINDINGS #6). After S5, run the same install and `--check` on `/home/evo/AI/evo-x3`, using the script from that clone.
+- Items 2 (MCP) and 3 (ntfy) are still to do and need a Hermes gateway restart, so they wait until W1b has a `RESULT.md` (t2850u). Until S5, take the source files from `/home/derekboone/evo-x3`, not `/home/evo/AI/evo-x3`. Step 0's `pre-commit.before` copy and the hook lines in Rollback apply only after S5.
+
 ## Needs before launch (ALL required)
 - `/home/derekboone/evo-x3/records/UNI-APPLY-X3-E-HERMES/RESULT.md` exists. If not, stop (`BLOCKED`) without taking the lease.
 - Max pulled `mono` (this brief's commit or newer) into `/home/derekboone/evo-x3` and `/home/evo/AI/evo-x3`.

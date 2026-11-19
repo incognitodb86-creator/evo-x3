@@ -10,6 +10,11 @@ Authority: Derrick 2026-11-19 13:46 CT ("we should run benchmarks first, to dete
 - **Arm 4 added (Derrick t2751u/t2752u):** Swift 1.5 Qwen3.8 Flash-Next IQ4_XS at `/srv/models/swift15-iq4xs/` (3 shards, still downloading). Run it only if `download.done` exists and every shard's sha256 matches `files.json`; otherwise mark it `SKIPPED (download not finished)` and finish the other arms.
 - **Quiet window:** Derrick is told in chat that it starts as soon as arms 1a/1b finish. AlienPc lane has no test running.
 
+## Update 2026-11-19 17:05 CT (Opus): superseded by W1b, do not rerun as written
+- Derrick t2810u / t2843u: W1 results are replaced by W1b (heretic ref2va Q4, then heretic Q5, each the official way). See `records/uplan/PLAN.md` "Derrick decisions 2026-11-19" and `records/uplan/OPUS-FINDINGS-20261119.md`.
+- Arm 4 (Swift IQ4_XS) is dropped: Derrick stopped the download (16:48 CT). Ignore its "ESP off" note; ESP is on everywhere (t2764u).
+- Known faults in this brief (OPUS-FINDINGS #1, #2, #7), for anyone rerunning an arm: each arm must follow its own upstream guide, request format, thinking and sampler with its uncensored build; `profiles.halogen-only` routes `gemma4-heretic` to Gufo (check `/running`); `wp_accept.py` has no `--arm`, needs `/home/evo/AI/render/x3/.venv/bin/python3`, has unchecked still paths, and `comfy_busy()` probes the wrong host; `test_u54_named_e2e.py` is mocked; the F4 creative asks are categories, not prompts.
+
 ## Needs before launch (ALL required)
 - X3 lease free (`/home/derekboone/AI/locks/x3-lease.txt` empty); no active render (`/home/evo/AI/community/runs` has no running job and AlienPc ComfyUI queue is empty).
 

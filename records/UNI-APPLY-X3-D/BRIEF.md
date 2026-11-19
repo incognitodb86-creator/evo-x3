@@ -4,6 +4,11 @@ Goal: After `UNI-APPLY-X3-A` has a `RESULT.md`, apply the rest of the X3 file it
 
 Authority: Derrick 2026-11-19 (11:11/11:16 CT Card 2 file work; 13:09 CT render review handoff RP1-RP3; prompting chat FX1; 13:15 CT skills review SK1-SK5; t2546u/t2571u ST6) and `records/uplan/PLAN.md` "Order of work" step X2. Max verifies your `RESULT.md` afterwards.
 
+## Update 2026-11-19 17:05 CT (Opus)
+- The line below that says `MONO-S5` "has already switched over" is wrong. `/home/evo/AI/evo-x3` does not exist yet (VERIFIED: `UNI-APPLY-X3-C-QNAP-NIGHTLY/RESULT.md`, 16:34 CT). Use the part-branch bridge from `/home/derekboone/evo-x3` until S5 is done; use the `pull --ff-only` line only after S5.
+- The bridge now also includes this commit: the LoRA backslash fix in `fill_request.py` / `flux_still.py` (OPUS-FINDINGS #4) and the `comm.py` cold-wake fix.
+- SK1 (writer persona + recompiled `writer_prompt.md`) changes the X3 writer, so it waits until W1b has a `RESULT.md` (t2850u).
+
 ## Needs before launch (ALL required)
 - `/home/derekboone/evo-x3/records/UNI-APPLY-X3-A/RESULT.md` exists. If not, stop (`BLOCKED`) without taking the lease.
 - X3 lease free (`/home/derekboone/AI/locks/x3-lease.txt` empty). No active render (`ps aux | grep -E 'queue-remote|run_queue' | grep -v grep` empty).

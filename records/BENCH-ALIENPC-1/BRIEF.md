@@ -4,6 +4,11 @@ Goal: After `UNI-APPLY-ALIENPC-C` (Flux nodes load) and `UNI-APPLY-X3-D` (FX1 sk
 
 Authority: Derrick 2026-11-19 13:46 CT ("run benchmarks first") and 13:55 CT ("while we choose prompt writer we can install and test our setup for flux miraclein"); `records/uplan/PLAN.md` items `R1`, `M4`, `ST4`, `ST5`, card 37 (yes per still), card 30 (existing still read + text lint only). "Order of work" steps A4, A5. Runs while the X3 does `BENCH-X3-W1`, but not during W1's quiet window.
 
+## Update 2026-11-19 17:05 CT (Opus)
+- Step 1 (A4 / R1) is DONE: `records/BENCH-ALIENPC-1/A4-RESULT.md`. Per-stage times were not in any log (only wall times), so R3/R4 stay untried. That was this brief's fault: it assumed ComfyUI stdout was logged.
+- Step 2 (A5), per arm, before Derrick's yes (OPUS-FINDINGS #1/#2): name the model build, its upstream guide (model card or node README), steps, CFG/guidance, sampler and scheduler, with links, and follow them. Our own settings are a separate arm only if Derrick wants one.
+- Hybrid arm and any subfolder LoRA: build it with `flux_still.py` from `mono` at this commit or newer. It writes `klein9\...` with a backslash, which AlienPc ComfyUI needs (OPUS-FINDINGS #4). Older copies fail with `value_not_in_list`.
+
 ## Needs before launch (ALL required)
 - `UNI-APPLY-ALIENPC-C` RESULT shows the Klein9Mod nodes in `object_info` (M3 pass) and lists their widget enums; `UNI-APPLY-X3-D` RESULT shows `flux-klein-prompting` installed on the X3.
 - AlienPc lease free (one line per brain `10_packs/max/max-briefing.md`); no render running (`C:\AI\locks\gpu-render.lock` absent, `:8447` idle).

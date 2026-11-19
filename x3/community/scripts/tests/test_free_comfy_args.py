@@ -90,5 +90,46 @@ class TestFreeComfyArgs(unittest.TestCase):
                           "line %d passes %s: the batch log path must be built from the run dir" % (call.lineno, text))
 
 
+class TestEnsureComfyWake(unittest.TestCase):
+    """ALIENPC-C follow-up (Derrick t2777s9793): /system_stats is in llama-swap upstream.ignorePaths, so a cold
+    comm.ensure_comfy() must send the route-root GET (run_graph_job.wake's trigger) before polling readiness."""
+
+    def _run(self, loaded: bool) -> list[str]:
+        from unittest import mock
+        sys.path.insert(0, REPO_ROOT)
+        import comm
+        urls: list[str] = []
+        stats = {"system": {"comfyui_version": "0.38.0", "argv": ["--use-ck-attention", "--disable-pinned-memory"]},
+                 "devices": [{"vram_free": 0}]}
+        run = {"running": [{"model": "comfyui_auto", "state": "ready"}] if loaded else []}
+
+        class _R:
+            def read(self) -> bytes:
+                return b""
+
+        def fake_urlopen(u, timeout=None):
+            urls.append(u if isinstance(u, str) else u.full_url)
+            return _R()
+
+        def fake_http(u, data=None, timeout=60, method=None):
+            urls.append(u)
+            return run if u.endswith("/running") else stats
+
+        with mock.patch.object(comm, "http", fake_http), mock.patch.object(comm.urllib.request, "urlopen", fake_urlopen), \
+                mock.patch.object(comm, "log", lambda *a, **k: None):
+            comm.ensure_comfy()
+        return urls
+
+    def test_cold_start_sends_root_get_before_system_stats(self) -> None:
+        urls = self._run(loaded=False)
+        import comm
+        root = [i for i, u in enumerate(urls) if u == comm.BASE + "/"]
+        stats = [i for i, u in enumerate(urls) if u.endswith("/system_stats")]
+        self.assertTrue(root and stats and root[0] < stats[0], urls)
+
+    def test_loaded_comfy_sends_no_root_get(self) -> None:
+        import comm
+        self.assertNotIn(comm.BASE + "/", self._run(loaded=True))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
