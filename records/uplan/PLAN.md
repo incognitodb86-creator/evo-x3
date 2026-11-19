@@ -77,12 +77,13 @@ Rules:
 | A7 | Video template A/B, fixed seed, Derrick picks by eye: TQ1 -> TQ4 -> TQ2/TQ3 -> TQ5, then M5 realism | (after A6) | A6 | production templates |
 | A8 | Lock down: S2 allowlist hook (lists A5/A7 winners), then S1 Manager `strong` (after the last node install) | (after A7) | A5, A7 | - |
 
-**Any time, Derrick yes:** monorepo `S5`/`S6` switchover (quiet window, neither lane running; after it Max pulls `mono`
-instead of bridging), Tailscale ACL (card 11).
+**Monorepo switchover (S5/S6) - Derrick yes 2026-11-19 14:05 CT:** waits for `S1b` (patch the scripts that use `Path(__file__).resolve().parents[N]` / `git rev-parse --show-toplevel` so they still find `/home/evo/AI/...` once `render`, `community` and `forge` are symlinks into the `mono` clone; file work on `mono`, not on the old branches), then a window when neither lane is running. Tailscale ACL (card 11): Derrick, any time.
 
 Already answered by the snapshots (13:45-13:52 CT): `M1` done live (MiniMaxH3Mod `54f93eb`; A3 only checks it);
 `G6` Sydney already moved to `flash-next-uncensored` (llama-swap comment 2026-11-17, t70u) - keep it on the writer
 model; card 12: live `pi-job` already sends ntfy with `ntfy-x3.token` (Max only checks mode `0600`).
+
+**Derrick yes 2026-11-19 14:05 CT (orchestrator chat; Max adds the id):** go on the apply briefs (both lanes, in the order above); run `BENCH-X3-W1` (Max picks the quiet-window time and tells Derrick first); run the Flux / Miraclein still tests (each still still gets its own yes, card 37); monorepo `S5`/`S6` (after `S1b`).
 
 ## For Opus reviewer (read this first)
 
@@ -521,7 +522,7 @@ Opus items from the inventory: `AGT1` ("AlienPc agent files redo", `reports\ALIE
 
 Answer these in chat, or let Opus recommend and then confirm. Defaults below are Max's recommendation where one is safe; cards without a default stay open.
 
-1. **Go ahead with this unified plan?** (hold all live work until yes.) Recommended: yes, as plan-only until you also say yes per live step.
+1. **Go ahead with this unified plan - YES (Derrick 2026-11-19 14:05 CT).** Live steps still get their own yes where the plan says so.
 2. **Start Wave 1 file-only now — APPROVED by Derrick (2026-11-19 11:11/11:16 CT, verbal, this chat).** All Wave 1 worker groups (`render`, `community-code`, `templates`, `u58-pijob`, `hermes`, `leftovers`) plus **`ST6`** (`evo-raw-clip-cleanup`), **`ST7`** (`990ffd0`, nightly QNAP publish), and **`AGT1`** are **DONE and on `mono`**. **Not live until Max imports, scans, and the machine's Forge applies under lease.** (`LX1-LX9` out of scope per Card 32.)
 3. **Hermes two-path plan (`U3-U9`):** `U2` (Hermes WebUI `:8787` / Serve `8443 /`) is **DONE via `H7`** (`eabc8c7`, Open WebUI `:3000` retired `t2688u`). Go / hold / change on remaining `U3-U9`? (See **Card 43** for whether the `render-a` vs `render-b` bakeoff still runs.)
 4. **Monorepo `Q1-Q8` — APPROVED in `records/monorepo-consolidation/PLAN.md`.** Remaining steps in Wave 5: `S1` (box gitleaks), `S1b`, `S2`, `S5`, `S6` (recommended next — ends the bridge), `S7`; carryover branches (`3e56220`, `4122e40`), `switchyard`, and `evo-x3-all` source plans are being ported to `mono` by orchestrator (`records/source-plans/` + carryover review).
