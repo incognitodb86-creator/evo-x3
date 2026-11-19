@@ -130,6 +130,61 @@ def _write_status(run_dir: Path, status: str, detail: str = "") -> None:
     (run_dir / "status").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _write_stuck_bundle(run_dir: Path, meta: dict, detail: str) -> Path:
+    """L6: write ~/AI/_runs/<id>/escalate.md on STUCK with task, git status/diff, and last 3 tool errors."""
+    sections = [
+        f"# Escalation bundle: {meta.get('job_id', run_dir.name)}",
+        f"- Role: `{meta.get('role', '?')}`",
+        f"- Updated: `{_now_iso()}`",
+        f"- Detail: `{detail}`",
+        "",
+        "## Task",
+        "```text",
+        str(meta.get("prompt", "")).strip(),
+        "```",
+    ]
+    target = meta.get("target")
+    if target and Path(target).is_dir() and (Path(target) / ".git").exists():
+        st = subprocess.run(["git", "-C", str(target), "status", "--short"], capture_output=True, text=True)
+        df = subprocess.run(["git", "-C", str(target), "diff"], capture_output=True, text=True)
+        sections += [
+            "",
+            "## Git status",
+            "```text",
+            (st.stdout or "(clean)").strip()[:4000],
+            "```",
+            "",
+            "## Git diff (truncated)",
+            "```diff",
+            (df.stdout or "(none)").strip()[:8000],
+            "```",
+        ]
+    errors: list[str] = []
+    sessions = sorted(run_dir.glob("*.jsonl"), key=lambda q: q.stat().st_mtime)
+    if sessions:
+        for line in sessions[-1].read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                e = json.loads(line)
+            except ValueError:
+                continue
+            m = e.get("message") or {}
+            if m.get("isError") or e.get("isError"):
+                errors.append(json.dumps(m or e, ensure_ascii=False)[:600])
+    if not errors and (run_dir / "log").is_file():
+        log_lines = (run_dir / "log").read_text(encoding="utf-8", errors="replace").splitlines()
+        err_lines = [ln for ln in log_lines if any(k in ln.lower() for k in ("error", "traceback", "failed", "refused"))]
+        errors = (err_lines or log_lines)[-3:]
+    sections += ["", "## Last 3 tool errors"]
+    if errors:
+        for idx, err in enumerate(errors[-3:], 1):
+            sections += [f"### Error {idx}", "```text", err, "```"]
+    else:
+        sections.append("(none captured)")
+    out = run_dir / "escalate.md"
+    out.write_text("\n".join(sections) + "\n", encoding="utf-8")
+    return out
+
+
 def _new_job_id(role: str) -> str:
     ts = time.strftime("%Y%m%d-%H%M%S")
     return f"{ts}-{role}-{secrets.token_hex(2)}"
@@ -403,6 +458,7 @@ def _exec_job(job_id: str) -> int:
                     _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
                     return 0
                 _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}")
+                _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}")
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={rc}, commits={ahead})")
                 return 1
 
@@ -411,6 +467,8 @@ def _exec_job(job_id: str) -> int:
                 rc, where = _run_pi(run_dir, "1800", meta["prompt"], str(repo), logf)
                 st = "DONE" if rc == 0 else "STUCK"
                 _write_status(run_dir, st, f"rc={rc} model={where}")
+                if st == "STUCK":
+                    _write_stuck_bundle(run_dir, meta, f"rc={rc} model={where}")
                 _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
                 return 0 if rc == 0 else 1
 
@@ -424,7 +482,10 @@ def _exec_job(job_id: str) -> int:
                 last = [x for x in (qlog.read_text(encoding="utf-8", errors="replace").splitlines() if qlog.is_file() else [])
                         if " UPSCALE" in x][-2:]
                 st = "DONE" if proc.returncode == 0 else "STUCK"
-                _write_status(run_dir, st, f"rc={proc.returncode} " + " | ".join(last)[-400:])
+                detail = f"rc={proc.returncode} " + " | ".join(last)[-400:]
+                _write_status(run_dir, st, detail)
+                if st == "STUCK":
+                    _write_stuck_bundle(run_dir, meta, detail)
                 _send_ntfy(f"pi-job {job_id}", f"{st} (upscale {run.name}, rc={proc.returncode})")
                 return 0 if proc.returncode == 0 else 1
 
@@ -470,8 +531,12 @@ def _exec_job(job_id: str) -> int:
                     return 0
                 nr = crun / "clip_NOT_READY.txt"
                 why = nr.read_text(encoding="utf-8", errors="replace").strip()[:300] if nr.is_file() else ""
-                _write_status(run_dir, "STUCK", f"rc={proc.returncode} run={crun.name} build={built} "
-                                               f"prompt_exists={prompt_file.is_file()} {why}".strip())
+                stuck_detail = (
+                    f"rc={proc.returncode} run={crun.name} build={built} "
+                    f"prompt_exists={prompt_file.is_file()} {why}"
+                ).strip()
+                _write_status(run_dir, "STUCK", stuck_detail)
+                _write_stuck_bundle(run_dir, meta, stuck_detail)
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (render, rc={proc.returncode})")
                 return 1
 
