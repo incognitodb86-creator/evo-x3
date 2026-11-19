@@ -6,7 +6,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
 
 ## Needs before launch (Max / Derrick checklist — do not launch until met)
 - **Derrick's live yes in chat:** Card 1 (live apply), Card 26 (`ST1` default), and Card 12 (`P4.11` ntfy token for H3 timers) answered in chat (Max records id).
-- **X3 lease taken** (`30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-taken-x3-forge-uni-apply-x3-a.md`, mirrored to `records/status/`). Max writes/mirrors take and release files on brief issue/closeout unless X3 Forge is verified writable to the brain (Card 28 / M2 answered in chat; Max records id).
+- **X3 lease taken (written by Max — Card 28 answered, Derrick 2026-11-19 12:29 CT, side chat):** `30_handoff/status/YYYY-MM-DD-HHMM-evo-x3-lease-taken-x3-forge-uni-apply-x3-a.md` (mirrored to `records/status/`).
 - **No active render** on X3/AlienPc (required for R5 and `sync-renders`), and **not during the Hermes bakeoff window** (Plan C16).
 - **Max import + pre-cutover bridge complete** from `mono` tip `5ccba67` (or newer):
   - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
@@ -128,7 +128,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 file-only work + Forge exec
       sudo install -o root -g root -m 0755 /home/derekboone/evo-x3/config/bin/sync-renders /usr/local/bin/sync-renders
       install -m 0755 /home/derekboone/evo-x3/hosts/x3/pixlstash-tagging/import_inbox.py /home/evo/AI/pixlstash-tagging/import_inbox.py
       ```
-      (Do **not** edit `pixlstash.service.d/10-memcap.conf` — ST3(c) is held for Card 23.)
+      (Do **not** edit `pixlstash.service.d/10-memcap.conf` — Card 23 `ST3(c)` is already resolved live, Derrick 2026-11-19 12:29 CT, side chat.)
     - Exact ST3 + L2 checks:
       1. `bash -n /usr/local/bin/sync-renders && python3 -c 'import ast,sys; ast.parse(open(sys.argv[1]).read())' /home/evo/AI/pixlstash-tagging/import_inbox.py`.
       2. Trigger one sync (`systemctl --user start evo-renders-sync.service` or run `/usr/local/bin/sync-renders` with no active render) and verify sync exits in `< 30 s`.

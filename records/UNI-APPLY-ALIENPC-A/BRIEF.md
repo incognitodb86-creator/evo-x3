@@ -5,17 +5,17 @@ Goal: Check AlienPc `C:\AI\community` dirty files (M7), then apply (staged patch
 Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `records/unified-implementation/PLAN.md` + `records/unified-implementation/CODE-REVIEW-20261119-opus-delta.md` ("Apply order for Max", AlienPc side). Max verifies your `RESULT.md` afterwards.
 
 ## Needs before launch (do not launch until met; held items stay skipped)
-1. **Derrick's live yes in chat:** Card 1 (live apply for `alienpc/community/` file-only items: `M4`, `ST4`, `ST5` candidate templates + `S2` allowlist script and offline tests into `C:\AI\community`) answered in chat (Max records id).
-2. **AlienPc lease taken (written by Max; Card 28 answered in chat, Max records id):** `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-taken-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`). Release file on closeout: `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-released-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`, written by Max).
+1. **Derrick's live yes in chat:** Card 1 (live apply for `alienpc/community/` file-only items: `M4`, `ST4`, `ST5` candidate templates + `S2` allowlist script and offline tests into `C:\AI\community`) answered in chat (Max records id). (Card 33 M7 dirty check is answered: checked in step 1 below, Derrick 2026-11-19 12:29 CT, side chat.)
+2. **AlienPc lease taken (written by Max — Card 28 answered, Derrick 2026-11-19 12:29 CT, side chat):** `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-taken-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`). Release file on closeout: `30_handoff/status/YYYY-MM-DD-HHMM-alienpc-lease-released-alienpc-forge-uni-apply-alienpc-a.md` (mirrored to `records/status/`, written by Max).
 3. **Max import + bridge patch staged** from `mono` tip `5ccba67` (or newer):
    - `gitleaks` clean on `947aa26..mono`; Gitea `mono` fast-forwarded (or merged, never force-pushed).
    - `C:\AI\community` does **not** track `derrick/evo-x3`: its upstream is the separate Gitea repo `derrick/alienpc-community-pc` (`master`), and its remote URL carries a credential (monorepo Q6), so never run `git remote -v` or print that URL. Until `MONO-S6` passes smoke, Max stages one patch on the X3 instead of a pull:
      `git diff --binary 947aa26 <mono-sha> --relative=alienpc/community/ -- alienpc/community > /home/derekboone/evo-x3/_bridge/UNI-APPLY-ALIENPC-A.patch`
      and gives the patch sha256 in the launch message. (`mono` SHAs in it: `a808401`, `30f9997`, `df6815c`, `4c4d4a6`, `6129330`, `c0c9492`; all 10 files are new on AlienPc.)
-   - If `MONO-S6` already passed: `C:\AI\community` is a junction into the `mono` clone; skip the patch and run `git -C C:\AI\evo-x3 pull --ff-only` instead (then the same tests).
-4. **HELD — do NOT apply unless unlocked in chat before launch:**
-   - **`INV1`** (`hosts/alienpc/live/pi-agent/AGENTS.md` line 1 fix, mono `1e2dc13`): requires Derrick's master-copy choice (`C:\Users\derek\.pi\agent\AGENTS.md` vs `C:\AI\community\agent-shared\AGENTS.md`) answered in chat (Max records id).
-   - **`INV1b`** (`hosts/alienpc/live/pi-agent/AGENTS.md` line 35 scope rule, mono `79ccbc8`, DRAFT): requires Card 38 answered in chat (Max records id) before copying to `C:\Users\derek\.pi\agent\AGENTS.md` (backup `C:\AI\_archive\20261119\pi-agent\`).
+   - If `MONO-S6` already passed (switchover still OPEN): `C:\AI\community` is a junction into the `mono` clone; skip the patch and run `git -C C:\AI\evo-x3 pull --ff-only` instead (then the same tests).
+4. **Separate / held items — do NOT apply in this brief:**
+   - **`INV1`:** **superseded by `AGT1`** (Derrick 2026-11-19 12:29 CT, side chat: one file, master = `C:\Users\derek\.pi\agent\AGENTS.md`, community `agent-shared/AGENTS.md` becomes a pointer; separate apply, brief to follow).
+   - **`INV1b` (Card 38):** **APPROVED** (Derrick 2026-11-19 12:29 CT, side chat: brief from X3/Max, AlienPc Forge is the hands) — no longer held; **ships with `AGT1`** (separate apply, brief to follow).
    - **`S2` live hook into `comm.py` / `gpu_lock_gate.py`**: **HELD** — requires Card 6 answered in chat (Max records id) and a Derrick-approved commit to `scripts/allowlist_promoted.json` for any promoted template. Do **not** edit `comm.py` or the gate in this brief.
 
 ## Access & Lease
@@ -68,7 +68,7 @@ Authority: Derrick 2026-11-19 11:11/11:16 CT (Card 2 + Forge execution) and `rec
      git -C C:\AI\community diff HEAD~1 HEAD --stat -- scripts/comm.py templates/flux_stills_s2_kv.api.json
      ```
    - **DO NOT** hook `template_allowlist.py` into `scripts/comm.py` or `gpu_lock_gate.py`.
-   - **DO NOT** apply `INV1` or `INV1b` to `C:\Users\derek\.pi\agent\AGENTS.md` (leave both `SKIPPED (held - Needs before launch)` unless Derrick explicitly unlocked them before launch).
+   - **DO NOT** touch `C:\Users\derek\.pi\agent\AGENTS.md` in this brief (`INV1` is superseded by `AGT1`; approved `INV1b` ships with `AGT1` in a separate brief).
 ## Tests (CPU / offline only — no GPU, no ComfyUI; keep `PYTHONDONTWRITEBYTECODE=1` to avoid littering the dirty repo)
 
 1. **S2 pytest suite:**
