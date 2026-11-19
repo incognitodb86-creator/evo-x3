@@ -37,9 +37,12 @@ COMMUNITY_RUNS = COMMUNITY_DIR / "runs"
 RQ_PY = HOME / "AI" / "render" / "x3" / ".venv" / "bin" / "python"
 NTFY_TOKEN_FILE = HOME / ".config" / "evo-x3" / "ntfy-x3.token"
 NTFY_URL = "https://qnap.tailf242b2.ts.net:8447/renders-a7gma8xg"
-# P5.3: AlienPC Swift when the X3 render lock is free at job start; one resume on the X3 after a failed request.
+# H1c: X3 Gufo is primary for code/review; AlienPC Swift (ESP off) is used only when both X3 Gufo sessions are busy
+# (or opportunistic mode is enabled) AND AlienPC :8447 (--fail-if-busy) probes idle, with 1-way X3 --continue resume.
 X3_RENDER_LOCK = HOME / "AI" / "locks" / "gpu-render.lock"
-ALIENPC_MODEL = "alienpc/coding_swift15_iq3s_esp"
+ALIENPC_MODEL = os.environ.get("PI_JOB_ALIENPC_MODEL", "alienpc/coding_swift15_iq3s")
+ALIENPC_GATE_URL = os.environ.get("PI_JOB_ALIENPC_GATE_URL", "https://alienpc.tailf242b2.ts.net:8447/health")
+X3_GUFO_SLOTS_URL = os.environ.get("PI_JOB_X3_GUFO_SLOTS_URL", "http://127.0.0.1:8080/upstream/flash-next-uncensored-v2/slots")
 RESUME_PROMPT = "Continue from where you stopped and finish the task."
 # 2026-11-19 hermesflow (Derrick t2572u/t2572s9151): Hermes chat shows the still Render picked + the full prompt, the
 # user's in-chat yes queues it (`pi-job approve`), and the 2x upscaled video comes back as a renders-share link.
@@ -267,6 +270,33 @@ def _x3_render_lock_free() -> bool:
         os.close(fd)
 
 
+def _alienpc_gate_idle(timeout: float = 3.0) -> bool:
+    """True only when X3 render lock is free AND AlienPC :8447 (--fail-if-busy) reports idle (2xx)."""
+    if not _x3_render_lock_free():
+        return False
+    req = urllib.request.Request(ALIENPC_GATE_URL, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+
+def _x3_gufo_sessions_busy(timeout: float = 2.0) -> bool:
+    """True when X3 Gufo's 2 resident sessions are both actively processing."""
+    req = urllib.request.Request(X3_GUFO_SLOTS_URL, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if not (200 <= resp.status < 300):
+                return False
+            slots = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        return False
+    if not isinstance(slots, list) or len(slots) < 2:
+        return False
+    return all(isinstance(s, dict) and bool(s.get("is_processing")) for s in slots)
+
+
 def _last_stop_reason(run_dir: Path) -> str | None:
     """stopReason of the last assistant message in the newest pi session file in run_dir (P5.3 tested: a 503
     after pi's 2 retries ends rc=1 with stopReason 'error')."""
@@ -286,9 +316,10 @@ def _last_stop_reason(run_dir: Path) -> str | None:
 
 
 def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple[int, str]:
-    """P5.3: AlienPC first when the X3 render lock is free, else the launcher's X3 default. If the AlienPC run
-    stops on a failed request (503 from the fail-fast gate or any error), resume once on the X3 in the same
-    session (--continue picks the newest session in run_dir). Never moves back to the AlienPC."""
+    """H1c: X3 Gufo is primary for code/review. Route to AlienPC Swift (ESP off) only when AlienPC :8447 probes idle
+    AND either both X3 Gufo sessions are busy or PI_JOB_OPPORTUNISTIC_ALIENPC=1 is set. If an AlienPC run stops on a
+    failed request (503 from the fail-fast gate or any error), resume once on the X3 in the same session (--continue).
+    Never moves back to the AlienPC."""
     def run(extra: list[str], text: str, model: str | None) -> int:
         env = dict(os.environ)
         if model:
@@ -300,7 +331,8 @@ def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple
         return subprocess.run(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=logf,
                               stderr=subprocess.STDOUT).returncode
 
-    if not _x3_render_lock_free():
+    want_alienpc = _x3_gufo_sessions_busy() or os.environ.get("PI_JOB_OPPORTUNISTIC_ALIENPC") == "1"
+    if not (want_alienpc and _alienpc_gate_idle()):
         return run([], prompt, None), "x3"
     rc = run([], prompt, ALIENPC_MODEL)
     if rc == 0:
