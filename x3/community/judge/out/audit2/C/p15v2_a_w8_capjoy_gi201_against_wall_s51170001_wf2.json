@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical rough cave wall, lighting, and background elements as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same build, skin tone, hair, and clothing across all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "By frame 8, bodies are not in standing position against wall; elf is leaning back, orc is still behind her."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals without fusion or missing parts."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0008,
+  "target_reached": 0.7754,
+  "anatomy_defect": 0.0771
+ },
+ "finish": "stop",
+ "flags": [
+  "target_reached"
+ ],
+ "tag": "p15v2_a_w8_capjoy_gi201_against_wall_s51170001_wf2"
+}

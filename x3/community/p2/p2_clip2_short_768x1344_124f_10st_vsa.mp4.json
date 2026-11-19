@@ -1,0 +1,20 @@
+{
+ "phase": "P2",
+ "image": "FD006 (ALI-80 approved)",
+ "prompt_file": "ali80 prompts/clip2_short.txt",
+ "w": 768,
+ "h": 1344,
+ "frames": 124,
+ "steps": 10,
+ "sampler": "euler/simple",
+ "shift": "10/3",
+ "vsa": true,
+ "seed": 51050001,
+ "unet": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+ "tag": "p2_clip2_short_768x1344_124f_10st_vsa",
+ "secs": 160.3,
+ "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\p2_clip2_short_00001_.mp4",
+ "file": "C:\\AI\\community\\p2\\p2_clip2_short_768x1344_124f_10st_vsa.mp4",
+ "prompt_id": "3774d9e4-1c3f-4a52-8914-c535dd31d412",
+ "finished": "2026-10-20 10:42 CT"
+}

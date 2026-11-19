@@ -1,0 +1,42 @@
+ALI-147 PV2-6 report probe 2 (K1 / KV31 gates) - 2026-10-23 01:08:43  READ-ONLY
+
+== the K1 card (PV2-4 gate C)
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\models\loras\h3\Vagina_minimax-h3_epoch20.safetensors exists=False
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\models\loras\Vagina_minimax-h3_epoch20.safetensors exists=False
+PASS  no h3\Vagina_minimax-h3_epoch20.safetensors in the runtime loras tree = PV2-4 gate C is not met
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\models\loras listing: ['.cache', 'HMNSFW-AIO-V2.5.safetensors', 'Kutan Megamalamar Transformation.metadata.json', 'Kutan Megamalamar Transformation.safetensors', 'MM-H3 - Blowjob v3.safetensors', 'MS_real_and_Details_klein.metadata.json', 'MS_real_and_Details_klein.safetensors', 'Mesh_dress_experimental.safetensors', 'MysticXXX_MMH3-V4.safetensors', 'Mystic_XXX_RuinedFocus.metadata.json', 'Mystic_XXX_RuinedFocus.safetensors', 'NSFW_MASTER_FLUX.metadata.json', 'NSFW_MASTER_FLUX.safetensors', 'PenisV2_minimax-h3_epoch60.safetensors', 'SexGod_DoggyStyle_Thrust.safetensors', 'ZI_Hands_v2.1.safetensors', 'aidmaNSFWunlock_v2.metadata.json', 'aidmaNSFWunlock_v2.safetensors', 'bfs_head_v1_flux-klein_9b_step3750_rank64.safetensors', 'clothes_remover_v0.safetensors', 'h3_antiburn_universal_v1.safetensors', 'hm_nsfw_mis_doggy_only_v16_r32_384_minimax-h3_epoch170.safetensors', 'klein_snofs_v1_1.safetensors', 'klein_snofs_v1_4.safetensors', 'put_loras_here', 'recipes', 'refcontrol_pose.safetensors', 'saliva_juice_fluid_on_penis_v0.0.0.metadata.json', 'saliva_juice_fluid_on_penis_v0.0.0.safetensors', 'submissive_blowjob_SDXL-000019.metadata.json', 'submissive_blowjob_SDXL-000019.safetensors']
+  'vagina' name search under models\loras: []
+  'snofs' name search under models\loras: [('C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\\models\\loras\\klein_snofs_v1_1.safetensors', 1090563760), ('C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\\models\\loras\\klein_snofs_v1_4.safetensors', 1090563760)]
+  'snofs' name search under ComfyUI\input: []
+
+== the SNOFS reference image named by PV2-4/PV2-5 (looked for by NAME, no download)
+  'sno' name search under C:/Users/derek/5slock/approved_characters: []
+  'sno' name search under C:/Users/derek/5slock/plans: []
+  b3_p04 reference-image candidates in approved_characters\REF_SHEETS_2026-10-19: ['CHARACTER.md', 'CONTACT_SHEET.jpg', 'MANIFEST.csv', 'RS001.jpg', 'RS002.jpg', 'RS003.jpg', 'RS004.jpg', 'RS005.jpg', 'RS006.jpg', 'RS007.jpg', 'RS008.jpg', 'RS009.jpg', 'RS010.jpg', 'RS011.jpg', 'RS012.jpg', 'RS013.jpg', 'RS014.jpg', 'RS015.jpg', 'RS016.jpg', 'RS016_portrait_1152x2016.png']
+  approved_characters\POOL: ['CHARACTER.md', 'CHARACTER.md.bak-0822', 'CHARACTER.md.bak-1018', 'CHARACTER.md.bak-1019', 'CHARACTER.md.bak-20261019-1125', 'CHARACTER.md.bak-20261019-1126', 'CHARACTER.md.bak-alienpc-20261019-2010', 'COND_POOL_BIKINI_PORTRAIT.jpg', 'POOL_face_crop_250.png', 'POOL_face_up_1024.png', 'flow_more_2026-10-19']
+
+== the KV31 card (PV2-5 gate C)
+  path C:/Users/derek/cufy/gemma4-3b-export/cards/qwen-image-2-9b/kv31_inference_master.safetensors exists=False
+  'kv31' name search under C:/Users/derek/cufy: []
+  'inference_master' search under cufy: []
+
+== PV2-5 prompt file (the Klein prompt named by the spec/TASKS)
+  stillfix_A_anatomy_ref_klein.txt exists=False
+  stillfix_B_matte_skin_klein.txt exists=False
+  v2_rs016_c1_r2v.txt exists=False
+  v2_seg1_c1_r2v_fix1.txt exists=False
+  specs\prompt_v2 listing: ['SHA256SUMS.txt', 'v2_seg1_c0_r2v.txt', 'v2_seg1_c1_t2va.txt', 'v2_seg3_c0_r2v.txt', 'v2_seg3_c1_t2va.txt']
+
+== PV2-4 / PV2-5 spec text (specs\ali147.md, the K1 and KV31 arms)
+
+== budget gate for any further GPU job (ralph.ps1 reads this file)
+  p7_budget.json {"cap_min": 390, "job_cap": 27, "jobs": 26, "updated": "2026-10-23T00:06:22", "used_min": 375.3}
+  remaining minutes = 14.7 of cap 390 ; jobs 26 of job_cap 27
+  PV2-4/PV2-5 estimated GPU cost = a Klein 9B bf16 image render (the spec/TASKS estimate 30-40 min wall, NOT a 60 min video)
+PASS  remaining budget minutes (14.7) < the PV2-5 KV31 render estimate (30-40 min) = the budget gate would refuse it in this run
+PASS  job_cap has 1 slot(s) left (so the minutes, not the job count, is the binding gate)
+
+== the PV2-4/PV2-5 lines as written in TASKS.md (the gate the line itself imposes)
+
+TOTAL PASS=3 FAIL=0
+ALL CHECKS PASS

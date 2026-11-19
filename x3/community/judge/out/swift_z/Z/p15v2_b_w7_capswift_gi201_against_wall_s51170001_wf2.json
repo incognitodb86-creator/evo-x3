@@ -1,0 +1,53 @@
+{
+ "frames": [
+  229,
+  332
+ ],
+ "diffs": [
+  11.32,
+  11.0
+ ],
+ "per_frame": [
+  {
+   "frame": 229,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting conditions, and overall setting remain consistent between the two images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "No anatomical defects are visible; limbs, bodies, and contact areas appear structurally normal in both frames."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0835,
+    "anatomy_defect": 0.42
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 332,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background environment, lighting, and setting remain consistent between the two images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "No anatomical defects are visible; limbs, bodies, and features appear structurally normal in both frames."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.084,
+    "anatomy_defect": 0.4377
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w7_capswift_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 33.7
+}

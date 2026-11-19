@@ -1,0 +1,53 @@
+{
+ "frames": [
+  6,
+  250
+ ],
+ "diffs": [
+  42.43,
+  11.35
+ ],
+ "per_frame": [
+  {
+   "frame": 6,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "The scene is mirrored horizontally; the wall and characters switch sides, indicating a flipped image rather than the same continuous view."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "The male character's genitalia appears as a detached, floating tube-like object between his thigh and her buttocks."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.5956,
+    "anatomy_defect": 0.8453
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 250,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background features the same rocky cave walls, lighting conditions, and general environment in both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomy appears consistent with no visible melting, extra limbs, or malformed body parts in the second frame."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.2661,
+    "anatomy_defect": 0.5435
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w2_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.3
+}

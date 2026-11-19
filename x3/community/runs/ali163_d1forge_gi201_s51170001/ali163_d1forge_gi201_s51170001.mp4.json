@@ -1,0 +1,12 @@
+{
+ "run": "ali163_d1forge_gi201_s51170001",
+ "attempt": 0,
+ "label": "METHOD_ONLY",
+ "plan": "ALI-147",
+ "tag": "ali163_d1forge_gi201_s51170001",
+ "secs": 240.2,
+ "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali163_d1forge_gi201_s51170001\\ali163_d1forge_gi201_s51170001_00001_.mp4",
+ "file": "C:/AI/community/runs/ali163_d1forge_gi201_s51170001\\ali163_d1forge_gi201_s51170001.mp4",
+ "prompt_id": "a7735c64-e1ee-4305-9e24-bd891edb6cb8",
+ "finished": "2026-10-26 14:21 CT"
+}

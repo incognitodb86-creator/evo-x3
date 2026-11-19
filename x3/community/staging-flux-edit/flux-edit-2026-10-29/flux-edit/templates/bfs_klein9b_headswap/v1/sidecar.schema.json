@@ -1,0 +1,16 @@
+{
+ "required": [
+  "tag",
+  "arm",
+  "seed",
+  "template",
+  "template_version",
+  "workflow_api_sha256",
+  "body_sha256",
+  "head_sha256",
+  "out_sha256",
+  "out_wh",
+  "secs",
+  "prompt_id"
+ ]
+}

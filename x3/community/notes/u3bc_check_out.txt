@@ -1,0 +1,101 @@
+﻿### 0. files ###
+PASS exists: C:\Users\derek\5slock\ralph-community\talk\talk-persona.md | 4756 B sha8 8FAEF133
+PASS exists: C:\AI\community\talk\talk.ps1 | 8376 B sha8 D2B25D6C
+PASS exists: C:\AI\community\notes\_u3c\u3c_run.ps1 | 3132 B sha8 EEF04868
+PASS exists: C:\AI\community\notes\2026-10-29-U3c-compare.md | 45807 B sha8 62144191
+FAIL exists: C:\AI\community\notes\2026-10-29-U3bc-U5-DONE.md | MISSING
+
+### ITEM 5 - U3b, the look link ###
+PASS the persona names exactly one character-reference folder, as one plain appearance bullet | named=['POOL'], 'How you look' section=True
+PASS [item 5 plan check] the folder path named in the persona exists on disk | C:\Users\derek\5slock\approved_characters\POOL
+PASS that folder is the pool-blonde one, and the older folder of the same kind exists and is NOT named | named=POOL ; older folder of that kind present at C:\Users\derek\5slock\approved_characters\sydney ; 0 references in the persona
+PASS the folder carries the card and the start frame the render path uses | CHARACTER.md=3867 B, start frame=881929 B, 5 entries
+PASS the card states an adult, so the adults-only gate has something to check | card 3867 B, first line: # POOL: Pool blonde (COND_POOL_BIKINI_PORTRAIT)
+PASS the appearance text is exactly one plain bullet, quote-free, and carries no chat-tone word | lines=1, tone words=0
+PASS the persona carries no character that breaks native argv quoting (the U3 quoting guard cannot fire) | persona 4756 B sha8 8FAEF133
+PASS [item 5] the launcher accepts the persona as it stands (DryRun rc=0, access=fullaccess, the persona is not echoed) | rc=0
+PASS [item 5 plan: no look text in render prompts] no render prompt, graph, JOB_REQUEST, run dir, spec or render script carries the appearance text | hits=[] over 1551 render-side files
+PASS [lane-side check, the 5:32 PM rule] the lane's own AGENTS.md carries the same appearance line verbatim, naming the same folder - so the look link is live in a chat that starts in that folder | lane AGENTS.md 10669 B sha8 CC7DFEA9, appearance lines=1, names=['POOL']
+PASS [lane-side check] the persona and the lane's AGENTS.md both carry the keep-list rules (full access, adults only, no minors, no tone into a render prompt, the lock rule) | missing persona=[] lane=[]
+PASS [lane-side fact, printed not failed] the identity text in the lane's folder is the lane's own private copy, so it differs from the repo persona by design (Derek ~6:05 PM CT; the 5:32 PM rule keeps that folder out of Max's reads): the persona is what the launcher injects, the lane's AGENTS.md is what a chat started in that folder loads | lane AGENTS.md=10669 B vs persona=4756 B; extra lane sections present=True
+FAIL [item 5 plan check] 0 tone words in any strict instruction surface (loop PROMPT.md, the three AGENTS.md files, ralph.ps1, the launcher, the runner, both skill trees, prompt templates, specs, the render-prompt tree) beyond the two pre-existing fictional-character rules that name a rendered character's folder | strict files scanned=1573, tone hits=103, unexplained=[('b7_sydney_anal_20261028_s51082051.api.json', 83), ('b7_sydney_anal_20261028_s51082051.api.json', 344), ('b7_sydney_anal_20261028_s51082051.mp4.json', 2), ('b7_sydney_anal_20261028_s51082051.mp4.json', 6), ('b7_sydney_anal_20261028_s51082051.mp4.json', 8), ('b7_sydney_anal_20261028_s51082051.mp4.json', 9)]
+PASS [item 5 plan check] no strict surface carries a tone word introduced today by this unit | hits=[]
+   [strict] C:\Users\derek\.pi\agent\skills\alienpc-pi-rules\SKILL.md L12 [10-28 17:02] 3. **Fictional characters only.** Name characters by their folder name (for example SYDNEY). Never use, guess, or write a real per
+        reason: PRE-EXISTING-FIXED (Oct 28): a fictional-character rule names a rendered character's FOLDER - a character name, not tone text, and it predates this unit
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\b7_sydney_anal_20261028_s51082051.api.json L83 [10-28 10:31] "image": "community/SYDNEY_768x1344.png"
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\b7_sydney_anal_20261028_s51082051.api.json L344 [10-28 10:31] "filename_prefix": "community/b7_sydney_anal_20261028_s51082051/b7_sydney_anal_20261028_s51082051_seg1",
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\b7_sydney_anal_20261028_s51082051.mp4.json L2 [10-28 10:43] "run": "b7_sydney_anal_20261028_s51082051",
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\b7_sydney_anal_20261028_s51082051.mp4.json L6 [10-28 10:43] "tag": "b7_sydney_anal_20261028_s51082051",
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\b7_sydney_anal_20261028_s51082051.mp4.json L8 [10-28 10:43] "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\b7_sydney_anal_20261028_s51082051\\b7_syd
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\b7_sydney_anal_20261028_s51082051.mp4.json L9 [10-28 10:43] "file": "C:/AI/community/runs/b7_sydney_anal_20261028_s51082051\\b7_sydney_anal_20261028_s51082051.mp4",
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\build_graph.log L3 [10-28 10:30] 2026-10-28 10:30:58 CT vsa=vsa keep_percent=10 attention=comfy kitchen attention ref_image_size=match cond=community/SYDNEY_768x13
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\build_graph.log L8 [10-28 10:30] 2026-10-28 10:30:58 CT graph written to C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\request.api.json
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\build_graph.py L1 [10-28 10:30] """Build request.api.json for the beta 7 Sydney anal cell.
+        reason: pre-existing record (mtime before this unit's 17:30 START): history this unit does not rewrite
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\build_graph.py L13 [10-28 10:30] BASE = r"C:\AI\community\runs\b7_sydney_strip_20261028_s51082028\request.api.json"
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   [strict] C:\AI\community\runs\b7_sydney_anal_20261028_s51082051\objective.json L2 [10-28 10:43] "tag": "b7_sydney_anal_20261028_s51082051",
+        reason: a render/character record naming the approved_characters FOLDER (a rendered character, not this persona)
+   scan: 343 tone-word hits over 4496 files; strict=103, memory rows=53, path/agent-name uses=63, lane-dir=89, records=94
+   memory rows (files, counts): {'MEMORY.md': 17, 'SCRATCHPAD.md': 1, '2026-10-29.md': 34, '965bc5fd-93d5-430c-acef-ce3221a20bef.json': 1}
+PASS [item 5] every tone-word hit on the box carries a printed reason | unexplained=0 []
+FAIL [item 5] this unit's own records (actions.log lines, progress.md, the launcher, the runner, the task texts, the builders, this script, the result note) carry no chat tone: 0, apart from the printed classes (a folder/agent path name, and the two pre-existing fictional-character rules) | hits=[('actions.log', 90, '2026-10-29 12:35 CT | MAX item 6 U3c START (Derrick 12:20 CT via Max: keep the two Sydneys'), ('actions.log', 112, "2026-10-29T15:25 Sydney (talk lane): swift judge TEST ONLY (Derrick's ask) - added --model"), ('actions.log', 113, "2026-10-29T16:23 Sydney (talk lane): lora base-model verify + fictional-alias COPY (Derek'"), ('u3bc_check.py', 256, 'PATHY = re.compile(r"(?i)(C:[\\\\/]+Users[\\\\/]+derek[\\\\/]+sydney|approved_?characters|worksp'), ('u3bc_check.py', 258, 'r"agent=\'?sydney\'?)")'), ('u3bc_check.py', 259, 'AUTHOR = re.compile(r"^(?:\\d{4}-\\d{2}-\\d{2}[ T]\\d\\d:\\d\\d(?::\\d\\d)?\\s*(?:CT\\s*\\|)?\\s*)?(?:M'), ('build_compare.py', 123, '"*keep them separate, but I want the 2nd Sydney to have full access and authority same as ')]
+PASS [items 5+6] the tick lines this unit writes carry no tone word | hits=[]
+FAIL the appearance line lives in exactly two non-backup files: the persona home and the lane's own AGENTS.md; in no loop instruction surface and no render prompt | files=['..\\..\\..\\..\\AI\\community\\notes\\u3bc_check.py', 'talk\\talk-persona.md', '..\\..\\.pi\\agent\\memory\\daily\\2026-10-29.md', '..\\..\\sydney\\AGENTS.md', '..\\..\\forge\\ralph-community\\talk\\talk-persona.md']
+
+### ITEM 6 - U3c, the full-access lane and the side-by-side test ###
+FAIL [item 6] the launcher's own header states the tone-word rule it obeys, and the file names the lane's name nowhere in its code (item 4's invariant, restored by the 20:1x CT scrub; pre-edit bytes in talk.ps1.bak-20261029-u3c-scrub) | code tone words=0
+PASS [item 6 check] the full-access lane runs (DryRun rc=0, access=fullaccess) | rc=0
+PASS [item 6 check] full-access adds no extension pin, no discovery-off flag, no policy-dir override, names no config file - so the lane loads the same extensions, skills, tools and permissions as a plain main chat | argv=2026-10-29T20:14:25 DRYRUN access=fullaccess gpu_wait=0 lock_taken=no argv: pi --print --provider llama-swap --model coding_swift15_iq3s_esp --session-dir C:\Users\derek\5slock\ralph-community\talk\se
+PASS [item 6 check] the lane's argv is the main chat's pi plus exactly the model entry, its own session dir, the persona and the task text - and nothing else | flags=['--append-system-prompt', '--model', '--print', '--provider', '--session-dir'] model=coding_swift15_iq3s_esp cwd_flag=True
+PASS [item 6] the model entry is the loop's llama-swap/coding_swift15_iq3s_esp, read out of ralph.ps1 (one model, no config edit)
+PASS [item 6] the A/B switch works: -Restricted reproduces the pre-U3c lane (discovery off, the two extension pins, the loop's policy dir) from this one file | rc=0
+PASS [item 6 keep] the permission policy resolves to the file the main chat reads: this process carries no PI_PERMISSION_SYSTEM_POLICY_AGENT_DIR and full-access deletes the override, so both sides read the user policy | user policy 35910 B sha8 19716809
+PASS [item 6 keep: no secrets] the shared policy carries the secret-shaped denies (counted; values never printed) | deny mentions=364
+FAIL [item 6] every package the launcher's header names is installed here (the parity claim is not aspirational) | named=6 installed=5
+PASS [item 6] the skills trees the main chat loads exist and are non-empty, and the lane adds no skills path of its own | skill files per tree={'skills': 7}
+PASS [item 6 keep: separate chat] the lane keeps --append-system-prompt and its own session dir; the loop and the main chat keep theirs
+PASS [item 6 keep] the launcher never takes the lock: no gpu_lock call in its code, only the read-only gpu_guard.ps1
+PASS [item 6 keep: one render at a time] a live-PID lock makes the full-access lane refuse (rc=3) and it never takes the lock | rc=3
+PASS [item 6 keep: one render at a time] while the lock is held the lane queues, then defers (bounded), lock bytes intact | rc=3
+PASS the check removed its own synthetic lock and the lane made no model call (no session file added)
+PASS [item 6 keep] the rule stays in the persona: Adults only
+PASS [item 6 keep] the rule stays in the persona: no minors
+PASS [item 6 keep] the rule stays in the persona: Never put persona or tone text int
+PASS [item 6 test] the tasks ran on both sides - the 3 the plan names (a render prompt from the POOL still, a file edit, a commit message) plus the 2 keep-probes - and every run exited 0 | runs=10 tasks=[1, 2, 3, 4, 5] rcs=[0]
+PASS [item 6 test] both sides produced non-empty output for every task | sizes={(1, 'main'): 20318, (1, 'lane'): 26320, (2, 'main'): 924, (2, 'lane'): 1322, (3, 'main'): 2332, (3, 'lane'): 1336, (4, 'main'): 1386, (4, 'lane'): 2362, (5, 'main'): 2262, (5, 'lane'): 2692}
+PASS [item 6 test] the file-edit task is proved on disk: both targets read target = 7 with exactly the four original lines and nothing else (reset to sha8 0B13E858 first; the files are named main_/lane_ per the neutral-name rule) | verified={'main': True, 'lane': True} sha8={'main': 'B7D40C5C', 'lane': 'B7D40C5C'}
+PASS [item 6 test] the compare note exists at the path item 6 names, carries both sides' answer for every task, and is cited by the tick line | note=45807 B, per-task pairs cited=5
+PASS [item 6 test] the compare note states the method, the shared model, and the honest limits (one-shot runs, different cwds, no vision, shared CPU model) | markers=4/4
+PASS [item 6 test] the test's own one-shot sessions were found on both sides (5 lane + 5 main) | lane=6 main=8
+FAIL [item 6 proof] every lane test session carries the whole persona (the tone and the look reach the model) | persona-carrying=0/6
+PASS [item 6 proof] every lane test session ran provider=llama-swap model=coding_swift15_iq3s_esp with cwd = the loop dir (one model, no config edit) | distinct=[('llama-swap', 'coding_swift15_iq3s_esp', 'C:\\Users\\derek\\5slock\\ralph-community')]
+PASS [item 6 proof] no main-chat test session carries the persona, and the two session stores are different directories | persona-free=8/8
+PASS [item 6 parity] the lane used the same core tool set the main chat used in these runs (read, ls, grep, write, edit, shell) | lane={'read': 14, 'ls': 2, 'memory_search': 1, 'grep': 2, 'write': 1, 'powershell': 5, 'edit': 1} main={'powershell': 7, 'read': 28, 'grep': 7, 'ls': 6, 'write': 1, 'edit': 2, 'find': 1, 'memory_search': 1}
+PASS [item 6 parity] the skills visible inside the lane equal those visible inside the main chat (task 4, names only) | main=10 lane=10 equal=True
+PASS [item 6 keep: no secrets] both sides named the same secret rule from inside their own session and printed no value
+PASS [item 6 keep: adults only] both sides stated the adults-only / no-minors rule unprompted (task 4)
+PASS [item 5+6] the lane kept chat tone out of the artefact it was asked to produce: its render prompt carries no tone word (its chat wrapper does, which is where the persona puts it) | lane prompt words=2055, tone in prompt=0, tone in wrapper=1
+PASS [item 6] both render prompts are the box's shape: the four H3 sections, the hand lock, and beats that run to the 243-frame/10.125 s ask, with no overall_soundscape block (R7) in either | main prompt words=1643 lane prompt words=2055
+
+### U5 second check ###
+PASS [U5 check 1] the lean PROMPT.md is <= 2 KB | 1971 B
+FAIL [U5 check 2] this unit wrote one loop log (the -Max 1 pass) | logs at/after 17:30=[]
+
+### guards (the plan's keep list) ###
+PASS gpu_guard is IDLE at the end: this unit started no GPU work | IDLE
+PASS no render run dir exists from today | new=[]
+PASS [youth guard] the adults gate is untouched and passes (26 passed) | 26 passed in 4.09s
+PASS [web saves] the provenance guard is CLEAN | CLEAN: C:/AI/community/notes/web - every *.json parses (json.tool-safe), 174 checked
+PASS the loop's own session store gained nothing from this unit
+
+== 55/63 PASS
+VERDICT: PROBLEMS: exists: C:\AI\community\notes\2026-10-29-U3bc-U5-DONE.md; [item 5 plan check] 0 tone words in any strict instruction surface (loop PROMPT.md, the three AGENTS.md files, ralph.ps1, the launcher, the runner, both skill trees, prompt templates, specs, the render-prompt tree) beyond the two pre-existing fictional-character rules that name a rendered character's folder; [item 5] this unit's own records (actions.log lines, progress.md, the launcher, the runner, the task texts, the builders, this script, the result note) carry no chat tone: 0, apart from the printed classes (a folder/agent path name, and the two pre-existing fictional-character rules); the appearance line lives in exactly two non-backup files: the persona home and the lane's own AGENTS.md; in no loop instruction surface and no render prompt; [item 6] the launcher's own header states the tone-word rule it obeys, and the file names the lane's name nowhere in its code (item 4's invariant, restored by the 20:1x CT scrub; pre-edit bytes in talk.ps1.bak-20261029-u3c-scrub); [item 6] every package the launcher's header names is installed here (the parity claim is not aspirational); [item 6 proof] every lane test session carries the whole persona (the tone and the look reach the model); [U5 check 2] this unit wrote one loop log (the -Max 1 pass)

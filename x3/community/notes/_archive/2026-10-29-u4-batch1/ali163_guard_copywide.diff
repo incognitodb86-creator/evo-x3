@@ -1,0 +1,130 @@
+diff --git a/.pi/extensions/headless-guard-and-truncate.ts.bak-20261023-copywide b/.pi/extensions/headless-guard-and-truncate.ts
+index 131a3e2..276edac 100644
+--- a/.pi/extensions/headless-guard-and-truncate.ts.bak-20261023-copywide
++++ b/.pi/extensions/headless-guard-and-truncate.ts
+@@ -227,7 +227,7 @@ export interface Allowlist {
+ 	denyReasons?: Record<string, string>;
+ 	git?: { subcommands?: string[] };
+ 	python?: { modules?: string[]; scriptRoots?: string[] };
+-	copyItem?: { sourceRoots?: string[]; destRoots?: string[] };   // ALI-163 (2026-10-23)
++	copyItem?: { sourceRoots?: string[]; destRoots?: string[]; protectRoots?: string[]; imageExts?: string[] };   // ALI-163 (2026-10-23; copywide 11:09 AM CT)
+ }
+ 
+ // Where to look for the JSON. Pi's extension loader does not always expose import.meta.url/dirname, so fall back to
+@@ -602,32 +602,37 @@ function checkArgs(name: string, args: string[], tool: string, al: Allowlist, st
+ 		}
+ 		return allowBlock("git-subcommand", `git ${sub || "(none)"} is not allowed. Allowed: git ${(al.git?.subcommands ?? []).join(", ")}. Commit/push/reset are the supervisor's.`);
+ 	}
+-	// ALI-163 (Derrick 2026-10-23 batch): Copy-Item only copies ONE literal approved still into the hc input folder
+-	// (allowlist copyItem.sourceRoots -> destRoots); only -Path/-LiteralPath/-Destination; never overwrites an existing file.
++	// ALI-163 copywide (Derrick 2026-10-23 11:09 AM CT "Yes don't be so restrictive to forge wtf"): Copy-Item copies image files
++	// (.png/.jpg/.jpeg/.webp; wildcards ok) from ComfyUI/output (any subfolder; approved stills still allowed) into ComfyUI/input (any subfolder).
++	// Only two hard limits: the destination must be under ComfyUI/input, and nothing in 5slock/approved_characters is ever overwritten.
+ 	if (name === "copy-item") {
+ 		const cfg = al.copyItem;
+ 		if (!cfg) return allowBlock("copy-item", "Copy-Item is not configured in the allowlist.");
++		const srcs: string[] = [];
+ 		const pos: string[] = [];
+-		let src = "";
+ 		let dst = "";
+ 		for (let k = 0; k < raw.length; k++) {
+ 			const f = raw[k].toLowerCase();
+-			if (f === "-path" || f === "-literalpath" || f === "-lp") { src = raw[++k] ?? ""; continue; }
++			if (f === "-path" || f === "-literalpath" || f === "-lp") { srcs.push(raw[++k] ?? ""); continue; }
+ 			if (f === "-destination") { dst = raw[++k] ?? ""; continue; }
+-			if (f.startsWith("-")) return allowBlock("copy-item", `Copy-Item ${raw[k]} is not allowed (only -Path/-LiteralPath and -Destination).`);
++			if (f === "-force" || f === "-passthru" || f === "-recurse") continue;
++			if (f.startsWith("-")) return allowBlock("copy-item", `Copy-Item ${raw[k]} is not allowed (use -Path/-LiteralPath, -Destination, -Force, -Recurse, -PassThru).`);
+ 			pos.push(raw[k]);
+ 		}
+-		if (!src && pos.length) src = pos.shift() as string;
++		if (!srcs.length && pos.length) srcs.push(pos.shift() as string);
+ 		if (!dst && pos.length) dst = pos.shift() as string;
+-		if (!src || !dst || pos.length) return allowBlock("copy-item", "Copy-Item needs exactly one source and one destination.");
+-		if ([src, dst].some((x) => /[*?\[\]$`]/.test(x))) return allowBlock("copy-item", "Copy-Item paths must be literal (no wildcards or variables).");
++		const list = srcs.flatMap((x) => x.split(",")).map((x) => unquote(x.trim())).filter(Boolean);
++		if (!list.length || !dst || pos.length) return allowBlock("copy-item", "Copy-Item needs a source (image file or wildcard) and one destination.");
++		if ([...list, dst].some((x) => /[$`]/.test(x))) return allowBlock("copy-item", "Copy-Item paths must not use variables or subexpressions.");
+ 		const sr = cfg.sourceRoots ?? [];
+ 		const dr = cfg.destRoots ?? [];
+-		if (!underRoot(src, sr, state.cwd)) return allowBlock("copy-item", `Copy-Item source must be under ${sr.join(", ")}.`);
++		const exts = (cfg.imageExts ?? [".png", ".jpg", ".jpeg", ".webp"]).map((x) => x.toLowerCase());
++		for (const s of list) {
++			if (!underRoot(s, sr, state.cwd)) return allowBlock("copy-item", `Copy-Item source must be under ${sr.join(", ")}.`);
++			if (!exts.some((x) => s.toLowerCase().endsWith(x))) return allowBlock("copy-item", `Copy-Item copies image files only (${exts.join(", ")}): ${s}`);
++		}
+ 		if (!underRoot(dst, dr, state.cwd)) return allowBlock("copy-item", `Copy-Item destination must be under ${dr.join(", ")}.`);
+-		const d = normPath(dst, state.cwd);
+-		const target = dr.some((r) => normPath(r, state.cwd).replace(/\/+$/, "") === d) ? `${d}/${basename(normPath(src, state.cwd))}` : d;
+-		if (existsSync(target)) return allowBlock("copy-item", `Copy-Item would overwrite ${target}; never overwrite.`);
++		if (underRoot(dst, cfg.protectRoots ?? [], state.cwd)) return allowBlock("copy-item", `Copy-Item may never write into ${(cfg.protectRoots ?? []).join(", ")}.`);
+ 		return null;
+ 	}
+ 	// ALI-163: ffmpeg/ffprobe on local files only - no URL/protocol arguments (network), no -y overwrite, no -listen.
+
+diff --git a/.pi/extensions/headless-guard-allowlist.json.bak-20261023-copywide b/.pi/extensions/headless-guard-allowlist.json
+index 6c8f02c..ebf43f3 100644
+--- a/.pi/extensions/headless-guard-allowlist.json.bak-20261023-copywide
++++ b/.pi/extensions/headless-guard-allowlist.json
+@@ -52,9 +52,12 @@
+ 		"subcommands": ["status", "diff", "log", "show", "rev-parse", "ls-files", "blame", "grep", "shortlog", "describe", "cat-file"]
+ 	},
+ 	"_ali163": "Derrick 2026-10-23 batch (ALI-163): powershell copy-item = one literal approved still -> the hc input folder only, no flags but -Path/-LiteralPath/-Destination, never overwrite; ffmpeg/ffprobe = local files only (no URLs/protocols, -y, -listen). Checked in headless-guard-and-truncate.ts checkArgs.",
++	"_ali163_copywide": "Derrick 2026-10-23 11:09 AM CT \"Yes don't be so restrictive to forge wtf\": Copy-Item may copy image files (.png/.jpg/.jpeg/.webp, wildcards ok) from ComfyUI/output (any subfolder) or approved_characters into ComfyUI/input (any subfolder). Limits: destination under ComfyUI/input only; approved_characters is never written.",
+ 	"copyItem": {
+-		"sourceRoots": ["C:/Users/derek/5slock/approved_characters"],
+-		"destRoots": ["C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input/community/hc"]
++		"sourceRoots": ["C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/output", "C:/Users/derek/5slock/approved_characters"],
++		"destRoots": ["C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input"],
++		"protectRoots": ["C:/Users/derek/5slock/approved_characters"],
++		"imageExts": [".png", ".jpg", ".jpeg", ".webp"]
+ 	},
+ 	"python": {
+ 		"modules": ["json.tool", "py_compile", "pytest"],
+
+diff --git a/tests/pi/headless-guard.test.mjs.bak-20261023-copywide b/tests/pi/headless-guard.test.mjs
+index e9f5c0d..caf1d83 100644
+--- a/tests/pi/headless-guard.test.mjs.bak-20261023-copywide
++++ b/tests/pi/headless-guard.test.mjs
+@@ -390,21 +390,33 @@ test("K4 handlers: headless tool_call enforces the allowlist; UI runs are unchan
+ });
+ 
+ // ALI-163 (2026-10-23): Copy-Item scoped to approved still -> hc input folder; ffmpeg/ffprobe local files only
+-test("ALI-163 hc: Copy-Item approved still -> hc only, never overwrite", () => {
++test("ALI-163 copywide: Copy-Item images ComfyUI/output (or approved) -> ComfyUI/input, wildcards ok", () => {
+ 	const src = "C:\\Users\\derek\\5slock\\approved_characters\\GROK_IMAGINE_2026-10-19\\GI046.jpg";
+-	const hc = "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\input\\community\\hc";
++	const out = "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output";
++	const inp = "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\input";
++	const hc = `${inp}\\community\\hc`;
++	// allowed
+ 	assert.equal(ps(`Copy-Item -LiteralPath '${src}' -Destination '${hc}\\HC1_GI046.jpg'`), null);
+ 	assert.equal(ps(`Copy-Item '${src}' '${hc}'`), null);
++	assert.equal(ps(`Copy-Item -Path '${out}\\community\\ali147\\sheet_00001_.png' -Destination '${hc}\\sheet.png'`), null);
++	assert.equal(ps(`Copy-Item '${out}\\community\\*\\*.png' '${inp}\\community\\sheets'`), null);
++	assert.equal(ps(`Copy-Item -Force -Path '${out}\\x_*.webp' -Destination '${inp}\\x.webp'`), null);
++	assert.equal(ps(`Copy-Item -Recurse -Path '${out}\\a\\*.jpeg' -Destination '${inp}'`), null);
++	assert.equal(ps(`Copy-Item 'C:\\Users\\derek\\5slock\\approved_characters\\POOL\\*.jpg' '${hc}'`), null);
++	assert.equal(ps(`Copy-Item -LiteralPath '${src}' -Destination '${hc}\\..\\POOL_768x1344.png'`), null, "still inside ComfyUI/input");
++	// blocked
+ 	assert.equal(ps(`Copy-Item -LiteralPath '${src}' -Destination 'C:\\AI\\community\\notes\\x.jpg'`)?.id, "copy-item");
++	assert.equal(ps(`Copy-Item -Path '${out}\\a.png' -Destination '${out}\\b.png'`)?.id, "copy-item", "dest must be under ComfyUI/input");
++	assert.equal(ps(`Copy-Item -Path '${out}\\a.png' -Destination '${inp}\\..\\models\\a.png'`)?.id, "copy-item");
++	assert.equal(ps(`Copy-Item -Force -Path '${out}\\a.png' -Destination 'C:\\Users\\derek\\5slock\\approved_characters\\POOL\\a.png'`)?.id, "copy-item", "never overwrite approved_characters");
+ 	assert.equal(ps(`Copy-Item -LiteralPath 'C:\\AI\\community\\runs\\a.mp4' -Destination '${hc}\\a.mp4'`)?.id, "copy-item");
+-	assert.equal(ps(`Copy-Item -Recurse -LiteralPath '${src}' -Destination '${hc}\\x.jpg'`)?.id, "copy-item");
+-	assert.equal(ps(`Copy-Item -Force -LiteralPath '${src}' -Destination '${hc}\\x.jpg'`)?.id, "copy-item");
+-	assert.equal(ps(`Copy-Item 'C:\\Users\\derek\\5slock\\approved_characters\\POOL\\*.jpg' '${hc}'`)?.id, "copy-item");
+-	assert.equal(ps(`Copy-Item -LiteralPath '${src}' -Destination '${hc}\\..\\POOL_768x1344.png'`)?.id, "copy-item");
++	assert.equal(ps(`Copy-Item -Path '${out}\\a\\*' -Destination '${inp}'`)?.id, "copy-item", "image files only");
++	assert.equal(ps(`Copy-Item -Path '${out}\\a.mp4' -Destination '${inp}\\a.mp4'`)?.id, "copy-item");
++	assert.equal(ps(`Copy-Item -Path '${out}\\$x.png' -Destination '${inp}'`)?.id, "copy-item");
++	assert.equal(ps(`Copy-Item -Exclude x -Path '${out}\\a.png' -Destination '${inp}'`)?.id, "copy-item");
+ 	assert.equal(ps(`Move-Item '${src}' '${hc}'`)?.id, "not-allowlisted");
+ 	assert.equal(sh(`cp '${src}' '${hc}'`), null, "bash cp is unchanged by this patch (pi-permissions still denies absolute targets)");
+ });
+-
+ test("ALI-163 hc: ffmpeg/ffprobe local files only", () => {
+ 	const ff = "& 'C:\\ff\\bin\\ffmpeg.exe'";
+ 	assert.equal(ps(`${ff} -hide_banner -i C:\\AI\\community\\runs\\a\\a.mp4 -vn -c:a copy C:\\AI\\community\\runs\\a\\a.m4a`), null);
+

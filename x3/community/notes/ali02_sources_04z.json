@@ -1,0 +1,78 @@
+[
+  {
+    "name": "04z_qwen4b_api.json",
+    "url": "https://huggingface.co/api/models/Qwen/Qwen3.5-4B"
+  },
+  {
+    "name": "04z_gemmae4b_api.json",
+    "url": "https://huggingface.co/api/models/unsloth/Gemma-4-E4B-it-GGUF"
+  },
+  {
+    "name": "04z_gemma12b_api.json",
+    "url": "https://huggingface.co/api/models/unsloth/Gemma-4-12B-it-GGUF"
+  },
+  {
+    "name": "04z_pe_api.json",
+    "url": "https://huggingface.co/api/models/lightx2v/MiniMax-H3-Prompt-Relabeler-LoRA"
+  },
+  {
+    "name": "04z_lightx2v_card.401.txt",
+    "url": "https://huggingface.co/lightx2v/MiniMax-H3-Prompt-Relabeler-LoRA"
+  },
+  {
+    "name": "04z_pack_card.401.txt",
+    "url": "https://huggingface.co/lightx2v/MiniMax-H3-Comfyui-Package"
+  },
+  {
+    "name": "04z_fal_api.json",
+    "url": "https://huggingface.co/api/models/fal/MiniMax-H3-Realism-Style-LoRA"
+  },
+  {
+    "name": "04z_antiburn_api.json",
+    "url": "https://huggingface.co/api/models/ElDakar/MiniMax-H3-Antiburn-Universal"
+  },
+  {
+    "name": "04z_charswap_api.json",
+    "url": "https://huggingface.co/api/models/InnocentPrior/MiniMax-H3-Character-Swap-RL-LoRA"
+  },
+  {
+    "name": "04z_mc_discussions.404.txt",
+    "url": "https://huggingface.co/api/models/McPandaExpress/ComfyUI-Minimax-H3-Multiple-Character-Prompt-Extender/discussions"
+  },
+  {
+    "name": "04z_cont_repo.404.txt",
+    "url": "https://api.github.com/repos/Physon-XX/ComfyUI_Minimax_H3_Continuation"
+  },
+  {
+    "name": "04z_cont_v39_ref_repo.404.txt",
+    "url": "https://api.github.com/repos/Physon-XX/ComfyUI_Minimax_H3_Continuation_v39_reference"
+  },
+  {
+    "name": "04z_continuation_repo.404.txt",
+    "url": "https://api.github.com/repos/brianpetro/nodes-comfyui-minimax-h3-continuation"
+  },
+  {
+    "name": "04z_civ_face.404.txt",
+    "url": "https://civitai.com/api/v1/search?query=face%20consistency%20minimax"
+  },
+  {
+    "name": "04z_civ_antiburn.404.txt",
+    "url": "https://civitai.com/api/v1/search?query=antiburn"
+  },
+  {
+    "name": "04z_codexbench_api.401.txt",
+    "url": "https://huggingface.co/api/models/amirfarzam/CodexBench"
+  },
+  {
+    "name": "04z_gh_facerepo.json",
+    "url": "https://api.github.com/repos/Facerian/ComfyUI-FaceRefine"
+  },
+  {
+    "name": "04z_civ_vagina.json",
+    "url": "https://civitai.com/api/v1/search?query=vagina+fix"
+  },
+  {
+    "name": "04z_pe_bytedance_api.json",
+    "url": "https://huggingface.co/api/models/ByteDance-Seed/prompt-relabeller-9B"
+  }
+]

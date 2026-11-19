@@ -1,0 +1,30 @@
+Figure 1:
+- Species: Human
+- Build: Slim, athletic
+- Skin tone: Fair
+- Hair colour: Blonde
+- Wardrobe items visible: Pink lace lingerie set, silver metallic harness across torso, black fishnet stockings on right leg, clear high-heeled sandals with ankle straps
+- Position in frame: Lying prone on a black padded examination table, left side of frame, head turned toward viewer
+
+Figure 2:
+- Species: Robot
+- Build: Tall, articulated mechanical frame
+- Skin tone: N/A (metallic silver finish)
+- Hair colour: N/A
+- Wardrobe items visible: Black shorts covering lower torso and upper thighs
+- Position in frame: Standing to the right, leaning forward over Figure 1, right hand placed on Figure 1’s hip
+
+Room:
+- Dark interior space resembling a clinical or laboratory setting
+- Walls and floor are dark gray or black
+- Minimal background furniture; a large screen mounted on the wall displays a blurred image of a similar scene
+
+Props:
+- Black padded examination table with metal frame
+- Heavy silver chains attached to Figure 1’s wrists and ankles, looped through table fixtures
+- Large flat-screen monitor on the back wall
+
+Light:
+- Dramatic, directional lighting from above and slightly in front
+- Highlights skin sheen and metallic surfaces
+- Background is dimly lit, creating contrast with foreground subjects

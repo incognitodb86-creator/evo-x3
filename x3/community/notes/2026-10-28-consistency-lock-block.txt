@@ -1,0 +1,2 @@
+CONSISTENCY LOCK (ABSOLUTE PRIORITY — DO NOT DEVIATE):
+100% pixel-perfect visual fidelity to the exact uploaded source image in every detail. Maintain identical face identity, exact facial features, micro-expressions, skin texture/pores, hair strands and style, body proportions/anatomy, the fictional adult model exact appearance pose foundations, gaze direction, expression, clothing, and all static elements. Zero drift, zero morphing, zero changes to faces, bodies, or lighting throughout the entire video.

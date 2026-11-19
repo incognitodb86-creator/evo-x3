@@ -1,0 +1,28 @@
+{
+ "tag": "p15v2_a_w8_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 4.5,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background consistently shows same bed, sheets, and tan upholstered headboard across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical blonde woman in white lace and nude man appear in all frames, matching START IMAGE."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 shows same pose, framing, and clothing as START IMAGE with no jump."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary position with bodies in contact and act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  }
+ },
+ "flags": []
+}

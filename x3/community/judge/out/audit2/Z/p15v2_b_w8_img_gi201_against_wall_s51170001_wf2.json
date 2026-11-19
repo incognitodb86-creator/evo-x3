@@ -1,0 +1,49 @@
+{
+ "frames": [
+  263,
+  324
+ ],
+ "diffs": [
+  9.46,
+  9.53
+ ],
+ "per_frame": [
+  {
+   "frame": 263,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "New rock wall and lit brazier appear; background lighting and texture changed significantly."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and genitalia intact; no melting, floating parts, or extra limbs visible."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.9059,
+    "anatomy_defect": 0.0084
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 324,
+   "answers": {
+    "same_scene": {
+     "answer": "no",
+     "reason": "New stone wall, torch, and floor texture appear. Background has changed significantly from Image 1."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies remain intact and proportionate. No malformed or detached parts visible."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.9399,
+    "anatomy_defect": 0.0014
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_b_w8_img_gi201_against_wall_s51170001_wf2"
+}

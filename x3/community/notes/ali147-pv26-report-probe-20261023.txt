@@ -1,0 +1,262 @@
+ALI-147 PV2-6 report probe - 2026-10-23 01:07:04
+read-only; no GPU/ComfyUI/node-list/llama-swap/Strata, no render, no run_graph_job.py, no job request, no vision judge
+
+== A. prompt_v2 source files (specs\prompt_v2)
+v2_seg1_c0_r2v.txt  4411 B  sha256 889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6  crlf=False  trailing_nl=False
+v2_seg1_c1_t2va.txt  2769 B  sha256 655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b  crlf=False  trailing_nl=False
+v2_seg3_c0_r2v.txt  4358 B  sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b  crlf=False  trailing_nl=False
+v2_seg3_c1_t2va.txt  2903 B  sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383  crlf=False  trailing_nl=False
+PASS  prompt file v2_seg1_c0_r2v.txt sha256 equals SHA256SUMS.txt
+PASS  prompt file v2_seg1_c1_t2va.txt sha256 equals SHA256SUMS.txt
+PASS  prompt file v2_seg3_c0_r2v.txt sha256 equals SHA256SUMS.txt
+PASS  prompt file v2_seg3_c1_t2va.txt sha256 equals SHA256SUMS.txt
+
+== B. controls (measured here)
+CTRL seg1 mp4 C:/AI/community/runs\ali147_pool_ctrl_s51080000\ali147_pool_ctrl_s51080000.mp4
+  5781091 B sha256 1dc59ed446e4cf1a5ecbfa18616a311b658d1acc281a3624974732373ba42fda
+harness blackfreeze chain (run_graph_job.py) = 'blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2'
+  CTRL seg1 ffprobe -count_packets = 768,1344,24/1,481 | streams=0,h264,video | 1,aac,audio,32000,2 | format_dur=20.041688
+PASS  CTRL seg1 ffprobe video packets = 481 (count_packets, never format=duration)
+PASS  CTRL seg1 ffprobe resolution 768x1344
+PASS  CTRL seg1 ffprobe r_frame_rate 24/1
+PASS  CTRL seg1 audio stream present
+  graph submitted_graph.pretty.json node c0 prompt 3295 chars sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+  graph submitted_graph.pretty.json node c1 prompt 2303 chars sha256 6686d7057ead8ac945bff9263858afee0d3881b119502d7d13ab63f69d86f013
+  graph submitted_graph.pretty.json 10886 B sha256 698854152284100e60b6ac87a795a7f083160a9556acb3fb868793b7f4373bb6 nodes=25
+BASE seg3 mp4 C:/AI/community/runs\p7_r2_c3_pmot_full_pool\p7_r2_c3_pmot_full_pool_seg3.mp4
+  5624126 B sha256 fc28701abc585f3ae052b9316df22ba4edf7f31a2f3c685d2bbd758d2191d053
+harness blackfreeze chain (run_graph_job.py) = 'blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2'
+  BASE seg3 ffprobe -count_packets = 768,1344,24/1,481 | streams=0,h264,video | 1,aac,audio,32000,2 | format_dur=20.041688
+PASS  BASE seg3 ffprobe video packets = 481 (count_packets, never format=duration)
+PASS  BASE seg3 ffprobe resolution 768x1344
+PASS  BASE seg3 ffprobe r_frame_rate 24/1
+PASS  BASE seg3 audio stream present
+  graph p7_r2_c3_pmot_full_pool_seg3.api.json node c0 prompt 3354 chars sha256 8ed332629e80a8702f11eb4eb996e5a42fe3ee5f716168d25512ae01d7df5d76
+  graph p7_r2_c3_pmot_full_pool_seg3.api.json node c1 prompt 2269 chars sha256 dcd574692f426508d5ed5703cda68080ad7e9b1e8b4a49c0da3b049fd4b45d89
+  graph p7_r2_c3_pmot_full_pool_seg3.api.json 10910 B sha256 c5b6726c1d5870f597ba51fcf65499d489be9a1755ebf1905ab8fac5960e8fec nodes=25
+
+== PV2-1  ali147_pool_promptv2_s51080000
+control = ali147_pool_ctrl_s51080000   source = runs\ali147_pool_ctrl_s51080000\submitted_graph.pretty.json (the driver-rendered CTRL graph)
+  file PROOF.md                                                  19191 B  sha256 12dd6da787fd0baf1cd888f75e03299345cde1ddede0b2e7b22d6792f0873c57
+  file ali147_pool_promptv2_s51080000.api.json                   12480 B  sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+  file ali147_pool_promptv2_s51080000.mp4                      6397658 B  sha256 bab4112003d81683df225aa536d2603462d0df9cc01b35800e4a6b174348bf53
+  file ali147_pool_promptv2_s51080000.mp4.json                     533 B  sha256 db430d218bf255f1196973e7c14ffc14843fe8483327c014b8d6613d3dd95d69
+  file ali147_pool_promptv2_s51080000_stills_contact.png       1746695 B  sha256 d7695898f5a91a5285443d9e551f0004ebd68f86aec94aa5b1ef67d5c3cd4359
+  file fairness.txt                                               9572 B  sha256 5fa43786217edb83f181fc04d5bb1a65990a9f5bb451857d25ef7bebb4b24f9a
+  file graph_diff.txt                                            13725 B  sha256 f8d0b01c9f6c623ef88447886d256100c420ac1e2a13b1b7ef5cc9f88ce8e8f1
+  file objective.json                                              653 B  sha256 7807ef245a9316e49c96cfddf5e1e02908356e68cb44870144f71491d74cc9a0
+  file request.api.json                                          12480 B  sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+  file status.log                                                  635 B  sha256 07691bd51b858781b8e9c45e97f8e313cbf5401dc93564b4953664fc964e646f
+PASS  PROVENANCE request.api.json bytes == harness-rendered ali147_pool_promptv2_s51080000.api.json (0 bytes differ)
+PASS  PROVENANCE identical sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+  status.log| 2026-10-22 22:21:37 CT UNLOAD LLM coding_swift15_iq3s_esp
+  status.log| 2026-10-22 22:22:43 CT JOB start ali147_pool_promptv2_s51080000 prompt_id=af19daf9-f562-4339-a43f-777e2518ead5
+  status.log| 2026-10-22 22:36:31 CT JOB end ali147_pool_promptv2_s51080000 ok secs=827.7 file=C:\AI\community\runs\ali147_pool_promptv2_s51080000\ali147_pool_promptv2_s51080000.mp4
+  status.log| 2026-10-22 22:36:31 CT OBJECTIVE ok ali147_pool_promptv2_s51080000 frames=481 audio=True dur=20.042 bytes=6397658 contact=C:\AI\community\runs\ali147_pool_promptv2_s51080000\ali147_pool_promptv2_s51080000_stills_contact.png
+  status.log| 2026-10-22 22:36:32 CT UNLOAD comfyui_auto (POST /api/models/unload)
+PASS  exactly one 'JOB end ... ok' line
+PASS  status.log has no error/redo/STUCK/SKIP/OOM line (regex over every line)
+PASS  objective.json ok=true (attempts shape)
+PASS  objective.json attempts length 1 = no redo, no STUCK
+  objective attempt0 frames=481 768x1344 fps=24/1 audio=True dur=20.041688 bytes=6397658 secs=827.7
+  objective attempt0 blackfreeze=[]
+PASS  objective.json attempt0 blackfreeze []
+  arm ali147_pool_promptv2_s51080000 ffprobe -count_packets = 768,1344,24/1,481 | streams=0,h264,video | 1,aac,audio,32000,2 | format_dur=20.041688
+PASS  arm ali147_pool_promptv2_s51080000 ffprobe video packets = 481 (count_packets, never format=duration)
+PASS  arm ali147_pool_promptv2_s51080000 ffprobe resolution 768x1344
+PASS  arm ali147_pool_promptv2_s51080000 ffprobe r_frame_rate 24/1
+PASS  arm ali147_pool_promptv2_s51080000 audio stream present
+PASS  mp4 bytes == objective bytes
+  harness-chain black/freeze events = [] rc=0
+PASS  harness blackfreeze chain (blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2) re-run = 0 events
+  contact sheet ali147_pool_promptv2_s51080000_stills_contact.png 1816x900 RGB PNG  1746695 B sha256 d7695898f5a91a5285443d9e551f0004ebd68f86aec94aa5b1ef67d5c3cd4359
+  graph node c0 prompt 4411 chars sha256 889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6
+  graph node c1 prompt 2769 chars sha256 655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b
+PASS  comm.guard_ok passes on every prompt string in the graph
+  nodes: arm 25, control 25, shared 25, control-only [], arm-only []
+  differing shared nodes = ['c0', 'c1', 'save']
+    node c0 class MiniMaxH3ReferenceToVideo -> MiniMaxH3ReferenceToVideo ; input keys arm-only [] control-only []
+    node c0 input 'prompt' CHANGED
+    node c1 class MiniMaxH3ImageToVideo -> MiniMaxH3ImageToVideo ; input keys arm-only [] control-only []
+    node c1 input 'prompt' CHANGED
+    node save class SaveVideo -> SaveVideo ; input keys arm-only [] control-only []
+    node save input 'filename_prefix' CHANGED
+PASS  control-only nodes = [] (expected none)
+PASS  no new nodes added
+PASS  fairness: differing shared nodes are EXACTLY ['c0', 'c1'] + save
+PASS  node c0 prompt == v2_seg1_c0_r2v.txt verbatim (EOL-folded, 4411 chars, sha256 889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6)
+PASS  guard_ok on node c0 prompt (from v2_seg1_c0_r2v.txt)
+PASS  node c1 prompt == v2_seg1_c1_t2va.txt verbatim (EOL-folded, 2769 chars, sha256 655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b)
+PASS  guard_ok on node c1 prompt (from v2_seg1_c1_t2va.txt)
+  graph_diff.txt 13725 B sha256 f8d0b01c9f6c623ef88447886d256100c420ac1e2a13b1b7ef5cc9f88ce8e8f1 hunks=3 removed=3 added=3
+    hunk @@ -47,7 +47,7 @@
+    hunk @@ -72,7 +72,7 @@
+    hunk @@ -289,7 +289,7 @@
+  result.json {"budget_cap_min": 390, "budget_used_min": 342, "finished": "2026-10-22T22:36:32", "id": "ali147_pool_promptv2_s51080000", "kind": "graph", "log": "C:\\AI\\community\\p7\\jobs\\ali147_pool_promptv2_s51080000.out", "note": "run_graph_job rc=0 (ok)", "ok": true, "outputs": ["C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\status.log", "C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\objective.json", "C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51080000.mp4", "C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51080000_stills_contact.png"], "rc": 0, "started": "2026-10-22T22:21:37", "wall_min": 14.9}
+  mp4.json sidecar {"attempt": 0, "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51080000_00001_.mp4", "file": "C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51080000.mp4", "finished": "2026-10-22 22:36 CT", "label": "METHOD_ONLY", "plan": "ALI-147", "prompt_id": "af19daf9-f562-4339-a43f-777e2518ead5", "run": "ali147_pool_promptv2_s51080000", "secs": 827.7, "tag": "ali147_pool_promptv2_s51080000"}
+
+== PV2-2  ali147_pool_promptv2_seg3_s51080002
+control = p7_r2_c3_pmot_full_pool_seg3   source = runs\p7_r2_c3_pmot_full_pool\p7_r2_c3_pmot_full_pool_seg3.api.json (the BASE minute's own segment 3)
+  file PROOF.md                                                  20312 B  sha256 cb20169e64c7ea694155d6fa5226af4dac6225467ac71c876c3312b7b95b17da
+  file ali147_pool_promptv2_seg3_s51080002.api.json              12569 B  sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2
+  file ali147_pool_promptv2_seg3_s51080002.mp4                 5654344 B  sha256 f58198551261f1beb7ac555703f2a578440110497bf532682e4d3766052ea788
+  file ali147_pool_promptv2_seg3_s51080002.mp4.json                563 B  sha256 3d6a0f3469f61e2b3a43ee889100b8b6243b5d51c38c50ac96dcd625598187db
+  file ali147_pool_promptv2_seg3_s51080002_stills_contact.png    1721133 B  sha256 2a3762ab13139662acb88f6ded88b2f1d028fd1c2dafdb43147e7787a5a81879
+  file fairness.txt                                              11843 B  sha256 ff154a14772cafbcc9e974909ae2dc425dfc0dac1e6d1da765d409b6f28b5550
+  file graph_diff.txt                                            13806 B  sha256 1d9cd4dee53e5b6c792a44150ffd50edf793934bd20f1639178140f064b091b7
+  file objective.json                                              693 B  sha256 0a6b1321d9b60a5e5cdc7715634a083b5b7f5242d092cb1574d1e5e6506af455
+  file request.api.json                                          12569 B  sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2
+  dir  review/ (harness-owned)
+  file status.log                                                  670 B  sha256 be199aa1f20e2a87cde589978b557c033c2ff30520272965c3bfcd52727fc0e2
+PASS  PROVENANCE request.api.json bytes == harness-rendered ali147_pool_promptv2_seg3_s51080002.api.json (0 bytes differ)
+PASS  PROVENANCE identical sha256 935622324ad136b1c970963c5c1331143677717e39c33d5c62bdbb19f0492fe2
+  status.log| 2026-10-22 23:12:00 CT UNLOAD LLM coding_swift15_iq3s_esp
+  status.log| 2026-10-22 23:12:29 CT JOB start ali147_pool_promptv2_seg3_s51080002 prompt_id=2f5e0d06-b177-4463-814f-183b4d63aebf
+  status.log| 2026-10-22 23:26:27 CT JOB end ali147_pool_promptv2_seg3_s51080002 ok secs=837.7 file=C:\AI\community\runs\ali147_pool_promptv2_seg3_s51080002\ali147_pool_promptv2_seg3_s51080002.mp4
+  status.log| 2026-10-22 23:26:27 CT OBJECTIVE ok ali147_pool_promptv2_seg3_s51080002 frames=481 audio=True dur=20.042 bytes=5654344 contact=C:\AI\community\runs\ali147_pool_promptv2_seg3_s51080002\ali147_pool_promptv2_seg3_s51080002_stills_contact.png
+  status.log| 2026-10-22 23:26:28 CT UNLOAD comfyui_auto (POST /api/models/unload)
+PASS  exactly one 'JOB end ... ok' line
+PASS  status.log has no error/redo/STUCK/SKIP/OOM line (regex over every line)
+PASS  objective.json ok=true (attempts shape)
+PASS  objective.json attempts length 1 = no redo, no STUCK
+  objective attempt0 frames=481 768x1344 fps=24/1 audio=True dur=20.041688 bytes=5654344 secs=837.7
+  objective attempt0 blackfreeze=[]
+PASS  objective.json attempt0 blackfreeze []
+  arm ali147_pool_promptv2_seg3_s51080002 ffprobe -count_packets = 768,1344,24/1,481 | streams=0,h264,video | 1,aac,audio,32000,2 | format_dur=20.041688
+PASS  arm ali147_pool_promptv2_seg3_s51080002 ffprobe video packets = 481 (count_packets, never format=duration)
+PASS  arm ali147_pool_promptv2_seg3_s51080002 ffprobe resolution 768x1344
+PASS  arm ali147_pool_promptv2_seg3_s51080002 ffprobe r_frame_rate 24/1
+PASS  arm ali147_pool_promptv2_seg3_s51080002 audio stream present
+PASS  mp4 bytes == objective bytes
+  harness-chain black/freeze events = [] rc=0
+PASS  harness blackfreeze chain (blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2) re-run = 0 events
+  contact sheet ali147_pool_promptv2_seg3_s51080002_stills_contact.png 1816x900 RGB PNG  1721133 B sha256 2a3762ab13139662acb88f6ded88b2f1d028fd1c2dafdb43147e7787a5a81879
+  graph node c0 prompt 4358 chars sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b
+  graph node c1 prompt 2903 chars sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383
+PASS  comm.guard_ok passes on every prompt string in the graph
+  nodes: arm 25, control 25, shared 25, control-only [], arm-only []
+  differing shared nodes = ['c0', 'c1', 'save']
+    node c0 class MiniMaxH3ReferenceToVideo -> MiniMaxH3ReferenceToVideo ; input keys arm-only [] control-only []
+    node c0 input 'prompt' CHANGED
+    node c1 class MiniMaxH3ImageToVideo -> MiniMaxH3ImageToVideo ; input keys arm-only [] control-only []
+    node c1 input 'prompt' CHANGED
+    node save class SaveVideo -> SaveVideo ; input keys arm-only [] control-only []
+    node save input 'filename_prefix' CHANGED
+PASS  control-only nodes = [] (expected none)
+PASS  no new nodes added
+PASS  fairness: differing shared nodes are EXACTLY ['c0', 'c1'] + save
+PASS  node c0 prompt == v2_seg3_c0_r2v.txt verbatim (EOL-folded, 4358 chars, sha256 ad77122b96f4ad474a6329a72b556f3372a80cb010e68a6c3ea10fe48a53763b)
+PASS  guard_ok on node c0 prompt (from v2_seg3_c0_r2v.txt)
+PASS  node c1 prompt == v2_seg3_c1_t2va.txt verbatim (EOL-folded, 2903 chars, sha256 2e3905ee2272a9d7ff0ab47d5db1765e4fa456ba4aa5ae2798e3fac404cfb383)
+PASS  guard_ok on node c1 prompt (from v2_seg3_c1_t2va.txt)
+  graph_diff.txt 13806 B sha256 1d9cd4dee53e5b6c792a44150ffd50edf793934bd20f1639178140f064b091b7 hunks=3 removed=3 added=3
+    hunk @@ -98,7 +98,7 @@
+    hunk @@ -181,7 +181,7 @@
+    hunk @@ -341,7 +341,7 @@
+  result.json {"budget_cap_min": 390, "budget_used_min": 356.5, "finished": "2026-10-22T23:26:28", "id": "ali147_pool_promptv2_seg3_s51080002", "kind": "graph", "log": "C:\\AI\\community\\p7\\jobs\\ali147_pool_promptv2_seg3_s51080002.out", "note": "run_graph_job rc=0 (ok)", "ok": true, "outputs": ["C:\\AI\\community\\runs\\ali147_pool_promptv2_seg3_s51080002\\status.log", "C:\\AI\\community\\runs\\ali147_pool_promptv2_seg3_s51080002\\objective.json", "C:\\AI\\community\\runs\\ali147_pool_promptv2_seg3_s51080002\\ali147_pool_promptv2_seg3_s51080002.mp4", "C:\\AI\\community\\runs\\ali147_pool_promptv2_seg3_s51080002\\ali147_pool_promptv2_seg3_s51080002_stills_contact.png"], "rc": 0, "started": "2026-10-22T23:12:00", "wall_min": 14.5}
+  mp4.json sidecar {"attempt": 0, "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali147_pool_promptv2_seg3_s51080002\\ali147_pool_promptv2_seg3_s51080002_00001_.mp4", "file": "C:\\AI\\community\\runs\\ali147_pool_promptv2_seg3_s51080002\\ali147_pool_promptv2_seg3_s51080002.mp4", "finished": "2026-10-22 23:26 CT", "label": "METHOD_ONLY", "plan": "ALI-147", "prompt_id": "2f5e0d06-b177-4463-814f-183b4d63aebf", "run": "ali147_pool_promptv2_seg3_s51080002", "secs": 837.7, "tag": "ali147_pool_promptv2_seg3_s51080002"}
+
+== PV2-3  ali147_pool_dense_s51080000
+control = ali147_pool_ctrl_s51080000   source = runs\ali147_pool_ctrl_s51080000\submitted_graph.pretty.json (the driver-rendered CTRL graph)
+  file ali147_pool_dense_s51080000.api.json                      10517 B  sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+  file ali147_pool_dense_s51080000.mp4                         5842735 B  sha256 07ac2f7cb36bda07f54a9185295c45f011efece143c16c2f2be0b0eca3c5003c
+  file ali147_pool_dense_s51080000.mp4.json                        516 B  sha256 aac774c3b48603ec984b0e6783c82628185e33867b877aa4002ba67de7b1583a
+  file ali147_pool_dense_s51080000_stills_contact.png          1675216 B  sha256 759583d6cc5878b0fba3f5c76dc7395f4db3719705388d87f9ad831271fdd864
+  file graph_diff.txt                                             1241 B  sha256 5ec6bd9c32c9ecb14f93c2f4474dca27508789e0c7803e15e4ca44cc755e28e8
+  file objective.json                                              630 B  sha256 3a13cb91f22ce88bc9006ded91b0b3947393a19f4eb05bc10f245e35f82e29d4
+  file request.api.json                                          10517 B  sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+  file status.log                                                  615 B  sha256 148d9a4e2c4b1e7b5e1228a5b8489b43d2794c8b6fc3a56ae83cb787762e22e1
+PASS  PROVENANCE request.api.json bytes == harness-rendered ali147_pool_dense_s51080000.api.json (0 bytes differ)
+PASS  PROVENANCE identical sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+  status.log| 2026-10-22 23:47:34 CT UNLOAD LLM coding_swift15_iq3s_esp
+  status.log| 2026-10-22 23:48:02 CT JOB start ali147_pool_dense_s51080000 prompt_id=a0c742b2-d45b-4aa1-895d-0fd92b97bd58
+  status.log| 2026-10-23 00:06:21 CT JOB end ali147_pool_dense_s51080000 ok secs=1098.9 file=C:\AI\community\runs\ali147_pool_dense_s51080000\ali147_pool_dense_s51080000.mp4
+  status.log| 2026-10-23 00:06:21 CT OBJECTIVE ok ali147_pool_dense_s51080000 frames=481 audio=True dur=20.042 bytes=5842735 contact=C:\AI\community\runs\ali147_pool_dense_s51080000\ali147_pool_dense_s51080000_stills_contact.png
+  status.log| 2026-10-23 00:06:22 CT UNLOAD comfyui_auto (POST /api/models/unload)
+PASS  exactly one 'JOB end ... ok' line
+PASS  status.log has no error/redo/STUCK/SKIP/OOM line (regex over every line)
+PASS  objective.json ok=true (attempts shape)
+PASS  objective.json attempts length 1 = no redo, no STUCK
+  objective attempt0 frames=481 768x1344 fps=24/1 audio=True dur=20.041688 bytes=5842735 secs=1098.9
+  objective attempt0 blackfreeze=[]
+PASS  objective.json attempt0 blackfreeze []
+  arm ali147_pool_dense_s51080000 ffprobe -count_packets = 768,1344,24/1,481 | streams=0,h264,video | 1,aac,audio,32000,2 | format_dur=20.041688
+PASS  arm ali147_pool_dense_s51080000 ffprobe video packets = 481 (count_packets, never format=duration)
+PASS  arm ali147_pool_dense_s51080000 ffprobe resolution 768x1344
+PASS  arm ali147_pool_dense_s51080000 ffprobe r_frame_rate 24/1
+PASS  arm ali147_pool_dense_s51080000 audio stream present
+PASS  mp4 bytes == objective bytes
+  harness-chain black/freeze events = [] rc=0
+PASS  harness blackfreeze chain (blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2) re-run = 0 events
+  contact sheet ali147_pool_dense_s51080000_stills_contact.png 1816x900 RGB PNG  1675216 B sha256 759583d6cc5878b0fba3f5c76dc7395f4db3719705388d87f9ad831271fdd864
+  graph node c0 prompt 3295 chars sha256 7b4b22bb170fbcb85dce706ef746a862d49fa14142c1a704a672d4819b77f889
+  graph node c1 prompt 2303 chars sha256 6686d7057ead8ac945bff9263858afee0d3881b119502d7d13ab63f69d86f013
+PASS  comm.guard_ok passes on every prompt string in the graph
+  nodes: arm 24, control 25, shared 24, control-only ['m_vsa'], arm-only []
+  differing shared nodes = ['m_shift', 'save']
+    node m_shift class MiniMaxH3SigmaShift -> MiniMaxH3SigmaShift ; input keys arm-only [] control-only []
+    node m_shift input 'model' CHANGED
+    node save class SaveVideo -> SaveVideo ; input keys arm-only [] control-only []
+    node save input 'filename_prefix' CHANGED
+PASS  control-only nodes = ['m_vsa'] (expected ['m_vsa'] (the deleted VSA node))
+PASS  no new nodes added
+PASS  fairness: differing shared nodes are EXACTLY ['m_shift', 'save'] (VSA-off rewire + prefix)
+PASS  prompts are CTRL verbatim on c0 and c1
+PASS  node m_vsa (BlockSparseAttention) present in CTRL, DELETED in the arm
+PASS  m_shift.inputs.model ['m_vsa',0] -> ['m_attn',0]
+PASS  seed node byte-identical (noise_seed)
+PASS  m_attn untouched
+PASS  img LoadImage node byte-identical
+  graph_diff.txt 1241 B sha256 5ec6bd9c32c9ecb14f93c2f4474dca27508789e0c7803e15e4ca44cc755e28e8 hunks=2 removed=20 added=2
+    hunk @@ -140,31 +140,13 @@
+    hunk @@ -289,7 +271,7 @@
+  result.json {"budget_cap_min": 390, "budget_used_min": 375.3, "finished": "2026-10-23T00:06:22", "id": "ali147_pool_dense_s51080000", "kind": "graph", "log": "C:\\AI\\community\\p7\\jobs\\ali147_pool_dense_s51080000.out", "note": "run_graph_job rc=0 (ok)", "ok": true, "outputs": ["C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\status.log", "C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\objective.json", "C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000.mp4", "C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000_stills_contact.png"], "rc": 0, "started": "2026-10-22T23:47:34", "wall_min": 18.8}
+  mp4.json sidecar {"attempt": 0, "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000_00001_.mp4", "file": "C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000.mp4", "finished": "2026-10-23 00:06 CT", "label": "METHOD_ONLY", "plan": "ALI-147", "prompt_id": "a0c742b2-d45b-4aa1-895d-0fd92b97bd58", "run": "ali147_pool_dense_s51080000", "secs": 1098.9, "tag": "ali147_pool_dense_s51080000"}
+
+== C. stills (source + contact sheets)
+source still C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input\community\POOL_768x1344.png PNG 768x1344 RGB  sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075
+size 1354030 B
+PV2-1 sheet ali147_pool_promptv2_s51080000_stills_contact.png 1816x900 RGB tiles(approx)=12 sha256 d7695898f5a91a5285443d9e551f0004ebd68f86aec94aa5b1ef67d5c3cd4359
+   sampled windows (run_graph_job.py: +-1.5 s around 0:10/0:20/0:30/0:40/0:50, t <= dur-0.05) for a 20.04 s clip = t 8.5-11.5 and 18.5-19.5 s = frames 204/216/228/240/252/264/276/444/456/468; frame 0 and 480 are NEVER sampled (harness-fixed sampling, not a defect)
+PV2-2 sheet ali147_pool_promptv2_seg3_s51080002_stills_contact.png 1816x900 RGB tiles(approx)=12 sha256 2a3762ab13139662acb88f6ded88b2f1d028fd1c2dafdb43147e7787a5a81879
+   sampled windows (run_graph_job.py: +-1.5 s around 0:10/0:20/0:30/0:40/0:50, t <= dur-0.05) for a 20.04 s clip = t 8.5-11.5 and 18.5-19.5 s = frames 204/216/228/240/252/264/276/444/456/468; frame 0 and 480 are NEVER sampled (harness-fixed sampling, not a defect)
+PV2-3 sheet ali147_pool_dense_s51080000_stills_contact.png 1816x900 RGB tiles(approx)=12 sha256 759583d6cc5878b0fba3f5c76dc7395f4db3719705388d87f9ad831271fdd864
+   sampled windows (run_graph_job.py: +-1.5 s around 0:10/0:20/0:30/0:40/0:50, t <= dur-0.05) for a 20.04 s clip = t 8.5-11.5 and 18.5-19.5 s = frames 204/216/228/240/252/264/276/444/456/468; frame 0 and 480 are NEVER sampled (harness-fixed sampling, not a defect)
+
+== D. render seconds across every 481-frame run in runs\ (objective.json, both shapes)
+  secs 706.8    frames 481   status-log secs 706.8    ali147_pool_fix5_s51080000
+  secs 809.7    frames 481   status-log secs 809.7    ali147_pool_ctrl_s51080000
+  secs 827.7    frames 481   status-log secs 827.7    ali147_pool_promptv2_s51080000
+  secs 837.7    frames 481   status-log secs 837.7    ali147_pool_promptv2_seg3_s51080002
+  secs 857.5    frames 481   status-log secs 857.5    ali147_pool_fix1_s51080000
+  secs 902.7    frames 481   status-log secs 902.7    ali147_pool_refsheet_s51080000
+  secs 978.1    frames 481   status-log secs 978.1    ali147_pool_refsheet_b_s51080000
+  secs 1098.9   frames 481   status-log secs 1098.9   ali147_pool_dense_s51080000
+  secs 3004.9   frames 1433  status-log secs 3004.9   ali147_pool_fix4_s51080000
+
+== E. live p7 budget + sbs/stills ownership
+  p7_budget.json {"cap_min": 390, "job_cap": 27, "jobs": 26, "updated": "2026-10-23T00:06:22", "used_min": 375.3}
+  find runs -name sbs_*.mp4 -> 0 file(s): 
+  sbs newer than the dense render: none
+  runs\*still* files: none
+  p7\JOB_REQUEST.json present: False (this iteration wrote no request)
+  archived requests: 
+  request_iter12.json 115 B sha256 c24820f489e112726ed5abe10a3c00d06f29605548eabe960e36bf7b6f04cd0a content={"jobs": [{"id": "ali147_pool_dense_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 120}]}
+  request_iter01.json 116 B sha256 18c015eaa0d42c9a3bc44438175fc03cd83f976bd5d13ae02b524210b0987ed8 content={"jobs": [{"id": "ali147_pool_fix4_s51080000", "kind": "graph", "frames": 1443, "frames_tol": 24, "minutes": 180}]}
+  request_iter02.json 119 B sha256 ecbf672e43c1ce0dbf9fc73c84b1b40a8e1867a77ca87d9353e205b0b97bc4db content={"jobs": [{"id": "ali147_pool_refsheet_b_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}
+
+== F. held / not-rendered lines (PV2-4, PV2-5) - read-only presence checks, NO GPU
+  LORA card h3\Vagina_minimax-h3_epoch20.safetensors exists=False size=- path=C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\models\loras\h3\Vagina_minimax-h3_epoch20.safetensors
+  PV2-4 arm dir (must not exist = not built) exists=False size=- path=C:/AI/community/runs\ali147_pool_pv2_hmpussy_s51080002
+  PV2-5 output dir (must not exist = not rendered) exists=False size=- path=C:/AI/community/runs\pool_stillfix_a
+  the stillfix_A prompt file (PV2-5 input) exists=False size=- path=C:/AI/community/specs/prompt_v2\stillfix_A_anatomy_ref_klein.txt
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\models\loras -> lora/SNOFS name matches: ['klein_snofs_v1_1.safetensors', 'klein_snofs_v1_4.safetensors']
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI\models\loras\h3 -> NOT A DIRECTORY
+  C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/input -> lora/SNOFS name matches: []
+  C:/Users/derek/5slock/approved_characters (66 entries) snofs/pool matches: ['ORC_POOL_EDGE', 'POOL']
+  C:/Users/derek/5slock/approved_characters/REF_SHEETS_2026-10-19 (20 entries) snofs/pool matches: []
+  specs\prompt_v2\stillfix_A_anatomy_ref_klein.txt exists=False
+  specs\prompt_v2\stillfix_B_matte_skin_klein.txt exists=False
+
+TOTAL PASS=77 FAIL=0
+ALL CHECKS PASS

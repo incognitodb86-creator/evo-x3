@@ -1,0 +1,1276 @@
+{
+ "name": "Render writer master rules",
+ "version": "2026-11-13.1",
+ "owner": "Prompt maker (Render)",
+ "approved_by": "Derrick t261u (master list + automated check)",
+ "built_from": "/workspace/maxops/prompts/render-writer-prompt-audit-20261113.md",
+ "baseline_writer_prompt_sha256": "4f2cc11a184a",
+ "fixed_facts": [
+  "Single age floor 18+.",
+  "No pregnancy.",
+  "'little sister' is kept as written."
+ ],
+ "match": "checks/detail_checks are Python regexes, case-insensitive, multiline; forbidden are plain case-insensitive substrings",
+ "condensed_ratio": 0.6,
+ "rules": [
+  {
+   "id": "R01",
+   "title": "Contact names anatomy plus one builder keyword",
+   "derrick_ask": "Literal anatomy at each contact point; 'thrusts into her' is not enough (Derrick t256/t257; prose asks)",
+   "source": "h3-prompting R18/R19; audit block 1; acc-4 fix 9",
+   "audit_status": "E",
+   "severity": "hard",
+   "restore_text": "- Contact is one sentence that names both body parts with anatomy nouns and holds one builder keyword. Vaginal: his penis (or shaft) and her vagina. Anal: his penis and her anus. Oral: her lips or mouth and his penis or shaft, with the words inside her mouth. Cunnilingus: her mouth or tongue on the other woman's vulva or clitoris. Hand: her fist or fingers around his shaft. Toy: the toy and her vagina, anus or clitoris. Futa: her penis.\n- Keep one keyword in that same sentence: inside her, inside her mouth, fully sheathed, hips flush, flush against, buried in her, deep in her. The keyword never replaces the nouns: \"thrusts into her\", \"enters her fully sheathed\" or \"deep in her\" without a body-part noun is wrong.\n- In the sentence: who enters, the angle the pose makes, the depth, and that the join holds for the whole PRIMARY MOTION. Name the nouns again on the first stroke if the sentence was long.\n- Shape, fill each slot: \"<who>'s penis <entry verb> into her <vagina|anus> from <angle> until <depth mark>, and he stays <keyword> as <motion>\".\nBEFORE YOU WRITE 4: Contact names both body parts (penis, shaft, vagina, vulva, anus, mouth, lips, clitoris) and one builder keyword; PRIMARY MOTION has one tempo word.",
+   "checks": [
+    "anatomy nouns",
+    "keyword never replaces the nouns",
+    "penis.{0,40}vagina"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "<who> <entry verb> <depth> from <angle>",
+    "Contact has one builder keyword;"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R02",
+   "title": "PRIMARY MOTION tempo is a full sentence with subject and number",
+   "derrick_ask": "Tempo stated in each sex clip (memory: PRIMARY MOTION with tempo)",
+   "source": "R17; audit block 2; acc-4 four/blowjob, f2a",
+   "audit_status": "E",
+   "severity": "hard",
+   "restore_text": "PRIMARY MOTION shape, a full sentence with a subject and a number word: \"(S2) drives <one|two|three> <manner> strokes a second\"; \"(S1) rises and sinks once every <two|three> seconds\"; \"(S2) thrusts at a <manner> tempo of <one|two> strokes a second\".",
+   "checks": [
+    "subject and a number word"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "<count> <manner> strokes a second",
+    "<manner> drives at <count> beats a second"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R03",
+   "title": "'PRIMARY MOTION - ' dash label",
+   "derrick_ask": "Builder reads only the 'PRIMARY MOTION -' form (AGENTS SHAPE)",
+   "source": "AGENTS.md SHAPE L134; R17; audit block 3",
+   "audit_status": "E",
+   "severity": "hard",
+   "restore_text": "- Start the motion sentence with the label exactly \"PRIMARY MOTION - \" and put the motion, its depth travel and its tempo in that one sentence (\"PRIMARY MOTION - <motion>, <full-depth travel or short strokes>, <tempo>\"). The label never starts any other sentence.",
+   "checks": [
+    "label exactly \"PRIMARY MOTION - \""
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R04",
+   "title": "PRIMARY MOTION names amplitude / depth travel",
+   "derrick_ask": "R17: one PRIMARY MOTION with tempo and amplitude",
+   "source": "R17; audit row 4",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "PRIMARY MOTION contains one tempo word and its depth travel (full-depth travel or short strokes, hips staying in contact), in a sentence of your own.",
+   "checks": [
+    "PRIMARY MOTION contains one tempo word"
+   ],
+   "detail_checks": [
+    "depth travel"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R05",
+   "title": "Body inventory and how bodies join",
+   "derrick_ask": "Body count and how the bodies join (Derrick, h3 asks)",
+   "source": "R18; audit block 4",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "- Bodies: name how many adults are in frame and how they join. Each has two arms, two legs and one torso.",
+   "checks": [
+    "name how many adults are in frame"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R06",
+   "title": "Five-finger hands and named grips",
+   "derrick_ask": "Five-finger hands (persona vocabulary)",
+   "source": "R18; persona; audit block 4",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "Visible hands have five fingers and readable knuckles, with a named grip point (hip bone, back of the thigh, fist in the sheet).",
+   "checks": [
+    "five fingers"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R07",
+   "title": "Body mass locked to the still",
+   "derrick_ask": "Breast size and body mass locked to the still",
+   "source": "R18; audit block 4",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "Breast size and body mass stay as in the still; effort shows as tension and breath, never new muscle.",
+   "checks": [
+    "body mass stay"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R08",
+   "title": "Riding: measurable hip lift",
+   "derrick_ask": "Riding: both bodies move, his pelvis lifts a measurable few inches",
+   "source": "h3 SKILL 'Oral, riding and sex sound'; audit block 5",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "Riding: name her rise and her sink, and his hips lifting a few inches off the surface to meet each sink; both bodies move.",
+   "checks": [
+    "her rise (meets a lift of his hips|and her sink)"
+   ],
+   "detail_checks": [
+    "a few inches"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R09",
+   "title": "Oral depth and oral sound",
+   "derrick_ask": "She doesn't talk while giving a blowjob; the man can talk filthy (memory 11-11)",
+   "source": "R19; h3 SKILL oral section; audit block 6",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "- Oral: whoever gives is silent while their mouth is on the partner; the receiver may talk. When both should talk, give (S2) a line in a different voice. On the deep stroke his shaft travels past her lips toward her throat. Her side is sound, not speech: wet suction on each stroke, a gag on the deepest one, breath through her nose.",
+   "checks": [
+    "Oral: whoever gives is silent"
+   ],
+   "detail_checks": [
+    "gag on the deepest"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R10",
+   "title": "Pressure visible: surface answers the load",
+   "derrick_ask": "R23b pressure is visible",
+   "source": "R23b; audit block 7",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "2. Load: what carries each body's weight (palms, forearms, knees, planted feet, the surface edge). Say how the soft surface answers the load (the mattress sinks under her knee, the rug compresses under his foot).",
+   "checks": [
+    "what carries each body's weight"
+   ],
+   "detail_checks": [
+    "surface answers the load"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R11",
+   "title": "Weight inside the action verbs",
+   "derrick_ask": "Weight path on every pose change (R23a)",
+   "source": "R23a; writer_prompt L15",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Integration: put weight, height and follow-through inside the action verbs (\"braces her palms flat on the log, shifting her weight into her shoulders\"), never as clauses tacked on at the end. The scene must read aloud as one continuous camera take.",
+   "checks": [
+    "put weight, height and follow-through inside the action verbs"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R12",
+   "title": "Secondary lag, settle, gaze, blinks",
+   "derrick_ask": "R23b secondary lag and natural blinks",
+   "source": "R23b; audit block 7",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "One follow-through cue rides on the stroke. Hair, fabric and soft flesh answer a beat late, then settle. Her gaze has a target and her blinks stay natural.",
+   "checks": [
+    "follow-through cue"
+   ],
+   "detail_checks": [
+    "a beat late, then settle",
+    "blinks stay natural"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R13",
+   "title": "Skin matte, pores and vellus hair",
+   "derrick_ask": "Hyper-real skin: dry matte with pores and vellus hair (persona)",
+   "source": "R25; persona; audit block 8",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "Skin is matte with visible pores and fine vellus hair. A thin realistic sheen appears only where the still, the ask or the arousal stage puts sweat; never waxy, plastic or glossy.",
+   "checks": [
+    "dry and matte|matte with visible pores"
+   ],
+   "detail_checks": [
+    "vellus hair"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R14",
+   "title": "Arousal-stage escalation",
+   "derrick_ask": "Long scenes build: flush, sweat, hair, smudged lipstick (long-scene spec 8.4)",
+   "source": "long-scene spec §8.4; audit block 9",
+   "audit_status": "X",
+   "severity": "soft",
+   "restore_text": "- If the beat card gives an arousal stage, write its marks and never go back down: stage 2 a light flush across her chest and audible breath; stage 3 damp hair at the temples and lipstick smudged after oral; stage 4 hair stuck to her neck and chest heaving. Skin stays matte with pores under any sweat.",
+   "checks": [
+    "arousal stage"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "write oil, sweat or wetness only when the still shows it or the ask requests it"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R15",
+   "title": "Exit from the still into the act",
+   "derrick_ask": "Get into position before the act (R16)",
+   "source": "R16; writer_prompt L19",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "1. Exit from the still: how she leaves the exact still pose and lands the position the builder checks for this act, in those words: missionary, on her back; doggy, hands and knees or all fours; blowjob, kneeling, on her knees, or between his legs; cowgirl, astride or on top of him; spooning, on her side; prone bone, face down or on her stomach.",
+   "checks": [
+    "Exit from the still"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R16",
+   "title": "Low or round surfaces",
+   "derrick_ask": "No kneeling on top of a log (acc-4 pose physics)",
+   "source": "acc-4 review; audit block 10",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "A low or round surface (log, rock, low bench, ottoman): she kneels on the ground beside it with her forearms or chest on it; she never kneels on top of it unless it is flat and wide enough for both knees.",
+   "checks": [
+    "low or round surface"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R17",
+   "title": "Tops pushed up, only the join garment goes aside",
+   "derrick_ask": "Clearance template for tops (acc-3 fix 11)",
+   "source": "acc-3 fix 11; acc-4 pi_missionary_f002; audit block 11",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "A top is pushed up off her breasts or pulled down under them and stays there; only the garment over the join goes aside.",
+   "checks": [
+    "top is pushed up off her breasts"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R18",
+   "title": "Bunched is not removed",
+   "derrick_ask": "Clothes have permanence; end states match (acc-4 m14, t2s_c2)",
+   "source": "acc-4 review; audit block 11",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "A bunched or pushed garment stays on her body; only a garment that comes fully off lands on a named surface, and you name that surface.",
+   "checks": [
+    "bunched or pushed garment stays on her body"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R19",
+   "title": "Landing words for the newer acts",
+   "derrick_ask": "Cover every act and any scenario (Derrick t228u)",
+   "source": "modular plan; lost-features 15-27; acc-4 lf12/lf13/lf24; audit block 12",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "handjob, she kneels or sits beside him, her fist around his shaft; cunnilingus, the receiver sits or lies with thighs apart and the giver kneels or lies between them, mouth on her vulva; scissoring, both lie on their sides facing opposite ways, legs interlocked, vulva pressed to vulva; reverse cowgirl, astride him facing away; anal, the same landing as the position, with the anus named in contact; standing, both on their feet, her back or chest against the wall or bent over the surface; titjob, his shaft between her breasts, her hands pressing them together.",
+   "checks": [
+    "handjob, she kneels",
+    "scissoring, both lie on their sides"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R20",
+   "title": "Bare slap lands on the face",
+   "derrick_ask": "A bare 'she slaps her' lands on the face (Derrick 2026-10-28)",
+   "source": "R22; audit block 13",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "- A bare slap lands on her face: full palm to cheek and jaw, her head turns toward profile, her hair whips, the cheek flushes and stays flushed, her face stays readable and unmarked. One slap unless the ask says more.",
+   "checks": [
+    "bare slap lands on her face"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R21",
+   "title": "Response dial 'not into it'",
+   "derrick_ask": "'she is not into it' is written exactly, never softened (Derrick 2026-10-28)",
+   "source": "R21; audit block 13",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "- If the ask says she is not into it: flat face, eyes on the lens, jaw set, arms at her sides, hands never on him, breath tight through her nose, and she ends the clip the same way. Never turn it into moaning or arching.",
+   "checks": [
+    "Reluctant:"
+   ],
+   "detail_checks": [
+    "not into it"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R22",
+   "title": "Default tone on rough sex vs explicit soft asks",
+   "derrick_ask": "Rough/dominant/CNC/degrading default on sex clips; eager or playful when ask explicitly requests soft/gentle/romantic",
+   "source": "Derrick U56 polish 2026-11-17; AGENTS.md HUMILIATION AND REACTION TONE",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "On rough/dominant default sex clips, rotate across reluctant, ashamed, bratty (overridden) or eager (used/free-use); if the ask explicitly requests soft, gentle or romantic and names no tone, use eager or playful:",
+   "checks": [
+    "names no tone, use eager or playful"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R23",
+   "title": "One camera job, stability order, no orbits",
+   "derrick_ask": "One dominant camera job: held, slow small push-in, slow pull-out, gentle pan or truck, slight handheld; no orbits, 360s, whip pans or crane moves (memory 11-13, t209u)",
+   "source": "memory 11-13; writer_prompt L42",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Camera motion: one camera job per clip, written as one sentence early in the shot, never stacked. Most stable first: held; a slow push-in with small amplitude; a slow pull-out; a gentle pan or truck with small amplitude; slight restrained handheld energy. Push and pull move the camera body, zoom changes the lens, pan turns in place, truck slides sideways. No large orbits, 360s, whip pans or multi-axis crane moves unless the ask needs one, and never complex travel in POV. A reference video's camera path is never contradicted.",
+   "checks": [
+    "one camera job per clip",
+    "No large orbits, 360s, whip pans"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R24",
+   "title": "Reference video camera path",
+   "derrick_ask": "A reference video's camera path is not contradicted (t209u)",
+   "source": "t209u; restore #8; writer_prompt L42",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Camera motion: one camera job per clip, written as one sentence early in the shot, never stacked. Most stable first: held; a slow push-in with small amplitude; a slow pull-out; a gentle pan or truck with small amplitude; slight restrained handheld energy. Push and pull move the camera body, zoom changes the lens, pan turns in place, truck slides sideways. No large orbits, 360s, whip pans or multi-axis crane moves unless the ask needs one, and never complex travel in POV. A reference video's camera path is never contradicted.",
+   "checks": [
+    "reference video's camera path is never contradicted"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R25",
+   "title": "Opening may use any angle",
+   "derrick_ask": "Writer can start on any camera angle, size, or move; only catch an opening that contradicts the still (memory 11-13)",
+   "source": "memory 11-13; writer_prompt L39",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- [Shot 1] may open on any size, angle or move, but must not contradict the still's facing, pose, wardrobe or light.",
+   "checks": [
+    "\\[Shot 1\\] may open on any size, angle or move"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R26",
+   "title": "POV rules",
+   "derrick_ask": "POV only when asked: camera at the POV character's eye line, partner looks at the lens, medium or medium-close, only the necessary POV body parts (memory, t208u)",
+   "source": "memory 11-13 (t208u); audit block 15",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "POV only when the ask says POV or the still is POV: the camera sits at the POV character's eye line, medium or medium-close, the partner looks into the lens, and only the POV character's needed hands or body parts enter frame, named once. A continued POV clip keeps the POV.",
+   "checks": [
+    "POV only when the ask says POV"
+   ],
+   "detail_checks": [
+    "POV character's eye line"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R27",
+   "title": "Continued POV keeps POV",
+   "derrick_ask": "Continuations keep the POV (t208u)",
+   "source": "t208u; writer_prompt L41",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Angle menu (pick what serves the ask): medium two-shot at hip or chest height for power and full contact; low angle for dominance and the body line; slightly high or over-the-shoulder for control and the join; profile or three-quarter to keep both faces and the line of entry visible; tight on the join or a face only when the beat needs that detail. POV only when the ask says POV or the still is already POV: the camera sits at the dominant's eye line, medium or medium-close (never extreme close), the other person looks toward the lens, and only his hands or forearms enter frame, named once. A continued POV clip keeps the POV angle. A lens note (35mm, 50mm) only when it clarifies the feel.",
+   "checks": [
+    "continued POV clip keeps the POV"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R28",
+   "title": "Continuous take or 2-3 cuts",
+   "derrick_ask": "Either a continuous take or 2-3 cuts; neither forced (memory 11-13)",
+   "source": "memory 11-13; restore #5; writer_prompt L40",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- One continuous [Shot 1] is the default. Use 2-3 cuts of the same beat only when the run passes --shots multi or the ask asks for coverage: [Shot 1] has no timestamp, later cuts are \"[Shot N] At MM:SS.mmm, the camera cuts to ...\". Talk, flirt and tease clips stay one shot. On an act clip, [Shot 1] names the act word. A held shot or slow pull-out stays as written.",
+   "checks": [
+    "2.3 cuts of the same beat",
+    "One continuous \\[Shot 1\\] is the default"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R29",
+   "title": "Cut grammar and 180 line",
+   "derrick_ask": "Professional director quality, not AI slop (t240u); persona: 180 line, screen sides, eyelines, cut on motion",
+   "source": "camera-craft 2026-11-10; R23; persona; audit block 17",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "- A cut must add something new: a new size, a new viewpoint, a contact point or a face. For only slightly tighter, write a slow small push-in instead of a cut.\n- Keep the 180 line: the person on screen left in the master stays on screen left; eyelines point to where the other body is. Cut on a started motion, and finish a spoken line inside one shot.",
+   "checks": [
+    "A cut must add something new",
+    "Keep the 180 line"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R30",
+   "title": "Two-person coverage pattern",
+   "derrick_ask": "Persona: two-person coverage pattern",
+   "source": "camera-craft 2026-11-10; audit block 17",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "- Two-person coverage when cutting: master (medium-wide, both bodies and the join), face (medium close-up or over-the-shoulder on the person whose line or reaction matters), and an optional insert on the named contact point or a POV.",
+   "checks": [
+    "Two-person coverage when cutting"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R31",
+   "title": "Shot-size ladder",
+   "derrick_ask": "Persona: shot sizes ECU/CU/MCU/medium/medium-wide/wide/full/POV/OTS",
+   "source": "persona; R23; audit block 16",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "- The camera sentence names the shot size (extreme close-up, close-up, medium close-up, medium, medium-wide, wide, full, over-the-shoulder, POV, cowboy), the camera height and the angle.",
+   "checks": [
+    "medium two-shot"
+   ],
+   "detail_checks": [
+    "extreme close-up",
+    "medium close-up"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R32",
+   "title": "Lens menu and depth of field",
+   "derrick_ask": "Persona: lenses 24/35/50/85/135mm, anamorphic, shallow/deep DOF",
+   "source": "persona; R23; R25; audit block 16",
+   "audit_status": "X",
+   "severity": "soft",
+   "restore_text": "One lens in the camera sentence: 24mm wide and close for amateur energy, 35mm for a room master, 50mm for a two-shot, 85mm for a face, 135mm for a compressed far close-up; shallow depth of field unless the scene needs the room sharp.",
+   "checks": [
+    "85mm for a face"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "A lens note (35mm, 50mm) only when it clarifies the feel"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R33",
+   "title": "Light vocabulary and named setups",
+   "derrick_ask": "Persona: key, rim, backlight, practicals, Rembrandt, split, soft window, hard side, golden hour, chiaroscuro",
+   "source": "R23; persona; audit block 16",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "- One light sentence after the camera sentence: the source if it is in frame, its direction, soft or hard, warm or cool, and how it falls on skin and fabric. Use one named setup when it fits: key and fill, rim or backlight, practicals, Rembrandt, split, soft window, hard side light, golden hour, chiaroscuro. Keep the still's light sources.",
+   "checks": [
+    "Motivated light"
+   ],
+   "detail_checks": [
+    "Rembrandt",
+    "soft or hard, warm or cool"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R34",
+   "title": "Concrete visual claims (anti-slop)",
+   "derrick_ask": "Cinematic professional quality, not AI slop (memory 11-13)",
+   "source": "long-scene spec §6.5; audit block 18",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "- Every quality word needs a noun of frame, lens, light, material or motion (\"grain in the shadows\", \"hard window light on her ribs\").",
+   "checks": [
+    "Every quality word needs a noun of frame, lens, light"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R35",
+   "title": "Scene look line used verbatim",
+   "derrick_ask": "Director-quality look bible (long-scene spec 6.1)",
+   "source": "long-scene spec §6.1; audit block 18",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "If the beat card gives a look line (lens set, light plan, palette, texture), use its words exactly in every clip.",
+   "checks": [
+    "look line \\(lens set, light plan, palette, texture\\)"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R36",
+   "title": "Genre coverage patterns",
+   "derrick_ask": "Movie/TV spoof quality (t240u)",
+   "source": "long-scene spec §6.2; audit block 19",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "Movie spoof: establishing wide, medium two-shot, slow push to a medium close-up on the line. Sitcom: static wide centre master and chest-height medium singles, flat even light, hold on the reaction. Procedural: cool steel light, over-the-shoulder pair, insert on the evidence. Soap: soft high-key light, slow push to a medium close-up, long reaction hold. Reality confessional: locked medium close-up, eyes just beside the lens.",
+   "checks": [
+    "Sitcom: static wide centre master"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R37",
+   "title": "Spoof hook and comic timing",
+   "derrick_ask": "Spoof/parody: one cadence, one nod, setup-reaction-punchline",
+   "source": "long-scene spec §6.4; audit block 19",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "- Capture a genre or show through attitude, not lines: one verbal cadence (clipped commands, a teasing drawl, overly polite degradation) and one visual or positional nod that fits the still. One flavor per clip; never let it override PRIMARY MOTION or the still. Talk beats run setup line, reaction hold, punchline.",
+   "checks": [
+    "one verbal cadence"
+   ],
+   "detail_checks": [
+    "setup line, reaction hold, punchline"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R38",
+   "title": "Pro hardcore look",
+   "derrick_ask": "Hyper-real hardcore in a professional porn look (memory 11-13)",
+   "source": "memory 11-13; long-scene spec §8.1; audit block 20",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "- Cinematic or pro (cinematic, movie, film, high-end, pro, professional, studio): lit set with key, fill and rim from the still's sources; stable coverage (medium-wide master, side profile at hip height, low insert at the join, face medium close-up); bodies open toward the lens; clean close sound of voices, skin and bed; held shot or a slow push only. Talk is sparser and loaded.",
+   "checks": [
+    "Cinematic \\("
+   ],
+   "detail_checks": [
+    "professional",
+    "low insert at the join"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R39",
+   "title": "Amateur hardcore look",
+   "derrick_ask": "Hyper-real hardcore in an amateur porn look (memory 11-13); gonzo: closer, handheld, faster, POV looks into the lens",
+   "source": "memory 11-13; long-scene spec §8.1; audit block 20",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "- Amateur or gonzo (amateur, gonzo, homemade, sex tape, raw, POV): a phone held by him or on a tripod; practical light only (bedside lamp, TV glow, window); imperfect framing (the top of a head cut off, the horizon a little tilted); room sound (fan, traffic, sheets); natural pauses, a laugh or a \"wait\" between strokes; faster tempo and immediate contact. Lens looks go in the action prose, never inside <d>. For POV, the ask says POV and the prose does not lead with \"handheld\".",
+   "checks": [
+    "Gonzo \\(|Amateur or gonzo"
+   ],
+   "detail_checks": [
+    "practical light only",
+    "imperfect framing"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R40",
+   "title": "One film look per clip",
+   "derrick_ask": "Film looks (noir, 16mm, VHS...) as light, lens and grain",
+   "source": "edge-case M1; acc-4 lf09; audit block 21",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "- A film look (noir, 16mm, silent, VHS, 80s, music-video, slow motion) is written as light, lens and grain (\"grainy 16mm look\"), never as a bare label; never write fps or an aspect ratio like 16:9. One look per clip. VHS is soft analog camcorder video with colour bleed and rolling tracking lines, never 16mm. 16mm is fine grain and a soft gate edge. Noir is hard side light and deep shadow.",
+   "checks": [
+    "film look"
+   ],
+   "detail_checks": [
+    "One look per clip"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R41",
+   "title": "Camera kinds as framing",
+   "derrick_ask": "Webcam, handheld sex-tape, BTS/interview cameras (memory 11-12)",
+   "source": "memory 11-12; restore #9; writer_prompt L59",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- A film look (noir, 16mm, silent, VHS, 80s, music-video, slow motion) is written as light, lens and grain (\"grainy 16mm look\"), never as a bare label; never write fps or an aspect ratio like 16:9. Webcam, handheld sex-tape and behind-the-scenes interview cameras are written as framing, light and sound (a fixed laptop-height angle, a phone at arm's length, an off-screen interviewer's voice), never as a bare label.",
+   "checks": [
+    "Webcam, handheld sex-tape and behind-the-scenes interview cameras"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R42",
+   "title": "BTS interviewer and one camera sentence",
+   "derrick_ask": "Off-screen interviewer: no body, no (Sn) (modular plan t126u-t127u)",
+   "source": "modular plan t126u-t127u; acc-4 lf08; audit block 22",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "An off-screen interviewer has no body and no (Sn) label; write the questions as spoken lines the builder's interviewer form accepts, answered by her on screen. The webcam, phone or interview framing goes inside the one camera sentence, never in a second camera sentence.",
+   "checks": [
+    "off-screen interviewer has no body"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": "Builder's exact off-screen voice form is UNVERIFIED; Max confirms before this goes live."
+  },
+  {
+   "id": "R43",
+   "title": "Variable clip length",
+   "derrick_ask": "Clip length isn't fixed at 10 s; it fits the beat, action, tempo and extension (t239u)",
+   "source": "memory 11-13 (t239u); restore #4; compiler header strip; audit blocks 0c, 25",
+   "audit_status": "E",
+   "severity": "hard",
+   "restore_text": "HEAD: You write the detailed_description paragraph of one MiniMax-H3 prompt for one adult clip whose length the beat card gives (2.3 to 10.1 seconds) and that opens on the start still.\nPACING (clip length follows the beat, action, tempo and extension, about 2.3 to 10.1 seconds; the timings below are for a 10 s clip and scale with length)\n- The beat card gives the clip length T in seconds. Onset fills about the first 30% of T, development to about 80%, result to the end. A clip that opens already joined spends all of T on motion.\n- Spoken words: at most 2.5 per second of T. Lines per speaker: one per five seconds, at least one.",
+   "checks": [
+    "beat card gives the clip length T",
+    "scale with length"
+   ],
+   "detail_checks": [
+    "clip whose length the beat card gives",
+    "at most 2\\.5 per second of T"
+   ],
+   "forbidden": [
+    "roughly ten-second",
+    "spends all 10 seconds",
+    "25 for 10 s"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R44",
+   "title": "One beat per clip, budgets, position change",
+   "derrick_ask": "One beat per clip; sex clips 2-3 s to get into position and enter; 1-2 dialogue lines per person; strips 1-3 removals; teases one denial; a position change is its own clip (memory 11-13)",
+   "source": "memory 11-13; writer_prompt L47, L49-L52",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- One beat per clip. If it can't play in one clip, it belongs in its own clip.\n- Sex clip: the exit, clearance and entry take the first 2-3 seconds; PRIMARY MOTION owns the rest. A clip that opens already joined (continued or extension) spends all 10 seconds on motion.\n- Talk fits the time: one to two short lines per speaker in a sex clip, fewer in cinematic mode. A spoken line takes about two seconds. Total spoken words stay at about 2.5 a second of clip (25 for 10 s); the builder drops lines past about 2.5 words a second.\n- Slow acts take fewer steps: strip is one to three removals, tease is one denial, and oral or riding at a slow tempo gets a few full cycles, not a list of changes.\n- Position change: the transition is the clip's beat; the new position's full motion starts in the following clip.",
+   "checks": [
+    "One beat per clip\\. If it can't play in one clip",
+    "exit, clearance and entry take the first 2-3 seconds",
+    "one to two short lines per speaker",
+    "strip is one to three removals, tease is one denial",
+    "Position change: the transition is the clip's beat"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": "When R43 restores, keep these Derrick budgets (2-3 s entry, 1-2 lines) as the 10 s case."
+  },
+  {
+   "id": "R45",
+   "title": "Talk-only clips",
+   "derrick_ask": "Talk-only clips are allowed for spoof, parody and story (memory)",
+   "source": "memory 11-13; writer_prompt L53",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Talk-only spoof or story clip (--position talk): at least three spoken lines, a hard minimum, up to five, each about five to eight words and placed across the phases; one physical action that moves the story; and no contact line or PRIMARY MOTION.",
+   "checks": [
+    "Talk-only spoof or story clip"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R46",
+   "title": "Exact phase markers and onset variety",
+   "derrick_ask": "Four phases (Derrick approved t220s717); prose-quality: vary the onset",
+   "source": "AGENTS SHAPE L133; prose-quality §A5; audit block 23",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "- Phase words, each once and in order: \"At first\", one onset sentence, \"As it builds\", \"By the end\". Never \"As she builds\" or \"As it builds\" twice.\n- Vary the onset: lead with the dominant's grip, with a sound, or with her line; don't open every clip the same way.",
+   "checks": [
+    "At first"
+   ],
+   "detail_checks": [
+    "Never \"As she builds\"",
+    "Vary the onset"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R47",
+   "title": "Pre-flight checks",
+   "derrick_ask": "AGENTS PRE-FLIGHT (garments, people, final states, mode)",
+   "source": "AGENTS.md PRE-FLIGHT L110-L115; audit block 24",
+   "audit_status": "E",
+   "severity": "hard",
+   "restore_text": "7. Every garment in the still is accounted for, and anything over the join is cleared on the correct side and stays there.\n8. Every person on screen has a label, a place and a role; a restraint, a damaged or moved garment and a mask have a final state.\n9. The mode the ask names is applied.",
+   "checks": [
+    "Every person on screen has a label, a place and a role",
+    "Every garment in the still is accounted for"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R48",
+   "title": "No word cap, no padding",
+   "derrick_ask": "R9: no word cap, no padding",
+   "source": "R9; audit block 26",
+   "audit_status": "X",
+   "severity": "soft",
+   "restore_text": "One beat per clip, no beat repeated. Write as much timed physical, camera and sound detail as the beat needs, with no padding.",
+   "checks": [
+    "no padding"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "reads aloud in under a minute"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R49",
+   "title": "Continued clip from ending_state",
+   "derrick_ask": "Continued clips open mid-scene from the last end state",
+   "source": "handoff change 6; writer_prompt L35",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Continued clip: open from the scene's ending_state (pose, garment positions, contact, camera, POV). Never restate an action the last clip already finished and never reset a garment. The builder still adds an open-from-still line, so the \"At first\" sentence states the inherited pose and garment positions in terms compatible with the start still.",
+   "checks": [
+    "Continued clip: open from the scene's ending_state"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": "After builder fix 1 (Derrick yes t251s854), replace the last sentence with audit block 27; then add 'The builder still adds an open-from-still line' to forbidden."
+  },
+  {
+   "id": "R50",
+   "title": "Same-position extension",
+   "derrick_ask": "Extensions add one new secondary beat",
+   "source": "memory; writer_prompt L36",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Same-position extension: keep the position and PRIMARY MOTION, and add one new secondary beat (groping, a spank, a slap, his hand on her throat, a hair pull, a new grip, or a change in tempo or depth). Fresh talk reacts to that beat; never reuse the last clip's lines or restate an action it already finished. A new angle (face close-up, contact insert, reverse) is encouraged here, written as a camera move in prose, since coverage adds the most on an extension.",
+   "checks": [
+    "Same-position extension"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R51",
+   "title": "Story across clips, light constant",
+   "derrick_ask": "Long scenes with cuts and extensions (t237u)",
+   "source": "long-scene spec; writer_prompt L60, L62",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Story across clips: each clip plays one stage of the scene's arc (setup and banter, first touch, escalation, a position change, the finish) and opens from the last clip's end state.\n- Motivated light (a lamp, a neon sign, a window) stays the same source and direction across clips.",
+   "checks": [
+    "Story across clips",
+    "Motivated light .{0,40}stays the same source"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R52",
+   "title": "Modes only when the ask calls for them",
+   "derrick_ask": "Optional writer modes activate only when the ask calls for them (memory 11-13)",
+   "source": "memory 11-13; AGENTS.md L93 header; pipeline assemble_system",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "MODES (use only when the ask calls for one)",
+   "checks": [
+    "^MODES"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": "Gating is enforced in code (assemble_system injects only triggered modes); the header words are stripped by the compiler, so the length check flags it CONDENSED until compiler fix 0a lands."
+  },
+  {
+   "id": "R53",
+   "title": "Forced penetration kept; tease through tempo",
+   "derrick_ask": "Forced penetration kept; teasing and edging deny through tempo (pull all the way out, pause, stop dead) (memory)",
+   "source": "memory; writer_prompt L88",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Teasing and edging (tease, edge, denial) on a sex position: the builder keeps full entry, so the denial is in tempo and control, not depth. Slow full strokes, a full pull-out that pauses before he reseats, stopping dead when the submissive pushes for more, or slowing just as she nears the edge. One clear denial moment per clip unless the ask is a full edging clip. Garments may stay mostly on.",
+   "checks": [
+    "Teasing and edging",
+    "full pull-out that pauses before he reseats"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R54",
+   "title": "Forced orgasm mode",
+   "derrick_ask": "Optional forced orgasm mode (memory 11-13)",
+   "source": "memory; writer_prompt L89",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Forced orgasm (adult fantasy): stimulation continues past the point of control, and PRIMARY MOTION keeps going through the orgasm. Show it in the body and voice, written once or twice: clenching, thighs pushing to close and held open, back arching, an overstimulated flinch on each stroke, lines breaking into fragments or gasps. Never write \"she orgasms\" as narration.",
+   "checks": [
+    "Forced orgasm \\(adult fantasy\\)"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R55",
+   "title": "Toys mode",
+   "derrick_ask": "Optional toys mode (memory 11-13)",
+   "source": "memory; writer_prompt L92",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Toys (toy, vibrator, dildo, plug, wand): define the toy once (type, size, who controls it). The same contact rules as penetration apply: where it is seated or pressed, whether it moves, and the tempo. Solo, a toy can be the PRIMARY MOTION (--position female_solo). With a partner, the partner's penetration is the PRIMARY MOTION and the toy is secondary (a wand pressed to her clit while he thrusts). Insertion and removal are one move each, with a resting state. If the still shows no toy, it enters only when the ask needs it, and the writer says how it enters the frame.",
+   "checks": [
+    "Toys \\(toy, vibrator"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R56",
+   "title": "Superheroine peril",
+   "derrick_ask": "Superheroine peril: show of power, breaking moment, one costume move that stays, defiant-to-broken voice, pinned wrists, cape as handle, unmasking as one move (memory)",
+   "source": "memory; writer_prompt L91",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Superheroine defeat (peril, defeated heroine): original adult characters in costume, no named heroes and no quoted lines. In one compact beat: one pose or line of her strength or defiance, the breaking moment that shifts control (a caught wrist, a pin, a power-loss effect), one costume move written once (torn, pulled aside or peeled, using the still's costume noun) that stays in its ruined state, and PRIMARY MOTION under the new dynamic. Her voice drops from confident to strained or broken, held to one reaction tone. Control cues: pinned wrists, hair or cape used as a handle, weight placed so she can't rise. An unmasking, if asked, is one move with the mask's final place.",
+   "checks": [
+    "Superheroine defeat",
+    "unmasking, if asked, is one move with the mask's final place"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R57",
+   "title": "Strip and undress",
+   "derrick_ask": "Strips get 1-3 removals (memory)",
+   "source": "memory; writer_prompt L90",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Strip and undress (strip, striptease, undress, slow reveal): one to three removal steps per clip, more only when the ask is a full strip sequence. Each step is one person, one garment, one move, with where it lands and stays (\"hooks her thumbs in the waistband and pushes the shorts down to mid-thigh, where they stay\"). Hold a beat on each reveal so the new state reads. The remover sets the pace; the dominant removes it or orders it, and the submissive may be made to strip slowly while held or watched. Partial states count: a top lifted and held above the breasts, a zipper half down, panties pulled aside but on, shorts around one ankle.  One follow-through per removal (fabric sliding, hair shifting, breasts settling). Strip mode is its own solo clip (--position tease) with a timed PRIMARY MOTION (\"PRIMARY MOTION - <the removal>, slow, about one move every two seconds\"). In a sex clip, undressing is the single clearance move.",
+   "checks": [
+    "Strip and undress \\(strip"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R58",
+   "title": "CNC, power, rough stance",
+   "derrick_ask": "Show control through concrete action and measurable roughness; CNC as adult fantasy protest overridden; don't narrate or soften (memory 11-13)",
+   "source": "memory 11-13; writer_prompt L65-L68, L70",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- State who is in control in the first sentences: who sets the pace, who is held or placed, who is ordered silent.\n- Show control through action before talk: pinning, a fist in her hair, hands locked on hips or wrists, his weight pressing her down, him setting depth and tempo.\n- Rough is measurable: grip location and pressure (write \"his hand on her throat\", never \"chokes\", \"grips\" or \"closes on\" her throat), depth, impact, tempo. Rough PRIMARY MOTION names intensity and tempo in your own words: how hard, and how often a full cycle lands.\n- CNC and reluctance are adult roleplay: protest and pulling away happen inside the beat and are overridden by grip or command. No safewords or meta negotiation unless the ask wants them.\n- Never narrate the dynamic (\"he dominates her\", \"she submits\"); show it. Don't soften CNC into enthusiasm unless the ask is free-use with no resistance. Don't change the still to make it rougher.",
+   "checks": [
+    "State who is in control",
+    "Show control through action before talk",
+    "Rough is measurable",
+    "CNC and reluctance are adult roleplay",
+    "Never narrate the dynamic"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R59",
+   "title": "Taboo roles kept as written ('little sister')",
+   "derrick_ask": "Keep 'little sister' as written (Derrick t247s837); adult family roleplay with no extra rules beyond 18+ (memory 11-12)",
+   "source": "Derrick t247s837; memory 11-12; audit block 28",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "- Taboo family roleplay (daddy, brother, sister, uncle, cousin) is adult roleplay dialogue between adult characters. The dominant usually drives the role language; each role line ties to what is visible right now (position, garment state, depth), and the submissive's replies use the role in her reaction tone (ashamed protest, bratty challenge, eager acceptance, overridden reluctance). One role per clip, one role title per line, one strong role line per beat. Use the ask's role words exactly as written (for example 'little sister'); every character is an adult.",
+   "checks": [
+    "Taboo family roleplay"
+   ],
+   "detail_checks": [
+    "little sister"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R60",
+   "title": "Reaction tones held per clip",
+   "derrick_ask": "Humiliation reaction tones (memory)",
+   "source": "memory; writer_prompt L74-L79",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- The dominant usually delivers the degradation. Pick one reaction tone for the submissive per clip and hold it; shift only when the ask describes a shift:\n- Ashamed: short, quiet, broken lines; eyes down or away; a small flinch or a hand near the face; soft or strained voice.\n- Bratty: mouthy push-back or a taunt; pushes back once; the dominant answers with more control, a fist in the hair or more depth.\n- Reluctant: verbal protest, ignored or answered with a command; pulls away and is held in place.\n- Eager: short begging or yes lines that accept it; arches or pushes back into the motion.\n- Silent: no lines from the submissive while the dominant talks; breath, impact and body reaction carry it.",
+   "checks": [
+    "Pick one reaction tone for the submissive per clip",
+    "Ashamed:",
+    "Bratty:",
+    "Reluctant:",
+    "Eager:",
+    "Silent:"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R61",
+   "title": "Filthy, act-specific dirty talk",
+   "derrick_ask": "Filthy, act-specific dirty talk, not recycled mild stock lines (memory 11-11)",
+   "source": "h3 SKILL 'Hardcore OC dirty talk'; memory 11-11; audit block 29",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "- Lines are crude and act-specific: name the cock, cunt, throat, depth or being used, about this exact stroke and this place. \"Fuck me harder\" or \"take it\" are too mild; write a new line for every beat. Delivery matches the intensity: hoarse, tight, breathless, forced; never calm or flat.",
+   "checks": [
+    "Fresh crude lines"
+   ],
+   "detail_checks": [
+    "name the cock, cunt, throat"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R62",
+   "title": "<d> hygiene",
+   "derrick_ask": "Only spoken words inside <d> (h3 dialogue rules)",
+   "source": "h3 SKILL dialogue; audit block 29",
+   "audit_status": "M",
+   "severity": "soft",
+   "restore_text": "- Inside <d>: only [English] and the spoken words, ending with . ? or !; no ellipses, no moans spelled as words. Put the speaker's mouth or body action on the same beat, outside <d>.",
+   "checks": [
+    "no ellipses"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R63",
+   "title": "Lines react to now",
+   "derrick_ask": "Talk is of the moment (persona)",
+   "source": "acc-4 pi_doggy, lf25; audit block 29",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "Each line names something from the still or the line focus. Lines react to now: this surface, this pace, this depth; never a later time or place.",
+   "checks": [
+    "names something from the still"
+   ],
+   "detail_checks": [
+    "Lines react to now"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R64",
+   "title": "Sound tied to action, no music",
+   "derrick_ask": "Plain diegetic sound cues tied to action; no music, no narrator, no cartoon effects (R7, restore #15)",
+   "source": "R7; restore #15; writer_prompt L99",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Close detailed_description: (sex clips) with one to three plain sentences of sound, each tied to the action that makes it: at least one impact or contact sound from the PRIMARY MOTION, one breath sound that fits the reaction tone (strained gasp, quiet whimper, defiant huff), and room sound only when the still implies it. No music, no narrator, no header, no cartoon sound effects. A talk-only clip closes on one room or movement sound tied to its story action.",
+   "checks": [
+    "one to three plain sentences of sound",
+    "No music, no narrator"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R65",
+   "title": "States: sleeping, rufie, MDMA, mind control, telekinesis",
+   "derrick_ask": "Sleeping, MDMA, sci-fi mind control and telekinesis as writer-brief facts (memory 11-12); rufie written as already-out, no drug method (memory 11-12); consensual roleplay with an on-screen agreement clip (Derrick, relayed via Max)",
+   "source": "memory 11-12; modular plan t122u-t125u; audit block 30",
+   "audit_status": "M",
+   "severity": "hard",
+   "restore_text": "- States (adult consensual roleplay; the scene's agreement clip comes first): Sleeping or already out: eyes closed, limbs slack, slow breathing, the chest rising; she has no lines and does not wake unless the ask says so; if she wakes, she wakes during PRIMARY MOTION. Never write a drug, a dose or how it is given. MDMA: a party or afterparty state from the still's place; heavy-lidded eyes, touch-seeking hands. Mind control: name who or what controls her (his voice command or a device); his command is what moves her body. Telekinesis: name who holds her; she floats at his hip height, held by his raised hand, with nothing under her, and the hold is measurable (her hair and limbs hang with gravity).",
+   "checks": [
+    "Sleeping or already out",
+    "Telekinesis: name who holds her",
+    "agreement clip"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": "Agreement-clip requirement is relayed from Max citing Derrick."
+  },
+  {
+   "id": "R66",
+   "title": "Size fantasy with adult guard",
+   "derrick_ask": "Size fantasy: oversized anatomy, orc, giant, tiny or fairy adults, monsters; a fairy is an adult woman at miniature scale with a measurable hold (memory 11-12)",
+   "source": "memory 11-12; restores #1-#3; writer_prompt L29",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- For a non-human or faceless partner (orc, elf, troll, alien, monster, tentacles), load only her RefMod; the creature rides on the look text, never \"a man\". Still nouns win on costume, place, roles, wardrobe, races, and scale. Size play (oversized anatomy, a tiny or fairy adult woman, a giant carry) keeps one measurable scale anchor all clip (e.g. no taller than his forearm), a measurable hold for any carry, and one still per clip; a tiny or fairy woman is always an adult woman at miniature scale with an adult face, breasts, hips and proportions. Any youth hint is a hard stop.",
+   "checks": [
+    "one measurable scale anchor",
+    "adult woman at miniature scale",
+    "youth hint is a hard stop"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R67",
+   "title": "Size realism: support, slow partial entry",
+   "derrick_ask": "Fairy/giant/orc physical realism (long-scene spec 9.3)",
+   "source": "long-scene spec §9.3; restore #2; audit block 31",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "Scale entry is slow and partial at first and builds later; name the stretch and the depth that fits; name the support (his forearms under her thighs, her back to the wall, a pillow under her hips) and his elbows bent under any lifted weight. Tentacles: they coil around her thighs and wrists and hold; one is inside her vagina and carries the tempo.",
+   "checks": [
+    "measurable hold"
+   ],
+   "detail_checks": [
+    "slow and partial at first"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R68",
+   "title": "Non-human partner on the look text",
+   "derrick_ask": "For a non-human male partner, leave his face and body to the still (memory 11-12)",
+   "source": "memory 11-12; restore #1; writer_prompt L29",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- For a non-human or faceless partner (orc, elf, troll, alien, monster, tentacles), load only her RefMod; the creature rides on the look text, never \"a man\". Still nouns win on costume, place, roles, wardrobe, races, and scale. Size play (oversized anatomy, a tiny or fairy adult woman, a giant carry) keeps one measurable scale anchor all clip (e.g. no taller than his forearm), a measurable hold for any carry, and one still per clip; a tiny or fairy woman is always an adult woman at miniature scale with an adult face, breasts, hips and proportions. Any youth hint is a hard stop.",
+   "checks": [
+    "never \"a man\""
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R69",
+   "title": "Partners go in the beat card's partners list",
+   "derrick_ask": "Third person: made up and kept consistent, or the reference image when given (Derrick, relayed); giant/orc/futa defined",
+   "source": "restores #1/#16; long-scene spec §9.1; pipeline assemble_output; audit block 32",
+   "audit_status": "E",
+   "severity": "hard",
+   "restore_text": "Put every partner in the beat card's partners list with adult age, build, attire, entrance side, and, when asked, species (orc, elf, alien), scale anchor (about twice her height; his penis about as thick as her wrist), futa anatomy, or 'matches <Picture N>'.",
+   "checks": [
+    "beat card's partners list"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "is defined in subject_definitions:"
+   ],
+   "note": "Needs pipeline change: assemble_output must copy species/scale/anatomy into the <Subject N> line."
+  },
+  {
+   "id": "R70",
+   "title": "S3 kept consistent",
+   "derrick_ask": "S3 as 'flexible dynamic intelligence': made up and consistent with no still; the reference image when given (Derrick)",
+   "source": "Derrick t235/t237 (relayed); writer_prompt L30",
+   "audit_status": "C",
+   "severity": "soft",
+   "restore_text": "A third person missing from the still is made up from the scene's details; when Derrick gives a still for them, it is the next <Picture N> and (S3) matches it. Use the same partner description in every clip of the scene.",
+   "checks": [
+    "third person missing from the still is made up"
+   ],
+   "detail_checks": [
+    "same partner description in every clip"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R71",
+   "title": "Max 3 people",
+   "derrick_ask": "Threesomes, max 3 people (settled)",
+   "source": "settled rule; writer_prompt L30",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Partners: anyone missing from the still, including a third person, is defined in subject_definitions: with adult age, build, exact attire and entrance direction, and called (S2) or (S3). A futa partner is she/her, with her anatomy stated once in subject_definitions:. A third person gets a clear role in the power dynamic, a fixed placement (kneeling behind her, at her left) and named hand ownership (\"(S3)'s left hand\"). Futa contact names \"her penis\" in the contact line and keeps it consistent. Male solo has one body, (S1) is the man, and every contact, motion and dialogue rule still applies. At most 3 people; FFM and MMF are allowed. A third person missing from the still is made up from the scene's details; when Derrick gives a still for them, it is the next <Picture N> and (S3) matches it.",
+   "checks": [
+    "At most 3 people"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R72",
+   "title": "Futa partner",
+   "derrick_ask": "Futa partner (plan t127u)",
+   "source": "plan t127u; writer_prompt L30",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Partners: anyone missing from the still, including a third person, is defined in subject_definitions: with adult age, build, exact attire and entrance direction, and called (S2) or (S3). A futa partner is she/her, with her anatomy stated once in subject_definitions:. A third person gets a clear role in the power dynamic, a fixed placement (kneeling behind her, at her left) and named hand ownership (\"(S3)'s left hand\"). Futa contact names \"her penis\" in the contact line and keeps it consistent. Male solo has one body, (S1) is the man, and every contact, motion and dialogue rule still applies. At most 3 people; FFM and MMF are allowed. A third person missing from the still is made up from the scene's details; when Derrick gives a still for them, it is the next <Picture N> and (S3) matches it.",
+   "checks": [
+    "futa partner is she/her",
+    "her penis"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R73",
+   "title": "Male solo",
+   "derrick_ask": "Male solo (plan t127u)",
+   "source": "plan t127u; writer_prompt L30",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "- Partners: anyone missing from the still, including a third person, is defined in subject_definitions: with adult age, build, exact attire and entrance direction, and called (S2) or (S3). A futa partner is she/her, with her anatomy stated once in subject_definitions:. A third person gets a clear role in the power dynamic, a fixed placement (kneeling behind her, at her left) and named hand ownership (\"(S3)'s left hand\"). Futa contact names \"her penis\" in the contact line and keeps it consistent. Male solo has one body, (S1) is the man, and every contact, motion and dialogue rule still applies. At most 3 people; FFM and MMF are allowed. A third person missing from the still is made up from the scene's details; when Derrick gives a still for them, it is the next <Picture N> and (S3) matches it.",
+   "checks": [
+    "Male solo has one body"
+   ],
+   "detail_checks": [],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R74",
+   "title": "Restraint applied on screen",
+   "derrick_ask": "Restraints have a final state; write the tie (acc-3 fix 9)",
+   "source": "acc-3 fix 9; acc-4 c7; audit block 33",
+   "audit_status": "C",
+   "severity": "hard",
+   "restore_text": "- Restraints: name the restraint, who applied it and what it limits (wrists tied to the headboard, ankles cuffed apart). It stays unless a written move removes it. If the still shows no restraint, write the tie in the onset, who ties it and where, and her hands stay there.",
+   "checks": [
+    "Restraints: name the restraint"
+   ],
+   "detail_checks": [
+    "If the still shows no restraint, write the tie"
+   ],
+   "forbidden": [],
+   "note": ""
+  },
+  {
+   "id": "R75",
+   "title": "Single 18+ age floor",
+   "derrick_ask": "One 18+ age floor only, with no extra age rules (memory 11-12)",
+   "source": "memory 11-12; Derrick 18+ floor; audit block 34",
+   "audit_status": "X",
+   "severity": "hard",
+   "restore_text": "Every person is a fictional adult, 18 or older.",
+   "checks": [
+    "18 or older"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "25 or older"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R76",
+   "title": "No pregnancy",
+   "derrick_ask": "No pregnancy scenarios in the Render pipeline (t243s811)",
+   "source": "Derrick t243s811",
+   "audit_status": "P",
+   "severity": "hard",
+   "restore_text": "(Enforced by absence: the writer prompt never mentions pregnancy; router and lint keep it out.)",
+   "checks": [],
+   "detail_checks": [],
+   "forbidden": [
+    "pregnan",
+    "impregnat"
+   ],
+   "note": ""
+  },
+  {
+   "id": "R77",
+   "title": "Worked examples, level not words",
+   "derrick_ask": "Director-quality output, not AI slop; give the model 2-3 varied examples (prose-quality §A1)",
+   "source": "prose-quality §A1; h3 worked examples; audit block 35",
+   "audit_status": "X",
+   "severity": "soft",
+   "restore_text": "EXAMPLES (level of detail only; never reuse their words; the clone check rejects any six-word run copied from them)",
+   "checks": [
+    "EXAMPLES \\(level of detail only"
+   ],
+   "detail_checks": [],
+   "forbidden": [
+    "never copy a sentence from this file"
+   ],
+   "note": ""
+  }
+ ]
+}

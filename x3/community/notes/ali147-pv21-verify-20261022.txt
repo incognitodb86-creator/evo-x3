@@ -1,0 +1,216 @@
+== A. harness result gate (p7\jobs\ali147_pool_promptv2_s51080000.result.json)
+  result.json ok = True
+  result.json rc = 0
+  result.json note = 'run_graph_job rc=0 (ok)'
+  result.json id = 'ali147_pool_promptv2_s51080000'
+  result.json kind = 'graph'
+  result.json started = '2026-10-22T22:21:37'
+  result.json finished = '2026-10-22T22:36:32'
+  result.json wall_min = 14.9
+  result.json budget_used_min = 342
+  result.json budget_cap_min = 390
+PASS result.json ok is True (PV2-1 gate: status.log JOB end ok)
+PASS result.json rc == 0 (got 0)
+PASS result.json id/kind match the arm
+PASS p7\jobs\<id>.out is byte-identical to runs\<id>\status.log (same job log)
+
+== B. status.log verbatim + error greps
+  | 2026-10-22 22:21:37 CT UNLOAD LLM coding_swift15_iq3s_esp
+  | 2026-10-22 22:22:43 CT JOB start ali147_pool_promptv2_s51080000 prompt_id=af19daf9-f562-4339-a43f-777e2518ead5
+  | 2026-10-22 22:36:31 CT JOB end ali147_pool_promptv2_s51080000 ok secs=827.7 file=C:\AI\community\runs\ali147_pool_promptv2_s51080000\ali147_pool_promptv2_s51080000.mp4
+  | 2026-10-22 22:36:31 CT OBJECTIVE ok ali147_pool_promptv2_s51080000 frames=481 audio=True dur=20.042 bytes=6397658 contact=C:\AI\community\runs\ali147_pool_promptv2_s51080000\ali147_pool_promptv2_s51080000_stills_contact.png
+  | 2026-10-22 22:36:32 CT UNLOAD comfyui_auto (POST /api/models/unload)
+PASS status.log: no 'JOB error' (hits 0)
+PASS status.log: no 'CLIP_SKIP' (hits 0)
+PASS status.log: no 'clip_skip' (hits 0)
+PASS status.log: no 'node_errors' (hits 0)
+PASS status.log: no 'Traceback' (hits 0)
+PASS status.log: no 'STUCK' (hits 0)
+PASS status.log: no 'REDO' (hits 0)
+PASS status.log: no 'redo' (hits 0)
+PASS status.log: no 'STATIC_FAIL' (hits 0)
+PASS status.log: no 'COMFY_DOWN' (hits 0)
+PASS status.log: no 'error' (hits 0)
+PASS status.log: no 'ERROR' (hits 0)
+PASS status.log: no 'FAIL' (hits 0)
+PASS status.log: no 'OBJECTIVE FAIL' (hits 0)
+PASS LLM unloaded BEFORE the job (ALI-154), by the harness: ['2026-10-22 22:21:37 CT UNLOAD LLM coding_swift15_iq3s_esp']
+PASS exactly one JOB start line for the arm
+PASS exactly one JOB end ... ok line for the arm (the task's 'JOB end ok')
+PASS exactly one OBJECTIVE ok line for the arm
+  JOB start : 2026-10-22 22:22:43 CT JOB start ali147_pool_promptv2_s51080000 prompt_id=af19daf9-f562-4339-a43f-777e2518ead5
+  JOB end   : 2026-10-22 22:36:31 CT JOB end ali147_pool_promptv2_s51080000 ok secs=827.7 file=C:\AI\community\runs\ali147_pool_promptv2_s51080000\ali147_pool_promptv2_s51080000.mp4
+  OBJECTIVE : 2026-10-22 22:36:31 CT OBJECTIVE ok ali147_pool_promptv2_s51080000 frames=481 audio=True dur=20.042 bytes=6397658 contact=C:\AI\community\runs\ali147_pool_promptv2_s51080000\ali147_pool_promptv2_s51080000_stills_contact.png
+PASS result.json started matches the status.log UNLOAD line (22:21:37 CT)
+PASS result.json finished matches the status.log last line (22:36:32 CT)
+
+== C. objective.json (harness shape attempts:[{...}]) + control comparison
+  top-level keys ['attempts', 'contact_sheet', 'file', 'ok', 'tag']
+  attempts: 1
+PASS one attempt only = no automatic redo, no STUCK (got 1)
+  attempts[0].frames = 481
+  attempts[0].w = 768
+  attempts[0].h = 1344
+  attempts[0].fps = '24/1'
+  attempts[0].audio = True
+  attempts[0].duration = 20.041688
+  attempts[0].bytes = 6397658
+  attempts[0].secs = 827.7
+  attempts[0].blackfreeze = []
+  attempts[0].file = 'C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51080000.mp4'
+  top-level ok=True contact_sheet='C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51080000_stills_contact.png'
+PASS objective.json ok is True
+PASS objective frames == 481 (frames_tol 0)
+PASS resolution 768x1344
+PASS fps 24/1 (got '24/1')
+PASS audio stream present
+PASS blackfreeze [] = no black/frozen frames (the harness chain)
+PASS objective bytes == os.path.getsize(mp4) (6397658)
+  CONTROL ali147_pool_ctrl_s51080000 objective keys ['audio', 'blackfreeze', 'bytes', 'contact_sheet', 'duration', 'fps', 'frames', 'h', 'ok', 'secs', 'sha256', 'tag', 'w']
+  ctrl.frames = 481
+  ctrl.w = 768
+  ctrl.h = 1344
+  ctrl.fps = '24/1'
+  ctrl.audio = True
+  ctrl.duration = 20.041688
+  ctrl.bytes = 5781091
+  ctrl.secs = 809.7
+  ctrl.sha256 = '1dc59ed446e4cf1a5ecbfa18616a311b658d1acc281a3624974732373ba42fda'
+PASS the control is the FLAT driver shape (no attempts, top-level secs) = the control was rendered by the driver, not this loop
+PASS control objective is 481 / 768x1344 / 24/1 / audio - a valid one-variable control
+  RENDER SECONDS vs CTRL: arm 827.7 s vs control 809.7 s = +18.0 s (+2.22 %)  [the task's 'render seconds vs CTRL 809.7']
+  wall: result.json wall_min 14.9 (job 2026-10-22T22:21:37 -> 2026-10-22T22:36:32); the request's minutes=60 is a PRE-job gate, not a render cap
+  bytes arm 6397658 vs control 5781091 = +616567 (10.67 %)
+PASS same frame count as the control (one prompt-only variable, frames_tol 0 both)
+
+== D. independent ffprobe recount + black/frozen re-probes (read-only, this iteration)
+  video: rc=0 out='768,1344,24/1,24/1,481' err=''
+PASS ffprobe -count_packets video packets = 481 (independent recount, never format=duration)
+PASS ffprobe width/height 768x1344
+PASS ffprobe r_frame_rate 24/1
+  streams: rc=0 out='0,h264,video,20.041667,481\n1,aac,audio,32000,2,20.041688,628'
+PASS exactly one audio stream in the container (['1,aac,audio,32000,2,20.041688,628'])
+  format (informational, NOT the frame gate): '20.041688,6397658'
+  harness filter chain (run_graph_job.py blackfreeze) = 'blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2'
+  harness-chain events: [] rc=0
+PASS re-running the harness's own blackdetect+freezedetect chain gives 0 events = objective.json blackfreeze [] reproduces
+  stricter blackdetect (d=0.2): [] rc=0
+PASS own stricter blackdetect: no black intervals
+  stricter freezedetect (n=0.005 d=0.5): [] rc=0
+PASS own stricter freezedetect: no frozen intervals >= 0.5 s
+
+== E. provenance: the graph that rendered is the graph Forge wrote
+  request.api.json 12480 B sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+  ali147_pool_promptv2_s51080000.api.json 12480 B sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+PASS ali147_pool_promptv2_s51080000.api.json is BYTE-IDENTICAL to request.api.json (plain cmp: no output) = the rendered graph is mine
+PASS request.api.json sha256 == the PROOF record d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+PASS parsed graphs identical (25 nodes)
+PASS node key set == the CTRL graph (25 nodes, no node added/removed)
+PASS no *_redo*.api.json in the arm dir (consistent with attempts length 1)
+  p7\jobs request archives: ['request_iter01.json', 'request_iter02.json', 'request_iter03.json', 'request_iter04.json', 'request_iter05.json', 'request_iter06.json', 'request_iter07.json', 'request_iter08.json', 'request_iter09.json']
+PASS the consumed job request (sha256 f37aa53f8127...) is archived at p7\jobs\['request_iter07.json'] = exactly one job, id as written
+  archived request content: {"jobs": [{"id": "ali147_pool_promptv2_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}
+  p7\JOB_REQUEST.json present = False (a Request file is CONSUMED at exit)
+
+== F. the rendered graph carries the two PROMPT_V2 files verbatim (the arm's only variable)
+  c0: file 4411 B sha256 889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6 | graph string 4411 ch sha256 889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6
+PASS v2_seg1_c0_r2v.txt file sha256 == the PV2-0 / SHA256SUMS record
+PASS graph c0.prompt == v2_seg1_c0_r2v.txt VERBATIM (byte-for-byte, no EOL change)
+PASS graph c0.prompt sha256 == 889c543a13cfb3d0e37c20198a2d03cc3d9e4b32934ad2ce71b37b359d3175b6
+  c1: file 2769 B sha256 655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b | graph string 2769 ch sha256 655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b
+PASS v2_seg1_c1_t2va.txt file sha256 == the PV2-0 / SHA256SUMS record
+PASS graph c1.prompt == v2_seg1_c1_t2va.txt VERBATIM (byte-for-byte, no EOL change)
+PASS graph c1.prompt sha256 == 655e92a8f668f51e74bececce3471bcc32492bfdd1ade7377b456b65eec17d2b
+PASS SHA256SUMS.txt entry for v2_seg1_c0_r2v.txt == 889c543a13cf
+PASS SHA256SUMS.txt entry for v2_seg1_c1_t2va.txt == 655e92a8f668
+PASS adults-only guard (the harness's own comm.guard_ok, run_graph_job.py:60) passes on both V2 prompts
+PASS only c0/c1 carry prompt strings in the rendered graph (no hidden prompt edits)
+
+== G. fairness vs CTRL: only c0.prompt, c1.prompt, filename_prefix
+  identical nodes 22, differing nodes ['c0', 'c1', 'save']
+PASS differing node set == ['c0','c1','save'] (22/25 nodes byte-identical)
+PASS c0 input key set unchanged (['audio_vae', 'clip', 'height', 'length', 'prompt', 'ref_image_size', 'ref_images.ref_image_1', 'vae', 'width'])
+PASS c0: changed inputs == ['prompt'] (got ['prompt'])
+PASS c1 input key set unchanged (['clip', 'height', 'length', 'prompt', 'vae', 'width'])
+PASS c1: changed inputs == ['prompt'] (got ['prompt'])
+PASS save input key set unchanged (['codec', 'filename_prefix', 'format', 'video'])
+PASS save: changed inputs == ['filename_prefix'] (got ['filename_prefix'])
+PASS save.filename_prefix = the new id ('community/ali147_pool_promptv2_s51080000/ali147_pool_promptv2_s51080000')
+PASS seed held at 51080000 (noise.noise_seed, identical to CTRL)
+PASS CTRL prefix read from the control graph: 'community/ali147_pool_ctrl_s51080000/ali147_pool_ctrl_s51080000'
+PASS held equal: steps = 10 on every node that has it, arm and control
+PASS held equal: sampler_name = 'euler' on every node that has it, arm and control
+PASS held equal: scheduler = 'simple' on every node that has it, arm and control
+PASS held equal: denoise = 1.0 on every node that has it, arm and control
+PASS sigma shift 10/3 held
+PASS c0 resolution 768x1344
+PASS c0.length 243 (CTRL value)
+PASS c0.length 243 + win1.extension_frames 238 = 481 = the requested frames
+PASS c1.length stays the window link ['win1', 1] (no length change)
+PASS LoadImage string unchanged: ['community/POOL_768x1344.png']
+PASS the start still resolves inside ComfyUI\input: 1354030 B sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075
+  m_attn attention = 'comfy kitchen attention' (informational; NOT 'vsa')
+PASS VSA patch node unchanged vs CTRL (this arm is prompt-only, dense is PV2-3)
+  graph_diff.txt 13725 B sha256 f8d0b01c9f6c623ef88447886d256100c420ac1e2a13b1b7ef5cc9f88ce8e8f1 hunks=3 removed=3 added=3
+PASS graph_diff.txt sha256 == the PROOF record f8d0b01c9f6c...
+PASS graph_diff = 3 hunks, exactly 3 removed + 3 added lines (the task's 'only c0.prompt, c1.prompt, filename_prefix')
+PASS the 3 removed lines are prompt, prompt, filename_prefix
+PASS the 3 added lines are prompt, prompt, filename_prefix
+PASS removed line 1 (a prompt) is byte-equal to a line of the CTRL graph (stripped of the diff marker)
+PASS added line 1 (a prompt) is byte-equal to a line of the new arm graph
+PASS removed line 3 (filename_prefix) is byte-equal to a CTRL graph line
+PASS added line 3 (filename_prefix) is byte-equal to a new arm graph line
+
+== H. outputs: sizes, sha256, contact-sheet geometry and sampled frames
+  ali147_pool_promptv2_s51080000.mp4                          6397658 B sha256 bab4112003d81683df225aa536d2603462d0df9cc01b35800e4a6b174348bf53
+  ali147_pool_promptv2_s51080000_stills_contact.png           1746695 B sha256 d7695898f5a91a5285443d9e551f0004ebd68f86aec94aa5b1ef67d5c3cd4359
+  request.api.json                                              12480 B sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+  ali147_pool_promptv2_s51080000.api.json                       12480 B sha256 d9212ff14b1f899dd7fb67b308d4e09d86fc8520f2f828fd83d1cfd0408fbcb5
+  ali147_pool_promptv2_s51080000.mp4.json                         533 B sha256 db430d218bf255f1196973e7c14ffc14843fe8483327c014b8d6613d3dd95d69
+  status.log                                                      635 B sha256 07691bd51b858781b8e9c45e97f8e313cbf5401dc93564b4953664fc964e646f
+  objective.json                                                  653 B sha256 7807ef245a9316e49c96cfddf5e1e02908356e68cb44870144f71491d74cc9a0
+  graph_diff.txt                                                13725 B sha256 f8d0b01c9f6c623ef88447886d256100c420ac1e2a13b1b7ef5cc9f88ce8e8f1
+  fairness.txt                                                   9572 B sha256 5fa43786217edb83f181fc04d5bb1a65990a9f5bb451857d25ef7bebb4b24f9a
+  PROOF.md                                                       9053 B sha256 f03462b7232ea2423dff6c1e07bbf971a55ff7ac9382e9fd34e2297ce4281b0f
+PASS mp4 bytes 6397658 match objective.json + the status.log OBJECTIVE line
+PASS control mp4 sha256 1dc59ed446e4 (from its own objective.json) - the pair is hash-attested
+  contact sheet PIL (1816, 900) mode=RGB format=PNG  expected for 10 tiles (7x2 grid, tile 256x448, padding 4): (1816, 900)
+PASS contact sheet geometry matches run_graph_job.py:contact_sheet for a 20.042 s clip
+  sampled t = [8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 18.5, 19.0, 19.5] s -> frames [204, 216, 228, 240, 252, 264, 276, 444, 456, 468]
+  NOT sampled by the harness sheet: frame 0 and every frame outside those windows (fixed-frame stills 0/120/230/243/256/360/480 are Max's, not Forge's)
+  sidecar attempt = '0'
+  sidecar comfy_output = 'C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51'
+  sidecar file = 'C:\\AI\\community\\runs\\ali147_pool_promptv2_s51080000\\ali147_pool_promptv2_s51080000.mp4'
+  sidecar finished = '2026-10-22 22:36 CT'
+  sidecar label = 'METHOD_ONLY'
+  sidecar plan = 'ALI-147'
+  sidecar prompt_id = 'af19daf9-f562-4339-a43f-777e2518ead5'
+  sidecar run = 'ali147_pool_promptv2_s51080000'
+  sidecar secs = '827.7'
+  sidecar tag = 'ali147_pool_promptv2_s51080000'
+PASS sidecar labels METHOD_ONLY, run = the arm, attempt 0 (no redo)
+  dir listing runs\ali147_pool_promptv2_s51080000
+    f  PROOF.md 9053
+    f  ali147_pool_promptv2_s51080000.api.json 12480
+    f  ali147_pool_promptv2_s51080000.mp4 6397658
+    f  ali147_pool_promptv2_s51080000.mp4.json 533
+    f  ali147_pool_promptv2_s51080000_stills_contact.png 1746695
+    f  fairness.txt 9572
+    f  graph_diff.txt 13725
+    f  objective.json 653
+    f  request.api.json 12480
+    f  status.log 635
+PASS arm dir holds only harness outputs + the PROOF.md/fairness.txt/graph_diff.txt Forge is allowed to write
+
+== I. sbs / fixed-frame stills (Max's per the TASKS sbs rule)
+  find runs -name sbs_*.mp4 -> []
+PASS no sbs_ctrl_promptv2.mp4 exists -> sbs/stills pending Max (run_graph_job.py has no hstack path; sbs_* are Max/harness files)
+  find runs -name *promptv2* -> []
+PASS no sbs for this arm in runs (confirmed)
+
+== J. p7 budget (read-only, the live counter file)
+  C:/Users/derek/5slock/ralph-community/logs/p7_budget.json = {"used_min": 342, "jobs": 24, "cap_min": 390, "job_cap": 27, "updated": "2026-10-22T22:36:32"}
+PASS budget after this job: used_min 342 < cap_min 390, jobs 24 < job_cap 27
+  this arm spent 14.9 min of GPU wall; control cost 809.7 s = 13.5 min (the loop's per-arm cost is consistent)
+
+ALL CHECKS PASS

@@ -1,0 +1,19 @@
+{
+ "templates": [
+  {
+   "description": "BFS head swap, Klein 9B, flattened core nodes",
+   "files": {
+    "README.md": "6ac062e6bb44b09c5202ea8d395d04ce3c6704fda341f8e105bab7ff0b5451e1",
+    "models.json": "5decca40568e8d923891941126d85d453aea8f5e412244f11cbf58d6b5d051db",
+    "params.schema.json": "46483f97bba9cc9d5d20270fc4c3400b43b22159ede989d8ace85b7db7a152a1",
+    "sidecar.schema.json": "5af30d2b4659740c751d8a9fca8901b61fa0aea955ac920866933b5c50ce60c3",
+    "workflow_api.json": "e0678a473ca719328f43e13040a2b1bd6eb837b0cc6d054f3575b4fd81f70d0e"
+   },
+   "name": "bfs_klein9b_headswap",
+   "phase": "A",
+   "source": "plans/bfs-head-swap-klein-2026-10-26.md \u00a70",
+   "status": "draft",
+   "version": "v1"
+  }
+ ]
+}

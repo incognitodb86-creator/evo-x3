@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_a_w8_capswift_gi201_against_wall_s51170001_wf2",
+ "secs": 6.7,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show consistent cave rock wall background matching START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Identical elf woman and orc man appear across all frames with same features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows both bodies in standing rear-entry pose against wall with visible penetration."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "The bodies are clearly defined and do not show any fusion defects. The characters have complete, correctly proportioned limbs and genitalia. The green-skinned male's hand is placed on the female's hip"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.1442,
+  "target_reached": 0.003,
+  "anatomy_defect": 0.0015,
+  "anatomy_zoom": 0.0017
+ },
+ "flags": []
+}

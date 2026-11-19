@@ -1,0 +1,28 @@
+--- /dev/fd/63	2026-10-23 13:46:31.697096988 -0500
++++ /dev/fd/62	2026-10-23 13:46:31.697096988 -0500
+@@ -40,6 +40,7 @@
+ #  - a JOB_REQUEST left by a timed-out/failed pass is kept (RunJobs, all normal guards) when its ids are in TASKS.md and the pass ticked/REQUESTED a line.
+ # bakeoff 2026-10-23 (ALI-173, Derrick 2026-10-23 1:07 PM CT "Yes, add 120 GPU min and 10 jobs for the bakeoff and let Forge restart and call ComfyUI itself"; backup C:\AI\community\notes\ralph.ps1.bak-20261023-bakeoff):
+ #  - default caps 495 -> 615 GPU min, 35 -> 45 jobs (+120 min / +10 jobs for the bakeoff B1-B8; R6-R9 stay inside 495/35 per TASKS.md).
++#  - readfix 2026-10-23: deny counter = tool-result denies only; scripts\face_crop.py (R4G2 crops) is harness-owned ($Prot).
+ #  - graph/dip + generic job ids may be ali173_<arm>_s<seed>; scripts\comfy_ctl.py (Forge's ComfyUI restart helper) is harness-owned ($Prot).
+ param([int]$Max=10,[int]$TimeoutMin=20,[int]$GuardWaitMin=180,[int]$GuardPollSec=120,[int]$GpuCapMin=615,[int]$JobMax=45,[int]$UtilMax=30)
+ $R='C:\Users\derek\5slock'; $K='C:\Users\derek\5slock\ralph-community'; $L="$K\logs"; $C='C:\AI\community'
+@@ -110,7 +111,7 @@
+ $DPy='C:\AI\director\.venv\Scripts\python.exe'; $GJ="$C\scripts\run_graph_job.py"; $DJ="$C\scripts\dip_join.py"   # ali160
+ $CPy='C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\.venv\Scripts\python.exe'; $Rev="$C\scripts\p6_review.py"; $BQ="$C\scripts\batch_queue.py"
+ # harness-owned files the model must not change (restored from a per-iteration snapshot + STOP_RALPH); plus every *.json/*.md in p7\jobs and p7\reviews
+-$Prot=@("$C\scripts\tests\test_p6_review.py","$C\scripts\comm.py","$C\scripts\comfy_ctl.py",   # narrow 2026-10-22: harness scripts editable by Forge except comm.py (youth guard) and the test
++$Prot=@("$C\scripts\tests\test_p6_review.py","$C\scripts\comm.py","$C\scripts\comfy_ctl.py","$C\scripts\face_crop.py",   # narrow 2026-10-22: harness scripts editable by Forge except comm.py (youth guard) and the test
+         "$P7\KNOBS.md",$Guard,'C:\AI\director\scripts\gpu_lock.ps1',"$C\runs\P6_RANKING.md","$C\runs\P6_RANKING.json",$Budget,
+         "$C\shots\pool_parents\p6_1min_cuts.json","$C\shots\pool_parents\p6_1min_cuts_ab05.json","$C\shots\pool_parents\p6_1min_community.json")
+ $Enc = New-Object Text.UTF8Encoding $false; $script:JobStop = $false
+@@ -349,7 +350,7 @@
+   if($ptFail){ $null = G -C $C revert --no-edit HEAD; Log "iter ${n}: FAIL pytest backpressure - reverted this iteration's C:\AI\community commit (git rc $script:GitRc)" }
+   # --- one-line summary
+   $den = 0; $sf = Get-ChildItem -LiteralPath $Sess -Recurse -File -Filter *.jsonl -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+-  if($sf){ $den = @(Select-String -LiteralPath $sf.FullName -Pattern 'is not permitted to run|requires approval|Blocked by (headless guard|protected-paths)' -AllMatches | ForEach-Object { $_.Matches.Count } | Measure-Object -Sum).Sum; if(-not $den){ $den = 0 } }
++  if($sf){ $den = @(Get-Content -LiteralPath $sf.FullName | Where-Object { $_ -match '"role"\s*:\s*"toolResult"' } | Select-String -Pattern 'is not permitted to run|requires approval|Blocked by (headless guard|protected-paths)' -AllMatches | ForEach-Object { $_.Matches.Count } | Measure-Object -Sum).Sum; if(-not $den){ $den = 0 } }   # readfix E 2026-10-23: tool-result denies only (compaction summaries re-quote them)
+   $ex = if($timedOut){ 'TIMEOUT' } elseif($code -eq 1){ '1(CUTOFF)' } else { "$code" }
+   Log ("iter $n summary: status=$status exit=$ex ticks=+{0} wall={1:N1}m denies={2} checkfails={3} scope={4} open={5}" -f ((Ticks) - $preTicks), ((Get-Date)-$t0).TotalMinutes, $den, $fails.Count, $viol.Count, (Open))
+   # --- stop rules (existing STOP_RALPH / COMPLETE logic kept)

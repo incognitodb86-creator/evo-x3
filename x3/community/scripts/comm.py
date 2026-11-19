@@ -1,0 +1,437 @@
+# Community-path helper (ALI-52 P2-P6). Stock ComfyUI API only; Switchyard untouched.
+import json, os, re, sys, time, shutil, urllib.request, urllib.error, datetime, hashlib
+W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+C = r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI"
+LS = "http://127.0.0.1:8080"
+BASE = LS + "/upstream/comfyui_auto"
+UNET = "10Eros_Max_h3_8stepTURBO_beta7_int8HQ.safetensors"
+TE = "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+VVAE = "minimax_h3_video_vae_int8_convrot.safetensors"
+AVAE = "minimax_h3_audio_vae_fp32.safetensors"
+ANTIBURN = "h3_antiburn_universal_v1.safetensors"
+# RENDER-TIMEOUT (2026-10-26): llama-swap queues a request behind a model start, and its own budget for that is
+# healthCheckTimeout (1200 in the live C:/AI/director/config/llama-swap.yaml:5); the published rule is "set client
+# timeouts high enough for the queue and load time" (docs/kb/guides/routing/capacity-and-queues.md, saved body
+# C:/AI/community/notes/web/rt_ls_capacity-and-queues.txt:16-20). Measured with the old 60 s / 30 s: the POST /prompt
+# died at 60 s while llama-swap was starting comfyui_auto (briefs/agy_monitor.log 2026-10-24 22:36, "TimeoutError:
+# timed out at comm.run BASE/prompt" for ali163_hc15_bd002_s51150021), and a 5 s /history poll is itself a comfyui
+# wake, so poller and LLM caller ping-pong the GPU (C:/AI/director/logs/comfy-graceful-stop.log = ~90 s cycles of
+# "stop after 0s" for a fresh PID across the night of 2026-10-24/25).
+SUBMIT_TIMEOUT = 1200   # = live healthCheckTimeout; the /prompt POST waits behind a comfyui_auto start
+POLL_TIMEOUT = 120      # one /history read; ComfyUI answers slowly while it renders
+POLL_SEC = 60           # every /comfyui request is a wake, so the cadence sits above the measured ~90 s start
+LOST_PROMPT_MISSES = 3  # consecutive polls missing from both /queue and /history before aborting as evicted
+LOG = os.path.join(W, "community.log")
+
+
+def check_launch_argv(st, logfile=None, require_ck=None):
+    """Audit ComfyUI system_stats['system']['argv'] for RTX 5070 Ti baseline flags.
+    Logs ARGV_WARN by default; raises RuntimeError('ARGV_MISMATCH: ...') when require_ck is True or RQ_REQUIRE_CK_ARGV=1."""
+    if not isinstance(st, dict):
+        return []
+    argv = (st.get("system") or {}).get("argv")
+    if not isinstance(argv, list) or not argv:
+        return []
+    missing = [flag for flag in ("--use-ck-attention", "--disable-pinned-memory") if flag not in argv]
+    if not missing:
+        return []
+    enforce = (os.environ.get("RQ_REQUIRE_CK_ARGV", "").strip() in ("1", "true", "yes")) if require_ck is None else bool(require_ck)
+    msg = f"ComfyUI booted without {' '.join(missing)} (argv={argv})"
+    if enforce:
+        log(f"ARGV_MISMATCH {msg}", logfile)
+        raise RuntimeError("ARGV_MISMATCH: " + msg)
+    log(f"ARGV_WARN {msg}", logfile)
+    return missing
+
+def log(s, logfile=None):
+    line = f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} CT {s}"
+    print(line, flush=True)
+    for f in {LOG, logfile} - {None}:
+        if os.path.dirname(f):
+            os.makedirs(os.path.dirname(f), exist_ok=True)
+        open(f, "a", encoding="utf-8").write(line + "\n")
+
+def http(url, data=None, timeout=60, method=None):
+    r = urllib.request.Request(url, data=json.dumps(data).encode() if data is not None else None,
+                               headers={"Content-Type": "application/json"}, method=method)
+    raw = urllib.request.urlopen(r, timeout=timeout).read()
+    try: return json.loads(raw)
+    except Exception: return raw.decode("utf-8", "replace")
+
+# --- adults-only guard: real minor terms only, fail closed (Derrick 2026-11-11 t835u) ---
+# A word counts only when it stands alone (no letter on either side), so childhood passes
+# without an exception list. Anything that is not a string fails. girl/teen/school are not blocked.
+_BAD_RE = re.compile(r"(?<![a-z])(?:underage|minor|child|children)s?(?![a-z])", re.I)
+# The positive check accepts the word adult, and an unambiguous age 18-99 stated as an age:
+# "28-year-old", "28 years old", "28 yo", "age 28", "21+". "17 years old" and "in her twenties"
+# do NOT count - the number must be 18+ and stated as an age, so an unclear text stays blocked.
+_ADULT_RE = re.compile(r"(?<![a-z])adults?(?![a-z])"
+                      r"|\b(?:1[89]|[2-9]\d)[- ](?:years?|yrs?|yo)[- ]old\b"
+                      r"|\b(?:1[89]|[2-9]\d)\s*(?:years?|yrs?|yo)\b"
+                      r"|\bage\s+(?:1[89]|[2-9]\d)\b"
+                      r"|\b(?:1[89]|[2-9]\d)\+", re.I)
+def guard_ok(t):
+    """True when the text names no minor-coded word. Non-strings fail (fail closed)."""
+    return isinstance(t, str) and not _BAD_RE.search(t)
+def adult_stated(t):
+    """True when the text states an adult (the one positive check)."""
+    return isinstance(t, str) and bool(_ADULT_RE.search(t))
+
+# prompt_text / builder_state: node MiniMaxH3PromptBuilder carries the clip prompt there (measured
+# 2026-11-04 on runs/pw_strip_20261104b: the key list missed it, the guard collected 0 strings and
+# the gate failed closed, so a clean prompt was reported as "adults guard").
+PROMPT_KEYS = ("prompt", "text", "prompt_1", "prompt_2", "prompt_3", "prompt_4", "prompt_5", "prompt_6", "clips_json", "sequence_prompt", "value", "script", "prompt_text", "builder_state")
+
+def prompt_strings(inputs):
+    """Yield all prompt-bearing string values from node inputs."""
+    for _, v in prompt_items(inputs):
+        yield v
+
+def prompt_items(inputs):
+    """Yield (key, value) for every prompt-bearing string input of a node."""
+    if not isinstance(inputs, dict):
+        return
+    for k in PROMPT_KEYS:
+        v = inputs.get(k)
+        if isinstance(v, str):
+            yield k, v
+
+def guard_reason(g, require_adult=False):
+    """(ok, reason) for the adults-only gate; reason is "" when ok. Fail closed.
+    The reason names WHY it failed - a graph whose prompt text is invisible to PROMPT_KEYS says so,
+    instead of reporting the generic adults failure a wording problem would produce.
+    require_adult is accepted for compatibility and ignored: prompts no longer must contain
+    'adult' or a stated age (Derrick 2026-11-11 t835u)."""
+    if not isinstance(g, dict) or not all(isinstance(n, dict) for n in g.values()):
+        return False, "malformed graph"
+    items = [(nid, n.get("class_type"), k, v)
+             for nid, n in g.items() for k, v in prompt_items(n.get("inputs", {}))]
+    if not items:
+        return False, ("no prompt text visible to the guard "
+                       "(every node input is outside PROMPT_KEYS - check the node's key names)")
+    bad = [(nid, ct, k) for nid, ct, k, v in items if not guard_ok(v)]
+    if bad:
+        return False, "minor-coded word in node %s (%s).%s" % bad[0]
+    return True, ""
+
+APPROVED = {  # ALI-80 approved adult stills only
+ "D15": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\D15\D15_Woman_in_bikini.jpg",
+ "FD006": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\FLOW_DARKHAIR_2026-10-19\FD006.jpg",
+ "FD003": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\FLOW_DARKHAIR_2026-10-19\FD003.jpg",
+ "D12": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\D12\D12_Woman_posing_in_bikini.jpg",
+ "POOL": r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters\POOL\COND_POOL_BIKINI_PORTRAIT.jpg",  # pool-20261021: Derek-approved (approved_characters\INDEX.csv id POOL); P7 fixed still from 2026-10-21
+}
+
+def stage(key, w, h):
+    """Center-crop an approved still to the output aspect (D9/TenStrip: ref aspect == output) and stage it in ComfyUI input."""
+    from PIL import Image
+    src = APPROVED[key]
+    os.makedirs(os.path.join(C, "input", "community"), exist_ok=True)
+    name = f"community/{key}_{w}x{h}.png"
+    dst = os.path.join(C, "input", name)
+    if not os.path.exists(dst):
+        im = Image.open(src).convert("RGB"); iw, ih = im.size
+        ta = w / h
+        if iw / ih > ta: nw = int(ih * ta); box = ((iw - nw) // 2, 0, (iw - nw) // 2 + nw, ih)
+        else: nh = int(iw / ta); box = (0, (ih - nh) // 2, iw, (ih - nh) // 2 + nh)
+        im.crop(box).resize((w, h), Image.LANCZOS).save(dst)
+    return name
+
+def frames_for(sec):  # 17k+5 grid at 24 fps
+    k = max(0, round((sec * 24 - 5) / 17)); return 17 * k + 5
+
+def _model_chain(g, loras=(), vsa=True, prefix="m", attention="pytorch attention"):
+    if "unet" not in g:  # one shared loader (never load the UNET twice)
+        g["unet"] = {"class_type": "UNETLoader", "inputs": {"unet_name": UNET, "weight_dtype": "default"}}
+    src = ["unet", 0]
+    for i, (name, s) in enumerate(loras):
+        if "beta6mix" in name.lower(): raise ValueError("never stack Eros_beta6mix_Lora on beta6")
+        g[f"{prefix}_lora{i}"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": src, "lora_name": name, "strength_model": float(s)}}
+        src = [f"{prefix}_lora{i}", 0]
+    if vsa:
+        g[f"{prefix}_attn"] = {"class_type": "ModelAttentionBackend", "inputs": {"model": src, "attention": attention}}  # ALI-157: A/B arm
+        g[f"{prefix}_vsa"] = {"class_type": "BlockSparseAttention", "inputs": {"model": [f"{prefix}_attn", 0],
+            "selection": "vsa", "selection.keep_percent": 10, "start_percent": 0.2, "end_percent": 1.0,
+            "dense_blocks": "", "min_tokens": 12288, "extra_tokens": 256, "sink_conditioning": "exact_kv_and_rows", "verbose": False}}
+        src = [f"{prefix}_vsa", 0]
+    g[f"{prefix}_shift"] = {"class_type": "MiniMaxH3SigmaShift", "inputs": {"model": src, "shift_video": 12.0, "shift_audio": 3.0}}
+    return [f"{prefix}_shift", 0]
+
+def _common(g):
+    g["clip"] = {"class_type": "CLIPLoader", "inputs": {"clip_name": TE, "type": "minimax", "device": "default"}}
+    g["vvae"] = {"class_type": "VAELoader", "inputs": {"vae_name": VVAE}}
+    g["avae"] = {"class_type": "VAELoader", "inputs": {"vae_name": AVAE}}
+    g["ksel"] = {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}}
+
+def _sample(g, tag, model, cond, latent, steps, noise):
+    g[f"{tag}_sched"] = {"class_type": "BasicScheduler", "inputs": {"model": model, "scheduler": "simple", "steps": steps, "denoise": 1.0}}
+    g[f"{tag}_guide"] = {"class_type": "BasicGuider", "inputs": {"model": model, "conditioning": cond}}
+    g[f"{tag}_samp"] = {"class_type": "SamplerCustomAdvanced", "inputs": {"noise": noise, "guider": [f"{tag}_guide", 0],
+        "sampler": ["ksel", 0], "sigmas": [f"{tag}_sched", 0], "latent_image": latent}}
+    return [f"{tag}_samp", 0]
+
+def _decode_save(g, latent, prefix):
+    g["dec_v"] = {"class_type": "VAEDecode", "inputs": {"samples": latent, "vae": ["vvae", 0]}}
+    g["dec_a"] = {"class_type": "VAEDecodeAudio", "inputs": {"samples": latent, "vae": ["avae", 0]}}
+    g["mkvid"] = {"class_type": "CreateVideo", "inputs": {"images": ["dec_v", 0], "audio": ["dec_a", 0], "fps": 24}}
+    g["save"] = {"class_type": "SaveVideo", "inputs": {"video": ["mkvid", 0], "filename_prefix": prefix, "format": "auto", "codec": "auto"}}
+
+def first_pass(g, mode, prompt, img, w, h, length, steps, model):
+    """mode 'i2v' (first_frame) or 'r2v' (reference image)."""
+    g["img"] = {"class_type": "LoadImage", "inputs": {"image": img}}
+    if mode == "i2v":
+        g["c0"] = {"class_type": "MiniMaxH3ImageToVideo", "inputs": {"clip": ["clip", 0], "vae": ["vvae", 0], "prompt": prompt,
+            "width": w, "height": h, "length": length, "first_frame": ["img", 0]}}
+    else:
+        g["c0"] = {"class_type": "MiniMaxH3ReferenceToVideo", "inputs": {"clip": ["clip", 0], "vae": ["vvae", 0], "audio_vae": ["avae", 0],
+            "prompt": prompt, "width": w, "height": h, "length": length, "ref_image_size": "max", "ref_images.ref_image_1": ["img", 0]}}
+    return _sample(g, "s0", model, ["c0", 0], ["c0", 1], steps, ["noise", 0])
+
+def build(mode, prompts, img, w, h, first_len, steps, seed, prefix, ext_frames=119, overlap=22,
+          loras=(), vsa=True, antiburn=None, attention="pytorch attention"):
+    """prompts[0] = first chunk; prompts[1:] = continuation chunks (latent-tail continuation, ttulttul nodes).
+    antiburn: strength for Anti-Burn LoRA on chunk 2+ only (None = off)."""
+    g = {}; _common(g)
+    g["noise"] = {"class_type": "RandomNoise", "inputs": {"noise_seed": int(seed)}}
+    m0 = _model_chain(g, loras, vsa, "m", attention)
+    mc = m0
+    if antiburn and len(prompts) > 1:
+        mc = _model_chain(g, tuple(loras) + ((ANTIBURN, antiburn),), vsa, "mab", attention)
+    lat = first_pass(g, mode, prompts[0], img, w, h, first_len, steps, m0)
+    for i, p in enumerate(prompts[1:], start=1):
+        g[f"win{i}"] = {"class_type": "MiniMaxH3GuidedContinuationWindow", "inputs": {"previous_av_latent": lat,
+            "overlap_frames": overlap, "extension_frames": ext_frames}}
+        g[f"c{i}"] = {"class_type": "MiniMaxH3ImageToVideo", "inputs": {"clip": ["clip", 0], "vae": ["vvae", 0], "prompt": p,
+            "width": w, "height": h, "length": [f"win{i}", 1]}}
+        g[f"tail{i}"] = {"class_type": "MiniMaxH3LatentTailGuide", "inputs": {"positive": [f"c{i}", 0], "previous_av_latent": lat,
+            "target_av_latent": [f"win{i}", 0], "overlap_video_tokens": [f"win{i}", 2], "overlap_audio_tokens": [f"win{i}", 3]}}
+        smp = _sample(g, f"s{i}", mc, [f"tail{i}", 0], [f"win{i}", 0], steps, ["noise", 0])
+        g[f"app{i}"] = {"class_type": "MiniMaxH3AppendContinuation", "inputs": {"previous_av_latent": lat, "sampled_window": smp,
+            "overlap_video_tokens": [f"win{i}", 2], "overlap_audio_tokens": [f"win{i}", 3],
+            "transition_video_tokens": [f"win{i}", 4], "transition_audio_tokens": [f"win{i}", 5]}}
+        lat = [f"app{i}", 0]
+    _decode_save(g, lat, prefix)
+    return g
+
+def running():
+    try: return http(LS + "/running", timeout=10)
+    except Exception as e: return {"error": str(e)}
+
+def comfy_loaded():
+    """True only when llama-swap answers /running and comfyui_auto is in it. /running is the documented admin route
+    (README, saved C:/AI/community/notes/web/rt_llamaswap_readme.txt:57 "`/running` - list currently running models"),
+    so unlike a /comfyui/... path it never wakes a model. None = /running unreadable: never conclude, keep polling."""
+    r = running()
+    if not isinstance(r, dict) or "error" in r: return None
+    return any(x.get("model") == "comfyui_auto" for x in (r.get("running") or []))
+
+def comfy_stopping() -> bool:
+    """True when llama-swap answers /running and comfyui_auto is in 'stopping' state."""
+    r = running()
+    if not isinstance(r, dict) or "error" in r: return False
+    return any(x.get("model") == "comfyui_auto" and x.get("state") == "stopping" for x in (r.get("running") or []))
+
+def outcome(out, kind, pid=None, note=""):
+    """RENDER-TIMEOUT: comm.run keeps its contract (side dict on success, None on failure) and records WHY it failed
+    in the caller's dict, so the runner can tell a node error (an objective failure, so the redo rule applies) from
+    a client stall: a stall means the render may already be running and paid for, and llama-swap's own doc says client
+    retries "create more queued work" (notes/web/rt_ls_capacity-and-queues.txt:16-20). Kinds: guard, node_error,
+    submit_stall, evicted, stalled. Returns None so every call site stays a one-line `return outcome(...)`."""
+    if isinstance(out, dict):
+        out["outcome"] = kind
+        if pid: out["prompt_id"] = pid
+        if note: out["note"] = note
+    return None
+
+def ensure_comfy(logfile=None):
+    """GPU sharing: make sure no LLM is loaded, then wake ComfyUI through llama-swap."""
+    r = running(); names = [x.get("model") for x in (r.get("running") or [])] if isinstance(r, dict) else []
+    if any(n and n != "comfyui_auto" for n in names):
+        log(f"UNLOAD LLM(s) {names}", logfile)
+        for n in names:  # ALI-154: documented POST /api/models/unload/:model_id (llama-swap README), not legacy GET /unload
+            if n and n != "comfyui_auto": http(LS + "/api/models/unload/" + n, timeout=120, method="POST")
+    t0 = time.time()
+    st = http(BASE + "/system_stats", timeout=300)
+    check_launch_argv(st, logfile)
+    log(f"COMFY ready v{st['system']['comfyui_version']} wait={time.time()-t0:.0f}s vram_free={st['devices'][0].get('vram_free',0)/2**30:.1f}GiB", logfile)
+
+def free_comfy(logfile: str | None = None) -> dict | None:
+    """Free ComfyUI model weights and memory via POST /api/free (Discussion #962)."""
+    if comfy_loaded() is False:
+        log("COMFY free: comfyui_auto is not loaded, skip", logfile)
+        return None
+    data = {"unload_models": True, "free_memory": True}
+    try:
+        res = http(BASE + "/api/free", data=data, timeout=30, method="POST")
+        log("COMFY free /api/free ok", logfile)
+        return res if isinstance(res, dict) else {"status": "ok"}
+    except Exception as e:
+        log(f"COMFY free /api/free note: {e}", logfile)
+        try:
+            res = http(BASE + "/free", data=data, timeout=30, method="POST")
+            log("COMFY free /free ok", logfile)
+            return res if isinstance(res, dict) else {"status": "ok"}
+        except Exception as e2:
+            log(f"COMFY free /free note: {e2}", logfile)
+            return None
+
+PENDING = "pending"  # fetch(): the prompt_id is not in /history yet
+
+def submit(g, tag, meta, outdir, logfile=None, out=None):
+    """Guard + save <tag>.api.json + POST /prompt. Returns the prompt_id, or None (the reason is in `out`; a guard
+    hit leaves `out` empty, as run() always did). run_queue.py calls this for every job of a batch up front."""
+    os.makedirs(outdir, exist_ok=True)
+    for n in g.values():
+        for s in prompt_strings(n.get("inputs", {})):
+            if not guard_ok(s):
+                log(f"SKIP {tag} adults-only guard hit", logfile); return None
+    json.dump(g, open(os.path.join(outdir, tag + ".api.json"), "w", encoding="utf-8"), indent=1)
+    try:
+        res = http(BASE + "/prompt", {"prompt": g, "client_id": "community-ali52",
+                   "extra_data": {"extra_pnginfo": {"workflow": {"api_prompt": g, "community": meta}}}},
+                   timeout=SUBMIT_TIMEOUT)
+    except urllib.error.HTTPError as e:
+        log(f"JOB error {tag} POST {e.code} {e.read()[:1500]!r}", logfile)
+        return outcome(out, "node_error", note="POST /prompt rejected: " + str(e.code))
+    except Exception as e:
+        # a client-side stall on the submit says nothing about the server: llama-swap queues /prompt behind a model
+        # start, so the job may be running. Never re-POST on this outcome - that is how one clip cost 7 full renders.
+        log(f"JOB submit-stall {tag} {str(e)[:160]} (submit timeout {SUBMIT_TIMEOUT}s; the job may be running server-side)", logfile)
+        return outcome(out, "submit_stall", note=str(e)[:160])
+    pid = res.get("prompt_id"); log(f"JOB start {tag} prompt_id={pid}", logfile)
+    return pid
+
+def fetch(pid, tag, meta, outdir, t0, logfile=None, out=None):
+    """ONE /history/<pid> read (raises if the read fails). PENDING = not finished yet; side dict = success (output
+    copied next to the request, .json side file written); None = node error (recorded in `out`)."""
+    h = http(f"{BASE}/history/{pid}", timeout=POLL_TIMEOUT)
+    if pid not in h: return PENDING
+    st = h[pid].get("status", {}); outs = h[pid].get("outputs", {})
+    files = [(f.get("subfolder"), f.get("filename")) for o in outs.values() for k in ("images", "gifs", "videos") for f in o.get(k, [])]
+    dt = time.time() - t0
+    if st.get("status_str") == "success" and files:
+        src = os.path.join(C, "output", files[0][0] or "", files[0][1])
+        dst = os.path.join(outdir, tag + os.path.splitext(src)[1])
+        try:
+            if os.path.exists(dst): os.remove(dst)
+            os.link(src, dst)
+        except OSError:
+            shutil.copyfile(src, dst)
+        side = dict(meta, tag=tag, secs=round(dt, 1), comfy_output=src, file=dst, prompt_id=pid,
+                    finished=datetime.datetime.now().strftime('%Y-%m-%d %H:%M CT'))
+        json.dump(side, open(dst + ".json", "w", encoding="utf-8"), indent=1)
+        log(f"JOB end {tag} ok secs={dt:.1f} file={dst}", logfile); return side
+    msgs = [m for m in st.get("messages", []) if m[0] == "execution_error"]
+    log(f"JOB error {tag} secs={dt:.1f} {json.dumps(msgs)[:1500]}", logfile)
+    return outcome(out, "node_error", pid, note=json.dumps(msgs)[:300])
+
+def _in_comfy_queue(pid):
+    """True when pid is in queue_running or queue_pending, False when /queue answered without pid, None on HTTP error."""
+    try:
+        q = http(BASE + "/queue", timeout=POLL_TIMEOUT)
+    except Exception:
+        return None
+    if not isinstance(q, dict):
+        return None
+    qids = {x[1] for x in (q.get("queue_running") or []) + (q.get("queue_pending") or []) if isinstance(x, (list, tuple)) and len(x) > 1}
+    return pid in qids
+
+
+def run(g, tag, meta, outdir, logfile=None, poll=POLL_SEC, timeout=7200, out=None):
+    """One job, submit then wait (submit() + fetch() every `poll` s). Batches use run_queue.py's up-front queue."""
+    t0 = time.time()
+    pid = submit(g, tag, meta, outdir, logfile, out)
+    if pid is None: return None
+    misses = 0
+    while time.time() - t0 < timeout:
+        time.sleep(poll)
+        try: r = fetch(pid, tag, meta, outdir, t0, logfile, out)
+        except Exception as e:
+            log(f"poll warn {tag} {e}", logfile)
+            if comfy_loaded() is False:
+                # comfyui_auto is gone: the next wake is a FRESH process with an EMPTY history, so this prompt_id can
+                # never be answered. Measured 2026-10-25: ComfyUI stopped at 04:04:54, 2 s after the gi046_s51150031
+                # clip was written at 04:04:52, and this loop went on warning for 19 more minutes (status.log 04:23:29).
+                log(f"poll stop {tag} comfyui_auto is not running: prompt_id {pid} is in no live history", logfile)
+                return outcome(out, "evicted", pid, note="history lost with the comfyui_auto process")
+            continue
+        if r is PENDING:
+            q_present = _in_comfy_queue(pid)
+            if q_present is False:
+                # Re-read /history once in case the job completed right between our first fetch() and /queue check.
+                try:
+                    r2 = fetch(pid, tag, meta, outdir, t0, logfile, out)
+                except Exception:
+                    r2 = PENDING
+                if r2 is not PENDING:
+                    return r2
+                misses += 1
+                if misses >= LOST_PROMPT_MISSES:
+                    log(f"poll stop {tag} LOST_PROMPT: prompt_id {pid} absent from /queue and /history for {misses} polls", logfile)
+                    return outcome(out, "evicted", pid, note=f"LOST_PROMPT: missing from /queue and /history for {misses} polls")
+            elif q_present is True:
+                misses = 0
+            continue
+        return r
+    log(f"JOB timeout {tag}", logfile)
+    try:
+        http(BASE + "/interrupt", data={}, timeout=10, method="POST")
+        if pid:
+            http(BASE + "/queue", data={"delete": [pid]}, timeout=10, method="POST")
+        log(f"JOB cancelled via /interrupt and /queue delete {tag} prompt_id={pid}", logfile)
+    except Exception as ex_cancel:
+        log(f"JOB cancel error {tag}: {ex_cancel}", logfile)
+    return outcome(out, "stalled", pid, note=f"no history in {timeout}s; cancelled via /interrupt; the render may have landed in ComfyUI output")
+
+# --- (b) 2026-11-02: no LLM/llama-swap chat call while a render holds the GPU lock -------------------------------
+# Same lock rule as gpu_guard.ps1 / ralph.ps1 GpuBusy: a lock file whose first number is a live PID = held; a dead PID is
+# stale and ignored. The holder itself (os.getpid() or GPU_LOCK_DRIVER_PID, e.g. a VLM judge that took the lock) may call.
+GPU_LOCK_FILE = r"C:\AI\locks\gpu-render.lock"
+GPU_COLLECTED_FILE = r"C:\AI\locks\gpu-render.collected"
+
+class GpuBusy(RuntimeError):
+    pass
+
+def _pid_alive(pid):
+    if pid <= 0: return False
+    if os.name == "nt":
+        import ctypes
+        h = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h: return False
+        code = ctypes.c_ulong(); ctypes.windll.kernel32.GetExitCodeProcess(h, ctypes.byref(code)); ctypes.windll.kernel32.CloseHandle(h)
+        return code.value == 259  # STILL_ACTIVE
+    try: os.kill(pid, 0); return True
+    except OSError: return False
+
+def gpu_lock_holder(lock_file=None, alive=None):
+    """PID holding the GPU lock (live), else None. A lock without a PID counts as held (-1), as in ralph.ps1."""
+    alive = alive or _pid_alive
+    lf = lock_file or GPU_LOCK_FILE
+    try: raw = open(lf, encoding="utf-8", errors="replace").read()
+    except OSError: return None
+    m = re.search(r"(\d+)", raw)
+    if not m: return -1
+    pid = int(m.group(1))
+    return pid if alive(pid) else None
+
+def llm_gate(lock_file=None, alive=None, me=None):
+    """Raise GpuBusy if a render (any live PID but this process / its declared driver) holds the GPU lock."""
+    h = gpu_lock_holder(lock_file, alive)
+    if h is None: return
+    mine = {me or os.getpid()}
+    if os.environ.get("GPU_LOCK_DRIVER_PID", "").isdigit(): mine.add(int(os.environ["GPU_LOCK_DRIVER_PID"]))
+    if h in mine: return
+    raise GpuBusy(f"GPU lock {lock_file or GPU_LOCK_FILE} held by pid {h}: no LLM call while a render holds the GPU")
+
+def mark_collected(pid=None, path=None):
+    """(c) the lock holder says 'outputs collected': comfy_graceful_stop.ps1 may stop comfyui_auto before the lock goes."""
+    try:
+        with open(path or GPU_COLLECTED_FILE, "w", encoding="ascii") as f: f.write("%d %s\n" % (pid or os.getpid(), time.strftime("%Y-%m-%dT%H:%M:%S")))
+    except OSError: pass
+
+def llm(system, user, max_tokens=3000, temperature=0.6, model="coding_swift15_iq3s_esp"):
+    llm_gate()
+    body = {"model": model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            "max_tokens": max_tokens, "temperature": temperature}
+    r = http(LS + "/v1/chat/completions", body, timeout=1200)
+    return (r["choices"][0]["message"].get("content") or "").split("</think>")[-1].strip()

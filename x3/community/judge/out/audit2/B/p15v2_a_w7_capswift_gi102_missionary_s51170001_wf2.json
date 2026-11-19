@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains identical: same bed, sheets, headboard, and lighting across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same two individuals with matching hair, skin, and body types visible in all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing without jump or repositioning."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Final frame shows man on top, torso pressed to woman's back, face to her shoulder, in missionary position."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact, correctly proportioned anatomy with no fused or malformed limbs or genitals."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0004,
+  "same_people": 0.0,
+  "start_kept": 0.0333,
+  "target_reached": 0.029,
+  "anatomy_defect": 0.0027
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w7_capswift_gi102_missionary_s51170001_wf2"
+}

@@ -1,0 +1,56 @@
+{
+ "BODY_IMAGE": {
+  "input": "image",
+  "node_title": "picture1_body",
+  "pattern": "[A-Za-z0-9_./\\-]+",
+  "type": "string"
+ },
+ "HEAD_IMAGE": {
+  "input": "image",
+  "node_title": "picture2_head",
+  "pattern": "[A-Za-z0-9_./\\-]+",
+  "type": "string"
+ },
+ "LORA_NAME": {
+  "input": "lora_name",
+  "node_title": "lora",
+  "pattern": "([A-Za-z0-9_\\-]+[/\\\\])*bfs_head_v1_flux-klein_9b_step3750_rank64\\.safetensors",
+  "type": "string"
+ },
+ "LORA_STRENGTH": {
+  "input": "strength_model",
+  "max": 1.0,
+  "min": 0.0,
+  "node_title": "lora",
+  "type": "float"
+ },
+ "PREFIX": {
+  "input": "filename_prefix",
+  "node_title": "save",
+  "pattern": "[A-Za-z0-9_./\\-]+",
+  "type": "string"
+ },
+ "SAMPLER": {
+  "enum": [
+   "lcm",
+   "euler"
+  ],
+  "input": "sampler_name",
+  "node_title": "sampler",
+  "type": "enum"
+ },
+ "SEED": {
+  "input": "noise_seed",
+  "max": 9007199254740992,
+  "min": 0,
+  "node_title": "noise",
+  "type": "int"
+ },
+ "STEPS": {
+  "input": "steps",
+  "max": 12,
+  "min": 1,
+  "node_title": "scheduler",
+  "type": "int"
+ }
+}

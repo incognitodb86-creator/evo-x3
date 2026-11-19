@@ -1,0 +1,32 @@
+{
+ "tag": "p15v2_b_w8_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 3.7,
+ "finish": "stop",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same bedroom, white sheets, and greyish wall as START IMAGE."
+  },
+  "same_people": {
+   "answer": "no",
+   "reason": "START IMAGE shows two women; frames show a man and a woman."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows man behind woman, not the all-fours oral pose from START IMAGE."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "Frame 8 shows man on top, but not vulva-to-vulva contact as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame."
+  }
+ },
+ "flags": [
+  "same_people",
+  "start_kept",
+  "target_reached"
+ ]
+}

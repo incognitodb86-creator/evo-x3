@@ -1,0 +1,53 @@
+{
+ "frames": [
+  20,
+  301
+ ],
+ "diffs": [
+  38.24,
+  9.69
+ ],
+ "per_frame": [
+  {
+   "frame": 20,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rocky cave walls and lighting conditions in both images, maintaining environmental consistency."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "Image 2 shows a malformed green limb protruding from the male's groin area that blends unnaturally into the female's body."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.4198,
+    "anatomy_defect": 0.8662
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 301,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background consists of the same rocky cave walls and lighting conditions in both images, maintaining environmental consistency."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "Anatomical structures are consistent; limbs, hands, and bodies are correctly formed without melting, extra parts, or shapeless blobs."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.3789,
+    "anatomy_defect": 0.8117
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_a_w7_capjoy_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.1
+}

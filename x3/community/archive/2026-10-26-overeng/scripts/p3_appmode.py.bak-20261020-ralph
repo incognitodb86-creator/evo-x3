@@ -1,0 +1,43 @@
+# P3 (ALI-125): App Mode workflow built from the official FastH3 I2V template (TenStrip: "the correct sampling setup ... just add more steps"),
+# switched to beta6 int8, euler/simple 10 steps, shift 10/3, VSA keep10/start0.2, comfy kitchen attention.
+import json, os, sys, copy, shutil
+sys.path.insert(0, r"C:\AI\community\scripts"); from comm import *
+TD = os.path.join(C, r".venv\Lib\site-packages\comfyui_workflow_templates_json\templates")
+j = json.load(open(os.path.join(TD, "video_fastvideo_fasth3_i2v.json"), encoding="utf-8"))
+img = stage("FD006", 768, 1344)
+default_prompt = open(r"C:\Users\derek\5slock\runs\ali80-6clip-20261019\prompts\clip2_short.txt", encoding="utf-8").read().strip()
+nodes = {n["id"]: n for n in j["nodes"]}
+sg = j["definitions"]["subgraphs"][0]; sgn = {n["id"]: n for n in sg["nodes"]}
+w = nodes[105]["widgets_values"]
+assert w[5].startswith("fastvideo_fasth3"), w
+w[0] = default_prompt; w[3] = 5; w[4] = 51050001; w[5] = UNET
+sgn[6]["widgets_values"][0] = UNET
+sgn[17]["widgets_values"] = ["euler"]
+sgn[9]["widgets_values"] = ["simple", 10, 1]
+assert sgn[143]["widgets_values"][:2] == [10, 3], sgn[143]["widgets_values"]
+assert sgn[127]["widgets_values"][:4] == ["vsa", 10, 0.2, 1], sgn[127]["widgets_values"]
+assert sgn[128]["widgets_values"] == ["comfy kitchen attention"]
+nodes[136]["widgets_values"][0] = img
+nodes[142]["widgets_values"][1] = 0.5   # D3: drafts 0.3-0.6 MP; set 1.03 for the 768x1344 final
+nodes[92]["widgets_values"][0] = "community/app_h3_i2v"
+sg["name"] = "H3 I2V beta6 (community settings)"
+j["extra"]["linearMode"] = True
+j["extra"]["linearData"] = {"inputs": [[136, "image"], [105, "prompt"], [105, "value_1"], [105, "noise_seed"], [142, "megapixels"]],
+                            "outputs": [92]}
+j["extra"]["community_note"] = ("ALI-52 P3, 2026-10-20: beta6 int8, euler/simple 10 steps (8 for drafts), shift 10/3, VSA keep 10 start 0.2, "
+    "comfy kitchen attention. megapixels 0.5 = draft, 1.03 = 768x1344 final. Start image must already match the output aspect. "
+    "Adult (21+) approved stills only.")
+dst_dir = os.path.join(C, r"user\default\workflows"); os.makedirs(dst_dir, exist_ok=True)
+dst = os.path.join(dst_dir, "Community_H3_I2V_beta6.app.json")
+if os.path.exists(dst): shutil.copy2(dst, dst + ".bak-20261020-p3")
+json.dump(j, open(dst, "w", encoding="utf-8"), indent=1)
+os.makedirs(os.path.join(W, "p3"), exist_ok=True); shutil.copy2(dst, os.path.join(W, "p3", os.path.basename(dst)))
+print("WROTE", dst, os.path.getsize(dst))
+# verify: re-read, check values
+k = json.load(open(dst, encoding="utf-8")); kn = {n["id"]: n for n in k["nodes"]}; ks = {n["id"]: n for n in k["definitions"]["subgraphs"][0]["nodes"]}
+print("VERIFY linearMode", k["extra"]["linearMode"], "inputs", k["extra"]["linearData"]["inputs"], "outputs", k["extra"]["linearData"]["outputs"])
+print("VERIFY unet", kn[105]["widgets_values"][5], "| sampler", ks[17]["widgets_values"], "| sched", ks[9]["widgets_values"], "| shift", ks[143]["widgets_values"], "| vsa", ks[127]["widgets_values"][:4], "| image", kn[136]["widgets_values"][0])
+# verify via ComfyUI userdata API that the frontend can list it
+try:
+    lst = http(BASE + "/userdata?dir=workflows&recurse=false", timeout=30); print("VERIFY userdata lists app:", "Community_H3_I2V_beta6.app.json" in lst)
+except Exception as e: print("userdata check skipped", e)

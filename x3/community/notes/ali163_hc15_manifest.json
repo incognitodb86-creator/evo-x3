@@ -1,0 +1,140 @@
+{
+ "clip": 6,
+ "id": "ali163_hc15_gi072_s51150006",
+ "seed": 51150006,
+ "source_still": "GROK_IMAGINE_2026-10-19/GI072.jpg",
+ "source_sha256": "54e13b00dcc9895331e3b8cfef08dae95c4fdf7305f7736c392ebb2658417588",
+ "face_crops": [
+  "GI072_w1_face.png",
+  "GI072_w2_face.png"
+ ],
+ "face_gate_cos": [
+  0.954,
+  0.99
+ ],
+ "face_gate_rule": "verify.py:87 gate px(400, 550) faces>=1 pct>=12.0 cos>=0.45 + margin 0.55",
+ "slots": [
+  "ref_images.ref_image_1",
+  "ref_images.ref_image_2",
+  "ref_images.ref_image_3"
+ ],
+ "frames": 362,
+ "canvas": [
+  1344,
+  768
+ ],
+ "fps": 24,
+ "chunk_lengths": [
+  124,
+  119,
+  119
+ ],
+ "duration_s": 15.083333,
+ "prompts": {
+  "c0": {
+   "main_words": 497,
+   "words": 1088,
+   "beats": 4,
+   "negation": 0,
+   "ages": [
+    27,
+    24
+   ],
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ]
+  },
+  "c1": {
+   "main_words": 483,
+   "words": 1013,
+   "beats": 4,
+   "negation": 0,
+   "ages": [
+    27,
+    24
+   ],
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ]
+  },
+  "c2": {
+   "main_words": 455,
+   "words": 980,
+   "beats": 4,
+   "negation": 0,
+   "ages": [
+    27,
+    24
+   ],
+   "sections": [
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music"
+   ]
+  }
+ },
+ "diff_paths": [
+  "c0.prompt",
+  "c0.ref_images.ref_image_3",
+  "c1.prompt",
+  "c1.ref_images.ref_image_3",
+  "c2.prompt",
+  "c2.ref_images.ref_image_3",
+  "img.image",
+  "img2.image",
+  "img3.NODE",
+  "noise.noise_seed",
+  "save.filename_prefix"
+ ],
+ "prose_strings": 3,
+ "gate_ok_all_prose": true,
+ "budget_at_build": {
+  "used_min": 472.9,
+  "jobs": 38,
+  "cap_min": 615,
+  "job_cap": 45,
+  "updated": "2026-10-23T18:53:47"
+ },
+ "est_min": 30,
+ "graph_sha256": null,
+ "notes": "staged only; no queue, no GPU, no render in a Ralph pass",
+ "graph_sha": "6334aa0ef103d6a0191a9c03826cb48c76f667670564418e57969e10d272cb3f",
+ "req_sha256": "1d53207d0ea6ba6a10d4d43056b9916e34c8034d7e038058c7ff30179276bea7",
+ "checks": {
+  "ck_base": 0,
+  "ck_onevar": 0,
+  "ck_seed": 0,
+  "ck_prefix": 0,
+  "ck_shape": 0,
+  "ck_static": 0,
+  "ck_gate": 0,
+  "ck_format": 0,
+  "ck_prompt_source": 0,
+  "ck_negation": 0,
+  "ck_age": 0,
+  "ck_slots": 0,
+  "ck_inputs": 0,
+  "ck_idfree": 0,
+  "ck_budget": 0,
+  "ck_req": 0,
+  "ck_graphfile": 0,
+  "ck_manifest": 0,
+  "ck_keepword": 0,
+  "ck_nogpu": 0
+ },
+ "check_failures": {},
+ "checks_all_clean": true
+}

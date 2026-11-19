@@ -1,0 +1,39 @@
+{
+ "tag": "bjpov_b1_s51083020",
+ "model": "qwen3vl_judge",
+ "secs": 18.5,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains pale wall and grey carpet, matching START IMAGE throughout frames 1-8."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Man's body, jeans, boxers, and hand match START IMAGE; woman's appearance and clothing are consistent across frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman entering frame, not the same pose as START IMAGE which has no woman."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows woman's mouth on man's shaft with deep oral contact, matching TARGET POSE."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No malformed genitals, extra limbs, or melted bodies visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.9998,
+  "target_reached": 0.0,
+  "anatomy_defect": 0.003
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

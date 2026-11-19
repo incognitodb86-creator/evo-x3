@@ -1,0 +1,9 @@
+DIP start
+segment frames [481, 481, 481]
+DIP base_reenc.mp4 ffmpeg_exit=0 frames=1444 audio=True dur=60.192 bytes=35528476
+DIP contact C:\AI\community\runs\ali147_pool_dip_s51080000\base_reenc_stills_contact.png
+DIP dipblack.mp4 ffmpeg_exit=0 frames=1444 audio=True dur=60.192 bytes=36068430
+DIP contact C:\AI\community\runs\ali147_pool_dip_s51080000\dipblack_stills_contact.png
+DIP dipwhite.mp4 ffmpeg_exit=0 frames=1444 audio=True dur=60.192 bytes=38222051
+DIP contact C:\AI\community\runs\ali147_pool_dip_s51080000\dipwhite_stills_contact.png
+DIP end FAIL

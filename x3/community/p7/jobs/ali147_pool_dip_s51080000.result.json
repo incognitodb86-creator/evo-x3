@@ -1,0 +1,20 @@
+{
+    "started":  "2026-10-22T17:23:19",
+    "rc":  0,
+    "budget_cap_min":  345,
+    "budget_used_min":  242.5,
+    "log":  "C:\\AI\\community\\p7\\jobs\\ali147_pool_dip_s51080000.out",
+    "id":  "ali147_pool_dip_s51080000",
+    "ok":  true,
+    "kind":  "dip",
+    "note":  "dip_join rc=0",
+    "outputs":  [
+                    "C:\\AI\\community\\runs\\ali147_pool_dip_s51080000\\dip.log",
+                    "C:\\AI\\community\\runs\\ali147_pool_dip_s51080000\\ffmpeg_cmd.txt",
+                    "C:\\AI\\community\\runs\\ali147_pool_dip_s51080000\\dipblack.mp4",
+                    "C:\\AI\\community\\runs\\ali147_pool_dip_s51080000\\dipwhite.mp4",
+                    "C:\\AI\\community\\runs\\ali147_pool_dip_s51080000\\base_reenc.mp4"
+                ],
+    "finished":  "2026-10-22T17:23:36",
+    "wall_min":  0.3
+}

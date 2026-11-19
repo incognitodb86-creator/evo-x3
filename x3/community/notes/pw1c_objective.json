@@ -1,0 +1,158 @@
+{
+ "model_root": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models\\LLM",
+ "user_models_json": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/user\\minimax_h3_rewriter\\models.json",
+ "node_version": "",
+ "checks": [
+  {
+   "name": "base Q4_K_M is scanned into the Omni base list",
+   "ok": true,
+   "note": "Qwen2.5-Omni-7B-Q4_K_M.gguf [+mmproj, vision, audio, 5.8 GB]"
+  },
+  {
+   "name": "base GGUF header is an Omni build (no 'wrong size' suffix)",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "mmproj carries audio (a real Omni projector, not vision-only)",
+   "ok": true,
+   "note": "mmproj audio=True vision=True"
+  },
+  {
+   "name": "mmproj is paired by stem to the base (discovery._pair_mmproj rule)",
+   "ok": true,
+   "note": "LLM/Qwen2.5-Omni-7B-GGUF/mmproj-Qwen2.5-Omni-7B-Q8_0.gguf"
+  },
+  {
+   "name": "Q8_0 Omni adapter GGUF is scanned into the adapter list",
+   "ok": true,
+   "note": "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]"
+  },
+  {
+   "name": "catalog entry 'Qwen2.5-Omni-7B GGUF Q4_K_M' resolves on disk (no models.json edit)",
+   "ok": true,
+   "note": "LLM/Qwen2.5-Omni-7B-GGUF/Qwen2.5-Omni-7B-Q4_K_M.gguf"
+  },
+  {
+   "name": "transformers (lightx2v safetensors) adapter resolves at the repo dir",
+   "ok": true,
+   "note": "files sit in the repo dir = PW1b's lightx2v-safetensors subfolder was moved up"
+  },
+  {
+   "name": "GGUF Q8_0 adapter resolves through paths.present_file (pytraveler/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF)",
+   "ok": true,
+   "note": "LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf"
+  }
+ ],
+ "dump": {
+  "scan_omni_base": [
+   [
+    "Qwen2.5-Omni-3B-Q4_K_M.gguf [+mmproj, vision, audio, 3.4 GB]",
+    "LLM/Qwen2.5-Omni-3B-GGUF/Qwen2.5-Omni-3B-Q4_K_M.gguf",
+    "LLM/Qwen2.5-Omni-3B-GGUF/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf"
+   ],
+   [
+    "Qwen2.5-Omni-7B-Q4_K_M.gguf [+mmproj, vision, audio, 5.8 GB]",
+    "LLM/Qwen2.5-Omni-7B-GGUF/Qwen2.5-Omni-7B-Q4_K_M.gguf",
+    "LLM/Qwen2.5-Omni-7B-GGUF/mmproj-Qwen2.5-Omni-7B-Q8_0.gguf"
+   ]
+  ],
+  "base_header": {
+   "model": {
+    "arch": "qwen2vl",
+    "kind": "model",
+    "blocks": 28,
+    "draft_blocks": 0,
+    "width": 3584,
+    "vision": false,
+    "audio": false,
+    "context": 32768,
+    "kv_per_token": 57344,
+    "names": []
+   },
+   "mmproj": {
+    "arch": "clip",
+    "kind": "mmproj",
+    "blocks": null,
+    "draft_blocks": 0,
+    "width": null,
+    "vision": true,
+    "audio": true,
+    "context": null,
+    "kv_per_token": null,
+    "names": []
+   },
+   "problem": ""
+  },
+  "scan_adapters": [
+   [
+    "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf [qwen2vl, 0.3 GB]",
+    "LLM/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf"
+   ]
+  ],
+  "catalog_models_omni": [
+   {
+    "label": "Qwen2.5-Omni-7B (official, bf16) · 22.4 GB download · ~9 GB as nf4 / ~13 GB as int8 / ~24 GB as bf16",
+    "format": "transformers",
+    "repo": "Qwen/Qwen2.5-Omni-7B",
+    "file": "",
+    "mmproj": "",
+    "on_disk": []
+   },
+   {
+    "label": "Qwen2.5-Omni-7B GGUF Q4_K_M · 6.2 GB download · ~9 GB with the adapter and a 12k context",
+    "format": "gguf",
+    "repo": "ggml-org/Qwen2.5-Omni-7B-GGUF",
+    "file": "Qwen2.5-Omni-7B-Q4_K_M.gguf",
+    "mmproj": "mmproj-Qwen2.5-Omni-7B-Q8_0.gguf",
+    "on_disk": [
+     "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models\\LLM\\Qwen2.5-Omni-7B-GGUF\\Qwen2.5-Omni-7B-Q4_K_M.gguf",
+     "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models\\LLM\\Qwen2.5-Omni-7B-GGUF\\mmproj-Qwen2.5-Omni-7B-Q8_0.gguf"
+    ]
+   },
+   {
+    "label": "Qwen2.5-Omni-7B GGUF Q8_0 · 9.7 GB download · ~13 GB - closer to the bf16 rewrite on a card that has room",
+    "format": "gguf",
+    "repo": "ggml-org/Qwen2.5-Omni-7B-GGUF",
+    "file": "Qwen2.5-Omni-7B-Q8_0.gguf",
+    "mmproj": "mmproj-Qwen2.5-Omni-7B-Q8_0.gguf",
+    "on_disk": []
+   }
+  ],
+  "catalog_adapter_gguf": {
+   "repo": "pytraveler/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF",
+   "file": "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-F16.gguf",
+   "configured": true,
+   "alts": [
+    "MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf"
+   ]
+  },
+  "catalog_adapter_transformers": {
+   "repo": "lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA-Omni",
+   "file": "",
+   "configured": true,
+   "alts": []
+  },
+  "safetensors_route": {
+   "repo": "lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA-Omni",
+   "repo_dir": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models\\LLM\\MiniMax-H3-Prompt-Rewriter-LoRA-Omni",
+   "repo_dir_files": [
+    "README.md",
+    "adapter_config.json",
+    "adapter_model.safetensors",
+    "requirements.txt",
+    "system_prompt.py"
+   ],
+   "adapter_is_complete_at_repo_dir": true,
+   "subdir": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models\\LLM\\MiniMax-H3-Prompt-Rewriter-LoRA-Omni\\lightx2v-safetensors",
+   "subdir_files": [],
+   "adapter_is_complete_in_subdir": false,
+   "present_folder_adapter_complete": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models\\LLM\\MiniMax-H3-Prompt-Rewriter-LoRA-Omni"
+  },
+  "gguf_adapter_route": {
+   "repo": "pytraveler/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF",
+   "resolved": "C:/Users/derek/HardcoreNSFW-TestRuntime/ComfyUI/models\\LLM\\MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF\\MiniMax-H3-Prompt-Rewriter-LoRA-Omni-Q8_0.gguf"
+  }
+ },
+ "pass": true
+}

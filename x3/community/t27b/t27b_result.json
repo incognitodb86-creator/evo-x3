@@ -1,0 +1,81 @@
+{
+ "cold_load_plus_first_reply_s": 13.6,
+ "first_usage": {
+  "completion_tokens": 400,
+  "prompt_tokens": 63,
+  "total_tokens": 463,
+  "prompt_tokens_details": {
+   "cached_tokens": 0
+  }
+ },
+ "first_timings": {
+  "cache_n": 0,
+  "prompt_n": 63,
+  "prompt_ms": 568.241,
+  "prompt_per_token_ms": 9.019698412698412,
+  "prompt_per_second": 110.86845194204571,
+  "predicted_n": 400,
+  "predicted_ms": 3392.01,
+  "predicted_per_token_ms": 8.501278195488723,
+  "predicted_per_second": 117.62937019643219,
+  "draft_n": 428,
+  "draft_n_accepted": 313
+ },
+ "warm_reply_s": 5.0,
+ "warm_timings": {
+  "cache_n": 0,
+  "prompt_n": 28,
+  "prompt_ms": 149.627,
+  "prompt_per_token_ms": 5.343821428571429,
+  "prompt_per_second": 187.13200157725544,
+  "predicted_n": 720,
+  "predicted_ms": 4715.62,
+  "predicted_per_token_ms": 6.558581363004173,
+  "predicted_per_second": 152.47199731954655,
+  "draft_n": 610,
+  "draft_n_accepted": 597
+ },
+ "swap_27b_to_comfy_s": 24.6,
+ "tiny_render": {
+  "secs": 40.4,
+  "file": "C:\\AI\\community\\t27b\\t27b_tiny_render_416x736_29f_8st.mp4"
+ },
+ "swap_comfy_to_27b_plus_reply_s": 7.2,
+ "strata_cold_plus_reply_s": 56.7,
+ "strata_first_timings": {
+  "cache_n": 0,
+  "prompt_n": 105,
+  "prompt_ms": 1009.2,
+  "prompt_per_token_ms": 9.611,
+  "prompt_per_second": 104.0,
+  "predicted_n": 400,
+  "predicted_ms": 3313.8,
+  "predicted_per_token_ms": 8.285,
+  "predicted_per_second": 120.7,
+  "draft_n": 351,
+  "draft_n_accepted": 271
+ },
+ "strata_warm_reply_s": 5.4,
+ "strata_warm_timings": {
+  "cache_n": 0,
+  "prompt_n": 70,
+  "prompt_ms": 462.1,
+  "prompt_per_token_ms": 6.601,
+  "prompt_per_second": 151.5,
+  "predicted_n": 800,
+  "predicted_ms": 4942.0,
+  "predicted_per_token_ms": 6.178,
+  "predicted_per_second": 161.9,
+  "draft_n": 605,
+  "draft_n_accepted": 591
+ },
+ "strata_warm_usage": {
+  "prompt_tokens": 70,
+  "completion_tokens": 800,
+  "total_tokens": 870,
+  "prompt_tokens_details": {
+   "cached_tokens": 0
+  }
+ },
+ "config_restored": true
+}

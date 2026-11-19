@@ -1,0 +1,634 @@
+[
+  {
+    "name": "02v_mc_api.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max?blobs=true"
+  },
+  {
+    "name": "02v_mc_readme.txt",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_mc_disc54.json",
+    "url": "https://huggingface.co/api/discussions/TenStrip/10Eros-Max/54"
+  },
+  {
+    "name": "02v_mc_disc61.json",
+    "url": "https://huggingface.co/api/discussions/TenStrip/10Eros-Max/61"
+  },
+  {
+    "name": "02v_mc_disc63.json",
+    "url": "https://huggingface.co/api/discussions/TenStrip/10Eros-Max/63"
+  },
+  {
+    "name": "02v_mc_discussions.json",
+    "url": "https://huggingface.co/api/discussions/TenStrip/10Eros-Max?num=100"
+  },
+  {
+    "name": "02v_minimax_h3_repo.json",
+    "url": "https://huggingface.co/api/models/MiniMax/H3-1031-AIO-3dp7"
+  },
+  {
+    "name": "02v_minimax_disc28.json",
+    "url": "https://huggingface.co/api/discussions/MiniMax/H3-1031-AIO-3dp7/28"
+  },
+  {
+    "name": "02v_docs_h3.txt",
+    "url": "https://docs.comfy.org/tutorials/video/minimax/minimax-h3.md"
+  },
+  {
+    "name": "02v_docs_h3_native.txt",
+    "url": "https://docs.comfy.org/tutorials/video/minimax/minimax-h3-native.md"
+  },
+  {
+    "name": "02v_docs_h3_fastvideo.txt",
+    "url": "https://docs.comfy.org/tutorials/video/minimax/minimax-h3-fastvideo.md"
+  },
+  {
+    "name": "02v_drbaph_readme.txt",
+    "url": "https://raw.githubusercontent.com/drbaph/MiniMax-H3-Turbo-Lora-ComfyUI/HEAD/README.md"
+  },
+  {
+    "name": "02v_drbaph_repo.json",
+    "url": "https://api.github.com/repos/drbaph/MiniMax-H3-Turbo-Lora-ComfyUI"
+  },
+  {
+    "name": "02v_extender_readme.txt",
+    "url": "https://raw.githubusercontent.com/tritant/ComfyUI_MiniMax_H3_Extender/HEAD/README.md"
+  },
+  {
+    "name": "02v_extender_repo.json",
+    "url": "https://api.github.com/repos/tritant/ComfyUI_MiniMax_H3_Extender"
+  },
+  {
+    "name": "02v_longvideos_readme.txt",
+    "url": "https://raw.githubusercontent.com/Smite79/MiniMax-H3-LongVideos/HEAD/README.md"
+  },
+  {
+    "name": "02v_longvideos_repo.json",
+    "url": "https://api.github.com/repos/Smite79/MiniMax-H3-LongVideos"
+  },
+  {
+    "name": "02v_storyboard_readme.txt",
+    "url": "https://raw.githubusercontent.com/Shlomit2025/h3-storyboard-ALLInOne-/HEAD/README.md"
+  },
+  {
+    "name": "02v_storyboard_repo.json",
+    "url": "https://api.github.com/repos/Shlomit2025/h3-storyboard-ALLInOne-"
+  },
+  {
+    "name": "02v_comfycli_readme2.txt",
+    "url": "https://raw.githubusercontent.com/brianpetro/comfy-cli/HEAD/README.md"
+  },
+  {
+    "name": "02v_comfycli_repo.json",
+    "url": "https://api.github.com/repos/brianpetro/comfy-cli"
+  },
+  {
+    "name": "02v_cwb_repo.json",
+    "url": "https://api.github.com/repos/joedata/comfy-workflow-builder"
+  },
+  {
+    "name": "02v_cwb_skill.txt",
+    "url": "https://raw.githubusercontent.com/joedata/comfy-workflow-builder/HEAD/skills/comfy-workflow-builder/SKILL.md"
+  },
+  {
+    "name": "02v_lightx2v_pe.json",
+    "url": "https://huggingface.co/api/models/lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA?blobs=true"
+  },
+  {
+    "name": "02v_lightx2v_pe_readme.txt",
+    "url": "https://huggingface.co/lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_lightx2v_omni.json",
+    "url": "https://huggingface.co/api/models/lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF?blobs=true"
+  },
+  {
+    "name": "02v_pytraveler_readme.txt",
+    "url": "https://raw.githubusercontent.com/pytraveler/minimax_h3_prompt_rewriter/HEAD/README.md"
+  },
+  {
+    "name": "02v_pytraveler_repo.json",
+    "url": "https://api.github.com/repos/pytraveler/minimax_h3_prompt_rewriter"
+  },
+  {
+    "name": "02v_omni7b.json",
+    "url": "https://huggingface.co/api/models/Qwen/Qwen2.5-Omni-7B"
+  },
+  {
+    "name": "02v_qwen35_4b.json",
+    "url": "https://huggingface.co/api/models/unsloth/Qwen3.5-4B-GGUF"
+  },
+  {
+    "name": "02v_qwen35_4b_readme.txt",
+    "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_gemma4_e4b.json",
+    "url": "https://huggingface.co/api/models/unsloth/Gemma-4-E4B-it-GGUF"
+  },
+  {
+    "name": "02v_gemma4_12b.json",
+    "url": "https://huggingface.co/api/models/unsloth/gemma-4-12b-it-GGUF"
+  },
+  {
+    "name": "02v_huihui_qwen35_4b.json",
+    "url": "https://huggingface.co/api/models/Huihui/Qwen3.5-4B-heretic"
+  },
+  {
+    "name": "02v_hauhau_27b.json",
+    "url": "https://huggingface.co/api/models/HauhauCS/Qwen3.8-27B-Uncensored-Herse-AGXT-Um-Heretic-V3-GGUF"
+  },
+  {
+    "name": "02v_hauhau_9b.json",
+    "url": "https://huggingface.co/api/models/HauhauCS/Qwen3.6-9B-Uncensored-Herse-AGXT-Um-Heretic-V3-GGUF"
+  },
+  {
+    "name": "02v_mradermacher_q3vl8b.json",
+    "url": "https://huggingface.co/api/models/mradermacher/Qwen3-VL-8B-Abliterated-GGUF"
+  },
+  {
+    "name": "02v_geocine.json",
+    "url": "https://huggingface.co/api/models/geocine/gocoin-2.6b-GGUF"
+  },
+  {
+    "name": "02v_geocine_readme.txt",
+    "url": "https://huggingface.co/geocine/gocoin-2.6b-GGUF/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_fal_realism.json",
+    "url": "https://huggingface.co/api/models/fal/MiniMax-H3-Realism-People-LoRA?blobs=true"
+  },
+  {
+    "name": "02v_fal_realism_readme.txt",
+    "url": "https://huggingface.co/fal/MiniMax-H3-Realism-People-LoRA/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_akatz_swap.json",
+    "url": "https://huggingface.co/api/models/akatz-ai/MiniMax-H3-Character-Swap-LoRA?blobs=true"
+  },
+  {
+    "name": "02v_alissonerdx_sharp.json",
+    "url": "https://huggingface.co/api/models/Alissonerdx/minimax_h3_lms_v1.0_r64?blobs=true"
+  },
+  {
+    "name": "02v_alissonerdx_readme.txt",
+    "url": "https://huggingface.co/Alissonerdx/minimax_h3_lms_v1.0_r64/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_alissonerdx_body.json",
+    "url": "https://huggingface.co/api/models/Alissonerdx/MiniMax-H3-Concept-LoRA-Body-Swap?blobs=true"
+  },
+  {
+    "name": "02v_antiburn.json",
+    "url": "https://huggingface.co/api/models/Imagineer13/H3-Anti-Burn-LoRA?blobs=true"
+  },
+  {
+    "name": "02v_antiburn_readme.txt",
+    "url": "https://huggingface.co/Imagineer13/H3-Anti-Burn-LoRA/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_w4a8.json",
+    "url": "https://huggingface.co/api/models/berryber09/10Eros-Max-h3-turbo-beta6-pruned-w4a8"
+  },
+  {
+    "name": "02v_fasth3_workflows.json",
+    "url": "https://huggingface.co/api/models/TenStrip/H3-FastVideoV2-ComfyUI-workflows"
+  },
+  {
+    "name": "02v_fasth3_readme.txt",
+    "url": "https://huggingface.co/TenStrip/H3-FastVideoV2-ComfyUI-workflows/raw/HEAD/README.md"
+  },
+  {
+    "name": "02v_turbo_workflow.json",
+    "url": "https://huggingface.co/api/models/TenStrip/MiniMax-H3-Turbo-ComfyUI-workflow"
+  },
+  {
+    "name": "02v_concept_loras.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Concept-LoRAs-H3"
+  },
+  {
+    "name": "02v_upscaler.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max-upscaler"
+  },
+  {
+    "name": "02v_comfyorg_h3.json",
+    "url": "https://huggingface.co/api/models/Comfy-Org/MiniMax-H3-ComfyUI?blobs=true"
+  },
+  {
+    "name": "02v_civitai_2967166.json",
+    "url": "https://civitai.com/api/v1/models/2967166"
+  },
+  {
+    "name": "02v_civitai_2906001.json",
+    "url": "https://civitai.com/api/v1/models/2906001"
+  },
+  {
+    "name": "02v_civitai_2860061.json",
+    "url": "https://civitai.com/api/v1/models/2860061"
+  },
+  {
+    "name": "02v_civitai_2833322.json",
+    "url": "https://civitai.com/api/v1/models/2833322"
+  },
+  {
+    "name": "02v_beta6_civarchive.html",
+    "url": "https://civarchive.com/models/2851079?modelVersionId=3393047"
+  },
+  {
+    "name": "02v_arxiv.xml",
+    "url": "http://export.arxiv.org/api/query?id_list=2311.17982,2406.15252,2504.14716,2503.09949,2503.05977,2602.06013&max_results=20"
+  },
+  {
+    "name": "02v_vbench_issue206.json",
+    "url": "https://api.github.com/repos/Vchitect/VBench/issues/206"
+  },
+  {
+    "name": "02v_vbench_repo.json",
+    "url": "https://api.github.com/repos/vchitect/vbench"
+  },
+  {
+    "name": "02v_videoscore.json",
+    "url": "https://huggingface.co/api/models/TIGER-Lab/VideoScore"
+  },
+  {
+    "name": "02v_qwen_vl_utils.txt",
+    "url": "https://raw.githubusercontent.com/QwenLM/Qwen3-VL/HEAD/qwen-vl-utils/src/qwen_vl_utils/vision_process.py"
+  },
+  {
+    "name": "02v_llama_video_repo.json",
+    "url": "https://api.github.com/repos/Cobdog/llama-video"
+  },
+  {
+    "name": "02v_ltx2_guidance.txt",
+    "url": "https://raw.githubusercontent.com/Lightricks/LTX-2/HEAD/packages/ltx-pipelines/docs/multimodal-guidance.md"
+  },
+  {
+    "name": "02v_ltx2_selection.txt",
+    "url": "https://raw.githubusercontent.com/Lightricks/LTX-2/HEAD/packages/ltx-pipelines/docs/pipeline-selection.md"
+  },
+  {
+    "name": "02v_siti_docs.html",
+    "url": "https://ayosec.github.io/ffmpeg-filters-docs/8.0/Filters/Video/siti.html"
+  },
+  {
+    "name": "02v_comfyui_issue15529.json",
+    "url": "https://api.github.com/repos/Comfy-Org/ComfyUI/issues/15529"
+  },
+  {
+    "name": "02v_comfyui_issue15337.json",
+    "url": "https://api.github.com/repos/Comfy-Org/ComfyUI/issues/15337"
+  },
+  {
+    "name": "02v_comfyui_issue15665.json",
+    "url": "https://api.github.com/repos/Comfy-Org/ComfyUI/issues/15665"
+  },
+  {
+    "name": "02v_insightface_faq.txt",
+    "url": "https://raw.githubusercontent.com/deepinsight/insightface/HEAD/doc/faq.md"
+  },
+  {
+    "name": "02v_registry_continuation.json",
+    "url": "https://api.comfy.org/nodes/comfyui-minimax-h3-continuation"
+  },
+  {
+    "name": "02v_registry_extender.json",
+    "url": "https://api.comfy.org/nodes/comfyui-minimax-h3-extender"
+  },
+  {
+    "name": "02v_registry_continuum.json",
+    "url": "https://api.comfy.org/nodes/comfyui-h3-continuum"
+  },
+  {
+    "name": "02v_repo_10eros.json",
+    "url": "https://api.github.com/repos/TenStrip/10Eros"
+  },
+  {
+    "name": "02v_mc_disc54_page.html",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max/discussions/54"
+  },
+  {
+    "name": "02v_mc_disc61_page.html",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max/discussions/61"
+  },
+  {
+    "name": "02v_mc_disc63_page.html",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max/discussions/63"
+  },
+  {
+    "name": "02v_minimax_disc28_page.html",
+    "url": "https://huggingface.co/MiniMax/H3-1031-AIO-3dp7/discussions/28"
+  },
+  {
+    "name": "02v_hauhau27_page.html",
+    "url": "https://huggingface.co/HauhauCS/Qwen3.8-27B-Uncensored-Herse-AGXT-Um-Heretic-V3-GGUF"
+  },
+  {
+    "name": "02v_hauhau9_page.html",
+    "url": "https://huggingface.co/HauhauCS/Qwen3.6-9B-Uncensored-Herse-AGXT-Um-Heretic-V3-GGUF"
+  },
+  {
+    "name": "02v_mradermacher_page.html",
+    "url": "https://huggingface.co/mradermacher/Qwen3-VL-8B-Abliterated-GGUF"
+  },
+  {
+    "name": "02v_huihui_page.html",
+    "url": "https://huggingface.co/Huihui/Qwen3.5-4B-heretic"
+  },
+  {
+    "name": "02v_geocine_page.html",
+    "url": "https://huggingface.co/geocine/gocoin-2.6b-GGUF"
+  },
+  {
+    "name": "02v_alissonerdx_page.html",
+    "url": "https://huggingface.co/Alissonerdx/minimax_h3_lms_v1.0_r64"
+  },
+  {
+    "name": "02v_alissonerdx_body_page.html",
+    "url": "https://huggingface.co/Alissonerdx/MiniMax-H3-Concept-LoRA-Body-Swap"
+  },
+  {
+    "name": "02v_fasth3_page.html",
+    "url": "https://huggingface.co/TenStrip/H3-FastVideoV2-ComfyUI-workflows"
+  },
+  {
+    "name": "02v_comfyorg_h3_page.html",
+    "url": "https://huggingface.co/Comfy-Org/MiniMax-H3-ComfyUI"
+  },
+  {
+    "name": "02v_lightx2v_omni_page.html",
+    "url": "https://huggingface.co/lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA-Omni-GGUF"
+  },
+  {
+    "name": "02v_turbolora_repo.json",
+    "url": "https://api.github.com/repos/minimaxh3turbo/MiniMax-H3-Turbo-LoRA-ComfyUI"
+  },
+  {
+    "name": "02v_turbolora_readme.txt",
+    "url": "https://raw.githubusercontent.com/minimaxh3turbo/MiniMax-H3-Turbo-LoRA-ComfyUI/HEAD/README.md"
+  },
+  {
+    "name": "02v_storyboard2_repo.json",
+    "url": "https://api.github.com/repos/acer1204/h3-storyboard-ALLInOne"
+  },
+  {
+    "name": "02v_storyboard2_readme.txt",
+    "url": "https://raw.githubusercontent.com/acer1204/h3-storyboard-ALLInOne/HEAD/README.md"
+  },
+  {
+    "name": "02v_pytraveler2_repo.json",
+    "url": "https://api.github.com/repos/pytraveler/MiniMax-H3-Prompt-Rewriter-ComfyUI"
+  },
+  {
+    "name": "02v_pytraveler2_readme.txt",
+    "url": "https://raw.githubusercontent.com/pytraveler/MiniMax-H3-Prompt-Rewriter-ComfyUI/HEAD/README.md"
+  },
+  {
+    "name": "02v_comfycli_org.json",
+    "url": "https://api.github.com/repos/Comfy-Org/comfy-cli"
+  },
+  {
+    "name": "02v_cwb_siddharth.json",
+    "url": "https://api.github.com/repos/SiddharthFulia/comfy-workflow-builder"
+  },
+  {
+    "name": "02v_cwb_siddharth_skill.txt",
+    "url": "https://raw.githubusercontent.com/SiddharthFulia/comfy-workflow-builder/HEAD/skills/comfy-workflow-builder/SKILL.md"
+  },
+  {
+    "name": "02v_cwb_saman.json",
+    "url": "https://api.github.com/repos/samansalari/Comfy-workflow-builder"
+  },
+  {
+    "name": "02v_continuum_repo.json",
+    "url": "https://api.github.com/repos/ukr8b3g-cmyk/ComfyUI-H3-Continuum"
+  },
+  {
+    "name": "02v_continuum_readme.txt",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/HEAD/README.md"
+  },
+  {
+    "name": "02v_infinite_repo.json",
+    "url": "https://api.github.com/repos/SwotAtmk/infinite-creation"
+  },
+  {
+    "name": "02v_continuation_repo.json",
+    "url": "https://api.github.com/repos/ttulttul/ComfyUI-Minimax-H3-Continuation"
+  },
+  {
+    "name": "02v_extender_registry.json",
+    "url": "https://api.comfy.org/nodes/ComfyUI_MiniMax_H3_Extender"
+  },
+  {
+    "name": "02v_insightface_pyreadme.txt",
+    "url": "https://raw.githubusercontent.com/deepinsight/insightface/HEAD/python/README.md"
+  },
+  {
+    "name": "02v_klein_repo.json",
+    "url": "https://api.github.com/repos/ShooteshSound/ComfyUI-Klein-9B-Native-Prompting"
+  },
+  {
+    "name": "02v_upscaler_page.html",
+    "url": "https://huggingface.co/TenStrip/10Eros-Max-upscaler"
+  },
+  {
+    "name": "02v_concept_loras_page.html",
+    "url": "https://huggingface.co/TenStrip/10Eros-Concept-LoRAs-H3"
+  },
+  {
+    "name": "02v_turbo_workflow_page.html",
+    "url": "https://huggingface.co/TenStrip/MiniMax-H3-Turbo-ComfyUI-workflow"
+  },
+  {
+    "name": "02x_pytorch_pypi.json",
+    "url": "https://pypi.org/pypi/torch/json"
+  },
+  {
+    "name": "02x_comfyui_repo.json",
+    "url": "https://api.github.com/repos/Comfy-Org/ComfyUI"
+  },
+  {
+    "name": "02x_kijai_repo.json",
+    "url": "https://api.github.com/repos/Kijai/ComfyUI-KJNodes"
+  },
+  {
+    "name": "02x_fizgig_repo.json",
+    "url": "https://api.github.com/repos/shootthesound/Fizgig"
+  },
+  {
+    "name": "02x_latent_up_api.json",
+    "url": "https://huggingface.co/api/models/LBH-123-AI/Minimax_h3_latent_Upscaler"
+  },
+  {
+    "name": "02x_latent_up_repo.json",
+    "url": "https://api.github.com/repos/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler"
+  },
+  {
+    "name": "02x_minimax_base_api.json",
+    "url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-H3"
+  },
+  {
+    "name": "02x_comfyui_disc12471.json",
+    "url": "https://huggingface.co/api/spaces/15420602242/ComfyUI-Resources/discussions/12471"
+  },
+  {
+    "name": "02x_comfyui_disc8568.json",
+    "url": "https://huggingface.co/api/spaces/15420602242/ComfyUI-Resources/discussions/8568"
+  },
+  {
+    "name": "02x_comfyui_disc24165.json",
+    "url": "https://huggingface.co/api/spaces/15420602242/ComfyUI-Resources/discussions/24165"
+  },
+  {
+    "name": "02x_comfyui_issue17706.json",
+    "url": "https://api.github.com/repos/Comfy-Org/ComfyUI/issues/17706"
+  },
+  {
+    "name": "02x_comfyui_issue24551.json",
+    "url": "https://api.github.com/repos/Comfy-Org/ComfyUI/issues/24551"
+  },
+  {
+    "name": "02x_comfyui_issue18071.json",
+    "url": "https://api.github.com/repos/Comfy-Org/ComfyUI/issues/18071"
+  },
+  {
+    "name": "02x_mps_utils_repo.json",
+    "url": "https://api.github.com/repos/Ludifred/ComfyUI-MPS-Utils"
+  },
+  {
+    "name": "02x_loras_tree.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max/tree/main/Loras"
+  },
+  {
+    "name": "02x_mc_files_api.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max?blobs=true"
+  },
+  {
+    "name": "02x_hf_paper_4b.json",
+    "url": "https://huggingface.co/api/papers/2607.22010"
+  },
+  {
+    "name": "02x_disc54_api.json",
+    "url": "https://huggingface.co/api/discussions/TenStrip/10Eros-Max/54?with_msgs=1"
+  },
+  {
+    "name": "02x_disc61_api.json",
+    "url": "https://huggingface.co/api/discussions/TenStrip/10Eros-Max/61?with_msgs=1"
+  },
+  {
+    "name": "02x_disc63_api.json",
+    "url": "https://huggingface.co/api/discussions/TenStrip/10Eros-Max/63?with_msgs=1"
+  },
+  {
+    "name": "02x_disc_minimax28_api.json",
+    "url": "https://huggingface.co/api/discussions/MiniMaxAI/MiniMax-H3/28?with_msgs=1"
+  },
+  {
+    "name": "02x_cwb_skill_raw.txt",
+    "url": "https://raw.githubusercontent.com/SiddharthFulia/comfy-workflow-builder/main/skills/comfy-workflow-builder/SKILL.md"
+  },
+  {
+    "name": "02x_civitai_3343324.json",
+    "url": "https://civitai.com/api/ja/models/3343324"
+  },
+  {
+    "name": "02x_civitai_wf_3343238.html",
+    "url": "https://civitai.com/api/ja/models/3343238"
+  },
+  {
+    "name": "02x_civitai_wf_3343324.html",
+    "url": "https://civitai.com/api/ja/models/3343324"
+  },
+  {
+    "name": "02x_comfyui_disc12471_page.html",
+    "url": "https://huggingface.co/spaces/15420602242/ComfyUI-Resources/discussions/12471"
+  },
+  {
+    "name": "02x_fal_realism_card_more.txt",
+    "url": "https://huggingface.co/fal/MiniMax-H3-Realism-People-LoRA/raw/HEAD/README.md"
+  },
+  {
+    "name": "02x_comfyorg_h3_api.json",
+    "url": "https://huggingface.co/api/models/Comfy-Org/MiniMax-H3"
+  },
+  {
+    "name": "02x_comfyorg_tree.json",
+    "url": "https://huggingface.co/api/models/Comfy-Org/MiniMax-H3/tree/main?recursive=true"
+  },
+  {
+    "name": "02x_lightx2v_turbo_api.json",
+    "url": "https://huggingface.co/api/models/lightx2v/Minimax-h3-Turbo"
+  },
+  {
+    "name": "02x_cont_v39_workflow.json",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/examples/workflows/MiniMax_H3_Continuum_V39.json"
+  },
+  {
+    "name": "02x_cont_v39_ref_inline.txt",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/docs/V39_REFERENCE_INLINE.md"
+  },
+  {
+    "name": "02x_cont_turbo_sample.txt",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/docs/TURBO_SAMPLE.md"
+  },
+  {
+    "name": "02x_cont_relnotes_3912.txt",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/docs/RELEASE_NOTES_V3912.md"
+  },
+  {
+    "name": "02x_cont_user_guide.txt",
+    "url": "https://raw.githubusercontent.com/ukr8b3g-cmyk/ComfyUI-H3-Continuum/main/docs/USER_GUIDE.md"
+  },
+  {
+    "name": "02x_cont_repo_api.json",
+    "url": "https://api.github.com/repos/ukr8b3g-cmyk/ComfyUI-H3-Continuum"
+  },
+  {
+    "name": "02x_extender_repo_api.json",
+    "url": "https://api.github.com/repos/lucasmanier/ComfyUI-MiniMax-H3-Continuation"
+  },
+  {
+    "name": "02x_mc_disc54_api2.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max/discussions/54"
+  },
+  {
+    "name": "02x_lightx2v_pe_tree.json",
+    "url": "https://huggingface.co/api/models/lightx2v/MiniMax-H3-Prompt-Rewriter-LoRA/tree/main"
+  },
+  {
+    "name": "02x_mc_disc61_api.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max/discussions/61"
+  },
+  {
+    "name": "02x_mc_disc63_api.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max/discussions/63"
+  },
+  {
+    "name": "02x_mc_disc_index.json",
+    "url": "https://huggingface.co/api/models/TenStrip/10Eros-Max/discussions?status=open&pages=20"
+  },
+  {
+    "name": "02x_minimax_disc_index.json",
+    "url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-H3/discussions?status=open&pages=20"
+  },
+  {
+    "name": "02x_minimax_disc28.json",
+    "url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-H3/discussions/28"
+  },
+  {
+    "name": "02v_civitai_3153751.json",
+    "url": "https://civitai.com/api/ja/models/3153751"
+  },
+  {
+    "name": "02x_arxiv_2607_22010.html",
+    "url": "https://arxiv.org/abs/2607.22010"
+  },
+  {
+    "name": "02x_llamacpp_awq_master.txt",
+    "url": "https://raw.githubusercontent.com/ggml-org/llama.cpp/master/awq/gguf_get_rotating_max_stats.py"
+  },
+  {
+    "name": "02x_llamacpp_quantize_awq.txt",
+    "url": "https://raw.githubusercontent.com/ggml-org/llama.cpp/master/tools/server/README.md"
+  }
+]

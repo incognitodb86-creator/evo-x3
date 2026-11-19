@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show consistent dark cave with rough stone walls and dim lighting, matching START IMAGE background."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde elf woman and green orc appear in all frames with identical body types, skin tones, and attire."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows orc gripping wrists; START IMAGE has same pose but orc's hands are not yet released."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows elf woman pressed against wall, orc behind her, genitals visibly engaged in thrusting motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0002,
+  "same_people": 0.0,
+  "start_kept": 0.8327,
+  "target_reached": 0.0024,
+  "anatomy_defect": 0.0005
+ },
+ "finish": "stop",
+ "flags": [
+  "start_kept"
+ ],
+ "tag": "p15v2_b_w8_capjoy_gi201_against_wall_s51170001_wf2"
+}

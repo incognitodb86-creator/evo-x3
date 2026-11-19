@@ -1,0 +1,332 @@
+== A. harness result gate (p7\jobs\ali147_pool_dense_s51080000.result.json)
+  result.json ok = True
+  result.json rc = 0
+  result.json note = 'run_graph_job rc=0 (ok)'
+  result.json id = 'ali147_pool_dense_s51080000'
+  result.json kind = 'graph'
+  result.json started = '2026-10-22T23:47:34'
+  result.json finished = '2026-10-23T00:06:22'
+  result.json wall_min = 18.8
+  result.json budget_used_min = 375.3
+  result.json budget_cap_min = 390
+PASS result.json ok is True (the task's 'JOB end ok' gate)
+PASS result.json rc == 0 (got 0)
+PASS result.json id/kind match the arm
+PASS no failed-<date> copy for this id (never refused, never re-run)
+PASS p7\jobs\<id>.out is byte-identical to runs\<id>\status.log (same job log)
+PASS p7\jobs\<id>.err.out is 0 bytes (no stderr, no CUDA OOM text there)
+
+== B. status.log verbatim + error greps (the task's 'JOB end ok')
+  | 2026-10-22 23:47:34 CT UNLOAD LLM coding_swift15_iq3s_esp
+  | 2026-10-22 23:48:02 CT JOB start ali147_pool_dense_s51080000 prompt_id=a0c742b2-d45b-4aa1-895d-0fd92b97bd58
+  | 2026-10-23 00:06:21 CT JOB end ali147_pool_dense_s51080000 ok secs=1098.9 file=C:\AI\community\runs\ali147_pool_dense_s51080000\ali147_pool_dense_s51080000.mp4
+  | 2026-10-23 00:06:21 CT OBJECTIVE ok ali147_pool_dense_s51080000 frames=481 audio=True dur=20.042 bytes=5842735 contact=C:\AI\community\runs\ali147_pool_dense_s51080000\ali147_pool_dense_s51080000_stills_contact.png
+  | 2026-10-23 00:06:22 CT UNLOAD comfyui_auto (POST /api/models/unload)
+PASS status.log: no 'JOB error' (hits 0)
+PASS status.log: no 'CLIP_SKIP' (hits 0)
+PASS status.log: no 'clip_skip' (hits 0)
+PASS status.log: no 'node_errors' (hits 0)
+PASS status.log: no 'Traceback' (hits 0)
+PASS status.log: no 'STUCK' (hits 0)
+PASS status.log: no 'REDO' (hits 0)
+PASS status.log: no 'redo' (hits 0)
+PASS status.log: no 'STATIC_FAIL' (hits 0)
+PASS status.log: no 'COMFY_DOWN' (hits 0)
+PASS status.log: no 'OBJECTIVE FAIL' (hits 0)
+PASS status.log: no 'error' (hits 0)
+PASS status.log: no 'ERROR' (hits 0)
+PASS status.log: no 'SKIP' (hits 0)
+PASS status.log: no 'blocked' (hits 0)
+PASS status.log: no 'out of memory' (hits 0)
+PASS status.log: no 'CUDA out of memory' (hits 0)
+PASS status.log: no 'OOM' (hits 0)
+PASS status.log: no 'RuntimeError' (hits 0)
+PASS status.log: no 'Killed' (hits 0)
+PASS status.log: no 'timeout' (hits 0)
+PASS the LLM was unloaded before the job (ALI-154) by the harness: ['2026-10-22 23:47:34 CT UNLOAD LLM coding_swift15_iq3s_esp']
+PASS exactly one JOB start line for the arm
+PASS exactly one 'JOB end ... ok' line for the arm
+PASS exactly one OBJECTIVE ok line for the arm
+  JOB start : 2026-10-22 23:48:02 CT JOB start ali147_pool_dense_s51080000 prompt_id=a0c742b2-d45b-4aa1-895d-0fd92b97bd58
+  JOB end   : 2026-10-23 00:06:21 CT JOB end ali147_pool_dense_s51080000 ok secs=1098.9 file=C:\AI\community\runs\ali147_pool_dense_s51080000\ali147_pool_dense_s51080000.mp4
+  OBJECTIVE : 2026-10-23 00:06:21 CT OBJECTIVE ok ali147_pool_dense_s51080000 frames=481 audio=True dur=20.042 bytes=5842735 contact=C:\AI\community\runs\ali147_pool_dense_s51080000\ali147_pool_dense_s51080000_stills_contact.png
+PASS the JOB end line carries secs= (render seconds are quotable)
+PASS result.json started == the status.log UNLOAD/JOB start (23:47:34 CT)
+PASS result.json finished == the status.log last line (00:06:22 CT)
+  CONTROL status.log lines:
+    | 2026-10-22 15:42:03 CT COMFY ready v0.38.0 wait=0s vram_free=0.9GiB
+    | 2026-10-22 15:42:03 CT JOB start ali147_pool_ctrl_s51080000 prompt_id=bb419c84-4af7-44c2-b106-04a7b5e0762b
+    | 2026-10-22 15:55:32 CT JOB end ali147_pool_ctrl_s51080000 ok secs=809.7 file=C:\AI\community\runs\ali147_pool_ctrl_s51080000\ali147_pool_ctrl_s51080000.mp4 (recorded by ali147_record_ctrl.py; wall secs from JOB start)
+PASS CTRL baseline re-read from the live file: secs=809.7 (the task's 809.7 denominator)
+PASS documented: the DRIVER-RENDERED CTRL status.log has NO 'OBJECTIVE ok' line (its JOB end line is 'recorded by ali147_record_ctrl.py'), so the control's frame count comes from its objective.json + the ffprobe recount (C/D)
+
+== C. objective.json (harness shape attempts:[{...}]) + the render-seconds comparison
+  top-level keys ['attempts', 'contact_sheet', 'file', 'ok', 'tag']
+  attempts: 1
+PASS one attempt only = no redo, no STUCK (got 1)
+  attempts[0].frames = 481
+  attempts[0].w = 768
+  attempts[0].h = 1344
+  attempts[0].fps = '24/1'
+  attempts[0].audio = True
+  attempts[0].duration = 20.041688
+  attempts[0].bytes = 5842735
+  attempts[0].secs = 1098.9
+  attempts[0].blackfreeze = []
+  attempts[0].file = 'C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000.mp4'
+  attempts[0].tag = 'ali147_pool_dense_s51080000'
+  top-level ok=True contact_sheet='C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000_stills_contact.png'
+PASS objective.json ok is True
+PASS objective frames == 481 (request frames 481, frames_tol 0)
+PASS resolution 768x1344
+PASS fps 24/1 (got '24/1')
+PASS audio stream present
+PASS blackfreeze [] = no black/frozen frames (the harness chain)
+PASS objective bytes == os.path.getsize(mp4) (5842735)
+PASS objective secs == the status.log secs= (1098.9)
+PASS objective contact_sheet == the file in the arm dir ('C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000_stills_contact.png')
+  CONTROL objective.json keys ['audio', 'blackfreeze', 'bytes', 'contact_sheet', 'duration', 'fps', 'frames', 'h', 'ok', 'secs', 'sha256', 'tag', 'w'] (flat shape, no attempts)
+  control objective: frames=481 w=768 h=1344 fps='24/1' audio=True bytes=5781091 secs=809.7 blackfreeze=[]
+PASS the control objective shape matches the arm's (481 / 768x1344 / 24/1 / audio) = a valid one-variable control
+PASS control objective.json secs == 809.7 = the denominator the task names
+  RENDER SECONDS (the task's 'report the slowdown'): dense 1098.9 s vs CTRL 809.7 s = +289.2 s (+35.72 %, ratio 1.357x)
+  wall: result.json wall_min 18.8 (2026-10-22T23:47:34 -> 2026-10-23T00:06:22); the request's minutes=120 is a PRE-job gate/timeout, not a render cap
+  every 481-frame render in runs\ (secs, id, source), ascending:
+       706.8 s  ali147_pool_fix5_s51080000                 objective.json (attempts[0])  vs CTRL -102.9 s
+       809.7 s  ali147_pool_ctrl_s51080000                 objective.json (flat)  vs CTRL +0.0 s
+       827.7 s  ali147_pool_promptv2_s51080000             objective.json (attempts[0])  vs CTRL +18.0 s
+       837.7 s  ali147_pool_promptv2_seg3_s51080002        objective.json (attempts[0])  vs CTRL +28.0 s
+       857.5 s  ali147_pool_fix1_s51080000                 objective.json (attempts[0])  vs CTRL +47.8 s
+       902.7 s  ali147_pool_refsheet_s51080000             objective.json (attempts[0])  vs CTRL +93.0 s
+       978.1 s  ali147_pool_refsheet_b_s51080000           objective.json (attempts[0])  vs CTRL +168.4 s
+      1098.9 s  ali147_pool_dense_s51080000                objective.json (attempts[0])  vs CTRL +289.2 s
+PASS dense is the SLOWEST 481-frame render in runs\ (the VSA-off slowdown is the set maximum)
+PASS the CTRL baseline sits inside the spread: fastest 706.8 s < CTRL 809.7 s < dense 1098.9 s
+PASS the driver-rendered CTRL (flat objective.json, no status.log OBJECTIVE line) IS in the table via its objective.json secs
+  bytes dense 5842735 vs CTRL 5781091 = +61644 (1.07 %)
+
+== D. independent ffprobe recount + black/frozen re-probes (read-only, this iteration)
+  video: rc=0 out='768,1344,24/1,24/1,481' err=''
+PASS ffprobe -count_packets video packets = 481 (independent recount, never format=duration)
+PASS ffprobe width/height 768x1344
+PASS ffprobe r_frame_rate 24/1
+  streams: rc=0 out='0,h264,video,20.041667,481\n1,aac,audio,32000,2,20.041688,628'
+PASS exactly one audio stream in the container (['1,aac,audio,32000,2,20.041688,628'])
+  format (informational, NOT the frame gate): '20.041688,5842735'
+  CTRL recount: rc=0 out='768,1344,24/1,481'
+PASS CTRL is 481 packets = a valid one-variable control (same frame count)
+  CTRL mp4 5781091 B sha256 1dc59ed446e4cf1a5ecbfa18616a311b658d1acc281a3624974732373ba42fda
+  CTRL mp4 sha256 is measured here (the report quotes it); the pair is hash-attested by this file
+  harness blackfreeze filter chain (run_graph_job.py) = 'blackdetect=d=1.0:pix_th=0.10,freezedetect=n=-60dB:d=2'
+PASS the harness blackdetect+freezedetect chain is readable out of run_graph_job.py
+  harness-chain events: [] rc=0
+PASS re-running the harness's own blackdetect+freezedetect chain gives 0 events = objective.json blackfreeze [] reproduces
+  stricter blackdetect (d=0.2): [] rc=0
+PASS own stricter blackdetect: no black intervals
+  stricter freezedetect (n=0.005 d=0.5): [] rc=0
+PASS own stricter freezedetect: no frozen intervals >= 0.5 s
+
+== E. provenance: the graph that rendered is the graph Forge wrote
+  request.api.json 10517 B sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+  ali147_pool_dense_s51080000.api.json 10517 B sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+PASS ali147_pool_dense_s51080000.api.json is BYTE-IDENTICAL to request.api.json (plain cmp: no output) = the rendered graph is mine
+PASS request.api.json sha256 == the iter-12 request note 4e59e6265c5d...
+PASS both graph hashes are 64 hex chars (the 63-char literal trap)
+PASS CTRL copy source (submitted_graph.pretty.json) sha256 == the recorded 698854152284...
+  CTRL rendered .api.json 10886 B sha256 21e47217d3d6ceda46b60ebab0a298db9016868cd27c1565c389d624ed72192a
+  CTRL source .pretty.json 10886 B sha256 698854152284100e60b6ac87a795a7f083160a9556acb3fb868793b7f4373bb6
+PASS both CTRL graph hashes are 64 hex chars
+  NOTE: the AGENTS-recorded 'graph d9212ff14b1f...' matches NEITHER on-disk file measured here (the CTRL mp4 line is 'recorded by ali147_record_ctrl.py'); the fairness gate is the node-body compare, not that literal.
+PASS parsed graphs identical (24 nodes)
+PASS CTRL source vs CTRL rendered api: 25/25 node bodies byte-identical (only top-level KEY ORDER differs - the known PV2-1 finding); byte equality is NOT expected and is not a gate
+PASS no *_redo*.api.json in the arm dir (consistent with attempts length 1)
+  p7\jobs request archives: ['request_iter01.json', 'request_iter02.json', 'request_iter03.json', 'request_iter04.json', 'request_iter05.json', 'request_iter06.json', 'request_iter07.json', 'request_iter08.json', 'request_iter09.json', 'request_iter09.skipped.json', 'request_iter10.json', 'request_iter12.json']
+PASS the consumed job request (sha256 c24820f489e1...) is archived at exactly one p7\jobs\['request_iter12.json'] = one job per request
+  archived request: {"jobs": [{"id": "ali147_pool_dense_s51080000", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 120}]}
+PASS the archived request is exactly one graph job (id ali147_pool_dense_s51080000, frames 481, tol 0, minutes 120)
+  model request_iter10.json: {"jobs": [{"id": "ali147_pool_promptv2_seg3_s51080002", "kind": "graph", "frames": 481, "frames_tol": 0, "minutes": 60}]}
+PASS bytes-shape = the accepted model request with ONLY id + minutes differing (keys identical: ['frames', 'frames_tol', 'id', 'kind', 'minutes'])
+  p7\JOB_REQUEST.json present = False (a Request file is CONSUMED at exit)
+  sidecar attempt = '0'
+  sidecar comfy_output = 'C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000'
+  sidecar file = 'C:\\AI\\community\\runs\\ali147_pool_dense_s51080000\\ali147_pool_dense_s51080000.mp4'
+  sidecar finished = '2026-10-23 00:06 CT'
+  sidecar label = 'METHOD_ONLY'
+  sidecar plan = 'ALI-147'
+  sidecar prompt_id = 'a0c742b2-d45b-4aa1-895d-0fd92b97bd58'
+  sidecar run = 'ali147_pool_dense_s51080000'
+  sidecar secs = '1098.9'
+  sidecar tag = 'ali147_pool_dense_s51080000'
+PASS sidecar labels METHOD_ONLY, run = the arm, attempt 0 (no redo; KEEP is Derrick's)
+PASS sidecar prompt_id == the status.log JOB start prompt_id
+PASS sidecar secs == objective.json secs (1098.9)
+  CTRL sidecar label='METHOD_ONLY' run='ali147_pool_ctrl_s51080000' seed=51080000 secs=809.7 prompt_id='bb419c84-4af7-44c2-b106-04a7b5e0762b'
+
+== F. the ONE variable: m_shift.model -> m_attn, m_vsa deleted, nothing else touched
+PASS m_vsa exists in the control graph and is DELETED in the arm
+PASS control m_shift.model = ['m_vsa', 0] (the VSA-patched model)
+PASS arm m_shift.model = ['m_attn', 0] (the task's exact change)
+  control consumers of m_vsa: [('m_shift', 'model')]
+PASS m_vsa had exactly one consumer (m_shift.model) = the single rewire is provable
+PASS no link in the arm points at m_vsa or at any missing node (no dangling links): []
+  arm m_shift class_type='MiniMaxH3SigmaShift' inputs=['model', 'shift_audio', 'shift_video']
+  arm m_attn class_type='ModelAttentionBackend' inputs=['attention', 'model'] attention='comfy kitchen attention'
+  control m_vsa class_type='BlockSparseAttention' inputs=['dense_blocks', 'end_percent', 'extra_tokens', 'min_tokens', 'model', 'selection', 'selection.keep_percent', 'sink_conditioning', 'start_percent', 'verbose']
+    removed VSA setting model = ['m_attn', 0]
+    removed VSA setting selection = 'vsa'
+    removed VSA setting selection.keep_percent = 10
+    removed VSA setting start_percent = 0.2
+    removed VSA setting end_percent = 1.0
+    removed VSA setting min_tokens = 12288
+    removed VSA setting extra_tokens = 256
+    removed VSA setting sink_conditioning = 'exact_kv_and_rows'
+    removed VSA setting dense_blocks = ''
+    removed VSA setting verbose = False
+PASS the deleted node carried exactly the 9 VSA settings the task names PLUS its own 'model' link input (= 10 input keys)
+PASS m_attn is UNTOUCHED (attention = 'comfy kitchen attention' read from the file, NOT a hardcoded enum); it is now the last model patch in the chain
+PASS m_shift: the ONLY changed input is 'model' (other inputs identical)
+  arm classes (20): ['BasicGuider', 'BasicScheduler', 'CLIPLoader', 'CreateVideo', 'KSamplerSelect', 'LoadImage', 'MiniMaxH3AppendContinuation', 'MiniMaxH3GuidedContinuationWindow', 'MiniMaxH3ImageToVideo', 'MiniMaxH3LatentTailGuide', 'MiniMaxH3ReferenceToVideo', 'MiniMaxH3SigmaShift', 'ModelAttentionBackend', 'RandomNoise', 'SamplerCustomAdvanced', 'SaveVideo', 'UNETLoader', 'VAEDecode', 'VAEDecodeAudio', 'VAELoader']
+  control classes (21): ['BasicGuider', 'BasicScheduler', 'BlockSparseAttention', 'CLIPLoader', 'CreateVideo', 'KSamplerSelect', 'LoadImage', 'MiniMaxH3AppendContinuation', 'MiniMaxH3GuidedContinuationWindow', 'MiniMaxH3ImageToVideo', 'MiniMaxH3LatentTailGuide', 'MiniMaxH3ReferenceToVideo', 'MiniMaxH3SigmaShift', 'ModelAttentionBackend', 'RandomNoise', 'SamplerCustomAdvanced', 'SaveVideo', 'UNETLoader', 'VAEDecode', 'VAEDecodeAudio', 'VAELoader']
+PASS no NEW node class: arm classes = control classes minus the deleted BlockSparseAttention-type node
+PASS every arm class_type also appears in the ok-rendered CTRL .api.json = the strongest non-GPU listability proof (the node-list GET at 127.0.0.1:10004 is the harness's at render time)
+PASS the VSA patch class is absent from the arm = full dense attention
+PASS save.filename_prefix = the new id ('community/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000')
+  prefix chain: 'community/ali147_pool_ctrl_s51080000/ali147_pool_ctrl_s51080000' -> 'community/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000' (the only prefix change, per graph_diff)
+  RandomNoise nodes: ['noise'] seeds=[51080000] (control [51080000])
+PASS seed held at 51080000 and every RandomNoise node is IDENTICAL to the control
+  schedulers: ['s0_sched', 's1_sched']
+PASS s0_sched (BasicScheduler steps/scheduler/denoise) identical to the control: [10, 'simple', 1.0]
+PASS s1_sched (BasicScheduler steps/scheduler/denoise) identical to the control: [10, 'simple', 1.0]
+PASS LoadImage node identical: 'community/POOL_768x1344.png'
+PASS the start still resolves inside ComfyUI\input: 1354030 B sha256 9cf9ff95f2d6f2fb3882219a8d98995b673e78a80001d7a41af1755cc918d075
+PASS still hash is 64 hex chars and starts with the recorded prefix (the 63-char AGENTS literal is a truncation = a false fail)
+PASS c0 node byte-identical to the control (prompt = CTRL verbatim)
+PASS c0 prompt 3295 chars sha256 7b4b22bb170f... = the recorded CTRL text (no prompt edit in a settings arm)
+PASS c1 node byte-identical to the control (prompt = CTRL verbatim)
+PASS c1 prompt 2303 chars sha256 6686d7057ead... = the recorded CTRL text (no prompt edit in a settings arm)
+PASS adults-only guard (the harness's own comm.guard_ok, run_graph_job.py:60) passes on both rendered prompts
+PASS only c0/c1 carry prompt strings in the arm and the control (no hidden prompt edits)
+PASS c0.length 243 + 768x1344 (control values)
+PASS c0.length 243 + win1.extension_frames 238 = 481 = the requested frames (the control's own budget)
+PASS win1 identical (only the frame-budget arithmetic matters here)
+PASS node count 24 = control 25 minus the deleted m_vsa
+PASS arm graph is canonical json.dumps(indent=1, ensure_ascii=True) (LF-normalised compare)
+PASS arm graph is CRLF with NO trailing newline (the accepted .api.json shape)
+PASS line count = control 349 - 18 (the deleted m_vsa block) = 331
+
+== G. fairness vs the RENDERED control graph: only m_shift + save differ
+  shared nodes 24, identical 22, differing nodes ['m_shift', 'save'], control-only nodes ['m_vsa']
+PASS differing node set over the 24 SHARED nodes == ['m_shift','save'] (22/24 byte-identical)
+PASS the only node in the control and not in the arm is m_vsa
+PASS no node was added
+PASS m_shift input key set unchanged (['model', 'shift_audio', 'shift_video'])
+PASS m_shift: changed inputs == ['model'] (got ['model'])
+PASS save input key set unchanged (['codec', 'filename_prefix', 'format', 'video'])
+PASS save: changed inputs == ['filename_prefix'] (got ['filename_prefix'])
+PASS held identical to the control: node m_attn (ModelAttentionBackend)
+PASS held identical to the control: node c0 (MiniMaxH3ReferenceToVideo)
+PASS held identical to the control: node c1 (MiniMaxH3ImageToVideo)
+PASS held identical to the control: node img (LoadImage)
+PASS held identical to the control: node win1 (MiniMaxH3GuidedContinuationWindow)
+PASS held identical to the control: node app1 (MiniMaxH3AppendContinuation)
+PASS held equal across the whole graph: sampler_name = ['euler'] (control ['euler'])
+PASS held equal across the whole graph: noise_seed = ['51080000'] (control ['51080000'])
+PASS held equal across the whole graph: steps = ['10'] (control ['10'])
+PASS held equal across the whole graph: scheduler = ['simple'] (control ['simple'])
+PASS held equal across the whole graph: denoise = ['1.0'] (control ['1.0'])
+  (no node carries 'seed' in either graph - skipped, an empty==empty gate is a false fail)
+
+== H. graph_diff.txt: the task's 'shows only m_shift.model, m_vsa removed, filename_prefix'
+  graph_diff.txt 1241 B sha256 5ec6bd9c32c9ecb14f93c2f4474dca27508789e0c7803e15e4ca44cc755e28e8 hunks=2 removed=20 added=2
+PASS the diff is exactly 2 hunks / 20 removed / 2 added lines = the three named changes and nothing else
+  removed lines (20):
+    - "m_vsa",
+    - "m_vsa": {
+    - "class_type": "BlockSparseAttention",
+    - "inputs": {
+    - "dense_blocks": "",
+    - "end_percent": 1.0,
+    - "extra_tokens": 256,
+    - "min_tokens": 12288,
+    - "model": [
+    - "m_attn",
+    - 0
+    - ],
+    - "selection": "vsa",
+    - "selection.keep_percent": 10,
+    - "sink_conditioning": "exact_kv_and_rows",
+    - "start_percent": 0.2,
+    - "verbose": false
+    - }
+    - },
+    - "filename_prefix": "community/ali147_pool_ctrl_s51080000/ali147_pool_ctrl_s51080000",
+  added lines (2): ['"m_attn",', '"filename_prefix": "community/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000",']
+  hunks: ['@@ -140,31 +140,13 @@', '@@ -289,7 +271,7 @@']
+PASS the m_vsa node block is 18 lines (control lines 150-167), located by brace depth
+PASS the control graph has exactly one '"m_vsa",' link element line (the m_shift.model input) = a single rewire
+PASS the arm graph has exactly one '"m_attn",' link element line (the new m_shift.model input)
+PASS the control prefix line is unique and names the CTRL id: '"filename_prefix": "community/ali147_pool_ctrl_s51080000/ali147_pool_ctrl_s51080000",'
+PASS the arm prefix line is unique and names the arm id: '"filename_prefix": "community/ali147_pool_dense_s51080000/ali147_pool_dense_s51080000",'
+PASS the removed set == the 18-line m_vsa block + the m_shift 'm_vsa' link line + the CTRL prefix line, nothing else (20 lines)
+PASS the added set == the m_shift 'm_attn' link line + the arm prefix line, nothing else (2 lines)
+PASS every removed line is byte-equal to a control graph line (diff marker + indentation stripped)
+PASS every added line is byte-equal to an arm graph line
+PASS no prompt line in the diff = prompts are CTRL verbatim (confirms F)
+PASS no new node block in the diff (nothing was added except 2 single lines)
+PASS line count control 349 - arm 331 = 18 = the deleted block only
+
+== I. outputs: sizes, sha256, contact-sheet geometry and sampled frames
+  ali147_pool_dense_s51080000.mp4                               5842735 B sha256 07ac2f7cb36bda07f54a9185295c45f011efece143c16c2f2be0b0eca3c5003c
+  ali147_pool_dense_s51080000_stills_contact.png                1675216 B sha256 759583d6cc5878b0fba3f5c76dc7395f4db3719705388d87f9ad831271fdd864
+  request.api.json                                                10517 B sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+  ali147_pool_dense_s51080000.api.json                            10517 B sha256 4e59e6265c5d5addc84bfa6ed4c37240da457878d9139243389f238e32726f39
+  ali147_pool_dense_s51080000.mp4.json                              516 B sha256 aac774c3b48603ec984b0e6783c82628185e33867b877aa4002ba67de7b1583a
+  status.log                                                        615 B sha256 148d9a4e2c4b1e7b5e1228a5b8489b43d2794c8b6fc3a56ae83cb787762e22e1
+  objective.json                                                    630 B sha256 3a13cb91f22ce88bc9006ded91b0b3947393a19f4eb05bc10f245e35f82e29d4
+  graph_diff.txt                                                   1241 B sha256 5ec6bd9c32c9ecb14f93c2f4474dca27508789e0c7803e15e4ca44cc755e28e8
+  CONTROL for the sbs pair: mp4 5781091 B sha256 1dc59ed446e4cf1a5ecbfa18616a311b658d1acc281a3624974732373ba42fda / contact sheet 1711845 B sha256 9d97ecca9df312a0d9b997757d58c2f4daf15f10ba36f435fb9c48ddbe4930c6
+PASS mp4 bytes agree across objective.json, the status.log OBJECTIVE line and os.path.getsize
+PASS the contact sheet and the rendered .api.json are non-empty
+  contact sheet PIL (1816, 900) mode=RGB format=PNG  expected for 10 tiles (grid 7x2, tile 256x448, padding 4): (1816, 900)
+PASS contact-sheet geometry matches run_graph_job.py:contact_sheet for a 20.042 s clip
+  sampled t = [8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 18.5, 19.0, 19.5] s -> frames [204, 216, 228, 240, 252, 264, 276, 444, 456, 468]
+PASS the 481-frame sheet samples exactly frames 204-276 + 444-468 (10 tiles)
+PASS the LAST sampled frame is 468: the t=20.0 tile is dropped by the code's t <= dur-0.05 test (dur 20.0417), so frames 480 and 0 are NEVER sampled by the sheet
+  never sampled by the sheet: frames 0-203, 277-443, 445-455, 457-467, 469-480
+  the review is this contact sheet + the objective checks only: no vision judge was called on any output (superseded 2026-10-22)
+  dir listing runs\ali147_pool_dense_s51080000
+    f  ali147_pool_dense_s51080000.api.json 10517
+    f  ali147_pool_dense_s51080000.mp4 5842735
+    f  ali147_pool_dense_s51080000.mp4.json 516
+    f  ali147_pool_dense_s51080000_stills_contact.png 1675216
+    f  graph_diff.txt 1241
+    f  objective.json 630
+    f  request.api.json 10517
+    f  status.log 615
+PASS arm dir holds only harness outputs + the graph_diff.txt Forge is allowed to write (no PROOF.md/fairness.txt on a render line)
+  NOTE: this PV2-3 line names no PROOF.md/fairness.txt; the report is the PV2-6 notes file (Max posts it).
+
+== J. sbs / fixed-frame stills (Max's per the TASKS sbs rule) + p7 budget + ralph.log
+  find runs -name sbs_*.mp4 -> []
+PASS no sbs_ctrl_dense.mp4 exists -> sbs/stills pending Max (run_graph_job.py has no hstack path; sbs_* are Max/harness files)
+  find runs -name *dense* -> []
+PASS no fixed-frame stills for this arm in runs (run_graph_job.py writes only the contact sheet)
+  C:/Users/derek/5slock/ralph-community/logs/p7_budget.json = {"used_min": 375.3, "jobs": 26, "cap_min": 390, "job_cap": 27, "updated": "2026-10-23T00:06:22"}
+  result.json snapshot (older): budget_used_min 375.3 cap 390
+PASS live budget after this job: used_min 375.3 < cap_min 390, jobs 26 < job_cap 27
+  this arm spent 18.8 min of GPU wall (1098.9 s render); the CTRL cost 809.7 s = 13.5 min; delta +4.8 min
+  last 8 ralph.log lines:
+    | 2026-10-22T23:37:58 iter 11 summary: status=ok exit=0 ticks=+1 wall=11.4m denies=6 checkfails=0 scope=0 open=3
+    | 2026-10-22T23:38:04 iter 12 start
+    | 2026-10-22T23:47:25 iter 12 exit 0
+    | 2026-10-22T23:47:28 iter 12 note: 5slock\AGENTS.md was updated by the model (allowed: command notes)
+    | 2026-10-22T23:47:28 iter 12 summary: status=ok exit=0 ticks=+0 wall=9.4m denies=1 checkfails=0 scope=0 open=3
+    | 2026-10-22T23:47:34 P7 job ali147_pool_dense_s51080000 start: C:\AI\director\.venv\Scripts\python.exe -u C:\AI\community\scripts\run_graph_job.py C:\AI\community\runs\ali147_pool_dense_s51080000 ali147_pool_dense_s51080000 --frames 481 --frames-tol 0 --timeout 2400 --max-redo 2 (timeout 120 min)
+    | 2026-10-23T00:06:22 P7 job ali147_pool_dense_s51080000 ok=True run_graph_job rc=0 (ok)
+    | 2026-10-23T00:51:31 iter 01 start
+  P7 job lines for the arm: ['2026-10-22T23:47:34 P7 job ali147_pool_dense_s51080000 start: C:\\AI\\director\\.venv\\Scripts\\python.exe -u C:\\AI\\community\\scripts\\run_graph_job.py C:\\AI\\community\\runs\\ali147_pool_dense_s51080000 ali147_pool_dense_s51080000 --frames 481 --frames-tol 0 --timeout 2400 --max-redo 2 (timeout 120 min)', '2026-10-23T00:06:22 P7 job ali147_pool_dense_s51080000 ok=True run_graph_job rc=0 (ok)']
+PASS the harness ran this job exactly once, ok=True, never refused
+PASS no ok=False run of this id (no second attempt, no re-request)
+  request-time budget check (iter 12 note): used_min 356.5 < 390, jobs 25 < 27 - both gates passed; live now: '{"used_min": 375.3, "jobs": 26, "cap_min": 390, "job_cap": 27, "updated": "2026-10-23T00:06:22"}'
+
+ALL CHECKS PASS

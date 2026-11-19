@@ -1,0 +1,49 @@
+{
+ "frames": [
+  82,
+  290
+ ],
+ "diffs": [
+  9.76,
+  10.55
+ ],
+ "per_frame": [
+  {
+   "frame": 82,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background walls, lighting, and overall environment remain consistent between frames."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies maintain correct proportions and connections without malformations."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0004,
+    "anatomy_defect": 0.0003
+   },
+   "finish": "stop"
+  },
+  {
+   "frame": 290,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "Background walls and textures remain consistent; no new objects or structural changes visible."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "All limbs, hands, and bodies appear intact and anatomically plausible; no melting or floating parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.013,
+    "anatomy_defect": 0.0075
+   },
+   "finish": "stop"
+  }
+ ],
+ "tag": "p15v2_b_w7_capjoy_gi201_against_wall_s51170001_wf2"
+}

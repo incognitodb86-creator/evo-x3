@@ -1,0 +1,118 @@
+--- a/headless-guard-and-truncate.ts
++++ b/headless-guard-and-truncate.ts
+@@ -19,6 +19,7 @@
+  * This is a best-effort static policy, not a sandbox. Pure helpers are exported for tests/headless-guard.test.mjs.
+  */
+ 
++import { execFileSync } from "node:child_process";
+ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+ import { randomUUID } from "node:crypto";
+ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+@@ -220,6 +221,39 @@
+ 	return !!cwd && underRoot(cwd, roots, cwd);
+ }
+ 
++// bakeoff 2026-10-23 (ALI-173, Derrick 1:07 PM CT "Yes, add 120 GPU min and 10 jobs for the bakeoff and let Forge restart and call ComfyUI itself"):
++// Forge sessions may call ComfyUI's HTTP API (read + queue) on :8188 / :8189 / :10004 (ComfyUI's own port under llama-swap) and llama-swap's
++// OpenAI-style /v1 endpoints + the documented /comfyui/ wake route on :8080. Still blocked: /upstream/*, /unload + /load, /interrupt, /free,
++// llama-swap's /api/* and every other local GPU port (e.g. Strata :10002). Restarts go through scripts\comfy_ctl.py, refused while a render runs.
++const LOCAL_URL = /(?:https?:\/\/)?(?:127\.0\.0\.1|localhost|0\.0\.0\.0|\[::1\]):(\d{2,5})(\/[^\s"'`)\]},;|&]*)?/gi;
++const COMFY_PORTS = new Set(["8188", "8189", "10004"]);
++const COMFY_PATH_OK = /^\/(?:api\/)?(?:prompt|queue|history(?:\/[\w-]+)?|view|upload\/image|system_stats|object_info\/[\w.%-]+|embeddings|extensions|features|models(?:\/[\w-]+)?)?\/?(?:\?[^\s]*)?$/i;
++const LS_PATH_OK = /^\/(?:v1\/(?:chat\/completions|completions|models|embeddings)|comfyui)\/?(?:\?[^\s]*)?$/i;
++export function isAllowedLocalUrl(port: string, path: string | undefined): boolean {
++	const pth = path && path.length ? path : "/";
++	if (COMFY_PORTS.has(port)) return COMFY_PATH_OK.test(pth);
++	if (port === "8080") return LS_PATH_OK.test(pth);
++	return false;
++}
++/** Masks the allowed local ComfyUI / llama-swap /v1 URLs so the normal deny rules judge the rest of the command. */
++export function maskAllowedLocal(command: string): string {
++	return command.replace(LOCAL_URL, (m, port: string, path: string | undefined) => (isAllowedLocalUrl(port, path) ? "LOCAL_API_OK" : m));
++}
++const COMFY_STOP = /comfy_ctl\.py["']?\s+(?:stop|restart)\b/i;
++/** true = a render is running (or the check failed: fail closed). PI_GUARD_RENDER_RUNNING=1/0 overrides for tests. */
++export function renderRunning(): boolean {
++	const o = process.env.PI_GUARD_RENDER_RUNNING;
++	if (o === "1") return true;
++	if (o === "0") return false;
++	try {
++		execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", "C:\\AI\\director\\scripts\\gpu_guard.ps1"], { timeout: 90000, stdio: "pipe" });
++		return false;
++	} catch {
++		return true;
++	}
++}
++const COMFY_BUSY_REASON = "a render is running (gpu_guard.ps1 BUSY: ComfyUI queue, render process or GPU lock), so ComfyUI is not stopped or restarted. Wait for the job to finish (python C:/AI/community/scripts/comfy_ctl.py status), then retry.";
++
+ export interface EvalOptions {
+ 	/** true = headless run (ctx.hasUI === false): the K4 command allowlist applies. */
+ 	headless?: boolean;
+@@ -231,15 +265,21 @@
+ 	const args = asRecord(input);
+ 	if (toolName === "bash" || toolName === "powershell") {
+ 		if (typeof args.command !== "string") return null;
+-		const denied = checkCommand(args.command);
+-		if (denied) return denied;
+-		let al: Allowlist;
++		let al: Allowlist | undefined;
++		let alErr: unknown;
+ 		try {
+ 			al = loadAllowlist();
+ 		} catch (error) {
++			alErr = error;
++		}
++		const forge = !!opts.headless && !!al && isForgeSession(opts.cwd || process.cwd(), al);
++		const denied = checkCommand(forge ? maskAllowedLocal(args.command) : args.command);
++		if (denied) return denied;
++		if (!al) {
+ 			if (!opts.headless) return null; // UI runs keep working without the file; headless fails closed
+-			return { id: "allowlist-missing", reason: `the command allowlist (${ALLOWLIST_FILE}) could not be loaded (${String(error)}); all shell commands are blocked until the supervisor fixes it.` };
++			return { id: "allowlist-missing", reason: `the command allowlist (${ALLOWLIST_FILE}) could not be loaded (${String(alErr)}); all shell commands are blocked until the supervisor fixes it.` };
+ 		}
++		if (forge && COMFY_STOP.test(args.command) && renderRunning()) return { id: "comfy-restart-busy", reason: COMFY_BUSY_REASON };
+ 		if (!opts.headless && !al.applyInUI) return null;
+ 		if (opts.headless && isForgeSession(opts.cwd || process.cwd(), al)) {
+ 			if (FORGE_FINANCE.test(args.command)) return { id: "finance-paths", reason: FINANCE_REASON };
+@@ -767,9 +807,18 @@
+ 	}
+ 	// community 2026-10-23 (row 14): read-only web = curl GET to a short docs-domain list. No upload/POST/data/header/cookie/config/proxy flags.
+ 	if (name === "curl") {
++		// community 2026-10-23: GET-only to web.domains. bakeoff 2026-10-23: local ComfyUI API / llama-swap /v1 URLs may also POST JSON (queue, chat).
+ 		const doms = (al.web?.domains ?? []).map((d) => d.toLowerCase());
+ 		const outRoots = al.web?.outputRoots ?? [];
++		const valFlags = /^(?:-o|--output|-m|--max-time|--connect-timeout|--retry|--max-filesize|--max-redirs|-X|--request|-d|--data|--data-binary|--data-raw|--data-urlencode|--json|-H|--header|-F|--form)$/;
+ 		const urls: string[] = [];
++		for (let k = 0; k < raw.length; k++) {
++			if (valFlags.test(raw[k])) { k++; continue; }
++			if (!raw[k].startsWith("-")) urls.push(raw[k]);
++		}
++		if (!urls.length) return allowBlock("curl-arg", "curl needs one URL.");
++		const localOk = (u: string) => { const m = /^(?:https?:\/\/)?(?:127\.0\.0\.1|localhost):(\d{2,5})(\/[^\s?#]*)?(?:[?#].*)?$/i.exec(u); return !!m && isAllowedLocalUrl(m[1], m[2] ? m[2] + (u.includes("?") ? u.slice(u.indexOf("?")) : "") : undefined); };
++		const allLocal = urls.every(localOk);
+ 		const shortOk = new Set(["s", "S", "L", "f", "I", "v", "i", "g", "4", "6"]);
+ 		for (let k = 0; k < raw.length; k++) {
+ 			const x = raw[k];
+@@ -780,13 +829,19 @@
+ 				if (!o || o === "-" || /[$`]/.test(o) || !underRoot(o, outRoots, state.cwd)) return allowBlock("curl-arg", `curl -o may only write under ${outRoots.join(", ")}.`);
+ 				k++; continue;
+ 			}
+-			if (/^-X$|^--request$/.test(x)) { if ((raw[k + 1] ?? "").toUpperCase() !== "GET") return allowBlock("curl-method", "curl is GET only (no -X POST/PUT/DELETE/PATCH)."); k++; continue; }
++			if (/^-X$|^--request$/.test(x)) {
++				const m = (raw[k + 1] ?? "").toUpperCase();
++				if (!(m === "GET" || (allLocal && m === "POST"))) return allowBlock("curl-method", "curl is GET only (POST only to the local ComfyUI API / llama-swap /v1).");
++				k++; continue;
++			}
++			if (/^(?:-d|--data|--data-binary|--data-raw|--json)$/.test(x)) { if (!allLocal) return allowBlock("curl-arg", `curl ${x} (POST data) is only allowed to the local ComfyUI API / llama-swap /v1.`); k++; continue; }
++			if (/^(?:-H|--header)$/.test(x)) { if (!allLocal || !/^(?:Content-Type|Accept):\s*[\w/+.-]+(?:;\s*charset=[\w-]+)?$/i.test(raw[k + 1] ?? "")) return allowBlock("curl-arg", "curl -H only Content-Type/Accept, and only to the local ComfyUI API / llama-swap /v1."); k++; continue; }
++			if (/^(?:-F|--form)$/.test(x)) { if (!allLocal || !urls.every((u) => /\/upload\/image\b/i.test(u))) return allowBlock("curl-arg", "curl -F only for ComfyUI /upload/image."); k++; continue; }
+ 			if (/^-[A-Za-z0-9]+$/.test(x) && [...x.slice(1)].every((c) => shortOk.has(c))) continue;
+ 			if (x.startsWith("-")) return allowBlock("curl-arg", `curl ${x} is not allowed: GET only, no upload/data/form/header/cookie/user/config/proxy/output-elsewhere flags.`);
+-			urls.push(x);
+ 		}
+-		if (!urls.length) return allowBlock("curl-arg", "curl needs one https URL.");
+ 		for (const u of urls) {
++			if (localOk(u)) continue;
+ 			const m = /^https?:\/\/([^/:?#@\s]+)(?::\d+)?(?:[/?#]|$)/i.exec(u);
+ 			if (!m || /@/.test(u.split(/[/?#]/, 3).join("/"))) return allowBlock("curl-url", `curl ${u}: only plain http(s) URLs (no other schemes, no user@host).`);
+ 			const host = m[1].toLowerCase().replace(/\.$/, "");

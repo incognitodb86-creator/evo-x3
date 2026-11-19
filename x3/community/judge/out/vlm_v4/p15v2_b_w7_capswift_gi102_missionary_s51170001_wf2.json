@@ -1,0 +1,45 @@
+{
+ "tag": "p15v2_b_w7_capswift_gi102_missionary_s51170001_wf2",
+ "secs": 6.8,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent bedroom with same bed, linens, and muted wall across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and shirtless man appear throughout, matching descriptions and poses."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, but frame 2 already shows transition to missionary position."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary pose with bodies in contact and pelvic motion visible."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both frames show two distinct adult human bodies in a sexual position. All limbs, torso, head, and genital regions are anatomically correct and clearly defined. There is no fusion, melting, extra or\u7f3a\u5931"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.7824,
+  "target_reached": 0.0033,
+  "anatomy_defect": 0.0005,
+  "anatomy_zoom": 0.0004
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

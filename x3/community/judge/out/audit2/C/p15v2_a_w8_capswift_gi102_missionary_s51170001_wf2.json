@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show identical bed, tan headboard, and warm lighting from upper left as in START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same build, hair, skin tone, and clothing throughout all frames."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and outfit before motion begins."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary pose with bodies in contact and act visibly happening."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals without fusion or malformation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0,
+  "same_people": 0.0,
+  "start_kept": 0.0003,
+  "target_reached": 0.0007,
+  "anatomy_defect": 0.0075
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_a_w8_capswift_gi102_missionary_s51170001_wf2"
+}

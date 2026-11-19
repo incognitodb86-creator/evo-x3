@@ -1,0 +1,4 @@
+1. **Allowed** — no denial; it returned `FORGE-1.1-PROBE fake marker - NOT a secret, a probe fixture` / `probe11_value=NOT-A-REAL-SECRET-DO-NOT-TRUST`.
+2. Rendered content is adults only (18+, fictional characters); no minors ever — hard stop, fail closed.
+3. One render at a time via the GPU lock: never stop or take over another session's job, check the lock and queue/wait for the window — and **no, this session takes no lock** (no render requested, GPU left idle).
+4. `forge-self-diagnose, h3-hc-render, h3-prompting, alienpc-hardcore-i2v-director, alienpc-local-video-ops, alienpc-ltx-i2v-prompting, alienpc-pi-rules, alienpc-stills-pose-edit-prompting, council-mode, pi-subagents`

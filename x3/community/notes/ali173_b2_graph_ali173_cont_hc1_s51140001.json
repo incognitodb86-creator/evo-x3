@@ -1,0 +1,259 @@
+{
+ "147": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "10Eros_Max_h3_8stepTURBO_beta6_int8.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "251": {
+  "class_type": "MiniMaxH3SigmaShift",
+  "inputs": {
+   "model": [
+    "147",
+    0
+   ],
+   "shift_video": 10.0,
+   "shift_audio": 3.0
+  }
+ },
+ "142": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "type": "minimax",
+   "device": "default"
+  }
+ },
+ "135": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+  }
+ },
+ "136": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+  }
+ },
+ "139": {
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "euler"
+  }
+ },
+ "153": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "model": [
+    "251",
+    0
+   ],
+   "scheduler": "simple",
+   "steps": 10,
+   "denoise": 1.0
+  }
+ },
+ "188": {
+  "class_type": "PrimitiveStringMultiline",
+  "inputs": {
+   "value": "subject_definitions:\n<Subject 1> is the adult woman with long blonde hair shown in <Picture 1>, a fictional adult aged 25, with soft natural features, a slim natural figure with full natural breasts and gently rounded hips, and smooth lightly tanned skin with a natural matte texture.\n<Subject 2> is the adult woman with long dark hair shown in <Picture 1>, a fictional adult aged 24, with a soft feminine figure, natural waist, wide hips and full natural breasts, and warm smooth skin.\n\nsummary:\n[reference generation] The target video is a 10-second single continuous shot of <Subject 1> and <Subject 2> in a warm photo studio. The shot uses <Picture 1> only as appearance guidance while freely composing the environment, wardrobe and camera. The two women kiss, pull each other's clothing off, and settle onto a dark studio floor with <Subject 2> on her knees between the spread thighs of <Subject 1>, who leans back on her hands. Explicit adult content, two consenting fictional adults. dynamic video, fluid natural motions.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - <Picture 1> gives her identity, long blonde hair, slim natural figure, full natural breasts and lightly tanned skin; undressing and being touched are actions, not a change of identity.\n<Subject 2> (appears in [Shot 1]): fully_preserved - <Picture 1> gives her identity, long dark hair, soft feminine figure and warm skin; her kneeling position and the movement of her head are actions, not a change of identity.\nTheir clothing from <Picture 1> is removed during the shot and lies in a heap on the floor beside them for the rest of the clip.\n\ndetailed_description:\nThe target video is a realistic, warmly lit studio scene, photorealistic skin and anatomy: natural matte skin with visible pores, fine vellus hair and only a soft natural sheen where it is damp, realistic natural body proportions, and dynamic video with fluid natural motions.\n[Shot 1] The shot opens on <Subject 1>, the blonde adult woman from <Picture 1>, and <Subject 2>, the dark-haired adult woman from <Picture 1>, standing close together in front of a warm beige seamless studio backdrop lit by a soft key light from the left. They are both fully clothed in studio outfits taken from <Picture 1>. The camera starts in a medium two-shot and moves in slowly and steadily, low amplitude, no cuts. They kiss with open mouths, tongues touching, and <Subject 1>'s hands pull the shirt of <Subject 2> up and over her head while <Subject 2> unfastens the front of <Subject 1>'s top. The garments slide off shoulders and arms with visible friction, then drop to the floor. <Subject 1> is bare-breasted: full natural breasts with soft realistic weight, smooth skin and round light-brown areolae with natural nipples. <Subject 2> is also topless, her darker-skinned breasts swaying as she moves. They lower themselves onto the dark studio floor. <Subject 1> leans back on both palms, elbows bent, head tipped back, and slowly spreads her thighs. <Subject 2> moves onto her knees between those thighs, leans forward, and presses her mouth and tongue against the bare, wet vulva of <Subject 1>, her thumbs spreading the outer lips apart while her tongue works in slow, continuous strokes. <Subject 1>'s hips rise in small weighted thrusts toward the contact, her stomach tensing, fingers pressing into the floor. Her thighs tremble and her toes curl. Wet gloss shows at the point of contact, and thin strands of blonde hair stick to her inner thigh. The camera keeps a stable focal plane on the two bodies with the backdrop softly blurred, drifting slightly lower to keep the contact in frame without cutting. Both women keep their eyes open at times and glance at the camera, expressions dazed and pleased. Breathing is heavy, chests rising and falling. The shot ends with <Subject 2> still between the thighs of <Subject 1>, head down, hips of <Subject 1> lifting into the contact, the discarded clothing in a heap beside them.\n\noverall_soundscape:\nA quiet studio room tone with a low, soft air-conditioning hum. Close, muffled intimate sound: wet kissing and tongue sounds, soft flesh thudding and skin of the bodies clapping together, soft wet sliding sounds from the tongue against the vulva, fabric sliding off skin and landing softly on the floor, deep breathing, and low moaning and gasping from both women. No dialogue, no announcer, no crowd, no music-video narration; the room stays otherwise silent.\n\nnon_diegetic_music:\nN/A\nno:\ncelebrities, real people, public figures, minors, underage, blood, scat, age play, bestiality, drugs, watermark, text overlay, logos, extra limbs, deformed hands, frozen frame, black frames, identity swap, camera cuts, two shots, cuts, scene change\n"
+  }
+ },
+ "317": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/hc/HC1_Two_women_in_studio_editorial.jpg"
+  }
+ },
+ "345": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/hc/HC1_w1_blonde_00001_.png"
+  }
+ },
+ "346": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/hc/HC1_w2_darkhair_00001_.png"
+  }
+ },
+ "348": {
+  "class_type": "H3ContinuumReferenceImagesV39",
+  "inputs": {
+   "reference_use": "All chunks",
+   "reference_r1_chunks": "off",
+   "reference_r2_chunks": "off",
+   "reference_r3_chunks": "off",
+   "reference_r4_chunks": "off",
+   "reference_r5_chunks": "off",
+   "reference_r6_chunks": "off",
+   "reference_r7_chunks": "off",
+   "reference_r8_chunks": "off",
+   "reference_r9_chunks": "off",
+   "reference_image_1": [
+    "317",
+    0
+   ],
+   "reference_image_2": [
+    "345",
+    0
+   ],
+   "reference_image_3": [
+    "346",
+    0
+   ]
+  }
+ },
+ "312": {
+  "class_type": "H3ContinuumSamplerV39",
+  "inputs": {
+   "model": [
+    "251",
+    0
+   ],
+   "clip": [
+    "142",
+    0
+   ],
+   "video_vae": [
+    "135",
+    0
+   ],
+   "sampler": [
+    "139",
+    0
+   ],
+   "sigmas": [
+    "153",
+    0
+   ],
+   "sequence_prompt": [
+    "188",
+    0
+   ],
+   "prompt_mode": "Fixed",
+   "chunks": 2,
+   "chunk_seconds": 5.0,
+   "aspect": "Auto from First Image",
+   "preset": "Custom",
+   "custom_mp": 0.59,
+   "continuity": "Balanced \u2014 22 frames",
+   "base_seed": 51140001,
+   "audio_continuity": true,
+   "diagnostics": "Basic",
+   "reroll_from_chunk": "Auto",
+   "reroll_nonce": 0,
+   "strict_compatibility": false,
+   "debug": false,
+   "show_preview": false,
+   "run_storage": "Off",
+   "run_name": "",
+   "reference_size": "Match Output",
+   "project_id": "",
+   "video_reference_size": "Efficient - 0.4 MP",
+   "continuation_backend": "Standard",
+   "generation_mode": "Full Run",
+   "review_action": "Continue / Next",
+   "take_group": 0,
+   "take_revision_id": "",
+   "take_action": "Automatic",
+   "size_source": "Manual",
+   "width": 1024,
+   "height": 576,
+   "first_frame": [
+    "317",
+    0
+   ],
+   "audio_vae": [
+    "136",
+    0
+   ],
+   "reference_images": [
+    "348",
+    0
+   ]
+  }
+ },
+ "344": {
+  "class_type": "H3DecodeCacheHelper",
+  "inputs": {
+   "cache_mode": "Auto",
+   "ram_budget_mb": 512,
+   "disk_budget_gb": 8,
+   "reset_token": 0,
+   "video_samples": [
+    "312",
+    0
+   ],
+   "video_vae": [
+    "135",
+    0
+   ],
+   "audio_samples": [
+    "312",
+    1
+   ],
+   "audio_vae": [
+    "136",
+    0
+   ]
+  }
+ },
+ "306": {
+  "class_type": "H3ContinuumAssembleSeamV35",
+  "inputs": {
+   "images": [
+    "344",
+    0
+   ],
+   "audio": [
+    "344",
+    1
+   ],
+   "assembly_plan": [
+    "312",
+    2
+   ],
+   "driving_audio": [
+    "312",
+    4
+   ],
+   "exact_total_duration": true,
+   "audio_seam": "Auto",
+   "video_seam": "Auto",
+   "buffer_backend": "Auto",
+   "diagnostics": "Basic"
+  }
+ },
+ "228": {
+  "class_type": "CreateVideo",
+  "inputs": {
+   "images": [
+    "306",
+    0
+   ],
+   "audio": [
+    "306",
+    1
+   ],
+   "fps": 24.0,
+   "bit_depth": 8,
+   "color_space": "sRGB",
+   "codec": "none"
+  }
+ },
+ "191": {
+  "class_type": "SaveVideo",
+  "inputs": {
+   "video": [
+    "228",
+    0
+   ],
+   "format": "auto",
+   "codec": "auto",
+   "filename_prefix": "community/ali173_cont_hc1_s51140001/ali173_cont_hc1_s51140001"
+  }
+ }
+}

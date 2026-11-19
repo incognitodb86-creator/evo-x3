@@ -1,0 +1,40 @@
+{
+ "tag": "p15v2_b_w8_capswift_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 19.0,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The dark cave wall background and lighting remain consistent across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters maintain their distinct appearances, clothing, and physical traits throughout the sequence."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches the pose, framing, and composition of the start image perfectly."
+  },
+  "target_reached": {
+   "answer": "no",
+   "reason": "The final frame shows a frontal embrace with hands on chest, not the rear-entry position described in the target prompt."
+  },
+  "anatomy_defect": {
+   "answer": "yes",
+   "reason": "In Image 3, the green humanoid's right hand is fused into the woman's hip/thigh area, lacking clear separation."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0216,
+  "same_people": 0.0206,
+  "start_kept": 0.021,
+  "target_reached": 0.3122,
+  "anatomy_defect": 0.184
+ },
+ "flags": [
+  "target_reached",
+  "anatomy_defect"
+ ]
+}

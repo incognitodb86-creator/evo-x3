@@ -1,0 +1,53 @@
+{
+ "frames": [
+  217,
+  316
+ ],
+ "diffs": [
+  7.82,
+  7.84
+ ],
+ "per_frame": [
+  {
+   "frame": 217,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background elements, including the bed linens, headboard, and lighting conditions, remain consistent between both images."
+    },
+    "anatomy_defect": {
+     "answer": "no",
+     "reason": "The anatomy of both figures appears structurally sound with no visible malformations, extra limbs, or fused body parts."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0358,
+    "anatomy_defect": 0.6331
+   },
+   "finish": "stop",
+   "parse": "direct"
+  },
+  {
+   "frame": 316,
+   "answers": {
+    "same_scene": {
+     "answer": "yes",
+     "reason": "The background, lighting, and bed linens remain consistent between the two frames."
+    },
+    "anatomy_defect": {
+     "answer": "yes",
+     "reason": "In Image 2, the man's hand gripping the woman's leg is malformed, with fingers blending into her skin."
+    }
+   },
+   "p_defect": {
+    "same_scene": 0.0672,
+    "anatomy_defect": 0.8663
+   },
+   "finish": "stop",
+   "parse": "direct"
+  }
+ ],
+ "tag": "p15v2_b_w7_img_gi102_missionary_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 27.1
+}

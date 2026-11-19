@@ -1,0 +1,43 @@
+{
+ "tag": "p15v2_b_w2_capjoy_gi102_missionary_s51170001_wf2",
+ "secs": 6.4,
+ "finish": [
+  "stop",
+  "stop"
+ ],
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background remains consistent: white sheets, greyish wall, same lighting and depth of field across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same blonde woman and man appear throughout; no replacements or body type changes detected."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and clothing exactly without jump cuts or repositioning."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 shows clear missionary pose with full body contact and intimate action as described."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed anatomy visible in any frame or final image."
+  },
+  "anatomy_zoom": {
+   "answer": "no",
+   "reason": "Both bodies are anatomically correct and clearly defined. No fusion defects, shapeless flesh blobs, extra or missing limbs, or malformed genitals are visible. The limbs, hands, feet, and genitalia are"
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0024,
+  "same_people": 0.0687,
+  "start_kept": 0.2707,
+  "target_reached": 0.0975,
+  "anatomy_defect": 0.0029,
+  "anatomy_zoom": 0.0011
+ },
+ "flags": []
+}

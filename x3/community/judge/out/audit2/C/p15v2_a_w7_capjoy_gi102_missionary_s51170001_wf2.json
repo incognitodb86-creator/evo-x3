@@ -1,0 +1,36 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "All frames show same bed, beige headboard, and neutral wall background as START IMAGE."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Both characters retain same faces, hair, skin tone, and body types across all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows woman on all fours, not supine as in START IMAGE; pose changes immediately."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Frame 8 shows woman supine, man kneeling between her legs in missionary pose with clear contact."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "All frames show intact limbs, hands, and genitals without fusion or missing parts."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0043,
+  "same_people": 0.0013,
+  "start_kept": 0.9476,
+  "target_reached": 0.0043,
+  "anatomy_defect": 0.0711
+ },
+ "finish": "stop",
+ "flags": [
+  "start_kept"
+ ],
+ "tag": "p15v2_a_w7_capjoy_gi102_missionary_s51170001_wf2"
+}

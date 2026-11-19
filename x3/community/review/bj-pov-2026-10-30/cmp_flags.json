@@ -1,0 +1,80 @@
+{
+ "bjpov_b1": {
+  "precheck_flags": [
+   "jump"
+  ],
+  "dino_prev_min": 0.6333,
+  "dino_start_last": 0.2734,
+  "cuts_adaptive": 0,
+  "cuts_content": 0,
+  "vlm_flags": [
+   "start_kept"
+  ],
+  "vlm_answers": {
+   "same_scene": "yes",
+   "same_people": "yes",
+   "start_kept": "no",
+   "target_reached": "yes",
+   "anatomy_defect": "no"
+  },
+  "vlm_reasons": {
+   "same_scene": "Background remains pale wall and grey carpet, matching START IMAGE across all frames.",
+   "same_people": "Man's body, jeans, boxers, hand pose match START IMAGE; woman's hair, face, clothing consistent.",
+   "start_kept": "Frame 1 shows woman entering frame, not same pose as START IMAGE which shows only man.",
+   "target_reached": "Image 3 shows woman's mouth fully on shaft with deep oral contact, matching TARGET POSE.",
+   "anatomy_defect": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  }
+ },
+ "bjpov_b4": {
+  "precheck_flags": [
+   "jump"
+  ],
+  "dino_prev_min": 0.6518,
+  "dino_start_last": 0.2545,
+  "cuts_adaptive": 0,
+  "cuts_content": 0,
+  "vlm_flags": [
+   "start_kept"
+  ],
+  "vlm_answers": {
+   "same_scene": "yes",
+   "same_people": "yes",
+   "start_kept": "no",
+   "target_reached": "yes",
+   "anatomy_defect": "no"
+  },
+  "vlm_reasons": {
+   "same_scene": "Background remains warm wooden interior with consistent lighting and fixtures across all frames.",
+   "same_people": "Same woman with identical hair, face, body, and clothing visible in all frames.",
+   "start_kept": "Frame 1 shows upright pose; frames 2-8 show progressive bending and oral action, not direct continuation.",
+   "target_reached": "Last frame shows woman's mouth on penis with deep oral contact, face large and readable in upper frame.",
+   "anatomy_defect": "No malformed genitals, extra limbs, or melted bodies visible in any frame or final image."
+  }
+ },
+ "bjpov_b5_lora": {
+  "precheck_flags": [
+   "jump"
+  ],
+  "dino_prev_min": 0.6231,
+  "dino_start_last": 0.1957,
+  "cuts_adaptive": 0,
+  "cuts_content": 0,
+  "vlm_flags": [
+   "start_kept"
+  ],
+  "vlm_answers": {
+   "same_scene": "yes",
+   "same_people": "yes",
+   "start_kept": "no",
+   "target_reached": "yes",
+   "anatomy_defect": "no"
+  },
+  "vlm_reasons": {
+   "same_scene": "Background remains pale wall and grey carpet, matching START IMAGE across all frames.",
+   "same_people": "Man's body, jeans, boxers, hand pose identical; woman's hair, face, clothing consistent with reference images.",
+   "start_kept": "Frame 1 shows only the man's erect penis; woman enters frame in frame 5, not continuing from START IMAGE.",
+   "target_reached": "Image 3 shows woman's mouth fully engulfing penis with deep oral contact, matching TARGET POSE.",
+   "anatomy_defect": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  }
+ }
+}

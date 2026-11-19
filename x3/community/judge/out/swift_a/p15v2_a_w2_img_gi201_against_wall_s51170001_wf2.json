@@ -1,0 +1,39 @@
+{
+ "tag": "p15v2_a_w2_img_gi201_against_wall_s51170001_wf2",
+ "model": "coding_swift15_iq3s_esp",
+ "secs": 18.9,
+ "finish": "stop",
+ "parse": "direct",
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "The cave background and lighting remain consistent throughout the frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "The characters maintain their identity, clothing, and physical traits across all frames."
+  },
+  "start_kept": {
+   "answer": "no",
+   "reason": "Frame 1 shows the man's hands on her hips, whereas the start image has his hand raised near her head."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Image 3 depicts the characters in the specified standing rear-entry pose against the wall."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No significant anatomical defects, fusion issues, or malformed limbs are visible in the frames."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0228,
+  "same_people": 0.1282,
+  "start_kept": 0.4041,
+  "target_reached": 0.063,
+  "anatomy_defect": 0.5004
+ },
+ "flags": [
+  "start_kept"
+ ]
+}

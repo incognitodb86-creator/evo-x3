@@ -1,0 +1,34 @@
+{
+ "answers": {
+  "same_scene": {
+   "answer": "yes",
+   "reason": "Background cave texture and lighting match START IMAGE across all frames."
+  },
+  "same_people": {
+   "answer": "yes",
+   "reason": "Same elf woman and orc appear in all frames with identical features and attire."
+  },
+  "start_kept": {
+   "answer": "yes",
+   "reason": "Frame 1 matches START IMAGE pose, framing, and composition exactly."
+  },
+  "target_reached": {
+   "answer": "yes",
+   "reason": "Last frame shows bodies in target pose with clear genital contact and thrusting motion."
+  },
+  "anatomy_defect": {
+   "answer": "no",
+   "reason": "No fused bodies, missing limbs, or malformed genitals visible in any frame or Image 3."
+  }
+ },
+ "p_defect": {
+  "same_scene": 0.0001,
+  "same_people": 0.0,
+  "start_kept": 0.0033,
+  "target_reached": 0.3496,
+  "anatomy_defect": 0.0081
+ },
+ "finish": "stop",
+ "flags": [],
+ "tag": "p15v2_b_w7_img_gi201_against_wall_s51170001_wf2"
+}

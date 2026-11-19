@@ -1,0 +1,39 @@
+# AGENTS.md - Forge rules for C:/Users/derek/5slock (Ralph's cwd). Derek-approved 2026-10-20 (forgesafe). Keep it under 40 lines.
+
+## Shell: your bash tool is Git Bash on Windows
+- One command per tool call. Never chain or pipe: no ; && || | and no > or >> redirects, no $(...) or backticks. They are denied and waste a turn.
+- Use forward slashes (C:/AI/community/scripts/comm.py) and quote paths that contain spaces.
+- Prefer the read / grep / find / ls tools over shell commands for reading and searching.
+
+## Check commands (one call each)
+- Python syntax: python -m py_compile C:/AI/community/scripts/<file>.py
+- JSON: python -m json.tool C:/AI/community/shots/<file>.json
+- Video duration: "C:/Users/derek/AppData/Local/Microsoft/Winget/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.0.1-full_build/bin/ffprobe.exe" -v error -show_entries format=duration -of csv=p=0 <file.mp4>
+
+## The GPU is off-limits
+- Never call llama-swap (127.0.0.1:8080), /upstream/*, /load, /unload, ComfyUI (:8188, :8189, :1000x) or Strata. One request unloads you and kills a running render.
+- Never run render scripts (p3-p6*.py, batch_queue.py, sy_1min.py, p6_variants.ps1, p6_rerun.ps1, chain.ps1). Compile-check them only.
+- Hard guards block these. Do not retry or work around a block; note it in your result (or BLOCKED + STOP_RALPH).
+
+## Scope
+- Only edit files named in your task.
+- Never edit ComfyUI/user, live workflows (*.app.json), llama-swap.yaml, Strata or Pi config, ralph.ps1, chain.ps1, PROMPT.md, or anything in C:/Apps.
+- Git checkpoints handle backups: the harness commits before and after every iteration, so no .bak copies are needed. Do not run git commit / checkout / reset yourself.
+- After each iteration the harness runs the checks above on changed files and restores out-of-scope edits.
+
+## Content
+- Adults only: every character is a fictional adult aged 21+ (canon: C:/Users/derek/5slock/plans/canon/fiction-cond-lock.md). Nothing involving minors, ever.
+
+## Keep this file useful
+- When you learn the right command for something (a check, a path, a flag), update the command notes above in one short line.
+- No status or progress notes here; those go in TASKS.md or C:/AI/community/notes/.
+
+## Learnings (ALI-160, Huntley Ralph pattern; one short operational line each, max 15 lines; Max prunes at review)
+- When you learn something new about how to run or check this work, add one short line here. No changelog, no status.
+- ALI-147 graph arms: request.api.json must be a byte-identical copy of that arm's submitted_graph.pretty.json (check: cmp -s <file> <file>.pretty.json, silent = identical); one job per p7\JOB_REQUEST.json.
+- Byte-identical copy (cp and python -c with ; are permission-denied): python -c "open(r'<dst>','wb').write(open(r'<src>','rb').read())"
+- ALI-147 PROOF frame count: verify objective.json with ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets,r_frame_rate,width,height -of csv=p=0 <file.mp4>
+- ALI-147 PROOF sha256 of an output mp4: certutil.exe -hashfile <path> SHA256; byte-compare graphs with plain `cmp a b` (no output = identical) because `cmp -s ... && echo` is denied by the *&&* rule
+- ALI-147 DIP: dip_join.py concat + `-r 24` gives 1444 packets (not 1443) -> result.json ok=false / "DIP end FAIL"; confirm with ffprobe -count_packets; a kind=dip job gets no harness redo, so it is BLOCKED for Derrick. Prove a job ran by mtimes: if result.json/dip.log/the mp4s keep their old timestamps, the written JOB_REQUEST.json was consumed with no run
+- ALI-147 DIP: a dip request is only {"jobs":[{"id":"ali147_pool_dip_s51080000","kind":"dip"}]} (dip_join.py reads BASE seg1..3, writes dip.log + ffmpeg_cmd.txt); patched by DIP_FIX 0f03d9a - build() ends with -frames:v sum(probed seg frames)=1443, no -r 24; py_compile it read-only before re-requesting kind=dip
+- ALI-147 DIP_FIX: a task that names C:/AI/community/scripts/*.py is out of Forge scope (PROMPT.md "Never edit ... scripts" + the write list) - mark [!] + BLOCKED, give the exact patch in C:/AI/community/notes/, never git commit, no dip re-request
