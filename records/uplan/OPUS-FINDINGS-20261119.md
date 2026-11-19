@@ -99,13 +99,13 @@ Sources: live copies on `mono` `df79048` (X3 snapshot 4:29 PM CT, AlienPc refres
 | B3 | AlienPc `settings.json` has the same key twice (`llama-swap/coding_swift15_iq3s_esp` in `compaction.modelOverrides`), left by the ESP rename in `0ac71cf` | JSON duplicate-key scan | **Fixed in this commit** in the proposed AGT1 copy (kept the last one, which is the value JSON already uses). |
 | B4 | Gufo returns HTTP 400 when a request has top-level `reasoning_effort` and `enable_thinking: false` (by design, [gufo openai_chat.cpp](https://github.com/gufo-org/gufo)). llama-swap `setParamsByID` adds `reasoning_effort: low` to `flash-next-uncensored-v2-sub` / `flash-next-uncensored-sub`. | live `llama-swap.yaml` | Any caller that asks for a `-sub` name with thinking off gets a 400. Today pi subagents keep thinking low, so it does not fire. If it ever shows: send `reasoning_effort: "none"`, or put the effort inside `chat_template_kwargs`. |
 | B5 | Hermes sets reasoning effort twice: `model.reasoning_effort: low` and `agent.reasoning_effort: medium` | live Hermes `config.yaml` | Max: check which one Hermes sends (`hermes config get`) and delete the other. |
-| B6 | `qwen27b` is still a pi model and in the exclusive `main` group with no `halogen-only` pin, so picking it in pi unloads Gufo (Hermes + writer down, ttl 1800 s) | live `llama-swap.yaml`, pi `models.json.example` | Pin it like the others, or drop it from pi's model list. Derrick's call (Q card below). |
+| B6 | `qwen27b` is still a pi model and in the exclusive `main` group with no `halogen-only` pin, so picking it in pi unloads Gufo (Hermes + writer down, ttl 1800 s) | live `llama-swap.yaml`, pi `models.json.example` | **Done 2026-11-19 5:42 PM CT:** pinned `qwen27b: flash-next-uncensored-v2` in `halogen-only` (Derrick picked pin, t2906s10193). |
 | B7 | Gufo runs `--sessions 2` while llama-swap allows `concurrencyLimit: 4`; Hermes, the writer, Forge/Ralph and pi-job's X3 fallback all share 2 sessions | live `llama-swap.yaml` | Writer calls can wait behind a Ralph loop (writer timeout 900 s). Note only; measure before changing. The slot's comments still describe Halogen KV pools: stale. |
 | B8 | The production writer/Hermes model loads from `/srv/bakeoff/...@cbc7fba/` | live `llama-swap.yaml` | Kept by the P2.2 manifest, so safe today. Move it to `/srv/models/` in a quiet window so a future bakeoff cleanup can't take it. |
 
 **Proposed, needs Derrick's yes (Q cards):**
-- **Q-W1c:** after W1b has a `RESULT.md`, run the live writer (Gufo `flash-next-uncensored-v2`, already the uncensored build) the official way, as 2 extra arms on the same 12 cases: (a) Qwen non-thinking 0.7 / 0.80 / 20 / 0 / presence 1.5; (b) thinking on, effort xhigh, 1.0 / 0.95 / 20 (slow). Compare with today's `Q`. Only `config.yaml` copies change; no model downloads.
-- **Q-B6:** pin `qwen27b` to Gufo in `halogen-only` (or remove it from pi)?
+- **Q-W1c:** DROPPED (Derrick t2904u): no more writer model testing; focus on making Ref2VA work. (t2905u: after Q4 passes Prompt maker's bar, test Q5 under the same settings.)
+- **Q-B6:** DONE (Derrick t2906s10193, 2026-11-19 5:38 PM CT): pin `qwen27b` to Gufo in `halogen-only`. Live pin `qwen27b: flash-next-uncensored-v2`; not removed from pi.
 
 ## beta7_validate gap 2026-11-19 evening
 
@@ -119,7 +119,7 @@ Checked against live X3 writer `config.yaml` and `/etc/evo-x3/llama-swap.yaml`, 
 |---|---|---|
 | S1 | correct | Live and repo writer `sampler_arm: Q` is 0.85 / 0.90 / 20 / min_p 0 / presence 0.5, labelled "Qwen3.8-Flash-Next card preset". Not changed live. |
 | S2 | correct | W1 brief step 3 still says temp 0.7-1.0, top_p 0.95, top_k 20 for the "Qwen native non-thinking" arm. |
-| S3 | correct | Live writer `thinking: false`. Official-way writer arms remain the open Q-W1c card. |
+| S3 | correct | Live writer `thinking: false`. Official-way writer arms (Q-W1c) were dropped (t2904u). |
 | S4 | correct | Live Gufo `flash-next-uncensored-v2` is 1.0 / 0.95 / 20, `--reasoning-effort medium`, `--reasoning-budget 8192`. |
 | S5 | correct (superseded in the client) | Live Q4 slot comment still says per-request 0.7 / 0.8 / 20, `max_tokens` 16384, thinking on, xhigh, `--ctx-size 32768`. Later t2884u/t2887u client runs use thinking off and `max_tokens` 3000. |
 | S6 | correct | Live `gemma4-heretic` is 1.0 / 0.95 / 64; `halogen-only` pins it to Gufo. |
@@ -134,7 +134,7 @@ Checked against live X3 writer `config.yaml` and `/etc/evo-x3/llama-swap.yaml`, 
 | B3 | correct | The proposed AGT1 repo `settings.json` has one `llama-swap/coding_swift15_iq3s_esp` override key. Live AlienPc `settings.json` still has that key twice. Repo copy was not overwritten. |
 | B4 | yaml correct; 400 not re-tested | Live `setParamsByID` still adds `reasoning_effort: low` on `flash-next-uncensored-v2-sub` and `flash-next-uncensored-sub`. The Gufo HTTP 400 was not reproduced (would hit the writer slot during W1b). |
 | B5 | partly right | Live Hermes has `model.reasoning_effort: low` and `agent.reasoning_effort: medium`, and also `auxiliary.vision.reasoning_effort: low`. |
-| B6 | correct | `qwen27b` is in exclusive group `main` and is not in `halogen-only` pins ("qwen27b left alone"). It is still in pi `models.json.example`. |
+| B6 | correct | Was unpinned at audit time. **Applied 2026-11-19 5:42 PM CT:** `qwen27b` is now in `halogen-only` pins (`flash-next-uncensored-v2`). Still listed in pi `models.json.example`. |
 | B7 | correct | Live Gufo slot has `--sessions 2` and `concurrencyLimit: 4`. |
 | B8 | correct | Live writer/Hermes weights path is `/srv/bakeoff/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF@cbc7fba/`. |
 

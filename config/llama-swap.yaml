@@ -365,7 +365,9 @@ models:
 # 2026-11-17 09:45 CT (Derrick t76 approval): keep flash-next-uncensored from being swapped out.
 # hooks.on_startup.preload loads Halogen FIRST on every llama-swap start (before ref2va/embed can fill RAM);
 # profile halogen-only pins the old main-group names to the resident Halogen slot so a stray request
-# for gemma4-heretic / flash-next no longer evicts it. qwen27b left alone. Backup: llama-swap.yaml.bak-20261117-094500-pre-preload-pins
+# for gemma4-heretic / flash-next / qwen27b no longer evicts it.
+# qwen27b pinned to flash-next-uncensored-v2 (Q-B6, Derrick t2906s10193, 2026-11-19 5:38 PM CT).
+# Backup: llama-swap.yaml.bak-20261117-094500-pre-preload-pins; pre-Q-B6: /etc/evo-x3/_archive/llama-swap.yaml-20261119-preQB6
 hooks:
   on_startup:
     preload:
@@ -381,3 +383,4 @@ profiles:
       gemma4-heretic-sub: flash-next-uncensored-v2
       flash-next: flash-next-uncensored-v2
       flash-next-sub: flash-next-uncensored-v2
+      qwen27b: flash-next-uncensored-v2
