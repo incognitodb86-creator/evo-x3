@@ -13,7 +13,7 @@ Use for any FLUX.2 Klein / Miraclein 4.5 still or H3Max start-still. Defer video
 
 | Mode | Template / Candidate | Prompt Topology |
 |---|---|---|
-| T2I (Miraclein 4.5) | `flux_stills_t2i_klein.candidate.api.json` (M4 candidate) | Pure prose; never mention `"image 1"` |
+| T2I (Miraclein 4.5 / Klein base) | M4 `miraclein_*` candidates (`Miraclein_4.5_9b_NVFP4`); `flux_stills_t2i_klein.candidate.api.json` still loads `flux-2-klein-9b-kv-fp8` (ST4 base) | Pure prose; never mention `"image 1"` |
 | Klein9 RefMod / LoRA | M4 Miraclein 4.5 RefMod / `loras/klein9/` candidates | Pure prose; never mention `"image 1"`; light facial detail at retention >= 0.7 |
 | Single-change edit | M4 ReferenceLatent edit candidate (or locked S2) | Lead with `"image 1"` + ONE changing axis; keep-locked clause last |
 | RefControl pose / layout | `flux_stills_pose_klein.candidate.api.json`, `flux_stills_layout_klein.candidate.api.json` (`refcontrol_v2_poses`) | Open with exact trigger `"apply pose from image 1 with reference from image 2"` |
@@ -88,7 +88,7 @@ Assemble the paragraph in this exact priority order:
 
 - Order subjects left-to-right in the frame and introduce **both** adults in one comma-linked opening clause **before the first period** to prevent Klein 9B second-subject identity drop-off.
 - Name each person by frame position plus one clear trait (`"the dark-haired woman on the right"`), never `"the woman"` alone.
-- Seated or multi-person poses require 8–12 steps in the template (4-step scouts cause anatomy errors).
+- Templates for seated or multi-person stills use 8–12 steps; ask for that template (4-step scouts cause anatomy errors).
 
 ## H3Max Start-Still Readiness
 
@@ -104,7 +104,7 @@ Assemble the paragraph in this exact priority order:
    > An adult woman in her mid-twenties sits cross-legged on a linen sofa, weight pressed into the cushions with her hips tilted slightly left. Her torso leans forward, palms braced on the seat beside her knees, hair draping over her collarbones. She wears an open cream shirt and cotton briefs. Warm tungsten light from a right-side floor lamp fills the room. Full-body three-quarter view at waist height, Fujifilm X-T5, 35mm f/1.8.
 
 3. **ReferenceLatent Single-Change Edit (`pose` axis):**
-   > Show the adult woman from image 1 kneeling on a quilted mattress, weight settled on her heels with her torso angled forward and both palms braced flat on the cotton sheets. Her hair hangs downward over her shoulders, mattress compressing under her shins. Warm bedside lamp light enters from the right. Side-profile full-body shot at bed level, 50mm lens at f/2.0. Keep her face, hair, wardrobe, and bedroom from image 1.
+   > Show the adult woman from image 1 kneeling on the quilted mattress, weight settled onto her heels with her torso angled slightly forward, elbows soft, and both palms braced flat on the rumpled cotton sheets ahead of her knees. Her hair hangs downward over her shoulders while the mattress compresses evenly beneath her shins and knees. Keep her face, hairstyle, wardrobe, bedroom setting, lighting, and camera angle from image 1.
 
 4. **RefControl Pose (`refcontrol_v2_poses.safetensors`, two subjects):**
    > Apply pose from image 1 with reference from image 2 for the adult woman in her late twenties on the left and the adult man in his thirties on the right beside a wooden counter. Her weight rests on her left hip, right forearm pressed flat on the counter, wearing her olive cotton tank and jeans from image 2. Cool window daylight enters from the left. Medium-full shot at chest height, 50mm lens at f/2.0.
