@@ -73,7 +73,7 @@ fi
 #    files, not only when NEW>0, so timed-out batches retry on the next 2-min pass; detached transient user unit
 #    survives oneshot exit; fixed unit name acts as lock: if pixl-import is active or exists, skip).
 if [ "$DRY" != 1 ] && [ -f "$IMPORT_PY" ] && [ -d "$INBOX" ]; then
-  if [ "$NEW" -gt 0 ] || [ -n "$(find "$INBOX" -maxdepth 1 -type f ! -name '.*' -print -quit 2>/dev/null || true)" ]; then
+  if [ "$NEW" -gt 0 ] || [ -n "$(find "$INBOX" -maxdepth 1 -type f ! -name '.*' \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mov' \) -print -quit 2>/dev/null || true)" ]; then
     if ! systemctl --user is-active --quiet pixl-import.service 2>/dev/null; then
       systemd-run --user --unit=pixl-import --collect \
         --description="PixlStash inbox import" \

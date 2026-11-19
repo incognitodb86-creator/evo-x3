@@ -47,7 +47,8 @@ import wp_lint  # noqa: E402
 import wp_state  # noqa: E402
 from wp_llm import Client, WriterDown  # noqa: E402
 
-_AI_ROOT = Path(__file__).resolve().parents[3]
+# AI root (/home/evo/AI). Not resolve(): after the mono switchover the part folders are symlinks into the mono clone (S1b).
+_AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdir("/home/evo/AI") else Path(__file__).resolve().parents[3]))
 PIPE_DIR = Path(os.environ.get("WP_HOME", str(_AI_ROOT / "render" / "writer_pipeline")))
 CONFIG_PATH = PIPE_DIR / "config.yaml"
 RUNS_ROOT = _AI_ROOT / "community" / "runs"
@@ -2005,6 +2006,10 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             dd_only = re.sub(r"(?im)^\s*(?:overall_soundscape|non_diegetic_music)\s*:\s*", "", t).strip()
             return assemble_output(dd_only, card, slots, bodies, kind), dd_only
 
+        # pi-job recompile re-lints an edited prompt with this same context (code review N3)
+        wp_state.atomic_write(run_dir / "lint_ctx.json", json.dumps(
+            lint_ctx, indent=2, ensure_ascii=False,
+            default=lambda o: sorted(o) if isinstance(o, (set, frozenset)) else str(o)))
         # 4 prose x N (verbatim writer output; no clean_prose/normalize_prose rewriting)
         n = int(job.get("n_candidates") or cfg.get("n_candidates", 1))
         cands: Dict[str, Dict[str, Any]] = {}

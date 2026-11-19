@@ -3,10 +3,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import os
+# AI root (/home/evo/AI). Not resolve(): after the mono switchover the part folders are symlinks into the mono clone (S1b).
+_AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdir("/home/evo/AI") else Path(__file__).resolve().parents[3]))
 
 H3_FPS = 24
 LEGAL = (56, 73, 90, 107, 124, 141, 158, 175, 192, 209, 226, 243)
-STILL = str(Path(__file__).resolve().parents[3] / "render" / "stills" / "approved_characters" / "BEDROOM01" / "01_BEDROOM_LINGERIE.jpg")
+STILL = str(_AI_ROOT / "render" / "stills" / "approved_characters" / "BEDROOM01" / "01_BEDROOM_LINGERIE.jpg")
 SURFACE = "the bed"
 GENRE = "hardcore pro"
 TARGET_MIN, TARGET_MAX = 285.0, 315.0

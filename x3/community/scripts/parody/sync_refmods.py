@@ -7,6 +7,9 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import os
+# AI root (/home/evo/AI). Not resolve(): after the mono switchover the part folders are symlinks into the mono clone (S1b).
+_AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdir("/home/evo/AI") else Path(__file__).resolve().parents[3]))
 import re
 import sys
 from typing import Any, Dict, List, Optional
@@ -160,7 +163,7 @@ def main() -> int:
     """CLI entrypoint for sync_refmods."""
     parser = argparse.ArgumentParser(description="Sync H3 RefMods from HuggingFace")
     parser.add_argument("names", nargs="+", help="Identity names to sync")
-    parser.add_argument("--target-dir", default=str(Path(__file__).resolve().parents[3] / "comfy-alienpc" / "models" / "refmods"), help="Destination folder")
+    parser.add_argument("--target-dir", default=str(_AI_ROOT / "comfy-alienpc" / "models" / "refmods"), help="Destination folder")
     parser.add_argument("--dry-run", action="store_true", help="Report missing without downloading")
     args = parser.parse_args()
 

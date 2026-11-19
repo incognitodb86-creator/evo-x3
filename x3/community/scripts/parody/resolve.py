@@ -8,17 +8,20 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import os
+# AI root (/home/evo/AI). Not resolve(): after the mono switchover the part folders are symlinks into the mono clone (S1b).
+_AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdir("/home/evo/AI") else Path(__file__).resolve().parents[3]))
 import re
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-DEFAULT_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "5slock" / "approved_characters"
-RENDER_APPROVED_STILLS_DIR = Path(__file__).resolve().parents[3] / "render" / "stills" / "approved_characters"
+DEFAULT_APPROVED_STILLS_DIR = _AI_ROOT / "5slock" / "approved_characters"
+RENDER_APPROVED_STILLS_DIR = _AI_ROOT / "render" / "stills" / "approved_characters"
 _HOME_RENDER_APPROVED_STILLS_DIR = Path("~/AI/render/stills/approved_characters").expanduser()
 KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
 NAS_APPROVED_STILLS_DIR = Path(r"\\NAS4CBE37.local\home\AlienPc-approved\approved_characters")
 # PixlStash vault.db lives in 5slock/libraries and every picture file_path is relative to it.
-PIXLSTASH_IMAGES_DIR = Path(__file__).resolve().parents[3] / "5slock" / "libraries"
-GROK_FLOW_LIBRARIES_DIR = Path(__file__).resolve().parents[3] / "5slock" / "libraries"
+PIXLSTASH_IMAGES_DIR = _AI_ROOT / "5slock" / "libraries"
+GROK_FLOW_LIBRARIES_DIR = _AI_ROOT / "5slock" / "libraries"
 APPROVED_IMAGE_POOLS: Tuple[Path, ...] = tuple(
     dict.fromkeys((
         DEFAULT_APPROVED_STILLS_DIR,

@@ -497,8 +497,9 @@ def test_contact_regex_and_prompt_compiler_77_rules():
         assert br._CONTACT_RE.search(phrase), phrase
 
     wt_render = os.environ.get("RALPH_FORGE_WORKTREE")
-    sibling_render = Path(__file__).resolve().parents[3] / "render" / "AGENTS.md"
-    sibling_x3_render = Path(__file__).resolve().parents[3] / "x3-render" / "AGENTS.md"
+    import writer_sys as _ws
+    sibling_render = _ws._AI_ROOT / "render" / "AGENTS.md"
+    sibling_x3_render = _ws._AI_ROOT / "x3-render" / "AGENTS.md"
     if wt_render and (Path(wt_render) / "AGENTS.md").is_file():
         agents_path = Path(wt_render) / "AGENTS.md"
     elif Path(r"/home/evo/AI/render/AGENTS.md").is_file():

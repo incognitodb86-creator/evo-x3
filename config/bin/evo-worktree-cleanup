@@ -34,6 +34,12 @@ while IFS= read -r wt; do
     continue
   fi
 
+  # N2: keep a detached HEAD whose commits are on no branch (removing it would let gc drop them).
+  if ! git -C "$wt" symbolic-ref -q HEAD >/dev/null 2>&1 && [ -z "$(git -C "$wt" for-each-ref --contains HEAD refs/heads 2>/dev/null)" ]; then
+    echo "=== SKIP detached HEAD with commits on no branch: $wt ($(git -C "$wt" rev-parse --short HEAD 2>/dev/null)) ===" >> "$REPORT"
+    continue
+  fi
+
   # Judge staleness from the newest commit time and newest file mtime inside the worktree.
   commit_ts="$(git -C "$wt" log -1 --format=%ct 2>/dev/null || echo 0)"
   file_ts="$(find "$wt" -path "$wt/.git" -prune -o -printf '%T@\n' 2>/dev/null | awk 'BEGIN{m=0} {v=int($1); if(v>m) m=v} END{print m}')"
@@ -48,7 +54,8 @@ while IFS= read -r wt; do
   COUNT=$((COUNT + 1))
   {
     echo "=== stale clean worktree: $wt (newest_ts=$newest_ts) ==="
-    git -C "$wt" status --short 2>&1 || true
+    # --ignored: `worktree remove` also deletes ignored files, so list them in the report first (N2).
+    git -C "$wt" status --short --ignored 2>&1 || true
     echo "--- diff HEAD ---"
     git -C "$wt" diff HEAD 2>&1 || true
   } >> "$REPORT"
@@ -64,7 +71,8 @@ while IFS= read -r wt; do
   else
     echo "SKIP remove (not a git worktree): $wt" >> "$REPORT"
   fi
-done < <(find "$WORKTREES_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
+done < <(find "$WORKTREES_DIR" -mindepth 2 -maxdepth 3 -name .git -type f -printf '%h\n' 2>/dev/null || true)
+# Linked worktrees have a .git FILE: <dir>/<wt>/.git, or <dir>/ralph-<day>-<pid>/<repo>/.git for Ralph loops.
 
 if [ "$COUNT" -gt 0 ] || [ "$SKIPPED_DIRTY" -gt 0 ]; then
   echo "cleaned=$COUNT skipped_dirty=$SKIPPED_DIRTY report=$REPORT"

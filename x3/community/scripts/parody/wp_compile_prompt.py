@@ -10,12 +10,15 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+import os
+# AI root (/home/evo/AI). Not resolve(): after the mono switchover the part folders are symlinks into the mono clone (S1b).
+_AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdir("/home/evo/AI") else Path(__file__).resolve().parents[3]))
 
 PARODY_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PARODY_DIR))
 from writer_sys import assert_writer_system_prompt  # noqa: E402
 
-_RENDER_ROOT = Path(__file__).resolve().parents[3] / "render"
+_RENDER_ROOT = _AI_ROOT / "render"
 AGENTS = _RENDER_ROOT / "AGENTS.md"
 OUT = _RENDER_ROOT / "writer_pipeline" / "writer_prompt.md"
 KEEP = ["PERSONA", "CRAFT RULES", "CAMERA AND TIME", "PACING", "SPOOF AND STORY", "POWER, ROUGH AND TABOO SCENES",

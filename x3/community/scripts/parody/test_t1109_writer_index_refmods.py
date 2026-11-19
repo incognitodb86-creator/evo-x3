@@ -9,7 +9,7 @@ import pytest
 import build_request as br
 import resolve as s
 
-_AI_ROOT = Path(__file__).resolve().parents[3]
+_AI_ROOT = s._AI_ROOT
 
 STAGE_HDR = (
     "subject_definitions:\n(S1) test.\nsummary:\n[keyframe completion] test.\n"

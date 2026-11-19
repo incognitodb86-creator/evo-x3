@@ -11,6 +11,9 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+import os
+# AI root (/home/evo/AI). Not resolve(): after the mono switchover the part folders are symlinks into the mono clone (S1b).
+_AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdir("/home/evo/AI") else Path(__file__).resolve().parents[3]))
 from typing import Dict, List, Optional, Sequence, Tuple
 
 SKILLS_ROOT = Path(__file__).resolve().parents[2] / "skills"
@@ -22,7 +25,7 @@ WRITER_SKILL_SOURCES: Tuple[Path, ...] = (
 )
 # Markers that only appear in agent instruction files (AGENTS.md / GEMINI.md), never in a prompt skill.
 _AGENT_FILE_NAMES = {"agents.md", "gemini.md", "claude.md"}
-_AGENT_MARKERS = ("# Render Rules", "## Prompt Writer Rules", str(Path(__file__).resolve().parents[3] / "locks" / "gpu-render.lock"), "pi_qnap.py")
+_AGENT_MARKERS = ("# Render Rules", "## Prompt Writer Rules", str(_AI_ROOT / "locks" / "gpu-render.lock"), "pi_qnap.py")
 
 
 class AgentInstructionsInWriterPrompt(ValueError):

@@ -815,13 +815,16 @@ def _cmd_recompile(run_ref: str) -> int:
 
     py = str(RQ_PY) if RQ_PY.is_file() else sys.executable
     lint_code = (
-        "import json, sys; sys.path.insert(0, sys.argv[1]); import wp_lint; "
+        "import json, os, sys; sys.path.insert(0, sys.argv[1]); import wp_lint; "
         "text = open(sys.argv[2], encoding='utf-8').read().strip(); "
-        "res = wp_lint.lint(text, {'kind': sys.argv[3]}); "
+        "ctx = json.load(open(sys.argv[4], encoding='utf-8')) if os.path.isfile(sys.argv[4]) else {}; "
+        "ctx.setdefault('kind', sys.argv[3]); "
+        "res = wp_lint.lint(text, ctx); "
         "print(json.dumps({'pass': res.get('pass'), 'hard': res.get('hard', []), 'score': res.get('score')})); "
         "sys.exit(0 if res.get('pass') else 1)"
     )
-    r = subprocess.run([py, "-c", lint_code, str(parody_dir), str(prompt_file), kind],
+    # N3: lint with the run's full context (slots, blacklist, cloned, cfg) saved by render_writer_pipeline.
+    r = subprocess.run([py, "-c", lint_code, str(parody_dir), str(prompt_file), kind, str(crun / "lint_ctx.json")],
                        capture_output=True, text=True, timeout=60)
     if r.returncode != 0:
         print(f"REFUSED: wp_lint failed:\n{(r.stdout + r.stderr).strip()[-1000:]}", file=sys.stderr)
@@ -831,9 +834,12 @@ def _cmd_recompile(run_ref: str) -> int:
     if not isinstance(graph.get("c0"), dict) or not isinstance(graph["c0"].get("inputs"), dict):
         print(f"REFUSED: invalid clip/request.api.json (missing c0.inputs)", file=sys.stderr)
         return 2
+    old_c0_prompt = graph["c0"]["inputs"].get("prompt")
     graph["c0"]["inputs"]["prompt"] = prompt_text
-    if isinstance(graph.get("c1"), dict) and isinstance(graph["c1"].get("inputs"), dict):
-        graph["c1"]["inputs"]["prompt"] = prompt_text
+    c1 = graph.get("c1")
+    # N1: on long_continuation runs c1 has its own continuation prompt; only mirror c0 when c1 was a copy of it.
+    if isinstance(c1, dict) and isinstance(c1.get("inputs"), dict) and c1["inputs"].get("prompt") == old_c0_prompt:
+        c1["inputs"]["prompt"] = prompt_text
     req_file.write_text(json.dumps(graph, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     if QNAP_RUNS.is_dir() and os.access(QNAP_RUNS, os.W_OK):

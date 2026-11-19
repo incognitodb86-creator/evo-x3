@@ -5,7 +5,8 @@ import argparse, json, os, re, shutil, subprocess, sys, time, urllib.request
 from pathlib import Path
 
 PY = sys.executable
-_AI_ROOT = Path(__file__).resolve().parents[3]
+# AI root (/home/evo/AI). Not resolve(): after the mono switchover the part folders are symlinks into the mono clone (S1b).
+_AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdir("/home/evo/AI") else Path(__file__).resolve().parents[3]))
 PARODY = _AI_ROOT / "community" / "scripts" / "parody"
 LIVE_HOME = _AI_ROOT / "render" / "writer_pipeline"
 PM6 = _AI_ROOT / "community" / "runs" / "u6_gemma_heretic_20261113" / "gemma_pmfix6"
