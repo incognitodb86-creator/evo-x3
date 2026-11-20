@@ -29,6 +29,15 @@ changes, code reviews, and debugging. Renders do not happen here; they use the d
 - For commands that may run past the 180 s terminal timeout, use the terminal tool with `background=true` and
   `notify_on_complete=true`, then the `process` tool to wait. Never use `setsid` or `nohup` (Hermes blocks them).
 
+## REA pipeline build (Derrick 2026-11-20)
+
+- The REA parody pipeline is built by pi, one unit per `pi-job code`, in the worktree
+  `/home/evo/AI/_worktrees/rea-parody` (branch `pi/rea-parody`).
+- Unit specs: `records/REA-PARODY-PIPELINE/PIJOB-TASKS.md` in that worktree. When Derrick says `Run REA unit C<n>`,
+  read that unit's task text and pass it to `pi-job code /home/evo/AI/_worktrees/rea-parody "<task text>"` exactly
+  as written. One unit at a time, in order. After DONE, run the unit's Check command and report the pass/fail counts.
+- Do not merge, push, or copy files into `/home/evo/AI/community`; Max does that after review.
+
 ## Time
 
 Report times in America/Chicago (CT).

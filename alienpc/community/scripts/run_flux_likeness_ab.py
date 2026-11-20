@@ -41,8 +41,12 @@ import flux_still as fs  # noqa: E402
 
 DEFAULT_COMFY_ROOT = Path(os.environ.get("COMFY_ROOT") or r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI")
 DEFAULT_FACE_PY = Path(os.environ.get("FACE_PY") or str(DEFAULT_COMFY_ROOT / ".venv" / "Scripts" / "python.exe"))
-DEFAULT_RUN_QUEUE = Path(os.environ.get("RUN_QUEUE_PY") or str(ALIENPC_SCRIPTS_DIR / "run_queue.py"))
+# Live AlienPc queue runner (R6-RESULT / ARM5-RESULT); the mono copy is only a fallback (it may lack local config).
+_LIVE_RUN_QUEUE = Path(r"C:\AI\community\scripts\run_queue.py")
+DEFAULT_RUN_QUEUE = Path(os.environ.get("RUN_QUEUE_PY") or str(
+    _LIVE_RUN_QUEUE if _LIVE_RUN_QUEUE.is_file() else ALIENPC_SCRIPTS_DIR / "run_queue.py"))
 DEFAULT_OUT_DIR = Path(os.environ.get("FLUX_AB_OUT") or r"C:\AI\community\runs\flux_likeness_ab_20261120")
+MIRACLEIN_FP8_DEFAULT = "Miraclein_4.5_9b_FP8.safetensors"
 
 # Controlled clothed portrait prompt P (no face shape / eye color / hair color words so text never fights RefMod).
 PROMPT_BODY = (
@@ -104,13 +108,17 @@ def preflight_check(comfy_root: Path, celebs: Sequence[str]) -> Dict[str, Any]:
     unet_dir = comfy_root / "models" / "unet"
     for fn in (
         "Miraclein_4.5_9b_NVFP4.safetensors",
-        "Miraclein_4.5_9b_FP8.safetensors",
         "flux-2-klein-9b-fp8.safetensors",
         "FLUX-KLEIN-9B-FP8-NSFW.safetensors",
         "flux-2-klein-9b-kv-fp8.safetensors",
     ):
         found = (diff_dir / fn).is_file() or (unet_dir / fn).is_file()
         info["unets"][fn] = found
+    # The FP8 download keeps whatever name Civitai gives it; match by pattern.
+    fp8 = sorted(p.name for d in (diff_dir, unet_dir) if d.is_dir()
+                 for p in d.glob("*.safetensors") if re.search(r"miraclein.*4\.5.*fp8", p.name, re.I))
+    info["miraclein_fp8"] = fp8[0] if fp8 else None
+    info["unets"][MIRACLEIN_FP8_DEFAULT] = bool(fp8)
 
     ref_dir = comfy_root / "models" / "refmods-klein9"
     lora_dir = comfy_root / "models" / "loras" / "klein9"
@@ -232,15 +240,16 @@ def build_arms_for_celeb(
 
     # L7: Miraclein 4.5 FP8 (D6c approved 8.87 GB download) — tests whether NVFP4 LoRA/RefMod approx hurts likeness
     d7 = out_root / f"{c}_L7_miraclein_fp8_hybrid"
-    has_m_fp8 = bool(unets.get("Miraclein_4.5_9b_FP8.safetensors"))
+    fp8_name = preflight.get("miraclein_fp8") or MIRACLEIN_FP8_DEFAULT
+    has_m_fp8 = bool(preflight.get("miraclein_fp8"))
     if has_m_fp8 or dry_run:
         r7 = fs.build_flux_still(
             d7, PROMPT_WITH_ANCHOR, mode="refmod", refmods=[hyb_mod], refmod_strength=0.85,
             retention="fully_preserved (1.0)", loras=[hyb_lora], seed=seed, character=celeb, dry_run=dry_run,
         )
         if r7.get("status") == "READY":
-            _edit_graph(d7, lambda g: g["1"]["inputs"].__setitem__("unet_name", "Miraclein_4.5_9b_FP8.safetensors"))
-        add("L7", "Hybrid ret 1.0 on Miraclein_4.5_9b_FP8.safetensors", d7, r7,
+            _edit_graph(d7, lambda g: g["1"]["inputs"].__setitem__("unet_name", fp8_name))
+        add("L7", f"Hybrid ret 1.0 on {fp8_name}", d7, r7,
             skipped=None if (has_m_fp8 or dry_run) else "Miraclein_4.5_9b_FP8.safetensors not downloaded yet (D6c)")
     else:
         add("L7", "Miraclein 4.5 FP8", d7, {}, skipped="Miraclein_4.5_9b_FP8.safetensors not downloaded yet (D6c)")
@@ -369,6 +378,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if not rq.is_file():
             print(f"FAIL: run_queue.py not found at {rq}", file=sys.stderr)
             return 2
+
+        # Never queue a graph whose RefMod or LoRA file is missing; it would only fail value_not_in_list.
+        needs = {"L0": "both", "L1": "refmod", "L2": "refmod", "L3": "both", "L4": "both",
+                 "L5": "lora", "L6": "refmod", "L7": "both", "L8": "both"}
+        for arm in all_arms:
+            ci = pre["celebs"].get(arm["celeb"]) or {}
+            need = needs.get(arm["arm"])
+            missing = [k for k in ("refmod", "lora") if need in (k, "both") and not ci.get(f"{k}_present")]
+            if arm["status"] == "READY" and missing:
+                arm["status"] = "SKIPPED"
+                arm["skip_reason"] = f"missing {'/'.join(missing)} file on AlienPc"
 
         for arm in all_arms:
             if arm["status"] != "READY":

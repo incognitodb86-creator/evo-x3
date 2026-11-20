@@ -1,6 +1,6 @@
 # REA-Video to MiniMax-H3 (`10Eros-Max Beta 7`) Integration Plan (`RV0-RV5`)
 
-- **Status:** HELD, updated 2026-11-20 ~8 AM CT. RV1 and RV2 are done. RV3 ran as the 30 s validation, failed twice, and is held. RV5 (the 20-min batch) is held, and RV0/RV4 are open. Lives on `mono` at `records/source-plans/` (primary, current copy; Derrick t3014u). The `evo-x3-all` copy is frozen at `96b71aa`.
+- **Status:** HELD, updated 2026-11-20 ~8 AM CT; RV6 added ~9:35 AM CT (open). RV1 and RV2 are done. RV3 ran as the 30 s validation, failed twice, and is held. RV5 (the 20-min batch) is held, and RV0/RV4 are open. Lives on `mono` at `records/source-plans/` (primary, current copy; Derrick t3014u). The `evo-x3-all` copy is frozen at `96b71aa`.
 - **Relationship:** Sibling plan to [2026-11-18-x3-alienpc-followup-plan.md](2026-11-18-x3-alienpc-followup-plan.md) (F3). Uses `JuneYaooo/rea-video` as a CPU-only upstream shot-decomposition stage, compiles **Beta 7 header-free prompts** on EVO-X3 (`0 MB` AlienPC LLM VRAM), renders via live AlienPC `comfyui_auto` (`:8446`) behind `gpu_lock_gate.py` and `P4.11` approval codes, and assembles hard-cut sequences.
 - **Owner:** Derrick. **Executor:** Max.
 - **Rules (same as main plan & follow-up):** Every live install, clone, download, and render queue needs Derrick's yes at the time. Never overwrite locked production templates (`b2.api.json`, `b2_refmod.api.json`, the 8 `U55` templates). Standing Rule 5: 18+ adults only. Zero secrets in git, manifests, or `/history`.
@@ -11,7 +11,7 @@
 
 Sources: [unified PLAN.md index](../uplan/PLAN.md) (Nov 20 closeout + dated Derrick decisions), RESULT records under `records/`, and `mono` git log. Item rows below carry the status in place.
 
-Count: 2 done, 2 open, 2 held, 0 closed.
+Count: 2 done, 3 open, 2 held, 0 closed (RV6 added 2026-11-20).
 
 ### Completed
 - **RV1:** user capability YAML on `mono` `d83ac47`, applied by [UNI-APPLY-X3-A](../UNI-APPLY-X3-A/RESULT.md) item 3 (`849eac98`). The live `rea-video models` check was skipped because RV0 is not installed on the X3.
@@ -20,6 +20,7 @@ Count: 2 done, 2 open, 2 held, 0 closed.
 ### Open (what each waits on)
 - **RV0:** `rea-video` is not installed on the X3 (X3-A RESULT, 2026-11-19 14:04 CT). The validation runs used the existing `hotel_vlm2` breakdown as-is (Derrick t2980u: no re-decompose), so RV0 was skipped, not passed.
 - **RV4:** optional Guide / AudioRefine nodes not started. Each needs its own yes.
+- **RV6:** REA parody pipeline plan + local-LLM unit specs + render test on mono (2026-11-20, [REA-PARODY-PIPELINE](../REA-PARODY-PIPELINE/PLAN.md)). Waits on H7 apply, C0 worktree (Max), then Derrick running units C1-C7 in the Hermes code chat. Q-RP1..Q-RP4 open.
 
 ### Held
 - **RV3:** run as the 30-second `hotel_vlm2` validation (FCSydny OC visual+voice RefMod + Adam Jensen visual RefMod, 1-pass `oc_ref` 1344x768). v1 and v2 both **failed** review. v2 removed the clones and speech issues from v1, but tongue morphing shows on both pack clips and pack02 audio duplicates pack01 ([REA-VIDEO-VAL30S-RESULT.md](../BENCH-ALIENPC-1/REA-VIDEO-VAL30S-RESULT.md)). The REA v3 proposal waits on Derrick. Run setup (graphs, manifests, fill/launch scripts, breakdown, install; prompts redacted) is on mono at `alienpc/community/runs-setup/reavideo/` (2026-11-20, Derrick t3020u).
@@ -67,6 +68,7 @@ Count: 2 done, 2 open, 2 held, 0 closed.
 | RV3 **Y** — **HELD** | **Single-clip end-to-end render test via live AlienPC `:8446` + approval gate.** Feed one `RV2` manifest into a frozen copy of a live Beta 7 template (`fill_request.py` / `b2.api.json`), approve via Derrick's in-chat / `P4.11` gate, render 1 clip on AlienPC `comfyui_auto` (Beta 7 baked-TURBO, VSA 90% ON, SLA OFF, 12/3 shift, `res_multistep`/`euler` + `simple`, 8 steps), and run `pi-job upscale` (RTX 2x) so `sync-renders` publishes it to `/srv/renders`. | Never mutates production templates; keeps GPU lease & `S2` template allowlist intact. | 1 clip renders + upscales cleanly end-to-end, lands in `/srv/renders`, and passes Derrick's visual/audio check. |
 | RV4 **Y** (optional, experimental) — **OPEN** | **Evaluate companion ComfyUI nodes (separate yes required before each install; ComfyUI `0.38.0` compatibility unverified).**<br>- `ethanfel/ComfyUI-MiniMax-H3-Guide` (planning/guide & 17k+5 AV latent helpers).<br>- `Adudeguyman/ComfyUI-H3-AudioRefine` (freezes video `video_denoise=0.0`, denoises audio `audio_denoise=0.5` on packed H3 AV NestedTensor).<br>Inspect `requirements.txt` against `pip-freeze.txt` first, install only via `git clone` under AlienPC lease (`S1`), run a ComfyUI `0.38.0` startup/import smoke check, test on a candidate graph copy, and keep only if a fixed-seed A/B shows clear audio/continuation improvement. | Neither node is required for `RV0-RV3` or `RV5`. Add to `S2` allowlist only if promoted by Derrick. | Import check + fixed-seed A/B scored by Derrick; clean rollback if dropped. |
 | RV5 — **HELD** | **Hard-cut multi-clip assembly & closeout.** Join 2+ approved `RV3` clips with deterministic `ffmpeg` concat hard cuts (or `rea-video drive OUT_DIR --join` for `drive/results.json` motion-drive runs; no crossfades, no `capsule-cinema` dependency), publish final video to QNAP `/srv/renders`, and commit run record + `h3max_bridge.py` to Gitea. | — | Multi-clip joined `.mp4` plays cleanly with synced audio; record committed. |
+| RV6 — **OPEN** (added 2026-11-20) | **REA -> FLUX (RefMod + LoRA) -> H3Max parody remake pipeline, built by the local LLM.** Derrick's blueprint (`rea-flux-h3max-b7-parody-auto-final`, saved as [BLUEPRINT-20261120.pdf](../REA-PARODY-PIPELINE/BLUEPRINT-20261120.pdf)) corrected in [REA-PARODY-PIPELINE/PLAN.md](../REA-PARODY-PIPELINE/PLAN.md) (21 fixes: real aliases, Hermes writes the prompts, candidate templates, reuse `align_h3_frames` / `h3max_bridge`, NSFW allowed for adults 18+). Coding units C1-C7 run through the Hermes `code` chat -> `pi-job code` ([PIJOB-TASKS.md](../REA-PARODY-PIPELINE/PIJOB-TASKS.md)); render test R1-R4 in the Hermes render chat with the new `rea-remake` skill ([RENDER-TEST.md](../REA-PARODY-PIPELINE/RENDER-TEST.md)). | Supersedes the RV3/RV5 one-off val30s scripts for new runs; keeps per-shot seeds and voice-window start (val30s bugs). | C1-C7 DONE with tests; R1-R4 recorded in `RESULT-CODING.md` / `RESULT-RENDER.md`. |
 
 ## 3. Evidence
 

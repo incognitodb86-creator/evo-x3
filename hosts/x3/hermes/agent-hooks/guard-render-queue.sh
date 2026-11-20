@@ -27,12 +27,15 @@ is_queue_remote = bool(re.search(r"\bqueue-remote\.sh\b", cmd)) and "--dry-run" 
 is_flux_queue = bool(re.search(r"\bflux_still\.py\b", cmd)) and bool(re.search(r"(?:^|\s)--queue(?:\s|$)", cmd))
 is_pipe_queue = bool(re.search(r"\brender_writer_pipeline\.py\b", cmd)) and bool(re.search(r"(?:^|\s)--queue(?:\s|$)", cmd))
 is_rq_remote = bool(re.search(r"\brun_queue\.py\b", cmd)) and "--dry-run" not in cmd
+# 2026-11-20 REA pipeline: its GPU stages (`flux ... --queue`, `queue`) call flux_still/queue-remote internally.
+is_rea_queue = bool(re.search(r"\brea_parody_remake\.py\b", cmd)) and bool(
+    re.search(r"(?:^|\s)--queue(?:\s|$)", cmd) or re.search(r"\brea_parody_remake\.py\s+queue\b", cmd))
 
-if not (is_queue_remote or is_flux_queue or is_pipe_queue or is_rq_remote):
+if not (is_queue_remote or is_flux_queue or is_pipe_queue or is_rq_remote or is_rea_queue):
     print("{}")
     sys.exit(0)
 
-if (is_queue_remote or is_flux_queue or is_pipe_queue) and not re.search(r"(?:^|\s)--yes-derrick(?:\s|$)", cmd):
+if (is_queue_remote or is_flux_queue or is_pipe_queue or is_rea_queue) and not re.search(r"(?:^|\s)--yes-derrick(?:\s|$)", cmd):
     print(json.dumps({
         "decision": "block",
         "reason": "guard-render-queue: queuing requires --yes-derrick after Derrick\x27s explicit yes in chat",

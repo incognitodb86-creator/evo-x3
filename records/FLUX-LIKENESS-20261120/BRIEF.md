@@ -22,6 +22,11 @@ python alienpc\community\scripts\run_flux_likeness_ab.py --run --celebs "Sydney 
 Place `Miraclein_4.5_9b_FP8.safetensors` (8.87 GB, Civitai model 2453960) into
 `ComfyUI\models\diffusion_models\` before `--run` so arm **L7** runs (otherwise the script skips L7 cleanly).
 
+Red-team fixes 2026-11-20 ~9:35 AM CT: the runner queues through the live `C:\AI\community\scripts\run_queue.py`
+(VERIFIED path from R6/ARM5 RESULTs; the mono copy is only a fallback), skips any arm whose RefMod or Prodigy LoRA file
+is missing on AlienPc instead of queueing a graph that fails `value_not_in_list`, and finds the Miraclein 4.5 FP8 file by
+name pattern (Civitai may name it differently).
+
 ## What the code fixes already changed (`mono`)
 
 - `flux_still.py`: `--refmod` defaults to `fully_preserved (1.0)` at strength 1.0 (was `0.7` flexible styling);

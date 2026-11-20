@@ -84,7 +84,8 @@ check_sources() {
   for f in \
     "$REPO_DIR/hosts/x3/hermes/workspaces/render/AGENTS.md" \
     "$REPO_DIR/hosts/x3/hermes/workspaces/code/AGENTS.md" \
-    "$REPO_DIR/hosts/x3/hermes/workspaces/code/MEMORY.md"; do
+    "$REPO_DIR/hosts/x3/hermes/workspaces/code/MEMORY.md" \
+    "$REPO_DIR/hosts/x3/hermes/agent-hooks/guard-render-queue.sh"; do
     [[ -f "$f" ]] || { echo "MISSING source file: $f (use --repo <mono-clone>)" >&2; exit 1; }
   done
   local sha
@@ -93,15 +94,49 @@ check_sources() {
 }
 
 check_idle() {
-  if command -v pi-job >/dev/null 2>&1; then
-    local st
-    st="$(sudo -n -iu evo pi-job status 2>/dev/null || true)"
-    if grep -qiE 'RUNNING|QUEUED' <<<"$st"; then
-      echo "BLOCKED: active pi-job detected:" >&2
-      echo "$st" >&2
-      exit 1
-    fi
+  # pi-job's single-slot lock and active marker live in the evo user's ~/AI/_runs (config/bin/pi-job).
+  if ! sudo -n -u evo flock -n /home/evo/AI/_runs/pi-job.lock true 2>/dev/null; then
+    echo "BLOCKED: pi-job lock is held (a pi-job is running)" >&2
+    exit 1
   fi
+  if sudo -n -u evo test -s /home/evo/AI/_runs/pi-job.active 2>/dev/null; then
+    echo "WARN: /home/evo/AI/_runs/pi-job.active is not empty; check 'pi-job status <id>' before applying" >&2
+  fi
+  # An X3-queued render holds this lock; llama-swap restart must not land mid-render.
+  if sudo -n -u evo test -e /home/evo/AI/locks/gpu-render.lock 2>/dev/null \
+     && ! sudo -n -u evo flock -n /home/evo/AI/locks/gpu-render.lock true 2>/dev/null; then
+    echo "BLOCKED: X3 gpu-render.lock is held (render in flight)" >&2
+    exit 1
+  fi
+}
+
+check_python_yaml() {
+  local pybin="python3"
+  [[ -x "$PY_EVO" ]] && pybin="$PY_EVO"
+  sudo -n "$pybin" -c 'import yaml' 2>/dev/null || {
+    echo "BLOCKED: '$pybin' (as root) cannot import yaml; install python3-pyyaml first" >&2
+    exit 1
+  }
+}
+
+wait_gufo_ready() {
+  local i
+  for i in $(seq 1 60); do
+    if curl -sS http://127.0.0.1:8080/running 2>/dev/null | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+rows = d.get("running", d) if isinstance(d, dict) else d
+ok = any(isinstance(r, dict) and r.get("model") == "flash-next-uncensored-v2" and r.get("state") == "ready" for r in (rows or []))
+sys.exit(0 if ok else 1)
+'; then
+      return 0
+    fi
+    sleep 3
+  done
+  return 1
 }
 
 probe_alias() {
@@ -282,7 +317,7 @@ elif role == "code":
     sk = cfg.setdefault("skills", {})
     sk["external_dirs"] = []
     dis = list(sk.get("disabled") or [])
-    for name in ("h3-render", "h3-writer", "pixlstash-image-library"):
+    for name in ("h3-render", "h3-writer", "pixlstash-image-library", "rea-remake"):
         if name not in dis:
             dis.append(name)
     sk["disabled"] = dis
@@ -319,6 +354,8 @@ do_rollback() {
     [[ -d "'"$HERMES_HOME_DIR"'/profiles/code" ]] && mv "'"$HERMES_HOME_DIR"'/profiles/code" "$B/profiles-code-rolledback-$(date +%H%M%S)"
     [[ -d "'"$CODE_WS"'" ]] && mv "'"$CODE_WS"'" "$B/ws-code-rolledback-$(date +%H%M%S)"
     [[ -d "$B/profiles-gemma" && ! -d "'"$HERMES_HOME_DIR"'/profiles/gemma" ]] && mv "$B/profiles-gemma" "'"$HERMES_HOME_DIR"'/profiles/gemma"
+    [[ -f "$B/guard-render-queue.sh" ]] && cp -a "$B/guard-render-queue.sh" "'"$HERMES_HOME_DIR"'/agent-hooks/guard-render-queue.sh"
+    true
   '
   sudo -n systemctl --user -M evo@ restart hermes-gateway
   echo "[$(ts_ct)] Rollback complete."
@@ -333,6 +370,8 @@ fi
 
 if [[ "$MODE" == "dry-run" ]]; then
   echo "=== DRY RUN (no live changes) ==="
+  check_python_yaml
+  check_idle
   patch_llama_swap "$LLAMA_CFG" 1
   patch_hermes_profile "${HERMES_HOME_DIR}/config.yaml" render 1
   echo "[dry-run] Would clone default -> code profile, write $CODE_WS/AGENTS.md + code/memories/MEMORY.md,"
@@ -345,6 +384,7 @@ fi
 
 # === APPLY ===
 START_CT="$(ts_ct)"
+check_python_yaml
 check_idle
 take_lease "UNI-APPLY-X3-HERMES-WORKSPACES"
 
@@ -371,15 +411,8 @@ echo "=== Step 1: Patch llama-swap & probe aliases BEFORE touching Hermes ==="
 patch_llama_swap "$LLAMA_CFG" 0
 sudo -n systemctl restart llama-swap
 
-echo "Waiting for flash-next-uncensored-v2 on /running (up to 120s)..."
-READY=0
-for _ in $(seq 1 40); do
-  if curl -sS http://127.0.0.1:8080/running 2>/dev/null | grep -q 'flash-next-uncensored-v2'; then
-    READY=1; break
-  fi
-  sleep 3
-done
-[[ "$READY" -eq 1 ]] || { echo "FAIL: flash-next-uncensored-v2 not ready in /running; run --rollback" >&2; exit 1; }
+echo "Waiting for flash-next-uncensored-v2 state=ready on /running (up to 180s)..."
+wait_gufo_ready || { echo "FAIL: flash-next-uncensored-v2 not ready in /running; run --rollback" >&2; exit 1; }
 
 P_RENDER="$(probe_alias flash-next-render 'Say OK.' 32 '')"
 check_probe_output "flash-next-render" "$P_RENDER" "no" "OK"
@@ -387,7 +420,8 @@ check_probe_output "flash-next-render" "$P_RENDER" "no" "OK"
 P_AUX="$(probe_alias flash-next-aux 'Say OK.' 32 '')"
 check_probe_output "flash-next-aux" "$P_AUX" "no" "OK"
 
-P_CODE="$(probe_alias flash-next-code 'What is 17*23? Reply with just the number.' 1024 '')"
+# 4096: thinking medium (Gufo budget 8192) must leave room for the final answer.
+P_CODE="$(probe_alias flash-next-code 'What is 17*23? Reply with just the number.' 4096 '')"
 check_probe_output "flash-next-code" "$P_CODE" "yes" "391"
 
 echo "=== Step 2: Update Render workspace (default profile) ==="
@@ -397,10 +431,28 @@ chmod 0755 "$STAGE_DIR"
 cp "$REPO_DIR/hosts/x3/hermes/workspaces/render/AGENTS.md" "$STAGE_DIR/render.AGENTS.md"
 cp "$REPO_DIR/hosts/x3/hermes/workspaces/code/AGENTS.md" "$STAGE_DIR/code.AGENTS.md"
 cp "$REPO_DIR/hosts/x3/hermes/workspaces/code/MEMORY.md" "$STAGE_DIR/code.MEMORY.md"
+cp "$REPO_DIR/hosts/x3/hermes/agent-hooks/guard-render-queue.sh" "$STAGE_DIR/guard-render-queue.sh"
 chmod 0644 "$STAGE_DIR"/*
 
 patch_hermes_profile "${HERMES_HOME_DIR}/config.yaml" render 0
 sudo -n -iu evo install -m 0644 "$STAGE_DIR/render.AGENTS.md" "${RENDER_WS}/AGENTS.md"
+
+# Updated queue guard (also blocks rea_parody_remake.py GPU stages without --yes-derrick). The hook is fail_closed,
+# so restore the old copy at once if Hermes does not call the hooks healthy.
+GUARD_LIVE="${HERMES_HOME_DIR}/agent-hooks/guard-render-queue.sh"
+sudo -n -iu evo bash -c '
+  set -euo pipefail
+  B="'"$HERMES_BAK"'"
+  [[ -f "$B/guard-render-queue.sh" ]] || cp -a "'"$GUARD_LIVE"'" "$B/guard-render-queue.sh"
+  install -m 0755 "'"$STAGE_DIR"'/guard-render-queue.sh" "'"$GUARD_LIVE"'"
+'
+HOOKS_OUT="$(sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" hermes hooks doctor 2>&1 || true)"
+echo "$HOOKS_OUT" | tail -n 3
+if ! grep -qi 'healthy' <<<"$HOOKS_OUT"; then
+  sudo -n -iu evo cp -a "${HERMES_BAK}/guard-render-queue.sh" "$GUARD_LIVE"
+  echo "FAIL: hermes hooks doctor not healthy after guard update; old guard restored. Run --rollback." >&2
+  exit 1
+fi
 
 echo "=== Step 3: Create & configure Coding workspace (code profile) ==="
 sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" bash -c '
