@@ -21,3 +21,27 @@ TQ4 two_person / ref2va 124f 1344x768, long_continuation 243+238f 768x1344. RTX 
 Prepared, not queued (wait for Derrick's eye pick of TQ1): TQ2 VSA `start_percent` 0.2 vs 0.0, TQ3 `res_multistep`
 vs `euler`+`simple` (`er_sde` banned), optional lcm/simple audio check, TQ5 headers. Mystic LoRA audio arm waits on
 Derrick. Note in the run dir: `STAGE2_PENDING.md`.
+
+
+## TQ1 winner (recorded 2026-11-19 18:51 CT, America/Chicago)
+
+Derrick t2948u (6:48 PM CT): "Go... Don't wait on my go, complete the damn plan." That is
+yes to queue A7 stage-2 now and to keep working the AlienPc lane without a further go.
+
+A Max video review ranked the stage-1 TQ1 clips: **`tq1_oc_ref_2pass` first at 6/10**,
+ahead of `tq1_oc_guide_2pass` at 5/10 and `tq1_oc_ref_1pass` at 4/10. That pick is the
+base graph for TQ2 / TQ3 / TQ5 (same still, prompt sha `6adb8150…`, seed 51083601).
+
+Winner already on disk (not re-rendered): JOB 235.3 s (17:18:39–17:22:38 CT), OBJECTIVE ok
+243 frames 768x1344 audio yes 7,068,488 raw bytes; RTX 2x 7.1 s, 31,132,812 bytes,
+sha256 `0677CB7611A39C6BB61DDA809BF7CB29D216B9ECF3F843B50441A3E9607890B9`.
+Request sha256 `718479ecaa54…`.
+
+Stage-2 run dir: `C:\AI\community\runs\a7_stage2_20261119\`. NAS:
+`\\NAS4CBE37.local\renders\runs\a7_stage2_20261119\`.
+Winner defaults: `m_vsa.start_percent=0.0`, `ksel.sampler_name=euler`, `s0_sched=simple` 8 steps,
+pass-2 `p2sched=beta` 3 steps denoise 0.4, 4-header prompt. So `tq2_vsa_0.0`, `tq3_euler_simple`,
+and `tq5_headers` are identical to the winner and are recorded as controls (not re-queued).
+Queued variants change only the named field: `tq2_vsa_0.2`, `tq3_res_multistep`, `tq3_lcm_simple`
+(optional lcm/simple audio check; pass-1 scheduler already simple), `tq5_headerfree`
+(`beta7_convert.py --mode plain`, validation READY, 2397 chars vs 3509).
