@@ -1,4 +1,4 @@
-# AlienPc model inventory (filenames + bytes + mtime only), read-only 2026-11-19 5:25 PM CT
+# AlienPc model inventory (filenames + bytes + mtime only), read-only 2026-11-19 6:23 PM CT
 # root: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models
 
 ## inv loras\klein9
@@ -9,7 +9,6 @@ loras\klein9\fk9_sydneysweeney_v1.safetensors	165704456	2026-11-19 11:34
 loras\klein9\fk9_sydneysweeney_v1_prodigy.safetensors	87090024	2026-11-19 11:34
 
 ## inv loras\MinimaxH3
-loras\MinimaxH3\stomach_bulge_H3_i2v_v2.0.safetensors	296485336	2026-11-19 12:14
 
 ## inv diffusion_models-miraclein
 diffusion_models\Miraclein_4.5_9b_NVFP4.safetensors	5179943610	2026-11-19 11:37

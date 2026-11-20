@@ -28,7 +28,7 @@ ComfyUI-H3-PowerLoraStack.disabled	https://github.com/cicalooo/ComfyUI-H3-PowerL
 ComfyUI-Impact-Pack.disabled	https://github.com/ltdrdata/ComfyUI-Impact-Pack.git	429d0159ad429e64d2b3916e6e7be9c22d025c3c
 ComfyUI-Impact-Subpack.disabled	https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git	50c7b71a6a224734cc9b21963c6d1926816a97f1
 ComfyUI-Inspire-Pack.disabled	https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git	d23db9aa544de9a6d4c609cb7005fa9e0d42031d
-ComfyUI-KJNodes.disabled	https://github.com/kijai/ComfyUI-KJNodes.git	bc8e4ce4254bcd0050383386ee2f9d753dbf1fa5
+ComfyUI-KJNodes	https://github.com/kijai/ComfyUI-KJNodes.git	bc8e4ce4254bcd0050383386ee2f9d753dbf1fa5
 ComfyUI-Lokken-VideoTools.disabled	https://github.com/LordLocksley/ComfyUI-Lokken-VideoTools	0f2eeb3c15e9bf04dff57aa915c8016ef92317ca
 ComfyUI-LTXVideo.disabled	https://github.com/Lightricks/ComfyUI-LTXVideo.git	4f45fd6c222eb06eb3e46605da62e7c889e4be5c
 ComfyUI-Manager	https://github.com/ltdrdata/ComfyUI-Manager.git	d6f480c911d0b98b4a9f4871f263d90a15f0d9d2
