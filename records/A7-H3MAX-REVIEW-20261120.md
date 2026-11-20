@@ -4,11 +4,11 @@ Reviewer: Max. No images or prompt prose are in this file. Clips stay on the QNA
 
 The video model refused to review the clips. Both passes used frames sampled 4–7 times per clip, plus ffmpeg YDIF motion stats. Audio was not judged. The 7:50 AM CT comparison is one seed only.
 
-## Verdict (7:50 AM CT)
+## Verdict (7:50 AM CT, confirmed Derrick t3013u at 7:43 AM CT)
 
 The original starting setup stays production: `h3max_lora_test_20261119/arm0_baseline`, which is the live `oc_guide.api.json` 1-pass at 768×1344 with MiniMaxH3AddGuide (first frame pinned) and `ref_image_size=match`.
 
-`oc_ref_2pass` is **not** promoted. Its only real gain on this seed is about 70 s faster. Derrick decides if he wants that speed trade. The earlier `tq2_vsa_0.2` promotion (`4d909034`) is also **not** the pick.
+Derrick t3013u (7:43 AM CT): "Ok update the plan that we are staying with our original setup." TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. `oc_ref_2pass` is not promoted; its only real gain on this seed was about 70 s faster, and that speed trade was declined. The earlier `tq2_vsa_0.2` promotion (`4d909034`) is closed, not the pick. 2-pass graphs stay as candidate files only. Production templates were not edited.
 
 ## How the tq1 graphs differ from the start
 
