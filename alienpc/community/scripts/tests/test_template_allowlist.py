@@ -310,25 +310,17 @@ def _safe_fill(g: dict) -> dict:
     return g
 
 
-def test_promoted_oc_ref_2pass_vsa_0_2_allowlisted_and_candidate_refused():
+def test_oc_ref_2pass_not_allowlisted_after_rollback_and_candidate_refused():
+    # Derrick card 2026-11-20 8:28 AM CT: 4d909034 promotion rolled back; oc_ref_2pass is a candidate again.
     prod = _safe_fill(_load_tpl("oc_ref_2pass"))
-    ok, matched, reason = ta.check_graph(prod)
-    assert ok, reason
-    assert matched == "oc_ref_2pass"
-    assert prod["m_vsa"]["inputs"]["start_percent"] == 0.2
+    ok, _, reason = ta.check_graph(prod)
+    assert not ok, reason
 
-    # Candidate still has start_percent 0.0 and is not in the promoted manifest as a candidate file.
+    # The VSA 0.0 candidate file is refused too.
     cand = _safe_fill(json.loads((TEMPLATES_DIR / "oc_ref_2pass.candidate.api.json").read_text(encoding="utf-8")))
     ok, _, reason = ta.check_graph(cand)
-    assert not ok
-    assert "start_percent" in reason
+    assert not ok, reason
 
-    # Tampering with the promoted VSA default is refused.
-    tampered = _safe_fill(_load_tpl("oc_ref_2pass"))
-    tampered["m_vsa"]["inputs"]["start_percent"] = 0.0
-    ok, _, reason = ta.check_graph(tampered)
-    assert not ok
-    assert "start_percent" in reason
 
     # 1-pass oc_ref remains allowlisted for explicit --template oc_ref and 16:9 ref.
     one = _safe_fill(_load_tpl("oc_ref"))

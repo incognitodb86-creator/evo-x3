@@ -1,0 +1,6 @@
+repo=C:\Users\derek\5slock\tools\rea-video
+HEAD=e3858539514a51c28e0dd1724ded249a0b01be3d
+last=2026-11-17 18:53:53 -0800 Point remakes at frame numbers
+status:
+?? HANDOFF-forge.md
+

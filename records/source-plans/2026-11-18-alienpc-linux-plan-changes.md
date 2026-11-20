@@ -23,7 +23,7 @@ Count: 2 done, 3 open, 4 held, 0 closed.
 ### Open (what each waits on)
 - **LX2:** same as F4 `H1a` / main-plan `P2.4` Tailscale ACL. Waits on Derrick in the Tailscale admin console.
 - **LX3:** same as F4 `S1`. Windows ComfyUI-Manager is still `security_level = normal` ([A8-RESULT.md](../BENCH-ALIENPC-1/A8-RESULT.md), `0fdf10a2`). Waits on the last node install, then Derrick's yes.
-- **LX8:** writer node is F4 `W3c` (card C5, undecided). The S2 allowlist code and tests are on `mono` (`4d909034`, `alienpc/community/scripts/allowlist_promoted.json`), but the hook into `run_queue.py` / `comm.py` is not installed (A8 skipped).
+- **LX8:** writer node is F4 `W3c` (card C5, undecided). The S2 allowlist code and tests are on `mono` (`4d909034`, `alienpc/community/scripts/allowlist_promoted.json`; the list is `[]` again after the 2026-11-20 8:28 AM CT picker rollback), but the hook into `run_queue.py` / `comm.py` is not installed (A8 skipped).
 
 ### Held
 - **LX4:** waits on the Windows tuning rows. Status of those rows: R1 done ([A4-RESULT.md](../BENCH-ALIENPC-1/A4-RESULT.md)), R3/R4 skipped ([A6-RESULT.md](../BENCH-ALIENPC-1/A6-RESULT.md)), R6 not adopted ([R6-RESULT.md](../BENCH-ALIENPC-1/R6-RESULT.md)), R2/R7 open. Windows same-graph control on Nov 19 was 286.5 s for a 243-frame 768x1344 clip (R6-RESULT), not the old 124-frame B2 number.

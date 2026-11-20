@@ -7,9 +7,10 @@ from pathlib import Path
 import fill_request as fr
 
 
-def test_pick_template_portrait_ref_defaults_to_oc_ref_2pass():
-    assert fr.pick_template(True, "ref", True, character="FCTest", width=768, height=1344) == "oc_ref_2pass"
-    assert fr.pick_template(True, "ref", False, width=768, height=1344) == "oc_ref_2pass"
+def test_pick_template_portrait_ref_defaults_to_one_pass_oc_ref():
+    # Derrick card 2026-11-20 8:28 AM CT: picker rolled back to the original 1-pass (4d909034 undone).
+    assert fr.pick_template(True, "ref", True, character="FCTest", width=768, height=1344) == "oc_ref"
+    assert fr.pick_template(True, "ref", False, width=768, height=1344) == "oc_ref"
 
 
 def test_pick_template_16x9_ref_stays_on_one_pass_oc_ref():
@@ -73,6 +74,7 @@ def test_fill_request_2pass_keeps_half_res_c0(tmp_path):
     rep = fr.fill_request(
         prompt, run_dir, ask="an adult woman walks along a beach at sunset",
         position="walking", still_image=str(still), still_mode="ref",
+        template_name="oc_ref_2pass",
         width=768, height=1344, frames=124, seed=51083601, dry_run=True,
         refmod_stems=[],
     )

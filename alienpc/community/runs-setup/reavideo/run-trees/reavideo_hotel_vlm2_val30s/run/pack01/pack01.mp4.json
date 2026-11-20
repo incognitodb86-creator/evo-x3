@@ -1,0 +1,12 @@
+{
+  "run": "pack01",
+  "attempt": 0,
+  "label": "METHOD_ONLY",
+  "plan": "run_queue",
+  "tag": "pack01",
+  "secs": 443.1,
+  "comfy_output": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\output\\community\\run\\pack01_00001_.mp4",
+  "file": "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2_val30s\\run\\pack01\\pack01.mp4",
+  "prompt_id": "9c1fe7e5-cd54-432e-8576-dacb8e675238",
+  "finished": "2026-11-19 22:12 CT"
+}

@@ -1,0 +1,92 @@
+{
+  "model_id": "minimax-h3-10eros-beta7",
+  "fps": 24,
+  "profile": "default",
+  "refmods": [
+    {
+      "slot": "mod_1",
+      "subject": "FCSydny",
+      "picture_index": 1,
+      "file": "minimaxh3_oc_poolclub_v1_refmod_visual"
+    },
+    {
+      "slot": "mod_2",
+      "subject": "Adam Jensen",
+      "picture_index": 2,
+      "file": "minimaxh3_adamjensen_v1_refmod"
+    }
+  ],
+  "clips": [
+    {
+      "clip_index": 1,
+      "frames": 362,
+      "duration_s": 15.083,
+      "audio_duration_s": 15.0,
+      "prompt": "<redacted prompt, 544 chars>",
+      "conversion": {
+        "mode_used": "plain",
+        "removed_headers": [
+          "detailed_description"
+        ],
+        "folded_sound_headers": [],
+        "dropped_music_headers": [],
+        "omitted_pictures": [
+          1,
+          2
+        ],
+        "offline_fallback": true
+      },
+      "validation": {
+        "status": "READY",
+        "header_violations": [],
+        "violations": [],
+        "lint": null,
+        "sections_present": [],
+        "six_section_complete": false,
+        "not_ready_reason": null
+      },
+      "video_proxies": [],
+      "keyframes": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2\\shots\\shot_058_first.jpg"
+      ],
+      "audio_stems": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel14sav80\\stems\\vocals.wav"
+      ]
+    },
+    {
+      "clip_index": 2,
+      "frames": 362,
+      "duration_s": 15.083,
+      "audio_duration_s": 15.0,
+      "prompt": "<redacted prompt, 674 chars>",
+      "conversion": {
+        "mode_used": "plain",
+        "removed_headers": [
+          "detailed_description"
+        ],
+        "folded_sound_headers": [],
+        "dropped_music_headers": [],
+        "omitted_pictures": [
+          1,
+          2
+        ]
+      },
+      "validation": {
+        "status": "READY",
+        "header_violations": [],
+        "violations": [],
+        "lint": null,
+        "sections_present": [],
+        "six_section_complete": false,
+        "not_ready_reason": null
+      },
+      "video_proxies": [],
+      "keyframes": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2\\shots\\shot_029_first.jpg"
+      ],
+      "audio_stems": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel14sav80\\stems\\vocals.wav"
+      ]
+    }
+  ]
+}

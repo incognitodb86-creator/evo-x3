@@ -129,7 +129,7 @@ def test_e2e_per_clip_type_template_diff(tmp_path, monkeypatch, case):
         "plain": {"ask": "a woman walks along a beach at sunset", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "frames": 124},
         "oc_guide": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "guide", "frames": 124},
         "oc_ref": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "ref", "template": "oc_ref", "frames": 124},
-        "oc_ref_2pass": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "ref", "frames": 124},
+        "oc_ref_2pass": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "ref", "template": "oc_ref_2pass", "frames": 124},
         "named_parody": {"ask": "Daenerys Targaryen holds court and speaks", "position": "talk", "names": ["Daenerys Targaryen"], "template": "named_parody", "frames": 192},
         "talk": {"ask": "she smiles and says <d>[English] What a sunset.</d>", "position": "talk", "still": str(s_port), "still_read": str(_sr_file(s_port)), "frames": 124},
         "two_person": {"ask": "two people together on the beach", "position": "two_person", "still": str(s_land), "still_read": str(_sr_file(s_land)), "partner2_still": str(s_p2), "size": "1344x768", "frames": 124},

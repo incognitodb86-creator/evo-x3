@@ -20,10 +20,9 @@ TEMPLATES = {k: TEMPLATES_DIR / f"{k}.api.json" for k in (
 
 
 def _default_oc_ref(width: int, height: int) -> str:
-    """Portrait/default ref uses promoted 2-pass VSA 0.2; 16:9 stays 1-pass until TQ4 promotion."""
-    if (int(width), int(height)) == (1344, 768):
-        return "oc_ref"
-    return "oc_ref_2pass"
+    """Ref mode uses the original 1-pass oc_ref at every size (Derrick card 2026-11-20 8:28 AM CT rolled back
+    the 4d909034 2-pass default). oc_ref_2pass stays a candidate, reachable only with an explicit --template."""
+    return "oc_ref"
 
 
 def _c0_canvas_for_graph(graph: Dict[str, Any], width: int, height: int) -> tuple[int, int]:

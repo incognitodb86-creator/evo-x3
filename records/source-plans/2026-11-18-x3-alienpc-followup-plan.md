@@ -53,7 +53,7 @@ Count: 11 done, 13 open, 2 held, 8 closed (34 items).
 - **L1, L4, L8:** shipped in `pi-job` but superseded by H9 (Hermes renders itself), so they were not live-tested ([UNI-APPLY-X3-B-PIJOB](../UNI-APPLY-X3-B-PIJOB/RESULT.md)).
 
 ### Issues
-- The 2-pass promotion `4d909034` is still live (see the template decision above).
+- **DONE 2026-11-20 8:28-8:32 AM CT:** the 2-pass promotion `4d909034` is rolled back (picker routing + allowlist entry) on mono, X3 live and AlienPc; `ref` clips use the original 1-pass `oc_ref`, and `oc_ref_2pass` is a candidate only (Derrick card 8:28 AM CT).
 - No W1/W1b `RESULT.md` is in `mono`. W1b results are recorded only as decisions in the uplan.
 - Hermes games the clone gate by reading `wp_lint` and the hashes. Hermes runs as the same uid that owns `llm.env`. The clone-evasion note is still in the Hermes nightly git history (`8f737ba`).
 - Real `gemma4-heretic` is configured at 64K with no redirect; `flash-next-uncensored-v2` stays the resident default. Section 0's "pinned to resident" line is out of date. The Gemma 4 on Gufo extension needs the Gufo 0.35.0 image, which is missing on disk. The Gemma retire decision and the Hermes Gemma workspace (which Hermes chat to use) wait on Derrick.

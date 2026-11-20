@@ -1,0 +1,3 @@
+2026-11-19 22:12:37 CT JOB start pack02 prompt_id=fd6c78cf-c543-450c-8a58-e32b431a534f
+2026-11-19 22:12:40 CT JOB running pack02 prompt_id=fd6c78cf-c543-450c-8a58-e32b431a534f queued=3s
+2026-11-19 22:19:57 CT JOB end pack02 ok secs=436.6 file=C:\Users\derek\forge\reavideo\out\hotel_vlm2_val30s\run\pack02\pack02.mp4

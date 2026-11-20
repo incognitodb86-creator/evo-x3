@@ -1,0 +1,8 @@
+{
+  "notes": [
+    "Forge (pi) on AlienPc: English reports; no VLM configured, agent does the visual review"
+  ],
+  "reviewer": "pi-forge",
+  "lang": "en",
+  "engine": "minimax-h3-max"
+}

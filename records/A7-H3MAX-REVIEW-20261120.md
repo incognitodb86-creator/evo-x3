@@ -8,7 +8,17 @@ The video model refused to review the clips. Both passes used frames sampled 4�
 
 The original starting setup stays production: `h3max_lora_test_20261119/arm0_baseline`, which is the live `oc_guide.api.json` 1-pass at 768×1344 with MiniMaxH3AddGuide (first frame pinned) and `ref_image_size=match`.
 
-Derrick t3013u (7:43 AM CT): "Ok update the plan that we are staying with our original setup." TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. `oc_ref_2pass` is not promoted; its only real gain on this seed was about 70 s faster, and that speed trade was declined. The earlier `tq2_vsa_0.2` promotion (`4d909034`) is closed, not the pick. **Correction (2026-11-20 ~8 AM CT):** `4d909034` is still in place. `oc_ref_2pass.api.json` is allowlisted, and `pick_template()` still routes default portrait `ref` clips to it on `mono`, X3 live and AlienPc. Nothing was edited this morning. Undoing it waits on Derrick's go.
+Derrick t3013u (7:43 AM CT): "Ok update the plan that we are staying with our original setup." TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. `oc_ref_2pass` is not promoted; its only real gain on this seed was about 70 s faster, and that speed trade was declined. The earlier `tq2_vsa_0.2` promotion (`4d909034`) is closed, not the pick. **Correction (2026-11-20 ~8 AM CT):** `4d909034` is still in place. `oc_ref_2pass.api.json` is allowlisted, and `pick_template()` still routes default portrait `ref` clips to it on `mono`, X3 live and AlienPc. Nothing was edited this morning. (Rolled back 8:28-8:32 AM CT, see below.) Undoing it waits on Derrick's go.
+
+**Picker rollback (Derrick card 2026-11-20 8:28 AM CT): DONE 8:28-8:32 AM CT.** `pick_template()` in `scripts/parody/fill_request.py` now returns the original 1-pass `oc_ref` for every `ref` clip (portrait and 16:9), and `scripts/allowlist_promoted.json` is `[]` again. Guide mode still returns `oc_guide`. `oc_ref_2pass.api.json` stays on disk as a candidate, reachable only with an explicit `--template`. No Forge settings, prompts or controls were touched.
+
+| Where | State | Tests | Dry pick |
+|---|---|---|---|
+| `mono` | `fill_request.py` sha256 `4a45b567…`, allowlist `37517e5f…` (`[]`) | `test_pick_template_2pass.py` 6 passed; `test_template_allowlist.py` 13 passed | portrait `ref` -> `oc_ref` |
+| X3 live `/home/evo/AI/community/scripts` | same sha256; backup `_archive/20261120/picker-rollback`; lease taken 8:30:11 and cleared to 0 bytes 8:30:43 AM CT | 6 passed; 13 passed; `test_u55_clip_types_e2e.py` 10 passed (4 env-only RefMod-dir failures, same as before) | portrait `ref` (with / without identity) -> `oc_ref`; 16:9 `ref` -> `oc_ref`; guide -> `oc_guide` |
+| AlienPc `C:\AI\community\scripts` (Grok Bot local execution; SSH is not running there) | same sha256; backup `C:\AI\_archive\20261120\picker-rollback`; lease `C:\AI\locks\alienpc-lease.txt` taken 8:31:32, cleared to 0 bytes 8:32:30 AM CT | live `tests\test_template_allowlist.py` (older 12-test copy) 12 passed | AlienPc's `build_request.py` (Nov 16) lacks `normalize_still_mode`, so `pick_template()` errors there both before and after this change; with that one helper stubbed it returns `oc_ref` / `oc_ref` / `oc_guide`. X3 is the live picker. |
+
+No restart: no running X3 process has the community scripts loaded (ps / cwd check ~8:47 AM CT), so the next run picks up the change. On AlienPc the S2 allowlist hook is not installed and no running Python process was started after the change.
 
 ## How the tq1 graphs differ from the start
 

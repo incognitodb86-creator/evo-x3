@@ -1,0 +1,10 @@
+2026-11-19 23:03:37 CT gpu_lock acquire rc=0 ACQUIRED pid 43504
+2026-11-19 23:03:47 CT wake: triggering comfyui_auto start via GET /comfyui/
+2026-11-19 23:03:57 CT wake: start trigger sent (timed out)
+2026-11-19 23:03:57 CT wake: polling /comfyui/system_stats for readiness (status GET polls readiness once started)
+2026-11-19 23:04:05 CT QUEUE submitted pos=1 tag=pack01 prompt_id=c4edaa87-0e89-47ca-ada9-79dbddcb68d6 (in-flight 1/1)
+2026-11-19 23:20:12 CT OBJECTIVE ok pack01 frames=362 size=1344x768 audio=True bytes=7697988
+2026-11-19 23:20:16 CT QUEUE submitted pos=2 tag=pack02 prompt_id=a5c4ed19-c3f5-44f1-9eb2-5ef9f3ceba35 (in-flight 1/1)
+2026-11-19 23:45:38 CT OBJECTIVE ok pack02 frames=362 size=1344x768 audio=True bytes=10513833
+2026-11-19 23:45:39 CT KEEP comfyui_auto (--keep-comfy-process: /free ran, llama-swap unload skipped)
+2026-11-19 23:45:39 CT gpu_lock release rc=0 RELEASED pid 43504

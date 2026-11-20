@@ -1,0 +1,19 @@
+{
+  "tag": "pack01",
+  "pos": 1,
+  "arm": "oc_ref",
+  "scene": "val30s_v2",
+  "seed": 51083601,
+  "frames": 362,
+  "prompt_sha256": "b2c514b7ae61bf53ddc413f8f8a442031c373b127ee6411da607a428525ce2e1",
+  "clip_sha256": "d2f0f6082996ce71cd1e50c1c13f4c99df76fe5d8bda300aca9f2e3b7cefc0e1",
+  "clip": "pack01\\pack01.mp4",
+  "bytes": 7697988,
+  "w": 1344,
+  "h": 768,
+  "audio": true,
+  "wall_seconds_output_mtime": null,
+  "rendered_at": "2026-11-19 23:20:13 CT",
+  "retry": false,
+  "driver": "run_queue.py"
+}

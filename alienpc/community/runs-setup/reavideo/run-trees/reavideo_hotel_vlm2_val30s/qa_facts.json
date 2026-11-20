@@ -1,0 +1,58 @@
+{
+  "clips": [
+    {
+      "path": "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2_val30s\\run\\pack01\\pack01.mp4",
+      "bytes": 9565825,
+      "width": 1344,
+      "height": 768,
+      "landscape": true,
+      "fps": 24.0,
+      "duration_s": 15.083,
+      "video_codec": "h264",
+      "audio_streams": 1,
+      "audio_codec": "aac",
+      "black_detect_hits": 0,
+      "ok_canvas": true,
+      "ok_fps": true,
+      "ok_audio": true,
+      "ok_size": true,
+      "tag": "pack01"
+    },
+    {
+      "path": "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2_val30s\\run\\pack02\\pack02.mp4",
+      "bytes": 10928159,
+      "width": 1344,
+      "height": 768,
+      "landscape": true,
+      "fps": 24.0,
+      "duration_s": 15.083,
+      "video_codec": "h264",
+      "audio_streams": 1,
+      "audio_codec": "aac",
+      "black_detect_hits": 0,
+      "ok_canvas": true,
+      "ok_fps": true,
+      "ok_audio": true,
+      "ok_size": true,
+      "tag": "pack02"
+    }
+  ],
+  "concat": {
+    "path": "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2_val30s\\reavideo_val_30s.mp4",
+    "bytes": 20476660,
+    "width": 1344,
+    "height": 768,
+    "landscape": true,
+    "fps": 24.0,
+    "duration_s": 30.167,
+    "video_codec": "h264",
+    "audio_streams": 1,
+    "audio_codec": "aac",
+    "black_detect_hits": 0,
+    "ok_canvas": true,
+    "ok_fps": true,
+    "ok_audio": true,
+    "ok_size": true
+  },
+  "pass": true
+}

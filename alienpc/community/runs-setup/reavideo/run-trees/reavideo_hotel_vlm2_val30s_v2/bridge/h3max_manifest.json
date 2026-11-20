@@ -1,0 +1,257 @@
+{
+  "model_id": "minimax-h3-10eros-beta7",
+  "fps": 24,
+  "profile": "default",
+  "refmods": [
+    {
+      "slot": "mod_1",
+      "subject": "FCSydny",
+      "picture_index": 1,
+      "file": "minimaxh3_oc_poolclub_v1_refmod_visual",
+      "kind": "visual"
+    },
+    {
+      "slot": "mod_2",
+      "subject": "Adam Jensen",
+      "picture_index": 2,
+      "file": "minimaxh3_adamjensen_v1_refmod",
+      "kind": "visual"
+    },
+    {
+      "slot": "mod_3",
+      "subject": "FCSydny",
+      "picture_index": null,
+      "file": "minimaxh3_oc_poolclub_v1_refmod_audio",
+      "kind": "audio"
+    }
+  ],
+  "clips": [
+    {
+      "clip_index": 1,
+      "frames": 362,
+      "duration_s": 15.083,
+      "audio_duration_s": 15.0,
+      "prompt": "<redacted prompt, 1352 chars>",
+      "conversion": {
+        "mode_used": "plain",
+        "removed_headers": [
+          "detailed_description"
+        ],
+        "folded_sound_headers": [],
+        "dropped_music_headers": [],
+        "omitted_pictures": [
+          1,
+          2
+        ],
+        "bridge_gates": {
+          "oral_context": true,
+          "official_oral_mouth_talk": false,
+          "official_d1_codes": [],
+          "oral_noun_hits": "<redacted prompt words, 3 items>",
+          "d_muted": 0,
+          "d_kept": 0,
+          "untagged_muted": 0,
+          "untagged_remaining": 0,
+          "lipsync_added": false,
+          "lipsync_present": false,
+          "status": "READY",
+          "codes": []
+        },
+        "lint_ctx_passed": true,
+        "bind_report": {
+          "people_n": 2,
+          "visual_bound": 2,
+          "visual_unbound": 0,
+          "audio_n": 1,
+          "shot_counts": [
+            {
+              "n": 2,
+              "male_hits": 4,
+              "female_hits": 8,
+              "two_cue": false,
+              "layers_n": null,
+              "faces": 0.5
+            }
+          ]
+        }
+      },
+      "validation": {
+        "status": "READY",
+        "header_violations": [],
+        "violations": [],
+        "lint": {
+          "score": 95,
+          "pass": true,
+          "hard": [],
+          "issues": [
+            {
+              "code": "header_order",
+              "note": "the four headers must appear once each, in order: subject_definitions, summary, retention_analysis, detailed_description",
+              "hard": false,
+              "penalty": 5
+            }
+          ],
+          "spoken_words": 0,
+          "lines": [],
+          "words": 233,
+          "sentences": 7,
+          "phases": {
+            "anchor": -1,
+            "onset": -1,
+            "development": -1,
+            "result": -1
+          },
+          "builder_preview": null
+        },
+        "sections_present": [],
+        "six_section_complete": false,
+        "not_ready_reason": null,
+        "redacted": {
+          "status": "READY",
+          "header_violations": [],
+          "violations": [],
+          "codes": [],
+          "policy_word_categories": [],
+          "not_ready_reason": null,
+          "lint_ran": true
+        },
+        "bridge_gates": {
+          "oral_context": true,
+          "official_oral_mouth_talk": false,
+          "official_d1_codes": [],
+          "oral_noun_hits": "<redacted prompt words, 3 items>",
+          "d_muted": 0,
+          "d_kept": 0,
+          "untagged_muted": 0,
+          "untagged_remaining": 0,
+          "lipsync_added": false,
+          "lipsync_present": false,
+          "status": "READY",
+          "codes": []
+        }
+      },
+      "writer_preflight": null,
+      "offline_fallback": false,
+      "video_proxies": [],
+      "keyframes": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2\\shots\\shot_058_first.jpg"
+      ],
+      "audio_stems": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel14sav80\\stems\\vocals.wav"
+      ]
+    },
+    {
+      "clip_index": 2,
+      "frames": 362,
+      "duration_s": 15.083,
+      "audio_duration_s": 15.0,
+      "prompt": "<redacted prompt, 678 chars>",
+      "conversion": {
+        "mode_used": "plain",
+        "removed_headers": [
+          "detailed_description"
+        ],
+        "folded_sound_headers": [],
+        "dropped_music_headers": [],
+        "omitted_pictures": [
+          1
+        ],
+        "bridge_gates": {
+          "oral_context": true,
+          "official_oral_mouth_talk": false,
+          "official_d1_codes": [],
+          "oral_noun_hits": "<redacted prompt words, 3 items>",
+          "d_muted": 0,
+          "d_kept": 0,
+          "untagged_muted": 0,
+          "untagged_remaining": 0,
+          "lipsync_added": false,
+          "lipsync_present": false,
+          "status": "READY",
+          "codes": []
+        },
+        "lint_ctx_passed": true,
+        "bind_report": {
+          "people_n": 1,
+          "visual_bound": 1,
+          "visual_unbound": 1,
+          "audio_n": 1,
+          "shot_counts": [
+            {
+              "n": 1,
+              "male_hits": 0,
+              "female_hits": 0,
+              "two_cue": false,
+              "layers_n": null,
+              "faces": 1.0
+            }
+          ]
+        }
+      },
+      "validation": {
+        "status": "READY",
+        "header_violations": [],
+        "violations": [],
+        "lint": {
+          "score": 95,
+          "pass": true,
+          "hard": [],
+          "issues": [
+            {
+              "code": "header_order",
+              "note": "the four headers must appear once each, in order: subject_definitions, summary, retention_analysis, detailed_description",
+              "hard": false,
+              "penalty": 5
+            }
+          ],
+          "spoken_words": 0,
+          "lines": [],
+          "words": 120,
+          "sentences": 6,
+          "phases": {
+            "anchor": -1,
+            "onset": -1,
+            "development": -1,
+            "result": -1
+          },
+          "builder_preview": null
+        },
+        "sections_present": [],
+        "six_section_complete": false,
+        "not_ready_reason": null,
+        "redacted": {
+          "status": "READY",
+          "header_violations": [],
+          "violations": [],
+          "codes": [],
+          "policy_word_categories": [],
+          "not_ready_reason": null,
+          "lint_ran": true
+        },
+        "bridge_gates": {
+          "oral_context": true,
+          "official_oral_mouth_talk": false,
+          "official_d1_codes": [],
+          "oral_noun_hits": "<redacted prompt words, 3 items>",
+          "d_muted": 0,
+          "d_kept": 0,
+          "untagged_muted": 0,
+          "untagged_remaining": 0,
+          "lipsync_added": false,
+          "lipsync_present": false,
+          "status": "READY",
+          "codes": []
+        }
+      },
+      "writer_preflight": null,
+      "offline_fallback": false,
+      "video_proxies": [],
+      "keyframes": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel_vlm2\\shots\\shot_029_first.jpg"
+      ],
+      "audio_stems": [
+        "C:\\Users\\derek\\forge\\reavideo\\out\\hotel14sav80\\stems\\vocals.wav"
+      ]
+    }
+  ]
+}

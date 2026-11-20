@@ -1,2 +1,5 @@
-1d3ec1da3ef8f2f2d8f111e52697713685d9084cb2271cc0aac8fc32e1882c9c  templates/oc_ref_2pass.api.json
-834d1d0a65e3bec938167ddf5f58ac5aaefa75024bdf4a1a4b94fef2195a71c4  scripts/allowlist_promoted.json
+# AlienPc C:\AI\community sha256, re-read 2026-11-20 8:45 AM CT (America/Chicago) after the picker rollback (Derrick card 8:28 AM CT)
+1d3ec1da3ef8f2f2d8f111e52697713685d9084cb2271cc0aac8fc32e1882c9c  templates/oc_ref_2pass.api.json  (candidate, no longer allowlisted)
+d3b2f381fdb6a39ca4b399a4587d911fadf66125d2987183195dc09950a55c4a  templates/oc_ref.api.json
+37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570  scripts/allowlist_promoted.json  ([])
+4a45b567c9c6acd04c94e753773072b44c00946787da3531c229c75f39318848  scripts/parody/fill_request.py  (untracked in C:\AI\community git; matches mono x3/community/scripts/parody/fill_request.py)

@@ -1,0 +1,8 @@
+2026-11-19T23:04:01-06:00 BATCH open: 2 clips, lock held, comfyui_auto kept loaded
+2026-11-19T23:04:01-06:00 START pos=1 tag=pack01 arm=oc_ref scene=val30s_v2 seed=51083601
+2026-11-19T23:20:13-06:00 DONE pos=1 tag=pack01 ok 1344x768 362f audio yes wall=?s bytes=7697988 retry=False
+2026-11-19T23:20:13-06:00 START pos=2 tag=pack02 arm=oc_ref scene=val30s_v2 seed=51083601
+2026-11-19T23:45:39-06:00 DONE pos=2 tag=pack02 ok 1344x768 362f audio yes wall=?s bytes=10513833 retry=False
+2026-11-19 23:45:39 CT COMFY free /api/free ok
+2026-11-19T23:45:39-06:00 UPSCALE skipped (--no-upscale): clips stay at the render size
+2026-11-19T23:45:39-06:00 BATCH closed rc=0 reason=all queued clips DONE ok done=2/2: comfyui_auto kept loaded, lock released

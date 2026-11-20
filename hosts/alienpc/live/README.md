@@ -2,6 +2,8 @@
 
 > **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`). Agent file copies in this folder remain the proposed AGT1 versions, not live.
 
+Live refresh 2026-11-20 8:45 AM CT (America/Chicago), via Grok Bot local execution on AlienPc (no sshd on AlienPc, so SSH refreshes fail): `C:\AI\community` HEAD still `8eec1d3d`. `community-promo-hashes.txt` re-read after the picker rollback: `allowlist_promoted.json` is `[]` (`37517e5f…`), `scripts/parody/fill_request.py` matches mono (`4a45b567…`), `oc_ref_2pass.api.json` unchanged on disk (`1d3ec1da…`, candidate). REA-Video run setup copied to `alienpc/community/runs-setup/reavideo/`. Other files in this folder were not re-read.
+
 Refresh attempted again 2026-11-20 07:52 CT from the box: SSH to `alienpc.tailf242b2.ts.net` closed the connection. Folder not rewritten.
 
 Refresh attempted 2026-11-20 07:23 CT (America/Chicago) from the box as part of the mono push dual-host snapshot. SSH to `alienpc.tailf242b2.ts.net:22` timed out, and the X3 has no AlienPc SSH host in `~/.ssh/config`. This folder was **not** rewritten; the newest copy is still the 2026-11-19 9:07 PM CT refresh below.

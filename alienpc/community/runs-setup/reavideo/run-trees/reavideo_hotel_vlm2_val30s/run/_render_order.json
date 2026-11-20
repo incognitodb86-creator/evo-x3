@@ -1,0 +1,18 @@
+{
+  "order": [
+    {
+      "pos": 1,
+      "tag": "pack01",
+      "arm": "oc_ref",
+      "scene": "val30s",
+      "seed": 51083601
+    },
+    {
+      "pos": 2,
+      "tag": "pack02",
+      "arm": "oc_ref",
+      "scene": "val30s",
+      "seed": 51083601
+    }
+  ]
+}

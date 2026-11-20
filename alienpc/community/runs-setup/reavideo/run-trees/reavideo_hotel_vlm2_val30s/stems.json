@@ -1,0 +1,11 @@
+{
+  "stems": [
+    "minimaxh3_oc_poolclub_v1_refmod_visual",
+    "minimaxh3_adamjensen_v1_refmod",
+    "minimaxh3_oc_poolclub_v1_refmod_audio"
+  ],
+  "fcsydny_visual": "minimaxh3_oc_poolclub_v1_refmod_visual",
+  "fcsydny_audio": "minimaxh3_oc_poolclub_v1_refmod_audio",
+  "adam_jensen_visual": "minimaxh3_adamjensen_v1_refmod",
+  "refmods_dir": "C:\\Users\\derek\\HardcoreNSFW-TestRuntime\\ComfyUI\\models\\refmods"
+}

@@ -1,0 +1,2 @@
+file 'C:/Users/derek/forge/reavideo/out/hotel_vlm2_val30s_v2/run/pack01/pack01.mp4'
+file 'C:/Users/derek/forge/reavideo/out/hotel_vlm2_val30s_v2/run/pack02/pack02.mp4'

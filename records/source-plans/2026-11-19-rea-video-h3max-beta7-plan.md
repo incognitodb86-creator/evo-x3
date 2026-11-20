@@ -22,7 +22,7 @@ Count: 2 done, 2 open, 2 held, 0 closed.
 - **RV4:** optional Guide / AudioRefine nodes not started. Each needs its own yes.
 
 ### Held
-- **RV3:** run as the 30-second `hotel_vlm2` validation (FCSydny OC visual+voice RefMod + Adam Jensen visual RefMod, 1-pass `oc_ref` 1344x768). v1 and v2 both **failed** review. v2 removed the clones and speech issues from v1, but tongue morphing shows on both pack clips and pack02 audio duplicates pack01 ([REA-VIDEO-VAL30S-RESULT.md](../BENCH-ALIENPC-1/REA-VIDEO-VAL30S-RESULT.md)). The REA v3 proposal waits on Derrick.
+- **RV3:** run as the 30-second `hotel_vlm2` validation (FCSydny OC visual+voice RefMod + Adam Jensen visual RefMod, 1-pass `oc_ref` 1344x768). v1 and v2 both **failed** review. v2 removed the clones and speech issues from v1, but tongue morphing shows on both pack clips and pack02 audio duplicates pack01 ([REA-VIDEO-VAL30S-RESULT.md](../BENCH-ALIENPC-1/REA-VIDEO-VAL30S-RESULT.md)). The REA v3 proposal waits on Derrick. Run setup (graphs, manifests, fill/launch scripts, breakdown, install; prompts redacted) is on mono at `alienpc/community/runs-setup/reavideo/` (2026-11-20, Derrick t3020u).
 - **RV5:** the 20-minute `hotel_vlm2` remake (101-pack batch) is held until a validation passes.
 
 ### Issues
