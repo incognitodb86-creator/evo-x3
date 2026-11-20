@@ -47,7 +47,7 @@ $PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --sti
 Add `--character`, `--template`, `--aspect`, `--size`, `--frames`, `--names`, or `--realism-lora` only when the ask needs them. On READY, `build_report.json` and `clip/request.api.json` exist and `DRY_RUN` is present.
 
 - READY: reply with the still, the run folder, the full prompt verbatim in a text block, and `Render this? (yes / no)`. Then stop and wait. Never shorten the prompt.
-- NOT_READY: quote the reason exactly. Rewrite the flagged beat fresh from the still once (never inspect `wp_lint` source, never call `wp_lint.cloned_hits` or import lint internals, and never synonym-swap to beat the clone gate); if still NOT_READY, stop.
+- NOT_READY: quote the reason exactly. For clones the pipeline reports only a count and beat number—rewrite that whole beat fresh from the still once (never write a scanner over skill or rule files, never grep or read `wp_lint`/`wp_state`/`lint_ctx`, never synonym-swap, and never save lint or clone-gate tips to memory); if still NOT_READY, stop.
 
 ## 4. Queue only on Derrick's yes (single clip)
 

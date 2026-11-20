@@ -1180,8 +1180,75 @@ def _partner_match_clause(p: Dict[str, Any], idx: int, slots: Dict[str, Any]) ->
     return cleaned
 
 
+_R11_SUBJECT_GUIDE = br.R11_SUBJECT.replace("<Picture 1> of the reference pictures", "the opening frame")
+_PIPELINE_REMOVE_RE = re.compile(
+    r"(?i)\b(?:"
+    r"glid(?:e|es|ed|ing)\s+(?:down|off|away)|"
+    r"pool(?:s|ed|ing)?\s+(?:around|at)|"
+    r"slid(?:e|es|ing)?\s+(?:(?:it|them|the\s+[\w-]+|her\s+[\w-]+)\s+)?(?:down|off)|"
+    r"slips?\s+(?:down|off)|"
+    r"drag(?:s|ged|ging)?\s+(?:(?:it|them|the\s+[\w-]+|her\s+[\w-]+)\s+)?(?:down|off)|"
+    r"falls?\s+(?:off|away|to\s+the\s+floor)|"
+    r"drops?\s+to\s+the\s+floor|dropped\s+to\s+the\s+floor|"
+    r"peels?\s+(?:away|off)|peeled\s+(?:away|off)|"
+    r"shed(?:s|ding)?|shrugs?\s+off|shrugged\s+off|"
+    r"(?:lifts?|pulls?)\s+(?:it|them|the\s+[\w-]+|her\s+[\w-]+)\s+over\s+(?:her|his)\s+head|"
+    r"unzips?|unzipped|unties?|untied|"
+    r"comes?\s+off|came\s+off"
+    r")\b"
+)
+# entrance into the shot only; a bare "enters" is also a penetration verb in sex prose, so it needs a place object
+_PARTNER_ENTRANCE_RE = re.compile(r"(?i)\b(?:(?:enters?|entering)\s+(?:the\s+)?(?:frame|shot|room|scene|from)|"
+                                  r"(?:steps?|walks?|comes?|strides?)\s+(?:in|into)\s+(?:the\s+)?(?:frame|shot|room|scene|view)|"
+                                  r"(?:steps?|walks?|comes?)\s+in\s+from|(?:steps?|walks?)\s+in\b(?!\w))")
+
+
+def _hermes_subject_line(hermes_sd: str, subj_num: int, label: str, pron: str, strip_picture: bool) -> str:
+    """Return Hermes's <Subject N> definition line if present, keeping (SN) binding and stripping <Picture N> in guide mode."""
+    pat = re.compile(rf"^\s*<Subject\s+{subj_num}>(?=\s|$).*$", re.I | re.M)
+    m = pat.search(hermes_sd or "")
+    if not m:
+        return ""
+    line = m.group(0).strip()
+    if strip_picture:
+        line = re.sub(r"(?i)\s*(?:from|in|of)?\s*<Picture\s+\d+>", "", line)
+        line = re.sub(r"\s{2,}", " ", line).replace(" ,", ",").replace(" ;", ";").strip()
+    if f"({label})" not in line:
+        line = line.rstrip(" .;:") + f"; {pron} is ({label})."
+    return line
+
+
+def _derive_partner_attire(dd: str, label: str, sex: str) -> str:
+    """Extract partner attire from prose when no structured partner attire is provided."""
+    text = dd or ""
+    m = re.search(rf"(?i)\({re.escape(label)}\)\s+(?:is\s+)?(?:in|wearing)\s+([^,.;\n]{{3,50}})", text)
+    if m:
+        return _clean_attr(m.group(1), "")
+    poss = "his" if sex == "man" else "her"
+    m2 = re.search(
+        rf"(?i)\b{poss}\s+((?:dark\s+|black\s+|white\s+|blue\s+|gray\s+|grey\s+)?(?:t-shirt|shirt|jeans|trousers|pants|shorts|jacket|hoodie|suit|boxers|briefs|trunks)(?:\s+and\s+(?:jeans|pants|shorts|trousers))?)\b",
+        text,
+    )
+    if m2:
+        return _clean_attr(m2.group(1), "")
+    m3 = re.search(rf"(?i)\({re.escape(label)}\)[^.!?\n]{{0,60}}\b(shirtless|naked|nude|bare-chested|topless)\b", text)
+    if m3:
+        return m3.group(1).lower()
+    return ""
+
+
+def _partner_in_frame_at_start(dd: str, label: str) -> bool:
+    """True when (label) appears in dd without an entrance verb in any sentence mentioning them."""
+    text = dd or ""
+    if f"({label})" not in text:
+        return False
+    sents = [s for s in re.split(r"(?<=[.!?])\s+", text) if f"({label})" in s]
+    return bool(sents) and not any(_PARTNER_ENTRANCE_RE.search(s) for s in sents)
+
+
 def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, Any], bodies: int, kind: str,
-                    continuation: Optional[str] = None) -> str:
+                    continuation: Optional[str] = None,
+                    hermes_sections: Optional[Dict[str, str]] = None) -> str:
     place = slots.get("place") or "setting"
     light = slots.get("light") or "light"
     hair = slots.get("hair") or "her hair as shown"
@@ -1203,14 +1270,16 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
                   f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1)" +
                   (", and <Audio 1> defines his voice timbre." if has_audio_ref else ".")]
         else:
-            sd = [f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1)."]
+            sd = [f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1).",
+                  br.R11_HAND]
     elif is_named_parody:
         who_label = f"{ichar} ({iact})" if (ichar and iact and ichar.lower() != iact.lower()) else (ichar or iact)
         if use_ref_pic:
             sd = [f"<Picture 1> is the reference image defining the {place}, its {light}, the wardrobe and the opening framing.",
                   f"<Subject 1> is {who_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1)."]
         else:
-            sd = [f"<Subject 1> is {who_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1)."]
+            sd = [f"{_R11_SUBJECT_GUIDE}; {who_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1).",
+                  br.R11_HAND]
     else:
         who = ichar or iact
         id_prefix = f"{who}, " if who else ""
@@ -1223,7 +1292,10 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
                   f"{voice_tail}"]
         else:
             role_label = who or "the woman"
-            sd = [f"<Subject 1> is {role_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1){voice_tail}"]
+            sd = [f"{_R11_SUBJECT_GUIDE}; {role_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1){voice_tail}",
+                  br.R11_HAND]
+    _hermes_sd = (hermes_sections or {}).get("subject_definitions") or ""
+    _hermes_ret = (hermes_sections or {}).get("retention_analysis") or ""
     partners = (card or {}).get("partners") or []
     want = 1 if bodies == 2 or kind == "talk" else (2 if bodies >= 3 else 0)
     if kind == "talk" and not re.search(r"\(S2\)", dd):
@@ -1232,14 +1304,19 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         label = f"S{i + 2}"
         p = _pick_partner(partners, label, i)
         sex = partner_sex(slots.get("ask") or "", str(p.get("sex") or ""), label=label)
+        pron = "he" if sex == "man" else "she"
+        if _hermes_sd:
+            _hline = _hermes_subject_line(_hermes_sd, i + 2, label, pron, strip_picture=(not use_ref_pic))
+            if _hline:
+                sd.append(_hline)
+                continue
         age = p.get("age") if isinstance(p.get("age"), int) and not isinstance(p.get("age"), bool) else 30
         age = max(25, min(int(age), 60))
-        pron = "he" if sex == "man" else "she"
         # Derrick t1411u SHAPE form (one sentence, "and he is"): the builder's partner gate splits on ';' (shapes2)
         build = _clean_attr(p.get("build"), "athletic build")
         if build.lower() == (slots.get("build") or "").lower() or re.search(r"(?i)\b(?:curvy|petite|busty)\b", build):
             build = "athletic build" if sex == "man" else "slim build"
-        attire = _clean_attr(p.get("attire"), "")
+        attire = _clean_attr(p.get("attire"), "") or _derive_partner_attire(dd, label, sex)
         same_as_s1 = any(g.lower() in attire.lower() for g in (slots.get("garments_all") or []) if g)
         bad_man_attire = (sex == "man") and bool(_S1_ONLY.search(attire))
         if not attire or bad_man_attire or same_as_s1:
@@ -1247,6 +1324,10 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         sm = _SIDE_RE.search(str(p.get("enters_from") or ""))
         side = ("the " + sm.group(0).lower()) if sm and not sm.group(0).lower().startswith(("the", "behind", "off")) else (
             sm.group(0).lower() if sm else "the right")
+        if not sm and _partner_in_frame_at_start(dd, label):
+            entrance_clause = "who is already in frame at the start"
+        else:
+            entrance_clause = f"who enters from {side}"
         species = _clean_attr(p.get("species"), "")
         if species and species.lower() not in ("human", "person"):
             role = f"the {species}, an adult" if sex == "man" else (
@@ -1259,7 +1340,8 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
         match_str = _partner_match_clause(p, i, slots)
         extras = ", ".join(x for x in (anat, scale, match_str) if x)
         extra_part = f", {extras}" if extras else ""
-        sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}{extra_part}, in {attire}, who enters from {side} "
+        attire_part = attire if attire.lower() in ("shirtless", "naked", "nude", "bare-chested", "topless") else f"in {attire}"
+        sd.append(f"<Subject {i + 2}> is {role}, {age} years of age, {build}{extra_part}, {attire_part}, {entrance_clause} "
                   f"and {pron} is ({label}).")
     _sum_surf = re.sub(r'^(?:the|a|an)\s+', '', (slots.get('surface') or 'surface').strip(), flags=re.I)
     _pos_id = str(slots.get('position') or 'scene').strip()
@@ -1279,6 +1361,7 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     summary = re.sub(r"\s{2,}", " ", re.sub(r"(?i)\b(?:cinematic|beautiful(?:ly)?)\b,?\s*", "", summary)).strip()
     summary = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", summary)
     summary = re.sub(r"\b(?:A|An) (?=[aeiou])", "An ", re.sub(r"\bAn (?=[^aeiouAEIOU])", "A ", summary))
+    summary = re.sub(r"(?i)(?<![<\w])Subject\s*([123])(?![>\w])", r"(S\1)", summary)
     if use_ref_pic and not summary.lower().startswith("[reference generation]"):
         summary = f"[reference generation] {summary}"
     elif still_mode == "guide":
@@ -1307,14 +1390,27 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
             f"<Subject {i + 2}> (appears in [Shot 1]): fully_preserved - {_p_pron} face, build and skin stay the same {_p_noun} throughout."
         )
     if attire_s1:
+        _hermes_ret_wardrobe = "\n".join(
+            ln for ln in _hermes_ret.splitlines()
+            if ln.strip() and not re.match(r"^\s*(?:<Subject\s+\d+>|<Picture\s+\d+>|The opening frame)\b", ln, re.I)
+        )
         _aside_hit = bool(
             br._ASIDE_RE.search(dd or "")
             or re.search(r"(?i)\b(?:pulls?|slides?|slid|pushes?|tugs?|hooks?|moves?)\b[^.!?\n]{0,60}\b(?:aside|to one side|up off)\b", dd or "")
+            or br._ASIDE_RE.search(_hermes_ret_wardrobe)
+            or (re.search(r"(?i)\bpartially_preserved\b", _hermes_ret_wardrobe) and not re.search(r"(?i)\bremoved\b", _hermes_ret_wardrobe))
+        )
+        _remove_hit = bool(
+            br._REMOVE_VERB_RE.search(dd or "")
+            or _PIPELINE_REMOVE_RE.search(dd or "")
+            or re.search(r"(?i)\bremoved\b", _hermes_ret_wardrobe)
+            or br._REMOVE_VERB_RE.search(_hermes_ret_wardrobe)
+            or _PIPELINE_REMOVE_RE.search(_hermes_ret_wardrobe)
         )
         _pic_ref = " of <Picture 1>" if use_ref_pic else ""
         if _aside_hit:
             ret_lines.append(f"The {attire_s1}{_pic_ref}: partially_preserved - stays on her body, pulled aside so the join is clear.")
-        elif br._REMOVE_VERB_RE.search(dd or ""):
+        elif _remove_hit:
             ret_lines.append(f"The {attire_s1}{_pic_ref}: partially_preserved - removed during the clip.")
         else:
             ret_lines.append(f"The {attire_s1}{_pic_ref}: fully_preserved - stays on her body as shown.")
@@ -1691,46 +1787,126 @@ class _Stop(Exception):
     """A hard stop that ends the clip as NOT_READY with result['not_ready_reason'] already set."""
 
 
+def _load_llama_swap_key(cfg: Dict[str, Any]) -> Tuple[str, str]:
+    """Resolve llama-swap API key from env or owner-only env file without shell/subprocess."""
+    env_key = (os.environ.get("LLAMA_SWAP_API_KEY") or "").strip()
+    if env_key:
+        return env_key, "env"
+    key_file = str(cfg.get("llama_swap_key_file") or os.environ.get("LLAMA_SWAP_KEY_FILE") or "/home/evo/.config/evo-x3/llm.env").strip()
+    key_var = str(cfg.get("llama_swap_key_var") or "LLM_KEY_HERMES").strip()
+    kp = Path(key_file)
+    try:
+        if not kp.is_file():
+            return "", "none"
+        st = kp.stat()
+        if st.st_mode & 0o077:
+            return "", "refused: file mode not owner-only"
+        parsed: Dict[str, str] = {}
+        for raw_line in kp.read_text(encoding="utf-8", errors="replace").splitlines():
+            ln = raw_line.strip()
+            if not ln or ln.startswith("#"):
+                continue
+            if ln.startswith("export "):
+                ln = ln[7:].strip()
+            if "=" not in ln:
+                continue
+            k, v = ln.split("=", 1)
+            k = k.strip()
+            v = v.strip()
+            if len(v) >= 2 and v[0] == v[-1] and v[0] in ("'", '"'):
+                v = v[1:-1]
+            parsed[k] = v
+        val = (parsed.get(key_var) or parsed.get("CUSTOM_API_KEY") or "").strip()
+        return (val, "file") if val else ("", "none")
+    except Exception:
+        return "", "none"
+
+
 def collect_backend_proof(run_dir: Path, cfg: Dict[str, Any], hermes_slot: Optional[str] = None) -> Dict[str, Any]:
     """Read-only routing proof: record Hermes slot, llama-swap /running (:8080), and llama-swap journal lines."""
     slot = (hermes_slot or os.environ.get("HERMES_SLOT") or "").strip() or "unknown"
     swap_base = (cfg.get("llama_swap_url") or os.environ.get("LLAMA_SWAP_URL") or "http://127.0.0.1:8080").rstrip("/")
+    api_key, key_source = _load_llama_swap_key(cfg)
+
+    def _redact(text: Optional[str]) -> Optional[str]:
+        if not text or not api_key:
+            return text
+        return text.replace(api_key, "***")
+
+    auth_headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
     running_url = f"{swap_base}/running"
     running: Any = None
     swap_err: Optional[str] = None
     try:
-        req = urllib.request.Request(running_url, headers={"Accept": "application/json"})
+        req = urllib.request.Request(running_url, headers={"Accept": "application/json", **auth_headers})
         with urllib.request.urlopen(req, timeout=1.5) as resp:
             raw = resp.read().decode("utf-8", errors="replace").strip()
         try:
             data = json.loads(raw)
-            running = data.get("running", data) if isinstance(data, dict) else data
+            r_raw = data.get("running", data) if isinstance(data, dict) else data
+            if isinstance(r_raw, list):
+                running = [
+                    ({"model": item.get("model"), "state": item.get("state")} if isinstance(item, dict) else _redact(str(item)))
+                    for item in r_raw
+                ]
+            elif isinstance(r_raw, str):
+                running = _redact(r_raw)
+            else:
+                running = r_raw
         except ValueError:
-            running = raw
+            running = _redact(raw)
     except Exception as e:
-        swap_err = f"{type(e).__name__}: {e}"
+        swap_err = _redact(f"{type(e).__name__}: {e}")
 
     unit = str(cfg.get("llama_swap_unit") or "llama-swap")
     journal_path = run_dir / "llama_swap_journal.txt"
     journal_ok = False
     journal_note = ""
+    journal_source = ""
     try:
         jp = subprocess.run(
             ["journalctl", "-u", unit, "--since", "-10 min", "--no-pager", "-n", "200"],
             capture_output=True, text=True, timeout=3,
         )
-        if jp.returncode == 0 and (jp.stdout or "").strip():
+        real_lines = [
+            ln for ln in (jp.stdout or "").splitlines()
+            if ln.strip()
+            and ln.strip() != "-- No entries --"
+            and not re.match(r"^--\s*(?:Journal|Logs)\s+begins?\b", ln.strip(), re.I)
+        ]
+        if jp.returncode == 0 and real_lines:
             wp_state.atomic_write(journal_path, jp.stdout)
             journal_ok = True
+            journal_source = "journalctl"
         else:
-            journal_note = f"journalctl unavailable (rc={jp.returncode}): {(jp.stderr or jp.stdout or 'empty').strip()[:300]}"
-            wp_state.atomic_write(journal_path, journal_note + "\n")
+            journal_note = _redact(
+                f"journalctl unavailable or empty (rc={jp.returncode}): {(jp.stderr or jp.stdout or 'empty').strip()[:300]}"
+            ) or "journalctl empty"
     except Exception as e:
-        journal_note = f"journalctl error: {type(e).__name__}: {e}"
-        wp_state.atomic_write(journal_path, journal_note + "\n")
+        journal_note = _redact(f"journalctl error: {type(e).__name__}: {e}") or "journalctl error"
+
+    if not journal_ok:
+        try:
+            lreq = urllib.request.Request(f"{swap_base}/logs", headers=auth_headers)
+            with urllib.request.urlopen(lreq, timeout=3.0) as lresp:
+                lraw = lresp.read().decode("utf-8", errors="replace")
+            llines = [ln for ln in lraw.splitlines() if ln.strip()]
+            if llines:
+                tail = "\n".join(lraw.splitlines()[-200:]) + "\n"
+                wp_state.atomic_write(journal_path, _redact(tail) or tail)
+                journal_ok = True
+                journal_source = "llama-swap /logs"
+            else:
+                journal_note = _redact(f"{journal_note}; /logs returned empty".strip("; ")) or "/logs empty"
+                wp_state.atomic_write(journal_path, journal_note + "\n")
+        except Exception as le:
+            lerr = _redact(f"/logs error: {type(le).__name__}: {le}")
+            journal_note = f"{journal_note}; {lerr}".strip("; ")
+            wp_state.atomic_write(journal_path, journal_note + "\n")
 
     proof: Dict[str, Any] = {
         "hermes_slot": slot,
+        "key_source": key_source,
         "llama_swap_url": running_url,
         "llama_swap_running": running,
         "llama_swap_error": swap_err,
@@ -1738,7 +1914,9 @@ def collect_backend_proof(run_dir: Path, cfg: Dict[str, Any], hermes_slot: Optio
         "journal_ok": journal_ok,
         "recorded_at": wp_state.now_ct(),
     }
-    if journal_note:
+    if journal_source:
+        proof["journal_source"] = journal_source
+    if journal_note and not journal_ok:
         proof["journal_note"] = journal_note
     wp_state.atomic_write(run_dir / "backend.json", json.dumps(proof, indent=2, ensure_ascii=False, default=str))
     return proof
@@ -2150,10 +2328,22 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                         r"(?is)^\s*summary:\s*\n(.*?)(?=\n\s*(?:retention_analysis|detailed_description|continuation)\s*:|\Z)",
                         t, re.M,
                     )
+                    m_sd = re.search(
+                        r"(?is)^\s*subject_definitions:\s*\n(.*?)(?=\n\s*(?:summary|retention_analysis|detailed_description|continuation)\s*:|\Z)",
+                        t, re.M,
+                    )
+                    m_ret = re.search(
+                        r"(?is)^\s*retention_analysis:\s*\n(.*?)(?=\n\s*(?:detailed_description|continuation)\s*:|\Z)",
+                        t, re.M,
+                    )
                     card_for_asm = dict(card or {})
                     if m_sum and m_sum.group(1).strip():
                         card_for_asm["summary"] = m_sum.group(1).strip()
-                    return assemble_output(dd_only, card_for_asm, slots, bodies, kind), dd_only
+                    hermes_sec = {
+                        "subject_definitions": m_sd.group(1).strip() if m_sd else "",
+                        "retention_analysis": m_ret.group(1).strip() if m_ret else "",
+                    }
+                    return assemble_output(dd_only, card_for_asm, slots, bodies, kind, hermes_sections=hermes_sec), dd_only
                 return t, wp_lint.get_dd(t)
             dd_only = re.sub(r"(?im)^\s*(?:overall_soundscape|non_diegetic_music)\s*:\s*", "", t).strip()
             return assemble_output(dd_only, card, slots, bodies, kind), dd_only
@@ -2301,6 +2491,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             wp_state.atomic_write(run_dir / "clip_NOT_READY.txt",
                                   "NOT_READY: six-word clone gate blocked READY after retries\n")
             result["warnings"].append("clone_gate_blocked_ready")
+        _clone_sum = wp_lint.clone_hit_summary(chosen["dd"], cloned)
         result.update(status=status, pick=pick, pick_score=chosen["lint"]["score"], pick_pass=chosen["lint"]["pass"],
                       pick_hard=chosen["lint"]["hard"], judge=judge, still=still, scene_id=scene_id,
                       frames=clip_frames, clip_seconds=clip_seconds,
@@ -2311,7 +2502,8 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                       thinking=bool(cfg.get("thinking", False)), slots_tone=slots["tone"], line_focus=slots["line_focus"],
                       builds=[{k: b[k] for k in ("status", "rc", "stdout", "seconds")} for b in builds],
                       build_added=((build["report"].get("build") or {}).get("added") or []),
-                      cloned_hits=wp_lint.cloned_hits(chosen["dd"], cloned), spoken_words=chosen["lint"]["spoken_words"],
+                      clone_hits_count=_clone_sum["count"], clone_hit_beats=_clone_sum["beats"],
+                      spoken_words=chosen["lint"]["spoken_words"],
                       llm_calls=client.calls)
         if status == "READY" and job.get("queue"):
             # Max Architect 2026-11-16 (Derrick t2036u, t2039u): same process, no second writer pass; queue-remote.sh keeps --yes-derrick, adults guard, pytest gate.

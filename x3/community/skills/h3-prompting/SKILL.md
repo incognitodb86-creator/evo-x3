@@ -58,6 +58,7 @@ command string. `run_graph_job.py` runs `comm.guard_ok` before any POST - never 
 **R6 - Task type.** Default `[reference generation]`. `keyframe completion` is a labelled one-axis try, never a
 silent freeze. For a first-and-last-frame (keyframe completion) clip, describe the physical path that connects the two stills, not two static portraits. `MiniMaxH3ReferenceToVideo` does not pin frame 0 (the still is conditioning); first-frame lock is
 `MiniMaxH3ImageToVideo`, and a reference image cannot be mixed with it on one node.
+Guide mode (oc_guide: the still enters only through `MiniMaxH3AddGuide` at frame 0 and no `ref_images` input is wired) writes no task tag and no `<Picture N>` label (R33, R34); R11's subject clause binds to the opening frame instead, and the HAND lock still applies.
 
 **R7 - Audio is plain cues in the main prompt, never a section. No labeled soundscape or
 non-diegetic-music header, no music/foley score.** TenStrip (model owner, HF 10Eros-Max discussion #77, quoted in

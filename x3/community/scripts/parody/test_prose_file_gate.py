@@ -74,7 +74,11 @@ def test_hermes_skills_route_path_b_through_render_writer_pipeline():
         if not skill_txt:
             continue
         low = skill_txt.lower()
-        assert "wp_lint.cloned_hits" in skill_txt
+        assert "wp_lint" in skill_txt
+        assert "wp_state" in skill_txt
+        assert "lint_ctx" in skill_txt
+        assert "scanner" in low
+        assert "memory" in low
         assert "synonym" in low
         assert "from the still" in low
 

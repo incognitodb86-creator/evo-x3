@@ -6,8 +6,9 @@ build_request.py (never copied), so the linter follows the builder when its rege
 from __future__ import annotations
 
 import difflib
+import hashlib
 import re
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import build_request as br
 
@@ -86,16 +87,27 @@ RELEASE_RE = re.compile(r"(?i)\b(?:unties?|untied|unbuckl\w*|uncuff\w*|releases?
 RESTRAINT_RE = re.compile(r"(?i)\b(?:tied|bound|cuff\w*|rope\w*|strap\w*|restrain\w*|pinned|pins? her wrists)\b")
 ROLE_RE = re.compile(r"(?i)\b(?:daddy|step-?(?:brother|sister|dad|mom|father|mother|son|daughter)|brother|sister|uncle|cousin)\b")
 WET_RE = re.compile(r"(?i)\b(?:wet\w*|oil\w*|oily|sweat\w*|glisten\w*|slick\w*)\b")
-PER_SEC_RE = re.compile(r"(?i)\b(one|two|three|four|five|\d+(?:\.\d+)?)\s+(?:\w+\s+){0,3}?(?:strokes?|thrusts?|beats?|cycles?|bobs?|drives?|moves?)\s+(?:a|per|every)\s+(half\s+)?second")
-_NUM = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
+PER_SEC_RE = re.compile(
+    r"(?i)\b(?:"
+    r"(one|two|three|four|five|\d+(?:\.\d+)?)\s+(?:(?:\w+\s+){0,3}?(?:strokes?|thrusts?|beats?|cycles?|bobs?|drives?|moves?)\s+)?(?:a|per|every)\s+(half\s+)?second"
+    r"|(once|twice)\s+(?:a|per|every)\s+(half\s+)?second"
+    r"|(?:strokes?|thrusts?|beats?|cycles?|bobs?|drives?|moves?)\s+every\s+(half\s+)?second"
+    r")"
+)
+_NUM = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "once": 1, "twice": 2}
 
 
 def tempo_rate(text: str) -> Optional[float]:
     m = PER_SEC_RE.search(text or "")
     if not m:
         return None
-    n = _NUM.get(m.group(1).lower()) or float(m.group(1))
-    return n * (2 if m.group(2) else 1)
+    if m.group(1):
+        n = _NUM.get(m.group(1).lower()) or float(m.group(1))
+        return n * (2 if m.group(2) else 1)
+    if m.group(3):
+        n = _NUM[m.group(3).lower()]
+        return n * (2 if m.group(4) else 1)
+    return 2.0 if m.group(5) else 1.0
 
 
 def speaker_counts(dd: str) -> Dict[str, int]:
@@ -260,7 +272,7 @@ SAFETY_HARD = frozenset({"youth_hint", "scale_adult"})
 # U56 (Derrick): the cowgirl check and the stock-talk check are hard stops too (pipeline maps them to NOT_READY).
 HARD_STOP = SAFETY_HARD | frozenset({
     "cowgirl_check", "stock_talk",
-    "no_primary", "no_tempo", "tempo_range",
+    "no_primary", "no_tempo", "tempo_unparsed", "tempo_range",
     "contact_anatomy", "unbound_partner",
     "shot_timestamp_placeholder",
     "slot_surface", "slot_light_or_place",
@@ -509,16 +521,121 @@ _MANDATED_CLONE_RE = re.compile(
 )
 
 
-def cloned_hits(dd: str, phrases: Iterable[str]) -> List[str]:
-    t = " " + norm(dd) + " "
-    out = []
-    for p in phrases:
-        pn = norm(p)
+_HASH_ENTRY_RE = re.compile(r"^sha256:(?:(\d+):)?([0-9a-f]{64})$")
+_R11_HAND_WORDS = WORD_RE.findall(re.sub(r"\[English\]", " ", br.R11_HAND, flags=re.I).lower())
+_R11_HAND_SIXGRAMS = frozenset(" ".join(_R11_HAND_WORDS[i:i + 6]) for i in range(max(0, len(_R11_HAND_WORDS) - 5)))
+
+
+def clone_hash(phrase: str) -> str:
+    """Return a non-reversible sha256:<n>:<hex> token for a normalized phrase."""
+    pn = norm(phrase)
+    n = len(pn.split())
+    return f"sha256:{n}:{hashlib.sha256(pn.encode('utf-8')).hexdigest()}"
+
+
+def _beat_spans(dd: str) -> List[Tuple[int, int, int]]:
+    """Map character spans in dd to 1-based beat numbers ([Shot N] if present, else sentence index)."""
+    text = dd or ""
+    shots = list(re.finditer(r"\[Shot\s+(\d+)\]", text, re.I))
+    if shots:
+        spans: List[Tuple[int, int, int]] = []
+        for idx, m in enumerate(shots):
+            start = m.start()
+            end = shots[idx + 1].start() if idx + 1 < len(shots) else len(text)
+            spans.append((start, end, int(m.group(1))))
+        return spans
+    sents = [s for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+    if sents:
+        spans = []
+        pos = 0
+        for idx, s in enumerate(sents, 1):
+            at = text.find(s, pos)
+            if at < 0:
+                at = pos
+            end = at + len(s)
+            spans.append((at, end, idx))
+            pos = end
+        return spans
+    return [(0, len(text), 1)]
+
+
+def _beat_for_char(pos: int, spans: List[Tuple[int, int, int]]) -> int:
+    for start, end, beat_no in spans:
+        if start <= pos < end:
+            return beat_no
+    return spans[-1][2] if spans else 1
+
+
+def _dd_word_spans(dd: str) -> List[Tuple[str, int]]:
+    """Normalized word tokens with approximate character start offsets in dd."""
+    out: List[Tuple[str, int]] = []
+    # Mask [English] with spaces of equal length to preserve character offsets.
+    masked = re.sub(r"\[English\]", lambda m: " " * len(m.group(0)), dd or "", flags=re.I)
+    for m in WORD_RE.finditer(masked.lower()):
+        out.append((m.group(0), m.start()))
+    return out
+
+
+def _scan_clone_hits(dd: str, phrases: Iterable[str]) -> List[Tuple[str, int]]:
+    """Return [(hit_token_or_phrase, beat_number)] for plaintext or sha256-hashed corpus entries."""
+    text = dd or ""
+    t = " " + norm(text) + " "
+    spans = _beat_spans(text)
+    hits: List[Tuple[str, int]] = []
+    hash_by_len: Dict[Optional[int], Dict[str, str]] = {}
+    for raw in phrases:
+        entry = str(raw or "").strip()
+        if not entry:
+            continue
+        hm = _HASH_ENTRY_RE.match(entry)
+        if hm:
+            n_len = int(hm.group(1)) if hm.group(1) else None
+            hash_by_len.setdefault(n_len, {})[hm.group(2)] = entry
+            continue
+        pn = norm(entry)
         if not pn or (len(pn.split()) <= 8 and _MANDATED_CLONE_RE.search(pn)):
             continue
         if (" " + pn + " ") in t:
-            out.append(p)
-    return out
+            # Find approximate char offset of first word sequence in dd
+            pat = r"\b" + r"\W+".join(re.escape(w) for w in pn.split()) + r"\b"
+            m = re.search(pat, re.sub(r"\[English\]", " ", text, flags=re.I), re.I)
+            beat_no = _beat_for_char(m.start(), spans) if m else 1
+            hits.append((entry, beat_no))
+    if hash_by_len:
+        wspans = _dd_word_spans(text)
+        words = [w for w, _ in wspans]
+        lengths = sorted({n for n in hash_by_len if n is not None})
+        if None in hash_by_len:
+            lengths = sorted(set(lengths) | set(range(4, 13)))
+        seen_hashes = set()
+        for n in lengths:
+            if n <= 0 or n > len(words):
+                continue
+            bucket = dict(hash_by_len.get(n) or {})
+            if None in hash_by_len:
+                bucket.update(hash_by_len[None])
+            for i in range(len(words) - n + 1):
+                g = " ".join(words[i:i + n])
+                if g in _R11_HAND_SIXGRAMS or (n <= 8 and _MANDATED_CLONE_RE.search(g)):
+                    continue
+                h = hashlib.sha256(g.encode("utf-8")).hexdigest()
+                if h in bucket and h not in seen_hashes:
+                    seen_hashes.add(h)
+                    hits.append((bucket[h], _beat_for_char(wspans[i][1], spans)))
+    return hits
+
+
+def cloned_hits(dd: str, phrases: Iterable[str]) -> List[str]:
+    return [tok for tok, _ in _scan_clone_hits(dd, phrases)]
+
+
+def clone_hit_summary(dd: str, corpus: Iterable[str]) -> Dict[str, Any]:
+    """Return only count and sorted 1-based beat numbers (never flagged phrase text)."""
+    hits = _scan_clone_hits(dd, corpus)
+    return {
+        "count": len(hits),
+        "beats": sorted({b for _, b in hits}),
+    }
 
 
 def ngrams(words: List[str], n: int) -> List[str]:
@@ -596,10 +713,14 @@ def _sex_oral_hard_checks(full: str, dd: str, sents: List[str], plain: str,
             out.append(_fix("no_primary", "add one 'PRIMARY MOTION - ...' sentence with the motion and its tempo", hard=True))
         elif not TEMPO_RE.search(sents[prim_idx]):
             out.append(_fix("no_tempo", "PRIMARY MOTION has no tempo word; use 'strokes a second', 'per second' or 'cycle'", hard=True))
-        rate = tempo_rate(sents[prim_idx]) if prim_idx is not None else None
-        tr = (cfg.get("tempo_range") or {}).get("edge" if "edge" in ov else kind)
-        if rate is not None and tr and not (tr[0] <= rate <= tr[1]):
-            out.append(_fix("tempo_range", f"tempo {rate:g}/s is outside {tr[0]}-{tr[1]}/s for this mode", hard=True))
+        else:
+            rate = tempo_rate(sents[prim_idx])
+            if rate is None:
+                out.append(_fix("tempo_unparsed", "PRIMARY MOTION tempo must be measurable, e.g. 'N strokes a second' or 'one cycle every half second'", hard=True))
+            else:
+                tr = (cfg.get("tempo_range") or {}).get("edge" if "edge" in ov else kind)
+                if tr and not (tr[0] <= rate <= tr[1]):
+                    out.append(_fix("tempo_range", f"tempo {rate:g}/s is outside {tr[0]}-{tr[1]}/s for this mode", hard=True))
     _facial_finish = (
         str(slots.get("position") or "").lower() == "finish"
         or bool(re.search(r"(?i)\b(?:facial|cum(?:shot)? on her face|finishes? on her)\b", ctx.get("ask") or ""))
@@ -790,8 +911,8 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
     for h in blacklist_hits(lines, ctx.get("blacklist") or [], float(cfg.get("blacklist_ratio", 0.8))):
         focus = slots.get("line_focus_text") or slots.get("line_focus") or "the still"
         issues.append(_fix("blacklist", f"line '{h['line']}' is in the last-20 list; write a new line about {focus}"))
-    for idx_c, p in enumerate(cloned_hits(dd, ctx.get("cloned") or [])):
-        issues.append(_fix("cloned", f"the phrase '{p}' is copied from the instructions; say it in your own words",
+    for idx_c, (_, beat_no) in enumerate(_scan_clone_hits(dd, ctx.get("cloned") or [])):
+        issues.append(_fix("cloned", f"beat {beat_no} copies a six-word run from the instructions; rewrite that beat from the still",
                            False, 5 if idx_c < 2 else 0))
 
     # -- act rules --

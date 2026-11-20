@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from build_request import R11_HAND
-from wp_lint import norm, WORD_RE
+from wp_lint import norm, WORD_RE, clone_hash
 
 WHITELIST = ("inside her", "inside her mouth", "fully sheathed", "hips flush", "flush against", "buried in her", "deep in her",
              "sheathed", "aside", "to one side", "primary motion", "per second", "every second", "every half second", "cycle",
@@ -229,9 +229,10 @@ def build_cloned(prompt_text: str, recent: List[str], extra_texts: Optional[Sequ
 
 def refresh_cloned(cloned_path: Path, prompt_text: str, prompt_sha: str, recent: List[str]) -> List[str]:
     phrases = build_cloned(prompt_text, recent)
+    hashed = list(dict.fromkeys(clone_hash(p) for p in phrases if norm(p)))
     header = f"# auto-generated {now_ct()} from writer prompt sha256 {prompt_sha}; recent outputs {len(recent)}\n"
-    atomic_write(cloned_path, header + "".join(p + "\n" for p in phrases))
-    return phrases
+    atomic_write(cloned_path, header + "".join(h + "\n" for h in hashed))
+    return hashed
 
 
 # ---- logs ------------------------------------------------------------------------------------------------------------
