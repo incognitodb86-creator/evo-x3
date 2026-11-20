@@ -35,7 +35,7 @@ RECENT_IMPORT_LIMIT = 40
 TOP_STRONG_POOL = 12
 SHEET_SIZE = 6
 
-PIC_FIELDS = "id,file_path,format,width,height,score,smart_score,likeness_score,stack_id,imported_at"
+PIC_FIELDS = "id,file_path,format,width,height,score,smart_score,character_likeness,stack_id,imported_at"
 
 
 def _token() -> str:
@@ -88,6 +88,12 @@ def _is_video(pic: dict) -> bool:
         return True
     fp = str(pic.get("file_path") or "").lower()
     return fp.endswith((".mp4", ".webm", ".mov", ".mkv", ".avi"))
+
+
+def _likeness(pic: dict):
+    """Live PixlStash returns character_likeness; older payloads/tests use likeness_score."""
+    v = pic.get("character_likeness")
+    return v if v is not None else pic.get("likeness_score")
 
 
 def _passes_smart_floor(pic: dict, min_smart_score: float) -> bool:
@@ -220,6 +226,9 @@ def _build_pictures_url(
     ]
     if character_id is not None:
         params.append(("character_id", str(character_id)))
+        if sort == "CHARACTER_LIKENESS":
+            # Live PixlStash 400s without it: "reference_character_id is required for CHARACTER_LIKENESS sort".
+            params.append(("reference_character_id", str(character_id)))
     if set_id is not None:
         params.append(("set_id", str(set_id)))
     for t in tags:
@@ -425,7 +434,7 @@ def build_sheet(
 
     # 1. Character likeness floor (fallback to all non-video if likeness empties)
     if character_id is not None:
-        like_ok = [p for p in non_video if (p.get("likeness_score") or 0.0) >= min_likeness]
+        like_ok = [p for p in non_video if (_likeness(p) or 0.0) >= min_likeness]
         pool = like_ok if like_ok else list(non_video)
     else:
         pool = list(non_video)
@@ -458,7 +467,7 @@ def build_sheet(
         pool,
         key=lambda p: (
             round(float(p.get("score") or 0.0), 4),
-            round(float(p.get("likeness_score") or 0.0), 4),
+            round(float(_likeness(p) or 0.0), 4),
             str(p.get("imported_at") or ""),
         ),
         reverse=True,
@@ -513,7 +522,7 @@ def build_sheet(
             "stack_id": pic.get("stack_id"),
             "score": pic.get("score"),
             "smart_score": pic.get("smart_score"),
-            "likeness_score": pic.get("likeness_score"),
+            "likeness_score": _likeness(pic),
             "needs_reframe": needs_reframe,
             "smart_floor_fallback": smart_floor_fallback,
             "seed": rng_seed,
@@ -538,7 +547,7 @@ def build_sheet(
             im = Image.open(io.BytesIO(raw)).convert("RGB")
             im.thumbnail((cell_w, cell_h))
             sheet.paste(im, (x0 + (cell_w - im.width) // 2, y0 + (cell_h - im.height) // 2))
-            like = pic.get("likeness_score")
+            like = _likeness(pic)
             smart = pic.get("smart_score")
             like_s = f"{like:.2f}" if isinstance(like, (int, float)) else "-"
             smart_s = f"{smart:.2f}" if isinstance(smart, (int, float)) else "-"
