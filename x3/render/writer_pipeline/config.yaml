@@ -9,7 +9,12 @@ thinking: false                         # chat_template_kwargs.enable_thinking (
 timeout_s: 900
 retry_backoff_s: [10, 30, 90]
 writer_prompt: writer_prompt.md          # relative to /home/evo/AI/render/writer_pipeline
-writer_prompt_sha256: 5e7643b7c3cf016df572a81c3646ac73bab451b6cf49c42a2d66244d0855c572
+writer_prompt_sha256: 418777e9376457ace4d45f809cfded15416e9c345db80fb27246a89ec1a9187f
+# Ref2VA rewriter only. Ignored unless model_alias contains "ref2va".
+# Do not point Flash-Next / general writers at these files; writer_prompt.md stays the general prompt.
+ref2va_system_prompt: ref2va_system_prompt.txt
+ref2va_user_prefix: ref2va_user_prefix.txt
+ref2va_max_tokens: 3000
 persona: current                        # pinned
 n_candidates: 1
 min_ready_score: 60  # reported only; never blocks READY (Max Architect 2026-11-16 (Derrick t2036u))
@@ -55,7 +60,7 @@ lint:
   words_max: 190
   pen_phase_no_sound: 5
   opening_ratio: 0.85
-  filler_lines: ["hold still", "stay still", "take it", "yes right there", "oh yes", "fuck me harder", "take it all", "you feel so good", "so fucking good", "don't stop now"]
+  filler_lines: ["hold still", "stay still", "take it", "yes right there", "oh yes", "fuck me harder", "take it all", "you feel so good", "so fucking good", "don't stop now", "right there"]
   tempo_range: {oral: [0.5, 1.5], sex: [0.5, 2.5], partner: [0.5, 2.5], edge: [0.2, 1.0], solo: [0.3, 2.5], strip: [0.2, 1.0]}
 position_kinds:   # a new builder act needs one line here (spec "Max, only on change")
   talk: [talk]

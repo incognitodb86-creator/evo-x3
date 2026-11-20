@@ -76,14 +76,14 @@ class Client:
              response_format: Optional[Dict[str, Any]] = None, purpose: str = "") -> str:
         body: Dict[str, Any] = {"model": self.model, "messages": messages, "max_tokens": int(max_tokens), "stream": False,
                                 "seed": int(seed), "cache_prompt": True}
-        for k in ("temperature", "top_p", "top_k", "min_p", "presence_penalty", "frequency_penalty", "repetition_penalty",
-                  "penalty_last_n"):
-            if sampler.get(k) is not None:
-                body[k] = sampler[k]
-        if sampler.get("dry_multiplier"):  # passed through; servers without DRY ignore unknown keys
-            for k in ("dry_multiplier", "dry_base", "dry_allowed_length", "dry_penalty_last_n", "dry_sequence_breakers"):
-                if sampler.get(k) is not None:
-                    body[k] = sampler[k]
+        dry_on = bool(sampler.get("dry_multiplier"))
+        for k, v in sampler.items():
+            if v is None or k in ("model", "messages", "max_tokens", "stream", "seed", "cache_prompt",
+                                  "chat_template_kwargs", "response_format"):
+                continue
+            if k.startswith("dry_") and not dry_on:
+                continue
+            body[k] = v
         body["chat_template_kwargs"] = {"enable_thinking": bool(self.cfg.get("thinking", False))}
         if response_format:
             body["response_format"] = response_format

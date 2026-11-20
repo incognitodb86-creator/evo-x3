@@ -1,0 +1,229 @@
+#!/usr/bin/env python3
+"""ST6: dry-run-first cleanup of raw render clips after verified RTX 2x upscale, plus read-only PixlStash dup report."""
+from __future__ import annotations
+
+import argparse, datetime as dt, hashlib, json, os, re, shutil, subprocess, sys, urllib.parse, urllib.request
+
+RUNS_DIR = "/home/evo/AI/community/runs"
+OUT_DIR = "/home/evo/AI/_runs"
+INBOX_DIR = "/home/evo/AI/pixl-inbox"
+PIXL_URL = os.environ.get("PIXL_URL", "http://127.0.0.1:9537")
+PIXL_TOKEN_FILE = os.environ.get("PIXL_TOKEN_FILE", "/home/evo/.config/pixlstash/tagger-write.token")
+VIDEO_EXTS = (".mp4", ".webm", ".mov")
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _sha256(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest().lower()
+
+
+def _freed_bytes(path: str) -> int:
+    st = os.stat(path)
+    return st.st_size if st.st_nlink == 1 else 0
+
+
+def _is_under_qnap(path: str) -> bool:
+    for p in (path, os.path.realpath(path)):
+        norm = p.replace("\\", "/").rstrip("/")
+        if norm == "/mnt/qnap" or norm.startswith("/mnt/qnap/"):
+            return True
+    return False
+
+
+def _ffprobe_duration(path: str) -> float:
+    exe = shutil.which("ffprobe") or "ffprobe"
+    try:
+        r = subprocess.run([exe, "-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", path],
+                           capture_output=True, text=True, timeout=30, check=False)
+    except Exception:
+        return 0.0
+    if r.returncode != 0:
+        return 0.0
+    m = re.search(r"(?:^|duration=)\s*([0-9]+(?:\.[0-9]+)?)", r.stdout or "", re.M)
+    return float(m.group(1)) if m else 0.0
+
+
+def _tag_candidates(run_dir: str, tag_dir: str) -> list[str]:
+    okp = os.path.join(tag_dir, "render_ok.json")
+    if not os.path.isfile(okp):
+        return []
+    try:
+        with open(okp, "r", encoding="utf-8") as fh:
+            meta = json.load(fh)
+    except Exception:
+        return []
+    upscale = meta.get("upscale")
+    clip_sha = meta.get("clip_sha256")
+    if not isinstance(upscale, dict) or meta.get("job_type") == "still" or not isinstance(clip_sha, str) or not clip_sha.strip():
+        return []
+    tag, tag_real = os.path.basename(tag_dir), os.path.realpath(tag_dir)
+    clip_rel = str(meta.get("clip") or f"{tag}/{tag}.mp4").replace("\\", "/")
+    if not clip_rel.endswith(".mp4") or clip_rel.endswith(("_raw.mp4", ".tmp.mp4")) or ".." in clip_rel or clip_rel.startswith("/") or os.path.isabs(clip_rel):
+        return []
+    upscaled = os.path.join(run_dir, clip_rel)
+    up_real = os.path.realpath(upscaled)
+    if os.path.islink(upscaled) or not os.path.isfile(upscaled) or os.path.dirname(up_real) != tag_real:
+        return []
+    if os.path.getsize(upscaled) <= 0 or _ffprobe_duration(upscaled) <= 0.0 or _sha256(upscaled) != clip_sha.strip().lower():
+        return []
+    raw_sha = upscale.get("raw_sha256")
+    raw_sha = raw_sha.strip().lower() if isinstance(raw_sha, str) and raw_sha.strip() else None
+    raw_rels = [clip_rel[:-4] + "_raw.mp4"]
+    if isinstance(upscale.get("raw_clip"), str) and upscale["raw_clip"].strip():
+        raw_rels.insert(0, upscale["raw_clip"].strip().replace("\\", "/"))
+    out, seen = [], set()
+    for rel in raw_rels:
+        if not rel.endswith("_raw.mp4") or ".." in rel or rel.startswith("/") or os.path.isabs(rel):
+            continue
+        cand = os.path.join(run_dir, rel)
+        rp = os.path.realpath(cand)
+        if rp in seen or os.path.islink(cand) or not os.path.isfile(cand) or os.path.dirname(rp) != tag_real:
+            continue
+        if os.path.samefile(cand, upscaled):
+            continue
+        if raw_sha and _sha256(cand) != raw_sha:
+            continue
+        seen.add(rp)
+        out.append(os.path.abspath(cand))
+    return out
+
+
+def discover_candidates(runs_dir: str) -> tuple[list[str], list[str]]:
+    cands, run_ids = [], []
+    if not os.path.isdir(runs_dir):
+        return cands, run_ids
+    for run in sorted(os.listdir(runs_dir)):
+        run_dir = os.path.join(runs_dir, run)
+        if not os.path.isdir(run_dir) or os.path.islink(run_dir):
+            continue
+        run_ids.append(run)
+        for tag in sorted(os.listdir(run_dir)):
+            tag_dir = os.path.join(run_dir, tag)
+            if os.path.isdir(tag_dir) and not os.path.islink(tag_dir):
+                cands.extend(_tag_candidates(run_dir, tag_dir))
+    return sorted(set(cands)), run_ids
+
+
+def _qualifies_path(path: str, runs_dir: str) -> bool:
+    if not path.endswith("_raw.mp4") or os.path.islink(path) or not os.path.isfile(path):
+        return False
+    rp, rroot = os.path.realpath(path), os.path.realpath(runs_dir)
+    if not rp.startswith(rroot + os.sep):
+        return False
+    parts = os.path.relpath(rp, rroot).split(os.sep)
+    if len(parts) != 3:
+        return False
+    run_dir, tag_dir = os.path.join(rroot, parts[0]), os.path.join(rroot, parts[0], parts[1])
+    if os.path.islink(run_dir) or os.path.islink(tag_dir):
+        return False
+    return rp in {os.path.realpath(p) for p in _tag_candidates(run_dir, tag_dir)}
+
+
+def _extract_run_id(filename: str, known_runs: list[str]) -> str | None:
+    base = os.path.basename(filename)
+    if not base.lower().endswith(VIDEO_EXTS):
+        return None
+    for rid in sorted(known_runs, key=len, reverse=True):
+        if base.startswith(rid + "_"):
+            return rid
+    return None
+
+
+def report_pixlstash(inbox_dir: str, pixl_url: str, token_file: str, known_runs: list[str]) -> dict:
+    inbox_counts: dict[str, int] = {}
+    imp_dir = os.path.join(inbox_dir, "_imported")
+    if os.path.isdir(imp_dir):
+        for name in os.listdir(imp_dir):
+            rid = _extract_run_id(name, known_runs)
+            if rid:
+                inbox_counts[rid] = inbox_counts.get(rid, 0) + 1
+    api_info: dict = {"status": "skipped", "multi_video_runs": {}}
+    if pixl_url and token_file and os.path.isfile(token_file):
+        host = (urllib.parse.urlparse(pixl_url).hostname or "").lower()
+        if host not in ("127.0.0.1", "localhost"):
+            api_info = {"status": "refused_non_loopback", "multi_video_runs": {}}
+        else:
+            try:
+                with open(token_file, "r", encoding="utf-8") as fh:
+                    headers = {"Authorization": "Bearer " + fh.read().strip()}
+                opener = urllib.request.build_opener(_NoRedirect)
+                by_run: dict[str, list[int]] = {}
+                offset, has_path = 0, False
+                while True:
+                    q = urllib.parse.urlencode({"batch_limit": 2000, "offset": offset, "fields": "id,format,file_path", "descending": "false"})
+                    with opener.open(urllib.request.Request(f"{pixl_url.rstrip('/')}/api/v1/pictures/stream?{q}", headers=headers), timeout=30) as resp:
+                        body = json.load(resp)
+                    for pic in body.get("pictures", []):
+                        fmt = str(pic.get("format") or "").lower()
+                        fp = str(pic.get("file_path") or pic.get("original_filename") or pic.get("filename") or "")
+                        has_path = has_path or bool(fp)
+                        if (fmt in ("mp4", "webm", "mov") or fp.lower().endswith(VIDEO_EXTS)) and fp:
+                            rid = _extract_run_id(fp, known_runs)
+                            if rid:
+                                by_run.setdefault(rid, []).append(int(pic["id"]))
+                    if body.get("done") or body.get("next_offset") is None or int(body["next_offset"]) <= offset:
+                        break
+                    offset = int(body["next_offset"])
+                dups = {k: {"count": len(v), "picture_ids": sorted(v)} for k, v in sorted(by_run.items()) if len(v) > 1}
+                api_info = {"status": "ok" if has_path else "ok_no_filename_field", "multi_video_runs": dups}
+            except Exception as exc:
+                api_info = {"status": f"error:{type(exc).__name__}", "multi_video_runs": {}}
+    return {"inbox_imported_multi_video_runs": {k: v for k, v in sorted(inbox_counts.items()) if v > 1}, "pixlstash_api": api_info}
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="Dry-run-first cleanup of raw render clips after verified 2x upscale.")
+    ap.add_argument("--runs-dir", default=RUNS_DIR); ap.add_argument("--out-dir", default=OUT_DIR)
+    ap.add_argument("--inbox-dir", default=INBOX_DIR); ap.add_argument("--pixl-url", default=PIXL_URL)
+    ap.add_argument("--pixl-token-file", default=PIXL_TOKEN_FILE); ap.add_argument("--no-pixlstash", action="store_true")
+    ap.add_argument("--apply", metavar="LIST_FILE", help="Delete only listed paths after re-checking each still qualifies.")
+    args = ap.parse_args(argv)
+    if _is_under_qnap(args.runs_dir):
+        print(f"refused: --runs-dir under /mnt/qnap ({args.runs_dir})", file=sys.stderr)
+        return 2
+    if args.apply:
+        deleted = skipped = failed = freed = 0
+        log_lines: list[str] = []
+        with open(args.apply, "r", encoding="utf-8") as fh:
+            paths = [ln.strip() for ln in fh if ln.strip() and not ln.lstrip().startswith("#")]
+        for p in paths:
+            if not _qualifies_path(p, args.runs_dir):
+                skipped += 1
+                log_lines.append(f"SKIP {p} not_qualified")
+                continue
+            try:
+                fb = _freed_bytes(p)
+                os.remove(p)
+                freed += fb; deleted += 1
+                log_lines.append(f"DELETED {p}")
+            except OSError as exc:
+                failed += 1
+                log_lines.append(f"SKIP {p} error:{type(exc).__name__}")
+        applied_log = args.apply + ".applied"
+        with open(applied_log, "w", encoding="utf-8") as fh:
+            fh.writelines(ln + "\n" for ln in log_lines)
+        for ln in log_lines:
+            print(ln)
+        print(f"APPLY deleted={deleted} bytes={freed} skipped={skipped} failed={failed} log={applied_log}")
+        return 1 if (skipped or failed) else 0
+    cands, run_ids = discover_candidates(args.runs_dir)
+    os.makedirs(args.out_dir, exist_ok=True)
+    list_path = os.path.join(args.out_dir, f"st6-raw-cleanup-{dt.datetime.now().strftime('%Y%m%d-%H%M')}.txt")
+    with open(list_path, "w", encoding="utf-8") as fh:
+        fh.writelines(p + "\n" for p in cands)
+    print(f"DRY_RUN candidates={len(cands)} bytes={sum(_freed_bytes(p) for p in cands)} list={list_path}")
+    if not args.no_pixlstash:
+        print("PIXLSTASH_REPORT " + json.dumps(report_pixlstash(args.inbox_dir, args.pixl_url, args.pixl_token_file, run_ids), sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

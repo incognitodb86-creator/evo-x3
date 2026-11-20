@@ -156,13 +156,13 @@ def convert_to_beta7(
         for k in RENDER_LEAD_SECTIONS:
             if secs.get(k):
                 body = secs[k][0].strip()
-                out_blocks.append(f"{k}:\n{body}" if "\n" in body else f"{k}: {body}")
+                out_blocks.append(f"{k}:\n{body}")  # official H3 layout: header on its own line (worked-examples.md, build_request.py)
         if description:
-            out_blocks.append(f"detailed_description: {description}")
+            out_blocks.append(f"detailed_description:\n{description}")
         if secs.get("continuation"):
             cont = secs["continuation"][0].strip()
             if cont:
-                out_blocks.append(f"continuation: {cont}")
+                out_blocks.append(f"continuation:\n{cont}")
         result = "\n\n".join(out_blocks).strip()
     else:
         if "detailed_description" in secs:

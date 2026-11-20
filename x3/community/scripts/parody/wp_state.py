@@ -136,6 +136,24 @@ def _strip_whitelist(p: str) -> str:
     return " ".join(t.split())
 
 
+
+_EXAMPLES_BLOCK_RE = re.compile(r"(?im)^EXAMPLES\b[\s\S]*?(?=^SHAPE\b|\Z)")
+
+
+def example_sixgrams(prompt_text: str) -> List[str]:
+    """Distinctive 6-grams from the EXAMPLES block only (structural phrases are whitelisted)."""
+    m = _EXAMPLES_BLOCK_RE.search(prompt_text or "")
+    if not m:
+        return []
+    w = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", m.group(0))))
+    out: List[str] = []
+    for g in {" ".join(w[i:i + 6]) for i in range(max(0, len(w) - 5))}:
+        rem = [tok for tok in _strip_whitelist(g).split() if tok not in _CLONE_STOP]
+        if len(rem) >= 3:
+            out.append(g)
+    return out
+
+
 def build_cloned(prompt_text: str, recent: List[str]) -> List[str]:
     """Every quoted string of >=4 words in the prompt, plus every 6-gram the prompt shares with >=2 of the last 20
     outputs. Builder keywords are whitelisted (a phrase that is only keywords plus <=2 other words is dropped)."""
@@ -144,6 +162,9 @@ def build_cloned(prompt_text: str, recent: List[str]) -> List[str]:
         q = norm(m.group(1))
         if len(q.split()) >= 4 and len(_strip_whitelist(q).split()) >= 3:
             out.append(q)
+    # 6-word runs from the EXAMPLES block are a clone gate even on a first copy
+    # (quoted strings above already cover dialogue; this catches unquoted narrative).
+    out.extend(example_sixgrams(prompt_text))
     pw = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", prompt_text)))
     pgrams = {" ".join(pw[i:i + 6]) for i in range(max(0, len(pw) - 5))}
     counts: Dict[str, int] = {}

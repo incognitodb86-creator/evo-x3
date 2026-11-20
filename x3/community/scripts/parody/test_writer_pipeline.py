@@ -928,3 +928,49 @@ def test_followup_item28_router_and_item29_fail_closed(home, tmp_path, monkeypat
     r = p.run_clip(job(tmp_path, "c2_bad_pose", ask="keep going", position="doggy", **{"continue": str(prev_dir)}),
                    p.load_config(home / "config.yaml"), lambda *a: None)
     assert r["status"] == "READY" and "missing_inherited_ending_state_pose" in (r.get("warnings") or []), r
+
+
+def test_wp_llm_forwards_all_sampler_keys(monkeypatch):
+    """Client.chat forwards top_n_sigma, adaptive_target, adaptive_decay and all configured sampler keys unchanged."""
+    import io
+    import urllib.request
+    from wp_llm import Client
+
+    captured = {}
+
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
+        def __exit__(self, *a):
+            return False
+
+    def fake_urlopen(req, timeout=None):
+        captured["body"] = json.loads(req.data.decode("utf-8"))
+        payload = {"choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}],
+                   "usage": {"completion_tokens": 2, "prompt_tokens": 10}}
+        return FakeResp(json.dumps(payload).encode("utf-8"))
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    c = Client({"model_alias": "gemma4-heretic", "endpoint": "http://127.0.0.1:9/v1", "thinking": False})
+    sampler = {
+        "temperature": 1.0,
+        "top_k": 0,
+        "top_p": 1.0,
+        "min_p": 0.05,
+        "top_n_sigma": 1.0,
+        "adaptive_target": 0.7,
+        "adaptive_decay": 0.9,
+        "repetition_penalty": 1.05,
+        "presence_penalty": 0.2,
+        "samplers": ["top_k", "top_n_sigma", "adaptive_p"],
+        "dry_base": 1.75,  # omitted when dry_multiplier is falsy
+        "seed": 999,       # structural key not overwritten
+    }
+    out = c.chat([{"role": "user", "content": "hi"}], sampler, seed=42, max_tokens=128, purpose="test")
+    assert out == "ok"
+    b = captured["body"]
+    assert b["seed"] == 42
+    for k in ("temperature", "top_k", "top_p", "min_p", "top_n_sigma", "adaptive_target", "adaptive_decay",
+              "repetition_penalty", "presence_penalty", "samplers"):
+        assert b[k] == sampler[k], (k, b.get(k))
+    assert "dry_base" not in b

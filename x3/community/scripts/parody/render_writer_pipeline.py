@@ -52,6 +52,7 @@ _AI_ROOT = Path(os.environ.get("EVO_AI_ROOT") or ("/home/evo/AI" if os.path.isdi
 PIPE_DIR = Path(os.environ.get("WP_HOME", str(_AI_ROOT / "render" / "writer_pipeline")))
 CONFIG_PATH = PIPE_DIR / "config.yaml"
 RUNS_ROOT = _AI_ROOT / "community" / "runs"
+CLONE_RETRY_BUDGET = 1  # same budget as --fix-once; clone hits retry detailed_description then block READY
 VERSION = "wp-2026-11-13.1"
 
 TONES = ("ashamed", "bratty", "reluctant", "eager", "silent")
@@ -203,6 +204,21 @@ def make_slots(still_read: Dict[str, Any], ask: str, position: str, kind: str, r
     return slots
 
 
+
+def _is_ref2va_writer(cfg: Dict[str, Any]) -> bool:
+    """True only for Ref2VA rewriter slots. Flash-Next and other general writers stay on writer_prompt.md."""
+    alias = str((cfg or {}).get("model_alias") or "")
+    return "ref2va" in alias.lower()
+
+
+def _ref2va_path(cfg: Dict[str, Any], key: str, default_name: str) -> Path:
+    raw = (cfg or {}).get(key) or default_name
+    path = Path(raw)
+    if not path.is_absolute():
+        path = PIPE_DIR / path
+    return path
+
+
 # ---- prompt assembly ------------------------------------------------------------------------------------------------
 def section_split(text: str) -> List[Tuple[str, List[str]]]:
     out: List[Tuple[str, List[str]]] = []
@@ -217,7 +233,19 @@ def section_split(text: str) -> List[Tuple[str, List[str]]]:
 
 
 def assemble_system(cfg: Dict[str, Any], ask: str, persona: str, blocks: Optional[List[str]] = None) -> Tuple[str, Dict[str, Any]]:
-    """writer_prompt.md with the chosen persona and only the mode block(s) the ask names (spec section 4 item 10)."""
+    """writer_prompt.md with the chosen persona and only the mode block(s) the ask names (spec section 4 item 10).
+
+    Ref2VA rewriter exception (t2884u): if model_alias contains "ref2va", use ref2va_system_prompt as the
+    ONLY system message (pytraveler / official guide + our rules). Do not load writer_prompt.md for that slot.
+    """
+    if _is_ref2va_writer(cfg):
+        wp = _ref2va_path(cfg, "ref2va_system_prompt", "ref2va_system_prompt.txt")
+        if not wp.is_file() or not wp.read_text(encoding="utf-8").strip():
+            raise FileNotFoundError(f"ref2va_system_prompt missing or empty: {wp}")
+        sysprompt = wp.read_text(encoding="utf-8")
+        meta = {"writer_prompt": str(wp), "writer_prompt_sha256": wp_state.sha256_file(wp),
+                "persona": "ref2va-pytraveler", "modes": [], "ref2va_layout": True}
+        return sysprompt, meta
     wp = Path(cfg.get("writer_prompt") or "writer_prompt.md")
     if not wp.is_absolute():
         wp = PIPE_DIR / wp
@@ -2083,17 +2111,44 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             cands["rewrite"] = {"full": full, "dd": dd, "lint": lr, "seed": seed_for(run_id, ask, n + 1), "notes": notes,
                                 "from": best_name}
             fixed_once = True
+        # Clone gate: a 6-word copy from the examples/system text retries detailed_description
+        # up to CLONE_RETRY_BUDGET, then blocks READY instead of passing.
+        clone_retries = 0
+        def _clone_hits(dd_text: str) -> list:
+            return wp_lint.cloned_hits(dd_text or "", cloned)
+        while clone_retries < CLONE_RETRY_BUDGET:
+            name = max(cands, key=lambda c: (0 if _clone_hits(cands[c]["dd"]) else 1, cands[c]["lint"]["score"]))
+            if not _clone_hits(cands[name]["dd"]):
+                break
+            clone_retries += 1
+            notes = [
+                "copied a six-word run from the instructions or examples; "
+                "rewrite the detailed_description in your own words and keep the same scene"
+            ]
+            raw = client.chat(rewrite_messages(sysprompt, brief, card, cands[name]["dd"], notes, kind, overlays), sampler,
+                              seed_for(run_id, ask, n + 10 + clone_retries), cfg.get("prose_max_tokens", 1100),
+                              purpose=f"rewrite_clone_{clone_retries}")
+            full, dd = _materialise_writer_text(raw)
+            if debug:
+                wp_state.atomic_write(run_dir / f"rewrite_clone_{clone_retries}.txt", full)
+            lr = wp_lint.lint(full, lint_ctx, minimal=True)
+            cands[f"rewrite_clone_{clone_retries}"] = {
+                "full": full, "dd": dd, "lint": lr,
+                "seed": seed_for(run_id, ask, n + 10 + clone_retries),
+                "notes": notes, "from": name,
+            }
+        result["clone_gate_retries"] = clone_retries
         # 7 rank and pick
         # Max Architect 2026-11-16 (Derrick t2036u): min_ready_score is reported only; it never keeps a lint-pass draft out of the pool.
         min_score = float(cfg.get("min_ready_score", 60))
-        passing = [c for c in cands if cands[c]["lint"]["pass"] and not cands[c]["lint"]["hard"]]
+        passing = [c for c in cands if cands[c]["lint"]["pass"] and not cands[c]["lint"]["hard"] and not _clone_hits(cands[c]["dd"])]
         pool = passing or list(cands)
         if not passing:
             worst = cands[max(cands, key=lambda c: cands[c]["lint"]["score"])]["lint"]["hard"]
             result["warnings"].append("lint_fail_fallback")
             result["fallback_reasons"] = worst
             log("lint_fail_fallback", {"run": run_id, "reasons": worst})
-        pool.sort(key=lambda c: cands[c]["lint"]["score"], reverse=True)
+        pool.sort(key=lambda c: (0 if _clone_hits(cands[c]["dd"]) else 1, cands[c]["lint"]["score"]), reverse=True)
         pick, judge = pool[0], None
         chosen = cands[pick]
         wp_state.atomic_write(run_dir / "writer_output.txt", chosen["full"])
@@ -2149,6 +2204,14 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
             wp_state.atomic_write(run_dir / "clip_NOT_READY.txt", "NOT_READY: lint hard rule(s) block READY: " + why
                                   + "\n" + "\n".join(i["note"] for i in chosen["lint"]["issues"] if i.get("hard") or i["code"] in blocking) + "\n")
             result["warnings"].append("lint_blocked_ready")
+        leftover_clones = _clone_hits(chosen["dd"])
+        if status == "READY" and leftover_clones:
+            status = "NOT_READY"
+            why = "cloned"
+            build = dict(build, reason="lint hard rule: cloned (six-word copy from instructions or examples)")
+            wp_state.atomic_write(run_dir / "clip_NOT_READY.txt",
+                                  "NOT_READY: six-word clone gate blocked READY after retries\n")
+            result["warnings"].append("clone_gate_blocked_ready")
         result.update(status=status, pick=pick, pick_score=chosen["lint"]["score"], pick_pass=chosen["lint"]["pass"],
                       pick_hard=chosen["lint"]["hard"], judge=judge, still=still, scene_id=scene_id,
                       frames=clip_frames, clip_seconds=clip_seconds,

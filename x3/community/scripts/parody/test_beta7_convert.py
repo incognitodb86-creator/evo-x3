@@ -209,7 +209,7 @@ def test_load_filler_lines_uses_writer_config_list():
     assert lines == [
         "hold still", "stay still", "take it", "yes right there", "oh yes",
         "fuck me harder", "take it all", "you feel so good", "so fucking good",
-        "don't stop now",
+        "don't stop now", "right there",
     ]
 
 

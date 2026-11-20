@@ -210,7 +210,7 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
         out.append(_fix("camera_big", f"use a stable camera move (held, slow push-in, slow pull-out); drop '{big.group(0)}'"))
     fillers = [norm(f) for f in (cfg.get("filler_lines") or [])]
     for l in spoken_lines(dd):
-        if any(f and re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", l) for f in fillers) and l not in norm(ask):  # PM acc3 #8: substrings
+        if filler_line_hit(l, fillers) and l not in norm(ask):  # PM acc3 #8 + settle filler rec
             out.append(_fix("filler", f"line '{l}' is a stock filler; write a line about the still"))
     if "pov" in ov:
         if re.search(r"(?i)\bhand-?held\b", " ".join(cam)) or re.search(r"(?i)\bextreme close", plain):
@@ -270,6 +270,42 @@ def norm(s: str) -> str:
 
 def spoken_lines(text: str) -> List[str]:
     return [norm(m.group(1)) for m in D_RE.finditer(text or "") if norm(m.group(1))]
+
+
+# "take it" / "take it all" are banned as a standalone line or line opener;
+# "take" is allowed inside a longer line that names something concrete on screen
+# (depth, a body part, or the position). "right there" is a hard filler.
+_TAKE_IT_FILLERS = ("take it all", "take it")
+_CONCRETE_ONSCREEN_RE = re.compile(
+    r"(?i)\b(?:"
+    r"inch|inches|depth|deep|deeper|base|hilt|flush|length|"
+    r"penis|shaft|cock|dick|vagina|pussy|cunt|vulva|clitoris|clit|"
+    r"mouth|lips|throat|anus|ass|butt|buttocks|hip|hips|thigh|thighs|"
+    r"breast|breasts|tit|tits|nipple|nipples|"
+    r"missionary|doggy|doggystyle|cowgirl|prone|spoon|"
+    r"behind|knees|back|all fours"
+    r")\b"
+)
+
+
+def filler_line_hit(line_norm: str, fillers: list) -> bool:
+    """True when a spoken line (already normed) hits the filler rules."""
+    l = line_norm or ""
+    # Longer phrases first so "take it all" wins over "take it".
+    ordered = sorted((norm(f) for f in fillers if f), key=len, reverse=True)
+    for f in ordered:
+        if not f:
+            continue
+        if f in _TAKE_IT_FILLERS:
+            if l == f or l.startswith(f + " "):
+                return True
+            if re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", l) and not _CONCRETE_ONSCREEN_RE.search(l):
+                return True
+            continue
+        if re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", l):
+            return True
+    return False
+
 
 
 _INTERVIEWER_LEAD_RE = re.compile(
@@ -565,7 +601,7 @@ def stop_checks(dd: str, plain: str, ctx: Dict[str, Any]) -> List[Dict[str, Any]
     fillers = [norm(f) for f in (cfg.get("filler_lines") or [])]
     ask_n = norm(ctx.get("ask") or "")
     for l in spoken_lines(dd):
-        if any(f and re.search(r"(?<!\w)" + re.escape(f) + r"(?!\w)", l) for f in fillers) and l not in ask_n:
+        if filler_line_hit(l, fillers) and l not in ask_n:
             out.append(_fix("stock_talk", f"line '{l}' is stock talk; write a line about the still"))
             break
     return out

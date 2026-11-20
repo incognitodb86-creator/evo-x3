@@ -1,8 +1,12 @@
 autonomous-ai-agents/hermes-agent/SKILL.md
 creative/architecture-diagram/SKILL.md
 creative/ascii-video/SKILL.md
+creative/h3-render/SKILL.md
+creative/h3-writer/SKILL.md
 creative/humanizer/SKILL.md
+devops/lab-status/SKILL.md
 devops/sdlc-review/SKILL.md
+knowledge/fleet-brain/SKILL.md
 pi-job/SKILL.md
 pixlstash-image-library/SKILL.md
 productivity/document-to-action-items/SKILL.md

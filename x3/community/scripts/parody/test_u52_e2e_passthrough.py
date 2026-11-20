@@ -19,6 +19,7 @@ import build_request as br
 import render_writer_pipeline as rwp
 import run_queue as rq
 import wp_lint
+import beta7_convert as b7
 
 
 def _patch_inproc_writer_run(monkeypatch):
@@ -187,9 +188,10 @@ def test_u52_e2e_pipeline_to_request_frames_and_passthrough(tmp_path, monkeypatc
     assert build_rep["frames"] == 124
     assert rq.graph_expect(req)[0] == 124
 
-    # Verbatim writer text (including 3rd spoken line, [Shot 2], and audio header) reaches c0.inputs.prompt
+    # Writer text reaches c0.inputs.prompt after the shared Beta 7 conversion (U56 Decision #1, mono 9d35c650):
+    # 3rd spoken line and [Shot 2] kept verbatim; the overall_soundscape header is folded into plain sound sentences.
     c0_prompt = req["c0"]["inputs"]["prompt"]
-    expected_core = writer_reply.strip()
+    expected_core = b7.convert_to_beta7(writer_reply.strip(), mode="auto")[0]
     if still_mode == "ref":
         assert c0_prompt == f"{br.REF_MODE_PICTURE1_LEAD}\n\n{expected_core}"
         assert not any(n.get("class_type") == "MiniMaxH3AddGuide" for n in req.values())
@@ -200,12 +202,12 @@ def test_u52_e2e_pipeline_to_request_frames_and_passthrough(tmp_path, monkeypatc
 
     assert "Line three" in c0_prompt
     assert "[Shot 2] At 00:02.500," in c0_prompt
-    assert "overall_soundscape:" in c0_prompt
+    assert "overall_soundscape:" not in c0_prompt
+    assert "Quiet bedroom ambience continues through the clip." in c0_prompt
     assert "consenting adults" not in c0_prompt.lower()
 
-    # Audio header emits a loud warning without stripping or blocking READY
+    # Folded audio no longer needs the header warning; the run stays READY
     assert pick["status"] == "READY"
-    assert any("! WARNING" in w and "overall_soundscape" in w for w in pick["warnings"])
 
 
 def test_align_h3_frames_and_graph_expect_all_node_types():
