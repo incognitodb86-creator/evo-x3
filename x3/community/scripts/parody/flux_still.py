@@ -45,7 +45,12 @@ MODES = {
     "klein_t2i": TEMPLATES_DIR / "flux_stills_t2i_klein.candidate.api.json",
     "pose": TEMPLATES_DIR / "flux_stills_pose_klein.candidate.api.json",
     "layout": TEMPLATES_DIR / "flux_stills_layout_klein.candidate.api.json",
+    "rea_edit": TEMPLATES_DIR / "flux_rea_edit.candidate.api.json",
+    "rea_pose": TEMPLATES_DIR / "flux_rea_pose.candidate.api.json",
 }
+
+# AlienPc Flux keeps memory headroom by running at most two active LoRAs on one UNET (template-baked ones count).
+FLUX_LORA_CAP = 2
 
 # Klein9 RefMod author's guide (malcolmrey/various klein9/docs/FLUX2_KLEIN9_REFMODS_GUIDE.md): fully_preserved (1.0) at
 # strength 1.0 is the likeness preset; partially_preserved (0.7) is the flexible-styling preset of the RefMod + LoRA hybrid.
@@ -87,7 +92,18 @@ def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -
         {"name": fr.comfy_lora_name(lr["name"]), "strength": float(lr.get("strength", 0.85))}
         for lr in loras if str(lr.get("name") or "").strip() and float(lr.get("strength", 0.85)) > 0
     ]
+
+    def _check_lora_cap() -> None:
+        n_active = sum(
+            1 for node in graph.values()
+            if isinstance(node, dict) and node.get("class_type") == "LoraLoaderModelOnly"
+            and float(node.get("inputs", {}).get("strength_model", 0) or 0.0) > 0.0
+        )
+        if n_active > FLUX_LORA_CAP:
+            raise ValueError(f"FLUX LoRA cap is {FLUX_LORA_CAP} active LoRAs (got {n_active})")
+
     if not active:
+        _check_lora_cap()
         return []
     unet_id = _find_node(graph, "UNETLoader")
     if not unet_id:
@@ -135,6 +151,7 @@ def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -
             for k, v in list(inp.items()):
                 if v == orig_out:
                     inp[k] = list(prev_ref)
+    _check_lora_cap()
     return active
 
 

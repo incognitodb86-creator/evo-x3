@@ -1,0 +1,425 @@
+{
+ "1": {
+  "_meta": {
+   "title": "unet_miraclein"
+  },
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "Miraclein_4.5_9b_NVFP4.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "2": {
+  "_meta": {
+   "title": "lora_refcontrol_pose"
+  },
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "lora_name": "refcontrol_v2_poses.safetensors",
+   "model": [
+    "1",
+    0
+   ],
+   "strength_model": 0.9
+  }
+ },
+ "3": {
+  "_meta": {
+   "title": "clip"
+  },
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+   "device": "default",
+   "type": "flux2"
+  }
+ },
+ "4": {
+  "_meta": {
+   "title": "vae"
+  },
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  }
+ },
+ "5": {
+  "_meta": {
+   "title": "positive"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "apply pose from image 1 with reference from image 2. Show the adult woman from image 2 in the exact pose of image 1. Keep the same face, hairstyle and hair color. LIGHT, photoreal."
+  }
+ },
+ "6": {
+  "_meta": {
+   "title": "negative"
+  },
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "3",
+    0
+   ],
+   "text": "bad quality, noise, blurry, worst quality, low resolution, blur, distortion, unnatural blending, cartoon, illustration, painting"
+  }
+ },
+ "7": {
+  "_meta": {
+   "title": "image1_pose_ref"
+  },
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/flux_rea/POSE_REF.png"
+  }
+ },
+ "8": {
+  "_meta": {
+   "title": "image2_identity"
+  },
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "community/flux_rea/IDENTITY.png"
+  }
+ },
+ "27": {
+  "_meta": {
+   "title": "dwpose_map"
+  },
+  "class_type": "DWPreprocessor",
+  "inputs": {
+   "bbox_detector": "yolox_l.onnx",
+   "detect_body": "enable",
+   "detect_face": "enable",
+   "detect_hand": "enable",
+   "image": [
+    "7",
+    0
+   ],
+   "pose_estimator": "dw-ll_ucoco_384.onnx",
+   "resolution": 1024,
+   "scale_stick_for_xinsr_cn": "disable"
+  }
+ },
+ "28": {
+  "_meta": {
+   "title": "pose_map_scale_1mp"
+  },
+  "class_type": "ResizeImageMaskNode",
+  "inputs": {
+   "input": [
+    "27",
+    0
+   ],
+   "resize_type": "scale total pixels",
+   "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos"
+  }
+ },
+ "29": {
+  "_meta": {
+   "title": "identity_scale_1mp"
+  },
+  "class_type": "ResizeImageMaskNode",
+  "inputs": {
+   "input": [
+    "8",
+    0
+   ],
+   "resize_type": "scale total pixels",
+   "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos"
+  }
+ },
+ "11": {
+  "_meta": {
+   "title": "enc_pose_map"
+  },
+  "class_type": "VAEEncode",
+  "inputs": {
+   "pixels": [
+    "28",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "12": {
+  "_meta": {
+   "title": "enc_identity"
+  },
+  "class_type": "VAEEncode",
+  "inputs": {
+   "pixels": [
+    "29",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "13": {
+  "_meta": {
+   "title": "ref1_pos_pose"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "5",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "14": {
+  "_meta": {
+   "title": "ref2_pos_identity"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "13",
+    0
+   ],
+   "latent": [
+    "12",
+    0
+   ]
+  }
+ },
+ "15": {
+  "_meta": {
+   "title": "ref1_neg_pose"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "6",
+    0
+   ],
+   "latent": [
+    "11",
+    0
+   ]
+  }
+ },
+ "16": {
+  "_meta": {
+   "title": "ref2_neg_identity"
+  },
+  "class_type": "ReferenceLatent",
+  "inputs": {
+   "conditioning": [
+    "15",
+    0
+   ],
+   "latent": [
+    "12",
+    0
+   ]
+  }
+ },
+ "30": {
+  "_meta": {
+   "title": "klein9_refmods_loader"
+  },
+  "class_type": "Klein9RefModsLoader",
+  "inputs": {
+   "copies_1": 1,
+   "copies_2": 1,
+   "copies_3": 1,
+   "copies_4": 1,
+   "copies_5": 1,
+   "copies_6": 1,
+   "copies_7": 1,
+   "copies_8": 1,
+   "mod_1": "none",
+   "mod_2": "none",
+   "mod_3": "none",
+   "mod_4": "none",
+   "mod_5": "none",
+   "mod_6": "none",
+   "mod_7": "none",
+   "mod_8": "none",
+   "strength_1": 1.0,
+   "strength_2": 1.0,
+   "strength_3": 1.0,
+   "strength_4": 1.0,
+   "strength_5": 1.0,
+   "strength_6": 1.0,
+   "strength_7": 1.0,
+   "strength_8": 1.0
+  }
+ },
+ "31": {
+  "_meta": {
+   "title": "klein9_refmod_apply"
+  },
+  "class_type": "Klein9RefModApply",
+  "inputs": {
+   "blend_mode": "manifold_blur",
+   "conditioning": [
+    "14",
+    0
+   ],
+   "custom_retention": 1.0,
+   "klein9_refmods": [
+    "30",
+    0
+   ],
+   "ref_method": "default",
+   "retention": "fully_preserved (1.0)"
+  }
+ },
+ "32": {
+  "_meta": {
+   "title": "klein9_refmod_apply_neg"
+  },
+  "class_type": "Klein9RefModApply",
+  "inputs": {
+   "blend_mode": "manifold_blur",
+   "conditioning": [
+    "16",
+    0
+   ],
+   "custom_retention": 1.0,
+   "klein9_refmods": [
+    "30",
+    0
+   ],
+   "ref_method": "default",
+   "retention": "fully_preserved (1.0)"
+  }
+ },
+ "17": {
+  "_meta": {
+   "title": "guider"
+  },
+  "class_type": "CFGGuider",
+  "inputs": {
+   "cfg": 1.1,
+   "model": [
+    "2",
+    0
+   ],
+   "negative": [
+    "32",
+    0
+   ],
+   "positive": [
+    "31",
+    0
+   ]
+  }
+ },
+ "18": {
+  "_meta": {
+   "title": "sampler"
+  },
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "euler"
+  }
+ },
+ "19": {
+  "_meta": {
+   "title": "scheduler"
+  },
+  "class_type": "Flux2Scheduler",
+  "inputs": {
+   "height": 1344,
+   "steps": 12,
+   "width": 768
+  }
+ },
+ "20": {
+  "_meta": {
+   "title": "noise"
+  },
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 0
+  }
+ },
+ "21": {
+  "_meta": {
+   "title": "latent"
+  },
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "batch_size": 1,
+   "height": 1344,
+   "width": 768
+  }
+ },
+ "22": {
+  "_meta": {
+   "title": "sample"
+  },
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "guider": [
+    "17",
+    0
+   ],
+   "latent_image": [
+    "21",
+    0
+   ],
+   "noise": [
+    "20",
+    0
+   ],
+   "sampler": [
+    "18",
+    0
+   ],
+   "sigmas": [
+    "19",
+    0
+   ]
+  }
+ },
+ "23": {
+  "_meta": {
+   "title": "decode"
+  },
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "22",
+    0
+   ],
+   "vae": [
+    "4",
+    0
+   ]
+  }
+ },
+ "24": {
+  "_meta": {
+   "title": "save"
+  },
+  "class_type": "SaveImage",
+  "inputs": {
+   "filename_prefix": "community/flux_rea/TAG_rea_pose",
+   "images": [
+    "23",
+    0
+   ]
+  }
+ }
+}
