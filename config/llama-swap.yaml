@@ -182,11 +182,7 @@ models:
           reasoning_effort: low
         "flash-next-uncensored-sub":
           reasoning_effort: low
-        # 2026-11-20 (Derrick ~8:17 AM CT + ~9:07 AM CT D1/D2/D2b): Hermes workspace aliases on this same resident
-        # slot (zero swaps). All keys verified in Gufo 0.35.0 (sampling_request.hpp, openai_chat.cpp).
-        # - flash-next-render: Qwen Instruct sampler, thinking OFF; presence_penalty 0.0 per D1 (A/B 1.5 later).
-        # - flash-next-code: Qwen Thinking sampler (C5 11/11 winner); thinking medium in Hermes, Gufo 8192 budget.
-        # - flash-next-aux: fast deterministic non-thinking alias for Hermes compression/vision/approval/title_generation.
+        # BEGIN-HERMES-WS-ALIASES
         "flash-next-render":
           chat_template_kwargs:
             enable_thinking: false
@@ -209,6 +205,7 @@ models:
           top_k: 20
           min_p: 0.0
           presence_penalty: 0.0
+        # END-HERMES-WS-ALIASES
     checkEndpoint: "/health"
 
   "gemma4-heretic":
@@ -379,7 +376,7 @@ models:
         llama-server --host 127.0.0.1 --port 8085
         -m /srv/models/ref2va-27b-heretic/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-heretic.i1-Q4_K_M.gguf
         --mmproj /srv/models/ref2va-27b-heretic/MiniMax-H3-Prompt-Rewriter-Qwen3.8-27B-Ref2VA-heretic.mmproj-f16.gguf
-        --jinja --ctx-size 32768 --n-gpu-layers 999
+        --jinja --ctx-size 65536 --n-gpu-layers 999
         --load-mode none -fa on -np 1
         --reasoning-format deepseek
         --spec-type draft-mtp --spec-draft-n-max 3
@@ -404,12 +401,14 @@ profiles:
   halogen-only:
     description: all chat names resolve to the resident Halogen uncensored slot
     pins:
+      # TEST-WINDOW 2026-11-19: pin removed so gemma4-heretic hits the real Gemma container
       gemma4-heretic: flash-next-uncensored-v2
       flash-next-uncensored: flash-next-uncensored-v2
       flash-next-uncensored-sub: flash-next-uncensored-v2
+      # TEST-WINDOW 2026-11-19: pin removed so gemma4-heretic-sub hits the real Gemma container
       gemma4-heretic-sub: flash-next-uncensored-v2
       flash-next: flash-next-uncensored-v2
       flash-next-sub: flash-next-uncensored-v2
       qwen27b: flash-next-uncensored-v2
-      # 2026-11-20 (Derrick ~9:07 AM CT D7): pin ref2va so nothing in main can unload Gufo while W4 is held.
+
       ref2va-27b-heretic-q4: flash-next-uncensored-v2

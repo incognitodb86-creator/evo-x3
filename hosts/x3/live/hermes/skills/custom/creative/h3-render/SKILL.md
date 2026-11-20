@@ -14,6 +14,8 @@ metadata:
 
 You run renders yourself on this machine. pi is only for code: `pi-job code|review`. Do not use `pi-job render`, `pi-job approve`, or `pi-job queue` unless Derrick says "use the old pi render".
 
+If a file or path from Derrick or Max is not found after one quick check (one `ls` or one narrow search), stop and reply naming the missing file. Do not keep searching. This box is the X3 and cannot see AlienPc Windows paths (C:\...); ask for an X3 path instead.
+
 Do not call a writer or judge *model* (never use `fill_request.py` as the Hermes dry-run entry). Hermes writes the prompt with `h3-writer` and passes `--prose-file` to `render_writer_pipeline.py`, which runs `still_read`, `wp_lint`, clone/filler/oral-speech gates, the 18+ gate, and the dry-run ComfyUI JSON build.
 
 Use this Python: `/home/evo/AI/render/x3/.venv/bin/python3` (called PY below).
@@ -23,9 +25,9 @@ Use this pipeline entry: `/home/evo/AI/community/scripts/parody/render_writer_pi
 
 Three sources:
 
-- **PixlStash:** use the `pixlstash-image-library` skill or its search API. Never browse library folders, tags, character-name lists, or `unmatched-person-names.txt`. Never print the token; read `/home/evo/.config/pixlstash/render-read.token` only inside the command.
+- **PixlStash:** use the `pixlstash-image-library` skill (`/home/evo/AI/render/x3/still_candidate_sheet.py` with `--aspect 9:16|16:9` and `--min-smart-score 2.2` floor — never `sort=SMART_SCORE`, never `character_id` on `/pictures/search`). If the picker returns `"needs_reframe": true` (no matching orientation still exists), pre-reframe the chosen still with `flux_still.py --mode edit --width <W> --height <H>` before `oc_guide`. Never browse library folders, tags, character-name lists, or `unmatched-person-names.txt`. Never print the token.
 - **Image Derrick puts in chat:** copy it into `<run_dir>/_inputs/<file>`, pass that path as `--still`, and drop a copy into `/home/evo/AI/pixl-inbox/` so PixlStash can import it.
-- **New Miraclein / Flux still:** load `flux-klein-prompting`, draft the still prompt, dry-run `flux_still.py`, and show it. Queue that still only after Derrick's yes, with `--queue --yes-derrick`. Do not print RefMod or LoRA triggers.
+- **New Miraclein / Flux still (or aspect-ratio reframe):** load `flux-klein-prompting`, draft the still prompt, dry-run `flux_still.py`, and show it. Queue that still only after Derrick's yes, with `--queue --yes-derrick`. If a PixlStash or uploaded start still has a different aspect ratio than the requested H3 video (for example a 2:3 or 9:16 photo for a 16:9 `1344x768` clip, or 16:9 for `768x1344`), pre-reframe it first with `flux_still.py --mode edit --image <still> --width <W> --height <H>` so `MiniMaxH3AddGuide` does not center-crop off the face. Do not print RefMod or LoRA triggers.
 
 If a still or ask has a youth cue, stop. Everyone is 18+.
 

@@ -1,5 +1,4 @@
-# X3 live /home/evo/AI/community/scripts sha256, read 2026-11-20 ~8:45 AM CT (America/Chicago) after the picker rollback (Derrick card 8:28 AM CT).
-# All four match mono. Files were written 2026-11-20 08:30:12-08:30:13 CT. Backups: /home/evo/AI/_archive/20261120/picker-rollback (see records/A7-H3MAX-REVIEW-20261120.md).
+# X3 live /home/evo/AI/community/scripts sha256, read 2026-11-20 1:24 PM CT (America/Chicago) during mono snapshot push.
 4a45b567c9c6acd04c94e753773072b44c00946787da3531c229c75f39318848  parody/fill_request.py
 62fdb81a6906fd629589a5c75e3abdad431d9df52e013e34f583ad2afc02f752  parody/test_pick_template_2pass.py
 37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570  allowlist_promoted.json

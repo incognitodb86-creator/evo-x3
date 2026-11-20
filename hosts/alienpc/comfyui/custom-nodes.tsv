@@ -1,7 +1,19 @@
-name	remote	commit
+﻿name	remote	commit
+__pycache__	(not a git clone)	
 10S-Comfy-nodes.disabled	https://github.com/TenStrip/10S-Comfy-nodes.git	c412da5207357b293c98c7de3122d1107d5d10be
 cg-use-everywhere.disabled	https://github.com/chrisgoringe/cg-use-everywhere	632ed7bb51bb18ceb03ccaefe1f34be8bd416500
+comfy_sync_wrapper	(not a git clone)	
 ComfyMath.disabled	https://github.com/evanspearman/ComfyMath.git	c01177221c31b8e5fbc062778fc8254aeb541638
+comfyui_controlnet_aux	https://github.com/Fannovel16/comfyui_controlnet_aux	a587a4c1594524c1d2de5cd1a86cd868ff448e1c
+ComfyUI_essentials	https://github.com/cubiq/ComfyUI_essentials.git	9d9f4bedfc9f0321c19faf71855e228c93bd0dc9
+ComfyUI_FaceAnalysis.disabled	https://github.com/cubiq/ComfyUI_FaceAnalysis	8846653446a6b13582da11793faf950325a398e0
+ComfyUI_LayerStyle.disabled	https://github.com/chflame163/ComfyUI_LayerStyle.git	d94bef1ee5ed3656f5ff1bb2830a4ffd94f40935
+ComfyUI_MiniMax_H3_Extender.disabled	https://github.com/tritant/ComfyUI_MiniMax_H3_Extender.git	0861230cc38cbfbdb8d7b97dd9473f536a253c0b
+Comfyui_Minimax_h3_latent_Upscaler	https://github.com/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler	40316cf008b2fd8663263270669eb4da23f89d2c
+ComfyUI_Nvidia_VFX_Nodes	https://github.com/Comfy-Org/ComfyUI_Nvidia_VFX_Nodes	38d790ded00650681fa3645362efe28c8560cf40
+ComfyUI_PuLID_Flux_ll.disabled	https://github.com/lldacing/ComfyUI_PuLID_Flux_ll.git	7c7362b806c2c0f4bde8742ada9e7cb05b44d249
+ComfyUI_UltimateSDUpscale.disabled	https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git	bebd5696fddd61cb0d08949a222c508898ab5577
+ComfyUI_UniBlockSwap.disabled	https://github.com/smthemex/ComfyUI_UniBlockSwap	95bb6d9f302394e7a1f4a2ba29142d4f35dad225
 ComfyUI-Crystools.disabled	https://github.com/crystian/ComfyUI-Crystools.git	2f18256c5b5063937106f29a8e0a7db3ae3869b7
 ComfyUI-Custom-Scripts.disabled	https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git	609f3afaa74b2f88ef9ce8d939626065e3247469
 ComfyUI-DaSiWa-Nodes	https://github.com/darksidewalker/ComfyUI-DaSiWa-Nodes	c0fa32554530c98f8cf6f01445c5891be6456d2d
@@ -20,11 +32,11 @@ ComfyUI-KJNodes	https://github.com/kijai/ComfyUI-KJNodes.git	bc8e4ce4254bcd00503
 ComfyUI-Lokken-VideoTools.disabled	https://github.com/LordLocksley/ComfyUI-Lokken-VideoTools	0f2eeb3c15e9bf04dff57aa915c8016ef92317ca
 ComfyUI-LTXVideo.disabled	https://github.com/Lightricks/ComfyUI-LTXVideo.git	4f45fd6c222eb06eb3e46605da62e7c889e4be5c
 ComfyUI-Manager	https://github.com/ltdrdata/ComfyUI-Manager.git	d6f480c911d0b98b4a9f4871f263d90a15f0d9d2
-comfyui-minimax-h3-continuation	https://github.com/ttulttul/ComfyUI-Minimax-H3-Continuation	e1768d5fdfc6f9519d2090dcf78458c2d9625f80
-ComfyUI-MiniMaxH3-Prompt-Writer	https://github.com/duckyshell/ComfyUI-MiniMaxH3-Prompt-Writer.git	0af78751ab8cd7dc283678fd9b859ebddd56143c
-ComfyUI-MiniMaxH3Mod	https://github.com/Luisacaotica/ComfyUI-MiniMaxH3Mod	54f93eb6569fe35c9303e9bceb1c8b66c5722bbf
-ComfyUI-MiniMaxH3RefLoRA.disabled	https://github.com/malcolmamal/ComfyUI-MiniMaxH3RefLoRA.git	5c914fbb9ca091421abf3a8ff7e59e48787d8571
 ComfyUI-MiniMaxH3_LatentUpscaler.disabled	https://github.com/Tr1dae/ComfyUI-MiniMaxH3_LatentUpscaler.git	895e3c471164423f0ea0e8eaf45eb701efe641ae
+comfyui-minimax-h3-continuation	https://github.com/ttulttul/ComfyUI-Minimax-H3-Continuation	e1768d5fdfc6f9519d2090dcf78458c2d9625f80
+ComfyUI-MiniMaxH3Mod	https://github.com/Luisacaotica/ComfyUI-MiniMaxH3Mod	54f93eb6569fe35c9303e9bceb1c8b66c5722bbf
+ComfyUI-MiniMaxH3-Prompt-Writer	https://github.com/duckyshell/ComfyUI-MiniMaxH3-Prompt-Writer.git	0af78751ab8cd7dc283678fd9b859ebddd56143c
+ComfyUI-MiniMaxH3RefLoRA.disabled	https://github.com/malcolmamal/ComfyUI-MiniMaxH3RefLoRA.git	5c914fbb9ca091421abf3a8ff7e59e48787d8571
 ComfyUI-PixlStash.disabled	https://github.com/Pikselkroken/ComfyUI-PixlStash.git	e5ce77da02447083801f1f3363031001b01baed4
 ComfyUI-PuLID-Flux.disabled	https://github.com/balazik/ComfyUI-PuLID-Flux.git	a80912fc3435c358607bf4b43a58dbcbebdb09ff
 ComfyUI-PuLID-Flux2.disabled	https://github.com/iFayens/ComfyUI-PuLID-Flux2.git	3a0a3f5f18260fc914f96a8c7f0f23c835e881cd
@@ -32,20 +44,8 @@ comfyui-SelfLift.disabled	https://github.com/facok/comfyui-SelfLift	835c3cf79194
 comfyui-storyboard.disabled	https://github.com/colorAi/comfyui-storyboard	42b45db94106a466909bf6a55e37f020f89fa47a
 ComfyUI-VideoHelperSuite	https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git	4ee72c065db22c9d96c2427954dc69e7b908444b
 ComfyUI-WanVideoWrapper.disabled	https://github.com/kijai/ComfyUI-WanVideoWrapper.git	088128b224242e110d3906c6750e9a3a348a659b
-comfyui_controlnet_aux	https://github.com/Fannovel16/comfyui_controlnet_aux	a587a4c1594524c1d2de5cd1a86cd868ff448e1c
-ComfyUI_essentials	https://github.com/cubiq/ComfyUI_essentials.git	9d9f4bedfc9f0321c19faf71855e228c93bd0dc9
-ComfyUI_FaceAnalysis.disabled	https://github.com/cubiq/ComfyUI_FaceAnalysis	8846653446a6b13582da11793faf950325a398e0
-ComfyUI_LayerStyle.disabled	https://github.com/chflame163/ComfyUI_LayerStyle.git	d94bef1ee5ed3656f5ff1bb2830a4ffd94f40935
-ComfyUI_MiniMax_H3_Extender.disabled	https://github.com/tritant/ComfyUI_MiniMax_H3_Extender.git	0861230cc38cbfbdb8d7b97dd9473f536a253c0b
-Comfyui_Minimax_h3_latent_Upscaler	https://github.com/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler	40316cf008b2fd8663263270669eb4da23f89d2c
-ComfyUI_Nvidia_VFX_Nodes	https://github.com/Comfy-Org/ComfyUI_Nvidia_VFX_Nodes	38d790ded00650681fa3645362efe28c8560cf40
-ComfyUI_PuLID_Flux_ll.disabled	https://github.com/lldacing/ComfyUI_PuLID_Flux_ll.git	7c7362b806c2c0f4bde8742ada9e7cb05b44d249
-ComfyUI_UltimateSDUpscale.disabled	https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git	bebd5696fddd61cb0d08949a222c508898ab5577
-ComfyUI_UniBlockSwap.disabled	https://github.com/smthemex/ComfyUI_UniBlockSwap	95bb6d9f302394e7a1f4a2ba29142d4f35dad225
-comfy_sync_wrapper	(not a git clone)	
 ControlFlowUtils.disabled	https://github.com/VykosX/ControlFlowUtils	b675bc6c2c6847d53d8a010fed1497a1b565c144
 LTX_Director.disabled	https://github.com/WhatDreamsCost/WhatDreamsCost-ComfyUI.git	fe09f73756df202d08341c66b4dc5fc8d2acca22
 MiniMax-H3-Prompt-Rewriter-ComfyUI	https://github.com/pytraveler/MiniMax-H3-Prompt-Rewriter-ComfyUI.git	c8fca445486bf49183743c4e79e38bdd7584f63a
 Nvidia_RTX_Nodes_ComfyUI.disabled	https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI	892515e3eb9a4920a131a502a047e47adca9eb0d
 rgthree-comfy.disabled	https://github.com/rgthree/rgthree-comfy.git	738105af5fb14e96fbecaf406dc356e284797e8c
-__pycache__	(not a git clone)	

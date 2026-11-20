@@ -408,35 +408,71 @@ def _last_stop_reason(run_dir: Path) -> str | None:
     return last
 
 
+def _job_timeout_s(meta: dict, default_s: int) -> str:
+    """Per-job pi time limit: `--timeout-min` stored in meta.json, else the role default (code 60, review 30 min)."""
+    try:
+        return str(int(meta.get("timeout_s") or default_s))
+    except (TypeError, ValueError):
+        return str(default_s)
+
+
+def _timeout_note(rc: int, meta: dict, default_s: int) -> str:
+    # coreutils `timeout` exits 124 when it had to stop the command.
+    if rc != 124:
+        return ""
+    mins = int(_job_timeout_s(meta, default_s)) // 60
+    return f" timed_out_after={mins}m (work so far stays in the repo; rerun with --timeout-min to continue)"
+
+
 def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple[int, str]:
-    """H1c (card 21): AlienPC Swift (ESP on, Derrick t2764u reversed card 21) first for code/review whenever AlienPC :8447 probes idle (and X3 render
-    lock is free), else X3 Gufo. If an AlienPC run stops on a failed request (503 from the fail-fast gate or any error),
-    resume once on the X3 in the same session (--continue). Never moves back to the AlienPC."""
+    """X3 Gufo first for code/review (Derrick 2026-11-20 t3061s10741); AlienPC Swift (ESP on) is the fallback: if the X3
+    run stops on a failed request, resume once on AlienPC in the same session (--continue) when :8447 probes idle."""
     def run(extra: list[str], text: str, model: str | None) -> int:
         env = dict(os.environ)
+        env["FORGE_KEEP_CWD"] = "1"
         if model:
             env["FORGE_MODEL"] = model
         else:
             env.pop("FORGE_MODEL", None)
-        # AlienPc Swift codes with thinking medium (Derrick t2766s9752, 2026-11-19 16:48 CT); the X3 Gufo fallback stays low.
-        thinking = os.environ.get("PI_JOB_ALIENPC_THINKING", "medium") if model else "low"
+        # 2026-11-20: both AlienPc Swift and X3 Gufo fallback code at thinking medium (passed via FORGE_THINKING so
+        # forge-pi.sh emits a single --thinking flag instead of duplicate flags on argv).
+        thinking = (
+            os.environ.get("PI_JOB_ALIENPC_THINKING", "medium")
+            if model
+            else os.environ.get("PI_JOB_X3_THINKING", "medium")
+        )
+        env["FORGE_THINKING"] = thinking
         cmd = ["timeout", timeout_s, "bash", str(FORGE_LAUNCHER), "-p", "--session-dir", str(run_dir),
-               *extra, "--thinking", thinking, text]
+               *extra, text]
         return subprocess.run(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=logf,
                               stderr=subprocess.STDOUT).returncode
 
+    # 2026-11-20 (Derrick t3061s10741): X3 Gufo first; AlienPC Swift is the fallback. If the X3 run stops on a failed
+    # request (error/aborted), resume once on AlienPC in the same session when AlienPC probes idle.
+    # PI_JOB_FORCE_ALIENPC=1 starts on AlienPC (old order); PI_JOB_FORCE_X3=1 disables the fallback.
     alienpc_model = os.environ.get("PI_JOB_ALIENPC_MODEL", ALIENPC_MODEL).strip()
-    if os.environ.get("PI_JOB_FORCE_X3") == "1" or not alienpc_model or not _alienpc_gate_idle():
-        return run([], prompt, None), "x3"
-    rc = run([], prompt, alienpc_model)
+    if os.environ.get("PI_JOB_FORCE_ALIENPC") == "1" and alienpc_model and _alienpc_gate_idle():
+        return run([], prompt, alienpc_model), "alienpc"
+    rc = run([], prompt, None)
     if rc == 0:
-        return rc, "alienpc"
+        return rc, "x3"
+    reason = _last_stop_reason(run_dir)
+    if (reason not in ("error", "aborted") or os.environ.get("PI_JOB_FORCE_X3") == "1" or not alienpc_model
+            or not _alienpc_gate_idle()):
+        return rc, f"x3(rc={rc},stop={reason})"
+    logf.write(f"\n[pi-job] X3 run stopped (rc={rc}, stop={reason}); resuming once on AlienPC\n".encode())
+    logf.flush()
+    rc = run(["--continue"], RESUME_PROMPT, alienpc_model)
+    if rc == 0:
+        return rc, "x3->alienpc"
+    # ComfyUI has GPU priority: the AlienPC gate answers 503 when a render needs the GPU, so the AlienPC turn stops
+    # with an error. pi's work stays in the worktree/session, so hand the job back to the X3 once.
     reason = _last_stop_reason(run_dir)
     if reason not in ("error", "aborted"):
-        return rc, f"alienpc(rc={rc},stop={reason})"
-    logf.write(f"\n[pi-job] AlienPC run stopped (rc={rc}, stop={reason}); resuming once on the X3\n".encode())
+        return rc, f"x3->alienpc(rc={rc},stop={reason})"
+    logf.write(f"\n[pi-job] AlienPC run stopped (rc={rc}, stop={reason}; GPU busy?); handing back to the X3\n".encode())
     logf.flush()
-    return run(["--continue"], RESUME_PROMPT, None), "alienpc->x3"
+    return run(["--continue"], RESUME_PROMPT, None), "x3->alienpc->x3"
 
 
 def _run_makefile_check_all(repo: Path, logf) -> int | None:
@@ -476,7 +512,7 @@ def _exec_job(job_id: str) -> int:
                 base_head = subprocess.check_output(
                     ["git", "-C", str(repo), "rev-parse", "HEAD"], text=True
                 ).strip()
-                rc, where = _run_pi(run_dir, "3600", meta["prompt"], str(repo), logf)
+                rc, where = _run_pi(run_dir, _job_timeout_s(meta, 3600), meta["prompt"], str(repo), logf)
                 ahead = subprocess.check_output(
                     ["git", "-C", str(repo), "rev-list", "--count", f"{base_head}..HEAD"],
                     text=True,
@@ -495,9 +531,9 @@ def _exec_job(job_id: str) -> int:
                     _write_status(run_dir, "DONE", f"commits_added={ahead} model={where}")
                     _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
                     return 0
-                _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}")
+                _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}{_timeout_note(rc, meta, 3600)}")
                 try:
-                    _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}")
+                    _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}{_timeout_note(rc, meta, 3600)}")
                 except Exception:
                     pass
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={rc}, commits={ahead})")
@@ -505,12 +541,13 @@ def _exec_job(job_id: str) -> int:
 
             if role == "review":
                 repo = Path(meta["target"])
-                rc, where = _run_pi(run_dir, "1800", meta["prompt"], str(repo), logf)
+                rc, where = _run_pi(run_dir, _job_timeout_s(meta, 1800), meta["prompt"], str(repo), logf)
                 st = "DONE" if rc == 0 else "STUCK"
-                _write_status(run_dir, st, f"rc={rc} model={where}")
+                rev_detail = f"rc={rc} model={where}{_timeout_note(rc, meta, 1800)}"
+                _write_status(run_dir, st, rev_detail)
                 if st == "STUCK":
                     try:
-                        _write_stuck_bundle(run_dir, meta, f"rc={rc} model={where}")
+                        _write_stuck_bundle(run_dir, meta, rev_detail)
                     except Exception:
                         pass
                 _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
@@ -628,6 +665,7 @@ def _start_detached(
     prompt: str,
     still_path: str | None = None,
     pick: int | None = None,
+    timeout_min: int | None = None,
 ) -> int:
     fd = _acquire_single_job_lock()
     try:
@@ -662,6 +700,8 @@ def _start_detached(
             meta["run_name"] = _render_run_name(job_id)
             if pick is not None:
                 meta["pick"] = pick
+        if timeout_min is not None:
+            meta["timeout_s"] = int(timeout_min) * 60
         (run_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
         _write_status(run_dir, "QUEUED", f"role={role}")
         ACTIVE_FILE.write_text(job_id + "\n", encoding="utf-8")
@@ -998,11 +1038,19 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="pi-job")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
+    def _minutes(v: str) -> int:
+        n = int(v)
+        if not 5 <= n <= 480:
+            raise argparse.ArgumentTypeError("--timeout-min must be 5..480")
+        return n
+
     p_code = sub.add_parser("code")
+    p_code.add_argument("--timeout-min", type=_minutes, default=None, help="pi time limit in minutes (default 60, max 480)")
     p_code.add_argument("target")
     p_code.add_argument("prompt")
 
     p_rev = sub.add_parser("review")
+    p_rev.add_argument("--timeout-min", type=_minutes, default=None, help="pi time limit in minutes (default 30, max 480)")
     p_rev.add_argument("target")
     p_rev.add_argument("prompt")
 
@@ -1040,9 +1088,17 @@ def main(argv: list[str] | None = None) -> int:
 
     args = ap.parse_args(argv)
     if args.cmd == "code":
-        return _start_detached("code", str(Path(args.target).resolve()), args.prompt)
+        target = Path(args.target).resolve()
+        if not target.is_dir() or not (target / ".git").exists():
+            print(f"REFUSED: target is not a git repo (no .git in {target})", file=sys.stderr)
+            return 2
+        return _start_detached("code", str(target), args.prompt, timeout_min=args.timeout_min)
     if args.cmd == "review":
-        return _start_detached("review", str(Path(args.target).resolve()), args.prompt)
+        target = Path(args.target).resolve()
+        if not target.is_dir():
+            print(f"REFUSED: review target directory not found: {target}", file=sys.stderr)
+            return 2
+        return _start_detached("review", str(target), args.prompt, timeout_min=args.timeout_min)
     if args.cmd == "render":
         return _start_detached("render", None, args.ask, still_path=args.still, pick=args.pick)
     if args.cmd == "queue":

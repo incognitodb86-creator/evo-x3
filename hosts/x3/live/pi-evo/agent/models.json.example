@@ -76,7 +76,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -121,7 +121,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -167,7 +167,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -212,7 +212,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -258,7 +258,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -303,7 +303,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -357,7 +357,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -404,7 +404,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -448,7 +448,7 @@
             "image"
           ],
           "contextWindow": 122000,
-          "maxTokens": 8192,
+          "maxTokens": 32768,
           "compat": {
             "thinkingFormat": "qwen-chat-template",
             "thinkingTokenBudgetField": "thinking_budget_tokens"

@@ -9,8 +9,9 @@ Hermes does renders itself (h3-render skill). pi is only for code. Use `/usr/loc
 code reviews in a git repo.
 
 ## Commands
-- `pi-job code <repo_path> "<task>"`: runs Forge detached. `DONE` only if a new git commit is created, else `STUCK`.
-- `pi-job review <repo_path> "<task>"`: runs a read-only Forge review detached.
+- `pi-job code [--timeout-min N] <repo_path> "<task>"`: runs Forge detached. `DONE` only if a new git commit is
+  created, else `STUCK`. pi is stopped after 60 min unless `--timeout-min` (5-480) says otherwise.
+- `pi-job review [--timeout-min N] <repo_path> "<task>"`: runs a read-only Forge review detached (default 30 min).
 - `pi-job wait <job_id> [--timeout 170]`: blocks up to 170 s while the job is working, then prints its status.
 - `pi-job status <job_id>`: prints job status (and recent log lines while it runs).
 
@@ -21,7 +22,8 @@ Only one `pi-job` runs at a time. Tell Derrick the job ID right after starting a
 2. Run `pi-job wait <job_id> --timeout 170` in a bounded loop (several rounds in one terminal call) until the status
    is no longer QUEUED/RUNNING.
 3. `DONE`: report the new commit SHA and the one-line summary. `STUCK`: quote the `detail=` line exactly and stop.
-   Never retry on your own.
+   Never retry on your own. If the detail says `timed_out_after=`, the job ran out of time: tell Derrick, and only if
+   he says so, start it again with a longer `--timeout-min` (the work done so far is still in the repo).
 4. `REFUSED: another pi-job is already running (<id>)`: the single slot is busy (maybe Derrick's own job). Tell him
    and retry about every 10 s only if he asks.
 

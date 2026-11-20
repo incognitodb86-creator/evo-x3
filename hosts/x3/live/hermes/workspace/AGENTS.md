@@ -28,6 +28,7 @@ Do not edit llama-swap, ComfyUI server config, or live production templates unle
 - For commands that may run longer than the terminal timeout, use the terminal tool with `background=true` and `notify_on_complete=true`, then the `process` tool to wait or poll. Never use `setsid` or `nohup` (Hermes blocks them). To wait for a finished 2x clip, poll `clip/render_ok.json` (a real status file) in short rounds or use `process` wait.
 - Never print keys, tokens, RefMod or LoRA triggers, or adult prompt text in logs you do not need. Never browse PixlStash library folders, tags, character names, or `unmatched-person-names.txt`. Use the PixlStash search API or the `pixlstash-image-library` skill.
 - Thinking stays off unless Derrick explicitly asks for it.
+- If a tool call fails, write one short line saying what failed and what changed before retrying; never repeat the exact same failing command.
 
 ## Coding
 

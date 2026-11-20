@@ -1,8 +1,153 @@
+diff --git a/skills/.usage.json b/skills/.usage.json
+index c8a32eb..43499a8 100644
+--- a/skills/.usage.json
++++ b/skills/.usage.json
+@@ -15,6 +15,38 @@
+     "use_count": 2,
+     "view_count": 2
+   },
++  "fleet-brain": {
++    "archived_at": null,
++    "created_at": "2026-11-20T19:03:27.335608+00:00",
++    "created_by": null,
++    "first_seen_at": null,
++    "last_patched_at": null,
++    "last_reused_patch_generation": 0,
++    "last_used_at": "2026-11-20T19:10:37.631939+00:00",
++    "last_viewed_at": "2026-11-20T19:10:37.629161+00:00",
++    "patch_count": 0,
++    "patch_generation": 0,
++    "pinned": false,
++    "state": "active",
++    "use_count": 2,
++    "view_count": 2
++  },
++  "flux-klein-prompting": {
++    "archived_at": null,
++    "created_at": "2026-11-20T18:58:39.204750+00:00",
++    "created_by": null,
++    "first_seen_at": null,
++    "last_patched_at": null,
++    "last_reused_patch_generation": 0,
++    "last_used_at": "2026-11-20T18:58:39.209024+00:00",
++    "last_viewed_at": "2026-11-20T18:58:39.204759+00:00",
++    "patch_count": 0,
++    "patch_generation": 0,
++    "pinned": false,
++    "state": "active",
++    "use_count": 1,
++    "view_count": 1
++  },
+   "h3-parody-identity": {
+     "archived_at": null,
+     "created_at": "2026-11-20T01:58:44.037241+00:00",
+@@ -54,14 +86,14 @@
+     "first_seen_at": null,
+     "last_patched_at": null,
+     "last_reused_patch_generation": 0,
+-    "last_used_at": "2026-11-20T06:12:31.971923+00:00",
+-    "last_viewed_at": "2026-11-20T06:12:31.967904+00:00",
++    "last_used_at": "2026-11-20T19:10:40.693719+00:00",
++    "last_viewed_at": "2026-11-20T19:10:40.691511+00:00",
+     "patch_count": 0,
+     "patch_generation": 0,
+     "pinned": false,
+     "state": "active",
+-    "use_count": 13,
+-    "view_count": 13
++    "use_count": 15,
++    "view_count": 15
+   },
+   "h3-writer": {
+     "archived_at": null,
+@@ -79,21 +111,37 @@
+     "use_count": 16,
+     "view_count": 16
+   },
++  "hermes-agent": {
++    "archived_at": null,
++    "created_at": "2026-11-20T19:07:27.421288+00:00",
++    "created_by": null,
++    "first_seen_at": null,
++    "last_patched_at": null,
++    "last_reused_patch_generation": 0,
++    "last_used_at": "2026-11-20T19:07:32.366792+00:00",
++    "last_viewed_at": "2026-11-20T19:07:32.360097+00:00",
++    "patch_count": 0,
++    "patch_generation": 0,
++    "pinned": false,
++    "state": "active",
++    "use_count": 2,
++    "view_count": 2
++  },
+   "pi-job": {
+     "archived_at": null,
+     "created_at": "2026-11-19T13:58:08.743653+00:00",
+     "created_by": null,
+     "first_seen_at": null,
+     "last_patched_at": "2026-11-19T19:28:43.661583+00:00",
+-    "last_reused_patch_generation": 7,
+-    "last_used_at": "2026-11-19T19:28:33.227750+00:00",
+-    "last_viewed_at": "2026-11-19T19:28:33.226047+00:00",
++    "last_reused_patch_generation": 8,
++    "last_used_at": "2026-11-20T19:14:19.116560+00:00",
++    "last_viewed_at": "2026-11-20T19:14:19.114869+00:00",
+     "patch_count": 8,
+     "patch_generation": 8,
+     "pinned": false,
+     "state": "active",
+-    "use_count": 21,
+-    "view_count": 21
++    "use_count": 24,
++    "view_count": 24
+   },
+   "pixlstash-image-library": {
+     "archived_at": null,
+@@ -102,13 +150,13 @@
+     "first_seen_at": null,
+     "last_patched_at": "2026-11-19T17:57:54.476666+00:00",
+     "last_reused_patch_generation": 1,
+-    "last_used_at": "2026-11-19T18:31:49.844389+00:00",
+-    "last_viewed_at": "2026-11-19T18:31:49.842898+00:00",
++    "last_used_at": "2026-11-20T19:10:37.637327+00:00",
++    "last_viewed_at": "2026-11-20T19:10:37.634251+00:00",
+     "patch_count": 1,
+     "patch_generation": 1,
+     "pinned": false,
+     "state": "active",
+-    "use_count": 5,
+-    "view_count": 5
++    "use_count": 7,
++    "view_count": 7
+   }
+ }
+\ No newline at end of file
 diff --git a/skills/creative/h3-render/SKILL.md b/skills/creative/h3-render/SKILL.md
-index 443be92..a9f57a5 100644
+index 443be92..90d2250 100644
 --- a/skills/creative/h3-render/SKILL.md
 +++ b/skills/creative/h3-render/SKILL.md
-@@ -47,7 +47,7 @@ $PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --sti
+@@ -14,6 +14,8 @@ metadata:
+ 
+ You run renders yourself on this machine. pi is only for code: `pi-job code|review`. Do not use `pi-job render`, `pi-job approve`, or `pi-job queue` unless Derrick says "use the old pi render".
+ 
++If a file or path from Derrick or Max is not found after one quick check (one `ls` or one narrow search), stop and reply naming the missing file. Do not keep searching. This box is the X3 and cannot see AlienPc Windows paths (C:\...); ask for an X3 path instead.
++
+ Do not call a writer or judge *model* (never use `fill_request.py` as the Hermes dry-run entry). Hermes writes the prompt with `h3-writer` and passes `--prose-file` to `render_writer_pipeline.py`, which runs `still_read`, `wp_lint`, clone/filler/oral-speech gates, the 18+ gate, and the dry-run ComfyUI JSON build.
+ 
+ Use this Python: `/home/evo/AI/render/x3/.venv/bin/python3` (called PY below).
+@@ -23,9 +25,9 @@ Use this pipeline entry: `/home/evo/AI/community/scripts/parody/render_writer_pi
+ 
+ Three sources:
+ 
+-- **PixlStash:** use the `pixlstash-image-library` skill or its search API. Never browse library folders, tags, character-name lists, or `unmatched-person-names.txt`. Never print the token; read `/home/evo/.config/pixlstash/render-read.token` only inside the command.
++- **PixlStash:** use the `pixlstash-image-library` skill (`/home/evo/AI/render/x3/still_candidate_sheet.py` with `--aspect 9:16|16:9` and `--min-smart-score 2.2` floor — never `sort=SMART_SCORE`, never `character_id` on `/pictures/search`). If the picker returns `"needs_reframe": true` (no matching orientation still exists), pre-reframe the chosen still with `flux_still.py --mode edit --width <W> --height <H>` before `oc_guide`. Never browse library folders, tags, character-name lists, or `unmatched-person-names.txt`. Never print the token.
+ - **Image Derrick puts in chat:** copy it into `<run_dir>/_inputs/<file>`, pass that path as `--still`, and drop a copy into `/home/evo/AI/pixl-inbox/` so PixlStash can import it.
+-- **New Miraclein / Flux still:** load `flux-klein-prompting`, draft the still prompt, dry-run `flux_still.py`, and show it. Queue that still only after Derrick's yes, with `--queue --yes-derrick`. Do not print RefMod or LoRA triggers.
++- **New Miraclein / Flux still (or aspect-ratio reframe):** load `flux-klein-prompting`, draft the still prompt, dry-run `flux_still.py`, and show it. Queue that still only after Derrick's yes, with `--queue --yes-derrick`. If a PixlStash or uploaded start still has a different aspect ratio than the requested H3 video (for example a 2:3 or 9:16 photo for a 16:9 `1344x768` clip, or 16:9 for `768x1344`), pre-reframe it first with `flux_still.py --mode edit --image <still> --width <W> --height <H>` so `MiniMaxH3AddGuide` does not center-crop off the face. Do not print RefMod or LoRA triggers.
+ 
+ If a still or ask has a youth cue, stop. Everyone is 18+.
+ 
+@@ -47,7 +49,7 @@ $PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --sti
  Add `--character`, `--template`, `--aspect`, `--size`, `--frames`, `--names`, or `--realism-lora` only when the ask needs them. On READY, `build_report.json` and `clip/request.api.json` exist and `DRY_RUN` is present.
  
  - READY: reply with the still, the run folder, the full prompt verbatim in a text block, and `Render this? (yes / no)`. Then stop and wait. Never shorten the prompt.
@@ -11,3 +156,151 @@ index 443be92..a9f57a5 100644
  
  ## 4. Queue only on Derrick's yes (single clip)
  
+diff --git a/skills/pi-job/SKILL.md b/skills/pi-job/SKILL.md
+index 1e9a2e6..2c1836e 100644
+--- a/skills/pi-job/SKILL.md
++++ b/skills/pi-job/SKILL.md
+@@ -9,8 +9,9 @@ Hermes does renders itself (h3-render skill). pi is only for code. Use `/usr/loc
+ code reviews in a git repo.
+ 
+ ## Commands
+-- `pi-job code <repo_path> "<task>"`: runs Forge detached. `DONE` only if a new git commit is created, else `STUCK`.
+-- `pi-job review <repo_path> "<task>"`: runs a read-only Forge review detached.
++- `pi-job code [--timeout-min N] <repo_path> "<task>"`: runs Forge detached. `DONE` only if a new git commit is
++  created, else `STUCK`. pi is stopped after 60 min unless `--timeout-min` (5-480) says otherwise.
++- `pi-job review [--timeout-min N] <repo_path> "<task>"`: runs a read-only Forge review detached (default 30 min).
+ - `pi-job wait <job_id> [--timeout 170]`: blocks up to 170 s while the job is working, then prints its status.
+ - `pi-job status <job_id>`: prints job status (and recent log lines while it runs).
+ 
+@@ -21,7 +22,8 @@ Only one `pi-job` runs at a time. Tell Derrick the job ID right after starting a
+ 2. Run `pi-job wait <job_id> --timeout 170` in a bounded loop (several rounds in one terminal call) until the status
+    is no longer QUEUED/RUNNING.
+ 3. `DONE`: report the new commit SHA and the one-line summary. `STUCK`: quote the `detail=` line exactly and stop.
+-   Never retry on your own.
++   Never retry on your own. If the detail says `timed_out_after=`, the job ran out of time: tell Derrick, and only if
++   he says so, start it again with a longer `--timeout-min` (the work done so far is still in the repo).
+ 4. `REFUSED: another pi-job is already running (<id>)`: the single slot is busy (maybe Derrick's own job). Tell him
+    and retry about every 10 s only if he asks.
+ 
+diff --git a/skills/pixlstash-image-library/SKILL.md b/skills/pixlstash-image-library/SKILL.md
+index 36d56cf..4708961 100644
+--- a/skills/pixlstash-image-library/SKILL.md
++++ b/skills/pixlstash-image-library/SKILL.md
+@@ -1,54 +1,67 @@
+ ---
+ name: pixlstash-image-library
+-description: "Use when finding stills in the local PixlStash library."
++description: "Use when finding or picking diverse stills from the local PixlStash library (Smart Score >= 2.2 floor only, never primary sort, orientation-aware, stack-deduped, recent-pick excluded)."
++version: 2.0.0
++platforms: [linux]
++metadata:
++  hermes:
++    tags: [pixlstash, stills, images, render]
++    category: creative
++    requires_toolsets: [terminal]
+ ---
+ 
+-# PixlStash image library
+-
+-Use when the user asks to find/pick reference images of their characters (`FCSydny`, `FCMegan`, etc.) or styles from the local PixlStash service — e.g. "find me 5 images of FCSydny in office attire".
+-
+-## Rules (strict)
+-- **Use PixlStash HTTP API (`127.0.0.1:9537`) with `curl` and `jq`.**
+-- **NEVER write scratch `.py` files (`write_file`), NEVER query `vault.db` directly, NEVER run `python3 -c`, and NEVER use heredocs (`<<EOF`).** Both `python3 -c` and heredocs trigger approval prompts; `curl` + `jq` runs cleanly with no approval prompt.
+-- **Auth:** Read the read-only Bearer token inside the `curl` command from `/home/evo/.config/pixlstash/render-read.token`. Never print, echo, log, or embed the token anywhere.
+-- **Image paths (`MEDIA:`):** `file_path` returned by PixlStash is relative to `/home/evo/AI/5slock/libraries/`, and many paths contain spaces (which break `MEDIA:` token parsing). Always expose selected stills via space-free symlinks `/home/evo/.hermes/image_cache/pixl_<id>.<ext>` (unless `file_path` already has no whitespace) and return each selected image on its own `MEDIA:` line:
+-  `MEDIA:/home/evo/.hermes/image_cache/pixl_<id>.<ext>`
+-  (Do not place `MEDIA:` lines inside code fences.)
+-
+-## Workflow (1–2 `curl | jq` calls)
+-
+-1. **Resolve character ID (if needed):**
+-   ```bash
+-   curl -sS -H "Authorization: Bearer $(cat /home/evo/.config/pixlstash/render-read.token)" \
+-     "http://127.0.0.1:9537/api/v1/characters" | jq -r '.[] | "\(.id)\t\(.name)"'
+-   ```
+-   (`FCSydny` is `character_id=1`.)
+-
+-2. **Query tagged stills via `GET /api/v1/pictures` and emit `MEDIA:` lines:**
+-   Use `character_id=`, repeatable `tag=` / `rejected_tag=`, `format=JPEG&format=PNG` (to exclude `.mp4` videos when stills are requested), `fields=id,file_path,format,score,smart_score`, `sort=SCORE` (or `SMART_SCORE`), and `limit=`:
+-   ```bash
+-   curl -sS -H "Authorization: Bearer $(cat /home/evo/.config/pixlstash/render-read.token)" \
+-     "http://127.0.0.1:9537/api/v1/pictures?character_id=1&tag=office&format=JPEG&format=PNG&fields=id,file_path,format,score,smart_score&sort=SMART_SCORE&limit=5" \
+-     | jq -r '.[] | "\(.id)\t\(.file_path)"' \
+-     | while IFS=$'\t' read -r id fp; do ext="${fp##*.}"; ln -sf "/home/evo/AI/5slock/libraries/$fp" "/home/evo/.hermes/image_cache/pixl_${id}.${ext}"; echo "MEDIA:/home/evo/.hermes/image_cache/pixl_${id}.${ext}"; done
+-   ```
+-   - Multiple `tag=` params filter by all listed tags; `rejected_tag=` excludes unwanted tags.
+-   - To discover exact tag names before filtering:
+-     ```bash
+-     curl -sS -H "Authorization: Bearer $(cat /home/evo/.config/pixlstash/render-read.token)" \
+-       "http://127.0.0.1:9537/api/v1/tags" | jq -r '.[] | select(.tag | test("office|work|suit|blazer|skirt"; "i")) | "\(.count)\t\(.tag)"' | head -n 40
+-     ```
+-
+-3. **Semantic / text search via `GET /api/v1/pictures/search`:**
+-   Use `query=` (URL-encoded via `--data-urlencode` with `curl -sSG`) when searching by free-text description or attire style:
+-   ```bash
+-   curl -sSG -H "Authorization: Bearer $(cat /home/evo/.config/pixlstash/render-read.token)" \
+-     --data-urlencode "query=office attire" \
+-     "http://127.0.0.1:9537/api/v1/pictures/search?limit=5" \
+-     | jq -r '.[] | select(.format != "MP4") | "\(.id)\t\(.file_path)"' \
+-     | while IFS=$'\t' read -r id fp; do ext="${fp##*.}"; ln -sf "/home/evo/AI/5slock/libraries/$fp" "/home/evo/.hermes/image_cache/pixl_${id}.${ext}"; echo "MEDIA:/home/evo/.hermes/image_cache/pixl_${id}.${ext}"; done
+-   ```
+-   Note: do not pass `character_id=` to `/api/v1/pictures/search` for large character sets (>32k images hits SQLite bind-variable limit); use `GET /api/v1/pictures` with `character_id=` + `tag=` for character-scoped queries.
+-
+-## Delivery
+-- Honor setting/attire constraints strictly; pick the top matching stills and deliver the exact requested count as `MEDIA:/home/evo/.hermes/image_cache/pixl_<id>.<ext>` lines (one per line) cleanly and promptly.
++# PixlStash image library (diverse picker)
++
++Use `/home/evo/AI/render/x3/still_candidate_sheet.py` whenever Derrick asks to find or pick stills of his characters
++(`FCSydny`, `FCMegan`, etc.), Smart Sets, or scenes from PixlStash (`127.0.0.1:9537`).
++
++## Hard rules
++- **Never sort by `SMART_SCORE`** (`sort=SMART_SCORE` repeats the same 5 sharp close-up headshots every time). Smart
++  Score `>= 2.2` is strictly a **quality floor** (`None` always passes so brand-new unscored Flux/imported stills stay
++  visible).
++- **Never pass `character_id=` to `/api/v1/pictures/search`** (large character libraries >32k hit SQLite bind limits).
++  `still_candidate_sheet.py` automatically routes `--character-id` / `--set-id` / `--tag` through `GET /api/v1/pictures`
++  ranked by `CHARACTER_LIKENESS` + stratified recent imports (`IMPORTED_AT`) + random-fresh candidates.
++- **Never write scratch `.py` files, never run `python3 -c`, never use heredocs (`<<EOF`), never browse `/home/evo/AI/5slock/libraries/`, `vault.db`, tag dumps, or character lists.**
++- **Never print, echo, or log `/home/evo/.config/pixlstash/render-read.token`.** The picker script reads it internally.
++
++## Commands
++
++```bash
++PY=/home/evo/AI/render/x3/.venv/bin/python3
++PICK=/home/evo/AI/render/x3/still_candidate_sheet.py
++```
++
++### 1. Pick stills for a render (2x3 contact sheet, orientation-matched)
++Pass `--aspect 9:16` (portrait) or `--aspect 16:9` (landscape) to match the requested H3Max video canvas so
++`MiniMaxH3AddGuide` does not center-crop off faces:
++
++```bash
++$PY "$PICK" --character-id 1 --aspect 9:16 --out /home/evo/.hermes/image_cache/candidates_sydny.png
++```
++- `FCSydny` = `--character-id 1`, `FCMegan` = `--character-id 2`.
++- If a render-ready Smart Picture Set exists (e.g. `FCSydny 9:16` / `FCSydny 16:9`), prefer `--set-id <id>`.
++- Optional filters: repeatable `--tag <tag>`, `--rejected-tag <tag>`, `--query '<scene words>'`, `--limit 6`,
++  `--min-smart-score 2.2` (default), `--page 2` or `--exclude <id1,id2,...>` to see a fresh batch.
++- Show the contact sheet inline on its own line (never inside a code fence):
++  `MEDIA:/home/evo/.hermes/image_cache/candidates_sydny.png`
++- **Aspect fallback (`needs_reframe: true` in JSON output):** if no still matches the requested orientation, the picker
++  falls back and marks `"needs_reframe": true`. In that case, pre-reframe the chosen still with
++  `flux_still.py --mode edit --image <still> --width <W> --height <H>` (after Derrick's yes) before passing it to
++  `oc_guide` / `MiniMaxH3AddGuide`.
++
++### 2. Show individual stills directly in chat (e.g. "find me 5 images of FCSydny in office attire")
++Use `--media-dir /home/evo/.hermes/image_cache` so the script creates space-free symlinks and prints ready-to-paste
++`MEDIA:` lines:
++
++```bash
++$PY "$PICK" --character-id 1 --tag office --limit 5 --media-dir /home/evo/.hermes/image_cache
++```
++
++Copy each printed `MEDIA:/home/evo/.hermes/image_cache/pixl_<id>.<ext>` line into your reply on its own line (never
++inside a code fence).
++
++### 3. Free-text scene search (no character filter)
++```bash
++$PY "$PICK" --query 'warm bedroom window light' --aspect 9:16 --limit 5 --media-dir /home/evo/.hermes/image_cache
++```

@@ -9,11 +9,11 @@ attachments:
 plugins:
   clone_timeout_seconds: 300
 model:
-  default: gemma4-heretic
+  default: flash-next-code
   provider: custom
   base_url: http://127.0.0.1:8080/v1
   context_length: 131072
-  reasoning_effort: false
+  reasoning_effort: medium
   key_env: LLM_KEY_HERMES
 kanban:
   review_dispatch: true
@@ -21,7 +21,7 @@ cron:
   catch_up_missed: true
 terminal:
   backend: local
-  cwd: /home/evo/workspace
+  cwd: /home/evo/AI/hermes-code
   timeout: 180
   home_mode: auto
   docker_mount_cwd_to_workspace: false
@@ -58,7 +58,7 @@ compression:
   max_attempts: 3
   codex_app_server_auto: native
   codex_responses_native: false
-  codex_responses_compact_threshold:
+  codex_responses_compact_threshold: null
   protect_first_n: 3
   idle_compact_after_seconds: 0
   hygiene_max_turn_hold_seconds: 10
@@ -68,13 +68,13 @@ compression:
 prompt_caching:
   cache_ttl: 5m
 memory:
-  memory_enabled: false
-  user_profile_enabled: false
+  memory_enabled: true
+  user_profile_enabled: true
   prefetch_spill_enabled: false
   memory_char_limit: 2200
   user_char_limit: 1375
   nudge_interval: 10
-max_concurrent_sessions:
+max_concurrent_sessions: null
 group_sessions_per_user: true
 hosted_rooms:
   discussion:
@@ -84,23 +84,26 @@ streaming:
   enabled: false
 skills:
   creation_nudge_interval: 15
-  external_dirs:
-    - /home/evo/AI/community/skills
+  external_dirs: []
   disabled:
-    - alienpc-hardcore-i2v-director
-    - alienpc-stills-pose-edit-prompting
-    - comfy-render
-    - h3-hc-render
-    - h3-max-ref2va-prompt
-    - image-render
-    - video-render
-    - ascii-video
-    - manim-video
-    - comfyui
+  - alienpc-hardcore-i2v-director
+  - alienpc-stills-pose-edit-prompting
+  - comfy-render
+  - h3-hc-render
+  - h3-max-ref2va-prompt
+  - image-render
+  - video-render
+  - ascii-video
+  - manim-video
+  - comfyui
+  - h3-render
+  - h3-writer
+  - pixlstash-image-library
+  - rea-remake
   write_approval: true
 agent:
   max_turns: 80
-  reasoning_effort: false
+  reasoning_effort: medium
   service_tier: ''
   fast_auto_seconds: 60
   daybreak: false
@@ -147,25 +150,25 @@ gateway:
   trust_recent_files_seconds: 600
 platform_toolsets:
   cli:
-    - hermes-cli
+  - hermes-cli
   telegram:
-    - hermes-telegram
+  - hermes-telegram
   discord:
-    - hermes-discord
+  - hermes-discord
   whatsapp:
-    - hermes-whatsapp
+  - hermes-whatsapp
   slack:
-    - hermes-slack
+  - hermes-slack
   signal:
-    - hermes-signal
+  - hermes-signal
   qqbot:
-    - hermes-qqbot
+  - hermes-qqbot
   api_server:
-    - terminal
-    - file
-    - memory
-    - skills
-    - vision
+  - terminal
+  - file
+  - memory
+  - skills
+  - vision
 stt:
   enabled: true
   local:
@@ -205,9 +208,27 @@ updates:
 auxiliary:
   vision:
     provider: custom
-    model: gemma4-heretic
+    model: flash-next-aux
     base_url: http://127.0.0.1:8080/v1
-    reasoning_effort: "false"
+    reasoning_effort: 'false'
+    key_env: LLM_KEY_HERMES
+  compression:
+    provider: custom
+    model: flash-next-aux
+    base_url: http://127.0.0.1:8080/v1
+    reasoning_effort: 'false'
+    key_env: LLM_KEY_HERMES
+  approval:
+    provider: custom
+    model: flash-next-aux
+    base_url: http://127.0.0.1:8080/v1
+    reasoning_effort: 'false'
+    key_env: LLM_KEY_HERMES
+  title_generation:
+    provider: custom
+    model: flash-next-aux
+    base_url: http://127.0.0.1:8080/v1
+    reasoning_effort: 'false'
     key_env: LLM_KEY_HERMES
 approvals:
   unattended_mode: deny
@@ -223,26 +244,26 @@ secrets:
     override_existing: true
 hooks:
   pre_tool_call:
-    - matcher: terminal
-      command: /home/evo/.hermes/agent-hooks/guard-render-queue.sh
-      timeout: 5
-      fail_closed: true
+  - matcher: terminal
+    command: /home/evo/.hermes/agent-hooks/guard-render-queue.sh
+    timeout: 5
+    fail_closed: true
 mcp_servers:
   gitea:
     command: /home/evo/.config/forge-mcp/run-gitea-mcp.sh
     args:
-      - --host
-      - https://qnap.tailf242b2.ts.net
-      - --read-only
+    - --host
+    - https://qnap.tailf242b2.ts.net
+    - --read-only
     tools:
       exclude:
-        - '*create*'
-        - '*update*'
-        - '*delete*'
-        - '*merge*'
-        - '*fork*'
-        - '*push*'
-        - '*write*'
-        - '*edit*'
-        - '*add*'
-        - '*remove*'
+      - '*create*'
+      - '*update*'
+      - '*delete*'
+      - '*merge*'
+      - '*fork*'
+      - '*push*'
+      - '*write*'
+      - '*edit*'
+      - '*add*'
+      - '*remove*'
