@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""REA C4: REA-video -> FLUX -> H3Max parody remake orchestrator (`plan` + `status`).
+"""REA: REA-video -> FLUX -> H3Max parody remake orchestrator (`plan` + `status` + `flux` + `build`).
 
 `plan` turns an rea-video decomposition folder (breakdown.json + shots/*.jpg + stems/*.wav) into an H3 batch:
 one run dir per shot under <batch_dir>/shots/, each with the source keyframe in `_inputs/`, a
@@ -10,10 +10,17 @@ REA folder does not ship one.
 
 `status` prints, per shot, which of the pipeline artifacts already exist.
 
+`flux` (C5) turns each shot's Hermes-written `flux_prompt.txt` into a Flux still request under
+`<shot_dir>/flux/` (dry run by default; `--queue --yes-derrick` queues it and copies the returned still to
+`_inputs/<id>_edited.png`). `build` (C5) runs render_writer_pipeline.py over `hermes_prose.txt` + the edited
+still for every ready shot and records the per-shot build reports in `<batch_dir>/build_status.json`.
+
 Usage:
   rea_parody_remake.py plan   <batch_dir> --rea-dir <dir> (--names NAME... | --character FCSydny|FCMegan)
                               [--lane parody|oc] [--aspect 9:16|16:9] [--shots shot_001,shot_002]
   rea_parody_remake.py status <batch_dir>
+  rea_parody_remake.py flux   <batch_dir> [--shot ID] [--queue --yes-derrick]
+  rea_parody_remake.py build  <batch_dir> [--shot ID]
 
 stdlib + the parody modules only; vision/HTTP happen inside render_writer_pipeline._ensure_still_read_raw.
 """
@@ -25,6 +32,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
@@ -34,6 +42,7 @@ if str(PARODY_DIR) not in sys.path:
     sys.path.insert(0, str(PARODY_DIR))
 
 import build_request as br  # noqa: E402
+import flux_still  # noqa: E402
 import rea_onset_probe  # noqa: E402
 import rea_shot_plan as rsp  # noqa: E402
 import render_writer_pipeline as wp  # noqa: E402
@@ -46,6 +55,12 @@ BATCH_PREFIX = "rea_"
 SEED_BASE = 51083601  # the builder's default seed; every shot gets SEED_BASE + index
 DIALOGUE_MAX_WORDS = 25
 ONSET_NAME = "onset_beats.json"
+FLUX_MODE_DEFAULT = "rea_edit"
+FLUX_MODE_POSE = "rea_pose"
+HYBRID_REFMOD_STRENGTH = 0.85  # the RefMod author's hybrid preset (flux_still.HYBRID_RETENTION at 0.85)
+HYBRID_RETENTION = "partially_preserved (0.7)"
+BUILD_STATUS_NAME = "build_status.json"
+PIPELINE_SCRIPT = PARODY_DIR / "render_writer_pipeline.py"
 # status probes, in pipeline order: (label, relative path, build_report key or None)
 STATUS_ARTIFACTS = (
     ("raw_still_read", "raw_still_read.json", None),
@@ -325,6 +340,195 @@ def plan(batch_dir: Path, rea_dir: Path, names: Optional[Sequence[str]] = None,
     return 0
 
 
+# --- shared shot plumbing ------------------------------------------------------
+
+def _load_json_obj(path: Path) -> Dict[str, Any]:
+    """A JSON object, or {} when missing/corrupt/not-an-object (never raises)."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _shot_dirs(batch: Path, only: Optional[str] = None) -> List[Path]:
+    """The shot dirs to run a stage over; `only` selects a single shot id (KeyError when unknown)."""
+    if only:
+        d = batch / "shots" / str(only)
+        if not d.is_dir():
+            raise KeyError(f"unknown shot {only!r}")
+        return [d]
+    return sorted((batch / "shots").glob("shot_*"))
+
+
+def _lock_override(lock: Dict[str, Any], sid: str) -> Dict[str, Any]:
+    for o in lock.get("shot_overrides") or []:
+        if isinstance(o, dict) and str(o.get("shot_id") or "") == sid:
+            return o
+    return {}
+
+
+def flux_mode_for(brief: Dict[str, Any], lock: Dict[str, Any], sid: str) -> str:
+    """shot_brief flux_mode, else the cast lock's, else rea_edit; a new_pose shot override forces rea_pose."""
+    ovr = _lock_override(lock, sid)
+    if ovr.get("new_pose") is True or str(ovr.get("flux_mode") or "").strip().lower() == "new_pose":
+        return FLUX_MODE_POSE
+    return str(brief.get("flux_mode") or lock.get("flux_mode") or FLUX_MODE_DEFAULT)
+
+
+# --- flux (C5) -----------------------------------------------------------------
+
+def flux(batch: Path, only: Optional[str] = None, queue: bool = False, yes_derrick: bool = False) -> int:
+    """Build (and with --queue run) the Flux still for every shot that has a Hermes flux_prompt.txt.
+
+    One shot at a time: a failed or skipped shot is reported and the next shot still runs; the queue only
+    drops the returned still into `_inputs/<id>_edited.png`. Hermes owns retries (it may rewrite the prompt);
+    this stage never loops.
+    """
+    if queue and not yes_derrick:
+        print("NOT_READY flux: --queue requires --yes-derrick")
+        return 3
+    batch = Path(batch)
+    lock = _load_json_obj(batch / "parody_cast_lock.json")
+    if not lock:
+        print(f"NOT_READY flux cast lock: {batch}/parody_cast_lock.json")
+        return 2
+    try:
+        shot_dirs = _shot_dirs(batch, only)
+    except KeyError as exc:
+        print(f"NOT_READY flux: {exc}")
+        return 3
+
+    canvas = list(lock.get("canvas") or [768, 1344])[:2]
+    width, height = int(canvas[0]), int(canvas[1])
+    flux_id = dict(lock.get("flux_identity") or {})
+    h3 = dict(lock.get("h3_identity") or {})
+    refmod = str(flux_id.get("refmod") or "").strip()
+    names = [str(n).strip() for n in (h3.get("names") or []) if str(n).strip()]
+    character = str(h3.get("character") or "").strip() or None
+    hybrid = bool(lock.get("hybrid"))
+    loras: List[Dict[str, Any]] = []
+    if hybrid and str(flux_id.get("lora") or "").strip():
+        loras = [{"name": str(flux_id["lora"]), "strength": float(flux_id.get("lora_strength") or 0.60)}]
+
+    done = failed = 0
+    for shot_dir in shot_dirs:
+        sid = shot_dir.name
+        if (shot_dir / "clip_NOT_READY.txt").is_file():
+            continue
+        prompt_file = shot_dir / "flux_prompt.txt"
+        if not prompt_file.is_file():
+            print(f"NOT_READY {sid} flux_prompt.txt missing")
+            failed += 1
+            continue
+        brief = _load_json_obj(shot_dir / "shot_brief.json")
+        kwargs: Dict[str, Any] = {
+            "refmods": [refmod] if refmod else [],
+            "loras": loras,
+            "image": str(shot_dir / "_inputs" / f"{sid}_first.jpg"),
+            "width": width,
+            "height": height,
+            "seed": int(brief.get("seed") or SEED_BASE),
+            "character": character,
+            "names": names or None,
+            "dry_run": not queue,
+        }
+        if hybrid:
+            kwargs["refmod_strength"] = HYBRID_REFMOD_STRENGTH
+            kwargs["retention"] = HYBRID_RETENTION
+        rep = flux_still.build_flux_still(shot_dir / "flux", prompt_file.read_text(encoding="utf-8").strip(),
+                                          flux_mode_for(brief, lock, sid), **kwargs)
+        if not isinstance(rep, dict) or str(rep.get("status")) != "READY":
+            reason = str(rep.get("reason") or "?") if isinstance(rep, dict) else "?"
+            print(f"NOT_READY flux {sid}: {reason}")
+            failed += 1
+            continue
+        if queue:
+            qres = flux_still.queue_flux_still(shot_dir / "flux") or {}
+            still = str(qres.get("still") or "")
+            if int(qres.get("rc") or 0) != 0 or not still or not Path(still).is_file():
+                print(f"NOT_READY queue {sid}: {str(qres.get('stderr') or 'no still returned').strip()[:200]}")
+                failed += 1
+                continue
+            dst = shot_dir / "_inputs" / f"{sid}_edited.png"
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(still, str(dst))
+            print(f"EDITED {sid} {dst}")
+        done += 1
+    print(f"READY flux {batch} shots={done} failed={failed}")
+    return 3 if failed else 0
+
+
+# --- build (C5) ----------------------------------------------------------------
+
+def build(batch: Path, only: Optional[str] = None) -> int:
+    """Run render_writer_pipeline.py (--prose-file, never --queue/--yes-derrick/--fix-once) per ready shot.
+
+    A shot is ready when it has `_inputs/<id>_edited.png`, `hermes_prose.txt` and no clip_NOT_READY.txt.
+    Each shot's `build_report.json` is recorded as {id, status, reason} in `<batch_dir>/build_status.json`;
+    a NOT_READY shot prints `STUCK <id> <reason>` for Hermes to rewrite the prose once and rerun this stage.
+    """
+    batch = Path(batch)
+    lock = _load_json_obj(batch / "parody_cast_lock.json")
+    if not lock:
+        print(f"NOT_READY build cast lock: {batch}/parody_cast_lock.json")
+        return 2
+    try:
+        shot_dirs = _shot_dirs(batch, only)
+    except KeyError as exc:
+        print(f"NOT_READY build: {exc}")
+        return 3
+
+    h3 = dict(lock.get("h3_identity") or {})
+    names = [str(n).strip() for n in (h3.get("names") or []) if str(n).strip()]
+    character = str(h3.get("character") or "").strip() or None
+    aspect = str(lock.get("aspect") or "9:16")
+
+    records: List[Dict[str, Any]] = []
+    stuck = 0
+    for shot_dir in shot_dirs:
+        sid = shot_dir.name
+        if (shot_dir / "clip_NOT_READY.txt").is_file():
+            continue
+        edited = shot_dir / "_inputs" / f"{sid}_edited.png"
+        prose = shot_dir / "hermes_prose.txt"
+        if not edited.is_file() or not prose.is_file():
+            continue
+        brief = _load_json_obj(shot_dir / "shot_brief.json")
+        parts = brief.get("parts") or _lock_override(lock, sid).get("parts") or []
+        frames = parts[0].get("frames") if parts and isinstance(parts[0], dict) else None
+        cmd = [sys.executable, str(PIPELINE_SCRIPT), str(shot_dir),
+               "--prose-file", str(prose),
+               "--still", str(edited),
+               "--still-mode", "guide",
+               "--position", str(brief.get("position") or "talk"),
+               "--ask", f"rea remake {sid}"]
+        if frames is not None:
+            cmd += ["--frames", str(int(frames))]
+        cmd += ["--aspect", aspect]
+        if names and str(lock.get("lane") or "parody") != "oc":
+            cmd += ["--names", *names]
+        elif character:
+            cmd += ["--character", character]
+        elif names:
+            cmd += ["--names", *names]
+        proc = subprocess.run(cmd, cwd=str(PARODY_DIR), capture_output=True, text=True)
+        report = _load_json_obj(shot_dir / "build_report.json")
+        if report:
+            st = str(report.get("status") or "?")
+            reason = str(report.get("reason") or "")
+        else:
+            st = "NOT_READY"
+            reason = f"no build_report.json (rc={getattr(proc, 'returncode', '?')})"
+        records.append({"id": sid, "status": st, "reason": reason})
+        if st == "NOT_READY":
+            stuck += 1
+            print(f"STUCK {sid} {reason}")
+    wp_state.atomic_write(batch / BUILD_STATUS_NAME, json.dumps(records, indent=2, ensure_ascii=False))
+    print(f"READY build {batch} shots={len(records)} stuck={stuck}")
+    return 3 if stuck else 0
+
+
 # --- status ------------------------------------------------------------------
 
 def _build_status(path: Path) -> str:
@@ -378,6 +582,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     st = sub.add_parser("status", help="list which artifacts each shot already has")
     st.add_argument("batch_dir")
 
+    fx = sub.add_parser("flux", help="build (and with --queue run) the Flux still for each shot's flux_prompt.txt")
+    fx.add_argument("batch_dir")
+    fx.add_argument("--shot", default=None, help="only this shot id")
+    fx.add_argument("--queue", action="store_true", help="queue on AlienPc ComfyUI (requires --yes-derrick)")
+    fx.add_argument("--yes-derrick", action="store_true", help="Derrick approved the prompts; required with --queue")
+
+    bd = sub.add_parser("build", help="run render_writer_pipeline over hermes_prose.txt + the edited still")
+    bd.add_argument("batch_dir")
+    bd.add_argument("--shot", default=None, help="only this shot id")
+
     args = ap.parse_args(argv)
     try:
         batch = check_batch_dir(args.batch_dir)
@@ -387,6 +601,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if args.cmd == "status":
         return status(batch)
+    if args.cmd == "flux":
+        return flux(batch, only=args.shot, queue=args.queue, yes_derrick=args.yes_derrick)
+    if args.cmd == "build":
+        return build(batch, only=args.shot)
 
     names = [n for n in (args.names or []) if str(n).strip()]
     if names and args.character:
