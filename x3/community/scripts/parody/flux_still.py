@@ -235,20 +235,48 @@ def _inject_flux_refmods(
     return clean[:8]
 
 
+def _existing_graph_refmods(graph: Dict[str, Any]) -> List[str]:
+    out: List[str] = []
+    for node in graph.values():
+        if not isinstance(node, dict) or node.get("class_type") != "Klein9RefModsLoader":
+            continue
+        inp = node.get("inputs") or {}
+        for i in range(1, 9):
+            m = str(inp.get(f"mod_{i}") or "").strip()
+            if m and m.lower() not in ("none", "(none)") and m not in out:
+                out.append(m)
+    return out
+
+
+def _existing_graph_loras(graph: Dict[str, Any]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    for node in graph.values():
+        if not isinstance(node, dict) or node.get("class_type") not in ("LoraLoaderModelOnly", "LoraLoader"):
+            continue
+        inp = node.get("inputs") or {}
+        name = str(inp.get("lora_name") or "").strip()
+        strength = float(inp.get("strength_model") or 0.0)
+        if name and strength > 0.0:
+            out.append({"name": name, "strength": strength})
+    return out
+
+
 def build_flux_still(
     run_dir: Path,
     prompt_text: str,
     mode: str = "t2i",
     *,
     template_path: Optional[Path] = None,
+    request_json: Optional[Path] = None,
+    unet: Optional[str] = None,
     refmods: Optional[Sequence[str]] = None,
     refmod_strength: float = 1.0,
     retention: Optional[str] = None,
     loras: Optional[Sequence[Dict[str, Any]]] = None,
     image: Optional[str] = None,
     pose_image: Optional[str] = None,
-    width: int = 768,
-    height: int = 1344,
+    width: Optional[int] = 768,
+    height: Optional[int] = 1344,
     steps: Optional[int] = None,
     cfg: Optional[float] = None,
     seed: int = 51083601,
@@ -277,14 +305,20 @@ def build_flux_still(
     except br.WriterNotReady as e:
         return _fail(str(e).removeprefix("NOT_READY: "))
 
-    # Auto-switch plain t2i -> refmod template when Klein9 RefMods are supplied.
-    eff_mode = "refmod" if (mode == "t2i" and refmods and not template_path) else mode
-    tpath = Path(template_path) if template_path else MODES.get(eff_mode)
+    # Load a saved request.api.json directly when provided; else auto-switch plain t2i -> refmod if RefMods supplied.
+    if request_json is not None:
+        eff_mode = "request_json"
+        tpath = Path(request_json)
+    else:
+        eff_mode = "refmod" if (mode == "t2i" and refmods and not template_path) else mode
+        tpath = Path(template_path) if template_path else MODES.get(eff_mode)
     if not tpath or not tpath.is_file():
-        return _fail(f"unknown or missing Flux template: {eff_mode!r}")
+        return _fail(f"unknown or missing Flux template: {tpath or eff_mode!r}")
 
-    if width % 16 != 0 or height % 16 != 0:
-        return _fail(f"Flux width/height must be divisible by 16 (got {width}x{height})")
+    if width is not None and width % 16 != 0:
+        return _fail(f"Flux width must be divisible by 16 (got {width})")
+    if height is not None and height % 16 != 0:
+        return _fail(f"Flux height must be divisible by 16 (got {height})")
 
     g = copy.deepcopy(json.loads(tpath.read_text(encoding="utf-8")))
     pos_id = _find_node(g, "CLIPTextEncode", "positive") or _find_node(g, "CLIPTextEncode")
@@ -292,15 +326,21 @@ def build_flux_still(
         return _fail("Flux template has no positive CLIPTextEncode node")
     g[pos_id]["inputs"]["text"] = raw
 
+    if unet and str(unet).strip():
+        unet_id = _find_node(g, "UNETLoader")
+        if not unet_id:
+            return _fail("Flux template has no UNETLoader node for --unet")
+        g[unet_id]["inputs"]["unet_name"] = str(unet).strip()
+
     if (lat_id := _find_node(g, "EmptyFlux2LatentImage")):
-        if isinstance(g[lat_id]["inputs"].get("width"), int):
+        if width is not None and isinstance(g[lat_id]["inputs"].get("width"), int):
             g[lat_id]["inputs"]["width"] = int(width)
-        if isinstance(g[lat_id]["inputs"].get("height"), int):
+        if height is not None and isinstance(g[lat_id]["inputs"].get("height"), int):
             g[lat_id]["inputs"]["height"] = int(height)
     if (sched_id := _find_node(g, "Flux2Scheduler")):
-        if isinstance(g[sched_id]["inputs"].get("width"), int):
+        if width is not None and isinstance(g[sched_id]["inputs"].get("width"), int):
             g[sched_id]["inputs"]["width"] = int(width)
-        if isinstance(g[sched_id]["inputs"].get("height"), int):
+        if height is not None and isinstance(g[sched_id]["inputs"].get("height"), int):
             g[sched_id]["inputs"]["height"] = int(height)
         if steps is not None:
             g[sched_id]["inputs"]["steps"] = int(steps)
@@ -323,12 +363,28 @@ def build_flux_still(
 
     applied_refmods = _inject_flux_refmods(g, refmods or [], strength=refmod_strength, retention=retention)
     applied_loras = _inject_flux_loras(g, loras or [])
+    if request_json is not None:
+        if not applied_refmods:
+            applied_refmods = _existing_graph_refmods(g)
+        if not applied_loras:
+            applied_loras = _existing_graph_loras(g)
     if applied_refmods and "reference" not in raw.lower():
         raw = f"{REFMOD_ANCHOR} {raw}"
         g[pos_id]["inputs"]["text"] = raw
 
     if (sid := _find_node(g, "SaveImage")):
         g[sid]["inputs"]["filename_prefix"] = f"community/{run_dir.name}/still"
+
+    eff_w = width
+    eff_h = height
+    if (lat_id := _find_node(g, "EmptyFlux2LatentImage")):
+        if eff_w is None:
+            eff_w = g[lat_id]["inputs"].get("width")
+        if eff_h is None:
+            eff_h = g[lat_id]["inputs"].get("height")
+    size_str = f"{int(eff_w)}x{int(eff_h)}" if (eff_w and eff_h) else "saved"
+    unet_id = _find_node(g, "UNETLoader")
+    eff_unet = g[unet_id]["inputs"].get("unet_name") if unet_id else None
 
     # Collect identity metadata so H3Max auto-picks up the celeb + INDEX character + H3 RefMod when animating this still.
     inferred_names: List[str] = []
@@ -344,13 +400,14 @@ def build_flux_still(
         "source": "flux_still",
         "mode": eff_mode,
         "template": tpath.name,
+        "unet": eff_unet,
         "prompt": raw,
         "character": character,
         "actor": actor,
         "names": inferred_names,
         "refmods": applied_refmods,
         "loras": applied_loras,
-        "size": f"{int(width)}x{int(height)}",
+        "size": size_str,
         "seed": int(seed),
     }
 
@@ -363,7 +420,7 @@ def build_flux_still(
     if (nr := run_dir / "still_NOT_READY.txt").exists():
         nr.unlink()
 
-    order = {"order": [{"pos": 1, "tag": "still", "job_type": "still", "size": f"{int(width)}x{int(height)}",
+    order = {"order": [{"pos": 1, "tag": "still", "job_type": "still", "size": size_str,
                         "arm": eff_mode, "scene": "flux_still", "seed": int(seed)}]}
     marker, order_file = run_dir / "DRY_RUN", run_dir / "_render_order.json"
     if dry_run:
@@ -375,7 +432,7 @@ def build_flux_still(
             marker.unlink()
         order_file.write_text(json.dumps(order, indent=2) + "\n", encoding="utf-8")
 
-    rep.update(status="READY", mode=eff_mode, template=tpath.name, size=f"{int(width)}x{int(height)}",
+    rep.update(status="READY", mode=eff_mode, template=tpath.name, unet=eff_unet, size=size_str,
                refmods=applied_refmods, loras=applied_loras, names=inferred_names, dry_run=dry_run)
     (run_dir / "build_report.json").write_text(json.dumps(rep, indent=2) + "\n", encoding="utf-8")
     return dict(rep, run_dir=str(run_dir))
@@ -425,6 +482,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--prompt", required=True, help="Positive FLUX still prompt (per flux-klein-prompting skill)")
     ap.add_argument("--mode", default="t2i", choices=sorted(MODES), help="Flux mode (default: t2i; auto-refmod if --refmod)")
     ap.add_argument("--template", default=None, help="Optional explicit template JSON path")
+    ap.add_argument("--request-json", default=None, help="Reuse a saved request.api.json graph (preserves its UNET/RefMod/LoRA/canvas unless overridden)")
+    ap.add_argument("--unet", default=None, help="Override UNETLoader unet_name (e.g. Miraclein_4.5_9b_FP8.safetensors)")
     ap.add_argument("--refmod", action="append", default=[], help="Klein9 RefMod filename, stem, or celeb name (repeatable, up to 8)")
     ap.add_argument("--refmod-strength", type=float, default=None, help="RefMod strength (default 1.0; 0.85 with --hybrid)")
     ap.add_argument("--retention", default=None,
@@ -434,8 +493,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--hybrid", default=None, help="RefMod author's hybrid stack for a celeb name: fk9_<name>_v1_refmod @ 0.85 + fk9_<name>_v1_prodigy LoRA @ 0.60, retention 0.7")
     ap.add_argument("--image", default=None, help="Input/identity image path (for edit / pose / layout)")
     ap.add_argument("--pose-image", default=None, help="Pose/layout reference image path (for pose / layout)")
-    ap.add_argument("--width", type=int, default=768)
-    ap.add_argument("--height", type=int, default=1344)
+    ap.add_argument("--width", type=int, default=None, help="Output width (default 768; with --request-json keeps saved width unless set)")
+    ap.add_argument("--height", type=int, default=None, help="Output height (default 1344; with --request-json keeps saved height unless set)")
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--cfg", type=float, default=None)
     ap.add_argument("--seed", type=int, default=51083601)
@@ -469,12 +528,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             char = a.hybrid
     if refmod_strength is None:
         refmod_strength = 1.0
+    eff_w = a.width if a.width is not None else (None if a.request_json else 768)
+    eff_h = a.height if a.height is not None else (None if a.request_json else 1344)
     rep = build_flux_still(
         d, a.prompt, a.mode,
         template_path=Path(a.template) if a.template else None,
+        request_json=Path(a.request_json) if a.request_json else None,
+        unet=a.unet,
         refmods=refmods, refmod_strength=refmod_strength, retention=retention,
         loras=loras, image=a.image, pose_image=a.pose_image,
-        width=a.width, height=a.height, steps=a.steps, cfg=a.cfg, seed=a.seed,
+        width=eff_w, height=eff_h, steps=a.steps, cfg=a.cfg, seed=a.seed,
         character=char, actor=a.actor, names=a.names,
         dry_run=not a.queue,
     )
