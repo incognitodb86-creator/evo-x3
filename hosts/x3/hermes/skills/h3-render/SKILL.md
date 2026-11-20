@@ -25,7 +25,7 @@ Three sources:
 
 - **PixlStash:** use the `pixlstash-image-library` skill or its search API. Never browse library folders, tags, character-name lists, or `unmatched-person-names.txt`. Never print the token; read `/home/evo/.config/pixlstash/render-read.token` only inside the command.
 - **Image Derrick puts in chat:** copy it into `<run_dir>/_inputs/<file>`, pass that path as `--still`, and drop a copy into `/home/evo/AI/pixl-inbox/` so PixlStash can import it.
-- **New Miraclein / Flux still:** load `flux-klein-prompting`, draft the still prompt, dry-run `flux_still.py`, and show it. Queue that still only after Derrick's yes, with `--queue --yes-derrick`. Do not print RefMod or LoRA triggers.
+- **New Miraclein / Flux still (or aspect-ratio reframe):** load `flux-klein-prompting`, draft the still prompt, dry-run `flux_still.py`, and show it. Queue that still only after Derrick's yes, with `--queue --yes-derrick`. If a PixlStash or uploaded start still has a different aspect ratio than the requested H3 video (for example a 2:3 or 9:16 photo for a 16:9 `1344x768` clip, or 16:9 for `768x1344`), pre-reframe it first with `flux_still.py --mode edit --image <still> --width <W> --height <H>` so `MiniMaxH3AddGuide` does not center-crop off the face. Do not print RefMod or LoRA triggers.
 
 If a still or ask has a youth cue, stop. Everyone is 18+.
 

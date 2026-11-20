@@ -27,6 +27,7 @@ LLAMA_CFG="/etc/evo-x3/llama-swap.yaml"
 LLAMA_BAK="/etc/evo-x3/_archive/llama-swap.yaml-20261120-preWS"
 HERMES_HOME_DIR="/home/evo/.hermes"
 HERMES_BAK="${HERMES_HOME_DIR}/_archive/20261120-ws"
+PI_BAK="/home/evo/AI/_archive/20261120-ws-pi"
 CODE_WS="/home/evo/AI/hermes-code"
 RENDER_WS="/home/evo/workspace"
 STAGE_DIR=""
@@ -85,7 +86,12 @@ check_sources() {
     "$REPO_DIR/hosts/x3/hermes/workspaces/render/AGENTS.md" \
     "$REPO_DIR/hosts/x3/hermes/workspaces/code/AGENTS.md" \
     "$REPO_DIR/hosts/x3/hermes/workspaces/code/MEMORY.md" \
-    "$REPO_DIR/hosts/x3/hermes/agent-hooks/guard-render-queue.sh"; do
+    "$REPO_DIR/hosts/x3/hermes/agent-hooks/guard-render-queue.sh" \
+    "$REPO_DIR/hosts/x3/hermes/skills/h3-render/SKILL.md" \
+    "$REPO_DIR/hosts/x3/hermes/skills/pi-job/SKILL.after-h9.md" \
+    "$REPO_DIR/config/bin/pi-job" \
+    "$REPO_DIR/pi-chats/forge-pi.sh" \
+    "$REPO_DIR/config/pi-evo/extensions/syntax-check.ts"; do
     [[ -f "$f" ]] || { echo "MISSING source file: $f (use --repo <mono-clone>)" >&2; exit 1; }
   done
   local sha
@@ -94,13 +100,14 @@ check_sources() {
 }
 
 check_idle() {
-  # pi-job's single-slot lock and active marker live in the evo user's ~/AI/_runs (config/bin/pi-job).
-  if ! sudo -n -u evo flock -n /home/evo/AI/_runs/pi-job.lock true 2>/dev/null; then
-    echo "BLOCKED: pi-job lock is held (a pi-job is running)" >&2
-    exit 1
-  fi
+  # pi-job only holds pi-job.lock while spawning systemd-run; a running job is tracked by pi-job.active + its unit.
+  local active_id=""
   if sudo -n -u evo test -s /home/evo/AI/_runs/pi-job.active 2>/dev/null; then
-    echo "WARN: /home/evo/AI/_runs/pi-job.active is not empty; check 'pi-job status <id>' before applying" >&2
+    active_id="$(sudo -n -u evo cat /home/evo/AI/_runs/pi-job.active 2>/dev/null | tr -d '[:space:]' || true)"
+  fi
+  if [[ -n "$active_id" ]] && sudo -n systemctl --user -M evo@ is-active --quiet "pi-job-${active_id}.service" 2>/dev/null; then
+    echo "BLOCKED: pi-job-${active_id}.service is active" >&2
+    exit 1
   fi
   # An X3-queued render holds this lock; llama-swap restart must not land mid-render.
   if sudo -n -u evo test -e /home/evo/AI/locks/gpu-render.lock 2>/dev/null \
@@ -108,6 +115,69 @@ check_idle() {
     echo "BLOCKED: X3 gpu-render.lock is held (render in flight)" >&2
     exit 1
   fi
+}
+
+patch_pi_permissions() {
+  local perm_path="$1" dry="$2"
+  sudo -n -iu evo python3 - "$perm_path" "$dry" <<'PY'
+import os, sys
+
+path, dry = sys.argv[1], (sys.argv[2] == "1")
+if not os.path.isfile(path):
+    print(f"SKIP: {path} not found")
+    sys.exit(0)
+text = open(path, encoding="utf-8").read()
+marker = "2026-11-20 red-team fix"
+if marker in text:
+    print(f"OK: secret denies already present in {path}")
+    sys.exit(0)
+
+tools_add = (
+    '    "mcp__google_workspace__*post*": "ask",\n'
+    '    // 2026-11-20 red-team fix: explicitly block file-tool reads/writes of evo-x3 / pixlstash secret files.\n'
+    '    "read:/home/evo/.config/evo-x3/*": "deny",\n'
+    '    "edit:/home/evo/.config/evo-x3/*": "deny",\n'
+    '    "write:/home/evo/.config/evo-x3/*": "deny",\n'
+    '    "read:/home/evo/.config/pixlstash/*": "deny",\n'
+    '    "edit:/home/evo/.config/pixlstash/*": "deny",\n'
+    '    "write:/home/evo/.config/pixlstash/*": "deny",\n'
+    '    "read:**/llm.env": "deny",\n'
+    '    "read:**/*.token": "deny",\n'
+    '    "read:**/*.cred": "deny"\n'
+)
+tools_old = '    "mcp__google_workspace__*post*": "ask"\n'
+bash_old = '    "*/etc/evo-x3*": "deny",\n'
+bash_add = (
+    '    "*/etc/evo-x3*": "deny",\n'
+    '    // 2026-11-20 red-team fix: block reading locked user key/token files in bash too.\n'
+    '    "*/.config/evo-x3/*": "deny",\n'
+    '    "*/.config/pixlstash/*": "deny",\n'
+    '    "*llm.env*": "deny",\n'
+    '    "*render-read.token*": "deny",\n'
+)
+ext_old = '    "external_directory:/home/evo/.pi/agent/auth.json": "deny",\n'
+ext_add = (
+    '    "external_directory:/home/evo/.pi/agent/auth.json": "deny",\n'
+    '    "external_directory:/home/evo/.config/evo-x3/*": "deny",\n'
+    '    "external_directory:/home/evo/.config/pixlstash/*": "deny",\n'
+    '    "external_directory:*.token": "deny",\n'
+    '    "external_directory:*.cred": "deny",\n'
+)
+updated = text
+for old, new in ((tools_old, tools_add), (bash_old, bash_add), (ext_old, ext_add)):
+    assert old in updated, f"anchor not found in {path}: {old.strip()}"
+    updated = updated.replace(old, new, 1)
+
+if dry:
+    print(f"[dry-run] Would add evo-x3/pixlstash/token/cred denies to {path}")
+    sys.exit(0)
+tmp = path + ".tmp-ws"
+with open(tmp, "w", encoding="utf-8") as fh:
+    fh.write(updated)
+os.chmod(tmp, 0o644)
+os.replace(tmp, path)
+print(f"OK: added secret denies to {path}")
+PY
 }
 
 check_python_yaml() {
@@ -355,8 +425,14 @@ do_rollback() {
     [[ -d "'"$CODE_WS"'" ]] && mv "'"$CODE_WS"'" "$B/ws-code-rolledback-$(date +%H%M%S)"
     [[ -d "$B/profiles-gemma" && ! -d "'"$HERMES_HOME_DIR"'/profiles/gemma" ]] && mv "$B/profiles-gemma" "'"$HERMES_HOME_DIR"'/profiles/gemma"
     [[ -f "$B/guard-render-queue.sh" ]] && cp -a "$B/guard-render-queue.sh" "'"$HERMES_HOME_DIR"'/agent-hooks/guard-render-queue.sh"
+    [[ -f "$B/h3-render.SKILL.md" ]] && cp -a "$B/h3-render.SKILL.md" "'"$HERMES_HOME_DIR"'/skills/creative/h3-render/SKILL.md"
+    [[ -f "$B/pi-job.SKILL.md" ]] && cp -a "$B/pi-job.SKILL.md" "'"$HERMES_HOME_DIR"'/skills/pi-job/SKILL.md"
+    PB="'"$PI_BAK"'"
+    [[ -f "$PB/forge-pi.sh" ]] && cp -a "$PB/forge-pi.sh" /home/evo/evo-x3/pi-chats/forge-pi.sh
+    [[ -f "$PB/pi-permissions.jsonc" ]] && cp -a "$PB/pi-permissions.jsonc" /home/evo/.pi/agent/pi-permissions.jsonc
     true
   '
+  [[ -f "${PI_BAK}/pi-job" ]] && sudo -n install -o root -g root -m 0755 "${PI_BAK}/pi-job" /usr/local/bin/pi-job
   sudo -n systemctl --user -M evo@ restart hermes-gateway
   echo "[$(ts_ct)] Rollback complete."
 }
@@ -374,9 +450,11 @@ if [[ "$MODE" == "dry-run" ]]; then
   check_idle
   patch_llama_swap "$LLAMA_CFG" 1
   patch_hermes_profile "${HERMES_HOME_DIR}/config.yaml" render 1
+  patch_pi_permissions /home/evo/.pi/agent/pi-permissions.jsonc 1
   echo "[dry-run] Would clone default -> code profile, write $CODE_WS/AGENTS.md + code/memories/MEMORY.md,"
   echo "          set model=flash-next-code, model+agent reasoning_effort=$CODE_THINKING, disable render skills,"
   echo "          route auxiliary.{compression,vision,approval,title_generation} -> flash-next-aux,"
+  echo "          install fixed /usr/local/bin/pi-job + forge-pi.sh (FORGE_KEEP_CWD=1) + pi-job/h3-render skills + syntax-check.ts,"
   echo "          archive $HERMES_HOME_DIR/profiles/gemma (weights untouched), and restart llama-swap + hermes-gateway."
   echo "Run with --apply to execute."
   exit 0
@@ -432,6 +510,10 @@ cp "$REPO_DIR/hosts/x3/hermes/workspaces/render/AGENTS.md" "$STAGE_DIR/render.AG
 cp "$REPO_DIR/hosts/x3/hermes/workspaces/code/AGENTS.md" "$STAGE_DIR/code.AGENTS.md"
 cp "$REPO_DIR/hosts/x3/hermes/workspaces/code/MEMORY.md" "$STAGE_DIR/code.MEMORY.md"
 cp "$REPO_DIR/hosts/x3/hermes/agent-hooks/guard-render-queue.sh" "$STAGE_DIR/guard-render-queue.sh"
+cp "$REPO_DIR/hosts/x3/hermes/skills/h3-render/SKILL.md" "$STAGE_DIR/h3-render.SKILL.md"
+cp "$REPO_DIR/hosts/x3/hermes/skills/pi-job/SKILL.after-h9.md" "$STAGE_DIR/pi-job.SKILL.md"
+cp "$REPO_DIR/pi-chats/forge-pi.sh" "$STAGE_DIR/forge-pi.sh"
+cp "$REPO_DIR/config/pi-evo/extensions/syntax-check.ts" "$STAGE_DIR/syntax-check.ts"
 chmod 0644 "$STAGE_DIR"/*
 
 patch_hermes_profile "${HERMES_HOME_DIR}/config.yaml" render 0
@@ -466,7 +548,6 @@ sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" bash -c '
   install -m 0644 "'"$STAGE_DIR"'/code.AGENTS.md" "'"$CODE_WS"'/AGENTS.md"
   install -m 0644 "'"$STAGE_DIR"'/code.MEMORY.md" "'"$HERMES_HOME_DIR"'/profiles/code/memories/MEMORY.md"
 '
-rm -rf "$STAGE_DIR"
 patch_hermes_profile "${HERMES_HOME_DIR}/profiles/code/config.yaml" code 0
 
 echo "=== Step 4: Archive hand-made gemma profile (weights untouched per D3) ==="
@@ -478,6 +559,45 @@ sudo -n -iu evo bash -c '
     echo "profiles/gemma already absent"
   fi
 '
+
+echo "=== Step 4b: Install pi coding fixes (pi-job, forge-pi.sh cwd fix, skills, secret denies) ==="
+sudo -n -iu evo mkdir -p "$PI_BAK"
+if [[ -f /usr/local/bin/pi-job && ! -f "${PI_BAK}/pi-job" ]]; then
+  sudo -n cp -a /usr/local/bin/pi-job "${PI_BAK}/pi-job"
+fi
+sudo -n install -o root -g root -m 0755 "$REPO_DIR/config/bin/pi-job" /usr/local/bin/pi-job
+
+sudo -n -iu evo bash -c '
+  set -euo pipefail
+  B="'"$HERMES_BAK"'"; PB="'"$PI_BAK"'"
+  if [[ -f /home/evo/evo-x3/pi-chats/forge-pi.sh ]]; then
+    [[ -f "$PB/forge-pi.sh" ]] || cp -a /home/evo/evo-x3/pi-chats/forge-pi.sh "$PB/forge-pi.sh"
+    install -m 0755 "'"$STAGE_DIR"'/forge-pi.sh" /home/evo/evo-x3/pi-chats/forge-pi.sh
+  else
+    echo "WARN: /home/evo/evo-x3/pi-chats/forge-pi.sh not found; update FORGE_LAUNCHER manually"
+  fi
+  [[ -f "$B/h3-render.SKILL.md" || ! -f "'"$HERMES_HOME_DIR"'/skills/creative/h3-render/SKILL.md" ]] || \
+    cp -a "'"$HERMES_HOME_DIR"'/skills/creative/h3-render/SKILL.md" "$B/h3-render.SKILL.md"
+  install -m 0644 "'"$STAGE_DIR"'/h3-render.SKILL.md" "'"$HERMES_HOME_DIR"'/skills/creative/h3-render/SKILL.md"
+  [[ -f "$B/pi-job.SKILL.md" || ! -f "'"$HERMES_HOME_DIR"'/skills/pi-job/SKILL.md" ]] || \
+    cp -a "'"$HERMES_HOME_DIR"'/skills/pi-job/SKILL.md" "$B/pi-job.SKILL.md"
+  install -m 0644 "'"$STAGE_DIR"'/pi-job.SKILL.md" "'"$HERMES_HOME_DIR"'/skills/pi-job/SKILL.md"
+  if [[ -d "'"$HERMES_HOME_DIR"'/profiles/code/skills/pi-job" ]]; then
+    install -m 0644 "'"$STAGE_DIR"'/pi-job.SKILL.md" "'"$HERMES_HOME_DIR"'/profiles/code/skills/pi-job/SKILL.md"
+  fi
+  if [[ -f /home/evo/.pi/agent/pi-permissions.jsonc ]]; then
+    [[ -f "$PB/pi-permissions.jsonc" ]] || cp -a /home/evo/.pi/agent/pi-permissions.jsonc "$PB/pi-permissions.jsonc"
+  fi
+  if [[ ! -f /home/evo/.pi/agent/extensions/syntax-check.ts && -d /home/evo/.pi/agent/extensions ]]; then
+    install -m 0644 "'"$STAGE_DIR"'/syntax-check.ts" /home/evo/.pi/agent/extensions/syntax-check.ts
+    echo "Installed missing syntax-check.ts extension"
+  fi
+'
+patch_pi_permissions /home/evo/.pi/agent/pi-permissions.jsonc 0
+rm -rf "$STAGE_DIR"
+STAGE_DIR=""
+echo "NOTE: models.json is never edited automatically. Check /home/evo/.pi/agent/models.json against"
+echo "      config/pi-evo/models.json.example (thinking_budget_tokens + AlienPc maxTokens: 32768)."
 
 echo "=== Step 5: Restart hermes-gateway & run end-to-end smoke checks ==="
 sudo -n systemctl --user -M evo@ restart hermes-gateway

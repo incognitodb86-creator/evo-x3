@@ -79,35 +79,43 @@ def test_chat_reply_has_media_line_not_video_tag(tmp_path, monkeypatch, pi_job):
     assert "[Open the 2x video](" in text
 
 
-def test_run_pi_thinking_medium_on_alienpc_low_on_x3(pi_job, tmp_path, monkeypatch):
-    """Swift on AlienPc codes with thinking medium (Derrick t2766s9752); the X3 fallback keeps low."""
+def test_run_pi_thinking_medium_and_keep_cwd_on_both_routes(pi_job, tmp_path, monkeypatch):
+    """Both AlienPc Swift and X3 Gufo fallback keep caller cwd and pass thinking medium via env (no dup --thinking)."""
     seen = []
 
     class _P:
         returncode = 0
 
     def fake_run(cmd, **kw):
-        seen.append((kw["env"].get("FORGE_MODEL"), cmd[cmd.index("--thinking") + 1]))
+        assert "--thinking" not in cmd
+        seen.append((kw["env"].get("FORGE_MODEL"), kw["env"].get("FORGE_THINKING"), kw["env"].get("FORGE_KEEP_CWD")))
         return _P()
 
     monkeypatch.setattr(pi_job.subprocess, "run", fake_run)
     monkeypatch.delenv("PI_JOB_FORCE_X3", raising=False)
     monkeypatch.setattr(pi_job, "_alienpc_gate_idle", lambda: True)
     rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
-    assert (rc, where) == (0, "alienpc") and seen[-1] == ("alienpc/coding_swift15_iq3s_esp", "medium")
+    assert (rc, where) == (0, "alienpc") and seen[-1] == ("alienpc/coding_swift15_iq3s_esp", "medium", "1")
     monkeypatch.setenv("PI_JOB_FORCE_X3", "1")
     rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
-    assert where == "x3" and seen[-1] == (None, "low")
+    assert where == "x3" and seen[-1] == (None, "medium", "1")
 
-def test_timeout_min_flag_and_defaults(pi_job, monkeypatch):
+
+def test_timeout_min_flag_and_git_repo_guard(pi_job, tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    non_git = tmp_path / "plain"
+    non_git.mkdir()
     started = {}
-    monkeypatch.setattr(pi_job, "_start_detached", lambda role, target, prompt, **kw: started.update(role=role, **kw) or 0)
-    assert pi_job.main(["code", "--timeout-min", "180", "/tmp", "task"]) == 0
+    monkeypatch.setattr(pi_job, "_start_detached", lambda role, target, prompt, **kw: started.update(role=role, target=target, **kw) or 0)
+    assert pi_job.main(["code", str(non_git), "task"]) == 2
+    assert not started
+    assert pi_job.main(["code", "--timeout-min", "180", str(repo), "task"]) == 0
     assert started["role"] == "code" and started["timeout_min"] == 180
-    assert pi_job.main(["review", "/tmp", "task"]) == 0
+    assert pi_job.main(["review", str(non_git), "task"]) == 0
     assert started["timeout_min"] is None
     with pytest.raises(SystemExit):
-        pi_job.main(["code", "--timeout-min", "600", "/tmp", "task"])
+        pi_job.main(["code", "--timeout-min", "600", str(repo), "task"])
     assert pi_job._job_timeout_s({}, 3600) == "3600"
     assert pi_job._job_timeout_s({"timeout_s": 10800}, 3600) == "10800"
     assert pi_job._timeout_note(0, {}, 3600) == ""

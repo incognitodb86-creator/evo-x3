@@ -3,7 +3,7 @@
     "x3-local": {
       "baseUrl": "http://127.0.0.1:8080/v1",
       "api": "openai-completions",
-      "apiKey": "<from /etc/evo-x3/llm.env>",
+      "apiKey": "<redacted-in-locked-keyfile>",
       "models": [
         {
           "id": "gemma4-heretic",
@@ -76,7 +76,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -121,7 +121,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -167,7 +167,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -212,7 +212,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -258,7 +258,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -303,7 +303,7 @@
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -335,11 +335,11 @@
     "x3-local-coding": {
       "baseUrl": "http://127.0.0.1:8080/v1",
       "api": "openai-completions",
-      "apiKey": "<from /etc/evo-x3/llm.env>",
+      "apiKey": "<redacted-in-locked-keyfile>",
       "models": [
         {
           "id": "flash-next-uncensored",
-          "name": "Huihui Flash-Next abliterated (same served slot) CODING sampling temp 0.6 (Forge)",
+          "name": "Huihui Flash-Next abliterated (same served slot) Qwen card thinking 1.0/0.95 (Forge)",
           "reasoning": true,
           "input": [
             "text",
@@ -352,12 +352,11 @@
             "top_p": 0.95,
             "top_k": 20,
             "min_p": 0,
-            "presence_penalty": 0.0,
-            "repetition_penalty": 1.0
+            "presence_penalty": 0.0
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -386,7 +385,7 @@
         },
         {
           "id": "flash-next-uncensored-v2",
-          "name": "Huihui Flash-Next abliterated (same served slot) CODING sampling temp 0.6 (Forge) [v2 HGN]",
+          "name": "Huihui Flash-Next abliterated v2 (Gufo 0.35.0) Qwen card thinking 1.0/0.95 (Forge)",
           "reasoning": true,
           "input": [
             "text",
@@ -399,12 +398,11 @@
             "top_p": 0.95,
             "top_k": 20,
             "min_p": 0,
-            "presence_penalty": 0.0,
-            "repetition_penalty": 1.0
+            "presence_penalty": 0.0
           },
           "compat": {
             "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_budget"
+            "thinkingTokenBudgetField": "thinking_budget_tokens"
           },
           "samplingParamsByThinkingLevel": {
             "off": {
@@ -432,12 +430,12 @@
           }
         }
       ],
-      "name": "X3 local (coding sampling: Qwen card thinking-coding temp 0.6)"
+      "name": "X3 local (Qwen card thinking 1.0/0.95 on Gufo 0.35.0)"
     },
     "alienpc": {
       "baseUrl": "https://alienpc.tailf242b2.ts.net:8447/v1",
       "api": "openai-completions",
-      "apiKey": "<from /etc/evo-x3/llm.env>",
+      "apiKey": "<redacted-in-locked-keyfile>",
       "models": [
         {
           "id": "coding_swift15_iq3s_esp",
@@ -448,7 +446,7 @@
             "image"
           ],
           "contextWindow": 122000,
-          "maxTokens": 8192,
+          "maxTokens": 32768,
           "compat": {
             "thinkingFormat": "qwen-chat-template",
             "thinkingTokenBudgetField": "thinking_budget_tokens"
@@ -467,8 +465,22 @@
               "top_p": 0.8,
               "top_k": 20,
               "min_p": 0,
-              "presence_penalty": 1.5,
-              "repetition_penalty": 1.0
+              "presence_penalty": 1.5
+            },
+            "minimal": {
+              "reasoning_effort": "low"
+            },
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "xhigh"
+            },
+            "xhigh": {
+              "reasoning_effort": "xhigh"
             }
           },
           "inputLimits": {

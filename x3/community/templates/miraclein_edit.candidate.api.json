@@ -66,14 +66,17 @@
  },
  "10": {
   "_meta": {
-   "title": "image_size"
+   "title": "ref_scale_1mp"
   },
-  "class_type": "GetImageSize",
+  "class_type": "ResizeImageMaskNode",
   "inputs": {
-   "image": [
+   "input": [
     "7",
     0
-   ]
+   ],
+   "resize_type": "scale total pixels",
+   "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos"
   }
  },
  "11": {
@@ -83,7 +86,7 @@
   "class_type": "VAEEncode",
   "inputs": {
    "pixels": [
-    "7",
+    "10",
     0
    ],
    "vae": [
@@ -160,15 +163,9 @@
   },
   "class_type": "Flux2Scheduler",
   "inputs": {
-   "height": [
-    "10",
-    1
-   ],
+   "height": 1344,
    "steps": 12,
-   "width": [
-    "10",
-    0
-   ]
+   "width": 768
   }
  },
  "20": {
@@ -187,14 +184,8 @@
   "class_type": "EmptyFlux2LatentImage",
   "inputs": {
    "batch_size": 1,
-   "height": [
-    "10",
-    1
-   ],
-   "width": [
-    "10",
-    0
-   ]
+   "height": 1344,
+   "width": 768
   }
  },
  "22": {

@@ -3,7 +3,7 @@ title: "REA-video -> FLUX.2 Klein (RefMod + LoRA) -> H3Max Beta 7 parody remake 
 date: 2026-11-20
 type: plan
 artifact_contract: ce-unified-plan/v1
-source: BLUEPRINT-20261120.pdf (Derrick, 2026-11-20 ~9:19 AM CT, plan id rea-flux-h3max-b7-parody-auto-final), saved byte-exact beside this file
+source: Derrick's draft blueprint (rea-flux-h3max-b7-parody-auto-final, 2026-11-20 ~9:19 AM CT); original PDF removed from git per Derrick (~9:45 AM CT) to avoid confusing local LLMs with its 21 outdated claims. This PLAN.md + PIJOB-TASKS.md are the single source of truth.
 author: Opus (VS Code, Windows clone). PLAN ONLY. Nothing applied on the X3 or AlienPc.
 ---
 

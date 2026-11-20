@@ -52,9 +52,14 @@ via 3 zero-swap `setParamsByID` aliases (all keys VERIFIED in Gufo `0.35.0` sour
 6b. Installs the updated `hosts/x3/hermes/agent-hooks/guard-render-queue.sh` (now also blocks `rea_parody_remake.py`
    GPU stages without `--yes-derrick`), backing up the live copy first; runs `hermes hooks doctor` and restores the old
    guard and stops if it is not healthy. The code profile also disables the new `rea-remake` skill.
-   Red-team fixes 2026-11-20 ~9:35 AM CT: real pi-job lock check (`/home/evo/AI/_runs/pi-job.lock` + X3
-   `gpu-render.lock`), PyYAML pre-check, `/running` waits for `state: ready`, code probe `max_tokens` 4096, rollback no
-   longer stops early (`set -e` + `[[ ]] &&`), `bash -n` clean.
+6c. **Pi coding fixes (Step 4b, backed up to `/home/evo/AI/_archive/20261120-ws-pi/`):** installs fixed
+   `/usr/local/bin/pi-job` (`FORGE_KEEP_CWD=1`, `FORGE_THINKING=medium` on both AlienPc and X3, `--timeout-min`, git-repo
+   guard), fixed `/home/evo/evo-x3/pi-chats/forge-pi.sh` (stops `cd "$HOME/AI/forge"` from clobbering `pi-job`'s target
+   repo), updated Hermes `pi-job` & `h3-render` skills, secret-file denies in `/home/evo/.pi/agent/pi-permissions.jsonc`
+   (`evo-x3/*`, `pixlstash/*`, `llm.env`, `*.token`, `*.cred`), and `syntax-check.ts` if missing. Never touches
+   `models.json` automatically (update `thinking_budget_tokens` + AlienPc `maxTokens: 32768` per `models.json.example`).
+   `check_idle()` checks live `pi-job.active` + `systemctl --user -M evo@ is-active pi-job-<id>.service` + X3
+   `gpu-render.lock`.
 7. Restarts `hermes-gateway`, runs `/running`, Render oneshot, Code oneshot (`pwd` + `pi-job`), and `code skills list`
    smoke checks, and writes `records/UNI-APPLY-X3-HERMES-WORKSPACES/RESULT.md`.
 

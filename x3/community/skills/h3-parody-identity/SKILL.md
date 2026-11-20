@@ -6,7 +6,9 @@ description: >-
   autonomous chat execution from /home/evo/AI/render or writer-run builds.
 ---
 
-> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`). Before Derrick's yes, run `render_writer_pipeline.py` dry and show `prompt.txt`. After Derrick's yes: run `queue-remote.sh <run_dir> --yes-derrick` on an existing `READY` folder (or run `render_writer_pipeline.py` once with `--queue --yes-derrick` if Derrick already approved writing + queueing upfront).
+> EVO-X3: renders run on AlienPc ComfyUI over Tailscale Serve (`https://alienpc.tailf242b2.ts.net:8446`).
+> **Hermes Path B (default on EVO-X3):** Hermes writes the 4-header Beta 7 prompt itself (`h3-writer`), saves it to `<run_dir>/hermes_prose.txt`, and runs `render_writer_pipeline.py <run_dir> --prose-file <run_dir>/hermes_prose.txt ...` dry (never call the Python writer model). Queue only after Derrick's yes via `queue-remote.sh <run_dir> --yes-derrick`.
+> *(Legacy pi Render Path A: dry-run `render_writer_pipeline.py --ask ...` without `--prose-file`, only if Derrick explicitly asks for the old pi render path.)*
 # H3 parody / identity lane (INDEX + RefMod)
 
 Internals, legacy CLI, VRAM: `references/h3-parody-identity-reference.md`. Read only when changing pipeline code.
@@ -22,8 +24,8 @@ Internals, legacy CLI, VRAM: `references/h3-parody-identity-reference.md`. Read 
 - Never use minor-coded words (`underage`, `minor`, `child`, `children`) — `guard_ok` blocks the submit (`18+` is the only content rule).
 - **Single Writer Command (`/home/evo/AI/render`, `flash-next-uncensored` on EVO-X3):** Always use `render_writer_pipeline.py` (or `fill_request.py` when `writer_output.txt` already exists):
   - Flags supported on `render_writer_pipeline.py`: `<run_dir> --ask "<ask>" --position "<position>" --still "<still>" [--still-read "<json>"] [--character "<Character>"] [--actor "<Actor>"] [--names "<Name>" ...] [--frames <N>] [--shots single|multi] [--shot-count <k>] [--scene "<scene_id>"] [--continue "<prev_run_dir>"] [--partner2-still "<still>"] [--still-mode guide|ref] [--aspect 9:16|16:9] [--size WxH] [--template <name>] [--lora "<file>[:<strength>[:<trigger>]]"] [--realism-lora [<strength>]] [--queue --yes-derrick]`.
-  - **Flux-generated celeb still auto-pickup:** When `--still` points to a still created with `flux_still.py` (or any ComfyUI PNG containing a Klein9 celeb RefMod or `loras/klein9/` celeb LoRA in its metadata / `flux_meta.json`), `render_writer_pipeline.py` and `fill_request.py` automatically detect the celebrity, link her to `INDEX.md` / `INDEX_BAD.md` + `aliases.json` for her iconic character & voice cue, and attach her H3Max visual RefMod without re-specifying `--character`/`--names`.
-  - **H3Max Beta 7 LoRAs & Realism LoRA (`M5`):** Pass `--realism-lora [0.7]` (attaches `h3-realism-people-t2v-i2v-r2v.safetensors` via `LoraLoaderModelOnly` and auto-prepends trigger `r34l1sm` per R31) or `--lora <file>[:<strength>[:<trigger>]]` for any other H3 LoRA. Never emit `r34l1sm` manually when the LoRA is not loaded.
+  - **Flux-generated celeb still auto-pickup:** When `--still` points to a still created with `flux_still.py` (or any ComfyUI PNG containing a Klein9 celeb RefMod or `loras/klein9/` celeb LoRA in its metadata / `flux_meta.json`), `render_writer_pipeline.py` and `fill_request.py` automatically detect the celebrity, link her to `INDEX.md` / `INDEX_BAD.md` + `aliases.json` for her iconic character & **text** vocal-timbre cue (visual RefMod only; never attach a celebrity voice audio ref per U56 #2), and attach her H3Max visual RefMod without re-specifying `--character`/`--names`.
+  - **H3Max Beta 7 LoRAs (`M5` dropped):** The `fal/MiniMax-H3-Realism-People-LoRA` (`--realism-lora` / `r34l1sm`) was dropped and archived (Derrick t2885u). Do **not** pass `--realism-lora` or emit `r34l1sm` unless Derrick explicitly requests an H3 LoRA test for a specific run (for other H3 LoRAs, `--lora <file>[:<strength>[:<trigger>]]` remains supported).
   - *(Do **not** pass retired classic `submit_parody_run.py` flags such as `--description`, `--camera`, `--dialogue`, `--end-action`, or `--pronoun` to `render_writer_pipeline.py`; put scene/camera/quoted `<d>` dialogue inside `--ask`.)*
 
 ## Craft & Voice Guidance for `--ask` / `writer_output.txt`

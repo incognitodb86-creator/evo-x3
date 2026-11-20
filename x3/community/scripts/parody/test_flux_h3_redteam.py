@@ -120,6 +120,22 @@ def test_refmod_likeness_defaults_anchor_and_negative_stream(tmp_path):
     x3_cmd = fs._queue_cmd(tmp_path / "lk", exe="python3", rq=Path("run_queue.py"), remote=True)
     assert "--remote" not in win_cmd and "--remote" in x3_cmd
 
+    # Edit / reframe template keeps reference aspect-preserving (ResizeImageMaskNode) while setting target 16:9 canvas
+    r_edit = fs.build_flux_still(
+        tmp_path / "reframe",
+        "Reframe the adult woman from image 1 into a wide 16:9 shot, extending the room background to the left and right.",
+        mode="edit",
+        width=1344,
+        height=768,
+        dry_run=True,
+    )
+    assert r_edit["status"] == "READY"
+    ge = json.loads((tmp_path / "reframe" / "still" / "request.api.json").read_text(encoding="utf-8"))
+    assert ge["10"]["class_type"] == "ResizeImageMaskNode"
+    assert ge["11"]["inputs"]["pixels"] == ["10", 0]
+    assert ge["21"]["inputs"]["width"] == 1344 and ge["21"]["inputs"]["height"] == 768
+    assert ge["19"]["inputs"]["width"] == 1344 and ge["19"]["inputs"]["height"] == 768
+
 
 def test_comfy_png_celeb_refmod_and_lora_auto_pickup_for_h3max(tmp_path, monkeypatch):
     # Fake local H3 RefMod dir containing Sydney Sweeney + Megan Fox visual RefMods

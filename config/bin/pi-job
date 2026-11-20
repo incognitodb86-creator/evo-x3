@@ -430,14 +430,21 @@ def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple
     resume once on the X3 in the same session (--continue). Never moves back to the AlienPC."""
     def run(extra: list[str], text: str, model: str | None) -> int:
         env = dict(os.environ)
+        env["FORGE_KEEP_CWD"] = "1"
         if model:
             env["FORGE_MODEL"] = model
         else:
             env.pop("FORGE_MODEL", None)
-        # AlienPc Swift codes with thinking medium (Derrick t2766s9752, 2026-11-19 16:48 CT); the X3 Gufo fallback stays low.
-        thinking = os.environ.get("PI_JOB_ALIENPC_THINKING", "medium") if model else "low"
+        # 2026-11-20: both AlienPc Swift and X3 Gufo fallback code at thinking medium (passed via FORGE_THINKING so
+        # forge-pi.sh emits a single --thinking flag instead of duplicate flags on argv).
+        thinking = (
+            os.environ.get("PI_JOB_ALIENPC_THINKING", "medium")
+            if model
+            else os.environ.get("PI_JOB_X3_THINKING", "medium")
+        )
+        env["FORGE_THINKING"] = thinking
         cmd = ["timeout", timeout_s, "bash", str(FORGE_LAUNCHER), "-p", "--session-dir", str(run_dir),
-               *extra, "--thinking", thinking, text]
+               *extra, text]
         return subprocess.run(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=logf,
                               stderr=subprocess.STDOUT).returncode
 
@@ -523,10 +530,11 @@ def _exec_job(job_id: str) -> int:
                 repo = Path(meta["target"])
                 rc, where = _run_pi(run_dir, _job_timeout_s(meta, 1800), meta["prompt"], str(repo), logf)
                 st = "DONE" if rc == 0 else "STUCK"
-                _write_status(run_dir, st, f"rc={rc} model={where}{_timeout_note(rc, meta, 1800)}")
+                rev_detail = f"rc={rc} model={where}{_timeout_note(rc, meta, 1800)}"
+                _write_status(run_dir, st, rev_detail)
                 if st == "STUCK":
                     try:
-                        _write_stuck_bundle(run_dir, meta, f"rc={rc} model={where}")
+                        _write_stuck_bundle(run_dir, meta, rev_detail)
                     except Exception:
                         pass
                 _send_ntfy(f"pi-job {job_id}", f"{st} (review, rc={rc})")
@@ -1067,9 +1075,17 @@ def main(argv: list[str] | None = None) -> int:
 
     args = ap.parse_args(argv)
     if args.cmd == "code":
-        return _start_detached("code", str(Path(args.target).resolve()), args.prompt, timeout_min=args.timeout_min)
+        target = Path(args.target).resolve()
+        if not target.is_dir() or not (target / ".git").exists():
+            print(f"REFUSED: target is not a git repo (no .git in {target})", file=sys.stderr)
+            return 2
+        return _start_detached("code", str(target), args.prompt, timeout_min=args.timeout_min)
     if args.cmd == "review":
-        return _start_detached("review", str(Path(args.target).resolve()), args.prompt, timeout_min=args.timeout_min)
+        target = Path(args.target).resolve()
+        if not target.is_dir():
+            print(f"REFUSED: review target directory not found: {target}", file=sys.stderr)
+            return 2
+        return _start_detached("review", str(target), args.prompt, timeout_min=args.timeout_min)
     if args.cmd == "render":
         return _start_detached("render", None, args.ask, still_path=args.still, pick=args.pick)
     if args.cmd == "queue":

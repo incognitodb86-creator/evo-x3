@@ -45,7 +45,11 @@ Derrick's GO covers the whole batch (h3-render overnight/batch rule): FLUX still
 
 For each shot, load `flux-klein-prompting`, read `shots/<id>/raw_still_read.json`, `shot_brief.json` and
 `parody_cast_lock.json`, and write `shots/<id>/flux_prompt.txt` (one paragraph, positive only, starts with the reference
-anchor when a RefMod is used; `rea_pose` mode opens with `apply pose from image 1 with reference from image 2`). Then:
+anchor when a RefMod is used; `rea_pose` mode opens with `apply pose from image 1 with reference from image 2`). If the
+target `--aspect` differs from the source video's orientation (e.g., 9:16 source -> 16:9 `1344x768`, or 16:9 -> 9:16
+`768x1344`), explicitly tell FLUX to expand the scene/background naturally to the new edges while keeping the subject's
+face, body, and proportions unchanged (`flux_rea_edit` keeps the source reference aspect-preserving and never stretches
+it). Then:
 
 ```bash
 $PY "$REA" flux "$B" --queue --yes-derrick

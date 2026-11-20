@@ -25,7 +25,7 @@ Use for any FLUX.2 Klein / Miraclein 4.5 still or H3Max start-still. Defer video
 | Klein9 RefMod / LoRA | M4 Miraclein 4.5 RefMod / `loras/klein9/` candidates | Pure prose; never mention `"image 1"`; open with the reference anchor sentence (section 2) |
 | Single-change edit | M4 ReferenceLatent edit candidate (or locked S2) | Lead with `"image 1"` + ONE changing axis; keep-locked clause last |
 | RefControl pose / layout | `flux_stills_pose_klein.candidate.api.json`, `flux_stills_layout_klein.candidate.api.json` (`refcontrol_v2_poses`) | Open with exact trigger `"apply pose from image 1 with reference from image 2"` |
-| H3Max start-still | Any mode above at `768x1344` portrait / `1792x1008` landscape | Match beat-1 pose/wardrobe, natural headroom, zero video triggers |
+| H3Max start-still | Any mode above at `768x1344` portrait / `1344x768` landscape | Match beat-1 pose/wardrobe, natural headroom, zero video triggers |
 
 ## Core Rules
 
@@ -84,10 +84,13 @@ Assemble the paragraph in this exact priority order:
 - **RefMod prompt anchor (required):** Klein is an edit model and must be pointed at the reference. Start the paragraph with `"The reference images represent one adult woman; keep her face and hair unchanged and exact as in the reference images."` (the author's benchmark wording). `flux_still.py` adds an equivalent sentence when a RefMod prompt never says "reference". Never write `"image 1"` (RefMods are pre-encoded latents, not a LoadImage input). Do not describe face shape, eye color, or hair color; the reference carries them and text fights it.
 - **LoRA alone:** the author's pure-LoRA baseline ran at strength `1.0`, not `0.6`.
 
-### 3. ReferenceLatent Single-Change Edit
-- Pick **ONE** changing axis: `pose`, `wardrobe`, `lighting`, `camera_angle`, or `background`.
+### 3. ReferenceLatent Single-Change Edit & Aspect-Ratio Reframing (2:3 / 9:16 ↔ 16:9)
+- Pick **ONE** changing axis: `pose`, `wardrobe`, `lighting`, `camera_angle`, `background`, or **aspect-ratio reframe / canvas expansion**.
 - Lead the paragraph with explicit image indexing (`"Show the adult woman from image 1..."`) plus that single change; never open with `"keep everything the same"`.
 - End with a short keep-locked sentence that **excludes** the changing axis.
+- **Aspect-ratio reframe / outpaint (e.g. 2:3 or 9:16 portrait → `1344x768` landscape, or 16:9 → `768x1344` portrait):** FLUX.2 Klein 9B natively RoPE-concatenates any aspect-ratio `ReferenceLatent` onto an independent target `EmptyFlux2LatentImage` (`miraclein_edit.candidate.api.json` keeps the reference aspect-preserving via `ResizeImageMaskNode` while setting the output canvas directly to `--width`/`--height`). Never stretch the reference image into the target ratio and never use `InpaintModelConditioning` (unsupported on Klein 9B).
+  - Run `flux_still.py --mode edit --image <src> --width 1344 --height 768` (or `768 1344`) and prompt explicitly for background expansion, e.g.: `"Reframe the adult woman from image 1 into a wide 16:9 horizontal shot, naturally extending the room background and lighting to the left and right edges. Keep her face, hairstyle, body proportions, pose, wardrobe, and warm window light from image 1 unchanged."`
+  - **Why this matters before H3Max:** `MiniMaxH3AddGuide` (`oc_guide`) hardcodes center-cropping to the video canvas, which slices off faces/heads when a 2:3 or 9:16 photo is fed directly into a `1344x768` clip. Always pre-reframe mismatched stills to exact `768x1344` or `1344x768` first.
 - Always edit from the original conditioning still; reserve tiny-denoise repair passes for 3+ chained edits only.
 
 ### 4. RefControl Pose / Layout (`refcontrol_v2_poses.safetensors`)
@@ -102,7 +105,7 @@ Assemble the paragraph in this exact priority order:
 
 ## H3Max Start-Still Readiness
 
-- Target **`768x1344`** portrait (matches locked B2 canvas) or **`1792x1008`** landscape (all dimensions divisible by 16).
+- Target **`768x1344`** portrait (matches locked 9:16 H3 canvas) or **`1344x768`** landscape (matches 16:9 H3 canvas; all dimensions divisible by 16).
 - Match start posture and wardrobe to clip beat 1, leave natural headroom, and keep video-only triggers (`r34l1sm`, `hmpussy`, `dynv2`, `hmmotion`) out of the still prompt.
 
 ## Worked Examples (45–80 Words Each)
@@ -128,15 +131,14 @@ Use `/home/evo/AI/community/scripts/parody/flux_still.py` (dry run by default; r
   '/home/evo/AI/community/runs/<still_run_name>' --prompt '<prompt>' \
   --mode t2i|refmod|edit|klein_t2i|pose|layout \
   [--refmod '<klein9_refmod_or_name>'] [--retention 'fully_preserved (1.0)'] \
-  [--lora 'klein9/<file>.safetensors:0.60'] [--hybrid '<Celeb Name>'] \
+  [--lora 'klein9/<file>.safetensors:1.0'] [--hybrid '<Celeb Name>'] \
   [--image '<ref_still>'] [--pose-image '<pose_ref>'] \
   [--character '<Name>'] [--actor '<Actor>'] [--names '<Name>' ...] \
   [--width 768 --height 1344] [--queue --yes-derrick]
 ```
-
-- **RefMods AND LoRAs:** Supports Klein9 RefMods (`--refmod`), Klein9 LoRAs (`--lora`), or both together on any Miraclein/Klein template (wires `LoraLoaderModelOnly` / `Klein9RefModsLoader` automatically on the per-run copy).
+- **RefMods AND LoRAs:** Supports Klein9 RefMods (`--refmod`), Klein9 LoRAs (`--lora`, baseline `1.0` standalone; `0.60` in `--hybrid`), or both together on any Miraclein/Klein template (wires `LoraLoaderModelOnly` / `Klein9RefModsLoader` automatically on the per-run copy).
 - **PixlStash auto-import:** After `--queue --yes-derrick` finishes, `flux_still.py` (and `sync-renders` for any AlienPc-run still) copies the generated PNG into `/home/evo/AI/pixl-inbox/` so PixlStash imports it automatically in the background.
-- **H3Max celeb pickup:** `flux_still.py` writes `flux_meta.json` beside the PNG (and ComfyUI embeds the workflow JSON in the PNG metadata). Passing that PNG to `render_writer_pipeline.py --still <png>` automatically detects the celeb RefMod/LoRA, links her to the H3Max celeb INDEX + iconic character voice, and loads her H3Max visual RefMod.
+- **H3Max celeb pickup:** `flux_still.py` writes `flux_meta.json` beside the PNG (and ComfyUI embeds the workflow JSON in the PNG metadata). Passing that PNG to `render_writer_pipeline.py --still <png>` automatically detects the celeb RefMod/LoRA, links her to the H3Max celeb INDEX + **text** vocal-timbre cue (visual RefMod only; never attaches a celebrity voice audio ref per U56 #2), and loads her H3Max visual RefMod.
 
 ## Review Rubric
 

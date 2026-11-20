@@ -111,28 +111,32 @@ and make it pass; commit once with git add of the exact paths, message "rea C2: 
 
 ```text
 REA unit C3. Add two candidate templates and wire them into flux_still.py.
-1) x3/community/templates/flux_rea_edit.candidate.api.json: start from miraclein_edit.candidate.api.json. Replace the
-   size path so the LoadImage output goes through one ImageScale node (upscale_method "lanczos", crop "disabled",
-   width 768, height 1344) before VAEEncode, and EmptyFlux2LatentImage / Flux2Scheduler use fixed width 768 and
-   height 1344 (no GetImageSize links). Add Klein9RefModsLoader + Klein9RefModApply on BOTH the positive and negative
-   paths exactly like miraclein_refmod.candidate.api.json nodes "12", "13", "14" (retention "fully_preserved (1.0)",
-   all mod_N "none"); the RefMod apply nodes take the ReferenceLatent outputs as their conditioning and feed the
-   CFGGuider. Keep UNET Miraclein_4.5_9b_NVFP4.safetensors, euler, 12 steps, CFG 1.1, the LoadImage title "image1".
+1) x3/community/templates/flux_rea_edit.candidate.api.json: start from miraclein_edit.candidate.api.json. Keep its
+   aspect-preserving ResizeImageMaskNode ("resize_type": "scale total pixels", "resize_type.megapixels": 1.0,
+   "scale_method": "lanczos") between LoadImage ("image1") and VAEEncode (NEVER use ImageScale crop="disabled" on the
+   reference image — that stretches/squashes faces on cross-aspect 9:16<->16:9 reframing), and keep fixed integer
+   width 768 and height 1344 on EmptyFlux2LatentImage and Flux2Scheduler (no GetImageSize links, so flux_still.py
+   --width 1344 --height 768 natively reframes/expands the canvas). Add Klein9RefModsLoader + Klein9RefModApply on BOTH
+   the positive and negative paths exactly like miraclein_refmod.candidate.api.json nodes "12", "13", "14" (retention
+   "fully_preserved (1.0)", all mod_N "none"); the RefMod apply nodes take the ReferenceLatent outputs as their
+   conditioning and feed the CFGGuider. Keep UNET Miraclein_4.5_9b_NVFP4.safetensors, euler, 12 steps, CFG 1.1.
 2) x3/community/templates/flux_rea_pose.candidate.api.json: start from flux_stills_pose_klein.candidate.api.json.
    Change UNETLoader to Miraclein_4.5_9b_NVFP4.safetensors, remove the FluxKVCache node and rewire its consumers to
-   the model output before it, set steps 12, sampler euler, CFG 1.1, replace any ImageScaleToTotalPixels /
-   ResizeImageMaskNode on the input images with ImageScale (lanczos, crop "disabled", 768x1344), fix the latent and
-   scheduler to 768x1344, keep the refcontrol_v2_poses LoRA at 0.9 and the DWPreprocessor, and add the same pos+neg
-   RefMod nodes as above.
+   the model output before it, set steps 12, sampler euler, CFG 1.1, ensure each reference LoadImage -> VAEEncode path
+   uses aspect-preserving ResizeImageMaskNode ("scale total pixels", 1.0 MP, lanczos) with NO GetImageSize links, fix
+   EmptyFlux2LatentImage and Flux2Scheduler to integer width 768 and height 1344, keep the refcontrol_v2_poses LoRA at
+   0.9 and the DWPreprocessor, and add the same pos+neg RefMod nodes as above.
 3) flux_still.py: add MODES "rea_edit" and "rea_pose" pointing at the two files. In _inject_flux_loras count the
    LoraLoaderModelOnly nodes with strength_model > 0 after injection; if more than 2, raise ValueError("FLUX LoRA cap
    is 2 active LoRAs (got N)"). Do not change any other behavior or default.
 4) x3/community/scripts/parody/test_flux_rea_templates.py: both JSON files load; every link target node exists; no
-   FluxKVCache, no GetImageSize, no ImageScaleToTotalPixels or ResizeImageMaskNode; ImageScale has crop "disabled" and
-   768x1344; build_flux_still(mode="rea_edit", refmods=["Sydney Sweeney"], image=<tmp png>, dry_run=True) is READY with
-   retention "fully_preserved (1.0)" on both apply nodes and the anchor sentence; rea_pose with one celeb LoRA has
-   exactly 2 active LoRAs; rea_pose with 2 extra LoRAs raises ValueError; plain t2i with one LoRA still works.
-   Monkeypatch fill_request._stage_still and fill_request.pixl_abs so no file leaves tmp_path.
+   FluxKVCache, no GetImageSize, no ImageScale node stretching the reference; ResizeImageMaskNode has "scale total pixels"
+   and 1.0 MP feeding VAEEncode; EmptyFlux2LatentImage and Flux2Scheduler have integer 768x1344;
+   build_flux_still(mode="rea_edit", refmods=["Sydney Sweeney"], image=<tmp png>, width=1344, height=768, dry_run=True)
+   is READY with 1344x768 latent/scheduler, retention "fully_preserved (1.0)" on both apply nodes, and the anchor
+   sentence; rea_pose with one celeb LoRA has exactly 2 active LoRAs; rea_pose with 2 extra LoRAs raises ValueError;
+   plain t2i with one LoRA still works. Monkeypatch fill_request._stage_still and fill_request.pixl_abs so no file
+   leaves tmp_path.
 Common rules: change only these 4 files; do not touch production templates (files without .candidate); offline tests; run
 `cd x3/community/scripts/parody && /home/evo/AI/render/x3/.venv/bin/python3 -m pytest -q test_flux_rea_templates.py test_flux_h3_redteam.py`
 and make it pass; commit once with git add of the exact paths, message "rea C3: flux rea templates + lora cap"; no push; no secrets.
