@@ -29,12 +29,15 @@ def _read_wav(path):
     with wave.open(path, "rb") as wf:
         n_channels = wf.getnchannels()
         sampwidth = wf.getsampwidth()
+        if sampwidth != 2:
+            raise ValueError(f"expected 16-bit PCM WAV, got {sampwidth * 8}-bit")
         n_frames = wf.getnframes()
         raw = wf.readframes(n_frames)
+        sr = wf.getframerate()
     samples = np.frombuffer(raw, dtype="<i2")
     if n_channels > 1:
         samples = samples.reshape(-1, n_channels)
-    return samples, wf.getframerate(), n_channels
+    return samples, sr, n_channels
 
 
 def load_wav_mono(path):
@@ -136,13 +139,21 @@ def estimate_bpm(env, sr, hop=HOP):
 
     frame_rate = float(sr) / float(hop)
     lo_lag = max(2, int(np.floor(frame_rate * 60.0 / BPM_HI)))
-    hi_lag = min(acf.size - 1, int(np.ceil(frame_rate * 60.0 / BPM_HI * 2.0)))
+    hi_lag = min(acf.size - 1, int(np.ceil(frame_rate * 60.0 / BPM_LO)))
     if hi_lag <= lo_lag:
         return None
 
     best = int(np.argmax(acf[lo_lag:hi_lag + 1])) + lo_lag
     if acf[best] <= 0:
         return None
+    # Guard against half-time octave ambiguity (e.g. 120 BPM matching a cleaner integer lag at 60 BPM):
+    # prefer the half-lag fundamental whenever it carries a comparable correlation peak inside [lo_lag, hi_lag].
+    half = int(round(best / 2.0))
+    if half >= lo_lag:
+        win_lo, win_hi = max(lo_lag, half - 1), min(hi_lag, half + 1)
+        sub_best = int(np.argmax(acf[win_lo:win_hi + 1])) + win_lo
+        if acf[sub_best] >= 0.75 * acf[best]:
+            best = sub_best
     bpm = 60.0 * frame_rate / best
     if bpm < BPM_LO or bpm > BPM_HI:
         return None

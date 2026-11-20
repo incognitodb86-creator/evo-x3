@@ -147,7 +147,7 @@ def test_plan_two_shots_isolated_dirs_with_own_files(runs_root, rea_dir, canned,
     # onsets were probed from the stems and saved into the batch dir, not into the REA folder
     assert (batch / "onset_beats.json").is_file()
     assert not (rea_dir / "onset_beats.json").exists()
-    assert len(probe) == 1 and probe[0]["wav"].endswith("stems/music.wav")
+    assert len(probe) == 1 and Path(probe[0]["wav"]).parts[-2:] == ("stems", "music.wav")
 
     briefs = _briefs(batch)
     assert set(briefs) == {"shot_001", "shot_002"}
@@ -624,7 +624,7 @@ def test_queue_two_ready_shots_in_order_one_at_a_time(runs_root, rea_dir, canned
     assert rr.main(["queue", str(batch), "--yes-derrick"]) == 0
     assert [c["shot"] for c in media.queue_cmds] == ["shot_001", "shot_002"]
     for c, sid in zip(media.queue_cmds, ("shot_001", "shot_002")):
-        assert c["cmd"] == ["bash", QUEUE_SCRIPT, str(batch / "shots" / sid), "--yes-derrick"]
+        assert c["cmd"] == ["bash", str(Path(QUEUE_SCRIPT)), str(batch / "shots" / sid), "--yes-derrick"]
     # one at a time: shot_002 was only submitted once shot_001's 2x was on disk, and nothing ran in parallel
     assert media.queue_cmds[0]["prior_ok"] == []
     assert media.queue_cmds[1]["prior_ok"] == ["shot_001"]
@@ -802,3 +802,42 @@ def test_assemble_publish_copies_the_master_when_the_dir_is_writable(runs_root, 
     dest = pub / "rea_a6_final_2x.mp4"
     assert dest.is_file() and dest.read_bytes() == (batch / "final_2x.mp4").read_bytes()
     assert f"PUBLISHED {dest}" in capsys.readouterr().out
+
+
+def test_non_shot_prefix_ids_and_rea_pose_passes_pose_image(runs_root, tmp_path, monkeypatch, capsys):
+    batch = runs_root / "rea_custom_ids"
+    for sid in ("s1", "s2"):
+        sd = batch / "shots" / sid
+        (sd / "_inputs").mkdir(parents=True)
+        (sd / "_inputs" / f"{sid}_first.jpg").write_bytes(b"\xff\xd8\xff\xe0" + b"\x00" * 16)
+        (sd / "flux_prompt.txt").write_text("adult woman standing in daylight", encoding="utf-8")
+        (sd / "shot_brief.json").write_text(json.dumps({"shot_id": sid, "seed": 123}), encoding="utf-8")
+    lock = {
+        "lane": "parody", "aspect": "9:16", "canvas": [768, 1344],
+        "flux_identity": {"mode": "hybrid", "refmod": "fk9_sydneysweeney_v1_refmod", "names": ["Sydney Sweeney"]},
+        "h3_identity": {"allow_audio_ref": False, "names": ["Sydney Sweeney"], "character": None},
+        "shot_overrides": [
+            {"shot_id": "s2", "new_pose": True, "parts": [{"frames": 73}]},
+            {"shot_id": "s1", "parts": [{"frames": 73}]},
+        ],
+    }
+    (batch / "parody_cast_lock.json").write_text(json.dumps(lock), encoding="utf-8")
+
+    # status honors cast-lock order and finds non-"shot_*" IDs
+    assert rr.main(["status", str(batch)]) == 0
+    st_lines = capsys.readouterr().out.strip().splitlines()
+    assert [ln.split()[0] for ln in st_lines] == ["s2", "s1"]
+
+    # flux passes pose_image in rea_pose mode (s2) and omits it in rea_edit mode (s1)
+    seen = []
+
+    def fake_build(run_dir, prompt, mode, **kwargs):
+        seen.append((Path(run_dir).parent.name, mode, kwargs))
+        return {"status": "READY"}
+
+    monkeypatch.setattr(rr.flux_still, "build_flux_still", fake_build)
+    assert rr.main(["flux", str(batch)]) == 0
+    assert [(s, m) for s, m, _ in seen] == [("s2", "rea_pose"), ("s1", "rea_edit")]
+    assert seen[0][2].get("pose_image") == str(batch / "shots" / "s2" / "_inputs" / "s2_first.jpg")
+    assert "pose_image" not in seen[1][2]
+

@@ -388,14 +388,34 @@ def _load_records(path: Path) -> List[Dict[str, Any]]:
     return [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
 
 
-def _shot_dirs(batch: Path, only: Optional[str] = None) -> List[Path]:
+def _all_shot_dirs(batch: Path, lock: Optional[Dict[str, Any]] = None) -> List[Path]:
+    """Every shot directory under <batch>/shots/, honoring cast-lock shot_overrides order first."""
+    shots_root = Path(batch) / "shots"
+    if not shots_root.is_dir():
+        return []
+    present = {p.name: p for p in sorted(shots_root.iterdir()) if p.is_dir()}
+    ordered: List[Path] = []
+    seen: set[str] = set()
+    cfg = lock if lock is not None else _load_json_obj(Path(batch) / "parody_cast_lock.json")
+    for ovr in (cfg.get("shot_overrides") or []):
+        sid = str(ovr.get("shot_id") or "") if isinstance(ovr, dict) else ""
+        if sid and sid in present and sid not in seen:
+            ordered.append(present[sid])
+            seen.add(sid)
+    for sid, path in present.items():
+        if sid not in seen:
+            ordered.append(path)
+    return ordered
+
+
+def _shot_dirs(batch: Path, only: Optional[str] = None, lock: Optional[Dict[str, Any]] = None) -> List[Path]:
     """The shot dirs to run a stage over; `only` selects a single shot id (KeyError when unknown)."""
     if only:
         d = batch / "shots" / str(only)
         if not d.is_dir():
             raise KeyError(f"unknown shot {only!r}")
         return [d]
-    return sorted((batch / "shots").glob("shot_*"))
+    return _all_shot_dirs(batch, lock=lock)
 
 
 def _lock_override(lock: Dict[str, Any], sid: str) -> Dict[str, Any]:
@@ -459,10 +479,12 @@ def flux(batch: Path, only: Optional[str] = None, queue: bool = False, yes_derri
             failed += 1
             continue
         brief = _load_json_obj(shot_dir / "shot_brief.json")
+        mode = flux_mode_for(brief, lock, sid)
+        src_frame = str(shot_dir / "_inputs" / f"{sid}_first.jpg")
         kwargs: Dict[str, Any] = {
             "refmods": [refmod] if refmod else [],
             "loras": loras,
-            "image": str(shot_dir / "_inputs" / f"{sid}_first.jpg"),
+            "image": str(brief.get("identity_image") or lock.get("identity_image") or src_frame) if mode == FLUX_MODE_POSE else src_frame,
             "width": width,
             "height": height,
             "seed": int(brief.get("seed") or SEED_BASE),
@@ -470,11 +492,13 @@ def flux(batch: Path, only: Optional[str] = None, queue: bool = False, yes_derri
             "names": names or None,
             "dry_run": not queue,
         }
+        if mode == FLUX_MODE_POSE:
+            kwargs["pose_image"] = src_frame
         if hybrid:
             kwargs["refmod_strength"] = HYBRID_REFMOD_STRENGTH
             kwargs["retention"] = HYBRID_RETENTION
         rep = flux_still.build_flux_still(shot_dir / "flux", prompt_file.read_text(encoding="utf-8").strip(),
-                                          flux_mode_for(brief, lock, sid), **kwargs)
+                                          mode, **kwargs)
         if not isinstance(rep, dict) or str(rep.get("status")) != "READY":
             reason = str(rep.get("reason") or "?") if isinstance(rep, dict) else "?"
             print(f"NOT_READY flux {sid}: {reason}")
@@ -658,7 +682,7 @@ def queue(batch: Path, only: Optional[str] = None, yes_derrick: bool = False) ->
     built = {str(r.get("id") or ""): str(r.get("status") or "") for r in _load_records(built_file)}
     records: Dict[str, Dict[str, Any]] = {str(r.get("id") or ""): r
                                          for r in _load_records(batch / QUEUE_STATUS_NAME) if r.get("id")}
-    all_shots = [p.name for p in sorted((batch / "shots").glob("shot_*"))]
+    all_shots = [p.name for p in _all_shot_dirs(batch)]
     script = str(queue_remote_script())
     queued = failed = 0
 
@@ -744,7 +768,7 @@ def assemble(batch: Path, bgm: bool = False, publish: bool = False) -> int:
 
     clips: List[Dict[str, Any]] = []
     ref_stats: Optional[Any] = None
-    for shot_dir in sorted((batch / "shots").glob("shot_*")):
+    for shot_dir in _all_shot_dirs(batch, lock=lock):
         sid = shot_dir.name
         if sid not in done:
             continue
@@ -814,7 +838,7 @@ def _build_status(path: Path) -> str:
 def status(batch_dir: Path) -> int:
     """One line per shot listing which pipeline artifacts exist. Prints nothing when there are no shots."""
     batch = Path(batch_dir)
-    shot_dirs = sorted((batch / "shots").glob("shot_*"))
+    shot_dirs = _all_shot_dirs(batch)
     if not shot_dirs:
         print(f"DONE status {batch} shots=0")
         return 0

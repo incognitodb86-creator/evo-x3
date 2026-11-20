@@ -120,3 +120,23 @@ def test_cli_writes_json(tmp_path, capsys):
     assert [s["id"] for s in data["shots"]] == ["a", "b"]
     assert all(len(s["beats"]) == 0 or 0.0 <= min(s["beats"]) for s in data["shots"])
     assert stdout.startswith("DONE ")
+
+
+def test_estimate_bpm_detects_slow_track_below_90_bpm():
+    # 75 BPM = 0.8s per beat; previously hi_lag capped detection at 90 BPM.
+    x, _ = _click_track(dur=8.0, n_beats=10, period=0.8)
+    env, _ = rop.onset_envelope(x, SR)
+    bpm = rop.estimate_bpm(env, SR)
+    assert bpm is not None and 70.0 <= bpm <= 80.0
+
+
+def test_read_wav_rejects_non_16bit_pcm(tmp_path):
+    p = tmp_path / "eight_bit.wav"
+    with wave.open(str(p), "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(1)
+        wf.setframerate(SR)
+        wf.writeframes(bytes([128] * 100))
+    with pytest.raises(ValueError, match="16-bit"):
+        rop.load_wav_mono(str(p))
+
