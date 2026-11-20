@@ -47,6 +47,14 @@ MODES = {
     "layout": TEMPLATES_DIR / "flux_stills_layout_klein.candidate.api.json",
 }
 
+# Klein9 RefMod author's guide (malcolmrey/various klein9/docs/FLUX2_KLEIN9_REFMODS_GUIDE.md): fully_preserved (1.0) at
+# strength 1.0 is the likeness preset; partially_preserved (0.7) is the flexible-styling preset of the RefMod + LoRA hybrid.
+LIKENESS_RETENTION = "fully_preserved (1.0)"
+HYBRID_RETENTION = "partially_preserved (0.7)"
+# Klein is an edit model: the author's benchmark prompt points it at the reference images.
+REFMOD_ANCHOR = ("The reference images represent one adult person; keep the face and hair unchanged "
+                 "and exact as in the reference images.")
+
 RETENTION_PRESETS = {
     "0.4": "attribute_transfer (0.4)",
     "0.7": "partially_preserved (0.7)",
@@ -58,7 +66,7 @@ RETENTION_PRESETS = {
 
 
 def _norm_retention(val: Optional[str]) -> str:
-    s = (val or "partially_preserved (0.7)").strip()
+    s = (val or LIKENESS_RETENTION).strip()
     return RETENTION_PRESETS.get(s.lower(), s)
 
 
@@ -146,7 +154,8 @@ def _klein9_refmod_name(spec: str) -> str:
 
 
 def _hybrid_stack_for_name(name: str) -> tuple[str, Dict[str, Any]]:
-    """Malcolmrey empirical 98%-likeness Hybrid stack: RefMod @ 0.85 + Prodigy LoRA @ 0.60."""
+    """RefMod author's hybrid stack: RefMod @ 0.85 + Prodigy LoRA @ 0.60 at partially_preserved (0.7).
+    The author's own visual score (98%) was measured on distilled flux-2-klein-9b-fp8, not on Miraclein."""
     import re
     compact = re.sub(r"[^a-zA-Z0-9]", "", str(name or "")).lower()
     return (
@@ -159,7 +168,7 @@ def _inject_flux_refmods(
     graph: Dict[str, Any],
     refmods: Sequence[str],
     strength: float = 1.0,
-    retention: str = "partially_preserved (0.7)",
+    retention: Optional[str] = None,
 ) -> List[str]:
     clean = [_klein9_refmod_name(m) for m in refmods if str(m or "").strip()]
     clean = [m for m in clean if m != "none"]
@@ -205,6 +214,24 @@ def _inject_flux_refmods(
         graph[apply_id]["inputs"]["klein9_refmods"] = graph[apply_id]["inputs"].pop("refmods")
     graph[apply_id]["inputs"].setdefault("custom_retention", 1.0)
     graph[apply_id]["inputs"]["retention"] = _norm_retention(retention)
+
+    # The author's workflow injects the RefMod into both the positive and the negative stream, so CFG > 1 does not
+    # push away from the reference. Mirror the positive apply node onto the guider's negative input.
+    guider_id = _find_node(graph, "CFGGuider")
+    neg_in = graph[guider_id]["inputs"].get("negative") if guider_id else None
+    neg_node = graph.get(neg_in[0]) if isinstance(neg_in, list) and neg_in else None
+    if isinstance(neg_in, list) and not (isinstance(neg_node, dict) and neg_node.get("class_type") == "Klein9RefModApply"):
+        neg_id = "klein9_refmod_apply_neg"
+        while neg_id in graph:
+            neg_id += "_x"
+        graph[neg_id] = {
+            "_meta": {"title": "klein9_refmod_apply_neg"},
+            "class_type": "Klein9RefModApply",
+            "inputs": {**copy.deepcopy(graph[apply_id]["inputs"]), "conditioning": list(neg_in)},
+        }
+        graph[guider_id]["inputs"]["negative"] = [neg_id, 0]
+    elif isinstance(neg_node, dict):
+        neg_node["inputs"]["retention"] = graph[apply_id]["inputs"]["retention"]
     return clean[:8]
 
 
@@ -216,7 +243,7 @@ def build_flux_still(
     template_path: Optional[Path] = None,
     refmods: Optional[Sequence[str]] = None,
     refmod_strength: float = 1.0,
-    retention: str = "partially_preserved (0.7)",
+    retention: Optional[str] = None,
     loras: Optional[Sequence[Dict[str, Any]]] = None,
     image: Optional[str] = None,
     pose_image: Optional[str] = None,
@@ -296,6 +323,9 @@ def build_flux_still(
 
     applied_refmods = _inject_flux_refmods(g, refmods or [], strength=refmod_strength, retention=retention)
     applied_loras = _inject_flux_loras(g, loras or [])
+    if applied_refmods and "reference" not in raw.lower():
+        raw = f"{REFMOD_ANCHOR} {raw}"
+        g[pos_id]["inputs"]["text"] = raw
 
     if (sid := _find_node(g, "SaveImage")):
         g[sid]["inputs"]["filename_prefix"] = f"community/{run_dir.name}/still"
@@ -388,9 +418,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--template", default=None, help="Optional explicit template JSON path")
     ap.add_argument("--refmod", action="append", default=[], help="Klein9 RefMod filename, stem, or celeb name (repeatable, up to 8)")
     ap.add_argument("--refmod-strength", type=float, default=None, help="RefMod strength (default 1.0; 0.85 with --hybrid)")
-    ap.add_argument("--retention", default="partially_preserved (0.7)", help="Klein9RefModApply retention preset/string")
+    ap.add_argument("--retention", default=None,
+                    help="Klein9RefModApply retention (default 'fully_preserved (1.0)' for likeness; "
+                         "'partially_preserved (0.7)' with --hybrid)")
     ap.add_argument("--lora", action="append", default=[], help="Klein9 LoRA spec: <filename>[:<strength>] (repeatable)")
-    ap.add_argument("--hybrid", default=None, help="Hybrid 98%%-likeness stack for a celeb name: fk9_<name>_v1_refmod @ 0.85 + fk9_<name>_v1_prodigy LoRA @ 0.60")
+    ap.add_argument("--hybrid", default=None, help="RefMod author's hybrid stack for a celeb name: fk9_<name>_v1_refmod @ 0.85 + fk9_<name>_v1_prodigy LoRA @ 0.60, retention 0.7")
     ap.add_argument("--image", default=None, help="Input/identity image path (for edit / pose / layout)")
     ap.add_argument("--pose-image", default=None, help="Pose/layout reference image path (for pose / layout)")
     ap.add_argument("--width", type=int, default=768)
@@ -414,6 +446,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     refmods = list(a.refmod or [])
     loras = [fr.parse_lora_spec(s) for s in (a.lora or [])]
     refmod_strength = a.refmod_strength
+    retention = a.retention
     char = a.character
     if a.hybrid:
         h_mod, h_lora = _hybrid_stack_for_name(a.hybrid)
@@ -421,6 +454,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         loras.insert(0, h_lora)
         if refmod_strength is None:
             refmod_strength = 0.85
+        if retention is None:
+            retention = HYBRID_RETENTION
         if not char:
             char = a.hybrid
     if refmod_strength is None:
@@ -428,7 +463,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     rep = build_flux_still(
         d, a.prompt, a.mode,
         template_path=Path(a.template) if a.template else None,
-        refmods=refmods, refmod_strength=refmod_strength, retention=a.retention,
+        refmods=refmods, refmod_strength=refmod_strength, retention=retention,
         loras=loras, image=a.image, pose_image=a.pose_image,
         width=a.width, height=a.height, steps=a.steps, cfg=a.cfg, seed=a.seed,
         character=char, actor=a.actor, names=a.names,

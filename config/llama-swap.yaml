@@ -182,6 +182,23 @@ models:
           reasoning_effort: low
         "flash-next-uncensored-sub":
           reasoning_effort: low
+        # 2026-11-20 (Derrick chat ~8:17 AM CT: "two workspaces one for rendering and one for coding and optimize the
+        # qwen flashnext settings for both"): Hermes workspace aliases on this same resident slot (zero swaps).
+        # Sampler only, from the Qwen3.8-Flash-Next card. Thinking stays in each Hermes profile (render: off,
+        # code: server default medium): Gufo 0.35.0 returns HTTP 400 when enable_thinking and reasoning_effort
+        # arrive together, so these entries set neither.
+        "flash-next-render":  # card instruct (non-thinking) preset
+          temperature: 0.7
+          top_p: 0.8
+          top_k: 20
+          min_p: 0.0
+          presence_penalty: 1.5
+        "flash-next-code":  # card thinking preset (the card's agentic-coding runs used 1.0 / 0.95)
+          temperature: 1.0
+          top_p: 0.95
+          top_k: 20
+          min_p: 0.0
+          presence_penalty: 0.0
     checkEndpoint: "/health"
 
   "gemma4-heretic":
