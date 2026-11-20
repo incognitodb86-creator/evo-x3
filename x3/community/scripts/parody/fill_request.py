@@ -15,8 +15,34 @@ import build_request as br
 import resolve as res
 
 TEMPLATES = {k: TEMPLATES_DIR / f"{k}.api.json" for k in (
-    "plain", "oc_guide", "oc_ref", "named_parody", "talk", "two_person", "long_continuation", "ref2va_16x9"
+    "plain", "oc_guide", "oc_ref", "oc_ref_2pass", "named_parody", "talk", "two_person", "long_continuation", "ref2va_16x9"
 )}
+
+
+def _default_oc_ref(width: int, height: int) -> str:
+    """Portrait/default ref uses promoted 2-pass VSA 0.2; 16:9 stays 1-pass until TQ4 promotion."""
+    if (int(width), int(height)) == (1344, 768):
+        return "oc_ref"
+    return "oc_ref_2pass"
+
+
+def _c0_canvas_for_graph(graph: Dict[str, Any], width: int, height: int) -> tuple[int, int]:
+    """Pass-1 size for c0. 2-pass graphs (lsu3 scale 2.0) keep c0 at half the requested final canvas."""
+    lsu = graph.get("lsu3") if isinstance(graph.get("lsu3"), dict) else None
+    scale = 0.0
+    if lsu and str(lsu.get("class_type") or "") in {"MinimaxH3LatentUpscaler3D", "MiniMaxH3LatentUpscaler3D"}:
+        inp = lsu.get("inputs") or {}
+        try:
+            scale = float(inp.get("mode.scale") or inp.get("scale") or 0)
+        except (TypeError, ValueError):
+            scale = 0.0
+    if scale == 2.0:
+        t_w = (graph.get("c0") or {}).get("inputs", {}).get("width")
+        t_h = (graph.get("c0") or {}).get("inputs", {}).get("height")
+        if t_w == width and t_h == height:
+            return int(width), int(height)
+        return int(width) // 2, int(height) // 2
+    return int(width), int(height)
 
 
 def pick_template(has_still: bool, still_mode: str = "guide", has_identity: bool = False,
@@ -28,9 +54,9 @@ def pick_template(has_still: bool, still_mode: str = "guide", has_identity: bool
     pos = (position or "").strip().lower()
     if has_identity:
         if not has_still: return "named_parody"
-        if mode == "ref": return "oc_ref"
+        if mode == "ref": return _default_oc_ref(width, height)
         return "talk" if pos == "talk" and not (character and str(character).upper().startswith("FC")) else "oc_guide"
-    if mode == "ref" and has_still: return "oc_ref"
+    if mode == "ref" and has_still: return _default_oc_ref(width, height)
     return "talk" if pos == "talk" else "plain"
 
 
@@ -201,7 +227,8 @@ def fill_request(
     (run_dir / "prompt.txt").write_text(final_prompt + "\n", encoding="utf-8")
 
     c0_in = g["c0"]["inputs"]
-    c0_in.update(prompt=final_prompt, width=int(width), height=int(height))
+    c0_w, c0_h = _c0_canvas_for_graph(g, int(width), int(height))
+    c0_in.update(prompt=final_prompt, width=c0_w, height=c0_h)
     if isinstance(c0_in.get("length"), int) and frames is not None and "win1" not in g:
         try:
             c0_in["length"] = int(br.align_h3_frames(int(frames)))

@@ -2,6 +2,11 @@
 
 Candidates only — **not live**. Production templates (`b2*`, the 8 U55 templates, `flux_stills_s2_*`) are untouched, and `alienpc/community/scripts/template_allowlist.py` (S2) refuses `*.candidate.api.json`. Promotion happens **only** after Derrick's eye pick via a Derrick-approved S2 allowlist update (`allowlist_promoted.json` / production template swap).
 
+
+## Promoted (2026-11-19, Derrick t2970s10407 / t2971u)
+
+`oc_ref_2pass.api.json` is now a production template: the TQ1 `oc_ref_2pass` graph with `m_vsa.start_percent=0.2`, pass-1 `euler`/`simple` 8 steps, pass-2 `beta` 3 steps denoise 0.4, 4-header Beta 7. `pick_template()` routes default portrait `ref` clips to `oc_ref_2pass`. 1-pass `oc_ref.api.json` stays available via `--template oc_ref`. 16:9 ref stays on 1-pass `oc_ref` until TQ4 Beta 7 candidates get Derrick's eye pick. Listed in `alienpc/community/scripts/allowlist_promoted.json`. The `*.candidate.api.json` files above remain candidates.
+
 ## Candidate Files
 
 | File | Item | What it tests |

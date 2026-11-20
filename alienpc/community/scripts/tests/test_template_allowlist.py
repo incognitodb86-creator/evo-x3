@@ -297,3 +297,41 @@ def test_promoted_manifest_checks_sha256_and_rejects_traversal(tmp_path: Path):
     ok, _, _ = ta.check_graph(custom, templates_dir=tdir)
     assert not ok
 
+
+
+def _safe_fill(g: dict) -> dict:
+    g = copy.deepcopy(g)
+    if "img_1" in g:
+        g["img_1"]["inputs"]["image"] = "community/test_still.png"
+    g["c0"]["inputs"]["prompt"] = "an adult woman walks on a beach"
+    g["c0"]["inputs"]["length"] = 124
+    g["noise"]["inputs"]["noise_seed"] = 51083601
+    g["save"]["inputs"]["filename_prefix"] = "community/test/clip"
+    return g
+
+
+def test_promoted_oc_ref_2pass_vsa_0_2_allowlisted_and_candidate_refused():
+    prod = _safe_fill(_load_tpl("oc_ref_2pass"))
+    ok, matched, reason = ta.check_graph(prod)
+    assert ok, reason
+    assert matched == "oc_ref_2pass"
+    assert prod["m_vsa"]["inputs"]["start_percent"] == 0.2
+
+    # Candidate still has start_percent 0.0 and is not in the promoted manifest as a candidate file.
+    cand = _safe_fill(json.loads((TEMPLATES_DIR / "oc_ref_2pass.candidate.api.json").read_text(encoding="utf-8")))
+    ok, _, reason = ta.check_graph(cand)
+    assert not ok
+    assert "start_percent" in reason
+
+    # Tampering with the promoted VSA default is refused.
+    tampered = _safe_fill(_load_tpl("oc_ref_2pass"))
+    tampered["m_vsa"]["inputs"]["start_percent"] = 0.0
+    ok, _, reason = ta.check_graph(tampered)
+    assert not ok
+    assert "start_percent" in reason
+
+    # 1-pass oc_ref remains allowlisted for explicit --template oc_ref and 16:9 ref.
+    one = _safe_fill(_load_tpl("oc_ref"))
+    ok, matched, reason = ta.check_graph(one)
+    assert ok, reason
+    assert matched == "oc_ref"

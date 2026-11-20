@@ -93,7 +93,7 @@ ALLOWED_PER_CLIP = {
 
 
 @pytest.mark.parametrize("case", [
-    "plain", "oc_guide", "oc_ref", "named_parody", "talk", "two_person", "long_continuation", "ref2va_16x9"
+    "plain", "oc_guide", "oc_ref", "oc_ref_2pass", "named_parody", "talk", "two_person", "long_continuation", "ref2va_16x9"
 ])
 def test_e2e_per_clip_type_template_diff(tmp_path, monkeypatch, case):
     monkeypatch.setattr(rwp, "PIPE_DIR", _make_home(tmp_path))
@@ -128,7 +128,8 @@ def test_e2e_per_clip_type_template_diff(tmp_path, monkeypatch, case):
     jobs = {
         "plain": {"ask": "a woman walks along a beach at sunset", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "frames": 124},
         "oc_guide": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "guide", "frames": 124},
-        "oc_ref": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "ref", "frames": 124},
+        "oc_ref": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "ref", "template": "oc_ref", "frames": 124},
+        "oc_ref_2pass": {"ask": "FCSydny walks along the beach", "position": "walking", "still": str(s_port), "still_read": str(_sr_file(s_port)), "character": "FCSydny", "still_mode": "ref", "frames": 124},
         "named_parody": {"ask": "Daenerys Targaryen holds court and speaks", "position": "talk", "names": ["Daenerys Targaryen"], "template": "named_parody", "frames": 192},
         "talk": {"ask": "she smiles and says <d>[English] What a sunset.</d>", "position": "talk", "still": str(s_port), "still_read": str(_sr_file(s_port)), "frames": 124},
         "two_person": {"ask": "two people together on the beach", "position": "two_person", "still": str(s_land), "still_read": str(_sr_file(s_land)), "partner2_still": str(s_p2), "size": "1344x768", "frames": 124},
@@ -147,15 +148,24 @@ def test_e2e_per_clip_type_template_diff(tmp_path, monkeypatch, case):
 
     c0 = req["c0"]["inputs"]
     assert "What a sunset." in c0["prompt"]
-    assert (c0["width"], c0["height"]) == tuple(rep["canvas"])
+    if case == "oc_ref_2pass":
+        assert (c0["width"] * 2, c0["height"] * 2) == tuple(rep["canvas"])
+    else:
+        assert (c0["width"], c0["height"]) == tuple(rep["canvas"])
     if case == "plain":
         assert (c0["width"], c0["height"]) == (768, 1344) and req["img_1"]["inputs"]["image"]
         assert all(req["refmods"]["inputs"][f"mod_{i}"] == "(none)" for i in range(1, 9))
-    elif case in ("oc_guide", "oc_ref"):
-        assert (c0["width"], c0["height"]) == (768, 1344) and req["img_1"]["inputs"]["image"]
+    elif case in ("oc_guide", "oc_ref", "oc_ref_2pass"):
+        if case == "oc_ref_2pass":
+            assert (c0["width"], c0["height"]) == (384, 672)
+            assert req["m_vsa"]["inputs"]["start_percent"] == 0.2
+            assert req["lsu3"]["inputs"]["mode.scale"] == 2.0
+        else:
+            assert (c0["width"], c0["height"]) == (768, 1344)
+        assert req["img_1"]["inputs"]["image"]
         mods = [req["refmods"]["inputs"][f"mod_{i}"] for i in range(1, 9)]
         assert any("poolclub" in m for m in mods)
-        if case == "oc_ref":
+        if case in ("oc_ref", "oc_ref_2pass"):
             assert c0["prompt"].startswith(br.REF_MODE_PICTURE1_LEAD)
     elif case == "named_parody":
         assert (c0["width"], c0["height"]) == (768, 1344)
