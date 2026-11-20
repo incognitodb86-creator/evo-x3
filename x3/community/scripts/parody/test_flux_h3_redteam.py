@@ -268,3 +268,59 @@ def test_beta7_convert_strips_banned_headers_on_prose_file(home, tmp_path, monke
     for banned in ("integrated_multimodal_description:", "overall_soundscape:", "non_diegetic_music:"):
         assert banned not in out
     assert "Soft surf and breath." in out
+
+
+def test_flux_still_unet_override_and_saved_request_json(tmp_path):
+    # --unet sets UNETLoader unet_name on a standard build
+    d1 = tmp_path / "l7_saved"
+    rc1 = fs.main([
+        str(d1),
+        "--prompt", "The reference images represent one adult woman standing in warm daylight, 35mm film.",
+        "--refmod", "Sydney Sweeney",
+        "--lora", "klein9/fk9_sydneysweeney_v1_prodigy.safetensors:0.6",
+        "--unet", "Miraclein_4.5_9b_FP8.safetensors",
+        "--width", "1344", "--height", "768", "--seed", "777",
+    ])
+    assert rc1 == 0
+    saved_req = d1 / "still" / "request.api.json"
+    g1 = json.loads(saved_req.read_text(encoding="utf-8"))
+    assert g1["1"]["inputs"]["unet_name"] == "Miraclein_4.5_9b_FP8.safetensors"
+    assert g1["21"]["inputs"]["width"] == 1344 and g1["21"]["inputs"]["height"] == 768
+
+    # --request-json reuses the saved L7 graph (preserving UNET, RefMod, LoRA, canvas) with a new prompt & seed
+    d2 = tmp_path / "l7_reused"
+    rc2 = fs.main([
+        str(d2),
+        "--request-json", str(saved_req),
+        "--prompt", "The reference images represent one adult woman seated at a cafe table, natural skin pores.",
+        "--seed", "888",
+    ])
+    assert rc2 == 0
+    g2 = json.loads((d2 / "still" / "request.api.json").read_text(encoding="utf-8"))
+    assert g2["1"]["inputs"]["unet_name"] == "Miraclein_4.5_9b_FP8.safetensors"
+    assert g2["12"]["inputs"]["mod_1"] == "fk9_sydneysweeney_v1_refmod"
+    assert g2["21"]["inputs"]["width"] == 1344 and g2["21"]["inputs"]["height"] == 768
+    assert g2["20"]["inputs"]["noise_seed"] == 888
+    assert g2["24"]["inputs"]["filename_prefix"] == "community/l7_reused/still"
+    meta2 = json.loads((d2 / "flux_meta.json").read_text(encoding="utf-8"))
+    assert meta2["mode"] == "request_json"
+    assert meta2["unet"] == "Miraclein_4.5_9b_FP8.safetensors"
+    assert meta2["size"] == "1344x768"
+    assert "fk9_sydneysweeney_v1_refmod" in meta2["refmods"]
+    assert any("fk9_sydneysweeney_v1_prodigy" in x["name"] for x in meta2["loras"])
+    assert "sydneysweeney" in meta2["names"]
+
+    # --request-json + --unet overrides UNET without losing RefMod/LoRA, and 18+ guard still blocks bad prompts
+    d3 = tmp_path / "l7_override"
+    rc3 = fs.main([
+        str(d3), "--request-json", str(saved_req),
+        "--unet", "FLUX-KLEIN-9B-FP8-NSFW.safetensors",
+        "--prompt", "The reference images represent one adult woman in golden hour light.",
+    ])
+    assert rc3 == 0
+    g3 = json.loads((d3 / "still" / "request.api.json").read_text(encoding="utf-8"))
+    assert g3["1"]["inputs"]["unet_name"] == "FLUX-KLEIN-9B-FP8-NSFW.safetensors"
+
+    rc_bad = fs.main([str(tmp_path / "l7_bad"), "--request-json", str(saved_req), "--prompt", "teen schoolgirl"])
+    assert rc_bad == 3
+
