@@ -123,19 +123,19 @@ index c8a32eb..43499a8 100644
  }
 \ No newline at end of file
 diff --git a/skills/creative/h3-render/SKILL.md b/skills/creative/h3-render/SKILL.md
-index 443be92..90d2250 100644
+index 443be92..e41510d 100644
 --- a/skills/creative/h3-render/SKILL.md
 +++ b/skills/creative/h3-render/SKILL.md
 @@ -14,6 +14,8 @@ metadata:
  
  You run renders yourself on this machine. pi is only for code: `pi-job code|review`. Do not use `pi-job render`, `pi-job approve`, or `pi-job queue` unless Derrick says "use the old pi render".
  
-+If a file or path from Derrick or Max is not found after one quick check (one `ls` or one narrow search), stop and reply naming the missing file. Do not keep searching. This box is the X3 and cannot see AlienPc Windows paths (C:\...); ask for an X3 path instead.
++If a file or path from Derrick or Max is not found after one quick check (one `ls` or one narrow search), stop and reply naming the missing file. Do not keep searching. This box is the X3 and cannot see AlienPc Windows paths (C:\...); for AlienPc outputs use the ComfyUI or IIB gallery APIs in section 2b below, otherwise ask for an X3 path.
 +
  Do not call a writer or judge *model* (never use `fill_request.py` as the Hermes dry-run entry). Hermes writes the prompt with `h3-writer` and passes `--prose-file` to `render_writer_pipeline.py`, which runs `still_read`, `wp_lint`, clone/filler/oral-speech gates, the 18+ gate, and the dry-run ComfyUI JSON build.
  
  Use this Python: `/home/evo/AI/render/x3/.venv/bin/python3` (called PY below).
-@@ -23,9 +25,9 @@ Use this pipeline entry: `/home/evo/AI/community/scripts/parody/render_writer_pi
+@@ -23,15 +25,64 @@ Use this pipeline entry: `/home/evo/AI/community/scripts/parody/render_writer_pi
  
  Three sources:
  
@@ -147,7 +147,65 @@ index 443be92..90d2250 100644
  
  If a still or ask has a youth cue, stop. Everyone is 18+.
  
-@@ -47,7 +49,7 @@ $PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --sti
+-## 2. Show stills inline
+-
+-Copy small stills or contact sheets into `/home/evo/.hermes/image_cache/` (no spaces in the filename), then reply with `MEDIA:/home/evo/.hermes/image_cache/<file>` on its own line (never inside a code fence).
++## 2. Show images and videos inline (`MEDIA:`)
++
++Hermes WebUI renders `MEDIA:/absolute/path` inline via `/api/media?path=...` for both images (`.png`, `.jpg`, `.webp`) and videos (`.mp4`, `.webm`).
++
++- Copy or symlink the file into `/home/evo/.hermes/image_cache/` using a **space-free** filename (for example `mkdir -p /home/evo/.hermes/image_cache && ln -sf '<abs_path>' /home/evo/.hermes/image_cache/<safe_name>.<ext>`).
++- Reply with `MEDIA:/home/evo/.hermes/image_cache/<safe_name>.<ext>` on its own line (never inside a code fence), plus a short one-line label.
++- For H3 video runs, post only the 2x final clip; never post a 1x/raw clip.
++
++## 2b. Browse and show today's outputs & tailnet galleries (read-only)
++
++When Derrick asks to see today's stills, recent runs, or rendered videos, check these locations (read-only, tailnet only):
++
++1. **X3 local runs & QNAP finals (direct filesystem):**
++   - Today's X3 runs: `find /home/evo/AI/community/runs -maxdepth 3 -mtime -1 \( -name '*.png' -o -name '*.mp4' -o -name '*.webm' \) | sort`
++   - Shared QNAP finals (also served at `https://evo-x3-1.tailf242b2.ts.net:8443/renders/`): `find /mnt/qnap/renders/runs -maxdepth 3 -mtime -1 \( -name '*.png' -o -name '*.jpg' -o -name '*.mp4' -o -name '*.webm' \) | sort`
++   - Symlink any chosen file into `/home/evo/.hermes/image_cache/` and post with `MEDIA:`.
++
++2. **AlienPc ComfyUI outputs (`https://alienpc.tailf242b2.ts.net:8446`):**
++   - List recent jobs and output filenames/subfolders:
++     ```bash
++     curl -sS "https://alienpc.tailf242b2.ts.net:8446/history?max_items=20" | jq -r '
++       to_entries[] | .key as $id | .value.outputs // {} | to_entries[] |
++       ((.value.images // []) + (.value.gifs // []) + (.value.videos // []))[] |
++       [$id, (.type // "output"), (.subfolder // ""), .filename] | @tsv'
++     ```
++   - Fetch a file into `image_cache` and post with `MEDIA:` (URL-encode `filename` and `subfolder`):
++     ```bash
++     curl -sS -G "https://alienpc.tailf242b2.ts.net:8446/view" \
++       --data-urlencode "filename=<filename>" --data-urlencode "subfolder=<subfolder>" --data-urlencode "type=output" \
++       -o "/home/evo/.hermes/image_cache/<safe_name>"
++     ```
++
++3. **AlienPc gallery — Infinite Image Browsing (`https://alienpc.tailf242b2.ts.net:8444`):**
++   - Read-only HTTP API over AlienPc's ComfyUI output folders (never call delete/move/copy endpoints):
++     - Discover configured folder roots: `curl -sS "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/global_setting" | jq '.extra_paths, .global_setting'`
++     - List a folder: `curl -sS -G "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/files" --data-urlencode "folder_path=<path>" | jq '.files[] | {type, name, size, fullpath}'`
++     - Search indexed outputs (`media_type`: `"all"`, `"image"`, or `"video"`):
++       ```bash
++       curl -sS -X POST "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/db/search_by_substr" \
++         -H "Content-Type: application/json" \
++         -d '{"surstr":"<query>","size":50,"media_type":"all"}' | jq '.files[] | {name, size, fullpath}'
++       ```
++     - Fetch an image or video into `image_cache` (`t=0` is required) and post with `MEDIA:`:
++       ```bash
++       curl -sS -G "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/file" \
++         --data-urlencode "path=<fullpath>" --data-urlencode "t=0" \
++         -o "/home/evo/.hermes/image_cache/<safe_name>"
++       ```
++     - Read the prompt/seed info saved inside an output (handy for "what prompt made this one?"): `curl -sS -G "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/image_geninfo" --data-urlencode "path=<fullpath>"`. Quote it only to Derrick; never paste RefMod/LoRA triggers into memory or files.
++     - If any IIB call returns `401 secret_verification_failed` or `400 secret_key_required`, IIB has a secret key set (it expects an `IIB_S` cookie). Stop and tell Derrick; do not search for or guess the key.
++   - **Note:** X3 `:8444` (`https://evo-x3-1.tailf242b2.ts.net:8444`) is `pi-mobile-hub` (`127.0.0.1:7878`), **not** a gallery—do not query X3 `:8444` for media.
++   - Never browse PixlStash library folders directly; use the `pixlstash-image-library` skill for PixlStash stills.
+ 
+ ## 3. Write, lint, and build (dry-run)
+ 
+@@ -47,7 +98,7 @@ $PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --sti
  Add `--character`, `--template`, `--aspect`, `--size`, `--frames`, `--names`, or `--realism-lora` only when the ask needs them. On READY, `build_report.json` and `clip/request.api.json` exist and `DRY_RUN` is present.
  
  - READY: reply with the still, the run folder, the full prompt verbatim in a text block, and `Render this? (yes / no)`. Then stop and wait. Never shorten the prompt.
