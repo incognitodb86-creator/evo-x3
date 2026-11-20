@@ -2,13 +2,13 @@
 
 Reviewer: Max. No images or prompt prose are in this file. Clips stay on the QNAP; hashes are in [BENCH-ALIENPC-1/QNAP-MEDIA-INDEX-20261120.md](./BENCH-ALIENPC-1/QNAP-MEDIA-INDEX-20261120.md).
 
-The video model refused to review the clips. Both passes used frames sampled 4–7 times per clip, plus ffmpeg YDIF motion stats. Audio was not judged. The 7:50 AM CT comparison is one seed only.
+The video model refused to review the clips. Both passes used frames sampled 4–7 times per clip, plus ffmpeg YDIF motion stats. Audio was not judged. The comparison against the starting setup is one seed only.
 
-## Verdict (7:50 AM CT, confirmed Derrick t3013u at 7:43 AM CT)
+## Verdict (comparison done before 7:43 AM CT; confirmed by Derrick t3013u at 7:43 AM CT)
 
 The original starting setup stays production: `h3max_lora_test_20261119/arm0_baseline`, which is the live `oc_guide.api.json` 1-pass at 768×1344 with MiniMaxH3AddGuide (first frame pinned) and `ref_image_size=match`.
 
-Derrick t3013u (7:43 AM CT): "Ok update the plan that we are staying with our original setup." TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. `oc_ref_2pass` is not promoted; its only real gain on this seed was about 70 s faster, and that speed trade was declined. The earlier `tq2_vsa_0.2` promotion (`4d909034`) is closed, not the pick. 2-pass graphs stay as candidate files only. Production templates were not edited.
+Derrick t3013u (7:43 AM CT): "Ok update the plan that we are staying with our original setup." TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. `oc_ref_2pass` is not promoted; its only real gain on this seed was about 70 s faster, and that speed trade was declined. The earlier `tq2_vsa_0.2` promotion (`4d909034`) is closed, not the pick. **Correction (2026-11-20 ~8 AM CT):** `4d909034` is still in place. `oc_ref_2pass.api.json` is allowlisted, and `pick_template()` still routes default portrait `ref` clips to it on `mono`, X3 live and AlienPc. Nothing was edited this morning. Undoing it waits on Derrick's go.
 
 ## How the tq1 graphs differ from the start
 
@@ -17,7 +17,7 @@ Compared with the arm0_baseline `oc_guide` 1-pass:
 - `oc_ref_1pass` is the same graph with no AddGuide and `ref_image_size=max`.
 - `oc_ref_2pass` renders at 384×672, then a 2× latent upscale and a 3-step beta refine at denoise 0.4.
 
-## Measurements vs the starting setup (7:50 AM CT)
+## Measurements vs the starting setup (before 7:43 AM CT)
 
 YDIF mean / sd / max:
 
@@ -46,7 +46,7 @@ None of the stage-2 changes beat `tq1_oc_ref_2pass` (euler/simple, VSA 0.0, prom
 - `oc_ref_1pass` is close to 2-pass.
 - `guide_2pass` is the smoothest (YDIF sd 1.89) but its face drifts after about 6 s.
 
-Those stage-1 notes do not change the 7:50 AM CT verdict: production stays the original `oc_guide` 1-pass.
+Those stage-1 notes do not change the verdict above: production stays the original `oc_guide` 1-pass.
 
 ## TQ4 (7:35 AM CT)
 

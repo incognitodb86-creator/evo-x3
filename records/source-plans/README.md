@@ -1,8 +1,13 @@
-# Source plans (copied from branch `evo-x3-all`, tip 96b71aa, 2026-11-19)
+# Source plans (primary, current per-area plans)
 
-These are the plans the unified plan ([../uplan/PLAN.md](../uplan/PLAN.md)) was built
-from. They are kept here so `mono` holds every plan; the unified plan is the one to follow. Copies are byte-exact
-(`git show origin/evo-x3-all:plans/<file>`); do not edit them, update the unified plan instead.
+**2026-11-20 (Derrick t3014u):** these per-area plans are the **primary, current plans** again. Each one has a dated
+"Status as of" section and DONE / OPEN / HELD / CLOSED marks on its item rows. The unified plan
+([../uplan/PLAN.md](../uplan/PLAN.md)) is now the index and history. Edit the plan for the area you are working on,
+then add a one-line pointer in the unified plan if needed.
+
+Origin: copied byte-exact on 2026-11-19 from branch `evo-x3-all` (GitHub tip `96b71aa`; Gitea's `b021bcb` is an
+ancestor of it). `evo-x3-all` is frozen (one-branch rule); do not push it. Not updated on 2026-11-20: the main setup plan
+(`2026-11-18-x3-alienpc-hermes-setup-plan.md`, frozen after Phases 0-4) and the Linux dual-boot plan and its review.
 
 | File | What |
 |---|---|

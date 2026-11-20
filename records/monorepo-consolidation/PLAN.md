@@ -1,6 +1,7 @@
 ---
 title: "evo-x3 monorepo consolidation: one main branch for X3 + AlienPc setup"
 date: 2026-11-19
+updated: 2026-11-20
 type: plan
 artifact_contract: ce-unified-plan/v1
 product_contract_source: derrick-chat (t2620u, t2621u)
@@ -10,6 +11,11 @@ author: Max Architect (executor subagent). PLAN ONLY, nothing restructured, move
 review: outside AI (Opus) reviews this file before any step runs
 pending_upload: true
 ---
+
+> **Status as of 2026-11-20 ~8 AM CT (Derrick t3014u: source plans are the primary, current plans; [../uplan/PLAN.md](../uplan/PLAN.md) is the index/history).**
+> - **Done:** S0 (review + Q1-Q8 approved), S1b Python sites (`1f8eb17`), S3 (`mono` built), and the Ralph loop fixed for `mono` (`8c942bca`). S4 in practice: `mono` is on both Gitea (primary) and GitHub, and the heads matched on 2026-11-20. Every `mono` push runs gitleaks first.
+> - **Open:** S1 X3 snapshot dry run (as written), S2 quiesce, S5 X3 switchover (no `/home/evo/AI/evo-x3` clone on the X3 yet; live `/home/evo/AI/community` is still the `x3-community` checkout with copied `mono` files), S6 AlienPc switchover, S7 archive/default branch, then SY1. Each needs a window when neither lane is running.
+> - **Note:** `evo-x3-all` is frozen. GitHub has it at `96b71aa`, which adds the four F4/LX/M/RV plan updates on top of Gitea's `b021bcb` (a fast-forward; nothing is lost). Nobody pushes it now (one-branch rule, 2026-11-19 13:05 CT). The current copies of those plans live on `mono` in `records/source-plans/`.
 
 # evo-x3 monorepo consolidation
 

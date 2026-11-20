@@ -4,6 +4,8 @@ Copied read-only from the running X3 by `scripts/snapshot-live-setup.sh` (Max Ar
 Live files stay the source of truth; nothing here was edited on the box. Values that are secrets read
 `<redacted-in-locked-keyfile>`; units and launchers read keys from owner-only files that are not in git.
 
+Live refresh 2026-11-20 07:52 CT (America/Chicago): re-ran `scripts/snapshot-live-setup.sh` read-only over `ssh evo-x3-1` into a temp folder (no lease, no live changes; temp folder removed). Against the 07:25 copy only `hermes/memories-listing.txt` changed (a directory mtime). Every other file matched.
+
 Live refresh 2026-11-20 07:25–07:29 CT (America/Chicago): ran `scripts/snapshot-live-setup.sh` read-only on the X3 (lease taken and cleared the same morning). Compared with the 2026-11-19 9:06 PM CT copy, four files changed: `llama-swap/llama-swap.yaml` (ref2va-27b-heretic-q4 ctx 65536; `halogen-only` pins for `gemma4-heretic` and `gemma4-heretic-sub` are commented as a 2026-11-19 test window so those names hit the real Gemma container), `hermes/config.yaml` (read-only Gitea MCP server added), `hermes/memories-listing.txt` (listing only), and `hermes/skills/local-edits-to-bundled-skills.diff` (now a 13-line live edit on `h3-render`). `README.md`, `hermes-webui/install.txt`, and `containers/_archive/` were kept from the previous copy (the script does not emit them). Canonical `hosts/x3/pixlstash-tagging/import_inbox.py` was not overwritten (repo draft remains ahead of live).
 
 

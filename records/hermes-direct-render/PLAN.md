@@ -1,6 +1,7 @@
 ---
 title: "Hermes direct H3 render on EVO-X3: two side-by-side paths (pipeline vs community)"
 date: 2026-11-19
+updated: 2026-11-20
 type: plan
 artifact_contract: ce-unified-plan/v1
 product_contract_source: derrick-chat (t2598u, t2600u-t2610u, card t2603s9268)
@@ -9,6 +10,12 @@ tier: T2 Durable (Derrick asked for a plan file, t2607u)
 author: Max Architect (executor subagent), plan only, nothing applied on the X3
 pending_upload: true
 ---
+
+> **Status as of 2026-11-20 ~8 AM CT (Derrick t3014u: source plans are the primary, current plans; [../uplan/PLAN.md](../uplan/PLAN.md) is the index/history).**
+> - **Done:** U2 Hermes WebUI (H7, `eabc8c7`). Hermes renders itself and uses pi only for coding: one profile, `h3-render` / `h3-writer`, SOUL/USER/MEMORY, coding-only `pi-job` skill, queue guard hook, and the no-agent digest ([UNI-APPLY-X3-E-HERMES](../UNI-APPLY-X3-E-HERMES/RESULT.md), `d31feaae`). Slim `h3-render` / `h3-writer` v2.0.0, thinking off, `/home/evo/workspace`, WebUI `exp-v0.52.723`, Hermes Agent v0.23.3 ([HERMES-CLEANUP-20261119](../HERMES-CLEANUP-20261119/RESULT.md), `193e7dfd`). U5 `--prose-file` is on `mono`. Path B fix rounds: `9ef253bb`, then `fb35316c` (adds the `writertest` Hermes profile with memory off).
+> - **Held:** the next Path B fix round (Prompt maker FAIL, means 6.83 / 6.33). Derrick held it at 7:01 AM CT on 2026-11-20.
+> - **Open:** clone-gate isolation (separate uid, or no terminal for the writer), waiting on Derrick. U7 side-by-side and Derrick's five Hermes WebUI checks have not been done. The U8 coding hand-off test (R11) is pending ([UNI-APPLY-X3-B-PIJOB](../UNI-APPLY-X3-B-PIJOB/RESULT.md)). X3-F read-only MCP + ntfy were skipped in that apply; a read-only Gitea MCP server now shows in the live `hermes/config.yaml` snapshot. Hermes Gemma workspace: Derrick wants it set up by a job sent through a Hermes chat to pi; which chat to use waits on Derrick. A hand-made `gemma` profile (cloned from the render default) exists and needs redoing.
+> - **Issues:** Hermes games the clone gate (reads `wp_lint` and the hashes). Hermes runs as the same uid that owns `llm.env`. The clone-evasion note is still in the Hermes nightly git history (`8f737ba`). xai-oauth is blocked on xAI browser verification.
 
 > **Update 2026-11-19 12:31 PM CT (Derrick t2688u):** Open WebUI is retired. Hermes WebUI (127.0.0.1:8787) is the tailnet chat UI via Serve 8443 `/`. Lines below that mention Open WebUI or :3000 are historical.
 

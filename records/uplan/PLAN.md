@@ -12,6 +12,8 @@ review: skipped here; outside AI (Opus via GitHub Copilot) reviews this file on 
 pending_upload: true
 ---
 
+> **2026-11-20 (Derrick t3014u): the per-area source plans in [`records/source-plans/`](../source-plans/README.md) (F4 follow-up, LX1-LX9 Linux, M0-M5 Miraclein, RV0-RV5 REA-Video) are now the primary, current plans; this PLAN.md is the index and history.**
+
 Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo plan](../monorepo-consolidation/PLAN.md) · [Opus review (2026-11-19)](./REVIEW-20261119-opus.md) · source plans on `evo-x3-all` (blob SHAs verified 2026-11-19 ~10:28 AM CT):
 [Linux LX1-LX9](https://github.com/incognitodb86-creator/evo-x3/blob/evo-x3-all/plans/2026-11-18-alienpc-linux-plan-changes.md) `078da632` ·
 [Miraclein M0-M5](https://github.com/incognitodb86-creator/evo-x3/blob/evo-x3-all/plans/2026-11-19-alienpc-miraclein43-refmods-h3max-realism-plan.md) `ca1a6a94` ·
@@ -76,7 +78,7 @@ These override any older line in this plan or in an Opus commit that says otherw
   4. Keep AlienPc's GPU busy overnight with the 20-minute `hotel_vlm2` REA-Video remake once the 30-second `videoReview` passes.
   5. Check/link Hermes `xai-oauth` (SuperGrok / Grok Heavy) and `gemini` using Derrick's `Derek.boone` Google email where supported cleanly.
 
-- 2026-11-20 t3013u (7:43 AM CT): **Stay with the original setup.** Production remains the live `oc_guide.api.json` 1-pass at 768×1344, with MiniMaxH3AddGuide (first frame pinned) and `ref_image_size=match`. TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. 2-pass graphs stay as candidate files only; production templates were not edited. The `tq2_vsa_0.2` promotion item is closed.
+- 2026-11-20 t3013u (7:43 AM CT): **Stay with the original setup.** Production remains the live `oc_guide.api.json` 1-pass at 768×1344, with MiniMaxH3AddGuide (first frame pinned) and `ref_image_size=match`. TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. The `tq2_vsa_0.2` promotion item is closed as a decision. **Correction (2026-11-20 ~8 AM CT):** the Nov 19 promotion `4d909034` is still in place. `oc_ref_2pass.api.json` is an allowlisted production template, and `pick_template()` still sends default portrait `ref` clips to it, on `mono`, on X3 live `/home/evo/AI/community` and on AlienPc ([A7-PROMOTE-RESULT.md](../BENCH-ALIENPC-1/A7-PROMOTE-RESULT.md), [HERMES-CLEANUP-20261119](../HERMES-CLEANUP-20261119/RESULT.md)). Nothing was edited this morning. Guide-mode clips already use `oc_guide`. Undoing the ref routing is open (see Open / held).
 
 
 ## Status 2026-11-20 (morning CT)
@@ -86,15 +88,16 @@ Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick
 ### Completed (since the Nov 19 evening PLAN update, `512b81d9`)
 
 - Path B fix rounds on `mono`: `9ef253bb`, then `fb35316c` with the writertest Hermes profile (memory off).
-- QNAP backfill 2026-11-20 06:34–06:39 CT: 16 files copied and 14 already present, all hashes matched, nightly not touched.
+- QNAP backfill 2026-11-20 06:34–06:39 CT: 16 files copied and 14 already present, all hashes matched, nightly not touched ([QNAP-MEDIA-INDEX-20261120.md](../BENCH-ALIENPC-1/QNAP-MEDIA-INDEX-20261120.md), `d9214b6c`).
 - TQ4 verified complete (all three arms PASS). Waiting on Derrick's eye pick before promotion. [TQ4-RESULT.md](../BENCH-ALIENPC-1/TQ4-RESULT.md). Max's 7:35 AM CT review: `long_continuation` is consistent across the 10 s join, with slight face drift; the 16:9 Ref2VA and two-person clips are only 5.2 s, and their first frame is a tight crop before cutting to a wide shot.
 - A7 stage-2: `tq2_vsa_0.2`, `tq3_res_multistep`, `tq3_lcm_simple`, and `tq5_headerfree` rendered. `tq2_vsa_0.0`, `tq3_euler_simple`, and `tq5_headers` are controls copied from the `tq1_oc_ref_2pass` winner (byte-identical). [A7-STAGE2-RESULT.md](../BENCH-ALIENPC-1/A7-STAGE2-RESULT.md).
-- H3max A7/TQ4 clip review, 2026-11-20 (Max): 7:35 AM CT frames + YDIF (video model refused; audio not judged). 7:50 AM CT follow-up compared those tq1 graphs against the original starting setup, `h3max_lora_test_20261119/arm0_baseline` (live `oc_guide.api.json` 1-pass at 768×1344, MiniMaxH3AddGuide with the first frame pinned, `ref_image_size=match`). One seed only. [A7-H3MAX-REVIEW-20261120.md](../A7-H3MAX-REVIEW-20261120.md).
-- 2026-11-20 t3013u (7:43 AM CT): stay with the original setup. Production remains the live `oc_guide.api.json` 1-pass (768×1344, AddGuide first-frame pin, `ref_image_size=match`). TQ1, TQ2, TQ3, and TQ5 are closed as not promoted. 2-pass candidates stay as candidate files only; production templates were not edited. The `tq2_vsa_0.2` promotion item is closed.
-- Gemma 4 on Gufo research: the gemma4 Gufo extension reads GGUF, nothing needs converting, the Gufo 0.35.0 image is missing on disk, MTP and DFlash options exist.
+- H3max A7/TQ4 clip review, 2026-11-20 (Max): 7:35 AM CT frames + YDIF (video model refused; audio not judged). A follow-up before 7:43 AM CT (committed `eaac179f` at 7:43 AM CT) compared those tq1 graphs against the original starting setup, `h3max_lora_test_20261119/arm0_baseline` (live `oc_guide.api.json` 1-pass at 768×1344, MiniMaxH3AddGuide with the first frame pinned, `ref_image_size=match`). One seed only. [A7-H3MAX-REVIEW-20261120.md](../A7-H3MAX-REVIEW-20261120.md).
+- 2026-11-20 t3013u (7:43 AM CT): stay with the original setup. Production remains the live `oc_guide.api.json` 1-pass (768×1344, AddGuide first-frame pin, `ref_image_size=match`). TQ1, TQ2, TQ3, and TQ5 are closed as not promoted ([A7-H3MAX-REVIEW-20261120.md](../A7-H3MAX-REVIEW-20261120.md), `eaac179f`, `2df4b6db`). No templates were edited this morning. The `4d909034` 2-pass ref routing is still live; see Open / held.
+- Gemma 4 on Gufo research: the gemma4 Gufo extension reads GGUF, nothing needs converting, the Gufo 0.35.0 image is missing on disk, MTP and DFlash options exist. (Chat finding only; no record file or commit holds it yet.)
 
 ### Open / held
 
+- Undo the `4d909034` 2-pass ref routing so `ref` clips also follow t3013u: revert the `pick_template()` portrait default and the `oc_ref_2pass` allowlist entry on `mono`, X3 live and AlienPc. This is a code + live change, so it waits on Derrick's go.
 - Path B next round (Prompt maker FAIL, means 6.83 / 6.33). Derrick held it at 7:01 AM CT.
 - Clone-gate isolation (separate uid, or no terminal for the writer), waiting on Derrick.
 - REA-Video v3 proposal and the 101-pack batch, held. [REA-VIDEO-VAL30S-RESULT.md](../BENCH-ALIENPC-1/REA-VIDEO-VAL30S-RESULT.md).
@@ -114,6 +117,9 @@ Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick
 - Grok Bot weekly at 70%.
 - The clone-evasion note is still in the Hermes nightly git history (`8f737ba`).
 - Hermes runs as the same uid that owns `llm.env`.
+- `U56 Decision #1` wording conflict: the source plans say it means no H3 headers on Beta 7, while A7-STAGE2-RESULT and the TQ5 row describe it as the 4-header layout. Derrick or Opus should confirm which wording is current.
+- AlienPc `comfyui_auto` reports ComfyUI 0.46.0 ([R6-RESULT.md](../BENCH-ALIENPC-1/R6-RESULT.md)), while this plan's audit (A14) and the source plans say 0.38.0. The upgrade was not recorded as its own job (F4 R7).
+- No W1/W1b `RESULT.md` is in `mono`. W1b results are recorded only as decisions above (t2898u, t2904u, t2905u).
 
 ## Order of work: benchmarks first, two machines in parallel (Derrick 2026-11-19 13:46 / 13:55 CT)
 
@@ -582,8 +588,8 @@ Downloads for ST4/ST5: none required (Klein 9B, TE, VAE, pose LoRA, DWPose prese
 | SK4 | **yes** (`alienpc/render/`, `alienpc/community/skills/`) — **DONE on `mono`** | Max imports; AlienPc Forge applies | AlienPc | AlienPc | M | Sync `alienpc/render/` + `alienpc/community/skills/` to X3 U56/U57 so AlienPc backup writer matches X3's contract (replaces/extends Card 40). | Diff against X3 shows only intentional AlienPc-specific lines; `writer_prompt_sha256` matches. | Restore backups / revert. |
 | SK5 | **yes** (`x3/community/skills/`, `alienpc/community/skills/`) — **DONE on `mono`** | Max imports; X3 Forge + AlienPc Forge apply | both | matching | S | Skill link/path cleanup: `sydney.md` links, `/home/derekboone/AI` paths, `h3-parody-identity-reference` historical marks, dead pointer. | Zero broken relative links or stale `/home/derekboone/AI` paths in skills. | Revert commit. |
 | SK6 | **yes** (`x3/community/skills/`) — *LOW, later* | Max imports; X3 Forge applies later | X3 | X3 | S | Bring back useful retired-skill pieces (wave variety rule, failure taxonomy) when convenient. | Skill docs read cleanly. | Revert commit. |
-| TQ1 | **CLOSED, not promoted** (t3013u, 2026-11-20 7:43 AM CT). Candidates remain on `mono` (`templates/oc_guide_2pass.candidate.api.json`, `oc_ref_2pass.candidate.api.json`). Production stays the original `oc_guide` 1-pass. | — | AlienPc | — | M | 2-pass candidates (`MinimaxH3LatentUpscaler3D` + Pass-2 refine + RefMods) to fix 1-pass background flicker. First in Card 45 A/B order. | A/B done; Derrick t3013u stays with the original 1-pass. Not promoted. | Candidate files only. Production templates untouched. |
-| TQ2 | **CLOSED, not promoted** (t3013u, 2026-11-20 7:43 AM CT), including the `tq2_vsa_0.2` promotion item. | — | AlienPc | — | S | VSA `start_percent` `0.2` vs `0.0` fixed-seed A/B. | A/B done; Derrick t3013u stays with the original setup (VSA 0.0 on the live `oc_guide` 1-pass). Not promoted. | Keep current setting. Production templates untouched. |
+| TQ1 | **CLOSED, not promoted** (t3013u, 2026-11-20 7:43 AM CT). Candidates remain on `mono` (`templates/oc_guide_2pass.candidate.api.json`, `oc_ref_2pass.candidate.api.json`). Production stays the original `oc_guide` 1-pass. Note: the promoted `oc_ref_2pass.api.json` (`4d909034`) is still allowlisted and routed for portrait `ref`; undoing that is open. | — | AlienPc | — | M | 2-pass candidates (`MinimaxH3LatentUpscaler3D` + Pass-2 refine + RefMods) to fix 1-pass background flicker. First in Card 45 A/B order. | A/B done; Derrick t3013u stays with the original 1-pass. Not promoted. | Candidate files only. Production templates untouched. |
+| TQ2 | **CLOSED, not promoted** (t3013u, 2026-11-20 7:43 AM CT), including the `tq2_vsa_0.2` promotion item (decision; the `4d909034` files and routing are still live, see Open / held). | — | AlienPc | — | S | VSA `start_percent` `0.2` vs `0.0` fixed-seed A/B. | A/B done; Derrick t3013u stays with the original setup (VSA 0.0 on the live `oc_guide` 1-pass). Not promoted. | Keep current setting. Production templates untouched. |
 | TQ3 | **CLOSED, not promoted** (t3013u, 2026-11-20 7:43 AM CT). | — | AlienPc | — | S | `res_multistep` vs `euler` fixed-seed A/B (`er_sde` stays banned). | A/B done; Derrick t3013u stays with the original setup (`euler`). Not promoted. | Keep `euler`. Production templates untouched. |
 | TQ4 | **yes** (`templates/{two_person,ref2va_16x9,long_continuation}.candidate.api.json`, `fill_request.py`) — **DONE on `mono`** | Max imports; AlienPc Forge A/B -> X3 Forge `pick_template` fix on promotion | both | matching | M | Rebuild `two_person`, `ref2va_16x9`, `long_continuation` as Beta 7 candidates (`s0_sep` `LTXVSeparateAVLatent` + RefMods; `long_continuation` `768x1344`), then fix `pick_template()` routing on promotion. | Offline `fill_request` + AlienPc smoke clip per candidate; Derrick eye pick. | Candidate files only. |
 | TQ5 | **CLOSED, not promoted** (t3013u, 2026-11-20 7:43 AM CT). | — | AlienPc | — | S | 4-header vs header-free prompt fixed-seed A/B. | A/B done; Derrick t3013u stays with the original setup (headers kept). Not promoted. | Keep U56 Decision #1. Production templates untouched. |
