@@ -66,12 +66,12 @@ When Derrick asks to see today's stills, recent runs, or rendered videos, check 
 3. **AlienPc gallery — Infinite Image Browsing (`https://alienpc.tailf242b2.ts.net:8444`):**
    - Read-only HTTP API over AlienPc's ComfyUI output folders (never call delete/move/copy endpoints):
      - Discover configured folder roots: `curl -sS "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/global_setting" | jq '.extra_paths, .global_setting'`
-     - List a folder: `curl -sS -G "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/files" --data-urlencode "folder_path=<path>" | jq '.files[] | {type, name, date, fullpath}'`
+     - List a folder: `curl -sS -G "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/files" --data-urlencode "folder_path=<path>" | jq '.files[] | {type, name, size, fullpath}'`
      - Search indexed outputs (`media_type`: `"all"`, `"image"`, or `"video"`):
        ```bash
        curl -sS -X POST "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/db/search_by_substr" \
          -H "Content-Type: application/json" \
-         -d '{"surstr":"<query>","size":50,"media_type":"all"}' | jq '.files[] | {name, date, fullpath}'
+         -d '{"surstr":"<query>","size":50,"media_type":"all"}' | jq '.files[] | {name, size, fullpath}'
        ```
      - Fetch an image or video into `image_cache` (`t=0` is required) and post with `MEDIA:`:
        ```bash
@@ -79,6 +79,8 @@ When Derrick asks to see today's stills, recent runs, or rendered videos, check 
          --data-urlencode "path=<fullpath>" --data-urlencode "t=0" \
          -o "/home/evo/.hermes/image_cache/<safe_name>"
        ```
+     - Read the prompt/seed info saved inside an output (handy for "what prompt made this one?"): `curl -sS -G "https://alienpc.tailf242b2.ts.net:8444/infinite_image_browsing/image_geninfo" --data-urlencode "path=<fullpath>"`. Quote it only to Derrick; never paste RefMod/LoRA triggers into memory or files.
+     - If any IIB call returns `401 secret_verification_failed` or `400 secret_key_required`, IIB has a secret key set (it expects an `IIB_S` cookie). Stop and tell Derrick; do not search for or guess the key.
    - **Note:** X3 `:8444` (`https://evo-x3-1.tailf242b2.ts.net:8444`) is `pi-mobile-hub` (`127.0.0.1:7878`), **not** a gallery—do not query X3 `:8444` for media.
    - Never browse PixlStash library folders directly; use the `pixlstash-image-library` skill for PixlStash stills.
 
