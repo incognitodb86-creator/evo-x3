@@ -232,3 +232,22 @@ hooks:
       command: /home/evo/.hermes/agent-hooks/guard-render-queue.sh
       timeout: 5
       fail_closed: true
+mcp_servers:
+  gitea:
+    command: /home/evo/.config/forge-mcp/run-gitea-mcp.sh
+    args:
+      - --host
+      - https://qnap.tailf242b2.ts.net
+      - --read-only
+    tools:
+      exclude:
+        - '*create*'
+        - '*update*'
+        - '*delete*'
+        - '*merge*'
+        - '*fork*'
+        - '*push*'
+        - '*write*'
+        - '*edit*'
+        - '*add*'
+        - '*remove*'

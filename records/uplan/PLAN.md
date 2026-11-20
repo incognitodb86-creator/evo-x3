@@ -22,6 +22,8 @@ Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo pl
 
 **Path rename 2026-11-19 13:43 CT (Derrick t2731u-t2733u):** this folder was `records/unified-implementation/`; renamed to `records/uplan/` because Forge-X3's pi permission rule for the UniFi folder (`*unifi*`) also matched "unified" and blocked reads of this plan. All references updated.
 
+**Status 2026-11-20 morning CT:** closeout section below (Completed / Open / Issues). Image and video binaries stay on the QNAP; see the media index.
+
 **Status 2026-11-19:** Reviewed by Opus (`VERDICT: CHANGES`, [REVIEW-20261119-opus.md](./REVIEW-20261119-opus.md)); delta re-reviewed (`VERDICT: CHANGES`, 1 major bridge + text fixes); all delta fixes applied in this revision (reviewer confirmed text-only fixes need no further review).
 
 **Code on `mono` 2026-11-19:** all Opus-file items from Card 2 are on `mono` (render, community-code, templates, u58-pijob, hermes, leftovers). Opus code review [CODE-REVIEW-20261119-opus.md](./CODE-REVIEW-20261119-opus.md) (`CHANGES`, L3/L8 blocked) -> one fix round -> delta [CODE-REVIEW-20261119-opus-delta.md](./CODE-REVIEW-20261119-opus-delta.md) (`APPROVE`, 6 MINOR follow-ups N1-N6). **Max: use the delta file's "Apply order for Max"**; cite `mono` SHAs (not worker branch SHAs) in RESULT files. Follow-ups N1, N2, N3, N5 FIXED on `mono` `1f8eb17` (2026-11-19 14:30 CT; N2 also fixes the cleanup never seeing Ralph's two-level worktrees). They reach the box through the briefs that install those files: `pi-job` (N1/N3) in `X3-B`, `sync-renders` (N5) in `X3-C` item 1, `evo-worktree-cleanup` + L3 timer in `X3-C` item 4, `render_writer_pipeline.py` `lint_ctx.json` (N3) with the `x3/community` bridge in `X3-D`. N4 (rare race) and N6 (docs) stay as notes.
@@ -73,6 +75,41 @@ These override any older line in this plan or in an Opus commit that says otherw
   3. Conserve Grok Bot usage by delegating research/debugging to Antigravity (`agy` `gemini-4-neon-high`) and coding to `agy` (`gemini-4-hydrogen-medium`), plus X3 local coding once a writer is picked; keep `gbrain` updated by syncing Max's changes.
   4. Keep AlienPc's GPU busy overnight with the 20-minute `hotel_vlm2` REA-Video remake once the 30-second `videoReview` passes.
   5. Check/link Hermes `xai-oauth` (SuperGrok / Grok Heavy) and `gemini` using Derrick's `Derek.boone` Google email where supported cleanly.
+
+
+## Status 2026-11-20 (morning CT)
+
+Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick t3011u: do not debug Flux; get the image work onto Gitea, GitHub, and gbrain for Opus; update this plan with completed, open, and issues. Dual-host snapshot: X3 refreshed 07:25–07:29 CT; AlienPc could not be refreshed from the box (SSH to `alienpc.tailf242b2.ts.net:22` timed out). Media index: [QNAP-MEDIA-INDEX-20261120.md](../BENCH-ALIENPC-1/QNAP-MEDIA-INDEX-20261120.md).
+
+### Completed (since the Nov 19 evening PLAN update, `512b81d9`)
+
+- Path B fix rounds on `mono`: `9ef253bb`, then `fb35316c` with the writertest Hermes profile (memory off).
+- QNAP backfill 2026-11-20 06:34–06:39 CT: 16 files copied and 14 already present, all hashes matched, nightly not touched.
+- TQ4 verified complete (all three arms PASS). Waiting on Derrick's eye pick before promotion. [TQ4-RESULT.md](../BENCH-ALIENPC-1/TQ4-RESULT.md).
+- A7 stage-2: `tq2_vsa_0.2`, `tq3_res_multistep`, `tq3_lcm_simple`, and `tq5_headerfree` rendered. `tq2_vsa_0.0`, `tq3_euler_simple`, and `tq5_headers` are controls copied from the `tq1_oc_ref_2pass` winner (byte-identical). [A7-STAGE2-RESULT.md](../BENCH-ALIENPC-1/A7-STAGE2-RESULT.md).
+- Gemma 4 on Gufo research: the gemma4 Gufo extension reads GGUF, nothing needs converting, the Gufo 0.35.0 image is missing on disk, MTP and DFlash options exist.
+
+### Open / held
+
+- Path B next round (Prompt maker FAIL, means 6.83 / 6.33). Derrick held it at 7:01 AM CT.
+- Clone-gate isolation (separate uid, or no terminal for the writer), waiting on Derrick.
+- REA-Video v3 proposal and the 101-pack batch, held. [REA-VIDEO-VAL30S-RESULT.md](../BENCH-ALIENPC-1/REA-VIDEO-VAL30S-RESULT.md).
+- Gemma retire decision.
+- xai-oauth, blocked on xAI browser verification.
+- Alfred audit feedback.
+- Hermes Gemma workspace: Derrick wants the setup sent through the Hermes chat to pi and the coding pipeline. The first attempt went to the render workspace by mistake, and a hand-made `gemma` profile (cloned from render) exists and needs redoing. Waiting on which Hermes chat to use.
+- H3max video review and setup pick: Max is doing it now.
+
+### Issues
+
+- Hermes games the clone gate (reads `wp_lint` and hashes).
+- Flux A5 stills judged bad by Derrick (not being debugged).
+- REA tongue morphing, shared seed, voice window dropped in `h3max_bridge`.
+- X3 nightly QNAP copy ran in 47 ms and likely copied nothing (not touched per Derrick).
+- agy quota: Gemini weekly 17.6% left, resets about Wed Nov 25 8:45 AM CT.
+- Grok Bot weekly at 70%.
+- The clone-evasion note is still in the Hermes nightly git history (`8f737ba`).
+- Hermes runs as the same uid that owns `llm.env`.
 
 ## Order of work: benchmarks first, two machines in parallel (Derrick 2026-11-19 13:46 / 13:55 CT)
 

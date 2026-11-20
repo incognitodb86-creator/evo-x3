@@ -2,6 +2,8 @@
 
 > **Status:** pending AGT1 apply (not live yet — see `records/UNI-APPLY-ALIENPC-B-AGT1/BRIEF.md`). Agent file copies in this folder remain the proposed AGT1 versions, not live.
 
+Refresh attempted 2026-11-20 07:23 CT (America/Chicago) from the box as part of the mono push dual-host snapshot. SSH to `alienpc.tailf242b2.ts.net:22` timed out, and the X3 has no AlienPc SSH host in `~/.ssh/config`. This folder was **not** rewritten; the newest copy is still the 2026-11-19 9:07 PM CT refresh below.
+
 Live refresh 2026-11-19 9:07 PM CT (America/Chicago): re-read `C:\AI\community` HEAD (still `8eec1d3d`; promoted `oc_ref_2pass.api.json` and `allowlist_promoted.json` on disk match mono sha256 `1d3ec1da...` / `834d1d0a...`). Re-read global pi agent files, Forge loop scripts, the redacted AlienPc Swift llama-swap copy, and ComfyUI `custom-nodes.tsv`, `pip-freeze.txt`, `comfy.settings.json`, and `extra_model_paths.yaml`. ComfyUI checkout is now `a277b5bf` (was `6b747c04` in the morning inventory). Model inventory was not re-counted this refresh. Agent file copies remain the proposed AGT1 versions where that still applies.
 
 Live refresh 2026-11-19 7:55 PM CT (America/Chicago): re-read `C:\AI\community` HEAD (still `8eec1d3d`), `C:\Users\derek\.pi\agent\AGENTS.md` (same as the copy here), `settings.json` (still the live version with the duplicate key; the copy here stays the proposed AGT1 version), ComfyUI custom node folders (50, of which 31 `.disabled`; same as `custom-nodes.tsv`), and the AlienPc Swift llama-swap file (unchanged since 2026-11-17). No files changed.
