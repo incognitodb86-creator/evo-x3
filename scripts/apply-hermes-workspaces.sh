@@ -198,10 +198,16 @@ check_python_yaml() {
   }
 }
 
+# /running needs the box key (llama-swap apiKeys). Header goes via stdin, never argv (same as apply-llama-swap.sh).
+running_get() {
+  sudo -n bash -c '. /etc/evo-x3/llm.env; printf "Authorization: Bearer %s\n" "$LLM_KEY_BOX"' \
+    | curl -sS -m 10 -H @- http://127.0.0.1:8080/running 2>/dev/null || true
+}
+
 wait_gufo_ready() {
   local i
-  for i in $(seq 1 60); do
-    if curl -sS http://127.0.0.1:8080/running 2>/dev/null | python3 -c '
+  for i in $(seq 1 100); do
+    if running_get | python3 -c '
 import json, sys
 try:
     d = json.load(sys.stdin)
@@ -422,7 +428,7 @@ PY
 
 do_rollback() {
   take_lease "UNI-APPLY-X3-HERMES-WORKSPACES rollback"
-  [[ -f "$LLAMA_BAK" ]] || { echo "Missing backup: $LLAMA_BAK" >&2; exit 1; }
+  sudo -n test -f "$LLAMA_BAK" || { echo "Missing backup: $LLAMA_BAK" >&2; exit 1; }
   sudo -n cp -a "$LLAMA_BAK" "$LLAMA_CFG"
   sudo -n systemctl restart llama-swap
   as_evo bash -c '
@@ -441,7 +447,7 @@ do_rollback() {
     [[ -f "$PB/pi-permissions.jsonc" ]] && cp -a "$PB/pi-permissions.jsonc" /home/evo/.pi/agent/pi-permissions.jsonc
     true
   '
-  [[ -f "${PI_BAK}/pi-job" ]] && sudo -n install -o root -g root -m 0755 "${PI_BAK}/pi-job" /usr/local/bin/pi-job
+  sudo -n test -f "${PI_BAK}/pi-job" && sudo -n install -o root -g root -m 0755 "${PI_BAK}/pi-job" /usr/local/bin/pi-job
   sudo -n systemctl --user -M evo@ restart hermes-gateway
   echo "[$(ts_ct)] Rollback complete."
 }
@@ -477,7 +483,7 @@ take_lease "UNI-APPLY-X3-HERMES-WORKSPACES"
 
 echo "=== Step 0: Backups ==="
 sudo -n mkdir -p /etc/evo-x3/_archive
-if [[ ! -f "$LLAMA_BAK" ]]; then
+if ! sudo -n test -f "$LLAMA_BAK"; then
   sudo -n cp -a "$LLAMA_CFG" "$LLAMA_BAK"
   echo "Backed up $LLAMA_CFG -> $LLAMA_BAK"
 else
@@ -498,7 +504,7 @@ echo "=== Step 1: Patch llama-swap & probe aliases BEFORE touching Hermes ==="
 patch_llama_swap "$LLAMA_CFG" 0
 sudo -n systemctl restart llama-swap
 
-echo "Waiting for flash-next-uncensored-v2 state=ready on /running (up to 180s)..."
+echo "Waiting for flash-next-uncensored-v2 state=ready on /running (up to 300s)..."
 wait_gufo_ready || { echo "FAIL: flash-next-uncensored-v2 not ready in /running; run --rollback" >&2; exit 1; }
 
 P_RENDER="$(probe_alias flash-next-render 'Say OK.' 32 '')"
@@ -571,7 +577,7 @@ as_evo bash -c '
 
 echo "=== Step 4b: Install pi coding fixes (pi-job, forge-pi.sh cwd fix, skills, secret denies) ==="
 as_evo mkdir -p "$PI_BAK"
-if [[ -f /usr/local/bin/pi-job && ! -f "${PI_BAK}/pi-job" ]]; then
+if [[ -f /usr/local/bin/pi-job ]] && ! sudo -n test -f "${PI_BAK}/pi-job"; then
   sudo -n cp -a /usr/local/bin/pi-job "${PI_BAK}/pi-job"
 fi
 sudo -n install -o root -g root -m 0755 "$REPO_DIR/config/bin/pi-job" /usr/local/bin/pi-job
@@ -613,7 +619,7 @@ sudo -n systemctl --user -M evo@ restart hermes-gateway
 sleep 3
 sudo -n systemctl --user -M evo@ is-active hermes-gateway
 
-RUNNING_OUT="$(curl -sS http://127.0.0.1:8080/running)"
+RUNNING_OUT="$(running_get)"
 echo "/running: $RUNNING_OUT"
 
 RENDER_SMOKE="$(as_evo hermes chat --oneshot -Q -q \
