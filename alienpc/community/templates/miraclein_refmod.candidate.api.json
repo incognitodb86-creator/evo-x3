@@ -44,15 +44,14 @@
  },
  "6": {
   "_meta": {
-   "title": "negative"
+   "title": "negative_zero_out"
   },
-  "class_type": "CLIPTextEncode",
+  "class_type": "ConditioningZeroOut",
   "inputs": {
-   "clip": [
-    "3",
+   "conditioning": [
+    "5",
     0
-   ],
-   "text": ""
+   ]
   }
  },
  "12": {
