@@ -1,4 +1,4 @@
-﻿# AlienPc model inventory (filenames + bytes + mtime only), read-only 2026-11-20 1:24 PM CT
+﻿# AlienPc model inventory (filenames + bytes + mtime only), read-only 2026-11-20 2:08 PM CT
 # root: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models
 
 ## inv loras\klein9
@@ -14,9 +14,19 @@ loras\klein9\fk9_sydneysweeney_v1_prodigy.safetensors	87090024	2026-11-19 11:34
 diffusion_models\Miraclein_4.5_9b_FP8.safetensors	9078663268	2026-11-20 11:44
 diffusion_models\Miraclein_4.5_9b_NVFP4.safetensors	5179943610	2026-11-19 11:37
 
+## refmods-h3
+files	1501
+bytes	1654263690
+ext .safetensors	1501
+safetensors_real_ge_1KB	1489
+safetensors_stub_or_lfs_lt_1KB	12
+
 ## refmods-klein9
 files	2913
 bytes	9969547727
-ext .gitignore	1
 ext .metadata	1456
 ext .safetensors	1456
+ext .gitignore	1
+safetensors_real_ge_1KB	1456
+safetensors_stub_or_lfs_lt_1KB	0
+
