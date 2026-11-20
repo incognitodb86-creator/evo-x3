@@ -1,2 +1,2 @@
-hermes-agent ae2a81ccc00e9b7c06301523e5bb09608397149c Mon Nov 16 11:28:45 2026 -0800 fix(cloud): answer 'not signed in to Nous Portal' with 409, not 401
+hermes-agent caafe5389ae585ef77387a962aee05b1bcf17029 Thu Nov 19 12:51:15 2026 -0800 plugin-catalog: re-pin claude-subscription-directsdk (0.4.0) and bubblewrap (1.5.2)
 https://github.com/NousResearch/hermes-agent.git

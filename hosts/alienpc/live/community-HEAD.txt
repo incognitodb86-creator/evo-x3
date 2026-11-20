@@ -1,6 +1,6 @@
 8eec1d3d821adfba41ff71e482dd986216ee9677
-2026-11-19T14:38:18-06:00
+2026-11-19T21:07:39-06:00
 comm.ensure_comfy: wake comfyui_auto via route-root GET like run_graph_job.wake, /system_stats is an ignored path (Derrick t2777s9793)
 
-# C:\AI\community local HEAD. Recorded 2026-11-19 6:23 PM CT (America/Chicago)
+# C:\AI\community local HEAD. Recorded 2026-11-19 21:07:39 CT (America/Chicago)
 # during the mono snapshot. Remote URL not listed (credential-bearing).

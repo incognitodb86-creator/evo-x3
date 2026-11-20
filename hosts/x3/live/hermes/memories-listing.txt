@@ -1,5 +1,6 @@
 total 12
-drwx------.  2 evo evo   38 Nov 19 19:47 .
-drwx------. 34 evo evo 4096 Nov 19 19:51 ..
--rw-r--r--.  1 evo evo 1225 Nov 19 19:49 MEMORY.md
+drwx------.  2 evo evo   60 Nov 19 20:52 .
+drwx------. 35 evo evo 4096 Nov 19 21:05 ..
+-rw-------.  1 evo evo 1224 Nov 19 20:52 MEMORY.md
+-rw-------.  1 evo evo    0 Nov 19 20:52 MEMORY.md.lock
 -rw-r--r--.  1 evo evo  582 Nov 19 19:47 USER.md

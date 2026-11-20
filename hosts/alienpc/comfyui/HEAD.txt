@@ -1,0 +1,3 @@
+Path: C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI
+commit: a277b5bf213e8a44fa34817b7770b54f86ef4cea
+recorded: 2026-11-19 21:07:39 CT (America/Chicago)

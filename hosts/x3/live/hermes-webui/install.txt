@@ -1,6 +1,6 @@
-# Hermes WebUI install (code not copied). Read-only 2026-11-19 ~12:30 PM CT
 path /home/evo/hermes-webui
-remote https://github.com/nesquena/hermes-webui.git
-commit 6c4aaaaf0beae8a95addc2c2b7e340203b7dd72b (master, v0.52.701 changelog stamp, 2026-11-19 09:37 UTC)
-unit ../systemd/evo-user/hermes-webui.service (enabled; 127.0.0.1:8787; EnvironmentFile llm.env not copied)
-serve Tailscale 8443 / -> 127.0.0.1:8787 since 2026-11-19 12:31 PM CT (Derrick t2688u)
+tag exp-v0.52.723
+commit 3a669b5abebd0862e8a487bdc84a97e0c77dbb1f (2026-11-19) Merge pull request #9203 from nesquena/stage/1119-9150
+unit ../systemd/evo-user/hermes-webui.service
+workspace /home/evo/workspace
+HERMES_WEBUI_DEFAULT_WORKSPACE=/home/evo/workspace

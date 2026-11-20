@@ -1,4 +1,4 @@
-_config_version: 53
+_config_version: 54
 database:
   journal_mode: wal
 runtime:
@@ -13,7 +13,7 @@ model:
   provider: custom
   base_url: http://127.0.0.1:8080/v1
   context_length: 131072
-  reasoning_effort: low
+  reasoning_effort: false
   key_env: LLM_KEY_HERMES
 kanban:
   review_dispatch: true
@@ -21,7 +21,7 @@ cron:
   catch_up_missed: true
 terminal:
   backend: local
-  cwd: .
+  cwd: /home/evo/workspace
   timeout: 180
   home_mode: auto
   docker_mount_cwd_to_workspace: false
@@ -212,7 +212,7 @@ auxiliary:
     provider: custom
     model: flash-next-uncensored-v2
     base_url: http://127.0.0.1:8080/v1
-    reasoning_effort: low
+    reasoning_effort: "false"
     key_env: LLM_KEY_HERMES
 approvals:
   unattended_mode: deny

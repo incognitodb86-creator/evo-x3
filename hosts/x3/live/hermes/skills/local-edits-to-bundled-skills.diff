@@ -1,3 +1,43 @@
+diff --git a/skills/.bundled_manifest b/skills/.bundled_manifest
+index 94b47c6..fe29b69 100644
+--- a/skills/.bundled_manifest
++++ b/skills/.bundled_manifest
+@@ -15,10 +15,10 @@ document-to-action-items:7bb2c30062d373d5c3ef9b8f2958cec6
+ dogfood:2992c4a2c35e13fbec54229b1b56e8e7
+ email-inbox-triage:e1a93e160552107366dd009159e5fa1a
+ findmy:7435a65c3e7bd7c162f22db27a1c91a5
+-github:78ea77a0f12ba2d7859b94c5ed01896c
++github:f811d3283a65ba8a3c1ee64e996f0f59
+ google-workspace:75d96f315c94c2336e485cbb5155e790
+ grounded-citations:9f8dccbce4bb98068a07cab4e942a9f5
+-hermes-agent:a6fbf90faf07b08821a964f0735872a6
++hermes-agent:ddc9e6eed61988fc51b3b6709c08c655
+ himalaya:d215ffaa3c1aecbc68a326e45d6927c8
+ humanizer:b3fa12781b41b4008fba21073632e3d0
+ imessage:f545da0f5cc64dd9ee1ffd2b7733a11b
+@@ -33,7 +33,7 @@ popular-web-designs:97bc1d97cd8e41810050a74a27522350
+ product-price-monitor:0f4ee987727a024a6810013acabdbcc5
+ requesting-code-review:a5f1e52435ea08f7251e4353cb54f545
+ sdlc-review:4a4be11e979ac444fdc9c277b8500a81
+-simplify-code:39e505ca71f8ecc74be6acec1dc0a4de
++simplify-code:d8c912c7bbde4fd4e21630dac5fcbbf5
+ songwriting-and-ai-music:3be4030c70ead6ca8d5db04c7cbcc3b7
+ spike:16489d68d54735a6935ea95b05bd497d
+ systematic-debugging:09b23d68c842d5273b02f59223b0b580
+diff --git a/skills/.curator_state b/skills/.curator_state
+index 8d04235..345bb92 100644
+--- a/skills/.curator_state
++++ b/skills/.curator_state
+@@ -3,7 +3,7 @@
+   "last_run_at": "2026-11-19T04:10:01.298389+00:00",
+   "last_run_duration_seconds": null,
+   "last_run_summary": "deferred first run — curator seeded, will run after one interval; use `hermes curator run --dry-run` to preview now",
+-  "last_run_summary_shown_at": null,
++  "last_run_summary_shown_at": "2026-11-19T04:10:01.298389+00:00",
+   "paused": false,
+   "run_count": 0
+ }
+\ No newline at end of file
 diff --git a/skills/apple/apple-notes/SKILL.md b/skills/apple/apple-notes/SKILL.md
 deleted file mode 100644
 index 3fcf4c2..0000000
@@ -1757,6 +1797,64 @@ index 798b72c..0000000
 -Those files describe the driver's OWN MCP tools (`get_window_state`,
 -`element_token`, `snapshot_id`, …). Read them for platform context; keep
 -calling the Hermes actions from this file — the wrapper does the translation.
+diff --git a/skills/autonomous-ai-agents/hermes-agent/references/contributor-guide.md b/skills/autonomous-ai-agents/hermes-agent/references/contributor-guide.md
+index 02bdf92..067f22c 100644
+--- a/skills/autonomous-ai-agents/hermes-agent/references/contributor-guide.md
++++ b/skills/autonomous-ai-agents/hermes-agent/references/contributor-guide.md
+@@ -10,7 +10,8 @@ hermes-agent/
+ ├── model_tools.py        # Tool discovery and dispatch
+ ├── toolsets.py           # Toolset definitions
+ ├── cli.py                # Interactive CLI (HermesCLI)
+-├── hermes_state.py       # SQLite session store
++├── persistence/          # Session storage contracts; persistence/sqlite/ is the SQLite store
++├── persistence_assembly.py # open_persistence(): opens a profile's store
+ ├── agent/                # Prompt builder, context compression, memory, model routing, credential pooling, skill dispatch
+ ├── hermes_cli/           # CLI subcommands, config, setup, commands
+ │   ├── commands.py       # Slash command registry (CommandDef)
+diff --git a/skills/autonomous-ai-agents/hermes-agent/references/delegate-task-concurrency-diagnosis.md b/skills/autonomous-ai-agents/hermes-agent/references/delegate-task-concurrency-diagnosis.md
+index 34851bb..42567c4 100644
+--- a/skills/autonomous-ai-agents/hermes-agent/references/delegate-task-concurrency-diagnosis.md
++++ b/skills/autonomous-ai-agents/hermes-agent/references/delegate-task-concurrency-diagnosis.md
+@@ -43,8 +43,8 @@ When a user says "delegate is capped at N":
+ hermes config get delegation.max_concurrent_children
+ 
+ # 2. Did Hermes' truncator or rejector actually fire?
+-grep -E "Truncated.*delegate_task|Too many tasks" ~/.hermes/logs/agent.log | tail
+-# If neither line appears, neither cap path executed.
++#    search_files(pattern="Truncated.*delegate_task|Too many tasks", path="~/.hermes/logs/agent.log")
++#    Read the newest hits; if neither line appears, neither cap path executed.
+ 
+ # 3. Confirm the resolver returns what config says (in venv with hermes on path)
+ python -c "from tools.delegate_tool import _get_max_concurrent_children; \
+diff --git a/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md b/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md
+index 1a70d3c..b9f6bbd 100644
+--- a/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md
++++ b/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md
+@@ -54,10 +54,7 @@ Blunt instruments: `web.cache_ttl_minutes: 1` (min) or
+ 3. Load explicitly: `hermes -s name` (or the skill's own `/<name>` slash command)
+ 
+ ### Gateway issues
+-Check logs first:
+-```bash
+-grep -i "failed to send\|error" ~/.hermes/logs/gateway.log | tail -20
+-```
++Check logs first: `read_file` the last page of `~/.hermes/logs/gateway.log` (offset from `total_lines`), or `search_files` it for `[Ff]ailed to send|[Ee]rror` and read the newest hits.
+ 
+ Common gateway problems:
+ - **Gateway dies on SSH logout**: Enable linger: `sudo loginctl enable-linger $USER`
+diff --git a/skills/autonomous-ai-agents/hermes-agent/references/webhooks.md b/skills/autonomous-ai-agents/hermes-agent/references/webhooks.md
+index 7a436fe..912a51d 100644
+--- a/skills/autonomous-ai-agents/hermes-agent/references/webhooks.md
++++ b/skills/autonomous-ai-agents/hermes-agent/references/webhooks.md
+@@ -216,7 +216,7 @@ If webhooks aren't working:
+ 
+ 1. **Is the gateway running?** Check with `systemctl --user status hermes-gateway` or `ps aux | grep gateway`
+ 2. **Is the webhook server listening?** `curl http://localhost:8644/health` should return `{"status": "ok"}`
+-3. **Check gateway logs:** `grep webhook ~/.hermes/logs/gateway.log | tail -20`
++3. **Check gateway logs:** `search_files` for `webhook` in `~/.hermes/logs/gateway.log` and read the newest hits (or `read_file` its last page)
+ 4. **Signature mismatch?** Verify the secret in your service matches the route's `secret` in `webhook_subscriptions.json` (or the value passed with `--secret`). GitHub sends `X-Hub-Signature-256`, GitLab sends `X-Gitlab-Token`. A route pinned with `--signature` rejects every other scheme: re-run `subscribe` with the `--signature` matching the sender.
+ 5. **Firewall/NAT?** The webhook URL must be reachable from the service. For local development, use a tunnel (ngrok, cloudflared).
+ 6. **Wrong event type?** Check `--events` filter matches what the service sends. Use `hermes webhook test <name>` to verify the route works.
 diff --git a/skills/creative/ascii-video/SKILL.md b/skills/creative/ascii-video/SKILL.md
 index 8534dfb..051511a 100644
 --- a/skills/creative/ascii-video/SKILL.md
@@ -42917,3 +43015,79 @@ index 9a500c5..0000000
 -## Notes
 -
 -{any_additional_observations_or_recommendations}
+diff --git a/skills/software-development/github/references/auth.md b/skills/software-development/github/references/auth.md
+index 7d13a51..8332633 100644
+--- a/skills/software-development/github/references/auth.md
++++ b/skills/software-development/github/references/auth.md
+@@ -101,20 +101,17 @@ Good for users who prefer SSH or already have keys set up.
+ 
+ **Step 1: Check for existing SSH keys**
+ 
+-```bash
+-ls -la ~/.ssh/id_*.pub 2>/dev/null || echo "No SSH keys found"
+-```
++`search_files` with `target="files"`, `pattern="id_*.pub"`, `path="~/.ssh"`; no match means no SSH keys.
+ 
+ **Step 2: Generate a key if needed**
+ 
+ ```bash
+ # Generate an ed25519 key (modern, secure, fast)
+ ssh-keygen -t ed25519 -C "their-email@example.com" -f ~/.ssh/id_ed25519 -N ""
+-
+-# Display the public key for them to add to GitHub
+-cat ~/.ssh/id_ed25519.pub
+ ```
+ 
++`read_file` `~/.ssh/id_ed25519.pub` and show them the public key to add to GitHub.
++
+ Tell the user to add the public key at: **https://github.com/settings/keys**
+ - Click "New SSH key"
+ - Paste the public key content
+diff --git a/skills/software-development/github/references/pr-workflow.md b/skills/software-development/github/references/pr-workflow.md
+index 6154880..c8d893f 100644
+--- a/skills/software-development/github/references/pr-workflow.md
++++ b/skills/software-development/github/references/pr-workflow.md
+@@ -233,9 +233,11 @@ curl -s -L \
+   -H "Authorization: token $GITHUB_TOKEN" \
+   https://api.github.com/repos/$OWNER/$REPO/actions/runs/$RUN_ID/logs \
+   -o ~/.hermes/cache/scratch/ci-logs.zip
+-cd ~/.hermes/cache/scratch && unzip -o ci-logs.zip -d ci-logs && cat ci-logs/*.txt
++cd ~/.hermes/cache/scratch && unzip -o ci-logs.zip -d ci-logs
+ ```
+ 
++Then `read_file` the job logs under `ci-logs/` (`search_files` for `error|FAILED` there finds the failing step).
++
+ ### Step 2: Fix and Push
+ 
+ After identifying the issue, use file tools (`patch`, `write_file`) to fix it:
+diff --git a/skills/software-development/simplify-code/SKILL.md b/skills/software-development/simplify-code/SKILL.md
+index 0dcfae3..da66095 100644
+--- a/skills/software-development/simplify-code/SKILL.md
++++ b/skills/software-development/simplify-code/SKILL.md
+@@ -97,7 +97,7 @@ knows what actually ran.
+ Give **every** reviewer the **complete diff** (not fragments — cross-file
+ issues hide in the gaps) plus the absolute repo path so they can search the
+ wider codebase. Each reviewer gets `terminal`, `file`, and `search`
+-toolsets (so they can `git`, `read_file`, and `search_files`/grep).
++toolsets (so they can `git`, `read_file`, and `search_files`).
+ 
+ Tell each reviewer to:
+ - Search the existing codebase for evidence (don't reason from the diff alone).
+@@ -126,7 +126,7 @@ Pass these four goals (drop any the user's focus excludes):
+ **Reviewer 1 — Code Reuse**
+ > Review this diff for code that duplicates functionality already in the
+ > codebase. Search utility modules, shared helpers, and adjacent files
+-> (use search_files / grep) for existing functions, constants, or patterns
++> (use search_files) for existing functions, constants, or patterns
+ > the new code could call instead of reimplementing. Flag: new functions
+ > that duplicate existing ones; hand-rolled logic that an existing utility
+ > already does (manual string/path manipulation, custom env checks, ad-hoc
+@@ -248,7 +248,7 @@ Wait for all four to return (batch mode returns them together).
+   may truncate.
+ - **Over-trusting dead code tools.** `knip`, `ts-prune`, and `depcheck` flag
+   exports that ARE used dynamically (string-based imports, reflection). Always
+-  grep for the symbol name before removing — a clean tool report is not proof.
++  `search_files` for the symbol name before removing — a clean tool report is not proof.
+ - **Renaming without checking public contracts.** Export names, API route
+   paths, DB column names, and config keys are contracts — even if the name is
+   bad, renaming breaks consumers. Tag public-contract changes as RISKY; never
