@@ -296,6 +296,7 @@ def build_arms_for_celeb(
     prompts_cfg: Optional[Dict[str, Dict[str, str]]] = None,
     rebuilt_refmod_suffix: str = "_rebuilt",
     seed_tag: str = "",
+    with_v1_lora: bool = False,
 ) -> List[Dict[str, Any]]:
     c = compact_name(celeb)
     sfx = f"_s{seed}" if seed_tag else ""
@@ -367,6 +368,25 @@ def build_arms_for_celeb(
         else:
             add("L7-rebuilt", f"Fixed L7 + rebuilt RefMod ({rebuilt_stem})", dr, {},
                 skipped=f"{rebuilt_stem}.safetensors not on disk" if not has_rebuilt else "Miraclein_4.5_9b_FP8.safetensors missing")
+
+        if with_v1_lora:
+            # Official malcolmrey workflow_klein9_refmod_lora.json uses the AdamW fk9_<name>_v1 LoRA at 0.6, not _prodigy.
+            dv = out_root / f"{c}_L7_v1lora{sfx}"
+            v1_spec = {"name": f"klein9/fk9_{c}_v1.safetensors", "strength": 0.60}
+            if has_m_fp8 or dry_run:
+                rv = fs.build_flux_still(
+                    dv, l7_prompt, mode="refmod", refmods=[hyb_mod], refmod_strength=1.0,
+                    retention="fully_preserved (1.0)", loras=[v1_spec], seed=seed, character=celeb, dry_run=dry_run,
+                )
+                if rv.get("status") == "READY":
+                    def _set_v1(g: Dict[str, Any]) -> None:
+                        g["1"]["inputs"]["unet_name"] = fp8_name
+                        _ensure_zero_out_negative(g)
+                    _edit_graph(dv, _set_v1)
+                add("L7-v1lora", f"Fixed L7 with fk9_{c}_v1 LoRA @ 0.60 (official workflow LoRA, {fp8_name})", dv, rv,
+                    skipped=None if (has_m_fp8 or dry_run) else "Miraclein_4.5_9b_FP8.safetensors missing")
+            else:
+                add("L7-v1lora", "Fixed L7 with v1 LoRA", dv, {}, skipped="Miraclein_4.5_9b_FP8.safetensors missing")
         return arms
 
     # L0: Apples-to-apples old A5 settings with SAME prompt P (hybrid 0.85/0.60, retention 0.7, no anchor, pos-only)
@@ -548,6 +568,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--ab-suite", default="full", choices=("full", "l7"), help="'full' (L0..L7) or 'l7' (L7-base vs L7-fixed vs L7-rebuilt)")
     ap.add_argument("--prompts-json", default="", help="Optional local non-git JSON with per-celeb {trigger, name, likeness_desc, scene}")
     ap.add_argument("--rebuilt-refmod-suffix", default="_rebuilt", help="Suffix for rebuilt RefMod stem in --ab-suite l7")
+    ap.add_argument("--with-v1-lora", action="store_true", help="--ab-suite l7: add L7-v1lora arm using fk9_<name>_v1.safetensors @ 0.60 (official workflow LoRA)")
     ap.add_argument("--comfy-root", default=str(DEFAULT_COMFY_ROOT))
     ap.add_argument("--run-queue", default=str(DEFAULT_RUN_QUEUE))
     ap.add_argument("--face-py", default=str(DEFAULT_FACE_PY))
@@ -586,6 +607,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ab_suite=a.ab_suite, prompts_cfg=prompts_cfg,
                 rebuilt_refmod_suffix=a.rebuilt_refmod_suffix,
                 seed_tag="1" if multi_seed else "",
+                with_v1_lora=a.with_v1_lora,
             ))
 
     if dry_run:
@@ -616,11 +638,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Never queue a graph whose RefMod or LoRA file is missing; it would only fail value_not_in_list.
         needs = {"L0": "both", "L1": "refmod", "L2": "refmod", "L3": "both", "L4": "both",
                  "L5": "lora", "L6": "refmod", "L7": "both", "L8": "both",
-                 "L7-base": "both", "L7-fixed": "both", "L7-rebuilt": "lora"}
+                 "L7-base": "both", "L7-fixed": "both", "L7-rebuilt": "lora", "L7-v1lora": "refmod"}
         for arm in all_arms:
             ci = pre["celebs"].get(arm["celeb"]) or {}
             need = needs.get(arm["arm"])
             missing = [k for k in ("refmod", "lora") if need in (k, "both") and not ci.get(f"{k}_present")]
+            if arm["arm"] == "L7-v1lora" and not ci.get("lora_v1_present"):
+                missing.append("lora_v1")
             if arm["status"] == "READY" and missing:
                 arm["status"] = "SKIPPED"
                 arm["skip_reason"] = f"missing {'/'.join(missing)} file on AlienPc"
@@ -696,16 +720,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for celeb in celebs:
             gm = gallery_meta.get(celeb) or {}
             ig = gm.get("intra_gallery") or {}
+            if isinstance(ig.get("mean"), float):
+                stats = f"{ig['mean']:.4f} | {ig['min']:.4f} | {ig['max']:.4f}"
+            else:
+                stats = "n/a | n/a | n/a"
             lines.append(
                 f"| {celeb} | {gm.get('valid_refs', 0)} | {gm.get('skipped_refs', 0)} | {gm.get('ref_faces', 0)} | "
-                f"{ig['mean']:.4f}" if isinstance(ig.get("mean"), float) else
-                f"| {celeb} | {gm.get('valid_refs', 0)} | {gm.get('skipped_refs', 0)} | {gm.get('ref_faces', 0)} | n/a"
+                f"{stats} | {gm.get('warning') or ''} |"
             )
-            # Finish the row cleanly
-            if isinstance(ig.get("mean"), float):
-                lines[-1] += f" | {ig['min']:.4f} | {ig['max']:.4f} | {gm.get('warning') or ''} |"
-            else:
-                lines[-1] += f" | n/a | n/a | {gm.get('warning') or ''} |"
 
         lines.extend([
             "",

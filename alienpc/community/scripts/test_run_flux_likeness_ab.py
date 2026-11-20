@@ -150,6 +150,26 @@ def test_l7_suite_builds_baseline_fixed_rebuilt_and_6_seeds(tmp_path):
     assert fixed_g6["20"]["inputs"]["noise_seed"] == 105
 
 
+def test_l7_suite_with_v1_lora_arm(tmp_path):
+    comfy = tmp_path / "ComfyUI"
+    (comfy / "models" / "diffusion_models").mkdir(parents=True)
+    (comfy / "models" / "diffusion_models" / "Miraclein_4.5_9b_FP8.safetensors").write_bytes(b"")
+    out_dir = tmp_path / "out_v1"
+    rc = ab.main([
+        "--dry-run", "--ab-suite", "l7", "--with-v1-lora", "--celebs", "Megan Fox",
+        "--comfy-root", str(comfy), "--out-dir", str(out_dir),
+    ])
+    assert rc == 0
+    g = json.loads((out_dir / "meganfox_L7_v1lora" / "still" / "request.api.json").read_text(encoding="utf-8"))
+    loras = [n for n in g.values() if isinstance(n, dict) and n.get("class_type") == "LoraLoaderModelOnly"
+             and float(n["inputs"].get("strength_model") or 0) > 0]
+    assert [n["inputs"]["lora_name"] for n in loras] == ["klein9\\fk9_meganfox_v1.safetensors"]
+    assert loras[0]["inputs"]["strength_model"] == 0.60
+    assert g["12"]["inputs"]["strength_1"] == 1.0
+    assert g["6"]["class_type"] == "ConditioningZeroOut"
+    assert not (out_dir / "meganfox_L7_v1lora_s51083601").exists()
+
+
 def test_run_writes_intra_gallery_and_per_ref_stats_to_result_md(tmp_path, monkeypatch):
     comfy = tmp_path / "ComfyUI"
     (comfy / "models" / "diffusion_models").mkdir(parents=True)
