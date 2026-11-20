@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""REA: REA-video -> FLUX -> H3Max parody remake orchestrator (`plan` + `status` + `flux` + `build`).
+"""REA: REA-video -> FLUX -> H3Max parody remake orchestrator
+(`plan` + `status` + `flux` + `build` + `queue` + `assemble`).
 
 `plan` turns an rea-video decomposition folder (breakdown.json + shots/*.jpg + stems/*.wav) into an H3 batch:
 one run dir per shot under <batch_dir>/shots/, each with the source keyframe in `_inputs/`, a
@@ -15,14 +16,24 @@ REA folder does not ship one.
 `_inputs/<id>_edited.png`). `build` (C5) runs render_writer_pipeline.py over `hermes_prose.txt` + the edited
 still for every ready shot and records the per-shot build reports in `<batch_dir>/build_status.json`.
 
+`queue` (C7) hands every built-and-READY shot to AlienPc with `queue-remote.sh`, one shot at a time, and waits for
+that shot's 2x `clip/render_ok.json` before starting the next one; the per-shot outcomes go to
+`<batch_dir>/queue_status.json`. `assemble` (C7) concatenates the 2x clips of the DONE shots in shot order with hard
+cuts, trims the padded shots back, matches every clip's color to the first clip (`rea_color_match`) and writes
+`<batch_dir>/final_2x.mp4` (`--bgm` mixes the REA stems music under the dialogue, `--publish` copies the master to
+`/srv/renders`).
+
 Usage:
   rea_parody_remake.py plan   <batch_dir> --rea-dir <dir> (--names NAME... | --character FCSydny|FCMegan)
                               [--lane parody|oc] [--aspect 9:16|16:9] [--shots shot_001,shot_002]
   rea_parody_remake.py status <batch_dir>
   rea_parody_remake.py flux   <batch_dir> [--shot ID] [--queue --yes-derrick]
   rea_parody_remake.py build  <batch_dir> [--shot ID]
+  rea_parody_remake.py queue  <batch_dir> --yes-derrick [--shot ID]
+  rea_parody_remake.py assemble <batch_dir> [--bgm] [--publish]
 
-stdlib + the parody modules only; vision/HTTP happen inside render_writer_pipeline._ensure_still_read_raw.
+stdlib + the parody modules only; vision/HTTP happen inside render_writer_pipeline._ensure_still_read_raw,
+ffmpeg/ffprobe happen inside rea_color_match.
 """
 
 from __future__ import annotations
@@ -34,6 +45,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -43,6 +55,7 @@ if str(PARODY_DIR) not in sys.path:
 
 import build_request as br  # noqa: E402
 import flux_still  # noqa: E402
+import rea_color_match as rcm  # noqa: E402
 import rea_onset_probe  # noqa: E402
 import rea_shot_plan as rsp  # noqa: E402
 import render_writer_pipeline as wp  # noqa: E402
@@ -61,6 +74,18 @@ HYBRID_REFMOD_STRENGTH = 0.85  # the RefMod author's hybrid preset (flux_still.H
 HYBRID_RETENTION = "partially_preserved (0.7)"
 BUILD_STATUS_NAME = "build_status.json"
 PIPELINE_SCRIPT = PARODY_DIR / "render_writer_pipeline.py"
+# queue (C7): the AlienPc submitter, the watch on its 2x output, and the per-shot outcome file
+QUEUE_REMOTE_SCRIPT = "/home/evo/AI/render/x3/queue-remote.sh"  # REA_QUEUE_REMOTE overrides (tests)
+QUEUE_STATUS_NAME = "queue_status.json"
+QUEUE_POLL_SEC = 15.0  # REA_QUEUE_POLL_SEC overrides (tests)
+QUEUE_TIMEOUT_SEC = 40 * 60.0  # REA_QUEUE_TIMEOUT_SEC overrides (tests)
+RENDER_OK_REL = "clip/render_ok.json"
+DEFAULT_CLIP_REL = "clip/clip.mp4"
+# assemble (C7)
+MASTER_NAME = "final_2x.mp4"
+PUBLISH_DIR = "/srv/renders"  # REA_PUBLISH_DIR overrides (tests)
+BGM_DB = -14.0
+COLOR_SAMPLES = 5  # frames sampled per clip, the rea_color_match default
 # status probes, in pipeline order: (label, relative path, build_report key or None)
 STATUS_ARTIFACTS = (
     ("raw_still_read", "raw_still_read.json", None),
@@ -332,6 +357,7 @@ def plan(batch_dir: Path, rea_dir: Path, names: Optional[Sequence[str]] = None,
     except ValueError as exc:
         print(f"NOT_READY cast: {exc}")
         return 3
+    cast_lock["rea_dir"] = str(rea)  # assemble --bgm reads <rea_dir>/stems/music.wav out of this
     wp_state.atomic_write(batch / "parody_cast_lock.json", json.dumps(cast_lock, indent=2, ensure_ascii=False))
     rsp.write_batch_card(batch, cast_lock, views)
 
@@ -349,6 +375,17 @@ def _load_json_obj(path: Path) -> Dict[str, Any]:
     except (OSError, ValueError):
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def _load_records(path: Path) -> List[Dict[str, Any]]:
+    """The per-shot records of a *_status.json file: a list of dicts, or [] when missing/corrupt."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    if isinstance(data, dict):
+        data = data.get("shots") or data.get("records") or []
+    return [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
 
 
 def _shot_dirs(batch: Path, only: Optional[str] = None) -> List[Path]:
@@ -529,6 +566,237 @@ def build(batch: Path, only: Optional[str] = None) -> int:
     return 3 if stuck else 0
 
 
+# --- queue (C7) ----------------------------------------------------------------
+
+def queue_remote_script() -> Path:
+    """The AlienPc submitter; REA_QUEUE_REMOTE overrides it (tests point at a stub path)."""
+    return Path(os.environ.get("REA_QUEUE_REMOTE") or QUEUE_REMOTE_SCRIPT)
+
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.environ.get(name) or default)
+    except (TypeError, ValueError):
+        return default
+
+
+def queue_wait_params() -> tuple:
+    """(poll_sec, timeout_sec) of the 2x watch; REA_QUEUE_POLL_SEC / REA_QUEUE_TIMEOUT_SEC override both."""
+    poll = _env_float("REA_QUEUE_POLL_SEC", QUEUE_POLL_SEC)
+    timeout = _env_float("REA_QUEUE_TIMEOUT_SEC", QUEUE_TIMEOUT_SEC)
+    return (poll if poll > 0 else QUEUE_POLL_SEC,
+            timeout if timeout >= 0 else QUEUE_TIMEOUT_SEC)
+
+
+def publish_dir() -> Path:
+    """Where `--publish` copies the master; REA_PUBLISH_DIR overrides it (tests use a tmp dir)."""
+    return Path(os.environ.get("REA_PUBLISH_DIR") or PUBLISH_DIR)
+
+
+def clip_path_for(shot_dir: Path, render_ok: Optional[Dict[str, Any]] = None) -> Path:
+    """A shot's 2x clip: render_ok.json "clip" (relative to the shot dir), default `clip/clip.mp4`."""
+    data = render_ok if render_ok is not None else _load_json_obj(shot_dir / RENDER_OK_REL)
+    raw = str(data.get("clip") or "").strip() or DEFAULT_CLIP_REL
+    p = Path(raw)
+    return p if p.is_absolute() else shot_dir / p
+
+
+def wait_for_render_ok(shot_dir: Path, poll_sec: Optional[float] = None,
+                       timeout_sec: Optional[float] = None) -> Dict[str, Any]:
+    """Watch <shot_dir>/clip/render_ok.json for an upscale object; {"status","clip","reason"}.
+
+    Poll-count loop (sleeps between checks, never wall clock), so a mocked time.sleep collapses a 40 minute
+    wait into a few iterations. DONE only when the file exists and carries an "upscale" object: a render_ok.json
+    from a render without the 2x pass is not a finished shot.
+    """
+    poll, timeout = queue_wait_params()
+    if poll_sec is not None:
+        poll = float(poll_sec)
+    if timeout_sec is not None:
+        timeout = float(timeout_sec)
+    ok_path = shot_dir / RENDER_OK_REL
+    checks = max(1, int(timeout // poll))
+    for i in range(checks):
+        data = _load_json_obj(ok_path)
+        if isinstance(data.get("upscale"), dict):
+            return {"status": "DONE", "clip": str(clip_path_for(shot_dir, data)), "reason": ""}
+        if i + 1 < checks:
+            time.sleep(poll)
+    return {"status": "FAIL", "clip": None,
+            "reason": f"no {RENDER_OK_REL} with an upscale object within {timeout:g}s"}
+
+
+def _write_queue_status(batch: Path, records: Dict[str, Dict[str, Any]], shot_names: Sequence[str]) -> None:
+    """Save {id, status, clip} per shot in shot order (ids this batch no longer has stay at the end)."""
+    known = set(shot_names)
+    ordered = [records[sid] for sid in shot_names if sid in records]
+    ordered += [r for sid, r in records.items() if sid not in known]
+    wp_state.atomic_write(batch / QUEUE_STATUS_NAME, json.dumps(ordered, indent=2, ensure_ascii=False))
+
+
+def queue(batch: Path, only: Optional[str] = None, yes_derrick: bool = False) -> int:
+    """Queue every built shot on AlienPc, one at a time, and watch for its 2x clip.
+
+    A shot is queueable when its `build_status.json` entry says READY and it has no `clip_NOT_READY.txt`, and a
+    shot whose `queue_status.json` entry already says DONE is never queued again. `queue-remote.sh` detaches the
+    render, so this stage waits for the shot's 2x render_ok.json before starting the next shot: one GPU job at a
+    time, and a FAIL (submit error or timeout) is recorded and the next shot still runs.
+    """
+    if not yes_derrick:
+        print("NOT_READY queue: --yes-derrick is required")
+        return 3
+    batch = Path(batch)
+    try:
+        shot_dirs = _shot_dirs(batch, only)
+    except KeyError as exc:
+        print(f"NOT_READY queue: {exc}")
+        return 3
+    built_file = batch / BUILD_STATUS_NAME
+    if not built_file.is_file():
+        print(f"NOT_READY queue {built_file}: run build first")
+        return 2
+    built = {str(r.get("id") or ""): str(r.get("status") or "") for r in _load_records(built_file)}
+    records: Dict[str, Dict[str, Any]] = {str(r.get("id") or ""): r
+                                         for r in _load_records(batch / QUEUE_STATUS_NAME) if r.get("id")}
+    all_shots = [p.name for p in sorted((batch / "shots").glob("shot_*"))]
+    script = str(queue_remote_script())
+    queued = failed = 0
+
+    for shot_dir in shot_dirs:
+        sid = shot_dir.name
+        if str(records.get(sid, {}).get("status") or "") == "DONE":
+            print(f"SKIP queue {sid} already DONE")
+            continue
+        if (shot_dir / "clip_NOT_READY.txt").is_file():
+            print(f"SKIP queue {sid} clip_NOT_READY.txt")
+            continue
+        if built.get(sid) != "READY":
+            print(f"SKIP queue {sid} build_status={built.get(sid) or 'none'}")
+            continue
+        queued += 1
+        print(f"QUEUED {sid} {script}")
+        proc = subprocess.run(["bash", script, str(shot_dir), "--yes-derrick"],
+                              capture_output=True, text=True)
+        rc = int(getattr(proc, "returncode", 0) or 0)
+        if rc != 0:
+            err = (str(getattr(proc, "stderr", "") or "").strip()
+                   or str(getattr(proc, "stdout", "") or "").strip())
+            res: Dict[str, Any] = {"status": "FAIL", "clip": None,
+                                   "reason": f"queue-remote.sh rc={rc} {err[:160]}".strip()}
+        else:
+            res = wait_for_render_ok(shot_dir)
+        records[sid] = {"id": sid, "status": res["status"], "clip": res["clip"]}
+        _write_queue_status(batch, records, all_shots)
+        if res["status"] == "DONE":
+            print(f"DONE clip {sid} {res['clip']}")
+        else:
+            failed += 1
+            print(f"FAIL clip {sid} {res['reason']}")
+
+    print(f"READY queue {batch} queued={queued} failed={failed}")
+    return 3 if failed else 0
+
+
+# --- assemble (C7) -------------------------------------------------------------
+
+def shot_trim_frames(brief: Dict[str, Any], lock: Dict[str, Any], sid: str) -> Optional[int]:
+    """Real frames a shot's clip must keep: the sum of its parts' trim_to_frames, or None when unpadded.
+
+    The graph renders every part on the 17n+5 grid, so a shot whose parts were padded (or split across beats)
+    renders more frames than the source footage had; the master trims the clip back to the real length.
+    """
+    parts = brief.get("parts") or _lock_override(lock, sid).get("parts") or []
+    parts = [p for p in parts if isinstance(p, dict)]
+    if not parts:
+        return None
+    rendered = sum(int(p.get("frames") or 0) for p in parts)
+    real = sum(int(p.get("trim_to_frames") or p.get("frames") or 0) for p in parts)
+    return real if rendered > real > 0 else None
+
+
+def bgm_path_for(batch: Path, lock: Optional[Dict[str, Any]] = None) -> Optional[Path]:
+    """`<rea-dir>/stems/music.wav` for --bgm: the rea_dir recorded in the cast lock, else batch_meta.json."""
+    meta = _load_json_obj(batch / "batch_meta.json")
+    for src in (lock or {}, meta):
+        raw = str(src.get("rea_dir") or src.get("rea-dir") or "").strip()
+        if not raw:
+            continue
+        wav = Path(raw) / "stems" / "music.wav"
+        if wav.is_file():
+            return wav
+    return None
+
+
+def assemble(batch: Path, bgm: bool = False, publish: bool = False) -> int:
+    """Cut the DONE shots' 2x clips into `<batch_dir>/final_2x.mp4` (hard cuts, color matched to the first clip).
+
+    Shot order is the order of `shots/`; the clips come from each shot's render_ok.json (default
+    `clip/clip.mp4`), padded shots are trimmed back to their planned frames, and every clip after the first gets a
+    lutrgb transfer toward the first clip's channel stats. One ffmpeg call does the whole master.
+    """
+    batch = Path(batch)
+    lock = _load_json_obj(batch / "parody_cast_lock.json")
+    done = {str(r.get("id") or "") for r in _load_records(batch / QUEUE_STATUS_NAME)
+            if str(r.get("status") or "") == "DONE"}
+    if not done:
+        print(f"NOT_READY assemble {batch}: no DONE shots in {QUEUE_STATUS_NAME}, run queue first")
+        return 2
+
+    clips: List[Dict[str, Any]] = []
+    ref_stats: Optional[Any] = None
+    for shot_dir in sorted((batch / "shots").glob("shot_*")):
+        sid = shot_dir.name
+        if sid not in done:
+            continue
+        clip = clip_path_for(shot_dir)
+        if not clip.is_file():
+            print(f"NOT_READY assemble {sid}: no 2x clip {clip}")
+            return 2
+        stats = rcm.channel_stats(rcm.sample_frames(str(clip), n=COLOR_SAMPLES))
+        if ref_stats is None:
+            ref_stats = stats
+            lut = None
+        else:
+            lut = rcm.transfer_expr(stats, ref_stats)
+        clips.append({"path": str(clip),
+                      "trim_to_frames": shot_trim_frames(_load_json_obj(shot_dir / "shot_brief.json"), lock, sid),
+                      "lut": lut})
+    if not clips:
+        print(f"NOT_READY assemble {batch}: the {len(done)} DONE ids have no shots/ folder")
+        return 2
+
+    bgm_wav: Optional[Path] = None
+    if bgm:
+        bgm_wav = bgm_path_for(batch, lock)
+        if bgm_wav is None:
+            print(f"NOT_READY assemble bgm: no stems/music.wav for {batch.name} "
+                  f"(cast lock or batch_meta.json needs rea_dir)")
+            return 2
+
+    out = batch / MASTER_NAME
+    cmd = rcm.build_master_cmd(clips, str(out), bgm=str(bgm_wav) if bgm_wav else None, bgm_db=BGM_DB)
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    rc = int(getattr(proc, "returncode", 0) or 0)
+    if rc != 0 or not out.is_file():
+        err = str(getattr(proc, "stderr", "") or "").strip()
+        print(f"NOT_READY assemble ffmpeg rc={getattr(proc, 'returncode', '?')} {err[:200]}")
+        return 2
+    print(f"MASTER {out} clips={len(clips)} luts={sum(1 for c in clips if c['lut'])}")
+
+    if publish:
+        pub = publish_dir()
+        if pub.is_dir() and os.access(str(pub), os.W_OK):
+            dest = pub / f"{batch.name}_{MASTER_NAME}"
+            shutil.copy2(str(out), str(dest))
+            print(f"PUBLISHED {dest}")
+        else:
+            print(f"note: --publish skipped, {pub} is not writable")
+
+    print(f"DONE assemble {out}")
+    print(f"MEDIA:{out}")
+    return 0
+
+
 # --- status ------------------------------------------------------------------
 
 def _build_status(path: Path) -> str:
@@ -592,6 +860,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     bd.add_argument("batch_dir")
     bd.add_argument("--shot", default=None, help="only this shot id")
 
+    qq = sub.add_parser("queue", help="queue every READY shot on AlienPc and wait for its 2x clip, one at a time")
+    qq.add_argument("batch_dir")
+    qq.add_argument("--shot", default=None, help="only this shot id")
+    qq.add_argument("--yes-derrick", action="store_true",
+                    help="Derrick approved this batch for the render queue; required")
+
+    asm = sub.add_parser("assemble", help="cut the DONE shots' 2x clips into final_2x.mp4 (hard cuts, color matched)")
+    asm.add_argument("batch_dir")
+    asm.add_argument("--bgm", action="store_true",
+                     help=f"mix <rea-dir>/stems/music.wav at {BGM_DB:g} dB under the dialogue")
+    asm.add_argument("--publish", action="store_true",
+                     help=f"copy the master to {PUBLISH_DIR}/<batch>_{MASTER_NAME} when that folder is writable")
+
     args = ap.parse_args(argv)
     try:
         batch = check_batch_dir(args.batch_dir)
@@ -605,6 +886,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return flux(batch, only=args.shot, queue=args.queue, yes_derrick=args.yes_derrick)
     if args.cmd == "build":
         return build(batch, only=args.shot)
+    if args.cmd == "queue":
+        return queue(batch, only=args.shot, yes_derrick=args.yes_derrick)
+    if args.cmd == "assemble":
+        return assemble(batch, bgm=args.bgm, publish=args.publish)
 
     names = [n for n in (args.names or []) if str(n).strip()]
     if names and args.character:
