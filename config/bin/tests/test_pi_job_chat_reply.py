@@ -80,7 +80,8 @@ def test_chat_reply_has_media_line_not_video_tag(tmp_path, monkeypatch, pi_job):
 
 
 def test_run_pi_thinking_medium_and_keep_cwd_on_both_routes(pi_job, tmp_path, monkeypatch):
-    """Both AlienPc Swift and X3 Gufo fallback keep caller cwd and pass thinking medium via env (no dup --thinking)."""
+    """X3 Gufo first (Derrick t3061s10741); AlienPc Swift only via PI_JOB_FORCE_ALIENPC or fallback. Both keep cwd and
+    pass thinking medium via env (no dup --thinking)."""
     seen = []
 
     class _P:
@@ -93,12 +94,42 @@ def test_run_pi_thinking_medium_and_keep_cwd_on_both_routes(pi_job, tmp_path, mo
 
     monkeypatch.setattr(pi_job.subprocess, "run", fake_run)
     monkeypatch.delenv("PI_JOB_FORCE_X3", raising=False)
+    monkeypatch.delenv("PI_JOB_FORCE_ALIENPC", raising=False)
     monkeypatch.setattr(pi_job, "_alienpc_gate_idle", lambda: True)
     rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
-    assert (rc, where) == (0, "alienpc") and seen[-1] == ("alienpc/coding_swift15_iq3s_esp", "medium", "1")
-    monkeypatch.setenv("PI_JOB_FORCE_X3", "1")
-    rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
     assert where == "x3" and seen[-1] == (None, "medium", "1")
+    monkeypatch.setenv("PI_JOB_FORCE_ALIENPC", "1")
+    rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
+    assert (rc, where) == (0, "alienpc") and seen[-1] == ("alienpc/coding_swift15_iq3s_esp", "medium", "1")
+
+
+def test_run_pi_x3_fails_to_alienpc_then_gpu_priority_hands_back(pi_job, tmp_path, monkeypatch, capsysbinary):
+    """X3 error -> resume on idle AlienPc; AlienPc 503 (ComfyUI needs the GPU) -> hand back to the X3."""
+    import io
+    models, rcs = [], iter([1, 1, 0])
+
+    class _P:
+        def __init__(self, rc):
+            self.returncode = rc
+
+    def fake_run(cmd, **kw):
+        models.append(kw["env"].get("FORGE_MODEL"))
+        return _P(next(rcs))
+
+    monkeypatch.setattr(pi_job.subprocess, "run", fake_run)
+    monkeypatch.delenv("PI_JOB_FORCE_X3", raising=False)
+    monkeypatch.delenv("PI_JOB_FORCE_ALIENPC", raising=False)
+    monkeypatch.setattr(pi_job, "_alienpc_gate_idle", lambda: True)
+    monkeypatch.setattr(pi_job, "_last_stop_reason", lambda run_dir: "error")
+    rc, where = pi_job._run_pi(tmp_path, "60", "task", str(tmp_path), io.BytesIO())
+    assert (rc, where) == (0, "x3->alienpc->x3")
+    assert models == [None, "alienpc/coding_swift15_iq3s_esp", None]
+    # AlienPc busy (gate not idle): no fallback, X3 result returned
+    models.clear(); rcs = iter([1])
+    monkeypatch.setattr(pi_job.subprocess, "run", lambda cmd, **kw: models.append(kw["env"].get("FORGE_MODEL")) or _P(next(rcs)))
+    monkeypatch.setattr(pi_job, "_alienpc_gate_idle", lambda: False)
+    rc, where = pi_job._run_pi(tmp_path, "60", "task", str(tmp_path), io.BytesIO())
+    assert where.startswith("x3(") and models == [None]
 
 
 def test_timeout_min_flag_and_git_repo_guard(pi_job, tmp_path, monkeypatch):
