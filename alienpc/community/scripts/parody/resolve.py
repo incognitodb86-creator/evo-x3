@@ -7,9 +7,45 @@ enforcing good/bad/fence rules, slot stacking, >8 truncation, and stills gate.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional, Tuple
+
+
+def _resolve_refmods_dir() -> Path:
+    """Resolve the host's H3 RefMods directory (AlienPc ComfyUI models/refmods or POSIX mirror)."""
+    env_dir = os.environ.get("H3_REFMODS_DIR")
+    if env_dir:
+        return Path(env_dir)
+    if os.name == "nt":
+        candidates = [
+            Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods"),
+            Path(r"C:\AI\comfy-alienpc\models\refmods"),
+        ]
+    else:
+        candidates = []
+        if os.environ.get("EVO_AI_ROOT"):
+            candidates.append(Path(os.environ["EVO_AI_ROOT"]) / "comfy-alienpc" / "models" / "refmods")
+        candidates.extend([
+            Path("/home/evo/AI/comfy-alienpc/models/refmods"),
+            Path.home() / "AI" / "comfy-alienpc" / "models" / "refmods",
+        ])
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return candidates[0]
+
+
+def check_refmods_dir(refmods_dir: Optional[Path] = None) -> Path:
+    """Raise a clear host-aware error if the H3 RefMods directory is missing."""
+    d = Path(refmods_dir or REFMODS_DIR)
+    if not d.is_dir():
+        raise FileNotFoundError(f"H3 REFMODS_DIR missing on host ({os.name}): {d}")
+    return d
+
+
+REFMODS_DIR = _resolve_refmods_dir()
 
 DEFAULT_APPROVED_STILLS_DIR = Path(r"C:\Users\derek\5slock\approved_characters")
 KD17_REFMOD_STRENGTHS: Tuple[float, float, float] = (1.0, 1.0, 0.80)
@@ -453,3 +489,32 @@ def resolve_identities(
         "dropped_refmods": [str(m[0]) for m in dropped_refmods],
         "stills": validated_stills,
     }
+
+
+_NON_IDENTITY_FLUX_LORA_RE = re.compile(
+    r"(?i)(?:refcontrol|bfs_head|ms_real|snofs|tripleview|quadview|realism|stomach_bulge|anatomy|consistency|turbo|detail)"
+)
+
+
+def names_from_flux_refmod_or_lora(filename: Optional[str]) -> List[str]:
+    """Extract a celebrity/character lookup token from a Klein9/H3 RefMod or Klein9 celeb LoRA filename."""
+    if not filename:
+        return []
+    s = str(filename).strip().replace("\\", "/")
+    if not s or s.lower() in ("(none)", "none"):
+        return []
+    stem = Path(s).stem
+    if _NON_IDENTITY_FLUX_LORA_RE.search(stem):
+        return []
+    cleaned = re.sub(r"(?i)^(?:klein9|fk9|flux2?klein9?|minimaxh3|h3)[_-]+", "", stem)
+    cleaned = re.sub(r"(?i)^oc[_-]+", "", cleaned)
+    cleaned = re.sub(r"(?i)(?:[_-]+(?:v\d+(?:\.\d+)?|prodigy|refmod|visual|audio|alt|lora|klein9|rank\d+|step\d+))+$", "", cleaned)
+    cleaned = cleaned.strip("_- ")
+    if len(cleaned) < 3:
+        return []
+    spaced = re.sub(r"[_-]+", " ", cleaned).strip()
+    out: List[str] = [spaced]
+    compact = re.sub(r"[^a-zA-Z0-9]", "", cleaned)
+    if compact and compact.lower() != spaced.lower():
+        out.append(compact)
+    return out

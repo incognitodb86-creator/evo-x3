@@ -10,7 +10,7 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from wp_lint import norm, WORD_RE
 
@@ -138,14 +138,17 @@ def _strip_whitelist(p: str) -> str:
 
 
 _EXAMPLES_BLOCK_RE = re.compile(r"(?im)^EXAMPLES\b[\s\S]*?(?=^SHAPE\b|\Z)")
+_WORKED_EXAMPLE_RE = re.compile(r"(?im)^##\s*Worked example\b[\s\S]*?(?=^##\s|\Z)")
 
 
-def example_sixgrams(prompt_text: str) -> List[str]:
-    """Distinctive 6-grams from the EXAMPLES block only (structural phrases are whitelisted)."""
-    m = _EXAMPLES_BLOCK_RE.search(prompt_text or "")
-    if not m:
-        return []
-    w = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", m.group(0))))
+def default_wording_example_paths() -> List[Path]:
+    """Return skill reference files containing worked prompt examples to include in the 6-gram clone gate."""
+    p = Path(__file__).resolve().parents[2] / "skills" / "h3-prompting" / "references" / "wording.md"
+    return [p] if p.is_file() else []
+
+
+def _sixgrams_from_text(text: str) -> List[str]:
+    w = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", text or "")))
     out: List[str] = []
     for g in {" ".join(w[i:i + 6]) for i in range(max(0, len(w) - 5))}:
         rem = [tok for tok in _strip_whitelist(g).split() if tok not in _CLONE_STOP]
@@ -154,17 +157,36 @@ def example_sixgrams(prompt_text: str) -> List[str]:
     return out
 
 
-def build_cloned(prompt_text: str, recent: List[str]) -> List[str]:
+def example_sixgrams(prompt_text: str) -> List[str]:
+    """Distinctive 6-grams from EXAMPLES / Worked example blocks (structural phrases are whitelisted)."""
+    chunks: List[str] = []
+    for rx in (_EXAMPLES_BLOCK_RE, _WORKED_EXAMPLE_RE):
+        for m in rx.finditer(prompt_text or ""):
+            chunks.append(m.group(0))
+    if not chunks:
+        return []
+    out: List[str] = []
+    for c in chunks:
+        out.extend(_sixgrams_from_text(c))
+    return out
+
+
+def build_cloned(prompt_text: str, recent: List[str], extra_texts: Optional[Sequence[str]] = None) -> List[str]:
     """Every quoted string of >=4 words in the prompt, plus every 6-gram the prompt shares with >=2 of the last 20
-    outputs. Builder keywords are whitelisted (a phrase that is only keywords plus <=2 other words is dropped)."""
+    outputs, plus worked examples from writer_prompt and h3-prompting/references/wording.md."""
     out: List[str] = []
     for m in _QUOTED_RE.finditer(prompt_text):
         q = norm(m.group(1))
         if len(q.split()) >= 4 and len(_strip_whitelist(q).split()) >= 3:
             out.append(q)
-    # 6-word runs from the EXAMPLES block are a clone gate even on a first copy
+    # 6-word runs from the EXAMPLES / Worked example blocks are a clone gate even on a first copy
     # (quoted strings above already cover dialogue; this catches unquoted narrative).
     out.extend(example_sixgrams(prompt_text))
+    if extra_texts is None:
+        extra_texts = [p.read_text(encoding="utf-8") for p in default_wording_example_paths()]
+    for et in extra_texts:
+        eg = example_sixgrams(et)
+        out.extend(eg if eg else _sixgrams_from_text(et))
     pw = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", prompt_text)))
     pgrams = {" ".join(pw[i:i + 6]) for i in range(max(0, len(pw) - 5))}
     counts: Dict[str, int] = {}

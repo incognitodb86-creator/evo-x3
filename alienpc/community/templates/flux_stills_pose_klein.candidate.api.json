@@ -87,21 +87,6 @@
    "image": "community/flux_stills_pose/IDENTITY.png"
   }
  },
- "9": {
-  "_meta": {
-   "title": "identity_resize_1mp"
-  },
-  "class_type": "ResizeImageMaskNode",
-  "inputs": {
-   "input": [
-    "8",
-    0
-   ],
-   "resize_type": "scale total pixels",
-   "resize_type.megapixels": 1.0,
-   "scale_method": "lanczos"
-  }
- },
  "10": {
   "_meta": {
    "title": "pose_size"
@@ -109,7 +94,7 @@
   "class_type": "GetImageSize",
   "inputs": {
    "image": [
-    "25",
+    "7",
     0
    ]
   }
@@ -137,7 +122,7 @@
   "class_type": "VAEEncode",
   "inputs": {
    "pixels": [
-    "9",
+    "8",
     0
    ],
    "vae": [
@@ -340,21 +325,6 @@
    ]
   }
  },
- "25": {
-  "_meta": {
-   "title": "pose_resize_1mp"
-  },
-  "class_type": "ResizeImageMaskNode",
-  "inputs": {
-   "input": [
-    "7",
-    0
-   ],
-   "resize_type": "scale total pixels",
-   "resize_type.megapixels": 1.0,
-   "scale_method": "lanczos"
-  }
- },
  "26": {
   "_meta": {
    "title": "kv_cache"
@@ -378,7 +348,7 @@
    "detect_face": "enable",
    "detect_hand": "enable",
    "image": [
-    "25",
+    "7",
     0
    ],
    "pose_estimator": "dw-ll_ucoco_384.onnx",

@@ -87,21 +87,6 @@
    "image": "community/flux_stills_layout/IDENTITY.png"
   }
  },
- "9": {
-  "_meta": {
-   "title": "identity_resize_1mp"
-  },
-  "class_type": "ResizeImageMaskNode",
-  "inputs": {
-   "input": [
-    "8",
-    0
-   ],
-   "resize_type": "scale total pixels",
-   "resize_type.megapixels": 1.0,
-   "scale_method": "lanczos"
-  }
- },
  "10": {
   "_meta": {
    "title": "layout_size"
@@ -109,7 +94,7 @@
   "class_type": "GetImageSize",
   "inputs": {
    "image": [
-    "25",
+    "7",
     0
    ]
   }
@@ -121,7 +106,7 @@
   "class_type": "VAEEncode",
   "inputs": {
    "pixels": [
-    "25",
+    "7",
     0
    ],
    "vae": [
@@ -137,7 +122,7 @@
   "class_type": "VAEEncode",
   "inputs": {
    "pixels": [
-    "9",
+    "8",
     0
    ],
    "vae": [
@@ -338,21 +323,6 @@
     "23",
     0
    ]
-  }
- },
- "25": {
-  "_meta": {
-   "title": "layout_resize_1mp"
-  },
-  "class_type": "ResizeImageMaskNode",
-  "inputs": {
-   "input": [
-    "7",
-    0
-   ],
-   "resize_type": "scale total pixels",
-   "resize_type.megapixels": 1.0,
-   "scale_method": "lanczos"
   }
  },
  "26": {

@@ -14,10 +14,10 @@ metadata:
 
 You run renders yourself on this machine. pi is only for code: `pi-job code|review`. Do not use `pi-job render`, `pi-job approve`, or `pi-job queue` unless Derrick says "use the old pi render".
 
-Do not call Python writer or judge scripts (`render_writer_pipeline.py` and its writer/judge models). Hermes writes the prompt with `h3-writer`. Keep the 18+ gate, the ComfyUI JSON build, and the queue step below.
+Do not call a writer or judge *model* (never use `fill_request.py` as the Hermes dry-run entry). Hermes writes the prompt with `h3-writer` and passes `--prose-file` to `render_writer_pipeline.py`, which runs `still_read`, `wp_lint`, clone/filler/oral-speech gates, the 18+ gate, and the dry-run ComfyUI JSON build.
 
 Use this Python: `/home/evo/AI/render/x3/.venv/bin/python3` (called PY below).
-Use this builder: `/home/evo/AI/community/scripts/parody/fill_request.py` (called FR below).
+Use this pipeline entry: `/home/evo/AI/community/scripts/parody/render_writer_pipeline.py` (called RWP below).
 
 ## 1. Pick a start still (18+ checked)
 
@@ -35,35 +35,13 @@ Copy small stills or contact sheets into `/home/evo/.hermes/image_cache/` (no sp
 
 ## 3. Write, lint, and build (dry-run)
 
-Load `h3-writer` and save the Beta 7 prompt to `<run_dir>/hermes_prose.txt` and `<run_dir>/writer_output.txt`. Then lint and build. If a command may exceed the 180 s terminal timeout, run the terminal tool with `background=true` and `notify_on_complete=true`, then use the `process` tool to wait or poll. Never use `setsid` or `nohup` (Hermes blocks them).
-
-Lint (prints READY or NOT_READY plus any hard-stop codes):
+Load `h3-writer` and save the Beta 7 prompt to `<run_dir>/hermes_prose.txt`. Then run `render_writer_pipeline.py --prose-file` (dry-run by default; never pass `--queue` or `--yes-derrick` unless Derrick already said yes in that turn). If a command may exceed the 180 s terminal timeout, run the terminal tool with `background=true` and `notify_on_complete=true`, then use the `process` tool to wait or poll. Never use `setsid` or `nohup` (Hermes blocks them).
 
 ```bash
 r='<run_dir>'
 PY=/home/evo/AI/render/x3/.venv/bin/python3
-$PY - "$r/hermes_prose.txt" <<'LINT'
-import sys
-from pathlib import Path
-sys.path.insert(0, "/home/evo/AI/community/scripts/parody")
-import wp_lint
-text = Path(sys.argv[1]).read_text(encoding="utf-8")
-result = wp_lint.lint(text, {})
-print("READY" if result.get("pass") else "NOT_READY")
-if result.get("hard"):
-    print("hard:", ", ".join(result["hard"]))
-for issue in result.get("issues") or []:
-    if issue.get("hard"):
-        print(issue.get("code"), issue.get("note", ""))
-LINT
-```
-
-Build the ComfyUI JSON (dry-run; do not pass `--queue`):
-
-```bash
-PY=/home/evo/AI/render/x3/.venv/bin/python3
-FR=/home/evo/AI/community/scripts/parody/fill_request.py
-$PY "$FR" "$r" --still '<still>' --still-mode '<guide|ref>' --ask '<short ask>'
+RWP=/home/evo/AI/community/scripts/parody/render_writer_pipeline.py
+$PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --still '<still>' --still-mode '<guide|ref>' --ask '<short ask>'
 ```
 
 Add `--character`, `--template`, `--aspect`, `--size`, `--frames`, `--names`, or `--realism-lora` only when the ask needs them. On READY, `build_report.json` and `clip/request.api.json` exist and `DRY_RUN` is present.

@@ -1204,7 +1204,7 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
             sd = [f"<Subject 1> is an adult man, twenty-four years of age, of solid adult build; he is (S1)."]
     elif is_named_parody:
         who_label = f"{ichar} ({iact})" if (ichar and iact and ichar.lower() != iact.lower()) else (ichar or iact)
-        if use_ref_pic and still_mode == "ref":
+        if use_ref_pic:
             sd = [f"<Picture 1> is the reference image defining the {place}, its {light}, the wardrobe and the opening framing.",
                   f"<Subject 1> is {who_label}, an adult woman, 25 years of age, {hair}{attire_clause}; she is (S1)."]
         else:
@@ -1277,7 +1277,7 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     summary = re.sub(r"\s{2,}", " ", re.sub(r"(?i)\b(?:cinematic|beautiful(?:ly)?)\b,?\s*", "", summary)).strip()
     summary = re.sub(r"(?i)\b(?:glistening|glossy|oily|oiled|shimmering)\b", "damp", summary)
     summary = re.sub(r"\b(?:A|An) (?=[aeiou])", "An ", re.sub(r"\bAn (?=[^aeiouAEIOU])", "A ", summary))
-    if still_mode == "ref" and not summary.lower().startswith("[reference generation]"):
+    if use_ref_pic and not summary.lower().startswith("[reference generation]"):
         summary = f"[reference generation] {summary}"
     elif still_mode == "guide":
         summary = re.sub(r"(?i)^\[reference generation\]\s*", "", summary).strip()
@@ -1295,8 +1295,29 @@ def assemble_output(dd: str, card: Optional[Dict[str, Any]], slots: Dict[str, An
     else:
         ret_line = ("<Subject 1>: fully_preserved - face, hair and body as described. The opening frame: fully_preserved - the "
                     f"{place}, the light and the opening framing.")
+    ret_lines = [ret_line]
+    for i in range(want):
+        _p = _pick_partner(partners, f"S{i + 2}", i)
+        _psex = partner_sex(slots.get("ask") or "", str(_p.get("sex") or ""), label=f"S{i + 2}")
+        _p_pron = "his" if _psex == "man" else "her"
+        _p_noun = "man" if _psex == "man" else "woman"
+        ret_lines.append(
+            f"<Subject {i + 2}> (appears in [Shot 1]): fully_preserved - {_p_pron} face, build and skin stay the same {_p_noun} throughout."
+        )
+    if attire_s1:
+        _aside_hit = bool(
+            br._ASIDE_RE.search(dd or "")
+            or re.search(r"(?i)\b(?:pulls?|slides?|slid|pushes?|tugs?|hooks?|moves?)\b[^.!?\n]{0,60}\b(?:aside|to one side|up off)\b", dd or "")
+        )
+        _pic_ref = " of <Picture 1>" if use_ref_pic else ""
+        if _aside_hit:
+            ret_lines.append(f"The {attire_s1}{_pic_ref}: partially_preserved - stays on her body, pulled aside so the join is clear.")
+        elif br._REMOVE_VERB_RE.search(dd or ""):
+            ret_lines.append(f"The {attire_s1}{_pic_ref}: partially_preserved - removed during the clip.")
+        else:
+            ret_lines.append(f"The {attire_s1}{_pic_ref}: fully_preserved - stays on her body as shown.")
     out = ["subject_definitions:", *sd, "", "summary:", summary + ".", "", "retention_analysis:",
-           ret_line, "", "detailed_description:", dd]
+           "\n".join(ret_lines), "", "detailed_description:", dd]
     if continuation:
         out += ["", "continuation:", continuation]
     return "\n".join(out) + "\n"
@@ -2116,7 +2137,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         clone_retries = 0
         def _clone_hits(dd_text: str) -> list:
             return wp_lint.cloned_hits(dd_text or "", cloned)
-        while clone_retries < CLONE_RETRY_BUDGET:
+        while not job.get("prose_file") and clone_retries < CLONE_RETRY_BUDGET:
             name = max(cands, key=lambda c: (0 if _clone_hits(cands[c]["dd"]) else 1, cands[c]["lint"]["score"]))
             if not _clone_hits(cands[name]["dd"]):
                 break

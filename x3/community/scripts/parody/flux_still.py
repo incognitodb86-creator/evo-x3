@@ -131,18 +131,18 @@ def _inject_flux_loras(graph: Dict[str, Any], loras: Sequence[Dict[str, Any]]) -
 
 
 def _klein9_refmod_name(spec: str) -> str:
-    """Turn a filename, stem, or plain celeb name (e.g. 'Sydney Sweeney') into a Klein9 RefMod filename.
-    ComfyUI-Flux2Klein9Mod lists `.safetensors` filenames from `models/refmods-klein9/` (e.g. `fk9_sydneysweeney_v1_refmod.safetensors`)."""
+    """Turn a filename, stem, or plain celeb name (e.g. 'Sydney Sweeney') into a Klein9 RefMod stem.
+    ComfyUI-Flux2Klein9Mod lists stems without `.safetensors` in `Klein9RefModsLoader` (e.g. `fk9_sydneysweeney_v1_refmod`)."""
     s = str(spec or "").strip()
     if not s or s.lower() in ("none", "(none)"):
         return "none"
-    if s.endswith(".safetensors"):
-        return s
+    if s.lower().endswith(".safetensors"):
+        return s[:-12]
     if " " in s or not any(tok in s.lower() for tok in ("fk9_", "klein9", "_refmod", "_v1", "_v2")):
         import re
         compact = re.sub(r"[^a-zA-Z0-9]", "", s).lower()
-        return f"fk9_{compact}_v1_refmod.safetensors"
-    return f"{s}.safetensors"
+        return f"fk9_{compact}_v1_refmod"
+    return s
 
 
 def _hybrid_stack_for_name(name: str) -> tuple[str, Dict[str, Any]]:
@@ -150,7 +150,7 @@ def _hybrid_stack_for_name(name: str) -> tuple[str, Dict[str, Any]]:
     import re
     compact = re.sub(r"[^a-zA-Z0-9]", "", str(name or "")).lower()
     return (
-        f"fk9_{compact}_v1_refmod.safetensors",
+        f"fk9_{compact}_v1_refmod",
         {"name": f"klein9/fk9_{compact}_v1_prodigy.safetensors", "strength": 0.60},
     )
 

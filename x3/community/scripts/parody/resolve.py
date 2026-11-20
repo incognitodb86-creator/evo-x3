@@ -469,9 +469,44 @@ def resolve_identities(
 
 # --- OC / INDEX / PixlStash RefMod picker (moved from submit_parody_run.py in U55) ---
 _PARODY_DIR = Path(__file__).resolve().parent
-_AI_ROOT = _PARODY_DIR.parents[2]
-INDEX_DIR = _AI_ROOT / "community" / "index" / "h3-known-characters"
-REFMODS_DIR = _AI_ROOT / "comfy-alienpc" / "models" / "refmods"
+_REPO_AI_ROOT = _PARODY_DIR.parents[2]
+INDEX_DIR = _REPO_AI_ROOT / "community" / "index" / "h3-known-characters"
+
+
+def _resolve_refmods_dir() -> Path:
+    """Resolve the host's H3 RefMods directory without falling back to a missing repo-relative path."""
+    env_dir = os.environ.get("H3_REFMODS_DIR")
+    if env_dir:
+        return Path(env_dir)
+    if os.name == "nt":
+        candidates = [
+            Path(r"C:\Users\derek\HardcoreNSFW-TestRuntime\ComfyUI\models\refmods"),
+            Path(r"C:\AI\comfy-alienpc\models\refmods"),
+        ]
+    else:
+        candidates = []
+        if os.environ.get("EVO_AI_ROOT"):
+            candidates.append(Path(os.environ["EVO_AI_ROOT"]) / "comfy-alienpc" / "models" / "refmods")
+        candidates.extend([
+            Path("/home/evo/AI/comfy-alienpc/models/refmods"),
+            Path.home() / "AI" / "comfy-alienpc" / "models" / "refmods",
+            _REPO_AI_ROOT / "comfy-alienpc" / "models" / "refmods",
+        ])
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return candidates[0]
+
+
+def check_refmods_dir(refmods_dir: Optional[Path] = None) -> Path:
+    """Raise a clear host-aware error if the H3 RefMods directory is missing."""
+    d = Path(refmods_dir or REFMODS_DIR)
+    if not d.is_dir():
+        raise FileNotFoundError(f"H3 REFMODS_DIR missing on host ({os.name}): {d}")
+    return d
+
+
+REFMODS_DIR = _resolve_refmods_dir()
 ALIASES_PATH = _PARODY_DIR / "aliases.json"
 _CONTINUATION_VOICE_SUFFIX = "_23s"
 def _mod_stem(value: str) -> str:
@@ -907,7 +942,10 @@ def resolve_writer_refmods(
             out["trigger"] = _oc_trigger(matched)
             return out
         who = char or (name_list[0] if name_list else "named identity")
-        out["reason"] = f"no local RefMod installed for '{who}' in {REFMODS_DIR}"
+        if not Path(REFMODS_DIR).is_dir():
+            out["reason"] = f"missing H3 REFMODS_DIR on host ({os.name}): {REFMODS_DIR}"
+        else:
+            out["reason"] = f"no local RefMod installed for '{who}' in {REFMODS_DIR}"
         return out
 
     keys = oc_keys_for_still_and_names(still_image, char, " ".join(str(n) for n in name_list))

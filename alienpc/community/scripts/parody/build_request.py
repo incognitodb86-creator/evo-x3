@@ -2787,6 +2787,23 @@ def lint_final_prompt(full: str) -> List[str]:
     return errs
 
 
+_YOUTH_GATE_RE = re.compile(
+    r"(?i)\b(?:child\w*|kids?|teen\w*|tween|underage|under-age|minor|loli\w*|shota\w*|schoolgirl|little girl|"
+    r"little boy|young girl|young boy|preteen|pre-teen|pubescent|adolescent|juvenile)\b"
+)
+
+
+def _check_writer_18plus(raw: str, cast: Dict[str, Any]) -> None:
+    """Enforce the 18+ safety floor on writer text and partner definitions."""
+    for _pk in ("man", "partner", "man3", "partner3"):
+        _pval = str(cast.get(_pk) or "").strip()
+        if _pval and (not _adult_age_ok(_pval) or _MINOR_RE.search(_pval) or _YOUTH_GATE_RE.search(_pval)):
+            raise WriterNotReady(f"NOT_READY: partner definition {_pk!r} failed adult age / youth lint")
+    for _label, _txt in (("prompt", raw or ""), ("ask", str(cast.get("ask") or ""))):
+        if _MINOR_RE.search(_txt) or _YOUTH_GATE_RE.search(_txt):
+            raise WriterNotReady(f"NOT_READY: minor / under-18 descriptor in {_label}")
+
+
 def finalize_writer_prompt(raw: str, cast: Dict[str, Any], strict: bool = True) -> Tuple[str, Dict[str, Any]]:
     """Turn one free-text writer prompt into the R5 paste for an OC RefMod clip that opens on <Picture 1>.
 

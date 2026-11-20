@@ -25,7 +25,7 @@ thighs, groin, pelvis), not euphemism. Action does not change body mass. A flex,
 shoulder, arm, breast and thigh size as `<Picture 1>`; write the effort as tension and breath, not new muscle.
 
 **R19 - State the contact geometry, then lock it.** Say the join: hips stacked / flush / named orifice, and the
-supports (knees, hands, mattress, wall). For a vaginal cell: fully sheathed, hips flush (no tip-only, no miss, no
+supports (knees, hands, mattress, wall). On a hip-height surface (log, couch arm, counter edge), she stands and bends over with palms on it; knees-on-surface only on floor or bed. For a vaginal cell: fully sheathed, hips flush (no tip-only, no miss, no
 float), measurable in-out depth each stroke. For an oral cell: shaft past the lips with deep oral travel on the deep
 stroke, not tip-lick-only. Keep the contact type constant per cell, and write the pull-out and reseat beat when the
 contact type changes. No wrong-orifice teleport. Standing tip-against-fabric, floating join and grind-without-entry

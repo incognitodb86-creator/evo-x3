@@ -44,3 +44,73 @@ def test_cli_refuses_empty_or_relative_prose_file(tmp_path, capsys):
     good.write_text(GOOD_SEX, encoding="utf-8")
     assert p.main(base + ["--prose-file", str(good), "--fix-once"]) == 3
     assert capsys.readouterr().out.count("NOT_READY") == 3
+
+
+def test_hermes_skills_route_path_b_through_render_writer_pipeline():
+    repo_root = Path(__file__).resolve().parents[4]
+    h3_render = (repo_root / "hosts" / "x3" / "hermes" / "skills" / "h3-render" / "SKILL.md").read_text(encoding="utf-8")
+    h3_writer = (repo_root / "hosts" / "x3" / "hermes" / "skills" / "h3-writer" / "SKILL.md").read_text(encoding="utf-8")
+    assert "render_writer_pipeline.py" in h3_render
+    assert "--prose-file" in h3_render
+    assert "--position" in h3_render
+    assert "--still" in h3_render
+    assert "FR=/home/evo/AI/community/scripts/parody/fill_request.py" not in h3_render
+    assert "render_writer_pipeline.py --prose-file" in h3_writer
+    assert "fill_request.py" not in h3_writer
+
+    live_root = repo_root / "hosts" / "x3" / "live" / "hermes" / "skills" / "custom" / "creative"
+    live_render = live_root / "h3-render" / "SKILL.md"
+    live_writer = live_root / "h3-writer" / "SKILL.md"
+    if live_render.is_file():
+        live_r = live_render.read_text(encoding="utf-8")
+        assert "render_writer_pipeline.py" in live_r
+        assert "--prose-file" in live_r
+        assert "FR=/home/evo/AI/community/scripts/parody/fill_request.py" not in live_r
+    if live_writer.is_file():
+        live_w = live_writer.read_text(encoding="utf-8")
+        assert "render_writer_pipeline.py --prose-file" in live_w
+        assert "fill_request.py" not in live_w
+
+
+def test_clone_gate_covers_stub_wording_example():
+    import wp_lint
+    import wp_state
+
+    stub_wording = "## Worked example: synthetic stub\n```text\nThe lantern hangs beside the cedar doorframe.\n```\n"
+    phrases = wp_state.build_cloned("WRITER PROMPT\n", [], extra_texts=[stub_wording])
+    hits = wp_lint.cloned_hits("At first, the lantern hangs beside the cedar doorframe while she stands.", phrases)
+    assert hits
+
+
+def test_assemble_output_emits_ref_sections_s2_and_wardrobe_pulled_aside():
+    slots_ref = {
+        "place": "bedroom",
+        "light": "soft window light",
+        "hair": "blonde hair",
+        "position": "doggy",
+        "surface": "bed",
+        "still_mode": "ref",
+        "garment": "satin slip",
+    }
+    card = {"partners": [{"label": "S2", "sex": "man", "age": 30, "build": "athletic build"}], "summary": "(S1) on the bed"}
+    out_aside = p.assemble_output(
+        "[Shot 1] Medium shot. At first, (S1) pulls her satin slip aside at one hip. By the end, soft breath.",
+        card,
+        slots_ref,
+        2,
+        "sex",
+    )
+    assert "<Picture 1>" in out_aside
+    assert "[reference generation]" in out_aside
+    assert "<Subject 2>" in out_aside.split("retention_analysis:", 1)[1]
+    assert "pulled aside" in out_aside.split("retention_analysis:", 1)[1]
+
+    out_kept = p.assemble_output(
+        "[Shot 1] Medium shot. At first, (S1) stands beside the bed. By the end, soft breath.",
+        card,
+        slots_ref,
+        2,
+        "sex",
+    )
+    assert "fully_preserved" in out_kept.split("retention_analysis:", 1)[1]
+    assert "pulled aside" not in out_kept.split("retention_analysis:", 1)[1]

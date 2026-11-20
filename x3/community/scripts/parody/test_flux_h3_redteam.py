@@ -47,7 +47,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     )
     assert r["status"] == "READY" and r["mode"] == "refmod"
     g = json.loads((tmp_path / "f1" / "still" / "request.api.json").read_text(encoding="utf-8"))
-    assert g["12"]["inputs"]["mod_1"] == "klein9_sydney_sweeney_v1.safetensors"
+    assert g["12"]["inputs"]["mod_1"] == "klein9_sydney_sweeney_v1"
     assert g["12"]["inputs"]["mod_2"] == "none"
     assert g["12"]["inputs"]["copies_1"] == 1
     assert g["13"]["inputs"]["klein9_refmods"] == ["12", 0]
@@ -70,7 +70,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     ])
     assert rc == 0
     gh = json.loads((tmp_path / "f_hyb" / "still" / "request.api.json").read_text(encoding="utf-8"))
-    assert gh["12"]["inputs"]["mod_1"] == "fk9_sydneysweeney_v1_refmod.safetensors"
+    assert gh["12"]["inputs"]["mod_1"] == "fk9_sydneysweeney_v1_refmod"
     assert gh["12"]["inputs"]["strength_1"] == 0.85
     hl = [n for n in gh.values() if isinstance(n, dict) and n.get("class_type") == "LoraLoaderModelOnly"]
     assert hl and hl[0]["inputs"]["lora_name"] == "klein9\\fk9_sydneysweeney_v1_prodigy.safetensors"
