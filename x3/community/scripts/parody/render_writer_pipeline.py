@@ -29,6 +29,8 @@ import subprocess
 import sys
 import time
 import traceback
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -1689,6 +1691,59 @@ class _Stop(Exception):
     """A hard stop that ends the clip as NOT_READY with result['not_ready_reason'] already set."""
 
 
+def collect_backend_proof(run_dir: Path, cfg: Dict[str, Any], hermes_slot: Optional[str] = None) -> Dict[str, Any]:
+    """Read-only routing proof: record Hermes slot, llama-swap /running (:8080), and llama-swap journal lines."""
+    slot = (hermes_slot or os.environ.get("HERMES_SLOT") or "").strip() or "unknown"
+    swap_base = (cfg.get("llama_swap_url") or os.environ.get("LLAMA_SWAP_URL") or "http://127.0.0.1:8080").rstrip("/")
+    running_url = f"{swap_base}/running"
+    running: Any = None
+    swap_err: Optional[str] = None
+    try:
+        req = urllib.request.Request(running_url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            raw = resp.read().decode("utf-8", errors="replace").strip()
+        try:
+            data = json.loads(raw)
+            running = data.get("running", data) if isinstance(data, dict) else data
+        except ValueError:
+            running = raw
+    except Exception as e:
+        swap_err = f"{type(e).__name__}: {e}"
+
+    unit = str(cfg.get("llama_swap_unit") or "llama-swap")
+    journal_path = run_dir / "llama_swap_journal.txt"
+    journal_ok = False
+    journal_note = ""
+    try:
+        jp = subprocess.run(
+            ["journalctl", "-u", unit, "--since", "-10 min", "--no-pager", "-n", "200"],
+            capture_output=True, text=True, timeout=3,
+        )
+        if jp.returncode == 0 and (jp.stdout or "").strip():
+            wp_state.atomic_write(journal_path, jp.stdout)
+            journal_ok = True
+        else:
+            journal_note = f"journalctl unavailable (rc={jp.returncode}): {(jp.stderr or jp.stdout or 'empty').strip()[:300]}"
+            wp_state.atomic_write(journal_path, journal_note + "\n")
+    except Exception as e:
+        journal_note = f"journalctl error: {type(e).__name__}: {e}"
+        wp_state.atomic_write(journal_path, journal_note + "\n")
+
+    proof: Dict[str, Any] = {
+        "hermes_slot": slot,
+        "llama_swap_url": running_url,
+        "llama_swap_running": running,
+        "llama_swap_error": swap_err,
+        "journal_file": journal_path.name,
+        "journal_ok": journal_ok,
+        "recorded_at": wp_state.now_ct(),
+    }
+    if journal_note:
+        proof["journal_note"] = journal_note
+    wp_state.atomic_write(run_dir / "backend.json", json.dumps(proof, indent=2, ensure_ascii=False, default=str))
+    return proof
+
+
 def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     ov = overrides or {}
     t_start = time.time()
@@ -1714,8 +1769,11 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
     sampler = dict((cfg.get("samplers") or {}).get(arm) or {"temperature": 1.0, "top_p": 0.95, "top_k": 64, "min_p": 0.10})
     persona = cfg.get("persona", "current")
     client = Client(cfg, log)
+    backend_proof = collect_backend_proof(run_dir, cfg, job.get("hermes_slot"))
     result: Dict[str, Any] = {"run": run_id, "run_dir": str(run_dir), "ask": ask, "position": position, "kind": kind,
-                              "status": None, "warnings": [], "version": VERSION, "sampler_arm": arm, "persona": persona}
+                              "status": None, "warnings": [], "version": VERSION, "sampler_arm": arm, "persona": persona,
+                              "hermes_slot": backend_proof["hermes_slot"],
+                              "llama_swap_running": backend_proof["llama_swap_running"]}
     state_dir = Path(cfg["shared_state_dir"]) if cfg.get("shared_state_dir") else PIPE_DIR  # one global blacklist
     state_dir.mkdir(parents=True, exist_ok=True)
     bl_path = state_dir / "dialogue_blacklist.jsonl"
@@ -1935,7 +1993,7 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
         lint_cfg["speech_words_max"] = speech_words_max
         lint_cfg["max_lines_per_speaker"] = max_lines_spk
         lint_ctx = {"kind": kind, "slots": slots, "blacklist": blacklist, "cloned": cloned, "cfg": lint_cfg,
-                    "scene": scene_prev, 
+                    "scene": scene_prev, "bodies": bodies,
                     "cast": cast_l, "overlays": overlays, "ask": ask, "act_id": route["act_id"], "wet_ok": wet_ok,
                     "recent_openings": [wp_lint.opening_sentence(d) for d in wp_state.load_recent(recent_path)[-10:]]}
         # 3 beat card (Cut 2: talk clips and runs with --frames use the in-code minimal beat card, no LLM planning call)
@@ -2086,6 +2144,16 @@ def run_clip(job: Dict[str, Any], cfg: Dict[str, Any], log, overrides: Optional[
                 import beta7_convert as _b7
                 t, _ = _b7.convert_to_beta7(t, mode="auto")
             if re.search(r"(?im)^\s*(?:subject_definitions|summary|retention_analysis|detailed_description)\s*:", t):
+                if job.get("prose_file"):
+                    dd_only = wp_lint.get_dd(t).strip()
+                    m_sum = re.search(
+                        r"(?is)^\s*summary:\s*\n(.*?)(?=\n\s*(?:retention_analysis|detailed_description|continuation)\s*:|\Z)",
+                        t, re.M,
+                    )
+                    card_for_asm = dict(card or {})
+                    if m_sum and m_sum.group(1).strip():
+                        card_for_asm["summary"] = m_sum.group(1).strip()
+                    return assemble_output(dd_only, card_for_asm, slots, bodies, kind), dd_only
                 return t, wp_lint.get_dd(t)
             dd_only = re.sub(r"(?im)^\s*(?:overall_soundscape|non_diegetic_music)\s*:\s*", "", t).strip()
             return assemble_output(dd_only, card, slots, bodies, kind), dd_only
@@ -2371,6 +2439,7 @@ def main(argv=None) -> int:
     ap.add_argument("--debug", action="store_true", help="Write debug per-run files (cand_*, lint_*, slots.json, route.json, beat_card*)")
     ap.add_argument("--fix-once", action="store_true", help="Opt-in single retry/rewrite on lint or build failure (off by default)")
     ap.add_argument("--prose-file", help="Hermes Path B: prose Hermes wrote; skips the writer call, same lint/hard stops/build")
+    ap.add_argument("--hermes-slot", default=None, help="Hermes model slot name for backend routing proof (or HERMES_SLOT env)")
     ap.add_argument("--lora", action="append", default=[], help="H3 Beta 7 LoRA spec: <filename>[:<strength>[:<trigger>]] (repeatable)")
     ap.add_argument("--realism-lora", nargs="?", const=str(fr.REALISM_LORA_DEFAULT["strength"]), default=None,
                     help="Attach MiniMax-H3-Realism-People-LoRA (optional strength, default 0.7; injects r34l1sm trigger)")
@@ -2412,7 +2481,7 @@ def main(argv=None) -> int:
                      "partner2_still": a.partner2_still, "frames": a.frames, "shots": a.shots, "shot_count": a.shot_count,
                      "aspect": a.aspect, "size": a.size, "still_mode": a.still_mode, "template": a.template,
                      "n_candidates": a.n_candidates, "debug": bool(a.debug), "fix_once": bool(a.fix_once),
-                     "prose_file": a.prose_file,
+                     "prose_file": a.prose_file, "hermes_slot": a.hermes_slot,
                      "loras": list(a.lora or []), "realism_lora": a.realism_lora,
                      "queue": bool(a.queue), "yes_derrick": bool(a.yes_derrick)})
     results = []

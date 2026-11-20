@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
+from build_request import R11_HAND
 from wp_lint import norm, WORD_RE
 
 WHITELIST = ("inside her", "inside her mouth", "fully sheathed", "hips flush", "flush against", "buried in her", "deep in her",
@@ -147,10 +148,27 @@ def default_wording_example_paths() -> List[Path]:
     return [p] if p.is_file() else []
 
 
+def _r11_hand_sixgrams() -> frozenset:
+    """Six-word runs of the required verbatim R11 hand-lock clause; never flagged as cloned."""
+    w = WORD_RE.findall(norm(R11_HAND))
+    return frozenset(" ".join(w[i:i + 6]) for i in range(max(0, len(w) - 5)))
+
+
+_R11_HAND_EXCLUDED = _r11_hand_sixgrams()
+_R11_HAND_NORM = norm(R11_HAND)
+
+
+def _is_r11_hand_phrase(phrase: str) -> bool:
+    pn = norm(phrase)
+    return bool(pn) and (pn in _R11_HAND_EXCLUDED or pn == _R11_HAND_NORM)
+
+
 def _sixgrams_from_text(text: str) -> List[str]:
     w = WORD_RE.findall(norm(_STRIP_TAG_RE.sub(" ", text or "")))
     out: List[str] = []
     for g in {" ".join(w[i:i + 6]) for i in range(max(0, len(w) - 5))}:
+        if g in _R11_HAND_EXCLUDED:
+            continue
         rem = [tok for tok in _strip_whitelist(g).split() if tok not in _CLONE_STOP]
         if len(rem) >= 3:
             out.append(g)
@@ -201,6 +219,8 @@ def build_cloned(prompt_text: str, recent: List[str], extra_texts: Optional[Sequ
                 out.append(g)
     seen, uniq = set(), []
     for p in out:
+        if _is_r11_hand_phrase(p):
+            continue
         if p not in seen:
             seen.add(p)
             uniq.append(p)

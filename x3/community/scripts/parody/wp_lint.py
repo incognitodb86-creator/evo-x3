@@ -248,7 +248,7 @@ def mode_checks(dd: str, full: str, sents: List[str], plain: str, ctx: Dict[str,
         out.append(_fix("wet_unasked", "wet, oil or sweat words only when the still or the ask has them", False, 5))
     rate = tempo_rate(sents[prim_idx]) if prim_idx is not None else None
     tr = (cfg.get("tempo_range") or {}).get("edge" if "edge" in ov else kind)
-    if rate is not None and tr and not (tr[0] <= rate <= tr[1]):
+    if kind not in SEX_KINDS and rate is not None and tr and not (tr[0] <= rate <= tr[1]):
         out.append(_fix("tempo_range", f"tempo {rate:g}/s is outside {tr[0]}-{tr[1]}/s for this mode", False, 5))
     return out
 
@@ -258,7 +258,14 @@ def mode_rules(kind: str) -> Dict[str, Any]:
 # U52: Only 18+ safety codes stay hard; all other craft/format rules are advisory warnings/notes.
 SAFETY_HARD = frozenset({"youth_hint", "scale_adult"})
 # U56 (Derrick): the cowgirl check and the stock-talk check are hard stops too (pipeline maps them to NOT_READY).
-HARD_STOP = SAFETY_HARD | frozenset({"cowgirl_check", "stock_talk"})
+HARD_STOP = SAFETY_HARD | frozenset({
+    "cowgirl_check", "stock_talk",
+    "no_primary", "no_tempo", "tempo_range",
+    "contact_anatomy", "unbound_partner",
+    "shot_timestamp_placeholder",
+    "slot_surface", "slot_light_or_place",
+    "banned_skin_shine", "summary_role_swap",
+})
 HARD_WEIGHT = 20
 SOFT_WEIGHT = 5
 
@@ -559,8 +566,68 @@ def _fix(code: str, note: str, hard: Optional[bool] = None, pen: Optional[int] =
 # U56: beat-sheet timestamps are a planning artifact and never ship; final-text glue (F8). Hard in the lint result, advisory for READY.
 BEAT_SHEET_TS_RE = re.compile(r"\[\s*\d+(?:\.\d+)?\s*s?\s*[-\u2013\u2014]\s*\d+(?:\.\d+)?\s*s\s*\]|"
                               r"\b\d{1,2}:\d{2}(?:\.\d+)?\s*[-\u2013\u2014]\s*\d{1,2}:\d{2}(?:\.\d+)?\b", re.I)
+SHOT_PLACEHOLDER_TS_RE = re.compile(r"(?i)\b(?:MM|SS|HH):(?:\d{1,2}(?:\.\d+)?|SS|MM)\b")
+SKIN_GLITTER_RE = re.compile(r"(?i)\b(?:glisten\w*|glitter\w*)\b")
+_KNEEL_S1_RE = re.compile(r"(?i)(?:\(S1\)|\bshe)[^.!?\n]{0,40}\bkneels?\b")
+_KNEEL_S2_RE = re.compile(r"(?i)(?:\(S2\)|\bhe)[^.!?\n]{0,40}\bkneels?\b")
 BARE_LABEL_RE = re.compile(r"(?<![(\w<,/])S[123](?![\w)>,/])")
 RIDE_ACTS = ("cowgirl", "reverse_cowgirl")
+
+
+def _summary_text(full: str) -> str:
+    m = re.search(r"(?im)^\s*summary\s*:\s*(.*?)(?=\n\s*(?:retention_analysis|detailed_description|continuation)\s*:|\Z)",
+                  full or "", flags=re.S)
+    return m.group(1).strip() if m else ""
+
+
+def _sex_oral_hard_checks(full: str, dd: str, sents: List[str], plain: str,
+                          ctx: Dict[str, Any], kind: str) -> List[Dict[str, Any]]:
+    """Hard craft/binding gates for sex/oral modes (also enforced when minimal=True)."""
+    if kind not in SEX_KINDS:
+        return []
+    out: List[Dict[str, Any]] = []
+    rules = mode_rules(kind)
+    cfg = ctx.get("cfg") or {}
+    slots = ctx.get("slots") or {}
+    ov = set(ctx.get("overlays") or [])
+    prim_idx = next((i for i, s in enumerate(sents) if PRIMARY_RE.search(s)), None)
+    if rules["primary"]:
+        if prim_idx is None:
+            out.append(_fix("no_primary", "add one 'PRIMARY MOTION - ...' sentence with the motion and its tempo", hard=True))
+        elif not TEMPO_RE.search(sents[prim_idx]):
+            out.append(_fix("no_tempo", "PRIMARY MOTION has no tempo word; use 'strokes a second', 'per second' or 'cycle'", hard=True))
+        rate = tempo_rate(sents[prim_idx]) if prim_idx is not None else None
+        tr = (cfg.get("tempo_range") or {}).get("edge" if "edge" in ov else kind)
+        if rate is not None and tr and not (tr[0] <= rate <= tr[1]):
+            out.append(_fix("tempo_range", f"tempo {rate:g}/s is outside {tr[0]}-{tr[1]}/s for this mode", hard=True))
+    _facial_finish = (
+        str(slots.get("position") or "").lower() == "finish"
+        or bool(re.search(r"(?i)\b(?:facial|cum(?:shot)? on her face|finishes? on her)\b", ctx.get("ask") or ""))
+    )
+    if not _facial_finish and not re.search(
+            r"(?i)\b(?:penis|cock|shaft|glans|vagina|pussy|anus|asshole|mouth|lips|vulvas?|clitoris|clit)\b", plain):
+        out.append(_fix("contact_anatomy",
+                        "the entry or contact sentence must name penis, vagina, anus, mouth, vulva, vulvas or clitoris; "
+                        "'thrusts into her' alone is not enough", hard=True))
+    bodies = int(ctx.get("bodies") or slots.get("bodies")
+                 or (2 if (ctx.get("cast") or {}).get("off_still_s2") or re.search(r"\(S2\)|<Subject 2>", full) else 1))
+    _sd_sec = re.split(r"(?im)^\s*summary\s*:", full, maxsplit=1)[0]
+    if bodies >= 2 and not re.search(r"(?im)<Subject\s+2>", _sd_sec):
+        out.append(_fix("unbound_partner", "every cast partner needs a <Subject 2> definition in subject_definitions", hard=True))
+    if (bodies >= 3 or (ctx.get("cast") or {}).get("off_still_s3") or re.search(r"\(S3\)|<Subject 3>", full)) \
+            and not re.search(r"(?im)<Subject\s+3>", _sd_sec):
+        out.append(_fix("unbound_partner", "every cast partner needs a <Subject 3> definition in subject_definitions", hard=True))
+    if SKIN_GLITTER_RE.search(plain):
+        out.append(_fix("banned_skin_shine", "remove 'glistening'/'glitter' skin wording; use plain wet or damp skin instead", hard=True))
+    sum_txt = _summary_text(full)
+    if sum_txt:
+        s_k1, s_k2 = bool(_KNEEL_S1_RE.search(sum_txt)), bool(_KNEEL_S2_RE.search(sum_txt))
+        d_k1, d_k2 = bool(_KNEEL_S1_RE.search(plain)), bool(_KNEEL_S2_RE.search(plain))
+        if (s_k2 and not s_k1 and d_k1 and not d_k2) or (s_k1 and not s_k2 and d_k2 and not d_k1):
+            out.append(_fix("summary_role_swap",
+                            "summary swaps who kneels compared to detailed_description; align summary with detailed_description",
+                            hard=True))
+    return out
 
 
 def final_text_checks(full: str, plain: str, ctx: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
@@ -569,6 +636,11 @@ def final_text_checks(full: str, plain: str, ctx: Optional[Dict[str, Any]] = Non
     if m:
         out.append(_fix("beat_sheet_timestamp", f"beat-sheet timestamp '{m.group(0)}' in the writer output; the beat sheet is a planning artifact, "
                         "order comes from phase words", hard=True))
+    m_ph = SHOT_PLACEHOLDER_TS_RE.search(full or "")
+    if m_ph:
+        out.append(_fix("shot_timestamp_placeholder",
+                        f"literal timestamp placeholder '{m_ph.group(0)}' in text; use real seconds or remove it",
+                        hard=True))
     if BARE_LABEL_RE.search(plain or ""):
         out.append(_fix("bare_label", "write the speaker label with parentheses, (S1) or (S2), never a bare S1 or S2", hard=True))
     if re.search(r"(?i)\bthe\s+the\b", full or ""):
@@ -667,7 +739,8 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
     req = required_slots(slots)
     for name, words in req.items():
         if not any(_has_word(dn, w) for w in words):
-            issues.append(_fix("slot_" + name, f"name the still's {name.replace('_', ' ')} ({' / '.join(words[:3])}) in the prose"))
+            _slot_hard = (kind in SEX_KINDS) if ("slot_" + name) in HARD_STOP else None
+            issues.append(_fix("slot_" + name, f"name the still's {name.replace('_', ' ')} ({' / '.join(words[:3])}) in the prose", hard=_slot_hard))
 
     # -- scale (lost-features audit): tiny/fairy women are adults at miniature scale; any youth hint is a hard stop --
     yh = (YOUTH_RE.search(dd) or YOUTH_RE.search(ctx.get("ask") or "") or UNDER18_AGE_RE.search(full)
@@ -684,6 +757,7 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
             issues.append(_fix("scale_anchor", "fix one measurable scale anchor (e.g. 'no taller than his forearm') and keep it", False, 5))
     issues += final_text_checks(full, plain, ctx)
     issues += stop_checks(dd, plain, ctx)
+    issues += _sex_oral_hard_checks(full, dd, sents, plain, ctx, kind)
     if minimal:
         _lines = spoken_lines(dd)
         _words = sum(len(l.split()) for l in _lines)
@@ -722,12 +796,12 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
 
     # -- act rules --
     prim_idx = next((i for i, s in enumerate(sents) if PRIMARY_RE.search(s)), None)
-    if rules["primary"]:
+    if rules["primary"] and kind not in SEX_KINDS:
         if prim_idx is None:
-            issues.append(_fix("no_primary", "add one 'PRIMARY MOTION - ...' sentence with the motion and its tempo"))
+            issues.append(_fix("no_primary", "add one 'PRIMARY MOTION - ...' sentence with the motion and its tempo", hard=False))
         else:
             if not TEMPO_RE.search(sents[prim_idx]):
-                issues.append(_fix("no_tempo", "PRIMARY MOTION has no tempo word; use 'strokes a second', 'per second' or 'cycle'"))
+                issues.append(_fix("no_tempo", "PRIMARY MOTION has no tempo word; use 'strokes a second', 'per second' or 'cycle'", hard=False))
     _facial_finish = (
         str(slots.get("position") or "").lower() == "finish"
         or bool(re.search(r"(?i)\b(?:facial|cum(?:shot)? on her face|finishes? on her)\b", ctx.get("ask") or ""))
@@ -738,9 +812,9 @@ def lint(full: str, ctx: Dict[str, Any], minimal: bool = False) -> Dict[str, Any
         issues.append(_fix(kind + "_contact", rules.get("banned_hint") or "wrong join words for this mode"))
     if kind != "oral" and ORAL_SHEATHED_RE.search(plain):  # acc4: mmf/spitroast oral words too
         issues.append(_fix("oral_contact", "oral contact names the mouth (inside her mouth), never sheathed or hips flush"))
-    if (rules["contact"] or kind in ("sex", "oral")) and not _facial_finish:
+    if rules["contact"] and kind not in SEX_KINDS and not _facial_finish:
         if not re.search(r"(?i)\b(?:penis|cock|shaft|glans|vagina|pussy|anus|asshole|mouth|lips|vulvas?|clitoris|clit)\b", plain):
-            issues.append(_fix("contact_anatomy", "the entry or contact sentence must name penis, vagina, anus, mouth, vulva, vulvas or clitoris; 'thrusts into her' alone is not enough"))
+            issues.append(_fix("contact_anatomy", "the entry or contact sentence must name penis, vagina, anus, mouth, vulva, vulvas or clitoris; 'thrusts into her' alone is not enough", hard=False))
     if re.search(r"(?i)\bseats himself\b", plain):
         issues.append(_fix("seats_himself", "do not write 'seats himself'; land the pose in (S1)'s own words", False, 5))
     if re.search(r"(?i)\b(?:says|asks)\s*,\s*(?:and\s+)?\(S\d\)\s+(?:says|asks)\b", plain):

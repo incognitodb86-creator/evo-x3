@@ -111,7 +111,7 @@ def test_each_hard_rule_trips_alone(code, mut):
     r = wp_lint.lint(full(bad), ctx())
     codes = [i["code"] for i in r["issues"]]
     assert code in codes
-    if code in wp_lint.SAFETY_HARD:
+    if code in wp_lint.HARD_STOP:
         got = r["hard"]
         assert got == [code] or (code == "clearance" and set(got) <= {"clearance", "clearance_missing"} and code in got)
     else:
@@ -591,7 +591,7 @@ def test_acc4_oral_sheathed_lint_in_mmf_mode():
     hdr = "detailed_description:\n[Shot 1] "
     ctx = {"kind": "sex", "slots": {}, "overlays": ["threesome"], "ask": "MMF spitroast", "cfg": {}}
     r = L.lint(hdr + "At first, (S1) kneels. (S2) is fully sheathed in her mouth while (S3) is buried in her.", ctx)
-    assert "oral_contact" in [i["code"] for i in r["issues"]] and r["hard"] == []
+    assert "oral_contact" in [i["code"] for i in r["issues"]] and "oral_contact" not in r["hard"]
     ok = L.lint(hdr + "At first, (S1) kneels. (S2) is deep inside her mouth while (S3) is buried in her.", ctx)
     assert "oral_contact" not in ok["hard"]
 
@@ -608,7 +608,7 @@ def test_pm_acc3_glue_summary_and_lints():
     hdr = "detailed_description:\n[Shot 1] "
     ctx = {"kind": "sex", "act_id": "standing_mf", "slots": {}, "overlays": [], "ask": "he takes her at the sideboard", "cfg": {}}
     r = L.lint(hdr + "At first, (S1) leans on the sideboard. She settles onto her hands and knees. (S2) is buried in her.", ctx)
-    assert "act_mismatch" in [i["code"] for i in r["issues"]] and r["hard"] == []
+    assert "act_mismatch" in [i["code"] for i in r["issues"]] and "act_mismatch" not in r["hard"]
     assert "youth_hint" in L.lint(hdr + "(S1), 16 years old, sits.", dict(ctx, act_id="missionary"))["hard"]
     assert p.partner_look_from_card({"partners": [{"label": "S3", "age": 31, "build": "lean", "hair": "short dark,"}]}, "S3").endswith("short dark hair")
 

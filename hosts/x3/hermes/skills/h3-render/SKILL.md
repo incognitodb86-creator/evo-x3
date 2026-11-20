@@ -41,13 +41,13 @@ Load `h3-writer` and save the Beta 7 prompt to `<run_dir>/hermes_prose.txt`. The
 r='<run_dir>'
 PY=/home/evo/AI/render/x3/.venv/bin/python3
 RWP=/home/evo/AI/community/scripts/parody/render_writer_pipeline.py
-$PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --still '<still>' --still-mode '<guide|ref>' --ask '<short ask>'
+$PY "$RWP" "$r" --prose-file "$r/hermes_prose.txt" --position '<position>' --still '<still>' --still-mode '<guide|ref>' --ask '<short ask>' --hermes-slot '<this chat model slot>'
 ```
 
 Add `--character`, `--template`, `--aspect`, `--size`, `--frames`, `--names`, or `--realism-lora` only when the ask needs them. On READY, `build_report.json` and `clip/request.api.json` exist and `DRY_RUN` is present.
 
 - READY: reply with the still, the run folder, the full prompt verbatim in a text block, and `Render this? (yes / no)`. Then stop and wait. Never shorten the prompt.
-- NOT_READY: quote the reason exactly. Fix once where the lint reason is a prompt typo you can correct, then stop.
+- NOT_READY: quote the reason exactly. Rewrite the flagged beat fresh from the still once (never inspect `wp_lint` source, never call `wp_lint.cloned_hits` or import lint internals, and never synonym-swap to beat the clone gate); if still NOT_READY, stop.
 
 ## 4. Queue only on Derrick's yes (single clip)
 

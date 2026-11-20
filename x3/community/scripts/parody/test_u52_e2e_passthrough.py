@@ -100,10 +100,12 @@ def _stub_writer_prompt(kind: str) -> str:
             "(S1) says in a ragged voice, <d>[English] Line three never drops.</d> "
             "By the end, he keeps the same pace, wet skin slapping on each stroke."
         )
+    s2_def = "" if kind == "talk" else "<Subject 2> is an adult man, 30 years of age, athletic build; he is (S2).\n"
     return (
         "subject_definitions:\n"
         "<Picture 1> is the reference image.\n"
-        "<Subject 1> is the adult woman in <Picture 1>; she is (S1).\n\n"
+        "<Subject 1> is the adult woman in <Picture 1>; she is (S1).\n"
+        f"{s2_def}\n"
         "summary:\n"
         "[reference generation] (S1) in a scene beside the bed.\n\n"
         "retention_analysis:\n"
@@ -246,7 +248,7 @@ def test_summary_line_queued_and_surface_mismatch_warning(tmp_path, monkeypatch)
         return _stub_writer_prompt("sex").replace(
             "PRIMARY MOTION - steady strokes, one every second, keeping hips flush.",
             "PRIMARY MOTION - she rises and sinks at one cycle every second as his hips lift a few inches to meet each sink.",
-        )
+        ).replace("beside the bed", "beside the sideboard")
 
     monkeypatch.setattr(rwp.Client, "chat", fake_chat)
     _patch_inproc_writer_run(monkeypatch)
