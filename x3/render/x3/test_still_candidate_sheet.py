@@ -2,6 +2,7 @@
 """Offline unit tests for x3/still_candidate_sheet.py (ST1 + 2026-11-20 PixlStash 2.0 picker upgrade)."""
 from __future__ import annotations
 
+import contextlib
 import io
 import json
 import os
@@ -223,7 +224,7 @@ class StillCandidateSheetTests(unittest.TestCase):
         if os.name == "nt":
             cm = mock.patch.object(scs.os, "symlink", side_effect=lambda src, dst: created.append((src, dst)))
         else:
-            cm = mock.nullcontext()
+            cm = contextlib.nullcontext()
         with cm:
             summary = self._run_sheet(
                 hits,
