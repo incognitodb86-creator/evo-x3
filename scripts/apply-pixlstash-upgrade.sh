@@ -29,6 +29,8 @@ PICKER_DST="/home/evo/AI/render/x3/still_candidate_sheet.py"
 PICKER_TEST_DST="/home/evo/AI/render/x3/test_still_candidate_sheet.py"
 READ_TOKEN_FILE="/home/evo/.config/pixlstash/render-read.token"
 WRITE_TOKEN_FILE="${PIXL_WRITE_TOKEN_FILE:-$READ_TOKEN_FILE}"
+# dedup/counts is write-scoped (read token gets 403 "Token is read-only"); used ONLY for that status call.
+DEDUP_TOKEN_FILE="${PIXL_DEDUP_TOKEN_FILE:-/home/evo/.config/pixlstash/tagger-write.token}"
 PIXL_URL="http://127.0.0.1:9537"
 PY_EVO="/home/evo/AI/render/x3/.venv/bin/python3"
 STAGE_DIR=""
@@ -122,7 +124,7 @@ do_status() {
     cat "/sys/fs/cgroup${cg}/memory.events"
   fi
   echo "=== /api/v1/dedup/counts (counts only) ==="
-  pixl_curl GET /api/v1/dedup/counts "$READ_TOKEN_FILE" || true
+  pixl_curl GET /api/v1/dedup/counts "$DEDUP_TOKEN_FILE" || true
   echo "=== /api/v1/users/me/penalised-tags (tag names & weights only) ==="
   pixl_curl GET /api/v1/users/me/penalised-tags "$READ_TOKEN_FILE" || true
 }
