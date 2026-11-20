@@ -69,7 +69,7 @@ Not done here, needs a look on its own: the other `alienpc/community/skills/` co
 
 W1 ran ref2va with our `writer_prompt.md` replacing its trained guide (wrong shape). Fixed per the model card and the pytraveler MiniMax-H3-Prompt-Rewriter node: the system message is only `fast_system_prompt.txt`, and `fast_user_prefix.txt` goes at the start of the user message before `Original prompt:`. Thinking is off, `max_tokens` is 3000, and MTP stays on if the llama-server build supports it. Official thinking-on heretic Q4 (step 2c) was paused after 3 finished cases; heretic Q4 then Q5 are rerun in this layout. General writers (Flash-Next) still use `writer_prompt.md`.
 
-## Setup audit 2026-11-19 17:40 CT (Opus, read-only, Derrick: "debug our setup")
+## Setup audit 2026-11-19 ~17:15 CT (Opus, read-only, Derrick: "debug our setup"; committed `466bcf3b` 17:19 CT)
 
 Sources: live copies on `mono` `df79048` (X3 snapshot 4:29 PM CT, AlienPc refresh 4:54 PM CT), repo code, and upstream model cards and runtime docs read today (links in each line). Nothing here was run on a box.
 

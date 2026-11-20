@@ -52,7 +52,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     assert g["12"]["inputs"]["copies_1"] == 1
     assert g["13"]["inputs"]["klein9_refmods"] == ["12", 0]
     assert g["13"]["inputs"]["custom_retention"] == 1.0
-    assert g["13"]["inputs"]["retention"] == "partially_preserved (0.7)"
+    assert g["13"]["inputs"]["retention"] == "fully_preserved (1.0)"
     # LoRA node wired between UNET (1) and CFGGuider (17)
     lora_nodes = [nid for nid, n in g.items() if n.get("class_type") == "LoraLoaderModelOnly"]
     assert len(lora_nodes) == 1
@@ -62,7 +62,7 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     meta = json.loads((tmp_path / "f1" / "flux_meta.json").read_text(encoding="utf-8"))
     assert "Sydney Sweeney" in meta["names"] and (tmp_path / "f1" / "DRY_RUN").is_file()
 
-    # Hybrid CLI shortcut: 0.85 RefMod + 0.60 Prodigy LoRA (Malcolmrey 98% likeness sweet spot)
+    # Hybrid CLI shortcut: RefMod author's recipe (RefMod 0.85 + Prodigy LoRA 0.60, retention 0.7)
     rc = fs.main([
         str(tmp_path / "f_hyb"),
         "--prompt", "The reference images represent one adult woman sitting on a sofa, natural skin pores, 35mm Kodak Portra 400.",
@@ -75,6 +75,39 @@ def test_flux_still_refmod_and_lora_and_guard(tmp_path):
     hl = [n for n in gh.values() if isinstance(n, dict) and n.get("class_type") == "LoraLoaderModelOnly"]
     assert hl and hl[0]["inputs"]["lora_name"] == "klein9\\fk9_sydneysweeney_v1_prodigy.safetensors"
     assert hl[0]["inputs"]["strength_model"] == 0.60
+    assert gh["13"]["inputs"]["retention"] == "partially_preserved (0.7)"
+
+
+def test_refmod_likeness_defaults_anchor_and_negative_stream(tmp_path):
+    """RefMod author's guide: likeness = fully_preserved (1.0); prompt points at the reference; RefMod on pos + neg."""
+    r = fs.build_flux_still(
+        tmp_path / "lk",
+        "Adult woman in her late twenties sitting at a cafe table, natural skin pores, 35mm film.",
+        refmods=["Sydney Sweeney"],
+        dry_run=True,
+    )
+    assert r["status"] == "READY"
+    g = json.loads((tmp_path / "lk" / "still" / "request.api.json").read_text(encoding="utf-8"))
+    assert g["13"]["inputs"]["retention"] == "fully_preserved (1.0)"
+    assert g["12"]["inputs"]["strength_1"] == 1.0
+    assert g["5"]["inputs"]["text"].startswith(fs.REFMOD_ANCHOR)
+    assert (tmp_path / "lk" / "prompt.txt").read_text(encoding="utf-8").startswith(fs.REFMOD_ANCHOR)
+    neg_id = g["17"]["inputs"]["negative"][0]
+    assert g[neg_id]["class_type"] == "Klein9RefModApply"
+    assert g[neg_id]["inputs"]["conditioning"] == ["6", 0]
+    assert g[neg_id]["inputs"]["klein9_refmods"] == ["12", 0]
+    assert g[neg_id]["inputs"]["retention"] == "fully_preserved (1.0)"
+    assert g["17"]["inputs"]["positive"] == ["13", 0]
+
+    # A prompt that already names the reference is left as written; plain T2I gets no RefMod nodes or anchor.
+    own = "The reference images represent one adult woman standing in a garden at golden hour."
+    fs.build_flux_still(tmp_path / "own", own, refmods=["Sydney Sweeney"], dry_run=True)
+    g2 = json.loads((tmp_path / "own" / "still" / "request.api.json").read_text(encoding="utf-8"))
+    assert g2["5"]["inputs"]["text"] == own
+    fs.build_flux_still(tmp_path / "t2i", "Adult woman standing in a garden at golden hour.", dry_run=True)
+    g3 = json.loads((tmp_path / "t2i" / "still" / "request.api.json").read_text(encoding="utf-8"))
+    assert not any(n.get("class_type") == "Klein9RefModApply" for n in g3.values() if isinstance(n, dict))
+    assert not g3["5"]["inputs"]["text"].startswith(fs.REFMOD_ANCHOR)
 
 
 def test_comfy_png_celeb_refmod_and_lora_auto_pickup_for_h3max(tmp_path, monkeypatch):

@@ -22,7 +22,7 @@ Use for any FLUX.2 Klein / Miraclein 4.5 still or H3Max start-still. Defer video
 | Mode | Template / Candidate | Prompt Topology |
 |---|---|---|
 | T2I (Miraclein 4.5 / Klein base) | M4 `miraclein_*` candidates (`Miraclein_4.5_9b_NVFP4`); `flux_stills_t2i_klein.candidate.api.json` still loads `flux-2-klein-9b-kv-fp8` (ST4 base) | Pure prose; never mention `"image 1"` |
-| Klein9 RefMod / LoRA | M4 Miraclein 4.5 RefMod / `loras/klein9/` candidates | Pure prose; never mention `"image 1"`; light facial detail at retention >= 0.7 |
+| Klein9 RefMod / LoRA | M4 Miraclein 4.5 RefMod / `loras/klein9/` candidates | Pure prose; never mention `"image 1"`; open with the reference anchor sentence (section 2) |
 | Single-change edit | M4 ReferenceLatent edit candidate (or locked S2) | Lead with `"image 1"` + ONE changing axis; keep-locked clause last |
 | RefControl pose / layout | `flux_stills_pose_klein.candidate.api.json`, `flux_stills_layout_klein.candidate.api.json` (`refcontrol_v2_poses`) | Open with exact trigger `"apply pose from image 1 with reference from image 2"` |
 | H3Max start-still | Any mode above at `768x1344` portrait / `1792x1008` landscape | Match beat-1 pose/wardrobe, natural headroom, zero video triggers |
@@ -78,10 +78,11 @@ Assemble the paragraph in this exact priority order:
 - Never reference `"image 1"` or edit/keep clauses.
 
 ### 2. Klein9 RefMod (`models/refmods-klein9/`) & Klein9 LoRA (`loras/klein9/`)
-- Naming convention (Malcolmrey): RefMods are `fk9_<compactname>_v1_refmod.safetensors` (e.g., `fk9_sydneysweeney_v1_refmod.safetensors`); paired Prodigy LoRAs are `klein9/fk9_<compactname>_v1_prodigy.safetensors`.
-- **Hybrid 98% likeness sweet spot (Malcolmrey empirical benchmark):** When a celeb has BOTH a Klein9 RefMod and a paired Prodigy LoRA (e.g., `sydneysweeney`, `meganfox`, `sabrinacarpenter`), **RefMod @ `0.85` + Prodigy LoRA @ `0.60`** beats Pure RefMod (`91%`) and Pure LoRA (`92%`). Use `--hybrid "<Name>"` on `flux_still.py` to wire this automatically.
-- **RefMod prompt anchor:** Never write `"image 1"` in RefMod prose (RefMods are pre-encoded latents, not a LoadImage input). Instead, anchor identity with `"the reference images represent one adult woman, keeping her face and hair exact from the reference"` and keep extra facial biometrics minimal at `retention >= 0.7` so text does not fight the RefMod latents.
-- Live `Klein9RefModApply` retention strings include the number: `"partially_preserved (0.7)"` (best default for new poses/outfits), `"attribute_transfer (0.4)"`, `"fully_preserved (1.0)"`.
+- Naming convention (Malcolmrey): RefMods are `fk9_<compactname>_v1_refmod.safetensors` (the loader lists the stem, e.g. `fk9_sydneysweeney_v1_refmod`); paired Prodigy LoRAs are `klein9/fk9_<compactname>_v1_prodigy.safetensors`.
+- **Likeness first (RefMod author's guide, 2026-11-20 check):** the author's maximum-likeness setting is pure RefMod at strength `1.0` with `"fully_preserved (1.0)"`. That is now the `flux_still.py` default for `--refmod`. `"partially_preserved (0.7)"` is the author's flexible-styling preset (new outfits and scenes at some likeness cost), and `"attribute_transfer (0.4)"` is looser still.
+- **Hybrid stack:** when a celeb has BOTH a RefMod and a Prodigy LoRA, the author's hybrid is RefMod `0.85` + LoRA `0.60`–`0.70` at `"partially_preserved (0.7)"` (`--hybrid "<Name>"`). The author's own visual scores (hybrid 98%, LoRA 92%, RefMod 91%) were measured on distilled `flux-2-klein-9b-fp8`, not on Miraclein; the 2026-11-20 likeness A/B decides which stack we use.
+- **RefMod prompt anchor (required):** Klein is an edit model and must be pointed at the reference. Start the paragraph with `"The reference images represent one adult woman; keep her face and hair unchanged and exact as in the reference images."` (the author's benchmark wording). `flux_still.py` adds an equivalent sentence when a RefMod prompt never says "reference". Never write `"image 1"` (RefMods are pre-encoded latents, not a LoadImage input). Do not describe face shape, eye color, or hair color; the reference carries them and text fights it.
+- **LoRA alone:** the author's pure-LoRA baseline ran at strength `1.0`, not `0.6`.
 
 ### 3. ReferenceLatent Single-Change Edit
 - Pick **ONE** changing axis: `pose`, `wardrobe`, `lighting`, `camera_angle`, or `background`.
@@ -109,8 +110,8 @@ Assemble the paragraph in this exact priority order:
 1. **T2I (Miraclein 4.5):**
    > An adult woman in her late twenties stands on a worn oak floor, weight shifted onto her right hip with her left knee relaxed. Her torso angles toward a tall window, right palm braced on a wooden dresser, dark hair hanging loose over her shoulders. She wears a charcoal #2E3033 cotton tank and denim shorts. Warm late-afternoon window light enters from the left. Medium-full shot at chest height, 35mm film, 50mm lens at f/2.0.
 
-2. **Klein9 RefMod (`partially_preserved (0.7)`):**
-   > An adult woman in her mid-twenties sits cross-legged on a linen sofa, weight pressed into the cushions with her hips tilted slightly left. Her torso leans forward, palms braced on the seat beside her knees, hair draping over her collarbones. She wears an open cream shirt and cotton briefs. Warm tungsten light from a right-side floor lamp fills the room. Full-body three-quarter view at waist height, Fujifilm X-T5, 35mm f/1.8.
+2. **Klein9 RefMod (`fully_preserved (1.0)`, the default):**
+   > The reference images represent one adult woman; keep her face and hair unchanged and exact as in the reference images. She is in her mid-twenties and sits cross-legged on a linen sofa, weight pressed into the cushions with her hips tilted slightly left, palms braced on the seat beside her knees. She wears an open cream shirt and cotton briefs. Warm tungsten light from a right-side floor lamp. Full-body three-quarter view at waist height, Fujifilm X-T5, 35mm f/1.8.
 
 3. **ReferenceLatent Single-Change Edit (`pose` axis):**
    > Show the adult woman from image 1 kneeling on the quilted mattress, weight settled onto her heels with her torso angled slightly forward, elbows soft, and both palms braced flat on the rumpled cotton sheets ahead of her knees. Her hair hangs downward over her shoulders while the mattress compresses evenly beneath her shins and knees. Keep her face, hairstyle, wardrobe, bedroom setting, lighting, and camera angle from image 1.
@@ -126,7 +127,7 @@ Use `/home/evo/AI/community/scripts/parody/flux_still.py` (dry run by default; r
 /home/evo/AI/render/x3/.venv/bin/python3 /home/evo/AI/community/scripts/parody/flux_still.py \
   '/home/evo/AI/community/runs/<still_run_name>' --prompt '<prompt>' \
   --mode t2i|refmod|edit|klein_t2i|pose|layout \
-  [--refmod '<klein9_refmod_or_name>'] [--retention 'partially_preserved (0.7)'] \
+  [--refmod '<klein9_refmod_or_name>'] [--retention 'fully_preserved (1.0)'] \
   [--lora 'klein9/<file>.safetensors:0.60'] [--hybrid '<Celeb Name>'] \
   [--image '<ref_still>'] [--pose-image '<pose_ref>'] \
   [--character '<Name>'] [--actor '<Actor>'] [--names '<Name>' ...] \

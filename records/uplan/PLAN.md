@@ -97,20 +97,20 @@ Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick
 
 ### Open / held
 
-- Opus brief for Hermes workspaces: records/UNI-OPUS-HERMES-WORKSPACES/BRIEF.md (Derrick t3015u)
+- Opus brief for Hermes workspaces: records/UNI-OPUS-HERMES-WORKSPACES/BRIEF.md (Derrick t3015u). **Reviewed 2026-11-20: BLOCK** ([REVIEW-20261120-opus.md](../UNI-OPUS-HERMES-WORKSPACES/REVIEW-20261120-opus.md)); replaced by [UNI-APPLY-X3-HERMES-WORKSPACES](../UNI-APPLY-X3-HERMES-WORKSPACES/BRIEF.md) (F4 H7), which waits on Derrick's yes.
 - Undo the `4d909034` 2-pass ref routing so `ref` clips also follow t3013u: revert the `pick_template()` portrait default and the `oc_ref_2pass` allowlist entry on `mono`, X3 live and AlienPc. This is a code + live change, so it waits on Derrick's go.
 - Path B next round (Prompt maker FAIL, means 6.83 / 6.33). Derrick held it at 7:01 AM CT.
 - Clone-gate isolation (separate uid, or no terminal for the writer), waiting on Derrick.
 - REA-Video v3 proposal and the 101-pack batch, held. [REA-VIDEO-VAL30S-RESULT.md](../BENCH-ALIENPC-1/REA-VIDEO-VAL30S-RESULT.md).
-- Gemma retire decision.
+- Gemma retire decision. **Decided 2026-11-20 ~8:45 AM CT: Gemma is dropped; the X3 stays on Qwen Flash-Next** (pins restored and `gemma` profile archived in F4 H7).
 - xai-oauth, blocked on xAI browser verification.
 - Alfred audit feedback.
-- Hermes Gemma workspace: Derrick wants the setup sent through the Hermes chat to pi and the coding pipeline. The first attempt went to the render workspace by mistake, and a hand-made `gemma` profile (cloned from render) exists and needs redoing. Waiting on which Hermes chat to use.
+- Hermes Gemma workspace: superseded by the Gemma drop above. The hand-made `gemma` profile is archived by F4 H7.
 
 ### Issues
 
 - Hermes games the clone gate (reads `wp_lint` and hashes).
-- Flux A5 stills judged bad by Derrick (not being debugged).
+- Flux A5 stills judged bad by Derrick. Reopened 2026-11-20 ~8:17 AM CT: RefMods and LoRAs don't carry likeness. Fix and A/B are Miraclein plan M6 ([FLUX-LIKENESS-20261120](../FLUX-LIKENESS-20261120/BRIEF.md)).
 - H3max: versus the original `oc_guide` 1-pass start (YDIF full-frame 7.19/2.13/12.1, background 4.22/2.47/9.4, 304.7 s), `oc_ref_2pass` is 7.53/2.59/15.8 and 4.91/3.09/14.9 in 235.3 s — about 70 s faster, but faces are softer and 2-pass did not reduce background flicker on this seed. `oc_ref_1pass` is 7.89/2.12/13.2 and 5.75/3.06/11.3. Stage-2 vs `tq1_oc_ref_2pass`: `tq2_vsa_0.2` oilier/plastic with a distorted face near the start (YDIF max 17.9 vs 15.9); `tq3_lcm_simple` waxier (spike 17.1); `tq3_res_multistep` about equal with more motion (mean 9.6 vs 7.6); `tq5_headerfree` weaker face match. Stage-1 `guide_2pass` was the smoothest among those later graphs (YDIF sd 1.89) but the face drifts after about 6 s. TQ4 16:9 and two-person clips are only 5.2 s and open on a tight crop.
 - REA tongue morphing, shared seed, voice window dropped in `h3max_bridge`.
 - X3 nightly QNAP copy ran in 47 ms and likely copied nothing (not touched per Derrick).
