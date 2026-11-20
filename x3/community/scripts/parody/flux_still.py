@@ -381,14 +381,23 @@ def build_flux_still(
     return dict(rep, run_dir=str(run_dir))
 
 
-def queue_flux_still(run_dir: Path, *, pixl_inbox: Path = PIXL_INBOX) -> Dict[str, Any]:
-    """Queue a READY Flux still via run_queue.py --remote, then drop the PNG into pixl-inbox for PixlStash."""
+def _queue_cmd(run_dir: Path, *, exe: str, rq: Path, remote: Optional[bool] = None) -> List[str]:
+    use_remote = (os.name != "nt") if remote is None else bool(remote)
+    cmd = [exe, str(rq)]
+    if use_remote:
+        cmd.append("--remote")
+    cmd.extend(["--run-dir", str(run_dir), "--no-upscale"])
+    return cmd
+
+
+def queue_flux_still(run_dir: Path, *, pixl_inbox: Path = PIXL_INBOX, remote: Optional[bool] = None) -> Dict[str, Any]:
+    """Queue a READY Flux still via run_queue.py (--remote on X3, local on Windows), then drop into pixl-inbox."""
     run_dir = Path(run_dir)
     rq = SCRIPTS_DIR / "run_queue.py"
     py = Path(os.environ.get("RQ_PY") or (_AI_ROOT / "render" / "x3" / ".venv" / "bin" / "python3"))
     exe = str(py) if py.is_file() else sys.executable
     proc = subprocess.run(
-        [exe, str(rq), "--remote", "--run-dir", str(run_dir), "--no-upscale"],
+        _queue_cmd(run_dir, exe=exe, rq=rq, remote=remote),
         cwd=str(SCRIPTS_DIR.parent),
         capture_output=True, text=True, timeout=600,
     )

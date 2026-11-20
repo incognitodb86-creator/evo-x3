@@ -109,6 +109,17 @@ def test_refmod_likeness_defaults_anchor_and_negative_stream(tmp_path):
     assert not any(n.get("class_type") == "Klein9RefModApply" for n in g3.values() if isinstance(n, dict))
     assert not g3["5"]["inputs"]["text"].startswith(fs.REFMOD_ANCHOR)
 
+    # Static RefMod candidate template matches likeness defaults (pos + neg RefMod at 1.0)
+    static_g = json.loads(fs.MODES["refmod"].read_text(encoding="utf-8"))
+    assert static_g["13"]["inputs"]["retention"] == "fully_preserved (1.0)"
+    assert static_g["14"]["class_type"] == "Klein9RefModApply"
+    assert static_g["17"]["inputs"]["negative"] == ["14", 0]
+
+    # Queue command omits --remote on Windows local queueing, keeps it on X3 remote
+    win_cmd = fs._queue_cmd(tmp_path / "lk", exe="python", rq=Path("run_queue.py"), remote=False)
+    x3_cmd = fs._queue_cmd(tmp_path / "lk", exe="python3", rq=Path("run_queue.py"), remote=True)
+    assert "--remote" not in win_cmd and "--remote" in x3_cmd
+
 
 def test_comfy_png_celeb_refmod_and_lora_auto_pickup_for_h3max(tmp_path, monkeypatch):
     # Fake local H3 RefMod dir containing Sydney Sweeney + Megan Fox visual RefMods

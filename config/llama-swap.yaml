@@ -182,20 +182,30 @@ models:
           reasoning_effort: low
         "flash-next-uncensored-sub":
           reasoning_effort: low
-        # 2026-11-20 (Derrick chat ~8:17 AM CT: "two workspaces one for rendering and one for coding and optimize the
-        # qwen flashnext settings for both"): Hermes workspace aliases on this same resident slot (zero swaps).
-        # Sampler only, from the Qwen3.8-Flash-Next card. Thinking stays in each Hermes profile (render: off,
-        # code: server default medium): Gufo 0.35.0 returns HTTP 400 when enable_thinking and reasoning_effort
-        # arrive together, so these entries set neither.
-        "flash-next-render":  # card instruct (non-thinking) preset
+        # 2026-11-20 (Derrick ~8:17 AM CT + ~9:07 AM CT D1/D2/D2b): Hermes workspace aliases on this same resident
+        # slot (zero swaps). All keys verified in Gufo 0.35.0 (sampling_request.hpp, openai_chat.cpp).
+        # - flash-next-render: Qwen Instruct sampler, thinking OFF; presence_penalty 0.0 per D1 (A/B 1.5 later).
+        # - flash-next-code: Qwen Thinking sampler (C5 11/11 winner); thinking medium in Hermes, Gufo 8192 budget.
+        # - flash-next-aux: fast deterministic non-thinking alias for Hermes compression/vision/approval/title_generation.
+        "flash-next-render":
+          chat_template_kwargs:
+            enable_thinking: false
           temperature: 0.7
           top_p: 0.8
           top_k: 20
           min_p: 0.0
-          presence_penalty: 1.5
-        "flash-next-code":  # card thinking preset (the card's agentic-coding runs used 1.0 / 0.95)
+          presence_penalty: 0.0
+        "flash-next-code":
           temperature: 1.0
           top_p: 0.95
+          top_k: 20
+          min_p: 0.0
+          presence_penalty: 0.0
+        "flash-next-aux":
+          chat_template_kwargs:
+            enable_thinking: false
+          temperature: 0.35
+          top_p: 0.9
           top_k: 20
           min_p: 0.0
           presence_penalty: 0.0
@@ -401,3 +411,5 @@ profiles:
       flash-next: flash-next-uncensored-v2
       flash-next-sub: flash-next-uncensored-v2
       qwen27b: flash-next-uncensored-v2
+      # 2026-11-20 (Derrick ~9:07 AM CT D7): pin ref2va so nothing in main can unload Gufo while W4 is held.
+      ref2va-27b-heretic-q4: flash-next-uncensored-v2

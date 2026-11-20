@@ -51,3 +51,21 @@ profile, 1 `AGENTS.md`).
 - Hermes memory caps (USER 1375, MEMORY 2200) stay as live.
 - Derrick 2026-11-20 ~8:40 AM CT: Gemma is dropped and the X3 stays on Qwen Flash-Next. The replacement brief restores
   the Gemma pins and archives the hand-made `gemma` profile.
+
+## Primary-source correction (2026-11-20 ~9:05 AM CT)
+
+Checking upstream **Gufo `v0.35.0`** (`sampling_request.hpp`, `openai_chat.cpp`) and **Hermes Agent `v0.23.3`**
+(`config_defaults.py`, `cli_config_load.py`) corrected three claims above while confirming the verdict stays **BLOCK**:
+
+- **Corrected (valid in upstream source):** Gufo `0.35.0` DOES allow `enable_thinking: true` + `reasoning_effort: "medium"`
+  together (HTTP 400 only fires when they disagree), and DOES accept `min_p`, `presence_penalty`, `top_k`, and
+  `reasoning_budget_tokens`. Hermes `v0.23.3` DOES have `prefill_messages_file`, `auxiliary.compression`,
+  `auxiliary.approval`, and issues `#9635`/`#106012`/`#156360`/`#156911`.
+- **Two extra bugs caught in the Opus brief:** Gufo `0.35.0` parses `repeat_penalty`, **not** `repetition_penalty`
+  (silently ignored); Hermes `v0.23.3` uses `auxiliary.title_generation`, **not** `auxiliary.title`; and `gufo#388` was
+  closed 2026-10-03 after a prompt fix hit 100/100 at `presence_penalty=1.5` (not a Gufo `presence_penalty` bug).
+- **Adopted from the Opus brief into our replacement installer (`scripts/apply-hermes-workspaces.sh`):** a 3rd zero-swap
+  alias `flash-next-aux` (thinking OFF, temp 0.35) for `auxiliary.{compression,vision,approval,title_generation}` so
+  background tasks never waste thinking tokens on the coding profile, plus a one-line no-think tool retry rule in
+  Render `AGENTS.md`. The 4 live blockers (WebUI rewrite, dropped auth/hook + `reasoning_effort: none`, literal `******`
+  scripts, header-free `[Shot 1]` skills) remain unchanged.

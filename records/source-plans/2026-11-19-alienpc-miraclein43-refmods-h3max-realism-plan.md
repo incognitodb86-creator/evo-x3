@@ -20,7 +20,7 @@ Count: 3 done, 2 open, 1 held, 1 closed (M6 added 2026-11-20).
 
 ### Open (what it waits on)
 - **M2:** standalone H3 RefMod extract not run. Waits on Derrick picking the 6-12 stills (agents do not view the PixlStash library).
-- **M6:** Flux likeness fix. Code on mono (2026-11-20); the still A/B ([FLUX-LIKENESS-20261120](../FLUX-LIKENESS-20261120/BRIEF.md)) waits on Derrick's yes, reference photos, and Q-FL1 to Q-FL3.
+- **M6:** Flux likeness fix. Code + static `miraclein_refmod.candidate.api.json` + runner (`alienpc/community/scripts/run_flux_likeness_ab.py`) ready on mono; approved by Derrick (2026-11-20 ~9:07 AM CT D6: Sydney Sweeney + Megan Fox, Miraclein FP8 8.87 GB download for L7, existing `FLUX-KLEIN-9B-FP8-NSFW` for L6). Brief: [FLUX-LIKENESS-20261120](../FLUX-LIKENESS-20261120/BRIEF.md).
 
 ### Held
 - **M4:** ran 2026-11-19 night as uplan A5 ([A5-RESULT.md](../BENCH-ALIENPC-1/A5-RESULT.md), `497e2741`). T2I, RefMod (`partially_preserved (0.7)`), Hybrid and single-change edit all passed the objective checks. Peak VRAM 14.7-15.5 GB (under 16 GB), but sampling took 33-55 s per still, not the 6-15 s target. Derrick judged the Flux stills bad (t3010u) and said not to debug them (t3011u). Not promoted; candidate templates stay `*.candidate.api.json` ([M4-ST4-ST5-DRAFTS-RESULT.md](../BENCH-ALIENPC-1/M4-ST4-ST5-DRAFTS-RESULT.md)).
