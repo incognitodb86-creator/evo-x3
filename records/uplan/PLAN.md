@@ -14,7 +14,7 @@ pending_upload: true
 
 > **2026-11-20 (Derrick t3014u): the per-area source plans in [`records/source-plans/`](../source-plans/README.md) (F4 follow-up, LX1-LX9 Linux, M0-M5 Miraclein, RV0-RV5 REA-Video) are now the primary, current plans; this PLAN.md is the index and history.**
 
-Related: [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo plan](../monorepo-consolidation/PLAN.md) · [Opus review (2026-11-19)](./REVIEW-20261119-opus.md) · source plans on `evo-x3-all` (blob SHAs verified 2026-11-19 ~10:28 AM CT):
+Related: [Opus brief for Hermes workspaces](../UNI-OPUS-HERMES-WORKSPACES/BRIEF.md) (Derrick t3015u) · [X3 Hermes live snapshot incl. profiles](../../hosts/x3/live/hermes/README.md) · [Hermes two-path plan](../hermes-direct-render/PLAN.md) · [monorepo plan](../monorepo-consolidation/PLAN.md) · [Opus review (2026-11-19)](./REVIEW-20261119-opus.md) · source plans on `evo-x3-all` (blob SHAs verified 2026-11-19 ~10:28 AM CT):
 [Linux LX1-LX9](https://github.com/incognitodb86-creator/evo-x3/blob/evo-x3-all/plans/2026-11-18-alienpc-linux-plan-changes.md) `078da632` ·
 [Miraclein M0-M5](https://github.com/incognitodb86-creator/evo-x3/blob/evo-x3-all/plans/2026-11-19-alienpc-miraclein43-refmods-h3max-realism-plan.md) `ca1a6a94` ·
 [REA-Video RV0-RV5](https://github.com/incognitodb86-creator/evo-x3/blob/evo-x3-all/plans/2026-11-19-rea-video-h3max-beta7-plan.md) `591680d8` ·
@@ -97,6 +97,7 @@ Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick
 
 ### Open / held
 
+- Opus brief for Hermes workspaces: records/UNI-OPUS-HERMES-WORKSPACES/BRIEF.md (Derrick t3015u)
 - Undo the `4d909034` 2-pass ref routing so `ref` clips also follow t3013u: revert the `pick_template()` portrait default and the `oc_ref_2pass` allowlist entry on `mono`, X3 live and AlienPc. This is a code + live change, so it waits on Derrick's go.
 - Path B next round (Prompt maker FAIL, means 6.83 / 6.33). Derrick held it at 7:01 AM CT.
 - Clone-gate isolation (separate uid, or no terminal for the writer), waiting on Derrick.
