@@ -47,3 +47,7 @@ records/plan-v32/c5-results/live/**/target/
 # pi mcp.json can hold literal service auth headers (Home Assistant) - never commit
 **/mcp.json
 **/auth.json
+
+# Runtime/test ComfyUI input staging folder (never commit staged test PNGs)
+x3/comfy-alienpc/
+

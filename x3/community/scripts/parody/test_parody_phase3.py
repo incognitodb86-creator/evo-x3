@@ -25,14 +25,16 @@ from build_request import (
     verify_keep_dials,
 )
 from c2v_chain import plan_c2v_chain
-from resolve import resolve_identities
+from resolve import check_refmods_dir, resolve_identities
 from run_record import build_assets_record, save_run_record, verify_run_artifacts
 import comm
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 INDEX_DIR = _REPO_ROOT / "index" / "h3-known-characters"
-REFMODS_DIR = _REPO_ROOT.parent / "comfy-alienpc" / "models" / "refmods"
+# Real H3 RefMods come from the production host-aware resolver, so git worktrees
+# (where the repo-relative guess has no comfy-alienpc/) still find the real files.
+REFMODS_DIR = check_refmods_dir()
 ALIASES_PATH = Path(__file__).parent / "aliases.json"
 
 
