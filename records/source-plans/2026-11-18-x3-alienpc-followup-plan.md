@@ -73,6 +73,13 @@ x3"), and the Flux likeness fix in the Miraclein plan (M6). Opus error owned: th
 - AlienPc AGT1 agent files are still not applied ([UNI-APPLY-ALIENPC-B-AGT1](../UNI-APPLY-ALIENPC-B-AGT1/RESULT-still-blocked.md)).
 - **`U56 Decision #1` wording conflict (flagged, not resolved here):** this plan says Decision #1 means *no* H3 headers on Beta 7. The Nov 19 A7 records ([A7-STAGE2-RESULT.md](../BENCH-ALIENPC-1/A7-STAGE2-RESULT.md)) and the uplan TQ5 row describe it as the 4-header Beta 7 layout, and the ref2va writer now uses the official six-section layout (Derrick t2878u/t2884u/t2887u). Derrick or Opus should confirm which wording is current.
 
+## Update 2026-11-20 ~2:30 PM CT
+
+- **H7 + PX1/PX2 applied on the X3** 11:11–11:13 AM CT by agy (U59 run 2): three alias probes PASS, `code` profile live, PixlStash memcap 14G/16G. The live picker check hit HTTP 400, fixed by Max in `e4aa5376` (`reference_character_id`, `character_likeness`). Record: [U59-RESULT.md](../U59-RESULT.md).
+- **Opus brief items 1–3, 9, 10 (Derrick t3104u–t3120u):** Hermes media/gallery access + stop-if-missing line on PR `#2` (canonical `h3-render` skill; Max copies it to the live profiles). AlienPc OpenSSH review checklist, X3 master catalog design (Q-CAT1), X3 3-slot 131K test + rollback, and phone login for `xai-oauth` are in [NEXT-STEPS.md](../opus/NEXT-STEPS.md) sections 3, 9, 10 and 11.
+- **Q-cards Q-OPT1..6** (Gufo prompt cache 2 GiB → 16 GiB + disk tier, Hermes loop hard stop, ComfyUI-PixlStash v1.9.2, MiniMaxH3Mod masks, Klein9 `copies_1`, Gufo ASR/TTS): NEXT-STEPS section 7. Nothing applied.
+- **Render speed:** section 4's "checked and not adopted" list (SageAttention, `torch.compile`, TeaCache) also applies to Flux stills in the same `comfyui_auto` process.
+
 ## 0. Already true on 2026-11-19 (don't redo)
 
 | Area | Live State | Source |

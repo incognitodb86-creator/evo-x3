@@ -35,6 +35,15 @@ Count: 3 done, 2 open, 1 held, 1 closed (M6 added 2026-11-20).
 - Last item in the uplan (`LAST`): the free Klein 9B Bulge Editor test is still untested. It waits on everything else being done and on Derrick's go for the download.
 - **`U56 Decision #1` wording conflict (flagged, not resolved here):** this plan says Decision #1 means *no* H3 headers on Beta 7. The Nov 19 A7 records ([A7-STAGE2-RESULT.md](../BENCH-ALIENPC-1/A7-STAGE2-RESULT.md)) and the uplan TQ5 row describe it as the 4-header Beta 7 layout, and the ref2va writer now uses the official six-section layout (Derrick t2878u/t2884u/t2887u). Derrick or Opus should confirm which wording is current.
 
+## Update 2026-11-20 ~2:30 PM CT (M6, Opus brief items 4-6, 11)
+
+- **RefMod audit:** the `fk9_*` RefMods are FLUX.2 Klein9 image RefMods built by malcolmrey (21 images × 256 tokens = 5,376 tokens). That is his standard build, not a bad one. AlienPc's LoRA sizes match HuggingFace byte-for-byte. Details: [REFMOD-AUDIT-20261120.md](../FLUX-LIKENESS-20261120/REFMOD-AUDIT-20261120.md) (PR `#3`).
+- **Fixes on PRs (file only, not live):** `#3` `ConditioningZeroOut` negative + placeholder L7 prompt template; `#4` A/B runner fixes (real-image refs only, InsightFace JSON parse, gallery ceiling, 6-seed `--ab-suite l7`, optional `--with-v1-lora`); `#5` `flux_still.py --unet` / `--request-json`.
+- **1:59 PM CT L7fix stills still look off** (Max brief `mono-brief` `52567d19`). M6 stays OPEN. Next: the 5-arm likeness test (FP8 L7fix, NVFP4 L7fix head-to-head, same graph on non-Miraclein Klein FP8, Kontext-style single-photo edit on NVFP4, curated 4–8 image RefMod) in [NEXT-STEPS.md](../opus/NEXT-STEPS.md) section 8. Hermes Render writes the prompts.
+- **Miraclein NVFP4 default rule (Derrick 2026-11-20 ~2:36 PM CT):** all static `miraclein_*.candidate.api.json` templates already default to `Miraclein_4.5_9b_NVFP4.safetensors` (`5.18 GB`, 43–55 s in A5 vs 139–180 s on `9.08 GB` FP8). Keep **NVFP4** as the production default unless FP8 beats NVFP4 by >0.02 ArcFace mean AND wins Derrick's eye check in `L7-nvfp4` vs `L7-fixed` (`--with-nvfp4` in `#4`, bakeoff arm S1 in NEXT-STEPS section 12).
+- **Speed (item 11):** the bakeoff in NEXT-STEPS section 12 tests NVFP4, CFG 1.0, 8 steps, curated refs, and Kontext edit one at a time. SageAttention, `--fast`, `torch.compile` and TeaCache stay out (already rejected in F4 section 4 / R6).
+- **One ComfyUI, not two:** NEXT-STEPS section 13 (one 16 GB GPU, 64 GB RAM).
+
 ## 0. Conflicts fixed from the Nov 19 `.docx` draft (do NOT reintroduce)
 
 | Draft item | Conflict with live setup | Fixed rule in this plan |
