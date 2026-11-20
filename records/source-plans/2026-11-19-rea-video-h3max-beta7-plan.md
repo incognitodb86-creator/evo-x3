@@ -34,6 +34,12 @@ Count: 2 done, 3 open, 2 held, 0 closed (RV6 added 2026-11-20).
 - The automatic video reviewer refuses explicit clips, so review of these clips needs Max or Derrick by eye.
 - **`U56 Decision #1` wording conflict (flagged, not resolved here):** this plan says Decision #1 means *no* H3 headers on Beta 7. The Nov 19 A7 records ([A7-STAGE2-RESULT.md](../BENCH-ALIENPC-1/A7-STAGE2-RESULT.md)) and the uplan TQ5 row describe it as the 4-header Beta 7 layout, and the ref2va writer now uses the official six-section layout (Derrick t2878u/t2884u/t2887u). Derrick or Opus should confirm which wording is current.
 
+## Update 2026-11-20 ~2:30 PM CT (RV6)
+
+- H7 and C0 are done (U59). The local LLM coded C1–C7 through `pi-job` on the X3 (all DONE, `model=x3`), and Max's C8 check plus test fixes are on `pi/rea-parody` `4b2d142` ([RESULT-CODING.md](../REA-PARODY-PIPELINE/RESULT-CODING.md) on that branch).
+- Opus review (brief item 7) is PR `#6`: test PNGs removed and blocked by a `tmp_path` fixture + `.gitignore`; fixes for BPM detection below 90 BPM, non-16-bit WAVs, shot ids that don't start with `shot_`, and the `rea_pose` pose image. 106 REA + Flux tests pass offline.
+- Next: merge `#6`, full parody pytest on the X3, then C8 deploy and C9 skill on Derrick's go, then R1–R4 ([NEXT-STEPS.md](../opus/NEXT-STEPS.md) section 5).
+
 ## 0. Conflicts fixed from the Rev 2 `.docx` draft (do NOT reintroduce)
 
 | Draft item | Conflict with live setup | Fixed rule in this plan |

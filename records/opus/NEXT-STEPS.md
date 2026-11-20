@@ -14,6 +14,8 @@ All file-only fixes are open as separate PRs into `mono` (no direct pushes to `m
 | `#5` | `fix/brief-6-flux-still-flags` | 6 | `x3/community/scripts/parody/flux_still.py` + tests (`--unet`, `--request-json`) |
 | `#6` | `fix/brief-7-rea-parody-review` | 7 | `pi/rea-parody` review & fixes (drop 7 PNGs, `conftest.py` `tmp_path` isolation, `.gitignore`, BPM lag range, WAV width check, shot discovery, `rea_pose` `pose_image`) |
 
+**First:** Max's 2:08 PM CT brief and live snapshot are on branch `origin/mono-brief` (`52567d19`, one commit on top of `mono` `8e75395`). Fast-forward `mono` to it. All six PRs also merge cleanly on top of `mono-brief` (checked with `git merge-tree` and each PR's real merge base, 2026-11-20 ~2:25 PM CT).
+
 After merging on GitHub (with Derrick's yes), mirror to Gitea and pull `mono` on X3 (`~/evo-x3`) and the AlienPc sparse `mono` clone. `#5` and `#6` both touch `x3/community/scripts/parody/flux_still.py` in different regions; `git merge-tree` shows all six PRs merge cleanly into `mono` 8e753955, including `#5` + `#6` together (VERIFIED 2026-11-20 ~2:10 PM CT). Run the full parody pytest on X3 afterward. `#6` carries the original C1-C8 commits, so the 7 synthetic test PNGs stay in history (added in 4b2d142, removed in the next commit); a squash merge keeps them out of `mono` history if Derrick prefers.
 
 ## 2. X3 live: deploy `h3-render/SKILL.md` to all Hermes profiles (Brief items 1, 1b, 3)
@@ -104,17 +106,17 @@ Max's 2:08 PM CT brief (`origin/mono-brief` `52567d19`, Derrick `t3108u`–`t312
 ### Recommendation: test Kontext-style `ReferenceLatent` edit + non-Miraclein Klein9 isolation
 
 1. **Why L7fix T2I+RefMod can still miss likeness:**
-   - Miraclein 4.5 is a heavy NSFW fine-tune, whereas Malcolmrey's 98% RefMod+LoRA score was measured on distilled `flux-2-klein-9b-fp8` (8 steps, CFG 1.0, `res_multistep`/`simple`). Miraclein's weights may shift away from stock Klein9 RefMod/LoRA manifolds.
+   - Miraclein 4.5 is a heavy NSFW fine-tune, whereas Malcolmrey's 98% RefMod+LoRA score was measured on distilled `flux-2-klein-9b-fp8` (8 steps, CFG 1.0). Miraclein's weights may shift away from stock Klein9 RefMod/LoRA manifolds.
    - Each official RefMod bundles 21 varied images (5,376 compressed 512x512 tokens), averaging angles/lighting/eras together.
-2. **Why Kontext-style `ReferenceLatent` edit should beat T2I+RefMod for likeness:**
+2. **Why a Kontext-style `ReferenceLatent` edit may beat T2I+RefMod for likeness (ASSUMPTION; Arm C tests it):**
    - FLUX.2 Klein 9B is natively a Kontext-style reference-conditioning edit model (`miraclein_edit.candidate.api.json`: `LoadImage -> ResizeImageMaskNode (1.0 MP) -> VAEEncode -> ReferenceLatent` on pos + neg, denoising from pure `EmptyFlux2LatentImage` noise).
-   - Unlike pixel img2img (partial denoise, which locks pose/framing), `ReferenceLatent` edit lets you change scene, pose, lighting, and wardrobe while giving the DiT one crisp 1 MP reference face directly (~4,096 tokens instead of 21 blurred thumbnails). You can optionally add `fk9_*_v1` LoRA (`0.5–0.6`) for angle changes.
+   - Unlike pixel img2img (partial denoise, which locks pose/framing), `ReferenceLatent` edit lets you change scene, pose, lighting, and wardrobe while giving the DiT one crisp 1 MP reference face directly (~4,000 tokens from one 1 MP image instead of 21 images pooled to 512×512). You can optionally add `fk9_*_v1` LoRA (`0.5–0.6`) for angle changes.
 3. **Controlled 4-arm likeness test on AlienPc (6 seeds, ArcFace vs `C:\AI\refs_ab_celeb`):**
    - **Arm A (L7fix baseline):** Miraclein FP8 + 21-img RefMod (`1.0`) + LoRA (`0.6`) + `ConditioningZeroOut`, Hermes-written prompt.
-   - **Arm B (model-drift isolation):** Exact same graph as Arm A on `FLUX-KLEIN-9B-FP8-NSFW.safetensors` (or stock `flux-2-klein-9b-fp8`, 8 steps, CFG 1.0, `res_multistep`/`simple`) — proves whether Miraclein's fine-tune is what breaks likeness.
-   - **Arm C (Kontext-style `ReferenceLatent` edit, single picked still):** `miraclein_edit.candidate.api.json` (wired with `ConditioningZeroOut` on negative) taking one clean front/3-quarter ref photo from `C:\AI\refs_ab_celeb`, with and without `fk9_*_v1` LoRA @ `0.55`.
+   - **Arm B (model-drift isolation):** Exact same graph as Arm A on `FLUX-KLEIN-9B-FP8-NSFW.safetensors` if the runner preflight finds it on disk (stock `flux-2-klein-9b-fp8` was not downloaded, D6). Shows whether Miraclein's fine-tune is what breaks likeness.
+   - **Arm C (Kontext-style `ReferenceLatent` edit, single picked still):** `miraclein_edit.candidate.api.json` as is (`flux_still.py --mode edit --image <photo>`), taking one clean front/3-quarter ref photo from `C:\AI\refs_ab_celeb`, with and without `fk9_*_v1` LoRA @ `0.55`.
    - **Arm D (curated small RefMod):** 4–8 curated portraits from `C:\AI\refs_ab_celeb` extracted at `--token-budget 256` (`1,024–2,048` total tokens) via `extract_klein9_mod.py`.
-   - Pick the winner by ArcFace mean/max vs intra-gallery ceiling plus Derrick's eyeball check.
+   - Pick the winner by ArcFace mean/max vs the intra-gallery ceiling plus Derrick's eye check. Arms A–D run at the same CFG; at CFG 1.0 the negative branch (and `ConditioningZeroOut`) is never evaluated (section 12).
 
 ## 9. Phone-friendly Hermes subscription login flows (`mono-brief` `52567d19` item e)
 
@@ -125,11 +127,13 @@ Never store tokens, keys, or cookies in git. Verified against upstream `NousRese
 - **Phone-friendly device-code flow (no X3 browser, no SSH tunnel needed):**
   1. Over SSH (or Termius/Blink on phone) to X3, run as `evo`:
      ```bash
-     sudo -n -u evo -H env HERMES_HOME=/home/evo/.hermes hermes auth add xai-oauth --no-browser
+     sudo -n -u evo -H env HERMES_HOME=/home/evo/.hermes \
+       /home/evo/.hermes/hermes-agent/.hermes/bin/hermes auth add xai-oauth --no-browser
      ```
+     (Full path: `hermes` is not on `sudo`'s PATH. Keep this terminal open; it polls until you approve.)
   2. Hermes prints an `https://accounts.x.ai/...` verification URL and short user code and polls in the background.
   3. Open that URL in your **phone's real Safari/Chrome browser** (normal session, not an in-app webview), sign into your SuperGrok Heavy account, enter the code if asked, and approve.
-  4. Hermes saves tokens to `/home/evo/.hermes/auth.json` (mode `0600`, gitignored) and auto-refreshes. Verify with `hermes doctor`.
+  4. Hermes saves tokens to `/home/evo/.hermes/auth.json` (mode `0600`, gitignored) and auto-refreshes. Verify with `hermes doctor` (same full path).
 - **Known upstream caveat (issue `#26847`):** xAI has rejected some SuperGrok OAuth inference calls with `HTTP 403` even after login succeeds. If inference returns 403, fall back to API key (`XAI_API_KEY` in `/home/evo/.config/evo-x3/llm.env`, `provider: xai`).
 
 ### B. Google Gemini login (confirmed API-key only in Hermes)
@@ -155,7 +159,7 @@ Never store tokens, keys, or cookies in git. Verified against upstream `NousRese
   2. `INDEX.md` + `INDEX_BAD.md` grouped by normalized actor. Deterministic **ONE-character picker** per celeb:
      - Tier 1: status `good` > `onthefence` > `bad`.
      - Tier 2: curated `_DEFAULT_ICONIC_VOICE_ROLE` match if in the same best status tier.
-     - Tier 3: highest `len(clips)` in INDEX (tie-breaker: fictional character row over `"Real Person / Celebrity"`, else solo-actor mode for singers/models/influencers).
+     - Tier 3: most clips in INDEX, as a stand-in for popularity (no popularity data exists; ASSUMPTION) (tie-breaker: fictional character row over `"Real Person / Celebrity"`, else solo-actor mode for singers/models/influencers).
   3. Synced 345-key `aliases.json` + PixlStash `GET /api/v1/characters` (`character_id` and `person <Name>` tag; no library browsing).
 - **Per-entry schema (keyed by compact slug, e.g. `sydneysweeney`, `fcsydny`):**
   ```json
@@ -182,13 +186,13 @@ Never store tokens, keys, or cookies in git. Verified against upstream `NousRese
 ### Config & memory audit (VERIFIED against live `8e753955` snapshot)
 - **Can 3 Hermes agents/sessions run concurrently today? Almost — blocked only by Gufo `--sessions 2`.**
   - **Hermes (`config.yaml` + `profiles/code/config.yaml`):** `max_concurrent_sessions: null`, `gateway.multiplex_profiles: true`, `gateway.api_server.max_concurrent_runs: 10` -> **ready for 3+ sessions.**
-  - **llama-swap (`llama-swap.yaml`):** `globalConcurrencyLimit: 6`, `flash-next-uncensored-v2` `concurrencyLimit: 4` -> **mismatched** against Gufo's `--sessions 2` (extra requests queue inside Gufo and risk `--stall-timeout-ms 120000`). Match both to `3`.
-  - **Memory budget on 128 GiB Strix Halo:** Flash-Next Q4_K_XL + MTP + mmproj (~50 GiB, confirm from startup log) + KV for 3 × 131,072 tokens at ~27.5 KiB/tok (`gufo/docs/models/qwen3.8-flash-next.md`) ≈ **10.3 GiB** (+3.44 GiB over 2 slots) + PixlStash (~9.4 GiB live RSS, 14G/16G cap) + OS/Hermes/embed-small/cache (~10–12 GiB) ≈ **~80–88 GiB total** (~40 GiB headroom; still check `free -g` and Gufo's startup memory log before raising RAM prefix cache).
+  - **llama-swap (`llama-swap.yaml`):** `globalConcurrencyLimit: 6`, `flash-next-uncensored-v2` `concurrencyLimit: 4` -> **mismatched** against Gufo's `--sessions 2` (the extra requests wait in Gufo's own queue, `--max-pending 16`). Match both to `3`.
+  - **Memory budget on 128 GiB Strix Halo:** Flash-Next Q4_K_XL + MTP + mmproj (size not recorded in the repo; ASSUMPTION ~50 GiB, read it from the startup log) + KV for 3 × 131,072 tokens at ~27.5 KiB/tok (`gufo/docs/models/qwen3.8-flash-next.md`) ≈ **10.3 GiB** (+3.44 GiB over 2 slots; ASSUMPTION that `--context` is per session) + PixlStash (~9.4 GiB live RSS, 14G/16G cap) + OS/Hermes/embed-small/cache (~10–12 GiB) ≈ **~80–88 GiB total, an estimate** (~40 GiB headroom; still check `free -g` and Gufo's startup memory log before raising RAM prefix cache).
 
 ### 3-slot 131K live test steps (X3 lease required, on Derrick's go)
 1. **Lease & backup:** Take X3 lease (`max | 3-slot 131K test | <CT>`). Confirm idle (`pi-job.active` empty, no `gpu-render.lock`). Back up `/etc/evo-x3/llama-swap.yaml` to `/etc/evo-x3/_archive/llama-swap.yaml-20261120-pre3slot`.
 2. **Edit `flash-next-uncensored-v2`:** Change `--sessions 2` -> `--sessions 3` and `concurrencyLimit: 4` -> `concurrencyLimit: 3`. Keep `--context 131072`.
-3. **Restart & check startup memory:** `sudo -n systemctl restart llama-swap`, wait for `/running` `state=ready`, record `free -g` and Gufo's startup log line showing reserved KV + RAM cache budget (`journalctl -u llama-swap -n 80`).
+3. **Restart & check startup memory:** `sudo -n systemctl restart llama-swap`, wait for authed `/running` `state=ready` (as `apply-hermes-workspaces.sh` does since `8888ba63`), record `free -g` and Gufo's startup log line showing reserved KV + RAM cache budget (`journalctl -u llama-swap -n 80`).
 4. **3-way concurrent test:** Fire 3 parallel authenticated requests simultaneously (one each to `flash-next-render`, `flash-next-code`, and `flash-next-aux` with `max_tokens: 256`) and verify all 3 return `HTTP 200` cleanly with no stall timeout and total RAM stays under ~105 GiB (`memory.events` on `pixlstash.service` stays flat).
 5. **Rollback to 2 slots (if OOM, stall, or slowdown):**
    ```bash
@@ -203,29 +207,134 @@ Never store tokens, keys, or cookies in git. Verified against upstream `NousRese
 <!-- TIMING_BREAKDOWN_PLACEHOLDER: replace with measured per-phase seconds (TE load/encode, UNET load, 12-step sample, VAE decode, offload/swap) from AlienPc -->
 - **Measured timing breakdown:** _PENDING — another job will fill in per-phase seconds (TE load/encode, UNET load, sampling steps, VAE decode, VRAM offload) here._
 
-### Verified root causes of 139–180 s L7 stills (from live AlienPc config & upstream code)
-1. **CFG 1.1 doubles every step (2x UNET passes):** `miraclein_refmod.candidate.api.json` uses `CFG 1.1` × `12 steps` = **24 UNET forward passes**. Official `workflow_klein9_refmod_lora.json` uses **`CFG 1.0` × `8 steps` = 8 passes** (at `CFG 1.0`, ComfyUI skips negative evaluation completely -> **2x–3x speedup** right away).
-2. **Quadratic attention over 21 ref images (5,376 ref tokens):** `768x1344` (~4,032 image tokens) + 5,376 ref tokens ≈ **9,500+ tokens** per step. RefMods are already pre-encoded on disk (`<5 ms` load — VAE encode is NOT the bottleneck), so the cost is quadratic self-attention. Using 4–8 curated refs (`1,024–2,048` tokens) or a single 1 MP `ReferenceLatent` edit (~4,096 tokens) cuts attention FLOPs substantially.
-3. **Live `comfyui_auto` is NOT using installed SageAttention 2.2 or `--fast`, and disables pinned memory:**
-   - VERIFIED (`hosts/alienpc/comfyui/pip-freeze.txt` + `run_nvidia_gpu.bat` vs `hosts/alienpc/live/llama-swap/llama-swap.yaml:162`): AlienPc ALREADY has `sageattention==2.2.0+cu130` and `triton-windows==3.7.1`, and `run_nvidia_gpu.bat` passes `--use-sage-attention --fast`.
-   - Yet `comfyui_auto` in `llama-swap.yaml` launches with `--use-ck-attention --disable-pinned-memory --reserve-vram 1.5` (no SageAttention, no `--fast`, and unpinned CPU↔GPU offload).
-4. **Model residency on 16 GB VRAM:** Miraclein FP8 (`9.08 GB`) + Qwen3-8B FP8 TE (`8.66 GB`) = `17.74 GB > 16 GB`. Do **not** pass `--highvram` or `--gpu-only` (will OOM on 16 GB); keep ComfyUI's dynamic VRAM offload, test dropping `--disable-pinned-memory` (and optionally `--fast-disk` on NVMe), and benchmark `Miraclein_4.5_9b_NVFP4` (`5.18 GB`, ~43% smaller -> much less offload thrashing) against FP8 on the same fixed graph.
-5. **Graph caching (`torch.compile` / TeaCache / FBCache):** ComfyUI 0.46.0 includes built-in `TorchCompileModel` + CUDA graphs (~15–25% steady-state gain after a 30–60 s cold warmup per resolution). TeaCache / WaveSpeed First-Block Cache are not installed (`custom-nodes.tsv`); test only after S1–S5, with a conservative threshold (`rel_l1_thresh ~0.12`) so fine facial details don't blur.
+### Why L7 stills take ~139–180 s (checked against repo records)
+1. **Miraclein FP8 vs NVFP4 is the likely main cost.** A5 (2026-11-19, [A5-RESULT.md](../BENCH-ALIENPC-1/A5-RESULT.md)) ran the same 12 steps / CFG 1.1 / `euler` RefMod and Hybrid graphs on `Miraclein_4.5_9b_NVFP4` (5.18 GB) with sample times of **55 s** and **43 s**. L7 on `Miraclein_4.5_9b_FP8` (9.08 GB) takes ~139–180 s. FP8 UNET (9.08 GB) plus the Qwen3-8B FP8 text encoder (8.66 GB) cannot both sit in 16 GB, so ComfyUI swaps weights; NVFP4 is native on the RTX 5070 Ti (Blackwell). ASSUMPTION until the timing breakdown above confirms where the seconds go.
+2. **CFG 1.1 costs a second model pass every step.** VERIFIED in ComfyUI `comfy/samplers.py` (`sampling_function`): at CFG exactly 1.0 the negative is not evaluated. L7 runs 12 steps × 2 passes = 24 passes; the official malcolmrey workflows run 8 steps × 1 pass (CFG 1.0, `res_multistep` / `simple`). Side effect: at CFG 1.0 the `ConditioningZeroOut` negative from `#3` is never run, so that fix only matters at CFG above 1.0.
+3. **Reference tokens.** 21 images × 256 = 5,376 reference tokens on top of ~4,032 image tokens at 768×1344. Attention cost grows with sequence length, so a 4–8 image RefMod (1,024–2,048 tokens) should be faster. ASSUMPTION; measure it.
+4. **Cold starts.** `comfyui_auto` sits in AlienPc llama-swap's one exclusive `main` group with the Swift, judge and JoyCaption LLMs. Any of those requests between stills stops ComfyUI, and the next still pays a cold load. Time the first (cold) still separately from warm ones.
 
-### Flux speed + likeness bakeoff (AlienPc lease, same 6 seeds, ArcFace vs `C:\AI\refs_ab_celeb`)
+### Already tested on this box and not adopted (do not add to the bakeoff)
+From [the follow-up plan](../source-plans/2026-11-18-x3-alienpc-followup-plan.md) section 4 and [R6-RESULT.md](../BENCH-ALIENPC-1/R6-RESULT.md) (measured on H3; same `comfyui_auto` process):
+- **SageAttention:** off since Oct 14; Comfy Kitchen (`--use-ck-attention`, the live flag) won by 23%. `run_nvidia_gpu.bat`'s `--use-sage-attention --fast` is an old manual launcher, not production.
+- **`--fast fp16_accumulation`:** R6 tied on time (286.3 s vs 286.5 s) and changed the output (SSIM 0.78).
+- **`torch.compile`:** conflicts with Dynamic VRAM. **TeaCache / EasyCache / Spectrum:** change the sampling trajectory.
+- **Dropping `--disable-pinned-memory`:** the flag exists because of Windows WinError 1450 (Linux plan LX7).
+- **`--highvram` / `--gpu-only`:** 16 GB cannot hold the FP8 UNET plus the 8.66 GB text encoder.
 
-Measure **warm wall time (s/still, exclude 1st cold run)**, **peak VRAM**, and **ArcFace mean/max/min** on the exact same 6 seeds and Hermes-written prompts:
+### Flux speed + likeness bakeoff (AlienPc lease, one change per arm)
+Same 6 seeds, the same Hermes-written prompt, ArcFace against `C:\AI\refs_ab_celeb` (runner `#4`). Record the cold first still on its own, then the median of warm stills 2–6, plus peak VRAM (`nvidia-smi`).
 
-| Arm | Single change vs S0 | Expected speedup | Quality / likeness watch |
-|---|---|---|---|
-| **S0 (baseline)** | Current L7fix (`Miraclein FP8`, 12 steps, `CFG 1.1`, 21-img RefMod, `--use-ck-attention --disable-pinned-memory`) | 1.0x (~139 s) | Reference baseline |
-| **S1 (CFG 1.0)** | Set `CFG 1.0` (skips negative pass; 12 UNET passes vs 24) | ~1.8–2.0x | Check contrast / likeness delta |
-| **S2 (8 steps + sampler)** | `CFG 1.0`, **8 steps**, `res_multistep`/`simple` (official workflow) | ~2.7–3.0x | Check fine skin/hand detail vs 12 steps |
-| **S3 (ComfyUI launch flags)** | Switch `comfyui_auto` to `--use-sage-attention --fast` and drop `--disable-pinned-memory` (keep backup of `llama-swap.yaml`) | +1.4–2.0x on top of S2 | Check zero NaNs / identical ArcFace |
-| **S4 (fewer ref tokens)** | Curated 6-img RefMod (`1,536` tokens) vs 21-img (`5,376` tokens) — and Kontext-style 1-img `ReferenceLatent` edit | +1.5–2.2x attention | Often **higher** likeness (less averaging) |
-| **S5 (NVFP4 vs FP8)** | `Miraclein_4.5_9b_NVFP4.safetensors` (5.18 GB) vs FP8 (9.08 GB) under S3+S4 | Faster load & less VRAM swap | Must stay within ~0.01–0.02 ArcFace of FP8 |
-| **S6 (optional compile)** | ComfyUI built-in `TorchCompileModel` on S3–S5 winner (warm runs 2–6) | +15–25% steady-state | Check warmup penalty on resolution switches |
-| **S7 (optional FBCache/TeaCache)** | Only if S1–S6 still >25 s/still and Derrick approves node install (`rel_l1_thresh 0.12`) | +20–30% | Watch eye/skin micro-detail & ArcFace drop |
+| Arm | Change vs S0 | Why |
+|---|---|---|
+| **S0** | Current L7fix graph (Miraclein FP8, 12 steps, CFG 1.1, 21-image RefMod @ 1.0, LoRA @ 0.6) | Baseline |
+| **S1** | Miraclein **NVFP4** instead of FP8 | A5 measured 43–55 s on NVFP4; check likeness holds |
+| **S2** | **CFG 1.0** | Halves model passes (VERIFIED); malcolmrey's setting |
+| **S3** | **8 steps, `res_multistep` / `simple`** | Official malcolmrey workflow settings |
+| **S4** | Curated 4–8 image RefMod (Arm D in section 8) | Fewer reference tokens; may also help likeness |
+| **S5** | Kontext-style single-image edit (Arm C in section 8) | Different identity path; compare time and likeness |
 
-**Target:** Drop warm L7 stills from **~139 s → ~15–30 s** with equal or higher ArcFace likeness before promoting any flag change. Rollback for S3: restore `C:\AI\director\config\llama-swap.yaml` backup and restart ComfyUI.
+Keep a change only if ArcFace mean stays within 0.01 of S0 (or better) and Derrick's eye check agrees, then stack the winners and run one final 6-seed check. No speed target is promised before the timing breakdown is in. Rollback: the arms only change per-run graphs; no launch flag or llama-swap edit is part of this bakeoff.
 
+## 13. One ComfyUI or two (Flux + H3Max)? (Derrick 2026-11-20 ~2:22 PM CT)
+
+**Answer: keep one running ComfyUI for both Flux stills and H3Max clips.** Two at once would hurt, not help, on this box.
+
+Facts (VERIFIED, `hosts/alienpc/live/llama-swap/llama-swap.yaml`, AlienPc notes): one RTX 5070 Ti 16 GB, 64 GB system RAM, Windows. Two ComfyUI installs already exist: `comfyui_auto` (`HardcoreNSFW-TestRuntime`, used for both Flux and H3) and `comfyui_longvideo` (`C:\AI\comfy-longvideo`, sharing the same input folder). Both are members of the single exclusive `main` swap group, so llama-swap only ever runs one; starting one stops the other after its queue drains (`comfy_graceful_stop.ps1`).
+
+Why two running at the same time is worse:
+- **VRAM:** each process gets its own CUDA context and its own copy of the weights. ComfyUI's dynamic VRAM only sees its own process, so the two fight over 16 GB: out-of-memory errors or slow system-memory fallback. Flux FP8 alone (9.08 GB UNET + 8.66 GB text encoder) already overflows 16 GB.
+- **System RAM:** each process keeps its own RAM cache of offloaded weights (ComfyUI's default `--cache-ram` keeps inactive models up to the system RAM size). Flux and H3 weights cached twice on 64 GB means paging to disk.
+- **No speed gain:** there is one GPU and `gpu-render.lock` already runs one job at a time.
+
+What one process costs: switching Flux → H3 unloads the Flux weights from VRAM and loads H3. With RAM to spare, ComfyUI reloads from its RAM cache instead of disk. Measure that switch in the timing breakdown above. The bigger risk is the shared llama-swap group: an LLM request on AlienPc between a still and its clip stops ComfyUI completely. Max's `8c079afb` pi-job routing already hands coding back to the X3 when ComfyUI holds the GPU; keep it that way.
+
+A second ComfyUI only makes sense with a second GPU, or as a separate install for dependency isolation that runs one at a time (that is what `comfyui_longvideo` already is).
+
+## 14. Hermes learning loop (brief addendum item 12, Derrick 2026-11-20)
+
+Goal: the X3 Hermes chats (default/Render, `code`, `writertest`, `grok`) learn from their mistakes the way Forge does, so fixes like the M6/L7 prompt issues (missing LoRA `{TRIGGER}`, celeb `{NAME}`, likeness line, identical prompts) stick without Max fixing them by hand.
+
+### How Hermes v0.23.3 learns (VERIFIED, upstream docs at tag `v0.23.3`: `user-guide/features/memory.md`, `skills.md`, `curator.md`, `profiles.md`, `sessions.md`)
+- **Memory:** `MEMORY.md` (2,200 chars) and `USER.md` (1,375 chars), written with the `memory` tool. They load into the system prompt as a frozen snapshot at session start, so a new lesson is only seen by the *next* session.
+- **Background review:** after a turn, every `memory.nudge_interval` / `skills.creation_nudge_interval` turns, Hermes forks a review that can save memory or create/patch a skill. That review is the learning loop.
+- **Skills:** new agent-made skills go to the profile's own `skills/` folder. Existing skills are patched where they are found, **including skills under `external_dirs`** ("external dirs are not a write-protection boundary").
+- **`skills.write_approval: true`** stages every `skill_manage` write in `pending/skills/<id>.json` until someone runs `/skills pending` → `/skills diff <id>` → `/skills approve <id>`. **`memory.write_approval`** (default `false`) does the same for memory.
+- **Curator** (on by default): every 7 days it marks unused agent-made skills stale (14 days) and archives them (30 days); it never deletes. **Pin** blocks deletion only. **Lock** (`hermes curator lock <skill>`) blocks every agent write to that skill, including `skill_manage`, `write_file`/`patch` and `terminal` writes into the skill's folder, in normal turns, the background review and the curator. Your own edits still work.
+- **Per profile:** memory, skills, sessions (`state.db`, `session_search`), pins and locks are all per profile. `--clone` copies skills and memory once, then the profiles are separate.
+- **Long chats don't learn:** a WebUI chat that runs for days is one session, so new memory never loads and `session_search` rarely fires. The docs say to start a new chat (`/new`) at natural task boundaries.
+
+### What is on now (VERIFIED from the live snapshot on `mono-brief` `52567d19`, except `grok`)
+| Profile | Memory | `memory.write_approval` | `skills.write_approval` | `external_dirs` | Nudges (memory/skills) |
+|---|---|---|---|---|---|
+| default (Render) | on | unset → `false` | `true` | `/home/evo/AI/community/skills` | 10 / 15 |
+| `code` | on | unset → `false` | `true` | none | 10 / 15 |
+| `writertest` | **off** | — | `true` | `/home/evo/AI/community/skills` | 10 / 15 |
+| `grok` | cloned from default (ASSUMPTION: same settings; its config is not in the snapshot yet) | | | | |
+
+What this means:
+1. **Skill lessons don't stick today.** Every skill create/patch from the review is staged and waits for an approval that nobody does. ASSUMPTION until Max counts the staged files (live check below).
+2. **Memory lessons do land at once.** They are unreviewed, and limited to 2,200 characters.
+3. **Render can rewrite shared community skills.** An approved patch to `h3-writer`, `h3-prompting`, `flux-klein-prompting` or `h3-parody-identity` edits `/home/evo/AI/community/skills` in place, outside git review. The terminal can also edit them directly, because the write gate only covers `skill_manage`.
+4. **The nightly `hermes-state-commit.timer` (03:15) only commits the default profile.** It runs `git add SOUL.md skills/ memories/` in `~/.hermes`, so `profiles/*/skills` and `profiles/*/memories` are not in that history.
+5. **The background review runs on the same Gufo slot as the chat.** Its "wait for idle GPU" default only applies to Hermes' managed local server, not our `custom` provider. So a review can take one of the 2 Gufo sessions right after a turn (see section 11).
+6. **The M6/L7 prompt mistakes came from Max's A/B harness script, not Hermes** (brief item a). So the fix belongs in the skill text, which PR `#3` already does (`{TRIGGER}` + `{NAME}` + a short likeness cue when a LoRA is loaded). Hermes has nothing to "learn" for that one.
+
+### Proposed loop (plan only; each live step needs Derrick's yes, the X3 lease and a backup)
+**One source of truth.** Shared skills live in git: `hosts/x3/hermes/skills/*` and `x3/community/skills/*`. Hermes proposes changes, people review them, and changes ship through a PR plus the existing installers. This avoids duplicates, keeps history, and keeps a skill from drifting differently in each profile.
+
+1. **Lock what Render must not change on its own (Q-LRN1).** In every profile, run `hermes curator lock` on:
+   - the shared skills: `h3-render`, `h3-writer`, `h3-prompting`, `h3-parody-identity`, `flux-klein-prompting`, `pixlstash-image-library`, `rea-remake`, `pi-job`;
+   - any skill that holds the 18+ or queue rules.
+
+   When Hermes wants to change a locked skill, it must describe the change in chat. Hermes' own agent-made skills (new topics) stay unlocked, so it can still learn new things.
+2. **Block edits to the locked parody graph and safety files (Q-LRN2).** A lock only covers skill folders. Extend the existing `guard-render-queue.sh` `pre_tool_call` terminal hook (fail-closed) to refuse writes to:
+   - `/home/evo/AI/community/templates/*.api.json` and `scripts/parody/*`;
+   - `/home/evo/AI/render/**`;
+   - `/home/evo/.hermes/agent-hooks/*`;
+   - the profiles' `config.yaml` files.
+
+   This is a policy check, not a sandbox (it does not see `execute_code`). It matches the h3-render rule "never edit render, community, or forge code or config yourself".
+3. **Review queue → brain (Hermes → `20_learnings`, Q-LRN3).**
+   - Extend the nightly state commit to also add `profiles/*/skills` and `profiles/*/memories`, plus a list of staged `pending/skills/*.json`, for each profile.
+   - Max's daily job reads that diff and the pending list. He writes one `20_learnings` note per real lesson with `ce-compound`. Each note gets a stable key (`hermes/<profile>/<skill-or-topic>`) so a second sighting updates the same note instead of adding a new one, plus the source commit SHA.
+   - Before anything is written: drop anything matching the gitleaks rules, replace literal LoRA/RefMod triggers and adult prompt text with `{TRIGGER}` / `{NAME}` placeholders, and never copy `auth.json`, `.env` or `llm.env`.
+   - Derrick gets a short digest (lessons found, staged skill writes waiting) and approves or rejects staged writes in chat with `/skills approve|reject <id>`.
+4. **Brain → Hermes (no duplicates).** A brain lesson that applies to Hermes becomes a PR to the canonical SKILL.md in git, not a new Hermes skill. After merge, the existing installers copy it to every profile (`apply-hermes-workspaces.sh` pattern). If Hermes made its own skill on the same topic, fold it into the canonical one and archive the local copy (`hermes curator` archive; never delete). Keep `fleet-brain` out of Hermes `external_dirs`: it holds Max-only skills, and Hermes would patch it in place.
+5. **Learn at task boundaries.** Add one line to the Render and Code workspace `AGENTS.md`: start a new chat after each finished task (render delivered, unit DONE). The docs say this is when memory and `session_search` pay off.
+6. **Keep the review off the busy slot (Q-LRN4).** Route `auxiliary.background_review` to `flash-next-aux` (thinking off) with `max_input_tokens: 48000`, or set `auxiliary.background_review.enabled: false` on `writertest` (memory is already off there). Re-check after the 3-slot test in section 11.
+7. **Memory approval (Q-LRN5, default no).** Keep `memory.write_approval: false` for Render, because a memory note cannot change a locked skill or the guard hook. Turn it on for `grok` if Derrick wants cloud-model notes reviewed.
+
+Upstream also offers external memory providers (Honcho, Mem0, etc.) to share memory across profiles. Not proposed: it adds a service, and with `grok` on xAI it would send local chat context to a cloud model. I found no community practice beyond the upstream docs worth adopting here.
+
+### Live read-only checks for Max (no lease needed)
+```bash
+for h in /home/evo/.hermes /home/evo/.hermes/profiles/*; do
+  echo "== $h"; sudo -n -u evo ls "$h/pending/skills" 2>/dev/null | wc -l
+done
+sudo -n -u evo -H env -C /home/evo HERMES_HOME=/home/evo/.hermes /home/evo/.hermes/hermes-agent/.hermes/bin/hermes curator status
+sudo -n -u evo git -C /home/evo/.hermes log --stat -5 --format='%h %ad %s' --date=short
+```
+Record the counts in the next RESULT. Do not print the staged files' contents (they can hold prompt text).
+
+## 15. Hermes `grok` profile (brief addendum item 13; created 2026-11-20, record only)
+
+- **What:** new Hermes profile `grok` (wrapper `/home/evo/.local/bin/grok`), cloned from default with shared logins.
+  - `model.provider: xai-oauth`, `model.default: grok-4.6`, `base_url: https://api.x.ai/v1`.
+  - `image_gen` and `video_gen` toolsets are on, backed by xAI (`grok-imagine-image` / `grok-imagine-video`).
+  - Backup: `profiles/grok/config.yaml.bak-20261120-1415CT`.
+- **Default/Render is unchanged and fully local** (config sha256 `526812b3…`, per Max).
+- **Auth:** two `xai-oauth` credentials are linked (pool entries #1 and #2; ids are in `hermes auth list xai-oauth`, not copied here). Both return `403 personal-team-blocked:spending-limit`, most likely because the account is out of credits right now. Retest after the reset:
+  ```bash
+  sudo -n -u evo -H env -C /home/evo /home/evo/.local/bin/grok chat --oneshot -Q -q 'Say OK.'
+  ```
+  If it still returns 403 with credits available, see the upstream tier caveat in section 9A (issue `#26847`).
+- **Things to decide (Q-GROK1):**
+  - As a clone of default, `grok` inherits the render skills, `external_dirs` and the queue guard hook. Prompts sent from `grok` go to xAI's cloud, not the local model. Proposal: in `grok`, disable `h3-render`, `h3-writer`, `pixlstash-image-library` and `rea-remake`, the same way `code` does, so render work stays on the local default profile.
+  - Lock the shared skills (section 14, item 1).
+  - xAI image/video generation spends credits.
+- **Docs:** added to `hosts/x3/live/hermes/README.md` (profile list). The next live snapshot should copy `profiles/grok/{config.yaml,profile.yaml,SOUL.md}` with secrets redacted, the same as `code`. Never copy `auth.json`.
+
+## 16. Push and snapshot rules for this batch (Max)
+1. Merge the PRs on GitHub only after Derrick's yes; never push straight to `mono` from the Windows clone.
+2. On the box: run gitleaks first (pre-push), push GitHub first, then mirror to Gitea.
+3. Take a fresh live snapshot of **both** the X3 (`scripts/snapshot-live-setup.sh` + `sync-config-copies.sh`, now including `profiles/grok`) and AlienPc (`model-inventory.txt`, `custom-nodes.tsv`, the redacted llama-swap copy), as one commit, and say which PRs it follows.

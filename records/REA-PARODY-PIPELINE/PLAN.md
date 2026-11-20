@@ -89,6 +89,10 @@ rea_parody_remake.py status   <batch_dir>
 
 Every subcommand prints one final line: `READY ...`, `DONE ...`, `NOT_READY <reason>` or `STUCK <shot> <reason>`.
 
+## Update 2026-11-20 ~2:30 PM CT
+
+C0 done (U59). C1–C7 coded by the local LLM via `pi-job` (all DONE); C8 check + test fixes on `pi/rea-parody` `4b2d142`. Opus review and fixes are PR `#6` (test PNGs removed, `tmp_path` fixture, BPM range, WAV width, shot ids, `rea_pose` pose image). C8 deploy, C9 and R1–R4 wait on Derrick's go ([NEXT-STEPS.md](../opus/NEXT-STEPS.md) section 5).
+
 ## Units
 
 | ID | Who | What | Test / gate | Rollback |
