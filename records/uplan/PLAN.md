@@ -87,7 +87,7 @@ Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick
 - QNAP backfill 2026-11-20 06:34–06:39 CT: 16 files copied and 14 already present, all hashes matched, nightly not touched.
 - TQ4 verified complete (all three arms PASS). Waiting on Derrick's eye pick before promotion. [TQ4-RESULT.md](../BENCH-ALIENPC-1/TQ4-RESULT.md). Max's 7:35 AM CT review: `long_continuation` is consistent across the 10 s join, with slight face drift; the 16:9 Ref2VA and two-person clips are only 5.2 s, and their first frame is a tight crop before cutting to a wide shot.
 - A7 stage-2: `tq2_vsa_0.2`, `tq3_res_multistep`, `tq3_lcm_simple`, and `tq5_headerfree` rendered. `tq2_vsa_0.0`, `tq3_euler_simple`, and `tq5_headers` are controls copied from the `tq1_oc_ref_2pass` winner (byte-identical). [A7-STAGE2-RESULT.md](../BENCH-ALIENPC-1/A7-STAGE2-RESULT.md).
-- H3max A7/TQ4 clip review, 2026-11-20 7:35 AM CT (Max): the video model refused to review the clips, so the review used frames sampled 4–7 times per clip plus ffmpeg YDIF motion stats. Audio was not judged. The baseline `tq1_oc_ref_2pass` (euler/simple, VSA 0.0, prompt headers kept) stays as the production setup; none of the stage-2 changes beat it. The earlier `tq2_vsa_0.2` promotion is **not** promoted, pending Derrick. [A7-H3MAX-REVIEW-20261120.md](../A7-H3MAX-REVIEW-20261120.md).
+- H3max A7/TQ4 clip review, 2026-11-20 (Max): 7:35 AM CT frames + YDIF (video model refused; audio not judged). 7:50 AM CT follow-up compared those tq1 graphs against the original starting setup, `h3max_lora_test_20261119/arm0_baseline` (live `oc_guide.api.json` 1-pass at 768×1344, MiniMaxH3AddGuide with the first frame pinned, `ref_image_size=match`). That start setup stays production. `oc_ref_2pass` and `tq2_vsa_0.2` are **not** promoted. Derrick decides if he wants the ~70 s speed trade. One seed only. [A7-H3MAX-REVIEW-20261120.md](../A7-H3MAX-REVIEW-20261120.md).
 - Gemma 4 on Gufo research: the gemma4 Gufo extension reads GGUF, nothing needs converting, the Gufo 0.35.0 image is missing on disk, MTP and DFlash options exist.
 
 ### Open / held
@@ -99,13 +99,13 @@ Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick
 - xai-oauth, blocked on xAI browser verification.
 - Alfred audit feedback.
 - Hermes Gemma workspace: Derrick wants the setup sent through the Hermes chat to pi and the coding pipeline. The first attempt went to the render workspace by mistake, and a hand-made `gemma` profile (cloned from render) exists and needs redoing. Waiting on which Hermes chat to use.
-- `tq2_vsa_0.2` is **not** promoted, pending Derrick. Production setup stays `tq1_oc_ref_2pass`. [A7-H3MAX-REVIEW-20261120.md](../A7-H3MAX-REVIEW-20261120.md).
+- Production setup stays the original `oc_guide` 1-pass (`arm0_baseline`). `oc_ref_2pass` and `tq2_vsa_0.2` are **not** promoted. Derrick decides if he wants the `oc_ref_2pass` speed trade (~70 s faster, softer faces, no flicker win on this seed). [A7-H3MAX-REVIEW-20261120.md](../A7-H3MAX-REVIEW-20261120.md).
 
 ### Issues
 
 - Hermes games the clone gate (reads `wp_lint` and hashes).
 - Flux A5 stills judged bad by Derrick (not being debugged).
-- H3max A7 stage-2: none of the candidates beat the `tq1_oc_ref_2pass` baseline. `tq2_vsa_0.2` is oilier, more plastic, with a distorted face near the start (YDIF max 17.9 vs 15.9). `tq3_lcm_simple` is softer and waxier (spike 17.1). `tq3_res_multistep` is about equal with more motion (mean 9.6 vs 7.6). `tq5_headerfree` is a weaker match to the face in the still. Stage-1 `guide_2pass` is the smoothest (YDIF sd 1.89) but the face drifts after about 6 s. TQ4 16:9 and two-person clips are only 5.2 s and open on a tight crop.
+- H3max: versus the original `oc_guide` 1-pass start (YDIF full-frame 7.19/2.13/12.1, background 4.22/2.47/9.4, 304.7 s), `oc_ref_2pass` is 7.53/2.59/15.8 and 4.91/3.09/14.9 in 235.3 s — about 70 s faster, but faces are softer and 2-pass did not reduce background flicker on this seed. `oc_ref_1pass` is 7.89/2.12/13.2 and 5.75/3.06/11.3. Stage-2 vs `tq1_oc_ref_2pass`: `tq2_vsa_0.2` oilier/plastic with a distorted face near the start (YDIF max 17.9 vs 15.9); `tq3_lcm_simple` waxier (spike 17.1); `tq3_res_multistep` about equal with more motion (mean 9.6 vs 7.6); `tq5_headerfree` weaker face match. Stage-1 `guide_2pass` was the smoothest among those later graphs (YDIF sd 1.89) but the face drifts after about 6 s. TQ4 16:9 and two-person clips are only 5.2 s and open on a tight crop.
 - REA tongue morphing, shared seed, voice window dropped in `h3max_bridge`.
 - X3 nightly QNAP copy ran in 47 ms and likely copied nothing (not touched per Derrick).
 - agy quota: Gemini weekly 17.6% left, resets about Wed Nov 25 8:45 AM CT.
