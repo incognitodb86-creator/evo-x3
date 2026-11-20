@@ -28,21 +28,32 @@ bash scripts/apply-pixlstash-upgrade.sh --dry-run
 # Apply PX1 (upgraded picker + Hermes skills) + PX2 (persist 14G/16G memcap, no PixlStash restart):
 bash scripts/apply-pixlstash-upgrade.sh --apply
 
-# Optional PX3 Smart Picture Sets (preview first, then create via PixlStash API):
-bash scripts/apply-pixlstash-upgrade.sh --create-smart-sets --dry-run
+# Optional PX3 Smart Picture Sets: preview the 4 definitions (no API call):
 bash scripts/apply-pixlstash-upgrade.sh --create-smart-sets
+# With --apply it also lists existing sets and prints the 4 to create. It does NOT POST: the v2.0.1 Smart Set
+# filter schema is unverified, so create the 4 sets in PixlStash UI -> Picture Sets -> New Smart Set.
+bash scripts/apply-pixlstash-upgrade.sh --apply --create-smart-sets
 
-# Rollback PX1/PX2 cleanly:
+# Rollback PX1/PX2 (restores files from /home/evo/AI/_archive/20261120-pixlstash-upgrade and resets the live
+# memcap with set-property --runtime from the backed-up drop-in):
 bash scripts/apply-pixlstash-upgrade.sh --rollback
 ```
+
+Order with the workspace installer: run `scripts/apply-hermes-workspaces.sh --apply` first, then this one. Both
+install the same repo copy of `h3-render/SKILL.md`, so the result is the same either way, but this installer backs
+up whatever the first one left. Roll back in reverse: PixlStash first, then workspaces.
+
+Both installers run evo commands through `as_evo` (`sudo -n -u evo -H env -C /home/evo ...`), not `sudo -i`.
+`sudo -i` re-escapes argv for a login shell, leaves `$` unescaped and turns newlines into line continuations
+(sudo `src/parse_args.c`), which broke every multi-line `bash -c` block in the `02f552c6` copies.
 
 ## Units (`PX1–PX6`)
 
 | ID | Host | Status | Scope & Guardrails | Verification / Gate |
 |---|---|---|---|---|
 | **PX1** | X3 (code on `mono`) | **READY TO APPLY** | **Upgraded Hermes still picker (`still_candidate_sheet.py`) + canonical `pixlstash-image-library` skill + `h3-render` update.** Smart Score `>= 2.2` floor only (`None` passes); NEVER sorts by `SMART_SCORE`; routes `--character-id`/`--set-id`/`--tag` through `GET /api/v1/pictures` (`sort=CHARACTER_LIKENESS`, avoiding >32k `/pictures/search` SQLite bind limits); filters by `--aspect 9:16|16:9` + `--min-short-edge 768` (sets `needs_reframe=true` if no orientation match, handing off to `5415ccc7` Flux aspect reframing); dedups `stack_id` (1 pick/stack); excludes last 30 `runs/*/pick.json`; stratifies 2 recent imports (`IMPORTED_AT`) + 2 strong matches + 2 random-fresh; supports `--out` contact sheet and `--media-dir` space-free `MEDIA:` symlinks. | Offline `pytest test_still_candidate_sheet.py`: **8 passed**. Live: picker returns diverse fresh stills & `MEDIA:` lines; `hermes skills list` shows `pixlstash-image-library` enabled in default, disabled in `code`. |
-| **PX2** (`ST3c`) | X3 | **READY TO APPLY** | **Persist PixlStash memory cap (`14G`/`16G`) + sync stale `scripts/sync-renders.sh`.** Fixes reboot drift where live `10-memcap.conf` body still had `10G`/`12G` despite Derrick's `t2649` `--runtime` bump to `14G`/`16G`. Applied with `daemon-reload` + `set-property` (zero PixlStash restart). Note: `ST3a`/`ST3b` (`sync-renders` detached `pixl-import` + `import_inbox.py` batching/flock) are already live (`RESULT-ST3-pixl-sync-timer.md`) and untouched. Optional housekeeping gated on **Q-PX1**: detach empty default `"Library 1"` (`~/.config/pixlstash/images`) and archive old ~1 GB `_u39`/`_u42` vault backups. | `systemctl --user -M evo@ show pixlstash.service -p MemoryHigh -p MemoryMax` shows 14G / 16G; `memory.events` recorded in `--status`. |
-| **PX3** | X3 | **READY (Q-PX2)** | **Smart Picture Sets (PixlStash v2.0 PR `#2740`).** Create render-ready Smart Sets per main OC + orientation (`FCSydny 9:16`, `FCSydny 16:9`, `FCMegan 9:16`, `FCMegan 16:9`) with `smart_score >= 2.2`, `likeness >= 0.55`, non-video, excluding defect tags. Lets Hermes pass `--set-id <id>` (and keeps sets well under the >32k bind limit). | `scripts/apply-pixlstash-upgrade.sh --create-smart-sets` creates sets via API (token on stdin via `curl -K -`, never argv); picker `--set-id` returns orientation-matched stills. |
+| **PX2** (`ST3c`) | X3 | **READY TO APPLY** | **Persist PixlStash memory cap (`14G`/`16G`) + sync stale `scripts/sync-renders.sh`.** Fixes reboot drift where live `10-memcap.conf` body still had `10G`/`12G` despite Derrick's `t2649` `--runtime` bump to `14G`/`16G`. Applied with `daemon-reload` + `set-property --runtime` (zero PixlStash restart; the drop-in file is the persistent copy). Note: `ST3a`/`ST3b` (`sync-renders` detached `pixl-import` + `import_inbox.py` batching/flock) are already live (`RESULT-ST3-pixl-sync-timer.md`) and untouched. Optional housekeeping gated on **Q-PX1**: detach empty default `"Library 1"` (`~/.config/pixlstash/images`) and archive old ~1 GB `_u39`/`_u42` vault backups. | `systemctl --user -M evo@ show pixlstash.service -p MemoryHigh -p MemoryMax` shows 14G / 16G; `memory.events` recorded in `--status`. |
+| **PX3** | X3 | **READY (Q-PX2)** | **Smart Picture Sets (PixlStash v2.0 PR `#2740`).** Create render-ready Smart Sets per main OC + orientation (`FCSydny 9:16`, `FCSydny 16:9`, `FCMegan 9:16`, `FCMegan 16:9`) with `smart_score >= 2.2`, `likeness >= 0.55`, non-video, excluding defect tags. Lets Hermes pass `--set-id <id>` (and keeps sets well under the >32k bind limit). | Sets created in PixlStash UI from the 4 definitions `--create-smart-sets` prints (API POST waits until the v2.0.1 filter schema is read live); picker `--set-id` returns orientation-matched stills. |
 | **PX4** | X3 | **RUNBOOK / Q-PX2** | **Multi-Tier Deduplication & Stacks + Anomaly Penalty Tuning + Tag Review / Reference Faces (PRs `#2739–#2742`).** Run `--status` first to read `/api/v1/dedup/counts` (counts only) and `GET /api/v1/users/me/penalised-tags` (tag names/weights only, never library contents). Operator runbook below for collapsing near-duplicate bursts into stacks, dialing down false-positive `smart_score_penalised_tags` via `PATCH /api/v1/users/me/config`, and using Tag Review Queue + Reference Face cluster re-centering in PixlStash UI. Note: rating any image across `4–5★` or `1★` resets `smart_score = NULL` vault-wide (`routes/pictures/_crud.py:809-814`) — do rating batches together, not mid-render. | Counts + penalised-tag list reviewed by Derrick; stack collapse reduces repeated burst variations in picker output. |
 | **PX5** | AlienPc | **BRIEF / Q-PX3** | **Re-enable `ComfyUI-PixlStash` (`ComfyUI-PixlStash.disabled` @ `e5ce77da`, optional update to latest `Pikselkroken/ComfyUI-PixlStash`).** Under AlienPc lease: rename folder back (or `git pull` pinned SHA), verify `requirements.txt` against `hosts/alienpc/comfyui/pip-freeze.txt` (never touch `torch`), configure X3 PixlStash URL + scoped API token strictly inside ComfyUI Settings (NEVER in workflow JSON or git!). Wire **Face Likeness Gate** into candidate Miraclein/Flux batch templates (pairs directly with M6 Flux likeness A/B!) and optionally **Picture / Video Saver** for Recipe-preserving saves straight to PixlStash. | `/object_info` registers ComfyUI-PixlStash nodes; 1 dry candidate run passes Face Likeness Gate; zero tokens in `/history` or template JSON. |
 | **PX6** | X3 / AlienPc | **DOC / Q-PX4** | **Diversity-aware LoRA / RefMod dataset picker (`GET /api/v1/training/character_set_suggestion`, `dataset_picker.py`).** Use PixlStash 2.0's built-in CLIP-diversity picker with `flux2-klein-9b-base` and `minimax-h3-image`/`minimax-h3-motion` presets when selecting 6–12 stills for M2 H3Max RefMod extraction or future Klein9 celeb LoRA training (replaces manual blind picking without exposing library folders). | Single API query returns diverse picture IDs for a chosen character; no secrets logged. |
@@ -67,7 +78,7 @@ bash scripts/apply-pixlstash-upgrade.sh --rollback
 - **Q-PX1 (housekeeping):** detach empty default `"Library 1"` (`~/.config/pixlstash/images`) and archive old ~1 GB
   `_u39`/`_u42` vault backups after verifying the live vault? Default **yes** (archive first, never delete).
 - **Q-PX2 (Smart Sets + dedup/penalties):** create the 4 orientation Smart Sets (`FCSydny`/`FCMegan` `9:16` & `16:9`)
-  via `--create-smart-sets` right after `--apply`, and review `--status` output before collapsing dedup stacks?
+  (definitions from `--create-smart-sets`, created in the PixlStash UI) right after `--apply`, and review `--status` output before collapsing dedup stacks?
   Default **yes**.
 - **Q-PX3 (AlienPc `ComfyUI-PixlStash`):** re-enable `ComfyUI-PixlStash` on AlienPc (and update past `e5ce77da`?)
   with a scoped token in ComfyUI Settings to wire Face Likeness Gate alongside the M6 Flux A/B? Default **yes**

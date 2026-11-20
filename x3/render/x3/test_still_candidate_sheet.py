@@ -143,6 +143,7 @@ class StillCandidateSheetTests(unittest.TestCase):
         )
         self.assertTrue(any("/api/v1/pictures?" in u and "character_id=1" in u and "sort=CHARACTER_LIKENESS" in u for u in self.captured_urls))
         self.assertTrue(any("/api/v1/pictures?" in u and "sort=IMPORTED_AT" in u for u in self.captured_urls))
+        self.assertTrue(all("descending=true" in u for u in self.captured_urls if "/api/v1/pictures?" in u))
         self.assertFalse(any("/api/v1/pictures/search" in u for u in self.captured_urls))
         self.assertFalse(any("SMART_SCORE" in u for u in self.captured_urls))
         # Stratified sample must include at least one recent import (IDs 100..104)

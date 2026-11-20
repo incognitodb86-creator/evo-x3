@@ -214,6 +214,8 @@ def _build_pictures_url(
         ("format", "PNG"),
         ("fields", PIC_FIELDS),
         ("sort", sort),
+        # Explicit, like OPERATOR.md (sort=DATE&descending=true): newest imports / strongest likeness first.
+        ("descending", "true"),
         ("limit", str(limit)),
     ]
     if character_id is not None:

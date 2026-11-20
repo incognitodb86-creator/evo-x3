@@ -55,6 +55,15 @@ esac
 
 ts_ct() { TZ=America/Chicago date '+%Y-%m-%d %H:%M:%S CT'; }
 
+# Run as evo WITHOUT sudo -i. sudo -i re-escapes argv for a login shell: it leaves "$" unescaped (so $1/$B expand
+# to empty in evo's login shell) and turns newlines into line continuations, which breaks every multi-line
+# bash -c script below. -u/-H passes argv as-is; PATH covers evo's hermes CLI.
+as_evo() {
+  sudo -n -u evo -H env -C /home/evo \
+    PATH="/home/evo/.local/bin:/home/evo/.hermes/hermes-agent/.hermes/bin:/usr/local/bin:/usr/bin:/bin" \
+    HERMES_HOME="$HERMES_HOME_DIR" "$@"
+}
+
 cleanup() {
   if [[ -n "$STAGE_DIR" && -d "$STAGE_DIR" ]]; then
     rm -rf "$STAGE_DIR" || true
@@ -119,7 +128,7 @@ check_idle() {
 
 patch_pi_permissions() {
   local perm_path="$1" dry="$2"
-  sudo -n -iu evo python3 - "$perm_path" "$dry" <<'PY'
+  as_evo python3 - "$perm_path" "$dry" <<'PY'
 import os, sys
 
 path, dry = sys.argv[1], (sys.argv[2] == "1")
@@ -213,7 +222,7 @@ probe_alias() {
   local model="$1" prompt="$2" max_tok="$3" extra_json="${4:-}"
   local payload
   payload="{\"model\":\"${model}\",\"messages\":[{\"role\":\"user\",\"content\":\"${prompt}\"}],\"max_tokens\":${max_tok}${extra_json}}"
-  sudo -n -iu evo bash -c '
+  as_evo bash -c '
     set -euo pipefail
     (
       set -a
@@ -353,7 +362,7 @@ patch_hermes_profile() {
   local cfg_path="$1" role="$2" dry="$3"
   local pybin="python3"
   [[ -x "$PY_EVO" ]] && pybin="$PY_EVO"
-  sudo -n -iu evo "$pybin" - "$cfg_path" "$role" "$CODE_THINKING" "$CODE_WS" "$dry" <<'PY'
+  as_evo "$pybin" - "$cfg_path" "$role" "$CODE_THINKING" "$CODE_WS" "$dry" <<'PY'
 import os, sys, yaml
 
 path, role, code_think, code_ws, dry = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], (sys.argv[5] == "1")
@@ -416,7 +425,7 @@ do_rollback() {
   [[ -f "$LLAMA_BAK" ]] || { echo "Missing backup: $LLAMA_BAK" >&2; exit 1; }
   sudo -n cp -a "$LLAMA_BAK" "$LLAMA_CFG"
   sudo -n systemctl restart llama-swap
-  sudo -n -iu evo bash -c '
+  as_evo bash -c '
     set -euo pipefail
     B="'"$HERMES_BAK"'"
     [[ -f "$B/config.yaml" ]] && cp -a "$B/config.yaml" "'"$HERMES_HOME_DIR"'/config.yaml"
@@ -475,7 +484,7 @@ else
   echo "Keeping existing pre-WS backup: $LLAMA_BAK"
 fi
 
-sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" bash -c '
+as_evo bash -c '
   set -euo pipefail
   B="'"$HERMES_BAK"'"
   mkdir -p "$B"
@@ -517,27 +526,27 @@ cp "$REPO_DIR/config/pi-evo/extensions/syntax-check.ts" "$STAGE_DIR/syntax-check
 chmod 0644 "$STAGE_DIR"/*
 
 patch_hermes_profile "${HERMES_HOME_DIR}/config.yaml" render 0
-sudo -n -iu evo install -m 0644 "$STAGE_DIR/render.AGENTS.md" "${RENDER_WS}/AGENTS.md"
+as_evo install -m 0644 "$STAGE_DIR/render.AGENTS.md" "${RENDER_WS}/AGENTS.md"
 
 # Updated queue guard (also blocks rea_parody_remake.py GPU stages without --yes-derrick). The hook is fail_closed,
 # so restore the old copy at once if Hermes does not call the hooks healthy.
 GUARD_LIVE="${HERMES_HOME_DIR}/agent-hooks/guard-render-queue.sh"
-sudo -n -iu evo bash -c '
+as_evo bash -c '
   set -euo pipefail
   B="'"$HERMES_BAK"'"
   [[ -f "$B/guard-render-queue.sh" ]] || cp -a "'"$GUARD_LIVE"'" "$B/guard-render-queue.sh"
   install -m 0755 "'"$STAGE_DIR"'/guard-render-queue.sh" "'"$GUARD_LIVE"'"
 '
-HOOKS_OUT="$(sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" hermes hooks doctor 2>&1 || true)"
+HOOKS_OUT="$(as_evo hermes hooks doctor 2>&1 || true)"
 echo "$HOOKS_OUT" | tail -n 3
 if ! grep -qi 'healthy' <<<"$HOOKS_OUT"; then
-  sudo -n -iu evo cp -a "${HERMES_BAK}/guard-render-queue.sh" "$GUARD_LIVE"
+  as_evo cp -a "${HERMES_BAK}/guard-render-queue.sh" "$GUARD_LIVE"
   echo "FAIL: hermes hooks doctor not healthy after guard update; old guard restored. Run --rollback." >&2
   exit 1
 fi
 
 echo "=== Step 3: Create & configure Coding workspace (code profile) ==="
-sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" bash -c '
+as_evo bash -c '
   set -euo pipefail
   if [[ ! -d "'"$HERMES_HOME_DIR"'/profiles/code" ]]; then
     hermes profile create code --clone --no-alias
@@ -551,7 +560,7 @@ sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" bash -c '
 patch_hermes_profile "${HERMES_HOME_DIR}/profiles/code/config.yaml" code 0
 
 echo "=== Step 4: Archive hand-made gemma profile (weights untouched per D3) ==="
-sudo -n -iu evo bash -c '
+as_evo bash -c '
   if [[ -d "'"$HERMES_HOME_DIR"'/profiles/gemma" ]]; then
     mv "'"$HERMES_HOME_DIR"'/profiles/gemma" "'"$HERMES_BAK"'/profiles-gemma"
     echo "Archived profiles/gemma -> '"$HERMES_BAK"'/profiles-gemma"
@@ -561,13 +570,13 @@ sudo -n -iu evo bash -c '
 '
 
 echo "=== Step 4b: Install pi coding fixes (pi-job, forge-pi.sh cwd fix, skills, secret denies) ==="
-sudo -n -iu evo mkdir -p "$PI_BAK"
+as_evo mkdir -p "$PI_BAK"
 if [[ -f /usr/local/bin/pi-job && ! -f "${PI_BAK}/pi-job" ]]; then
   sudo -n cp -a /usr/local/bin/pi-job "${PI_BAK}/pi-job"
 fi
 sudo -n install -o root -g root -m 0755 "$REPO_DIR/config/bin/pi-job" /usr/local/bin/pi-job
 
-sudo -n -iu evo bash -c '
+as_evo bash -c '
   set -euo pipefail
   B="'"$HERMES_BAK"'"; PB="'"$PI_BAK"'"
   if [[ -f /home/evo/evo-x3/pi-chats/forge-pi.sh ]]; then
@@ -607,15 +616,15 @@ sudo -n systemctl --user -M evo@ is-active hermes-gateway
 RUNNING_OUT="$(curl -sS http://127.0.0.1:8080/running)"
 echo "/running: $RUNNING_OUT"
 
-RENDER_SMOKE="$(sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" hermes chat --oneshot -Q -q \
+RENDER_SMOKE="$(as_evo hermes chat --oneshot -Q -q \
   'Which skill renders a video, and which changes code? One short line.' 2>&1 | tail -n 5)"
 echo "Render oneshot: $RENDER_SMOKE"
 
-CODE_SMOKE="$(sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" hermes -p code chat --oneshot -Q -q \
+CODE_SMOKE="$(as_evo hermes -p code chat --oneshot -Q -q \
   'Run pwd, then name the skill that changes code. One short line.' 2>&1 | tail -n 5)"
 echo "Code oneshot: $CODE_SMOKE"
 
-CODE_SKILLS="$(sudo -n -iu evo env HERMES_HOME="$HERMES_HOME_DIR" hermes -p code skills list 2>&1 | grep -E 'h3-render|h3-writer|pi-job' || true)"
+CODE_SKILLS="$(as_evo hermes -p code skills list 2>&1 | grep -E 'h3-render|h3-writer|pi-job' || true)"
 echo "Code skills check:"
 echo "$CODE_SKILLS"
 

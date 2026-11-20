@@ -9,8 +9,10 @@
 #   bash scripts/apply-pixlstash-upgrade.sh --status                       # read-only: memcap, dedup counts, penalised tags
 #   bash scripts/apply-pixlstash-upgrade.sh --dry-run                      # default: preview PX1 + PX2 changes
 #   bash scripts/apply-pixlstash-upgrade.sh --apply                        # take X3 lease, back up, install PX1 + PX2
-#   bash scripts/apply-pixlstash-upgrade.sh --create-smart-sets --dry-run  # preview PX3 Smart Set API payloads
-#   bash scripts/apply-pixlstash-upgrade.sh --create-smart-sets [--token-file <path>]
+#   bash scripts/apply-pixlstash-upgrade.sh --create-smart-sets            # preview the 4 PX3 Smart Set definitions
+#   bash scripts/apply-pixlstash-upgrade.sh --create-smart-sets --apply [--token-file <path>]
+#                                          # PX1+PX2, then list existing sets + print the 4 to create (no POST:
+#                                          # the v2.0.1 Smart Set filter schema is unverified; create them in the UI)
 #   bash scripts/apply-pixlstash-upgrade.sh --rollback                     # restore backups
 
 set -euo pipefail
@@ -48,6 +50,15 @@ done
 
 ts_ct() { TZ=America/Chicago date '+%Y-%m-%d %H:%M:%S CT'; }
 
+# Run as evo WITHOUT sudo -i. sudo -i re-escapes argv for a login shell: it leaves "$" unescaped (so $1/$B expand
+# to empty in evo's login shell) and turns newlines into line continuations, which breaks every multi-line
+# bash -c script below. -u/-H passes argv as-is; PATH covers evo's hermes CLI.
+as_evo() {
+  sudo -n -u evo -H env -C /home/evo \
+    PATH="/home/evo/.local/bin:/home/evo/.hermes/hermes-agent/.hermes/bin:/usr/local/bin:/usr/bin:/bin" \
+    HERMES_HOME="$HERMES_HOME_DIR" "$@"
+}
+
 cleanup() {
   if [[ -n "$STAGE_DIR" && -d "$STAGE_DIR" ]]; then
     rm -rf "$STAGE_DIR" || true
@@ -76,7 +87,7 @@ take_lease() {
 pixl_curl() {
   # Token is read inside an evo subshell and passed on curl stdin (-K -), never on argv or printed.
   local method="$1" path="$2" tok_file="$3" body="${4:-}"
-  sudo -n -iu evo bash -c '
+  as_evo bash -c '
     set -euo pipefail
     m="$1"; url="$2"; tf="$3"; body="$4"
     [[ -r "$tf" ]] || { echo "MISSING/UNREADABLE token file: $tf" >&2; exit 2; }
@@ -145,7 +156,7 @@ PY
 
 do_rollback() {
   take_lease "PIXLSTASH-UPGRADE rollback"
-  sudo -n -iu evo bash -c '
+  as_evo bash -c '
     set -euo pipefail
     B="'"$BAK_DIR"'"
     [[ -f "$B/still_candidate_sheet.py" ]] && cp -a "$B/still_candidate_sheet.py" "'"$PICKER_DST"'"
@@ -156,6 +167,13 @@ do_rollback() {
     true
   '
   sudo -n systemctl --user -M evo@ daemon-reload
+  local props
+  props="$(as_evo bash -c 'f="$1"; [[ -f "$f" ]] && grep -E "^Memory(High|Max|SwapMax)=" "$f" | tr "\n" " "' _ "$BAK_DIR/10-memcap.conf" || true)"
+  if [[ -n "$props" ]]; then
+    # shellcheck disable=SC2086
+    sudo -n systemctl --user -M evo@ set-property --runtime pixlstash.service $props
+    echo "Live memcap reset to: $props"
+  fi
   echo "[$(ts_ct)] Rollback complete (no PixlStash restart required)."
 }
 
@@ -169,9 +187,9 @@ if [[ "$DO_SMART_SETS" -eq 1 && "$MODE" == "dry-run" ]]; then
   exit 0
 fi
 
-if [[ "$DO_SMART_SETS" -eq 1 && "$MODE" != "apply" ]]; then
-  do_smart_sets 0
-  exit 0
+if [[ "$DO_SMART_SETS" -eq 1 && "$MODE" == "rollback" ]]; then
+  echo "--create-smart-sets cannot be combined with --rollback (Smart Sets are removed in the PixlStash UI)." >&2
+  exit 2
 fi
 
 check_sources
@@ -186,7 +204,7 @@ if [[ "$MODE" == "dry-run" ]]; then
   echo "[dry-run] Would back up existing files into $BAK_DIR"
   echo "[dry-run] PX1: install upgraded still_candidate_sheet.py + test_still_candidate_sheet.py into /home/evo/AI/render/x3/ and run pytest"
   echo "[dry-run] PX1: install canonical pixlstash-image-library/SKILL.md and updated h3-render/SKILL.md into $HERMES_HOME_DIR/skills/"
-  echo "[dry-run] PX2: persist 10-memcap.conf (MemoryHigh=14G, MemoryMax=16G, MemorySwapMax=2G) + daemon-reload + set-property (no PixlStash restart)"
+  echo "[dry-run] PX2: persist 10-memcap.conf (MemoryHigh=14G, MemoryMax=16G, MemorySwapMax=2G) + daemon-reload + set-property --runtime (no PixlStash restart)"
   [[ "$DO_SMART_SETS" -eq 1 ]] && do_smart_sets 1
   echo "Run with --apply to execute, or --status to inspect live PixlStash health/dedup/penalised-tags."
   exit 0
@@ -205,7 +223,7 @@ cp "$REPO_DIR/hosts/x3/systemd/user/pixlstash.service.d/10-memcap.conf" "$STAGE_
 chmod 0644 "$STAGE_DIR"/*
 
 echo "=== Step 1: Backups + install PX1 (picker + skills) & PX2 (14G/16G memcap) ==="
-sudo -n -iu evo bash -c '
+as_evo bash -c '
   set -euo pipefail
   B="'"$BAK_DIR"'"
   mkdir -p "$B" "'"$HERMES_HOME_DIR"'/skills/pixlstash-image-library" "'"$HERMES_HOME_DIR"'/skills/creative/h3-render" "$(dirname "'"$MEMCAP_DST"'")"
@@ -228,10 +246,12 @@ STAGE_DIR=""
 
 echo "=== Step 2: Persist memcap (daemon-reload + live property, no PixlStash restart) ==="
 sudo -n systemctl --user -M evo@ daemon-reload
-sudo -n systemctl --user -M evo@ set-property pixlstash.service MemoryHigh=14G MemoryMax=16G MemorySwapMax=2G
+# --runtime: the drop-in file is the persistent copy; a plain set-property would also write a user.control drop-in
+# that outranks 10-memcap.conf and survives --rollback.
+sudo -n systemctl --user -M evo@ set-property --runtime pixlstash.service MemoryHigh=14G MemoryMax=16G MemorySwapMax=2G
 
 echo "=== Step 3: Verify picker unit tests ==="
-sudo -n -iu evo "$PY_EVO" -m pytest -q "$PICKER_TEST_DST"
+as_evo "$PY_EVO" -m pytest -q "$PICKER_TEST_DST"
 
 if [[ "$DO_SMART_SETS" -eq 1 ]]; then
   do_smart_sets 0

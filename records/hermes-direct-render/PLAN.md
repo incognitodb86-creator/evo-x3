@@ -211,7 +211,7 @@ U0 → U1 → U2 → U3 → U4 → (U5 ∥ U6) → U7 → U8 → U9. U5/U6 touch
 ### U1. Shared base on the default profile
 - Goal: R8, R15, R16 (KTD8).
 - Files: `/home/evo/.hermes/SOUL.md`, `/home/evo/.hermes/memories/USER.md` (new), `/home/evo/.hermes/config.yaml`.
-- Steps: restore SOUL.md from `_archive/SOUL.md.bak-20261119-0916-uncensored` after a diff shows only Max's 3 appended lines differ (if more differs, stop and ask); write USER.md with the OC facts (FCSydny and FCMegan are Derrick's fictional OCs, adults 18+, adult use fine; `Sydney Sweeney` is a celebrity, not FCSydny), ≤1,375 chars, `§` separated, no prompt text; set `approvals.timeout: 300`, `agent.max_turns: 80`, `agent.reasoning_effort: low`; leave `model.*` (`flash-next-uncensored-v2`), `terminal.cwd`, gateway and API settings alone. Restart gateway only when no Hermes WebUI chat is mid-turn: `sudo -n systemctl --user -M evo@ restart hermes-gateway`.
+- Steps: restore SOUL.md from `_archive/SOUL.md.bak-20261119-0916-uncensored` after a diff shows only Max's 3 appended lines differ (if more differs, stop and ask); write USER.md with the OC facts (FCSydny and FCMegan are Derrick's fictional OCs, adults 18+, adult use fine), ≤1,375 chars, `§` separated, no prompt text; set `approvals.timeout: 300`, `agent.max_turns: 80`, `agent.reasoning_effort: low`; leave `model.*` (`flash-next-uncensored-v2`), `terminal.cwd`, gateway and API settings alone. Restart gateway only when no Hermes WebUI chat is mid-turn: `sudo -n systemctl --user -M evo@ restart hermes-gateway`.
 - Test: `hermes config check` (or `hermes doctor`) clean; gateway active; Hermes WebUI (`:8787` / Serve `8443 /`) answers one "hi". *(Open WebUI `:3000` check dropped — retired per Derrick `t2688u`.)*
 - Rollback: copy the three backups back, delete USER.md, restart gateway.
 
@@ -315,7 +315,7 @@ Same model alias and thinking level as Render (R8, O4), same `render_writer_pipe
 
 ## Known open issues (carry into the work)
 
-- O1. Render's writer voiced FCSydny as a real actress in a recent run (identity bleed between `FCSydny` and the celebrity name). Both paths: ask 2 checks that the OC talk clip uses OC-only voice refs and no celebrity name; Path B's desk keeps OPERATOR.md's "Sydney Sweeney is not FCSydny" line.
+- O1. Render's writer gave an OC talk clip a celebrity voice cue in a recent run. Both paths: ask 2 checks that the OC talk clip uses OC-only voice refs and no celebrity name.
 - O2. ntfy is still sent on the pi path (`pi-job` lines 338-407). Hermes paths do not call pi-job for renders (R5). Turning ntfy off in pi-job itself is out of scope until the render part retires.
 - O3. Hermes paraphrases the prompt and posts a renders-share link instead of the video. Fixed here by the desk addendum (verbatim `prompt.txt`, `file://` 2x path) and `MEDIA_ALLOWED_ROOTS` (R7).
 - O4. **RESOLVED (`eabc8c7`):** live `hermes/config.yaml` and `render-pi.sh` both use `flash-next-uncensored-v2` (and llama-swap profile `halogen-only` pins `flash-next-uncensored` → `flash-next-uncensored-v2`). Zero GPU swaps.

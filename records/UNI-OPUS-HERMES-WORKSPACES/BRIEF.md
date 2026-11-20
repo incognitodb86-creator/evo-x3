@@ -533,7 +533,7 @@ User: Derrick (Fort Worth, TX; America/Chicago CT). Wants direct, thorough, prac
 §
 Content rule: Adults 18+ only is the single content hard stop. Consensual adult fiction, explicit hardcore, rough/CNC/taboo adult roleplay, and named adult celebrity/character parodies are explicitly approved. Never refuse or lecture on adult asks.
 §
-Original Characters (OCs): FCSydny (PixlStash character_id 1, attaches poolclub visual + audio RefMods) and FCMegan (PixlStash character_id 2) are Derrick's fictional adult OCs (18+, adult use approved). Sydney Sweeney is a celebrity parody target—NEVER confuse her with FCSydny or attach celebrity voice audio refs to named parodies (U56 #2).
+Original Characters (OCs): FCSydny (PixlStash character_id 1, attaches poolclub visual + audio RefMods) and FCMegan (PixlStash character_id 2) are Derrick's fictional adult OCs (18+, adult use approved). Never attach celebrity voice audio refs to named parodies (U56 #2).
 §
 Approval & delivery gates: Every H3 video render AND every generated FLUX/Miraclein still requires Derrick's explicit yes in this Hermes chat before queueing (Card 37). Always show start still (`MEDIA:`) + verbatim `prompt.txt`, then ask "Render this?". Deliver finished RTX 2x clips inline immediately via `MEDIA:` path. Never queue silently.
 §
@@ -767,7 +767,6 @@ Use this skill alongside `h3-writer` for any named adult celebrity, actor, or ch
 - **U56 Decision #2 (STRICT — Voice Refs):**
   - **Named celebrity/character parodies do NOT attach celebrity voice audio refs.** Drive vocal likeness strictly through concrete text timbre and delivery cues + actor/character pairing (`--names`).
   - Voice audio refs (`<Audio 1>` / `*_refmod_audio`) are strictly for Derrick's original characters (`FCSydny`, `FCMegan`) only.
-  - **Identity isolation:** `Sydney Sweeney` is a celebrity parody target, NEVER `FCSydny`. Never mix their RefMods, voice refs, or character IDs.
 - **Graph & Model:** Locked 1-pass `b2_refmod.api.json` / `named_parody.api.json` on `10Eros_Max_h3_8stepTURBO_beta7_int8HQ`, 8 steps `euler`/`simple`, shift `12.0`/`3.0`, `RefModsLoader -> RefModApply` (`retention 1.0`), followed by automatic NVIDIA RTX VSR 2.0 ULTRA 2x upscale (raw deleted after verify).
 - **Pipeline execution:** NEVER call archived `submit_parody_run.py`. Always save prose to `<run_dir>/hermes_prose.txt` and pass it through `/home/evo/AI/hermes-render/bin/gate-prose.sh` with `--names "<Actor/Character>"` (dry first -> verbatim `prompt.txt` -> Derrick yes -> `bin/queue-approved.sh`).
 
@@ -992,7 +991,7 @@ Step 5 — Queue on Derrick's Yes & Deliver Inline 2x Video
 * Wait for completion and immediately post the printed MEDIA:/home/evo/AI/community/runs/<run_id>/<tag>/<clip_2x>.mp4 line in your reply so WebUI plays the upscaled 2x clip inline. Delivering a finished clip requires no extra permission.
 4. Hard Constraints (Never Violate)
 1. 18+ adults only: Any youth-coded cue or minor depiction stops NOT_READY before any AlienPc GPU job.
-2. Named parody vs OC separation (U56 #2): FCSydny (character_id 1) and FCMegan (character_id 2) are Derrick's fictional OCs and may use OC voice refs (<Audio 1>). Named celebrity/character parodies (including Sydney Sweeney) use text vocal-timbre cues ONLY—never attach celebrity voice audio refs and never mix Sydney Sweeney with FCSydny.
+2. Named parody vs OC separation (U56 #2): FCSydny (character_id 1) and FCMegan (character_id 2) are Derrick's fictional OCs and may use OC voice refs (<Audio 1>). Named celebrity/character parodies use text vocal-timbre cues ONLY—never attach celebrity voice audio refs.
 3. Never inspect forbidden paths: Never read build_request.py, fill_request.py, acts.yaml, /etc/evo-x3/*, ~/.ssh/*, Grok Imagine prompt sidecars, /home/evo/AI/sydney/, or raw PixlStash library files/captions/vault.db.
 4. Zero secret exposure: Never print API keys, tokens, or passwords in chat, logs, or command arguments.
 5. Never touch llama-swap or ComfyUI directly: Never edit llama-swap.yaml, never wake ComfyUI from chat, never call AlienPc ports outside queue-approved.sh / run_queue.py.
