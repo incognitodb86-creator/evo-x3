@@ -98,3 +98,17 @@ def test_run_pi_thinking_medium_on_alienpc_low_on_x3(pi_job, tmp_path, monkeypat
     monkeypatch.setenv("PI_JOB_FORCE_X3", "1")
     rc, where = pi_job._run_pi(tmp_path, "60", "reply done", str(tmp_path), None)
     assert where == "x3" and seen[-1] == (None, "low")
+
+def test_timeout_min_flag_and_defaults(pi_job, monkeypatch):
+    started = {}
+    monkeypatch.setattr(pi_job, "_start_detached", lambda role, target, prompt, **kw: started.update(role=role, **kw) or 0)
+    assert pi_job.main(["code", "--timeout-min", "180", "/tmp", "task"]) == 0
+    assert started["role"] == "code" and started["timeout_min"] == 180
+    assert pi_job.main(["review", "/tmp", "task"]) == 0
+    assert started["timeout_min"] is None
+    with pytest.raises(SystemExit):
+        pi_job.main(["code", "--timeout-min", "600", "/tmp", "task"])
+    assert pi_job._job_timeout_s({}, 3600) == "3600"
+    assert pi_job._job_timeout_s({"timeout_s": 10800}, 3600) == "10800"
+    assert pi_job._timeout_note(0, {}, 3600) == ""
+    assert "timed_out_after=180m" in pi_job._timeout_note(124, {"timeout_s": 10800}, 3600)

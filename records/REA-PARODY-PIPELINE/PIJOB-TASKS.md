@@ -9,7 +9,9 @@ coding workspace, as the test that the coding workspace works.
 2. Hermes reads this file in the worktree and runs, with the unit's task text exactly as written below:
    `pi-job code /home/evo/AI/_worktrees/rea-parody "<task text of the unit>"`
 3. Hermes gives the job ID, waits (`pi-job wait <id> --timeout 170`, several rounds), then reports `DONE` + the commit
-   SHA, or `STUCK` + the `detail=` line. No auto retry.
+   SHA, or `STUCK` + the `detail=` line. No auto retry. Each unit is sized for the default 60-minute limit. If one
+   reports `timed_out_after=60m`, Derrick can say "rerun C<n> with 2 hours" and Hermes adds `--timeout-min 120`
+   (max 480). The partial work stays in the worktree, so pi continues from it.
 4. After `DONE`, Hermes runs the unit's **Check** command itself (read-only) and reports pass/fail counts.
 
 Rules for every unit (pi must follow them; they are repeated in each task text as "Common rules"):

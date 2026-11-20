@@ -408,6 +408,22 @@ def _last_stop_reason(run_dir: Path) -> str | None:
     return last
 
 
+def _job_timeout_s(meta: dict, default_s: int) -> str:
+    """Per-job pi time limit: `--timeout-min` stored in meta.json, else the role default (code 60, review 30 min)."""
+    try:
+        return str(int(meta.get("timeout_s") or default_s))
+    except (TypeError, ValueError):
+        return str(default_s)
+
+
+def _timeout_note(rc: int, meta: dict, default_s: int) -> str:
+    # coreutils `timeout` exits 124 when it had to stop the command.
+    if rc != 124:
+        return ""
+    mins = int(_job_timeout_s(meta, default_s)) // 60
+    return f" timed_out_after={mins}m (work so far stays in the repo; rerun with --timeout-min to continue)"
+
+
 def _run_pi(run_dir: Path, timeout_s: str, prompt: str, cwd: str, logf) -> tuple[int, str]:
     """H1c (card 21): AlienPC Swift (ESP on, Derrick t2764u reversed card 21) first for code/review whenever AlienPC :8447 probes idle (and X3 render
     lock is free), else X3 Gufo. If an AlienPC run stops on a failed request (503 from the fail-fast gate or any error),
@@ -476,7 +492,7 @@ def _exec_job(job_id: str) -> int:
                 base_head = subprocess.check_output(
                     ["git", "-C", str(repo), "rev-parse", "HEAD"], text=True
                 ).strip()
-                rc, where = _run_pi(run_dir, "3600", meta["prompt"], str(repo), logf)
+                rc, where = _run_pi(run_dir, _job_timeout_s(meta, 3600), meta["prompt"], str(repo), logf)
                 ahead = subprocess.check_output(
                     ["git", "-C", str(repo), "rev-list", "--count", f"{base_head}..HEAD"],
                     text=True,
@@ -495,9 +511,9 @@ def _exec_job(job_id: str) -> int:
                     _write_status(run_dir, "DONE", f"commits_added={ahead} model={where}")
                     _send_ntfy(f"pi-job {job_id}", f"DONE (code, +{ahead} commit)")
                     return 0
-                _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}")
+                _write_status(run_dir, "STUCK", f"rc={rc} commits_added={ahead} model={where}{_timeout_note(rc, meta, 3600)}")
                 try:
-                    _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}")
+                    _write_stuck_bundle(run_dir, meta, f"rc={rc} commits_added={ahead} model={where}{_timeout_note(rc, meta, 3600)}")
                 except Exception:
                     pass
                 _send_ntfy(f"pi-job {job_id}", f"STUCK (code, rc={rc}, commits={ahead})")
@@ -505,9 +521,9 @@ def _exec_job(job_id: str) -> int:
 
             if role == "review":
                 repo = Path(meta["target"])
-                rc, where = _run_pi(run_dir, "1800", meta["prompt"], str(repo), logf)
+                rc, where = _run_pi(run_dir, _job_timeout_s(meta, 1800), meta["prompt"], str(repo), logf)
                 st = "DONE" if rc == 0 else "STUCK"
-                _write_status(run_dir, st, f"rc={rc} model={where}")
+                _write_status(run_dir, st, f"rc={rc} model={where}{_timeout_note(rc, meta, 1800)}")
                 if st == "STUCK":
                     try:
                         _write_stuck_bundle(run_dir, meta, f"rc={rc} model={where}")
@@ -628,6 +644,7 @@ def _start_detached(
     prompt: str,
     still_path: str | None = None,
     pick: int | None = None,
+    timeout_min: int | None = None,
 ) -> int:
     fd = _acquire_single_job_lock()
     try:
@@ -662,6 +679,8 @@ def _start_detached(
             meta["run_name"] = _render_run_name(job_id)
             if pick is not None:
                 meta["pick"] = pick
+        if timeout_min is not None:
+            meta["timeout_s"] = int(timeout_min) * 60
         (run_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
         _write_status(run_dir, "QUEUED", f"role={role}")
         ACTIVE_FILE.write_text(job_id + "\n", encoding="utf-8")
@@ -998,11 +1017,19 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="pi-job")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
+    def _minutes(v: str) -> int:
+        n = int(v)
+        if not 5 <= n <= 480:
+            raise argparse.ArgumentTypeError("--timeout-min must be 5..480")
+        return n
+
     p_code = sub.add_parser("code")
+    p_code.add_argument("--timeout-min", type=_minutes, default=None, help="pi time limit in minutes (default 60, max 480)")
     p_code.add_argument("target")
     p_code.add_argument("prompt")
 
     p_rev = sub.add_parser("review")
+    p_rev.add_argument("--timeout-min", type=_minutes, default=None, help="pi time limit in minutes (default 30, max 480)")
     p_rev.add_argument("target")
     p_rev.add_argument("prompt")
 
@@ -1040,9 +1067,9 @@ def main(argv: list[str] | None = None) -> int:
 
     args = ap.parse_args(argv)
     if args.cmd == "code":
-        return _start_detached("code", str(Path(args.target).resolve()), args.prompt)
+        return _start_detached("code", str(Path(args.target).resolve()), args.prompt, timeout_min=args.timeout_min)
     if args.cmd == "review":
-        return _start_detached("review", str(Path(args.target).resolve()), args.prompt)
+        return _start_detached("review", str(Path(args.target).resolve()), args.prompt, timeout_min=args.timeout_min)
     if args.cmd == "render":
         return _start_detached("render", None, args.ask, still_path=args.still, pick=args.pick)
     if args.cmd == "queue":
