@@ -519,7 +519,10 @@ def test_acceptance3_round2():
     full = r.assemble_output("[Shot 1] At first, (S1) sits.", {"summary": "A cinematic medium shot of a glistening woman"},
                              {"place": "beach", "light": "dusk", "hair": "blonde"}, 2, "sex")
     summ = full.split("summary:\n", 1)[1].split("\n", 1)[0]
-    assert "cinematic" not in summ.lower() and "glistening" not in summ and summ.startswith("A medium shot")
+    # Ref mode (legacy default: no still_mode key) ships the intentional "[reference generation]"
+    # tag in front of the sentence; the tag/shine scrubbing still applies to the sentence itself.
+    assert "cinematic" not in summ.lower() and "glistening" not in summ
+    assert summ.startswith("[reference generation] A medium shot")
     assert r.partner_type2_for("mmf", "mmf on the log") == "faceless" and r.partner_type2_for("missionary", "x") is None
 
 

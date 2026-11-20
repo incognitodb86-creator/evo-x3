@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 from request import parse_request
-from resolve import resolve_identities, validate_stills
+from resolve import check_refmods_dir, resolve_identities, validate_stills
 from sync_refmods import check_sync_status, sync_refmods
 
 
@@ -19,7 +19,9 @@ class TestParodyPhase1(unittest.TestCase):
         repo_root = Path(__file__).resolve().parents[2]
         ai_root = repo_root.parent
         self.index_dir = repo_root / "index" / "h3-known-characters"
-        self.refmods_dir = ai_root / "comfy-alienpc" / "models" / "refmods"
+        # Real H3 RefMods come from the production host-aware resolver, so git worktrees
+        # (where the repo-relative guess has no comfy-alienpc/) still find the real files.
+        self.refmods_dir = check_refmods_dir()
         self.approved_dir = ai_root / "5slock" / "approved_characters"
         self.aliases_path = Path(__file__).resolve().parent / "aliases.json"
 

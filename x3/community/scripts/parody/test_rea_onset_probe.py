@@ -1,10 +1,7 @@
 """Tests for rea_onset_probe (REA C1) -- synthetic audio only, no disk fixtures."""
 
 import json
-import subprocess
-import sys
 import wave
-from pathlib import Path
 
 import numpy as np
 import pytest
@@ -12,7 +9,6 @@ import pytest
 import rea_onset_probe as rop
 
 SR = 22050
-HERE = Path(__file__).resolve().parent
 
 
 def _write_wav(path, samples, sr=SR):
@@ -100,7 +96,7 @@ def test_probe_shot_windows(tmp_path):
     assert by_id["s3"]["strongest"] is None or 5.95 <= by_id["s3"]["strongest"] < 6.1
 
 
-def test_cli_writes_json(tmp_path):
+def test_cli_writes_json(tmp_path, capsys):
     x, _ = _click_track(dur=4.0, n_beats=8)
     wav = tmp_path / "music.wav"
     _write_wav(wav, x)
@@ -113,15 +109,14 @@ def test_cli_writes_json(tmp_path):
         ]
     }))
     out = tmp_path / "onset_beats.json"
-    proc = subprocess.run(
-        [sys.executable, str(HERE / "rea_onset_probe.py"), str(wav),
-         "--breakdown", str(breakdown), "-o", str(out)],
-        capture_output=True, text=True, timeout=120,
-    )
-    assert proc.returncode == 0, proc.stderr
+    # U3 CPU fixture installs a sys.audit hook that blocks subprocess.Popen, so the CLI is
+    # driven in-process through main() (same pattern as test_beta7_convert.py).
+    rc = rop.main([str(wav), "--breakdown", str(breakdown), "-o", str(out)])
+    assert rc == 0
+    stdout = capsys.readouterr().out
     data = json.loads(out.read_text())
     assert data["sr"] == SR
     assert isinstance(data["bpm"], float)
     assert [s["id"] for s in data["shots"]] == ["a", "b"]
     assert all(len(s["beats"]) == 0 or 0.0 <= min(s["beats"]) for s in data["shots"])
-    assert proc.stdout.startswith("DONE ")
+    assert stdout.startswith("DONE ")
