@@ -57,7 +57,7 @@ sudo -n -iu evo bash -c 'B=/home/evo/.hermes/_archive/20261120-ws; mkdir -p "$B"
    included). Do not copy the whole mono file over the live one. Keep both `-sub` entries and `concurrencyLimit: 4`.
 2. Restore the two `halogen-only` pins the 2026-11-19 TEST-WINDOW commented out
    (`gemma4-heretic: flash-next-uncensored-v2`, `gemma4-heretic-sub: flash-next-uncensored-v2`). Derrick 2026-11-20
-   ~8:45 AM CT: Gemma is dropped and the X3 stays on Qwen Flash-Next. W1b is closed (t2898u). Without the pins, any
+   ~8:40 AM CT: Gemma is dropped and the X3 stays on Qwen Flash-Next. W1b is closed (t2898u). Without the pins, any
    `gemma4-heretic` call loads the real Gemma in the exclusive `main` group and unloads Gufo. Leave the
    `gemma4-heretic` model block and its weights in place; deleting the 25 GiB of weights is a separate yes.
 3. Parse check, then restart:
@@ -99,7 +99,7 @@ $P skills.disabled "[alienpc-hardcore-i2v-director, alienpc-stills-pose-edit-pro
   `hermes -p code config show`).
 - Restart the gateway only when no chat is mid-turn: `sudo -n systemctl --user -M evo@ restart hermes-gateway`.
 
-### Item 4: drop the Gemma profile (Derrick 2026-11-20 ~8:45 AM CT)
+### Item 4: drop the Gemma profile (Derrick 2026-11-20 ~8:40 AM CT)
 Before the gateway restart in Item 3, move `/home/evo/.hermes/profiles/gemma` into
 `/home/evo/.hermes/_archive/20261120-ws/profiles-gemma` (archive, do not delete). Leave `writertest` alone.
 
@@ -137,7 +137,7 @@ probe '{"model":"flash-next-code","messages":[{"role":"user","content":"What is 
 ## Q-card for Derrick (answer in chat; Max records the id)
 
 - **Q-WS2:** thinking in the code workspace: **medium** (default; your 2026-11-19 16:48 CT coding pick) or low.
-- Settled by Derrick 2026-11-20 ~8:45 AM CT ("we are going to drop gemma. and stick with qwenflash next on x3"): the
+- Settled by Derrick 2026-11-20 ~8:40 AM CT ("we are going to drop gemma. and stick with qwenflash next on x3"): the
   Gemma pins come back (Item 1) and the `gemma` profile is archived (Item 4).
 
 ## Rules

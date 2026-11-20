@@ -102,7 +102,7 @@ Closeout after the Nov 19 evening work and this morning's QNAP backfill. Derrick
 - Path B next round (Prompt maker FAIL, means 6.83 / 6.33). Derrick held it at 7:01 AM CT.
 - Clone-gate isolation (separate uid, or no terminal for the writer), waiting on Derrick.
 - REA-Video v3 proposal and the 101-pack batch, held. [REA-VIDEO-VAL30S-RESULT.md](../BENCH-ALIENPC-1/REA-VIDEO-VAL30S-RESULT.md).
-- Gemma retire decision. **Decided 2026-11-20 ~8:45 AM CT: Gemma is dropped; the X3 stays on Qwen Flash-Next** (pins restored and `gemma` profile archived in F4 H7).
+- Gemma retire decision. **Decided 2026-11-20 ~8:40 AM CT: Gemma is dropped; the X3 stays on Qwen Flash-Next** (pins restored and `gemma` profile archived in F4 H7).
 - xai-oauth, blocked on xAI browser verification.
 - Alfred audit feedback.
 - Hermes Gemma workspace: superseded by the Gemma drop above. The hand-made `gemma` profile is archived by F4 H7.

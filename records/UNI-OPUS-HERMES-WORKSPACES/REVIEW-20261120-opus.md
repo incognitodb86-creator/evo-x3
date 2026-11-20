@@ -49,5 +49,5 @@ profile, 1 `AGENTS.md`).
 - Two aliases on the resident slot via `setParamsByID` (now `flash-next-render` and `flash-next-code`, sampler only).
 - A separate code profile with its own `terminal.cwd` and a short, scanner-safe `AGENTS.md`.
 - Hermes memory caps (USER 1375, MEMORY 2200) stay as live.
-- Derrick 2026-11-20 ~8:45 AM CT: Gemma is dropped and the X3 stays on Qwen Flash-Next. The replacement brief restores
+- Derrick 2026-11-20 ~8:40 AM CT: Gemma is dropped and the X3 stays on Qwen Flash-Next. The replacement brief restores
   the Gemma pins and archives the hand-made `gemma` profile.
