@@ -297,6 +297,7 @@ def build_arms_for_celeb(
     rebuilt_refmod_suffix: str = "_rebuilt",
     seed_tag: str = "",
     with_v1_lora: bool = False,
+    with_nvfp4: bool = False,
 ) -> List[Dict[str, Any]]:
     c = compact_name(celeb)
     sfx = f"_s{seed}" if seed_tag else ""
@@ -387,6 +388,26 @@ def build_arms_for_celeb(
                     skipped=None if (has_m_fp8 or dry_run) else "Miraclein_4.5_9b_FP8.safetensors missing")
             else:
                 add("L7-v1lora", "Fixed L7 with v1 LoRA", dv, {}, skipped="Miraclein_4.5_9b_FP8.safetensors missing")
+
+        if with_nvfp4:
+            # Exact same fixed L7 graph on Miraclein 4.5 NVFP4 (5.18 GB native Blackwell) to test speed & likeness vs FP8.
+            nvfp4_name = "Miraclein_4.5_9b_NVFP4.safetensors"
+            has_nvfp4 = bool((preflight.get("unets") or {}).get(nvfp4_name))
+            dn = out_root / f"{c}_L7_nvfp4{sfx}"
+            if has_nvfp4 or dry_run:
+                rn = fs.build_flux_still(
+                    dn, l7_prompt, mode="refmod", refmods=[hyb_mod], refmod_strength=1.0,
+                    retention="fully_preserved (1.0)", loras=[hyb_lora], seed=seed, character=celeb, dry_run=dry_run,
+                )
+                if rn.get("status") == "READY":
+                    def _set_nv(g: Dict[str, Any]) -> None:
+                        g["1"]["inputs"]["unet_name"] = nvfp4_name
+                        _ensure_zero_out_negative(g)
+                    _edit_graph(dn, _set_nv)
+                add("L7-nvfp4", f"Fixed L7 on {nvfp4_name} (str 1.0, ZeroOut, per-celeb prompt)", dn, rn,
+                    skipped=None if (has_nvfp4 or dry_run) else f"{nvfp4_name} missing")
+            else:
+                add("L7-nvfp4", f"Fixed L7 on {nvfp4_name}", dn, {}, skipped=f"{nvfp4_name} missing")
         return arms
 
     # L0: Apples-to-apples old A5 settings with SAME prompt P (hybrid 0.85/0.60, retention 0.7, no anchor, pos-only)
@@ -569,6 +590,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--prompts-json", default="", help="Optional local non-git JSON with per-celeb {trigger, name, likeness_desc, scene}")
     ap.add_argument("--rebuilt-refmod-suffix", default="_rebuilt", help="Suffix for rebuilt RefMod stem in --ab-suite l7")
     ap.add_argument("--with-v1-lora", action="store_true", help="--ab-suite l7: add L7-v1lora arm using fk9_<name>_v1.safetensors @ 0.60 (official workflow LoRA)")
+    ap.add_argument("--with-nvfp4", action="store_true", help="--ab-suite l7: add L7-nvfp4 arm using Miraclein_4.5_9b_NVFP4.safetensors (head-to-head speed/likeness vs FP8)")
     ap.add_argument("--comfy-root", default=str(DEFAULT_COMFY_ROOT))
     ap.add_argument("--run-queue", default=str(DEFAULT_RUN_QUEUE))
     ap.add_argument("--face-py", default=str(DEFAULT_FACE_PY))
@@ -608,6 +630,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 rebuilt_refmod_suffix=a.rebuilt_refmod_suffix,
                 seed_tag="1" if multi_seed else "",
                 with_v1_lora=a.with_v1_lora,
+                with_nvfp4=a.with_nvfp4,
             ))
 
     if dry_run:
@@ -638,7 +661,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Never queue a graph whose RefMod or LoRA file is missing; it would only fail value_not_in_list.
         needs = {"L0": "both", "L1": "refmod", "L2": "refmod", "L3": "both", "L4": "both",
                  "L5": "lora", "L6": "refmod", "L7": "both", "L8": "both",
-                 "L7-base": "both", "L7-fixed": "both", "L7-rebuilt": "lora", "L7-v1lora": "refmod"}
+                 "L7-base": "both", "L7-fixed": "both", "L7-rebuilt": "lora", "L7-v1lora": "refmod", "L7-nvfp4": "both"}
         for arm in all_arms:
             ci = pre["celebs"].get(arm["celeb"]) or {}
             need = needs.get(arm["arm"])

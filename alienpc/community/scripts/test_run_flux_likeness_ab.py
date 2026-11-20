@@ -170,6 +170,24 @@ def test_l7_suite_with_v1_lora_arm(tmp_path):
     assert not (out_dir / "meganfox_L7_v1lora_s51083601").exists()
 
 
+def test_l7_suite_with_nvfp4_arm(tmp_path):
+    comfy = tmp_path / "ComfyUI"
+    (comfy / "models" / "diffusion_models").mkdir(parents=True)
+    (comfy / "models" / "diffusion_models" / "Miraclein_4.5_9b_NVFP4.safetensors").write_bytes(b"")
+    out_dir = tmp_path / "out_nv"
+    rc = ab.main([
+        "--dry-run", "--ab-suite", "l7", "--with-nvfp4", "--celebs", "Sydney Sweeney",
+        "--comfy-root", str(comfy), "--out-dir", str(out_dir),
+    ])
+    assert rc == 0
+    g = json.loads((out_dir / "sydneysweeney_L7_nvfp4" / "still" / "request.api.json").read_text(encoding="utf-8"))
+    assert g["1"]["inputs"]["unet_name"] == "Miraclein_4.5_9b_NVFP4.safetensors"
+    assert g["12"]["inputs"]["strength_1"] == 1.0
+    assert g["6"]["class_type"] == "ConditioningZeroOut"
+    assert "Sydney Sweeney" in g["5"]["inputs"]["text"]
+
+
+
 def test_run_writes_intra_gallery_and_per_ref_stats_to_result_md(tmp_path, monkeypatch):
     comfy = tmp_path / "ComfyUI"
     (comfy / "models" / "diffusion_models").mkdir(parents=True)
